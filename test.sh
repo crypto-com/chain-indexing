@@ -14,6 +14,7 @@ export TEST_POSTGRES_SCHEMA=${TEST_POSTGRES_SCHEMA:-public}
 
 DOCKER_COMPOSE_PROJECT="chain_indexing_test"
 
+FN_BOOTSTRAP="bootstrap"
 FN_GENERATE="generate"
 FN_TEST="test"
 
@@ -92,6 +93,14 @@ run_test_watch() {
     set -e
 }
 
+run_bootstrap() {
+    pushd .
+    cd $1
+    ginkgo bootstrap
+    RET_VALUE=$?
+    popd
+}
+
 run_generate() {
     ginkgo generate $@
     RET_VALUE=$?
@@ -103,6 +112,10 @@ TEST_DB=1
 FN=FN_TEST
 while [[ $# > 0 ]]; do
     case "$1" in
+        bootstrap)
+            FN=FN_BOOTSTRAP
+            shift 1
+        ;;
         generate)
             FN=FN_GENERATE
             shift 1
@@ -144,7 +157,10 @@ if [[ "${RET_VALUE}" != 0 ]]; then
     fi
 fi
 
-if [[ "${FN}" == FN_GENERATE ]]; then
+if [[ "${FN}" == FN_BOOTSTRAP ]]; then
+    run_bootstrap $@
+    exit "${RET_VALUE}"
+elif [[ "${FN}" == FN_GENERATE ]]; then
     run_generate $@
     exit "${RET_VALUE}"
 fi
