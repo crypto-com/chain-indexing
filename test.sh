@@ -67,6 +67,7 @@ wait_postgres_ready() {
             echo "Postgres is ready to accept connections"
             return
         fi
+        docker ps
         echo "Waiting for Postgres container(${CONTAINER_ID}) to be ready ..."
         sleep 1
     done
@@ -74,7 +75,7 @@ wait_postgres_ready() {
 
 is_postgres_ready() {
     set +e
-    docker exec -it "$1" pg_isready > /dev/null
+    docker exec "$1" pg_isready > /dev/null
     RET_VALUE=$?
     set -e
 }
@@ -102,8 +103,11 @@ run_bootstrap() {
 }
 
 run_generate() {
-    ginkgo generate $@
+    pushd .
+    cd $(dirname $1)
+    ginkgo generate $(basename $1)
     RET_VALUE=$?
+    popd
 }
 
 INSTALL_DEPENDENCY=0

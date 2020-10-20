@@ -56,7 +56,7 @@ jobs:
     # - name: Build TxAuxDecoder
     #   run: make txauxdecoder
     - name: Run test cases
-      run: ./test.sh --install-dependency --no-db
+      run: ./test.sh --install-dependency
 
   # build:
   #   name: Test Building Docker Image
