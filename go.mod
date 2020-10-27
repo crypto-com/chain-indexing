@@ -3,6 +3,7 @@ module github.com/crypto-com/chainindex
 go 1.14
 
 require (
+	github.com/BurntSushi/toml v0.3.1
 	github.com/Masterminds/squirrel v1.4.0
 	github.com/brianvoe/gofakeit/v5 v5.10.1
 	github.com/golang-migrate/migrate/v4 v4.12.2
@@ -15,4 +16,5 @@ require (
 	github.com/onsi/gomega v1.10.2
 	github.com/rs/zerolog v1.15.0
 	github.com/stretchr/testify v1.5.1
+	github.com/urfave/cli/v2 v2.2.0
 )

@@ -94,6 +94,23 @@ func (client *HTTPClient) parseBlockSignatures(rawSignatures []types.RawBlockSig
 	return signatures
 }
 
+// LatestBlockHeight gets the chain's latest block and return the height
+func (client *HTTPClient) LatestBlockHeight() (int64, error) {
+	var err error
+	rawRespBody, err := client.request("block")
+	if err != nil {
+		return int64(0), fmt.Errorf("error getting /block: %v", err)
+	}
+	defer rawRespBody.Close()
+
+	block, err := client.parseBlockResp(rawRespBody)
+	if err != nil {
+		return int64(0), fmt.Errorf("error parsing /block response: %v", err)
+	}
+
+	return block.Height, nil
+}
+
 // request construct tendermint url and issues an HTTP request
 // returns the success http Body
 func (client *HTTPClient) request(method string, queryString ...string) (io.ReadCloser, error) {
