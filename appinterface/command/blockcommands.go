@@ -2,9 +2,9 @@ package command
 
 import (
 	"fmt"
-	tenderminttypes "github.com/crypto-com/chainindex/adapter/tendermint/types"
 	"github.com/crypto-com/chainindex/appinterface/command/types"
 	"github.com/crypto-com/chainindex/appinterface/event"
+	tenderminttypes "github.com/crypto-com/chainindex/appinterface/tendermint/types"
 )
 
 // CreateBlockCommand
