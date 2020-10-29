@@ -1,8 +1,8 @@
 package tendermint_test
 
 import (
-	tendermintadapter "github.com/crypto-com/chainindex/adapter/tendermint"
-	"github.com/crypto-com/chainindex/adapter/tendermint/types"
+	tendermintadapter "github.com/crypto-com/chainindex/appinterface/tendermint"
+	"github.com/crypto-com/chainindex/appinterface/tendermint/types"
 	"github.com/crypto-com/chainindex/infrastructure/tendermint"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

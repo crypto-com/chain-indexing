@@ -2,7 +2,7 @@ package tendermint
 
 import (
 	"fmt"
-	"github.com/crypto-com/chainindex/adapter/tendermint/types"
+	"github.com/crypto-com/chainindex/appinterface/tendermint/types"
 	jsoniter "github.com/json-iterator/go"
 	"io"
 	"net/http"
