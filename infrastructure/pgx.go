@@ -57,6 +57,7 @@ func (config *PgxConnPoolConfig) ToURL() string {
 }
 
 type PgxConn struct {
+	// pgxConn could be simple connection or connetion pool
 	pgxConn PgxConnLike
 }
 

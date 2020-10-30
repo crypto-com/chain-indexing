@@ -1,19 +1,6 @@
 package appinterface
 
-import (
-	"errors"
-	"fmt"
-)
-
 // Relational database interface
-
-var (
-	ErrBuildSQLStmt = fmt.Errorf("error building SQL statement: %w", ErrRepoPrepare)
-	ErrTypeConv     = fmt.Errorf("error converting between types: %w", ErrRepoPrepare)
-
-	// when trying to scan a null row
-	ErrNoRows = errors.New("no rows in result set")
-)
 
 type RDbConn interface {
 	Begin() (RDbTx, error)
@@ -30,7 +17,7 @@ type RDbTx interface {
 	Rollback() error
 }
 
-// Implementing RDbConn and RDbTx interface automatically fullfills RDbRunner
+// Implementing RDbConn and RDbTx interface automatically fulfills RDbRunner
 type RDbRunner interface {
 	Exec(sql string, args ...interface{}) (RDbExecResult, error)
 	Query(sql string, args ...interface{}) (RDbRowsResult, error)
