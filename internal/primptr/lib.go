@@ -3,6 +3,8 @@ package primptr
 import (
 	"math/big"
 	"time"
+
+	"github.com/crypto-com/chainindex/internal/utctime"
 )
 
 // Shorthand functions to create primitive pointers
@@ -40,6 +42,10 @@ func String(value string) *string {
 }
 
 func Time(value time.Time) *time.Time {
+	return &value
+}
+
+func UTCTime(value utctime.UTCTime) *utctime.UTCTime {
 	return &value
 }
 

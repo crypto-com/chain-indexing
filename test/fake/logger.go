@@ -1,6 +1,6 @@
 package fake
 
-import "github.com/crypto-com/chainindex/usecase"
+import "github.com/crypto-com/chainindex/internal/logger"
 
 type FakeLogger struct{}
 
@@ -8,23 +8,23 @@ func NewFakeLogger() *FakeLogger {
 	return &FakeLogger{}
 }
 
-func (logger *FakeLogger) SetLogLevel(_ usecase.LogLevel) {}
-func (logger *FakeLogger) GetLogLevel() usecase.LogLevel {
-	return usecase.LOG_LEVEL_INFO
+func (l *FakeLogger) SetLogLevel(_ logger.LogLevel) {}
+func (l *FakeLogger) GetLogLevel() logger.LogLevel {
+	return logger.LOG_LEVEL_INFO
 }
-func (logger *FakeLogger) Panic(_ string)                    {}
-func (logger *FakeLogger) Panicf(_ string, _ ...interface{}) {}
-func (logger *FakeLogger) Error(_ string)                    {}
-func (logger *FakeLogger) Errorf(_ string, _ ...interface{}) {}
-func (logger *FakeLogger) Info(_ string)                     {}
-func (logger *FakeLogger) Infof(_ string, _ ...interface{})  {}
-func (logger *FakeLogger) Debug(_ string)                    {}
-func (logger *FakeLogger) Debugf(_ string, _ ...interface{}) {}
+func (l *FakeLogger) Panic(_ string)                    {}
+func (l *FakeLogger) Panicf(_ string, _ ...interface{}) {}
+func (l *FakeLogger) Error(_ string)                    {}
+func (l *FakeLogger) Errorf(_ string, _ ...interface{}) {}
+func (l *FakeLogger) Info(_ string)                     {}
+func (l *FakeLogger) Infof(_ string, _ ...interface{})  {}
+func (l *FakeLogger) Debug(_ string)                    {}
+func (l *FakeLogger) Debugf(_ string, _ ...interface{}) {}
 
-func (logger *FakeLogger) WithInterface(_ string, _ interface{}) usecase.Logger {
-	return logger
+func (l *FakeLogger) WithInterface(_ string, _ interface{}) logger.Logger {
+	return l
 }
 
-func (logger *FakeLogger) WithFields(_ usecase.LogFields) usecase.Logger {
-	return logger
+func (l *FakeLogger) WithFields(_ logger.LogFields) logger.Logger {
+	return l
 }

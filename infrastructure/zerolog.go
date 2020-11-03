@@ -7,10 +7,10 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/crypto-com/chainindex/usecase"
+	applogger "github.com/crypto-com/chainindex/internal/logger"
 )
 
-// ZerologLogger implements usecase.Logger interface and provide logging service
+// ZerologLogger implements applogger.Logger interface and provide logging service
 // using zerolog.
 type ZerologLogger struct {
 	instance *zerolog.Logger
@@ -40,45 +40,45 @@ func NewZerologLoggerWithColor(output io.Writer) *ZerologLogger {
 	}
 }
 
-func (logger *ZerologLogger) SetLogLevel(level usecase.LogLevel) {
+func (logger *ZerologLogger) SetLogLevel(level applogger.LogLevel) {
 	updatedLogger := logger.instance.Level(logLevelToZerologLevel(level))
 
 	logger.instance = &updatedLogger
 }
 
-func logLevelToZerologLevel(logLevel usecase.LogLevel) zerolog.Level {
+func logLevelToZerologLevel(logLevel applogger.LogLevel) zerolog.Level {
 	switch logLevel {
-	case usecase.LOG_DISABLED:
+	case applogger.LOG_DISABLED:
 		return zerolog.Disabled
-	case usecase.LOG_LEVEL_PANIC:
+	case applogger.LOG_LEVEL_PANIC:
 		return zerolog.PanicLevel
-	case usecase.LOG_LEVEL_ERROR:
+	case applogger.LOG_LEVEL_ERROR:
 		return zerolog.ErrorLevel
-	case usecase.LOG_LEVEL_INFO:
+	case applogger.LOG_LEVEL_INFO:
 		return zerolog.InfoLevel
-	case usecase.LOG_LEVEL_DEBUG:
+	case applogger.LOG_LEVEL_DEBUG:
 		return zerolog.DebugLevel
 	default:
 		panic(fmt.Sprintf("Unsupported log level %v", logLevel))
 	}
 }
 
-func (logger *ZerologLogger) GetLogLevel() usecase.LogLevel {
+func (logger *ZerologLogger) GetLogLevel() applogger.LogLevel {
 	return zerologLevelToLogLevel(logger.instance.GetLevel())
 }
 
-func zerologLevelToLogLevel(logLevel zerolog.Level) usecase.LogLevel {
+func zerologLevelToLogLevel(logLevel zerolog.Level) applogger.LogLevel {
 	switch logLevel {
 	case zerolog.Disabled:
-		return usecase.LOG_DISABLED
+		return applogger.LOG_DISABLED
 	case zerolog.PanicLevel:
-		return usecase.LOG_LEVEL_PANIC
+		return applogger.LOG_LEVEL_PANIC
 	case zerolog.ErrorLevel:
-		return usecase.LOG_LEVEL_ERROR
+		return applogger.LOG_LEVEL_ERROR
 	case zerolog.InfoLevel:
-		return usecase.LOG_LEVEL_INFO
+		return applogger.LOG_LEVEL_INFO
 	case zerolog.DebugLevel:
-		return usecase.LOG_LEVEL_DEBUG
+		return applogger.LOG_LEVEL_DEBUG
 	default:
 		panic(fmt.Sprintf("Unsupported log level %v", logLevel))
 	}
@@ -116,14 +116,14 @@ func (logger *ZerologLogger) Debugf(format string, values ...interface{}) {
 	logger.instance.Debug().Timestamp().Msgf(format, values...)
 }
 
-func (logger *ZerologLogger) WithInterface(key string, value interface{}) usecase.Logger {
+func (logger *ZerologLogger) WithInterface(key string, value interface{}) applogger.Logger {
 	instance := logger.instance.With().Interface(key, value).Logger()
 	return &ZerologLogger{
 		instance: &instance,
 	}
 }
 
-func (logger *ZerologLogger) WithFields(fields usecase.LogFields) usecase.Logger {
+func (logger *ZerologLogger) WithFields(fields applogger.LogFields) applogger.Logger {
 	instance := logger.instance.With().Fields(fields).Logger()
 	return &ZerologLogger{
 		instance: &instance,

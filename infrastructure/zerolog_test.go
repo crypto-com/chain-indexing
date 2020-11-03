@@ -8,7 +8,7 @@ import (
 	"github.com/onsi/gomega/gbytes"
 
 	"github.com/crypto-com/chainindex/infrastructure"
-	"github.com/crypto-com/chainindex/usecase"
+	applogger "github.com/crypto-com/chainindex/internal/logger"
 )
 
 const RFC3339_TIME_REGEX = `\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}`
@@ -16,7 +16,7 @@ const RFC3339_TIME_REGEX = `\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}`
 var _ = Describe("Zerolog", func() {
 	It("should implement Logger interface", func() {
 		mockWriter := NewMockWriter()
-		var _ usecase.Logger = infrastructure.NewZerologLogger(mockWriter)
+		var _ applogger.Logger = infrastructure.NewZerologLogger(mockWriter)
 	})
 
 	Describe("SetLogLevel", func() {
@@ -27,7 +27,7 @@ var _ = Describe("Zerolog", func() {
 			logger.Info("any info message")
 			Expect(mockWriter).To(gbytes.Say("any info message"))
 
-			logger.SetLogLevel(usecase.LOG_LEVEL_ERROR)
+			logger.SetLogLevel(applogger.LOG_LEVEL_ERROR)
 
 			logger.Info("any info message")
 			Expect(mockWriter).NotTo(gbytes.Say("any info message"))
@@ -40,7 +40,7 @@ var _ = Describe("Zerolog", func() {
 			mockWriter := NewMockWriter()
 			logger := infrastructure.NewZerologLogger(mockWriter)
 
-			logger.SetLogLevel(usecase.LOG_DISABLED)
+			logger.SetLogLevel(applogger.LOG_DISABLED)
 
 			logger.Debug("any debug message")
 			Expect(mockWriter).NotTo(gbytes.Say("any debug message"))
@@ -67,11 +67,11 @@ var _ = Describe("Zerolog", func() {
 			mockWriter := NewMockWriter()
 			logger := infrastructure.NewZerologLogger(mockWriter)
 
-			logger.SetLogLevel(usecase.LOG_DISABLED)
-			Expect(logger.GetLogLevel()).To(Equal(usecase.LOG_DISABLED))
+			logger.SetLogLevel(applogger.LOG_DISABLED)
+			Expect(logger.GetLogLevel()).To(Equal(applogger.LOG_DISABLED))
 
-			logger.SetLogLevel(usecase.LOG_LEVEL_DEBUG)
-			Expect(logger.GetLogLevel()).To(Equal(usecase.LOG_LEVEL_DEBUG))
+			logger.SetLogLevel(applogger.LOG_LEVEL_DEBUG)
+			Expect(logger.GetLogLevel()).To(Equal(applogger.LOG_LEVEL_DEBUG))
 		})
 	})
 
@@ -326,7 +326,7 @@ var _ = Describe("Zerolog", func() {
 			mockWriter := NewMockWriter()
 			logger := infrastructure.NewZerologLogger(mockWriter)
 
-			contextedLogger := logger.WithFields(usecase.LogFields{
+			contextedLogger := logger.WithFields(applogger.LogFields{
 				"anyKey":     "any value",
 				"anotherKey": "another value",
 			})
@@ -339,7 +339,7 @@ var _ = Describe("Zerolog", func() {
 			mockWriter := NewMockWriter()
 			logger := infrastructure.NewZerologLogger(mockWriter)
 
-			contextedLogger := logger.WithFields(usecase.LogFields{
+			contextedLogger := logger.WithFields(applogger.LogFields{
 				"anyKey":     "any value",
 				"anotherKey": "another value",
 			})
@@ -355,7 +355,7 @@ var _ = Describe("Zerolog", func() {
 			mockWriter := NewMockWriter()
 			logger := infrastructure.NewZerologLogger(mockWriter)
 
-			contextedLogger := logger.WithFields(usecase.LogFields{
+			contextedLogger := logger.WithFields(applogger.LogFields{
 				"anyKey":     "any value",
 				"anotherKey": "another value",
 			})
@@ -371,10 +371,10 @@ var _ = Describe("Zerolog", func() {
 			mockWriter := NewMockWriter()
 			logger := infrastructure.NewZerologLogger(mockWriter)
 
-			contextedLogger := logger.WithFields(usecase.LogFields{
+			contextedLogger := logger.WithFields(applogger.LogFields{
 				"anyKey":     "any value",
 				"anotherKey": "another value",
-			}).WithFields((usecase.LogFields{
+			}).WithFields((applogger.LogFields{
 				"moreKey": "more value",
 			}))
 

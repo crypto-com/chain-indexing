@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestChainindex(t *testing.T) {
+func TestChainIndexing(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Chainindex Suite")
+	RunSpecs(t, "ChainIndexing Suite")
 }

@@ -2,18 +2,21 @@ package test
 
 import (
 	"os"
+	"path"
+	"runtime"
 
-	"github.com/crypto-com/chainindex/infrastructure"
+	"github.com/crypto-com/chainindex/infrastructure/pg"
 	"github.com/crypto-com/chainindex/internal/primptr"
 	"github.com/crypto-com/chainindex/internal/typeconv"
+	"github.com/crypto-com/chainindex/test/fake"
 )
 
-func WithTestPgConnConfig(body func(*infrastructure.PgConnConfig)) bool {
+func WithTestPgConnConfig(body func(*pg.ConnConfig)) bool {
 	ssl := true
 	if os.Getenv("TEST_POSTGRES_SSL") == "0" {
 		ssl = false
 	}
-	config := infrastructure.PgConnConfig{
+	config := pg.ConnConfig{
 		Host:          "127.0.0.1",
 		Port:          typeconv.MustAtou32(os.Getenv("TEST_POSTGRES_PORT")),
 		MaybeUsername: primptr.String(os.Getenv("TEST_POSTGRES_USERNAME")),
@@ -27,12 +30,12 @@ func WithTestPgConnConfig(body func(*infrastructure.PgConnConfig)) bool {
 	return true
 }
 
-func WithTestPgx(body func(infrastructure.PgConnConfig)) bool {
+func WithTestPgxConn(body func(*pg.PgxConn, *pg.Migrate)) bool {
 	ssl := true
 	if os.Getenv("TEST_POSTGRES_SSL") == "0" {
 		ssl = false
 	}
-	config := infrastructure.PgConnConfig{
+	config := &pg.ConnConfig{
 		Host:          "127.0.0.1",
 		Port:          typeconv.MustAtou32(os.Getenv("TEST_POSTGRES_PORT")),
 		MaybeUsername: primptr.String(os.Getenv("TEST_POSTGRES_USERNAME")),
@@ -40,8 +43,16 @@ func WithTestPgx(body func(infrastructure.PgConnConfig)) bool {
 		Database:      os.Getenv("TEST_POSTGRES_DATABASE"),
 		SSL:           ssl,
 	}
+	fakeLogger := fake.NewFakeLogger()
+	conn := pg.MustNewPgxConn(config, fakeLogger)
 
-	body(config)
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		panic("error retrieving file directory")
+	}
+	migrate := pg.MustNewMigrate(config, path.Join(filename, "../../migrations"))
+
+	body(conn, migrate)
 
 	return true
 }

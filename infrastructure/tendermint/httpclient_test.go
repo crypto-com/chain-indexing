@@ -1,15 +1,17 @@
 package tendermint_test
 
 import (
-	tendermintadapter "github.com/crypto-com/chainindex/appinterface/tendermint"
-	"github.com/crypto-com/chainindex/appinterface/tendermint/types"
-	"github.com/crypto-com/chainindex/infrastructure/tendermint"
+	"net/http"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"net/http"
-	"time"
 
 	"github.com/onsi/gomega/ghttp"
+
+	"github.com/crypto-com/chainindex/appinterface/tendermint"
+	types "github.com/crypto-com/chainindex/appinterface/tendermint/types"
+	. "github.com/crypto-com/chainindex/infrastructure/tendermint"
+	"github.com/crypto-com/chainindex/internal/utctime"
 )
 
 var _ = Describe("HTTPClient", func() {
@@ -20,7 +22,7 @@ var _ = Describe("HTTPClient", func() {
 	})
 
 	It("should implement Client", func() {
-		var _ tendermintadapter.Client = tendermint.NewHTTPClient("http://localhost:26657")
+		var _ tendermint.Client = NewHTTPClient("http://localhost:26657")
 	})
 
 	Describe("Block", func() {
@@ -32,14 +34,14 @@ var _ = Describe("HTTPClient", func() {
 				),
 			)
 
-			blockHeight := uint64(100)
-			client := tendermint.NewHTTPClient(server.URL())
+			blockHeight := int64(100)
+			client := NewHTTPClient(server.URL())
 			block, err := client.Block(blockHeight)
 			Expect(err).To(BeNil())
-			blockTime, _ := time.Parse("2006-01-02T15:04:05.000000000Z", "2020-10-15T09:33:42.195143319Z")
-			signature0Time, _ := time.Parse("2006-01-02T15:04:05.00000000Z", "2020-10-15T09:33:42.18646236Z")
-			signature1Time, _ := time.Parse("2006-01-02T15:04:05.000000000Z", "2020-10-15T09:33:42.195143319Z")
-			signature2Time, _ := time.Parse("2006-01-02T15:04:05.000000000Z", "2020-10-15T09:33:42.206633743Z")
+			blockTime, _ := utctime.Parse("2006-01-02T15:04:05.000000000Z", "2020-10-15T09:33:42.195143319Z")
+			signature0Time, _ := utctime.Parse("2006-01-02T15:04:05.00000000Z", "2020-10-15T09:33:42.18646236Z")
+			signature1Time, _ := utctime.Parse("2006-01-02T15:04:05.000000000Z", "2020-10-15T09:33:42.195143319Z")
+			signature2Time, _ := utctime.Parse("2006-01-02T15:04:05.000000000Z", "2020-10-15T09:33:42.206633743Z")
 
 			Expect(*block).To(Equal(types.Block{
 				Height:          blockHeight,
