@@ -1,6 +1,8 @@
 package event
 
-import "github.com/crypto-com/chainindex/entity/model"
+import (
+	"github.com/crypto-com/chainindex/entity/model"
+)
 
 const RawBlockCreatedEventName = "RawBlockCreated"
 
