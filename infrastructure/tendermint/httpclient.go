@@ -2,6 +2,7 @@ package tendermint
 
 import (
 	"fmt"
+	"github.com/crypto-com/chainindex/entity/model"
 	"io"
 	"net/http"
 	"strconv"
@@ -30,35 +31,35 @@ func NewHTTPClient(tendermintRPCUrl string) *HTTPClient {
 }
 
 // Block gets the block response with target height
-func (client *HTTPClient) Block(height int64) (*types.Block, error) {
+func (client *HTTPClient) Block(height int64) (*types.Block, *model.RawBlock, error) {
 	var err error
 
 	rawRespBody, err := client.request("block", "height="+strconv.FormatInt(height, 10))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer rawRespBody.Close()
 
-	block, err := client.parseBlockResp(rawRespBody)
+	block, rawBlock, err := client.parseBlockResp(rawRespBody)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return block, nil
+	return block, rawBlock, nil
 }
 
-// parseBlockSignatures parses the BlockResp into Block type
-func (client *HTTPClient) parseBlockResp(rawRespReader io.Reader) (*types.Block, error) {
+// parseBlockSignatures parses the RawBlock into Block type
+func (client *HTTPClient) parseBlockResp(rawRespReader io.Reader) (*types.Block, *model.RawBlock, error) {
 	var err error
 
-	var resp types.BlockResp
+	var resp model.RawBlock
 	if err = jsoniter.NewDecoder(rawRespReader).Decode(&resp); err != nil {
-		return nil, fmt.Errorf("error decoding Tendermint block response: %v", err)
+		return nil, nil, fmt.Errorf("error decoding Tendermint block response: %v", err)
 	}
 
 	height, err := strconv.ParseInt(resp.Result.Block.Header.Height, 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf("error converting block height to unsigned integer: %v", err)
+		return nil, nil, fmt.Errorf("error converting block height to unsigned integer: %v", err)
 	}
 
 	return &types.Block{
@@ -69,11 +70,11 @@ func (client *HTTPClient) parseBlockResp(rawRespReader io.Reader) (*types.Block,
 		ProposerAddress: resp.Result.Block.Header.ProposerAddress,
 		Txs:             resp.Result.Block.Data.Txs,
 		Signatures:      client.parseBlockSignatures(resp.Result.Block.LastCommit.Signatures),
-	}, nil
+	}, &resp, nil
 }
 
 // parseBlockSignatures parses the rawSignatures in JSON response into BlockSignature type
-func (client *HTTPClient) parseBlockSignatures(rawSignatures []types.RawBlockSignature) []types.BlockSignature {
+func (client *HTTPClient) parseBlockSignatures(rawSignatures []model.RawBlockSignature) []types.BlockSignature {
 	if rawSignatures == nil {
 		return nil
 	}
@@ -103,7 +104,7 @@ func (client *HTTPClient) LatestBlockHeight() (int64, error) {
 	}
 	defer rawRespBody.Close()
 
-	block, err := client.parseBlockResp(rawRespBody)
+	block, _, err := client.parseBlockResp(rawRespBody)
 	if err != nil {
 		return int64(0), fmt.Errorf("error parsing /block response: %v", err)
 	}

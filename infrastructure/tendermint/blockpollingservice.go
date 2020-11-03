@@ -3,6 +3,7 @@ package tendermint
 import (
 	"fmt"
 	"github.com/crypto-com/chainindex/infrastructure"
+	"github.com/crypto-com/chainindex/infrastructure/parser"
 	"os"
 	"time"
 )
@@ -30,15 +31,20 @@ func NewBlockPollingService(tendermintRPCUrl string, startAtHeight int64) *Block
 func (s *BlockPollingService) SyncBlocks(latestHeight int64) error {
 	for s.currentSyncHeight < latestHeight {
 		// TODO: sync both Block and BlockResult
-		block, err := s.client.Block(s.currentSyncHeight)
+		block, rawBlock, err := s.client.Block(s.currentSyncHeight)
 		if err != nil {
 			return fmt.Errorf("error getting chain's block at %d: %v", s.currentSyncHeight, err)
 		}
 
 		// TODO: produce commands with parsers
 		// height 1001 => struct BlockParser, BlockResultParser, ValidatorParser
+		cmds, err := parser.ParseBlockToCommands(block, rawBlock)
+		if err != nil {
+			return fmt.Errorf("error parsing block data to commands %d: %v", s.currentSyncHeight, err)
+		}
 
-		fmt.Println("Synced and produce event:", block.Height)
+		fmt.Println("Synced and produce event:", block.Height, cmds)
+
 		s.currentSyncHeight++
 	}
 	return nil

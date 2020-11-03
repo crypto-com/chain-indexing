@@ -36,7 +36,7 @@ var _ = Describe("HTTPClient", func() {
 
 			blockHeight := int64(100)
 			client := NewHTTPClient(server.URL())
-			block, err := client.Block(blockHeight)
+			block, _, err := client.Block(blockHeight)
 			Expect(err).To(BeNil())
 			blockTime, _ := utctime.Parse("2006-01-02T15:04:05.000000000Z", "2020-10-15T09:33:42.195143319Z")
 			signature0Time, _ := utctime.Parse("2006-01-02T15:04:05.00000000Z", "2020-10-15T09:33:42.18646236Z")
