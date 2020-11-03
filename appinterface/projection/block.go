@@ -7,24 +7,30 @@ import (
 )
 
 // TODO: Listen to council node related events and project council node
-type BlockProjection struct {
-	blocksView view.Blocks
+type Block struct {
+	blocksView *view.Blocks
 }
 
-func (_ *BlockProjection) Id() string {
+func NewBlock(blocksView *view.Blocks) *Block {
+	return &Block{
+		blocksView,
+	}
+}
+
+func (_ *Block) Id() string {
 	return "Block"
 }
 
-func (_ *BlockProjection) GetEventsToListen() []string {
+func (_ *Block) GetEventsToListen() []string {
 	return []string{event.BLOCK_CREATED}
 }
 
-func (projection *BlockProjection) OnInit() error {
+func (projection *Block) OnInit() error {
 	// TODO
 	return nil
 }
 
-func (projection *BlockProjection) HandleEvent(evt ddd.Event) error {
+func (projection *Block) HandleEvent(evt ddd.Event) error {
 	if blockCreatedEvt, ok := evt.(*event.BlockCreated); ok {
 		committedCouncilNodes := make([]view.BlockCommittedCouncilNode, 0)
 		for _, signature := range blockCreatedEvt.Block.Signatures {

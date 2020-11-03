@@ -40,7 +40,7 @@ var _ = Describe("Blocks", func() {
 					MaybeHeight: &block.Height,
 				})
 				Expect(err).To(BeNil())
-				Expect(*actual).To(BeEquivalentTo(block))
+				Expect(*actual).To(Equal(block))
 			})
 		})
 	})
