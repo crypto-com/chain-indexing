@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/Masterminds/squirrel v1.4.0
+	github.com/brianvoe/gofakeit/v5 v5.10.1
 	github.com/golang-migrate/migrate/v4 v4.12.2
 	github.com/google/go-querystring v1.0.0
 	github.com/jackc/pgconn v1.6.4
@@ -13,4 +14,5 @@ require (
 	github.com/onsi/ginkgo v1.14.1
 	github.com/onsi/gomega v1.10.2
 	github.com/rs/zerolog v1.15.0
+	github.com/stretchr/testify v1.5.1
 )

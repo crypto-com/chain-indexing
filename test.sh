@@ -14,6 +14,7 @@ export TEST_POSTGRES_SCHEMA=${TEST_POSTGRES_SCHEMA:-public}
 
 DOCKER_COMPOSE_PROJECT="chain_indexing_test"
 
+FN_UNKNOWN="unknown"
 FN_BOOTSTRAP="bootstrap"
 FN_GENERATE="generate"
 FN_TEST="test"
@@ -113,7 +114,7 @@ run_generate() {
 INSTALL_DEPENDENCY=0
 WATCH_MODE=0
 TEST_DB=1
-FN=FN_TEST
+FN=FN_UNKNOWN
 while [[ $# > 0 ]]; do
     case "$1" in
         bootstrap)
@@ -124,20 +125,12 @@ while [[ $# > 0 ]]; do
             FN=FN_GENERATE
             shift 1
         ;;
+        run)
+            FN=FN_TEST
+            shift 1
+        ;;
         --install-dependency)
             INSTALL_DEPENDENCY=1
-            shift 1
-        ;;
-        --no-db)
-            TEST_DB=0
-            shift 1
-        ;;
-        --no-ssl)
-            POSTGRES_DRIVER_URL="${POSTGRES_DRIVER_URL}&sslmode=disable"
-            shift 1
-        ;;
-        --watch)
-            WATCH_MODE=1
             shift 1
         ;;
         *)
@@ -167,29 +160,52 @@ if [[ "${FN}" == FN_BOOTSTRAP ]]; then
 elif [[ "${FN}" == FN_GENERATE ]]; then
     run_generate $@
     exit "${RET_VALUE}"
-fi
+elif [[ "${FN}" == FN_TEST ]]; then
+    while [[ $# > 0 ]]; do
+        case "$1" in
+            --no-db)
+                TEST_DB=0
+                shift 1
+            ;;
+            --no-ssl)
+                POSTGRES_DRIVER_URL="${POSTGRES_DRIVER_URL}&sslmode=disable"
+                shift 1
+            ;;
+            --watch)
+                WATCH_MODE=1
+                shift 1
+            ;;
+            *)
+                break
+            ;;
+        esac
+    done
 
-echo "Stopping any previous test envionrment ..."
-teardown
-setup
+    echo "Stopping any previous test envionrment ..."
+    teardown
+    setup
 
-export TEST_DATABASE_URL="${POSTGRES_DRIVER_URL}"
-echo
-if [[ "${WATCH_MODE}" == 1 ]]; then
-    run_test_watch
+    export TEST_DATABASE_URL="${POSTGRES_DRIVER_URL}"
+    echo
+    if [[ "${WATCH_MODE}" == 1 ]]; then
+        run_test_watch
+    else
+        run_test
+    fi
+    TEST_RESULT="${RET_VALUE}"
+    echo
+
+    echo "Test finished. Stopping test envionrment ..."
+    teardown
+
+    echo
+    if [[ "${TEST_RESULT}" != 0 ]]; then
+        echo "Test Failed. Check the trace above"
+    else
+        echo "Test Passed"
+    fi
+    exit "${TEST_RESULT}"
 else
-    run_test
+    echo "Unknown or missing command"
+    exit 1
 fi
-TEST_RESULT="${RET_VALUE}"
-echo
-
-echo "Test finished. Stopping test envionrment ..."
-teardown
-
-echo
-if [[ "${TEST_RESULT}" != 0 ]]; then
-    echo "Test Failed. Check the trace above"
-else
-    echo "Test Passed"
-fi
-exit "${TEST_RESULT}"

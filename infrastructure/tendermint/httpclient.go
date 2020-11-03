@@ -2,12 +2,14 @@ package tendermint
 
 import (
 	"fmt"
-	"github.com/crypto-com/chainindex/appinterface/tendermint/types"
-	jsoniter "github.com/json-iterator/go"
 	"io"
 	"net/http"
 	"strconv"
 	"time"
+
+	jsoniter "github.com/json-iterator/go"
+
+	"github.com/crypto-com/chainindex/appinterface/tendermint/types"
 )
 
 type HTTPClient struct {
@@ -28,10 +30,10 @@ func NewHTTPClient(tendermintRPCUrl string) *HTTPClient {
 }
 
 // Block gets the block response with target height
-func (client *HTTPClient) Block(height uint64) (*types.Block, error) {
+func (client *HTTPClient) Block(height int64) (*types.Block, error) {
 	var err error
 
-	rawRespBody, err := client.request("block", "height="+strconv.FormatUint(height, 10))
+	rawRespBody, err := client.request("block", "height="+strconv.FormatInt(height, 10))
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +56,7 @@ func (client *HTTPClient) parseBlockResp(rawRespReader io.Reader) (*types.Block,
 		return nil, fmt.Errorf("error decoding Tendermint block response: %v", err)
 	}
 
-	height, err := strconv.ParseUint(resp.Result.Block.Header.Height, 10, 64)
+	height, err := strconv.ParseInt(resp.Result.Block.Header.Height, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("error converting block height to unsigned integer: %v", err)
 	}

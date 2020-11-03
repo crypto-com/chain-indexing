@@ -1,6 +1,8 @@
 package types
 
-import "time"
+import (
+	"github.com/crypto-com/chainindex/internal/utctime"
+)
 
 // BlockResp defines the structure for tendermint /block API response JSON
 type BlockResp struct {
@@ -19,9 +21,9 @@ type BlockResp struct {
 				Version struct {
 					Block string `json:"block"`
 				} `json:"version"`
-				ChainID     string    `json:"chain_id"`
-				Height      string    `json:"height"`
-				Time        time.Time `json:"time"`
+				ChainID     string          `json:"chain_id"`
+				Height      string          `json:"height"`
+				Time        utctime.UTCTime `json:"time"`
 				LastBlockID struct {
 					Hash  string `json:"hash"`
 					Parts struct {
@@ -61,10 +63,10 @@ type BlockResp struct {
 									Hash  string `json:"hash"`
 								} `json:"parts"`
 							} `json:"block_id"`
-							Timestamp        time.Time `json:"timestamp"`
-							ValidatorAddress string    `json:"validator_address"`
-							ValidatorIndex   string    `json:"validator_index"`
-							Signature        string    `json:"signature"`
+							Timestamp        utctime.UTCTime `json:"timestamp"`
+							ValidatorAddress string          `json:"validator_address"`
+							ValidatorIndex   string          `json:"validator_index"`
+							Signature        string          `json:"signature"`
 						} `json:"VoteA"`
 						VoteB struct {
 							Type    int    `json:"type"`
@@ -77,10 +79,10 @@ type BlockResp struct {
 									Hash  string `json:"hash"`
 								} `json:"parts"`
 							} `json:"block_id"`
-							Timestamp        time.Time `json:"timestamp"`
-							ValidatorAddress string    `json:"validator_address"`
-							ValidatorIndex   string    `json:"validator_index"`
-							Signature        string    `json:"signature"`
+							Timestamp        utctime.UTCTime `json:"timestamp"`
+							ValidatorAddress string          `json:"validator_address"`
+							ValidatorIndex   string          `json:"validator_index"`
+							Signature        string          `json:"signature"`
 						} `json:"VoteB"`
 					} `json:"value"`
 				} `json:"evidence"`
@@ -103,25 +105,25 @@ type BlockResp struct {
 
 // RawBlockSignature defines the structure for signatures in /block API
 type RawBlockSignature struct {
-	BlockIDFlag      int       `json:"block_id_flag"`
-	ValidatorAddress string    `json:"validator_address"`
-	Timestamp        time.Time `json:"timestamp"`
-	Signature        *string   `json:"signature"`
+	BlockIDFlag      int             `json:"block_id_flag"`
+	ValidatorAddress string          `json:"validator_address"`
+	Timestamp        utctime.UTCTime `json:"timestamp"`
+	Signature        *string         `json:"signature"`
 }
 
 // BlockSignature defines the parsed signatures
 type BlockSignature struct {
 	BlockIDFlag      int
 	ValidatorAddress string
-	Timestamp        time.Time
+	Timestamp        utctime.UTCTime
 	Signature        string
 }
 
 // Block defines parsed block data
 type Block struct {
-	Height          uint64
+	Height          int64
 	Hash            string
-	Time            time.Time
+	Time            utctime.UTCTime
 	AppHash         string
 	ProposerAddress string
 	Txs             []string
