@@ -2,6 +2,7 @@ package tendermint
 
 import (
 	"fmt"
+	"github.com/crypto-com/chainindex/entity/command"
 	"github.com/crypto-com/chainindex/infrastructure"
 	"github.com/crypto-com/chainindex/infrastructure/parser"
 	"os"
@@ -36,15 +37,18 @@ func (s *BlockPollingService) SyncBlocks(latestHeight int64) error {
 			return fmt.Errorf("error getting chain's block at %d: %v", s.currentSyncHeight, err)
 		}
 
-		// TODO: produce commands with parsers
-		// height 1001 => struct BlockParser, BlockResultParser, ValidatorParser
+		// Parse Tendermint response to commands
 		cmds, err := parser.ParseBlockToCommands(block, rawBlock)
 		if err != nil {
 			return fmt.Errorf("error parsing block data to commands %d: %v", s.currentSyncHeight, err)
 		}
 
-		fmt.Println("Synced and produce event:", block.Height, cmds)
+		// Create executor for event generation and persistent
+		executor := command.NewExecutor()
+		executor.AddCommands(cmds)
 
+		// Log and sync next
+		s.logger.Infof("Synced and produce event: %d %v", block.Height, executor.Commands)
 		s.currentSyncHeight++
 	}
 	return nil
