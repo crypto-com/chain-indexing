@@ -1,7 +1,7 @@
 package command
 
 import (
-	"github.com/crypto-com/chainindex/ddd"
+	dddevent "github.com/crypto-com/chainindex/ddd/event"
 	"github.com/crypto-com/chainindex/entity/event"
 	"github.com/crypto-com/chainindex/entity/model"
 )
@@ -24,7 +24,7 @@ func (_ *CreateRawBlockCommand) Version() int {
 	return 1
 }
 
-func (cmd *CreateRawBlockCommand) Exec() (ddd.Event, error) {
+func (cmd *CreateRawBlockCommand) Exec() (dddevent.Event, error) {
 	evt := event.NewRawBlockCreatedEvent(cmd.rawBlock)
 	return evt, nil
 }

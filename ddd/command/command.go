@@ -1,10 +1,10 @@
 package command
 
-import "github.com/crypto-com/chainindex/ddd"
+import "github.com/crypto-com/chainindex/ddd/event"
 
 type Command interface {
 	Name() string
 	Version() int
 
-	Exec() []ddd.Event
+	Exec() []event.Event
 }

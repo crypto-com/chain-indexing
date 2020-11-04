@@ -2,7 +2,7 @@ package projection
 
 import (
 	"github.com/crypto-com/chainindex/appinterface/projection/view"
-	"github.com/crypto-com/chainindex/ddd"
+	dddevent "github.com/crypto-com/chainindex/ddd/event"
 	"github.com/crypto-com/chainindex/entity/event"
 )
 
@@ -30,7 +30,7 @@ func (projection *Block) OnInit() error {
 	return nil
 }
 
-func (projection *Block) HandleEvent(evt ddd.Event) error {
+func (projection *Block) HandleEvent(evt dddevent.Event) error {
 	if blockCreatedEvt, ok := evt.(*event.BlockCreated); ok {
 		committedCouncilNodes := make([]view.BlockCommittedCouncilNode, 0)
 		for _, signature := range blockCreatedEvt.Block.Signatures {

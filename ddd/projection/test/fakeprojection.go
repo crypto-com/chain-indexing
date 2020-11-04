@@ -1,7 +1,7 @@
-package projectiontest
+package ddd_projection_test
 
 import (
-	"github.com/crypto-com/chainindex/ddd"
+	"github.com/crypto-com/chainindex/ddd/event"
 )
 
 type FakeProjection struct{}
@@ -16,12 +16,12 @@ func (projection *FakeProjection) Id() string {
 func (projection *FakeProjection) GetEventsToListen() []string {
 	return []string{}
 }
-func (projection *FakeProjection) GetLastHandledEventId() string {
-	return ""
+func (projection *FakeProjection) GetLastHandledEventSeq() *int64 {
+	return nil
 }
 func (projection *FakeProjection) OnInit() error {
 	return nil
 }
-func (projection *FakeProjection) HandleEvent(event ddd.Event) error {
+func (projection *FakeProjection) HandleEvent(event event.Event) error {
 	return nil
 }
