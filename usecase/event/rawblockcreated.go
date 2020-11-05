@@ -2,9 +2,10 @@ package event
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/crypto-com/chainindex/entity/model"
 	"github.com/luci/go-render/render"
-	"strconv"
 )
 
 const RawBlockCreatedEventName = "RawBlockCreated"

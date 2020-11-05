@@ -4,6 +4,7 @@ import (
 	"github.com/crypto-com/chainindex/internal/utctime"
 )
 
+// RawBlock defines the structure for Tendermint /block API response JSON
 type RawBlock struct {
 	Jsonrpc string `json:"jsonrpc"`
 	ID      int    `json:"id"`
