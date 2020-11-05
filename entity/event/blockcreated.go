@@ -3,21 +3,20 @@ package event
 import (
 	"github.com/luci/go-render/render"
 
-	"github.com/crypto-com/chainindex/ddd/event"
 	"github.com/crypto-com/chainindex/entity/model"
 )
 
 const BLOCK_CREATED = "BlockCreated"
 
 type BlockCreated struct {
-	event.Base
+	BlockBase
 
 	Block *model.Block
 }
 
 func NewBlockCreated(block *model.Block) *BlockCreated {
 	return &BlockCreated{
-		event.NewBase(),
+		NewBlockBase(block.Height),
 
 		block,
 	}

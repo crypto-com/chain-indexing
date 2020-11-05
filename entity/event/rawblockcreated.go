@@ -1,23 +1,28 @@
 package event
 
 import (
-	"github.com/crypto-com/chainindex/ddd/event"
+	"fmt"
 	"github.com/crypto-com/chainindex/entity/model"
 	"github.com/luci/go-render/render"
+	"strconv"
 )
 
 const RawBlockCreatedEventName = "RawBlockCreated"
 
 type RawBlockCreatedEvent struct {
-	event.Base
+	BlockBase
 
 	rawBlock *model.RawBlock
 }
 
 func NewRawBlockCreatedEvent(rawBlock *model.RawBlock) *RawBlockCreatedEvent {
-	return &RawBlockCreatedEvent{
-		event.NewBase(),
+	height, err := strconv.ParseInt(rawBlock.Result.Block.Header.Height, 10, 64)
+	if err != nil {
+		panic(fmt.Sprintf("Missing block height in raw block: %v", err))
+	}
 
+	return &RawBlockCreatedEvent{
+		NewBlockBase(height),
 		rawBlock,
 	}
 }
