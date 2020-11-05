@@ -1,7 +1,7 @@
 package command
 
-import "github.com/crypto-com/chainindex/ddd/command"
-
-func ExecAll(cmd []command.Command) error {
-	return nil
+// Executor interface defines command executor signature
+type Executor interface {
+	Exec() error
+	ExecAll(cmds []Command) error
 }

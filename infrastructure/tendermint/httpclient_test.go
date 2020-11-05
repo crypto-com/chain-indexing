@@ -1,7 +1,6 @@
 package tendermint_test
 
 import (
-	"github.com/crypto-com/chainindex/entity/model"
 	"net/http"
 
 	. "github.com/onsi/ginkgo"
@@ -12,6 +11,7 @@ import (
 	"github.com/crypto-com/chainindex/appinterface/tendermint"
 	. "github.com/crypto-com/chainindex/infrastructure/tendermint"
 	"github.com/crypto-com/chainindex/internal/utctime"
+	"github.com/crypto-com/chainindex/usecase/model"
 )
 
 var _ = Describe("HTTPClient", func() {

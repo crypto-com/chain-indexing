@@ -56,3 +56,8 @@ func Duration(value time.Duration) *time.Duration {
 func BigInt(value big.Int) *big.Int {
 	return &value
 }
+
+func Int64Nil() *int64 {
+	var p *int64
+	return p
+}

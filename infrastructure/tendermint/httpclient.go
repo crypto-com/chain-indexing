@@ -2,13 +2,14 @@ package tendermint
 
 import (
 	"fmt"
-	"github.com/crypto-com/chainindex/entity/model"
 	"io"
 	"net/http"
 	"strconv"
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
+
+	"github.com/crypto-com/chainindex/usecase/model"
 )
 
 type HTTPClient struct {
