@@ -4,20 +4,24 @@ import (
 	"github.com/crypto-com/chainindex/entity/event"
 )
 
-type FakeManager struct{}
+type FakeStore struct{}
 
-func NewFakeManager() *FakeManager {
-	return &FakeManager{}
+func NewFakeStore() *FakeStore {
+	return &FakeStore{}
 }
 
-func (manager *FakeManager) GetLatestEventSeq() *int64 {
+func (manager *FakeStore) GetLatestHeight() *int64 {
 	return nil
 }
 
-func (manager *FakeManager) GetEventBySeq(seq int64) (event.Event, error) {
+func (manager *FakeStore) GetByHeight(seq int64) (event.Event, error) {
 	return NewFakeEvent(), nil
 }
 
-func (manager *FakeManager) InsertEvent(evt event.Event) error {
+func (manager *FakeStore) Insert(evt event.Event) error {
+	return nil
+}
+
+func (manager *FakeStore) InsertAll(evts []event.Event) error {
 	return nil
 }
