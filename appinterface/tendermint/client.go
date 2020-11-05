@@ -1,7 +1,7 @@
 package tendermint
 
 import (
-	"github.com/crypto-com/chainindex/entity/model"
+	"github.com/crypto-com/chainindex/usecase/model"
 )
 
 type Client interface {

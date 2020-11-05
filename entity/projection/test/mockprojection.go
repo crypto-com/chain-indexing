@@ -1,8 +1,9 @@
 package ddd_projection_test
 
 import (
-	dddevent "github.com/crypto-com/chainindex/ddd/event"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/crypto-com/chainindex/entity/event"
 )
 
 type MockProjection struct {
@@ -25,7 +26,7 @@ func (projection *MockProjection) GetEventsToListen() []string {
 	return mockArgs.Get(0).([]string)
 }
 
-func (projection *MockProjection) GetLastHandledEventSeq() *int64 {
+func (projection *MockProjection) GetLastHandledEventHeight() *int64 {
 	mockArgs := projection.Called()
 
 	return mockArgs.Get(0).(*int64)
@@ -37,8 +38,8 @@ func (projection *MockProjection) OnInit() error {
 	return mockArgs.Error(0)
 }
 
-func (projection *MockProjection) HandleEvent(event dddevent.Event) error {
-	mockArgs := projection.Called(event)
+func (projection *MockProjection) HandleEvents(evt []event.Event) error {
+	mockArgs := projection.Called(evt)
 
 	return mockArgs.Error(0)
 }

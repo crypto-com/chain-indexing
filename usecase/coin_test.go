@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/crypto-com/chainindex/entity"
+	. "github.com/crypto-com/chainindex/usecase"
 )
 
 var _ = Describe("Coin", func() {

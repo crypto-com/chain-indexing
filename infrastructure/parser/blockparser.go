@@ -1,9 +1,9 @@
 package parser
 
 import (
-	"github.com/crypto-com/chainindex/ddd/command"
-	entity_command "github.com/crypto-com/chainindex/entity/command"
-	"github.com/crypto-com/chainindex/entity/model"
+	"github.com/crypto-com/chainindex/entity/command"
+	usecase_command "github.com/crypto-com/chainindex/usecase/command"
+	"github.com/crypto-com/chainindex/usecase/model"
 )
 
 func ParseBlockToCommands(block *model.Block, rawBlock *model.RawBlock) ([]command.Command, error) {
@@ -19,11 +19,11 @@ func ParseBlockToCommands(block *model.Block, rawBlock *model.RawBlock) ([]comma
 	return cmds, err
 }
 
-func ParseCreateRawBlockCommand(rawBlock *model.RawBlock) entity_command.CreateRawBlockCommand {
-	return entity_command.NewCreateRawBlockCommand(rawBlock)
+func ParseCreateRawBlockCommand(rawBlock *model.RawBlock) usecase_command.CreateRawBlock {
+	return usecase_command.NewCreateRawBlock(rawBlock)
 }
 
-func ParseCreateBlockCommand(block *model.Block) entity_command.CreateBlockCommand {
+func ParseCreateBlockCommand(block *model.Block) usecase_command.CreateBlock {
 	var modelBlockSigs []model.BlockSignature
 	for _, sig := range block.Signatures {
 		modelBlockSigs = append(modelBlockSigs, model.BlockSignature{
@@ -44,5 +44,5 @@ func ParseCreateBlockCommand(block *model.Block) entity_command.CreateBlockComma
 		Signatures:      modelBlockSigs,
 	}
 
-	return entity_command.NewCreateBlockCommand(modelBlock)
+	return usecase_command.NewCreateBlock(modelBlock)
 }

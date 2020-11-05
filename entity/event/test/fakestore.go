@@ -1,7 +1,7 @@
-package ddd_event_test
+package entity_event_test
 
 import (
-	"github.com/crypto-com/chainindex/ddd/event"
+	"github.com/crypto-com/chainindex/entity/event"
 )
 
 type FakeManager struct{}

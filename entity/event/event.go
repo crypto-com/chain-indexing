@@ -1,12 +1,11 @@
 package event
 
+// Event must be JSON-completed. i.e. All important fields must be encoded to JSON
 type Event interface {
-	Category() string
-	CategorySequence() int64
+	Height() int64
 
 	Name() string
 	Version() int
-	Payload() interface{}
 
 	// Unique Id that is assigned on event creation
 	Id() string

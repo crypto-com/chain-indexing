@@ -4,42 +4,41 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/crypto-com/chainindex/entity/model"
 	"github.com/luci/go-render/render"
+
+	"github.com/crypto-com/chainindex/entity/event"
+	"github.com/crypto-com/chainindex/usecase/model"
 )
 
-const RawBlockCreatedEventName = "RawBlockCreated"
+const RAW_BLOCK_CREATED = "RawBlockCreated"
 
-type RawBlockCreatedEvent struct {
-	BlockBase
+type RawBlockCreated struct {
+	event.Base
 
-	rawBlock *model.RawBlock
+	RawBlock *model.RawBlock `json:"rawBlock"`
 }
 
-func NewRawBlockCreatedEvent(rawBlock *model.RawBlock) *RawBlockCreatedEvent {
+func NewRawBlockCreated(rawBlock *model.RawBlock) *RawBlockCreated {
 	height, err := strconv.ParseInt(rawBlock.Result.Block.Header.Height, 10, 64)
 	if err != nil {
 		panic(fmt.Sprintf("Missing block height in raw block: %v", err))
 	}
 
-	return &RawBlockCreatedEvent{
-		NewBlockBase(height),
+	return &RawBlockCreated{
+		event.NewBase(height),
+
 		rawBlock,
 	}
 }
 
-func (_ *RawBlockCreatedEvent) Name() string {
-	return RawBlockCreatedEventName
+func (_ *RawBlockCreated) Name() string {
+	return RAW_BLOCK_CREATED
 }
 
-func (_ *RawBlockCreatedEvent) Version() int {
+func (_ *RawBlockCreated) Version() int {
 	return 1
 }
 
-func (event *RawBlockCreatedEvent) Payload() interface{} {
-	return event.rawBlock
-}
-
-func (event *RawBlockCreatedEvent) String() string {
-	return render.Render(event)
+func (evt *RawBlockCreated) String() string {
+	return render.Render(evt)
 }

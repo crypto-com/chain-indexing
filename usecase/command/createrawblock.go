@@ -1,30 +1,30 @@
 package command
 
 import (
-	dddevent "github.com/crypto-com/chainindex/ddd/event"
 	"github.com/crypto-com/chainindex/entity/event"
-	"github.com/crypto-com/chainindex/entity/model"
+	usecase_event "github.com/crypto-com/chainindex/usecase/event"
+	"github.com/crypto-com/chainindex/usecase/model"
 )
 
-type CreateRawBlockCommand struct {
+type CreateRawBlock struct {
 	rawBlock *model.RawBlock
 }
 
-func NewCreateRawBlockCommand(rawBlock *model.RawBlock) CreateRawBlockCommand {
-	return CreateRawBlockCommand{
+func NewCreateRawBlock(rawBlock *model.RawBlock) CreateRawBlock {
+	return CreateRawBlock{
 		rawBlock,
 	}
 }
 
-func (_ *CreateRawBlockCommand) Name() string {
+func (_ *CreateRawBlock) Name() string {
 	return "CreateRawBlock"
 }
 
-func (_ *CreateRawBlockCommand) Version() int {
+func (_ *CreateRawBlock) Version() int {
 	return 1
 }
 
-func (cmd *CreateRawBlockCommand) Exec() (dddevent.Event, error) {
-	evt := event.NewRawBlockCreatedEvent(cmd.rawBlock)
+func (cmd *CreateRawBlock) Exec() (event.Event, error) {
+	evt := usecase_event.NewRawBlockCreated(cmd.rawBlock)
 	return evt, nil
 }
