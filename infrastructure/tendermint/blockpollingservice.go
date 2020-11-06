@@ -2,6 +2,7 @@ package tendermint
 
 import (
 	"fmt"
+	"github.com/crypto-com/chainindex/entity/executor"
 	"github.com/crypto-com/chainindex/infrastructure"
 	"github.com/crypto-com/chainindex/infrastructure/parser"
 	"os"
@@ -43,8 +44,14 @@ func (s *BlockPollingService) SyncBlocks(latestHeight int64) error {
 			return fmt.Errorf("error parsing block data to commands %d: %v", s.currentSyncHeight, err)
 		}
 
-		fmt.Println("Synced and produce event:", block.Height, cmds)
+		// Create executor for event generation and persistent
+		executor := executor.New()
+		executor.AddCommands(cmds)
 
+		// TODO: Process commands to events & store
+
+		// Log and sync next
+		s.logger.Infof("Synced and produce event: %d %v", block.Height, executor.Commands)
 		s.currentSyncHeight++
 	}
 	return nil
