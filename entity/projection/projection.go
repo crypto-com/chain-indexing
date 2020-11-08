@@ -1,7 +1,7 @@
 package projection
 
 import (
-	"github.com/crypto-com/chainindex/entity/event"
+	entity_event "github.com/crypto-com/chainindex/entity/event"
 )
 
 // Projection interface defines the necessary methods of to create a projection
@@ -13,7 +13,7 @@ type Projection interface {
 	GetEventsToListen() []string
 
 	// Returns the last handled event height. nil mean no event has been handled so far.
-	GetLastHandledEventHeight() *int64
+	GetLastHandledEventHeight() (*int64, error)
 
 	// `OnInit()` is called when the projection first-time initializes (Before the first event is
 	// handled). If an error is returned, the system will attempt to run again on next restart and
@@ -24,5 +24,5 @@ type Projection interface {
 
 	// Handle all events with the same height that matches `GetEventsToListen()` and create
 	// projection.
-	HandleEvents(event event.Event) error
+	HandleEvents(events []entity_event.Event) error
 }

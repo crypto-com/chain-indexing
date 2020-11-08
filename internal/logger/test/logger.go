@@ -1,4 +1,4 @@
-package fake
+package test
 
 import "github.com/crypto-com/chainindex/internal/logger"
 

@@ -1,4 +1,4 @@
-package fake
+package test
 
 import (
 	"math/big"
@@ -64,11 +64,11 @@ type FakeRDbRowResult struct{}
 
 func (result *FakeRDbRowResult) Scan(dest ...interface{}) error { return nil }
 
-type MockRDbTypeConv struct{}
+type FakeRDbTypeConv struct{}
 
-func (conv *MockRDbTypeConv) Bton(bigInt *big.Int) interface{} { return nil }
-func (conv *MockRDbTypeConv) Iton(i int) interface{}           { return nil }
-func (conv *MockRDbTypeConv) NtobReader() rdb.NtobReader {
+func (conv *FakeRDbTypeConv) Bton(bigInt *big.Int) interface{} { return nil }
+func (conv *FakeRDbTypeConv) Iton(i int) interface{}           { return nil }
+func (conv *FakeRDbTypeConv) NtobReader() rdb.NtobReader {
 	return &FakeRDbNtobReader{}
 }
 

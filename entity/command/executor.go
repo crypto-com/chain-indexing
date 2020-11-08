@@ -1,4 +1,4 @@
-package command
+package entity_command
 
 // Executor interface defines command executor signature
 type Executor interface {

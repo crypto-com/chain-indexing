@@ -1,16 +1,16 @@
 package command
 
 import (
-	"github.com/crypto-com/chainindex/entity/event"
+	entity_event "github.com/crypto-com/chainindex/entity/event"
 	usecase_event "github.com/crypto-com/chainindex/usecase/event"
-	"github.com/crypto-com/chainindex/usecase/model"
+	usecase_model "github.com/crypto-com/chainindex/usecase/model"
 )
 
 type CreateRawBlock struct {
-	rawBlock *model.RawBlock
+	rawBlock *usecase_model.RawBlock
 }
 
-func NewCreateRawBlock(rawBlock *model.RawBlock) CreateRawBlock {
+func NewCreateRawBlock(rawBlock *usecase_model.RawBlock) CreateRawBlock {
 	return CreateRawBlock{
 		rawBlock,
 	}
@@ -24,7 +24,7 @@ func (_ *CreateRawBlock) Version() int {
 	return 1
 }
 
-func (cmd *CreateRawBlock) Exec() (event.Event, error) {
+func (cmd *CreateRawBlock) Exec() (entity_event.Event, error) {
 	evt := usecase_event.NewRawBlockCreated(cmd.rawBlock)
 	return evt, nil
 }
