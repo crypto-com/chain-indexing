@@ -1,13 +1,13 @@
 package infrastructure_test
 
 import (
+	"github.com/crypto-com/chainindex/infrastructure"
 	"io"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
 
-	"github.com/crypto-com/chainindex/infrastructure"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
 )
 

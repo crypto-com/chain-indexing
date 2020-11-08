@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/crypto-com/chainindex/infrastructure/feed/chain"
 	toml "github.com/crypto-com/chainindex/internal/filereader/toml"
-
-	"github.com/crypto-com/chainindex/infrastructure/tendermint"
 )
 
 type IndexServer struct {
@@ -33,9 +32,8 @@ func NewIndexServer(configPath string, config *CLIConfig) (*IndexServer, error) 
 func (s *IndexServer) Run() error {
 	fmt.Println("TODO: will start server here")
 
-	blockPollingService := tendermint.NewBlockPollingService(s.TendermintHTTPRPCURL, 208920)
-
-	err := blockPollingService.Run()
+	blockFeed := chain.NewBlockFeed(s.TendermintHTTPRPCURL, 323300)
+	err := blockFeed.Run()
 	if err != nil {
 		return fmt.Errorf("error start running block polling service: %v", err)
 	}
