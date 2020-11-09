@@ -38,34 +38,35 @@ func (projection *Block) OnInit() error {
 	return nil
 }
 
-func (projection *Block) HandleEvents(evts []entity_event.Event) error {
-	for _, evt := range evts {
+func (projection *Block) HandleEvents(events []entity_event.Event) error {
+	for _, evt := range events {
 		if blockCreatedEvt, ok := evt.(*usecase_event.BlockCreated); ok {
 			return projection.handleBlockCreatedEvent(blockCreatedEvt)
 		} else {
-			return fmt.Errorf("received unexpecxted event %sV%d(%s)", evt.Name(), evt.Version(), evt.Id())
+			return fmt.Errorf("received unexpected event %sV%d(%s)", evt.Name(), evt.Version(), evt.Id())
 		}
 	}
+	// TODO: Update last handled event height
 	return nil
 }
 
-func (projection *Block) handleBlockCreatedEvent(evt *usecase_event.BlockCreated) error {
+func (projection *Block) handleBlockCreatedEvent(event *usecase_event.BlockCreated) error {
 	committedCouncilNodes := make([]view.BlockCommittedCouncilNode, 0)
-	for _, signature := range evt.Block.Signatures {
+	for _, signature := range event.Block.Signatures {
 		committedCouncilNodes = append(committedCouncilNodes, view.BlockCommittedCouncilNode{
 			Address:    signature.ValidatorAddress,
 			Time:       signature.Timestamp,
 			Signature:  signature.Signature,
-			IsProposer: evt.Block.ProposerAddress == signature.ValidatorAddress,
+			IsProposer: event.Block.ProposerAddress == signature.ValidatorAddress,
 		})
 	}
 
 	if err := projection.blocksView.Insert(&view.Block{
-		Height:                evt.Block.Height,
-		Hash:                  evt.Block.Hash,
-		Time:                  evt.Block.Time,
-		AppHash:               evt.Block.AppHash,
-		TransactionCount:      len(evt.Block.Txs),
+		Height:                event.Block.Height,
+		Hash:                  event.Block.Hash,
+		Time:                  event.Block.Time,
+		AppHash:               event.Block.AppHash,
+		TransactionCount:      len(event.Block.Txs),
 		CommittedCouncilNodes: committedCouncilNodes,
 	}); err != nil {
 		return err

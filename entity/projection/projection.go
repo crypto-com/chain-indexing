@@ -23,6 +23,6 @@ type Projection interface {
 	OnInit() error
 
 	// Handle all events with the same height that matches `GetEventsToListen()` and create
-	// projection.
+	// projection. It is also responsible to update the last handled event height.
 	HandleEvents(events []entity_event.Event) error
 }

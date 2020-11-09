@@ -1,4 +1,4 @@
-package entity_command
+package command
 
 import entity_event "github.com/crypto-com/chainindex/entity/event"
 
