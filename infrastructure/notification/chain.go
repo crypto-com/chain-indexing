@@ -12,13 +12,16 @@ type Notification struct {
 
 // TODO: add block results notification
 // Defines the notification name and payload here
-const NOTIF_TENDERMINT_BLOCK = "TENDERMINT_BLOCK"
-const NOTIF_CURRBLOCK_DONE = "CURRBLOCK_DONE"
+const (
+	NOTIF_TENDERMINT_BLOCK = "TENDERMINT_BLOCK"
+	NOTIF_CURRBLOCK_DONE   = "CURRBLOCK_DONE"
+)
 
 type BlockNotifPayload struct {
 	*model.Block
 	*model.RawBlock
 }
+
 func NewBlockNotif(block *model.Block, rawBlock *model.RawBlock) *feed.Notification {
 	// Prepare notification payload and dispatch
 	data := BlockNotifPayload{
@@ -29,12 +32,12 @@ func NewBlockNotif(block *model.Block, rawBlock *model.RawBlock) *feed.Notificat
 }
 
 func NewCurrBlockDoneNotif() *feed.Notification {
-	return NewNotif(NOTIF_CURRBLOCK_DONE, struct {}{})
+	return NewNotif(NOTIF_CURRBLOCK_DONE, struct{}{})
 }
 
 func NewNotif(name string, data interface{}) *feed.Notification {
 	return &feed.Notification{
-		Name: name,
+		Name:    name,
 		Payload: data,
 	}
 }

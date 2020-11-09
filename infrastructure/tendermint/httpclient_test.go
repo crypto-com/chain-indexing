@@ -1,6 +1,7 @@
 package tendermint_test
 
 import (
+	"github.com/crypto-com/chainindex/internal/primptr"
 	"net/http"
 
 	. "github.com/onsi/ginkgo"
@@ -23,6 +24,159 @@ var _ = Describe("HTTPClient", func() {
 
 	It("should implement Client", func() {
 		var _ tendermint.Client = NewHTTPClient("http://localhost:26657")
+	})
+
+	Describe("BlockResults", func() {
+		It("should return nil Events when there are no transactions nor events", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/block_results", "height=1"),
+					ghttp.RespondWith(http.StatusOK, BLOCK_RESULTS_EMPTY_EVENTS_JSON),
+				),
+			)
+
+			client := NewHTTPClient(server.URL())
+
+			anyBlockHeight := int64(1)
+			blockResults, err := client.BlockResults(anyBlockHeight)
+			Expect(err).To(BeNil())
+			Expect(*blockResults).To(Equal(model.BlockResults{
+				Height:           anyBlockHeight,
+				TxsEvents:        nil,
+				BeginBlockEvents: nil,
+				ValidatorUpdates: nil,
+			}))
+		})
+
+		It("should return parsed block results", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/block_results", "height=3813"),
+					ghttp.RespondWith(http.StatusOK, BLOCK_RESULTS_JSON),
+				),
+			)
+
+			client := NewHTTPClient(server.URL())
+
+			anyBlockHeight := int64(3813)
+			blockResults, err := client.BlockResults(anyBlockHeight)
+			Expect(err).To(BeNil())
+			Expect(*blockResults).To(Equal(model.BlockResults{
+				Height: anyBlockHeight,
+				TxsEvents: [][]model.BlockResultsEvent{
+					{
+						{
+							Type: "valid_txs",
+							Attributes: []model.BlockResultsEventAttribute{
+								{
+									Key:   "ZmVl",
+									Value: "MC4wMDAwMDQ2OQ==",
+								},
+								{
+									Key:   "dHhpZA==",
+									Value: "YmEyMjMwYTA0OTIyZDNmMDFkNDE5OTljNmFkYmUwNmZjOGE5ODQxM2IyZDU1YWM3ZjlhYzMwZmVjMzlmYzdiMg==",
+								},
+							},
+						},
+					},
+					{
+						{
+							Type: "valid_txs",
+							Attributes: []model.BlockResultsEventAttribute{
+								{
+									Key:   "ZmVl",
+									Value: "MC4wMDAwMDQ2OQ==",
+								},
+								{
+									Key:   "dHhpZA==",
+									Value: "N2I1YWMzNmY2M2ZmYjZlZTEzMjg5ZDQ5ZDljZmRhY2UzZjhkMjM0NDY5ZWIwNTc1NWY1ZjVhYzgxYjNhNDVhNg==",
+								},
+							},
+						},
+					},
+				},
+				BeginBlockEvents: []model.BlockResultsEvent{
+					{
+						Type: "staking_change",
+						Attributes: []model.BlockResultsEventAttribute{
+							{
+								Key:   "c3Rha2luZ19hZGRyZXNz",
+								Value: "MHg2ZGJkNWI4ZmUwZGFkNDk0NDY1YWE3NTc0ZGVmYmE3MTFjMTg0MTAy",
+							},
+							{
+								Key:   "c3Rha2luZ19vcHR5cGU=",
+								Value: "cmV3YXJk",
+							},
+							{
+								Key:   "c3Rha2luZ19kaWZm",
+								Value: "W3sia2V5IjoiQm9uZGVkIiwidmFsdWUiOiI0ODU4OTkwMjAzMzMzIn1d",
+							},
+						},
+					},
+					{
+						Type: "staking_change",
+						Attributes: []model.BlockResultsEventAttribute{
+							{
+								Key:   "c3Rha2luZ19hZGRyZXNz",
+								Value: "MHg2ZmMxZTMxMjRhN2VkMDdmMzcxMDM3OGI2OGY3MDQ2YzczMDAxNzlk",
+							},
+							{
+								Key:   "c3Rha2luZ19vcHR5cGU=",
+								Value: "cmV3YXJk",
+							},
+							{
+								Key:   "c3Rha2luZ19kaWZm",
+								Value: "W3sia2V5IjoiQm9uZGVkIiwidmFsdWUiOiI0ODU4OTkwMjAzMzMzIn1d",
+							},
+						},
+					},
+					{
+						Type: "staking_change",
+						Attributes: []model.BlockResultsEventAttribute{
+							{
+								Key:   "c3Rha2luZ19hZGRyZXNz",
+								Value: "MHhiOGM2ODg2ZGEwOWUxMmRiOGFlYmZjODEwOGM2N2NlMmJhMDg2YWM2",
+							},
+							{
+								Key:   "c3Rha2luZ19vcHR5cGU=",
+								Value: "cmV3YXJk",
+							},
+							{
+								Key:   "c3Rha2luZ19kaWZm",
+								Value: "W3sia2V5IjoiQm9uZGVkIiwidmFsdWUiOiI0ODU4OTkwMjAzMzMzIn1d",
+							},
+						},
+					},
+					{
+						Type: "reward",
+						Attributes: []model.BlockResultsEventAttribute{
+							{
+								Key:   "bWludGVk",
+								Value: "IjE0NTc2OTcwNjEwMDAwIg==",
+							},
+						},
+					},
+				},
+				ValidatorUpdates: []model.BlockResultsValidator{
+					{
+						PubKey: model.BlockResultsValidatorPubKey{
+							Type:    "tendermint.crypto.PublicKey_Ed25519",
+							PubKey:  "rXhu7xhqYBtJftVLKxvKN0XnpyOzxFnUEfAhD1dEF/8=",
+							Address: "34C725CABA703269B3F1D1A907A84DE5FEE96469",
+						},
+						Power: primptr.String("60000000"),
+					},
+					{
+						PubKey: model.BlockResultsValidatorPubKey{
+							Type:    "tendermint.crypto.PublicKey_Ed25519",
+							PubKey:  "tDLheZJwsA8oYEwarR6/X+zAmNKMLHTVkh/fvcLqcwA=",
+							Address: "D527DAECDE0501CF2E785A8DC0D9F4A64760F0BB",
+						},
+						Power: primptr.String("80000000"),
+					},
+				},
+			}))
+		})
 	})
 
 	Describe("Block", func() {
@@ -76,6 +230,189 @@ var _ = Describe("HTTPClient", func() {
 })
 
 const (
+	BLOCK_RESULTS_EMPTY_EVENTS_JSON = `
+{
+	"jsonrpc": "2.0",
+	"id": -1,
+	"result": {
+		"height": "1",
+		"txs_results": null,
+		"begin_block_events": null,
+		"end_block_events": null,
+		"validator_updates": null,
+		"consensus_param_updates": null
+	}
+}`
+	BLOCK_RESULTS_JSON = `
+{
+	"jsonrpc": "2.0",
+	"id": -1,
+	"result": {
+		"height": "3813",
+		"txs_results": [
+			{
+				"code": 0,
+				"data": null,
+				"log": "",
+				"info": "",
+				"gasWanted": "0",
+				"gasUsed": "0",
+				"events": [
+					{
+						"type": "valid_txs",
+						"attributes": [
+						{
+							"key": "ZmVl",
+							"value": "MC4wMDAwMDQ2OQ=="
+						},
+						{
+							"key": "dHhpZA==",
+							"value": "YmEyMjMwYTA0OTIyZDNmMDFkNDE5OTljNmFkYmUwNmZjOGE5ODQxM2IyZDU1YWM3ZjlhYzMwZmVjMzlmYzdiMg=="
+						}
+						]
+					}
+				],
+				"codespace": ""
+			},
+			{
+				"code": 0,
+				"data": null,
+				"log": "",
+				"info": "",
+				"gasWanted": "0",
+				"gasUsed": "0",
+				"events": [
+					{
+						"type": "valid_txs",
+						"attributes": [
+						{
+							"key": "ZmVl",
+							"value": "MC4wMDAwMDQ2OQ=="
+						},
+						{
+							"key": "dHhpZA==",
+							"value": "N2I1YWMzNmY2M2ZmYjZlZTEzMjg5ZDQ5ZDljZmRhY2UzZjhkMjM0NDY5ZWIwNTc1NWY1ZjVhYzgxYjNhNDVhNg=="
+						}
+						]
+					}
+				],
+				"codespace": ""
+			}
+		],
+		"begin_block_events": [
+			{
+				"type": "staking_change",
+				"attributes": [
+					{
+						"key": "c3Rha2luZ19hZGRyZXNz",
+						"value": "MHg2ZGJkNWI4ZmUwZGFkNDk0NDY1YWE3NTc0ZGVmYmE3MTFjMTg0MTAy"
+					},
+					{
+						"key": "c3Rha2luZ19vcHR5cGU=",
+						"value": "cmV3YXJk"
+					},
+					{
+						"key": "c3Rha2luZ19kaWZm",
+						"value": "W3sia2V5IjoiQm9uZGVkIiwidmFsdWUiOiI0ODU4OTkwMjAzMzMzIn1d"
+					}
+				]
+			},
+			{
+				"type": "staking_change",
+				"attributes": [
+					{
+						"key": "c3Rha2luZ19hZGRyZXNz",
+						"value": "MHg2ZmMxZTMxMjRhN2VkMDdmMzcxMDM3OGI2OGY3MDQ2YzczMDAxNzlk"
+					},
+					{
+						"key": "c3Rha2luZ19vcHR5cGU=",
+						"value": "cmV3YXJk"
+					},
+					{
+						"key": "c3Rha2luZ19kaWZm",
+						"value": "W3sia2V5IjoiQm9uZGVkIiwidmFsdWUiOiI0ODU4OTkwMjAzMzMzIn1d"
+					}
+				]
+			},
+			{
+				"type": "staking_change",
+				"attributes": [
+					{
+						"key": "c3Rha2luZ19hZGRyZXNz",
+						"value": "MHhiOGM2ODg2ZGEwOWUxMmRiOGFlYmZjODEwOGM2N2NlMmJhMDg2YWM2"
+					},
+					{
+						"key": "c3Rha2luZ19vcHR5cGU=",
+						"value": "cmV3YXJk"
+					},
+					{
+						"key": "c3Rha2luZ19kaWZm",
+						"value": "W3sia2V5IjoiQm9uZGVkIiwidmFsdWUiOiI0ODU4OTkwMjAzMzMzIn1d"
+					}
+				]
+			},
+			{
+				"type": "reward",
+				"attributes": [
+					{
+						"key": "bWludGVk",
+						"value": "IjE0NTc2OTcwNjEwMDAwIg=="
+					}
+				]
+			}
+		],
+		"end_block_events": [
+			{
+				"type": "block_filter",
+				"attributes": [
+					{
+						"key": "ZXRoYmxvb20=",
+						"value": "AAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+					}
+				]
+			}
+		],
+		"validator_updates": [
+			{
+				"pub_key": {
+					"Sum": {
+						"type": "tendermint.crypto.PublicKey_Ed25519",
+						"value": {
+							"ed25519": "rXhu7xhqYBtJftVLKxvKN0XnpyOzxFnUEfAhD1dEF/8="
+						}
+					}
+				},
+				"power": "60000000"
+			},
+			{
+				"pub_key": {
+				"Sum": {
+					"type": "tendermint.crypto.PublicKey_Ed25519",
+						"value": {
+							"ed25519": "tDLheZJwsA8oYEwarR6/X+zAmNKMLHTVkh/fvcLqcwA="
+						}
+					}
+				},
+				"power": "80000000"
+			}
+		],
+		"consensus_param_updates": {
+			"block": {
+				"max_bytes": "22020096",
+				"max_gas": "-1"
+			},
+			"evidence": {
+				"max_age_num_blocks": "100000",
+				"max_age_duration": "172800000000000"
+			},
+			"validator": {
+				"pub_key_types": [
+					"ed25519"
+				]
+			}
+		}
+	}
+}`
 	BLOCK_JSON = `
 {
   "jsonrpc": "2.0",

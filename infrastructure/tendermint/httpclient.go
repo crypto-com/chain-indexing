@@ -7,8 +7,6 @@ import (
 	"strconv"
 	"time"
 
-	jsoniter "github.com/json-iterator/go"
-
 	"github.com/crypto-com/chainindex/usecase/model"
 )
 
@@ -39,7 +37,7 @@ func (client *HTTPClient) Block(height int64) (*model.Block, *model.RawBlock, er
 	}
 	defer rawRespBody.Close()
 
-	block, rawBlock, err := client.parseBlockResp(rawRespBody)
+	block, rawBlock, err := parseBlockResp(rawRespBody)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -47,51 +45,21 @@ func (client *HTTPClient) Block(height int64) (*model.Block, *model.RawBlock, er
 	return block, rawBlock, nil
 }
 
-// parseBlockSignatures parses the RawBlock into Block type
-func (client *HTTPClient) parseBlockResp(rawRespReader io.Reader) (*model.Block, *model.RawBlock, error) {
+func (client *HTTPClient) BlockResults(height int64) (*model.BlockResults, error) {
 	var err error
 
-	var resp model.RawBlock
-	if err = jsoniter.NewDecoder(rawRespReader).Decode(&resp); err != nil {
-		return nil, nil, fmt.Errorf("error decoding Tendermint block response: %v", err)
-	}
-
-	height, err := strconv.ParseInt(resp.Result.Block.Header.Height, 10, 64)
+	rawRespBody, err := client.request("block_results", "height="+strconv.FormatInt(height, 10))
 	if err != nil {
-		return nil, nil, fmt.Errorf("error converting block height to unsigned integer: %v", err)
+		return nil, err
+	}
+	defer rawRespBody.Close()
+
+	blockResults, err := parseBlockResultsResp(rawRespBody)
+	if err != nil {
+		return nil, err
 	}
 
-	return &model.Block{
-		Height:          height,
-		Hash:            resp.Result.BlockID.Hash,
-		Time:            resp.Result.Block.Header.Time,
-		AppHash:         resp.Result.Block.Header.AppHash,
-		ProposerAddress: resp.Result.Block.Header.ProposerAddress,
-		Txs:             resp.Result.Block.Data.Txs,
-		Signatures:      client.parseBlockSignatures(resp.Result.Block.LastCommit.Signatures),
-	}, &resp, nil
-}
-
-// parseBlockSignatures parses the rawSignatures in JSON response into BlockSignature type
-func (client *HTTPClient) parseBlockSignatures(rawSignatures []model.RawBlockSignature) []model.BlockSignature {
-	if rawSignatures == nil {
-		return nil
-	}
-
-	signatures := make([]model.BlockSignature, 0, len(rawSignatures))
-	for _, rawSignature := range rawSignatures {
-		if rawSignature.Signature == nil {
-			continue
-		}
-		signatures = append(signatures, model.BlockSignature{
-			BlockIdFlag:      rawSignature.BlockIDFlag,
-			ValidatorAddress: rawSignature.ValidatorAddress,
-			Timestamp:        rawSignature.Timestamp,
-			Signature:        *rawSignature.Signature,
-		})
-	}
-
-	return signatures
+	return blockResults, nil
 }
 
 // LatestBlockHeight gets the chain's latest block and return the height
@@ -103,7 +71,7 @@ func (client *HTTPClient) LatestBlockHeight() (int64, error) {
 	}
 	defer rawRespBody.Close()
 
-	block, _, err := client.parseBlockResp(rawRespBody)
+	block, _, err := parseBlockResp(rawRespBody)
 	if err != nil {
 		return int64(0), fmt.Errorf("error parsing /block response: %v", err)
 	}
