@@ -3,6 +3,7 @@ package chain
 import (
 	"fmt"
 	"github.com/crypto-com/chainindex/appinterface/feed"
+	"github.com/crypto-com/chainindex/infrastructure/notification"
 	"sync"
 )
 
@@ -20,11 +21,7 @@ func (s *BlockSubject) Attach(o feed.Subscriber) {
 	s.Observers.Store(o, struct{}{})
 }
 
-func (s *BlockSubject) Detach(o feed.Subscriber) {
-	s.Observers.Delete(o)
-}
-
-func (s *BlockSubject) Notify(n *feed.Notification) {
+func (s *BlockSubject) Notify(n *notification.BlockNotification) {
 	s.Observers.Range(func(key interface{}, value interface{}) bool {
 		if key == nil || value == nil {
 			return false

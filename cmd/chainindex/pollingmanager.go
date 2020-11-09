@@ -30,22 +30,15 @@ func NewPollingManager(logger applogger.Logger, tendermintRPCUrl string, startAt
 // SyncBlocks makes request to tendermint, create and dispatch notifications
 func (pm *PollingManager) SyncBlocks(latestHeight int64) error {
 	for pm.currentSyncHeight < latestHeight {
-		// Get all subscriber ready for new block
-		newBlockNotif := notification.NewNotifNewBlock(pm.currentSyncHeight)
-		pm.Subject.Notify(newBlockNotif)
-
 		// Request tendermint RPC
 		block, rawBlock, err := pm.client.Block(pm.currentSyncHeight)
 		if err != nil {
 			return fmt.Errorf("error getting chain's block at %d: %v", pm.currentSyncHeight, err)
 		}
 
-		// Prepare notification payload and dispatch
-		blockNotif := notification.NewNotifBlockReceived(block, rawBlock)
-		pm.Subject.Notify(blockNotif)
-
-		doneNotif := notification.NewNotifCurrBlockDone()
-		pm.Subject.Notify(doneNotif)
+		// Create new block notification and notify subscribers
+		notif := notification.NewBlockNotification(pm.currentSyncHeight, block, rawBlock)
+		pm.Subject.Notify(notif)
 
 		// Log and sync next
 		pm.logger.Infof("Synced and produce event: %d", block.Height)
