@@ -3,21 +3,21 @@ package event
 import (
 	"github.com/luci/go-render/render"
 
-	"github.com/crypto-com/chainindex/entity/event"
-	"github.com/crypto-com/chainindex/usecase/model"
+	entity_event "github.com/crypto-com/chainindex/entity/event"
+	usecase_model "github.com/crypto-com/chainindex/usecase/model"
 )
 
 const BLOCK_CREATED = "BlockCreated"
 
 type BlockCreated struct {
-	event.Base
+	entity_event.Base
 
-	Block *model.Block `json:"block"`
+	Block *usecase_model.Block `json:"block"`
 }
 
-func NewBlockCreated(block *model.Block) *BlockCreated {
+func NewBlockCreated(block *usecase_model.Block) *BlockCreated {
 	return &BlockCreated{
-		event.NewBase(block.Height),
+		entity_event.NewBase(block.Height),
 
 		block,
 	}

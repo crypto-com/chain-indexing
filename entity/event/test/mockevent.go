@@ -1,4 +1,4 @@
-package entity_event_test
+package test
 
 import "github.com/stretchr/testify/mock"
 
