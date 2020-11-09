@@ -1,4 +1,4 @@
-package adaptermock
+package test
 
 import (
 	"math/big"
@@ -10,6 +10,10 @@ import (
 
 type MockRDbConn struct {
 	mock.Mock
+}
+
+func NewMockRDBbConn() *MockRDbConn {
+	return &MockRDbConn{}
 }
 
 func (conn *MockRDbConn) Begin() (rdb.Tx, error) {
@@ -156,6 +160,10 @@ func MockSQLWithAnyArgs(sql string, argsCount int) []interface{} {
 
 type MockRDbTypeConv struct {
 	mock.Mock
+}
+
+func NewMockRDbTypeConv() *MockRDbTypeConv {
+	return &MockRDbTypeConv{}
 }
 
 func (conv *MockRDbTypeConv) Bton(bigInt *big.Int) interface{} {

@@ -11,7 +11,7 @@ import (
 	"github.com/crypto-com/chainindex/appinterface/tendermint"
 	. "github.com/crypto-com/chainindex/infrastructure/tendermint"
 	"github.com/crypto-com/chainindex/internal/utctime"
-	"github.com/crypto-com/chainindex/usecase/model"
+	usecase_model "github.com/crypto-com/chainindex/usecase/model"
 )
 
 var _ = Describe("HTTPClient", func() {
@@ -43,14 +43,14 @@ var _ = Describe("HTTPClient", func() {
 			signature1Time, _ := utctime.Parse("2006-01-02T15:04:05.000000000Z", "2020-10-15T09:33:42.195143319Z")
 			signature2Time, _ := utctime.Parse("2006-01-02T15:04:05.000000000Z", "2020-10-15T09:33:42.206633743Z")
 
-			Expect(*block).To(Equal(model.Block{
+			Expect(*block).To(Equal(usecase_model.Block{
 				Height:          blockHeight,
 				Hash:            "82C25937191D1CF73BE9222CB04CE35B7A1366CC5BB08D9BB9AB457712E4F2D1",
 				Time:            blockTime,
 				AppHash:         "6AE0920938F76727054BC2531247632C5C0521E2B91EA3A9864EA4FF55023D77",
 				ProposerAddress: "384E5F30F02538C0A34CBFF32F8D5554671C9029",
 				Txs:             []string{},
-				Signatures: []model.BlockSignature{
+				Signatures: []usecase_model.BlockSignature{
 					{
 						BlockIdFlag:      2,
 						ValidatorAddress: "384E5F30F02538C0A34CBFF32F8D5554671C9029",

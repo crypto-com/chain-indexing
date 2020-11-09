@@ -1,10 +1,10 @@
 package tendermint
 
 import (
-	"github.com/crypto-com/chainindex/usecase/model"
+	usecase_model "github.com/crypto-com/chainindex/usecase/model"
 )
 
 type Client interface {
-	Block(height int64) (*model.Block, *model.RawBlock, error)
+	Block(height int64) (*usecase_model.Block, *usecase_model.RawBlock, error)
 	LatestBlockHeight() (int64, error)
 }

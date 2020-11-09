@@ -9,7 +9,7 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 
-	"github.com/crypto-com/chainindex/usecase/model"
+	usecase_model "github.com/crypto-com/chainindex/usecase/model"
 )
 
 type HTTPClient struct {
@@ -30,7 +30,7 @@ func NewHTTPClient(tendermintRPCUrl string) *HTTPClient {
 }
 
 // Block gets the block response with target height
-func (client *HTTPClient) Block(height int64) (*model.Block, *model.RawBlock, error) {
+func (client *HTTPClient) Block(height int64) (*usecase_model.Block, *usecase_model.RawBlock, error) {
 	var err error
 
 	rawRespBody, err := client.request("block", "height="+strconv.FormatInt(height, 10))
@@ -48,10 +48,10 @@ func (client *HTTPClient) Block(height int64) (*model.Block, *model.RawBlock, er
 }
 
 // parseBlockSignatures parses the RawBlock into Block type
-func (client *HTTPClient) parseBlockResp(rawRespReader io.Reader) (*model.Block, *model.RawBlock, error) {
+func (client *HTTPClient) parseBlockResp(rawRespReader io.Reader) (*usecase_model.Block, *usecase_model.RawBlock, error) {
 	var err error
 
-	var resp model.RawBlock
+	var resp usecase_model.RawBlock
 	if err = jsoniter.NewDecoder(rawRespReader).Decode(&resp); err != nil {
 		return nil, nil, fmt.Errorf("error decoding Tendermint block response: %v", err)
 	}
@@ -61,7 +61,7 @@ func (client *HTTPClient) parseBlockResp(rawRespReader io.Reader) (*model.Block,
 		return nil, nil, fmt.Errorf("error converting block height to unsigned integer: %v", err)
 	}
 
-	return &model.Block{
+	return &usecase_model.Block{
 		Height:          height,
 		Hash:            resp.Result.BlockID.Hash,
 		Time:            resp.Result.Block.Header.Time,
@@ -73,17 +73,17 @@ func (client *HTTPClient) parseBlockResp(rawRespReader io.Reader) (*model.Block,
 }
 
 // parseBlockSignatures parses the rawSignatures in JSON response into BlockSignature type
-func (client *HTTPClient) parseBlockSignatures(rawSignatures []model.RawBlockSignature) []model.BlockSignature {
+func (client *HTTPClient) parseBlockSignatures(rawSignatures []usecase_model.RawBlockSignature) []usecase_model.BlockSignature {
 	if rawSignatures == nil {
 		return nil
 	}
 
-	signatures := make([]model.BlockSignature, 0, len(rawSignatures))
+	signatures := make([]usecase_model.BlockSignature, 0, len(rawSignatures))
 	for _, rawSignature := range rawSignatures {
 		if rawSignature.Signature == nil {
 			continue
 		}
-		signatures = append(signatures, model.BlockSignature{
+		signatures = append(signatures, usecase_model.BlockSignature{
 			BlockIdFlag:      rawSignature.BlockIDFlag,
 			ValidatorAddress: rawSignature.ValidatorAddress,
 			Timestamp:        rawSignature.Timestamp,

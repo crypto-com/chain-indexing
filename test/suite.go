@@ -6,9 +6,9 @@ import (
 	"runtime"
 
 	"github.com/crypto-com/chainindex/infrastructure/pg"
+	. "github.com/crypto-com/chainindex/internal/logger/test"
 	"github.com/crypto-com/chainindex/internal/primptr"
 	"github.com/crypto-com/chainindex/internal/typeconv"
-	"github.com/crypto-com/chainindex/test/fake"
 )
 
 func WithTestPgConnConfig(body func(*pg.ConnConfig)) bool {
@@ -43,7 +43,7 @@ func WithTestPgxConn(body func(*pg.PgxConn, *pg.Migrate)) bool {
 		Database:      os.Getenv("TEST_POSTGRES_DATABASE"),
 		SSL:           ssl,
 	}
-	fakeLogger := fake.NewFakeLogger()
+	fakeLogger := NewFakeLogger()
 	conn := pg.MustNewPgxConn(config, fakeLogger)
 
 	_, filename, _, ok := runtime.Caller(0)
