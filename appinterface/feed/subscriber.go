@@ -1,5 +1,5 @@
 package feed
 
 type Subscriber interface {
-	NotifyCallback(n *Notification) error
+	OnNotification(n *Notification) error
 }

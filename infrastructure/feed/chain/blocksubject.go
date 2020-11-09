@@ -30,7 +30,7 @@ func (s *BlockSubject) Notify(n *feed.Notification) {
 			return false
 		}
 
-		if err := key.(feed.Subscriber).NotifyCallback(n); err != nil {
+		if err := key.(feed.Subscriber).OnNotification(n); err != nil {
 			fmt.Println("error when subscriber run callback function", err)
 		}
 		return true

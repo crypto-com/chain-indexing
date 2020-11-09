@@ -12,5 +12,5 @@ type Processor interface {
 	GenerateAll() error
 	StoreAll() error
 
-	NotifyCallback(n *feed.Notification) error
+	OnNotification(n *feed.Notification) error
 }
