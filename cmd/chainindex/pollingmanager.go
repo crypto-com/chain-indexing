@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/crypto-com/chainindex/appinterface/feed"
 	chainfeed "github.com/crypto-com/chainindex/infrastructure/feed/chain"
 	"github.com/crypto-com/chainindex/infrastructure/notification"
 	"github.com/crypto-com/chainindex/infrastructure/tendermint"
@@ -13,7 +12,7 @@ type PollingManager struct {
 	client            tendermint.HTTPClient
 	currentSyncHeight int64
 	logger            applogger.Logger
-	Subject           feed.Subject
+	Subject           *chainfeed.BlockSubject
 }
 
 // NewBlockPollingFeed creates a new feed with polling for latest block starts at a specific height
@@ -48,7 +47,7 @@ func (pm *PollingManager) SyncBlocks(latestHeight int64) error {
 }
 
 // InitSubject creates subject and attach subscribers
-func (pm *PollingManager) InitSubject() feed.Subject {
+func (pm *PollingManager) InitSubject() *chainfeed.BlockSubject {
 	// Currently only the chain processor subscriber
 	// add more subscriber base on the need
 	chainProcessor := chainfeed.NewBlockSubscriber(0)
@@ -64,9 +63,8 @@ func (pm *PollingManager) InitSubject() feed.Subject {
 func (pm *PollingManager) Run() error {
 	pm.Subject = pm.InitSubject()
 
-	for latestHeight := range chainfeed.LatestBlockHeightGenerator(pm.client) {
+	for latestHeight := range chainfeed.LatestBlockHeightGenerator(pm.client, pm.logger) {
 		// Notify all the listener
-		fmt.Println("current height:", latestHeight)
 		if err := pm.SyncBlocks(latestHeight); err != nil {
 			pm.logger.Error("Error syncing blocks")
 		}
