@@ -18,7 +18,7 @@ func NewBlockSubscriber(id int64) *BlockSubscriber {
 }
 
 func (bs *BlockSubscriber) OnNotification(n *notification.BlockNotification) error {
-	fmt.Println("processor", bs.Id, "got notification", n.Height)
+	fmt.Println("processor", bs.Id, "got notification", n.Height, n.Block)
 
 	// create an executor instance for current height
 	executor := executor.NewBlockExecutor(n.Height)

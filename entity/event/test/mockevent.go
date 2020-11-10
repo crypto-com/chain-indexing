@@ -10,27 +10,23 @@ func NewMockEvent() *MockEvent {
 	return &MockEvent{}
 }
 
-func (event *MockEvent) Height() int64 {
-	mockArgs := event.Called()
+func (evt *MockEvent) Height() int64 {
+	mockArgs := evt.Called()
 	return mockArgs.Get(0).(int64)
 }
-func (event *MockEvent) Name() string {
-	mockArgs := event.Called()
+func (evt *MockEvent) Name() string {
+	mockArgs := evt.Called()
 	return mockArgs.String(0)
 }
-func (event *MockEvent) Version() int {
-	mockArgs := event.Called()
+func (evt *MockEvent) Version() int {
+	mockArgs := evt.Called()
 	return mockArgs.Int(0)
 }
-func (event *MockEvent) Id() string {
-	mockArgs := event.Called()
+func (evt *MockEvent) Id() string {
+	mockArgs := evt.Called()
 	return mockArgs.String(0)
 }
-func (event *MockEvent) ToJSON() string {
-	mockArgs := event.Called()
-	return mockArgs.String(0)
-}
-func (event *MockEvent) String() string {
-	mockArgs := event.Called()
+func (evt *MockEvent) String() string {
+	mockArgs := evt.Called()
 	return mockArgs.String(0)
 }

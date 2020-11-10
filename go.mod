@@ -6,9 +6,9 @@ require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/Masterminds/squirrel v1.4.0
 	github.com/brianvoe/gofakeit/v5 v5.10.1
+	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/golang-migrate/migrate/v4 v4.12.2
 	github.com/google/go-querystring v1.0.0
-	github.com/google/uuid v1.1.1
 	github.com/jackc/pgconn v1.6.4
 	github.com/jackc/pgtype v1.4.2
 	github.com/jackc/pgx/v4 v4.8.1

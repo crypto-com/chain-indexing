@@ -10,8 +10,8 @@ func NewFakeEventStore() *FakeEventStore {
 	return &FakeEventStore{}
 }
 
-func (manager *FakeEventStore) GetLatestHeight() (*int64, error) {
-	return nil, nil
+func (manager *FakeEventStore) GetLatestHeight() *int64 {
+	return nil
 }
 
 func (manager *FakeEventStore) GetAllByHeight(seq int64) ([]entity_event.Event, error) {
