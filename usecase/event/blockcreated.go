@@ -1,9 +1,6 @@
 package event
 
 import (
-	"fmt"
-
-	jsoniter "github.com/json-iterator/go"
 	"github.com/luci/go-render/render"
 
 	entity_event "github.com/crypto-com/chainindex/entity/event"
@@ -32,15 +29,6 @@ func (event *BlockCreated) Name() string {
 
 func (event *BlockCreated) Version() int {
 	return 1
-}
-
-func (event *BlockCreated) ToJSON() string {
-	encoded, err := jsoniter.Marshal(event)
-	if err != nil {
-		panic(fmt.Sprintf("error encoding BlockCreated event to JSON: %v", err))
-	}
-
-	return string(encoded)
 }
 
 func (evt *BlockCreated) String() string {

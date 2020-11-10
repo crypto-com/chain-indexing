@@ -10,9 +10,6 @@ type Event interface {
 	// Unique Id that is assigned on event creation
 	Id() string
 
-	// Encode the event into JSON string payload
-	ToJSON() string
-
 	// String function returns the stringified event
 	String() string
 }

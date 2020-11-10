@@ -39,11 +39,11 @@ func (projection *Block) OnInit() error {
 }
 
 func (projection *Block) HandleEvents(events []entity_event.Event) error {
-	for _, event := range events {
-		if blockCreatedEvent, ok := event.(*usecase_event.BlockCreated); ok {
-			return projection.handleBlockCreatedEvent(blockCreatedEvent)
+	for _, evt := range events {
+		if blockCreatedEvt, ok := evt.(*usecase_event.BlockCreated); ok {
+			return projection.handleBlockCreatedEvent(blockCreatedEvt)
 		} else {
-			return fmt.Errorf("received unexpected event %sV%d(%s)", event.Name(), event.Version(), event.Id())
+			return fmt.Errorf("received unexpected event %sV%d(%s)", evt.Name(), evt.Version(), evt.Id())
 		}
 	}
 	// TODO: Update last handled event height
