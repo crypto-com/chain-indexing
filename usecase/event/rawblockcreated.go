@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
+	jsoniter "github.com/json-iterator/go"
+
 	"github.com/luci/go-render/render"
 
 	entity_event "github.com/crypto-com/chainindex/entity/event"
@@ -37,6 +39,15 @@ func (_ *RawBlockCreated) Name() string {
 
 func (_ *RawBlockCreated) Version() int {
 	return 1
+}
+
+func (event *RawBlockCreated) ToJSON() string {
+	encoded, err := jsoniter.Marshal(event)
+	if err != nil {
+		panic(fmt.Sprintf("error encoding RawBlockCreated event to JSON: %v", err))
+	}
+
+	return string(encoded)
 }
 
 func (evt *RawBlockCreated) String() string {
