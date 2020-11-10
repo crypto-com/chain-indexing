@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
 	entity_event "github.com/crypto-com/chainindex/entity/event"
-	"github.com/crypto-com/chainindex/internal/primptr"
 )
 
 const DEFAULT_TABLE = "events"
@@ -39,7 +38,7 @@ func (store *RDbEventStore) GetLatestHeight() (*int64, error) {
 		return nil, fmt.Errorf("error building get latest event height selection SQL: %v", err)
 	}
 
-	var latestEventHeight int64
+	var latestEventHeight *int64
 	if err := store.rdbHandle.QueryRow(sql, args...).Scan(&latestEventHeight); err != nil {
 		if err == rdb.ErrNoRows {
 			return nil, nil
@@ -48,7 +47,7 @@ func (store *RDbEventStore) GetLatestHeight() (*int64, error) {
 		}
 	}
 
-	return primptr.Int64(latestEventHeight), nil
+	return latestEventHeight, nil
 }
 
 func (store *RDbEventStore) GetAllByHeight(height int64) ([]entity_event.Event, error) {

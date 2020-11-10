@@ -9,6 +9,7 @@ require (
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/golang-migrate/migrate/v4 v4.12.2
 	github.com/google/go-querystring v1.0.0
+	github.com/google/uuid v1.1.1
 	github.com/jackc/pgconn v1.6.4
 	github.com/jackc/pgtype v1.4.2
 	github.com/jackc/pgx/v4 v4.8.1
@@ -19,4 +20,5 @@ require (
 	github.com/rs/zerolog v1.15.0
 	github.com/stretchr/testify v1.5.1
 	github.com/urfave/cli/v2 v2.2.0
+	golang.org/x/tools v0.0.0-20200725200936-102e7d357031
 )
