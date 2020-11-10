@@ -1,8 +1,11 @@
-package event
+package rawblockcreated
 
 import (
+	"bytes"
 	"fmt"
 	"strconv"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/luci/go-render/render"
 
@@ -10,7 +13,7 @@ import (
 	usecase_model "github.com/crypto-com/chainindex/usecase/model"
 )
 
-const RAW_BLOCK_CREATED = "RawBlockCreated"
+const NAME = "RawBlockCreated"
 
 type RawBlockCreated struct {
 	entity_event.Base
@@ -18,8 +21,8 @@ type RawBlockCreated struct {
 	RawBlock *usecase_model.RawBlock `json:"rawBlock"`
 }
 
-func NewRawBlockCreated(rawBlock *usecase_model.RawBlock) *RawBlockCreated {
-	height, err := strconv.ParseInt(rawBlock.Result.Block.Header.Height, 10, 64)
+func New(rawBlock *usecase_model.RawBlock) *RawBlockCreated {
+	height, err := strconv.ParseInt(rawBlock.Block.Header.Height, 10, 64)
 	if err != nil {
 		panic(fmt.Sprintf("Missing block height in raw block: %v", err))
 	}
@@ -32,7 +35,7 @@ func NewRawBlockCreated(rawBlock *usecase_model.RawBlock) *RawBlockCreated {
 }
 
 func (_ *RawBlockCreated) Name() string {
-	return RAW_BLOCK_CREATED
+	return NAME
 }
 
 func (_ *RawBlockCreated) Version() int {
@@ -41,4 +44,16 @@ func (_ *RawBlockCreated) Version() int {
 
 func (evt *RawBlockCreated) String() string {
 	return render.Render(evt)
+}
+
+func Decode(encoded []byte) (entity_event.Event, error) {
+	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
+	jsonDecoder.DisallowUnknownFields()
+
+	var event *RawBlockCreated
+	if err := jsonDecoder.Decode(&event); err != nil {
+		return nil, err
+	}
+
+	return event, nil
 }
