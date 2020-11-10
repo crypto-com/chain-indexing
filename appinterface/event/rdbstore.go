@@ -1,41 +1,48 @@
-package rdbeventstore
+package event
 
 import (
 	"errors"
 	"fmt"
+
 	"github.com/crypto-com/chainindex/appinterface/rdb"
 	entity_event "github.com/crypto-com/chainindex/entity/event"
 )
 
 const DEFAULT_TABLE = "events"
 
-// Table should have the following schema
-// | Field                     | Data Type | Constraint  |
-// | ------------------------- | --------- | ----------- |
-// | id 					   | VARCHAR   | PRIMARY KEY |
-// | height                    | INT64     | NOT NULL    |
-// | name                      | VARCHAR   | NOT NULL    |
-// | version                   | INT64     | NOT NULL    |
-// | payload				   | JSONB	   | NOT NULL    |
-type RDbEventStore struct {
+// Events table should have the following schema
+// | Field   | Data Type | Constraint  |
+// | ------- | --------- | ----------- |
+// | id      | VARCHAR   | PRIMARY KEY |
+// | height  | INT64     | NOT NULL    |
+// | name    | VARCHAR   | NOT NULL    |
+// | version | INT64     | NOT NULL    |
+// | payload | JSONB     | NOT NULL    |
+
+// EventStore implemented using relational database
+type RDbStore struct {
 	rdbHandle *rdb.Handle
+
+	table string
 }
 
-func NewRDbEventStore(handle *rdb.Handle) *RDbEventStore {
-	return &RDbEventStore{
+func NewRDbStore(handle *rdb.Handle) *RDbStore {
+	return &RDbStore{
 		rdbHandle: handle,
+
+		table: DEFAULT_TABLE,
 	}
 }
 
 // GetLatestEventHeight returns latest event height, nil if no event is stored
-func (store *RDbEventStore) GetLatestHeight() (*int64, error) {
+func (store *RDbStore) GetLatestHeight() (*int64, error) {
 	sql, args, err := store.rdbHandle.StmtBuilder.Select(
 		"MAX(height)",
 	).From(
-		DEFAULT_TABLE,
+		store.table,
 	).ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("error building get latest event height selection SQL: %v", err)
+		return nil, fmt.Errorf("error building latest event height selection SQL: %v", err)
 	}
 
 	var latestEventHeight *int64
@@ -43,18 +50,18 @@ func (store *RDbEventStore) GetLatestHeight() (*int64, error) {
 		if err == rdb.ErrNoRows {
 			return nil, nil
 		} else {
-			return nil, fmt.Errorf("error executing get latest event height selection SQL: %v", err)
+			return nil, fmt.Errorf("error executing latest event height selection SQL: %v", err)
 		}
 	}
 
 	return latestEventHeight, nil
 }
 
-func (store *RDbEventStore) GetAllByHeight(height int64) ([]entity_event.Event, error) {
+func (store *RDbStore) GetAllByHeight(height int64) ([]entity_event.Event, error) {
 	sql, args, err := store.rdbHandle.StmtBuilder.Select(
 		"id", "height", "name", "version", "payload",
 	).From(
-		DEFAULT_TABLE,
+		store.table,
 	).Where("height = ?", height).ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("error building get all events by height selection SQL: %v", err)
@@ -81,7 +88,7 @@ func (store *RDbEventStore) GetAllByHeight(height int64) ([]entity_event.Event, 
 				return nil, fmt.Errorf("error error executing get each event by height selection SQL: %v", err)
 			}
 		}
-		
+
 		// TODO: Missing event json deserializer
 		//evt := struct{
 		//	id string
@@ -102,18 +109,17 @@ func (store *RDbEventStore) GetAllByHeight(height int64) ([]entity_event.Event, 
 	return events, nil
 }
 
-func (store *RDbEventStore) Insert(evt entity_event.Event) error {
-	// Insert the incoming event
+func (store *RDbStore) Insert(event entity_event.Event) error {
 	sql, args, err := store.rdbHandle.StmtBuilder.Insert(
-		DEFAULT_TABLE,
+		store.table,
 	).Columns(
 		"id", "height", "name", "version", "payload",
 	).Values(
-		evt.Id(),
-		evt.Height(),
-		evt.Name(),
-		evt.Version(),
-		evt.String(),
+		event.Id(),
+		event.Height(),
+		event.Name(),
+		event.Version(),
+		event.ToJSON(),
 	).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building event insertion SQL: %v", err)
@@ -131,9 +137,9 @@ func (store *RDbEventStore) Insert(evt entity_event.Event) error {
 }
 
 // InsertAll insert all events into store. It will rollback when the insert fails at any point.
-func (store *RDbEventStore) InsertAll(evts []entity_event.Event) error {
-	for _, evt := range evts {
-		if err := store.Insert(evt); err != nil {
+func (store *RDbStore) InsertAll(events []entity_event.Event) error {
+	for _, event := range events {
+		if err := store.Insert(event); err != nil {
 			return errors.New("error executing events batch insertion SQL")
 		}
 	}

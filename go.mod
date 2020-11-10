@@ -6,7 +6,6 @@ require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/Masterminds/squirrel v1.4.0
 	github.com/brianvoe/gofakeit/v5 v5.10.1
-	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/golang-migrate/migrate/v4 v4.12.2
 	github.com/google/go-querystring v1.0.0
 	github.com/google/uuid v1.1.1
@@ -20,5 +19,4 @@ require (
 	github.com/rs/zerolog v1.15.0
 	github.com/stretchr/testify v1.5.1
 	github.com/urfave/cli/v2 v2.2.0
-	golang.org/x/tools v0.0.0-20200725200936-102e7d357031
 )

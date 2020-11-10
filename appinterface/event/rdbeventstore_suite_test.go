@@ -1,4 +1,4 @@
-package rdbeventstore_test
+package event_test
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestRdbeventstore(t *testing.T) {
+func TestEvent(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Rdbeventstore Suite")
+	RunSpecs(t, "Event Suite")
 }
