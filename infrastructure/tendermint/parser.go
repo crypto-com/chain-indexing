@@ -3,11 +3,14 @@ package tendermint
 import (
 	"encoding/base64"
 	"fmt"
+	"io"
+	"math/big"
+	"strconv"
+	"strings"
+
 	"github.com/crypto-com/chainindex/usecase/model"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/tendermint/tendermint/crypto/ed25519"
-	"io"
-	"strconv"
 )
 
 // Block related parsing functions
@@ -15,7 +18,9 @@ func parseBlockResp(rawRespReader io.Reader) (*model.Block, *model.RawBlock, err
 	var err error
 
 	var resp model.RawBlock
-	if err = jsoniter.NewDecoder(rawRespReader).Decode(&resp); err != nil {
+	jsonDecoder := jsoniter.NewDecoder(rawRespReader)
+	jsonDecoder.DisallowUnknownFields()
+	if err = jsonDecoder.Decode(&resp); err != nil {
 		return nil, nil, fmt.Errorf("error decoding Tendermint block response: %v", err)
 	}
 
@@ -56,49 +61,79 @@ func parseBlockSignatures(rawSignatures []model.RawBlockSignature) []model.Block
 	return signatures
 }
 
-// BlockResults related parsing functions
+// RawBlockResults related parsing functions
 func parseBlockResultsResp(rawRespReader io.Reader) (*model.BlockResults, error) {
 	var err error
 
-	var resp model.RawBlockResults
-	if err = jsoniter.NewDecoder(rawRespReader).Decode(&resp); err != nil {
+	var resp RawBlockResultsResp
+	jsonDecoder := jsoniter.NewDecoder(rawRespReader)
+	jsonDecoder.DisallowUnknownFields()
+	if err = jsonDecoder.Decode(&resp); err != nil {
 		return nil, fmt.Errorf("error unmarshalling Tendermint block_results response: %v", err)
 	}
 
-	var txsResults [][]model.BlockResultsEvent
-	if resp.Result.TxsEvents != nil {
-		txsResults = parseBlockResultsTxsEvents(resp.Result.TxsEvents)
-	}
-
-	var beginBlockEvents []model.BlockResultsEvent
-	if resp.Result.BeginBlockEvents != nil {
-		beginBlockEvents = parseBlockResultsEvent(resp.Result.BeginBlockEvents)
-	}
+	rawBlockResults := resp.Result
 
 	height, err := strconv.ParseUint(resp.Result.Height, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("error converting block height to unsigned integer: %v", err)
 	}
 	return &model.BlockResults{
-		Height:           int64(height),
-		TxsEvents:        txsResults,
-		BeginBlockEvents: beginBlockEvents,
-		ValidatorUpdates: parseBlockResultsValidatorUpdates(resp.Result.ValidatorUpdates),
+		Height:                int64(height),
+		TxsResults:            parseBlockResultsTxsResults(rawBlockResults.TxsResults),
+		BeginBlockEvents:      parseBlockResultsEvents(rawBlockResults.BeginBlockEvents),
+		EndBlockEvents:        parseBlockResultsEvents(rawBlockResults.EndBlockEvents),
+		ValidatorUpdates:      parseBlockResultsValidatorUpdates(rawBlockResults.ValidatorUpdates),
+		ConsensusParamUpdates: parseBlockResultsConsensusParamsUpdates(rawBlockResults.ConsensusParamUpdates),
 	}, nil
 }
 
-func parseBlockResultsTxsEvents(rawResults []model.RawBlockResultsTxResult) [][]model.BlockResultsEvent {
-	results := make([][]model.BlockResultsEvent, 0, len(rawResults))
-	for _, rawResult := range rawResults {
-		results = append(results, parseBlockResultsEvent(rawResult.Events))
+func parseBlockResultsTxsResults(rawTxsResults []RawBlockResultsTxsResult) []model.BlockResultsTxsResult {
+	txsResults := make([]model.BlockResultsTxsResult, 0, len(rawTxsResults))
+	for _, rawTxsResult := range rawTxsResults {
+		events := parseBlockResultsEvents(rawTxsResult.Events)
+
+		var rawLog []RawBlockResultsTxsResultLog
+		jsonDecoder := jsoniter.NewDecoder(strings.NewReader(rawTxsResult.Log))
+		jsonDecoder.DisallowUnknownFields()
+		if err := jsonDecoder.Decode(&rawLog); err != nil {
+			panic(fmt.Sprintf("error decoding transaction log: %v", err))
+		}
+		txsResults = append(txsResults, model.BlockResultsTxsResult{
+			Code:      rawTxsResult.Code,
+			Data:      MustBase64Decode(rawTxsResult.Data),
+			Log:       parseBlockResultsTxsResultLog(rawLog),
+			Info:      rawTxsResult.Info,
+			GasWanted: rawTxsResult.GasWanted,
+			GasUsed:   rawTxsResult.GasUsed,
+			Events:    events,
+			Codespace: rawTxsResult.Codespace,
+		})
 	}
 
-	return results
+	return txsResults
 }
 
-func parseBlockResultsEvent(rawEvents []model.RawBlockResultsEvent) []model.BlockResultsEvent {
+func parseBlockResultsTxsResultLog(rawLogs []RawBlockResultsTxsResultLog) []model.BlockResultsTxsResultLog {
+	logs := make([]model.BlockResultsTxsResultLog, 0, len(rawLogs))
+	for _, rawLog := range rawLogs {
+		var log model.BlockResultsTxsResultLog
+		if rawLog.MaybeMsgIndex == nil {
+			log.MsgIndex = 0
+		} else {
+			log.MsgIndex = *rawLog.MaybeMsgIndex
+		}
+
+		log.Events = parseBlockResultsTxsResultLogEvents(rawLog.Events)
+		logs = append(logs, log)
+	}
+
+	return logs
+}
+
+func parseBlockResultsTxsResultLogEvents(rawEvents []RawBlockResultsEvent) []model.BlockResultsEvent {
 	if rawEvents == nil {
-		return nil
+		return []model.BlockResultsEvent{}
 	}
 
 	events := make([]model.BlockResultsEvent, 0, len(rawEvents))
@@ -119,20 +154,47 @@ func parseBlockResultsEvent(rawEvents []model.RawBlockResultsEvent) []model.Bloc
 	return events
 }
 
-func parseBlockResultsValidatorUpdates(rawUpdates []model.RawBlockResultsValidator) []model.BlockResultsValidator {
-	if rawUpdates == nil {
-		return nil
+func parseBlockResultsEvents(rawEvents []RawBlockResultsEvent) []model.BlockResultsEvent {
+	if rawEvents == nil {
+		return []model.BlockResultsEvent{}
 	}
 
-	updates := make([]model.BlockResultsValidator, 0, len(rawUpdates))
+	events := make([]model.BlockResultsEvent, 0, len(rawEvents))
+	for _, rawEvent := range rawEvents {
+		attributes := make([]model.BlockResultsEventAttribute, 0, len(rawEvent.Attributes))
+		for _, rawAttribute := range rawEvent.Attributes {
+			attributes = append(attributes, model.BlockResultsEventAttribute{
+				Key:   MustBase64Decode(rawAttribute.Key),
+				Value: MustBase64Decode(rawAttribute.Value),
+			})
+		}
+		events = append(events, model.BlockResultsEvent{
+			Type:       rawEvent.Type,
+			Attributes: attributes,
+		})
+	}
+
+	return events
+}
+
+func parseBlockResultsValidatorUpdates(rawUpdates []RawBlockResultsValidatorUpdate) []model.BlockResultsValidatorUpdate {
+	if rawUpdates == nil {
+		return []model.BlockResultsValidatorUpdate{}
+	}
+
+	updates := make([]model.BlockResultsValidatorUpdate, 0, len(rawUpdates))
 	for _, rawUpdate := range rawUpdates {
-		updates = append(updates, model.BlockResultsValidator{
+		power, ok := new(big.Int).SetString(rawUpdate.Power, 10)
+		if !ok {
+			panic(fmt.Sprintf("invalid block_results power: %s", power))
+		}
+		updates = append(updates, model.BlockResultsValidatorUpdate{
 			PubKey: model.BlockResultsValidatorPubKey{
 				Type:    rawUpdate.PubKey.Sum.Type,
 				PubKey:  rawUpdate.PubKey.Sum.Value.Ed25519,
 				Address: AddressFromPubKey(rawUpdate.PubKey.Sum.Value.Ed25519),
 			},
-			Power: rawUpdate.Power,
+			Power: power,
 		})
 	}
 
@@ -146,4 +208,35 @@ func AddressFromPubKey(base64PubKey string) string {
 	copy(key[:], data[:])
 
 	return key.Address().String()
+}
+
+func MustBase64Decode(s string) string {
+	decoded, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		panic(fmt.Sprintf("error decoding block_results `%s`: %v", s, err))
+	}
+	return string(decoded)
+}
+
+func parseBlockResultsConsensusParamsUpdates(rawUpdates RawBlockResultsConsensusParamUpdates) model.BlockResultsConsensusParamUpdates {
+	var validatorPubKeyTypes []string
+	if rawUpdates.Validator.PubKeyTypes == nil {
+		validatorPubKeyTypes = []string{}
+	} else {
+		validatorPubKeyTypes = make([]string, 0, len(rawUpdates.Validator.PubKeyTypes))
+		validatorPubKeyTypes = append(validatorPubKeyTypes, rawUpdates.Validator.PubKeyTypes...)
+	}
+	return model.BlockResultsConsensusParamUpdates{
+		Block: model.BlockResultsConsensusParamUpdatesBlock{
+			MaxBytes: rawUpdates.Block.MaxBytes,
+			MaxGas:   rawUpdates.Block.MaxGas,
+		},
+		Evidence: model.BlockResultsConsensusParamUpdatesEvidence{
+			MaxAgeNumBlocks: rawUpdates.Evidence.MaxAgeNumBlocks,
+			MaxAgeDuration:  rawUpdates.Evidence.MaxAgeDuration,
+		},
+		Validator: model.BlockResultsConsensusParamsUpdatesValidator{
+			PubKeyTypes: validatorPubKeyTypes,
+		},
+	}
 }

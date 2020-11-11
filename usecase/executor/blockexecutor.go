@@ -2,11 +2,12 @@ package executor
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/crypto-com/chainindex/entity/command"
 	"github.com/crypto-com/chainindex/entity/event"
 	"github.com/crypto-com/chainindex/infrastructure"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
-	"os"
 )
 
 type BlockExecutor struct {
@@ -29,11 +30,11 @@ func NewBlockExecutor(Hegiht int64) *BlockExecutor {
 	}
 }
 
-func (ce *BlockExecutor) AddAll(commands []command.Command) {
+func (ce *BlockExecutor) AddAllCommands(commands []command.Command) {
 	ce.Commands = append(ce.Commands, commands...)
 }
 
-func (ce *BlockExecutor) GenerateAll() error {
+func (ce *BlockExecutor) ExecAllComands() error {
 	for _, command := range ce.Commands {
 		event, error := command.Exec()
 		if error != nil {
@@ -45,7 +46,7 @@ func (ce *BlockExecutor) GenerateAll() error {
 	return nil
 }
 
-func (ce *BlockExecutor) StoreAll() error {
+func (ce *BlockExecutor) StoreAllEvents() error {
 	// TODO: store batch events
 	fmt.Println("\t\tTODO: store all events number", len(ce.Events))
 

@@ -100,3 +100,9 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 
 	return rawResp.Body, nil
 }
+
+type RawBlockResultsResp struct {
+	Jsonrpc string          `json:"jsonrpc"`
+	ID      int             `json:"id"`
+	Result  RawBlockResults `json:"result"`
+}

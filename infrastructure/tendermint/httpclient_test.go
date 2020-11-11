@@ -1,7 +1,10 @@
 package tendermint_test
 
 import (
+	"fmt"
 	"net/http"
+
+	jsoniter "github.com/json-iterator/go"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -9,7 +12,6 @@ import (
 
 	"github.com/crypto-com/chainindex/appinterface/tendermint"
 	. "github.com/crypto-com/chainindex/infrastructure/tendermint"
-	"github.com/crypto-com/chainindex/internal/primptr"
 	"github.com/crypto-com/chainindex/internal/utctime"
 
 	usecase_model "github.com/crypto-com/chainindex/usecase/model"
@@ -26,156 +28,56 @@ var _ = Describe("HTTPClient", func() {
 		var _ tendermint.Client = NewHTTPClient("http://localhost:26657")
 	})
 
-	Describe("BlockResults", func() {
+	Describe("RawBlockResults", func() {
 		It("should return nil Events when there are no transactions nor events", func() {
+			anyBlockHeight := int64(1)
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/block_results", "height=1"),
+					ghttp.VerifyRequest("GET", "/block_results", fmt.Sprintf("height=%d", anyBlockHeight)),
 					ghttp.RespondWith(http.StatusOK, BLOCK_RESULTS_EMPTY_EVENTS_JSON),
 				),
 			)
 
 			client := NewHTTPClient(server.URL())
 
-			anyBlockHeight := int64(1)
 			blockResults, err := client.BlockResults(anyBlockHeight)
 			Expect(err).To(BeNil())
 			Expect(*blockResults).To(Equal(usecase_model.BlockResults{
 				Height:           anyBlockHeight,
-				TxsEvents:        nil,
-				BeginBlockEvents: nil,
-				ValidatorUpdates: nil,
+				TxsResults:       []usecase_model.BlockResultsTxsResult{},
+				BeginBlockEvents: []usecase_model.BlockResultsEvent{},
+				EndBlockEvents:   []usecase_model.BlockResultsEvent{},
+				ValidatorUpdates: []usecase_model.BlockResultsValidatorUpdate{},
+				ConsensusParamUpdates: usecase_model.BlockResultsConsensusParamUpdates{
+					Block: usecase_model.BlockResultsConsensusParamUpdatesBlock{
+						MaxBytes: "22020096",
+						MaxGas:   "-1",
+					},
+					Evidence: usecase_model.BlockResultsConsensusParamUpdatesEvidence{
+						MaxAgeNumBlocks: "100000",
+						MaxAgeDuration:  "172800000000000",
+					},
+					Validator: usecase_model.BlockResultsConsensusParamsUpdatesValidator{
+						PubKeyTypes: []string{"ed25519"},
+					},
+				},
 			}))
 		})
 
 		It("should return parsed block results", func() {
+			anyBlockHeight := int64(3813)
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/block_results", "height=3813"),
+					ghttp.VerifyRequest("GET", "/block_results", fmt.Sprintf("height=%d", anyBlockHeight)),
 					ghttp.RespondWith(http.StatusOK, BLOCK_RESULTS_JSON),
 				),
 			)
 
 			client := NewHTTPClient(server.URL())
 
-			anyBlockHeight := int64(3813)
 			blockResults, err := client.BlockResults(anyBlockHeight)
 			Expect(err).To(BeNil())
-			Expect(*blockResults).To(Equal(usecase_model.BlockResults{
-				Height: anyBlockHeight,
-				TxsEvents: [][]usecase_model.BlockResultsEvent{
-					{
-						{
-							Type: "valid_txs",
-							Attributes: []usecase_model.BlockResultsEventAttribute{
-								{
-									Key:   "ZmVl",
-									Value: "MC4wMDAwMDQ2OQ==",
-								},
-								{
-									Key:   "dHhpZA==",
-									Value: "YmEyMjMwYTA0OTIyZDNmMDFkNDE5OTljNmFkYmUwNmZjOGE5ODQxM2IyZDU1YWM3ZjlhYzMwZmVjMzlmYzdiMg==",
-								},
-							},
-						},
-					},
-					{
-						{
-							Type: "valid_txs",
-							Attributes: []usecase_model.BlockResultsEventAttribute{
-								{
-									Key:   "ZmVl",
-									Value: "MC4wMDAwMDQ2OQ==",
-								},
-								{
-									Key:   "dHhpZA==",
-									Value: "N2I1YWMzNmY2M2ZmYjZlZTEzMjg5ZDQ5ZDljZmRhY2UzZjhkMjM0NDY5ZWIwNTc1NWY1ZjVhYzgxYjNhNDVhNg==",
-								},
-							},
-						},
-					},
-				},
-				BeginBlockEvents: []usecase_model.BlockResultsEvent{
-					{
-						Type: "staking_change",
-						Attributes: []usecase_model.BlockResultsEventAttribute{
-							{
-								Key:   "c3Rha2luZ19hZGRyZXNz",
-								Value: "MHg2ZGJkNWI4ZmUwZGFkNDk0NDY1YWE3NTc0ZGVmYmE3MTFjMTg0MTAy",
-							},
-							{
-								Key:   "c3Rha2luZ19vcHR5cGU=",
-								Value: "cmV3YXJk",
-							},
-							{
-								Key:   "c3Rha2luZ19kaWZm",
-								Value: "W3sia2V5IjoiQm9uZGVkIiwidmFsdWUiOiI0ODU4OTkwMjAzMzMzIn1d",
-							},
-						},
-					},
-					{
-						Type: "staking_change",
-						Attributes: []usecase_model.BlockResultsEventAttribute{
-							{
-								Key:   "c3Rha2luZ19hZGRyZXNz",
-								Value: "MHg2ZmMxZTMxMjRhN2VkMDdmMzcxMDM3OGI2OGY3MDQ2YzczMDAxNzlk",
-							},
-							{
-								Key:   "c3Rha2luZ19vcHR5cGU=",
-								Value: "cmV3YXJk",
-							},
-							{
-								Key:   "c3Rha2luZ19kaWZm",
-								Value: "W3sia2V5IjoiQm9uZGVkIiwidmFsdWUiOiI0ODU4OTkwMjAzMzMzIn1d",
-							},
-						},
-					},
-					{
-						Type: "staking_change",
-						Attributes: []usecase_model.BlockResultsEventAttribute{
-							{
-								Key:   "c3Rha2luZ19hZGRyZXNz",
-								Value: "MHhiOGM2ODg2ZGEwOWUxMmRiOGFlYmZjODEwOGM2N2NlMmJhMDg2YWM2",
-							},
-							{
-								Key:   "c3Rha2luZ19vcHR5cGU=",
-								Value: "cmV3YXJk",
-							},
-							{
-								Key:   "c3Rha2luZ19kaWZm",
-								Value: "W3sia2V5IjoiQm9uZGVkIiwidmFsdWUiOiI0ODU4OTkwMjAzMzMzIn1d",
-							},
-						},
-					},
-					{
-						Type: "reward",
-						Attributes: []usecase_model.BlockResultsEventAttribute{
-							{
-								Key:   "bWludGVk",
-								Value: "IjE0NTc2OTcwNjEwMDAwIg==",
-							},
-						},
-					},
-				},
-				ValidatorUpdates: []usecase_model.BlockResultsValidator{
-					{
-						PubKey: usecase_model.BlockResultsValidatorPubKey{
-							Type:    "tendermint.crypto.PublicKey_Ed25519",
-							PubKey:  "rXhu7xhqYBtJftVLKxvKN0XnpyOzxFnUEfAhD1dEF/8=",
-							Address: "34C725CABA703269B3F1D1A907A84DE5FEE96469",
-						},
-						Power: primptr.String("60000000"),
-					},
-					{
-						PubKey: usecase_model.BlockResultsValidatorPubKey{
-							Type:    "tendermint.crypto.PublicKey_Ed25519",
-							PubKey:  "tDLheZJwsA8oYEwarR6/X+zAmNKMLHTVkh/fvcLqcwA=",
-							Address: "D527DAECDE0501CF2E785A8DC0D9F4A64760F0BB",
-						},
-						Power: primptr.String("80000000"),
-					},
-				},
-			}))
+			Expect(jsoniter.MarshalToString(blockResults)).To(Equal("{\"Height\":367216,\"TxsResults\":[{\"code\":0,\"data\":\"\\n\\n\\n\\u0008delegate\",\"log\":[{\"msgIndex\":0,\"events\":[{\"type\":\"delegate\",\"attributes\":[{\"key\":\"validator\",\"value\":\"tcrocncl1pm27djcs5djxjsxw3unrkv3m3jtxdexktw5epu\"},{\"key\":\"amount\",\"value\":\"19302674761\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"delegate\"},{\"key\":\"sender\",\"value\":\"tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l\"},{\"key\":\"module\",\"value\":\"staking\"},{\"key\":\"sender\",\"value\":\"tcro1pm27djcs5djxjsxw3unrkv3m3jtxdexk73hqel\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro1pm27djcs5djxjsxw3unrkv3m3jtxdexk73hqel\"},{\"key\":\"sender\",\"value\":\"tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l\"},{\"key\":\"amount\",\"value\":\"1913979901basetcro\"}]}]}],\"info\":\"\",\"gasWanted\":\"200000\",\"gasUsed\":\"143179\",\"events\":[{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro17xpfvakm2amg962yls6f84z3kell8c5lxhzaha\"},{\"key\":\"sender\",\"value\":\"tcro1pm27djcs5djxjsxw3unrkv3m3jtxdexk73hqel\"},{\"key\":\"amount\",\"value\":\"20000basetcro\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"sender\",\"value\":\"tcro1pm27djcs5djxjsxw3unrkv3m3jtxdexk73hqel\"}]}],\"codespace\":\"\"},{\"code\":0,\"data\":\"\\n\\n\\n\\u0008delegate\",\"log\":[{\"msgIndex\":0,\"events\":[{\"type\":\"delegate\",\"attributes\":[{\"key\":\"validator\",\"value\":\"tcrocncl10gsqs8jzdlrem80shp0x6wx0jw7qu7m8cd29y5\"},{\"key\":\"amount\",\"value\":\"17338013566\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"delegate\"},{\"key\":\"sender\",\"value\":\"tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l\"},{\"key\":\"module\",\"value\":\"staking\"},{\"key\":\"sender\",\"value\":\"tcro10gsqs8jzdlrem80shp0x6wx0jw7qu7m8djfuuh\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro10gsqs8jzdlrem80shp0x6wx0jw7qu7m8djfuuh\"},{\"key\":\"sender\",\"value\":\"tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l\"},{\"key\":\"amount\",\"value\":\"2310941249basetcro\"}]}]}],\"info\":\"\",\"gasWanted\":\"200000\",\"gasUsed\":\"143737\",\"events\":[{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro17xpfvakm2amg962yls6f84z3kell8c5lxhzaha\"},{\"key\":\"sender\",\"value\":\"tcro10gsqs8jzdlrem80shp0x6wx0jw7qu7m8djfuuh\"},{\"key\":\"amount\",\"value\":\"20000basetcro\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"sender\",\"value\":\"tcro10gsqs8jzdlrem80shp0x6wx0jw7qu7m8djfuuh\"}]}],\"codespace\":\"\"}],\"BeginBlockEvents\":[{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro17xpfvakm2amg962yls6f84z3kell8c5lxhzaha\"},{\"key\":\"sender\",\"value\":\"tcro1m3h30wlvsf8llruxtpukdvsy0km2kum87lx9mq\"},{\"key\":\"amount\",\"value\":\"17449528321basetcro\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"sender\",\"value\":\"tcro1m3h30wlvsf8llruxtpukdvsy0km2kum87lx9mq\"}]},{\"type\":\"mint\",\"attributes\":[{\"key\":\"bonded_ratio\",\"value\":\"0.000809196054376644\"},{\"key\":\"inflation\",\"value\":\"0.013755821936855184\"},{\"key\":\"annual_provisions\",\"value\":\"110133046994204576.138016526579386288\"},{\"key\":\"amount\",\"value\":\"17449528321\"}]}],\"EndBlockEvents\":[{\"type\":\"commission\",\"attributes\":[{\"key\":\"amount\",\"value\":\"87247841.605000000000000000basetcro\"},{\"key\":\"validator\",\"value\":\"tcrocncl18p07yvmphymscz6tl4a7zmh93g0k6vy72ww4s4\"}]},{\"type\":\"rewards\",\"attributes\":[{\"key\":\"amount\",\"value\":\"872478416.050000000000000000basetcro\"},{\"key\":\"validator\",\"value\":\"tcrocncl18p07yvmphymscz6tl4a7zmh93g0k6vy72ww4s4\"}]}],\"ValidatorUpdates\":[{\"PubKey\":{\"type\":\"tendermint.crypto.PublicKey_Ed25519\",\"pubKey\":\"SE5zeTjcYPXVrfcOva61QWokSZFfQu2h316fR6bB2dY=\",\"address\":\"CA721C3A05F500838DDD1B16F4E2D2D09E463218\"},\"power\":138525202},{\"PubKey\":{\"type\":\"tendermint.crypto.PublicKey_Ed25519\",\"pubKey\":\"Epmo3U6yXlxSDQzWZ8yBPOMHw2R85lc26RK98Rlo0oM=\",\"address\":\"E067FCE33F7FDBD0CE4872F8E240A7AD6E654726\"},\"power\":112904113}],\"ConsensusParamUpdates\":{\"block\":{\"maxBytes\":\"22020096\",\"maxGas\":\"-1\"},\"evidence\":{\"maxAgeNumBlocks\":\"100000\",\"maxAgeDuration\":\"172800000000000\"},\"validator\":{\"pubKeyTypes\":[\"ed25519\"]}}}"))
 		})
 	})
 
@@ -240,178 +142,244 @@ const (
 		"begin_block_events": null,
 		"end_block_events": null,
 		"validator_updates": null,
-		"consensus_param_updates": null
-	}
-}`
-	BLOCK_RESULTS_JSON = `
-{
-	"jsonrpc": "2.0",
-	"id": -1,
-	"result": {
-		"height": "3813",
-		"txs_results": [
-			{
-				"code": 0,
-				"data": null,
-				"log": "",
-				"info": "",
-				"gasWanted": "0",
-				"gasUsed": "0",
-				"events": [
-					{
-						"type": "valid_txs",
-						"attributes": [
-						{
-							"key": "ZmVl",
-							"value": "MC4wMDAwMDQ2OQ=="
-						},
-						{
-							"key": "dHhpZA==",
-							"value": "YmEyMjMwYTA0OTIyZDNmMDFkNDE5OTljNmFkYmUwNmZjOGE5ODQxM2IyZDU1YWM3ZjlhYzMwZmVjMzlmYzdiMg=="
-						}
-						]
-					}
-				],
-				"codespace": ""
-			},
-			{
-				"code": 0,
-				"data": null,
-				"log": "",
-				"info": "",
-				"gasWanted": "0",
-				"gasUsed": "0",
-				"events": [
-					{
-						"type": "valid_txs",
-						"attributes": [
-						{
-							"key": "ZmVl",
-							"value": "MC4wMDAwMDQ2OQ=="
-						},
-						{
-							"key": "dHhpZA==",
-							"value": "N2I1YWMzNmY2M2ZmYjZlZTEzMjg5ZDQ5ZDljZmRhY2UzZjhkMjM0NDY5ZWIwNTc1NWY1ZjVhYzgxYjNhNDVhNg=="
-						}
-						]
-					}
-				],
-				"codespace": ""
-			}
-		],
-		"begin_block_events": [
-			{
-				"type": "staking_change",
-				"attributes": [
-					{
-						"key": "c3Rha2luZ19hZGRyZXNz",
-						"value": "MHg2ZGJkNWI4ZmUwZGFkNDk0NDY1YWE3NTc0ZGVmYmE3MTFjMTg0MTAy"
-					},
-					{
-						"key": "c3Rha2luZ19vcHR5cGU=",
-						"value": "cmV3YXJk"
-					},
-					{
-						"key": "c3Rha2luZ19kaWZm",
-						"value": "W3sia2V5IjoiQm9uZGVkIiwidmFsdWUiOiI0ODU4OTkwMjAzMzMzIn1d"
-					}
-				]
-			},
-			{
-				"type": "staking_change",
-				"attributes": [
-					{
-						"key": "c3Rha2luZ19hZGRyZXNz",
-						"value": "MHg2ZmMxZTMxMjRhN2VkMDdmMzcxMDM3OGI2OGY3MDQ2YzczMDAxNzlk"
-					},
-					{
-						"key": "c3Rha2luZ19vcHR5cGU=",
-						"value": "cmV3YXJk"
-					},
-					{
-						"key": "c3Rha2luZ19kaWZm",
-						"value": "W3sia2V5IjoiQm9uZGVkIiwidmFsdWUiOiI0ODU4OTkwMjAzMzMzIn1d"
-					}
-				]
-			},
-			{
-				"type": "staking_change",
-				"attributes": [
-					{
-						"key": "c3Rha2luZ19hZGRyZXNz",
-						"value": "MHhiOGM2ODg2ZGEwOWUxMmRiOGFlYmZjODEwOGM2N2NlMmJhMDg2YWM2"
-					},
-					{
-						"key": "c3Rha2luZ19vcHR5cGU=",
-						"value": "cmV3YXJk"
-					},
-					{
-						"key": "c3Rha2luZ19kaWZm",
-						"value": "W3sia2V5IjoiQm9uZGVkIiwidmFsdWUiOiI0ODU4OTkwMjAzMzMzIn1d"
-					}
-				]
-			},
-			{
-				"type": "reward",
-				"attributes": [
-					{
-						"key": "bWludGVk",
-						"value": "IjE0NTc2OTcwNjEwMDAwIg=="
-					}
-				]
-			}
-		],
-		"end_block_events": [
-			{
-				"type": "block_filter",
-				"attributes": [
-					{
-						"key": "ZXRoYmxvb20=",
-						"value": "AAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
-					}
-				]
-			}
-		],
-		"validator_updates": [
-			{
-				"pub_key": {
-					"Sum": {
-						"type": "tendermint.crypto.PublicKey_Ed25519",
-						"value": {
-							"ed25519": "rXhu7xhqYBtJftVLKxvKN0XnpyOzxFnUEfAhD1dEF/8="
-						}
-					}
-				},
-				"power": "60000000"
-			},
-			{
-				"pub_key": {
-				"Sum": {
-					"type": "tendermint.crypto.PublicKey_Ed25519",
-						"value": {
-							"ed25519": "tDLheZJwsA8oYEwarR6/X+zAmNKMLHTVkh/fvcLqcwA="
-						}
-					}
-				},
-				"power": "80000000"
-			}
-		],
 		"consensus_param_updates": {
-			"block": {
-				"max_bytes": "22020096",
-				"max_gas": "-1"
-			},
-			"evidence": {
-				"max_age_num_blocks": "100000",
-				"max_age_duration": "172800000000000"
-			},
-			"validator": {
-				"pub_key_types": [
-					"ed25519"
-				]
-			}
+		  "block": {
+			"max_bytes": "22020096",
+			"max_gas": "-1"
+		  },
+		  "evidence": {
+			"max_age_num_blocks": "100000",
+			"max_age_duration": "172800000000000"
+		  },
+		  "validator": {
+			"pub_key_types": [
+			  "ed25519"
+			]
+		  }
 		}
 	}
+}`
+
+	// This BlockResults is a modified version and is NOT real chain data
+	BLOCK_RESULTS_JSON = `
+	{
+  "jsonrpc": "2.0",
+  "id": -1,
+  "result": {
+    "height": "367216",
+    "txs_results": [
+      {
+        "code": 0,
+        "data": "CgoKCGRlbGVnYXRl",
+        "log": "[{\"events\":[{\"type\":\"delegate\",\"attributes\":[{\"key\":\"validator\",\"value\":\"tcrocncl1pm27djcs5djxjsxw3unrkv3m3jtxdexktw5epu\"},{\"key\":\"amount\",\"value\":\"19302674761\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"delegate\"},{\"key\":\"sender\",\"value\":\"tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l\"},{\"key\":\"module\",\"value\":\"staking\"},{\"key\":\"sender\",\"value\":\"tcro1pm27djcs5djxjsxw3unrkv3m3jtxdexk73hqel\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro1pm27djcs5djxjsxw3unrkv3m3jtxdexk73hqel\"},{\"key\":\"sender\",\"value\":\"tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l\"},{\"key\":\"amount\",\"value\":\"1913979901basetcro\"}]}]}]",
+        "info": "",
+        "gas_wanted": "200000",
+        "gas_used": "143179",
+        "events": [
+          {
+            "type": "transfer",
+            "attributes": [
+              {
+                "key": "cmVjaXBpZW50",
+                "value": "dGNybzE3eHBmdmFrbTJhbWc5NjJ5bHM2Zjg0ejNrZWxsOGM1bHhoemFoYQ==",
+                "index": true
+              },
+              {
+                "key": "c2VuZGVy",
+                "value": "dGNybzFwbTI3ZGpjczVkanhqc3h3M3Vucmt2M20zanR4ZGV4azczaHFlbA==",
+                "index": true
+              },
+              {
+                "key": "YW1vdW50",
+                "value": "MjAwMDBiYXNldGNybw==",
+                "index": true
+              }
+            ]
+          },
+          {
+            "type": "message",
+            "attributes": [
+              {
+                "key": "c2VuZGVy",
+                "value": "dGNybzFwbTI3ZGpjczVkanhqc3h3M3Vucmt2M20zanR4ZGV4azczaHFlbA==",
+                "index": true
+              }
+            ]
+          }
+        ],
+        "codespace": ""
+      },
+      {
+        "code": 0,
+        "data": "CgoKCGRlbGVnYXRl",
+        "log": "[{\"events\":[{\"type\":\"delegate\",\"attributes\":[{\"key\":\"validator\",\"value\":\"tcrocncl10gsqs8jzdlrem80shp0x6wx0jw7qu7m8cd29y5\"},{\"key\":\"amount\",\"value\":\"17338013566\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"delegate\"},{\"key\":\"sender\",\"value\":\"tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l\"},{\"key\":\"module\",\"value\":\"staking\"},{\"key\":\"sender\",\"value\":\"tcro10gsqs8jzdlrem80shp0x6wx0jw7qu7m8djfuuh\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro10gsqs8jzdlrem80shp0x6wx0jw7qu7m8djfuuh\"},{\"key\":\"sender\",\"value\":\"tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l\"},{\"key\":\"amount\",\"value\":\"2310941249basetcro\"}]}]}]",
+        "info": "",
+        "gas_wanted": "200000",
+        "gas_used": "143737",
+        "events": [
+          {
+            "type": "transfer",
+            "attributes": [
+              {
+                "key": "cmVjaXBpZW50",
+                "value": "dGNybzE3eHBmdmFrbTJhbWc5NjJ5bHM2Zjg0ejNrZWxsOGM1bHhoemFoYQ==",
+                "index": true
+              },
+              {
+                "key": "c2VuZGVy",
+                "value": "dGNybzEwZ3NxczhqemRscmVtODBzaHAweDZ3eDBqdzdxdTdtOGRqZnV1aA==",
+                "index": true
+              },
+              {
+                "key": "YW1vdW50",
+                "value": "MjAwMDBiYXNldGNybw==",
+                "index": true
+              }
+            ]
+          },
+          {
+            "type": "message",
+            "attributes": [
+              {
+                "key": "c2VuZGVy",
+                "value": "dGNybzEwZ3NxczhqemRscmVtODBzaHAweDZ3eDBqdzdxdTdtOGRqZnV1aA==",
+                "index": true
+              }
+            ]
+          }
+        ],
+        "codespace": ""
+      }
+    ],
+    "begin_block_events": [
+      {
+        "type": "transfer",
+        "attributes": [
+          {
+            "key": "cmVjaXBpZW50",
+            "value": "dGNybzE3eHBmdmFrbTJhbWc5NjJ5bHM2Zjg0ejNrZWxsOGM1bHhoemFoYQ==",
+            "index": true
+          },
+          {
+            "key": "c2VuZGVy",
+            "value": "dGNybzFtM2gzMHdsdnNmOGxscnV4dHB1a2R2c3kwa20ya3VtODdseDltcQ==",
+            "index": true
+          },
+          {
+            "key": "YW1vdW50",
+            "value": "MTc0NDk1MjgzMjFiYXNldGNybw==",
+            "index": true
+          }
+        ]
+      },
+      {
+        "type": "message",
+        "attributes": [
+          {
+            "key": "c2VuZGVy",
+            "value": "dGNybzFtM2gzMHdsdnNmOGxscnV4dHB1a2R2c3kwa20ya3VtODdseDltcQ==",
+            "index": true
+          }
+        ]
+      },
+      {
+        "type": "mint",
+        "attributes": [
+          {
+            "key": "Ym9uZGVkX3JhdGlv",
+            "value": "MC4wMDA4MDkxOTYwNTQzNzY2NDQ=",
+            "index": true
+          },
+          {
+            "key": "aW5mbGF0aW9u",
+            "value": "MC4wMTM3NTU4MjE5MzY4NTUxODQ=",
+            "index": true
+          },
+          {
+            "key": "YW5udWFsX3Byb3Zpc2lvbnM=",
+            "value": "MTEwMTMzMDQ2OTk0MjA0NTc2LjEzODAxNjUyNjU3OTM4NjI4OA==",
+            "index": true
+          },
+          {
+            "key": "YW1vdW50",
+            "value": "MTc0NDk1MjgzMjE=",
+            "index": true
+          }
+        ]
+      }
+    ],
+    "end_block_events": [
+      {
+        "type": "commission",
+        "attributes": [
+          {
+            "key": "YW1vdW50",
+            "value": "ODcyNDc4NDEuNjA1MDAwMDAwMDAwMDAwMDAwYmFzZXRjcm8=",
+            "index": true
+          },
+          {
+            "key": "dmFsaWRhdG9y",
+            "value": "dGNyb2NuY2wxOHAwN3l2bXBoeW1zY3o2dGw0YTd6bWg5M2cwazZ2eTcyd3c0czQ=",
+            "index": true
+          }
+        ]
+      },
+      {
+        "type": "rewards",
+        "attributes": [
+          {
+            "key": "YW1vdW50",
+            "value": "ODcyNDc4NDE2LjA1MDAwMDAwMDAwMDAwMDAwMGJhc2V0Y3Jv",
+            "index": true
+          },
+          {
+            "key": "dmFsaWRhdG9y",
+            "value": "dGNyb2NuY2wxOHAwN3l2bXBoeW1zY3o2dGw0YTd6bWg5M2cwazZ2eTcyd3c0czQ=",
+            "index": true
+          }
+        ]
+      }
+    ],
+    "validator_updates": [
+      {
+        "pub_key": {
+          "Sum": {
+            "type": "tendermint.crypto.PublicKey_Ed25519",
+            "value": {
+              "ed25519": "SE5zeTjcYPXVrfcOva61QWokSZFfQu2h316fR6bB2dY="
+            }
+          }
+        },
+        "power": "138525202"
+      },
+      {
+        "pub_key": {
+          "Sum": {
+            "type": "tendermint.crypto.PublicKey_Ed25519",
+            "value": {
+              "ed25519": "Epmo3U6yXlxSDQzWZ8yBPOMHw2R85lc26RK98Rlo0oM="
+            }
+          }
+        },
+        "power": "112904113"
+      }
+    ],
+    "consensus_param_updates": {
+      "block": {
+        "max_bytes": "22020096",
+        "max_gas": "-1"
+      },
+      "evidence": {
+        "max_age_num_blocks": "100000",
+        "max_age_duration": "172800000000000"
+      },
+      "validator": {
+        "pub_key_types": [
+          "ed25519"
+        ]
+      }
+    }
+  }
 }`
 	BLOCK_JSON = `
 {
