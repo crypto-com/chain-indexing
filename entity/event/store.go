@@ -1,10 +1,10 @@
 package event
 
 type Store interface {
-	// GetLatstEventHeight returns latest event height, nil if no event is stored
-	GetLatestHeight() *int64
+	// GetLatestEventHeight returns latest event height, nil if no event is stored
+	GetLatestHeight() (*int64, error)
 
-	GetByHeight(height int64) ([]Event, error)
+	GetAllByHeight(height int64) ([]Event, error)
 
 	Insert(evt Event) error
 

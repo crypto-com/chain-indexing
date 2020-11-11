@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/crypto-com/chainindex/usecase/model"
+	usecase_model "github.com/crypto-com/chainindex/usecase/model"
 )
 
 type HTTPClient struct {
@@ -28,7 +28,7 @@ func NewHTTPClient(tendermintRPCUrl string) *HTTPClient {
 }
 
 // Block gets the block response with target height
-func (client *HTTPClient) Block(height int64) (*model.Block, *model.RawBlock, error) {
+func (client *HTTPClient) Block(height int64) (*usecase_model.Block, *usecase_model.RawBlock, error) {
 	var err error
 
 	rawRespBody, err := client.request("block", "height="+strconv.FormatInt(height, 10))
@@ -45,7 +45,7 @@ func (client *HTTPClient) Block(height int64) (*model.Block, *model.RawBlock, er
 	return block, rawBlock, nil
 }
 
-func (client *HTTPClient) BlockResults(height int64) (*model.BlockResults, error) {
+func (client *HTTPClient) BlockResults(height int64) (*usecase_model.BlockResults, error) {
 	var err error
 
 	rawRespBody, err := client.request("block_results", "height="+strconv.FormatInt(height, 10))

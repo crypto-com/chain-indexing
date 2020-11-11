@@ -2,7 +2,7 @@ package chain
 
 import (
 	"fmt"
-	"github.com/crypto-com/chainindex/appinterface/feed"
+	"github.com/crypto-com/chainindex/infrastructure/notification"
 	"sync"
 )
 
@@ -16,21 +16,17 @@ func NewBlockSubject() *BlockSubject {
 	}
 }
 
-func (s *BlockSubject) Attach(o feed.Subscriber) {
-	s.Observers.Store(o, struct{}{})
+func (s *BlockSubject) Attach(subj *BlockSubscriber) {
+	s.Observers.Store(subj, struct{}{})
 }
 
-func (s *BlockSubject) Detach(o feed.Subscriber) {
-	s.Observers.Delete(o)
-}
-
-func (s *BlockSubject) Notify(n *feed.Notification) {
+func (s *BlockSubject) Notify(n *notification.BlockNotification) {
 	s.Observers.Range(func(key interface{}, value interface{}) bool {
 		if key == nil || value == nil {
 			return false
 		}
 
-		if err := key.(feed.Subscriber).NotifyCallback(n); err != nil {
+		if err := key.(*BlockSubscriber).OnNotification(n); err != nil {
 			fmt.Println("error when subscriber run callback function", err)
 		}
 		return true

@@ -1,27 +1,27 @@
-package entity_event_test
+package test
 
 import (
-	"github.com/crypto-com/chainindex/entity/event"
+	entity_event "github.com/crypto-com/chainindex/entity/event"
 )
 
-type FakeStore struct{}
+type FakeEventStore struct{}
 
-func NewFakeStore() *FakeStore {
-	return &FakeStore{}
+func NewFakeEventStore() *FakeEventStore {
+	return &FakeEventStore{}
 }
 
-func (manager *FakeStore) GetLatestHeight() *int64 {
+func (manager *FakeEventStore) GetLatestHeight() (*int64, error) {
+	return nil, nil
+}
+
+func (manager *FakeEventStore) GetAllByHeight(seq int64) ([]entity_event.Event, error) {
+	return []entity_event.Event{NewFakeEvent()}, nil
+}
+
+func (manager *FakeEventStore) Insert(evt entity_event.Event) error {
 	return nil
 }
 
-func (manager *FakeStore) GetByHeight(seq int64) (event.Event, error) {
-	return NewFakeEvent(), nil
-}
-
-func (manager *FakeStore) Insert(evt event.Event) error {
-	return nil
-}
-
-func (manager *FakeStore) InsertAll(evts []event.Event) error {
+func (manager *FakeEventStore) InsertAll(evts []entity_event.Event) error {
 	return nil
 }

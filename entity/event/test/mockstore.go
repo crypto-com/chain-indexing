@@ -1,38 +1,37 @@
-package entity_event_test
+package test
 
 import (
+	entity_event "github.com/crypto-com/chainindex/entity/event"
 	"github.com/stretchr/testify/mock"
-
-	"github.com/crypto-com/chainindex/entity/event"
 )
 
-type MockStore struct {
+type MockEventStore struct {
 	mock.Mock
 }
 
-func NewMockStore() *MockStore {
-	return &MockStore{}
+func NewMockEventStore() *MockEventStore {
+	return &MockEventStore{}
 }
 
-func (manager *MockStore) GetLatestHeight() *int64 {
+func (manager *MockEventStore) GetLatestHeight() (*int64, error) {
 	mockArgs := manager.Called()
 
-	return mockArgs.Get(0).(*int64)
+	return mockArgs.Get(0).(*int64), mockArgs.Error(1)
 }
 
-func (manager *MockStore) GetByHeight(height int64) ([]event.Event, error) {
+func (manager *MockEventStore) GetAllByHeight(height int64) ([]entity_event.Event, error) {
 	mockArgs := manager.Called(height)
 
-	return mockArgs.Get(0).([]event.Event), mockArgs.Error(1)
+	return mockArgs.Get(0).([]entity_event.Event), mockArgs.Error(1)
 }
 
-func (manager *MockStore) Insert(evt event.Event) error {
+func (manager *MockEventStore) Insert(evt entity_event.Event) error {
 	mockArgs := manager.Called(evt)
 
 	return mockArgs.Error(0)
 }
 
-func (manager *MockStore) InsertAll(evts []event.Event) error {
+func (manager *MockEventStore) InsertAll(evts []entity_event.Event) error {
 	mockArgs := manager.Called(evts)
 
 	return mockArgs.Error(0)

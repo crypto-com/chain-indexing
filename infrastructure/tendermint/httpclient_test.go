@@ -1,18 +1,18 @@
 package tendermint_test
 
 import (
-	"github.com/crypto-com/chainindex/internal/primptr"
 	"net/http"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
 	"github.com/onsi/gomega/ghttp"
 
 	"github.com/crypto-com/chainindex/appinterface/tendermint"
 	. "github.com/crypto-com/chainindex/infrastructure/tendermint"
+	"github.com/crypto-com/chainindex/internal/primptr"
 	"github.com/crypto-com/chainindex/internal/utctime"
-	"github.com/crypto-com/chainindex/usecase/model"
+
+	usecase_model "github.com/crypto-com/chainindex/usecase/model"
 )
 
 var _ = Describe("HTTPClient", func() {
@@ -40,7 +40,7 @@ var _ = Describe("HTTPClient", func() {
 			anyBlockHeight := int64(1)
 			blockResults, err := client.BlockResults(anyBlockHeight)
 			Expect(err).To(BeNil())
-			Expect(*blockResults).To(Equal(model.BlockResults{
+			Expect(*blockResults).To(Equal(usecase_model.BlockResults{
 				Height:           anyBlockHeight,
 				TxsEvents:        nil,
 				BeginBlockEvents: nil,
@@ -61,13 +61,13 @@ var _ = Describe("HTTPClient", func() {
 			anyBlockHeight := int64(3813)
 			blockResults, err := client.BlockResults(anyBlockHeight)
 			Expect(err).To(BeNil())
-			Expect(*blockResults).To(Equal(model.BlockResults{
+			Expect(*blockResults).To(Equal(usecase_model.BlockResults{
 				Height: anyBlockHeight,
-				TxsEvents: [][]model.BlockResultsEvent{
+				TxsEvents: [][]usecase_model.BlockResultsEvent{
 					{
 						{
 							Type: "valid_txs",
-							Attributes: []model.BlockResultsEventAttribute{
+							Attributes: []usecase_model.BlockResultsEventAttribute{
 								{
 									Key:   "ZmVl",
 									Value: "MC4wMDAwMDQ2OQ==",
@@ -82,7 +82,7 @@ var _ = Describe("HTTPClient", func() {
 					{
 						{
 							Type: "valid_txs",
-							Attributes: []model.BlockResultsEventAttribute{
+							Attributes: []usecase_model.BlockResultsEventAttribute{
 								{
 									Key:   "ZmVl",
 									Value: "MC4wMDAwMDQ2OQ==",
@@ -95,10 +95,10 @@ var _ = Describe("HTTPClient", func() {
 						},
 					},
 				},
-				BeginBlockEvents: []model.BlockResultsEvent{
+				BeginBlockEvents: []usecase_model.BlockResultsEvent{
 					{
 						Type: "staking_change",
-						Attributes: []model.BlockResultsEventAttribute{
+						Attributes: []usecase_model.BlockResultsEventAttribute{
 							{
 								Key:   "c3Rha2luZ19hZGRyZXNz",
 								Value: "MHg2ZGJkNWI4ZmUwZGFkNDk0NDY1YWE3NTc0ZGVmYmE3MTFjMTg0MTAy",
@@ -115,7 +115,7 @@ var _ = Describe("HTTPClient", func() {
 					},
 					{
 						Type: "staking_change",
-						Attributes: []model.BlockResultsEventAttribute{
+						Attributes: []usecase_model.BlockResultsEventAttribute{
 							{
 								Key:   "c3Rha2luZ19hZGRyZXNz",
 								Value: "MHg2ZmMxZTMxMjRhN2VkMDdmMzcxMDM3OGI2OGY3MDQ2YzczMDAxNzlk",
@@ -132,7 +132,7 @@ var _ = Describe("HTTPClient", func() {
 					},
 					{
 						Type: "staking_change",
-						Attributes: []model.BlockResultsEventAttribute{
+						Attributes: []usecase_model.BlockResultsEventAttribute{
 							{
 								Key:   "c3Rha2luZ19hZGRyZXNz",
 								Value: "MHhiOGM2ODg2ZGEwOWUxMmRiOGFlYmZjODEwOGM2N2NlMmJhMDg2YWM2",
@@ -149,7 +149,7 @@ var _ = Describe("HTTPClient", func() {
 					},
 					{
 						Type: "reward",
-						Attributes: []model.BlockResultsEventAttribute{
+						Attributes: []usecase_model.BlockResultsEventAttribute{
 							{
 								Key:   "bWludGVk",
 								Value: "IjE0NTc2OTcwNjEwMDAwIg==",
@@ -157,9 +157,9 @@ var _ = Describe("HTTPClient", func() {
 						},
 					},
 				},
-				ValidatorUpdates: []model.BlockResultsValidator{
+				ValidatorUpdates: []usecase_model.BlockResultsValidator{
 					{
-						PubKey: model.BlockResultsValidatorPubKey{
+						PubKey: usecase_model.BlockResultsValidatorPubKey{
 							Type:    "tendermint.crypto.PublicKey_Ed25519",
 							PubKey:  "rXhu7xhqYBtJftVLKxvKN0XnpyOzxFnUEfAhD1dEF/8=",
 							Address: "34C725CABA703269B3F1D1A907A84DE5FEE96469",
@@ -167,7 +167,7 @@ var _ = Describe("HTTPClient", func() {
 						Power: primptr.String("60000000"),
 					},
 					{
-						PubKey: model.BlockResultsValidatorPubKey{
+						PubKey: usecase_model.BlockResultsValidatorPubKey{
 							Type:    "tendermint.crypto.PublicKey_Ed25519",
 							PubKey:  "tDLheZJwsA8oYEwarR6/X+zAmNKMLHTVkh/fvcLqcwA=",
 							Address: "D527DAECDE0501CF2E785A8DC0D9F4A64760F0BB",
@@ -197,14 +197,14 @@ var _ = Describe("HTTPClient", func() {
 			signature1Time, _ := utctime.Parse("2006-01-02T15:04:05.000000000Z", "2020-10-15T09:33:42.195143319Z")
 			signature2Time, _ := utctime.Parse("2006-01-02T15:04:05.000000000Z", "2020-10-15T09:33:42.206633743Z")
 
-			Expect(*block).To(Equal(model.Block{
+			Expect(*block).To(Equal(usecase_model.Block{
 				Height:          blockHeight,
 				Hash:            "82C25937191D1CF73BE9222CB04CE35B7A1366CC5BB08D9BB9AB457712E4F2D1",
 				Time:            blockTime,
 				AppHash:         "6AE0920938F76727054BC2531247632C5C0521E2B91EA3A9864EA4FF55023D77",
 				ProposerAddress: "384E5F30F02538C0A34CBFF32F8D5554671C9029",
 				Txs:             []string{},
-				Signatures: []model.BlockSignature{
+				Signatures: []usecase_model.BlockSignature{
 					{
 						BlockIdFlag:      2,
 						ValidatorAddress: "384E5F30F02538C0A34CBFF32F8D5554671C9029",

@@ -50,6 +50,7 @@ type RowsResult interface {
 	Err() error
 	ExecResult() ExecResult
 	Next() bool
+	// When no row was found it should return ErrNoRows
 	Scan(dest ...interface{}) error
 }
 
