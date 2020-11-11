@@ -10,8 +10,8 @@ type CreateRawBlock struct {
 	rawBlock *usecase_model.RawBlock
 }
 
-func NewCreateRawBlock(rawBlock *usecase_model.RawBlock) CreateRawBlock {
-	return CreateRawBlock{
+func NewCreateRawBlock(rawBlock *usecase_model.RawBlock) *CreateRawBlock {
+	return &CreateRawBlock{
 		rawBlock,
 	}
 }
@@ -21,7 +21,7 @@ func (_ *CreateRawBlock) Name() string {
 }
 
 func (_ *CreateRawBlock) Version() int {
-	return 1
+	return 0
 }
 
 func (cmd *CreateRawBlock) Exec() (entity_event.Event, error) {

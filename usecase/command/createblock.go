@@ -10,8 +10,8 @@ type CreateBlock struct {
 	block *usecase_model.Block
 }
 
-func NewCreateBlock(block *usecase_model.Block) CreateBlock {
-	return CreateBlock{
+func NewCreateBlock(block *usecase_model.Block) *CreateBlock {
+	return &CreateBlock{
 		block,
 	}
 }
@@ -21,7 +21,7 @@ func (_ *CreateBlock) Name() string {
 }
 
 func (_ *CreateBlock) Version() int {
-	return 1
+	return 0
 }
 
 func (cmd *CreateBlock) Exec() (entity_event.Event, error) {

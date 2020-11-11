@@ -11,19 +11,22 @@ func ParseBlockToCommands(block *usecase_model.Block, rawBlock *usecase_model.Ra
 	var cmds []entity_command.Command
 
 	createRawBlockCommand := ParseCreateRawBlockCommand(rawBlock)
-	cmds = append(cmds, &createRawBlockCommand)
+	cmds = append(cmds, createRawBlockCommand)
 
 	createBlockCommand := ParseCreateBlockCommand(block)
-	cmds = append(cmds, &createBlockCommand)
+	cmds = append(cmds, createBlockCommand)
+
+	signBlockCommands := ParseSignBlockCommands(block)
+	cmds = append(cmds, signBlockCommands...)
 
 	return cmds, err
 }
 
-func ParseCreateRawBlockCommand(rawBlock *usecase_model.RawBlock) usecase_command.CreateRawBlock {
+func ParseCreateRawBlockCommand(rawBlock *usecase_model.RawBlock) *usecase_command.CreateRawBlock {
 	return usecase_command.NewCreateRawBlock(rawBlock)
 }
 
-func ParseCreateBlockCommand(block *usecase_model.Block) usecase_command.CreateBlock {
+func ParseCreateBlockCommand(block *usecase_model.Block) *usecase_command.CreateBlock {
 	var modelBlockSigs []usecase_model.BlockSignature
 	for _, sig := range block.Signatures {
 		modelBlockSigs = append(modelBlockSigs, usecase_model.BlockSignature{
@@ -45,4 +48,20 @@ func ParseCreateBlockCommand(block *usecase_model.Block) usecase_command.CreateB
 	}
 
 	return usecase_command.NewCreateBlock(modelBlock)
+}
+
+func ParseSignBlockCommands(block *usecase_model.Block) []entity_command.Command {
+	commands := make([]entity_command.Command, len(block.Signatures))
+
+	for _, signature := range block.Signatures {
+		commands = append(commands, usecase_command.NewSignBlock(
+			block.Height,
+			signature.ValidatorAddress,
+			block.ProposerAddress == signature.ValidatorAddress,
+			signature.Timestamp,
+			signature.Signature,
+		))
+	}
+
+	return commands
 }

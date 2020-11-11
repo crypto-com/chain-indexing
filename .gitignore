@@ -32,6 +32,5 @@ target/
 *.log
 
 config/config.yml
-chainindex
-!chainindex/
+chain-indexing
 

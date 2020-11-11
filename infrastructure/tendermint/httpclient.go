@@ -80,14 +80,14 @@ func (client *HTTPClient) parseBlockSignatures(rawSignatures []usecase_model.Raw
 
 	signatures := make([]usecase_model.BlockSignature, 0, len(rawSignatures))
 	for _, rawSignature := range rawSignatures {
-		if rawSignature.Signature == nil {
+		if rawSignature.MaybeSignature == nil {
 			continue
 		}
 		signatures = append(signatures, usecase_model.BlockSignature{
 			BlockIdFlag:      rawSignature.BlockIDFlag,
 			ValidatorAddress: rawSignature.ValidatorAddress,
 			Timestamp:        rawSignature.Timestamp,
-			Signature:        *rawSignature.Signature,
+			Signature:        *rawSignature.MaybeSignature,
 		})
 	}
 

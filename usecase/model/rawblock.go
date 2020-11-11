@@ -104,5 +104,5 @@ type RawBlockSignature struct {
 	BlockIDFlag      int             `json:"block_id_flag"`
 	ValidatorAddress string          `json:"validator_address"`
 	Timestamp        utctime.UTCTime `json:"timestamp"`
-	Signature        *string         `json:"signature"`
+	MaybeSignature   *string         `json:"signature"`
 }
