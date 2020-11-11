@@ -38,8 +38,8 @@ func (projection *MockProjection) OnInit() error {
 	return mockArgs.Error(0)
 }
 
-func (projection *MockProjection) HandleEvents(events []entity_event.Event) error {
-	mockArgs := projection.Called(events)
+func (projection *MockProjection) HandleEvents(height int64, events []entity_event.Event) error {
+	mockArgs := projection.Called(height, events)
 
 	return mockArgs.Error(0)
 }

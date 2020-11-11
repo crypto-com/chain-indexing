@@ -24,5 +24,5 @@ type Projection interface {
 
 	// Handle all events with the same height that matches `GetEventsToListen()` and create
 	// projection. It is also responsible to update the last handled event height.
-	HandleEvents(events []entity_event.Event) error
+	HandleEvents(height int64, events []entity_event.Event) error
 }
