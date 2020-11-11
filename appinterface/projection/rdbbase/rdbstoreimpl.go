@@ -41,7 +41,7 @@ func (impl *RDbStoreImpl) UpdateLastHandledEventHeight(rdbHandle *rdb.Handle, pr
 			return fmt.Errorf("error exectuing last handled event height insertion SQL: %v", err)
 		}
 		if execResult.RowsAffected() == 0 {
-			return errors.New("error exectuing last handled event height insertion SQL: no rows inserted")
+			return errors.New("error executing last handled event height insertion SQL: no rows inserted")
 		}
 
 		return nil
