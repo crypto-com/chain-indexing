@@ -51,7 +51,7 @@ func (client *HTTPClient) Block(height int64) (*usecase_model.Block, *usecase_mo
 func (client *HTTPClient) parseBlockResp(rawRespReader io.Reader) (*usecase_model.Block, *usecase_model.RawBlock, error) {
 	var err error
 
-	var resp usecase_model.RawBlock
+	var resp RawBlockResp
 	if err = jsoniter.NewDecoder(rawRespReader).Decode(&resp); err != nil {
 		return nil, nil, fmt.Errorf("error decoding Tendermint block response: %v", err)
 	}
@@ -69,7 +69,7 @@ func (client *HTTPClient) parseBlockResp(rawRespReader io.Reader) (*usecase_mode
 		ProposerAddress: resp.Result.Block.Header.ProposerAddress,
 		Txs:             resp.Result.Block.Data.Txs,
 		Signatures:      client.parseBlockSignatures(resp.Result.Block.LastCommit.Signatures),
-	}, &resp, nil
+	}, &resp.Result, nil
 }
 
 // parseBlockSignatures parses the rawSignatures in JSON response into BlockSignature type
@@ -131,4 +131,10 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 	}
 
 	return rawResp.Body, nil
+}
+
+type RawBlockResp struct {
+	Jsonrpc string                 `json:"jsonrpc"`
+	ID      int                    `json:"id"`
+	Result  usecase_model.RawBlock `json:"result"`
 }
