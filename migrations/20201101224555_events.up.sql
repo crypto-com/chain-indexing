@@ -1,7 +1,7 @@
 CREATE TABLE events (
-    id BIGSERIAL,
+    id VARCHAR PRIMARY KEY,
+    height INT NOT NULL,
     name VARCHAR NOT NULL,
     version INT NOT NULL,
-    payload JSONB NOT NULL,
-    PRIMARY KEY(id)
+    payload JSONB NOT NULL
 );

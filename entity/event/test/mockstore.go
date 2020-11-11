@@ -13,10 +13,10 @@ func NewMockEventStore() *MockEventStore {
 	return &MockEventStore{}
 }
 
-func (manager *MockEventStore) GetLatestHeight() *int64 {
+func (manager *MockEventStore) GetLatestHeight() (*int64, error) {
 	mockArgs := manager.Called()
 
-	return mockArgs.Get(0).(*int64)
+	return mockArgs.Get(0).(*int64), mockArgs.Error(1)
 }
 
 func (manager *MockEventStore) GetAllByHeight(height int64) ([]entity_event.Event, error) {
