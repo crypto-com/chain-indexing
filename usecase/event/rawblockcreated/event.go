@@ -42,6 +42,15 @@ func (_ *RawBlockCreated) Version() int {
 	return 1
 }
 
+func (event *RawBlockCreated) ToJSON() string {
+	encoded, err := jsoniter.Marshal(event)
+	if err != nil {
+		panic(fmt.Sprintf("error encoding RawBlockCreated event to JSON: %v", err))
+	}
+
+	return string(encoded)
+}
+
 func (evt *RawBlockCreated) String() string {
 	return render.Render(evt)
 }

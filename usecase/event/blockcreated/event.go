@@ -2,6 +2,7 @@ package blockcreated
 
 import (
 	"bytes"
+	"fmt"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/luci/go-render/render"
@@ -32,6 +33,15 @@ func (_ *BlockCreated) Name() string {
 
 func (_ *BlockCreated) Version() int {
 	return 1
+}
+
+func (event *BlockCreated) ToJSON() string {
+	encoded, err := jsoniter.Marshal(event)
+	if err != nil {
+		panic(fmt.Sprintf("error encoding BlockCreated event to JSON: %v", err))
+	}
+
+	return string(encoded)
 }
 
 func (event *BlockCreated) String() string {

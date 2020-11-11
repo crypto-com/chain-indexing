@@ -16,17 +16,16 @@ import (
 type Block struct {
 	*rdbbase.RDbBase
 
-	logger applogger.Logger
-
-	blocksView *view.Blocks
+	rdbConn rdb.Conn
+	logger  applogger.Logger
 }
 
-func NewBlock(logger applogger.Logger, rdbHandle *rdb.Handle, blocksView *view.Blocks) *Block {
+func NewBlock(logger applogger.Logger, rdbConn rdb.Conn) *Block {
 	return &Block{
-		rdbbase.NewRDbBase(rdbHandle, "Block"),
-		logger,
+		rdbbase.NewRDbBase(rdbConn.ToHandle(), "Block"),
 
-		blocksView,
+		rdbConn,
+		logger,
 	}
 }
 
@@ -35,23 +34,44 @@ func (_ *Block) GetEventsToListen() []string {
 }
 
 func (projection *Block) OnInit() error {
-	// TODO
 	return nil
 }
 
-func (projection *Block) HandleEvents(events []entity_event.Event) error {
-	for _, evt := range events {
-		if blockCreatedEvt, ok := evt.(*blockcreated.BlockCreated); ok {
-			return projection.handleBlockCreatedEvent(blockCreatedEvt)
+func (projection *Block) HandleEvents(height int64, events []entity_event.Event) error {
+	var err error
+
+	var rdbTx rdb.Tx
+	rdbTx, err = projection.rdbConn.Begin()
+	if err != nil {
+		return fmt.Errorf("error beginning transaction: %v", err)
+	}
+	rdbTxHandle := rdbTx.ToHandle()
+	blocksView := view.NewBlocks(rdbTxHandle)
+
+	for _, event := range events {
+		if blockCreatedEvent, ok := event.(*blockcreated.BlockCreated); ok {
+			if err = projection.handleBlockCreatedEvent(blocksView, blockCreatedEvent); err != nil {
+				_ = rdbTx.Rollback()
+				return fmt.Errorf("error handling BlockCreatedEvent: %v", err)
+			}
 		} else {
-			return fmt.Errorf("received unexpected event %sV%d(%s)", evt.Name(), evt.Version(), evt.Id())
+			_ = rdbTx.Rollback()
+			return fmt.Errorf("received unexpected event %sV%d(%s)", event.Name(), event.Version(), event.Id())
 		}
 	}
-	// TODO: Update last handled event height
+	if err = projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
+		_ = rdbTx.Rollback()
+		return fmt.Errorf("error updating last handled event height: %v", err)
+	}
+
+	if err = rdbTx.Commit(); err != nil {
+		_ = rdbTx.Rollback()
+		return fmt.Errorf("error committing changes: %v", err)
+	}
 	return nil
 }
 
-func (projection *Block) handleBlockCreatedEvent(event *blockcreated.BlockCreated) error {
+func (projection *Block) handleBlockCreatedEvent(blocksView *view.Blocks, event *blockcreated.BlockCreated) error {
 	committedCouncilNodes := make([]view.BlockCommittedCouncilNode, 0)
 	for _, signature := range event.Block.Signatures {
 		committedCouncilNodes = append(committedCouncilNodes, view.BlockCommittedCouncilNode{
@@ -62,7 +82,7 @@ func (projection *Block) handleBlockCreatedEvent(event *blockcreated.BlockCreate
 		})
 	}
 
-	if err := projection.blocksView.Insert(&view.Block{
+	if err := blocksView.Insert(&view.Block{
 		Height:                event.Block.Height,
 		Hash:                  event.Block.Hash,
 		Time:                  event.Block.Time,

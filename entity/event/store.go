@@ -2,7 +2,7 @@ package event
 
 type Store interface {
 	// GetLatestEventHeight returns latest event height, nil if no event is stored
-	GetLatestHeight() *int64
+	GetLatestHeight() (*int64, error)
 
 	GetAllByHeight(height int64) ([]Event, error)
 
