@@ -74,11 +74,12 @@ type simpleJSONEvent struct {
 func newSimpleJSONEvent() *simpleJSONEvent {
 	return &simpleJSONEvent{Key: "value"}
 }
-func (evt *simpleJSONEvent) Height() int64  { return 1 }
-func (evt *simpleJSONEvent) Name() string   { return simpleJSONEventName }
-func (evt *simpleJSONEvent) Version() int   { return simpleJSONEventVersion }
-func (evt *simpleJSONEvent) Id() string     { return "simple-json-event-id" }
-func (evt *simpleJSONEvent) String() string { return simpleJSONEventName }
+func (event *simpleJSONEvent) Height() int64  { return 1 }
+func (event *simpleJSONEvent) Name() string   { return simpleJSONEventName }
+func (event *simpleJSONEvent) Version() int   { return simpleJSONEventVersion }
+func (event *simpleJSONEvent) Id() string     { return "simple-json-event-id" }
+func (event *simpleJSONEvent) ToJSON() string { return event.Id() }
+func (event *simpleJSONEvent) String() string { return simpleJSONEventName }
 func decodeSimpleJSONEvent(eventBytes []byte) (event.Event, error) {
 	var event *simpleJSONEvent
 	jsonDecoder := json.NewDecoder(bytes.NewReader(eventBytes))
