@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/crypto-com/chainindex/infrastructure"
 	toml "github.com/crypto-com/chainindex/internal/filereader/toml"
 	"os"
@@ -31,14 +30,10 @@ func NewIndexServer(configPath string, config *CLIConfig) (*IndexServer, error) 
 
 // Run function runs the polling server to index the data from Tendermint
 func (s *IndexServer) Run() error {
-	fmt.Println("TODO: will start server here")
-
 	logger := infrastructure.NewZerologLoggerWithColor(os.Stderr)
-	blockFeed := NewPollingManager(logger, s.TendermintHTTPRPCURL, 340400)
-	err := blockFeed.Run()
-	if err != nil {
-		return fmt.Errorf("error start running block polling service: %v", err)
-	}
+
+	syncPollingManager := NewPollingManager(logger, s.TendermintHTTPRPCURL, 367000)
+	syncPollingManager.Run()
 
 	return nil
 }

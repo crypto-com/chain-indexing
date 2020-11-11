@@ -2,17 +2,23 @@ package main
 
 import (
 	"fmt"
+	"github.com/crypto-com/chainindex/infrastructure/feed"
 	chainfeed "github.com/crypto-com/chainindex/infrastructure/feed/chain"
 	"github.com/crypto-com/chainindex/infrastructure/notification"
 	"github.com/crypto-com/chainindex/infrastructure/tendermint"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
+	"time"
 )
+
+const SYNC_INTERVAL = 5 * time.Second
 
 type PollingManager struct {
 	client            tendermint.HTTPClient
 	currentSyncHeight int64
 	logger            applogger.Logger
 	Subject           *chainfeed.BlockSubject
+
+	interval time.Duration
 }
 
 // NewBlockPollingFeed creates a new feed with polling for latest block starts at a specific height
@@ -23,6 +29,8 @@ func NewPollingManager(logger applogger.Logger, tendermintRPCUrl string, startAt
 		client:            *tendermintClient,
 		currentSyncHeight: startAtHeight,
 		logger:            logger,
+
+		interval: SYNC_INTERVAL,
 	}
 }
 
@@ -60,15 +68,21 @@ func (pm *PollingManager) InitSubject() *chainfeed.BlockSubject {
 
 // Run starts the polling service for blocks
 // new BlockFeedSubject and add listeners
-func (pm *PollingManager) Run() error {
+func (pm *PollingManager) Run() {
 	pm.Subject = pm.InitSubject()
 
-	for latestHeight := range chainfeed.LatestBlockHeightGenerator(pm.client, pm.logger) {
-		// Notify all the listener
-		if err := pm.SyncBlocks(latestHeight); err != nil {
-			pm.logger.Error("Error syncing blocks")
-		}
-	}
+	// Kickoff the block height syncing feed
+	blockHeightFeed := feed.NewBlockHeightFeed(pm.client, pm.logger)
+	go blockHeightFeed.Run()
 
-	return nil
+	// Constantly gets the latest height and runs sync service to catch up to the height
+	for {
+		latestHeight := blockHeightFeed.GetLatestBlockHeight()
+
+		if err := pm.SyncBlocks(latestHeight); err != nil {
+			pm.logger.Errorf("error when the sync service catching to block %d", latestHeight)
+		}
+
+		<-time.After(pm.interval)
+	}
 }
