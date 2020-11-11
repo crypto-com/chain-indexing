@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/crypto-com/chainindex/infrastructure"
+	"github.com/crypto-com/chainindex/infrastructure/pg"
 	toml "github.com/crypto-com/chainindex/internal/filereader/toml"
 	"os"
 )
@@ -32,7 +33,12 @@ func NewIndexServer(configPath string, config *CLIConfig) (*IndexServer, error) 
 func (s *IndexServer) Run() error {
 	logger := infrastructure.NewZerologLoggerWithColor(os.Stderr)
 
-	syncPollingManager := NewPollingManager(logger, s.TendermintHTTPRPCURL, 367000)
+	// TODO: init pgConn
+	config := &pg.ConnConfig{
+	}
+	pgConn, _ := pg.NewPgxConn(config, logger)
+
+	syncPollingManager := NewPollingManager(logger, s.TendermintHTTPRPCURL, pgConn)
 	syncPollingManager.Run()
 
 	return nil
