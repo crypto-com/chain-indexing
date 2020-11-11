@@ -20,6 +20,6 @@ func (projection *FakeProjection) GetLastHandledEventHeight() (*int64, error) {
 func (projection *FakeProjection) OnInit() error {
 	return nil
 }
-func (projection *FakeProjection) HandleEvents(evts []entity_event.Event) error {
+func (projection *FakeProjection) HandleEvents(_ int64, _ []entity_event.Event) error {
 	return nil
 }

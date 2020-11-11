@@ -60,16 +60,17 @@ var _ = Describe("Manager", func() {
 			Expect(err).To(BeNil())
 
 			// Produce event to the event store
-			mockEventStore.On("GetAllByHeight", int64(1)).Return(
+			nextHeight := int64(1)
+			mockEventStore.On("GetAllByHeight", nextHeight).Return(
 				[]entity_event.Event{anyEvent, anyOtherEvent}, nil,
 			)
 			mockEventStore.On("GetLatestHeight").Return(primptr.Int64(int64(1)), nil)
 
 			// Define the assertion expectations
-			mockProjection.On("HandleEvents", mock.MatchedBy(func(events interface{}) bool {
+			mockProjection.On("HandleEvents", nextHeight, mock.MatchedBy(func(events interface{}) bool {
 				typedEvents := events.([]entity_event.Event)
 				// should only receive `anyEvent`
-				return len(typedEvents) == 1 && typedEvents[0].Name() == anyEvent.Name()
+				return typedEvents[0].Name() == anyEvent.Name()
 			})).Once().Return(nil)
 
 			// Run the manager
@@ -105,20 +106,22 @@ var _ = Describe("Manager", func() {
 			Expect(err).To(BeNil())
 
 			// Produce event to the event store
-			mockEventStore.On("GetAllByHeight", int64(1)).Return(
+			anyEventHeight := int64(1)
+			mockEventStore.On("GetAllByHeight", anyEventHeight).Return(
 				[]entity_event.Event{anyEvent}, nil,
 			)
-			mockEventStore.On("GetAllByHeight", int64(2)).Return(
+			anyOtherEventHeight := int64(2)
+			mockEventStore.On("GetAllByHeight", anyOtherEventHeight).Return(
 				[]entity_event.Event{anyOtherEvent}, nil,
 			)
 			mockEventStore.On("GetLatestHeight").Return(primptr.Int64(int64(2)), nil)
 
 			// Define the assertion expectations
-			mockProjection.On("HandleEvents", mock.MatchedBy(func(events interface{}) bool {
+			mockProjection.On("HandleEvents", anyEventHeight, mock.MatchedBy(func(events interface{}) bool {
 				typedEvents := events.([]entity_event.Event)
 				return len(typedEvents) == 1 && typedEvents[0].Name() == anyEvent.Name()
 			})).Once().Return(nil)
-			mockProjection.On("HandleEvents", mock.MatchedBy(func(events interface{}) bool {
+			mockProjection.On("HandleEvents", anyOtherEventHeight, mock.MatchedBy(func(events interface{}) bool {
 				typedEvents := events.([]entity_event.Event)
 				return len(typedEvents) == 1 && typedEvents[0].Name() == anyOtherEvent.Name()
 			})).Once().Return(nil)
@@ -168,17 +171,18 @@ var _ = Describe("Manager", func() {
 			Expect(err).To(BeNil())
 
 			// Produce event to the event store
-			mockEventStore.On("GetAllByHeight", int64(1)).Return(
+			nextHeight := int64(1)
+			mockEventStore.On("GetAllByHeight", nextHeight).Return(
 				[]entity_event.Event{anyEvent, anyOtherEvent}, nil,
 			)
-			mockEventStore.On("GetLatestHeight").Return(primptr.Int64(int64(1)), nil)
+			mockEventStore.On("GetLatestHeight").Return(primptr.Int64(nextHeight), nil)
 
 			// Define the assertion expectations
-			anyProjection.On("HandleEvents", mock.MatchedBy(func(events interface{}) bool {
+			anyProjection.On("HandleEvents", nextHeight, mock.MatchedBy(func(events interface{}) bool {
 				typedEvents := events.([]entity_event.Event)
 				return len(typedEvents) == 1 && typedEvents[0].Name() == anyEvent.Name()
 			})).Once().Return(nil)
-			anyOtherProjection.On("HandleEvents", mock.MatchedBy(func(events interface{}) bool {
+			anyOtherProjection.On("HandleEvents", nextHeight, mock.MatchedBy(func(events interface{}) bool {
 				typedEvents := events.([]entity_event.Event)
 				return len(typedEvents) == 1 && typedEvents[0].Name() == anyOtherEvent.Name()
 			})).Once().Return(nil)
@@ -216,13 +220,14 @@ var _ = Describe("Manager", func() {
 			Expect(err).To(BeNil())
 
 			// Produce event to the event store
-			mockEventStore.On("GetAllByHeight", int64(2)).Return(
+			nextHeight := int64(2)
+			mockEventStore.On("GetAllByHeight", nextHeight).Return(
 				[]entity_event.Event{anyEvent}, nil,
 			)
-			mockEventStore.On("GetLatestHeight").Return(primptr.Int64(int64(2)), nil)
+			mockEventStore.On("GetLatestHeight").Return(primptr.Int64(nextHeight), nil)
 
 			// Define the assertion expectations
-			mockProjection.On("HandleEvents", mock.MatchedBy(func(events interface{}) bool {
+			mockProjection.On("HandleEvents", nextHeight, mock.MatchedBy(func(events interface{}) bool {
 				typedEvents := events.([]entity_event.Event)
 				return len(typedEvents) == 1 && typedEvents[0].Name() == anyEvent.Name()
 			})).Once().Return(nil)

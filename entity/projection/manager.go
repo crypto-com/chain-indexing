@@ -67,11 +67,11 @@ func (manager *Manager) projectionRunner(projection Projection) {
 		<-waitToRetry(5 * time.Second)
 	}
 
-	var nextEventHeightToHandle int64
+	var nextEventHeight int64
 	if lastHandledEventHeight == nil {
-		nextEventHeightToHandle = 1
+		nextEventHeight = 1
 	} else {
-		nextEventHeightToHandle = *lastHandledEventHeight + 1
+		nextEventHeight = *lastHandledEventHeight + 1
 	}
 
 	for {
@@ -80,15 +80,15 @@ func (manager *Manager) projectionRunner(projection Projection) {
 			logger.Debugf("no event in in the system yet")
 			<-waitToRetry(5 * time.Second)
 		}
-		for ; nextEventHeightToHandle <= *latestEventHeight; nextEventHeightToHandle += 1 {
+		for ; nextEventHeight <= *latestEventHeight; nextEventHeight += 1 {
 			var err error
 
 			eventLogger := logger.WithFields(applogger.LogFields{
-				"height": nextEventHeightToHandle,
+				"height": nextEventHeight,
 			})
 
 			var eventsAtHeight []entity_event.Event
-			if eventsAtHeight, err = manager.eventStore.GetAllByHeight(nextEventHeightToHandle); err != nil {
+			if eventsAtHeight, err = manager.eventStore.GetAllByHeight(nextEventHeight); err != nil {
 				eventLogger.Errorf("error getting all events by height: %v", err)
 				<-waitToRetry(time.Second)
 				continue
@@ -108,7 +108,7 @@ func (manager *Manager) projectionRunner(projection Projection) {
 			eventLogger = eventLogger.WithFields(applogger.LogFields{
 				"events": events,
 			})
-			if err = projection.HandleEvents(events); err != nil {
+			if err = projection.HandleEvents(nextEventHeight, events); err != nil {
 				eventLogger.Errorf("error handling events: %v", err)
 				<-waitToRetry(time.Second)
 				continue

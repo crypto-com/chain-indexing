@@ -3,6 +3,7 @@ package projection_test
 import (
 	. "github.com/crypto-com/chainindex/appinterface/rdb/test"
 	entity_event "github.com/crypto-com/chainindex/entity/event"
+	. "github.com/crypto-com/chainindex/entity/event/test"
 	entity_projection "github.com/crypto-com/chainindex/entity/projection"
 	. "github.com/crypto-com/chainindex/internal/logger/test"
 	. "github.com/crypto-com/chainindex/test"
@@ -22,24 +23,26 @@ import (
 var _ = Describe("Block", func() {
 	It("should implement projection", func() {
 		fakeLogger := NewFakeLogger()
-		fakeRdbHandle := NewFakeRDbConn().ToHandle()
-		fakeBlocksView := view.NewBlocks(fakeRdbHandle)
-		var _ entity_projection.Projection = NewBlock(fakeLogger, fakeRdbHandle, fakeBlocksView)
+		fakeRdbConn := NewFakeRDbConn()
+		var _ entity_projection.Projection = NewBlock(fakeLogger, fakeRdbConn)
 	})
 
-	WithTestPgxConn(func(conn *pg.PgxConn, migrate *pg.Migrate) {
+	WithTestPgxConn(func(pgConn *pg.PgxConn, pgMigrate *pg.Migrate) {
 		BeforeEach(func() {
-			_ = migrate.Reset()
-			migrate.MustUp()
+			_ = pgMigrate.Reset()
+			pgMigrate.MustUp()
 		})
 
 		AfterEach(func() {
-			_ = migrate.Reset()
+			_ = pgMigrate.Reset()
 		})
 
 		It("should project Blocks view when event is BlockCreated", func() {
-			evt := usecase_event.NewBlockCreated(&usecase_model.Block{
-				Height:          int64(405947),
+			blocksView := view.NewBlocks(pgConn.ToHandle())
+
+			anyHeight := int64(405947)
+			event := usecase_event.NewBlockCreated(&usecase_model.Block{
+				Height:          anyHeight,
 				Hash:            "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
 				Time:            utctime.FromUnixNano(int64(1000000)),
 				AppHash:         "24474D86CBFA7E6328D473C17A9E46CD5A80FFE82A348A74844BF3E2BA2B3AF1",
@@ -64,21 +67,21 @@ var _ = Describe("Block", func() {
 			})
 
 			fakeLogger := NewFakeLogger()
-			rdbHandle := conn.ToHandle()
-			blocksView := view.NewBlocks(rdbHandle)
-			projection := NewBlock(fakeLogger, rdbHandle, blocksView)
-			err := projection.HandleEvents([]entity_event.Event{evt})
+			projection := NewBlock(fakeLogger, pgConn)
 
+			Expect(blocksView.Count()).To(Equal(0))
+
+			err := projection.HandleEvents(anyHeight, []entity_event.Event{event})
 			Expect(err).To(BeNil())
 			Expect(blocksView.Count()).To(Equal(1))
 
 			actual, err := blocksView.FindBy(&view.BlockIdentity{
-				MaybeHeight: primptr.Int64(int64(405947)),
+				MaybeHeight: primptr.Int64(anyHeight),
 			})
 
 			Expect(err).To(BeNil())
 			Expect(actual).To(Equal(&view.Block{
-				Height:           int64(405947),
+				Height:           anyHeight,
 				Hash:             "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
 				Time:             utctime.FromUnixNano(int64(1000000)),
 				AppHash:          "24474D86CBFA7E6328D473C17A9E46CD5A80FFE82A348A74844BF3E2BA2B3AF1",
@@ -98,6 +101,35 @@ var _ = Describe("Block", func() {
 					},
 				},
 			}))
+		})
+
+		It("should update projection last handled event height when there is no event at the height", func() {
+			anyHeight := int64(1)
+
+			fakeLogger := NewFakeLogger()
+			projection := NewBlock(fakeLogger, pgConn)
+
+			Expect(projection.GetLastHandledEventHeight()).To(BeNil())
+
+			err := projection.HandleEvents(anyHeight, []entity_event.Event{})
+			Expect(err).To(BeNil())
+
+			Expect(projection.GetLastHandledEventHeight()).To(Equal(primptr.Int64(anyHeight)))
+		})
+
+		It("should not persist projection nor last handled event height on handling error", func() {
+			blocksView := view.NewBlocks(pgConn.ToHandle())
+
+			anyHeight := int64(1)
+			event := NewFakeEvent()
+
+			fakeLogger := NewFakeLogger()
+			projection := NewBlock(fakeLogger, pgConn)
+			Expect(blocksView.Count()).To(Equal(0))
+
+			err := projection.HandleEvents(anyHeight, []entity_event.Event{event})
+			Expect(err).NotTo(BeNil())
+			Expect(blocksView.Count()).To(Equal(0))
 		})
 	})
 })
