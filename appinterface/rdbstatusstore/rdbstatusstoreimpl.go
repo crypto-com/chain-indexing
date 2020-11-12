@@ -35,7 +35,7 @@ func NewRDbStatusStoreImpl(handle *rdb.Handle) *RDbStatusStoreImpl {
 // InitLatestStatus creates one row for initial latest status
 func (impl *RDbStatusStoreImpl) InitLatestStatus() error {
 	// Initial latest status defines here
-	initialLastIndexedBlockHeight := 0
+	initialLastIndexedBlockHeight := 1
 
 	// Insert initial latest status to the row
 	sql, args, err := impl.rdbHandle.StmtBuilder.Insert(

@@ -16,11 +16,10 @@ import (
 const SYNC_INTERVAL = 5 * time.Second
 
 type PollingManager struct {
-	rdbConn               rdb.Conn
-	client                tendermint.HTTPClient
-	logger                applogger.Logger
-	currentIndexingHeight int64
-	Subject               *chainfeed.BlockSubject
+	rdbConn rdb.Conn
+	client  tendermint.HTTPClient
+	logger  applogger.Logger
+	Subject *chainfeed.BlockSubject
 
 	interval time.Duration
 }
@@ -38,16 +37,6 @@ func NewPollingManager(logger applogger.Logger, tendermintRPCUrl string, rdbConn
 	}
 }
 
-func (pm *PollingManager) SetCurrentIndexingHeight() error {
-	var err error
-	statusStore := rdbstatusstore.NewRDbStatusStoreImpl(pm.rdbConn.ToHandle())
-	pm.currentIndexingHeight, err = statusStore.GetLastIndexedBlockHeight()
-	if err != nil {
-		return fmt.Errorf("error running GetLastIndexedBlockHeight %v", err)
-	}
-	return nil
-}
-
 func (pm *PollingManager) UpdateIndexedHeight(handle *rdb.Handle, nextHeight int64) error {
 	statusStore := rdbstatusstore.NewRDbStatusStoreImpl(handle)
 	err := statusStore.UpdateLastIndexedBlockHeight(nextHeight)
@@ -59,22 +48,28 @@ func (pm *PollingManager) UpdateIndexedHeight(handle *rdb.Handle, nextHeight int
 
 // SyncBlocks makes request to tendermint, create and dispatch notifications
 func (pm *PollingManager) SyncBlocks(latestHeight int64) error {
-	for pm.currentIndexingHeight < latestHeight {
-		// TODO: begin DB transaction
-		// Request tendermint RPC
-		block, rawBlock, err := pm.client.Block(pm.currentIndexingHeight)
+	statusStore := rdbstatusstore.NewRDbStatusStoreImpl(pm.rdbConn.ToHandle())
+	currentIndexingHeight, err := statusStore.GetLastIndexedBlockHeight()
+	if err != nil {
+		return fmt.Errorf("error running GetLastIndexedBlockHeight %v", err)
+	}
+
+	for currentIndexingHeight < latestHeight {
+		// Request tendermint RPC APIs
+		block, rawBlock, err := pm.client.Block(currentIndexingHeight)
 		if err != nil {
-			return fmt.Errorf("error getting chain's block at %d: %v", pm.currentIndexingHeight, err)
+			return fmt.Errorf("error getting chain's block at %d: %v", currentIndexingHeight, err)
 		}
 
 		// Create new block notification and notify subscribers
-		notif := notification.NewBlockNotification(pm.currentIndexingHeight, block, rawBlock)
-		pm.Subject.Notify(notif)
+		notification := notification.NewBlockNotification(currentIndexingHeight, block, rawBlock)
+		pm.Subject.Notify(notification)
 
-		// Current block indexing done, update db and sync next
-		pm.UpdateIndexedHeight(pm.rdbConn.ToHandle(), pm.currentIndexingHeight + 1)
-		pm.SetCurrentIndexingHeight()
+		// Current block indexing done, update db and sync next height
+		// if there is any error before, currentIndexingHeight won't be incremented and will re-try
 		pm.logger.Infof("block height %d synced and events produced", block.Height)
+		currentIndexingHeight += 1
+		pm.UpdateIndexedHeight(pm.rdbConn.ToHandle(), currentIndexingHeight)
 	}
 	return nil
 }
@@ -105,7 +100,7 @@ func (pm *PollingManager) Run() {
 		latestHeight := blockHeightFeed.GetLatestBlockHeight()
 
 		if err := pm.SyncBlocks(latestHeight); err != nil {
-			pm.logger.Errorf("error when the sync service catching to block %d", latestHeight)
+			pm.logger.Errorf("error when the sync service catching to block %d, %v", latestHeight, err)
 		}
 
 		<-time.After(pm.interval)
