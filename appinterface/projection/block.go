@@ -3,12 +3,13 @@ package projection
 import (
 	"fmt"
 
+	"github.com/crypto-com/chainindex/usecase/event/blockcreated"
+
 	"github.com/crypto-com/chainindex/appinterface/projection/rdbbase"
 	"github.com/crypto-com/chainindex/appinterface/projection/view"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
 	entity_event "github.com/crypto-com/chainindex/entity/event"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
-	usecase_event "github.com/crypto-com/chainindex/usecase/event"
 )
 
 // TODO: Listen to council node related events and project council node
@@ -29,7 +30,7 @@ func NewBlock(logger applogger.Logger, rdbConn rdb.Conn) *Block {
 }
 
 func (_ *Block) GetEventsToListen() []string {
-	return []string{usecase_event.BLOCK_CREATED}
+	return []string{blockcreated.NAME}
 }
 
 func (projection *Block) OnInit() error {
@@ -48,7 +49,7 @@ func (projection *Block) HandleEvents(height int64, events []entity_event.Event)
 	blocksView := view.NewBlocks(rdbTxHandle)
 
 	for _, event := range events {
-		if blockCreatedEvent, ok := event.(*usecase_event.BlockCreated); ok {
+		if blockCreatedEvent, ok := event.(*blockcreated.BlockCreated); ok {
 			if err = projection.handleBlockCreatedEvent(blocksView, blockCreatedEvent); err != nil {
 				_ = rdbTx.Rollback()
 				return fmt.Errorf("error handling BlockCreatedEvent: %v", err)
@@ -70,7 +71,7 @@ func (projection *Block) HandleEvents(height int64, events []entity_event.Event)
 	return nil
 }
 
-func (projection *Block) handleBlockCreatedEvent(blocksView *view.Blocks, event *usecase_event.BlockCreated) error {
+func (projection *Block) handleBlockCreatedEvent(blocksView *view.Blocks, event *blockcreated.BlockCreated) error {
 	committedCouncilNodes := make([]view.BlockCommittedCouncilNode, 0)
 	for _, signature := range event.Block.Signatures {
 		committedCouncilNodes = append(committedCouncilNodes, view.BlockCommittedCouncilNode{

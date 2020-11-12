@@ -6,5 +6,6 @@ import (
 
 type Client interface {
 	Block(height int64) (*usecase_model.Block, *usecase_model.RawBlock, error)
+	BlockResults(height int64) (*usecase_model.BlockResults, error)
 	LatestBlockHeight() (int64, error)
 }

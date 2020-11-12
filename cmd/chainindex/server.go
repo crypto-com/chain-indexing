@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/crypto-com/chainindex/infrastructure"
 	"github.com/crypto-com/chainindex/infrastructure/pg"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
-	"os"
 	"time"
 )
 
@@ -77,8 +78,8 @@ func SetupRdbConn(config *FileConfig, logger applogger.Logger) (*pg.PgxConn, err
 
 // Run function runs the polling server to index the data from Tendermint
 func (s *IndexServer) Run() error {
-	syncPollingManager := NewPollingManager(s.logger, s.TendermintHTTPRPCURL, s.RdbConn)
-	syncPollingManager.Run()
+	syncManager := NewSyncManager(s.logger, s.TendermintHTTPRPCURL, s.RdbConn)
+	syncManager.Run()
 
 	return nil
 }
