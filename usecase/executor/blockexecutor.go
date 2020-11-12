@@ -2,12 +2,13 @@ package executor
 
 import (
 	"fmt"
-	"os"
-
+	appevent "github.com/crypto-com/chainindex/appinterface/event"
+	"github.com/crypto-com/chainindex/appinterface/rdb"
 	"github.com/crypto-com/chainindex/entity/command"
 	"github.com/crypto-com/chainindex/entity/event"
 	"github.com/crypto-com/chainindex/infrastructure"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
+	"os"
 )
 
 type BlockExecutor struct {
@@ -30,25 +31,27 @@ func NewBlockExecutor(Hegiht int64) *BlockExecutor {
 	}
 }
 
-func (ce *BlockExecutor) AddAllCommands(commands []command.Command) {
-	ce.Commands = append(ce.Commands, commands...)
+func (exec *BlockExecutor) AddAllCommands(commands []command.Command) {
+	exec.Commands = append(exec.Commands, commands...)
 }
 
-func (ce *BlockExecutor) ExecAllComands() error {
-	for _, command := range ce.Commands {
-		event, error := command.Exec()
-		if error != nil {
-			ce.logger.Error("Error generating event")
-			return error
+func (exec *BlockExecutor) ExecAllCommands() error {
+	for _, command := range exec.Commands {
+		event, err := command.Exec()
+		if err != nil {
+			exec.logger.Errorf("Error generating event", err)
+			return err
 		}
-		ce.Events = append(ce.Events, event)
+		exec.Events = append(exec.Events, event)
 	}
 	return nil
 }
 
-func (ce *BlockExecutor) StoreAllEvents() error {
-	// TODO: store batch events
-	fmt.Println("\t\tTODO: store all events number", len(ce.Events))
-
+func (exec *BlockExecutor) StoreAllEvents(handle *rdb.Handle) error {
+	// TODO: tx rollback when has error
+	eventStore := appevent.NewRDbStore(handle)
+	if err := eventStore.InsertAll(exec.Events); err != nil {
+		return fmt.Errorf("executor error storing all events for height %d %v", exec.Height, err)
+	}
 	return nil
 }

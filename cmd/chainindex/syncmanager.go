@@ -36,7 +36,7 @@ func NewSyncManager(logger applogger.Logger, tendermintRPCUrl string, rdbConn rd
 	}
 }
 
-func (manager *SyncManager) UpdateIndexedHeight(handle *rdb.Handle, nextHeight int64) error {
+func (manager *SyncManager) UpdateIndexedHeight(nextHeight int64, handle *rdb.Handle) error {
 	statusStore := rdbstatusstore.NewRDbStatusStoreImpl(handle)
 	err := statusStore.UpdateLastIndexedBlockHeight(nextHeight)
 	if err != nil {
@@ -48,10 +48,13 @@ func (manager *SyncManager) UpdateIndexedHeight(handle *rdb.Handle, nextHeight i
 // SyncBlocks makes request to tendermint, create and dispatch notifications
 func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
 	statusStore := rdbstatusstore.NewRDbStatusStoreImpl(manager.rdbConn.ToHandle())
-	currentIndexingHeight, err := statusStore.GetLastIndexedBlockHeight()
+	lastIndexedHeight, err := statusStore.GetLastIndexedBlockHeight()
 	if err != nil {
 		return fmt.Errorf("error running GetLastIndexedBlockHeight %v", err)
 	}
+
+	// Sync next height to avoid duplication
+	currentIndexingHeight := lastIndexedHeight + 1
 
 	for currentIndexingHeight < latestHeight {
 		// Request tendermint RPC
@@ -69,13 +72,18 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
 		notif := notification.NewBlockNotification(
 			currentIndexingHeight, block, rawBlock, blockResults,
 		)
-		manager.Subject.Notify(notif)
+		manager.Subject.Notify(notif, manager.rdbConn.ToHandle())
 
 		// Current block indexing done, update db and sync next height
-		// if there is any error before, currentIndexingHeight won't be incremented and will re-try
 		manager.logger.Infof("block height %d synced and events produced", block.Height)
+		err = manager.UpdateIndexedHeight(currentIndexingHeight, manager.rdbConn.ToHandle())
+		if err != nil {
+			return fmt.Errorf("error updating last indexed height for height %d: %v", currentIndexingHeight, err)
+		}
+
+		// If there is any error before, short-circuit return in the error handling
+		// while the local currentIndexingHeight won't be incremented and will be retried later
 		currentIndexingHeight += 1
-		manager.UpdateIndexedHeight(manager.rdbConn.ToHandle(), currentIndexingHeight)
 	}
 	return nil
 }

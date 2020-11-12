@@ -67,19 +67,22 @@ func SetupRdbConn(config *FileConfig, logger applogger.Logger) (*pg.PgxConn, err
 			MaybeHealthCheckPeriod: &healthCheckInterval,
 		}, logger)
 
-		if pgxConnPool == nil {
-			logger.Debug("Cannot setup connection to database, will retry in 5 seconds")
+		if err != nil {
+			logger.Errorf("Cannot setup connection to database, will retry in 5 seconds, error %v", err)
 			<-time.After(5 * time.Second)
 		}
 	}
 
+	logger.Info("Successfully setup connection to database, start the indexing service now")
 	return pgxConnPool, nil
 }
 
 // Run function runs the polling server to index the data from Tendermint
 func (s *IndexServer) Run() error {
 	syncManager := NewSyncManager(s.logger, s.TendermintHTTPRPCURL, s.RdbConn)
-	syncManager.Run()
+	if err := syncManager.Run(); err != nil {
+		return fmt.Errorf("error running sync manager %v", err)
+	}
 
 	return nil
 }
