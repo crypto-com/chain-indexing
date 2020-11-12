@@ -6,17 +6,21 @@ import (
 	usecase_model "github.com/crypto-com/chainindex/usecase/model"
 )
 
-func ParseBlockToCommands(block *usecase_model.Block, rawBlock *usecase_model.RawBlock) ([]entity_command.Command, error) {
+func ParseBlockToCommands(
+	block *usecase_model.Block,
+	rawBlock *usecase_model.RawBlock,
+	_ *usecase_model.BlockResults,
+) ([]entity_command.Command, error) {
 	var err error
-	var cmds []entity_command.Command
+	var commands []entity_command.Command
 
 	createRawBlockCommand := ParseCreateRawBlockCommand(rawBlock)
-	cmds = append(cmds, &createRawBlockCommand)
+	commands = append(commands, &createRawBlockCommand)
 
 	createBlockCommand := ParseCreateBlockCommand(block)
-	cmds = append(cmds, &createBlockCommand)
+	commands = append(commands, &createBlockCommand)
 
-	return cmds, err
+	return commands, err
 }
 
 func ParseCreateRawBlockCommand(rawBlock *usecase_model.RawBlock) usecase_command.CreateRawBlock {
