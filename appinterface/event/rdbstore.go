@@ -110,6 +110,10 @@ func (store *RDbStore) GetAllByHeight(height int64) ([]entity_event.Event, error
 }
 
 func (store *RDbStore) Insert(event entity_event.Event) error {
+	encodedEvent, err := event.ToJSON()
+	if err != nil {
+		return fmt.Errorf("error encoding event to json: %v", err)
+	}
 	sql, args, err := store.rdbHandle.StmtBuilder.Insert(
 		store.table,
 	).Columns(
@@ -119,7 +123,7 @@ func (store *RDbStore) Insert(event entity_event.Event) error {
 		event.Height(),
 		event.Name(),
 		event.Version(),
-		event.ToJSON(),
+		encodedEvent,
 	).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building event insertion SQL: %v", err)

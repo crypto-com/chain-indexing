@@ -37,7 +37,7 @@ func (client *HTTPClient) Block(height int64) (*usecase_model.Block, *usecase_mo
 	}
 	defer rawRespBody.Close()
 
-	block, rawBlock, err := parseBlockResp(rawRespBody)
+	block, rawBlock, err := ParseBlockResp(rawRespBody)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -54,7 +54,7 @@ func (client *HTTPClient) BlockResults(height int64) (*usecase_model.BlockResult
 	}
 	defer rawRespBody.Close()
 
-	blockResults, err := parseBlockResultsResp(rawRespBody)
+	blockResults, err := ParseBlockResultsResp(rawRespBody)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (client *HTTPClient) LatestBlockHeight() (int64, error) {
 	}
 	defer rawRespBody.Close()
 
-	block, _, err := parseBlockResp(rawRespBody)
+	block, _, err := ParseBlockResp(rawRespBody)
 	if err != nil {
 		return int64(0), fmt.Errorf("error parsing /block response: %v", err)
 	}

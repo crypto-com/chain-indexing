@@ -1,25 +1,45 @@
 package event
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 // Base is a JSON-compatible rdbbase event with sequence and UUID support. It is not a must to
 // use this as rdbbase event but to implement your own one rdbbase on your design
 type Base struct {
-	BlockHeight int64  `json:"height"`
-	UUID        string `json:"id"`
+	EventName    string `json:"name"`
+	EventVersion int    `json:"version"`
+	BlockHeight  int64  `json:"height"`
+	UUID         string `json:"id"`
 }
 
-func NewBase(height int64) Base {
+func NewBase(params BaseParams) Base {
 	return Base{
-		BlockHeight: height,
-		UUID:        uuid.New().String(),
+		EventName:    params.Name,
+		EventVersion: params.Version,
+		BlockHeight:  params.BlockHeight,
+		UUID:         uuid.New().String(),
 	}
 }
 
-func (evt Base) Height() int64 {
-	return evt.BlockHeight
+func (event *Base) Name() string {
+	return event.EventName
 }
 
-func (evt Base) Id() string {
-	return evt.UUID
+func (event *Base) Version() int {
+	return event.EventVersion
+}
+
+func (event *Base) Height() int64 {
+	return event.BlockHeight
+}
+
+func (event *Base) Id() string {
+	return event.UUID
+}
+
+type BaseParams struct {
+	Name        string
+	Version     int
+	BlockHeight int64
 }

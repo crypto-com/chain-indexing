@@ -17,13 +17,13 @@ type BlockExecutor struct {
 	logger   applogger.Logger
 }
 
-func NewBlockExecutor(Hegiht int64) *BlockExecutor {
+func NewBlockExecutor(height int64) *BlockExecutor {
 	commands := make([]command.Command, 0)
 	events := make([]event.Event, 0)
 	logger := infrastructure.NewZerologLoggerWithColor(os.Stdout)
 
 	return &BlockExecutor{
-		Hegiht,
+		height,
 		commands,
 		events,
 		logger,
@@ -34,7 +34,7 @@ func (ce *BlockExecutor) AddAllCommands(commands []command.Command) {
 	ce.Commands = append(ce.Commands, commands...)
 }
 
-func (ce *BlockExecutor) ExecAllComands() error {
+func (ce *BlockExecutor) ExecAllCommands() error {
 	for _, command := range ce.Commands {
 		event, error := command.Exec()
 		if error != nil {

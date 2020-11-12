@@ -1,4 +1,4 @@
-package rawblockcreated_test
+package createrawblock_test
 
 import (
 	"testing"
@@ -9,5 +9,5 @@ import (
 
 func TestRawBlockCreated(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "RawBlockCreated Suite")
+	RunSpecs(t, "RawBlockCreatedEvent Suite")
 }

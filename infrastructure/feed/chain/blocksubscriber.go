@@ -3,9 +3,9 @@ package chain
 import (
 	"fmt"
 
-	"github.com/crypto-com/chainindex/infrastructure/feed/chain/parser"
 	"github.com/crypto-com/chainindex/infrastructure/notification"
 	"github.com/crypto-com/chainindex/usecase/executor"
+	"github.com/crypto-com/chainindex/usecase/parser"
 )
 
 type BlockSubscriber struct {
@@ -30,7 +30,7 @@ func (bs *BlockSubscriber) OnNotification(n *notification.BlockNotification) err
 	executor.AddAllCommands(commands)
 
 	// generate all events, make them persistent
-	if err := executor.ExecAllComands(); err != nil {
+	if err := executor.ExecAllCommands(); err != nil {
 		return fmt.Errorf("error generating all events%v", err)
 	}
 	if err := executor.StoreAllEvents(); err != nil {

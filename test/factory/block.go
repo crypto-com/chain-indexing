@@ -82,6 +82,10 @@ func RandomCommitSignature() string {
 	return base64.StdEncoding.EncodeToString(randomHex(20))
 }
 
+func RandomTxHash() string {
+	return strings.ToUpper(hex.EncodeToString(randomHex(32)))
+}
+
 func randomHex(n int) []byte {
 	placeholder := make([]byte, n)
 	_, err := rand.Read(placeholder)
