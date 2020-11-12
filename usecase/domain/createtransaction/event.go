@@ -3,6 +3,8 @@ package createtransaction
 import (
 	"bytes"
 
+	"github.com/crypto-com/chainindex/usecase"
+
 	"github.com/luci/go-render/render"
 
 	entity_event "github.com/crypto-com/chainindex/entity/event"
@@ -14,12 +16,13 @@ const EVENT_NAME = "TransactionCreated"
 type TransactionCreated struct {
 	entity_event.Base
 
-	TxHash    string `json:"txHash"`
-	Code      int    `json:"code"`
-	Log       string `json:"log"`
-	MsgCount  int    `json:"msgCount"`
-	GasWanted string `json:"gasWanted"`
-	GasUsed   string `json:"gasUsed"`
+	TxHash    string       `json:"txHash"`
+	Code      int          `json:"code"`
+	Log       string       `json:"log"`
+	MsgCount  int          `json:"msgCount"`
+	Fee       usecase.Coin `json:"fee"`
+	GasWanted string       `json:"gasWanted"`
+	GasUsed   string       `json:"gasUsed"`
 }
 
 func NewEvent(blockHeight int64, params Params) *TransactionCreated {
@@ -34,6 +37,7 @@ func NewEvent(blockHeight int64, params Params) *TransactionCreated {
 		Code:      params.Code,
 		Log:       params.Log,
 		MsgCount:  params.MsgCount,
+		Fee:       params.Fee,
 		GasWanted: params.GasWanted,
 		GasUsed:   params.GasUsed,
 	}
@@ -44,6 +48,7 @@ type Params struct {
 	Code      int
 	Log       string
 	MsgCount  int
+	Fee       usecase.Coin
 	GasWanted string
 	GasUsed   string
 }

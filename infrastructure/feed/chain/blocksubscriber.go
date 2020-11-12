@@ -9,21 +9,24 @@ import (
 )
 
 type BlockSubscriber struct {
-	Id int64
+	moduleAccounts *parser.ModuleAccounts
 }
 
-func NewBlockSubscriber(id int64) *BlockSubscriber {
+func NewBlockSubscriber(moduleAccounts *parser.ModuleAccounts) *BlockSubscriber {
 	return &BlockSubscriber{
-		Id: id,
+		moduleAccounts,
 	}
 }
 
-func (bs *BlockSubscriber) OnNotification(n *notification.BlockNotification) error {
-	fmt.Println("processor", bs.Id, "got notification", n.Height)
-
+func (subscriber *BlockSubscriber) OnNotification(n *notification.BlockNotification) error {
 	// create an executor instance for current height
 	executor := executor.NewBlockExecutor(n.Height)
-	commands, err := parser.ParseBlockToCommands(n.Block, n.RawBlock, n.BlockResults)
+	commands, err := parser.ParseBlockToCommands(
+		subscriber.moduleAccounts,
+		n.Block,
+		n.RawBlock,
+		n.BlockResults,
+	)
 	if err != nil {
 		return fmt.Errorf("error parsing block data to commands %v", err)
 	}

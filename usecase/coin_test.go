@@ -1,4 +1,4 @@
-package entity_test
+package usecase_test
 
 import (
 	"encoding/json"

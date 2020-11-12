@@ -10,6 +10,7 @@ import (
 )
 
 func ParseBlockToCommands(
+	moduleAccounts *ModuleAccounts,
 	block *usecase_model.Block,
 	rawBlock *usecase_model.RawBlock,
 	blockResults *usecase_model.BlockResults,
@@ -24,7 +25,7 @@ func ParseBlockToCommands(
 	commands = append(commands, createBlockCommand)
 
 	if len(blockResults.TxsResults) > 0 {
-		transactionCommands, err := ParseTransactionCommands(block, blockResults)
+		transactionCommands, err := ParseTransactionCommands(moduleAccounts, block, blockResults)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing transaction commands: %v", err)
 		}

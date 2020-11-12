@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/crypto-com/chainindex/usecase/parser"
+
 	chainfeed "github.com/crypto-com/chainindex/infrastructure/feed/chain"
 	"github.com/crypto-com/chainindex/infrastructure/notification"
 	"github.com/crypto-com/chainindex/infrastructure/tendermint"
@@ -17,13 +19,20 @@ type SyncManager struct {
 	logger  applogger.Logger
 	Subject *chainfeed.BlockSubject
 
+	moduleAccounts *parser.ModuleAccounts
+
 	currentSyncHeight int64
 
 	pollingInterval time.Duration
 }
 
 // NewSyncManager creates a new feed with polling for latest block starts at a specific height
-func NewSyncManager(logger applogger.Logger, tendermintRPCUrl string, startAtHeight int64) *SyncManager {
+func NewSyncManager(
+	logger applogger.Logger,
+	tendermintRPCUrl string,
+	startAtHeight int64,
+	moduleAccounts *parser.ModuleAccounts,
+) *SyncManager {
 	tendermintClient := tendermint.NewHTTPClient(tendermintRPCUrl)
 
 	return &SyncManager{
@@ -31,6 +40,8 @@ func NewSyncManager(logger applogger.Logger, tendermintRPCUrl string, startAtHei
 		logger: logger.WithFields(applogger.LogFields{
 			"module": "SyncManager",
 		}),
+
+		moduleAccounts: moduleAccounts,
 
 		currentSyncHeight: startAtHeight,
 
@@ -69,7 +80,7 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
 func (manager *SyncManager) InitSubject() *chainfeed.BlockSubject {
 	// Currently only the chain processor subscriber
 	// add more subscriber base on the need
-	chainProcessor := chainfeed.NewBlockSubscriber(0)
+	chainProcessor := chainfeed.NewBlockSubscriber(manager.moduleAccounts)
 
 	blockSubject := chainfeed.NewBlockSubject()
 	blockSubject.Attach(chainProcessor)

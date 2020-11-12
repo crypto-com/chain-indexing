@@ -1,4 +1,4 @@
-package entity
+package usecase
 
 import (
 	"errors"
@@ -82,6 +82,18 @@ func NewCoinFromInt(value int64) (Coin, error) {
 		return Coin{}, err
 	}
 	return coin, nil
+}
+
+// MustNewCoinFromString() accepts and parse a string to Coin and returns it.
+// Any error would panic immediately
+func MustNewCoinFromString(value string) Coin {
+	var err error
+
+	coin, err := NewCoinFromString(value)
+	if err != nil {
+		panic(err)
+	}
+	return coin
 }
 
 // NewCoinFromString() accepts and parse a string to Coin and returns it
@@ -185,6 +197,16 @@ func (coin *Coin) ToBigInt() *big.Int {
 }
 
 func (coin Coin) MarshalJSON() ([]byte, error) {
+	if coin.value == nil {
+		return []byte("null"), nil
+	}
+
+	s := coin.String()
+
+	return []byte("\"" + s + "\""), nil
+}
+
+func (coin Coin) UnmarshalJSON(encoded []byte) ([]byte, error) {
 	if coin.value == nil {
 		return []byte("null"), nil
 	}

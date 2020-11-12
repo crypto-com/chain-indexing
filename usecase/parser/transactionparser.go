@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/crypto-com/chainindex/usecase"
+
 	jsoniter "github.com/json-iterator/go"
 
 	"github.com/crypto-com/chainindex/entity/command"
@@ -14,7 +16,11 @@ import (
 	"github.com/crypto-com/chainindex/usecase/model"
 )
 
-func ParseTransactionCommands(block *model.Block, blockResults *model.BlockResults) ([]command.Command, error) {
+func ParseTransactionCommands(
+	moduleAccounts *ModuleAccounts,
+	block *model.Block,
+	blockResults *model.BlockResults,
+) ([]command.Command, error) {
 	blockHeight := blockResults.Height
 	cmds := make([]command.Command, 0, len(blockResults.TxsResults))
 	for i, txsResult := range blockResults.TxsResults {
@@ -29,12 +35,35 @@ func ParseTransactionCommands(block *model.Block, blockResults *model.BlockResul
 			Code:      txsResult.Code,
 			Log:       log,
 			MsgCount:  len(txsResult.Log),
+			Fee:       getTxFee(moduleAccounts.FeeCollector, txsResult),
 			GasWanted: txsResult.GasWanted,
 			GasUsed:   txsResult.GasUsed,
 		}))
 	}
 
 	return cmds, nil
+}
+
+func getTxFee(feeCollectorAddress string, txsResult model.BlockResultsTxsResult) usecase.Coin {
+	for _, event := range txsResult.Events {
+		if event.Type == "transfer" {
+			isFeeEvent := false
+			var amount string
+			for _, attribute := range event.Attributes {
+				if attribute.Key == "recipient" && attribute.Value == feeCollectorAddress {
+					isFeeEvent = true
+				} else if attribute.Key == "amount" {
+					amount = attribute.Value
+				}
+			}
+
+			if isFeeEvent {
+				return usecase.MustNewCoinFromString(TrimAmountDenom(amount))
+			}
+		}
+	}
+
+	return usecase.MustNewCoinFromInt(int64(0))
 }
 
 func TxHash(base64EncodedTxHex string) string {

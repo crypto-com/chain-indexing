@@ -3,6 +3,8 @@ package parser_test
 import (
 	"strings"
 
+	"github.com/crypto-com/chainindex/usecase"
+
 	"github.com/crypto-com/chainindex/usecase/domain/createtransaction"
 
 	"github.com/crypto-com/chainindex/entity/command"
@@ -26,11 +28,15 @@ var _ = Describe("TransactionParser", func() {
 	})
 
 	Describe("ParseTransactionCommands", func() {
-		It("should parse Transaction commands correctly", func() {
+		It("should parse Transaction commands when there is two Msg in one transaction", func() {
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.ONE_TX_TWO_MSG_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.ONE_TX_TWO_MSG_BLOCK_RESULTS_RESP))
 
-			cmds, err := parser.ParseTransactionCommands(block, blockResults)
+			cmds, err := parser.ParseTransactionCommands(
+				usecase_parser_test.FakeModuleAccounts,
+				block,
+				blockResults,
+			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			expectedBlockHeight := int64(343358)
@@ -41,8 +47,35 @@ var _ = Describe("TransactionParser", func() {
 					Code:      0,
 					Log:       "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"sender\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"amount\",\"value\":\"1000basetcro\"}]}]},{\"msgIndex\":1,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"sender\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"amount\",\"value\":\"2000basetcro\"}]}]}]",
 					MsgCount:  2,
+					Fee:       usecase.MustNewCoinFromInt(int64(0)),
 					GasWanted: "200000",
 					GasUsed:   "80148",
+				},
+			)}))
+		})
+
+		It("should parse Transaction commands when there is transaction fee", func() {
+			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_WITH_FEE_BLOCK_RESP))
+			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_WITH_FEE_BLOCK_RESULTS_RESP))
+
+			cmds, err := parser.ParseTransactionCommands(
+				usecase_parser_test.FakeModuleAccounts,
+				block,
+				blockResults,
+			)
+			Expect(err).To(BeNil())
+			Expect(cmds).To(HaveLen(1))
+			expectedBlockHeight := int64(377673)
+			Expect(cmds).To(Equal([]command.Command{createtransaction.NewCommand(
+				expectedBlockHeight,
+				createtransaction.Params{
+					TxHash:    "2A2A64A310B3D0E84C9831F4353E188A6E63BF451975C859DF40C54047AC6324",
+					Code:      0,
+					Log:       "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"sender\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"amount\",\"value\":\"1000000000basetcro\"}]}]}]",
+					MsgCount:  1,
+					Fee:       usecase.MustNewCoinFromString("8000000"),
+					GasWanted: "80000000",
+					GasUsed:   "62582",
 				},
 			)}))
 		})
