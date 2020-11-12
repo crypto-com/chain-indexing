@@ -2,7 +2,7 @@ package command
 
 import (
 	entity_event "github.com/crypto-com/chainindex/entity/event"
-	usecase_event "github.com/crypto-com/chainindex/usecase/event"
+	"github.com/crypto-com/chainindex/usecase/event/blockcreated"
 	usecase_model "github.com/crypto-com/chainindex/usecase/model"
 )
 
@@ -25,6 +25,6 @@ func (_ *CreateBlock) Version() int {
 }
 
 func (cmd *CreateBlock) Exec() (entity_event.Event, error) {
-	evt := usecase_event.NewBlockCreated(cmd.block)
+	evt := blockcreated.New(cmd.block)
 	return evt, nil
 }

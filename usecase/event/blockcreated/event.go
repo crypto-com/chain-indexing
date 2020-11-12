@@ -1,6 +1,7 @@
-package event
+package blockcreated
 
 import (
+	"bytes"
 	"fmt"
 
 	jsoniter "github.com/json-iterator/go"
@@ -10,7 +11,7 @@ import (
 	usecase_model "github.com/crypto-com/chainindex/usecase/model"
 )
 
-const BLOCK_CREATED = "BlockCreated"
+const NAME = "BlockCreated"
 
 type BlockCreated struct {
 	entity_event.Base
@@ -18,7 +19,7 @@ type BlockCreated struct {
 	Block *usecase_model.Block `json:"block"`
 }
 
-func NewBlockCreated(block *usecase_model.Block) *BlockCreated {
+func New(block *usecase_model.Block) *BlockCreated {
 	return &BlockCreated{
 		entity_event.NewBase(block.Height),
 
@@ -26,11 +27,11 @@ func NewBlockCreated(block *usecase_model.Block) *BlockCreated {
 	}
 }
 
-func (event *BlockCreated) Name() string {
-	return BLOCK_CREATED
+func (_ *BlockCreated) Name() string {
+	return NAME
 }
 
-func (event *BlockCreated) Version() int {
+func (_ *BlockCreated) Version() int {
 	return 1
 }
 
@@ -43,6 +44,18 @@ func (event *BlockCreated) ToJSON() string {
 	return string(encoded)
 }
 
-func (evt *BlockCreated) String() string {
-	return render.Render(evt)
+func (event *BlockCreated) String() string {
+	return render.Render(event)
+}
+
+func Decode(encoded []byte) (entity_event.Event, error) {
+	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
+	jsonDecoder.DisallowUnknownFields()
+
+	var event *BlockCreated
+	if err := jsonDecoder.Decode(&event); err != nil {
+		return nil, err
+	}
+
+	return event, nil
 }

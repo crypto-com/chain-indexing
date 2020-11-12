@@ -101,6 +101,12 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 	return rawResp.Body, nil
 }
 
+type RawBlockResp struct {
+	Jsonrpc string                 `json:"jsonrpc"`
+	ID      int                    `json:"id"`
+	Result  usecase_model.RawBlock `json:"result"`
+}
+
 type RawBlockResultsResp struct {
 	Jsonrpc string          `json:"jsonrpc"`
 	ID      int             `json:"id"`

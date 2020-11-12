@@ -17,7 +17,7 @@ import (
 func parseBlockResp(rawRespReader io.Reader) (*model.Block, *model.RawBlock, error) {
 	var err error
 
-	var resp model.RawBlock
+	var resp RawBlockResp
 	jsonDecoder := jsoniter.NewDecoder(rawRespReader)
 	jsonDecoder.DisallowUnknownFields()
 	if err = jsonDecoder.Decode(&resp); err != nil {
@@ -37,7 +37,7 @@ func parseBlockResp(rawRespReader io.Reader) (*model.Block, *model.RawBlock, err
 		ProposerAddress: resp.Result.Block.Header.ProposerAddress,
 		Txs:             resp.Result.Block.Data.Txs,
 		Signatures:      parseBlockSignatures(resp.Result.Block.LastCommit.Signatures),
-	}, &resp, nil
+	}, &resp.Result, nil
 }
 
 func parseBlockSignatures(rawSignatures []model.RawBlockSignature) []model.BlockSignature {
