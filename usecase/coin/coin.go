@@ -1,4 +1,4 @@
-package usecase
+package coin
 
 import (
 	"errors"
@@ -6,6 +6,8 @@ import (
 	"math/big"
 	"regexp"
 	"strings"
+
+	jsoniter "github.com/json-iterator/go"
 )
 
 // Coin is a wrapper of CRO amount in basic unit
@@ -196,7 +198,7 @@ func (coin *Coin) ToBigInt() *big.Int {
 	return copy
 }
 
-func (coin Coin) MarshalJSON() ([]byte, error) {
+func (coin *Coin) MarshalJSON() ([]byte, error) {
 	if coin.value == nil {
 		return []byte("null"), nil
 	}
@@ -206,12 +208,16 @@ func (coin Coin) MarshalJSON() ([]byte, error) {
 	return []byte("\"" + s + "\""), nil
 }
 
-func (coin Coin) UnmarshalJSON(encoded []byte) ([]byte, error) {
-	if coin.value == nil {
-		return []byte("null"), nil
+func (coin *Coin) UnmarshalJSON(data []byte) error {
+	var amount string
+	if err := jsoniter.Unmarshal(data, &amount); err != nil {
+		return err
+	}
+	b, ok := new(big.Int).SetString(amount, 10)
+	if !ok {
+		return ErrCoinInvalid
 	}
 
-	s := coin.String()
-
-	return []byte("\"" + s + "\""), nil
+	coin.value = b
+	return nil
 }

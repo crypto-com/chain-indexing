@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/crypto-com/chainindex/usecase"
+	"github.com/crypto-com/chainindex/usecase/coin"
 
 	jsoniter "github.com/json-iterator/go"
 
@@ -28,7 +28,7 @@ func ParseTransactionCommands(
 
 		log, err := jsoniter.MarshalToString(txsResult.Log)
 		if err != nil {
-			return nil, fmt.Errorf("error encoding transaction result log to JSON: %v", err)
+			return nil, fmt.Errorf("error encoding transaction result rawLog to JSON: %v", err)
 		}
 		cmds = append(cmds, createtransaction.NewCommand(blockHeight, createtransaction.Params{
 			TxHash:    TxHash(txHex),
@@ -44,7 +44,7 @@ func ParseTransactionCommands(
 	return cmds, nil
 }
 
-func getTxFee(feeCollectorAddress string, txsResult model.BlockResultsTxsResult) usecase.Coin {
+func getTxFee(feeCollectorAddress string, txsResult model.BlockResultsTxsResult) coin.Coin {
 	for _, event := range txsResult.Events {
 		if event.Type == "transfer" {
 			isFeeEvent := false
@@ -58,12 +58,12 @@ func getTxFee(feeCollectorAddress string, txsResult model.BlockResultsTxsResult)
 			}
 
 			if isFeeEvent {
-				return usecase.MustNewCoinFromString(TrimAmountDenom(amount))
+				return coin.MustNewCoinFromString(TrimAmountDenom(amount))
 			}
 		}
 	}
 
-	return usecase.MustNewCoinFromInt(int64(0))
+	return coin.MustNewCoinFromInt(int64(0))
 }
 
 func TxHash(base64EncodedTxHex string) string {
