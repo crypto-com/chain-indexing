@@ -7,6 +7,6 @@ import (
 )
 
 func RegisterEvents(registry *event.Registry) {
-	registry.Register(blockcreated.NAME, 0, blockcreated.Decode)
-	registry.Register(rawblockcreated.NAME, 0, rawblockcreated.Decode)
+	registry.Register(blockcreated.NAME, 1, blockcreated.Decode)
+	registry.Register(rawblockcreated.NAME, 1, rawblockcreated.Decode)
 }

@@ -3,7 +3,6 @@ package executor
 import (
 	"fmt"
 	appevent "github.com/crypto-com/chainindex/appinterface/event"
-	"github.com/crypto-com/chainindex/appinterface/rdb"
 	"github.com/crypto-com/chainindex/entity/command"
 	"github.com/crypto-com/chainindex/entity/event"
 	"github.com/crypto-com/chainindex/infrastructure"
@@ -47,9 +46,8 @@ func (exec *BlockExecutor) ExecAllCommands() error {
 	return nil
 }
 
-func (exec *BlockExecutor) StoreAllEvents(handle *rdb.Handle) error {
+func (exec *BlockExecutor) StoreAllEvents(eventStore *appevent.RDbStore) error {
 	// TODO: tx rollback when has error
-	eventStore := appevent.NewRDbStore(handle)
 	if err := eventStore.InsertAll(exec.Events); err != nil {
 		return fmt.Errorf("executor error storing all events for height %d %v", exec.Height, err)
 	}

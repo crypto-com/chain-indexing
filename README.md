@@ -4,6 +4,21 @@ Crypto.com Chain Indexing Service (chainindex) is a service to index all publicl
 
 Right now it supports Postgres database and provides RESTful API as query interface.
 
+## Test Chain Indexing Locally
+
+```bash
+# Run local pg database
+docker-compose --file docker/docker-compose.local.yml up -d
+
+# Run migrate
+./migrate.sh -- -verbose up
+
+# Run index server
+DB_PASSWORD=postgres go run cmd/chainindex/*.go
+```
+
+-------
+
 ## 1. Build
 
 ### 1.1 Build using Docker

@@ -116,6 +116,7 @@ func (manager *Manager) projectionRunner(projection Projection) {
 
 			eventLogger.Infof("successfully handled events")
 		}
+		<-waitToRetry(5 * time.Second)
 	}
 }
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"errors"
 	"fmt"
 	"github.com/crypto-com/chainindex/internal/filereader/toml"
@@ -22,11 +23,6 @@ func CliApp(args []string) error {
 				Value: "./config/config.toml",
 				Usage: "TOML `FILE` to load configuration from",
 			},
-			//&cli.StringFlag{
-			//	Name:    "tendermintURL",
-			//	Usage:   "Tendermint HTTP RPC URL",
-			//	EnvVars: []string{"TENDERMINT_URL"},
-			//},
 		},
 		Action: func(ctx *cli.Context) error {
 			if args := ctx.Args(); args.Len() > 0 {
@@ -45,9 +41,10 @@ func CliApp(args []string) error {
 			if readConfigErr != nil {
 				return readConfigErr
 			}
+
 			// TODO: use ENV before deployment
-			//fileConfig.Database.Password = os.Getenv("DB_PASSWORD")
-			fileConfig.Database.Password = "postgres"
+			//fileConfig.Database.Password = "postgres"
+			fileConfig.Database.Password = os.Getenv("DB_PASSWORD")
 			if fileConfig.Database.Password == "" {
 				return errors.New("DB_PASSWORD is empty")
 			}

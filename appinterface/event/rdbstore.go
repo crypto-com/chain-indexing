@@ -3,9 +3,8 @@ package event
 import (
 	"errors"
 	"fmt"
-
 	"github.com/crypto-com/chainindex/appinterface/rdb"
-	entity_event "github.com/crypto-com/chainindex/entity/event"
+	"github.com/crypto-com/chainindex/entity/event"
 )
 
 const DEFAULT_TABLE = "events"
@@ -22,13 +21,15 @@ const DEFAULT_TABLE = "events"
 // EventStore implemented using relational database
 type RDbStore struct {
 	rdbHandle *rdb.Handle
+	Registry  *event.Registry
 
 	table string
 }
 
-func NewRDbStore(handle *rdb.Handle) *RDbStore {
+func NewRDbStore(handle *rdb.Handle, registry *event.Registry) *RDbStore {
 	return &RDbStore{
 		rdbHandle: handle,
+		Registry: registry,
 
 		table: DEFAULT_TABLE,
 	}
@@ -57,7 +58,7 @@ func (store *RDbStore) GetLatestHeight() (*int64, error) {
 	return latestEventHeight, nil
 }
 
-func (store *RDbStore) GetAllByHeight(height int64) ([]entity_event.Event, error) {
+func (store *RDbStore) GetAllByHeight(height int64) ([]event.Event, error) {
 	sql, args, err := store.rdbHandle.StmtBuilder.Select(
 		"id", "height", "name", "version", "payload",
 	).From(
@@ -67,7 +68,7 @@ func (store *RDbStore) GetAllByHeight(height int64) ([]entity_event.Event, error
 		return nil, fmt.Errorf("error building get all events by height selection SQL: %v", err)
 	}
 
-	var events = make([]entity_event.Event, 0)
+	var events = make([]event.Event, 0)
 	rows, err := store.rdbHandle.Query(sql, args...)
 	if err != nil {
 		return nil, fmt.Errorf("error executing get all events by height selection SQL: %v", err)
@@ -77,7 +78,7 @@ func (store *RDbStore) GetAllByHeight(height int64) ([]entity_event.Event, error
 			id      string
 			height  int64
 			name    string
-			version int64
+			version int
 			payload string
 		)
 
@@ -85,31 +86,22 @@ func (store *RDbStore) GetAllByHeight(height int64) ([]entity_event.Event, error
 			if err == rdb.ErrNoRows {
 				return nil, nil
 			} else {
-				return nil, fmt.Errorf("error error executing get each event by height selection SQL: %v", err)
+				return nil, fmt.Errorf("error executing get each event by height selection SQL: %v", err)
 			}
 		}
 
-		// TODO: Missing event json deserializer
-		//evt := struct{
-		//	id string
-		//	height  int64
-		//	name    string
-		//	version int64
-		//	payload string
-		//}{
-		//	id,
-		//	height,
-		//	name,
-		//	version,
-		//	payload,
-		//}
-		//append(events, evt)
+		evt, err := store.Registry.DecodeByType(name, version, []byte(payload))
+		if err != nil {
+			return nil, fmt.Errorf("error decoding the event string into type: %v", err)
+		}
+
+		events = append(events, evt)
 	}
 
 	return events, nil
 }
 
-func (store *RDbStore) Insert(event entity_event.Event) error {
+func (store *RDbStore) Insert(event event.Event) error {
 	sql, args, err := store.rdbHandle.StmtBuilder.Insert(
 		store.table,
 	).Columns(
@@ -137,7 +129,7 @@ func (store *RDbStore) Insert(event entity_event.Event) error {
 }
 
 // InsertAll insert all events into store. It will rollback when the insert fails at any point.
-func (store *RDbStore) InsertAll(events []entity_event.Event) error {
+func (store *RDbStore) InsertAll(events []event.Event) error {
 	for _, event := range events {
 		if err := store.Insert(event); err != nil {
 			return errors.New("error executing events batch insertion SQL")
