@@ -15,7 +15,7 @@ const EVENT_NAME = "MsgSendCreated"
 type MsgSendCreated struct {
 	entity_event.Base
 
-	TxHash      string    `json:"txHash""`
+	TxHash      string    `json:"txHash"`
 	MsgIndex    int       `json:"msgIndex"`
 	FromAddress string    `json:"fromAddress"`
 	ToAddress   string    `json:"toAddress"`

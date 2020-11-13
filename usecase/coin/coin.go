@@ -198,7 +198,7 @@ func (coin *Coin) ToBigInt() *big.Int {
 	return copy
 }
 
-func (coin *Coin) MarshalJSON() ([]byte, error) {
+func (coin Coin) MarshalJSON() ([]byte, error) {
 	if coin.value == nil {
 		return []byte("null"), nil
 	}
