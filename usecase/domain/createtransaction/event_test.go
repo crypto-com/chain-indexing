@@ -1,6 +1,8 @@
 package createtransaction_test
 
 import (
+	"github.com/crypto-com/chainindex/usecase/coin"
+
 	"github.com/crypto-com/chainindex/test/factory"
 	"github.com/crypto-com/chainindex/usecase/domain/createtransaction"
 	. "github.com/onsi/ginkgo"
@@ -16,6 +18,7 @@ var _ = Describe("Event", func() {
 				Code:      0,
 				Log:       "{\"events\":[]}",
 				MsgCount:  1,
+				Fee:       coin.MustNewCoinFromString("1000"),
 				GasWanted: "200000",
 				GasUsed:   "10000",
 			}

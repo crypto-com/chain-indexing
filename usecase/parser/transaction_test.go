@@ -3,7 +3,7 @@ package parser_test
 import (
 	"strings"
 
-	"github.com/crypto-com/chainindex/usecase"
+	"github.com/crypto-com/chainindex/usecase/coin"
 
 	"github.com/crypto-com/chainindex/usecase/domain/createtransaction"
 
@@ -47,7 +47,7 @@ var _ = Describe("TransactionParser", func() {
 					Code:      0,
 					Log:       "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"sender\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"amount\",\"value\":\"1000basetcro\"}]}]},{\"msgIndex\":1,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"sender\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"amount\",\"value\":\"2000basetcro\"}]}]}]",
 					MsgCount:  2,
-					Fee:       usecase.MustNewCoinFromInt(int64(0)),
+					Fee:       coin.MustNewCoinFromInt(int64(0)),
 					GasWanted: "200000",
 					GasUsed:   "80148",
 				},
@@ -73,7 +73,7 @@ var _ = Describe("TransactionParser", func() {
 					Code:      0,
 					Log:       "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"sender\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"amount\",\"value\":\"1000000000basetcro\"}]}]}]",
 					MsgCount:  1,
-					Fee:       usecase.MustNewCoinFromString("8000000"),
+					Fee:       coin.MustNewCoinFromString("8000000"),
 					GasWanted: "80000000",
 					GasUsed:   "62582",
 				},
