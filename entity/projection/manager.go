@@ -17,7 +17,9 @@ type Manager struct {
 
 func NewManager(logger applogger.Logger, eventStore entity_event.Store) *Manager {
 	return &Manager{
-		logger:     logger,
+		logger: logger.WithFields(applogger.LogFields{
+			"module": "projectionManager",
+		}),
 		eventStore: eventStore,
 
 		projections: make([]Projection, 0),
@@ -41,7 +43,7 @@ func (manager *Manager) IsProjectionRegistered(projection Projection) bool {
 	return false
 }
 
-// Starts ProjectionManager by running all registered projection.
+// Starts projectionManager by running all registered projection.
 func (manager *Manager) Run() {
 	for _, projection := range manager.projections {
 		go manager.projectionRunner(projection)

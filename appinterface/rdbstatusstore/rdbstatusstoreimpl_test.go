@@ -43,7 +43,7 @@ var _ = Describe("RdbStatusStore", func() {
 				)
 
 				newHeight := int64(100)
-				err := store.UpdateLastIndexedBlockHeight(newHeight)
+				err := store.UpdateLastIndexedBlockHeight(pgxConn.ToHandle(), newHeight)
 				Expect(err).To(BeNil())
 
 				currentHeight, err := store.GetLastIndexedBlockHeight()

@@ -10,7 +10,7 @@ import (
 	"github.com/crypto-com/chainindex/entity/event"
 )
 
-var _ = Describe("Registry", func() {
+var _ = Describe("eventRegistry", func() {
 	Describe("Register", func() {
 		It("should register an event decoder with the name and version", func() {
 			registry := event.NewRegistry()

@@ -16,10 +16,10 @@ const DEFAULT_TABLE = "service_status"
 // | ------------------------- | --------- | ----------- |
 // | last_indexed_block_height | INT64     | NOT NULL    |
 
-// StatusStore implemented using relational database
+// statusStore implemented using relational database
 type RDbStatusStoreImpl struct {
-	rdbHandle *rdb.Handle
-	logger    applogger.Logger
+	selectRDbHandle *rdb.Handle
+	logger          applogger.Logger
 
 	table string
 }
@@ -28,9 +28,9 @@ type LatestStatus struct {
 	LastIndexedBlockHeight int64 `json:"last_indexed_block_height"`
 }
 
-func NewRDbStatusStoreImpl(logger applogger.Logger, handle *rdb.Handle) *RDbStatusStoreImpl {
+func NewRDbStatusStoreImpl(logger applogger.Logger, rdbHandle *rdb.Handle) *RDbStatusStoreImpl {
 	return &RDbStatusStoreImpl{
-		rdbHandle: handle,
+		selectRDbHandle: rdbHandle,
 		logger: logger.WithFields(applogger.LogFields{
 			"module": "RDbStatueStoreImpl",
 		}),
@@ -61,7 +61,7 @@ func (impl *RDbStatusStoreImpl) init() error {
 // InitLatestStatus creates one row for initial latest status
 func (impl *RDbStatusStoreImpl) initStatusRow() error {
 	// Insert initial latest status to the row
-	sql, args, err := impl.rdbHandle.StmtBuilder.Insert(
+	sql, args, err := impl.selectRDbHandle.StmtBuilder.Insert(
 		impl.table,
 	).Columns(
 		"last_indexed_block_height",
@@ -70,7 +70,7 @@ func (impl *RDbStatusStoreImpl) initStatusRow() error {
 		return fmt.Errorf("error building getting row count insertion SQL: %v", err)
 	}
 
-	execResult, err := impl.rdbHandle.Exec(sql, args...)
+	execResult, err := impl.selectRDbHandle.Exec(sql, args...)
 	if err != nil {
 		return fmt.Errorf("error inserting latest status SQL: %v", err)
 	}
@@ -83,7 +83,7 @@ func (impl *RDbStatusStoreImpl) initStatusRow() error {
 
 // isStatusRowExist returns true if the row exists
 func (impl *RDbStatusStoreImpl) isStatusRowExist() (bool, error) {
-	sql, args, err := impl.rdbHandle.StmtBuilder.Select(
+	sql, args, err := impl.selectRDbHandle.StmtBuilder.Select(
 		"COUNT(*)",
 	).From(impl.table).ToSql()
 	if err != nil {
@@ -91,7 +91,7 @@ func (impl *RDbStatusStoreImpl) isStatusRowExist() (bool, error) {
 	}
 
 	var count int64
-	if err := impl.rdbHandle.QueryRow(sql, args...).Scan(&count); err != nil {
+	if err := impl.selectRDbHandle.QueryRow(sql, args...).Scan(&count); err != nil {
 		return false, fmt.Errorf("error querying status row count: %v", err)
 	}
 
@@ -105,7 +105,7 @@ func (impl *RDbStatusStoreImpl) GetLastIndexedBlockHeight() (*int64, error) {
 		return nil, fmt.Errorf("error initializing status store: %v", err)
 	}
 
-	sql, args, err := impl.rdbHandle.StmtBuilder.Select(
+	sql, args, err := impl.selectRDbHandle.StmtBuilder.Select(
 		"last_indexed_block_height",
 	).From(impl.table).ToSql()
 	if err != nil {
@@ -113,7 +113,7 @@ func (impl *RDbStatusStoreImpl) GetLastIndexedBlockHeight() (*int64, error) {
 	}
 
 	var lastIndexedBlockHeight *int64
-	if err := impl.rdbHandle.QueryRow(sql, args...).Scan(&lastIndexedBlockHeight); err != nil {
+	if err := impl.selectRDbHandle.QueryRow(sql, args...).Scan(&lastIndexedBlockHeight); err != nil {
 		if err == rdb.ErrNoRows {
 			return nil, nil
 		} else {
@@ -124,14 +124,13 @@ func (impl *RDbStatusStoreImpl) GetLastIndexedBlockHeight() (*int64, error) {
 	return lastIndexedBlockHeight, nil
 }
 
-func (impl *RDbStatusStoreImpl) UpdateLastIndexedBlockHeight(height int64) error {
+func (impl *RDbStatusStoreImpl) UpdateLastIndexedBlockHeight(rdbHandle *rdb.Handle, height int64) error {
 	// lazy init
 	if err := impl.init(); err != nil {
 		return fmt.Errorf("error initializing status store: %v", err)
 	}
 
-	// TODO: pass the rdbHandle with params for transaction support
-	sql, args, err := impl.rdbHandle.StmtBuilder.Update(
+	sql, args, err := rdbHandle.StmtBuilder.Update(
 		impl.table,
 	).Set(
 		"last_indexed_block_height", height,
@@ -140,7 +139,7 @@ func (impl *RDbStatusStoreImpl) UpdateLastIndexedBlockHeight(height int64) error
 		return fmt.Errorf("error building last indexed block height update SQL: %v", err)
 	}
 
-	execResult, err := impl.rdbHandle.Exec(sql, args...)
+	execResult, err := rdbHandle.Exec(sql, args...)
 	if err != nil {
 		return fmt.Errorf("error executing last indexed block height update SQL: %v", err)
 	}
