@@ -3,6 +3,7 @@ package chain
 import (
 	"fmt"
 
+	appevent "github.com/crypto-com/chainindex/appinterface/event"
 	"github.com/crypto-com/chainindex/infrastructure/notification"
 	"github.com/crypto-com/chainindex/usecase/executor"
 	"github.com/crypto-com/chainindex/usecase/parser"
@@ -18,7 +19,7 @@ func NewBlockSubscriber(moduleAccounts *parser.ModuleAccounts) *BlockSubscriber 
 	}
 }
 
-func (subscriber *BlockSubscriber) OnNotification(n *notification.BlockNotification) error {
+func (subscriber *BlockSubscriber) OnNotification(n *notification.BlockNotification, eventStore *appevent.RDbStore) error {
 	// create an executor instance for current height
 	executor := executor.NewBlockExecutor(n.Height)
 	commands, err := parser.ParseBlockToCommands(
@@ -36,7 +37,7 @@ func (subscriber *BlockSubscriber) OnNotification(n *notification.BlockNotificat
 	if err := executor.ExecAllCommands(); err != nil {
 		return fmt.Errorf("error generating all events%v", err)
 	}
-	if err := executor.StoreAllEvents(); err != nil {
+	if err := executor.StoreAllEvents(eventStore); err != nil {
 		return fmt.Errorf("error storing all events%v", err)
 	}
 
