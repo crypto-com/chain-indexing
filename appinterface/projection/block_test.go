@@ -7,7 +7,7 @@ import (
 	entity_projection "github.com/crypto-com/chainindex/entity/projection"
 	. "github.com/crypto-com/chainindex/internal/logger/test"
 	. "github.com/crypto-com/chainindex/test"
-	"github.com/crypto-com/chainindex/usecase/event/blockcreated"
+	"github.com/crypto-com/chainindex/usecase/domain/createblock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -41,7 +41,7 @@ var _ = Describe("Block", func() {
 			blocksView := view.NewBlocks(pgConn.ToHandle())
 
 			anyHeight := int64(405947)
-			event := blockcreated.New(&usecase_model.Block{
+			event := createblock.NewEvent(&usecase_model.Block{
 				Height:          anyHeight,
 				Hash:            "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
 				Time:            utctime.FromUnixNano(int64(1000000)),

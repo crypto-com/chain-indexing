@@ -11,7 +11,7 @@ type Event interface {
 	Id() string
 
 	// Encode the event into JSON string payload
-	ToJSON() string
+	ToJSON() (string, error)
 
 	// String function returns the stringified event
 	String() string

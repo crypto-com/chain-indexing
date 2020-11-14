@@ -1,4 +1,4 @@
-package blockcreated_test
+package parser_test
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestBlockCreated(t *testing.T) {
+func TestParser(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Blockcreated Suite")
+	RunSpecs(t, "Parser Suite")
 }

@@ -1,17 +1,17 @@
-package blockcreated
+package createblock
 
 import (
 	"bytes"
-	"fmt"
+
+	"github.com/luci/go-render/render"
 
 	jsoniter "github.com/json-iterator/go"
-	"github.com/luci/go-render/render"
 
 	entity_event "github.com/crypto-com/chainindex/entity/event"
 	usecase_model "github.com/crypto-com/chainindex/usecase/model"
 )
 
-const NAME = "BlockCreated"
+const EVENT_NAME = "BlockCreated"
 
 type BlockCreated struct {
 	entity_event.Base
@@ -19,36 +19,32 @@ type BlockCreated struct {
 	Block *usecase_model.Block `json:"block"`
 }
 
-func New(block *usecase_model.Block) *BlockCreated {
+func NewEvent(block *usecase_model.Block) *BlockCreated {
 	return &BlockCreated{
-		entity_event.NewBase(block.Height),
+		entity_event.NewBase(entity_event.BaseParams{
+			Name:        EVENT_NAME,
+			Version:     1,
+			BlockHeight: block.Height,
+		}),
 
 		block,
 	}
 }
 
-func (_ *BlockCreated) Name() string {
-	return NAME
-}
-
-func (_ *BlockCreated) Version() int {
-	return 1
-}
-
-func (event *BlockCreated) ToJSON() string {
+func (event *BlockCreated) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
-		panic(fmt.Sprintf("error encoding BlockCreated event to JSON: %v", err))
+		return "", err
 	}
 
-	return string(encoded)
+	return string(encoded), nil
 }
 
 func (event *BlockCreated) String() string {
 	return render.Render(event)
 }
 
-func Decode(encoded []byte) (entity_event.Event, error) {
+func DecodeEvent(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 

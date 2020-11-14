@@ -1,33 +1,45 @@
 package parser
 
 import (
+	"fmt"
+
 	entity_command "github.com/crypto-com/chainindex/entity/command"
-	usecase_command "github.com/crypto-com/chainindex/usecase/command"
+	"github.com/crypto-com/chainindex/usecase/domain/createblock"
+	"github.com/crypto-com/chainindex/usecase/domain/createrawblock"
 	usecase_model "github.com/crypto-com/chainindex/usecase/model"
 )
 
 func ParseBlockToCommands(
+	moduleAccounts *ModuleAccounts,
 	block *usecase_model.Block,
 	rawBlock *usecase_model.RawBlock,
-	_ *usecase_model.BlockResults,
+	blockResults *usecase_model.BlockResults,
 ) ([]entity_command.Command, error) {
 	var err error
 	var commands []entity_command.Command
 
 	createRawBlockCommand := ParseCreateRawBlockCommand(rawBlock)
-	commands = append(commands, &createRawBlockCommand)
+	commands = append(commands, createRawBlockCommand)
 
 	createBlockCommand := ParseCreateBlockCommand(block)
-	commands = append(commands, &createBlockCommand)
+	commands = append(commands, createBlockCommand)
+
+	if len(blockResults.TxsResults) > 0 {
+		transactionCommands, err := ParseTransactionCommands(moduleAccounts, block, blockResults)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing transaction commands: %v", err)
+		}
+		commands = append(commands, transactionCommands...)
+	}
 
 	return commands, err
 }
 
-func ParseCreateRawBlockCommand(rawBlock *usecase_model.RawBlock) usecase_command.CreateRawBlock {
-	return usecase_command.NewCreateRawBlock(rawBlock)
+func ParseCreateRawBlockCommand(rawBlock *usecase_model.RawBlock) *createrawblock.CreateRawBlockCommand {
+	return createrawblock.NewCommand(rawBlock)
 }
 
-func ParseCreateBlockCommand(block *usecase_model.Block) usecase_command.CreateBlock {
+func ParseCreateBlockCommand(block *usecase_model.Block) *createblock.CreateBlockCommand {
 	var modelBlockSigs []usecase_model.BlockSignature
 	for _, sig := range block.Signatures {
 		modelBlockSigs = append(modelBlockSigs, usecase_model.BlockSignature{
@@ -48,5 +60,5 @@ func ParseCreateBlockCommand(block *usecase_model.Block) usecase_command.CreateB
 		Signatures:      modelBlockSigs,
 	}
 
-	return usecase_command.NewCreateBlock(modelBlock)
+	return createblock.NewCommand(modelBlock)
 }

@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/crypto-com/chainindex/internal/utctime"
+	"github.com/luci/go-render/render"
 )
 
 type Block struct {
@@ -12,6 +13,10 @@ type Block struct {
 	ProposerAddress string           `json:"proposerAddress" fake:"{validatoraddress}"`
 	Txs             []string         `json:"txs" fake:"skip"`
 	Signatures      []BlockSignature `json:"signature" fakesize:"3"`
+}
+
+func (block *Block) String() string {
+	return render.Render(block)
 }
 
 type BlockSignature struct {

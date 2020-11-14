@@ -26,9 +26,9 @@ func (event *MockEvent) Id() string {
 	mockArgs := event.Called()
 	return mockArgs.String(0)
 }
-func (event *MockEvent) ToJSON() string {
+func (event *MockEvent) ToJSON() (string, error) {
 	mockArgs := event.Called()
-	return mockArgs.String(0)
+	return mockArgs.String(0), mockArgs.Error(1)
 }
 func (event *MockEvent) String() string {
 	mockArgs := event.Called()

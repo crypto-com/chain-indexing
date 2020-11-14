@@ -1,6 +1,10 @@
 package model
 
-import "math/big"
+import (
+	"math/big"
+
+	"github.com/luci/go-render/render"
+)
 
 type BlockResults struct {
 	Height                int64
@@ -9,6 +13,10 @@ type BlockResults struct {
 	EndBlockEvents        []BlockResultsEvent
 	ValidatorUpdates      []BlockResultsValidatorUpdate
 	ConsensusParamUpdates BlockResultsConsensusParamUpdates
+}
+
+func (results *BlockResults) String() string {
+	return render.Render(results)
 }
 
 type BlockResultsTxsResult struct {

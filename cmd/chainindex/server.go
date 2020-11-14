@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 	"os"
-
 	"time"
 
 	"github.com/crypto-com/chainindex/infrastructure"
 	"github.com/crypto-com/chainindex/infrastructure/pg"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
+	"github.com/crypto-com/chainindex/usecase/parser"
 )
 
 type IndexServer struct {
@@ -69,18 +69,34 @@ func SetupRdbConn(config *FileConfig, logger applogger.Logger) (*pg.PgxConn, err
 		}, logger)
 
 		if err != nil {
-			logger.Errorf("Cannot setup connection to database, will retry in 5 seconds, error %v", err)
+			logger.Errorf("error setting up connection to database, will retry in 5 seconds: %v", err)
 			<-time.After(5 * time.Second)
 		}
 	}
 
-	logger.Info("Successfully setup connection to database, start the indexing service now")
+	logger.Info("successfully setup database connection")
 	return pgxConnPool, nil
 }
 
 // Run function runs the polling server to index the data from Tendermint
 func (s *IndexServer) Run() error {
-	syncManager := NewSyncManager(s.logger, s.TendermintHTTPRPCURL, s.RdbConn)
+	s.logger.Debug("TODO: should load module accounts configuration")
+
+	moduleAccounts := &parser.ModuleAccounts{
+		FeeCollector:        "tcro17xpfvakm2amg962yls6f84z3kell8c5lxhzaha",
+		Mint:                "tcro1m3h30wlvsf8llruxtpukdvsy0km2kum87lx9mq",
+		Distribution:        "tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l",
+		Gov:                 "tcro10d07y265gmmuvt4z0w9aw880jnsr700jvvjc2n",
+		BondedTokensPool:    "tcro1fl48vsnmsdzcv85q5d2q4z5ajdha8yu3r4gj9h",
+		NotBondedTokensPool: "tcro1tygms3xhhs3yv487phx3dw4a95jn7t7lh45rnr",
+	}
+
+	syncManager := NewSyncManager(
+		s.logger,
+		s.TendermintHTTPRPCURL,
+		s.RdbConn,
+		moduleAccounts,
+	)
 	if err := syncManager.Run(); err != nil {
 		return fmt.Errorf("error running sync manager %v", err)
 	}

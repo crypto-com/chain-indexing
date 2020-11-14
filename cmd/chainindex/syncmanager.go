@@ -5,18 +5,19 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/crypto-com/chainindex/usecase/domain"
+
 	app_event "github.com/crypto-com/chainindex/appinterface/event"
 	app_projection "github.com/crypto-com/chainindex/appinterface/projection"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
 	"github.com/crypto-com/chainindex/appinterface/rdbstatusstore"
 	"github.com/crypto-com/chainindex/entity/event"
 	"github.com/crypto-com/chainindex/entity/projection"
-	usecase_event "github.com/crypto-com/chainindex/usecase/event"
-
 	chainfeed "github.com/crypto-com/chainindex/infrastructure/feed/chain"
 	"github.com/crypto-com/chainindex/infrastructure/notification"
 	"github.com/crypto-com/chainindex/infrastructure/tendermint"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
+	"github.com/crypto-com/chainindex/usecase/parser"
 )
 
 const DEFAULT_POLLING_INTERVAL = 5 * time.Second
@@ -27,16 +28,22 @@ type SyncManager struct {
 	logger          applogger.Logger
 	pollingInterval time.Duration
 
+	moduleAccounts *parser.ModuleAccounts
+
 	StatusStore       *rdbstatusstore.RDbStatusStoreImpl
 	EventStore        *app_event.RDbStore
 	ProjectionManager *projection.Manager
-
-	Subject  *chainfeed.BlockSubject
-	Registry *event.Registry
+	Subject           *chainfeed.BlockSubject
+	Registry          *event.Registry
 }
 
 // NewSyncManager creates a new feed with polling for latest block starts at a specific height
-func NewSyncManager(logger applogger.Logger, tendermintRPCUrl string, rdbConn rdb.Conn) *SyncManager {
+func NewSyncManager(
+	logger applogger.Logger,
+	tendermintRPCUrl string,
+	rdbConn rdb.Conn,
+	moduleAccounts *parser.ModuleAccounts,
+) *SyncManager {
 	tendermintClient := tendermint.NewHTTPClient(tendermintRPCUrl)
 
 	return &SyncManager{
@@ -45,6 +52,8 @@ func NewSyncManager(logger applogger.Logger, tendermintRPCUrl string, rdbConn rd
 		logger: logger.WithFields(applogger.LogFields{
 			"module": "SyncManager",
 		}),
+
+		moduleAccounts:  moduleAccounts,
 		pollingInterval: DEFAULT_POLLING_INTERVAL,
 	}
 }
@@ -52,7 +61,7 @@ func NewSyncManager(logger applogger.Logger, tendermintRPCUrl string, rdbConn rd
 func (manager *SyncManager) UpdateIndexedHeight(nextHeight int64, handle *rdb.Handle) error {
 	err := manager.StatusStore.UpdateLastIndexedBlockHeight(nextHeight)
 	if err != nil {
-		return fmt.Errorf("error running UpdateLastIndexedBlockHeight %v", err)
+		return fmt.Errorf("error updating last indexed block height %v", err)
 	}
 	return nil
 }
@@ -102,10 +111,13 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
 }
 
 func (manager *SyncManager) InitSubject() *chainfeed.BlockSubject {
+	// Currently only the chain processor subscriber
+	// add more subscriber base on the need
+	chainProcessor := chainfeed.NewBlockSubscriber(manager.moduleAccounts)
+
 	blockSubject := chainfeed.NewBlockSubject()
 
 	// add more subscribers here
-	chainProcessor := chainfeed.NewBlockSubscriber(0)
 	blockSubject.Attach(chainProcessor)
 
 	return blockSubject
@@ -113,7 +125,7 @@ func (manager *SyncManager) InitSubject() *chainfeed.BlockSubject {
 
 func (manager *SyncManager) InitRegistry() *event.Registry {
 	registry := event.NewRegistry()
-	usecase_event.RegisterEvents(registry)
+	domain.RegisterEvents(registry)
 	return registry
 }
 

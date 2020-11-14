@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/crypto-com/chainindex/internal/utctime"
+	"github.com/luci/go-render/render"
 )
 
 // RawBlock defines the structure for Tendermint /block API response JSON
@@ -97,6 +98,10 @@ type RawBlock struct {
 			Signatures []RawBlockSignature `json:"signatures"`
 		} `json:"last_commit"`
 	} `json:"block"`
+}
+
+func (rawBlock *RawBlock) String() string {
+	return render.Render(rawBlock)
 }
 
 // RawBlockSignature defines the structure for signatures in /block API

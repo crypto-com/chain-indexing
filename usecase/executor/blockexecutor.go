@@ -18,13 +18,13 @@ type BlockExecutor struct {
 	logger   applogger.Logger
 }
 
-func NewBlockExecutor(Hegiht int64) *BlockExecutor {
+func NewBlockExecutor(height int64) *BlockExecutor {
 	commands := make([]command.Command, 0)
 	events := make([]event_entity.Event, 0)
 	logger := infrastructure.NewZerologLoggerWithColor(os.Stdout)
 
 	return &BlockExecutor{
-		Hegiht,
+		height,
 		commands,
 		events,
 		logger,

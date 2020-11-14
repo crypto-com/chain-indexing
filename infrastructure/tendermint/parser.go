@@ -14,7 +14,7 @@ import (
 )
 
 // Block related parsing functions
-func parseBlockResp(rawRespReader io.Reader) (*model.Block, *model.RawBlock, error) {
+func ParseBlockResp(rawRespReader io.Reader) (*model.Block, *model.RawBlock, error) {
 	var err error
 
 	var resp RawBlockResp
@@ -62,7 +62,7 @@ func parseBlockSignatures(rawSignatures []model.RawBlockSignature) []model.Block
 }
 
 // RawBlockResults related parsing functions
-func parseBlockResultsResp(rawRespReader io.Reader) (*model.BlockResults, error) {
+func ParseBlockResultsResp(rawRespReader io.Reader) (*model.BlockResults, error) {
 	var err error
 
 	var resp RawBlockResultsResp
@@ -101,7 +101,7 @@ func parseBlockResultsTxsResults(rawTxsResults []RawBlockResultsTxsResult) []mod
 		}
 		txsResults = append(txsResults, model.BlockResultsTxsResult{
 			Code:      rawTxsResult.Code,
-			Data:      MustBase64Decode(rawTxsResult.Data),
+			Data:      mustBase64Decode(rawTxsResult.Data),
 			Log:       parseBlockResultsTxsResultLog(rawLog),
 			Info:      rawTxsResult.Info,
 			GasWanted: rawTxsResult.GasWanted,
@@ -164,8 +164,8 @@ func parseBlockResultsEvents(rawEvents []RawBlockResultsEvent) []model.BlockResu
 		attributes := make([]model.BlockResultsEventAttribute, 0, len(rawEvent.Attributes))
 		for _, rawAttribute := range rawEvent.Attributes {
 			attributes = append(attributes, model.BlockResultsEventAttribute{
-				Key:   MustBase64Decode(rawAttribute.Key),
-				Value: MustBase64Decode(rawAttribute.Value),
+				Key:   mustBase64Decode(rawAttribute.Key),
+				Value: mustBase64Decode(rawAttribute.Value),
 			})
 		}
 		events = append(events, model.BlockResultsEvent{
@@ -210,7 +210,7 @@ func AddressFromPubKey(base64PubKey string) string {
 	return key.Address().String()
 }
 
-func MustBase64Decode(s string) string {
+func mustBase64Decode(s string) string {
 	decoded, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
 		panic(fmt.Sprintf("error decoding block_results `%s`: %v", s, err))
