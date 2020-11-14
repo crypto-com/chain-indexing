@@ -79,6 +79,7 @@ func (manager *Manager) projectionRunner(projection Projection) {
 		if latestEventHeight == nil {
 			logger.Debugf("no event in in the system yet")
 			<-waitToRetry(5 * time.Second)
+			continue
 		}
 		for ; nextEventHeight <= *latestEventHeight; nextEventHeight += 1 {
 			var err error
@@ -98,7 +99,7 @@ func (manager *Manager) projectionRunner(projection Projection) {
 			for _, event := range eventsAtHeight {
 				if !isListeningEvent(event, eventsToListen) {
 					eventLogger.WithFields(applogger.LogFields{
-						"event": event,
+						"eventName": event.Name(),
 					}).Debugf("skipping because event is not one of the listening events")
 					continue
 				}
@@ -106,7 +107,8 @@ func (manager *Manager) projectionRunner(projection Projection) {
 			}
 
 			eventLogger = eventLogger.WithFields(applogger.LogFields{
-				"events": events,
+				"eventCount": len(events),
+				"events":     events,
 			})
 			if err = projection.HandleEvents(nextEventHeight, events); err != nil {
 				eventLogger.Errorf("error handling events: %v", err)

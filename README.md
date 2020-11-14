@@ -79,7 +79,7 @@ docker run -it \
 #### Manual Build
 
 ```bash
-./migrate.sh -- -verbose up
+./pgmigrate.sh -- -verbose up
 ```
 
 ### 2.5 Run the Service

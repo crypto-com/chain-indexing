@@ -35,3 +35,4 @@ config/config.yml
 chainindex
 !chainindex/
 
+pgdata*

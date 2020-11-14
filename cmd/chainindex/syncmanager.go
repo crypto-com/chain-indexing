@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	app_event "github.com/crypto-com/chainindex/appinterface/event"
 	app_projection "github.com/crypto-com/chainindex/appinterface/projection"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
@@ -10,7 +12,6 @@ import (
 	"github.com/crypto-com/chainindex/entity/event"
 	"github.com/crypto-com/chainindex/entity/projection"
 	usecase_event "github.com/crypto-com/chainindex/usecase/event"
-	"time"
 
 	chainfeed "github.com/crypto-com/chainindex/infrastructure/feed/chain"
 	"github.com/crypto-com/chainindex/infrastructure/notification"
@@ -39,9 +40,11 @@ func NewSyncManager(logger applogger.Logger, tendermintRPCUrl string, rdbConn rd
 	tendermintClient := tendermint.NewHTTPClient(tendermintRPCUrl)
 
 	return &SyncManager{
-		rdbConn:         rdbConn,
-		client:          tendermintClient,
-		logger:          logger,
+		rdbConn: rdbConn,
+		client:  tendermintClient,
+		logger: logger.WithFields(applogger.LogFields{
+			"module": "SyncManager",
+		}),
 		pollingInterval: DEFAULT_POLLING_INTERVAL,
 	}
 }
@@ -83,7 +86,9 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
 		manager.Subject.Notify(notif, manager.EventStore)
 
 		// Current block indexing done, update db and sync next height
-		manager.logger.Infof("block height %d synced and events produced", block.Height)
+		manager.logger.WithFields(applogger.LogFields{
+			"blockHeight": block.Height,
+		}).Info("block synced and events produced")
 		err = manager.UpdateIndexedHeight(currentIndexingHeight, manager.rdbConn.ToHandle())
 		if err != nil {
 			return fmt.Errorf("error updating last indexed height for height %d: %v", currentIndexingHeight, err)

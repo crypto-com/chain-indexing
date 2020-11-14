@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"os"
 
+	"time"
+
 	"github.com/crypto-com/chainindex/infrastructure"
 	"github.com/crypto-com/chainindex/infrastructure/pg"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
-	"time"
 )
 
 type IndexServer struct {
@@ -18,7 +19,7 @@ type IndexServer struct {
 
 // NewIndexServer creates a new server instance for polling and indexing
 func NewIndexServer(config *FileConfig) (*IndexServer, error) {
-	logger := infrastructure.NewZerologLoggerWithColor(os.Stderr)
+	logger := infrastructure.NewZerologLoggerWithColor(os.Stdout)
 
 	pgxConnPool, err := SetupRdbConn(config, logger)
 	if err != nil {
