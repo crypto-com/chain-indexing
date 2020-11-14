@@ -4,24 +4,9 @@ Crypto.com Chain Indexing Service (chainindex) is a service to index all publicl
 
 Right now it supports Postgres database and provides RESTful API as query interface.
 
-## Test Chain Indexing Locally
-
-```bash
-# Run local pg database
-docker-compose --file docker/docker-compose.local.yml up -d
-
-# Run migrate
-./migrate.sh -- -verbose up
-
-# Run index server
-DB_PASSWORD=postgres go run cmd/chainindex/*.go
-```
-
--------
-
 ## 1. Build
 
-### 1.1 Build using Docker
+### 1.1 Build using Docker (Not working yet)
 
 Using Docker is the easiest way to build chainindex. The Docker image contains
 `/app/chainindex` Compiled chainindex binary
@@ -36,7 +21,6 @@ docker build -o chainindex .
 #### Prerequisite
 
 - [Go](https://golang.org/dl/) compiler
-- [Rust](https://rustup.rs/) compiler
 
 ```bash
 make all
@@ -79,7 +63,7 @@ This will start the following docker instances on your local network when you us
 
 ### 2.4 Execute Database Migration
 
-#### Docker
+#### Docker (Not working yet)
 
 ```bash
 docker run -it \
@@ -100,7 +84,7 @@ docker run -it \
 
 ### 2.5 Run the Service
 
-#### Docker
+#### Docker (Not working yet)
 
 ```bash
 docker run \
