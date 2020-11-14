@@ -1,10 +1,10 @@
 CREATE TABLE events (
-    row_id BIGSERIAL,
-    id VARCHAR,
+    id BIGSERIAL,
+    uuid VARCHAR,
     height INT NOT NULL,
     name VARCHAR NOT NULL,
     version INT NOT NULL,
     payload JSONB NOT NULL,
-    PRIMARY KEY(row_id),
-    UNIQUE(id)
+    PRIMARY KEY(id),
+    UNIQUE(uuid)
 );

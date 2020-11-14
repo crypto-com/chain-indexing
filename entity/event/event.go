@@ -8,7 +8,7 @@ type Event interface {
 	Version() int
 
 	// Unique Id that is assigned on event creation
-	Id() string
+	UUID() string
 
 	// Encode the event into JSON string payload
 	ToJSON() (string, error)

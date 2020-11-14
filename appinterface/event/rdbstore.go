@@ -110,9 +110,9 @@ func (store *RDbStore) Insert(event entity_event.Event) error {
 	sql, args, err := store.rdbHandle.StmtBuilder.Insert(
 		store.table,
 	).Columns(
-		"id", "height", "name", "version", "payload",
+		"uuid", "height", "name", "version", "payload",
 	).Values(
-		event.Id(),
+		event.UUID(),
 		event.Height(),
 		event.Name(),
 		event.Version(),

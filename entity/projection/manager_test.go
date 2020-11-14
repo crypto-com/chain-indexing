@@ -17,7 +17,7 @@ import (
 
 var _ = Describe("Manager", func() {
 	Describe("RegisterProjection", func() {
-		It("should return Error when the projection with the same Id already exists", func() {
+		It("should return Error when the projection with the same UUID already exists", func() {
 			manager := projection.NewManager(NewFakeLogger(), NewFakeEventStore())
 
 			anyProjection := NewFakeProjection()
@@ -49,7 +49,7 @@ var _ = Describe("Manager", func() {
 
 			// Projection setup
 			anyProjectionId := "ANY_PROJECTION_ID"
-			mockProjection.On("Id").Return(anyProjectionId)
+			mockProjection.On("UUID").Return(anyProjectionId)
 			mockProjection.On("GetEventsToListen").Return([]string{anyEvent.Name()})
 			mockProjection.On("GetLastHandledEventHeight").Return(
 				primptr.Int64Nil(), nil,
@@ -95,7 +95,7 @@ var _ = Describe("Manager", func() {
 
 			// Projection setup
 			anyProjectionId := "ANY_PROJECTION_ID"
-			mockProjection.On("Id").Return(anyProjectionId)
+			mockProjection.On("UUID").Return(anyProjectionId)
 			mockProjection.On("GetEventsToListen").Return([]string{anyEvent.Name(), anyOtherEvent.Name()})
 			mockProjection.On("GetLastHandledEventHeight").Return(
 				primptr.Int64Nil(), nil,
@@ -151,14 +151,14 @@ var _ = Describe("Manager", func() {
 
 			// Projection setup
 			anyProjectionId := "ANY_PROJECTION_ID"
-			anyProjection.On("Id").Return(anyProjectionId)
+			anyProjection.On("UUID").Return(anyProjectionId)
 			anyProjection.On("GetEventsToListen").Return([]string{anyEvent.Name()})
 			anyProjection.On("GetLastHandledEventHeight").Return(
 				primptr.Int64Nil(), nil,
 			)
 
 			anyOtherProjectionId := "ANY_OTHER_PROJECTION_ID"
-			anyOtherProjection.On("Id").Return(anyOtherProjectionId)
+			anyOtherProjection.On("UUID").Return(anyOtherProjectionId)
 			anyOtherProjection.On("GetEventsToListen").Return([]string{anyOtherEvent.Name()})
 			anyOtherProjection.On("GetLastHandledEventHeight").Return(
 				primptr.Int64Nil(), nil,
@@ -209,7 +209,7 @@ var _ = Describe("Manager", func() {
 
 			// Projection setup
 			anyProjectionId := "ANY_PROJECTION_ID"
-			mockProjection.On("Id").Return(anyProjectionId)
+			mockProjection.On("UUID").Return(anyProjectionId)
 			mockProjection.On("GetEventsToListen").Return([]string{anyEvent.Name()})
 			mockProjection.On("GetLastHandledEventHeight").Return(
 				primptr.Int64(int64(1)), nil,

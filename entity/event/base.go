@@ -4,13 +4,13 @@ import (
 	"github.com/google/uuid"
 )
 
-// Base is a JSON-compatible rdbbase event with sequence and UUID support. It is not a must to
+// Base is a JSON-compatible rdbbase event with sequence and EventUUID support. It is not a must to
 // use this as rdbbase event but to implement your own one rdbbase on your design
 type Base struct {
 	EventName    string `json:"name"`
 	EventVersion int    `json:"version"`
 	BlockHeight  int64  `json:"height"`
-	UUID         string `json:"id"`
+	EventUUID    string `json:"uuid"`
 }
 
 func NewBase(params BaseParams) Base {
@@ -18,7 +18,7 @@ func NewBase(params BaseParams) Base {
 		EventName:    params.Name,
 		EventVersion: params.Version,
 		BlockHeight:  params.BlockHeight,
-		UUID:         uuid.New().String(),
+		EventUUID:    uuid.New().String(),
 	}
 }
 
@@ -34,8 +34,8 @@ func (event *Base) Height() int64 {
 	return event.BlockHeight
 }
 
-func (event *Base) Id() string {
-	return event.UUID
+func (event *Base) UUID() string {
+	return event.EventUUID
 }
 
 type BaseParams struct {

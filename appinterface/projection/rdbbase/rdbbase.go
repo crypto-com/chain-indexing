@@ -41,7 +41,7 @@ func NewRDbBaseWithTable(rdbHandle *rdb.Handle, projectionId string, table strin
 	}
 }
 
-// Implements projection.Id()
+// Implements projection.UUID()
 func (base *RDbBase) Id() string {
 	return base.projectionId
 }
