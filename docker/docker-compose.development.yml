@@ -1,0 +1,17 @@
+# WARNING: This Docker Compose file is for development purpose only. Never use
+# it on production
+version: "3.3"
+services:
+  postgres:
+    build: ./postgres
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - ../pgdata-dev:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USERNAME: "${POSTGRES_USERNAME:-postgres}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-postgres}"
+      POSTGRES_DB: "${POSTGRES_DATABASE:-postgres}"
+      # Enable SSL with self-signed certificate generated on the fly
+      POSTGRES_SSL: "${POSTGRES_SSL:-1}"

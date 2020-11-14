@@ -21,12 +21,12 @@ var _ = Describe("RdbStatusStore", func() {
 		})
 
 		Describe("GetLastIndexedBlockHeight", func() {
-			It("should return the last indexed block height properly with no error", func() {
+			It("should return the initial last_indexed_block_height 1 with no error", func() {
 				store := rdbstatusstore.NewRDbStatusStoreImpl(pgxConn.ToHandle())
 				height, err := store.GetLastIndexedBlockHeight()
 
 				Expect(err).To(BeNil())
-				Expect(height).To(Equal(int64(0)))
+				Expect(height).To(Equal(int64(1)))
 			})
 		})
 
