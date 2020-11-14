@@ -68,9 +68,15 @@ func (manager *SyncManager) UpdateIndexedHeight(nextHeight int64, handle *rdb.Ha
 
 // SyncBlocks makes request to tendermint, create and dispatch notifications
 func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
-	lastIndexedHeight, err := manager.StatusStore.GetLastIndexedBlockHeight()
+	maybeLastIndexedHeight, err := manager.StatusStore.GetLastIndexedBlockHeight()
 	if err != nil {
 		return fmt.Errorf("error running GetLastIndexedBlockHeight %v", err)
+	}
+
+	// if none of the block has been indexed before, start with 0
+	lastIndexedHeight := int64(0)
+	if maybeLastIndexedHeight != nil {
+		lastIndexedHeight = *maybeLastIndexedHeight
 	}
 
 	// Sync next height to avoid duplication
@@ -130,7 +136,10 @@ func (manager *SyncManager) InitRegistry() *event.Registry {
 }
 
 func (manager *SyncManager) InitStatusStore() *rdbstatusstore.RDbStatusStoreImpl {
-	StatusStore := rdbstatusstore.NewRDbStatusStoreImpl(manager.rdbConn.ToHandle())
+	StatusStore := rdbstatusstore.NewRDbStatusStoreImpl(
+		manager.logger,
+		manager.rdbConn.ToHandle(),
+	)
 	return StatusStore
 }
 
