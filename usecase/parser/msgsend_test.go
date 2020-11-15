@@ -16,8 +16,9 @@ import (
 	"github.com/crypto-com/chainindex/usecase/parser"
 )
 
-var _ = Describe("Msg", func() {
-	Describe("ParseMsgCommands", func() {
+var _ = Describe("ParseMsgCommands", func() {
+	Describe("MsgSend", func() {
+
 		It("should parse Msg commands when there is bank.MsgSend in the transaction", func() {
 			txDecoder := parser.NewTxDecoder("basetrcro")
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_MSG_SEND_BLOCK_RESP))
@@ -77,7 +78,5 @@ var _ = Describe("Msg", func() {
 				},
 			)}))
 		})
-
-		// TODO: MsgMultiSend
 	})
 })
