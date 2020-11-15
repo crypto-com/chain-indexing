@@ -1,4 +1,4 @@
-package createrawblock
+package event
 
 import (
 	"bytes"
@@ -13,23 +13,23 @@ import (
 	usecase_model "github.com/crypto-com/chainindex/usecase/model"
 )
 
-const EVENT_NAME = "RawBlockCreatedEvent"
+const RAW_BLOCK_CREATED_NAME = "RawBlockCreated"
 
-type RawBlockCreatedEvent struct {
+type RawBlockCreated struct {
 	entity_event.Base
 
 	RawBlock *usecase_model.RawBlock `json:"rawBlock"`
 }
 
-func NewEvent(rawBlock *usecase_model.RawBlock) *RawBlockCreatedEvent {
+func NewEvent(rawBlock *usecase_model.RawBlock) *RawBlockCreated {
 	blockHeight, err := strconv.ParseInt(rawBlock.Block.Header.Height, 10, 64)
 	if err != nil {
 		panic(fmt.Sprintf("Missing block blockHeight in raw block: %v", err))
 	}
 
-	return &RawBlockCreatedEvent{
+	return &RawBlockCreated{
 		entity_event.NewBase(entity_event.BaseParams{
-			Name:        EVENT_NAME,
+			Name:        RAW_BLOCK_CREATED_NAME,
 			Version:     1,
 			BlockHeight: blockHeight,
 		}),
@@ -38,7 +38,7 @@ func NewEvent(rawBlock *usecase_model.RawBlock) *RawBlockCreatedEvent {
 	}
 }
 
-func (event *RawBlockCreatedEvent) ToJSON() (string, error) {
+func (event *RawBlockCreated) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
 		return "", err
@@ -47,15 +47,15 @@ func (event *RawBlockCreatedEvent) ToJSON() (string, error) {
 	return string(encoded), nil
 }
 
-func (event *RawBlockCreatedEvent) String() string {
+func (event *RawBlockCreated) String() string {
 	return render.Render(event)
 }
 
-func DecodeEvent(encoded []byte) (entity_event.Event, error) {
+func DecodeRawBlockCreated(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *RawBlockCreatedEvent
+	var event *RawBlockCreated
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}

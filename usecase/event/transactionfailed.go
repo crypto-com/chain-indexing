@@ -1,19 +1,19 @@
-package createtransaction
+package event
 
 import (
 	"bytes"
 
 	"github.com/crypto-com/chainindex/usecase/coin"
-
+	"github.com/crypto-com/chainindex/usecase/model"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/luci/go-render/render"
 
 	entity_event "github.com/crypto-com/chainindex/entity/event"
-	jsoniter "github.com/json-iterator/go"
 )
 
-const EVENT_NAME = "TransactionCreated"
+const TRANSACTION_FAILED_NAME = "TransactionFailed"
 
-type TransactionCreated struct {
+type TransactionFailed struct {
 	entity_event.Base
 
 	TxHash    string    `json:"txHash"`
@@ -25,10 +25,10 @@ type TransactionCreated struct {
 	GasUsed   string    `json:"gasUsed"`
 }
 
-func NewEvent(blockHeight int64, params Params) *TransactionCreated {
-	return &TransactionCreated{
+func NewTransactionFailed(blockHeight int64, params model.CreateTransactionParams) *TransactionFailed {
+	return &TransactionFailed{
 		Base: entity_event.NewBase(entity_event.BaseParams{
-			Name:        EVENT_NAME,
+			Name:        TRANSACTION_FAILED_NAME,
 			Version:     1,
 			BlockHeight: blockHeight,
 		}),
@@ -43,17 +43,7 @@ func NewEvent(blockHeight int64, params Params) *TransactionCreated {
 	}
 }
 
-type Params struct {
-	TxHash    string
-	Code      int
-	Log       string
-	MsgCount  int
-	Fee       coin.Coin
-	GasWanted string
-	GasUsed   string
-}
-
-func (event *TransactionCreated) ToJSON() (string, error) {
+func (event *TransactionFailed) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
 		return "", err
@@ -62,15 +52,15 @@ func (event *TransactionCreated) ToJSON() (string, error) {
 	return string(encoded), nil
 }
 
-func (event *TransactionCreated) String() string {
+func (event *TransactionFailed) String() string {
 	return render.Render(event)
 }
 
-func DecodeEvent(encoded []byte) (entity_event.Event, error) {
+func DecodeTransactionFailed(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *TransactionCreated
+	var event *TransactionFailed
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}

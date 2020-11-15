@@ -3,7 +3,8 @@ package parser
 import (
 	"github.com/crypto-com/chainindex/entity/command"
 	"github.com/crypto-com/chainindex/usecase/coin"
-	"github.com/crypto-com/chainindex/usecase/domain/createmsgsend"
+	command2 "github.com/crypto-com/chainindex/usecase/command"
+	"github.com/crypto-com/chainindex/usecase/event"
 	"github.com/crypto-com/chainindex/usecase/model"
 )
 
@@ -29,12 +30,12 @@ func ParseMsgToCommands(block *model.Block, blockResults *model.BlockResults) []
 				}
 
 				amount := transferEvent.MustGetAttribute("amount")
-				commands = append(commands, createmsgsend.NewCommand(
+				commands = append(commands, command2.NewCreateMsgSend(
 					blockHeight,
 
 					txHash,
 					log.MsgIndex,
-					createmsgsend.Params{
+					event.MsgSendCreatedParams{
 						FromAddress: transferEvent.MustGetAttribute("sender"),
 						ToAddress:   transferEvent.MustGetAttribute("recipient"),
 						Amount:      coin.MustNewCoinFromString(TrimAmountDenom(amount)),

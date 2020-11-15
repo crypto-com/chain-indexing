@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/crypto-com/chainindex/usecase/domain"
-
 	event_interface "github.com/crypto-com/chainindex/appinterface/event"
 	projection_interface "github.com/crypto-com/chainindex/appinterface/projection"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
@@ -17,6 +15,7 @@ import (
 	"github.com/crypto-com/chainindex/infrastructure/notification"
 	"github.com/crypto-com/chainindex/infrastructure/tendermint"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
+	event_usecase "github.com/crypto-com/chainindex/usecase/event"
 	"github.com/crypto-com/chainindex/usecase/parser"
 )
 
@@ -79,12 +78,12 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
 		// Request tendermint RPC
 		block, rawBlock, err := manager.client.Block(currentIndexingHeight)
 		if err != nil {
-			return fmt.Errorf("error requesting chain block at %d: %v", currentIndexingHeight, err)
+			return fmt.Errorf("error requesting chain block at height %d: %v", currentIndexingHeight, err)
 		}
 
 		blockResults, err := manager.client.BlockResults(currentIndexingHeight)
 		if err != nil {
-			return fmt.Errorf("error requesting chain block_results at %d: %v", currentIndexingHeight, err)
+			return fmt.Errorf("error requesting chain block_results at height %d: %v", currentIndexingHeight, err)
 		}
 
 		// Create new block notification and notify subscribers
@@ -134,7 +133,7 @@ func (manager *SyncManager) InitSubject() *chainfeed.BlockSubject {
 
 func (manager *SyncManager) InitRegistry() *event.Registry {
 	registry := event.NewRegistry()
-	domain.RegisterEvents(registry)
+	event_usecase.RegisterEvents(registry)
 	return registry
 }
 

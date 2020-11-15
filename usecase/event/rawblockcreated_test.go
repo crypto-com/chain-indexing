@@ -1,4 +1,4 @@
-package createrawblock_test
+package event_test
 
 import (
 	"encoding/json"
@@ -6,19 +6,19 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/crypto-com/chainindex/usecase/domain/createrawblock"
+	event_usecase "github.com/crypto-com/chainindex/usecase/event"
 	"github.com/crypto-com/chainindex/usecase/model"
 )
 
 var _ = Describe("Event", func() {
-	Describe("En/DecodeEvent", func() {
+	Describe("En/DecodeRawBlockCreated", func() {
 		It("should able to encode and decode to the same Event", func() {
 			var rawBlock model.RawBlock
 			_ = json.Unmarshal([]byte(RAW_BLOCK_JSON), &rawBlock)
-			event := createrawblock.NewEvent(&rawBlock)
+			event := event_usecase.NewEvent(&rawBlock)
 			encoded, _ := json.Marshal(event)
 
-			actual, err := createrawblock.DecodeEvent(encoded)
+			actual, err := event_usecase.DecodeRawBlockCreated(encoded)
 			Expect(err).To(BeNil())
 			Expect(actual).To(Equal(event))
 		})

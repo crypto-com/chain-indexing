@@ -23,6 +23,7 @@ type BlockResultsTxsResult struct {
 	Code      int                        `json:"code"`
 	Data      string                     `json:"data"`
 	Log       []BlockResultsTxsResultLog `json:"log"`
+	RawLog    string                     `json:"rawLog"`
 	Info      string                     `json:"info"`
 	GasWanted string                     `json:"gasWanted"`
 	GasUsed   string                     `json:"gasUsed"`
@@ -46,8 +47,8 @@ type BlockResultsEventAttribute struct {
 }
 
 type BlockResultsValidatorUpdate struct {
-	PubKey BlockResultsValidatorPubKey
-	Power  *big.Int `json:"power"`
+	PubKey     BlockResultsValidatorPubKey
+	MaybePower *big.Int `json:"power"`
 }
 
 type BlockResultsValidatorPubKey struct {

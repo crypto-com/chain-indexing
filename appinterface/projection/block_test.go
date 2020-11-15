@@ -2,19 +2,19 @@ package projection_test
 
 import (
 	. "github.com/crypto-com/chainindex/appinterface/rdb/test"
-	entity_event "github.com/crypto-com/chainindex/entity/event"
 	. "github.com/crypto-com/chainindex/entity/event/test"
-	entity_projection "github.com/crypto-com/chainindex/entity/projection"
 	. "github.com/crypto-com/chainindex/internal/logger/test"
 	. "github.com/crypto-com/chainindex/test"
-	"github.com/crypto-com/chainindex/usecase/domain/createblock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	"github.com/crypto-com/chainindex/appinterface/projection/view"
+	event_entity "github.com/crypto-com/chainindex/entity/event"
+	entity_projection "github.com/crypto-com/chainindex/entity/projection"
 	"github.com/crypto-com/chainindex/infrastructure/pg"
 	"github.com/crypto-com/chainindex/internal/primptr"
 	"github.com/crypto-com/chainindex/internal/utctime"
+	event_usecase "github.com/crypto-com/chainindex/usecase/event"
 	usecase_model "github.com/crypto-com/chainindex/usecase/model"
 
 	. "github.com/crypto-com/chainindex/appinterface/projection"
@@ -41,7 +41,7 @@ var _ = Describe("Block", func() {
 			blocksView := view.NewBlocks(pgConn.ToHandle())
 
 			anyHeight := int64(405947)
-			event := createblock.NewEvent(&usecase_model.Block{
+			event := event_usecase.NewBlockCreated(&usecase_model.Block{
 				Height:          anyHeight,
 				Hash:            "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
 				Time:            utctime.FromUnixNano(int64(1000000)),
@@ -71,7 +71,7 @@ var _ = Describe("Block", func() {
 
 			Expect(blocksView.Count()).To(Equal(0))
 
-			err := projection.HandleEvents(anyHeight, []entity_event.Event{event})
+			err := projection.HandleEvents(anyHeight, []event_entity.Event{event})
 			Expect(err).To(BeNil())
 			Expect(blocksView.Count()).To(Equal(1))
 
@@ -111,7 +111,7 @@ var _ = Describe("Block", func() {
 
 			Expect(projection.GetLastHandledEventHeight()).To(BeNil())
 
-			err := projection.HandleEvents(anyHeight, []entity_event.Event{})
+			err := projection.HandleEvents(anyHeight, []event_entity.Event{})
 			Expect(err).To(BeNil())
 
 			Expect(projection.GetLastHandledEventHeight()).To(Equal(primptr.Int64(anyHeight)))
@@ -127,7 +127,7 @@ var _ = Describe("Block", func() {
 			projection := NewBlock(fakeLogger, pgConn)
 			Expect(blocksView.Count()).To(Equal(0))
 
-			err := projection.HandleEvents(anyHeight, []entity_event.Event{event})
+			err := projection.HandleEvents(anyHeight, []event_entity.Event{event})
 			Expect(err).NotTo(BeNil())
 			Expect(blocksView.Count()).To(Equal(0))
 		})

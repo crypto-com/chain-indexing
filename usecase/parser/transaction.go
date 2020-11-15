@@ -7,12 +7,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/crypto-com/chainindex/usecase/coin"
-
 	jsoniter "github.com/json-iterator/go"
 
 	"github.com/crypto-com/chainindex/entity/command"
-	"github.com/crypto-com/chainindex/usecase/domain/createtransaction"
+	"github.com/crypto-com/chainindex/usecase/coin"
+	command_usecase "github.com/crypto-com/chainindex/usecase/command"
 	"github.com/crypto-com/chainindex/usecase/model"
 )
 
@@ -30,7 +29,7 @@ func ParseTransactionCommands(
 		if err != nil {
 			return nil, fmt.Errorf("error encoding transaction result rawLog to JSON: %v", err)
 		}
-		cmds = append(cmds, createtransaction.NewCommand(blockHeight, createtransaction.Params{
+		cmds = append(cmds, command_usecase.NewCreateTransaction(blockHeight, model.CreateTransactionParams{
 			TxHash:    TxHash(txHex),
 			Code:      txsResult.Code,
 			Log:       log,

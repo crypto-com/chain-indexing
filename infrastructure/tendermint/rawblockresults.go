@@ -45,7 +45,7 @@ type RawBlockResultsValidatorUpdate struct {
 			} `json:"value"`
 		} `json:"Sum"`
 	} `json:"pub_key"`
-	Power string `json:"power"`
+	MaybePower string `json:"power,omitempty"`
 }
 
 type RawBlockResultsConsensusParamUpdates struct {
