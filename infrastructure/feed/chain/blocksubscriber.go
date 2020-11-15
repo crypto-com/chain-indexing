@@ -12,12 +12,12 @@ import (
 )
 
 type BlockSubscriber struct {
-	moduleAccounts *parser.ModuleAccounts
+	txDecoder *parser.TxDecoder
 }
 
-func NewBlockSubscriber(moduleAccounts *parser.ModuleAccounts) *BlockSubscriber {
+func NewBlockSubscriber(txDecoder *parser.TxDecoder) *BlockSubscriber {
 	return &BlockSubscriber{
-		moduleAccounts,
+		txDecoder,
 	}
 }
 
@@ -25,7 +25,7 @@ func (subscriber *BlockSubscriber) OnNotification(n *notification.BlockNotificat
 	// create an executor instance for current height
 	executor := executor.NewBlockExecutor(logger, n.Height)
 	commands, err := parser.ParseBlockToCommands(
-		subscriber.moduleAccounts,
+		subscriber.txDecoder,
 		n.Block,
 		n.RawBlock,
 		n.BlockResults,

@@ -137,7 +137,7 @@ var _ = Describe("PgxTypeConv", func() {
 		It("should return nil when time is null", func() {
 			reader := pgxTypeConv.NtotReader()
 
-			arg := reader.ScannableArg().(**int64)
+			arg, _ := reader.ScannableArg().(**int64)
 			*arg = nil
 
 			actual, err := reader.Parse()
@@ -149,7 +149,7 @@ var _ = Describe("PgxTypeConv", func() {
 			expected := utctime.FromUnixNano(707810766000000000)
 
 			reader := pgxTypeConv.NtotReader()
-			arg := reader.ScannableArg().(**int64)
+			arg, _ := reader.ScannableArg().(**int64)
 			**arg = 707810766000000000
 
 			actual, err := reader.Parse()

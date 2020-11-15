@@ -13,6 +13,7 @@ func addGoTypesFuncLookup() {
 		Example:     "0",
 		Output:      "int",
 		Call: func(m *map[string][]string, info *random.Info) (interface{}, error) {
+			// nolint:gosec
 			return rand.Int(), nil
 		},
 	})

@@ -27,18 +27,18 @@ func (impl *RDbStoreImpl) UpdateLastHandledEventHeight(rdbHandle *rdb.Handle, pr
 
 	if lastHandledEventHeight == nil {
 		// Insert projection record with the updated height
-		sql, args, err := rdbHandle.StmtBuilder.Insert(
+		sql, args, sqlErr := rdbHandle.StmtBuilder.Insert(
 			impl.table,
 		).Columns(
 			"id", "last_handled_event_height",
 		).Values(projectionId, height).ToSql()
-		if err != nil {
-			return fmt.Errorf("error building last handled event height insertion SQL: %v", err)
+		if sqlErr != nil {
+			return fmt.Errorf("error building last handled event height insertion SQL: %v", sqlErr)
 		}
 
-		execResult, err := rdbHandle.Exec(sql, args...)
-		if err != nil {
-			return fmt.Errorf("error exectuing last handled event height insertion SQL: %v", err)
+		execResult, sqlErr := rdbHandle.Exec(sql, args...)
+		if sqlErr != nil {
+			return fmt.Errorf("error exectuing last handled event height insertion SQL: %v", sqlErr)
 		}
 		if execResult.RowsAffected() == 0 {
 			return errors.New("error executing last handled event height insertion SQL: no rows inserted")

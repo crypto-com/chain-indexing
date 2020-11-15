@@ -19,10 +19,12 @@ import (
 var _ = Describe("Msg", func() {
 	Describe("ParseMsgCommands", func() {
 		It("should parse Msg commands when there is bank.MsgSend in the transaction", func() {
+			txDecoder := parser.NewTxDecoder("basetrcro")
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_MSG_SEND_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_MSG_SEND_BLOCK_RESULTS_RESP))
 
 			cmds := parser.ParseMsgToCommands(
+				txDecoder,
 				block,
 				blockResults,
 			)
@@ -43,10 +45,12 @@ var _ = Describe("Msg", func() {
 		})
 
 		It("should parse Msg commands when there are multiple bank.MsgSend in one transaction", func() {
+			txDecoder := parser.NewTxDecoder("basetrcro")
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.ONE_TX_TWO_MSG_SEND_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.ONE_TX_TWO_MSG_SEND_BLOCK_RESULTS_RESP))
 
 			cmds := parser.ParseMsgToCommands(
+				txDecoder,
 				block,
 				blockResults,
 			)

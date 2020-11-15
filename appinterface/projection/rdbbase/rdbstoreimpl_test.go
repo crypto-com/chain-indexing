@@ -78,6 +78,7 @@ var _ = Describe("RdbStoreImpl", func() {
 func IsProjectionRowExist(pgxConn *pg.PgxConn, projectionId string) bool {
 	var rowCount int64
 	if err := pgxConn.QueryRow(
+		// nolint:gosec
 		fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE id='%s'", rdbbase.DEFAULT_TABLE, projectionId),
 	).Scan(&rowCount); err != nil {
 		panic(err)

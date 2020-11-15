@@ -12,9 +12,11 @@ import (
 )
 
 type IndexServer struct {
-	TendermintHTTPRPCURL string
-	RdbConn              *pg.PgxConn
-	logger               applogger.Logger
+	logger  applogger.Logger
+	rdbConn *pg.PgxConn
+
+	baseDenom            string
+	tendermintHTTPRPCURL string
 }
 
 // NewIndexServer creates a new server instance for polling and indexing
@@ -27,9 +29,11 @@ func NewIndexServer(config *FileConfig) (*IndexServer, error) {
 	}
 
 	return &IndexServer{
-		TendermintHTTPRPCURL: config.Tendermint.HTTPRPCURL,
-		RdbConn:              pgxConnPool,
-		logger:               logger,
+		logger:  logger,
+		rdbConn: pgxConnPool,
+
+		baseDenom:            config.Blockchain.BaseDenom,
+		tendermintHTTPRPCURL: config.Tendermint.HTTPRPCURL,
 	}, nil
 }
 
@@ -37,7 +41,7 @@ func SetupRdbConn(config *FileConfig, logger applogger.Logger) (*pg.PgxConn, err
 	var pgxConnPool *pg.PgxConn
 	var err error
 
-	// Parse duration strings to duration
+	// GetFee duration strings to duration
 	maxConnLifeTime, err := time.ParseDuration(config.Postgres.MaxConnLifeTime)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing MaxConnLifeTime string to duration %v", err)
@@ -82,20 +86,13 @@ func SetupRdbConn(config *FileConfig, logger applogger.Logger) (*pg.PgxConn, err
 func (s *IndexServer) Run() error {
 	s.logger.Debug("TODO: should load module accounts configuration")
 
-	moduleAccounts := &parser.ModuleAccounts{
-		FeeCollector:        "tcro17xpfvakm2amg962yls6f84z3kell8c5lxhzaha",
-		Mint:                "tcro1m3h30wlvsf8llruxtpukdvsy0km2kum87lx9mq",
-		Distribution:        "tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l",
-		Gov:                 "tcro10d07y265gmmuvt4z0w9aw880jnsr700jvvjc2n",
-		BondedTokensPool:    "tcro1fl48vsnmsdzcv85q5d2q4z5ajdha8yu3r4gj9h",
-		NotBondedTokensPool: "tcro1tygms3xhhs3yv487phx3dw4a95jn7t7lh45rnr",
-	}
+	txDecoder := parser.NewTxDecoder(s.baseDenom)
 
 	syncManager := NewSyncManager(
 		s.logger,
-		s.TendermintHTTPRPCURL,
-		s.RdbConn,
-		moduleAccounts,
+		s.rdbConn,
+		s.tendermintHTTPRPCURL,
+		txDecoder,
 	)
 	if err := syncManager.Run(); err != nil {
 		return fmt.Errorf("error running sync manager %v", err)

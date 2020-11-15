@@ -7,16 +7,14 @@ import (
 	"fmt"
 	"strings"
 
-	jsoniter "github.com/json-iterator/go"
-
 	"github.com/crypto-com/chainindex/entity/command"
-	"github.com/crypto-com/chainindex/usecase/coin"
 	command_usecase "github.com/crypto-com/chainindex/usecase/command"
 	"github.com/crypto-com/chainindex/usecase/model"
+	jsoniter "github.com/json-iterator/go"
 )
 
 func ParseTransactionCommands(
-	moduleAccounts *ModuleAccounts,
+	txDecoder *TxDecoder,
 	block *model.Block,
 	blockResults *model.BlockResults,
 ) ([]command.Command, error) {
@@ -25,16 +23,27 @@ func ParseTransactionCommands(
 	for i, txsResult := range blockResults.TxsResults {
 		txHex := block.Txs[i]
 
-		log, err := jsoniter.MarshalToString(txsResult.Log)
+		var log string
+		if len(txsResult.Log) == 0 {
+			// cater for failed transaction
+			log = txsResult.RawLog
+		} else {
+			var err error
+			if log, err = jsoniter.MarshalToString(txsResult.Log); err != nil {
+				return nil, fmt.Errorf("error encoding transaction result rawLog to JSON: %v", err)
+			}
+		}
+
+		fee, err := txDecoder.GetFee(txHex)
 		if err != nil {
-			return nil, fmt.Errorf("error encoding transaction result rawLog to JSON: %v", err)
+			return nil, fmt.Errorf("error parsing transaction fee: %v", err)
 		}
 		cmds = append(cmds, command_usecase.NewCreateTransaction(blockHeight, model.CreateTransactionParams{
 			TxHash:    TxHash(txHex),
 			Code:      txsResult.Code,
 			Log:       log,
 			MsgCount:  len(txsResult.Log),
-			Fee:       getTxFee(moduleAccounts.FeeCollector, txsResult),
+			Fee:       fee,
 			GasWanted: txsResult.GasWanted,
 			GasUsed:   txsResult.GasUsed,
 		}))
@@ -43,27 +52,27 @@ func ParseTransactionCommands(
 	return cmds, nil
 }
 
-func getTxFee(feeCollectorAddress string, txsResult model.BlockResultsTxsResult) coin.Coin {
-	for _, event := range txsResult.Events {
-		if event.Type == "transfer" {
-			isFeeEvent := false
-			var amount string
-			for _, attribute := range event.Attributes {
-				if attribute.Key == "recipient" && attribute.Value == feeCollectorAddress {
-					isFeeEvent = true
-				} else if attribute.Key == "amount" {
-					amount = attribute.Value
-				}
-			}
-
-			if isFeeEvent {
-				return coin.MustNewCoinFromString(TrimAmountDenom(amount))
-			}
-		}
-	}
-
-	return coin.MustNewCoinFromInt(int64(0))
-}
+//func getTxFee(feeCollectorAddress string, txsResult model.BlockResultsTxsResult) coin.Coin {
+//	for _, event := range txsResult.Events {
+//		if event.Type == "transfer" {
+//			isFeeEvent := false
+//			var amount string
+//			for _, attribute := range event.Attributes {
+//				if attribute.Key == "recipient" && attribute.Value == feeCollectorAddress {
+//					isFeeEvent = true
+//				} else if attribute.Key == "amount" {
+//					amount = attribute.Value
+//				}
+//			}
+//
+//			if isFeeEvent {
+//				return coin.MustNewCoinFromString(TrimAmountDenom(amount))
+//			}
+//		}
+//	}
+//
+//	return coin.MustNewCoinFromInt(int64(0))
+//}
 
 func TxHash(base64EncodedTxHex string) string {
 	txHexBytes, err := base64.StdEncoding.DecodeString(base64EncodedTxHex)

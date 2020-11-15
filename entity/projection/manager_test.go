@@ -68,7 +68,7 @@ var _ = Describe("Manager", func() {
 
 			// Define the assertion expectations
 			mockProjection.On("HandleEvents", nextHeight, mock.MatchedBy(func(events interface{}) bool {
-				typedEvents := events.([]entity_event.Event)
+				typedEvents, _ := events.([]entity_event.Event)
 				// should only receive `anyEvent`
 				return typedEvents[0].Name() == anyEvent.Name()
 			})).Once().Return(nil)
@@ -118,11 +118,11 @@ var _ = Describe("Manager", func() {
 
 			// Define the assertion expectations
 			mockProjection.On("HandleEvents", anyEventHeight, mock.MatchedBy(func(events interface{}) bool {
-				typedEvents := events.([]entity_event.Event)
+				typedEvents, _ := events.([]entity_event.Event)
 				return len(typedEvents) == 1 && typedEvents[0].Name() == anyEvent.Name()
 			})).Once().Return(nil)
 			mockProjection.On("HandleEvents", anyOtherEventHeight, mock.MatchedBy(func(events interface{}) bool {
-				typedEvents := events.([]entity_event.Event)
+				typedEvents, _ := events.([]entity_event.Event)
 				return len(typedEvents) == 1 && typedEvents[0].Name() == anyOtherEvent.Name()
 			})).Once().Return(nil)
 
@@ -179,11 +179,11 @@ var _ = Describe("Manager", func() {
 
 			// Define the assertion expectations
 			anyProjection.On("HandleEvents", nextHeight, mock.MatchedBy(func(events interface{}) bool {
-				typedEvents := events.([]entity_event.Event)
+				typedEvents, _ := events.([]entity_event.Event)
 				return len(typedEvents) == 1 && typedEvents[0].Name() == anyEvent.Name()
 			})).Once().Return(nil)
 			anyOtherProjection.On("HandleEvents", nextHeight, mock.MatchedBy(func(events interface{}) bool {
-				typedEvents := events.([]entity_event.Event)
+				typedEvents, _ := events.([]entity_event.Event)
 				return len(typedEvents) == 1 && typedEvents[0].Name() == anyOtherEvent.Name()
 			})).Once().Return(nil)
 
@@ -228,7 +228,7 @@ var _ = Describe("Manager", func() {
 
 			// Define the assertion expectations
 			mockProjection.On("HandleEvents", nextHeight, mock.MatchedBy(func(events interface{}) bool {
-				typedEvents := events.([]entity_event.Event)
+				typedEvents, _ := events.([]entity_event.Event)
 				return len(typedEvents) == 1 && typedEvents[0].Name() == anyEvent.Name()
 			})).Once().Return(nil)
 

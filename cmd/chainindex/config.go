@@ -2,9 +2,22 @@ package main
 
 // FileConfig is the struct matches config.toml
 type FileConfig struct {
+	Blockchain BlockchainConfig
 	Tendermint TendermintConfig
 	Database   DatabaseConfig
 	Postgres   PostgresConfig
+}
+
+type BlockchainConfig struct {
+	CRODenom  string `toml:"cro_denom"`
+	BaseDenom string `toml:"base_denom"`
+
+	AccountAddressPrefix   string `toml:"account_address_prefix"`
+	AccountPubKeyPrefix    string `toml:"account_pubkey_prefix"`
+	ValidatorAddressPrefix string `toml:"validator_address_prefix"`
+	ValidatorPubKeyPrefix  string `toml:"validator_pubkey_prefix"`
+	ConNodeAddressPrefix   string `toml:"connode_address_prefix"`
+	ConNodePubKeyPrefix    string `toml:"connode_pubkey_prefix"`
 }
 
 type TendermintConfig struct {

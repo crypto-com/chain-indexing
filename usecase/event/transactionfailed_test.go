@@ -32,7 +32,7 @@ var _ = Describe("Event", func() {
 			decodedEvent, err := event_usecase.DecodeTransactionFailed([]byte(encoded))
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))
-			typedEvent := decodedEvent.(*event_usecase.TransactionFailed)
+			typedEvent, _ := decodedEvent.(*event_usecase.TransactionFailed)
 			Expect(typedEvent.TxHash).To(Equal(anyTxHash))
 		})
 	})
