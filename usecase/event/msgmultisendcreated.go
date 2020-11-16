@@ -10,33 +10,32 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_MULTI_SEND_CREATED_NAME = "MsgSendCreated"
+const MSG_MULTI_SEND = "MsgMultiSend"
+const MSG_MULTI_SEND_CREATED = "MsgMultiSend"
+const MSG_MULTI_SEND_FAILED = "MsgMultiSendFailed"
 
-type MsgMultiSendCreated struct {
-	entity_event.Base
+type MsgMultiSend struct {
+	MsgBase
 
-	TxHash   string                     `json:"txHash"`
-	MsgIndex int                        `json:"msgIndex"`
-	Inputs   []model.MsgMultiSendInput  `json:"inputs"`
-	Outputs  []model.MsgMultiSendOutput `json:"outputs"`
+	Inputs  []model.MsgMultiSendInput  `json:"inputs"`
+	Outputs []model.MsgMultiSendOutput `json:"outputs"`
 }
 
-func NewMsgMultiSendCreated(blockHeight int64, txHash string, msgIndex int, params model.MsgMultiSendParams) *MsgMultiSendCreated {
-	return &MsgMultiSendCreated{
-		entity_event.NewBase(entity_event.BaseParams{
-			Name:        MSG_MULTI_SEND_CREATED_NAME,
-			Version:     1,
-			BlockHeight: blockHeight,
+func NewMsgMultiSend(msgCommonParams MsgCommonParams, params model.MsgMultiSendParams) *MsgMultiSend {
+	return &MsgMultiSend{
+		NewMsgBase(MsgBaseParams{
+			MsgName: MSG_MULTI_SEND,
+			Version: 1,
+
+			MsgCommonParams: msgCommonParams,
 		}),
 
-		txHash,
-		msgIndex,
 		params.Inputs,
 		params.Outputs,
 	}
 }
 
-func (event *MsgMultiSendCreated) ToJSON() (string, error) {
+func (event *MsgMultiSend) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
 		return "", err
@@ -45,15 +44,15 @@ func (event *MsgMultiSendCreated) ToJSON() (string, error) {
 	return string(encoded), nil
 }
 
-func (event *MsgMultiSendCreated) String() string {
+func (event *MsgMultiSend) String() string {
 	return render.Render(event)
 }
 
-func DecodeMsgMultiSendCreated(encoded []byte) (entity_event.Event, error) {
+func DecodeMsgMultiSend(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *MsgMultiSendCreated
+	var event *MsgMultiSend
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}

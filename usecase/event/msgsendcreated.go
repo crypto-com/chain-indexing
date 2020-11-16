@@ -10,28 +10,26 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_SEND_CREATED_NAME = "MsgSendCreated"
+const MSG_SEND = "MsgSend"
+const MSG_SEND_CREATED = "MsgSend"
+const MSG_SEND_FAILED = "MsgSendFailed"
 
-type MsgSendCreated struct {
-	entity_event.Base
+type MsgSend struct {
+	MsgBase
 
-	TxHash      string    `json:"txHash"`
-	MsgIndex    int       `json:"msgIndex"`
 	FromAddress string    `json:"fromAddress"`
 	ToAddress   string    `json:"toAddress"`
 	Amount      coin.Coin `json:"amount"`
 }
 
-func NewMsgSendCreated(blockHeight int64, txHash string, msgIndex int, params MsgSendCreatedParams) *MsgSendCreated {
-	return &MsgSendCreated{
-		entity_event.NewBase(entity_event.BaseParams{
-			Name:        MSG_SEND_CREATED_NAME,
-			Version:     1,
-			BlockHeight: blockHeight,
+func NewMsgSend(msgCommonParams MsgCommonParams, params MsgSendCreatedParams) *MsgSend {
+	return &MsgSend{
+		NewMsgBase(MsgBaseParams{
+			MsgName:         MSG_SEND,
+			Version:         1,
+			MsgCommonParams: msgCommonParams,
 		}),
 
-		txHash,
-		msgIndex,
 		params.FromAddress,
 		params.ToAddress,
 		params.Amount,
@@ -44,7 +42,7 @@ type MsgSendCreatedParams struct {
 	Amount      coin.Coin
 }
 
-func (event *MsgSendCreated) ToJSON() (string, error) {
+func (event *MsgSend) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
 		return "", err
@@ -53,15 +51,15 @@ func (event *MsgSendCreated) ToJSON() (string, error) {
 	return string(encoded), nil
 }
 
-func (event *MsgSendCreated) String() string {
+func (event *MsgSend) String() string {
 	return render.Render(event)
 }
 
-func DecodeMsgSendCreated(encoded []byte) (entity_event.Event, error) {
+func DecodeMsgSend(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *MsgSendCreated
+	var event *MsgSend
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}

@@ -3,6 +3,8 @@ package parser_test
 import (
 	"strings"
 
+	"github.com/crypto-com/chainindex/usecase/event"
+
 	"github.com/crypto-com/chainindex/usecase/coin"
 	"github.com/crypto-com/chainindex/usecase/model"
 
@@ -30,13 +32,13 @@ var _ = Describe("ParseMsgCommands", func() {
 				blockResults,
 			)
 			Expect(cmds).To(HaveLen(1))
-			expectedBlockHeight := int64(421481)
-			expectedTxHash := "89D220EC5C551DA81EE6993D05B53F25912B072E7FFD863D93AA742923239A5F"
-			expectedMsgIndex := 0
 			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateMsgMultiSend(
-				expectedBlockHeight,
-				expectedTxHash,
-				expectedMsgIndex,
+				event.MsgCommonParams{
+					BlockHeight: int64(421481),
+					TxHash:      "89D220EC5C551DA81EE6993D05B53F25912B072E7FFD863D93AA742923239A5F",
+					TxSuccess:   true,
+					MsgIndex:    0,
+				},
 				model.MsgMultiSendParams{
 					Inputs: []model.MsgMultiSendInput{
 						{

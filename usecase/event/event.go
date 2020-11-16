@@ -10,5 +10,8 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(TRANSACTION_CREATED_NAME, 1, DecodeTransactionCreated)
 	registry.Register(TRANSACTION_FAILED_NAME, 1, DecodeTransactionFailed)
 
-	registry.Register(MSG_SEND_CREATED_NAME, 1, DecodeMsgSendCreated)
+	registry.Register(MSG_SEND_CREATED, 1, DecodeMsgSend)
+	registry.Register(MSG_SEND_FAILED, 1, DecodeMsgSend)
+	registry.Register(MSG_MULTI_SEND_CREATED, 1, DecodeMsgMultiSend)
+	registry.Register(MSG_MULTI_SEND_FAILED, 1, DecodeMsgMultiSend)
 }

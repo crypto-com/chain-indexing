@@ -38,7 +38,7 @@ const FAILED_TX_WITH_FEE_BLOCK_RESP = `{
       },
       "data": {
         "txs": [
-            "CowGCpkBCjcvY29zbW9zLmRpc3RyaWJ1dGlvbi52MWJldGExLk1zZ1dpdGhkcmF3RGVsZWdhdG9yUmV3YXJkEl4KK3Rjcm8xNG01YTRreHQyZTgydXFxczVndHF6YTI5ZG01d3F6eWEyanc5c2gSL3Rjcm9jbmNsMTkyM3B6MDNtaGphenRnY3YzZ2V5MGhqMGFtd3gwMmR5c2thdTUyCpkBCjcvY29zbW9zLmRpc3RyaWJ1dGlvbi52MWJldGExLk1zZ1dpdGhkcmF3RGVsZWdhdG9yUmV3YXJkEl4KK3Rjcm8xNG01YTRreHQyZTgydXFxczVndHF6YTI5ZG01d3F6eWEyanc5c2gSL3Rjcm9jbmNsMXh3ZDNrOHh0ZXJkZWZ0M254cWc5MnN6aHB6NnZ4NDNxc3BkcHc2CpkBCjcvY29zbW9zLmRpc3RyaWJ1dGlvbi52MWJldGExLk1zZ1dpdGhkcmF3RGVsZWdhdG9yUmV3YXJkEl4KK3Rjcm8xNG01YTRreHQyZTgydXFxczVndHF6YTI5ZG01d3F6eWEyanc5c2gSL3Rjcm9jbmNsMTh5bGNoZ214eXBodzNjdHNsNzVuNTN1amVxdWttbWFnMm42eDNmCpkBCjcvY29zbW9zLmRpc3RyaWJ1dGlvbi52MWJldGExLk1zZ1dpdGhkcmF3RGVsZWdhdG9yUmV3YXJkEl4KK3Rjcm8xNG01YTRreHQyZTgydXFxczVndHF6YTI5ZG01d3F6eWEyanc5c2gSL3Rjcm9jbmNsMWZzOHI2enhtcjVuYzg2ajhjcGNtam1jY2Y4czJjYWZ4enQ1YWxxCpkBCjcvY29zbW9zLmRpc3RyaWJ1dGlvbi52MWJldGExLk1zZ1dpdGhkcmF3RGVsZWdhdG9yUmV3YXJkEl4KK3Rjcm8xNG01YTRreHQyZTgydXFxczVndHF6YTI5ZG01d3F6eWEyanc5c2gSL3Rjcm9jbmNsMWZqYTVuc3h6N2dzcXc0emNjdXV5OHI3cGpuam1jN2RzY2RsMnZ6EmwKUQpGCh8vY29zbW9zLmNyeXB0by5zZWNwMjU2azEuUHViS2V5EiMKIQL6Inwmwwd0nDUwtu9S8U0E+TU86f92eeo/ZUJfq+O1tRIECgIIARieHRIXChEKCGJhc2V0Y3JvEgUxNTAwMBDwkwkaQDfjeHPhtkdkDG3JyqECSN2DTIZeTC3Z2dK82HL1qshIH6dvMvT2JP4NGhmcQW/JK97sZ+FMdxe98GJxQNLfZfk="
+          "CpUBCpIBChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEnIKK3Rjcm8xZmVxaDZhZDl5dGprcjc5a2prNW5obmw0dW4zd2V6MHludXJyd3YSK3Rjcm8xZmVxaDZhZDl5dGprcjc5a2prNW5obmw0dW4zd2V6MHludXJyd3YaFgoIYmFzZXRjcm8SCjEwMDAwMDAwMDASbgpQCkYKHy9jb3Ntb3MuY3J5cHRvLnNlY3AyNTZrMS5QdWJLZXkSIwohAx+Rgmd2ta8FxUOoFJ9Dvo3782nMWJzdYP0Jcyrk5XwOEgQKAggBGDsSGgoTCghiYXNldGNybxIHODAwMDAwMBCA6JImGkClcXvyfOzeWFKVOt6JNesyiqPEXTiSJ2tE7KPxsny+vE+/at95xSzHcgeD4/gBUc6y1rFqseI/vl9ZBIH0EGxH"
         ]
       },
       "evidence": {
@@ -100,10 +100,10 @@ const FAILED_TX_WITH_FEE_BLOCK_RESULTS_RESP = `{
       {
         "code": 11,
         "data": null,
-        "log": "out of gas in location: WriteFlat; gasWanted: 150000, gasUsed: 150021: out of gas",
+        "log": "out of gas in location: WriteFlat; gasWanted: 80000000, gasUsed: 80150021: out of gas",
         "info": "",
-        "gas_wanted": "150000",
-        "gas_used": "150021",
+        "gas_wanted": "80000000",
+        "gas_used": "80150021",
         "events": [],
         "codespace": "sdk"
       }

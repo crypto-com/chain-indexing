@@ -1,7 +1,6 @@
 package chain
 
 import (
-	"fmt"
 	"sync"
 
 	applogger "github.com/crypto-com/chainindex/internal/logger"
@@ -11,11 +10,17 @@ import (
 )
 
 type BlockSubject struct {
+	logger applogger.Logger
+
 	Observers sync.Map
 }
 
-func NewBlockSubject() *BlockSubject {
+func NewBlockSubject(logger applogger.Logger) *BlockSubject {
 	return &BlockSubject{
+		logger: logger.WithFields(applogger.LogFields{
+			"module": "BlockSubject",
+		}),
+
 		Observers: sync.Map{},
 	}
 }
@@ -24,14 +29,14 @@ func (s *BlockSubject) Attach(subj *BlockSubscriber) {
 	s.Observers.Store(subj, struct{}{})
 }
 
-func (s *BlockSubject) Notify(n *notification.BlockNotification, logger applogger.Logger, eventStore *event_interface.RDbStore) {
+func (s *BlockSubject) Notify(n *notification.BlockNotification, eventStore *event_interface.RDbStore) {
 	s.Observers.Range(func(key interface{}, value interface{}) bool {
 		if key == nil || value == nil {
 			return false
 		}
 
-		if err := key.(*BlockSubscriber).OnNotification(n, logger, eventStore); err != nil {
-			fmt.Println("error when subscriber run callback function", err)
+		if err := key.(*BlockSubscriber).OnNotification(n, s.logger, eventStore); err != nil {
+			s.logger.Errorf("error when subscriber run callback function: %v", err)
 		}
 		return true
 	})
