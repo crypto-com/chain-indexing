@@ -7,7 +7,7 @@ require (
 	github.com/Masterminds/squirrel v1.4.0
 	github.com/brianvoe/gofakeit/v5 v5.10.1
 	github.com/btcsuite/btcutil v1.0.2
-	github.com/calvinlauco/cosmostxdecoder v0.0.0-20201115111612-fa4467c776d5
+	github.com/calvinlauco/cosmostxdecoder v0.0.1-rc3
 	github.com/cosmos/cosmos-sdk v0.39.1
 	github.com/golang-migrate/migrate/v4 v4.12.2
 	github.com/google/go-querystring v1.0.0
@@ -27,4 +27,6 @@ require (
 
 replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.2-alpha.regen.4
 
-replace github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.40.0-rc3
+replace github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.40.0-rc1
+
+replace github.com/calvinlauco/cosmostxdecoder => github.com/calvinlauco/cosmostxdecoder v0.0.1-rc1
