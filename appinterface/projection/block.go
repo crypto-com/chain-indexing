@@ -3,13 +3,12 @@ package projection
 import (
 	"fmt"
 
-	"github.com/crypto-com/chainindex/usecase/domain/createblock"
-
 	"github.com/crypto-com/chainindex/appinterface/projection/rdbbase"
 	"github.com/crypto-com/chainindex/appinterface/projection/view"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
-	entity_event "github.com/crypto-com/chainindex/entity/event"
+	event_entity "github.com/crypto-com/chainindex/entity/event"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
+	event_usecase "github.com/crypto-com/chainindex/usecase/event"
 )
 
 // TODO: Listen to council node related events and project council node
@@ -30,14 +29,14 @@ func NewBlock(logger applogger.Logger, rdbConn rdb.Conn) *Block {
 }
 
 func (_ *Block) GetEventsToListen() []string {
-	return []string{createblock.EVENT_NAME}
+	return []string{event_usecase.BLOCK_CREATED_NAME}
 }
 
 func (projection *Block) OnInit() error {
 	return nil
 }
 
-func (projection *Block) HandleEvents(height int64, events []entity_event.Event) error {
+func (projection *Block) HandleEvents(height int64, events []event_entity.Event) error {
 	var err error
 
 	var rdbTx rdb.Tx
@@ -49,7 +48,7 @@ func (projection *Block) HandleEvents(height int64, events []entity_event.Event)
 	blocksView := view.NewBlocks(rdbTxHandle)
 
 	for _, event := range events {
-		if blockCreatedEvent, ok := event.(*createblock.BlockCreated); ok {
+		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
 			if err = projection.handleBlockCreatedEvent(blocksView, blockCreatedEvent); err != nil {
 				_ = rdbTx.Rollback()
 				return fmt.Errorf("error handling BlockCreatedEvent: %v", err)
@@ -71,7 +70,7 @@ func (projection *Block) HandleEvents(height int64, events []entity_event.Event)
 	return nil
 }
 
-func (projection *Block) handleBlockCreatedEvent(blocksView *view.Blocks, event *createblock.BlockCreated) error {
+func (projection *Block) handleBlockCreatedEvent(blocksView *view.Blocks, event *event_usecase.BlockCreated) error {
 	committedCouncilNodes := make([]view.BlockCommittedCouncilNode, 0)
 	for _, signature := range event.Block.Signatures {
 		committedCouncilNodes = append(committedCouncilNodes, view.BlockCommittedCouncilNode{

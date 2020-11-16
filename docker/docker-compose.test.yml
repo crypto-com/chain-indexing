@@ -6,7 +6,7 @@ services:
     build: ./postgres
     restart: always
     ports:
-      - "${TEST_POSTGRES_PORT:-5434}:5432"
+      - "${TEST_POSTGRES_PORT:-5433}:5432"
     environment:
       POSTGRES_USERNAME: "${TEST_POSTGRES_USERNAME:-postgres}"
       POSTGRES_PASSWORD: "${TEST_POSTGRES_PASSWORD:-postgres}"

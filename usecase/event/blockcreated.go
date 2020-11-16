@@ -1,4 +1,4 @@
-package createblock
+package event
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 	usecase_model "github.com/crypto-com/chainindex/usecase/model"
 )
 
-const EVENT_NAME = "BlockCreated"
+const BLOCK_CREATED_NAME = "BlockCreated"
 
 type BlockCreated struct {
 	entity_event.Base
@@ -19,10 +19,10 @@ type BlockCreated struct {
 	Block *usecase_model.Block `json:"block"`
 }
 
-func NewEvent(block *usecase_model.Block) *BlockCreated {
+func NewBlockCreated(block *usecase_model.Block) *BlockCreated {
 	return &BlockCreated{
 		entity_event.NewBase(entity_event.BaseParams{
-			Name:        EVENT_NAME,
+			Name:        BLOCK_CREATED_NAME,
 			Version:     1,
 			BlockHeight: block.Height,
 		}),
@@ -44,7 +44,7 @@ func (event *BlockCreated) String() string {
 	return render.Render(event)
 }
 
-func DecodeEvent(encoded []byte) (entity_event.Event, error) {
+func DecodeBlockCreated(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 

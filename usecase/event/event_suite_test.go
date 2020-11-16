@@ -1,4 +1,4 @@
-package createmsgsend_test
+package event_test
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestCreatemsgsend(t *testing.T) {
+func TestEvent(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Createmsgsend Suite")
+	RunSpecs(t, "Event Suite")
 }

@@ -3,16 +3,14 @@ package parser_test
 import (
 	"strings"
 
-	"github.com/crypto-com/chainindex/usecase/coin"
-
-	"github.com/crypto-com/chainindex/usecase/domain/createtransaction"
-
-	"github.com/crypto-com/chainindex/entity/command"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/crypto-com/chainindex/entity/command"
 	"github.com/crypto-com/chainindex/infrastructure/tendermint"
+	"github.com/crypto-com/chainindex/usecase/coin"
+	command_usecase "github.com/crypto-com/chainindex/usecase/command"
+	"github.com/crypto-com/chainindex/usecase/model"
 	"github.com/crypto-com/chainindex/usecase/parser"
 	usecase_parser_test "github.com/crypto-com/chainindex/usecase/parser/test"
 )
@@ -40,9 +38,9 @@ var _ = Describe("TransactionParser", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			expectedBlockHeight := int64(343358)
-			Expect(cmds).To(Equal([]command.Command{createtransaction.NewCommand(
+			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateTransaction(
 				expectedBlockHeight,
-				createtransaction.Params{
+				model.CreateTransactionParams{
 					TxHash:    "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416",
 					Code:      0,
 					Log:       "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"sender\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"amount\",\"value\":\"1000basetcro\"}]}]},{\"msgIndex\":1,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"sender\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"amount\",\"value\":\"2000basetcro\"}]}]}]",
@@ -66,9 +64,9 @@ var _ = Describe("TransactionParser", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			expectedBlockHeight := int64(377673)
-			Expect(cmds).To(Equal([]command.Command{createtransaction.NewCommand(
+			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateTransaction(
 				expectedBlockHeight,
-				createtransaction.Params{
+				model.CreateTransactionParams{
 					TxHash:    "2A2A64A310B3D0E84C9831F4353E188A6E63BF451975C859DF40C54047AC6324",
 					Code:      0,
 					Log:       "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"sender\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"amount\",\"value\":\"1000000000basetcro\"}]}]}]",

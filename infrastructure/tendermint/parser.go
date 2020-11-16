@@ -78,9 +78,14 @@ func ParseBlockResultsResp(rawRespReader io.Reader) (*model.BlockResults, error)
 	if err != nil {
 		return nil, fmt.Errorf("error converting block height to unsigned integer: %v", err)
 	}
+
+	txsResults, err := parseBlockResultsTxsResults(rawBlockResults.TxsResults)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing TxsResults: %v", err)
+	}
 	return &model.BlockResults{
 		Height:                int64(height),
-		TxsResults:            parseBlockResultsTxsResults(rawBlockResults.TxsResults),
+		TxsResults:            txsResults,
 		BeginBlockEvents:      parseBlockResultsEvents(rawBlockResults.BeginBlockEvents),
 		EndBlockEvents:        parseBlockResultsEvents(rawBlockResults.EndBlockEvents),
 		ValidatorUpdates:      parseBlockResultsValidatorUpdates(rawBlockResults.ValidatorUpdates),
@@ -88,21 +93,16 @@ func ParseBlockResultsResp(rawRespReader io.Reader) (*model.BlockResults, error)
 	}, nil
 }
 
-func parseBlockResultsTxsResults(rawTxsResults []RawBlockResultsTxsResult) []model.BlockResultsTxsResult {
+func parseBlockResultsTxsResults(rawTxsResults []RawBlockResultsTxsResult) ([]model.BlockResultsTxsResult, error) {
 	txsResults := make([]model.BlockResultsTxsResult, 0, len(rawTxsResults))
 	for _, rawTxsResult := range rawTxsResults {
 		events := parseBlockResultsEvents(rawTxsResult.Events)
 
-		var rawLog []RawBlockResultsTxsResultLog
-		jsonDecoder := jsoniter.NewDecoder(strings.NewReader(rawTxsResult.Log))
-		jsonDecoder.DisallowUnknownFields()
-		if err := jsonDecoder.Decode(&rawLog); err != nil {
-			panic(fmt.Sprintf("error decoding transaction log: %v", err))
-		}
 		txsResults = append(txsResults, model.BlockResultsTxsResult{
 			Code:      rawTxsResult.Code,
 			Data:      mustBase64Decode(rawTxsResult.Data),
-			Log:       parseBlockResultsTxsResultLog(rawLog),
+			Log:       parseBlockResultsTxsResultLog(rawTxsResult.Log),
+			RawLog:    rawTxsResult.Log,
 			Info:      rawTxsResult.Info,
 			GasWanted: rawTxsResult.GasWanted,
 			GasUsed:   rawTxsResult.GasUsed,
@@ -111,12 +111,20 @@ func parseBlockResultsTxsResults(rawTxsResults []RawBlockResultsTxsResult) []mod
 		})
 	}
 
-	return txsResults
+	return txsResults, nil
 }
 
-func parseBlockResultsTxsResultLog(rawLogs []RawBlockResultsTxsResultLog) []model.BlockResultsTxsResultLog {
-	logs := make([]model.BlockResultsTxsResultLog, 0, len(rawLogs))
-	for _, rawLog := range rawLogs {
+func parseBlockResultsTxsResultLog(rawLog string) []model.BlockResultsTxsResultLog {
+	jsonDecoder := jsoniter.NewDecoder(strings.NewReader(rawLog))
+	jsonDecoder.DisallowUnknownFields()
+	var decodedRawLogs []RawBlockResultsTxsResultLog
+	if err := jsonDecoder.Decode(&decodedRawLogs); err != nil {
+		// Ignore the JSON decode error because the log could be a string on error
+		return []model.BlockResultsTxsResultLog{}
+	}
+
+	logs := make([]model.BlockResultsTxsResultLog, 0, len(decodedRawLogs))
+	for _, rawLog := range decodedRawLogs {
 		var log model.BlockResultsTxsResultLog
 		if rawLog.MaybeMsgIndex == nil {
 			log.MsgIndex = 0
@@ -184,9 +192,12 @@ func parseBlockResultsValidatorUpdates(rawUpdates []RawBlockResultsValidatorUpda
 
 	updates := make([]model.BlockResultsValidatorUpdate, 0, len(rawUpdates))
 	for _, rawUpdate := range rawUpdates {
-		power, ok := new(big.Int).SetString(rawUpdate.Power, 10)
-		if !ok {
-			panic(fmt.Sprintf("invalid block_results power: %s", power))
+		var power *big.Int
+		if rawUpdate.MaybePower != "" {
+			power, ok := new(big.Int).SetString(rawUpdate.MaybePower, 10)
+			if !ok {
+				panic(fmt.Sprintf("invalid block_results power: %s", power))
+			}
 		}
 		updates = append(updates, model.BlockResultsValidatorUpdate{
 			PubKey: model.BlockResultsValidatorPubKey{
@@ -194,7 +205,7 @@ func parseBlockResultsValidatorUpdates(rawUpdates []RawBlockResultsValidatorUpda
 				PubKey:  rawUpdate.PubKey.Sum.Value.Ed25519,
 				Address: AddressFromPubKey(rawUpdate.PubKey.Sum.Value.Ed25519),
 			},
-			Power: power,
+			MaybePower: power,
 		})
 	}
 

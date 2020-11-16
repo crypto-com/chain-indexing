@@ -1,4 +1,4 @@
-package createmsgsend
+package event
 
 import (
 	"bytes"
@@ -10,7 +10,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const EVENT_NAME = "MsgSendCreated"
+const MSG_SEND_CREATED_NAME = "MsgSendCreated"
 
 type MsgSendCreated struct {
 	entity_event.Base
@@ -22,10 +22,10 @@ type MsgSendCreated struct {
 	Amount      coin.Coin `json:"amount"`
 }
 
-func NewEvent(blockHeight int64, txHash string, msgIndex int, params Params) *MsgSendCreated {
+func NewMsgSendCreated(blockHeight int64, txHash string, msgIndex int, params MsgSendCreatedParams) *MsgSendCreated {
 	return &MsgSendCreated{
 		entity_event.NewBase(entity_event.BaseParams{
-			Name:        EVENT_NAME,
+			Name:        MSG_SEND_CREATED_NAME,
 			Version:     1,
 			BlockHeight: blockHeight,
 		}),
@@ -38,7 +38,7 @@ func NewEvent(blockHeight int64, txHash string, msgIndex int, params Params) *Ms
 	}
 }
 
-type Params struct {
+type MsgSendCreatedParams struct {
 	FromAddress string
 	ToAddress   string
 	Amount      coin.Coin
@@ -57,7 +57,7 @@ func (event *MsgSendCreated) String() string {
 	return render.Render(event)
 }
 
-func DecodeEvent(encoded []byte) (entity_event.Event, error) {
+func DecodeMsgSendCreated(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
