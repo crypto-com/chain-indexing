@@ -3,6 +3,8 @@ package chain
 import (
 	"fmt"
 
+	applogger "github.com/crypto-com/chainindex/internal/logger"
+
 	appevent "github.com/crypto-com/chainindex/appinterface/event"
 	"github.com/crypto-com/chainindex/infrastructure/notification"
 	"github.com/crypto-com/chainindex/usecase/executor"
@@ -19,9 +21,9 @@ func NewBlockSubscriber(moduleAccounts *parser.ModuleAccounts) *BlockSubscriber 
 	}
 }
 
-func (subscriber *BlockSubscriber) OnNotification(n *notification.BlockNotification, eventStore *appevent.RDbStore) error {
+func (subscriber *BlockSubscriber) OnNotification(n *notification.BlockNotification, logger applogger.Logger, eventStore *appevent.RDbStore) error {
 	// create an executor instance for current height
-	executor := executor.NewBlockExecutor(n.Height)
+	executor := executor.NewBlockExecutor(logger, n.Height)
 	commands, err := parser.ParseBlockToCommands(
 		subscriber.moduleAccounts,
 		n.Block,

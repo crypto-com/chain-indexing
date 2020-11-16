@@ -2,32 +2,33 @@ package executor
 
 import (
 	"fmt"
-	"os"
 
 	event_interface "github.com/crypto-com/chainindex/appinterface/event"
 	"github.com/crypto-com/chainindex/entity/command"
 	event_entity "github.com/crypto-com/chainindex/entity/event"
-	"github.com/crypto-com/chainindex/infrastructure"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
 )
 
 type BlockExecutor struct {
+	logger applogger.Logger
+
 	Height   int64
 	Commands []command.Command
 	Events   []event_entity.Event
-	logger   applogger.Logger
 }
 
-func NewBlockExecutor(height int64) *BlockExecutor {
+func NewBlockExecutor(logger applogger.Logger, height int64) *BlockExecutor {
 	commands := make([]command.Command, 0)
 	events := make([]event_entity.Event, 0)
-	logger := infrastructure.NewZerologLoggerWithColor(os.Stdout)
 
 	return &BlockExecutor{
+		logger.WithFields(applogger.LogFields{
+			"module": "BlockExecutor",
+		}),
+
 		height,
 		commands,
 		events,
-		logger,
 	}
 }
 

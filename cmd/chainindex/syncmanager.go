@@ -97,7 +97,7 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
 		notif := notification.NewBlockNotification(
 			currentIndexingHeight, block, rawBlock, blockResults,
 		)
-		manager.subject.Notify(notif, eventStore)
+		manager.subject.Notify(notif, manager.logger, eventStore)
 
 		// Current block indexing done, update db and sync next height
 		manager.logger.WithFields(applogger.LogFields{
