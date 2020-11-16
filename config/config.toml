@@ -1,3 +1,13 @@
+[blockchain]
+cro_denom = "tcro"
+base_denom = "basetcro"
+account_address_prefix = "tcro"
+account_pubkey_prefix = "tcro"
+validator_address_prefix = "tcrocncl"
+validator_pubkey_prefix = "tcrocncl"
+connode_address_prefix = "tcrocnclcons"
+connode_pubkey_prefix = "tcrocnclconspub"
+
 [tendermint]
 http_rpc_url = "https://testnet-croeseid-1.crypto.com:26657"
 

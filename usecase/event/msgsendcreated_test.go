@@ -34,7 +34,7 @@ var _ = Describe("Event", func() {
 			decodedEvent, err := event_usecase.DecodeMsgSendCreated([]byte(encoded))
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))
-			typedEvent := decodedEvent.(*event_usecase.MsgSendCreated)
+			typedEvent, _ := decodedEvent.(*event_usecase.MsgSendCreated)
 			Expect(typedEvent.TxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 			Expect(typedEvent.FromAddress).To(Equal(anyFromAddress))

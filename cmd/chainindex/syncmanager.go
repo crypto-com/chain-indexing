@@ -27,8 +27,7 @@ type SyncManager struct {
 	logger          applogger.Logger
 	pollingInterval time.Duration
 
-	moduleAccounts *parser.ModuleAccounts
-
+	txDecoder         *parser.TxDecoder
 	statusStore       *rdbstatusstore.RDbStatusStoreImpl
 	eventStore        *event_interface.RDbStore
 	projectionManager *projection.Manager
@@ -39,9 +38,10 @@ type SyncManager struct {
 // NewSyncManager creates a new feed with polling for latest block starts at a specific height
 func NewSyncManager(
 	logger applogger.Logger,
-	tendermintRPCUrl string,
 	rdbConn rdb.Conn,
-	moduleAccounts *parser.ModuleAccounts,
+
+	tendermintRPCUrl string,
+	txDecoder *parser.TxDecoder,
 ) *SyncManager {
 	tendermintClient := tendermint.NewHTTPClient(tendermintRPCUrl)
 
@@ -52,7 +52,7 @@ func NewSyncManager(
 			"module": "SyncManager",
 		}),
 
-		moduleAccounts:  moduleAccounts,
+		txDecoder:       txDecoder,
 		pollingInterval: DEFAULT_POLLING_INTERVAL,
 	}
 }
@@ -121,7 +121,7 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
 func (manager *SyncManager) InitSubject() *chainfeed.BlockSubject {
 	// Currently only the chain processor subscriber
 	// add more subscriber base on the need
-	chainProcessor := chainfeed.NewBlockSubscriber(manager.moduleAccounts)
+	chainProcessor := chainfeed.NewBlockSubscriber(manager.txDecoder)
 
 	blockSubject := chainfeed.NewBlockSubject()
 

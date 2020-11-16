@@ -8,9 +8,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/crypto-com/chainindex/internal/tmcosmosutils"
+
 	"github.com/crypto-com/chainindex/usecase/model"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/tendermint/tendermint/crypto/ed25519"
 )
 
 // Block related parsing functions
@@ -79,10 +80,7 @@ func ParseBlockResultsResp(rawRespReader io.Reader) (*model.BlockResults, error)
 		return nil, fmt.Errorf("error converting block height to unsigned integer: %v", err)
 	}
 
-	txsResults, err := parseBlockResultsTxsResults(rawBlockResults.TxsResults)
-	if err != nil {
-		return nil, fmt.Errorf("error parsing TxsResults: %v", err)
-	}
+	txsResults := parseBlockResultsTxsResults(rawBlockResults.TxsResults)
 	return &model.BlockResults{
 		Height:                int64(height),
 		TxsResults:            txsResults,
@@ -93,7 +91,7 @@ func ParseBlockResultsResp(rawRespReader io.Reader) (*model.BlockResults, error)
 	}, nil
 }
 
-func parseBlockResultsTxsResults(rawTxsResults []RawBlockResultsTxsResult) ([]model.BlockResultsTxsResult, error) {
+func parseBlockResultsTxsResults(rawTxsResults []RawBlockResultsTxsResult) []model.BlockResultsTxsResult {
 	txsResults := make([]model.BlockResultsTxsResult, 0, len(rawTxsResults))
 	for _, rawTxsResult := range rawTxsResults {
 		events := parseBlockResultsEvents(rawTxsResult.Events)
@@ -111,7 +109,7 @@ func parseBlockResultsTxsResults(rawTxsResults []RawBlockResultsTxsResult) ([]mo
 		})
 	}
 
-	return txsResults, nil
+	return txsResults
 }
 
 func parseBlockResultsTxsResultLog(rawLog string) []model.BlockResultsTxsResultLog {
@@ -194,31 +192,28 @@ func parseBlockResultsValidatorUpdates(rawUpdates []RawBlockResultsValidatorUpda
 	for _, rawUpdate := range rawUpdates {
 		var power *big.Int
 		if rawUpdate.MaybePower != "" {
-			power, ok := new(big.Int).SetString(rawUpdate.MaybePower, 10)
+			var ok bool
+			power, ok = new(big.Int).SetString(rawUpdate.MaybePower, 10)
 			if !ok {
 				panic(fmt.Sprintf("invalid block_results power: %s", power))
 			}
+		}
+
+		ed25519PubKey, err := base64.StdEncoding.DecodeString(rawUpdate.PubKey.Sum.Value.Ed25519)
+		if err != nil {
+			panic(fmt.Sprintf("invalid tendermint public key: %v", err))
 		}
 		updates = append(updates, model.BlockResultsValidatorUpdate{
 			PubKey: model.BlockResultsValidatorPubKey{
 				Type:    rawUpdate.PubKey.Sum.Type,
 				PubKey:  rawUpdate.PubKey.Sum.Value.Ed25519,
-				Address: AddressFromPubKey(rawUpdate.PubKey.Sum.Value.Ed25519),
+				Address: tmcosmosutils.TmAddressFromTmPubKey(ed25519PubKey),
 			},
 			MaybePower: power,
 		})
 	}
 
 	return updates
-}
-
-// Tendermint type convert function converts public key to address
-func AddressFromPubKey(base64PubKey string) string {
-	var key ed25519.PubKeyEd25519
-	data, _ := base64.StdEncoding.DecodeString(base64PubKey)
-	copy(key[:], data[:])
-
-	return key.Address().String()
 }
 
 func mustBase64Decode(s string) string {

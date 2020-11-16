@@ -27,11 +27,12 @@ var _ = Describe("TransactionParser", func() {
 
 	Describe("ParseTransactionCommands", func() {
 		It("should parse Transaction commands when there is two Msg in one transaction", func() {
+			txFeeParser := parser.NewTxDecoder("basetcro")
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.ONE_TX_TWO_MSG_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.ONE_TX_TWO_MSG_BLOCK_RESULTS_RESP))
 
 			cmds, err := parser.ParseTransactionCommands(
-				usecase_parser_test.FakeModuleAccounts,
+				txFeeParser,
 				block,
 				blockResults,
 			)
@@ -53,11 +54,12 @@ var _ = Describe("TransactionParser", func() {
 		})
 
 		It("should parse Transaction commands when there is transaction fee", func() {
+			txFeeParser := parser.NewTxDecoder("basetcro")
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_WITH_FEE_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_WITH_FEE_BLOCK_RESULTS_RESP))
 
 			cmds, err := parser.ParseTransactionCommands(
-				usecase_parser_test.FakeModuleAccounts,
+				txFeeParser,
 				block,
 				blockResults,
 			)
@@ -74,6 +76,60 @@ var _ = Describe("TransactionParser", func() {
 					Fee:       coin.MustNewCoinFromString("8000000"),
 					GasWanted: "80000000",
 					GasUsed:   "62582",
+				},
+			)}))
+		})
+
+		It("should parse Transaction commands when transaction failed with fee", func() {
+			txFeeParser := parser.NewTxDecoder("basetcro")
+			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.FAILED_TX_WITH_FEE_BLOCK_RESP))
+			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.FAILED_TX_WITH_FEE_BLOCK_RESULTS_RESP))
+
+			cmds, err := parser.ParseTransactionCommands(
+				txFeeParser,
+				block,
+				blockResults,
+			)
+			Expect(err).To(BeNil())
+			Expect(cmds).To(HaveLen(1))
+			expectedBlockHeight := int64(420301)
+			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateTransaction(
+				expectedBlockHeight,
+				model.CreateTransactionParams{
+					TxHash:    "4A23AF74FCC6DE653FD1DE0EBDF76FCE096CC349F0BB1D7811D324D74877152F",
+					Code:      11,
+					Log:       "out of gas in location: WriteFlat; gasWanted: 150000, gasUsed: 150021: out of gas",
+					MsgCount:  0,
+					Fee:       coin.MustNewCoinFromString("15000"),
+					GasWanted: "150000",
+					GasUsed:   "150021",
+				},
+			)}))
+		})
+
+		It("should parse Transaction commands when transaction failed without fee", func() {
+			txFeeParser := parser.NewTxDecoder("basetcro")
+			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.FAILED_TX_WITHOUT_FEE_BLOCK_RESP))
+			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.FAILED_TX_WITHOUT_FEE_BLOCK_RESULTS_RESP))
+
+			cmds, err := parser.ParseTransactionCommands(
+				txFeeParser,
+				block,
+				blockResults,
+			)
+			Expect(err).To(BeNil())
+			Expect(cmds).To(HaveLen(1))
+			expectedBlockHeight := int64(3245)
+			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateTransaction(
+				expectedBlockHeight,
+				model.CreateTransactionParams{
+					TxHash:    "CDBA166168176BF7ECA2EAC9E9B49054F1BF4C8799B8C26CC0B9EE85CB93AF27",
+					Code:      11,
+					Log:       "out of gas in location: WriteFlat; gasWanted: 200000, gasUsed: 201420: out of gas",
+					MsgCount:  0,
+					Fee:       coin.Zero(),
+					GasWanted: "200000",
+					GasUsed:   "201420",
 				},
 			)}))
 		})

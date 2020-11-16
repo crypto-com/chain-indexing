@@ -17,7 +17,8 @@ DOCKER_COMPOSE_PROJECT="chain_indexing_test"
 FN_UNKNOWN="unknown"
 FN_BOOTSTRAP="bootstrap"
 FN_GENERATE="generate"
-FN_SETUPDB="setupdb"
+FN_SETUP="setup"
+FN_TEARDOWN="teardown"
 FN_TEST="test"
 
 # main
@@ -126,8 +127,12 @@ while [[ $# > 0 ]]; do
             FN=FN_GENERATE
             shift 1
         ;;
-        setupdb)
-            FN=FN_SETUPDB
+        setup)
+            FN=FN_SETUP
+            shift 1
+        ;;
+        teardown)
+            FN=FN_TEARDOWN
             shift 1
         ;;
         run)
@@ -165,10 +170,13 @@ if [[ "${FN}" == FN_BOOTSTRAP ]]; then
 elif [[ "${FN}" == FN_GENERATE ]]; then
     run_generate $@
     exit "${RET_VALUE}"
-elif [[ "${FN}" == FN_SETUPDB ]]; then
+elif [[ "${FN}" == FN_SETUP ]]; then
     echo "Stopping any previous test environment ..."
     teardown
     setup
+elif [[ "${FN}" == FN_TEARDOWN ]]; then
+    echo "Stopping any previous test environment ..."
+    teardown
 elif [[ "${FN}" == FN_TEST ]]; then
     while [[ $# > 0 ]]; do
         case "$1" in

@@ -1,21 +1,21 @@
 package main
 
 import (
-	"os"
 	"errors"
 	"fmt"
-	"github.com/crypto-com/chainindex/internal/filereader/toml"
-	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"os"
 	"path/filepath"
+
+	"github.com/crypto-com/chainindex/internal/filereader/toml"
+	"github.com/urfave/cli/v2"
 )
 
 func CliApp(args []string) error {
 	cliApp := &cli.App{
-		Name:      filepath.Base(args[0]),
-		Usage:     "Crypto.com Chain Index",
-		Version:   "v0.0.1",
-		Copyright: "(c) 2020 Crypto.com",
+		Name:                 filepath.Base(args[0]),
+		Usage:                "Crypto.com Chain Indexing Service",
+		Version:              "v0.0.1",
+		Copyright:            "(c) 2020 Crypto.com",
 		EnableBashCompletion: true,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
@@ -64,10 +64,7 @@ func CliApp(args []string) error {
 
 	err := cliApp.Run(args)
 	if err != nil {
-		log.Fatal().
-			Err(err).
-			Str("service", "indexing").
-			Msgf("Cannot start %s", "polling server")
+		return err
 	}
 
 	return nil

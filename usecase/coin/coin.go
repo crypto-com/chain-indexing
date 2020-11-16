@@ -61,6 +61,10 @@ func NewCoin(value *big.Int) (Coin, error) {
 	}, nil
 }
 
+func Zero() Coin {
+	return MustNewCoin(new(big.Int).SetInt64(int64(0)))
+}
+
 // MustNewCoinFromInt() accepts and parse a int64 coin amount to Coin and
 // returns it. Any error would panic immediately
 func MustNewCoinFromInt(value int64) Coin {
