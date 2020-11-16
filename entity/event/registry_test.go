@@ -10,7 +10,7 @@ import (
 	"github.com/crypto-com/chainindex/entity/event"
 )
 
-var _ = Describe("Registry", func() {
+var _ = Describe("eventRegistry", func() {
 	Describe("Register", func() {
 		It("should register an event decoder with the name and version", func() {
 			registry := event.NewRegistry()
@@ -77,9 +77,9 @@ func newSimpleJSONEvent() *simpleJSONEvent {
 func (event *simpleJSONEvent) Height() int64 { return 1 }
 func (event *simpleJSONEvent) Name() string  { return simpleJSONEventName }
 func (event *simpleJSONEvent) Version() int  { return simpleJSONEventVersion }
-func (event *simpleJSONEvent) Id() string    { return "simple-json-event-id" }
+func (event *simpleJSONEvent) UUID() string  { return "simple-json-event-id" }
 func (event *simpleJSONEvent) ToJSON() (string, error) {
-	return event.Id(), nil
+	return event.UUID(), nil
 }
 func (event *simpleJSONEvent) String() string { return simpleJSONEventName }
 func decodeSimpleJSONEvent(eventBytes []byte) (event.Event, error) {

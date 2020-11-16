@@ -1,12 +1,14 @@
 package rdbstatusstore_test
 
 import (
-	"github.com/crypto-com/chainindex/appinterface/rdbstatusstore"
 	"github.com/crypto-com/chainindex/infrastructure/pg"
+	test_logger "github.com/crypto-com/chainindex/internal/logger/test"
+	"github.com/crypto-com/chainindex/internal/primptr"
+	. "github.com/crypto-com/chainindex/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/crypto-com/chainindex/test"
+	"github.com/crypto-com/chainindex/appinterface/rdbstatusstore"
 )
 
 var _ = Describe("RdbStatusStore", func() {
@@ -21,26 +23,32 @@ var _ = Describe("RdbStatusStore", func() {
 		})
 
 		Describe("GetLastIndexedBlockHeight", func() {
-			It("should return the initial last_indexed_block_height 1 with no error", func() {
-				store := rdbstatusstore.NewRDbStatusStoreImpl(pgxConn.ToHandle())
+			It("should return the nil with no error on first run", func() {
+				store := rdbstatusstore.NewRDbStatusStoreImpl(
+					test_logger.NewFakeLogger(),
+					pgxConn.ToHandle(),
+				)
 				height, err := store.GetLastIndexedBlockHeight()
 
 				Expect(err).To(BeNil())
-				Expect(height).To(Equal(int64(1)))
+				Expect(height).To(BeNil())
 			})
 		})
 
 		Describe("UpdateLastIndexedBlockHeight", func() {
 			It("should return the updated last indexed block height properly with no error", func() {
-				store := rdbstatusstore.NewRDbStatusStoreImpl(pgxConn.ToHandle())
+				store := rdbstatusstore.NewRDbStatusStoreImpl(
+					test_logger.NewFakeLogger(),
+					pgxConn.ToHandle(),
+				)
 
 				newHeight := int64(100)
-				err := store.UpdateLastIndexedBlockHeight(newHeight)
+				err := store.UpdateLastIndexedBlockHeight(pgxConn.ToHandle(), newHeight)
 				Expect(err).To(BeNil())
 
 				currentHeight, err := store.GetLastIndexedBlockHeight()
 				Expect(err).To(BeNil())
-				Expect(currentHeight).To(Equal(int64(100)))
+				Expect(currentHeight).To(Equal(primptr.Int64(int64(100))))
 			})
 		})
 	})

@@ -64,7 +64,7 @@ var _ = Describe("RdbEventStore", func() {
 				mockEvent.On("Height").Return(int64(1))
 				mockEvent.On("Name").Return("MockEvent")
 				mockEvent.On("Version").Return(0)
-				mockEvent.On("Id").Return("mock-event-id")
+				mockEvent.On("UUID").Return("mock-event-id")
 				mockEvent.On("ToJSON").Return("\"MockEvent\"", nil)
 				err := store.Insert(mockEvent)
 				Expect(err).To(BeNil())

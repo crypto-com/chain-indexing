@@ -22,7 +22,7 @@ func (event *MockEvent) Version() int {
 	mockArgs := event.Called()
 	return mockArgs.Int(0)
 }
-func (event *MockEvent) Id() string {
+func (event *MockEvent) UUID() string {
 	mockArgs := event.Called()
 	return mockArgs.String(0)
 }

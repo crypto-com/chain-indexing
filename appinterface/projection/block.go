@@ -56,7 +56,7 @@ func (projection *Block) HandleEvents(height int64, events []entity_event.Event)
 			}
 		} else {
 			_ = rdbTx.Rollback()
-			return fmt.Errorf("received unexpected event %sV%d(%s)", event.Name(), event.Version(), event.Id())
+			return fmt.Errorf("received unexpected event %sV%d(%s)", event.Name(), event.Version(), event.UUID())
 		}
 	}
 	if err = projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {

@@ -36,7 +36,7 @@ func NewRDbStore(handle *rdb.Handle, registry *entity_event.Registry) *RDbStore 
 	}
 }
 
-// GetLatestEventHeight returns latest event height, nil if no event is stored
+// GetLatestHeight returns latest event height, nil if no event is stored
 func (store *RDbStore) GetLatestHeight() (*int64, error) {
 	sql, args, err := store.rdbHandle.StmtBuilder.Select(
 		"MAX(height)",
@@ -61,7 +61,7 @@ func (store *RDbStore) GetLatestHeight() (*int64, error) {
 
 func (store *RDbStore) GetAllByHeight(height int64) ([]entity_event.Event, error) {
 	sql, args, err := store.rdbHandle.StmtBuilder.Select(
-		"id", "height", "name", "version", "payload",
+		"uuid", "height", "name", "version", "payload",
 	).From(
 		store.table,
 	).Where("height = ?", height).ToSql()
@@ -76,14 +76,14 @@ func (store *RDbStore) GetAllByHeight(height int64) ([]entity_event.Event, error
 	}
 	for rows.Next() {
 		var (
-			id      string
+			uuid    string
 			height  int64
 			name    string
 			version int
 			payload string
 		)
 
-		if err := rows.Scan(&id, &height, &name, &version, &payload); err != nil {
+		if err := rows.Scan(&uuid, &height, &name, &version, &payload); err != nil {
 			if err == rdb.ErrNoRows {
 				return nil, nil
 			} else {
@@ -110,9 +110,9 @@ func (store *RDbStore) Insert(event entity_event.Event) error {
 	sql, args, err := store.rdbHandle.StmtBuilder.Insert(
 		store.table,
 	).Columns(
-		"id", "height", "name", "version", "payload",
+		"uuid", "height", "name", "version", "payload",
 	).Values(
-		event.Id(),
+		event.UUID(),
 		event.Height(),
 		event.Name(),
 		event.Version(),
