@@ -37,6 +37,37 @@ func ParseMsgToCommands(
 						Amount:      sumAmountInterfaces(msg["amount"].([]interface{})),
 					},
 				))
+			} else if msg["@type"] == "/cosmos.bank.v1beta1.MsgMultiSend" {
+				rawInputs, _ := msg["inputs"].([]interface{})
+				inputs := make([]model.MsgMultiSendInput, 0, len(rawInputs))
+				for _, rawInput := range rawInputs {
+					input, _ := rawInput.(map[string]interface{})
+					inputs = append(inputs, model.MsgMultiSendInput{
+						Address: input["address"].(string),
+						Amount:  sumAmountInterfaces(input["coins"].([]interface{})),
+					})
+				}
+
+				rawOutputs, _ := msg["outputs"].([]interface{})
+				outputs := make([]model.MsgMultiSendOutput, 0, len(rawOutputs))
+				for _, rawOutput := range rawOutputs {
+					output, _ := rawOutput.(map[string]interface{})
+					outputs = append(outputs, model.MsgMultiSendOutput{
+						Address: output["address"].(string),
+						Amount:  sumAmountInterfaces(output["coins"].([]interface{})),
+					})
+				}
+
+				commands = append(commands, command_usecase.NewCreateMsgMultiSend(
+					blockHeight,
+
+					txHash,
+					msgIndex,
+					model.MsgMultiSendParams{
+						Inputs:  inputs,
+						Outputs: outputs,
+					},
+				))
 			}
 		}
 	}
