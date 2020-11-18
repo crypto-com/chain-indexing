@@ -11,7 +11,7 @@ import (
 )
 
 const MSG_SEND = "MsgSend"
-const MSG_SEND_CREATED = "MsgSend"
+const MSG_SEND_CREATED = "MsgSendCreated"
 const MSG_SEND_FAILED = "MsgSendFailed"
 
 type MsgSend struct {

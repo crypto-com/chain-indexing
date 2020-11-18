@@ -1,6 +1,7 @@
 package event_test
 
 import (
+	event_entity "github.com/crypto-com/chainindex/entity/event"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -9,6 +10,9 @@ import (
 )
 
 var _ = Describe("Event", func() {
+	registry := event_entity.NewRegistry()
+	event_usecase.RegisterEvents(registry)
+
 	Describe("En/DecodeMsgSend", func() {
 		It("should able to encode and decode to the same event", func() {
 			anyHeight := int64(1000)
@@ -32,11 +36,13 @@ var _ = Describe("Event", func() {
 			encoded, err := event.ToJSON()
 			Expect(err).To(BeNil())
 
-			decodedEvent, err := event_usecase.DecodeMsgSend([]byte(encoded))
+			decodedEvent, err := registry.DecodeByType(
+				event_usecase.MSG_SEND_CREATED, 1, []byte(encoded),
+			)
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))
 			typedEvent, _ := decodedEvent.(*event_usecase.MsgSend)
-			Expect(typedEvent.Name()).To(Equal("MsgSendCreated"))
+			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_SEND_CREATED))
 			Expect(typedEvent.Version()).To(Equal(1))
 
 			Expect(typedEvent.TxHash).To(Equal(anyTxHash))
@@ -68,11 +74,13 @@ var _ = Describe("Event", func() {
 			encoded, err := event.ToJSON()
 			Expect(err).To(BeNil())
 
-			decodedEvent, err := event_usecase.DecodeMsgSend([]byte(encoded))
+			decodedEvent, err := registry.DecodeByType(
+				event_usecase.MSG_SEND_FAILED, 1, []byte(encoded),
+			)
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))
 			typedEvent, _ := decodedEvent.(*event_usecase.MsgSend)
-			Expect(typedEvent.Name()).To(Equal("MsgSendFailed"))
+			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_SEND_FAILED))
 			Expect(typedEvent.Version()).To(Equal(1))
 		})
 	})
