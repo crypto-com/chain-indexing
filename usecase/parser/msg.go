@@ -133,6 +133,15 @@ func ParseMsgToCommands(
 						Amount:           amount,
 					},
 				))
+			} else if msg["@type"] == "/cosmos.distribution.v1beta1.MsgFundCommunityPool" {
+				commands = append(commands, command_usecase.NewCreateMsgFundCommunityPool(
+					msgCommonParams,
+
+					model.MsgFundCommunityPoolParams{
+						Depositor: msg["depositor"].(string),
+						Amount:    sumAmountInterfaces(msg["amount"].([]interface{})),
+					},
+				))
 			}
 		}
 	}

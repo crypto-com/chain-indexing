@@ -23,4 +23,6 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(MSG_WITHDRAW_DELEGATOR_REWARD_FAILED, 1, DecodeMsgWithdrawDelegatorReward)
 	registry.Register(MSG_WITHDRAW_VALIDATOR_COMMISSION_CREATED, 1, DecodeMsgWithdrawValidatorCommission)
 	registry.Register(MSG_WITHDRAW_VALIDATOR_COMMISSION_FAILED, 1, DecodeMsgWithdrawValidatorCommission)
+	registry.Register(MSG_FUND_COMMUNITY_POOL_CREATED, 1, DecodeMsgFundCommunityPool)
+	registry.Register(MSG_FUND_COMMUNITY_POOL_FAILED, 1, DecodeMsgFundCommunityPool)
 }
