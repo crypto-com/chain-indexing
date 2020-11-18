@@ -21,13 +21,16 @@ func ParseMsgToCommands(
 	for i, txHex := range block.Txs {
 		txHash := TxHash(txHex)
 		txSuccess := true
-		if blockResults.TxsResults[i].Code != 0 {
+		txsResult := blockResults.TxsResults[i]
+
+		if txsResult.Code != 0 {
 			txSuccess = false
 		}
 		tx, err := txDecoder.Decode(txHex)
 		if err != nil {
 			panic(fmt.Sprintf("error decoding transaction: %v", err))
 		}
+
 		for msgIndex, msg := range tx.Body.Messages {
 			msgCommonParams := event.MsgCommonParams{
 				BlockHeight: blockHeight,
@@ -74,6 +77,30 @@ func ParseMsgToCommands(
 						Outputs: outputs,
 					},
 				))
+			} else if msg["@type"] == "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward" {
+				log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+				var recipient string
+				var amount coin.Coin
+				// When there is no reward withdrew, `transfer` event would not exist
+				if event := log.GetEventByType("transfer"); event == nil {
+					recipient, _ = msg["delegator_address"].(string)
+					amount = coin.Zero()
+				} else {
+					recipient = event.MustGetAttributeByKey("recipient")
+					amountValue := event.MustGetAttributeByKey("amount")
+					amount = coin.MustNewCoinFromString(TrimAmountDenom(amountValue))
+				}
+
+				commands = append(commands, command_usecase.NewCreateMsgWithdrawDelegatorReward(
+					msgCommonParams,
+
+					model.MsgWithdrawDelegatorRewardParams{
+						DelegatorAddress: msg["delegator_address"].(string),
+						ValidatorAddress: msg["validator_address"].(string),
+						RecipientAddress: recipient,
+						Amount:           amount,
+					},
+				))
 			}
 		}
 	}
@@ -87,20 +114,20 @@ func ParseMsgToCommands(
 	//
 	//		msgType := getMsgType(txsResultLog)
 	//		if msgType.Module == "bank" && msgType.Action == "send" {
-	//			transferEvent := txsResultLog.GetEvent("transfer")
+	//			transferEvent := txsResultLog.GetEventByType("transfer")
 	//			if transferEvent == nil {
 	//				panic("expected bank.send message to have transfer event, but found none")
 	//			}
 	//
-	//			amount := transferEvent.MustGetAttribute("amount")
+	//			amount := transferEvent.MustGetAttributeByKey("amount")
 	//			commands = append(commands, command_usecase.NewCreateMsgSend(
 	//				blockHeight,
 	//
 	//				txHash,
 	//				log.MsgIndex,
 	//				event.MsgSendCreatedParams{
-	//					FromAddress: transferEvent.MustGetAttribute("sender"),
-	//					ToAddress:   transferEvent.MustGetAttribute("recipient"),
+	//					FromAddress: transferEvent.MustGetAttributeByKey("sender"),
+	//					ToAddress:   transferEvent.MustGetAttributeByKey("recipient"),
 	//					Amount:      coin.MustNewCoinFromString(TrimAmountDenom(amount)),
 	//				},
 	//			))
@@ -122,13 +149,13 @@ func sumAmountInterfaces(amounts []interface{}) coin.Coin {
 
 // Returns message type from block results TxsResult rawLog. Returns nil if no message is found.
 //func getMsgType(txsResultLog *ParsedTxsResultLog) *msgType {
-//	messageEvent := txsResultLog.GetEvent("message")
+//	messageEvent := txsResultLog.GetEventByType("message")
 //	if messageEvent == nil {
 //		return nil
 //	}
 //	return &msgType{
-//		Module: messageEvent.MustGetAttribute("module"),
-//		Action: messageEvent.MustGetAttribute("action"),
+//		Module: messageEvent.MustGetAttributeByKey("module"),
+//		Action: messageEvent.MustGetAttributeByKey("action"),
 //	}
 //}
 //

@@ -28,7 +28,7 @@ func (log *ParsedTxsResultLog) HasEvent(t string) bool {
 	return ok
 }
 
-func (log *ParsedTxsResultLog) GetEvent(t string) *ParsedTxsResultLogEvent {
+func (log *ParsedTxsResultLog) GetEventByType(t string) *ParsedTxsResultLogEvent {
 	if !log.HasEvent(t) {
 		return nil
 	}
