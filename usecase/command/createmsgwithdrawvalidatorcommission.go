@@ -24,7 +24,7 @@ func NewCreateMsgWithdrawValidatorCommission(
 }
 
 func (_ *CreateMsgWithdrawValidatorCommission) Name() string {
-	return "CreateMsgWithdrawDelegatorReward"
+	return "CreateMsgWithdrawValidatorCommission"
 }
 
 func (_ *CreateMsgWithdrawValidatorCommission) Version() int {

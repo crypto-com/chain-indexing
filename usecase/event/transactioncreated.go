@@ -13,7 +13,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-const TRANSACTION_CREATED_NAME = "TransactionCreated"
+const TRANSACTION_CREATED = "TransactionCreated"
 
 type TransactionCreated struct {
 	entity_event.Base
@@ -30,7 +30,7 @@ type TransactionCreated struct {
 func NewTransactionCreated(blockHeight int64, params model.CreateTransactionParams) *TransactionCreated {
 	return &TransactionCreated{
 		Base: entity_event.NewBase(entity_event.BaseParams{
-			Name:        TRANSACTION_CREATED_NAME,
+			Name:        TRANSACTION_CREATED,
 			Version:     1,
 			BlockHeight: blockHeight,
 		}),

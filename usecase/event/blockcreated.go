@@ -11,7 +11,7 @@ import (
 	usecase_model "github.com/crypto-com/chainindex/usecase/model"
 )
 
-const BLOCK_CREATED_NAME = "BlockCreated"
+const BLOCK_CREATED = "BlockCreated"
 
 type BlockCreated struct {
 	entity_event.Base
@@ -22,7 +22,7 @@ type BlockCreated struct {
 func NewBlockCreated(block *usecase_model.Block) *BlockCreated {
 	return &BlockCreated{
 		entity_event.NewBase(entity_event.BaseParams{
-			Name:        BLOCK_CREATED_NAME,
+			Name:        BLOCK_CREATED,
 			Version:     1,
 			BlockHeight: block.Height,
 		}),

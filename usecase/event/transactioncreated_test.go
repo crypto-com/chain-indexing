@@ -1,6 +1,7 @@
 package event_test
 
 import (
+	event_entity "github.com/crypto-com/chainindex/entity/event"
 	"github.com/crypto-com/chainindex/test/factory"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -11,6 +12,9 @@ import (
 )
 
 var _ = Describe("Event", func() {
+	registry := event_entity.NewRegistry()
+	event_usecase.RegisterEvents(registry)
+
 	Describe("En/DecodeTransactionCreated", func() {
 		It("should able to encode and decode to the same Event", func() {
 			anyTxHash := factory.RandomTxHash()
@@ -29,7 +33,9 @@ var _ = Describe("Event", func() {
 			encoded, err := event.ToJSON()
 			Expect(err).To(BeNil())
 
-			decodedEvent, err := event_usecase.DecodeTransactionCreated([]byte(encoded))
+			decodedEvent, err := registry.DecodeByType(
+				event_usecase.TRANSACTION_CREATED, 1, []byte(encoded),
+			)
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))
 			typedEvent, _ := decodedEvent.(*event_usecase.TransactionCreated)
