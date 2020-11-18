@@ -19,7 +19,7 @@ import (
 )
 
 var _ = Describe("ParseMsgCommands", func() {
-	Describe("MsgWithdrawDelegatorReward", func() {
+	Describe("MsgWithdrawValidatorReward", func() {
 		It("should parse Msg commands when there is distribution.MsgWithdrawValidatorReward in the transaction", func() {
 			txDecoder := parser.NewTxDecoder("basetrcro")
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_MSG_WITHDRAW_DELEGATOR_REWARD_BLOCK_RESP))
