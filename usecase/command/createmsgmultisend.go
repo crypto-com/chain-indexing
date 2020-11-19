@@ -7,19 +7,13 @@ import (
 )
 
 type CreateMsgMultiSend struct {
-	blockHeight int64
-	txHash      string
-	msgIndex    int
-
-	params model.MsgMultiSendParams
+	msgCommonParams event.MsgCommonParams
+	params          model.MsgMultiSendParams
 }
 
-func NewCreateMsgMultiSend(blockHeight int64, txHash string, msgIndex int, params model.MsgMultiSendParams) *CreateMsgMultiSend {
+func NewCreateMsgMultiSend(msgCommonParams event.MsgCommonParams, params model.MsgMultiSendParams) *CreateMsgMultiSend {
 	return &CreateMsgMultiSend{
-		blockHeight,
-		txHash,
-		msgIndex,
-
+		msgCommonParams,
 		params,
 	}
 }
@@ -33,6 +27,6 @@ func (_ *CreateMsgMultiSend) Version() int {
 }
 
 func (cmd *CreateMsgMultiSend) Exec() (entity_event.Event, error) {
-	event := event.NewMsgMultiSendCreated(cmd.blockHeight, cmd.txHash, cmd.msgIndex, cmd.params)
+	event := event.NewMsgMultiSend(cmd.msgCommonParams, cmd.params)
 	return event, nil
 }

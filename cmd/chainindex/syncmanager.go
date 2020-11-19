@@ -96,7 +96,7 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
 		notif := notification.NewBlockNotification(
 			currentIndexingHeight, block, rawBlock, blockResults,
 		)
-		manager.subject.Notify(notif, manager.logger, eventStore)
+		manager.subject.Notify(notif, eventStore)
 
 		// Current block indexing done, update db and sync next height
 		manager.logger.WithFields(applogger.LogFields{
@@ -123,7 +123,7 @@ func (manager *SyncManager) InitSubject() *chainfeed.BlockSubject {
 	// add more subscriber base on the need
 	chainProcessor := chainfeed.NewBlockSubscriber(manager.txDecoder)
 
-	blockSubject := chainfeed.NewBlockSubject()
+	blockSubject := chainfeed.NewBlockSubject(manager.logger)
 
 	// add more subscribers here
 	blockSubject.Attach(chainProcessor)

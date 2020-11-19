@@ -18,19 +18,27 @@ func ParseMsgToCommands(
 	commands := make([]command.Command, 0)
 
 	blockHeight := block.Height
-	for _, txHex := range block.Txs {
+	for i, txHex := range block.Txs {
 		txHash := TxHash(txHex)
+		txSuccess := true
+		if blockResults.TxsResults[i].Code != 0 {
+			txSuccess = false
+		}
 		tx, err := txDecoder.Decode(txHex)
 		if err != nil {
 			panic(fmt.Sprintf("error decoding transaction: %v", err))
 		}
 		for msgIndex, msg := range tx.Body.Messages {
+			msgCommonParams := event.MsgCommonParams{
+				BlockHeight: blockHeight,
+				TxHash:      txHash,
+				TxSuccess:   txSuccess,
+				MsgIndex:    msgIndex,
+			}
 			if msg["@type"] == "/cosmos.bank.v1beta1.MsgSend" {
 				commands = append(commands, command_usecase.NewCreateMsgSend(
-					blockHeight,
+					msgCommonParams,
 
-					txHash,
-					msgIndex,
 					event.MsgSendCreatedParams{
 						FromAddress: msg["from_address"].(string),
 						ToAddress:   msg["to_address"].(string),
@@ -59,10 +67,8 @@ func ParseMsgToCommands(
 				}
 
 				commands = append(commands, command_usecase.NewCreateMsgMultiSend(
-					blockHeight,
+					msgCommonParams,
 
-					txHash,
-					msgIndex,
 					model.MsgMultiSendParams{
 						Inputs:  inputs,
 						Outputs: outputs,

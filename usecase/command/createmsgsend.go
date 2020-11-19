@@ -6,17 +6,13 @@ import (
 )
 
 type CreateMsgSend struct {
-	blockHeight int64
-	txHash      string
-	msgIndex    int
-	params      event.MsgSendCreatedParams
+	msgCommonParams event.MsgCommonParams
+	params          event.MsgSendCreatedParams
 }
 
-func NewCreateMsgSend(blockHeight int64, txHash string, msgIndex int, params event.MsgSendCreatedParams) *CreateMsgSend {
+func NewCreateMsgSend(msgCommonParams event.MsgCommonParams, params event.MsgSendCreatedParams) *CreateMsgSend {
 	return &CreateMsgSend{
-		blockHeight,
-		txHash,
-		msgIndex,
+		msgCommonParams,
 		params,
 	}
 }
@@ -30,6 +26,6 @@ func (_ *CreateMsgSend) Version() int {
 }
 
 func (cmd *CreateMsgSend) Exec() (entity_event.Event, error) {
-	event := event.NewMsgSendCreated(cmd.blockHeight, cmd.txHash, cmd.msgIndex, cmd.params)
+	event := event.NewMsgSend(cmd.msgCommonParams, cmd.params)
 	return event, nil
 }

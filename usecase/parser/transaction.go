@@ -20,16 +20,20 @@ func ParseTransactionCommands(
 ) ([]command.Command, error) {
 	blockHeight := blockResults.Height
 	cmds := make([]command.Command, 0, len(blockResults.TxsResults))
-	for i, txsResult := range blockResults.TxsResults {
-		txHex := block.Txs[i]
+	for i, txHex := range block.Txs {
+		txsResult := blockResults.TxsResults[i]
+		tx, err := txDecoder.Decode(txHex)
+		if err != nil {
+			panic(fmt.Sprintf("error decoding transaction: %v", err))
+		}
 
 		var log string
 		if len(txsResult.Log) == 0 {
 			// cater for failed transaction
 			log = txsResult.RawLog
 		} else {
-			var err error
-			if log, err = jsoniter.MarshalToString(txsResult.Log); err != nil {
+			var logMarshalErr error
+			if log, logMarshalErr = jsoniter.MarshalToString(txsResult.Log); logMarshalErr != nil {
 				return nil, fmt.Errorf("error encoding transaction result rawLog to JSON: %v", err)
 			}
 		}
@@ -42,7 +46,7 @@ func ParseTransactionCommands(
 			TxHash:    TxHash(txHex),
 			Code:      txsResult.Code,
 			Log:       log,
-			MsgCount:  len(txsResult.Log),
+			MsgCount:  len(tx.Body.Messages),
 			Fee:       fee,
 			GasWanted: txsResult.GasWanted,
 			GasUsed:   txsResult.GasUsed,

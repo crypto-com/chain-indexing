@@ -96,13 +96,13 @@ var _ = Describe("TransactionParser", func() {
 			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateTransaction(
 				expectedBlockHeight,
 				model.CreateTransactionParams{
-					TxHash:    "4A23AF74FCC6DE653FD1DE0EBDF76FCE096CC349F0BB1D7811D324D74877152F",
+					TxHash:    "2A2A64A310B3D0E84C9831F4353E188A6E63BF451975C859DF40C54047AC6324",
 					Code:      11,
-					Log:       "out of gas in location: WriteFlat; gasWanted: 150000, gasUsed: 150021: out of gas",
-					MsgCount:  0,
-					Fee:       coin.MustNewCoinFromString("15000"),
-					GasWanted: "150000",
-					GasUsed:   "150021",
+					Log:       "out of gas in location: WriteFlat; gasWanted: 80000000, gasUsed: 80150021: out of gas",
+					MsgCount:  1,
+					Fee:       coin.MustNewCoinFromString("8000000"),
+					GasWanted: "80000000",
+					GasUsed:   "80150021",
 				},
 			)}))
 		})
@@ -126,7 +126,7 @@ var _ = Describe("TransactionParser", func() {
 					TxHash:    "CDBA166168176BF7ECA2EAC9E9B49054F1BF4C8799B8C26CC0B9EE85CB93AF27",
 					Code:      11,
 					Log:       "out of gas in location: WriteFlat; gasWanted: 200000, gasUsed: 201420: out of gas",
-					MsgCount:  0,
+					MsgCount:  5,
 					Fee:       coin.Zero(),
 					GasWanted: "200000",
 					GasUsed:   "201420",
