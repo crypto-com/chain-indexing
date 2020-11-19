@@ -77,6 +77,15 @@ func ParseMsgToCommands(
 						Outputs: outputs,
 					},
 				))
+			} else if msg["@type"] == "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress" {
+				commands = append(commands, command_usecase.NewCreateMsgSetWithdrawAddress(
+					msgCommonParams,
+
+					model.MsgSetWithdrawAddressParams{
+						DelegatorAddress: msg["delegator_address"].(string),
+						WithdrawAddress:  msg["withdraw_address"].(string),
+					},
+				))
 			} else if msg["@type"] == "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward" {
 				log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 				var recipient string
