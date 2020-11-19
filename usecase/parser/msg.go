@@ -101,6 +101,29 @@ func ParseMsgToCommands(
 						Amount:           amount,
 					},
 				))
+			} else if msg["@type"] == "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission" {
+				log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+				var recipient string
+				var amount coin.Coin
+				// When there is no reward withdrew, `transfer` event would not exist
+				if event := log.GetEventByType("transfer"); event == nil {
+					recipient, _ = msg["delegator_address"].(string)
+					amount = coin.Zero()
+				} else {
+					recipient = event.MustGetAttributeByKey("recipient")
+					amountValue := event.MustGetAttributeByKey("amount")
+					amount = coin.MustNewCoinFromString(TrimAmountDenom(amountValue))
+				}
+
+				commands = append(commands, command_usecase.NewCreateMsgWithdrawValidatorCommission(
+					msgCommonParams,
+
+					model.MsgWithdrawValidatorCommissionParams{
+						ValidatorAddress: msg["validator_address"].(string),
+						RecipientAddress: recipient,
+						Amount:           amount,
+					},
+				))
 			}
 		}
 	}

@@ -3,6 +3,8 @@ package event_test
 import (
 	"encoding/json"
 
+	event_entity "github.com/crypto-com/chainindex/entity/event"
+
 	random "github.com/brianvoe/gofakeit/v5"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -12,6 +14,9 @@ import (
 )
 
 var _ = Describe("BlockCreated", func() {
+	registry := event_entity.NewRegistry()
+	event_usecase.RegisterEvents(registry)
+
 	Describe("En/DecodeBlockCreated", func() {
 		It("should able to encode and decode to the same Event", func() {
 			var block model.Block
@@ -19,9 +24,11 @@ var _ = Describe("BlockCreated", func() {
 			event := event_usecase.NewBlockCreated(&block)
 			encoded, _ := json.Marshal(event)
 
-			actual, err := event_usecase.DecodeBlockCreated(encoded)
+			decodedEvent, err := registry.DecodeByType(
+				event_usecase.BLOCK_CREATED, 1, []byte(encoded),
+			)
 			Expect(err).To(BeNil())
-			Expect(actual).To(Equal(event))
+			Expect(decodedEvent).To(Equal(event))
 		})
 	})
 })

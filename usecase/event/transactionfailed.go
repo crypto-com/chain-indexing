@@ -11,7 +11,7 @@ import (
 	entity_event "github.com/crypto-com/chainindex/entity/event"
 )
 
-const TRANSACTION_FAILED_NAME = "TransactionFailed"
+const TRANSACTION_FAILED = "TransactionFailed"
 
 type TransactionFailed struct {
 	entity_event.Base
@@ -28,7 +28,7 @@ type TransactionFailed struct {
 func NewTransactionFailed(blockHeight int64, params model.CreateTransactionParams) *TransactionFailed {
 	return &TransactionFailed{
 		Base: entity_event.NewBase(entity_event.BaseParams{
-			Name:        TRANSACTION_FAILED_NAME,
+			Name:        TRANSACTION_FAILED,
 			Version:     1,
 			BlockHeight: blockHeight,
 		}),

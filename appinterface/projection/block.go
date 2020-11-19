@@ -29,7 +29,7 @@ func NewBlock(logger applogger.Logger, rdbConn rdb.Conn) *Block {
 }
 
 func (_ *Block) GetEventsToListen() []string {
-	return []string{event_usecase.BLOCK_CREATED_NAME}
+	return []string{event_usecase.BLOCK_CREATED}
 }
 
 func (projection *Block) OnInit() error {
