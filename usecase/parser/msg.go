@@ -142,6 +142,19 @@ func ParseMsgToCommands(
 						Amount:    sumAmountInterfaces(msg["amount"].([]interface{})),
 					},
 				))
+			} else if msg["@type"] == "/cosmos.staking.v1beta1.MsgDelegate" {
+				amountValue, _ := msg["amount"].(map[string]interface{})
+				amount := coin.MustNewCoinFromString(amountValue["amount"].(string))
+
+				commands = append(commands, command_usecase.NewCreateMsgDelegate(
+					msgCommonParams,
+
+					model.MsgDelegateParams{
+						DelegatorAddress: msg["delegator_address"].(string),
+						ValidatorAddress: msg["validator_address"].(string),
+						Amount:           amount,
+					},
+				))
 			}
 		}
 	}

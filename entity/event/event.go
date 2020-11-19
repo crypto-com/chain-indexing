@@ -7,10 +7,10 @@ type Event interface {
 	Name() string
 	Version() int
 
-	// Unique Id that is assigned on event creation
+	// UUID returns the unique ID that is assigned on event creation
 	UUID() string
 
-	// Encode the event into JSON string payload
+	// ToJSON encodes the event into JSON string payload
 	ToJSON() (string, error)
 
 	// String function returns the stringified event
