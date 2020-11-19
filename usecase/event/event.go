@@ -29,4 +29,6 @@ func RegisterEvents(registry *event.Registry) {
 	// Staking
 	registry.Register(MSG_DELEGATE_CREATED, 1, DecodeMsgDelegate)
 	registry.Register(MSG_DELEGATE_FAILED, 1, DecodeMsgDelegate)
+	registry.Register(MSG_UNDELEGATE_CREATED, 1, DecodeMsgUndelegate)
+	registry.Register(MSG_UNDELEGATE_FAILED, 1, DecodeMsgUndelegate)
 }
