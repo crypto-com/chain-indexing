@@ -1,8 +1,6 @@
 package parser_test
 
 import (
-	"strings"
-
 	"github.com/crypto-com/chainindex/usecase/event"
 
 	"github.com/crypto-com/chainindex/usecase/coin"
@@ -12,7 +10,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/crypto-com/chainindex/entity/command"
-	"github.com/crypto-com/chainindex/infrastructure/tendermint"
 	command_usecase "github.com/crypto-com/chainindex/usecase/command"
 	"github.com/crypto-com/chainindex/usecase/parser"
 	usecase_parser_test "github.com/crypto-com/chainindex/usecase/parser/test"
@@ -23,14 +20,15 @@ var _ = Describe("ParseMsgCommands", func() {
 
 		It("should parse Msg commands when there is bank.MsgMultiSend in the transaction", func() {
 			txDecoder := parser.NewTxDecoder("basetrcro")
-			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_MSG_MULTI_SEND_BLOCK_RESP))
-			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_MSG_MULTI_SEND_BLOCK_RESULTS_RESP))
+			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_MULTI_SEND_BLOCK_RESP)
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MSG_MULTI_SEND_BLOCK_RESULTS_RESP)
 
-			cmds := parser.ParseMsgToCommands(
+			cmds, err := parser.ParseMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
 			)
+			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateMsgMultiSend(
 				event.MsgCommonParams{

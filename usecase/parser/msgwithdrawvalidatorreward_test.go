@@ -20,18 +20,19 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgWithdrawDelegatorReward and MsgWithdrawValidatorCommission", func() {
 		It("should parse Msg commands when there is distribution.MsgWithdrawDelegatorReward and MsgWithdrawValidatorCommission in the transaction", func() {
 			txDecoder := parser.NewTxDecoder("basetrcro")
-			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
+			block, _ := mustParseBlockResp(
 				usecase_parser_test.TX_MSGS_WITHDRAW_DELEGATOR_REWARD_WITHDRAW_VALIDATOR_COMMISSION_BLOCK_RESP,
-			))
-			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
+			)
+			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSGS_WITHDRAW_DELEGATOR_REWARD_WITHDRAW_VALIDATOR_COMMISSION_BLOCK_RESULTS_RESP,
-			))
+			)
 
-			cmds := parser.ParseMsgToCommands(
+			cmds, err := parser.ParseMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
 			)
+			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))
 			Expect(cmds).To(Equal([]command.Command{
 				command_usecase.NewCreateMsgWithdrawDelegatorReward(
@@ -72,11 +73,12 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_WITHDRAW_DELEGATOR_REWARD_NO_REWARD_BLOCK_RESULTS_RESP,
 			))
 
-			cmds := parser.ParseMsgToCommands(
+			cmds, err := parser.ParseMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
 			)
+			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			Expect(cmds).To(Equal([]command.Command{
 				command_usecase.NewCreateMsgWithdrawDelegatorReward(
