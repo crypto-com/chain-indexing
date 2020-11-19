@@ -155,6 +155,19 @@ func ParseMsgToCommands(
 						Amount:           amount,
 					},
 				))
+			} else if msg["@type"] == "/cosmos.staking.v1beta1.MsgUndelegate" {
+				amountValue, _ := msg["amount"].(map[string]interface{})
+				amount := coin.MustNewCoinFromString(amountValue["amount"].(string))
+
+				commands = append(commands, command_usecase.NewCreateMsgUndelegate(
+					msgCommonParams,
+
+					model.MsgUndelegateParams{
+						DelegatorAddress: msg["delegator_address"].(string),
+						ValidatorAddress: msg["validator_address"].(string),
+						Amount:           amount,
+					},
+				))
 			}
 		}
 	}
