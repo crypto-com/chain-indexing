@@ -14,4 +14,6 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(MSG_SEND_FAILED, 1, DecodeMsgSend)
 	registry.Register(MSG_MULTI_SEND_CREATED, 1, DecodeMsgMultiSend)
 	registry.Register(MSG_MULTI_SEND_FAILED, 1, DecodeMsgMultiSend)
+	registry.Register(MSG_WITHDRAW_DELEGATOR_REWARD_CREATED, 1, DecodeMsgWithdrawDelegatorReward)
+	registry.Register(MSG_WITHDRAW_DELEGATOR_REWARD_FAILED, 1, DecodeMsgWithdrawDelegatorReward)
 }

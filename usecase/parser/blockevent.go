@@ -36,15 +36,15 @@ func (log *ParsedTxsResultLogEvent) HasAttribute(key string) bool {
 	return ok
 }
 
-func (log *ParsedTxsResultLogEvent) MustGetAttribute(key string) string {
-	attr := log.GetAttribute(key)
+func (log *ParsedTxsResultLogEvent) MustGetAttributeByKey(key string) string {
+	attr := log.GetAttributeByKey(key)
 	if attr == nil {
 		panic(fmt.Sprintf("expected block_results event to have attribute %s, but found none", key))
 	}
 	return *attr
 }
 
-func (log *ParsedTxsResultLogEvent) GetAttribute(key string) *string {
+func (log *ParsedTxsResultLogEvent) GetAttributeByKey(key string) *string {
 	if !log.HasAttribute(key) {
 		return nil
 	}
