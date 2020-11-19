@@ -31,4 +31,6 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(MSG_DELEGATE_FAILED, 1, DecodeMsgDelegate)
 	registry.Register(MSG_UNDELEGATE_CREATED, 1, DecodeMsgUndelegate)
 	registry.Register(MSG_UNDELEGATE_FAILED, 1, DecodeMsgUndelegate)
+	registry.Register(MSG_BEGIN_REDELEGATE_CREATED, 1, DecodeMsgBeginRedelegate)
+	registry.Register(MSG_BEGIN_REDELEGATE_FAILED, 1, DecodeMsgBeginRedelegate)
 }

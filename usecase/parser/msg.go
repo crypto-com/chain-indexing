@@ -168,6 +168,20 @@ func ParseMsgToCommands(
 						Amount:           amount,
 					},
 				))
+			} else if msg["@type"] == "/cosmos.staking.v1beta1.MsgBeginRedelegate" {
+				amountValue, _ := msg["amount"].(map[string]interface{})
+				amount := coin.MustNewCoinFromString(amountValue["amount"].(string))
+
+				commands = append(commands, command_usecase.NewCreateMsgBeginRedelegate(
+					msgCommonParams,
+
+					model.MsgBeginRedelegateParams{
+						DelegatorAddress:    msg["delegator_address"].(string),
+						ValidatorSrcAddress: msg["validator_src_address"].(string),
+						ValidatorDstAddress: msg["validator_dst_address"].(string),
+						Amount:              amount,
+					},
+				))
 			}
 		}
 	}
