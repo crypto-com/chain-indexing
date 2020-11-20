@@ -59,6 +59,8 @@ func ParseMsgToCommands(
 				msgCommand = parseMsgUndelegate(msgCommonParams, msg)
 			case "/cosmos.staking.v1beta1.MsgBeginRedelegate":
 				msgCommand = parseMsgBeginRedelegate(msgCommonParams, msg)
+			case "/cosmos.slashing.v1beta1.MsgUnjail":
+				msgCommand = parseMsgUnjail(msgCommonParams, msg)
 			}
 
 			commands = append(commands, msgCommand)
@@ -283,6 +285,19 @@ func parseMsgBeginRedelegate(
 			ValidatorSrcAddress: msg["validator_src_address"].(string),
 			ValidatorDstAddress: msg["validator_dst_address"].(string),
 			Amount:              amount,
+		},
+	)
+}
+
+func parseMsgUnjail(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) *command_usecase.CreateMsgUnjail {
+	return command_usecase.NewCreateMsgUnjail(
+		msgCommonParams,
+
+		model.MsgUnjailParams{
+			ValidatorAddr: msg["validator_addr"].(string),
 		},
 	)
 }
