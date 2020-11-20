@@ -42,13 +42,15 @@ var _ = Describe("TransactionParser", func() {
 			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateTransaction(
 				expectedBlockHeight,
 				model.CreateTransactionParams{
-					TxHash:    "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416",
-					Code:      0,
-					Log:       "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"sender\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"amount\",\"value\":\"1000basetcro\"}]}]},{\"msgIndex\":1,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"sender\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"amount\",\"value\":\"2000basetcro\"}]}]}]",
-					MsgCount:  2,
-					Fee:       coin.MustNewCoinFromInt(int64(0)),
-					GasWanted: "200000",
-					GasUsed:   "80148",
+					TxHash:        "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416",
+					Code:          0,
+					Log:           "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"sender\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"amount\",\"value\":\"1000basetcro\"}]}]},{\"msgIndex\":1,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"sender\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"amount\",\"value\":\"2000basetcro\"}]}]}]",
+					MsgCount:      2,
+					Fee:           coin.MustNewCoinFromInt(int64(0)),
+					GasWanted:     "200000",
+					GasUsed:       "80148",
+					Memo:          "",
+					TimeoutHeight: 0,
 				},
 			)}))
 		})
@@ -69,13 +71,15 @@ var _ = Describe("TransactionParser", func() {
 			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateTransaction(
 				expectedBlockHeight,
 				model.CreateTransactionParams{
-					TxHash:    "2A2A64A310B3D0E84C9831F4353E188A6E63BF451975C859DF40C54047AC6324",
-					Code:      0,
-					Log:       "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"sender\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"amount\",\"value\":\"1000000000basetcro\"}]}]}]",
-					MsgCount:  1,
-					Fee:       coin.MustNewCoinFromString("8000000"),
-					GasWanted: "80000000",
-					GasUsed:   "62582",
+					TxHash:        "2A2A64A310B3D0E84C9831F4353E188A6E63BF451975C859DF40C54047AC6324",
+					Code:          0,
+					Log:           "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"sender\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"amount\",\"value\":\"1000000000basetcro\"}]}]}]",
+					MsgCount:      1,
+					Fee:           coin.MustNewCoinFromString("8000000"),
+					GasWanted:     "80000000",
+					GasUsed:       "62582",
+					Memo:          "",
+					TimeoutHeight: 0,
 				},
 			)}))
 		})
@@ -96,13 +100,15 @@ var _ = Describe("TransactionParser", func() {
 			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateTransaction(
 				expectedBlockHeight,
 				model.CreateTransactionParams{
-					TxHash:    "2A2A64A310B3D0E84C9831F4353E188A6E63BF451975C859DF40C54047AC6324",
-					Code:      11,
-					Log:       "out of gas in location: WriteFlat; gasWanted: 80000000, gasUsed: 80150021: out of gas",
-					MsgCount:  1,
-					Fee:       coin.MustNewCoinFromString("8000000"),
-					GasWanted: "80000000",
-					GasUsed:   "80150021",
+					TxHash:        "2A2A64A310B3D0E84C9831F4353E188A6E63BF451975C859DF40C54047AC6324",
+					Code:          11,
+					Log:           "out of gas in location: WriteFlat; gasWanted: 80000000, gasUsed: 80150021: out of gas",
+					MsgCount:      1,
+					Fee:           coin.MustNewCoinFromString("8000000"),
+					GasWanted:     "80000000",
+					GasUsed:       "80150021",
+					Memo:          "",
+					TimeoutHeight: 0,
 				},
 			)}))
 		})
@@ -123,13 +129,15 @@ var _ = Describe("TransactionParser", func() {
 			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateTransaction(
 				expectedBlockHeight,
 				model.CreateTransactionParams{
-					TxHash:    "CDBA166168176BF7ECA2EAC9E9B49054F1BF4C8799B8C26CC0B9EE85CB93AF27",
-					Code:      11,
-					Log:       "out of gas in location: WriteFlat; gasWanted: 200000, gasUsed: 201420: out of gas",
-					MsgCount:  5,
-					Fee:       coin.Zero(),
-					GasWanted: "200000",
-					GasUsed:   "201420",
+					TxHash:        "CDBA166168176BF7ECA2EAC9E9B49054F1BF4C8799B8C26CC0B9EE85CB93AF27",
+					Code:          11,
+					Log:           "out of gas in location: WriteFlat; gasWanted: 200000, gasUsed: 201420: out of gas",
+					MsgCount:      5,
+					Fee:           coin.Zero(),
+					GasWanted:     "200000",
+					GasUsed:       "201420",
+					Memo:          "",
+					TimeoutHeight: 0,
 				},
 			)}))
 		})
