@@ -1,15 +1,12 @@
 package parser_test
 
 import (
-	"strings"
-
 	"github.com/crypto-com/chainindex/usecase/model"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	"github.com/crypto-com/chainindex/entity/command"
-	"github.com/crypto-com/chainindex/infrastructure/tendermint"
 	"github.com/crypto-com/chainindex/usecase/coin"
 	command_usecase "github.com/crypto-com/chainindex/usecase/command"
 	"github.com/crypto-com/chainindex/usecase/event"
@@ -21,18 +18,17 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgFundCommunityPool", func() {
 		It("should parse Msg commands when there is distribution.MsgFundCommunityPool in the transaction", func() {
 			txDecoder := parser.NewTxDecoder("basetrcro")
-			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
-				usecase_parser_test.TX_MSG_FUND_COMMUNITY_POOL_BLOCK_RESP,
-			))
-			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
+			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_FUND_COMMUNITY_POOL_BLOCK_RESP)
+			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_FUND_COMMUNITY_POOL_BLOCK_RESULTS_RESP,
-			))
+			)
 
-			cmds := parser.ParseMsgToCommands(
+			cmds, err := parser.ParseMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
 			)
+			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateMsgFundCommunityPool(
 				event.MsgCommonParams{

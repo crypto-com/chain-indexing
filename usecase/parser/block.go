@@ -30,6 +30,12 @@ func ParseBlockToCommands(
 			return nil, fmt.Errorf("error parsing transaction commands: %v", parseErr)
 		}
 		commands = append(commands, transactionCommands...)
+
+		msgCommands, parseErr := ParseMsgToCommands(txDecoder, block, blockResults)
+		if parseErr != nil {
+			return nil, fmt.Errorf("error parsing message commands: %v", parseErr)
+		}
+		commands = append(commands, msgCommands...)
 	}
 
 	return commands, err
