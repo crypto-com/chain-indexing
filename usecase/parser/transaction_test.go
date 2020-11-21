@@ -28,8 +28,8 @@ var _ = Describe("TransactionParser", func() {
 	Describe("ParseTransactionCommands", func() {
 		It("should parse Transaction commands when there is two Msg in one transaction", func() {
 			txFeeParser := parser.NewTxDecoder("basetcro")
-			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.ONE_TX_TWO_MSG_BLOCK_RESP))
-			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.ONE_TX_TWO_MSG_BLOCK_RESULTS_RESP))
+			block, _ := mustParseBlockResp(usecase_parser_test.ONE_TX_TWO_MSG_BLOCK_RESP)
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.ONE_TX_TWO_MSG_BLOCK_RESULTS_RESP)
 
 			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
@@ -47,6 +47,8 @@ var _ = Describe("TransactionParser", func() {
 					Log:           "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"sender\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"amount\",\"value\":\"1000basetcro\"}]}]},{\"msgIndex\":1,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"sender\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"amount\",\"value\":\"2000basetcro\"}]}]}]",
 					MsgCount:      2,
 					Fee:           coin.MustNewCoinFromInt(int64(0)),
+					FeePayer:      "",
+					FeeGranter:    "",
 					GasWanted:     "200000",
 					GasUsed:       "80148",
 					Memo:          "",
@@ -57,8 +59,8 @@ var _ = Describe("TransactionParser", func() {
 
 		It("should parse Transaction commands when there is transaction fee", func() {
 			txFeeParser := parser.NewTxDecoder("basetcro")
-			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_WITH_FEE_BLOCK_RESP))
-			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_WITH_FEE_BLOCK_RESULTS_RESP))
+			block, _ := mustParseBlockResp(usecase_parser_test.TX_WITH_FEE_BLOCK_RESP)
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_WITH_FEE_BLOCK_RESULTS_RESP)
 
 			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
@@ -76,6 +78,8 @@ var _ = Describe("TransactionParser", func() {
 					Log:           "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"sender\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"amount\",\"value\":\"1000000000basetcro\"}]}]}]",
 					MsgCount:      1,
 					Fee:           coin.MustNewCoinFromString("8000000"),
+					FeePayer:      "",
+					FeeGranter:    "",
 					GasWanted:     "80000000",
 					GasUsed:       "62582",
 					Memo:          "",
@@ -86,8 +90,8 @@ var _ = Describe("TransactionParser", func() {
 
 		It("should parse Transaction commands when transaction failed with fee", func() {
 			txFeeParser := parser.NewTxDecoder("basetcro")
-			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.FAILED_TX_WITH_FEE_BLOCK_RESP))
-			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.FAILED_TX_WITH_FEE_BLOCK_RESULTS_RESP))
+			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESP)
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESULTS_RESP)
 
 			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
@@ -105,6 +109,8 @@ var _ = Describe("TransactionParser", func() {
 					Log:           "out of gas in location: WriteFlat; gasWanted: 80000000, gasUsed: 80150021: out of gas",
 					MsgCount:      1,
 					Fee:           coin.MustNewCoinFromString("8000000"),
+					FeePayer:      "",
+					FeeGranter:    "",
 					GasWanted:     "80000000",
 					GasUsed:       "80150021",
 					Memo:          "",
@@ -115,8 +121,8 @@ var _ = Describe("TransactionParser", func() {
 
 		It("should parse Transaction commands when transaction failed without fee", func() {
 			txFeeParser := parser.NewTxDecoder("basetcro")
-			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.FAILED_TX_WITHOUT_FEE_BLOCK_RESP))
-			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.FAILED_TX_WITHOUT_FEE_BLOCK_RESULTS_RESP))
+			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_FAILED_WITHOUT_FEE_BLOCK_RESP))
+			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_FAILED_WITHOUT_FEE_BLOCK_RESULTS_RESP))
 
 			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
@@ -134,10 +140,74 @@ var _ = Describe("TransactionParser", func() {
 					Log:           "out of gas in location: WriteFlat; gasWanted: 200000, gasUsed: 201420: out of gas",
 					MsgCount:      5,
 					Fee:           coin.Zero(),
+					FeePayer:      "",
+					FeeGranter:    "",
 					GasWanted:     "200000",
 					GasUsed:       "201420",
 					Memo:          "",
 					TimeoutHeight: 0,
+				},
+			)}))
+		})
+
+		It("should parse Transaction commands when there is transaction memo and timeout_height", func() {
+			txFeeParser := parser.NewTxDecoder("basetcro")
+			block, _ := mustParseBlockResp(usecase_parser_test.TX_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESP)
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESULTS_RESP)
+
+			cmds, err := parser.ParseTransactionCommands(
+				txFeeParser,
+				block,
+				blockResults,
+			)
+			Expect(err).To(BeNil())
+			Expect(cmds).To(HaveLen(1))
+			expectedBlockHeight := int64(492481)
+			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateTransaction(
+				expectedBlockHeight,
+				model.CreateTransactionParams{
+					TxHash:        "314FB925A570DB56F69A9E58C05EB7CCBCBA444949FF14E5874D8B581322A952",
+					Code:          0,
+					Log:           "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro1782gn9hzqavecukdaqqclvsnpck4mtz3vwzpxl\"},{\"key\":\"sender\",\"value\":\"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn\"},{\"key\":\"amount\",\"value\":\"100000000basetcro\"}]}]}]",
+					MsgCount:      1,
+					Fee:           coin.Zero(),
+					FeePayer:      "",
+					FeeGranter:    "",
+					GasWanted:     "200000",
+					GasUsed:       "50685",
+					Memo:          "Test memo",
+					TimeoutHeight: int64(500000),
+				},
+			)}))
+		})
+
+		It("should parse failed Transaction commands when there is transaction memo and timeout_height", func() {
+			txFeeParser := parser.NewTxDecoder("basetcro")
+			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESP)
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESULTS_RESP)
+
+			cmds, err := parser.ParseTransactionCommands(
+				txFeeParser,
+				block,
+				blockResults,
+			)
+			Expect(err).To(BeNil())
+			Expect(cmds).To(HaveLen(1))
+			expectedBlockHeight := int64(492759)
+			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateTransaction(
+				expectedBlockHeight,
+				model.CreateTransactionParams{
+					TxHash:        "7CCAB9771B76F25E81C26E50265243014798172F9E8C06F8AD17442C61E592EC",
+					Code:          11,
+					Log:           "out of gas in location: ReadFlat; gasWanted: 50000, gasUsed: 50436: out of gas",
+					MsgCount:      1,
+					Fee:           coin.Zero(),
+					FeePayer:      "",
+					FeeGranter:    "",
+					GasWanted:     "50000",
+					GasUsed:       "50436",
+					Memo:          "Test memo",
+					TimeoutHeight: int64(500000),
 				},
 			)}))
 		})
