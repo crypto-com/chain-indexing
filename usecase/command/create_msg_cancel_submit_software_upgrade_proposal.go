@@ -23,7 +23,7 @@ func NewCreateMsgSubmitCancelSoftwareUpgradeProposal(
 
 // Name returns name of command
 func (*CreateMsgSubmitCancelSoftwareUpgradeProposal) Name() string {
-	return "CreateMsgSubmitProposal"
+	return "CreateMsgSubmitCancelSoftwareUpgradeProposal"
 }
 
 // Version returns version of command

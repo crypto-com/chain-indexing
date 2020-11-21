@@ -23,7 +23,7 @@ func NewCreateMsgSubmitCommunityPoolSpendProposal(
 
 // Name returns name of command
 func (*CreateMsgSubmitCommunityPoolSpendProposal) Name() string {
-	return "CreateMsgSubmitProposal"
+	return "CreateMsgSubmitCommunityPoolSpendProposal"
 }
 
 // Version returns version of command

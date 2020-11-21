@@ -23,7 +23,7 @@ func NewCreateMsgSubmitParamChangeProposal(
 
 // Name returns name of command
 func (*CreateMsgSubmitParamChangeProposal) Name() string {
-	return "CreateSubmitMSGParamChangeProposal"
+	return "CreateSubmitMsgParamChangeProposal"
 }
 
 // Version returns version of command
