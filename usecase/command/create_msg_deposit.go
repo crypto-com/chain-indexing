@@ -23,7 +23,7 @@ func NewCreateMsgDeposit(
 
 // Name returns name of command
 func (*CreateMsgDeposit) Name() string {
-	return "CreateMsgSubmitProposal"
+	return "CreateMsgDeposit"
 }
 
 // Version returns version of command
