@@ -33,4 +33,8 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(MSG_UNDELEGATE_FAILED, 1, DecodeMsgUndelegate)
 	registry.Register(MSG_BEGIN_REDELEGATE_CREATED, 1, DecodeMsgBeginRedelegate)
 	registry.Register(MSG_BEGIN_REDELEGATE_FAILED, 1, DecodeMsgBeginRedelegate)
+
+	// Slashing
+	registry.Register(MSG_UNJAIL_CREATED, 1, DecodeMsgUnjail)
+	registry.Register(MSG_UNJAIL_FAILED, 1, DecodeMsgUnjail)
 }
