@@ -54,6 +54,8 @@ func ParseTransactionCommands(
 			Log:           log,
 			MsgCount:      len(tx.Body.Messages),
 			Fee:           fee,
+			FeePayer:      tx.AuthInfo.Fee.Payer,
+			FeeGranter:    tx.AuthInfo.Fee.Granter,
 			GasWanted:     txsResult.GasWanted,
 			GasUsed:       txsResult.GasUsed,
 			Memo:          tx.Body.Memo,

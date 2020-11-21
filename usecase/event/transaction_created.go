@@ -23,6 +23,8 @@ type TransactionCreated struct {
 	Log           string    `json:"log"`
 	MsgCount      int       `json:"msgCount"`
 	Fee           coin.Coin `json:"fee"`
+	FeePayer      string    `json:"feePayer"`
+	FeeGranter    string    `json:"feeGranter"`
 	GasWanted     string    `json:"gasWanted"`
 	GasUsed       string    `json:"gasUsed"`
 	Memo          string    `json:"memo"`
@@ -42,6 +44,8 @@ func NewTransactionCreated(blockHeight int64, params model.CreateTransactionPara
 		Log:           params.Log,
 		MsgCount:      params.MsgCount,
 		Fee:           params.Fee,
+		FeePayer:      params.FeePayer,
+		FeeGranter:    params.FeeGranter,
 		GasWanted:     params.GasWanted,
 		GasUsed:       params.GasUsed,
 		Memo:          params.Memo,

@@ -8,6 +8,8 @@ type CreateTransactionParams struct {
 	Log           string
 	MsgCount      int
 	Fee           coin.Coin
+	FeePayer      string
+	FeeGranter    string
 	GasWanted     string
 	GasUsed       string
 	Memo          string
