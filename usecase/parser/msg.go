@@ -265,11 +265,8 @@ func parseMsgSubmitProposal(
 		return parseMsgSubmitSoftwareUpgradeProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal" {
 		return parseMsgSubmitCancelSoftwareUpgradeProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
-	} else {
-		panic(fmt.Sprintf("unrecognzied govenance proposal type `%s`", proposalContent.Type))
 	}
-
-	return []command.Command{}
+	panic(fmt.Sprintf("unrecognzied govenance proposal type `%s`", proposalContent.Type))
 }
 
 func parseMsgSubmitParamChangeProposal(
@@ -282,7 +279,7 @@ func parseMsgSubmitParamChangeProposal(
 ) []command.Command {
 	var proposalContent model.MsgSubmitParamChangeProposalContent
 	if err := jsoniter.Unmarshal(rawContent, &proposalContent); err != nil {
-		panic(fmt.Sprintf("error decoding param change proposal content"))
+		panic("error decoding param change proposal content")
 	}
 
 	if !txSuccess {
@@ -330,7 +327,7 @@ func parseMsgSubmitCommunityFundSpendProposal(
 ) []command.Command {
 	var rawProposalContent model.RawMsgSubmitCommunityPoolSpendProposalContent
 	if err := jsoniter.Unmarshal(rawContent, &rawProposalContent); err != nil {
-		panic(fmt.Sprintf("error decoding community pool spend proposal content"))
+		panic("error decoding community pool spend proposal content")
 	}
 	proposalContent := model.MsgSubmitCommunityPoolSpendProposalContent{
 		Type:             rawProposalContent.Type,
@@ -385,7 +382,7 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 ) []command.Command {
 	var rawProposalContent model.RawMsgSubmitSoftwareUpgradeProposalContent
 	if err := jsoniter.Unmarshal(rawContent, &rawProposalContent); err != nil {
-		panic(fmt.Sprintf("error decoding software upgrade proposal content"))
+		panic("error decoding software upgrade proposal content")
 	}
 
 	height, err := strconv.ParseInt(rawProposalContent.Plan.Height, 10, 64)
@@ -449,7 +446,7 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 ) []command.Command {
 	var proposalContent model.MsgSubmitCancelSoftwareUpgradeProposalContent
 	if err := jsoniter.Unmarshal(rawContent, &proposalContent); err != nil {
-		panic(fmt.Sprintf("error decoding software upgrade proposal content"))
+		panic("error decoding software upgrade proposal content")
 	}
 
 	if !txSuccess {
