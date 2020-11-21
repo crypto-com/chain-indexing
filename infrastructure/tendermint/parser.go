@@ -240,6 +240,7 @@ func parseBlockResultsConsensusParamsUpdates(rawUpdates RawBlockResultsConsensus
 		Evidence: model.BlockResultsConsensusParamUpdatesEvidence{
 			MaxAgeNumBlocks: rawUpdates.Evidence.MaxAgeNumBlocks,
 			MaxAgeDuration:  rawUpdates.Evidence.MaxAgeDuration,
+			MaxBytes:        rawUpdates.Evidence.MaxBytes,
 		},
 		Validator: model.BlockResultsConsensusParamsUpdatesValidator{
 			PubKeyTypes: validatorPubKeyTypes,

@@ -71,6 +71,7 @@ type BlockResultsConsensusParamUpdatesBlock struct {
 type BlockResultsConsensusParamUpdatesEvidence struct {
 	MaxAgeNumBlocks string `json:"maxAgeNumBlocks"`
 	MaxAgeDuration  string `json:"maxAgeDuration"`
+	MaxBytes        string `json:"maxBytes"`
 }
 
 type BlockResultsConsensusParamsUpdatesValidator struct {
