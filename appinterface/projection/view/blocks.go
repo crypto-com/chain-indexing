@@ -218,19 +218,19 @@ func (node *RdbBlockCommittedCouncilNode) ToRaw() *BlockCommittedCouncilNode {
 }
 
 type Block struct {
-	Height                int64                       `fake:"{+int64}"`
-	Hash                  string                      `fake:"{blockhash}"`
-	Time                  utctime.UTCTime             `fake:"{utctime}"`
-	AppHash               string                      `fake:"{apphash}"`
-	TransactionCount      int                         `fake:"{number:0,2147483647}"`
-	CommittedCouncilNodes []BlockCommittedCouncilNode `fakesize:"3"`
+	Height                int64                       `json:"height" fake:"{+int64}"`
+	Hash                  string                      `json:"hash" fake:"{blockhash}"`
+	Time                  utctime.UTCTime             `json:"time" fake:"{utctime}"`
+	AppHash               string                      `json:"app_hash" fake:"{apphash}"`
+	TransactionCount      int                         `json:"transaction_count" fake:"{number:0,2147483647}"`
+	CommittedCouncilNodes []BlockCommittedCouncilNode `json:"committed_council_nodes" fakesize:"3"`
 }
 
 type BlockCommittedCouncilNode struct {
-	Address    string          `fake:"{validatoraddress}"`
-	Time       utctime.UTCTime `fake:"{utctime}"`
-	Signature  string          `fake:"{commitsignature}"`
-	IsProposer bool            `fake:"{bool}"`
+	Address    string          `json:"address" fake:"{validatoraddress}"`
+	Time       utctime.UTCTime `json:"time" fake:"{utctime}"`
+	Signature  string          `json:"signature" fake:"{commitsignature}"`
+	IsProposer bool            `json:"is_proposer" fake:"{bool}"`
 }
 
 type RdbBlockCommittedCouncilNode struct {
