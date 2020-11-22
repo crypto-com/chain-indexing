@@ -10,8 +10,8 @@ type CreateTransactionParams struct {
 	Fee           coin.Coin
 	FeePayer      string
 	FeeGranter    string
-	GasWanted     string
-	GasUsed       string
+	GasWanted     int
+	GasUsed       int
 	Memo          string
 	TimeoutHeight int64
 }

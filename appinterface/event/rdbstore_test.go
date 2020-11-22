@@ -61,7 +61,7 @@ var _ = Describe("RdbEventStore", func() {
 
 				// Insert an event with latestHeight 1
 				mockEvent := test.NewMockEvent()
-				mockEvent.On("Height").Return(int64(1))
+				mockEvent.On("BlockHeight").Return(int64(1))
 				mockEvent.On("Name").Return("MockEvent")
 				mockEvent.On("Version").Return(0)
 				mockEvent.On("UUID").Return("mock-event-id")

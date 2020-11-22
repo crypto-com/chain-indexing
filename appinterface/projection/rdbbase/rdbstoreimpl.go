@@ -50,10 +50,11 @@ func (impl *RDbStoreImpl) UpdateLastHandledEventHeight(rdbHandle *rdb.Handle, pr
 	// Update existing projection record with the updated height
 	sql, args, err := rdbHandle.StmtBuilder.Update(
 		impl.table,
-	).Set(
-		"id", projectionId,
-	).Set(
-		"last_handled_event_height", height,
+	).SetMap(map[string]interface{}{
+		"id":                        projectionId,
+		"last_handled_event_height": height,
+	}).Where(
+		"id = ?", projectionId,
 	).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building last handled event height update SQL: %v", err)
@@ -61,10 +62,10 @@ func (impl *RDbStoreImpl) UpdateLastHandledEventHeight(rdbHandle *rdb.Handle, pr
 
 	execResult, err := rdbHandle.Exec(sql, args...)
 	if err != nil {
-		return fmt.Errorf("error exectuing last handled event height update SQL: %v", err)
+		return fmt.Errorf("error executing last handled event height update SQL: %v", err)
 	}
 	if execResult.RowsAffected() == 0 {
-		return errors.New("error exectuing last handled event height update SQL: no rows updated")
+		return errors.New("error executing last handled event height update SQL: no rows updated")
 	}
 
 	return nil

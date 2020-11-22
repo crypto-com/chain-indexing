@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"errors"
+	"strconv"
+
 	"github.com/valyala/fasthttp"
 
 	"github.com/crypto-com/chainindex/appinterface/projection/view"
@@ -12,7 +15,8 @@ import (
 type Blocks struct {
 	logger applogger.Logger
 
-	blocksView *view.Blocks
+	blocksView       *view.Blocks
+	transactionsView *view.Transactions
 }
 
 func NewBlocks(logger applogger.Logger, rdbHandle *rdb.Handle) *Blocks {
@@ -22,6 +26,7 @@ func NewBlocks(logger applogger.Logger, rdbHandle *rdb.Handle) *Blocks {
 		}),
 
 		view.NewBlocks(rdbHandle),
+		view.NewTransactions(rdbHandle),
 	}
 }
 
@@ -37,6 +42,32 @@ func (handler *Blocks) List(ctx *fasthttp.RequestCtx) {
 	blocks, paginationResult, err := handler.blocksView.List(pagination)
 	if err != nil {
 		handler.logger.Errorf("error listing blocks: %v", err)
+		httpapi.InternalServerError(ctx)
+		return
+	}
+
+	httpapi.SuccessWithPagination(ctx, blocks, paginationResult)
+}
+
+func (handler *Blocks) ListTransactionsByHeight(ctx *fasthttp.RequestCtx) {
+	pagination, err := httpapi.ParsePagination(ctx)
+	if err != nil {
+		httpapi.BadRequest(ctx, err)
+		return
+	}
+
+	blockHeightParam := ctx.UserValue("height")
+	blockHeight, err := strconv.ParseInt(blockHeightParam.(string), 10, 64)
+	if err != nil {
+		httpapi.BadRequest(ctx, errors.New("invalid block height"))
+		return
+	}
+
+	blocks, paginationResult, err := handler.transactionsView.List(view.TransactionsListFilter{
+		MaybeBlockHeight: &blockHeight,
+	}, pagination)
+	if err != nil {
+		handler.logger.Errorf("error listing transactions: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
 	}
