@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/crypto-com/chainindex/infrastructure"
+
 	"github.com/crypto-com/chainindex/internal/filereader/toml"
 	"github.com/urfave/cli/v2"
 )
@@ -49,15 +51,28 @@ func CliApp(args []string) error {
 				return errors.New("DB_PASSWORD is empty")
 			}
 
-			// New index server and run
-			indexServerApp, err := NewIndexServer(&fileConfig)
+			logger := infrastructure.NewZerologLogger(os.Stdout)
+
+			rdbConn, err := SetupRDbConn(&fileConfig, logger)
 			if err != nil {
-				return fmt.Errorf("error creating new index server instance: %v", err)
-			}
-			if err := indexServerApp.Run(); err != nil {
-				return fmt.Errorf("error when starting indexing server: %v", err)
+				logger.Panicf("error setting up RDb connection: %v", err)
 			}
 
+			httpAPIServer := NewHTTPAPIServer(logger, rdbConn, &fileConfig)
+			go func() {
+				if err := httpAPIServer.Run(); err != nil {
+					logger.Panicf("%v", err)
+				}
+			}()
+
+			indexService := NewIndexService(logger, rdbConn, &fileConfig)
+			go func() {
+				if err := indexService.Run(); err != nil {
+					logger.Panicf("%v", err)
+				}
+			}()
+
+			select {}
 			return nil
 		},
 	}

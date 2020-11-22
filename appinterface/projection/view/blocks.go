@@ -3,6 +3,8 @@ package view
 import (
 	"fmt"
 
+	"github.com/crypto-com/chainindex/appinterface/pagination"
+
 	jsoniter "github.com/json-iterator/go"
 
 	"github.com/crypto-com/chainindex/appinterface/rdb"
@@ -60,6 +62,75 @@ func (view *Blocks) Insert(block *Block) error {
 	}
 
 	return nil
+}
+
+func (view *Blocks) List(pagination *pagination.Pagination) ([]Block, *pagination.PaginationResult, error) {
+	stmtBuilder := view.rdb.StmtBuilder.Select(
+		"height",
+		"hash",
+		"time",
+		"app_hash",
+		"committed_council_nodes",
+		"transaction_count",
+	).From(
+		"view_blocks",
+	)
+
+	rDbPagination := rdb.NewRDbPaginationBuilder(
+		pagination,
+		view.rdb.Runner,
+	).BuildStmt(stmtBuilder)
+	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
+	fmt.Println(sql)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error building blocks select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	rowsResult, err := view.rdb.Query(sql, sqlArgs...)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error executing blocks select SQL: %v: %w", err, rdb.ErrQuery)
+	}
+
+	blocks := make([]Block, 0)
+	for rowsResult.Next() {
+		var block Block
+		var committedCouncilNodesJSON *string
+		timeReader := view.rdb.NtotReader()
+		if err = rowsResult.Scan(
+			&block.Height,
+			&block.Hash,
+			timeReader.ScannableArg(),
+			&block.AppHash,
+			&committedCouncilNodesJSON,
+			&block.TransactionCount,
+		); err != nil {
+			if err == rdb.ErrNoRows {
+				return nil, nil, rdb.ErrNoRows
+			}
+			return nil, nil, fmt.Errorf("error scanning block row: %v: %w", err, rdb.ErrQuery)
+		}
+		blockTime, err := timeReader.Parse()
+		if err != nil {
+			return nil, nil, fmt.Errorf("error parsing block time: %v: %w", err, rdb.ErrQuery)
+		}
+		block.Time = *blockTime
+
+		var committedCouncilNodes []BlockCommittedCouncilNode
+		if err = jsoniter.Unmarshal([]byte(*committedCouncilNodesJSON), &committedCouncilNodes); err != nil {
+			return nil, nil, fmt.Errorf("error unmarshalling block council nodes JSON: %v: %w", err, rdb.ErrQuery)
+		}
+
+		block.CommittedCouncilNodes = committedCouncilNodes
+
+		blocks = append(blocks, block)
+	}
+
+	paginationResult, err := rDbPagination.Result()
+	if err != nil {
+		return nil, nil, fmt.Errorf("error preparing pagination result: %v", err)
+	}
+
+	return blocks, paginationResult, nil
 }
 
 func (view *Blocks) FindBy(identity *BlockIdentity) (*Block, error) {

@@ -75,6 +75,11 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
 
 	manager.logger.Infof("going to synchronized blocks from %d to %d", currentIndexingHeight, latestHeight)
 	for currentIndexingHeight < latestHeight {
+		logger := manager.logger.WithFields(applogger.LogFields{
+			"blockHeight": currentIndexingHeight,
+		})
+
+		logger.Info("synchronizing block")
 		// Request tendermint RPC
 		block, rawBlock, err := manager.client.Block(currentIndexingHeight)
 		if err != nil {

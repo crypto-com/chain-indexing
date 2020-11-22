@@ -17,6 +17,9 @@ type Logger interface {
 	WithFields(fields LogFields) Logger
 }
 
+type LogFn = func(message string)
+type LogfFn = func(format string, values ...interface{})
+
 type LogLevel int8
 
 const (

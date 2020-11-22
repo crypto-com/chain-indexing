@@ -13,13 +13,16 @@ func ParseEndBlockEventsCommands(blockHeight int64, endBlockEvents []model.Block
 	for i, event := range endBlockEvents {
 		if event.Type == "transfer" {
 			transferEvent := NewParsedTxsResultLogEvent(&endBlockEvents[i])
+
+			amount := transferEvent.MustGetAttributeByKey("amount")
+			if amount == "" {
+				continue
+			}
 			commands = append(commands, command_usecase.NewCreateAccountTransfer(
 				blockHeight, model.AccountTransferParams{
 					Recipient: transferEvent.MustGetAttributeByKey("recipient"),
 					Sender:    transferEvent.MustGetAttributeByKey("sender"),
-					Amount: coin.MustNewCoinFromString(TrimAmountDenom(
-						transferEvent.MustGetAttributeByKey("amount"),
-					)),
+					Amount:    coin.MustNewCoinFromString(TrimAmountDenom(amount)),
 				}))
 		}
 	}

@@ -15,7 +15,7 @@ import (
 var _ = Describe("ParseTxAccountTransferCommands", func() {
 	Describe("MsgSend", func() {
 
-		It("should parse CreateAccountTransfer commands when there is transfer event in transaction", func() {
+		It("should return CreateAccountTransfer command when there is transfer event in transaction", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MSG_SEND_BLOCK_RESULTS_RESP)
 
 			cmds, err := parser.ParseTxAccountTransferCommands(
@@ -47,7 +47,7 @@ var _ = Describe("ParseTxAccountTransferCommands", func() {
 			}))
 		})
 
-		It("should parse Msg commands when there are multiple bank.MsgSend in one transaction", func() {
+		It("should return multiple CreateAccountTransfer commands when there are multiple bank.MsgSend in one transaction", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.ONE_TX_TWO_MSG_SEND_BLOCK_RESULTS_RESP)
 
 			cmds, err := parser.ParseTxAccountTransferCommands(
@@ -77,6 +77,18 @@ var _ = Describe("ParseTxAccountTransferCommands", func() {
 					},
 				),
 			}))
+		})
+
+		It("should retur no command when there are transfer event with no amount", func() {
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_WITH_EMPTY_TRANSFER_AMOUNT_BLOCK_RESULTS_RESP)
+
+			cmds, err := parser.ParseTxAccountTransferCommands(
+				blockResults.Height,
+				blockResults.TxsResults,
+			)
+			Expect(err).To(BeNil())
+			Expect(cmds).To(HaveLen(0))
+			Expect(cmds).To(Equal([]command.Command{}))
 		})
 	})
 })
