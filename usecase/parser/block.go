@@ -15,6 +15,12 @@ func ParseBlockToCommands(
 	rawBlock *usecase_model.RawBlock,
 	blockResults *usecase_model.BlockResults,
 ) ([]entity_command.Command, error) {
+	defer func() {
+		if r := recover(); r != nil {
+			panic(fmt.Sprintf("panic when parsing block at height %d: %v", block.Height, r))
+		}
+	}()
+
 	var err error
 	var commands []entity_command.Command
 
