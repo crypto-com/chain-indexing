@@ -13,18 +13,31 @@ func ParseTxAccountTransferCommands(
 ) ([]command.Command, error) {
 	commands := make([]command.Command, 0)
 	for _, txsResult := range txsResults {
+		var lastSender string
 		for i, event := range txsResult.Events {
-			if event.Type == "transfer" {
+			if event.Type == "message" {
+				messageEvent := NewParsedTxsResultLogEvent(&txsResult.Events[i])
+				if messageEvent.HasAttribute("sender") {
+					lastSender = messageEvent.MustGetAttributeByKey("sender")
+				}
+			} else if event.Type == "transfer" {
 				transferEvent := NewParsedTxsResultLogEvent(&txsResult.Events[i])
 
 				amount := transferEvent.MustGetAttributeByKey("amount")
 				if amount == "" {
 					continue
 				}
+
+				var sender string
+				if transferEvent.HasAttribute("sender") {
+					sender = transferEvent.MustGetAttributeByKey("sender")
+				} else {
+					sender = lastSender
+				}
 				commands = append(commands, command_usecase.NewCreateAccountTransfer(
 					blockHeight, model.AccountTransferParams{
 						Recipient: transferEvent.MustGetAttributeByKey("recipient"),
-						Sender:    transferEvent.MustGetAttributeByKey("sender"),
+						Sender:    sender,
 						Amount:    coin.MustNewCoinFromString(TrimAmountDenom(amount)),
 					}))
 			}
