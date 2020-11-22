@@ -73,7 +73,6 @@ func CliApp(args []string) error {
 			}()
 
 			select {}
-			return nil
 		},
 	}
 

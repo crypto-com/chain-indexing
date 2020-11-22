@@ -109,15 +109,15 @@ func (view *Blocks) List(pagination *pagination.Pagination) ([]Block, *paginatio
 			}
 			return nil, nil, fmt.Errorf("error scanning block row: %v: %w", err, rdb.ErrQuery)
 		}
-		blockTime, err := timeReader.Parse()
-		if err != nil {
-			return nil, nil, fmt.Errorf("error parsing block time: %v: %w", err, rdb.ErrQuery)
+		blockTime, parseErr := timeReader.Parse()
+		if parseErr != nil {
+			return nil, nil, fmt.Errorf("error parsing block time: %v: %w", parseErr, rdb.ErrQuery)
 		}
 		block.Time = *blockTime
 
 		var committedCouncilNodes []BlockCommittedCouncilNode
-		if err = jsoniter.Unmarshal([]byte(*committedCouncilNodesJSON), &committedCouncilNodes); err != nil {
-			return nil, nil, fmt.Errorf("error unmarshalling block council nodes JSON: %v: %w", err, rdb.ErrQuery)
+		if unmarshalErr := jsoniter.Unmarshal([]byte(*committedCouncilNodesJSON), &committedCouncilNodes); unmarshalErr != nil {
+			return nil, nil, fmt.Errorf("error unmarshalling block council nodes JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 		}
 
 		block.CommittedCouncilNodes = committedCouncilNodes

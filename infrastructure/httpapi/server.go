@@ -56,7 +56,7 @@ func (server *Server) WithLogger(logger applogger.Logger) *Server {
 	server.WithPanicHandler(func(ctx *fasthttp.RequestCtx, err interface{}) {
 		logger.Errorf("%s %s: PANIC %v", ctx.Method(), ctx.Path(), err)
 		ctx.SetStatusCode(fasthttp.StatusInternalServerError)
-		ctx.WriteString("Internal server error")
+		ctx.WriteString("Internal server error") // nolint:errcheck
 	})
 	return server
 }

@@ -47,7 +47,7 @@ func NotFound(ctx *fasthttp.RequestCtx) {
 	}
 
 	ctx.SetStatusCode(fasthttp.StatusNotFound)
-	ctx.Write(message)
+	ctx.SetBody(message)
 }
 
 func BadRequest(ctx *fasthttp.RequestCtx, errResp error) {
@@ -61,7 +61,7 @@ func BadRequest(ctx *fasthttp.RequestCtx, errResp error) {
 	}
 
 	ctx.SetStatusCode(fasthttp.StatusBadRequest)
-	ctx.Write(message)
+	ctx.SetBody(message)
 }
 
 func InternalServerError(ctx *fasthttp.RequestCtx) {
@@ -71,7 +71,7 @@ func InternalServerError(ctx *fasthttp.RequestCtx) {
 	})
 
 	ctx.SetStatusCode(fasthttp.StatusInternalServerError)
-	ctx.Write(message)
+	ctx.SetBody(message)
 }
 
 type PagedResponse struct {
