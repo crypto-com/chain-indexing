@@ -46,7 +46,7 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.Name()).To(Equal("MsgWithdrawValidatorCommissionCreated"))
 			Expect(typedEvent.Version()).To(Equal(1))
 
-			Expect(typedEvent.TxHash).To(Equal(anyTxHash))
+			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 			Expect(typedEvent.ValidatorAddress).To(Equal(anyValidatorAddress))
 			Expect(typedEvent.RecipientAddress).To(Equal(anyRecipientAddress))
@@ -84,7 +84,7 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.Name()).To(Equal("MsgWithdrawValidatorCommissionFailed"))
 			Expect(typedEvent.Version()).To(Equal(1))
 
-			Expect(typedEvent.TxHash).To(Equal(anyTxHash))
+			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 			Expect(typedEvent.ValidatorAddress).To(Equal(anyValidatorAddress))
 			Expect(typedEvent.RecipientAddress).To(Equal(anyRecipientAddress))

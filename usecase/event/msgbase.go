@@ -11,9 +11,9 @@ import (
 type MsgBase struct {
 	event.Base
 
-	MsgName      string `json:"msgName"`
-	ParentTxHash string `json:"txHash"`
-	MsgIndex     int    `json:"msgIndex"`
+	MsgName   string `json:"msgName"`
+	MsgTxHash string `json:"txHash"`
+	MsgIndex  int    `json:"msgIndex"`
 }
 
 func NewMsgBase(params MsgBaseParams) MsgBase {
@@ -39,7 +39,7 @@ func (base *MsgBase) MsgType() string {
 }
 
 func (base *MsgBase) TxHash() string {
-	return base.ParentTxHash
+	return base.MsgTxHash
 }
 
 func eventName(msgName string, txSuccess bool) string {
