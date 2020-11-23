@@ -113,10 +113,11 @@ func (manager *Manager) projectionRunner(projection Projection) {
 
 			eventLogger = eventLogger.WithFields(applogger.LogFields{
 				"eventCount": len(events),
-				"events":     events,
 			})
 			if err = projection.HandleEvents(nextEventHeight, events); err != nil {
-				eventLogger.Errorf("error handling events: %v", err)
+				eventLogger.WithFields(applogger.LogFields{
+					"events": events,
+				}).Errorf("error handling events: %v", err)
 				<-waitToRetry(time.Second)
 				continue
 			}

@@ -115,7 +115,7 @@ func (projection *BlockTransaction) HandleEvents(height int64, events []event_en
 
 		if insertErr := transactionsView.Insert(&txs[i]); insertErr != nil {
 			_ = rdbTx.Rollback()
-			return fmt.Errorf("error inserting parsed transaction into view: %v", err)
+			return fmt.Errorf("error inserting parsed transaction into view: %v", insertErr)
 		}
 	}
 

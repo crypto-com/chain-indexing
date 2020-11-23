@@ -5,6 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/crypto-com/chainindex/usecase/executor"
+
+	"github.com/crypto-com/chainindex/entity/command"
+	"github.com/crypto-com/chainindex/usecase/syncstrategy"
+
 	event_interface "github.com/crypto-com/chainindex/appinterface/event"
 	projection_interface "github.com/crypto-com/chainindex/appinterface/projection"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
@@ -12,7 +17,6 @@ import (
 	"github.com/crypto-com/chainindex/entity/event"
 	"github.com/crypto-com/chainindex/entity/projection"
 	chainfeed "github.com/crypto-com/chainindex/infrastructure/feed/chain"
-	"github.com/crypto-com/chainindex/infrastructure/notification"
 	"github.com/crypto-com/chainindex/infrastructure/tendermint"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
 	event_usecase "github.com/crypto-com/chainindex/usecase/event"
@@ -26,20 +30,24 @@ type SyncManager struct {
 	client          *tendermint.HTTPClient
 	logger          applogger.Logger
 	pollingInterval time.Duration
+	windowSize      int
 
-	txDecoder         *parser.TxDecoder
-	statusStore       *rdbstatusstore.RDbStatusStoreImpl
-	eventStore        *event_interface.RDbStore
-	projectionManager *projection.Manager
-	subject           *chainfeed.BlockSubject
-	eventRegistry     *event.Registry
+	latestBlockHeight *int64
+	shouldSyncCh      chan bool
+
+	txDecoder          *parser.TxDecoder
+	windowSyncStrategy *syncstrategy.Window
+	statusStore        *rdbstatusstore.RDbStatusStoreImpl
+	eventStore         *event_interface.RDbStore
+	projectionManager  *projection.Manager
+	eventRegistry      *event.Registry
 }
 
 // NewSyncManager creates a new feed with polling for latest block starts at a specific height
 func NewSyncManager(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
-
+	windowSize int,
 	tendermintRPCUrl string,
 	txDecoder *parser.TxDecoder,
 ) *SyncManager {
@@ -51,9 +59,13 @@ func NewSyncManager(
 		logger: logger.WithFields(applogger.LogFields{
 			"module": "SyncManager",
 		}),
-
-		txDecoder:       txDecoder,
 		pollingInterval: DEFAULT_POLLING_INTERVAL,
+		windowSize:      windowSize,
+
+		shouldSyncCh: make(chan bool),
+
+		txDecoder:          txDecoder,
+		windowSyncStrategy: syncstrategy.NewWindow(logger, windowSize),
 	}
 }
 
@@ -75,39 +87,34 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
 
 	manager.logger.Infof("going to synchronized blocks from %d to %d", currentIndexingHeight, latestHeight)
 	for currentIndexingHeight < latestHeight {
-		logger := manager.logger.WithFields(applogger.LogFields{
-			"blockHeight": currentIndexingHeight,
-		})
-
-		logger.Info("synchronizing block")
-		// Request tendermint RPC
-		block, rawBlock, err := manager.client.Block(currentIndexingHeight)
+		blocksCommands, syncedHeight, err := manager.windowSyncStrategy.Sync(
+			currentIndexingHeight, latestHeight, manager.syncBlockWorker,
+		)
 		if err != nil {
-			return fmt.Errorf("error requesting chain block at height %d: %v", currentIndexingHeight, err)
+			manager.logger.Errorf("error when synchronizing block with window strategy: %v", err)
+			<-time.After(5 * time.Second)
 		}
 
-		blockResults, err := manager.client.BlockResults(currentIndexingHeight)
-		if err != nil {
-			return fmt.Errorf("error requesting chain block_results at height %d: %v", currentIndexingHeight, err)
-		}
-
-		// Create new block notification and notify subscribers
+		manager.logger.Debug("start persisting blocks commands")
 		tx, err := manager.rdbConn.Begin()
 		txHandle := tx.ToHandle()
 		if err != nil {
 			return fmt.Errorf("error beginning transaction: %v", err)
 		}
 		eventStore := event_interface.NewRDbStore(txHandle, manager.eventRegistry)
-		notif := notification.NewBlockNotification(
-			currentIndexingHeight, block, rawBlock, blockResults,
-		)
-		manager.subject.Notify(notif, eventStore)
+		for i, commands := range blocksCommands {
+			blockHeight := currentIndexingHeight + int64(i)
+			executor := executor.NewBlockExecutor(manager.logger, blockHeight)
+			executor.AddAllCommands(commands)
 
-		// Current block indexing done, update db and sync next height
-		manager.logger.WithFields(applogger.LogFields{
-			"blockHeight": block.Height,
-		}).Info("block synced and events produced")
-
+			// generate all events, make them persistent
+			if err := executor.ExecAllCommands(); err != nil {
+				return fmt.Errorf("error generating all events%v", err)
+			}
+			if err := executor.StoreAllEvents(eventStore); err != nil {
+				return fmt.Errorf("error storing all events%v", err)
+			}
+		}
 		if err := manager.statusStore.UpdateLastIndexedBlockHeight(txHandle, currentIndexingHeight); err != nil {
 			return fmt.Errorf("error updating last indexed block height to %d: %v", currentIndexingHeight, err)
 		}
@@ -118,22 +125,42 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
 
 		// If there is any error before, short-circuit return in the error handling
 		// while the local currentIndexingHeight won't be incremented and will be retried later
-		currentIndexingHeight += 1
+		manager.logger.Infof("successfully synced to block height %d", syncedHeight)
+		currentIndexingHeight = syncedHeight + 1
 	}
 	return nil
 }
 
-func (manager *SyncManager) InitSubject() *chainfeed.BlockSubject {
-	// Currently only the chain processor subscriber
-	// add more subscriber base on the need
-	chainProcessor := chainfeed.NewBlockSubscriber(manager.txDecoder)
+func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command.Command, error) {
+	logger := manager.logger.WithFields(applogger.LogFields{
+		"submodule":   "SyncBlockWorker",
+		"blockHeight": blockHeight,
+	})
 
-	blockSubject := chainfeed.NewBlockSubject(manager.logger)
+	logger.Info("synchronizing block")
 
-	// add more subscribers here
-	blockSubject.Attach(chainProcessor)
+	// Request tendermint RPC
+	block, rawBlock, err := manager.client.Block(blockHeight)
+	if err != nil {
+		return nil, fmt.Errorf("error requesting chain block at height %d: %v", blockHeight, err)
+	}
 
-	return blockSubject
+	blockResults, err := manager.client.BlockResults(blockHeight)
+	if err != nil {
+		return nil, fmt.Errorf("error requesting chain block_results at height %d: %v", blockHeight, err)
+	}
+
+	commands, err := parser.ParseBlockToCommands(
+		manager.txDecoder,
+		block,
+		rawBlock,
+		blockResults,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing block data to commands %v", err)
+	}
+
+	return commands, nil
 }
 
 func (manager *SyncManager) InitRegistry() *event.Registry {
@@ -179,10 +206,8 @@ func (manager *SyncManager) InitProjectionManager() (*projection.Manager, error)
 }
 
 // Run starts the polling service for blocks
-// new BlockFeedSubject and add listeners
 func (manager *SyncManager) Run() error {
 	var err error
-	manager.subject = manager.InitSubject()
 	manager.eventRegistry = manager.InitRegistry()
 	manager.statusStore = manager.InitStatusStore()
 
@@ -197,16 +222,36 @@ func (manager *SyncManager) Run() error {
 	manager.projectionManager.Run()
 
 	tracker := chainfeed.NewBlockHeightTracker(manager.logger, manager.client)
+	manager.latestBlockHeight = tracker.GetLatestBlockHeight()
+	blockHeightCh := make(chan int64)
+	go func() {
+		latestBlockHeight := <-blockHeightCh
+		manager.latestBlockHeight = &latestBlockHeight
+		manager.logger.Infof("updated latest block height to %d", *manager.latestBlockHeight)
+		manager.drainShouldSyncCh()
+		manager.shouldSyncCh <- true
+	}()
+	tracker.Subscribe(blockHeightCh)
+
 	for {
-		latestHeight := tracker.GetLatestBlockHeight()
-		if latestHeight == nil {
-			<-time.After(manager.pollingInterval)
-			continue
-		}
-		if err := manager.SyncBlocks(*latestHeight); err != nil {
-			manager.logger.Errorf("error synchronizing blocks to latest height %d: %v", *latestHeight, err)
+		if manager.latestBlockHeight == nil {
+			manager.logger.Info("the chain has no block yet")
+		} else {
+			if err := manager.SyncBlocks(*manager.latestBlockHeight); err != nil {
+				manager.logger.Errorf("error synchronizing blocks to latest height %d: %v", *manager.latestBlockHeight, err)
+			}
 		}
 
-		<-time.After(manager.pollingInterval)
+		select {
+		case <-manager.shouldSyncCh:
+		case <-time.After(manager.pollingInterval):
+		}
+	}
+}
+
+func (manager *SyncManager) drainShouldSyncCh() {
+	select {
+	case <-manager.shouldSyncCh:
+	default:
 	}
 }
