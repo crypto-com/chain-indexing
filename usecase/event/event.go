@@ -26,6 +26,16 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(MSG_FUND_COMMUNITY_POOL_CREATED, 1, DecodeMsgFundCommunityPool)
 	registry.Register(MSG_FUND_COMMUNITY_POOL_FAILED, 1, DecodeMsgFundCommunityPool)
 
+	// Gov
+	registry.Register(MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_CREATED, 1, DecodeMsgSubmitParamChangeProposal)
+	registry.Register(MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_FAILED, 1, DecodeMsgSubmitParamChangeProposal)
+	registry.Register(MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_CREATED, 1, DecodeMsgSubmitCommunityPoolSpendProposal)
+	registry.Register(MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_FAILED, 1, DecodeMsgSubmitCommunityPoolSpendProposal)
+	registry.Register(MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_CREATED, 1, DecodeMsgSubmitSoftwareUpgradeProposal)
+	registry.Register(MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_FAILED, 1, DecodeMsgSubmitSoftwareUpgradeProposal)
+	registry.Register(MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_CREATED, 1, DecodeMsgSubmitCancelSoftwareUpgradeProposal)
+	registry.Register(MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_FAILED, 1, DecodeMsgSubmitCancelSoftwareUpgradeProposal)
+
 	// Staking
 	registry.Register(MSG_DELEGATE_CREATED, 1, DecodeMsgDelegate)
 	registry.Register(MSG_DELEGATE_FAILED, 1, DecodeMsgDelegate)

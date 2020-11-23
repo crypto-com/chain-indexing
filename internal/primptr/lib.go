@@ -61,3 +61,8 @@ func Int64Nil() *int64 {
 	var p *int64
 	return p
 }
+
+func StringNil() *string {
+	var p *string
+	return p
+}

@@ -2,6 +2,11 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
+
+	"github.com/crypto-com/chainindex/internal/utctime"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/crypto-com/chainindex/entity/command"
 	"github.com/crypto-com/chainindex/usecase/coin"
@@ -39,31 +44,33 @@ func ParseMsgToCommands(
 				MsgIndex:    msgIndex,
 			}
 
-			var msgCommand command.Command
+			var msgCommands []command.Command
 			switch msg["@type"] {
 			case "/cosmos.bank.v1beta1.MsgSend":
-				msgCommand = parseMsgSend(msgCommonParams, msg)
+				msgCommands = parseMsgSend(msgCommonParams, msg)
 			case "/cosmos.bank.v1beta1.MsgMultiSend":
-				msgCommand = parseMsgMultiSend(msgCommonParams, msg)
+				msgCommands = parseMsgMultiSend(msgCommonParams, msg)
 			case "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress":
-				msgCommand = parseMsgSetWithdrawAddress(msgCommonParams, msg)
+				msgCommands = parseMsgSetWithdrawAddress(msgCommonParams, msg)
 			case "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward":
-				msgCommand = parseMsgWithdrawDelegatorReward(txSuccess, txsResult, msgIndex, msgCommonParams, msg)
+				msgCommands = parseMsgWithdrawDelegatorReward(txSuccess, txsResult, msgIndex, msgCommonParams, msg)
 			case "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission":
-				msgCommand = parseMsgWithdrawValidatorCommission(txSuccess, txsResult, msgIndex, msgCommonParams, msg)
+				msgCommands = parseMsgWithdrawValidatorCommission(txSuccess, txsResult, msgIndex, msgCommonParams, msg)
 			case "/cosmos.distribution.v1beta1.MsgFundCommunityPool":
-				msgCommand = parseMsgFundCommunityPool(msgCommonParams, msg)
+				msgCommands = parseMsgFundCommunityPool(msgCommonParams, msg)
+			case "/cosmos.gov.v1beta1.MsgSubmitProposal":
+				msgCommands = parseMsgSubmitProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg)
 			case "/cosmos.staking.v1beta1.MsgDelegate":
-				msgCommand = parseMsgDelegate(msgCommonParams, msg)
+				msgCommands = parseMsgDelegate(msgCommonParams, msg)
 			case "/cosmos.staking.v1beta1.MsgUndelegate":
-				msgCommand = parseMsgUndelegate(msgCommonParams, msg)
+				msgCommands = parseMsgUndelegate(msgCommonParams, msg)
 			case "/cosmos.staking.v1beta1.MsgBeginRedelegate":
-				msgCommand = parseMsgBeginRedelegate(msgCommonParams, msg)
+				msgCommands = parseMsgBeginRedelegate(msgCommonParams, msg)
 			case "/cosmos.slashing.v1beta1.MsgUnjail":
-				msgCommand = parseMsgUnjail(msgCommonParams, msg)
+				msgCommands = parseMsgUnjail(msgCommonParams, msg)
 			}
 
-			commands = append(commands, msgCommand)
+			commands = append(commands, msgCommands...)
 		}
 	}
 
@@ -73,8 +80,8 @@ func ParseMsgToCommands(
 func parseMsgSend(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
-) *command_usecase.CreateMsgSend {
-	return command_usecase.NewCreateMsgSend(
+) []command.Command {
+	return []command.Command{command_usecase.NewCreateMsgSend(
 		msgCommonParams,
 
 		event.MsgSendCreatedParams{
@@ -82,13 +89,13 @@ func parseMsgSend(
 			ToAddress:   msg["to_address"].(string),
 			Amount:      sumAmountInterfaces(msg["amount"].([]interface{})),
 		},
-	)
+	)}
 }
 
 func parseMsgMultiSend(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
-) *command_usecase.CreateMsgMultiSend {
+) []command.Command {
 	rawInputs, _ := msg["inputs"].([]interface{})
 	inputs := make([]model.MsgMultiSendInput, 0, len(rawInputs))
 	for _, rawInput := range rawInputs {
@@ -109,28 +116,28 @@ func parseMsgMultiSend(
 		})
 	}
 
-	return command_usecase.NewCreateMsgMultiSend(
+	return []command.Command{command_usecase.NewCreateMsgMultiSend(
 		msgCommonParams,
 
 		model.MsgMultiSendParams{
 			Inputs:  inputs,
 			Outputs: outputs,
 		},
-	)
+	)}
 }
 
 func parseMsgSetWithdrawAddress(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
-) *command_usecase.CreateMsgSetWithdrawAddress {
-	return command_usecase.NewCreateMsgSetWithdrawAddress(
+) []command.Command {
+	return []command.Command{command_usecase.NewCreateMsgSetWithdrawAddress(
 		msgCommonParams,
 
 		model.MsgSetWithdrawAddressParams{
 			DelegatorAddress: msg["delegator_address"].(string),
 			WithdrawAddress:  msg["withdraw_address"].(string),
 		},
-	)
+	)}
 }
 
 func parseMsgWithdrawDelegatorReward(
@@ -139,10 +146,10 @@ func parseMsgWithdrawDelegatorReward(
 	msgIndex int,
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
-) *command_usecase.CreateMsgWithdrawDelegatorReward {
+) []command.Command {
 	if !txSuccess {
 		delegatorAddress, _ := msg["delegator_address"].(string)
-		return command_usecase.NewCreateMsgWithdrawDelegatorReward(
+		return []command.Command{command_usecase.NewCreateMsgWithdrawDelegatorReward(
 			msgCommonParams,
 
 			model.MsgWithdrawDelegatorRewardParams{
@@ -151,7 +158,7 @@ func parseMsgWithdrawDelegatorReward(
 				RecipientAddress: delegatorAddress,
 				Amount:           coin.Zero(),
 			},
-		)
+		)}
 	}
 	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	var recipient string
@@ -166,7 +173,7 @@ func parseMsgWithdrawDelegatorReward(
 		amount = coin.MustNewCoinFromString(TrimAmountDenom(amountValue))
 	}
 
-	return command_usecase.NewCreateMsgWithdrawDelegatorReward(
+	return []command.Command{command_usecase.NewCreateMsgWithdrawDelegatorReward(
 		msgCommonParams,
 
 		model.MsgWithdrawDelegatorRewardParams{
@@ -175,7 +182,7 @@ func parseMsgWithdrawDelegatorReward(
 			RecipientAddress: recipient,
 			Amount:           amount,
 		},
-	)
+	)}
 }
 
 func parseMsgWithdrawValidatorCommission(
@@ -184,9 +191,9 @@ func parseMsgWithdrawValidatorCommission(
 	msgIndex int,
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
-) *command_usecase.CreateMsgWithdrawValidatorCommission {
+) []command.Command {
 	if !txSuccess {
-		return command_usecase.NewCreateMsgWithdrawValidatorCommission(
+		return []command.Command{command_usecase.NewCreateMsgWithdrawValidatorCommission(
 			msgCommonParams,
 
 			model.MsgWithdrawValidatorCommissionParams{
@@ -194,7 +201,7 @@ func parseMsgWithdrawValidatorCommission(
 				RecipientAddress: msg["delegator_address"].(string),
 				Amount:           coin.Zero(),
 			},
-		)
+		)}
 	}
 	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	var recipient string
@@ -209,7 +216,7 @@ func parseMsgWithdrawValidatorCommission(
 		amount = coin.MustNewCoinFromString(TrimAmountDenom(amountValue))
 	}
 
-	return command_usecase.NewCreateMsgWithdrawValidatorCommission(
+	return []command.Command{command_usecase.NewCreateMsgWithdrawValidatorCommission(
 		msgCommonParams,
 
 		model.MsgWithdrawValidatorCommissionParams{
@@ -217,31 +224,274 @@ func parseMsgWithdrawValidatorCommission(
 			RecipientAddress: recipient,
 			Amount:           amount,
 		},
-	)
+	)}
 }
 
 func parseMsgFundCommunityPool(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
-) *command_usecase.CreateMsgFundCommunityPool {
-	return command_usecase.NewCreateMsgFundCommunityPool(
+) []command.Command {
+	return []command.Command{command_usecase.NewCreateMsgFundCommunityPool(
 		msgCommonParams,
 
 		model.MsgFundCommunityPoolParams{
 			Depositor: msg["depositor"].(string),
 			Amount:    sumAmountInterfaces(msg["amount"].([]interface{})),
 		},
-	)
+	)}
+}
+
+func parseMsgSubmitProposal(
+	txSuccess bool,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	rawContent, err := jsoniter.Marshal(msg["content"])
+	if err != nil {
+		panic(fmt.Sprintf("error encoding proposal content: %v", err))
+	}
+	var proposalContent model.MsgSubmitProposalContent
+	if err := jsoniter.Unmarshal(rawContent, &proposalContent); err != nil {
+		panic(fmt.Sprintf("error decoding proposal content: %v", err))
+	}
+
+	if proposalContent.Type == "/cosmos.params.v1beta1.ParameterChangeProposal" {
+		return parseMsgSubmitParamChangeProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
+	} else if proposalContent.Type == "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal" {
+		return parseMsgSubmitCommunityFundSpendProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
+	} else if proposalContent.Type == "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal" {
+		return parseMsgSubmitSoftwareUpgradeProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
+	} else if proposalContent.Type == "/cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal" {
+		return parseMsgSubmitCancelSoftwareUpgradeProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
+	}
+	panic(fmt.Sprintf("unrecognzied govenance proposal type `%s`", proposalContent.Type))
+}
+
+func parseMsgSubmitParamChangeProposal(
+	txSuccess bool,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+	rawContent []byte,
+) []command.Command {
+	var proposalContent model.MsgSubmitParamChangeProposalContent
+	if err := jsoniter.Unmarshal(rawContent, &proposalContent); err != nil {
+		panic("error decoding param change proposal content")
+	}
+
+	if !txSuccess {
+		return []command.Command{command_usecase.NewCreateMsgSubmitParamChangeProposal(
+			msgCommonParams,
+
+			model.MsgSubmitParamChangeProposalParams{
+				MaybeProposalId: nil,
+				Content:         proposalContent,
+				ProposerAddress: msg["proposer"].(string),
+				InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+			},
+		)}
+	}
+	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	// When there is no reward withdrew, `transfer` event would not exist
+	event := log.GetEventByType("submit_proposal")
+	if event == nil {
+		panic("missing `submit_proposal` event in TxsResult log")
+	}
+	proposalId := event.GetAttributeByKey("proposal_id")
+	if proposalId == nil {
+		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgSubmitParamChangeProposal(
+		msgCommonParams,
+
+		model.MsgSubmitParamChangeProposalParams{
+			MaybeProposalId: proposalId,
+			Content:         proposalContent,
+			ProposerAddress: msg["proposer"].(string),
+			InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+		},
+	)}
+}
+
+func parseMsgSubmitCommunityFundSpendProposal(
+	txSuccess bool,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+	rawContent []byte,
+) []command.Command {
+	var rawProposalContent model.RawMsgSubmitCommunityPoolSpendProposalContent
+	if err := jsoniter.Unmarshal(rawContent, &rawProposalContent); err != nil {
+		panic("error decoding community pool spend proposal content")
+	}
+	proposalContent := model.MsgSubmitCommunityPoolSpendProposalContent{
+		Type:             rawProposalContent.Type,
+		Title:            rawProposalContent.Title,
+		Description:      rawProposalContent.Description,
+		RecipientAddress: rawProposalContent.RecipientAddress,
+		Amount:           sumAmountInterfaces(rawProposalContent.Amount),
+	}
+
+	if !txSuccess {
+		return []command.Command{command_usecase.NewCreateMsgSubmitCommunityPoolSpendProposal(
+			msgCommonParams,
+
+			model.MsgSubmitCommunityPoolSpendProposalParams{
+				MaybeProposalId: nil,
+				Content:         proposalContent,
+				ProposerAddress: msg["proposer"].(string),
+				InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+			},
+		)}
+	}
+	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	// When there is no reward withdrew, `transfer` event would not exist
+	event := log.GetEventByType("submit_proposal")
+	if event == nil {
+		panic("missing `submit_proposal` event in TxsResult log")
+	}
+	proposalId := event.GetAttributeByKey("proposal_id")
+	if proposalId == nil {
+		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgSubmitCommunityPoolSpendProposal(
+		msgCommonParams,
+
+		model.MsgSubmitCommunityPoolSpendProposalParams{
+			MaybeProposalId: proposalId,
+			Content:         proposalContent,
+			ProposerAddress: msg["proposer"].(string),
+			InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+		},
+	)}
+}
+
+func parseMsgSubmitSoftwareUpgradeProposal(
+	txSuccess bool,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+	rawContent []byte,
+) []command.Command {
+	var rawProposalContent model.RawMsgSubmitSoftwareUpgradeProposalContent
+	if err := jsoniter.Unmarshal(rawContent, &rawProposalContent); err != nil {
+		panic("error decoding software upgrade proposal content")
+	}
+
+	height, err := strconv.ParseInt(rawProposalContent.Plan.Height, 10, 64)
+	if err != nil {
+		panic(fmt.Sprintf("error parsing software upgrade proposal plan height: %v", err))
+	}
+	proposalContent := model.MsgSubmitSoftwareUpgradeProposalContent{
+		Type:        rawProposalContent.Type,
+		Title:       rawProposalContent.Title,
+		Description: rawProposalContent.Description,
+		Plan: model.MsgSubmitSoftwareUpgradeProposalPlan{
+			Name:   rawProposalContent.Plan.Name,
+			Time:   utctime.FromTime(rawProposalContent.Plan.Time),
+			Height: height,
+			Info:   rawProposalContent.Plan.Info,
+		},
+	}
+
+	if !txSuccess {
+		return []command.Command{command_usecase.NewCreateMsgSubmitSoftwareUpgradeProposal(
+			msgCommonParams,
+
+			model.MsgSubmitSoftwareUpgradeProposalParams{
+				MaybeProposalId: nil,
+				Content:         proposalContent,
+				ProposerAddress: msg["proposer"].(string),
+				InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+			},
+		)}
+	}
+	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	// When there is no reward withdrew, `transfer` event would not exist
+	event := log.GetEventByType("submit_proposal")
+	if event == nil {
+		panic("missing `submit_proposal` event in TxsResult log")
+	}
+	proposalId := event.GetAttributeByKey("proposal_id")
+	if proposalId == nil {
+		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgSubmitSoftwareUpgradeProposal(
+		msgCommonParams,
+
+		model.MsgSubmitSoftwareUpgradeProposalParams{
+			MaybeProposalId: proposalId,
+			Content:         proposalContent,
+			ProposerAddress: msg["proposer"].(string),
+			InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+		},
+	)}
+}
+
+func parseMsgSubmitCancelSoftwareUpgradeProposal(
+	txSuccess bool,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+	rawContent []byte,
+) []command.Command {
+	var proposalContent model.MsgSubmitCancelSoftwareUpgradeProposalContent
+	if err := jsoniter.Unmarshal(rawContent, &proposalContent); err != nil {
+		panic("error decoding software upgrade proposal content")
+	}
+
+	if !txSuccess {
+		return []command.Command{command_usecase.NewCreateMsgSubmitCancelSoftwareUpgradeProposal(
+			msgCommonParams,
+
+			model.MsgSubmitCancelSoftwareUpgradeProposalParams{
+				MaybeProposalId: nil,
+				Content:         proposalContent,
+				ProposerAddress: msg["proposer"].(string),
+				InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+			},
+		)}
+	}
+	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	// When there is no reward withdrew, `transfer` event would not exist
+	event := log.GetEventByType("submit_proposal")
+	if event == nil {
+		panic("missing `submit_proposal` event in TxsResult log")
+	}
+	proposalId := event.GetAttributeByKey("proposal_id")
+	if proposalId == nil {
+		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgSubmitCancelSoftwareUpgradeProposal(
+		msgCommonParams,
+
+		model.MsgSubmitCancelSoftwareUpgradeProposalParams{
+			MaybeProposalId: proposalId,
+			Content:         proposalContent,
+			ProposerAddress: msg["proposer"].(string),
+			InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+		},
+	)}
 }
 
 func parseMsgDelegate(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
-) *command_usecase.CreateMsgDelegate {
+) []command.Command {
 	amountValue, _ := msg["amount"].(map[string]interface{})
 	amount := coin.MustNewCoinFromString(amountValue["amount"].(string))
 
-	return command_usecase.NewCreateMsgDelegate(
+	return []command.Command{command_usecase.NewCreateMsgDelegate(
 		msgCommonParams,
 
 		model.MsgDelegateParams{
@@ -249,17 +499,17 @@ func parseMsgDelegate(
 			ValidatorAddress: msg["validator_address"].(string),
 			Amount:           amount,
 		},
-	)
+	)}
 }
 
 func parseMsgUndelegate(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
-) *command_usecase.CreateMsgUndelegate {
+) []command.Command {
 	amountValue, _ := msg["amount"].(map[string]interface{})
 	amount := coin.MustNewCoinFromString(amountValue["amount"].(string))
 
-	return command_usecase.NewCreateMsgUndelegate(
+	return []command.Command{command_usecase.NewCreateMsgUndelegate(
 		msgCommonParams,
 
 		model.MsgUndelegateParams{
@@ -267,17 +517,17 @@ func parseMsgUndelegate(
 			ValidatorAddress: msg["validator_address"].(string),
 			Amount:           amount,
 		},
-	)
+	)}
 }
 
 func parseMsgBeginRedelegate(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
-) *command_usecase.CreateMsgBeginRedelegate {
+) []command.Command {
 	amountValue, _ := msg["amount"].(map[string]interface{})
 	amount := coin.MustNewCoinFromString(amountValue["amount"].(string))
 
-	return command_usecase.NewCreateMsgBeginRedelegate(
+	return []command.Command{command_usecase.NewCreateMsgBeginRedelegate(
 		msgCommonParams,
 
 		model.MsgBeginRedelegateParams{
@@ -286,20 +536,20 @@ func parseMsgBeginRedelegate(
 			ValidatorDstAddress: msg["validator_dst_address"].(string),
 			Amount:              amount,
 		},
-	)
+	)}
 }
 
 func parseMsgUnjail(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
-) *command_usecase.CreateMsgUnjail {
-	return command_usecase.NewCreateMsgUnjail(
+) []command.Command {
+	return []command.Command{command_usecase.NewCreateMsgUnjail(
 		msgCommonParams,
 
 		model.MsgUnjailParams{
 			ValidatorAddr: msg["validator_addr"].(string),
 		},
-	)
+	)}
 }
 
 func sumAmountInterfaces(amounts []interface{}) coin.Coin {
