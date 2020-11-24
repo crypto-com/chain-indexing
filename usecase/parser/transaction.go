@@ -44,6 +44,14 @@ func ParseTransactionCommands(
 			return nil, fmt.Errorf("error parsing transaction fee: %v", err)
 		}
 
+		gasWanted, err := strconv.Atoi(txsResult.GasWanted)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing gas wanted: %v", err)
+		}
+		gasUsed, err := strconv.Atoi(txsResult.GasUsed)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing gas wanted: %v", err)
+		}
 		timeoutHeight, err := strconv.ParseInt(tx.Body.TimeoutHeight, 10, 64)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing timeout height: %v", err)
@@ -56,8 +64,8 @@ func ParseTransactionCommands(
 			Fee:           fee,
 			FeePayer:      tx.AuthInfo.Fee.Payer,
 			FeeGranter:    tx.AuthInfo.Fee.Granter,
-			GasWanted:     txsResult.GasWanted,
-			GasUsed:       txsResult.GasUsed,
+			GasWanted:     gasWanted,
+			GasUsed:       gasUsed,
 			Memo:          tx.Body.Memo,
 			TimeoutHeight: timeoutHeight,
 		}))

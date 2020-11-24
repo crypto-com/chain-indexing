@@ -7,21 +7,26 @@ import (
 )
 
 type RouteRegistry struct {
-	blocksHandler *handlers.Blocks
+	blocksHandler      *handlers.Blocks
+	transactionHandler *handlers.Transactions
 }
 
 func NewRoutesRegistry(
 	blocksHandler *handlers.Blocks,
+	transactionHandler *handlers.Transactions,
 ) *RouteRegistry {
 	return &RouteRegistry{
 		blocksHandler,
+		transactionHandler,
 	}
 }
 
 func (registry *RouteRegistry) Register(server *httpapi.Server) {
-	server.GET("/health", func(ctx *fasthttp.RequestCtx) {
+	server.GET("/api/v1/health", func(ctx *fasthttp.RequestCtx) {
 		ctx.SetStatusCode(fasthttp.StatusOK)
 		ctx.SetBody([]byte("Ok"))
 	})
 	server.GET("/api/v1/blocks", registry.blocksHandler.List)
+	server.GET("/api/v1/blocks/{height}/transactions", registry.blocksHandler.ListTransactionsByHeight)
+	server.GET("/api/v1/transactions", registry.transactionHandler.List)
 }

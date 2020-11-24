@@ -81,7 +81,6 @@ func (view *Blocks) List(pagination *pagination.Pagination) ([]Block, *paginatio
 		view.rdb.Runner,
 	).BuildStmt(stmtBuilder)
 	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
-	fmt.Println(sql)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error building blocks select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
 	}

@@ -44,7 +44,7 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_FUND_COMMUNITY_POOL_CREATED))
 			Expect(typedEvent.Version()).To(Equal(1))
 
-			Expect(typedEvent.TxHash).To(Equal(anyTxHash))
+			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 			Expect(typedEvent.Depositor).To(Equal(anyDepositor))
 			Expect(typedEvent.Amount).To(Equal(anyAmount))
@@ -79,7 +79,7 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_FUND_COMMUNITY_POOL_FAILED))
 			Expect(typedEvent.Version()).To(Equal(1))
 
-			Expect(typedEvent.TxHash).To(Equal(anyTxHash))
+			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 			Expect(typedEvent.Depositor).To(Equal(anyDepositor))
 			Expect(typedEvent.Amount).To(Equal(anyAmount))

@@ -23,8 +23,8 @@ type TransactionFailed struct {
 	Fee           coin.Coin `json:"fee"`
 	FeePayer      string    `json:"feePayer"`
 	FeeGranter    string    `json:"feeGranter"`
-	GasWanted     string    `json:"gasWanted"`
-	GasUsed       string    `json:"gasUsed"`
+	GasWanted     int       `json:"gasWanted"`
+	GasUsed       int       `json:"gasUsed"`
 	Memo          string    `json:"memo"`
 	TimeoutHeight int64     `json:"timeoutHeight"`
 }

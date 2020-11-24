@@ -46,7 +46,7 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_VOTE_CREATED))
 			Expect(typedEvent.Version()).To(Equal(1))
 
-			Expect(typedEvent.TxHash).To(Equal(anyTxHash))
+			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 			Expect(typedEvent.ProposalId).To(Equal(anyProposalId))
 			Expect(typedEvent.Voter).To(Equal(anyVoter))
@@ -84,7 +84,7 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_DEPOSIT_FAILED))
 			Expect(typedEvent.Version()).To(Equal(1))
 
-			Expect(typedEvent.TxHash).To(Equal(anyTxHash))
+			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 			Expect(typedEvent.ProposalId).To(Equal(anyProposalId))
 			Expect(typedEvent.Depositor).To(Equal(anyDepositor))

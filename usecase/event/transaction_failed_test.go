@@ -27,8 +27,8 @@ var _ = Describe("Event", func() {
 				Fee:           coin.MustNewCoinFromString("1000"),
 				FeePayer:      "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 				FeeGranter:    "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-				GasWanted:     "200000",
-				GasUsed:       "10000",
+				GasWanted:     200000,
+				GasUsed:       10000,
 				Memo:          "Test memo",
 				TimeoutHeight: int64(10),
 			}
