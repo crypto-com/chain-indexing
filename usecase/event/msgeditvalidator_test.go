@@ -43,7 +43,7 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_EDIT_VALIDATOR_CREATED))
 			Expect(typedEvent.Version()).To(Equal(1))
 
-			Expect(typedEvent.TxHash).To(Equal(event.TxHash))
+			Expect(typedEvent.TxHash()).To(Equal(event.TxHash()))
 			Expect(typedEvent.MsgIndex).To(Equal(event.MsgIndex))
 			Expect(typedEvent.ValidatorAddress).To(Equal(event.ValidatorAddress))
 			Expect(typedEvent.CommissionRate).To(Equal(event.CommissionRate))

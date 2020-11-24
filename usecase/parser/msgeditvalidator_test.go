@@ -42,7 +42,6 @@ var _ = Describe("ParseMsgCommands", func() {
 					},
 
 					model.MsgEditValidatorParams{
-
 						ValidatorAddress:  "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
 						CommissionRate:    "",
 						MinSelfDelegation: "2",

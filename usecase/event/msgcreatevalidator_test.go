@@ -30,7 +30,6 @@ var _ = Describe("Event", func() {
 
 	Describe("En/DecodeMsgCreateValidator", func() {
 		It("should able to encode and decode to the same event", func() {
-
 			event := event_usecase.NewMsgCreateValidator(
 				event.MsgCommonParams{
 					BlockHeight: int64(503978),
@@ -60,7 +59,7 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_CREATE_VALIDATOR_CREATED))
 			Expect(typedEvent.Version()).To(Equal(1))
 
-			Expect(typedEvent.TxHash).To(Equal(event.TxHash))
+			Expect(typedEvent.TxHash()).To(Equal(event.TxHash()))
 			Expect(typedEvent.MsgIndex).To(Equal(event.MsgIndex))
 			Expect(typedEvent.DelegatorAddress).To(Equal(event.DelegatorAddress))
 			Expect(typedEvent.ValidatorAddress).To(Equal(event.ValidatorAddress))
@@ -69,7 +68,6 @@ var _ = Describe("Event", func() {
 		})
 
 		It("should able to encode and decode to failed event", func() {
-
 			event := event_usecase.NewMsgCreateValidator(
 				event.MsgCommonParams{
 					BlockHeight: int64(503978),
