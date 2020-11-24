@@ -1,6 +1,6 @@
 package usecase_parser_test
 
-const FAILED_TX_WITH_FEE_BLOCK_RESP = `{
+const TX_FAILED_WITH_FEE_BLOCK_RESP = `{
   "jsonrpc": "2.0",
   "id": -1,
   "result": {
@@ -91,7 +91,7 @@ const FAILED_TX_WITH_FEE_BLOCK_RESP = `{
   }
 }`
 
-const FAILED_TX_WITH_FEE_BLOCK_RESULTS_RESP = `{
+const TX_FAILED_WITH_FEE_BLOCK_RESULTS_RESP = `{
   "jsonrpc": "2.0",
   "id": -1,
   "result": {

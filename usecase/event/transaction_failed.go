@@ -16,13 +16,17 @@ const TRANSACTION_FAILED = "TransactionFailed"
 type TransactionFailed struct {
 	entity_event.Base
 
-	TxHash    string    `json:"txHash"`
-	Code      int       `json:"code"`
-	Log       string    `json:"log"`
-	MsgCount  int       `json:"msgCount"`
-	Fee       coin.Coin `json:"fee"`
-	GasWanted string    `json:"gasWanted"`
-	GasUsed   string    `json:"gasUsed"`
+	TxHash        string    `json:"txHash"`
+	Code          int       `json:"code"`
+	Log           string    `json:"log"`
+	MsgCount      int       `json:"msgCount"`
+	Fee           coin.Coin `json:"fee"`
+	FeePayer      string    `json:"feePayer"`
+	FeeGranter    string    `json:"feeGranter"`
+	GasWanted     string    `json:"gasWanted"`
+	GasUsed       string    `json:"gasUsed"`
+	Memo          string    `json:"memo"`
+	TimeoutHeight int64     `json:"timeoutHeight"`
 }
 
 func NewTransactionFailed(blockHeight int64, params model.CreateTransactionParams) *TransactionFailed {
@@ -33,13 +37,17 @@ func NewTransactionFailed(blockHeight int64, params model.CreateTransactionParam
 			BlockHeight: blockHeight,
 		}),
 
-		TxHash:    params.TxHash,
-		Code:      params.Code,
-		Log:       params.Log,
-		MsgCount:  params.MsgCount,
-		Fee:       params.Fee,
-		GasWanted: params.GasWanted,
-		GasUsed:   params.GasUsed,
+		TxHash:        params.TxHash,
+		Code:          params.Code,
+		Log:           params.Log,
+		MsgCount:      params.MsgCount,
+		Fee:           params.Fee,
+		FeePayer:      params.FeePayer,
+		FeeGranter:    params.FeeGranter,
+		GasWanted:     params.GasWanted,
+		GasUsed:       params.GasUsed,
+		Memo:          params.Memo,
+		TimeoutHeight: params.TimeoutHeight,
 	}
 }
 
