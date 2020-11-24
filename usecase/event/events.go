@@ -11,7 +11,7 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(TRANSACTION_FAILED, 1, DecodeTransactionFailed)
 
 	registry.Register(ACCOUNT_TRANSFERRED, 1, DecodeAccountTransferred)
-	registry.Register(BLOCK_PROPOSER_REWARDED, 1, DecodeProposerRewarded)
+	registry.Register(BLOCK_PROPOSER_REWARDED, 1, DecodeBlockProposerRewarded)
 	registry.Register(BLOCK_REWARDED, 1, DecodeBlockRewarded)
 	registry.Register(BLOCK_COMMISSIONED, 1, DecodeBlockCommissioned)
 	registry.Register(MINTED, 1, DecodeMinted)
@@ -46,6 +46,9 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(MSG_VOTE_CREATED, 1, DecodeMsgVote)
 	registry.Register(MSG_VOTE_FAILED, 1, DecodeMsgVote)
 
+	registry.Register(PROPOSAL_ENDED, 1, DecodeProposalEnded)
+	registry.Register(PROPOSAL_INACTIVED, 1, DecodeProposalInactived)
+
 	// Staking
 	registry.Register(MSG_CREATE_VALIDATOR_CREATED, 1, DecodeMsgCreateValidator)
 	registry.Register(MSG_CREATE_VALIDATOR_FAILED, 1, DecodeMsgCreateValidator)
@@ -57,6 +60,8 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(MSG_UNDELEGATE_FAILED, 1, DecodeMsgUndelegate)
 	registry.Register(MSG_BEGIN_REDELEGATE_CREATED, 1, DecodeMsgBeginRedelegate)
 	registry.Register(MSG_BEGIN_REDELEGATE_FAILED, 1, DecodeMsgBeginRedelegate)
+
+	registry.Register(BONDING_COMPLETED, 1, DecodeBondingCompleted)
 
 	// Slashing
 	registry.Register(MSG_UNJAIL_CREATED, 1, DecodeMsgUnjail)

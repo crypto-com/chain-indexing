@@ -24,6 +24,34 @@ func ParseEndBlockEventsCommands(blockHeight int64, endBlockEvents []model.Block
 					Sender:    transferEvent.MustGetAttributeByKey("sender"),
 					Amount:    coin.MustNewCoinFromString(TrimAmountDenom(amount)),
 				}))
+		} else if event.Type == "complete_unbonding" {
+			completeBondingEvent := NewParsedTxsResultLogEvent(&endBlockEvents[i])
+			amountValue := completeBondingEvent.MustGetAttributeByKey("amount")
+
+			commands = append(commands, command_usecase.NewCreateCompleteBonding(
+				blockHeight,
+				model.CompleteBondingParams{
+					Delegator: completeBondingEvent.MustGetAttributeByKey("delegator"),
+					Validator: completeBondingEvent.MustGetAttributeByKey("validator"),
+					Amount:    coin.MustNewCoinFromString(TrimAmountDenom(amountValue)),
+				},
+			))
+		} else if event.Type == "active_proposal" {
+			activeProposalEvent := NewParsedTxsResultLogEvent(&endBlockEvents[i])
+
+			commands = append(commands, command_usecase.NewEndProposal(
+				blockHeight,
+				activeProposalEvent.MustGetAttributeByKey("proposal_id"),
+				activeProposalEvent.MustGetAttributeByKey("proposal_result"),
+			))
+		} else if event.Type == "inactive_proposal" {
+			activeProposalEvent := NewParsedTxsResultLogEvent(&endBlockEvents[i])
+
+			commands = append(commands, command_usecase.NewInactiveProposal(
+				blockHeight,
+				activeProposalEvent.MustGetAttributeByKey("proposal_id"),
+				activeProposalEvent.MustGetAttributeByKey("proposal_result"),
+			))
 		}
 	}
 
