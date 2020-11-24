@@ -53,9 +53,12 @@ func (manager *Manager) Run() {
 func (manager *Manager) projectionRunner(projection Projection) {
 	eventsToListen := projection.GetEventsToListen()
 	logger := manager.logger.WithFields(applogger.LogFields{
-		"projection":     projection.Id(),
-		"eventsToListen": eventsToListen,
+		"projection": projection.Id(),
 	})
+
+	logger.WithFields(applogger.LogFields{
+		"eventsToListen": eventsToListen,
+	}).Infof("projection start running")
 
 	var lastHandledEventHeight *int64
 	for {
@@ -83,7 +86,7 @@ func (manager *Manager) projectionRunner(projection Projection) {
 			<-waitToRetry(5 * time.Second)
 			continue
 		}
-		for ; nextEventHeight <= *latestEventHeight; nextEventHeight += 1 {
+		for nextEventHeight <= *latestEventHeight {
 			var err error
 
 			eventLogger := logger.WithFields(applogger.LogFields{
@@ -110,15 +113,17 @@ func (manager *Manager) projectionRunner(projection Projection) {
 
 			eventLogger = eventLogger.WithFields(applogger.LogFields{
 				"eventCount": len(events),
-				"events":     events,
 			})
 			if err = projection.HandleEvents(nextEventHeight, events); err != nil {
-				eventLogger.Errorf("error handling events: %v", err)
+				eventLogger.WithFields(applogger.LogFields{
+					"events": events,
+				}).Errorf("error handling events: %v", err)
 				<-waitToRetry(time.Second)
 				continue
 			}
 
 			eventLogger.Infof("successfully handled events")
+			nextEventHeight += 1
 		}
 		<-waitToRetry(5 * time.Second)
 	}

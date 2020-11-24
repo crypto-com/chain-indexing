@@ -56,6 +56,7 @@ type RawBlockResultsConsensusParamUpdates struct {
 	Evidence struct {
 		MaxAgeNumBlocks string `json:"max_age_num_blocks"`
 		MaxAgeDuration  string `json:"max_age_duration"`
+		MaxBytes        string `json:"max_bytes"`
 	} `json:"evidence"`
 	Validator struct {
 		PubKeyTypes []string `json:"pub_key_types"`

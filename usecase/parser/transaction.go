@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/crypto-com/chainindex/entity/command"
@@ -42,14 +43,31 @@ func ParseTransactionCommands(
 		if err != nil {
 			return nil, fmt.Errorf("error parsing transaction fee: %v", err)
 		}
+
+		gasWanted, err := strconv.Atoi(txsResult.GasWanted)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing gas wanted: %v", err)
+		}
+		gasUsed, err := strconv.Atoi(txsResult.GasUsed)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing gas wanted: %v", err)
+		}
+		timeoutHeight, err := strconv.ParseInt(tx.Body.TimeoutHeight, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing timeout height: %v", err)
+		}
 		cmds = append(cmds, command_usecase.NewCreateTransaction(blockHeight, model.CreateTransactionParams{
-			TxHash:    TxHash(txHex),
-			Code:      txsResult.Code,
-			Log:       log,
-			MsgCount:  len(tx.Body.Messages),
-			Fee:       fee,
-			GasWanted: txsResult.GasWanted,
-			GasUsed:   txsResult.GasUsed,
+			TxHash:        TxHash(txHex),
+			Code:          txsResult.Code,
+			Log:           log,
+			MsgCount:      len(tx.Body.Messages),
+			Fee:           fee,
+			FeePayer:      tx.AuthInfo.Fee.Payer,
+			FeeGranter:    tx.AuthInfo.Fee.Granter,
+			GasWanted:     gasWanted,
+			GasUsed:       gasUsed,
+			Memo:          tx.Body.Memo,
+			TimeoutHeight: timeoutHeight,
 		}))
 	}
 

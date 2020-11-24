@@ -3,7 +3,9 @@ package main
 // FileConfig is the struct matches config.toml
 type FileConfig struct {
 	Blockchain BlockchainConfig
+	Sync       SyncConfig
 	Tendermint TendermintConfig
+	HTTP       HTTPConfig
 	Database   DatabaseConfig
 	Postgres   PostgresConfig
 }
@@ -18,6 +20,14 @@ type BlockchainConfig struct {
 	ValidatorPubKeyPrefix  string `toml:"validator_pubkey_prefix"`
 	ConNodeAddressPrefix   string `toml:"connode_address_prefix"`
 	ConNodePubKeyPrefix    string `toml:"connode_pubkey_prefix"`
+}
+
+type SyncConfig struct {
+	WindowSize int `toml:"window_size"`
+}
+
+type HTTPConfig struct {
+	ListeningAddress string `toml:"listening_address"`
 }
 
 type TendermintConfig struct {

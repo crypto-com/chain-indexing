@@ -61,7 +61,7 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_CREATED))
 			Expect(typedEvent.Version()).To(Equal(1))
 
-			Expect(typedEvent.TxHash).To(Equal(anyTxHash))
+			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 			Expect(typedEvent.MaybeProposalId).To(Equal(&anyProposalId))
 			Expect(typedEvent.ProposerAddress).To(Equal(anyProposerAddress))
@@ -111,7 +111,7 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_FAILED))
 			Expect(typedEvent.Version()).To(Equal(1))
 
-			Expect(typedEvent.TxHash).To(Equal(anyTxHash))
+			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 			Expect(typedEvent.ProposerAddress).To(Equal(anyProposerAddress))
 			Expect(typedEvent.Content).To(Equal(anyContent))

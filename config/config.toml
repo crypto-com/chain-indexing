@@ -8,8 +8,15 @@ validator_pubkey_prefix = "tcrocncl"
 connode_address_prefix = "tcrocnclcons"
 connode_pubkey_prefix = "tcrocnclconspub"
 
+[sync]
+# how many sync jobs running in parallel
+window_size = 20
+
 [tendermint]
 http_rpc_url = "https://testnet-croeseid-1.crypto.com:26657"
+
+[http]
+listening_address = "0.0.0.0:8080"
 
 [database]
 host = "localhost"
