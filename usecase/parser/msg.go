@@ -60,6 +60,8 @@ func ParseMsgToCommands(
 				msgCommands = parseMsgFundCommunityPool(msgCommonParams, msg)
 			case "/cosmos.gov.v1beta1.MsgSubmitProposal":
 				msgCommands = parseMsgSubmitProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg)
+			case "/cosmos.gov.v1beta1.MsgVote":
+				msgCommands = parseMsgVote(msgCommonParams, msg)
 			case "/cosmos.gov.v1beta1.MsgDeposit":
 				msgCommands = parseMsgDeposit(msgCommonParams, msg)
 			case "/cosmos.staking.v1beta1.MsgDelegate":
@@ -482,6 +484,21 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 			Content:         proposalContent,
 			ProposerAddress: msg["proposer"].(string),
 			InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+		},
+	)}
+}
+
+func parseMsgVote(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	return []command.Command{command_usecase.NewCreateMsgVote(
+		msgCommonParams,
+
+		model.MsgVoteParams{
+			ProposalId: msg["proposal_id"].(string),
+			Voter:      msg["voter"].(string),
+			Option:     msg["option"].(string),
 		},
 	)}
 }
