@@ -72,6 +72,10 @@ func ParseMsgToCommands(
 				msgCommands = parseMsgBeginRedelegate(msgCommonParams, msg)
 			case "/cosmos.slashing.v1beta1.MsgUnjail":
 				msgCommands = parseMsgUnjail(msgCommonParams, msg)
+			case "/cosmos.staking.v1beta1.MsgCreateValidator":
+				msgCommands = parseMsgCreateValidator(msgCommonParams, msg)
+			case "/cosmos.staking.v1beta1.MsgEditValidator":
+				msgCommands = parseMsgEditValidator(msgCommonParams, msg)
 			}
 
 			commands = append(commands, msgCommands...)
@@ -582,6 +586,83 @@ func parseMsgUnjail(
 
 		model.MsgUnjailParams{
 			ValidatorAddr: msg["validator_addr"].(string),
+		},
+	)}
+}
+
+func parseMsgCreateValidator(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	amountValue, _ := msg["value"].(map[string]interface{})
+	amount := coin.MustNewCoinFromString(amountValue["amount"].(string))
+
+	description := model.Description{
+		Moniker:         "",
+		Identity:        "",
+		Website:         "",
+		SecurityContact: "",
+		Details:         "",
+	}
+
+	if descriptionjson, ok := msg["description"].(map[string]interface{}); ok {
+		securitycontact := ""
+		if val, ok := msg["securityContact"]; ok {
+			securitycontact, _ = val.(string)
+		}
+		description = model.Description{
+			Moniker:         descriptionjson["moniker"].(string),
+			Identity:        descriptionjson["identity"].(string),
+			Website:         descriptionjson["website"].(string),
+			SecurityContact: securitycontact,
+			Details:         descriptionjson["details"].(string),
+		}
+	}
+
+	commiossionrates := model.CommissionRates{
+		Rate:          "",
+		MaxRate:       "",
+		MaxChangeRate: "",
+	}
+	if commissionratesjson, ok := msg["commission"].(map[string]interface{}); ok {
+		commiossionrates = model.CommissionRates{
+			Rate:          commissionratesjson["rate"].(string),
+			MaxRate:       commissionratesjson["max_rate"].(string),
+			MaxChangeRate: commissionratesjson["max_change_rate"].(string),
+		}
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgCreateValidator(
+		msgCommonParams,
+
+		model.MsgCreateValidatorParams{
+			Description:      description,
+			CommissionRates:  commiossionrates,
+			DelegatorAddress: msg["delegator_address"].(string),
+			ValidatorAddress: msg["validator_address"].(string),
+			Pubkey:           msg["pubkey"].(string),
+			Value:            amount,
+		},
+	)}
+}
+
+func parseMsgEditValidator(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	commissionrate := ""
+	if val, ok := msg["commission_rate"]; ok {
+		commissionrate, _ = val.(string)
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgEditValidator(
+		msgCommonParams,
+
+		model.MsgEditValidatorParams{
+
+			ValidatorAddress:  msg["validator_address"].(string),
+			CommissionRate:    commissionrate,
+			MinSelfDelegation: msg["min_self_delegation"].(string),
 		},
 	)}
 }

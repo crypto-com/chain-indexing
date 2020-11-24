@@ -43,6 +43,10 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(MSG_VOTE_FAILED, 1, DecodeMsgVote)
 
 	// Staking
+	registry.Register(MSG_CREATE_VALIDATOR_CREATED, 1, DecodeMsgCreateValidator)
+	registry.Register(MSG_CREATE_VALIDATOR_FAILED, 1, DecodeMsgCreateValidator)
+	registry.Register(MSG_EDIT_VALIDATOR_CREATED, 1, DecodeMsgEditValidator)
+	registry.Register(MSG_EDIT_VALIDATOR_FAILED, 1, DecodeMsgEditValidator)
 	registry.Register(MSG_DELEGATE_CREATED, 1, DecodeMsgDelegate)
 	registry.Register(MSG_DELEGATE_FAILED, 1, DecodeMsgDelegate)
 	registry.Register(MSG_UNDELEGATE_CREATED, 1, DecodeMsgUndelegate)
