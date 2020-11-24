@@ -18,6 +18,8 @@ type BlockHeightTracker struct {
 
 	pollingInterval time.Duration
 
+	subscriptions []chan<- int64
+
 	latestBlockHeight *int64
 	rwMutex           sync.RWMutex
 }
@@ -30,6 +32,8 @@ func NewBlockHeightTracker(logger applogger.Logger, client tendermint.Client) *B
 		client: client,
 
 		pollingInterval: DEFAULT_POLLING_INTERVAL,
+
+		subscriptions: make([]chan<- int64, 0),
 
 		latestBlockHeight: primptr.Int64Nil(),
 	}
@@ -48,6 +52,14 @@ func (tracker *BlockHeightTracker) Run() {
 			continue
 		}
 
+		for _, subscription := range tracker.subscriptions {
+			select {
+			case subscription <- height:
+			default:
+				tracker.logger.Error("block subscription channel is blocked")
+			}
+		}
+
 		tracker.rwMutex.Lock()
 		tracker.latestBlockHeight = &height
 		tracker.rwMutex.Unlock()
@@ -55,7 +67,10 @@ func (tracker *BlockHeightTracker) Run() {
 		tracker.logger.Infof("updated chain latest block height: %d", height)
 		<-time.After(tracker.pollingInterval)
 	}
+}
 
+func (tracker *BlockHeightTracker) Subscribe(ch chan<- int64) {
+	tracker.subscriptions = append(tracker.subscriptions, ch)
 }
 
 func (tracker *BlockHeightTracker) GetLatestBlockHeight() *int64 {

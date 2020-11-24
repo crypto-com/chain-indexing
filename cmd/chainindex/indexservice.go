@@ -14,6 +14,7 @@ type IndexService struct {
 	rdbConn rdb.Conn
 
 	baseDenom            string
+	windowSize           int
 	tendermintHTTPRPCURL string
 }
 
@@ -24,6 +25,7 @@ func NewIndexService(logger applogger.Logger, rdbConn rdb.Conn, config *FileConf
 		rdbConn: rdbConn,
 
 		baseDenom:            config.Blockchain.BaseDenom,
+		windowSize:           config.Sync.WindowSize,
 		tendermintHTTPRPCURL: config.Tendermint.HTTPRPCURL,
 	}
 }
@@ -37,6 +39,7 @@ func (service *IndexService) Run() error {
 	syncManager := NewSyncManager(
 		service.logger,
 		service.rdbConn,
+		service.windowSize,
 		service.tendermintHTTPRPCURL,
 		txDecoder,
 	)

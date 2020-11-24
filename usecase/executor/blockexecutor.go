@@ -23,7 +23,8 @@ func NewBlockExecutor(logger applogger.Logger, height int64) *BlockExecutor {
 
 	return &BlockExecutor{
 		logger.WithFields(applogger.LogFields{
-			"module": "BlockExecutor",
+			"module":      "BlockExecutor",
+			"blockHeight": height,
 		}),
 
 		height,

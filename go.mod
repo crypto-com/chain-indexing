@@ -9,6 +9,7 @@ require (
 	github.com/btcsuite/btcutil v1.0.2
 	github.com/calvinlauco/cosmostxdecoder v0.0.1-rc3
 	github.com/cosmos/cosmos-sdk v0.39.1
+	github.com/docker/go-metrics v0.0.1 // indirect
 	github.com/fasthttp/router v1.3.3
 	github.com/golang-migrate/migrate/v4 v4.12.2
 	github.com/google/go-querystring v1.0.0
