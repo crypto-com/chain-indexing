@@ -6,7 +6,6 @@ import (
 )
 
 type CreateBlockReward struct {
-	Nam         string
 	blockHeight int64
 	validator   string
 	amount      string
@@ -14,7 +13,6 @@ type CreateBlockReward struct {
 
 func NewCreateBlockReward(blockHeight int64, validator string, amount string) *CreateBlockReward {
 	return &CreateBlockReward{
-		"CreateBlockReward",
 		blockHeight,
 		validator,
 		amount,

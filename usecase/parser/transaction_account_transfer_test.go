@@ -24,11 +24,11 @@ var _ = Describe("ParseTxAccountTransferCommands", func() {
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))
-			expectecBlockHeight := int64(377673)
+			expectedBlockHeight := int64(377673)
 			Expect(cmds).To(Equal([]command.Command{
 				// Transaction fee
 				command_usecase.NewCreateAccountTransfer(
-					expectecBlockHeight,
+					expectedBlockHeight,
 					model.AccountTransferParams{
 						Recipient: "tcro17xpfvakm2amg962yls6f84z3kell8c5lxhzaha",
 						Sender:    "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
@@ -37,7 +37,7 @@ var _ = Describe("ParseTxAccountTransferCommands", func() {
 				),
 				// MsgSend
 				command_usecase.NewCreateAccountTransfer(
-					expectecBlockHeight,
+					expectedBlockHeight,
 					model.AccountTransferParams{
 						Recipient: "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
 						Sender:    "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
@@ -56,11 +56,11 @@ var _ = Describe("ParseTxAccountTransferCommands", func() {
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))
-			expectecBlockHeight := int64(343358)
+			expectedBlockHeight := int64(343358)
 			Expect(cmds).To(Equal([]command.Command{
 				// Transaction fee
 				command_usecase.NewCreateAccountTransfer(
-					expectecBlockHeight,
+					expectedBlockHeight,
 					model.AccountTransferParams{
 						Recipient: "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3",
 						Sender:    "tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3",
@@ -69,7 +69,7 @@ var _ = Describe("ParseTxAccountTransferCommands", func() {
 				),
 				// MsgSend
 				command_usecase.NewCreateAccountTransfer(
-					expectecBlockHeight,
+					expectedBlockHeight,
 					model.AccountTransferParams{
 						Recipient: "tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3",
 						Sender:    "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3",
