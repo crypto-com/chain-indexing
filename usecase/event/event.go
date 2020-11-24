@@ -10,6 +10,8 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(TRANSACTION_CREATED, 1, DecodeTransactionCreated)
 	registry.Register(TRANSACTION_FAILED, 1, DecodeTransactionFailed)
 
+	registry.Register(ACCOUNT_TRANSFERRED, 1, DecodeAccountTransferred)
+
 	// Bank
 	registry.Register(MSG_SEND_CREATED, 1, DecodeMsgSend)
 	registry.Register(MSG_SEND_FAILED, 1, DecodeMsgSend)
