@@ -8,3 +8,5 @@ CREATE TABLE events (
     PRIMARY KEY(id),
     UNIQUE(uuid)
 );
+
+CREATE INDEX events_block_height_index ON events(height);

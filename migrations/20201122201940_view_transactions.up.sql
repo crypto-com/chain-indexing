@@ -10,10 +10,14 @@ CREATE TABLE view_transactions (
     fee VARCHAR NOT NULL,
     fee_payer VARCHAR NOT NULL,
     fee_granter VARCHAR NOT NULL,
-    gas_wanted INT NOT NULL,
-    gas_used INT NOT NULL,
+    gas_wanted BIGINT NOT NULL,
+    gas_used BIGINT NOT NULL,
     memo VARCHAR NOT NULL,
     timeout_height BIGINT NOT NULL,
     messages JSONB NOT NULL,
     PRIMARY KEY(id)
 );
+
+CREATE INDEX view_transactions_block_height_index ON view_transactions(block_height);
+
+CREATE INDEX view_transactions_order_by_block_height_desc_index ON view_transactions(block_height DESC);

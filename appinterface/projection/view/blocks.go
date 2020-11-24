@@ -74,6 +74,8 @@ func (view *Blocks) List(pagination *pagination.Pagination) ([]Block, *paginatio
 		"transaction_count",
 	).From(
 		"view_blocks",
+	).OrderBy(
+		"id",
 	)
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
@@ -182,7 +184,7 @@ func (view *Blocks) FindBy(identity *BlockIdentity) (*Block, error) {
 }
 
 func (view *Blocks) Count() (int, error) {
-	sql, _, err := view.rdb.StmtBuilder.Select("COUNT(1)").From(
+	sql, _, err := view.rdb.StmtBuilder.Select("MAX(height)").From(
 		"view_blocks",
 	).ToSql()
 	if err != nil {

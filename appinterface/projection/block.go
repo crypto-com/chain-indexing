@@ -3,6 +3,8 @@ package projection
 import (
 	"fmt"
 
+	entity_projection "github.com/crypto-com/chainindex/entity/projection"
+
 	"github.com/crypto-com/chainindex/appinterface/projection/rdbbase"
 	"github.com/crypto-com/chainindex/appinterface/projection/view"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
@@ -10,6 +12,8 @@ import (
 	applogger "github.com/crypto-com/chainindex/internal/logger"
 	event_usecase "github.com/crypto-com/chainindex/usecase/event"
 )
+
+var _ entity_projection.Projection = &Block{}
 
 // TODO: Listen to council node related events and project council node
 type Block struct {
