@@ -3,6 +3,8 @@ package view
 import (
 	"fmt"
 
+	"github.com/crypto-com/chainindex/appinterface/pagination"
+
 	jsoniter "github.com/json-iterator/go"
 
 	"github.com/crypto-com/chainindex/appinterface/rdb"
@@ -60,6 +62,75 @@ func (view *Blocks) Insert(block *Block) error {
 	}
 
 	return nil
+}
+
+func (view *Blocks) List(pagination *pagination.Pagination) ([]Block, *pagination.PaginationResult, error) {
+	stmtBuilder := view.rdb.StmtBuilder.Select(
+		"height",
+		"hash",
+		"time",
+		"app_hash",
+		"committed_council_nodes",
+		"transaction_count",
+	).From(
+		"view_blocks",
+	)
+
+	rDbPagination := rdb.NewRDbPaginationBuilder(
+		pagination,
+		view.rdb.Runner,
+	).BuildStmt(stmtBuilder)
+	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
+	fmt.Println(sql)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error building blocks select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	rowsResult, err := view.rdb.Query(sql, sqlArgs...)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error executing blocks select SQL: %v: %w", err, rdb.ErrQuery)
+	}
+
+	blocks := make([]Block, 0)
+	for rowsResult.Next() {
+		var block Block
+		var committedCouncilNodesJSON *string
+		timeReader := view.rdb.NtotReader()
+		if err = rowsResult.Scan(
+			&block.Height,
+			&block.Hash,
+			timeReader.ScannableArg(),
+			&block.AppHash,
+			&committedCouncilNodesJSON,
+			&block.TransactionCount,
+		); err != nil {
+			if err == rdb.ErrNoRows {
+				return nil, nil, rdb.ErrNoRows
+			}
+			return nil, nil, fmt.Errorf("error scanning block row: %v: %w", err, rdb.ErrQuery)
+		}
+		blockTime, parseErr := timeReader.Parse()
+		if parseErr != nil {
+			return nil, nil, fmt.Errorf("error parsing block time: %v: %w", parseErr, rdb.ErrQuery)
+		}
+		block.Time = *blockTime
+
+		var committedCouncilNodes []BlockCommittedCouncilNode
+		if unmarshalErr := jsoniter.Unmarshal([]byte(*committedCouncilNodesJSON), &committedCouncilNodes); unmarshalErr != nil {
+			return nil, nil, fmt.Errorf("error unmarshalling block council nodes JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
+		}
+
+		block.CommittedCouncilNodes = committedCouncilNodes
+
+		blocks = append(blocks, block)
+	}
+
+	paginationResult, err := rDbPagination.Result()
+	if err != nil {
+		return nil, nil, fmt.Errorf("error preparing pagination result: %v", err)
+	}
+
+	return blocks, paginationResult, nil
 }
 
 func (view *Blocks) FindBy(identity *BlockIdentity) (*Block, error) {
@@ -147,19 +218,19 @@ func (node *RdbBlockCommittedCouncilNode) ToRaw() *BlockCommittedCouncilNode {
 }
 
 type Block struct {
-	Height                int64                       `fake:"{+int64}"`
-	Hash                  string                      `fake:"{blockhash}"`
-	Time                  utctime.UTCTime             `fake:"{utctime}"`
-	AppHash               string                      `fake:"{apphash}"`
-	TransactionCount      int                         `fake:"{number:0,2147483647}"`
-	CommittedCouncilNodes []BlockCommittedCouncilNode `fakesize:"3"`
+	Height                int64                       `json:"height" fake:"{+int64}"`
+	Hash                  string                      `json:"hash" fake:"{blockhash}"`
+	Time                  utctime.UTCTime             `json:"time" fake:"{utctime}"`
+	AppHash               string                      `json:"app_hash" fake:"{apphash}"`
+	TransactionCount      int                         `json:"transaction_count" fake:"{number:0,2147483647}"`
+	CommittedCouncilNodes []BlockCommittedCouncilNode `json:"committed_council_nodes" fakesize:"3"`
 }
 
 type BlockCommittedCouncilNode struct {
-	Address    string          `fake:"{validatoraddress}"`
-	Time       utctime.UTCTime `fake:"{utctime}"`
-	Signature  string          `fake:"{commitsignature}"`
-	IsProposer bool            `fake:"{bool}"`
+	Address    string          `json:"address" fake:"{validatoraddress}"`
+	Time       utctime.UTCTime `json:"time" fake:"{utctime}"`
+	Signature  string          `json:"signature" fake:"{commitsignature}"`
+	IsProposer bool            `json:"is_proposer" fake:"{bool}"`
 }
 
 type RdbBlockCommittedCouncilNode struct {

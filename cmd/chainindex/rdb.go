@@ -2,42 +2,14 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"time"
 
-	"github.com/crypto-com/chainindex/infrastructure"
+	"github.com/crypto-com/chainindex/appinterface/rdb"
 	"github.com/crypto-com/chainindex/infrastructure/pg"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
-	"github.com/crypto-com/chainindex/usecase/parser"
 )
 
-type IndexServer struct {
-	logger  applogger.Logger
-	rdbConn *pg.PgxConn
-
-	baseDenom            string
-	tendermintHTTPRPCURL string
-}
-
-// NewIndexServer creates a new server instance for polling and indexing
-func NewIndexServer(config *FileConfig) (*IndexServer, error) {
-	logger := infrastructure.NewZerologLoggerWithColor(os.Stdout)
-
-	pgxConnPool, err := SetupRdbConn(config, logger)
-	if err != nil {
-		return nil, fmt.Errorf("error setting up DB connection %v", err)
-	}
-
-	return &IndexServer{
-		logger:  logger,
-		rdbConn: pgxConnPool,
-
-		baseDenom:            config.Blockchain.BaseDenom,
-		tendermintHTTPRPCURL: config.Tendermint.HTTPRPCURL,
-	}, nil
-}
-
-func SetupRdbConn(config *FileConfig, logger applogger.Logger) (*pg.PgxConn, error) {
+func SetupRDbConn(config *FileConfig, logger applogger.Logger) (rdb.Conn, error) {
 	var pgxConnPool *pg.PgxConn
 	var err error
 
@@ -80,23 +52,4 @@ func SetupRdbConn(config *FileConfig, logger applogger.Logger) (*pg.PgxConn, err
 
 	logger.Info("successfully setup database connection")
 	return pgxConnPool, nil
-}
-
-// Run function runs the polling server to index the data from Tendermint
-func (s *IndexServer) Run() error {
-	s.logger.Debug("TODO: should load module accounts configuration")
-
-	txDecoder := parser.NewTxDecoder(s.baseDenom)
-
-	syncManager := NewSyncManager(
-		s.logger,
-		s.rdbConn,
-		s.tendermintHTTPRPCURL,
-		txDecoder,
-	)
-	if err := syncManager.Run(); err != nil {
-		return fmt.Errorf("error running sync manager %v", err)
-	}
-
-	return nil
 }

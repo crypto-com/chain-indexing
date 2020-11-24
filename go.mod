@@ -9,6 +9,7 @@ require (
 	github.com/btcsuite/btcutil v1.0.2
 	github.com/calvinlauco/cosmostxdecoder v0.0.1-rc3
 	github.com/cosmos/cosmos-sdk v0.39.1
+	github.com/fasthttp/router v1.3.3
 	github.com/golang-migrate/migrate/v4 v4.12.2
 	github.com/google/go-querystring v1.0.0
 	github.com/google/uuid v1.1.2
@@ -16,6 +17,7 @@ require (
 	github.com/jackc/pgtype v1.4.2
 	github.com/jackc/pgx/v4 v4.8.1
 	github.com/json-iterator/go v1.1.10
+	github.com/lab259/cors v0.2.0
 	github.com/luci/go-render v0.0.0-20160219211803-9a04cc21af0f
 	github.com/onsi/ginkgo v1.14.1
 	github.com/onsi/gomega v1.10.2
@@ -23,6 +25,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/tendermint/tendermint v0.34.0-rc6
 	github.com/urfave/cli/v2 v2.2.0
+	github.com/valyala/fasthttp v1.17.0
 )
 
 replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.2-alpha.regen.4

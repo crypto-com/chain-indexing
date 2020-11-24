@@ -4,6 +4,7 @@ package main
 type FileConfig struct {
 	Blockchain BlockchainConfig
 	Tendermint TendermintConfig
+	HTTP       HTTPConfig
 	Database   DatabaseConfig
 	Postgres   PostgresConfig
 }
@@ -18,6 +19,10 @@ type BlockchainConfig struct {
 	ValidatorPubKeyPrefix  string `toml:"validator_pubkey_prefix"`
 	ConNodeAddressPrefix   string `toml:"connode_address_prefix"`
 	ConNodePubKeyPrefix    string `toml:"connode_pubkey_prefix"`
+}
+
+type HTTPConfig struct {
+	ListeningAddress string `toml:"listening_address"`
 }
 
 type TendermintConfig struct {
