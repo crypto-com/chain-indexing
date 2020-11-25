@@ -16,6 +16,10 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(BLOCK_COMMISSIONED, 1, DecodeBlockCommissioned)
 	registry.Register(MINTED, 1, DecodeMinted)
 
+	registry.Register(POWER_CHANGED, 1, DecodePowerChanged)
+	registry.Register(VALIDATOR_SLASHED, 1, DecodeValidatorSlashed)
+	registry.Register(VALIDATOR_JAILED, 1, DecodeValidatorJailed)
+
 	// Bank
 	registry.Register(MSG_SEND_CREATED, 1, DecodeMsgSend)
 	registry.Register(MSG_SEND_FAILED, 1, DecodeMsgSend)

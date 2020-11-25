@@ -82,6 +82,7 @@ func (pagination *RDbPaginationStmtBuilder) offsetResult() (*pagination_interfac
 	// violate security
 	// nolint:gosec
 	sql = fmt.Sprintf("SELECT COUNT(*) FROM (%s) counting_table", sql)
+	// TODO: optimize by allowign estimation with SELECT reltuples::bigint FROM pg_class where relname='table';
 
 	var total uint64
 	if err = pagination.conn.QueryRow(sql, sqlArgs...).Scan(&total); err != nil {

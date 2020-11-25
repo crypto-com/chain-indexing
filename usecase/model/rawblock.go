@@ -49,7 +49,7 @@ type RawBlock struct {
 					PubKey struct {
 						Type  string `json:"type"`
 						Value string `json:"value"`
-					} `json:"PubKey"`
+					} `json:"Pubkey"`
 					VoteA struct {
 						Type    int    `json:"type"`
 						Height  string `json:"height"`

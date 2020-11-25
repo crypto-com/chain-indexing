@@ -17,7 +17,7 @@ func TmAddressFromTmPubKey(pubKey []byte) string {
 }
 
 func MustConsensusAddressFromTmPubKey(bech32Prefix string, pubKey []byte) string {
-	address, err := ConsensusAddressFromTmPubKey(bech32Prefix, pubKey)
+	address, err := ConsensusNodeAddressFromTmPubKey(bech32Prefix, pubKey)
 	if err != nil {
 		panic(err)
 	}
@@ -25,7 +25,7 @@ func MustConsensusAddressFromTmPubKey(bech32Prefix string, pubKey []byte) string
 	return address
 }
 
-func ConsensusAddressFromTmPubKey(bech32Prefix string, pubKey []byte) (string, error) {
+func ConsensusNodeAddressFromTmPubKey(bech32Prefix string, pubKey []byte) (string, error) {
 	cosmosPubKey := &ed255192.PubKey{
 		Key: pubKey,
 	}
@@ -42,8 +42,8 @@ func ConsensusAddressFromTmPubKey(bech32Prefix string, pubKey []byte) (string, e
 	return address, nil
 }
 
-func MustConsensusPubKeyFromTmPubKey(bech32Prefix string, pubKey []byte) string {
-	address, err := ConsensusPubKeyFromTmPubKey(bech32Prefix, pubKey)
+func MustConsensusNodePubKeyFromTmPubKey(bech32Prefix string, pubKey []byte) string {
+	address, err := ConsensusNodePubKeyFromTmPubKey(bech32Prefix, pubKey)
 	if err != nil {
 		panic(err)
 	}
@@ -52,7 +52,7 @@ func MustConsensusPubKeyFromTmPubKey(bech32Prefix string, pubKey []byte) string 
 
 }
 
-func ConsensusPubKeyFromTmPubKey(bech32Prefix string, pubKey []byte) (string, error) {
+func ConsensusNodePubKeyFromTmPubKey(bech32Prefix string, pubKey []byte) (string, error) {
 	cosmosPubKey := &ed255192.PubKey{
 		Key: pubKey,
 	}
@@ -62,6 +62,20 @@ func ConsensusPubKeyFromTmPubKey(bech32Prefix string, pubKey []byte) (string, er
 	if err != nil {
 		return "", fmt.Errorf("error converting tendermint public key to bech32 bits: %v", err)
 	}
+	address, err := bech32.Encode(bech32Prefix, conv)
+	if err != nil {
+		return "", fmt.Errorf("error encoding tendermint public key bits to consensus public key: %v", err)
+	}
+
+	return address, nil
+}
+
+func ConsensusNodeAddressFromPubKey(bech32Prefix string, consensusNodePubKey string) (string, error) {
+	_, conv, err := bech32.Decode(consensusNodePubKey)
+	if err != nil {
+		return "", fmt.Errorf("error converting consensus node pubkey to address")
+	}
+
 	address, err := bech32.Encode(bech32Prefix, conv)
 	if err != nil {
 		return "", fmt.Errorf("error encoding tendermint public key bits to consensus public key: %v", err)

@@ -33,14 +33,14 @@ var _ = Describe("ParseMsgCommands", func() {
 			thiscmd := cmds[2]
 			Expect(thiscmd.Name()).To(Equal("CreateMsgCreateValidator"))
 
-			description := model.Description{
+			description := model.MsgValidatorDescription{
 				Moniker:         "Calvin Test Node",
 				Identity:        "",
 				Website:         "",
 				SecurityContact: "",
 				Details:         "",
 			}
-			commiossionrates := model.CommissionRates{
+			commissionRates := model.MsgValidatorCommission{
 				Rate:          "0.100000000000000000",
 				MaxRate:       "0.200000000000000000",
 				MaxChangeRate: "0.010000000000000000",
@@ -55,11 +55,11 @@ var _ = Describe("ParseMsgCommands", func() {
 				},
 				model.MsgCreateValidatorParams{
 					Description:      description,
-					CommissionRates:  commiossionrates,
+					Commission:       commissionRates,
 					DelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 					ValidatorAddress: "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
 					Pubkey:           "tcrocnclconspub1zcjduepqa5rksn4ds9u6jmmg4n86d9wct7wmj23pyqe6p7e252lffzqsgcvqxm5lc2",
-					Value:            coin.MustNewCoinFromString("10"),
+					Amount:           coin.MustNewCoinFromString("10"),
 				},
 			)))
 		})

@@ -2,6 +2,7 @@ package view
 
 import (
 	"fmt"
+	"time"
 
 	pagination_interface "github.com/crypto-com/chainindex/appinterface/pagination"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
@@ -52,6 +53,51 @@ func (view *BlockEvents) Insert(blockEvent *BlockEventRow) error {
 	}
 	if result.RowsAffected() != 1 {
 		return fmt.Errorf("error inserting block transaction into the table: no rows inserted: %w", rdb.ErrWrite)
+	}
+
+	return nil
+}
+
+func (view *BlockEvents) InsertAll(blockEvents []BlockEventRow) error {
+	stmtBuilder := view.rdb.StmtBuilder.Insert(
+		"view_block_events",
+	).Columns(
+		"block_height",
+		"block_hash",
+		"block_time",
+		"data",
+	)
+	for _, blockEvent := range blockEvents {
+		blockEventDataJSON, marshalErr := jsoniter.MarshalToString(blockEvent.Data)
+		if marshalErr != nil {
+			return fmt.Errorf(
+				"error JSON marshalling block transation messages for insertion: %v: %w",
+				marshalErr, rdb.ErrBuildSQLStmt,
+			)
+		}
+
+		stmtBuilder = stmtBuilder.Values(
+			blockEvent.BlockHeight,
+			blockEvent.BlockHash,
+			view.rdb.Tton(&blockEvent.BlockTime),
+			blockEventDataJSON,
+		)
+	}
+
+	sql, sqlArgs, err := stmtBuilder.ToSql()
+	if err != nil {
+		return fmt.Errorf("error building events batch insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	result, err := view.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error inserting block transaction into the table: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() != int64(len(blockEvents)) {
+		return fmt.Errorf(
+			"error batch inserting block transaction into the table: mismatched number of rows inserted: %w",
+			rdb.ErrWrite,
+		)
 	}
 
 	return nil
@@ -142,10 +188,9 @@ func (view *BlockEvents) List(
 		return nil, nil, fmt.Errorf("error executing transactions select SQL: %v: %w", err, rdb.ErrQuery)
 	}
 
-	fmt.Println(sql, sqlArgs)
-
 	blockEvents := make([]BlockEventRow, 0)
 	for rowsResult.Next() {
+		fmt.Println(time.Now())
 		var blockEvent BlockEventRow
 		var blockEventDataJSON *string
 		blockTimeReader := view.rdb.NtotReader()

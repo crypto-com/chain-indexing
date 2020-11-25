@@ -15,14 +15,14 @@ var _ = Describe("Event", func() {
 	registry := event_entity.NewRegistry()
 	event_usecase.RegisterEvents(registry)
 
-	description := model.Description{
+	description := model.MsgValidatorDescription{
 		Moniker:         "mymonicker",
 		Identity:        "myidentity",
 		Website:         "mywebsite",
 		SecurityContact: "mysecuritycontact",
 		Details:         "mydetails",
 	}
-	commiossionrates := model.CommissionRates{
+	commiossionrates := model.MsgValidatorCommission{
 		Rate:          "0.100000000000000000",
 		MaxRate:       "0.200000000000000000",
 		MaxChangeRate: "0.010000000000000000",
@@ -39,11 +39,11 @@ var _ = Describe("Event", func() {
 				},
 				model.MsgCreateValidatorParams{
 					Description:      description,
-					CommissionRates:  commiossionrates,
+					Commission:       commiossionrates,
 					DelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 					ValidatorAddress: "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
 					Pubkey:           "tcrocnclconspub1zcjduepqa5rksn4ds9u6jmmg4n86d9wct7wmj23pyqe6p7e252lffzqsgcvqxm5lc2",
-					Value:            coin.MustNewCoinFromString("10"),
+					Amount:           coin.MustNewCoinFromString("10"),
 				},
 			)
 
@@ -64,7 +64,7 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.DelegatorAddress).To(Equal(event.DelegatorAddress))
 			Expect(typedEvent.ValidatorAddress).To(Equal(event.ValidatorAddress))
 			Expect(typedEvent.CommissionRates).To(Equal(event.CommissionRates))
-			Expect(typedEvent.Value).To(Equal(event.Value))
+			Expect(typedEvent.Amount).To(Equal(event.Amount))
 		})
 
 		It("should able to encode and decode to failed event", func() {
@@ -77,11 +77,11 @@ var _ = Describe("Event", func() {
 				},
 				model.MsgCreateValidatorParams{
 					Description:      description,
-					CommissionRates:  commiossionrates,
+					Commission:       commiossionrates,
 					DelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 					ValidatorAddress: "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
 					Pubkey:           "tcrocnclconspub1zcjduepqa5rksn4ds9u6jmmg4n86d9wct7wmj23pyqe6p7e252lffzqsgcvqxm5lc2",
-					Value:            coin.MustNewCoinFromString("10"),
+					Amount:           coin.MustNewCoinFromString("10"),
 				},
 			)
 			encoded, err := event.ToJSON()

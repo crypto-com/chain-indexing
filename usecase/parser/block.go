@@ -65,6 +65,12 @@ func ParseBlockToCommands(
 	}
 	commands = append(commands, endBlockEventsCommands...)
 
+	validatorUpdatesCommands, parseErr := ParseValidatorUpdatesCommands(block.Height, blockResults.ValidatorUpdates)
+	commands = append(commands, validatorUpdatesCommands...)
+	if parseErr != nil {
+		return nil, fmt.Errorf("error parsing validator_updates commands: %v", parseErr)
+	}
+
 	return commands, err
 }
 

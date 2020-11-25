@@ -14,7 +14,6 @@ import (
 
 var _ = Describe("ParseBeginBlockEventsCommands", func() {
 	Describe("MsgSend", func() {
-
 		It("should return commands corresponding to events in begin_block_events", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.BEGIN_BLOCK_COMMON_EVENTS_BLOCK_RESULTS_RESP)
 
@@ -23,7 +22,6 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 				blockResults.BeginBlockEvents,
 			)
 			Expect(err).To(BeNil())
-			Expect(cmds).To(HaveLen(9))
 			expectedBlockHeight := int64(377673)
 			Expect(cmds).To(Equal([]command.Command{
 				command_usecase.NewCreateAccountTransfer(
@@ -86,6 +84,42 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 			}))
 		})
 
-		It("", func() {})
+		It("should return ValidatorSlashed and ValidatorJailed command base on events", func() {
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.BEGIN_BLOCK_SLASH_EVENT_BLOCK_RESULTS_RESP)
+			cmds, err := parser.ParseBeginBlockEventsCommands(
+				blockResults.Height,
+				blockResults.BeginBlockEvents,
+			)
+			Expect(err).To(BeNil())
+			expectedBlockHeight := int64(28)
+			Expect(cmds).To(Equal([]command.Command{
+				command_usecase.NewSlashValidator(
+					expectedBlockHeight,
+					model.SlashValidatorParams{
+						ConsensusNodeAddress: "crocnclcons1548f5hydddg0ea4sdgxse7t7j4jn84zp6y954e",
+						SlashedPower:         "312",
+						Reason:               "missing_signature",
+					},
+				),
+				command_usecase.NewJailValidator(
+					expectedBlockHeight,
+					"crocnclcons1548f5hydddg0ea4sdgxse7t7j4jn84zp6y954e",
+					"missing_signature",
+				),
+				command_usecase.NewSlashValidator(
+					expectedBlockHeight,
+					model.SlashValidatorParams{
+						ConsensusNodeAddress: "crocnclcons1nftg2n9gzjr2l7lemcshk0v8wdmuuzq8nulnvs",
+						SlashedPower:         "212",
+						Reason:               "missing_signature",
+					},
+				),
+				command_usecase.NewJailValidator(
+					expectedBlockHeight,
+					"crocnclcons1nftg2n9gzjr2l7lemcshk0v8wdmuuzq8nulnvs",
+					"missing_signature",
+				),
+			}))
+		})
 	})
 })

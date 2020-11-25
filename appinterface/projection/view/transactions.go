@@ -182,7 +182,7 @@ func (view *BlockTransactions) List(
 	).From(
 		"view_transactions",
 	).OrderBy(
-		"height",
+		"block_height",
 	)
 
 	if filter.MaybeBlockHeight != nil {

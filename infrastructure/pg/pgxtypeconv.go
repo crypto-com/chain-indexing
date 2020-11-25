@@ -64,7 +64,7 @@ func (reader *PgxNtobReader) Parse() (*big.Int, error) {
 	}
 	switch str := value.(type) {
 	case string:
-		// pgtype.Numeric.Value() returns scientific notation e.g. "1000e0".
+		// pgtype.Numeric.Amount() returns scientific notation e.g. "1000e0".
 		i, err := sciToBigIntPtr(str)
 		if err != nil {
 			return nil, err

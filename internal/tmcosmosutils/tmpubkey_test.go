@@ -11,8 +11,8 @@ import (
 
 const tendermintPubKey = "tWY6qzpOg/6HFj2X3a8+tzIAehW7k2MWOgrjotcWCuI="
 const tendermintAddress = "18253C74D541A2B5BF492E8B5910A268AFED4D48"
-const consensusAddress = "tcrocnclcons1rqjncax4gx3tt06f9694jy9zdzh76n2gg5yqfd"
-const consensusPubKey = "tcrocnclconspub1zcjduepqk4nr42e6f6plapck8ktamte7kueqq7s4hwfkx936pt3694ckpt3q50kp4w"
+const consensusNodeAddress = "tcrocnclcons1rqjncax4gx3tt06f9694jy9zdzh76n2gg5yqfd"
+const consensusNodePubKey = "tcrocnclconspub1zcjduepqk4nr42e6f6plapck8ktamte7kueqq7s4hwfkx936pt3694ckpt3q50kp4w"
 
 var _ = Describe("tmcosmosutils", func() {
 	Describe("TmAddressFromTmPubKey", func() {
@@ -24,21 +24,29 @@ var _ = Describe("tmcosmosutils", func() {
 		})
 	})
 
-	Describe("ConsensusAddressFromTmPubKey", func() {
+	Describe("ConsensusNodeAddressFromTmPubKey", func() {
 		It("should work", func() {
 			pubKey, _ := base64.StdEncoding.DecodeString(tendermintPubKey)
-			Expect(tmcosmosutils.ConsensusAddressFromTmPubKey(
+			Expect(tmcosmosutils.ConsensusNodeAddressFromTmPubKey(
 				"tcrocnclcons", pubKey,
-			)).To(Equal(consensusAddress))
+			)).To(Equal(consensusNodeAddress))
 		})
 	})
 
-	Describe("ConsensusPubKeyFromTmPubKey", func() {
+	Describe("ConsensusNodePubKeyFromTmPubKey", func() {
 		It("should work", func() {
 			pubKey, _ := base64.StdEncoding.DecodeString(tendermintPubKey)
-			Expect(tmcosmosutils.ConsensusPubKeyFromTmPubKey(
+			Expect(tmcosmosutils.ConsensusNodePubKeyFromTmPubKey(
 				"tcrocnclconspub", pubKey,
-			)).To(Equal(consensusPubKey))
+			)).To(Equal(consensusNodePubKey))
+		})
+	})
+
+	Describe("ConsensusNodeAddressFromPubKey", func() {
+		It("should work", func() {
+			Expect(tmcosmosutils.ConsensusNodeAddressFromPubKey(
+				"tcrocnclcons", consensusNodeAddress,
+			)).To(Equal(consensusNodeAddress))
 		})
 	})
 })

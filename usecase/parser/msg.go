@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/crypto-com/chainindex/internal/primptr"
+
 	"github.com/crypto-com/chainindex/internal/utctime"
 
 	jsoniter "github.com/json-iterator/go"
@@ -597,7 +599,7 @@ func parseMsgCreateValidator(
 	amountValue, _ := msg["value"].(map[string]interface{})
 	amount := coin.MustNewCoinFromString(amountValue["amount"].(string))
 
-	description := model.Description{
+	description := model.MsgValidatorDescription{
 		Moniker:         "",
 		Identity:        "",
 		Website:         "",
@@ -605,30 +607,26 @@ func parseMsgCreateValidator(
 		Details:         "",
 	}
 
-	if descriptionjson, ok := msg["description"].(map[string]interface{}); ok {
-		securitycontact := ""
-		if val, ok := msg["securityContact"]; ok {
-			securitycontact, _ = val.(string)
-		}
-		description = model.Description{
-			Moniker:         descriptionjson["moniker"].(string),
-			Identity:        descriptionjson["identity"].(string),
-			Website:         descriptionjson["website"].(string),
-			SecurityContact: securitycontact,
-			Details:         descriptionjson["details"].(string),
+	if descriptionJSON, ok := msg["description"].(map[string]interface{}); ok {
+		description = model.MsgValidatorDescription{
+			Moniker:         descriptionJSON["moniker"].(string),
+			Identity:        descriptionJSON["identity"].(string),
+			Website:         descriptionJSON["website"].(string),
+			SecurityContact: descriptionJSON["security_contact"].(string),
+			Details:         descriptionJSON["details"].(string),
 		}
 	}
 
-	commiossionrates := model.CommissionRates{
+	commission := model.MsgValidatorCommission{
 		Rate:          "",
 		MaxRate:       "",
 		MaxChangeRate: "",
 	}
-	if commissionratesjson, ok := msg["commission"].(map[string]interface{}); ok {
-		commiossionrates = model.CommissionRates{
-			Rate:          commissionratesjson["rate"].(string),
-			MaxRate:       commissionratesjson["max_rate"].(string),
-			MaxChangeRate: commissionratesjson["max_change_rate"].(string),
+	if commissionJSON, ok := msg["commission"].(map[string]interface{}); ok {
+		commission = model.MsgValidatorCommission{
+			Rate:          commissionJSON["rate"].(string),
+			MaxRate:       commissionJSON["max_rate"].(string),
+			MaxChangeRate: commissionJSON["max_change_rate"].(string),
 		}
 	}
 
@@ -637,11 +635,11 @@ func parseMsgCreateValidator(
 
 		model.MsgCreateValidatorParams{
 			Description:      description,
-			CommissionRates:  commiossionrates,
+			Commission:       commission,
 			DelegatorAddress: msg["delegator_address"].(string),
 			ValidatorAddress: msg["validator_address"].(string),
 			Pubkey:           msg["pubkey"].(string),
-			Value:            amount,
+			Amount:           amount,
 		},
 	)}
 }
@@ -650,19 +648,35 @@ func parseMsgEditValidator(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 ) []command.Command {
-	commissionrate := ""
-	if val, ok := msg["commission_rate"]; ok {
-		commissionrate, _ = val.(string)
+	var description model.MsgValidatorDescription
+	if descriptionJSON, ok := msg["description"].(map[string]interface{}); ok {
+		description = model.MsgValidatorDescription{
+			Moniker:         descriptionJSON["moniker"].(string),
+			Identity:        descriptionJSON["identity"].(string),
+			Website:         descriptionJSON["website"].(string),
+			SecurityContact: descriptionJSON["security_contact"].(string),
+			Details:         descriptionJSON["details"].(string),
+		}
+	}
+
+	var maybeCommissionRate *string
+	if msg["commission_rate"] != nil {
+		maybeCommissionRate = primptr.String(msg["commission_rate"].(string))
+	}
+
+	var maybeMinSelfDelegation *string
+	if msg["min_self_delegation"] != nil {
+		maybeMinSelfDelegation = primptr.String(msg["min_self_delegation"].(string))
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgEditValidator(
 		msgCommonParams,
 
 		model.MsgEditValidatorParams{
-
-			ValidatorAddress:  msg["validator_address"].(string),
-			CommissionRate:    commissionrate,
-			MinSelfDelegation: msg["min_self_delegation"].(string),
+			Description:            description,
+			ValidatorAddress:       msg["validator_address"].(string),
+			MaybeCommissionRate:    maybeCommissionRate,
+			MaybeMinSelfDelegation: maybeMinSelfDelegation,
 		},
 	)}
 }

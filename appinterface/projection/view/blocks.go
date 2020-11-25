@@ -183,7 +183,7 @@ func (view *Blocks) FindBy(identity *BlockIdentity) (*Block, error) {
 	return &block, nil
 }
 
-func (view *Blocks) Count() (int, error) {
+func (view *Blocks) Count() (int64, error) {
 	sql, _, err := view.rdb.StmtBuilder.Select("MAX(height)").From(
 		"view_blocks",
 	).ToSql()
@@ -192,12 +192,15 @@ func (view *Blocks) Count() (int, error) {
 	}
 
 	result := view.rdb.QueryRow(sql)
-	var count int
+	var count *int64
 	if err := result.Scan(&count); err != nil {
 		return 0, fmt.Errorf("error scanning blocks count selection query: %v", err)
 	}
 
-	return count, nil
+	if count == nil {
+		return 0, nil
+	}
+	return *count, nil
 }
 
 func NewRdbBlockCommittedCouncilNodeFromRaw(raw *BlockCommittedCouncilNode) *RdbBlockCommittedCouncilNode {

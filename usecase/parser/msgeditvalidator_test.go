@@ -3,6 +3,8 @@ package parser_test
 import (
 	"strings"
 
+	"github.com/crypto-com/chainindex/internal/primptr"
+
 	"github.com/crypto-com/chainindex/infrastructure/tendermint"
 	command_usecase "github.com/crypto-com/chainindex/usecase/command"
 	"github.com/crypto-com/chainindex/usecase/event"
@@ -15,7 +17,7 @@ import (
 )
 
 var _ = Describe("ParseMsgCommands", func() {
-	Describe("MsgBeginRedelegate", func() {
+	Describe("MsgEditValidator", func() {
 
 		It("should parse Msg commands when there is staking.MsgEditValidator in the transaction", func() {
 			txDecoder := parser.NewTxDecoder("basetrcro")
@@ -42,9 +44,16 @@ var _ = Describe("ParseMsgCommands", func() {
 					},
 
 					model.MsgEditValidatorParams{
-						ValidatorAddress:  "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
-						CommissionRate:    "",
-						MinSelfDelegation: "2",
+						Description: model.MsgValidatorDescription{
+							Moniker:         "Edited Calvin Test Node",
+							Identity:        "[do-not-modify]",
+							Website:         "[do-not-modify]",
+							SecurityContact: "[do-not-modify]",
+							Details:         "[do-not-modify]",
+						},
+						ValidatorAddress:       "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+						MaybeCommissionRate:    nil,
+						MaybeMinSelfDelegation: primptr.String("2"),
 					},
 				)))
 		})

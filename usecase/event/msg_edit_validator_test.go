@@ -2,6 +2,7 @@ package event_test
 
 import (
 	event_entity "github.com/crypto-com/chainindex/entity/event"
+	"github.com/crypto-com/chainindex/internal/primptr"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -25,9 +26,16 @@ var _ = Describe("Event", func() {
 					MsgIndex:    0,
 				},
 				model.MsgEditValidatorParams{
-					ValidatorAddress:  "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
-					CommissionRate:    "0.1",
-					MinSelfDelegation: "2",
+					Description: model.MsgValidatorDescription{
+						Moniker:         "[do-not-modify]",
+						Identity:        "[do-not-modify]",
+						Website:         "[do-not-modify]",
+						SecurityContact: "[do-not-modify]",
+						Details:         "[do-not-modify]",
+					},
+					ValidatorAddress:       "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+					MaybeCommissionRate:    primptr.String("0.1"),
+					MaybeMinSelfDelegation: primptr.String("2"),
 				},
 			)
 
@@ -45,9 +53,10 @@ var _ = Describe("Event", func() {
 
 			Expect(typedEvent.TxHash()).To(Equal(event.TxHash()))
 			Expect(typedEvent.MsgIndex).To(Equal(event.MsgIndex))
+			Expect(typedEvent.Description).To(Equal(event.Description))
 			Expect(typedEvent.ValidatorAddress).To(Equal(event.ValidatorAddress))
-			Expect(typedEvent.CommissionRate).To(Equal(event.CommissionRate))
-			Expect(typedEvent.MinSelfDelegation).To(Equal(event.MinSelfDelegation))
+			Expect(typedEvent.MaybeCommissionRate).To(Equal(event.MaybeCommissionRate))
+			Expect(typedEvent.MaybeMinSelfDelegation).To(Equal(event.MaybeMinSelfDelegation))
 		})
 
 		It("should able to encode and decode to failed event", func() {
@@ -59,9 +68,16 @@ var _ = Describe("Event", func() {
 					MsgIndex:    0,
 				},
 				model.MsgEditValidatorParams{
-					ValidatorAddress:  "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
-					CommissionRate:    "0.1",
-					MinSelfDelegation: "2",
+					Description: model.MsgValidatorDescription{
+						Moniker:         "[do-not-modify]",
+						Identity:        "[do-not-modify]",
+						Website:         "[do-not-modify]",
+						SecurityContact: "[do-not-modify]",
+						Details:         "[do-not-modify]",
+					},
+					ValidatorAddress:       "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+					MaybeCommissionRate:    primptr.String("0.1"),
+					MaybeMinSelfDelegation: primptr.String("2"),
 				},
 			)
 			encoded, err := event.ToJSON()

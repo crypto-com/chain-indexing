@@ -79,15 +79,15 @@ func (projection *BlockEvent) HandleEvents(height int64, events []event_entity.E
 		}
 	}
 
-	for _, eventRow := range eventRows {
-		mutEventRow := eventRow
+	for i := range eventRows {
+		mutEventRow := eventRows[i]
 		mutEventRow.BlockTime = blockTime
 		mutEventRow.BlockHash = blockHash
 
-		if insertErr := eventsView.Insert(&mutEventRow); insertErr != nil {
-			_ = rdbTx.Rollback()
-			return fmt.Errorf("error inserting event into view: %v", insertErr)
-		}
+	}
+	if insertErr := eventsView.InsertAll(eventRows); insertErr != nil {
+		_ = rdbTx.Rollback()
+		return fmt.Errorf("error batch inserting events into view: %v", insertErr)
 	}
 
 	if err = projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {

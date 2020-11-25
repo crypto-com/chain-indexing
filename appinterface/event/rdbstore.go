@@ -19,6 +19,8 @@ const DEFAULT_TABLE = "events"
 // | version | INT64     | NOT NULL    |
 // | payload | JSONB     | NOT NULL    |
 
+var _ entity_event.Store = &RDbStore{}
+
 // EventStore implemented using relational database
 type RDbStore struct {
 	rdbHandle *rdb.Handle
@@ -135,10 +137,35 @@ func (store *RDbStore) Insert(event entity_event.Event) error {
 
 // InsertAll insert all events into store. It will rollback when the insert fails at any point.
 func (store *RDbStore) InsertAll(events []entity_event.Event) error {
+	stmtBuilder := store.rdbHandle.StmtBuilder.Insert(
+		store.table,
+	).Columns(
+		"uuid", "height", "name", "version", "payload",
+	)
 	for _, event := range events {
-		if err := store.Insert(event); err != nil {
-			return errors.New("error executing events batch insertion SQL")
+		encodedEvent, err := event.ToJSON()
+		if err != nil {
+			return fmt.Errorf("error encoding event to json: %v", err)
 		}
+		stmtBuilder = stmtBuilder.Values(
+			event.UUID(),
+			event.Height(),
+			event.Name(),
+			event.Version(),
+			encodedEvent,
+		)
+	}
+	sql, args, err := stmtBuilder.ToSql()
+	if err != nil {
+		return fmt.Errorf("error building event insertion SQL: %v", err)
+	}
+
+	execResult, err := store.rdbHandle.Exec(sql, args...)
+	if err != nil {
+		return fmt.Errorf("error exectuing event insertion SQL: %v", err)
+	}
+	if execResult.RowsAffected() != int64(len(events)) {
+		return errors.New("error executing event insertion SQL: mismatched number of rows inserted")
 	}
 
 	return nil

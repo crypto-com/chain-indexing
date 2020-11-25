@@ -40,7 +40,7 @@ var _ = Describe("Transaction", func() {
 		It("should project Blocks view when event is BlockCreated", func() {
 			blocksView := view.NewBlocks(pgConn.ToHandle())
 
-			anyHeight := int64(405947)
+			anyHeight := int64(1)
 			event := event_usecase.NewBlockCreated(&usecase_model.Block{
 				Height:          anyHeight,
 				Hash:            "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
@@ -69,11 +69,11 @@ var _ = Describe("Transaction", func() {
 			fakeLogger := NewFakeLogger()
 			projection := NewBlock(fakeLogger, pgConn)
 
-			Expect(blocksView.Count()).To(Equal(0))
+			Expect(blocksView.Count()).To(Equal(int64(0)))
 
 			err := projection.HandleEvents(anyHeight, []event_entity.Event{event})
 			Expect(err).To(BeNil())
-			Expect(blocksView.Count()).To(Equal(1))
+			Expect(blocksView.Count()).To(Equal(int64(1)))
 
 			actual, err := blocksView.FindBy(&view.BlockIdentity{
 				MaybeHeight: primptr.Int64(anyHeight),
@@ -125,11 +125,11 @@ var _ = Describe("Transaction", func() {
 
 			fakeLogger := NewFakeLogger()
 			projection := NewBlock(fakeLogger, pgConn)
-			Expect(blocksView.Count()).To(Equal(0))
+			Expect(blocksView.Count()).To(Equal(int64(0)))
 
 			err := projection.HandleEvents(anyHeight, []event_entity.Event{event})
 			Expect(err).NotTo(BeNil())
-			Expect(blocksView.Count()).To(Equal(0))
+			Expect(blocksView.Count()).To(Equal(int64(0)))
 		})
 	})
 })
