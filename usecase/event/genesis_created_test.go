@@ -32,7 +32,7 @@ var _ = Describe("Event", func() {
 			typedEvent, _ := decodedEvent.(*event_usecase.GenesisCreated)
 			Expect(typedEvent.Name()).To(Equal(event_usecase.GENESIS_CREATED))
 			Expect(typedEvent.Version()).To(Equal(1))
-			Expect(typedEvent.Height()).To(Equal(0))
+			Expect(typedEvent.Height()).To(Equal(int64(0)))
 
 			Expect(typedEvent.Genesis).To(Equal(anyGenesis))
 		})
