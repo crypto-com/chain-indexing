@@ -27,6 +27,19 @@ func (view *Blocks) Insert(block *Block) error {
 	var err error
 
 	var sql string
+	sql, _, err = view.rdb.StmtBuilder.Delete(
+		"view_blocks",
+	).Where(
+		"height=?",
+	).ToSql()
+	if err != nil {
+		return fmt.Errorf("error building blocks delete sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+	result, err := view.rdb.Exec(sql, block.Height)
+	if err != nil {
+		return fmt.Errorf("error delete block from the table: %v: %w", err, rdb.ErrWrite)
+	}
+
 	sql, _, err = view.rdb.StmtBuilder.Insert(
 		"view_blocks",
 	).Columns(
@@ -46,7 +59,7 @@ func (view *Blocks) Insert(block *Block) error {
 		return fmt.Errorf("error JSON marshalling blocks committed council nodes for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := view.rdb.Exec(sql,
+	result, err = view.rdb.Exec(sql,
 		block.Height,
 		block.Hash,
 		view.rdb.Tton(&block.Time),
