@@ -30,7 +30,7 @@ var _ = Describe("Blocks", func() {
 
 				blocksView := NewBlocks(conn.ToHandle())
 
-				Expect(blocksView.Count()).To(Equal(0))
+				Expect(blocksView.Count()).To(Equal(int64(0)))
 
 				err = blocksView.Insert(&block)
 				Expect(err).To(BeNil())

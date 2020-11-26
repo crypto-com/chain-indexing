@@ -202,6 +202,11 @@ func (manager *SyncManager) InitProjectionManager() (*projection.Manager, error)
 		return nil, fmt.Errorf("error registering transaction projection to manager %v", err)
 	}
 
+	blockEventProjection := projection_interface.NewBlockEvent(manager.logger, manager.rdbConn)
+	if err := projectionManager.RegisterProjection(blockEventProjection); err != nil {
+		return nil, fmt.Errorf("error registering block event projection to manager %v", err)
+	}
+
 	return projectionManager, nil
 }
 

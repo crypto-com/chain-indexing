@@ -18,12 +18,12 @@ const MSG_CREATE_VALIDATOR_FAILED = "MsgCreateValidatorFailed"
 type MsgCreateValidator struct {
 	MsgBase
 
-	Description      model.Description     `json:"description"`
-	CommissionRates  model.CommissionRates `json:"commission"`
-	DelegatorAddress string                `json:"delegatorAddress"`
-	ValidatorAddress string                `json:"validatorAddress"`
-	PubKey           string                `json:"pubkey"`
-	Value            coin.Coin             `json:"value"`
+	Description      model.MsgValidatorDescription `json:"description"`
+	CommissionRates  model.MsgValidatorCommission  `json:"commissionRates"`
+	DelegatorAddress string                        `json:"delegatorAddress"`
+	ValidatorAddress string                        `json:"validatorAddress"`
+	Pubkey           string                        `json:"pubkey"`
+	Amount           coin.Coin                     `json:"amount"`
 }
 
 func NewMsgCreateValidator(msgCommonParams MsgCommonParams, params model.MsgCreateValidatorParams) *MsgCreateValidator {
@@ -34,11 +34,11 @@ func NewMsgCreateValidator(msgCommonParams MsgCommonParams, params model.MsgCrea
 			MsgCommonParams: msgCommonParams,
 		}),
 		params.Description,
-		params.CommissionRates,
+		params.Commission,
 		params.DelegatorAddress,
 		params.ValidatorAddress,
 		params.Pubkey,
-		params.Value,
+		params.Amount,
 	}
 }
 

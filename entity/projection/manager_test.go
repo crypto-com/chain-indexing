@@ -43,7 +43,7 @@ var _ = Describe("Manager", func() {
 			manager := projection.NewManager(NewFakeLogger(), mockEventStore)
 			mockProjection := NewMockProjection()
 
-			// Event setup
+			// BlockEvent setup
 			anyEvent := newAnyEvent()
 			anyOtherEvent := newAnyOtherEvent()
 
@@ -89,7 +89,7 @@ var _ = Describe("Manager", func() {
 			manager := projection.NewManager(NewFakeLogger(), mockEventStore)
 			mockProjection := NewMockProjection()
 
-			// Event setup
+			// BlockEvent setup
 			anyEvent := newAnyEvent()
 			anyOtherEvent := newAnyOtherEvent()
 
@@ -145,7 +145,7 @@ var _ = Describe("Manager", func() {
 			anyProjection := NewMockProjection()
 			anyOtherProjection := NewMockProjection()
 
-			// Event setup
+			// BlockEvent setup
 			anyEvent := newAnyEvent()
 			anyOtherEvent := newAnyOtherEvent()
 
@@ -204,7 +204,7 @@ var _ = Describe("Manager", func() {
 			manager := projection.NewManager(NewFakeLogger(), mockEventStore)
 			mockProjection := NewMockProjection()
 
-			// Event setup
+			// BlockEvent setup
 			anyEvent := newAnyEvent()
 
 			// Projection setup

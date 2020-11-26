@@ -51,18 +51,24 @@ func ParseBlockToCommands(
 			return nil, fmt.Errorf("error parsing block_results account transfer commands: %v", parseErr)
 		}
 		commands = append(commands, txsAccountTransferCommands...)
+	}
 
-		beginBlockEventsCommands, parseErr := ParseBeginBlockEventsCommands(block.Height, blockResults.BeginBlockEvents)
-		if parseErr != nil {
-			return nil, fmt.Errorf("error parsing block_results_events commands: %v", parseErr)
-		}
-		commands = append(commands, beginBlockEventsCommands...)
+	beginBlockEventsCommands, parseErr := ParseBeginBlockEventsCommands(block.Height, blockResults.BeginBlockEvents)
+	if parseErr != nil {
+		return nil, fmt.Errorf("error parsing block_results_events commands: %v", parseErr)
+	}
+	commands = append(commands, beginBlockEventsCommands...)
 
-		endBlockEventsCommands, parseErr := ParseEndBlockEventsCommands(block.Height, blockResults.BeginBlockEvents)
-		if parseErr != nil {
-			return nil, fmt.Errorf("error parsing block_results_events commands: %v", parseErr)
-		}
-		commands = append(commands, endBlockEventsCommands...)
+	endBlockEventsCommands, parseErr := ParseEndBlockEventsCommands(block.Height, blockResults.BeginBlockEvents)
+	if parseErr != nil {
+		return nil, fmt.Errorf("error parsing block_results_events commands: %v", parseErr)
+	}
+	commands = append(commands, endBlockEventsCommands...)
+
+	validatorUpdatesCommands, parseErr := ParseValidatorUpdatesCommands(block.Height, blockResults.ValidatorUpdates)
+	commands = append(commands, validatorUpdatesCommands...)
+	if parseErr != nil {
+		return nil, fmt.Errorf("error parsing validator_updates commands: %v", parseErr)
 	}
 
 	return commands, err

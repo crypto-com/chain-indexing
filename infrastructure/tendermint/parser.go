@@ -204,11 +204,11 @@ func parseBlockResultsValidatorUpdates(rawUpdates []RawBlockResultsValidatorUpda
 			panic(fmt.Sprintf("invalid tendermint public key: %v", err))
 		}
 		updates = append(updates, model.BlockResultsValidatorUpdate{
-			PubKey: model.BlockResultsValidatorPubKey{
-				Type:    rawUpdate.PubKey.Sum.Type,
-				PubKey:  rawUpdate.PubKey.Sum.Value.Ed25519,
-				Address: tmcosmosutils.TmAddressFromTmPubKey(ed25519PubKey),
+			Pubkey: model.BlockResultsValidatorPubKey{
+				Type:   rawUpdate.PubKey.Sum.Type,
+				Pubkey: rawUpdate.PubKey.Sum.Value.Ed25519,
 			},
+			Address:    tmcosmosutils.TmAddressFromTmPubKey(ed25519PubKey),
 			MaybePower: power,
 		})
 	}

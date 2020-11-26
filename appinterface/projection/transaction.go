@@ -3,25 +3,28 @@ package projection
 import (
 	"fmt"
 
-	"github.com/crypto-com/chainindex/internal/utctime"
+	entity_projection "github.com/crypto-com/chainindex/entity/projection"
 
 	"github.com/crypto-com/chainindex/appinterface/projection/rdbbase"
 	"github.com/crypto-com/chainindex/appinterface/projection/view"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
 	event_entity "github.com/crypto-com/chainindex/entity/event"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
+	"github.com/crypto-com/chainindex/internal/utctime"
 	event_usecase "github.com/crypto-com/chainindex/usecase/event"
 )
 
-type BlockTransaction struct {
+var _ entity_projection.Projection = &Transaction{}
+
+type Transaction struct {
 	*rdbbase.RDbBase
 
 	rdbConn rdb.Conn
 	logger  applogger.Logger
 }
 
-func NewTransaction(logger applogger.Logger, rdbConn rdb.Conn) *BlockTransaction {
-	return &BlockTransaction{
+func NewTransaction(logger applogger.Logger, rdbConn rdb.Conn) *Transaction {
+	return &Transaction{
 		rdbbase.NewRDbBase(rdbConn.ToHandle(), "Transaction"),
 
 		rdbConn,
@@ -29,7 +32,7 @@ func NewTransaction(logger applogger.Logger, rdbConn rdb.Conn) *BlockTransaction
 	}
 }
 
-func (_ *BlockTransaction) GetEventsToListen() []string {
+func (_ *Transaction) GetEventsToListen() []string {
 	return append([]string{
 		event_usecase.BLOCK_CREATED,
 		event_usecase.TRANSACTION_CREATED,
@@ -37,11 +40,11 @@ func (_ *BlockTransaction) GetEventsToListen() []string {
 	}, event_usecase.MSG_EVENTS...)
 }
 
-func (projection *BlockTransaction) OnInit() error {
+func (projection *Transaction) OnInit() error {
 	return nil
 }
 
-func (projection *BlockTransaction) HandleEvents(height int64, events []event_entity.Event) error {
+func (projection *Transaction) HandleEvents(height int64, events []event_entity.Event) error {
 	var err error
 
 	var rdbTx rdb.Tx
@@ -54,14 +57,14 @@ func (projection *BlockTransaction) HandleEvents(height int64, events []event_en
 
 	var blockTime utctime.UTCTime
 	var blockHash string
-	txs := make([]view.Transaction, 0)
+	txs := make([]view.TransactionRow, 0)
 	txMsgs := make(map[string][]event_usecase.MsgEvent)
 	for _, event := range events {
 		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
 			blockTime = blockCreatedEvent.Block.Time
 			blockHash = blockCreatedEvent.Block.Hash
 		} else if transactionCreatedEvent, ok := event.(*event_usecase.TransactionCreated); ok {
-			txs = append(txs, view.Transaction{
+			txs = append(txs, view.TransactionRow{
 				BlockHeight:   height,
 				BlockTime:     utctime.UTCTime{}, // placeholder
 				Hash:          transactionCreatedEvent.TxHash,
@@ -75,10 +78,10 @@ func (projection *BlockTransaction) HandleEvents(height int64, events []event_en
 				GasUsed:       transactionCreatedEvent.GasUsed,
 				Memo:          transactionCreatedEvent.Memo,
 				TimeoutHeight: transactionCreatedEvent.TimeoutHeight,
-				Messages:      make([]view.TransactionMessage, 0),
+				Messages:      make([]view.TransactionRowMessage, 0),
 			})
 		} else if transactionFailedEvent, ok := event.(*event_usecase.TransactionFailed); ok {
-			txs = append(txs, view.Transaction{
+			txs = append(txs, view.TransactionRow{
 				BlockHeight:   height,
 				BlockTime:     utctime.UTCTime{}, // placeholder
 				Hash:          transactionFailedEvent.TxHash,
@@ -92,7 +95,7 @@ func (projection *BlockTransaction) HandleEvents(height int64, events []event_en
 				GasUsed:       transactionFailedEvent.GasUsed,
 				Memo:          transactionFailedEvent.Memo,
 				TimeoutHeight: transactionFailedEvent.TimeoutHeight,
-				Messages:      make([]view.TransactionMessage, 0),
+				Messages:      make([]view.TransactionRowMessage, 0),
 			})
 		} else if msgEvent, ok := event.(event_usecase.MsgEvent); ok {
 			if _, exist := txMsgs[msgEvent.TxHash()]; !exist {
@@ -102,20 +105,21 @@ func (projection *BlockTransaction) HandleEvents(height int64, events []event_en
 		}
 	}
 
-	for i, tx := range txs {
-		tx.BlockTime = blockTime
-		tx.BlockHash = blockHash
+	for _, tx := range txs {
+		mutTx := tx
+		mutTx.BlockTime = blockTime
+		mutTx.BlockHash = blockHash
 
-		for _, msg := range txMsgs[tx.Hash] {
-			tx.Messages = append(tx.Messages, view.TransactionMessage{
+		for _, msg := range txMsgs[mutTx.Hash] {
+			mutTx.Messages = append(mutTx.Messages, view.TransactionRowMessage{
 				Type:    msg.MsgType(),
 				Content: msg,
 			})
 		}
 
-		if insertErr := transactionsView.Insert(&txs[i]); insertErr != nil {
+		if insertErr := transactionsView.Insert(&mutTx); insertErr != nil {
 			_ = rdbTx.Rollback()
-			return fmt.Errorf("error inserting parsed transaction into view: %v", insertErr)
+			return fmt.Errorf("error inserting transaction into view: %v", insertErr)
 		}
 	}
 

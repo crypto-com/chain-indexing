@@ -80,10 +80,10 @@ func ParseTransactionCommands(
 //			isFeeEvent := false
 //			var amount string
 //			for _, attribute := range event.Attributes {
-//				if attribute.Key == "recipient" && attribute.Value == feeCollectorAddress {
+//				if attribute.Key == "recipient" && attribute.Amount == feeCollectorAddress {
 //					isFeeEvent = true
 //				} else if attribute.Key == "amount" {
-//					amount = attribute.Value
+//					amount = attribute.Amount
 //				}
 //			}
 //

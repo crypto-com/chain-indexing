@@ -12,7 +12,7 @@ type StatusHandler struct {
 	logger applogger.Logger
 
 	blocksView       *view.Blocks
-	transactionsView *view.Transactions
+	transactionsView *view.BlockTransactions
 }
 
 func NewStatusHandler(logger applogger.Logger, rdbHandle *rdb.Handle) *StatusHandler {
@@ -52,7 +52,7 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 }
 
 type Status struct {
-	BlockCount       int `json:"blockCount"`
-	TransactionCount int `json:"transactionCount"`
+	BlockCount       int64 `json:"blockCount"`
+	TransactionCount int64 `json:"transactionCount"`
 	// TODO: Add more items when available in projections
 }

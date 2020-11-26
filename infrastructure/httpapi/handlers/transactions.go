@@ -12,7 +12,7 @@ import (
 type Transactions struct {
 	logger applogger.Logger
 
-	transactionsView *view.Transactions
+	transactionsView *view.BlockTransactions
 }
 
 func NewTransactions(logger applogger.Logger, rdbHandle *rdb.Handle) *Transactions {
@@ -23,6 +23,21 @@ func NewTransactions(logger applogger.Logger, rdbHandle *rdb.Handle) *Transactio
 
 		view.NewTransactions(rdbHandle),
 	}
+}
+
+func (handler *Transactions) FindByHash(ctx *fasthttp.RequestCtx) {
+	var err error
+
+	transaction, err := handler.transactionsView.FindByHash(
+		ctx.UserValue("hash").(string),
+	)
+	if err != nil {
+		handler.logger.Errorf("error finding transactions by hash: %v", err)
+		httpapi.InternalServerError(ctx)
+		return
+	}
+
+	httpapi.Success(ctx, transaction)
 }
 
 func (handler *Transactions) List(ctx *fasthttp.RequestCtx) {

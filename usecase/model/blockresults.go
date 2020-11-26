@@ -7,12 +7,12 @@ import (
 )
 
 type BlockResults struct {
-	Height                int64
-	TxsResults            []BlockResultsTxsResult
-	BeginBlockEvents      []BlockResultsEvent
-	EndBlockEvents        []BlockResultsEvent
-	ValidatorUpdates      []BlockResultsValidatorUpdate
-	ConsensusParamUpdates BlockResultsConsensusParamUpdates
+	Height                int64                             `json:"height"`
+	TxsResults            []BlockResultsTxsResult           `json:"txsResults"`
+	BeginBlockEvents      []BlockResultsEvent               `json:"beginBlockEvents"`
+	EndBlockEvents        []BlockResultsEvent               `json:"endBlockEvents"`
+	ValidatorUpdates      []BlockResultsValidatorUpdate     `json:"validatorUpdates"`
+	ConsensusParamUpdates BlockResultsConsensusParamUpdates `json:"consensusParamUpdates"`
 }
 
 func (results *BlockResults) String() string {
@@ -47,14 +47,14 @@ type BlockResultsEventAttribute struct {
 }
 
 type BlockResultsValidatorUpdate struct {
-	PubKey     BlockResultsValidatorPubKey
-	MaybePower *big.Int `json:"power"`
+	Pubkey     BlockResultsValidatorPubKey `json:"pubkey"`
+	Address    string                      `json:"address"`
+	MaybePower *big.Int                    `json:"power"`
 }
 
 type BlockResultsValidatorPubKey struct {
-	Type    string `json:"type"`
-	PubKey  string `json:"pubKey"`
-	Address string `json:"address"`
+	Type   string `json:"type"`
+	Pubkey string `json:"pubkey"`
 }
 
 type BlockResultsConsensusParamUpdates struct {

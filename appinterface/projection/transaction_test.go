@@ -20,7 +20,7 @@ import (
 	. "github.com/crypto-com/chainindex/appinterface/projection"
 )
 
-var _ = Describe("Block", func() {
+var _ = Describe("Transaction", func() {
 	It("should implement projection", func() {
 		fakeLogger := NewFakeLogger()
 		fakeRdbConn := NewFakeRDbConn()
