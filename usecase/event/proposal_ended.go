@@ -9,29 +9,28 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const BLOCK_PROPOSER_REWARDED = "BlockProposerRewarded"
+const PROPOSAL_ENDED = "ProposalEnded"
 
-type BlockProposerRewarded struct {
+type ProposalEnded struct {
 	event_entity.Base
 
-	Validator string `json:"validator"`
-	Amount    string `json:"amount"`
+	ProposalId string `json:"proposalId"`
+	Result     string `json:"result"`
 }
 
-func NewProposerRewarded(blockHeight int64, validator string, amount string) *BlockProposerRewarded {
-	return &BlockProposerRewarded{
+func NewProposalEnded(blockHeight int64, proposalId string, result string) *ProposalEnded {
+	return &ProposalEnded{
 		event_entity.NewBase(event_entity.BaseParams{
-			Name:        BLOCK_PROPOSER_REWARDED,
+			Name:        PROPOSAL_ENDED,
 			Version:     1,
 			BlockHeight: blockHeight,
 		}),
-
-		validator,
-		amount,
+		proposalId,
+		result,
 	}
 
 }
-func (event *BlockProposerRewarded) ToJSON() (string, error) {
+func (event *ProposalEnded) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
 		return "", err
@@ -40,15 +39,15 @@ func (event *BlockProposerRewarded) ToJSON() (string, error) {
 	return string(encoded), nil
 }
 
-func (event *BlockProposerRewarded) String() string {
+func (event *ProposalEnded) String() string {
 	return render.Render(event)
 }
 
-func DecodeBlockProposerRewarded(encoded []byte) (event_entity.Event, error) {
+func DecodeProposalEnded(encoded []byte) (event_entity.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *BlockProposerRewarded
+	var event *ProposalEnded
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}
