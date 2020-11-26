@@ -256,6 +256,23 @@ func (view *BlockTransactions) List(
 	return transactions, paginationResult, nil
 }
 
+func (view *BlockTransactions) Count() (int64, error) {
+	sql, _, err := view.rdb.StmtBuilder.Select("COUNT(1)").From(
+		"view_transactions",
+	).ToSql()
+	if err != nil {
+		return 0, fmt.Errorf("error building transactions count selection sql: %v", err)
+	}
+
+	result := view.rdb.QueryRow(sql)
+	var count int64
+	if err := result.Scan(&count); err != nil {
+		return 0, fmt.Errorf("error scanning transactions count selection query: %v", err)
+	}
+
+	return count, nil
+}
+
 type TransactionRow struct {
 	BlockHeight   int64                   `json:"blockHeight"`
 	BlockHash     string                  `json:"blockHash"`
