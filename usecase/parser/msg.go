@@ -655,6 +655,13 @@ func parseMsgEditValidator(
 		commissionrate, _ = val.(string)
 	}
 
+	minSelfDelegation := ""
+	if val, ok := msg["min_self_delegation"]; ok {
+		if val != nil {
+			minSelfDelegation, _ = val.(string)
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgEditValidator(
 		msgCommonParams,
 
@@ -662,7 +669,7 @@ func parseMsgEditValidator(
 
 			ValidatorAddress:  msg["validator_address"].(string),
 			CommissionRate:    commissionrate,
-			MinSelfDelegation: msg["min_self_delegation"].(string),
+			MinSelfDelegation: minSelfDelegation,
 		},
 	)}
 }
