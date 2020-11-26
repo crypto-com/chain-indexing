@@ -24,7 +24,7 @@ func NewGenesisCreated(genesis genesis.Genesis) *GenesisCreated {
 		event_entity.NewBase(event_entity.BaseParams{
 			Name:        GENESIS_CREATED,
 			Version:     1,
-			BlockHeight: 0,
+			BlockHeight: int64(0),
 		}),
 
 		genesis,
