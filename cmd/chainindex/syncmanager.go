@@ -77,13 +77,10 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
 	}
 
 	// if none of the block has been indexed before, start with 0
-	lastIndexedHeight := int64(0)
+	currentIndexingHeight := int64(0)
 	if maybeLastIndexedHeight != nil {
-		lastIndexedHeight = *maybeLastIndexedHeight
+		currentIndexingHeight = *maybeLastIndexedHeight + 1
 	}
-
-	// Sync next height to avoid duplication
-	currentIndexingHeight := lastIndexedHeight + 1
 
 	manager.logger.Infof("going to synchronized blocks from %d to %d", currentIndexingHeight, latestHeight)
 	for currentIndexingHeight < latestHeight {
@@ -138,6 +135,15 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command.Comman
 	})
 
 	logger.Info("synchronizing block")
+
+	if blockHeight == int64(0) {
+		genesis, err := manager.client.Genesis()
+		if err != nil {
+			return nil, fmt.Errorf("error requesting chain genesis: %v", err)
+		}
+
+		return parser.ParseGenesisCommands(genesis)
+	}
 
 	// Request tendermint RPC
 	block, rawBlock, err := manager.client.Block(blockHeight)
