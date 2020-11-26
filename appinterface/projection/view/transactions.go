@@ -256,7 +256,7 @@ func (view *BlockTransactions) List(
 	return transactions, paginationResult, nil
 }
 
-func (view *BlockTransactions) Count() (int, error) {
+func (view *BlockTransactions) Count() (int64, error) {
 	sql, _, err := view.rdb.StmtBuilder.Select("COUNT(1)").From(
 		"view_transactions",
 	).ToSql()
@@ -265,7 +265,7 @@ func (view *BlockTransactions) Count() (int, error) {
 	}
 
 	result := view.rdb.QueryRow(sql)
-	var count int
+	var count int64
 	if err := result.Scan(&count); err != nil {
 		return 0, fmt.Errorf("error scanning transactions count selection query: %v", err)
 	}
