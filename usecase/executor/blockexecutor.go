@@ -50,7 +50,6 @@ func (exec *BlockExecutor) ExecAllCommands() error {
 }
 
 func (exec *BlockExecutor) StoreAllEvents(eventStore *event_interface.RDbStore) error {
-	// TODO: tx rollback when has error
 	if err := eventStore.InsertAll(exec.Events); err != nil {
 		return fmt.Errorf("executor error storing all events for height %d %v", exec.Height, err)
 	}
