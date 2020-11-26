@@ -29,7 +29,7 @@ func NewBlockEvents(logger applogger.Logger, rdbHandle *rdb.Handle) *BlockEvents
 }
 
 func (handler *BlockEvents) FindById(ctx *fasthttp.RequestCtx) {
-	idParam := ctx.UserValue("id").(string)
+	idParam, _ := ctx.UserValue("id").(string)
 	id, err := strconv.ParseInt(idParam, 10, 64)
 	if err != nil {
 		httpapi.BadRequest(ctx, errors.New("invalid event id"))
