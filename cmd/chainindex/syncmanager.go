@@ -112,7 +112,7 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
 				return fmt.Errorf("error storing all events%v", err)
 			}
 		}
-		if err := manager.statusStore.UpdateLastIndexedBlockHeight(txHandle, currentIndexingHeight); err != nil {
+		if err := manager.statusStore.UpdateLastIndexedBlockHeight(txHandle, syncedHeight); err != nil {
 			return fmt.Errorf("error updating last indexed block height to %d: %v", currentIndexingHeight, err)
 		}
 
