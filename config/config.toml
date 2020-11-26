@@ -10,7 +10,7 @@ connode_pubkey_prefix = "tcrocnclconspub"
 
 [sync]
 # how many sync jobs running in parallel
-window_size = 20
+window_size = 50
 
 [tendermint]
 http_rpc_url = "https://testnet-croeseid-1.crypto.com:26657"

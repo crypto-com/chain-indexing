@@ -5,6 +5,8 @@ import (
 )
 
 func RegisterEvents(registry *event.Registry) {
+	registry.Register(GENESIS_CREATED, 1, DecodeGenesisCreated)
+
 	registry.Register(BLOCK_CREATED, 1, DecodeBlockCreated)
 	registry.Register(RAW_BLOCK_CREATED, 1, DecodeRawBlockCreated)
 	registry.Register(TRANSACTION_CREATED, 1, DecodeTransactionCreated)

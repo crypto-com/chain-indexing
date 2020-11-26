@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/crypto-com/chainindex/usecase/model/genesis"
+
 	usecase_model "github.com/crypto-com/chainindex/usecase/model"
 )
 
@@ -25,6 +27,23 @@ func NewHTTPClient(tendermintRPCUrl string) *HTTPClient {
 		httpClient,
 		tendermintRPCUrl,
 	}
+}
+
+func (client *HTTPClient) Genesis() (*genesis.Genesis, error) {
+	var err error
+
+	rawRespBody, err := client.request("genesis")
+	if err != nil {
+		return nil, err
+	}
+	defer rawRespBody.Close()
+
+	genesis, err := ParseGenesisResp(rawRespBody)
+	if err != nil {
+		return nil, err
+	}
+
+	return genesis, nil
 }
 
 // Block gets the block response with target height
@@ -99,6 +118,16 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 	}
 
 	return rawResp.Body, nil
+}
+
+type GenesisResp struct {
+	Jsonrpc string            `json:"jsonrpc"`
+	ID      int64             `json:"id"`
+	Result  GenesisRespResult `json:"result"`
+}
+
+type GenesisRespResult struct {
+	Genesis genesis.Genesis `json:"genesis"`
 }
 
 type RawBlockResp struct {

@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/crypto-com/chainindex/usecase/model/genesis"
+
 	"github.com/crypto-com/chainindex/internal/tmcosmosutils"
 
 	"github.com/crypto-com/chainindex/usecase/model"
@@ -15,6 +17,17 @@ import (
 )
 
 // Block related parsing functions
+func ParseGenesisResp(rawRespReader io.Reader) (*genesis.Genesis, error) {
+	var genesisResp GenesisResp
+	jsonDecoder := jsoniter.NewDecoder(rawRespReader)
+	jsonDecoder.DisallowUnknownFields()
+	if err := jsonDecoder.Decode(&genesisResp); err != nil {
+		return nil, fmt.Errorf("error decoding Tendermint genesis response: %v", err)
+	}
+
+	return &genesisResp.Result.Genesis, nil
+}
+
 func ParseBlockResp(rawRespReader io.Reader) (*model.Block, *model.RawBlock, error) {
 	var err error
 
