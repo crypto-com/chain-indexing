@@ -27,7 +27,7 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSGS_WITHDRAW_DELEGATOR_REWARD_WITHDRAW_VALIDATOR_COMMISSION_BLOCK_RESULTS_RESP,
 			)
 
-			cmds, err := parser.ParseMsgToCommands(
+			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
@@ -73,7 +73,7 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_WITHDRAW_DELEGATOR_REWARD_NO_REWARD_BLOCK_RESULTS_RESP,
 			))
 
-			cmds, err := parser.ParseMsgToCommands(
+			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,

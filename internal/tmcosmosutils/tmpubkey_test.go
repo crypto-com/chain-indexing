@@ -9,10 +9,10 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-const tendermintPubKey = "tWY6qzpOg/6HFj2X3a8+tzIAehW7k2MWOgrjotcWCuI="
-const tendermintAddress = "18253C74D541A2B5BF492E8B5910A268AFED4D48"
-const consensusNodeAddress = "tcrocnclcons1rqjncax4gx3tt06f9694jy9zdzh76n2gg5yqfd"
-const consensusNodePubKey = "tcrocnclconspub1zcjduepqk4nr42e6f6plapck8ktamte7kueqq7s4hwfkx936pt3694ckpt3q50kp4w"
+const tendermintPubKey = "na51D8RmKXyWrid9I6wtdxgP6f1Nl3EyNNEzqxVquoM=="
+const tendermintAddress = "B5EC6D86F8F418F480799447F5C21F1C17C6F8F8"
+const consensusNodeAddress = "tcrocnclcons1khkxmphc7sv0fqrej3rltsslrstud78cam9ekl"
+const consensusNodePubKey = "tcrocnclconspub1zcjduepqnkh82r7yvc5he94wya7j8tpdwuvql60afkthzv356ye6k9t2h2psr3u067"
 
 var _ = Describe("tmcosmosutils", func() {
 	Describe("TmAddressFromTmPubKey", func() {
@@ -45,7 +45,7 @@ var _ = Describe("tmcosmosutils", func() {
 	Describe("ConsensusNodeAddressFromPubKey", func() {
 		It("should work", func() {
 			Expect(tmcosmosutils.ConsensusNodeAddressFromPubKey(
-				"tcrocnclcons", consensusNodeAddress,
+				"tcrocnclcons", consensusNodePubKey,
 			)).To(Equal(consensusNodeAddress))
 		})
 	})

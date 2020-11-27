@@ -169,36 +169,11 @@ type PublicKey struct {
 }
 
 type Body struct {
-	Messages                    []Message     `json:"messages"`
-	Memo                        string        `json:"memo"`
-	TimeoutHeight               string        `json:"timeout_height"`
-	ExtensionOptions            []interface{} `json:"extension_options"`
-	NonCriticalExtensionOptions []interface{} `json:"non_critical_extension_options"`
-}
-
-type Message struct {
-	Type              string      `json:"@type"`
-	Description       Description `json:"description"`
-	Commission        Commission  `json:"commission"`
-	MinSelfDelegation string      `json:"min_self_delegation"`
-	DelegatorAddress  string      `json:"delegator_address"`
-	ValidatorAddress  string      `json:"validator_address"`
-	Pubkey            string      `json:"pubkey"`
-	Value             MinDeposit  `json:"value"`
-}
-
-type Commission struct {
-	Rate          string `json:"rate"`
-	MaxRate       string `json:"max_rate"`
-	MaxChangeRate string `json:"max_change_rate"`
-}
-
-type Description struct {
-	Moniker         string `json:"moniker"`
-	Identity        string `json:"identity"`
-	Website         string `json:"website"`
-	SecurityContact string `json:"security_contact"`
-	Details         string `json:"details"`
+	Messages                    []map[string]interface{} `json:"messages"`
+	Memo                        string                   `json:"memo"`
+	TimeoutHeight               string                   `json:"timeout_height"`
+	ExtensionOptions            []interface{}            `json:"extension_options"`
+	NonCriticalExtensionOptions []interface{}            `json:"non_critical_extension_options"`
 }
 
 type Gov struct {

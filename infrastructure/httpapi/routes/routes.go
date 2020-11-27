@@ -11,6 +11,7 @@ type RouteRegistry struct {
 	statusHandler      *handlers.StatusHandler
 	transactionHandler *handlers.Transactions
 	blockEventHandler  *handlers.BlockEvents
+	validatorsHandler  *handlers.Validators
 }
 
 func NewRoutesRegistry(
@@ -18,12 +19,14 @@ func NewRoutesRegistry(
 	statusHandler *handlers.StatusHandler,
 	transactionHandler *handlers.Transactions,
 	blockEventHandler *handlers.BlockEvents,
+	validatorsHandler *handlers.Validators,
 ) *RouteRegistry {
 	return &RouteRegistry{
 		blocksHandler,
 		statusHandler,
 		transactionHandler,
 		blockEventHandler,
+		validatorsHandler,
 	}
 }
 
@@ -41,4 +44,6 @@ func (registry *RouteRegistry) Register(server *httpapi.Server) {
 	server.GET("/api/v1/transactions/{hash}", registry.transactionHandler.FindByHash)
 	server.GET("/api/v1/events", registry.blockEventHandler.List)
 	server.GET("/api/v1/events/{id}", registry.blockEventHandler.FindById)
+	server.GET("/api/v1/validators", registry.validatorsHandler.List)
+	server.GET("/api/v1/validators/{operator_address}", registry.validatorsHandler.FindBy)
 }

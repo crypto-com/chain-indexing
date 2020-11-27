@@ -74,7 +74,7 @@ func (manager *Manager) projectionRunner(projection Projection) {
 
 	var nextEventHeight int64
 	if lastHandledEventHeight == nil {
-		nextEventHeight = 1
+		nextEventHeight = 0
 	} else {
 		nextEventHeight = *lastHandledEventHeight + 1
 	}

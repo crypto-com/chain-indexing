@@ -22,7 +22,7 @@ var _ = Describe("Event", func() {
 		SecurityContact: "mysecuritycontact",
 		Details:         "mydetails",
 	}
-	commiossionrates := model.MsgValidatorCommission{
+	commission := model.MsgValidatorCommission{
 		Rate:          "0.100000000000000000",
 		MaxRate:       "0.200000000000000000",
 		MaxChangeRate: "0.010000000000000000",
@@ -38,12 +38,13 @@ var _ = Describe("Event", func() {
 					MsgIndex:    0,
 				},
 				model.MsgCreateValidatorParams{
-					Description:      description,
-					Commission:       commiossionrates,
-					DelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-					ValidatorAddress: "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
-					Pubkey:           "tcrocnclconspub1zcjduepqa5rksn4ds9u6jmmg4n86d9wct7wmj23pyqe6p7e252lffzqsgcvqxm5lc2",
-					Amount:           coin.MustNewCoinFromString("10"),
+					Description:       description,
+					Commission:        commission,
+					MinSelfDelegation: "1",
+					DelegatorAddress:  "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+					ValidatorAddress:  "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+					Pubkey:            "tcrocnclconspub1zcjduepqa5rksn4ds9u6jmmg4n86d9wct7wmj23pyqe6p7e252lffzqsgcvqxm5lc2",
+					Amount:            coin.MustNewCoinFromString("10"),
 				},
 			)
 
@@ -64,6 +65,7 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.DelegatorAddress).To(Equal(event.DelegatorAddress))
 			Expect(typedEvent.ValidatorAddress).To(Equal(event.ValidatorAddress))
 			Expect(typedEvent.CommissionRates).To(Equal(event.CommissionRates))
+			Expect(typedEvent.MinSelfDelegation).To(Equal(event.MinSelfDelegation))
 			Expect(typedEvent.Amount).To(Equal(event.Amount))
 		})
 
@@ -76,12 +78,13 @@ var _ = Describe("Event", func() {
 					MsgIndex:    0,
 				},
 				model.MsgCreateValidatorParams{
-					Description:      description,
-					Commission:       commiossionrates,
-					DelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-					ValidatorAddress: "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
-					Pubkey:           "tcrocnclconspub1zcjduepqa5rksn4ds9u6jmmg4n86d9wct7wmj23pyqe6p7e252lffzqsgcvqxm5lc2",
-					Amount:           coin.MustNewCoinFromString("10"),
+					Description:       description,
+					Commission:        commission,
+					MinSelfDelegation: "1",
+					DelegatorAddress:  "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+					ValidatorAddress:  "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+					Pubkey:            "tcrocnclconspub1zcjduepqa5rksn4ds9u6jmmg4n86d9wct7wmj23pyqe6p7e252lffzqsgcvqxm5lc2",
+					Amount:            coin.MustNewCoinFromString("10"),
 				},
 			)
 			encoded, err := event.ToJSON()

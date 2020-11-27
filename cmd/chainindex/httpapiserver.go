@@ -41,7 +41,14 @@ func (server *HTTPAPIServer) Run() error {
 	statusHandler := handlers.NewStatusHandler(server.logger, server.rdbConn.ToHandle())
 	transactionsHandler := handlers.NewTransactions(server.logger, server.rdbConn.ToHandle())
 	blockEventsHandler := handlers.NewBlockEvents(server.logger, server.rdbConn.ToHandle())
-	routeRegistry := routes.NewRoutesRegistry(blocksHandler, statusHandler, transactionsHandler, blockEventsHandler)
+	validatorsHandler := handlers.NewValidators(server.logger, server.rdbConn.ToHandle())
+	routeRegistry := routes.NewRoutesRegistry(
+		blocksHandler,
+		statusHandler,
+		transactionsHandler,
+		blockEventsHandler,
+		validatorsHandler,
+	)
 	routeRegistry.Register(httpServer)
 
 	server.logger.Infof("server start listening on: %s", server.listeningAddress)

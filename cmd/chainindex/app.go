@@ -44,8 +44,6 @@ func CliApp(args []string) error {
 				return readConfigErr
 			}
 
-			// TODO: use ENV before deployment
-			//fileConfig.Database.Password = "postgres"
 			fileConfig.Database.Password = os.Getenv("DB_PASSWORD")
 			if fileConfig.Database.Password == "" {
 				return errors.New("DB_PASSWORD is empty")

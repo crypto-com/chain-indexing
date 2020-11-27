@@ -23,7 +23,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_MSG_CREATE_VALIDATOR_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_MSG_CREATE_VALIDATOR_BLOCK_RESULTS_RESP))
 
-			cmds, err := parser.ParseMsgToCommands(
+			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
@@ -54,12 +54,13 @@ var _ = Describe("ParseMsgCommands", func() {
 					MsgIndex:    0,
 				},
 				model.MsgCreateValidatorParams{
-					Description:      description,
-					Commission:       commissionRates,
-					DelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-					ValidatorAddress: "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
-					Pubkey:           "tcrocnclconspub1zcjduepqa5rksn4ds9u6jmmg4n86d9wct7wmj23pyqe6p7e252lffzqsgcvqxm5lc2",
-					Amount:           coin.MustNewCoinFromString("10"),
+					Description:       description,
+					Commission:        commissionRates,
+					MinSelfDelegation: "1",
+					DelegatorAddress:  "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+					ValidatorAddress:  "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+					Pubkey:            "tcrocnclconspub1zcjduepqa5rksn4ds9u6jmmg4n86d9wct7wmj23pyqe6p7e252lffzqsgcvqxm5lc2",
+					Amount:            coin.MustNewCoinFromString("10"),
 				},
 			)))
 		})

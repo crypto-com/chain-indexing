@@ -26,11 +26,12 @@ import (
 const DEFAULT_POLLING_INTERVAL = 5 * time.Second
 
 type SyncManager struct {
-	rdbConn         rdb.Conn
-	client          *tendermint.HTTPClient
-	logger          applogger.Logger
-	pollingInterval time.Duration
-	windowSize      int
+	rdbConn               rdb.Conn
+	client                *tendermint.HTTPClient
+	logger                applogger.Logger
+	pollingInterval       time.Duration
+	consNodeAddressPrefix string
+	windowSize            int
 
 	latestBlockHeight *int64
 	shouldSyncCh      chan bool
@@ -47,6 +48,7 @@ type SyncManager struct {
 func NewSyncManager(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
+	consNodeAddressPrefix string,
 	windowSize int,
 	tendermintRPCUrl string,
 	txDecoder *parser.TxDecoder,
@@ -59,8 +61,9 @@ func NewSyncManager(
 		logger: logger.WithFields(applogger.LogFields{
 			"module": "SyncManager",
 		}),
-		pollingInterval: DEFAULT_POLLING_INTERVAL,
-		windowSize:      windowSize,
+		pollingInterval:       DEFAULT_POLLING_INTERVAL,
+		consNodeAddressPrefix: consNodeAddressPrefix,
+		windowSize:            windowSize,
 
 		shouldSyncCh: make(chan bool),
 
@@ -211,6 +214,13 @@ func (manager *SyncManager) InitProjectionManager() (*projection.Manager, error)
 	blockEventProjection := projection_interface.NewBlockEvent(manager.logger, manager.rdbConn)
 	if err := projectionManager.RegisterProjection(blockEventProjection); err != nil {
 		return nil, fmt.Errorf("error registering block event projection to manager %v", err)
+	}
+
+	validatorProjection := projection_interface.NewValidator(
+		manager.logger, manager.rdbConn, manager.consNodeAddressPrefix,
+	)
+	if err := projectionManager.RegisterProjection(validatorProjection); err != nil {
+		return nil, fmt.Errorf("error registering validator projection to manager %v", err)
 	}
 
 	return projectionManager, nil

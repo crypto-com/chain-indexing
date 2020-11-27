@@ -24,6 +24,7 @@ require (
 	github.com/onsi/gomega v1.10.2
 	github.com/rs/zerolog v1.15.0
 	github.com/stretchr/testify v1.6.1
+	github.com/tendermint/go-amino v0.16.0
 	github.com/tendermint/tendermint v0.34.0-rc6
 	github.com/urfave/cli/v2 v2.2.0
 	github.com/valyala/fasthttp v1.17.0
