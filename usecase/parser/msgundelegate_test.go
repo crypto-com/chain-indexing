@@ -1,6 +1,7 @@
 package parser_test
 
 import (
+	"github.com/crypto-com/chainindex/internal/utctime"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -39,6 +40,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					DelegatorAddress: "tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64",
 					ValidatorAddress: "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
 					Amount:           coin.MustNewCoinFromString("1000000000"),
+					UnbondCompleteAt: utctime.FromUnixNano(int64(1605152654000000000)),
 				},
 			)}))
 		})
