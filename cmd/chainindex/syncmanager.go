@@ -5,6 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/crypto-com/chainindex/appinterface/projection/block"
+	"github.com/crypto-com/chainindex/appinterface/projection/transasaction"
+
+	"github.com/crypto-com/chainindex/appinterface/projection/blockevent"
+
 	"github.com/crypto-com/chainindex/appinterface/projection/validator"
 
 	"github.com/crypto-com/chainindex/usecase/executor"
@@ -13,7 +18,6 @@ import (
 	"github.com/crypto-com/chainindex/usecase/syncstrategy"
 
 	event_interface "github.com/crypto-com/chainindex/appinterface/event"
-	projection_interface "github.com/crypto-com/chainindex/appinterface/projection"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
 	"github.com/crypto-com/chainindex/appinterface/rdbstatusstore"
 	"github.com/crypto-com/chainindex/entity/event"
@@ -203,17 +207,17 @@ func (manager *SyncManager) InitProjectionManager() (*projection.Manager, error)
 	projectionManager := projection.NewManager(manager.logger, manager.eventStore)
 
 	// register more projections here
-	blockProjection := projection_interface.NewBlock(manager.logger, manager.rdbConn)
+	blockProjection := block.NewBlock(manager.logger, manager.rdbConn)
 	if err := projectionManager.RegisterProjection(blockProjection); err != nil {
 		return nil, fmt.Errorf("error registering block projection to manager %v", err)
 	}
 
-	transactionProjection := projection_interface.NewTransaction(manager.logger, manager.rdbConn)
+	transactionProjection := transasaction.NewTransaction(manager.logger, manager.rdbConn)
 	if err := projectionManager.RegisterProjection(transactionProjection); err != nil {
 		return nil, fmt.Errorf("error registering transaction projection to manager %v", err)
 	}
 
-	blockEventProjection := projection_interface.NewBlockEvent(manager.logger, manager.rdbConn)
+	blockEventProjection := blockevent.NewBlockEvent(manager.logger, manager.rdbConn)
 	if err := projectionManager.RegisterProjection(blockEventProjection); err != nil {
 		return nil, fmt.Errorf("error registering block event projection to manager %v", err)
 	}

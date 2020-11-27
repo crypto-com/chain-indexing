@@ -86,10 +86,10 @@ type Response struct {
 }
 
 type PaginationOffsetResponse struct {
-	TotalRecord uint64 `json:"total_record"`
-	TotalPage   uint64 `json:"total_page"`
-	CurrentPage uint64 `json:"current_page"`
-	Limit       uint64 `json:"limit"`
+	TotalRecord int64 `json:"total_record"`
+	TotalPage   int64 `json:"total_page"`
+	CurrentPage int64 `json:"current_page"`
+	Limit       int64 `json:"limit"`
 }
 
 func OptPaginationOffsetResponseFromResult(

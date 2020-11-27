@@ -1,12 +1,13 @@
-package projection
+package block
 
 import (
 	"fmt"
 
+	view2 "github.com/crypto-com/chainindex/appinterface/projection/block/view"
+
 	entity_projection "github.com/crypto-com/chainindex/entity/projection"
 
 	"github.com/crypto-com/chainindex/appinterface/projection/rdbbase"
-	"github.com/crypto-com/chainindex/appinterface/projection/view"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
 	event_entity "github.com/crypto-com/chainindex/entity/event"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
@@ -54,7 +55,7 @@ func (projection *Block) HandleEvents(height int64, events []event_entity.Event)
 	}()
 
 	rdbTxHandle := rdbTx.ToHandle()
-	blocksView := view.NewBlocks(rdbTxHandle)
+	blocksView := view2.NewBlocks(rdbTxHandle)
 
 	for _, event := range events {
 		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
@@ -76,10 +77,10 @@ func (projection *Block) HandleEvents(height int64, events []event_entity.Event)
 	return nil
 }
 
-func (projection *Block) handleBlockCreatedEvent(blocksView *view.Blocks, event *event_usecase.BlockCreated) error {
-	committedCouncilNodes := make([]view.BlockCommittedCouncilNode, 0)
+func (projection *Block) handleBlockCreatedEvent(blocksView *view2.Blocks, event *event_usecase.BlockCreated) error {
+	committedCouncilNodes := make([]view2.BlockCommittedCouncilNode, 0)
 	for _, signature := range event.Block.Signatures {
-		committedCouncilNodes = append(committedCouncilNodes, view.BlockCommittedCouncilNode{
+		committedCouncilNodes = append(committedCouncilNodes, view2.BlockCommittedCouncilNode{
 			Address:    signature.ValidatorAddress,
 			Time:       signature.Timestamp,
 			Signature:  signature.Signature,
@@ -87,7 +88,7 @@ func (projection *Block) handleBlockCreatedEvent(blocksView *view.Blocks, event 
 		})
 	}
 
-	if err := blocksView.Insert(&view.Block{
+	if err := blocksView.Insert(&view2.Block{
 		Height:                event.Block.Height,
 		Hash:                  event.Block.Hash,
 		Time:                  event.Block.Time,

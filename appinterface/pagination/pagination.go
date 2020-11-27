@@ -11,7 +11,7 @@ type Pagination struct {
 	// cursorParams *PaginationCursorParams
 }
 
-func NewOffsetPagination(page uint64, limit uint64) *Pagination {
+func NewOffsetPagination(page int64, limit int64) *Pagination {
 	return &Pagination{
 		t: PAGINATION_OFFSET,
 
@@ -38,7 +38,7 @@ func (pagination *Pagination) OffsetParams() *PaginationOffsetParams {
 // 	return &pagination.cursorParams
 // }
 
-func (pagination *Pagination) OffsetResult(totalRecord uint64) *PaginationResult {
+func (pagination *Pagination) OffsetResult(totalRecord int64) *PaginationResult {
 	if pagination.Type() != PAGINATION_OFFSET {
 		return nil
 	}
@@ -50,11 +50,11 @@ func (pagination *Pagination) OffsetResult(totalRecord uint64) *PaginationResult
 }
 
 type PaginationOffsetParams struct {
-	Page  uint64
-	Limit uint64
+	Page  int64
+	Limit int64
 }
 
-func (params *PaginationOffsetParams) Offset() uint64 {
+func (params *PaginationOffsetParams) Offset() int64 {
 	return params.Limit * (params.Page - 1)
 }
 
@@ -77,7 +77,7 @@ type PaginationResult struct {
 	offsetResult PaginationOffsetResult
 }
 
-func NewOffsetPaginationResult(totalRecord uint64, currentPage uint64, limit uint64) *PaginationResult {
+func NewOffsetPaginationResult(totalRecord int64, currentPage int64, limit int64) *PaginationResult {
 	return &PaginationResult{
 		t: PAGINATION_OFFSET,
 
@@ -101,13 +101,13 @@ func (result *PaginationResult) OffsetResult() *PaginationOffsetResult {
 }
 
 type PaginationOffsetResult struct {
-	TotalRecord uint64
-	CurrentPage uint64
-	Limit       uint64
+	TotalRecord int64
+	CurrentPage int64
+	Limit       int64
 }
 
-func (result *PaginationOffsetResult) TotalPage() uint64 {
-	return uint64(math.Ceil(float64(result.TotalRecord) / float64(result.Limit)))
+func (result *PaginationOffsetResult) TotalPage() int64 {
+	return int64(math.Ceil(float64(result.TotalRecord) / float64(result.Limit)))
 }
 
 type PaginationType = string

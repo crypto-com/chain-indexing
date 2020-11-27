@@ -12,7 +12,7 @@ func ParsePagination(ctx *fasthttp.RequestCtx) (*pagination_interface.Pagination
 	var err error
 
 	var pagination pagination_interface.PaginationType
-	var page, limit uint64
+	var page, limit int64
 
 	queryArgs := NewQueryArgs(ctx.QueryArgs())
 
@@ -26,9 +26,9 @@ func ParsePagination(ctx *fasthttp.RequestCtx) (*pagination_interface.Pagination
 
 	pageQuery := queryArgs.Get("page")
 	if pageQuery == "" {
-		page = uint64(1)
+		page = int64(1)
 	} else {
-		page, err = strconv.ParseUint(pageQuery, 10, 64)
+		page, err = strconv.ParseInt(pageQuery, 10, 64)
 		if err != nil {
 			return nil, ErrInvalidPage
 		}
@@ -39,9 +39,9 @@ func ParsePagination(ctx *fasthttp.RequestCtx) (*pagination_interface.Pagination
 
 	limitQuery := queryArgs.Get("limit")
 	if limitQuery == "" {
-		limit = uint64(20)
+		limit = int64(20)
 	} else {
-		limit, err = strconv.ParseUint(limitQuery, 10, 64)
+		limit, err = strconv.ParseInt(limitQuery, 10, 64)
 		if err != nil {
 			return nil, ErrInvalidPage
 		}

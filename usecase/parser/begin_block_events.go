@@ -56,7 +56,7 @@ func ParseBeginBlockEventsCommands(blockHeight int64, beginBlockEvents []model.B
 
 			validator := proposerRewardEvent.MustGetAttributeByKey("validator")
 			commands = append(commands, command_usecase.NewCreateBlockProposerReward(
-				blockHeight, validator, amount,
+				blockHeight, validator, TrimAmountDenom(amount),
 			))
 		} else if event.Type == "rewards" {
 			proposerRewardEvent := NewParsedTxsResultLogEvent(&beginBlockEvents[i])
@@ -73,7 +73,7 @@ func ParseBeginBlockEventsCommands(blockHeight int64, beginBlockEvents []model.B
 			}
 
 			commands = append(commands, command_usecase.NewCreateBlockReward(
-				blockHeight, validator, amount,
+				blockHeight, validator, TrimAmountDenom(amount),
 			))
 		} else if event.Type == "commission" {
 			proposerRewardEvent := NewParsedTxsResultLogEvent(&beginBlockEvents[i])
@@ -84,7 +84,7 @@ func ParseBeginBlockEventsCommands(blockHeight int64, beginBlockEvents []model.B
 
 			validator := proposerRewardEvent.MustGetAttributeByKey("validator")
 			commands = append(commands, command_usecase.NewCreateBlockCommission(
-				blockHeight, validator, amount,
+				blockHeight, validator, TrimAmountDenom(amount),
 			))
 		} else if event.Type == "slash" {
 			slashEvent := NewParsedTxsResultLogEvent(&beginBlockEvents[i])

@@ -12,23 +12,32 @@ import (
 type RDbPaginationBuilder struct {
 	*pagination_interface.Pagination
 
-	conn Runner
+	customTotalQueryFn CustomTotalQueryFn
+	rdbHandle          *Handle
 }
 
-func NewRDbPaginationBuilder(pagination *pagination_interface.Pagination, conn Runner) *RDbPaginationBuilder {
+func NewRDbPaginationBuilder(pagination *pagination_interface.Pagination, rdbHandle *Handle) *RDbPaginationBuilder {
 	return &RDbPaginationBuilder{
 		pagination,
 
-		conn,
+		nil,
+		rdbHandle,
 	}
+}
+
+func (pagination *RDbPaginationBuilder) WithCustomTotalQueryFn(fn CustomTotalQueryFn) *RDbPaginationBuilder {
+	pagination.customTotalQueryFn = fn
+
+	return pagination
 }
 
 func (pagination *RDbPaginationBuilder) BuildStmt(stmtBuilder sq.SelectBuilder) *RDbPaginationStmtBuilder {
 	return &RDbPaginationStmtBuilder{
 		Pagination: pagination.Pagination,
 
-		conn:        pagination.conn,
-		stmtBuilder: stmtBuilder,
+		rdbHandle:          pagination.rdbHandle,
+		stmtBuilder:        stmtBuilder,
+		customTotalQueryFn: pagination.customTotalQueryFn,
 	}
 }
 
@@ -36,9 +45,9 @@ func (pagination *RDbPaginationBuilder) BuildSQL(sql string, args ...interface{}
 	return &RDbPaginationSQLBuilder{
 		Pagination: pagination.Pagination,
 
-		conn: pagination.conn,
-		sql:  sql,
-		args: args,
+		rdbHandle: pagination.rdbHandle,
+		sql:       sql,
+		args:      args,
 	}
 }
 
@@ -46,8 +55,9 @@ func (pagination *RDbPaginationBuilder) BuildSQL(sql string, args ...interface{}
 type RDbPaginationStmtBuilder struct {
 	*pagination_interface.Pagination
 
-	conn        Runner
-	stmtBuilder sq.SelectBuilder
+	rdbHandle          *Handle
+	stmtBuilder        sq.SelectBuilder
+	customTotalQueryFn CustomTotalQueryFn
 }
 
 func (pagination *RDbPaginationStmtBuilder) ToStmtBuilder() sq.SelectBuilder {
@@ -78,15 +88,21 @@ func (pagination *RDbPaginationStmtBuilder) offsetResult() (*pagination_interfac
 		return nil, fmt.Errorf("error building total count select SQL: %v", err)
 	}
 
-	// No new parameter is introduced in the prepared statement. Should not
-	// violate security
-	// nolint:gosec
-	sql = fmt.Sprintf("SELECT COUNT(*) FROM (%s) counting_table", sql)
-	// TODO: optimize by allowign estimation with SELECT reltuples::bigint FROM pg_class where relname='table';
+	var total int64
+	if pagination.customTotalQueryFn != nil {
+		total, err = pagination.customTotalQueryFn(pagination.rdbHandle, pagination.stmtBuilder)
+		if err != nil {
+			return nil, fmt.Errorf("error executing custom total query function: %v", err)
+		}
+	} else {
+		// No new parameter is introduced in the prepared statement. Should not
+		// violate security
+		// nolint:gosec
+		sql = fmt.Sprintf("SELECT COUNT(*) FROM (%s) counting_table", sql)
 
-	var total uint64
-	if err = pagination.conn.QueryRow(sql, sqlArgs...).Scan(&total); err != nil {
-		return nil, fmt.Errorf("error executing total count select SQL: %v", err)
+		if err = pagination.rdbHandle.QueryRow(sql, sqlArgs...).Scan(&total); err != nil {
+			return nil, fmt.Errorf("error executing total count select SQL: %v", err)
+		}
 	}
 
 	return pagination.OffsetResult(total), nil
@@ -96,9 +112,9 @@ func (pagination *RDbPaginationStmtBuilder) offsetResult() (*pagination_interfac
 type RDbPaginationSQLBuilder struct {
 	*pagination_interface.Pagination
 
-	conn Runner
-	sql  string
-	args []interface{}
+	rdbHandle Runner
+	sql       string
+	args      []interface{}
 }
 
 func (pagination *RDbPaginationSQLBuilder) ToSQL() (string, []interface{}) {
@@ -134,10 +150,14 @@ func (pagination *RDbPaginationSQLBuilder) offsetResult() (*pagination_interface
 	// nolint:gosec
 	sql := fmt.Sprintf("SELECT COUNT(*) FROM (%s) counting_table", pagination.sql)
 
-	var total uint64
-	if err = pagination.conn.QueryRow(sql, pagination.args...).Scan(&total); err != nil {
+	var total int64
+	if err = pagination.rdbHandle.QueryRow(sql, pagination.args...).Scan(&total); err != nil {
 		return nil, fmt.Errorf("error executing total count select SQL: %v", err)
 	}
 
 	return pagination.OffsetResult(total), nil
 }
+
+type CustomTotalQueryFn = func(conn *Handle, originalSelectBuilder sq.SelectBuilder) (int64, error)
+
+//"SELECT reltuples::bigint FROM pg_class where relname='$1';

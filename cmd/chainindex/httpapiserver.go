@@ -16,6 +16,9 @@ type HTTPAPIServer struct {
 	logger  applogger.Logger
 	rdbConn rdb.Conn
 
+	validatorAddressPrefix string
+	conNodeAddressPrefix   string
+
 	listeningAddress string
 }
 
@@ -25,7 +28,9 @@ func NewHTTPAPIServer(logger applogger.Logger, rdbConn rdb.Conn, config *FileCon
 		logger:  logger,
 		rdbConn: rdbConn,
 
-		listeningAddress: config.HTTP.ListeningAddress,
+		validatorAddressPrefix: config.Blockchain.ValidatorAddressPrefix,
+		conNodeAddressPrefix:   config.Blockchain.ConNodeAddressPrefix,
+		listeningAddress:       config.HTTP.ListeningAddress,
 	}
 }
 
@@ -41,7 +46,12 @@ func (server *HTTPAPIServer) Run() error {
 	statusHandler := handlers.NewStatusHandler(server.logger, server.rdbConn.ToHandle())
 	transactionsHandler := handlers.NewTransactions(server.logger, server.rdbConn.ToHandle())
 	blockEventsHandler := handlers.NewBlockEvents(server.logger, server.rdbConn.ToHandle())
-	validatorsHandler := handlers.NewValidators(server.logger, server.rdbConn.ToHandle())
+	validatorsHandler := handlers.NewValidators(
+		server.logger,
+		server.validatorAddressPrefix,
+		server.conNodeAddressPrefix,
+		server.rdbConn.ToHandle(),
+	)
 	routeRegistry := routes.NewRoutesRegistry(
 		blocksHandler,
 		statusHandler,

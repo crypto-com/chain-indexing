@@ -144,7 +144,7 @@ func (view *Validators) List(pagination *pagination.Pagination) ([]ValidatorRow,
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
-		view.rdb.Runner,
+		view.rdb,
 	).BuildStmt(stmtBuilder)
 	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
 	if err != nil {

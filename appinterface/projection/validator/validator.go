@@ -92,6 +92,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 	rdbTxHandle := rdbTx.ToHandle()
 	validatorsView := view.NewValidators(rdbTxHandle)
 	validatorActivitiesView := view.NewValidatorActivities(rdbTxHandle)
+	validatorActivitiesTotalView := view.NewValidatorActivitiesTotal(rdbTxHandle)
 
 	var blockTime utctime.UTCTime
 	var blockHash string
@@ -102,20 +103,19 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 		}
 	}
 
-	for i := range events {
-		if err := projection.projectValidatorView(validatorsView, height, events[i]); err != nil {
-			return fmt.Errorf("error projecting validator view: %v", err)
-		}
+	if err := projection.projectValidatorView(validatorsView, height, events); err != nil {
+		return fmt.Errorf("error projecting validator view: %v", err)
+	}
 
-		if err := projection.projectValidatorActivitiesView(
-			validatorsView,
-			validatorActivitiesView,
-			blockHash,
-			blockTime,
-			events[i],
-		); err != nil {
-			return fmt.Errorf("error projecting validator activities view: %v", err)
-		}
+	if err := projection.projectValidatorActivitiesView(
+		validatorsView,
+		validatorActivitiesView,
+		validatorActivitiesTotalView,
+		blockHash,
+		blockTime,
+		events,
+	); err != nil {
+		return fmt.Errorf("error projecting validator activities view: %v", err)
 	}
 
 	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
@@ -132,143 +132,146 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 func (projection *Validator) projectValidatorView(
 	validatorsView *view.Validators,
 	blockHeight int64,
-	event event_entity.Event,
+	events []event_entity.Event,
 ) error {
-	if msgCreateValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
-		projection.logger.Debug("handling MsgCreateValidator event")
+	for _, event := range events {
+		if msgCreateValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
+			projection.logger.Debug("handling MsgCreateValidator event")
 
-		consensusNodeAddress, err := tmcosmosutils.ConsensusNodeAddressFromPubKey(
-			projection.conNodeAddressPrefix, msgCreateValidatorEvent.Pubkey,
-		)
-		if err != nil {
-			return fmt.Errorf("error converting consensus node pubkey to address: %v", err)
-		}
-		validatorRow := view.ValidatorRow{
-			ConsensusNodeAddress:         consensusNodeAddress,
-			OperatorAddress:              msgCreateValidatorEvent.ValidatorAddress,
-			InitialDelegatorAddress:      msgCreateValidatorEvent.DelegatorAddress,
-			MinSelfDelegation:            msgCreateValidatorEvent.MinSelfDelegation,
-			Status:                       BONDED,
-			Jailed:                       false,
-			JoinedAtBlockHeight:          blockHeight,
-			MaybeUnbondingHeight:         nil,
-			MaybeUnbondingCompletionTime: nil,
-			Moniker:                      msgCreateValidatorEvent.Description.Moniker,
-			Identity:                     msgCreateValidatorEvent.Description.Identity,
-			Website:                      msgCreateValidatorEvent.Description.Website,
-			SecurityContact:              msgCreateValidatorEvent.Description.SecurityContact,
-			Details:                      msgCreateValidatorEvent.Description.Details,
-			CommissionRate:               msgCreateValidatorEvent.CommissionRates.Rate,
-			CommissionMaxRate:            msgCreateValidatorEvent.CommissionRates.MaxRate,
-			CommissionMaxChangeRate:      msgCreateValidatorEvent.CommissionRates.MaxChangeRate,
-		}
-
-		if err := validatorsView.Insert(&validatorRow); err != nil {
-			return fmt.Errorf("error inserting new validator into view: %v", err)
-		}
-	} else if msgEditValidatorEvent, ok := event.(*event_usecase.MsgEditValidator); ok {
-		projection.logger.Debug("handling MsgEditValidator event")
-
-		mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
-			MaybeOperatorAddress: &msgEditValidatorEvent.ValidatorAddress,
-		})
-		if err != nil {
-			return fmt.Errorf(
-				"error getting existing valiadtor %s from view", msgEditValidatorEvent.ValidatorAddress,
+			consensusNodeAddress, err := tmcosmosutils.ConsensusNodeAddressFromPubKey(
+				projection.conNodeAddressPrefix, msgCreateValidatorEvent.Pubkey,
 			)
-		}
+			if err != nil {
+				return fmt.Errorf("error converting consensus node pubkey to address: %v", err)
+			}
+			validatorRow := view.ValidatorRow{
+				ConsensusNodeAddress:         consensusNodeAddress,
+				OperatorAddress:              msgCreateValidatorEvent.ValidatorAddress,
+				InitialDelegatorAddress:      msgCreateValidatorEvent.DelegatorAddress,
+				MinSelfDelegation:            msgCreateValidatorEvent.MinSelfDelegation,
+				Status:                       BONDED,
+				Jailed:                       false,
+				JoinedAtBlockHeight:          blockHeight,
+				MaybeUnbondingHeight:         nil,
+				MaybeUnbondingCompletionTime: nil,
+				Moniker:                      msgCreateValidatorEvent.Description.Moniker,
+				Identity:                     msgCreateValidatorEvent.Description.Identity,
+				Website:                      msgCreateValidatorEvent.Description.Website,
+				SecurityContact:              msgCreateValidatorEvent.Description.SecurityContact,
+				Details:                      msgCreateValidatorEvent.Description.Details,
+				CommissionRate:               msgCreateValidatorEvent.CommissionRates.Rate,
+				CommissionMaxRate:            msgCreateValidatorEvent.CommissionRates.MaxRate,
+				CommissionMaxChangeRate:      msgCreateValidatorEvent.CommissionRates.MaxChangeRate,
+			}
 
-		if msgEditValidatorEvent.Description.Moniker != DO_NOT_MODIFY {
-			mutValidatorRow.Moniker = msgEditValidatorEvent.Description.Moniker
-		}
-		if msgEditValidatorEvent.Description.Identity != DO_NOT_MODIFY {
-			mutValidatorRow.Identity = msgEditValidatorEvent.Description.Identity
-		}
-		if msgEditValidatorEvent.Description.Details != DO_NOT_MODIFY {
-			mutValidatorRow.Details = msgEditValidatorEvent.Description.Details
-		}
-		if msgEditValidatorEvent.Description.SecurityContact != DO_NOT_MODIFY {
-			mutValidatorRow.SecurityContact = msgEditValidatorEvent.Description.SecurityContact
-		}
-		if msgEditValidatorEvent.Description.Website != DO_NOT_MODIFY {
-			mutValidatorRow.Website = msgEditValidatorEvent.Description.Website
-		}
+			if err := validatorsView.Insert(&validatorRow); err != nil {
+				return fmt.Errorf("error inserting new validator into view: %v", err)
+			}
+		} else if msgEditValidatorEvent, ok := event.(*event_usecase.MsgEditValidator); ok {
+			projection.logger.Debug("handling MsgEditValidator event")
 
-		if msgEditValidatorEvent.MaybeCommissionRate != nil {
-			mutValidatorRow.CommissionRate = *msgEditValidatorEvent.MaybeCommissionRate
-		}
-		if msgEditValidatorEvent.MaybeMinSelfDelegation != nil {
-			mutValidatorRow.MinSelfDelegation = *msgEditValidatorEvent.MaybeMinSelfDelegation
-		}
+			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
+				MaybeOperatorAddress: &msgEditValidatorEvent.ValidatorAddress,
+			})
+			if err != nil {
+				return fmt.Errorf(
+					"error getting existing valiadtor %s from view", msgEditValidatorEvent.ValidatorAddress,
+				)
+			}
 
-		if err := validatorsView.Update(mutValidatorRow); err != nil {
-			return fmt.Errorf("error updating validator into view: %v", err)
-		}
-	} else if validatorJailedEvent, ok := event.(*event_usecase.ValidatorJailed); ok {
-		projection.logger.Debug("handling ValidatorJailed event")
+			if msgEditValidatorEvent.Description.Moniker != DO_NOT_MODIFY {
+				mutValidatorRow.Moniker = msgEditValidatorEvent.Description.Moniker
+			}
+			if msgEditValidatorEvent.Description.Identity != DO_NOT_MODIFY {
+				mutValidatorRow.Identity = msgEditValidatorEvent.Description.Identity
+			}
+			if msgEditValidatorEvent.Description.Details != DO_NOT_MODIFY {
+				mutValidatorRow.Details = msgEditValidatorEvent.Description.Details
+			}
+			if msgEditValidatorEvent.Description.SecurityContact != DO_NOT_MODIFY {
+				mutValidatorRow.SecurityContact = msgEditValidatorEvent.Description.SecurityContact
+			}
+			if msgEditValidatorEvent.Description.Website != DO_NOT_MODIFY {
+				mutValidatorRow.Website = msgEditValidatorEvent.Description.Website
+			}
 
-		mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
-			MaybeConsensusNodeAddress: &validatorJailedEvent.ConsensusNodeAddress,
-		})
-		if err != nil {
-			return fmt.Errorf(
-				"error getting existing validator `%s` from view", validatorJailedEvent.ConsensusNodeAddress,
+			if msgEditValidatorEvent.MaybeCommissionRate != nil {
+				mutValidatorRow.CommissionRate = *msgEditValidatorEvent.MaybeCommissionRate
+			}
+			if msgEditValidatorEvent.MaybeMinSelfDelegation != nil {
+				mutValidatorRow.MinSelfDelegation = *msgEditValidatorEvent.MaybeMinSelfDelegation
+			}
+
+			if err := validatorsView.Update(mutValidatorRow); err != nil {
+				return fmt.Errorf("error updating validator into view: %v", err)
+			}
+		} else if validatorJailedEvent, ok := event.(*event_usecase.ValidatorJailed); ok {
+			projection.logger.Debug("handling ValidatorJailed event")
+
+			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
+				MaybeConsensusNodeAddress: &validatorJailedEvent.ConsensusNodeAddress,
+			})
+			if err != nil {
+				return fmt.Errorf(
+					"error getting existing validator `%s` from view", validatorJailedEvent.ConsensusNodeAddress,
+				)
+			}
+
+			mutValidatorRow.Status = JAILED
+			mutValidatorRow.Jailed = true
+
+			if err := validatorsView.Update(mutValidatorRow); err != nil {
+				return fmt.Errorf("error updating validator into view: %v", err)
+			}
+		} else if msgUnjailEvent, ok := event.(*event_usecase.MsgUnjail); ok {
+			projection.logger.Debug("handling MsgUnjail event")
+
+			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
+				MaybeOperatorAddress: &msgUnjailEvent.ValidatorAddr,
+			})
+			if err != nil {
+				return fmt.Errorf("error getting existing validator `%s` from view", msgUnjailEvent.ValidatorAddr)
+			}
+
+			mutValidatorRow.Status = BONDED
+			mutValidatorRow.Jailed = false
+
+			if err := validatorsView.Update(mutValidatorRow); err != nil {
+				return fmt.Errorf("error updating validator into view: %v", err)
+			}
+		} else if powerChangedEvent, ok := event.(*event_usecase.PowerChanged); ok {
+			projection.logger.Debug("handling PowerChange event")
+
+			pubkey, convErr := base64.StdEncoding.DecodeString(powerChangedEvent.TendermintPubkey)
+			if convErr != nil {
+				return fmt.Errorf("error base64 decoding tendermint pubkey")
+			}
+			consensusNodeAddress, convErr := tmcosmosutils.ConsensusNodeAddressFromTmPubKey(
+				projection.conNodeAddressPrefix, pubkey,
 			)
+			if convErr != nil {
+				return fmt.Errorf("error converting tendermint pubkey to consensus pubkey")
+			}
+
+			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
+				MaybeConsensusNodeAddress: &consensusNodeAddress,
+			})
+			if err != nil {
+				return fmt.Errorf("error getting existing validator `%s` from view", consensusNodeAddress)
+			}
+
+			mutValidatorRow.Power = powerChangedEvent.Power
+			if powerChangedEvent.Power == "0" && !mutValidatorRow.Jailed {
+				mutValidatorRow.Status = UNBONDED
+			}
+
+			if err := validatorsView.Update(mutValidatorRow); err != nil {
+				rows, _, err := validatorsView.List(pagination.NewOffsetPagination(1, 20))
+				fmt.Println(rows, err)
+				return fmt.Errorf("error updating validator into view: %v", err)
+			}
 		}
 
-		mutValidatorRow.Status = JAILED
-		mutValidatorRow.Jailed = true
-
-		if err := validatorsView.Update(mutValidatorRow); err != nil {
-			return fmt.Errorf("error updating validator into view: %v", err)
-		}
-	} else if msgUnjailEvent, ok := event.(*event_usecase.MsgUnjail); ok {
-		projection.logger.Debug("handling MsgUnjail event")
-
-		mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
-			MaybeOperatorAddress: &msgUnjailEvent.ValidatorAddr,
-		})
-		if err != nil {
-			return fmt.Errorf("error getting existing validator `%s` from view", msgUnjailEvent.ValidatorAddr)
-		}
-
-		mutValidatorRow.Status = BONDED
-		mutValidatorRow.Jailed = false
-
-		if err := validatorsView.Update(mutValidatorRow); err != nil {
-			return fmt.Errorf("error updating validator into view: %v", err)
-		}
-	} else if powerChangedEvent, ok := event.(*event_usecase.PowerChanged); ok {
-		projection.logger.Debug("handling PowerChange event")
-
-		pubkey, convErr := base64.StdEncoding.DecodeString(powerChangedEvent.TendermintPubkey)
-		if convErr != nil {
-			return fmt.Errorf("error base64 decoding tendermint pubkey")
-		}
-		consensusNodeAddress, convErr := tmcosmosutils.ConsensusNodeAddressFromTmPubKey(
-			projection.conNodeAddressPrefix, pubkey,
-		)
-		if convErr != nil {
-			return fmt.Errorf("error converting tendermint pubkey to consensus pubkey")
-		}
-
-		mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
-			MaybeConsensusNodeAddress: &consensusNodeAddress,
-		})
-		if err != nil {
-			return fmt.Errorf("error getting existing validator `%s` from view", consensusNodeAddress)
-		}
-
-		mutValidatorRow.Power = powerChangedEvent.Power
-		if powerChangedEvent.Power == "0" && !mutValidatorRow.Jailed {
-			mutValidatorRow.Status = UNBONDED
-		}
-
-		if err := validatorsView.Update(mutValidatorRow); err != nil {
-			rows, _, err := validatorsView.List(pagination.NewOffsetPagination(1, 20))
-			fmt.Println(rows, err)
-			return fmt.Errorf("error updating validator into view: %v", err)
-		}
 	}
 
 	return nil

@@ -63,6 +63,7 @@ func CliApp(args []string) error {
 				}
 			}()
 
+			//_ = NewIndexService(logger, rdbConn, &fileConfig)
 			indexService := NewIndexService(logger, rdbConn, &fileConfig)
 			go func() {
 				if err := indexService.Run(); err != nil {

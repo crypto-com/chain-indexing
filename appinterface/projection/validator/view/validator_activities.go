@@ -3,6 +3,8 @@ package view
 import (
 	"fmt"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/crypto-com/chainindex/internal/utctime"
 
 	pagination_interface "github.com/crypto-com/chainindex/appinterface/pagination"
@@ -82,7 +84,29 @@ func (view *ValidatorActivities) List(
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
-		view.rdb.Runner,
+		view.rdb,
+	).WithCustomTotalQueryFn(
+		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
+			identity := "-"
+			if filter.MaybeOperatorAddress != nil {
+				identity = *filter.MaybeOperatorAddress
+			} else if filter.MaybeConsensusNodeAddress != nil {
+				validatorsView := NewValidators(rdbHandle)
+				validator, err := validatorsView.FindBy(ValidatorIdentity{
+					MaybeConsensusNodeAddress: filter.MaybeConsensusNodeAddress,
+				})
+				if err != nil {
+					return int64(0), err
+				}
+				identity = validator.OperatorAddress
+			}
+			totalView := NewValidatorActivitiesTotal(rdbHandle)
+			total, err := totalView.FindBy(identity)
+			if err != nil {
+				return int64(0), err
+			}
+			return total, nil
+		},
 	).BuildStmt(stmtBuilder)
 	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
 	if err != nil {
@@ -132,7 +156,8 @@ func (view *ValidatorActivities) List(
 }
 
 type ValidatorActivitiesListFilter struct {
-	MaybeOperatorAddress *string
+	MaybeOperatorAddress      *string
+	MaybeConsensusNodeAddress *string
 }
 
 type ValidatorActivityRow struct {

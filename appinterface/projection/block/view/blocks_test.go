@@ -2,10 +2,10 @@ package view_test
 
 import (
 	random "github.com/brianvoe/gofakeit/v5"
+	"github.com/crypto-com/chainindex/appinterface/projection/block/view"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/crypto-com/chainindex/appinterface/projection/view"
 	"github.com/crypto-com/chainindex/infrastructure/pg"
 	. "github.com/crypto-com/chainindex/test"
 )
@@ -25,18 +25,18 @@ var _ = Describe("Blocks", func() {
 			It("should insert block into view", func() {
 				var err error
 
-				var block Block
+				var block view.Block
 				random.Struct(&block)
 
-				blocksView := NewBlocks(conn.ToHandle())
+				blocksView := view.NewBlocks(conn.ToHandle())
 
 				Expect(blocksView.Count()).To(Equal(int64(0)))
 
 				err = blocksView.Insert(&block)
 				Expect(err).To(BeNil())
 
-				var actual *Block
-				actual, err = blocksView.FindBy(&BlockIdentity{
+				var actual *view.Block
+				actual, err = blocksView.FindBy(&view.BlockIdentity{
 					MaybeHeight: &block.Height,
 				})
 				Expect(err).To(BeNil())

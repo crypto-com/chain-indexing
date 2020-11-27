@@ -1,7 +1,8 @@
 package handlers
 
 import (
-	"github.com/crypto-com/chainindex/appinterface/projection/view"
+	view2 "github.com/crypto-com/chainindex/appinterface/projection/block/view"
+	view3 "github.com/crypto-com/chainindex/appinterface/projection/transasaction/view"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
 	"github.com/crypto-com/chainindex/infrastructure/httpapi"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
@@ -11,8 +12,8 @@ import (
 type StatusHandler struct {
 	logger applogger.Logger
 
-	blocksView       *view.Blocks
-	transactionsView *view.BlockTransactions
+	blocksView       *view2.Blocks
+	transactionsView *view3.BlockTransactions
 }
 
 func NewStatusHandler(logger applogger.Logger, rdbHandle *rdb.Handle) *StatusHandler {
@@ -21,8 +22,8 @@ func NewStatusHandler(logger applogger.Logger, rdbHandle *rdb.Handle) *StatusHan
 			"module": "StatusHandler",
 		}),
 
-		view.NewBlocks(rdbHandle),
-		view.NewTransactions(rdbHandle),
+		view2.NewBlocks(rdbHandle),
+		view3.NewTransactions(rdbHandle),
 	}
 }
 

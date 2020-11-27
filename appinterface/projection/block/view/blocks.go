@@ -3,6 +3,10 @@ package view
 import (
 	"fmt"
 
+	"github.com/crypto-com/chainindex/appinterface/projection/view"
+
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/crypto-com/chainindex/appinterface/pagination"
 
 	jsoniter "github.com/json-iterator/go"
@@ -23,11 +27,11 @@ func NewBlocks(handle *rdb.Handle) *Blocks {
 	}
 }
 
-func (view *Blocks) Insert(block *Block) error {
+func (blocksView *Blocks) Insert(block *Block) error {
 	var err error
 
 	var sql string
-	sql, _, err = view.rdb.StmtBuilder.Insert(
+	sql, _, err = blocksView.rdb.StmtBuilder.Insert(
 		"view_blocks",
 	).Columns(
 		"height",
@@ -46,10 +50,10 @@ func (view *Blocks) Insert(block *Block) error {
 		return fmt.Errorf("error JSON marshalling blocks committed council nodes for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := view.rdb.Exec(sql,
+	result, err := blocksView.rdb.Exec(sql,
 		block.Height,
 		block.Hash,
-		view.rdb.Tton(&block.Time),
+		blocksView.rdb.Tton(&block.Time),
 		block.AppHash,
 		committedCouncilNodesJSON,
 		block.TransactionCount,
@@ -64,8 +68,8 @@ func (view *Blocks) Insert(block *Block) error {
 	return nil
 }
 
-func (view *Blocks) List(pagination *pagination.Pagination) ([]Block, *pagination.PaginationResult, error) {
-	stmtBuilder := view.rdb.StmtBuilder.Select(
+func (blocksView *Blocks) List(order BlocksListOrder, pagination *pagination.Pagination) ([]Block, *pagination.PaginationResult, error) {
+	stmtBuilder := blocksView.rdb.StmtBuilder.Select(
 		"height",
 		"hash",
 		"time",
@@ -74,20 +78,32 @@ func (view *Blocks) List(pagination *pagination.Pagination) ([]Block, *paginatio
 		"transaction_count",
 	).From(
 		"view_blocks",
-	).OrderBy(
-		"id",
 	)
+
+	if order.Height == view.ORDER_DESC {
+		stmtBuilder = stmtBuilder.OrderBy("height DESC")
+	} else {
+		stmtBuilder = stmtBuilder.OrderBy("height")
+	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
-		view.rdb.Runner,
+		blocksView.rdb,
+	).WithCustomTotalQueryFn(
+		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
+			var total int64
+			if err := rdbHandle.QueryRow("SELECT height FROM view_blocks ORDER BY height DESC LIMIT 1").Scan(&total); err != nil {
+				return int64(0), err
+			}
+			return total, nil
+		},
 	).BuildStmt(stmtBuilder)
 	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
 	if err != nil {
 		return nil, nil, fmt.Errorf("error building blocks select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	rowsResult, err := view.rdb.Query(sql, sqlArgs...)
+	rowsResult, err := blocksView.rdb.Query(sql, sqlArgs...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error executing blocks select SQL: %v: %w", err, rdb.ErrQuery)
 	}
@@ -96,7 +112,7 @@ func (view *Blocks) List(pagination *pagination.Pagination) ([]Block, *paginatio
 	for rowsResult.Next() {
 		var block Block
 		var committedCouncilNodesJSON *string
-		timeReader := view.rdb.NtotReader()
+		timeReader := blocksView.rdb.NtotReader()
 		if err = rowsResult.Scan(
 			&block.Height,
 			&block.Hash,
@@ -134,10 +150,10 @@ func (view *Blocks) List(pagination *pagination.Pagination) ([]Block, *paginatio
 	return blocks, paginationResult, nil
 }
 
-func (view *Blocks) FindBy(identity *BlockIdentity) (*Block, error) {
+func (blocksView *Blocks) FindBy(identity *BlockIdentity) (*Block, error) {
 	var err error
 
-	selectStmtBuilder := view.rdb.StmtBuilder.Select(
+	selectStmtBuilder := blocksView.rdb.StmtBuilder.Select(
 		"height", "hash", "time", "app_hash", "committed_council_nodes", "transaction_count",
 	).From("view_blocks")
 	if identity.MaybeHash != nil {
@@ -153,8 +169,8 @@ func (view *Blocks) FindBy(identity *BlockIdentity) (*Block, error) {
 
 	var block Block
 	var committedCouncilNodesJSON *string
-	timeReader := view.rdb.NtotReader()
-	if err = view.rdb.QueryRow(sql, sqlArgs...).Scan(
+	timeReader := blocksView.rdb.NtotReader()
+	if err = blocksView.rdb.QueryRow(sql, sqlArgs...).Scan(
 		&block.Height,
 		&block.Hash,
 		timeReader.ScannableArg(),
@@ -183,15 +199,15 @@ func (view *Blocks) FindBy(identity *BlockIdentity) (*Block, error) {
 	return &block, nil
 }
 
-func (view *Blocks) Count() (int64, error) {
-	sql, _, err := view.rdb.StmtBuilder.Select("MAX(height)").From(
+func (blocksView *Blocks) Count() (int64, error) {
+	sql, _, err := blocksView.rdb.StmtBuilder.Select("MAX(height)").From(
 		"view_blocks",
 	).ToSql()
 	if err != nil {
 		return 0, fmt.Errorf("error building blocks count selection sql: %v", err)
 	}
 
-	result := view.rdb.QueryRow(sql)
+	result := blocksView.rdb.QueryRow(sql)
 	var count *int64
 	if err := result.Scan(&count); err != nil {
 		return 0, fmt.Errorf("error scanning blocks count selection query: %v", err)
@@ -247,4 +263,8 @@ type RdbBlockCommittedCouncilNode struct {
 type BlockIdentity struct {
 	MaybeHeight *int64
 	MaybeHash   *string
+}
+
+type BlocksListOrder struct {
+	Height view.ORDER
 }

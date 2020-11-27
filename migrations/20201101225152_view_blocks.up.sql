@@ -9,4 +9,5 @@ CREATE TABLE view_blocks (
     PRIMARY KEY(height)
 );
 
+CREATE INDEX view_blocks_height_desc_index ON view_blocks(height DESC);
 CREATE INDEX view_blocks_hash_index ON view_blocks(hash);

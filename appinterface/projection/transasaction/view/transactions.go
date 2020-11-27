@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	pagination_interface "github.com/crypto-com/chainindex/appinterface/pagination"
+	"github.com/crypto-com/chainindex/appinterface/projection/view"
 
 	jsoniter "github.com/json-iterator/go"
 
@@ -23,15 +24,11 @@ func NewTransactions(handle *rdb.Handle) *BlockTransactions {
 	}
 }
 
-type TransactionsListFilter struct {
-	MaybeBlockHeight *int64
-}
-
-func (view *BlockTransactions) Insert(transaction *TransactionRow) error {
+func (transactionsView *BlockTransactions) Insert(transaction *TransactionRow) error {
 	var err error
 
 	var sql string
-	sql, _, err = view.rdb.StmtBuilder.Insert(
+	sql, _, err = transactionsView.rdb.StmtBuilder.Insert(
 		"view_transactions",
 	).Columns(
 		"block_height",
@@ -59,10 +56,10 @@ func (view *BlockTransactions) Insert(transaction *TransactionRow) error {
 		return fmt.Errorf("error JSON marshalling block transation messages for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := view.rdb.Exec(sql,
+	result, err := transactionsView.rdb.Exec(sql,
 		transaction.BlockHeight,
 		transaction.BlockHash,
-		view.rdb.Tton(&transaction.BlockTime),
+		transactionsView.rdb.Tton(&transaction.BlockTime),
 		transaction.Hash,
 		transaction.Success,
 		transaction.Code,
@@ -86,10 +83,10 @@ func (view *BlockTransactions) Insert(transaction *TransactionRow) error {
 	return nil
 }
 
-func (view *BlockTransactions) FindByHash(txHash string) (*TransactionRow, error) {
+func (transactionsView *BlockTransactions) FindByHash(txHash string) (*TransactionRow, error) {
 	var err error
 
-	selectStmtBuilder := view.rdb.StmtBuilder.Select(
+	selectStmtBuilder := transactionsView.rdb.StmtBuilder.Select(
 		"block_height",
 		"block_hash",
 		"block_time",
@@ -118,10 +115,10 @@ func (view *BlockTransactions) FindByHash(txHash string) (*TransactionRow, error
 
 	var transaction TransactionRow
 	var messagesJSON *string
-	blockTimeReader := view.rdb.NtotReader()
+	blockTimeReader := transactionsView.rdb.NtotReader()
 	var fee string
 
-	if err = view.rdb.QueryRow(sql, sqlArgs...).Scan(
+	if err = transactionsView.rdb.QueryRow(sql, sqlArgs...).Scan(
 		&transaction.BlockHeight,
 		&transaction.BlockHash,
 		blockTimeReader.ScannableArg(),
@@ -159,11 +156,12 @@ func (view *BlockTransactions) FindByHash(txHash string) (*TransactionRow, error
 	return &transaction, nil
 }
 
-func (view *BlockTransactions) List(
+func (transactionsView *BlockTransactions) List(
 	filter TransactionsListFilter,
+	order TransactionsListOrder,
 	pagination *pagination_interface.Pagination,
 ) ([]TransactionRow, *pagination_interface.PaginationResult, error) {
-	stmtBuilder := view.rdb.StmtBuilder.Select(
+	stmtBuilder := transactionsView.rdb.StmtBuilder.Select(
 		"block_height",
 		"block_hash",
 		"block_time",
@@ -185,20 +183,26 @@ func (view *BlockTransactions) List(
 		"block_height",
 	)
 
+	if order.Height == view.ORDER_DESC {
+		stmtBuilder = stmtBuilder.OrderBy("block_height DESC, id")
+	} else {
+		stmtBuilder = stmtBuilder.OrderBy("block_height, id")
+	}
+
 	if filter.MaybeBlockHeight != nil {
 		stmtBuilder = stmtBuilder.Where("block_height = ?", *filter.MaybeBlockHeight)
 	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
-		view.rdb.Runner,
+		transactionsView.rdb,
 	).BuildStmt(stmtBuilder)
 	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
 	if err != nil {
 		return nil, nil, fmt.Errorf("error building transactions select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	rowsResult, err := view.rdb.Query(sql, sqlArgs...)
+	rowsResult, err := transactionsView.rdb.Query(sql, sqlArgs...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error executing transactions select SQL: %v: %w", err, rdb.ErrQuery)
 	}
@@ -207,7 +211,7 @@ func (view *BlockTransactions) List(
 	for rowsResult.Next() {
 		var transaction TransactionRow
 		var messagesJSON *string
-		blockTimeReader := view.rdb.NtotReader()
+		blockTimeReader := transactionsView.rdb.NtotReader()
 		var fee string
 
 		if err = rowsResult.Scan(
@@ -256,15 +260,15 @@ func (view *BlockTransactions) List(
 	return transactions, paginationResult, nil
 }
 
-func (view *BlockTransactions) Count() (int64, error) {
-	sql, _, err := view.rdb.StmtBuilder.Select("COUNT(1)").From(
+func (transactionsView *BlockTransactions) Count() (int64, error) {
+	sql, _, err := transactionsView.rdb.StmtBuilder.Select("COUNT(1)").From(
 		"view_transactions",
 	).ToSql()
 	if err != nil {
 		return 0, fmt.Errorf("error building transactions count selection sql: %v", err)
 	}
 
-	result := view.rdb.QueryRow(sql)
+	result := transactionsView.rdb.QueryRow(sql)
 	var count int64
 	if err := result.Scan(&count); err != nil {
 		return 0, fmt.Errorf("error scanning transactions count selection query: %v", err)
@@ -294,4 +298,12 @@ type TransactionRow struct {
 type TransactionRowMessage struct {
 	Type    string      `json:"type"`
 	Content interface{} `json:"content"`
+}
+
+type TransactionsListFilter struct {
+	MaybeBlockHeight *int64
+}
+
+type TransactionsListOrder struct {
+	Height view.ORDER
 }

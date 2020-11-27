@@ -20,4 +20,7 @@ CREATE TABLE view_validators (
     min_self_delegation VARCHAR NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (operator_address, consensus_node_address)
-)
+);
+
+CREATE INDEX view_validators_operator_address_index ON view_validators(operator_address);
+CREATE INDEX view_validators_consensus_node_address_index ON view_validators(consensus_node_address);

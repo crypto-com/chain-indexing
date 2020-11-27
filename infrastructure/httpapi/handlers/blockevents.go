@@ -4,9 +4,11 @@ import (
 	"errors"
 	"strconv"
 
+	"github.com/crypto-com/chainindex/appinterface/projection/view"
+
 	"github.com/valyala/fasthttp"
 
-	"github.com/crypto-com/chainindex/appinterface/projection/view"
+	blockevents_view "github.com/crypto-com/chainindex/appinterface/projection/blockevent/view"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
 	"github.com/crypto-com/chainindex/infrastructure/httpapi"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
@@ -15,7 +17,7 @@ import (
 type BlockEvents struct {
 	logger applogger.Logger
 
-	blockEventsView *view.BlockEvents
+	blockEventsView *blockevents_view.BlockEvents
 }
 
 func NewBlockEvents(logger applogger.Logger, rdbHandle *rdb.Handle) *BlockEvents {
@@ -24,7 +26,7 @@ func NewBlockEvents(logger applogger.Logger, rdbHandle *rdb.Handle) *BlockEvents
 			"module": "BlockEventsHandler",
 		}),
 
-		view.NewBlockEvents(rdbHandle),
+		blockevents_view.NewBlockEvents(rdbHandle),
 	}
 }
 
@@ -37,6 +39,10 @@ func (handler *BlockEvents) FindById(ctx *fasthttp.RequestCtx) {
 	}
 	blockEvents, err := handler.blockEventsView.FindById(id)
 	if err != nil {
+		if err == rdb.ErrNoRows {
+			httpapi.NotFound(ctx)
+			return
+		}
 		handler.logger.Errorf("error finding event by id: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
@@ -54,11 +60,21 @@ func (handler *BlockEvents) List(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	blockEvents, paginationResult, err := handler.blockEventsView.List(view.BlockEventsListFilter{
+	heightOrder := view.ORDER_ASC
+	queryArgs := ctx.QueryArgs()
+	if queryArgs.Has("order") {
+		if string(queryArgs.Peek("order")) == "height.desc" {
+			heightOrder = view.ORDER_DESC
+		}
+	}
+
+	blockEvents, paginationResult, err := handler.blockEventsView.List(blockevents_view.BlockEventsListFilter{
 		MaybeBlockHeight: nil,
+	}, blockevents_view.BlockEventsListOrder{
+		Height: heightOrder,
 	}, pagination)
 	if err != nil {
-		handler.logger.Errorf("error listing transactions: %v", err)
+		handler.logger.Errorf("error listing events: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
 	}

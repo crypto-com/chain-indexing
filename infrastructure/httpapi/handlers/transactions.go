@@ -3,6 +3,7 @@ package handlers
 import (
 	"github.com/valyala/fasthttp"
 
+	transaction_view "github.com/crypto-com/chainindex/appinterface/projection/transasaction/view"
 	"github.com/crypto-com/chainindex/appinterface/projection/view"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
 	"github.com/crypto-com/chainindex/infrastructure/httpapi"
@@ -12,7 +13,7 @@ import (
 type Transactions struct {
 	logger applogger.Logger
 
-	transactionsView *view.BlockTransactions
+	transactionsView *transaction_view.BlockTransactions
 }
 
 func NewTransactions(logger applogger.Logger, rdbHandle *rdb.Handle) *Transactions {
@@ -21,7 +22,7 @@ func NewTransactions(logger applogger.Logger, rdbHandle *rdb.Handle) *Transactio
 			"module": "TransactionsHandler",
 		}),
 
-		view.NewTransactions(rdbHandle),
+		transaction_view.NewTransactions(rdbHandle),
 	}
 }
 
@@ -32,6 +33,10 @@ func (handler *Transactions) FindByHash(ctx *fasthttp.RequestCtx) {
 		ctx.UserValue("hash").(string),
 	)
 	if err != nil {
+		if err == rdb.ErrNoRows {
+			httpapi.NotFound(ctx)
+			return
+		}
 		handler.logger.Errorf("error finding transactions by hash: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
@@ -49,8 +54,18 @@ func (handler *Transactions) List(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	blocks, paginationResult, err := handler.transactionsView.List(view.TransactionsListFilter{
+	heightOrder := view.ORDER_ASC
+	queryArgs := ctx.QueryArgs()
+	if queryArgs.Has("order") {
+		if string(queryArgs.Peek("order")) == "height.desc" {
+			heightOrder = view.ORDER_DESC
+		}
+	}
+
+	blocks, paginationResult, err := handler.transactionsView.List(transaction_view.TransactionsListFilter{
 		MaybeBlockHeight: nil,
+	}, transaction_view.TransactionsListOrder{
+		Height: heightOrder,
 	}, pagination)
 	if err != nil {
 		handler.logger.Errorf("error listing transactions: %v", err)
