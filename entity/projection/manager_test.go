@@ -52,7 +52,7 @@ var _ = Describe("Manager", func() {
 			mockProjection.On("Id").Return(anyProjectionId)
 			mockProjection.On("GetEventsToListen").Return([]string{anyEvent.Name()})
 			mockProjection.On("GetLastHandledEventHeight").Return(
-				primptr.Int64Nil(), nil,
+				primptr.Int64(0), nil,
 			)
 
 			// Register the Projection
@@ -98,7 +98,7 @@ var _ = Describe("Manager", func() {
 			mockProjection.On("Id").Return(anyProjectionId)
 			mockProjection.On("GetEventsToListen").Return([]string{anyEvent.Name(), anyOtherEvent.Name()})
 			mockProjection.On("GetLastHandledEventHeight").Return(
-				primptr.Int64Nil(), nil,
+				primptr.Int64(0), nil,
 			)
 
 			// Register the Projection
@@ -154,14 +154,14 @@ var _ = Describe("Manager", func() {
 			anyProjection.On("Id").Return(anyProjectionId)
 			anyProjection.On("GetEventsToListen").Return([]string{anyEvent.Name()})
 			anyProjection.On("GetLastHandledEventHeight").Return(
-				primptr.Int64Nil(), nil,
+				primptr.Int64(0), nil,
 			)
 
 			anyOtherProjectionId := "ANY_OTHER_PROJECTION_ID"
 			anyOtherProjection.On("Id").Return(anyOtherProjectionId)
 			anyOtherProjection.On("GetEventsToListen").Return([]string{anyOtherEvent.Name()})
 			anyOtherProjection.On("GetLastHandledEventHeight").Return(
-				primptr.Int64Nil(), nil,
+				primptr.Int64(0), nil,
 			)
 
 			// Register the Projection
