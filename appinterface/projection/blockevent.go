@@ -56,6 +56,14 @@ func (projection *BlockEvent) HandleEvents(height int64, events []event_entity.E
 	if err != nil {
 		return fmt.Errorf("error beginning transaction: %v", err)
 	}
+
+	committed := false
+	defer func() {
+		if !committed {
+			_ = rdbTx.Rollback()
+		}
+	}()
+
 	rdbTxHandle := rdbTx.ToHandle()
 	eventsView := view.NewBlockEvents(rdbTxHandle)
 
@@ -86,18 +94,16 @@ func (projection *BlockEvent) HandleEvents(height int64, events []event_entity.E
 
 	}
 	if insertErr := eventsView.InsertAll(eventRows); insertErr != nil {
-		_ = rdbTx.Rollback()
 		return fmt.Errorf("error batch inserting events into view: %v", insertErr)
 	}
 
 	if err = projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
-		_ = rdbTx.Rollback()
 		return fmt.Errorf("error updating last handled event height: %v", err)
 	}
 
 	if err = rdbTx.Commit(); err != nil {
-		_ = rdbTx.Rollback()
 		return fmt.Errorf("error committing changes: %v", err)
 	}
+	committed = true
 	return nil
 }

@@ -41,36 +41,38 @@ func (projection *Block) OnInit() error {
 }
 
 func (projection *Block) HandleEvents(height int64, events []event_entity.Event) error {
-	var err error
-
-	var rdbTx rdb.Tx
-	rdbTx, err = projection.rdbConn.Begin()
+	rdbTx, err := projection.rdbConn.Begin()
 	if err != nil {
 		return fmt.Errorf("error beginning transaction: %v", err)
 	}
+
+	committed := false
+	defer func() {
+		if !committed {
+			_ = rdbTx.Rollback()
+		}
+	}()
+
 	rdbTxHandle := rdbTx.ToHandle()
 	blocksView := view.NewBlocks(rdbTxHandle)
 
 	for _, event := range events {
 		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
-			if err = projection.handleBlockCreatedEvent(blocksView, blockCreatedEvent); err != nil {
-				_ = rdbTx.Rollback()
-				return fmt.Errorf("error handling BlockCreatedEvent: %v", err)
+			if handleErr := projection.handleBlockCreatedEvent(blocksView, blockCreatedEvent); handleErr != nil {
+				return fmt.Errorf("error handling BlockCreatedEvent: %v", handleErr)
 			}
 		} else {
-			_ = rdbTx.Rollback()
 			return fmt.Errorf("received unexpected event %sV%d(%s)", event.Name(), event.Version(), event.UUID())
 		}
 	}
 	if err = projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
-		_ = rdbTx.Rollback()
 		return fmt.Errorf("error updating last handled event height: %v", err)
 	}
 
 	if err = rdbTx.Commit(); err != nil {
-		_ = rdbTx.Rollback()
 		return fmt.Errorf("error committing changes: %v", err)
 	}
+	committed = true
 	return nil
 }
 

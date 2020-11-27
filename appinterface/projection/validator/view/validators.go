@@ -31,6 +31,7 @@ func (view *Validators) Insert(validator *ValidatorRow) error {
 		"initial_delegator_address",
 		"status",
 		"jailed",
+		"joined_at_block_height",
 		"power",
 		"unbonding_height",
 		"unbonding_completion_time",
@@ -43,7 +44,7 @@ func (view *Validators) Insert(validator *ValidatorRow) error {
 		"commission_max_rate",
 		"commission_max_change_rate",
 		"min_self_delegation",
-	).Values("?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?").ToSql()
+	).Values("?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?").ToSql()
 	if err != nil {
 		return fmt.Errorf("error building blocks insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
@@ -54,6 +55,7 @@ func (view *Validators) Insert(validator *ValidatorRow) error {
 		validator.InitialDelegatorAddress,
 		validator.Status,
 		validator.Jailed,
+		validator.JoinedAtBlockHeight,
 		validator.Power,
 		validator.MaybeUnbondingHeight,
 		validator.MaybeUnbondingCompletionTime,
@@ -78,9 +80,6 @@ func (view *Validators) Insert(validator *ValidatorRow) error {
 }
 
 func (view *Validators) Update(validator *ValidatorRow) error {
-	//row, _, err := view.List(pagination.NewOffsetPagination(1, 20))
-	//fmt.Println(row, err)
-
 	var unbondingCompletionTime interface{} = nil
 	if validator.MaybeUnbondingCompletionTime != nil {
 		unbondingCompletionTime = view.rdb.Tton(validator.MaybeUnbondingCompletionTime)
@@ -101,7 +100,7 @@ func (view *Validators) Update(validator *ValidatorRow) error {
 		"details":                   validator.Details,
 		"commission_rate":           validator.CommissionRate,
 	}).Where(
-		"id = ?", validator.Id,
+		"id = ?", validator.MaybeId,
 	).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building validator update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -126,6 +125,7 @@ func (view *Validators) List(pagination *pagination.Pagination) ([]ValidatorRow,
 		"initial_delegator_address",
 		"status",
 		"jailed",
+		"joined_at_block_height",
 		"power",
 		"unbonding_height",
 		"unbonding_completion_time",
@@ -151,7 +151,6 @@ func (view *Validators) List(pagination *pagination.Pagination) ([]ValidatorRow,
 		return nil, nil, fmt.Errorf("error building blocks select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	fmt.Println(sql, sqlArgs)
 	rowsResult, err := view.rdb.Query(sql, sqlArgs...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error executing blocks select SQL: %v: %w", err, rdb.ErrQuery)
@@ -162,12 +161,13 @@ func (view *Validators) List(pagination *pagination.Pagination) ([]ValidatorRow,
 		var validator ValidatorRow
 		unbondingCompletionTimeReader := view.rdb.NtotReader()
 		if err = rowsResult.Scan(
-			&validator.Id,
+			&validator.MaybeId,
 			&validator.OperatorAddress,
 			&validator.ConsensusNodeAddress,
 			&validator.InitialDelegatorAddress,
 			&validator.Status,
 			&validator.Jailed,
+			&validator.JoinedAtBlockHeight,
 			&validator.Power,
 			&validator.MaybeUnbondingHeight,
 			unbondingCompletionTimeReader.ScannableArg(),
@@ -216,6 +216,7 @@ func (view *Validators) FindBy(identity ValidatorIdentity) (*ValidatorRow, error
 		"initial_delegator_address",
 		"status",
 		"jailed",
+		"joined_at_block_height",
 		"power",
 		"unbonding_height",
 		"unbonding_completion_time",
@@ -248,12 +249,13 @@ func (view *Validators) FindBy(identity ValidatorIdentity) (*ValidatorRow, error
 	var validator ValidatorRow
 	unbondingCompletionTimeReader := view.rdb.NtotReader()
 	if err = view.rdb.QueryRow(sql, sqlArgs...).Scan(
-		&validator.Id,
+		&validator.MaybeId,
 		&validator.OperatorAddress,
 		&validator.ConsensusNodeAddress,
 		&validator.InitialDelegatorAddress,
 		&validator.Status,
 		&validator.Jailed,
+		&validator.JoinedAtBlockHeight,
 		&validator.Power,
 		&validator.MaybeUnbondingHeight,
 		unbondingCompletionTimeReader.ScannableArg(),
@@ -289,12 +291,13 @@ type ValidatorIdentity struct {
 }
 
 type ValidatorRow struct {
-	Id                           int64            `json:"-"`
+	MaybeId                      *int64           `json:"-"`
 	OperatorAddress              string           `json:"operatorAddress"`
 	ConsensusNodeAddress         string           `json:"consensusNodeAddress"`
 	InitialDelegatorAddress      string           `json:"initialDelegatorAddress"`
 	Status                       string           `json:"status"`
 	Jailed                       bool             `json:"jailed"`
+	JoinedAtBlockHeight          int64            `json:"joinedAtBlockHeight"`
 	Power                        string           `json:"power"`
 	MaybeUnbondingHeight         *int64           `json:"unbondingHeight"`
 	MaybeUnbondingCompletionTime *utctime.UTCTime `json:"unbondingCompletionTime"`

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/crypto-com/chainindex/appinterface/projection/validator"
+
 	"github.com/crypto-com/chainindex/usecase/executor"
 
 	"github.com/crypto-com/chainindex/entity/command"
@@ -216,7 +218,7 @@ func (manager *SyncManager) InitProjectionManager() (*projection.Manager, error)
 		return nil, fmt.Errorf("error registering block event projection to manager %v", err)
 	}
 
-	validatorProjection := projection_interface.NewValidator(
+	validatorProjection := validator.NewValidator(
 		manager.logger, manager.rdbConn, manager.consNodeAddressPrefix,
 	)
 	if err := projectionManager.RegisterProjection(validatorProjection); err != nil {

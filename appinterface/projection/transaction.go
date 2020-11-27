@@ -45,13 +45,18 @@ func (projection *Transaction) OnInit() error {
 }
 
 func (projection *Transaction) HandleEvents(height int64, events []event_entity.Event) error {
-	var err error
-
-	var rdbTx rdb.Tx
-	rdbTx, err = projection.rdbConn.Begin()
+	rdbTx, err := projection.rdbConn.Begin()
 	if err != nil {
 		return fmt.Errorf("error beginning transaction: %v", err)
 	}
+
+	committed := false
+	defer func() {
+		if !committed {
+			_ = rdbTx.Rollback()
+		}
+	}()
+
 	rdbTxHandle := rdbTx.ToHandle()
 	transactionsView := view.NewTransactions(rdbTxHandle)
 
@@ -118,19 +123,17 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 		}
 
 		if insertErr := transactionsView.Insert(&mutTx); insertErr != nil {
-			_ = rdbTx.Rollback()
 			return fmt.Errorf("error inserting transaction into view: %v", insertErr)
 		}
 	}
 
-	if err = projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
-		_ = rdbTx.Rollback()
+	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
 		return fmt.Errorf("error updating last handled event height: %v", err)
 	}
 
-	if err = rdbTx.Commit(); err != nil {
-		_ = rdbTx.Rollback()
+	if err := rdbTx.Commit(); err != nil {
 		return fmt.Errorf("error committing changes: %v", err)
 	}
+	committed = true
 	return nil
 }

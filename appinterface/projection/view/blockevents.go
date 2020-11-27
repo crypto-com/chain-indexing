@@ -2,7 +2,6 @@ package view
 
 import (
 	"fmt"
-	"time"
 
 	pagination_interface "github.com/crypto-com/chainindex/appinterface/pagination"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
@@ -194,7 +193,6 @@ func (view *BlockEvents) List(
 
 	blockEvents := make([]BlockEventRow, 0)
 	for rowsResult.Next() {
-		fmt.Println(time.Now())
 		var blockEvent BlockEventRow
 		var blockEventDataJSON *string
 		blockTimeReader := view.rdb.NtotReader()
