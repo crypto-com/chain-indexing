@@ -148,7 +148,7 @@ func (view *Blocks) FindBy(identity *BlockIdentity) (*Block, error) {
 
 	sql, sqlArgs, err := selectStmtBuilder.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("error building blocks selection sql: %v: %w", err, rdb.ErrPrepare)
+		return nil, fmt.Errorf("error building block selection sql: %v: %w", err, rdb.ErrPrepare)
 	}
 
 	var block Block

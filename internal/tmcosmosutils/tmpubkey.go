@@ -3,6 +3,8 @@ package tmcosmosutils
 import (
 	"fmt"
 
+	"github.com/tendermint/tendermint/crypto"
+
 	"github.com/btcsuite/btcutil/bech32"
 	"github.com/cosmos/cosmos-sdk/codec/legacy"
 	ed255192 "github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
@@ -76,9 +78,20 @@ func ConsensusNodeAddressFromPubKey(bech32Prefix string, consensusNodePubKey str
 		return "", fmt.Errorf("error converting consensus node pubkey to address")
 	}
 
+	pkToUnmarshal, err := bech32.ConvertBits(conv, 5, 8, false)
+	if err != nil {
+		return "", fmt.Errorf("error converting bech32 bits to tendermint public key: %v", err)
+	}
+	var pubKey crypto.PubKey
+	legacy.Cdc.MustUnmarshalBinaryBare(pkToUnmarshal, &pubKey)
+
+	conv, err = bech32.ConvertBits(pubKey.Address().Bytes(), 8, 5, true)
+	if err != nil {
+		return "", fmt.Errorf("error converting tendermint public key to bech32 bits: %v", err)
+	}
 	address, err := bech32.Encode(bech32Prefix, conv)
 	if err != nil {
-		return "", fmt.Errorf("error encoding tendermint public key bits to consensus public key: %v", err)
+		return "", fmt.Errorf("error encoding tendermint public key bits to consensus address: %v", err)
 	}
 
 	return address, nil

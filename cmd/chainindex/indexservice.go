@@ -13,9 +13,10 @@ type IndexService struct {
 	logger  applogger.Logger
 	rdbConn rdb.Conn
 
-	baseDenom            string
-	windowSize           int
-	tendermintHTTPRPCURL string
+	baseDenom             string
+	consNodeAddressPrefix string
+	windowSize            int
+	tendermintHTTPRPCURL  string
 }
 
 // NewIndexService creates a new server instance for polling and indexing
@@ -24,9 +25,10 @@ func NewIndexService(logger applogger.Logger, rdbConn rdb.Conn, config *FileConf
 		logger:  logger,
 		rdbConn: rdbConn,
 
-		baseDenom:            config.Blockchain.BaseDenom,
-		windowSize:           config.Sync.WindowSize,
-		tendermintHTTPRPCURL: config.Tendermint.HTTPRPCURL,
+		baseDenom:             config.Blockchain.BaseDenom,
+		consNodeAddressPrefix: config.Blockchain.ConNodeAddressPrefix,
+		windowSize:            config.Sync.WindowSize,
+		tendermintHTTPRPCURL:  config.Tendermint.HTTPRPCURL,
 	}
 }
 
@@ -39,6 +41,7 @@ func (service *IndexService) Run() error {
 	syncManager := NewSyncManager(
 		service.logger,
 		service.rdbConn,
+		service.consNodeAddressPrefix,
 		service.windowSize,
 		service.tendermintHTTPRPCURL,
 		txDecoder,

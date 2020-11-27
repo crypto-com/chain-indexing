@@ -59,6 +59,10 @@ func (view *BlockEvents) Insert(blockEvent *BlockEventRow) error {
 }
 
 func (view *BlockEvents) InsertAll(blockEvents []BlockEventRow) error {
+	if len(blockEvents) == 0 {
+		return nil
+	}
+
 	stmtBuilder := view.rdb.StmtBuilder.Insert(
 		"view_block_events",
 	).Columns(

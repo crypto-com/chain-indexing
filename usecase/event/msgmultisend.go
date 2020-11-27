@@ -11,7 +11,7 @@ import (
 )
 
 const MSG_MULTI_SEND = "MsgMultiSend"
-const MSG_MULTI_SEND_CREATED = "MsgMultiSend"
+const MSG_MULTI_SEND_CREATED = "MsgMultiSendCreated"
 const MSG_MULTI_SEND_FAILED = "MsgMultiSendFailed"
 
 type MsgMultiSend struct {

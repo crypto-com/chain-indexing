@@ -37,7 +37,7 @@ func ParseBlockToCommands(
 		}
 		commands = append(commands, transactionCommands...)
 
-		msgCommands, parseErr := ParseMsgToCommands(txDecoder, block, blockResults)
+		msgCommands, parseErr := ParseBlockResultsTxsMsgToCommands(txDecoder, block, blockResults)
 		if parseErr != nil {
 			return nil, fmt.Errorf("error parsing message commands: %v", parseErr)
 		}

@@ -21,7 +21,7 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_VOTE_BLOCK_RESULTS_RESP,
 			)
 
-			cmds, err := parser.ParseMsgToCommands(
+			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,

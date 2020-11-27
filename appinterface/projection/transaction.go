@@ -3,7 +3,7 @@ package projection
 import (
 	"fmt"
 
-	entity_projection "github.com/crypto-com/chainindex/entity/projection"
+	projection_entity "github.com/crypto-com/chainindex/entity/projection"
 
 	"github.com/crypto-com/chainindex/appinterface/projection/rdbbase"
 	"github.com/crypto-com/chainindex/appinterface/projection/view"
@@ -14,7 +14,7 @@ import (
 	event_usecase "github.com/crypto-com/chainindex/usecase/event"
 )
 
-var _ entity_projection.Projection = &Transaction{}
+var _ projection_entity.Projection = &Transaction{}
 
 type Transaction struct {
 	*rdbbase.RDbBase

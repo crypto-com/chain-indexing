@@ -17,7 +17,7 @@ import (
 	"github.com/crypto-com/chainindex/usecase/model"
 )
 
-func ParseMsgToCommands(
+func ParseBlockResultsTxsMsgToCommands(
 	txDecoder *TxDecoder,
 	block *model.Block,
 	blockResults *model.BlockResults,
@@ -634,12 +634,13 @@ func parseMsgCreateValidator(
 		msgCommonParams,
 
 		model.MsgCreateValidatorParams{
-			Description:      description,
-			Commission:       commission,
-			DelegatorAddress: msg["delegator_address"].(string),
-			ValidatorAddress: msg["validator_address"].(string),
-			Pubkey:           msg["pubkey"].(string),
-			Amount:           amount,
+			Description:       description,
+			Commission:        commission,
+			MinSelfDelegation: msg["min_self_delegation"].(string),
+			DelegatorAddress:  msg["delegator_address"].(string),
+			ValidatorAddress:  msg["validator_address"].(string),
+			Pubkey:            msg["pubkey"].(string),
+			Amount:            amount,
 		},
 	)}
 }
