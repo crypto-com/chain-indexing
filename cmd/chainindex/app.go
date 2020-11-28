@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/crypto-com/chainindex/internal/primptr"
+
 	applogger "github.com/crypto-com/chainindex/internal/logger"
 
 	"github.com/crypto-com/chainindex/infrastructure"
@@ -27,6 +29,52 @@ func CliApp(args []string) error {
 				Value: "./config/config.toml",
 				Usage: "TOML `FILE` to load configuration from",
 			},
+
+			&cli.StringFlag{
+				Name:  "logLevel,l",
+				Usage: "Log level (Allowed values: fatal,error,info,debug)",
+			},
+			&cli.BoolFlag{
+				Name:  "color",
+				Usage: "Display colored log",
+			},
+
+			&cli.BoolFlag{
+				Name:    "dbSSL",
+				Usage:   "Enable Postgres SSL mode",
+				EnvVars: []string{"DB_SSL"},
+			},
+			&cli.StringFlag{
+				Name:    "dbHost",
+				Usage:   "Postgres database hostname",
+				EnvVars: []string{"DB_HOST"},
+			},
+			&cli.UintFlag{
+				Name:    "dbPort",
+				Usage:   "Postgres database port",
+				EnvVars: []string{"DB_PORT"},
+			},
+			&cli.StringFlag{
+				Name:    "dbUsername",
+				Usage:   "Postgres username",
+				EnvVars: []string{"DB_USERNAME"},
+			},
+			&cli.StringFlag{
+				Name:    "dbName",
+				Usage:   "Postgres database name",
+				EnvVars: []string{"DB_NAME"},
+			},
+			&cli.StringFlag{
+				Name:    "dbSchema",
+				Usage:   "Postgres schema name",
+				EnvVars: []string{"DB_SCHEMA"},
+			},
+
+			&cli.StringFlag{
+				Name:    "tendermintURL",
+				Usage:   "Tendermint HTTP RPC URL",
+				EnvVars: []string{"TENDERMINT_URL"},
+			},
 		},
 		Action: func(ctx *cli.Context) error {
 			if args := ctx.Args(); args.Len() > 0 {
@@ -39,27 +87,49 @@ func CliApp(args []string) error {
 			if configFileErr != nil {
 				return configFileErr
 			}
-
 			var fileConfig FileConfig
 			readConfigErr := configReader.Read(&fileConfig)
 			if readConfigErr != nil {
 				return readConfigErr
 			}
 
-			fileConfig.Database.Password = os.Getenv("DB_PASSWORD")
-			if fileConfig.Database.Password == "" {
+			cliConfig := CLIConfig{
+				LogLevel: ctx.String("logLevel"),
+
+				DatabaseHost:     ctx.String("dbHost"),
+				DatabaseUsername: ctx.String("dbUsername"),
+				DatabaseName:     ctx.String("dbName"),
+				DatabaseSchema:   ctx.String("dbSchema"),
+
+				TendermintHTTPRPCURL: ctx.String("tendermintURL"),
+			}
+			if ctx.IsSet("color") {
+				cliConfig.LoggerColor = primptr.Bool(ctx.Bool("color"))
+			}
+			if ctx.IsSet("dbSSL") {
+				cliConfig.DatabaseSSL = primptr.Bool(ctx.Bool("dbSSL"))
+			}
+			if ctx.IsSet("dgPort") {
+				cliConfig.DatabasePort = primptr.Int32(int32(ctx.Int("dbPort")))
+			}
+
+			config := Config{
+				fileConfig,
+			}
+			config.OverrideByCLIConfig(&cliConfig)
+
+			// Always overwrite database password with environment variable
+			config.Database.Password = os.Getenv("DB_PASSWORD")
+			if config.Database.Password == "" {
 				return errors.New("DB_PASSWORD is empty")
 			}
 
+			// Create logger
+			logLevel := parseLogLevel(config.Logger.Level)
 			logger := infrastructure.NewZerologLogger(os.Stdout)
-			if fileConfig.Log.Level == "DEBUG" {
-				logger.SetLogLevel(applogger.LOG_LEVEL_DEBUG)
-			} else if fileConfig.Log.Level == "INFO" {
-				logger.SetLogLevel(applogger.LOG_LEVEL_INFO)
-			} else if fileConfig.Log.Level == "ERROR" {
-				logger.SetLogLevel(applogger.LOG_LEVEL_ERROR)
-			}
+			logger.SetLogLevel(logLevel)
 
+			// Setup system
 			rdbConn, err := SetupRDbConn(&fileConfig, logger)
 			if err != nil {
 				logger.Panicf("error setting up RDb connection: %v", err)
@@ -89,4 +159,19 @@ func CliApp(args []string) error {
 	}
 
 	return nil
+}
+
+func parseLogLevel(level string) applogger.LogLevel {
+	switch level {
+	case "panic":
+		return applogger.LOG_LEVEL_PANIC
+	case "error":
+		return applogger.LOG_LEVEL_ERROR
+	case "info":
+		return applogger.LOG_LEVEL_INFO
+	case "debug":
+		return applogger.LOG_LEVEL_DEBUG
+	default:
+		panic("Unsupported log level: " + level)
+	}
 }

@@ -1,5 +1,56 @@
 package main
 
+type Config struct {
+	FileConfig
+}
+
+func (config *Config) OverrideByCLIConfig(cliConfig *CLIConfig) {
+	if cliConfig.LogLevel != "" {
+		config.Logger.Level = cliConfig.LogLevel
+	}
+	if cliConfig.LoggerColor != nil {
+		config.Logger.Color = *cliConfig.LoggerColor
+	}
+	if cliConfig.LoggerColor != nil {
+		config.Logger.Color = *cliConfig.LoggerColor
+	}
+	if cliConfig.DatabaseSSL != nil {
+		config.Database.SSL = *cliConfig.DatabaseSSL
+	}
+	if cliConfig.DatabaseHost != "" {
+		config.Database.Host = cliConfig.DatabaseHost
+	}
+	if cliConfig.DatabasePort != nil {
+		config.Database.Port = *cliConfig.DatabasePort
+	}
+	if cliConfig.DatabaseUsername != "" {
+		config.Database.Username = cliConfig.DatabaseUsername
+	}
+	if cliConfig.DatabaseName != "" {
+		config.Database.Name = cliConfig.DatabaseName
+	}
+	if cliConfig.DatabaseSchema != "" {
+		config.Database.Schema = cliConfig.DatabaseSchema
+	}
+	if cliConfig.TendermintHTTPRPCURL != "" {
+		config.Tendermint.HTTPRPCURL = cliConfig.TendermintHTTPRPCURL
+	}
+}
+
+type CLIConfig struct {
+	LoggerColor *bool
+	LogLevel    string
+
+	DatabaseSSL      *bool
+	DatabaseHost     string
+	DatabasePort     *int32
+	DatabaseUsername string
+	DatabaseName     string
+	DatabaseSchema   string
+
+	TendermintHTTPRPCURL string
+}
+
 // FileConfig is the struct matches config.toml
 type FileConfig struct {
 	Blockchain BlockchainConfig
@@ -8,7 +59,7 @@ type FileConfig struct {
 	HTTP       HTTPConfig
 	Database   DatabaseConfig
 	Postgres   PostgresConfig
-	Log        LogConfig
+	Logger     LoggerConfig
 }
 
 type BlockchainConfig struct {
@@ -38,7 +89,7 @@ type TendermintConfig struct {
 type DatabaseConfig struct {
 	SSL      bool   `toml:"ssl"`
 	Host     string `toml:"host"`
-	Port     uint32 `toml:"port"`
+	Port     int32  `toml:"port"`
 	Username string `toml:"username"`
 	Password string
 	Name     string `toml:"name"`
@@ -53,6 +104,7 @@ type PostgresConfig struct {
 	HealthCheckInterval string `toml:"pool_health_check_interval"`
 }
 
-type LogConfig struct {
+type LoggerConfig struct {
 	Level string `toml:"level"`
+	Color bool   `toml:"color"`
 }
