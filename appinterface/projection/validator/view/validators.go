@@ -368,6 +368,14 @@ func (view *Validators) FindBy(identity ValidatorIdentity) (*ValidatorRow, error
 	return &validator, nil
 }
 
+func (view *Validators) Count() (int64, error) {
+	var count int64
+	if err := view.rdb.QueryRow("SELECT COUNT(*) FROM view_validators").Scan(&count); err != nil {
+		return int64(0), fmt.Errorf("error getting validators count: %v", err)
+	}
+	return count, nil
+}
+
 type ValidatorIdentity struct {
 	MaybeConsensusNodeAddress *string
 	MaybeOperatorAddress      *string

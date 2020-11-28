@@ -1,1 +1,1 @@
-DROP TABLE validator_stats;
+DROP TABLE IF EXISTS view_validator_stats;

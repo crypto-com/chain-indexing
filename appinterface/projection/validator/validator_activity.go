@@ -35,7 +35,9 @@ func (projection *Validator) projectValidatorActivitiesView(
 				return fmt.Errorf("error inserting MsgCreateValiator into view: %v", err)
 			}
 
-			validatorActivitiesTotalView.Increment("-", int64(1))
+			if err := validatorActivitiesTotalView.Increment("-", int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
 			validatorActivitiesTotalView.Increment(createValidatorEvent.ValidatorAddress, int64(1))
 			validatorActivitiesTotalView.Increment(
 				fmt.Sprintf("%s:%s", createValidatorEvent.ValidatorAddress, createValidatorEvent.Name()),

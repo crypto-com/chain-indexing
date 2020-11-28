@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/crypto-com/chainindex/appinterface/projection/validatorstats"
+
 	"github.com/crypto-com/chainindex/appinterface/projection/block"
 	"github.com/crypto-com/chainindex/appinterface/projection/transasaction"
 
@@ -229,6 +231,10 @@ func (manager *SyncManager) InitProjectionManager() (*projection.Manager, error)
 		return nil, fmt.Errorf("error registering validator projection to manager %v", err)
 	}
 
+	validatorStatsProjection := validatorstats.NewValidatorStats(manager.logger, manager.rdbConn)
+	if err := projectionManager.RegisterProjection(validatorStatsProjection); err != nil {
+		return nil, fmt.Errorf("error registering validator stats projection to manager %v", err)
+	}
 	return projectionManager, nil
 }
 

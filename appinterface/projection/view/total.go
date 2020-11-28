@@ -44,7 +44,7 @@ func (view *Total) Set(identity string, total int64) error {
 	if err != nil {
 		return fmt.Errorf("error preparing total selection SQL: %v", err)
 	}
-	var placeholder string
+	var placeholder int
 	err = view.rdbHandle.QueryRow(sql, sqlArgs...).Scan(&placeholder)
 	if err != nil {
 		if err != rdb.ErrNoRows {
@@ -173,7 +173,7 @@ func (view *Total) FindBy(identity string) (int64, error) {
 
 	var total int64
 	if err := view.rdbHandle.QueryRow(sql, sqlArgs...).Scan(&total); err != nil {
-		if err != rdb.ErrNoRows {
+		if err == rdb.ErrNoRows {
 			return int64(0), nil
 		}
 		return int64(0), fmt.Errorf("error getting total: %v", err)

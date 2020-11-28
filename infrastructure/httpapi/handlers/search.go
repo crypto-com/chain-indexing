@@ -78,7 +78,7 @@ func (search *Search) Search(ctx *fasthttp.RequestCtx) {
 }
 
 type SearchResults struct {
-	Blocks       []block_view.Block
-	Transactions []transaction_view.TransactionRow
-	Validators   []validator_view.ValidatorRow
+	Blocks       []block_view.Block                `json:"blocks"`
+	Transactions []transaction_view.TransactionRow `json:"transactions"`
+	Validators   []validator_view.ValidatorRow     `json:"validators"`
 }
