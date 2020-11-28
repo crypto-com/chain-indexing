@@ -38,12 +38,18 @@ func (projection *Validator) projectValidatorActivitiesView(
 			if err := validatorActivitiesTotalView.Increment("-", int64(1)); err != nil {
 				return fmt.Errorf("error incrementing total: %v", err)
 			}
-			validatorActivitiesTotalView.Increment(createValidatorEvent.ValidatorAddress, int64(1))
-			validatorActivitiesTotalView.Increment(
+			if err := validatorActivitiesTotalView.Increment(createValidatorEvent.ValidatorAddress, int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
 				fmt.Sprintf("%s:%s", createValidatorEvent.ValidatorAddress, createValidatorEvent.Name()),
 				int64(1),
-			)
-			validatorActivitiesTotalView.Increment(fmt.Sprintf("-:%s", createValidatorEvent.Name()), int64(1))
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(fmt.Sprintf("-:%s", createValidatorEvent.Name()), int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
 		} else if editValidatorEvent, ok := event.(*event_usecase.MsgEditValidator); ok {
 			if err := validatorActivitiesView.Insert(&view.ValidatorActivityRow{
 				BlockHeight:          editValidatorEvent.BlockHeight,
@@ -60,12 +66,22 @@ func (projection *Validator) projectValidatorActivitiesView(
 				return fmt.Errorf("error inserting MsgEditValidator into view: %v", err)
 			}
 
-			validatorActivitiesTotalView.Increment("-", int64(1))
-			validatorActivitiesTotalView.Increment(editValidatorEvent.ValidatorAddress, int64(1))
-			validatorActivitiesTotalView.Increment(
+			if err := validatorActivitiesTotalView.Increment("-", int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(editValidatorEvent.ValidatorAddress, int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
 				fmt.Sprintf("%s:%s", editValidatorEvent.ValidatorAddress, editValidatorEvent.Name()), int64(1),
-			)
-			validatorActivitiesTotalView.Increment(fmt.Sprintf("-:%s", editValidatorEvent.Name()), int64(1))
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
+				fmt.Sprintf("-:%s", editValidatorEvent.Name()), int64(1),
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
 		} else if delegateEvent, ok := event.(*event_usecase.MsgDelegate); ok {
 			if err := validatorActivitiesView.Insert(&view.ValidatorActivityRow{
 				BlockHeight:          delegateEvent.BlockHeight,
@@ -82,12 +98,22 @@ func (projection *Validator) projectValidatorActivitiesView(
 				return fmt.Errorf("error inserting MsgDelegate into view: %v", err)
 			}
 
-			validatorActivitiesTotalView.Increment("-", int64(1))
-			validatorActivitiesTotalView.Increment(delegateEvent.ValidatorAddress, int64(1))
-			validatorActivitiesTotalView.Increment(
+			if err := validatorActivitiesTotalView.Increment("-", int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(delegateEvent.ValidatorAddress, int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
 				fmt.Sprintf("%s:%s", delegateEvent.ValidatorAddress, delegateEvent.Name()), int64(1),
-			)
-			validatorActivitiesTotalView.Increment(fmt.Sprintf("-:%s", delegateEvent.Name()), int64(1))
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
+				fmt.Sprintf("-:%s", delegateEvent.Name()), int64(1),
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
 		} else if redelegateEvent, ok := event.(*event_usecase.MsgBeginRedelegate); ok {
 			if err := validatorActivitiesView.Insert(&view.ValidatorActivityRow{
 				BlockHeight:          redelegateEvent.BlockHeight,
@@ -118,16 +144,30 @@ func (projection *Validator) projectValidatorActivitiesView(
 				return fmt.Errorf("error inserting MsgBeginRedelegate into view: %v", err)
 			}
 
-			validatorActivitiesTotalView.Increment("-", int64(2))
-			validatorActivitiesTotalView.Increment(redelegateEvent.ValidatorDstAddress, int64(1))
-			validatorActivitiesTotalView.Increment(
+			if err := validatorActivitiesTotalView.Increment("-", int64(2)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(redelegateEvent.ValidatorDstAddress, int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
 				fmt.Sprintf("%s:%s", redelegateEvent.ValidatorSrcAddress, redelegateEvent.Name()), int64(1),
-			)
-			validatorActivitiesTotalView.Increment(
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
 				fmt.Sprintf("-:%s", redelegateEvent.Name()), int64(1),
-			)
-			validatorActivitiesTotalView.Increment(redelegateEvent.ValidatorDstAddress, int64(1))
-			validatorActivitiesTotalView.Increment(fmt.Sprintf("-:%s", redelegateEvent.Name()), int64(1))
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(redelegateEvent.ValidatorDstAddress, int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
+				fmt.Sprintf("-:%s", redelegateEvent.Name()), int64(1),
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
 		} else if undelegateEvent, ok := event.(*event_usecase.MsgUndelegate); ok {
 			if err := validatorActivitiesView.Insert(&view.ValidatorActivityRow{
 				BlockHeight:          undelegateEvent.BlockHeight,
@@ -144,12 +184,22 @@ func (projection *Validator) projectValidatorActivitiesView(
 				return fmt.Errorf("error inserting MsgUndelegate into view: %v", err)
 			}
 
-			validatorActivitiesTotalView.Increment("-", int64(1))
-			validatorActivitiesTotalView.Increment(undelegateEvent.ValidatorAddress, int64(1))
-			validatorActivitiesTotalView.Increment(
+			if err := validatorActivitiesTotalView.Increment("-", int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(undelegateEvent.ValidatorAddress, int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
 				fmt.Sprintf("%s:%s", undelegateEvent.ValidatorAddress, undelegateEvent.Name()), int64(1),
-			)
-			validatorActivitiesTotalView.Increment(fmt.Sprintf("-:%s", undelegateEvent.Name()), int64(1))
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
+				fmt.Sprintf("-:%s", undelegateEvent.Name()), int64(1),
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
 		} else if withdrawDelegatorRewardEvent, ok := event.(*event_usecase.MsgWithdrawDelegatorReward); ok {
 			if err := validatorActivitiesView.Insert(&view.ValidatorActivityRow{
 				BlockHeight:          withdrawDelegatorRewardEvent.BlockHeight,
@@ -166,18 +216,26 @@ func (projection *Validator) projectValidatorActivitiesView(
 				return fmt.Errorf("error inserting MsgWithdrawDelegatorReward into view: %v", err)
 			}
 
-			validatorActivitiesTotalView.Increment("-", int64(1))
-			validatorActivitiesTotalView.Increment(withdrawDelegatorRewardEvent.ValidatorAddress, int64(1))
-			validatorActivitiesTotalView.Increment(
+			if err := validatorActivitiesTotalView.Increment("-", int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(withdrawDelegatorRewardEvent.ValidatorAddress, int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
 				fmt.Sprintf("%s:%s",
 					withdrawDelegatorRewardEvent.ValidatorAddress,
 					withdrawDelegatorRewardEvent.Name(),
 				),
 				int64(1),
-			)
-			validatorActivitiesTotalView.Increment(
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
 				fmt.Sprintf("-:%s", withdrawDelegatorRewardEvent.Name()), int64(1),
-			)
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
 		} else if withdrawValidatorCommissionEvent, ok := event.(*event_usecase.MsgWithdrawValidatorCommission); ok {
 			if err := validatorActivitiesView.Insert(&view.ValidatorActivityRow{
 				BlockHeight:          withdrawValidatorCommissionEvent.BlockHeight,
@@ -194,19 +252,25 @@ func (projection *Validator) projectValidatorActivitiesView(
 				return fmt.Errorf("error inserting MsgEditValidator into view: %v", err)
 			}
 
-			validatorActivitiesTotalView.Increment("-", int64(1))
-			validatorActivitiesTotalView.Increment(withdrawValidatorCommissionEvent.ValidatorAddress, int64(1))
-			validatorActivitiesTotalView.Increment(
+			if err := validatorActivitiesTotalView.Increment("-", int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(withdrawValidatorCommissionEvent.ValidatorAddress, int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
 				fmt.Sprintf("%s:%s",
 					withdrawValidatorCommissionEvent.ValidatorAddress,
 					withdrawValidatorCommissionEvent.Name(),
-				),
-				int64(1),
-			)
-			validatorActivitiesTotalView.Increment(
-				fmt.Sprintf("-:%s", withdrawValidatorCommissionEvent.Name()),
-				int64(1),
-			)
+				), int64(1),
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
+				fmt.Sprintf("-:%s", withdrawValidatorCommissionEvent.Name()), int64(1),
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
 		} else if blockProposerRewardedEvent, ok := event.(*event_usecase.BlockProposerRewarded); ok {
 			if err := validatorActivitiesView.Insert(&view.ValidatorActivityRow{
 				BlockHeight:          blockProposerRewardedEvent.BlockHeight,
@@ -223,15 +287,25 @@ func (projection *Validator) projectValidatorActivitiesView(
 				return fmt.Errorf("error inserting BlockProposerRewarded into view: %v", err)
 			}
 
-			validatorActivitiesTotalView.Increment("-", int64(1))
-			validatorActivitiesTotalView.Increment(blockProposerRewardedEvent.Validator, int64(1))
-			validatorActivitiesTotalView.Increment(
-				fmt.Sprintf("%s:%s", blockProposerRewardedEvent.Validator, blockProposerRewardedEvent.Name()),
-				int64(1),
-			)
-			validatorActivitiesTotalView.Increment(
+			if err := validatorActivitiesTotalView.Increment("-", int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(blockProposerRewardedEvent.Validator, int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
+				fmt.Sprintf("%s:%s",
+					blockProposerRewardedEvent.Validator,
+					blockProposerRewardedEvent.Name(),
+				), int64(1),
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
 				fmt.Sprintf("-:%s", blockProposerRewardedEvent.Name()), int64(1),
-			)
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
 		} else if blockRewardedEvent, ok := event.(*event_usecase.BlockRewarded); ok {
 			if err := validatorActivitiesView.Insert(&view.ValidatorActivityRow{
 				BlockHeight:          blockRewardedEvent.BlockHeight,
@@ -248,13 +322,20 @@ func (projection *Validator) projectValidatorActivitiesView(
 				return fmt.Errorf("error inserting BlockRewarded into view: %v", err)
 			}
 
-			validatorActivitiesTotalView.Increment("-", int64(1))
-			validatorActivitiesTotalView.Increment(blockRewardedEvent.Validator, int64(1))
-			validatorActivitiesTotalView.Increment(
-				fmt.Sprintf("%s:%s", blockRewardedEvent.Validator, blockRewardedEvent.Name()),
-				int64(1),
-			)
-			validatorActivitiesTotalView.Increment(fmt.Sprintf("-:%s", blockRewardedEvent.Name()), int64(1))
+			if err := validatorActivitiesTotalView.Increment("-", int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(blockRewardedEvent.Validator, int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
+				fmt.Sprintf("%s:%s", blockRewardedEvent.Validator, blockRewardedEvent.Name()), int64(1),
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(fmt.Sprintf("-:%s", blockRewardedEvent.Name()), int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
 		} else if blockCommissionedEvent, ok := event.(*event_usecase.BlockCommissioned); ok {
 			if err := validatorActivitiesView.Insert(&view.ValidatorActivityRow{
 				BlockHeight:          blockCommissionedEvent.BlockHeight,
@@ -271,13 +352,20 @@ func (projection *Validator) projectValidatorActivitiesView(
 				return fmt.Errorf("error inserting BlockCommissioned into view: %v", err)
 			}
 
-			validatorActivitiesTotalView.Increment("-", int64(1))
-			validatorActivitiesTotalView.Increment(blockCommissionedEvent.Validator, int64(1))
-			validatorActivitiesTotalView.Increment(
-				fmt.Sprintf("%s:%s", blockCommissionedEvent.Validator, blockCommissionedEvent.Name()),
-				int64(1),
-			)
-			validatorActivitiesTotalView.Increment(fmt.Sprintf("-:%s", blockCommissionedEvent.Name()), int64(1))
+			if err := validatorActivitiesTotalView.Increment("-", int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(blockCommissionedEvent.Validator, int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
+				fmt.Sprintf("%s:%s", blockCommissionedEvent.Validator, blockCommissionedEvent.Name()), int64(1),
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(fmt.Sprintf("-:%s", blockCommissionedEvent.Name()), int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
 		} else if validatorJailedEvent, ok := event.(*event_usecase.ValidatorJailed); ok {
 			validatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
 				MaybeConsensusNodeAddress: &validatorJailedEvent.ConsensusNodeAddress,
@@ -302,13 +390,20 @@ func (projection *Validator) projectValidatorActivitiesView(
 				return fmt.Errorf("error inserting BlockCommissioned into view: %v", err)
 			}
 
-			validatorActivitiesTotalView.Increment("-", int64(1))
-			validatorActivitiesTotalView.Increment(validatorRow.OperatorAddress, int64(1))
-			validatorActivitiesTotalView.Increment(
-				fmt.Sprintf("%s:%s", validatorRow.OperatorAddress, validatorJailedEvent.Name()),
-				int64(1),
-			)
-			validatorActivitiesTotalView.Increment(fmt.Sprintf("-:%s", validatorJailedEvent.Name()), int64(1))
+			if err := validatorActivitiesTotalView.Increment("-", int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(validatorRow.OperatorAddress, int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
+				fmt.Sprintf("%s:%s", validatorRow.OperatorAddress, validatorJailedEvent.Name()), int64(1),
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(fmt.Sprintf("-:%s", validatorJailedEvent.Name()), int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
 		} else if validatorSlashedEvent, ok := event.(*event_usecase.ValidatorSlashed); ok {
 			validatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
 				MaybeConsensusNodeAddress: &validatorSlashedEvent.ConsensusNodeAddress,
@@ -332,13 +427,20 @@ func (projection *Validator) projectValidatorActivitiesView(
 				return fmt.Errorf("error inserting BlockCommissioned into view: %v", err)
 			}
 
-			validatorActivitiesTotalView.Increment("-", int64(1))
-			validatorActivitiesTotalView.Increment(validatorRow.OperatorAddress, int64(1))
-			validatorActivitiesTotalView.Increment(
-				fmt.Sprintf("%s:%s", validatorRow.OperatorAddress, validatorSlashedEvent.Name()),
-				int64(1),
-			)
-			validatorActivitiesTotalView.Increment(fmt.Sprintf("-:%s", validatorSlashedEvent.Name()), int64(1))
+			if err := validatorActivitiesTotalView.Increment("-", int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(validatorRow.OperatorAddress, int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
+				fmt.Sprintf("%s:%s", validatorRow.OperatorAddress, validatorSlashedEvent.Name()), int64(1),
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(fmt.Sprintf("-:%s", validatorSlashedEvent.Name()), int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
 		} else if unjailEvent, ok := event.(*event_usecase.MsgUnjail); ok {
 			if err := validatorActivitiesView.Insert(&view.ValidatorActivityRow{
 				BlockHeight:          unjailEvent.BlockHeight,
@@ -355,13 +457,20 @@ func (projection *Validator) projectValidatorActivitiesView(
 				return fmt.Errorf("error inserting MsgEditValidator into view: %v", err)
 			}
 
-			validatorActivitiesTotalView.Increment("-", int64(1))
-			validatorActivitiesTotalView.Increment(unjailEvent.ValidatorAddr, int64(1))
-			validatorActivitiesTotalView.Increment(
-				fmt.Sprintf("%s:%s", unjailEvent.ValidatorAddr, unjailEvent.Name()),
-				int64(1),
-			)
-			validatorActivitiesTotalView.Increment(fmt.Sprintf("-:%s", unjailEvent.Name()), int64(1))
+			if err := validatorActivitiesTotalView.Increment("-", int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(unjailEvent.ValidatorAddr, int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(
+				fmt.Sprintf("%s:%s", unjailEvent.ValidatorAddr, unjailEvent.Name()), int64(1),
+			); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
+			if err := validatorActivitiesTotalView.Increment(fmt.Sprintf("-:%s", unjailEvent.Name()), int64(1)); err != nil {
+				return fmt.Errorf("error incrementing total: %v", err)
+			}
 		}
 	}
 
