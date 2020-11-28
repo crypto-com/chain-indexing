@@ -134,6 +134,7 @@ func (projection *Validator) projectValidatorView(
 	blockHeight int64,
 	events []event_entity.Event,
 ) error {
+	// MsgCreateValidator should be handled first
 	for _, event := range events {
 		if msgCreateValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
 			projection.logger.Debug("handling MsgCreateValidator event")
@@ -167,7 +168,11 @@ func (projection *Validator) projectValidatorView(
 			if err := validatorsView.Insert(&validatorRow); err != nil {
 				return fmt.Errorf("error inserting new validator into view: %v", err)
 			}
-		} else if msgEditValidatorEvent, ok := event.(*event_usecase.MsgEditValidator); ok {
+		}
+	}
+
+	for _, event := range events {
+		if msgEditValidatorEvent, ok := event.(*event_usecase.MsgEditValidator); ok {
 			projection.logger.Debug("handling MsgEditValidator event")
 
 			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{

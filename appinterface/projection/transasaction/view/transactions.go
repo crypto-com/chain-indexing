@@ -2,6 +2,7 @@ package view
 
 import (
 	"fmt"
+	"strings"
 
 	pagination_interface "github.com/crypto-com/chainindex/appinterface/pagination"
 	"github.com/crypto-com/chainindex/appinterface/projection/view"
@@ -258,6 +259,88 @@ func (transactionsView *BlockTransactions) List(
 	}
 
 	return transactions, paginationResult, nil
+}
+
+func (transactionsView *BlockTransactions) Search(keyword string) ([]TransactionRow, error) {
+	keyword = strings.ToUpper(keyword)
+	sql, sqlArgs, err := transactionsView.rdb.StmtBuilder.Select(
+		"block_height",
+		"block_hash",
+		"block_time",
+		"hash",
+		"success",
+		"code",
+		"log",
+		"fee",
+		"fee_payer",
+		"fee_granter",
+		"gas_wanted",
+		"gas_used",
+		"memo",
+		"timeout_height",
+		"messages",
+	).From(
+		"view_transactions",
+	).Where(
+		"block_height::TEXT = ? OR block_hash = ? OR hash = ?", keyword, keyword, keyword,
+	).OrderBy(
+		"block_height",
+	).Limit(5).ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("error building transactions select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	rowsResult, err := transactionsView.rdb.Query(sql, sqlArgs...)
+	if err != nil {
+		return nil, fmt.Errorf("error executing transactions select SQL: %v: %w", err, rdb.ErrQuery)
+	}
+
+	transactions := make([]TransactionRow, 0)
+	for rowsResult.Next() {
+		var transaction TransactionRow
+		var messagesJSON *string
+		blockTimeReader := transactionsView.rdb.NtotReader()
+		var fee string
+
+		if err = rowsResult.Scan(
+			&transaction.BlockHeight,
+			&transaction.BlockHash,
+			blockTimeReader.ScannableArg(),
+			&transaction.Hash,
+			&transaction.Success,
+			&transaction.Code,
+			&transaction.Log,
+			&fee,
+			&transaction.FeePayer,
+			&transaction.FeeGranter,
+			&transaction.GasWanted,
+			&transaction.GasUsed,
+			&transaction.Memo,
+			&transaction.TimeoutHeight,
+			&messagesJSON,
+		); err != nil {
+			if err == rdb.ErrNoRows {
+				return nil, rdb.ErrNoRows
+			}
+			return nil, fmt.Errorf("error scanning transaction row: %v: %w", err, rdb.ErrQuery)
+		}
+		blockTime, parseErr := blockTimeReader.Parse()
+		if parseErr != nil {
+			return nil, fmt.Errorf("error parsing transaction block time: %v: %w", parseErr, rdb.ErrQuery)
+		}
+		transaction.BlockTime = *blockTime
+		transaction.Fee = coin.MustNewCoinFromString(fee)
+
+		var messages []TransactionRowMessage
+		if unmarshalErr := jsoniter.Unmarshal([]byte(*messagesJSON), &messages); unmarshalErr != nil {
+			return nil, fmt.Errorf("error unmarshalling transaction messages JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
+		}
+		transaction.Messages = messages
+
+		transactions = append(transactions, transaction)
+	}
+
+	return transactions, nil
 }
 
 func (transactionsView *BlockTransactions) Count() (int64, error) {

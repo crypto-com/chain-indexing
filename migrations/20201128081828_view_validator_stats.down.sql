@@ -1,0 +1,1 @@
+DROP TABLE validator_stats;

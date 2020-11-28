@@ -1,0 +1,1 @@
+CREATE INDEX view_validator_activities_block_height_brin_index ON view_validator_activities USING brin (block_height);

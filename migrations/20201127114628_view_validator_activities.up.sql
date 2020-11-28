@@ -10,5 +10,3 @@ CREATE TABLE view_validator_activities (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX view_validator_activities_block_height_index ON view_validator_activities(block_height);
-CREATE INDEX view_validator_activities_operator_address_index ON view_validator_activities(operator_address);

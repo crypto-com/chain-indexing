@@ -7,6 +7,7 @@ import (
 )
 
 type RouteRegistry struct {
+	searchHandler      *handlers.Search
 	blocksHandler      *handlers.Blocks
 	statusHandler      *handlers.StatusHandler
 	transactionHandler *handlers.Transactions
@@ -15,6 +16,7 @@ type RouteRegistry struct {
 }
 
 func NewRoutesRegistry(
+	searchHandler *handlers.Search,
 	blocksHandler *handlers.Blocks,
 	statusHandler *handlers.StatusHandler,
 	transactionHandler *handlers.Transactions,
@@ -22,6 +24,7 @@ func NewRoutesRegistry(
 	validatorsHandler *handlers.Validators,
 ) *RouteRegistry {
 	return &RouteRegistry{
+		searchHandler,
 		blocksHandler,
 		statusHandler,
 		transactionHandler,
@@ -35,6 +38,7 @@ func (registry *RouteRegistry) Register(server *httpapi.Server) {
 		ctx.SetStatusCode(fasthttp.StatusOK)
 		ctx.SetBody([]byte("Ok"))
 	})
+	server.GET("/api/v1/search", registry.searchHandler.Search)
 	server.GET("/api/v1/blocks", registry.blocksHandler.List)
 	server.GET("/api/v1/blocks/{height-or-hash}", registry.blocksHandler.FindBy)
 	server.GET("/api/v1/blocks/{height}/transactions", registry.blocksHandler.ListTransactionsByHeight)

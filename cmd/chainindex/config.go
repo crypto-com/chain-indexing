@@ -8,6 +8,7 @@ type FileConfig struct {
 	HTTP       HTTPConfig
 	Database   DatabaseConfig
 	Postgres   PostgresConfig
+	Log        LogConfig
 }
 
 type BlockchainConfig struct {
@@ -50,4 +51,8 @@ type PostgresConfig struct {
 	MaxConnLifeTime     string `toml:"pool_max_conn_lifetime"`
 	MaxConnIdleTime     string `toml:"pool_max_conn_idle_time"`
 	HealthCheckInterval string `toml:"pool_health_check_interval"`
+}
+
+type LogConfig struct {
+	Level string `toml:"level"`
 }

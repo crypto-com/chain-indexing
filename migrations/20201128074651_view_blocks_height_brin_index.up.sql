@@ -1,0 +1,1 @@
+CREATE INDEX view_blocks_height_brin_index ON view_blocks USING brin (height);

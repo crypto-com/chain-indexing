@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
+	applogger "github.com/crypto-com/chainindex/internal/logger"
+
 	"github.com/crypto-com/chainindex/infrastructure"
 
 	"github.com/crypto-com/chainindex/internal/filereader/toml"
@@ -50,6 +52,13 @@ func CliApp(args []string) error {
 			}
 
 			logger := infrastructure.NewZerologLogger(os.Stdout)
+			if fileConfig.Log.Level == "DEBUG" {
+				logger.SetLogLevel(applogger.LOG_LEVEL_DEBUG)
+			} else if fileConfig.Log.Level == "INFO" {
+				logger.SetLogLevel(applogger.LOG_LEVEL_INFO)
+			} else if fileConfig.Log.Level == "ERROR" {
+				logger.SetLogLevel(applogger.LOG_LEVEL_ERROR)
+			}
 
 			rdbConn, err := SetupRDbConn(&fileConfig, logger)
 			if err != nil {
@@ -63,13 +72,13 @@ func CliApp(args []string) error {
 				}
 			}()
 
-			//_ = NewIndexService(logger, rdbConn, &fileConfig)
-			indexService := NewIndexService(logger, rdbConn, &fileConfig)
-			go func() {
-				if err := indexService.Run(); err != nil {
-					logger.Panicf("%v", err)
-				}
-			}()
+			_ = NewIndexService(logger, rdbConn, &fileConfig)
+			//indexService := NewIndexService(logger, rdbConn, &fileConfig)
+			//go func() {
+			//	if err := indexService.Run(); err != nil {
+			//		logger.Panicf("%v", err)
+			//	}
+			//}()
 
 			select {}
 		},

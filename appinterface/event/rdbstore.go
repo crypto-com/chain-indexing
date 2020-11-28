@@ -66,7 +66,9 @@ func (store *RDbStore) GetAllByHeight(height int64) ([]entity_event.Event, error
 		"uuid", "height", "name", "version", "payload",
 	).From(
 		store.table,
-	).Where("height = ?", height).ToSql()
+	).Where(
+		"height = ?", height,
+	).OrderBy("id").ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("error building get all events by height selection SQL: %v", err)
 	}

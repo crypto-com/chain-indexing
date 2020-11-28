@@ -42,6 +42,7 @@ func (server *HTTPAPIServer) Run() error {
 		server.logger,
 	)
 
+	searchHandler := handlers.NewSearch(server.logger, server.rdbConn.ToHandle())
 	blocksHandler := handlers.NewBlocks(server.logger, server.rdbConn.ToHandle())
 	statusHandler := handlers.NewStatusHandler(server.logger, server.rdbConn.ToHandle())
 	transactionsHandler := handlers.NewTransactions(server.logger, server.rdbConn.ToHandle())
@@ -53,6 +54,7 @@ func (server *HTTPAPIServer) Run() error {
 		server.rdbConn.ToHandle(),
 	)
 	routeRegistry := routes.NewRoutesRegistry(
+		searchHandler,
 		blocksHandler,
 		statusHandler,
 		transactionsHandler,
