@@ -5,30 +5,30 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/crypto-com/chainindex/appinterface/projection/validatorstats"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/validatorstats"
 
-	"github.com/crypto-com/chainindex/appinterface/projection/block"
-	"github.com/crypto-com/chainindex/appinterface/projection/transasaction"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/block"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/transasaction"
 
-	"github.com/crypto-com/chainindex/appinterface/projection/blockevent"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/blockevent"
 
-	"github.com/crypto-com/chainindex/appinterface/projection/validator"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/validator"
 
-	"github.com/crypto-com/chainindex/usecase/executor"
+	"github.com/crypto-com/chain-indexing/usecase/executor"
 
-	"github.com/crypto-com/chainindex/entity/command"
-	"github.com/crypto-com/chainindex/usecase/syncstrategy"
+	"github.com/crypto-com/chain-indexing/entity/command"
+	"github.com/crypto-com/chain-indexing/usecase/syncstrategy"
 
-	event_interface "github.com/crypto-com/chainindex/appinterface/event"
-	"github.com/crypto-com/chainindex/appinterface/rdb"
-	"github.com/crypto-com/chainindex/appinterface/rdbstatusstore"
-	"github.com/crypto-com/chainindex/entity/event"
-	"github.com/crypto-com/chainindex/entity/projection"
-	chainfeed "github.com/crypto-com/chainindex/infrastructure/feed/chain"
-	"github.com/crypto-com/chainindex/infrastructure/tendermint"
-	applogger "github.com/crypto-com/chainindex/internal/logger"
-	event_usecase "github.com/crypto-com/chainindex/usecase/event"
-	"github.com/crypto-com/chainindex/usecase/parser"
+	event_interface "github.com/crypto-com/chain-indexing/appinterface/event"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/appinterface/rdbstatusstore"
+	"github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/entity/projection"
+	chainfeed "github.com/crypto-com/chain-indexing/infrastructure/feed/chain"
+	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
+	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	"github.com/crypto-com/chain-indexing/usecase/parser"
 )
 
 const DEFAULT_POLLING_INTERVAL = 5 * time.Second

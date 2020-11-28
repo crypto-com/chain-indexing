@@ -5,13 +5,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/crypto-com/chainindex/internal/primptr"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
 
-	applogger "github.com/crypto-com/chainindex/internal/logger"
+	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 
-	"github.com/crypto-com/chainindex/infrastructure"
+	"github.com/crypto-com/chain-indexing/infrastructure"
 
-	"github.com/crypto-com/chainindex/internal/filereader/toml"
+	"github.com/crypto-com/chain-indexing/internal/filereader/toml"
 	"github.com/urfave/cli/v2"
 )
 

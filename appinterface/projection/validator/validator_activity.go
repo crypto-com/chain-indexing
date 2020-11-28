@@ -3,11 +3,11 @@ package validator
 import (
 	"fmt"
 
-	"github.com/crypto-com/chainindex/appinterface/projection/validator/view"
-	event_entity "github.com/crypto-com/chainindex/entity/event"
-	"github.com/crypto-com/chainindex/internal/primptr"
-	"github.com/crypto-com/chainindex/internal/utctime"
-	event_usecase "github.com/crypto-com/chainindex/usecase/event"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/validator/view"
+	event_entity "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
+	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
 func (projection *Validator) projectValidatorActivitiesView(

@@ -5,7 +5,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 
-	pagination_interface "github.com/crypto-com/chainindex/appinterface/pagination"
+	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
 )
 
 // RDbPaginationBuilder builds pagination query based on the pagination data. It supports both SQL and StmtBuilder

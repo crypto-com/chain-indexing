@@ -1,11 +1,11 @@
 package event_test
 
 import (
-	event_entity "github.com/crypto-com/chainindex/entity/event"
+	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	event_usecase "github.com/crypto-com/chainindex/usecase/event"
+	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
 var _ = Describe("Event", func() {

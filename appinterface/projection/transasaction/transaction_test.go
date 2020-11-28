@@ -1,22 +1,22 @@
 package transasaction_test
 
 import (
-	"github.com/crypto-com/chainindex/appinterface/projection/block"
-	view2 "github.com/crypto-com/chainindex/appinterface/projection/block/view"
-	. "github.com/crypto-com/chainindex/appinterface/rdb/test"
-	. "github.com/crypto-com/chainindex/entity/event/test"
-	. "github.com/crypto-com/chainindex/internal/logger/test"
-	. "github.com/crypto-com/chainindex/test"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/block"
+	view2 "github.com/crypto-com/chain-indexing/appinterface/projection/block/view"
+	. "github.com/crypto-com/chain-indexing/appinterface/rdb/test"
+	. "github.com/crypto-com/chain-indexing/entity/event/test"
+	. "github.com/crypto-com/chain-indexing/internal/logger/test"
+	. "github.com/crypto-com/chain-indexing/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	event_entity "github.com/crypto-com/chainindex/entity/event"
-	entity_projection "github.com/crypto-com/chainindex/entity/projection"
-	"github.com/crypto-com/chainindex/infrastructure/pg"
-	"github.com/crypto-com/chainindex/internal/primptr"
-	"github.com/crypto-com/chainindex/internal/utctime"
-	event_usecase "github.com/crypto-com/chainindex/usecase/event"
-	usecase_model "github.com/crypto-com/chainindex/usecase/model"
+	event_entity "github.com/crypto-com/chain-indexing/entity/event"
+	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
+	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 var _ = Describe("Transaction", func() {

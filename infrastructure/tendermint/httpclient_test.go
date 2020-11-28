@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	infrastructure_tendermint_test "github.com/crypto-com/chainindex/infrastructure/tendermint/test"
+	infrastructure_tendermint_test "github.com/crypto-com/chain-indexing/infrastructure/tendermint/test"
 
 	jsoniter "github.com/json-iterator/go"
 
@@ -12,11 +12,11 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
 
-	"github.com/crypto-com/chainindex/appinterface/tendermint"
-	. "github.com/crypto-com/chainindex/infrastructure/tendermint"
-	"github.com/crypto-com/chainindex/internal/utctime"
+	"github.com/crypto-com/chain-indexing/appinterface/tendermint"
+	. "github.com/crypto-com/chain-indexing/infrastructure/tendermint"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
 
-	usecase_model "github.com/crypto-com/chainindex/usecase/model"
+	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 var _ = Describe("HTTPClient", func() {

@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	applogger "github.com/crypto-com/chainindex/internal/logger"
+	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 
-	"github.com/crypto-com/chainindex/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 )
 
 const DEFAULT_TABLE = "service_status"

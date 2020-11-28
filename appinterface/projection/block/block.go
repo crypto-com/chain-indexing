@@ -3,15 +3,15 @@ package block
 import (
 	"fmt"
 
-	view2 "github.com/crypto-com/chainindex/appinterface/projection/block/view"
+	view2 "github.com/crypto-com/chain-indexing/appinterface/projection/block/view"
 
-	entity_projection "github.com/crypto-com/chainindex/entity/projection"
+	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
 
-	"github.com/crypto-com/chainindex/appinterface/projection/rdbbase"
-	"github.com/crypto-com/chainindex/appinterface/rdb"
-	event_entity "github.com/crypto-com/chainindex/entity/event"
-	applogger "github.com/crypto-com/chainindex/internal/logger"
-	event_usecase "github.com/crypto-com/chainindex/usecase/event"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbbase"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	event_entity "github.com/crypto-com/chain-indexing/entity/event"
+	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
 var _ entity_projection.Projection = &Block{}

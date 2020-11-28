@@ -3,11 +3,11 @@ package handlers
 import (
 	"github.com/valyala/fasthttp"
 
-	transaction_view "github.com/crypto-com/chainindex/appinterface/projection/transasaction/view"
-	"github.com/crypto-com/chainindex/appinterface/projection/view"
-	"github.com/crypto-com/chainindex/appinterface/rdb"
-	"github.com/crypto-com/chainindex/infrastructure/httpapi"
-	applogger "github.com/crypto-com/chainindex/internal/logger"
+	transaction_view "github.com/crypto-com/chain-indexing/appinterface/projection/transasaction/view"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
+	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 
 type Transactions struct {

@@ -6,9 +6,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/crypto-com/chainindex/appinterface/rdb"
-	. "github.com/crypto-com/chainindex/infrastructure/pg"
-	. "github.com/crypto-com/chainindex/test"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	. "github.com/crypto-com/chain-indexing/infrastructure/pg"
+	. "github.com/crypto-com/chain-indexing/test"
 )
 
 type TestPgConn struct {

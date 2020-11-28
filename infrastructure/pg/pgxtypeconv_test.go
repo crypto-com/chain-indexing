@@ -7,8 +7,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/crypto-com/chainindex/infrastructure/pg"
-	"github.com/crypto-com/chainindex/internal/utctime"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
 )
 
 var _ = Describe("PgxTypeConv", func() {

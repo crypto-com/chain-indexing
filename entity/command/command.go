@@ -1,6 +1,6 @@
 package command
 
-import entity_event "github.com/crypto-com/chainindex/entity/event"
+import entity_event "github.com/crypto-com/chain-indexing/entity/event"
 
 type Command interface {
 	Name() string

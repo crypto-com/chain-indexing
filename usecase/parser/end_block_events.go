@@ -1,10 +1,10 @@
 package parser
 
 import (
-	"github.com/crypto-com/chainindex/entity/command"
-	"github.com/crypto-com/chainindex/usecase/coin"
-	command_usecase "github.com/crypto-com/chainindex/usecase/command"
-	"github.com/crypto-com/chainindex/usecase/model"
+	"github.com/crypto-com/chain-indexing/entity/command"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
+	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 func ParseEndBlockEventsCommands(blockHeight int64, endBlockEvents []model.BlockResultsEvent) ([]command.Command, error) {

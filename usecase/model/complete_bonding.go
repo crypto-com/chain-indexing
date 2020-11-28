@@ -1,6 +1,6 @@
 package model
 
-import "github.com/crypto-com/chainindex/usecase/coin"
+import "github.com/crypto-com/chain-indexing/usecase/coin"
 
 type CompleteBondingParams struct {
 	Delegator string

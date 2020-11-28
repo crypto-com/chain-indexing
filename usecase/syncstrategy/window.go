@@ -1,8 +1,8 @@
 package syncstrategy
 
 import (
-	"github.com/crypto-com/chainindex/entity/command"
-	applogger "github.com/crypto-com/chainindex/internal/logger"
+	"github.com/crypto-com/chain-indexing/entity/command"
+	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 
 var _ Strategy = &Window{}

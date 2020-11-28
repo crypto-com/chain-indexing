@@ -3,16 +3,16 @@ package transasaction
 import (
 	"fmt"
 
-	view2 "github.com/crypto-com/chainindex/appinterface/projection/transasaction/view"
+	view2 "github.com/crypto-com/chain-indexing/appinterface/projection/transasaction/view"
 
-	projection_entity "github.com/crypto-com/chainindex/entity/projection"
+	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 
-	"github.com/crypto-com/chainindex/appinterface/projection/rdbbase"
-	"github.com/crypto-com/chainindex/appinterface/rdb"
-	event_entity "github.com/crypto-com/chainindex/entity/event"
-	applogger "github.com/crypto-com/chainindex/internal/logger"
-	"github.com/crypto-com/chainindex/internal/utctime"
-	event_usecase "github.com/crypto-com/chainindex/usecase/event"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbbase"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	event_entity "github.com/crypto-com/chain-indexing/entity/event"
+	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
+	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
 var _ projection_entity.Projection = &Transaction{}

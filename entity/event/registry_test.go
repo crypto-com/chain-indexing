@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/crypto-com/chainindex/entity/event"
+	"github.com/crypto-com/chain-indexing/entity/event"
 )
 
 var _ = Describe("eventRegistry", func() {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/calvinlauco/cosmostxdecoder"
-	"github.com/crypto-com/chainindex/usecase/coin"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
 	jsoniter "github.com/json-iterator/go"
 )
 

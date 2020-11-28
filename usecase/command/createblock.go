@@ -1,9 +1,9 @@
 package command
 
 import (
-	event_entity "github.com/crypto-com/chainindex/entity/event"
-	event_usecase "github.com/crypto-com/chainindex/usecase/event"
-	model_usecase "github.com/crypto-com/chainindex/usecase/model"
+	event_entity "github.com/crypto-com/chain-indexing/entity/event"
+	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	model_usecase "github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 type CreateBlock struct {

@@ -3,7 +3,7 @@ package test
 import (
 	"github.com/stretchr/testify/mock"
 
-	entity_event "github.com/crypto-com/chainindex/entity/event"
+	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 )
 
 type MockProjection struct {

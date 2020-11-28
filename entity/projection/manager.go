@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	entity_event "github.com/crypto-com/chainindex/entity/event"
-	applogger "github.com/crypto-com/chainindex/internal/logger"
+	entity_event "github.com/crypto-com/chain-indexing/entity/event"
+	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 
 type Manager struct {

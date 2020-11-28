@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 
-	"github.com/crypto-com/chainindex/infrastructure/httpapi/routes"
+	"github.com/crypto-com/chain-indexing/infrastructure/httpapi/routes"
 
-	"github.com/crypto-com/chainindex/infrastructure/httpapi/handlers"
+	"github.com/crypto-com/chain-indexing/infrastructure/httpapi/handlers"
 
-	"github.com/crypto-com/chainindex/appinterface/rdb"
-	"github.com/crypto-com/chainindex/infrastructure/httpapi"
-	applogger "github.com/crypto-com/chainindex/internal/logger"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
+	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 
 type HTTPAPIServer struct {

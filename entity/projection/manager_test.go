@@ -3,16 +3,16 @@ package projection_test
 import (
 	"time"
 
-	. "github.com/crypto-com/chainindex/entity/event/test"
-	. "github.com/crypto-com/chainindex/entity/projection/test"
-	. "github.com/crypto-com/chainindex/internal/logger/test"
+	. "github.com/crypto-com/chain-indexing/entity/event/test"
+	. "github.com/crypto-com/chain-indexing/entity/projection/test"
+	. "github.com/crypto-com/chain-indexing/internal/logger/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/mock"
 
-	entity_event "github.com/crypto-com/chainindex/entity/event"
-	"github.com/crypto-com/chainindex/entity/projection"
-	"github.com/crypto-com/chainindex/internal/primptr"
+	entity_event "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/entity/projection"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
 )
 
 var _ = Describe("Manager", func() {

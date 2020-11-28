@@ -4,7 +4,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/crypto-com/chainindex/internal/utctime"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
 )
 
 // Shorthand functions to create primitive pointers

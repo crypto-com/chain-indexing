@@ -1,6 +1,6 @@
 package test
 
-import entity_event "github.com/crypto-com/chainindex/entity/event"
+import entity_event "github.com/crypto-com/chain-indexing/entity/event"
 
 type FakeProjection struct{}
 

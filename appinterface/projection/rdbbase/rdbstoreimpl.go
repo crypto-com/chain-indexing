@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/crypto-com/chainindex/appinterface/rdb"
-	"github.com/crypto-com/chainindex/internal/primptr"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
 )
 
 // RDbStoreImpl is an implementation of the RDbStore

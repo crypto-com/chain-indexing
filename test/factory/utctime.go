@@ -4,7 +4,7 @@ import (
 	"math/rand"
 
 	random "github.com/brianvoe/gofakeit/v5"
-	"github.com/crypto-com/chainindex/internal/utctime"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
 )
 
 func addUTCTimeFuncLookup() {

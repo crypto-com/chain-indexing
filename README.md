@@ -1,6 +1,6 @@
 # Crypto.com Chain Indexing Service
 
-Crypto.com Chain Indexing Service (chainindex) is a service to index all publicly available data on Crypto.com chain and persist structured information into storage.
+Crypto.com Chain Indexing Service (chain-indexing) is a service to index all publicly available data on Crypto.com chain and persist structured information into storage.
 
 Right now it supports Postgres database and provides RESTful API as query interface.
 
@@ -8,12 +8,12 @@ Right now it supports Postgres database and provides RESTful API as query interf
 
 ### 1.1 Build using Docker (Not working yet)
 
-Using Docker is the easiest way to build chainindex. The Docker image contains
-`/app/chainindex` Compiled chainindex binary
+Using Docker is the easiest way to build chain-indexing. The Docker image contains
+`/app/chain-indexing` Compiled chain-indexing binary
 `/app/migrate` Program to perform migration
 
 ```bash
-docker build -o chainindex .
+docker build -o chain-indexing .
 ```
 
 ### 1.2 Build manually
@@ -73,7 +73,7 @@ docker run -it \
     --env DB_PORT=5432 \
     --env DB_NAME=postgres \
     --env DB_SCHEMA=public \
-    chainindex /app/migrate -- -verbose up
+    chain-indexing /app/migrate -- -verbose up
 ```
 
 #### Manual Build
@@ -91,13 +91,13 @@ docker run \
     -v `pwd`/config:/app/config --read-only \
     -p 28857:28857 \
     --env DB_PASSWORD=postgres \
-    chainindex /app/chainindex
+    chain-indexing /app/chain-indexing
 ```
 
 #### Manual build
 
 ```bash
-env DB_PASSWORD=postgres ./chainindex
+env DB_PASSWORD=postgres ./chain-indexing
 ```
 
 ## 3. Test

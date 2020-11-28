@@ -1,7 +1,7 @@
 package notification
 
 import (
-	"github.com/crypto-com/chainindex/usecase/model"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 type BlockNotification struct {

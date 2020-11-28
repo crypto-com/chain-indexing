@@ -1,9 +1,9 @@
 package command
 
 import (
-	entity_event "github.com/crypto-com/chainindex/entity/event"
-	"github.com/crypto-com/chainindex/usecase/event"
-	usecase_model "github.com/crypto-com/chainindex/usecase/model"
+	entity_event "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/usecase/event"
+	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 type CreateRawBlock struct {

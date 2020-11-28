@@ -1,8 +1,8 @@
 package command
 
 import (
-	entity_event "github.com/crypto-com/chainindex/entity/event"
-	"github.com/crypto-com/chainindex/usecase/event"
+	entity_event "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/usecase/event"
 )
 
 type CreateBlockReward struct {

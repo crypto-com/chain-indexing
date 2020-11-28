@@ -1,14 +1,14 @@
 package rdbstatusstore_test
 
 import (
-	"github.com/crypto-com/chainindex/infrastructure/pg"
-	test_logger "github.com/crypto-com/chainindex/internal/logger/test"
-	"github.com/crypto-com/chainindex/internal/primptr"
-	. "github.com/crypto-com/chainindex/test"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	test_logger "github.com/crypto-com/chain-indexing/internal/logger/test"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
+	. "github.com/crypto-com/chain-indexing/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/crypto-com/chainindex/appinterface/rdbstatusstore"
+	"github.com/crypto-com/chain-indexing/appinterface/rdbstatusstore"
 )
 
 var _ = Describe("RdbStatusStore", func() {

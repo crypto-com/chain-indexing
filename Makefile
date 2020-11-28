@@ -1,5 +1,5 @@
 all:
-	go build ./cmd/chainindex/
-	go install ./cmd/chainindex/
+	go build ./cmd/chain-indexing/
+	go install ./cmd/chain-indexing/
 migrate:
 	./pgmigrate.sh -- -verbose up	

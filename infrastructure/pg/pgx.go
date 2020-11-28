@@ -11,8 +11,8 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 
-	"github.com/crypto-com/chainindex/appinterface/rdb"
-	"github.com/crypto-com/chainindex/internal/logger"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/internal/logger"
 )
 
 var PostgresStmtBuilder = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)

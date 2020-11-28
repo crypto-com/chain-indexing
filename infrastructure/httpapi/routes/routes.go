@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"github.com/crypto-com/chainindex/infrastructure/httpapi"
-	"github.com/crypto-com/chainindex/infrastructure/httpapi/handlers"
+	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
+	"github.com/crypto-com/chain-indexing/infrastructure/httpapi/handlers"
 	"github.com/valyala/fasthttp"
 )
 

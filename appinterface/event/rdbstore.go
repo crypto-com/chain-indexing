@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/crypto-com/chainindex/appinterface/rdb"
-	entity_event "github.com/crypto-com/chainindex/entity/event"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 )
 
 const DEFAULT_TABLE = "events"
