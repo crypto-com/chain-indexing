@@ -22,7 +22,7 @@ listening_address = "0.0.0.0:8080"
 host = "localhost"
 port = 5432
 username = "postgres"
-# password can only be provided through Environment variable `DB_PASS`
+# password can only be provided through CLI or Environment variable `DB_PASS`
 name = "postgres"
 schema = "public"
 ssl = true

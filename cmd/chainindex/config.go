@@ -11,9 +11,6 @@ func (config *Config) OverrideByCLIConfig(cliConfig *CLIConfig) {
 	if cliConfig.LoggerColor != nil {
 		config.Logger.Color = *cliConfig.LoggerColor
 	}
-	if cliConfig.LoggerColor != nil {
-		config.Logger.Color = *cliConfig.LoggerColor
-	}
 	if cliConfig.DatabaseSSL != nil {
 		config.Database.SSL = *cliConfig.DatabaseSSL
 	}
@@ -26,6 +23,8 @@ func (config *Config) OverrideByCLIConfig(cliConfig *CLIConfig) {
 	if cliConfig.DatabaseUsername != "" {
 		config.Database.Username = cliConfig.DatabaseUsername
 	}
+	// Always overwrite database password with CLI (ENV)
+	config.Database.Password = cliConfig.DatabasePassword
 	if cliConfig.DatabaseName != "" {
 		config.Database.Name = cliConfig.DatabaseName
 	}
@@ -45,6 +44,7 @@ type CLIConfig struct {
 	DatabaseHost     string
 	DatabasePort     *int32
 	DatabaseUsername string
+	DatabasePassword string
 	DatabaseName     string
 	DatabaseSchema   string
 

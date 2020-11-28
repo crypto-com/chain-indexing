@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -60,6 +59,12 @@ func CliApp(args []string) error {
 				EnvVars: []string{"DB_USERNAME"},
 			},
 			&cli.StringFlag{
+				Name:     "dbPassword",
+				Usage:    "Postgres password",
+				EnvVars:  []string{"DB_PASSWORD"},
+				Required: true,
+			},
+			&cli.StringFlag{
 				Name:    "dbName",
 				Usage:   "Postgres database name",
 				EnvVars: []string{"DB_NAME"},
@@ -98,6 +103,7 @@ func CliApp(args []string) error {
 
 				DatabaseHost:     ctx.String("dbHost"),
 				DatabaseUsername: ctx.String("dbUsername"),
+				DatabasePassword: ctx.String("dbPassword"),
 				DatabaseName:     ctx.String("dbName"),
 				DatabaseSchema:   ctx.String("dbSchema"),
 
@@ -118,11 +124,7 @@ func CliApp(args []string) error {
 			}
 			config.OverrideByCLIConfig(&cliConfig)
 
-			// Always overwrite database password with environment variable
-			config.Database.Password = os.Getenv("DB_PASSWORD")
-			if config.Database.Password == "" {
-				return errors.New("DB_PASSWORD is empty")
-			}
+			fmt.Printf("%+v", config)
 
 			// Create logger
 			logLevel := parseLogLevel(config.Logger.Level)
@@ -130,19 +132,19 @@ func CliApp(args []string) error {
 			logger.SetLogLevel(logLevel)
 
 			// Setup system
-			rdbConn, err := SetupRDbConn(&fileConfig, logger)
+			rdbConn, err := SetupRDbConn(&config, logger)
 			if err != nil {
 				logger.Panicf("error setting up RDb connection: %v", err)
 			}
 
-			httpAPIServer := NewHTTPAPIServer(logger, rdbConn, &fileConfig)
+			httpAPIServer := NewHTTPAPIServer(logger, rdbConn, &config)
 			go func() {
 				if err := httpAPIServer.Run(); err != nil {
 					logger.Panicf("%v", err)
 				}
 			}()
 
-			indexService := NewIndexService(logger, rdbConn, &fileConfig)
+			indexService := NewIndexService(logger, rdbConn, &config)
 			go func() {
 				if err := indexService.Run(); err != nil {
 					logger.Panicf("%v", err)

@@ -23,7 +23,7 @@ type HTTPAPIServer struct {
 }
 
 // NewIndexService creates a new server instance for polling and indexing
-func NewHTTPAPIServer(logger applogger.Logger, rdbConn rdb.Conn, config *FileConfig) *HTTPAPIServer {
+func NewHTTPAPIServer(logger applogger.Logger, rdbConn rdb.Conn, config *Config) *HTTPAPIServer {
 	return &HTTPAPIServer{
 		logger:  logger,
 		rdbConn: rdbConn,
