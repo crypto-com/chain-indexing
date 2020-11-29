@@ -81,9 +81,9 @@ func CliApp(args []string) error {
 				EnvVars: []string{"TENDERMINT_URL"},
 			},
 			&cli.StringFlag{
-				Name:    "cosmosAPIURL",
-				Usage:   " HTTP RPC URL",
-				EnvVars: []string{"TENDERMINT_URL"},
+				Name:    "cosmosAppURL",
+				Usage:   " Cosmos App RPC URL",
+				EnvVars: []string{"COSMOSAPP_URL"},
 			},
 		},
 		Action: func(ctx *cli.Context) error {
@@ -113,6 +113,7 @@ func CliApp(args []string) error {
 				DatabaseSchema:   ctx.String("dbSchema"),
 
 				TendermintHTTPRPCURL: ctx.String("tendermintURL"),
+				CosmosHTTPRPCURL:     ctx.String("cosmosAppURL"),
 			}
 			if ctx.IsSet("color") {
 				cliConfig.LoggerColor = primptr.Bool(ctx.Bool("color"))
@@ -128,8 +129,6 @@ func CliApp(args []string) error {
 				fileConfig,
 			}
 			config.OverrideByCLIConfig(&cliConfig)
-
-			fmt.Printf("%+v", config)
 
 			// Create logger
 			logLevel := parseLogLevel(config.Logger.Level)

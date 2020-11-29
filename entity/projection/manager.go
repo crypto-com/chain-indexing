@@ -103,9 +103,9 @@ func (manager *Manager) projectionRunner(projection Projection) {
 			var events = make([]entity_event.Event, 0)
 			for _, event := range eventsAtHeight {
 				if !isListeningEvent(event, eventsToListen) {
-					eventLogger.WithFields(applogger.LogFields{
-						"eventName": event.Name(),
-					}).Debugf("skipping because event is not one of the listening events")
+					//eventLogger.WithFields(applogger.LogFields{
+					//	"eventName": event.Name(),
+					//}).Debugf("skipping because event is not one of the listening events")
 					continue
 				}
 				events = append(events, event)

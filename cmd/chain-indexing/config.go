@@ -34,6 +34,9 @@ func (config *Config) OverrideByCLIConfig(cliConfig *CLIConfig) {
 	if cliConfig.TendermintHTTPRPCURL != "" {
 		config.Tendermint.HTTPRPCURL = cliConfig.TendermintHTTPRPCURL
 	}
+	if cliConfig.CosmosHTTPRPCURL != "" {
+		config.CosmosApp.HTTPRPCUL = cliConfig.CosmosHTTPRPCURL
+	}
 }
 
 type CLIConfig struct {
