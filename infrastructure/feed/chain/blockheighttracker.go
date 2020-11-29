@@ -47,7 +47,7 @@ func (tracker *BlockHeightTracker) Run() {
 	for {
 		height, err := tracker.client.LatestBlockHeight()
 		if err != nil {
-			tracker.logger.Errorf("error getting chain latest block height", err)
+			tracker.logger.Errorf("error getting chain latest block height: %v", err)
 			<-time.After(1 * time.Second)
 			continue
 		}

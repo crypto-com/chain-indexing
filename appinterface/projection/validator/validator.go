@@ -6,8 +6,8 @@ import (
 
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 
-	"github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbbase"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/validator/constants"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/validator/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
@@ -18,11 +18,6 @@ import (
 )
 
 var _ projection_entity.Projection = &Validator{}
-
-const JAILED = "Jailed"
-const BONDED = "Bonded"
-const UNBONDED = "Unbonded"
-const UNBONDING = "Unbonding"
 
 const DO_NOT_MODIFY = "[do-not-modify]"
 
@@ -150,7 +145,7 @@ func (projection *Validator) projectValidatorView(
 				OperatorAddress:              msgCreateValidatorEvent.ValidatorAddress,
 				InitialDelegatorAddress:      msgCreateValidatorEvent.DelegatorAddress,
 				MinSelfDelegation:            msgCreateValidatorEvent.MinSelfDelegation,
-				Status:                       BONDED,
+				Status:                       constants.BONDED,
 				Jailed:                       false,
 				JoinedAtBlockHeight:          blockHeight,
 				MaybeUnbondingHeight:         nil,
@@ -222,7 +217,7 @@ func (projection *Validator) projectValidatorView(
 				)
 			}
 
-			mutValidatorRow.Status = JAILED
+			mutValidatorRow.Status = constants.JAILED
 			mutValidatorRow.Jailed = true
 
 			if err := validatorsView.Update(mutValidatorRow); err != nil {
@@ -238,7 +233,7 @@ func (projection *Validator) projectValidatorView(
 				return fmt.Errorf("error getting existing validator `%s` from view", msgUnjailEvent.ValidatorAddr)
 			}
 
-			mutValidatorRow.Status = BONDED
+			mutValidatorRow.Status = constants.BONDED
 			mutValidatorRow.Jailed = false
 
 			if err := validatorsView.Update(mutValidatorRow); err != nil {
@@ -267,12 +262,10 @@ func (projection *Validator) projectValidatorView(
 
 			mutValidatorRow.Power = powerChangedEvent.Power
 			if powerChangedEvent.Power == "0" && !mutValidatorRow.Jailed {
-				mutValidatorRow.Status = UNBONDED
+				mutValidatorRow.Status = constants.UNBONDED
 			}
 
 			if err := validatorsView.Update(mutValidatorRow); err != nil {
-				rows, _, err := validatorsView.List(pagination.NewOffsetPagination(1, 20))
-				fmt.Println(rows, err)
 				return fmt.Errorf("error updating validator into view: %v", err)
 			}
 		}

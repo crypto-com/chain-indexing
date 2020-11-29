@@ -20,6 +20,7 @@ type HTTPAPIServer struct {
 	conNodeAddressPrefix   string
 
 	listeningAddress string
+	routePrefix      string
 }
 
 // NewIndexService creates a new server instance for polling and indexing
@@ -31,6 +32,7 @@ func NewHTTPAPIServer(logger applogger.Logger, rdbConn rdb.Conn, config *Config)
 		validatorAddressPrefix: config.Blockchain.ValidatorAddressPrefix,
 		conNodeAddressPrefix:   config.Blockchain.ConNodeAddressPrefix,
 		listeningAddress:       config.HTTP.ListeningAddress,
+		routePrefix:            config.HTTP.RoutePrefix,
 	}
 }
 
@@ -61,7 +63,7 @@ func (server *HTTPAPIServer) Run() error {
 		blockEventsHandler,
 		validatorsHandler,
 	)
-	routeRegistry.Register(httpServer)
+	routeRegistry.Register(httpServer, server.routePrefix)
 
 	server.logger.Infof("server start listening on: %s", server.listeningAddress)
 	if err := httpServer.ListenAndServe(); err != nil {

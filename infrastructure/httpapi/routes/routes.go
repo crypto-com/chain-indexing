@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"fmt"
+
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi/handlers"
 	"github.com/valyala/fasthttp"
@@ -33,22 +35,27 @@ func NewRoutesRegistry(
 	}
 }
 
-func (registry *RouteRegistry) Register(server *httpapi.Server) {
-	server.GET("/api/v1/health", func(ctx *fasthttp.RequestCtx) {
+func (registry *RouteRegistry) Register(server *httpapi.Server, routePrefix string) {
+	if routePrefix == "/" {
+		routePrefix = ""
+	}
+
+	server.GET(fmt.Sprintf("%s/api/v1/health", routePrefix), func(ctx *fasthttp.RequestCtx) {
 		ctx.SetStatusCode(fasthttp.StatusOK)
 		ctx.SetBody([]byte("Ok"))
 	})
-	server.GET("/api/v1/search", registry.searchHandler.Search)
-	server.GET("/api/v1/blocks", registry.blocksHandler.List)
-	server.GET("/api/v1/blocks/{height-or-hash}", registry.blocksHandler.FindBy)
-	server.GET("/api/v1/blocks/{height}/transactions", registry.blocksHandler.ListTransactionsByHeight)
-	server.GET("/api/v1/blocks/{height}/events", registry.blocksHandler.ListEventsByHeight)
-	server.GET("/api/v1/status", registry.statusHandler.GetStatus)
-	server.GET("/api/v1/transactions", registry.transactionHandler.List)
-	server.GET("/api/v1/transactions/{hash}", registry.transactionHandler.FindByHash)
-	server.GET("/api/v1/events", registry.blockEventHandler.List)
-	server.GET("/api/v1/events/{id}", registry.blockEventHandler.FindById)
-	server.GET("/api/v1/validators", registry.validatorsHandler.List)
-	server.GET("/api/v1/validators/{address}", registry.validatorsHandler.FindBy)
-	server.GET("/api/v1/validators/{address}/activities", registry.validatorsHandler.ListActivities)
+	server.GET(fmt.Sprintf("%s/api/v1/search", routePrefix), registry.searchHandler.Search)
+	server.GET(fmt.Sprintf("%s/api/v1/blocks", routePrefix), registry.blocksHandler.List)
+	server.GET(fmt.Sprintf("%s/api/v1/blocks/{height-or-hash}", routePrefix), registry.blocksHandler.FindBy)
+	server.GET(fmt.Sprintf("%s/api/v1/blocks/{height}/transactions", routePrefix), registry.blocksHandler.ListTransactionsByHeight)
+	server.GET(fmt.Sprintf("%s/api/v1/blocks/{height}/events", routePrefix), registry.blocksHandler.ListEventsByHeight)
+	server.GET(fmt.Sprintf("%s/api/v1/status", routePrefix), registry.statusHandler.GetStatus)
+	server.GET(fmt.Sprintf("%s/api/v1/transactions", routePrefix), registry.transactionHandler.List)
+	server.GET(fmt.Sprintf("%s/api/v1/transactions/{hash}", routePrefix), registry.transactionHandler.FindByHash)
+	server.GET(fmt.Sprintf("%s/api/v1/events", routePrefix), registry.blockEventHandler.List)
+	server.GET(fmt.Sprintf("%s/api/v1/events/{id}", routePrefix), registry.blockEventHandler.FindById)
+	server.GET(fmt.Sprintf("%s/api/v1/validators", routePrefix), registry.validatorsHandler.List)
+	server.GET(fmt.Sprintf("%s/api/v1/validators/active", routePrefix), registry.validatorsHandler.ListActive)
+	server.GET(fmt.Sprintf("%s/api/v1/validators/{address}", routePrefix), registry.validatorsHandler.FindBy)
+	server.GET(fmt.Sprintf("%s/api/v1/validators/{address}/activities", routePrefix), registry.validatorsHandler.ListActivities)
 }

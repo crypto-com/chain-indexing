@@ -17,6 +17,7 @@ http_rpc_url = "https://testnet-croeseid-1.crypto.com:26657"
 
 [http]
 listening_address = "0.0.0.0:8080"
+route_prefix = "/"
 
 [database]
 host = "localhost"
