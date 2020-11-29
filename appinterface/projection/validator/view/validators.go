@@ -183,10 +183,10 @@ func (validatorsView *Validators) List(
 	cumulativePower := new(big.Float).SetInt64(int64(0))
 	for rowsResult.Next() {
 		var powerStr string
-		if err := rowsResult.Scan(&powerStr); err != nil {
-			if err != rdb.ErrNoRows {
+		if scanErr := rowsResult.Scan(&powerStr); scanErr != nil {
+			if errors.Is(scanErr, rdb.ErrNoRows) {
 				return nil, nil, fmt.Errorf(
-					"error executing validators cumulative power SQL: %v, %w", err, rdb.ErrQuery,
+					"error executing validators cumulative power SQL: %v, %w", scanErr, rdb.ErrQuery,
 				)
 			}
 			powerStr = "0"
@@ -277,7 +277,7 @@ func (validatorsView *Validators) List(
 			&validator.CommissionMaxChangeRate,
 			&validator.MinSelfDelegation,
 		); err != nil {
-			if err == rdb.ErrNoRows {
+			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
 			}
 			return nil, nil, fmt.Errorf("error scanning validator row: %v: %w", err, rdb.ErrQuery)
@@ -334,8 +334,8 @@ func (validatorsView *Validators) totalPower() (*big.Float, error) {
 	totalPower := new(big.Float).SetInt64(int64(0))
 	for rowsResult.Next() {
 		var powerStr string
-		if err := rowsResult.Scan(&powerStr); err != nil {
-			return nil, fmt.Errorf("error scanning power from validators: %v", err)
+		if scanErr := rowsResult.Scan(&powerStr); scanErr != nil {
+			return nil, fmt.Errorf("error scanning power from validators: %v", scanErr)
 		}
 		power, ok := new(big.Float).SetString(powerStr)
 		if !ok {
@@ -409,7 +409,7 @@ func (validatorsView *Validators) Search(keyword string) ([]ValidatorRow, error)
 			&validator.CommissionMaxChangeRate,
 			&validator.MinSelfDelegation,
 		); err != nil {
-			if err == rdb.ErrNoRows {
+			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, rdb.ErrNoRows
 			}
 			return nil, fmt.Errorf("error scanning validator row: %v: %w", err, rdb.ErrQuery)
@@ -492,7 +492,7 @@ func (validatorsView *Validators) FindBy(identity ValidatorIdentity) (*Validator
 		&validator.CommissionMaxChangeRate,
 		&validator.MinSelfDelegation,
 	); err != nil {
-		if err == rdb.ErrNoRows {
+		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
 		}
 		return nil, fmt.Errorf("error scanning validator row: %v: %w", err, rdb.ErrQuery)

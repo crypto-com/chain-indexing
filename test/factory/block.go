@@ -63,6 +63,7 @@ func addBlockFuncLookup() {
 }
 
 func RandomBlockHeight() int64 {
+	// nolint:gosec
 	return rand.Int63()
 }
 

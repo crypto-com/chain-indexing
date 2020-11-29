@@ -61,7 +61,7 @@ func (handler *Validators) FindBy(ctx *fasthttp.RequestCtx) {
 
 	validator, err := handler.validatorsView.FindBy(identity)
 	if err != nil {
-		if err == rdb.ErrNoRows {
+		if errors.Is(err, rdb.ErrNoRows) {
 			httpapi.NotFound(ctx)
 			return
 		}

@@ -1,6 +1,7 @@
 package pg
 
 import (
+	"errors"
 	"fmt"
 
 	gomigrate "github.com/golang-migrate/migrate/v4"
@@ -62,7 +63,7 @@ func (m *Migrate) MustUp() {
 
 func (m *Migrate) Up() error {
 	if err := m.Migrate.Up(); err != nil {
-		if err == gomigrate.ErrNoChange {
+		if errors.Is(err, gomigrate.ErrNoChange) {
 			return nil
 		}
 
@@ -80,7 +81,7 @@ func (m *Migrate) MustDown() {
 
 func (m *Migrate) Down() error {
 	if err := m.Migrate.Down(); err != nil {
-		if err == gomigrate.ErrNoChange {
+		if errors.Is(err, gomigrate.ErrNoChange) {
 			return nil
 		}
 

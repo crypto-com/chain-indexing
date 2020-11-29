@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"errors"
+
 	"github.com/valyala/fasthttp"
 
 	transaction_view "github.com/crypto-com/chain-indexing/appinterface/projection/transasaction/view"
@@ -33,7 +35,7 @@ func (handler *Transactions) FindByHash(ctx *fasthttp.RequestCtx) {
 		ctx.UserValue("hash").(string),
 	)
 	if err != nil {
-		if err == rdb.ErrNoRows {
+		if errors.Is(err, rdb.ErrNoRows) {
 			httpapi.NotFound(ctx)
 			return
 		}

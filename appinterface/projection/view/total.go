@@ -47,7 +47,7 @@ func (view *Total) Set(identity string, total int64) error {
 	var placeholder int
 	err = view.rdbHandle.QueryRow(sql, sqlArgs...).Scan(&placeholder)
 	if err != nil {
-		if err != rdb.ErrNoRows {
+		if !errors.Is(err, rdb.ErrNoRows) {
 			return fmt.Errorf("error scanning total: %v", err)
 		}
 		sql, sqlArgs, err = view.rdbHandle.StmtBuilder.Insert(
@@ -113,7 +113,7 @@ func (view *Total) Increment(identity string, incTotal int64) error {
 	var prevTotal int64
 	err = view.rdbHandle.QueryRow(sql, sqlArgs...).Scan(&prevTotal)
 	if err != nil {
-		if err != rdb.ErrNoRows {
+		if !errors.Is(err, rdb.ErrNoRows) {
 			return fmt.Errorf("error scanning total of identity: %v", err)
 		}
 		sql, sqlArgs, err = view.rdbHandle.StmtBuilder.Insert(
@@ -173,7 +173,7 @@ func (view *Total) FindBy(identity string) (int64, error) {
 
 	var total int64
 	if err := view.rdbHandle.QueryRow(sql, sqlArgs...).Scan(&total); err != nil {
-		if err == rdb.ErrNoRows {
+		if errors.Is(err, rdb.ErrNoRows) {
 			return int64(0), nil
 		}
 		return int64(0), fmt.Errorf("error getting total: %v", err)

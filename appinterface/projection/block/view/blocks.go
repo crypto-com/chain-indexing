@@ -1,6 +1,7 @@
 package view
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -122,7 +123,7 @@ func (blocksView *Blocks) List(order BlocksListOrder, pagination *pagination.Pag
 			&committedCouncilNodesJSON,
 			&block.TransactionCount,
 		); err != nil {
-			if err == rdb.ErrNoRows {
+			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
 			}
 			return nil, nil, fmt.Errorf("error scanning block row: %v: %w", err, rdb.ErrQuery)
@@ -179,7 +180,7 @@ func (blocksView *Blocks) FindBy(identity *BlockIdentity) (*Block, error) {
 		&committedCouncilNodesJSON,
 		&block.TransactionCount,
 	); err != nil {
-		if err == rdb.ErrNoRows {
+		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
 		}
 		return nil, fmt.Errorf("error scanning block row: %v: %w", err, rdb.ErrQuery)
@@ -240,7 +241,7 @@ func (blocksView *Blocks) Search(
 			&committedCouncilNodesJSON,
 			&block.TransactionCount,
 		); err != nil {
-			if err == rdb.ErrNoRows {
+			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, rdb.ErrNoRows
 			}
 			return nil, fmt.Errorf("error scanning block row: %v: %w", err, rdb.ErrQuery)

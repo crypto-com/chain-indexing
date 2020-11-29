@@ -85,7 +85,7 @@ func (impl *RDbStoreImpl) GetLastHandledEventHeight(rdbHandle *rdb.Handle, proje
 
 	var lastHandledEventHeight int64
 	if err := rdbHandle.QueryRow(sql, args...).Scan(&lastHandledEventHeight); err != nil {
-		if err == rdb.ErrNoRows {
+		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, nil
 		} else {
 			return nil, fmt.Errorf("error building last handled event height selection SQL: %v", err)

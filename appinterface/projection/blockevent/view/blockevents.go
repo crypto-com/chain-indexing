@@ -1,6 +1,7 @@
 package view
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -141,7 +142,7 @@ func (eventsView *BlockEvents) FindById(id int64) (*BlockEventRow, error) {
 		blockTimeReader.ScannableArg(),
 		&blockEventDataJSON,
 	); err != nil {
-		if err == rdb.ErrNoRows {
+		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
 		}
 		return nil, fmt.Errorf("error scanning transaction row: %v: %w", err, rdb.ErrQuery)
@@ -226,7 +227,7 @@ func (eventsView *BlockEvents) List(
 			blockTimeReader.ScannableArg(),
 			&blockEventDataJSON,
 		); err != nil {
-			if err == rdb.ErrNoRows {
+			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
 			}
 			return nil, nil, fmt.Errorf("error scanning transaction row: %v: %w", err, rdb.ErrQuery)

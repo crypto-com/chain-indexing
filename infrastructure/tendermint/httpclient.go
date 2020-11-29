@@ -1,6 +1,7 @@
 package tendermint
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -107,7 +108,12 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 	if len(queryString) > 0 {
 		url += "?" + queryString[0]
 	}
-	rawResp, err := client.httpClient.Get(url)
+
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error creating HTTP request with context: %v", err)
+	}
+	rawResp, err := client.httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error requesting Tendermint %s endpoint: %v", url, err)
 	}

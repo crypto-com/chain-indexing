@@ -72,16 +72,21 @@ func zerologLevelToLogLevel(logLevel zerolog.Level) applogger.LogLevel {
 	case zerolog.Disabled:
 		return applogger.LOG_DISABLED
 	case zerolog.PanicLevel:
+	case zerolog.FatalLevel:
 		return applogger.LOG_LEVEL_PANIC
 	case zerolog.ErrorLevel:
 		return applogger.LOG_LEVEL_ERROR
+	case zerolog.WarnLevel:
 	case zerolog.InfoLevel:
 		return applogger.LOG_LEVEL_INFO
 	case zerolog.DebugLevel:
+	case zerolog.NoLevel:
 		return applogger.LOG_LEVEL_DEBUG
 	default:
 		panic(fmt.Sprintf("Unsupported log level %v", logLevel))
 	}
+
+	return applogger.LOG_LEVEL_DEBUG
 }
 
 func (logger *ZerologLogger) Panic(message string) {

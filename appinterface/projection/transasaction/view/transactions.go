@@ -1,6 +1,7 @@
 package view
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -136,7 +137,7 @@ func (transactionsView *BlockTransactions) FindByHash(txHash string) (*Transacti
 		&transaction.TimeoutHeight,
 		&messagesJSON,
 	); err != nil {
-		if err == rdb.ErrNoRows {
+		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
 		}
 		return nil, fmt.Errorf("error scanning transaction row: %v: %w", err, rdb.ErrQuery)
@@ -232,7 +233,7 @@ func (transactionsView *BlockTransactions) List(
 			&transaction.TimeoutHeight,
 			&messagesJSON,
 		); err != nil {
-			if err == rdb.ErrNoRows {
+			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
 			}
 			return nil, nil, fmt.Errorf("error scanning transaction row: %v: %w", err, rdb.ErrQuery)
@@ -319,7 +320,7 @@ func (transactionsView *BlockTransactions) Search(keyword string) ([]Transaction
 			&transaction.TimeoutHeight,
 			&messagesJSON,
 		); err != nil {
-			if err == rdb.ErrNoRows {
+			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, rdb.ErrNoRows
 			}
 			return nil, fmt.Errorf("error scanning transaction row: %v: %w", err, rdb.ErrQuery)
