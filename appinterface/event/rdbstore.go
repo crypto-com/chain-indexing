@@ -139,6 +139,10 @@ func (store *RDbStore) Insert(event entity_event.Event) error {
 
 // InsertAll insert all events into store. It will rollback when the insert fails at any point.
 func (store *RDbStore) InsertAll(events []entity_event.Event) error {
+	if len(events) == 0 {
+		return nil
+	}
+
 	stmtBuilder := store.rdbHandle.StmtBuilder.Insert(
 		store.table,
 	).Columns(

@@ -1,1 +1,1 @@
-DROP INDEX WHEN EXISTS view_validator_activities_block_height_btree_index;
+DROP INDEX IF EXISTS view_validator_activities_block_height_btree_index;

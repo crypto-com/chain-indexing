@@ -2,8 +2,9 @@ package transasaction
 
 import (
 	"fmt"
+	"strconv"
 
-	view2 "github.com/crypto-com/chain-indexing/appinterface/projection/transasaction/view"
+	transaction_view "github.com/crypto-com/chain-indexing/appinterface/projection/transasaction/view"
 
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 
@@ -59,18 +60,19 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 	}()
 
 	rdbTxHandle := rdbTx.ToHandle()
-	transactionsView := view2.NewTransactions(rdbTxHandle)
+	transactionsView := transaction_view.NewTransactions(rdbTxHandle)
+	transactionsTotalView := transaction_view.NewTransactionsTotal(rdbTxHandle)
 
 	var blockTime utctime.UTCTime
 	var blockHash string
-	txs := make([]view2.TransactionRow, 0)
+	txs := make([]transaction_view.TransactionRow, 0)
 	txMsgs := make(map[string][]event_usecase.MsgEvent)
 	for _, event := range events {
 		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
 			blockTime = blockCreatedEvent.Block.Time
 			blockHash = blockCreatedEvent.Block.Hash
 		} else if transactionCreatedEvent, ok := event.(*event_usecase.TransactionCreated); ok {
-			txs = append(txs, view2.TransactionRow{
+			txs = append(txs, transaction_view.TransactionRow{
 				BlockHeight:   height,
 				BlockTime:     utctime.UTCTime{}, // placeholder
 				Hash:          transactionCreatedEvent.TxHash,
@@ -84,10 +86,10 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 				GasUsed:       transactionCreatedEvent.GasUsed,
 				Memo:          transactionCreatedEvent.Memo,
 				TimeoutHeight: transactionCreatedEvent.TimeoutHeight,
-				Messages:      make([]view2.TransactionRowMessage, 0),
+				Messages:      make([]transaction_view.TransactionRowMessage, 0),
 			})
 		} else if transactionFailedEvent, ok := event.(*event_usecase.TransactionFailed); ok {
-			txs = append(txs, view2.TransactionRow{
+			txs = append(txs, transaction_view.TransactionRow{
 				BlockHeight:   height,
 				BlockTime:     utctime.UTCTime{}, // placeholder
 				Hash:          transactionFailedEvent.TxHash,
@@ -101,7 +103,7 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 				GasUsed:       transactionFailedEvent.GasUsed,
 				Memo:          transactionFailedEvent.Memo,
 				TimeoutHeight: transactionFailedEvent.TimeoutHeight,
-				Messages:      make([]view2.TransactionRowMessage, 0),
+				Messages:      make([]transaction_view.TransactionRowMessage, 0),
 			})
 		} else if msgEvent, ok := event.(event_usecase.MsgEvent); ok {
 			if _, exist := txMsgs[msgEvent.TxHash()]; !exist {
@@ -117,7 +119,7 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 		mutTx.BlockHash = blockHash
 
 		for _, msg := range txMsgs[mutTx.Hash] {
-			mutTx.Messages = append(mutTx.Messages, view2.TransactionRowMessage{
+			mutTx.Messages = append(mutTx.Messages, transaction_view.TransactionRowMessage{
 				Type:    msg.MsgType(),
 				Content: msg,
 			})
@@ -126,6 +128,14 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 		if insertErr := transactionsView.Insert(&mutTx); insertErr != nil {
 			return fmt.Errorf("error inserting transaction into view: %v", insertErr)
 		}
+	}
+
+	totalTxs := int64(len(txs))
+	if err := transactionsTotalView.Increment("-", totalTxs); err != nil {
+		return fmt.Errorf("error incremnting total transactions: %w", err)
+	}
+	if err := transactionsTotalView.Set(strconv.FormatInt(height, 10), totalTxs); err != nil {
+		return fmt.Errorf("error setting total blcok transactions: %w", err)
 	}
 
 	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
