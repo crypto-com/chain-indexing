@@ -219,6 +219,6 @@ func (handler *Validators) ListActivities(ctx *fasthttp.RequestCtx) {
 type ValidatorDetails struct {
 	*validator_view.ValidatorRow
 
-	Tokens         string `json:"tokens""`
+	Tokens         string `json:"tokens"`
 	SelfDelegation string `json:"selfDelegation"`
 }

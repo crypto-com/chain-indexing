@@ -61,7 +61,7 @@ func (client *HTTPClient) Delegation(
 	for {
 		url := fmt.Sprintf("%s/%s", client.url("staking", "delegations"), delegator)
 		if resp.Pagination.MaybeNextKey != nil {
-			url = fmt.Sprintf("%s?pagination.key=%s", url, resp.Pagination.MaybeNextKey)
+			url = fmt.Sprintf("%s?pagination.key=%s", url, *resp.Pagination.MaybeNextKey)
 		}
 
 		rawRespBody, err := client.request(url)
