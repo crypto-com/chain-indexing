@@ -549,6 +549,6 @@ type ValidatorRow struct {
 type ListValidatorRow struct {
 	ValidatorRow
 
-	PowerPercentage           string `json:"power_percentage"`
-	CumulativePowerPercentage string `json:"cumulative_power_percentage"`
+	PowerPercentage           string `json:"powerPercentage"`
+	CumulativePowerPercentage string `json:"cumulativePowerPercentage"`
 }
