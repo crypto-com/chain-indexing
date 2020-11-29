@@ -181,8 +181,6 @@ func (transactionsView *BlockTransactions) List(
 		"messages",
 	).From(
 		"view_transactions",
-	).OrderBy(
-		"block_height",
 	)
 
 	if order.Height == view.ORDER_DESC {

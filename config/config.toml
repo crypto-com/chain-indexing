@@ -40,5 +40,5 @@ pool_health_check_interval = "1m"
 
 [logger]
 # comma separated log levels. possible values: debug,info,error,panic
-level = "info"
+level = "debug"
 color = false

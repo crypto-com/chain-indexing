@@ -1,0 +1,1 @@
+DROP INDEX IF EXITS view_block_events_block_height_btree_index;
