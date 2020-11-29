@@ -4,6 +4,8 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
+
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/internal/primptr"
 
@@ -23,6 +25,7 @@ type Validators struct {
 	validatorAddressPrefix string
 	consNodeAddressPrefix  string
 
+	cosmosAppClient         cosmosapp.Client
 	validatorsView          *validator_view.Validators
 	validatorActivitiesView *validator_view.ValidatorActivities
 }
@@ -31,6 +34,7 @@ func NewValidators(
 	logger applogger.Logger,
 	validatorAddressPrefix string,
 	consNodeAddressPrefix string,
+	cosmosAppClient cosmosapp.Client,
 	rdbHandle *rdb.Handle,
 ) *Validators {
 	return &Validators{
@@ -41,6 +45,7 @@ func NewValidators(
 		validatorAddressPrefix,
 		consNodeAddressPrefix,
 
+		cosmosAppClient,
 		validator_view.NewValidators(rdbHandle),
 		validator_view.NewValidatorActivities(rdbHandle),
 	}
@@ -59,7 +64,7 @@ func (handler *Validators) FindBy(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
-	validator, err := handler.validatorsView.FindBy(identity)
+	rawValidator, err := handler.validatorsView.FindBy(identity)
 	if err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			httpapi.NotFound(ctx)
@@ -68,6 +73,27 @@ func (handler *Validators) FindBy(ctx *fasthttp.RequestCtx) {
 		handler.logger.Errorf("error finding validator by operator address: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
+	}
+
+	validator := ValidatorDetails{
+		ValidatorRow: rawValidator,
+
+		Tokens:         "0",
+		SelfDelegation: "0",
+	}
+
+	validatorData, err := handler.cosmosAppClient.Validator(validator.OperatorAddress)
+	if err != nil {
+		handler.logger.Errorf("error getting validator details: %v", err)
+	} else {
+		validator.Tokens = validatorData.Tokens
+	}
+
+	delegation, err := handler.cosmosAppClient.Delegation(validator.InitialDelegatorAddress, validator.OperatorAddress)
+	if err != nil {
+		handler.logger.Errorf("error getting self delegation record: %v", err)
+	} else {
+		validator.SelfDelegation = delegation.Balance.Amount
 	}
 
 	httpapi.Success(ctx, validator)
@@ -166,7 +192,21 @@ func (handler *Validators) ListActivities(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
-	blocks, paginationResult, err := handler.validatorActivitiesView.List(filter, pagination)
+	order := validator_view.ValidatorActivitiesListOrder{}
+	queryArgs := ctx.QueryArgs()
+	if queryArgs.Has("order") {
+		orderArg := string(queryArgs.Peek("order"))
+		if orderArg == "height" {
+			order.MaybeBlockHeight = primptr.String(view.ORDER_ASC)
+		} else if orderArg == "height.desc" {
+			order.MaybeBlockHeight = primptr.String(view.ORDER_DESC)
+		} else {
+			httpapi.BadRequest(ctx, errors.New("invalid order"))
+			return
+		}
+	}
+
+	blocks, paginationResult, err := handler.validatorActivitiesView.List(filter, order, pagination)
 	if err != nil {
 		handler.logger.Errorf("error listing activities: %v", err)
 		httpapi.InternalServerError(ctx)
@@ -174,4 +214,11 @@ func (handler *Validators) ListActivities(ctx *fasthttp.RequestCtx) {
 	}
 
 	httpapi.SuccessWithPagination(ctx, blocks, paginationResult)
+}
+
+type ValidatorDetails struct {
+	*validator_view.ValidatorRow
+
+	Tokens         string `json:"tokens""`
+	SelfDelegation string `json:"selfDelegation"`
 }

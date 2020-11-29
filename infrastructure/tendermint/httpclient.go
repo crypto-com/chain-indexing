@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
@@ -26,7 +27,7 @@ func NewHTTPClient(tendermintRPCUrl string) *HTTPClient {
 
 	return &HTTPClient{
 		httpClient,
-		tendermintRPCUrl,
+		strings.TrimSuffix(tendermintRPCUrl, "/"),
 	}
 }
 

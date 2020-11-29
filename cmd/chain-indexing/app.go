@@ -80,6 +80,11 @@ func CliApp(args []string) error {
 				Usage:   "Tendermint HTTP RPC URL",
 				EnvVars: []string{"TENDERMINT_URL"},
 			},
+			&cli.StringFlag{
+				Name:    "cosmosAPIURL",
+				Usage:   " HTTP RPC URL",
+				EnvVars: []string{"TENDERMINT_URL"},
+			},
 		},
 		Action: func(ctx *cli.Context) error {
 			if args := ctx.Args(); args.Len() > 0 {

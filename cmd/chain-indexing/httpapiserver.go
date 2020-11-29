@@ -3,6 +3,10 @@ package main
 import (
 	"fmt"
 
+	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
+
+	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
+
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi/routes"
 
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi/handlers"
@@ -13,8 +17,9 @@ import (
 )
 
 type HTTPAPIServer struct {
-	logger  applogger.Logger
-	rdbConn rdb.Conn
+	logger          applogger.Logger
+	rdbConn         rdb.Conn
+	cosmosAppClient cosmosapp.Client
 
 	validatorAddressPrefix string
 	conNodeAddressPrefix   string
@@ -26,8 +31,9 @@ type HTTPAPIServer struct {
 // NewIndexService creates a new server instance for polling and indexing
 func NewHTTPAPIServer(logger applogger.Logger, rdbConn rdb.Conn, config *Config) *HTTPAPIServer {
 	return &HTTPAPIServer{
-		logger:  logger,
-		rdbConn: rdbConn,
+		logger:          logger,
+		rdbConn:         rdbConn,
+		cosmosAppClient: cosmosapp_infrastructure.NewHTTPClient(config.CosmosApp.HTTPRPCUL),
 
 		validatorAddressPrefix: config.Blockchain.ValidatorAddressPrefix,
 		conNodeAddressPrefix:   config.Blockchain.ConNodeAddressPrefix,
@@ -53,6 +59,7 @@ func (server *HTTPAPIServer) Run() error {
 		server.logger,
 		server.validatorAddressPrefix,
 		server.conNodeAddressPrefix,
+		server.cosmosAppClient,
 		server.rdbConn.ToHandle(),
 	)
 	routeRegistry := routes.NewRoutesRegistry(
