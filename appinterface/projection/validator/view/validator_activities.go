@@ -63,6 +63,51 @@ func (validatorActivitiesView *ValidatorActivities) Insert(validatorActivity *Va
 	return nil
 }
 
+func (validatorActivitiesView *ValidatorActivities) InsertAll(validatorActivities []ValidatorActivityRow) error {
+	if len(validatorActivities) == 0 {
+		return nil
+	}
+
+	stmtBuilder := validatorActivitiesView.rdb.StmtBuilder.Insert(
+		"view_validator_activities",
+	).Columns(
+		"block_height",
+		"block_hash",
+		"block_time",
+		"transaction_hash",
+		"operator_address",
+		"success",
+		"data",
+	)
+
+	for _, validatorActivity := range validatorActivities {
+		stmtBuilder = stmtBuilder.Values(
+			validatorActivity.BlockHeight,
+			validatorActivity.BlockHash,
+			validatorActivitiesView.rdb.Tton(&validatorActivity.BlockTime),
+			validatorActivity.MaybeTransactionHash,
+			validatorActivity.OperatorAddress,
+			validatorActivity.Success,
+			validatorActivity.Data,
+		)
+	}
+
+	sql, sqlArgs, err := stmtBuilder.ToSql()
+	if err != nil {
+		return fmt.Errorf("error building valiator activity insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	result, err := validatorActivitiesView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error inserting validator activity into the table: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() != int64(len(validatorActivities)) {
+		return fmt.Errorf("error inserting validator activities into the table: no rows inserted: %w", rdb.ErrWrite)
+	}
+
+	return nil
+}
+
 func (validatorActivitiesView *ValidatorActivities) List(
 	filter ValidatorActivitiesListFilter,
 	order ValidatorActivitiesListOrder,

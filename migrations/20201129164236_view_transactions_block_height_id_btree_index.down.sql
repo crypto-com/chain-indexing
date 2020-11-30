@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS view_transactions_block_height_id_btree_index;

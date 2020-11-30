@@ -3,7 +3,10 @@ package view
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
+
+	sq "github.com/Masterminds/squirrel"
 
 	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
@@ -181,8 +184,6 @@ func (transactionsView *BlockTransactions) List(
 		"messages",
 	).From(
 		"view_transactions",
-	).OrderBy(
-		"block_height",
 	)
 
 	if order.Height == view.ORDER_DESC {
@@ -198,6 +199,19 @@ func (transactionsView *BlockTransactions) List(
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
 		transactionsView.rdb,
+	).WithCustomTotalQueryFn(
+		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
+			identity := "-"
+			if filter.MaybeBlockHeight != nil {
+				identity = strconv.FormatInt(*filter.MaybeBlockHeight, 10)
+			}
+			totalView := NewTransactionsTotal(rdbHandle)
+			total, err := totalView.FindBy(identity)
+			if err != nil {
+				return int64(0), err
+			}
+			return total, nil
+		},
 	).BuildStmt(stmtBuilder)
 	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
 	if err != nil {
