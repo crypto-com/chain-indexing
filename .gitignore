@@ -32,7 +32,7 @@ target/
 log/
 *.log
 
-config/config.yml
+config/config.toml
 chain-indexing
 !chain-indexing/
 
