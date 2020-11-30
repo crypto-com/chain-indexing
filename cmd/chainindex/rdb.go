@@ -9,7 +9,7 @@ import (
 	applogger "github.com/crypto-com/chainindex/internal/logger"
 )
 
-func SetupRDbConn(config *FileConfig, logger applogger.Logger) (rdb.Conn, error) {
+func SetupRDbConn(config *Config, logger applogger.Logger) (rdb.Conn, error) {
 	var pgxConnPool *pg.PgxConn
 	var err error
 

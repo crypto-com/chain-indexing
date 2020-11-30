@@ -18,7 +18,7 @@ func WithTestPgConnConfig(body func(*pg.ConnConfig)) bool {
 	}
 	config := pg.ConnConfig{
 		Host:          "127.0.0.1",
-		Port:          typeconv.MustAtou32(os.Getenv("TEST_POSTGRES_PORT")),
+		Port:          typeconv.MustAtoi32(os.Getenv("TEST_POSTGRES_PORT")),
 		MaybeUsername: primptr.String(os.Getenv("TEST_POSTGRES_USERNAME")),
 		MaybePassword: primptr.String(os.Getenv("TEST_POSTGRES_PASSWORD")),
 		Database:      os.Getenv("TEST_POSTGRES_DATABASE"),
@@ -37,7 +37,7 @@ func WithTestPgxConn(body func(*pg.PgxConn, *pg.Migrate)) bool {
 	}
 	config := &pg.ConnConfig{
 		Host:          "127.0.0.1",
-		Port:          typeconv.MustAtou32(os.Getenv("TEST_POSTGRES_PORT")),
+		Port:          typeconv.MustAtoi32(os.Getenv("TEST_POSTGRES_PORT")),
 		MaybeUsername: primptr.String(os.Getenv("TEST_POSTGRES_USERNAME")),
 		MaybePassword: primptr.String(os.Getenv("TEST_POSTGRES_PASSWORD")),
 		Database:      os.Getenv("TEST_POSTGRES_DATABASE"),

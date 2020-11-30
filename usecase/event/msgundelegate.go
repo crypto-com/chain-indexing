@@ -3,6 +3,8 @@ package event
 import (
 	"bytes"
 
+	"github.com/crypto-com/chainindex/internal/utctime"
+
 	"github.com/crypto-com/chainindex/usecase/coin"
 	"github.com/crypto-com/chainindex/usecase/model"
 
@@ -20,9 +22,10 @@ const MSG_UNDELEGATE_FAILED = "MsgUndelegateFailed"
 type MsgUndelegate struct {
 	MsgBase
 
-	DelegatorAddress string    `json:"delegatorAddress"`
-	ValidatorAddress string    `json:"validatorAddress"`
-	Amount           coin.Coin `json:"amount"`
+	DelegatorAddress string          `json:"delegatorAddress"`
+	ValidatorAddress string          `json:"validatorAddress"`
+	Amount           coin.Coin       `json:"amount"`
+	UnbondCompleteAt utctime.UTCTime `json:"unbondCompleteAt"`
 }
 
 // NewMsgUndelegate creates a new instance of MsgUndelegate
@@ -37,6 +40,7 @@ func NewMsgUndelegate(msgCommonParams MsgCommonParams, params model.MsgUndelegat
 		params.DelegatorAddress,
 		params.ValidatorAddress,
 		params.Amount,
+		params.UnbondCompleteAt,
 	}
 }
 

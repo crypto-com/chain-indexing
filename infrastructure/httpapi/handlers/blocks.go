@@ -6,6 +6,9 @@ import (
 
 	"github.com/valyala/fasthttp"
 
+	block_view "github.com/crypto-com/chainindex/appinterface/projection/block/view"
+	blockevent_view "github.com/crypto-com/chainindex/appinterface/projection/blockevent/view"
+	transaction_view "github.com/crypto-com/chainindex/appinterface/projection/transasaction/view"
 	"github.com/crypto-com/chainindex/appinterface/projection/view"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
 	"github.com/crypto-com/chainindex/infrastructure/httpapi"
@@ -15,9 +18,9 @@ import (
 type Blocks struct {
 	logger applogger.Logger
 
-	blocksView       *view.Blocks
-	transactionsView *view.BlockTransactions
-	blockEventsView  *view.BlockEvents
+	blocksView       *block_view.Blocks
+	transactionsView *transaction_view.BlockTransactions
+	blockEventsView  *blockevent_view.BlockEvents
 }
 
 func NewBlocks(logger applogger.Logger, rdbHandle *rdb.Handle) *Blocks {
@@ -26,16 +29,16 @@ func NewBlocks(logger applogger.Logger, rdbHandle *rdb.Handle) *Blocks {
 			"module": "BlocksHandler",
 		}),
 
-		view.NewBlocks(rdbHandle),
-		view.NewTransactions(rdbHandle),
-		view.NewBlockEvents(rdbHandle),
+		block_view.NewBlocks(rdbHandle),
+		transaction_view.NewTransactions(rdbHandle),
+		blockevent_view.NewBlockEvents(rdbHandle),
 	}
 }
 
 func (handler *Blocks) FindBy(ctx *fasthttp.RequestCtx) {
 	heightOrHashParam, _ := ctx.UserValue("height-or-hash").(string)
 	height, err := strconv.ParseInt(heightOrHashParam, 10, 64)
-	var identity view.BlockIdentity
+	var identity block_view.BlockIdentity
 	if err == nil {
 		identity.MaybeHeight = &height
 	} else {
@@ -43,6 +46,10 @@ func (handler *Blocks) FindBy(ctx *fasthttp.RequestCtx) {
 	}
 	block, err := handler.blocksView.FindBy(&identity)
 	if err != nil {
+		if err == rdb.ErrNoRows {
+			httpapi.NotFound(ctx)
+			return
+		}
 		handler.logger.Errorf("error finding block by height or hash: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
@@ -60,7 +67,17 @@ func (handler *Blocks) List(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	blocks, paginationResult, err := handler.blocksView.List(pagination)
+	heightOrder := view.ORDER_ASC
+	queryArgs := ctx.QueryArgs()
+	if queryArgs.Has("order") {
+		if string(queryArgs.Peek("order")) == "height.desc" {
+			heightOrder = view.ORDER_DESC
+		}
+	}
+
+	blocks, paginationResult, err := handler.blocksView.List(block_view.BlocksListOrder{
+		Height: heightOrder,
+	}, pagination)
 	if err != nil {
 		handler.logger.Errorf("error listing blocks: %v", err)
 		httpapi.InternalServerError(ctx)
@@ -84,8 +101,18 @@ func (handler *Blocks) ListTransactionsByHeight(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	blocks, paginationResult, err := handler.transactionsView.List(view.TransactionsListFilter{
+	heightOrder := view.ORDER_ASC
+	queryArgs := ctx.QueryArgs()
+	if queryArgs.Has("order") {
+		if string(queryArgs.Peek("order")) == "height.desc" {
+			heightOrder = view.ORDER_DESC
+		}
+	}
+
+	blocks, paginationResult, err := handler.transactionsView.List(transaction_view.TransactionsListFilter{
 		MaybeBlockHeight: &blockHeight,
+	}, transaction_view.TransactionsListOrder{
+		Height: heightOrder,
 	}, pagination)
 	if err != nil {
 		handler.logger.Errorf("error listing transactions: %v", err)
@@ -103,6 +130,14 @@ func (handler *Blocks) ListEventsByHeight(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
+	heightOrder := view.ORDER_ASC
+	queryArgs := ctx.QueryArgs()
+	if queryArgs.Has("order") {
+		if string(queryArgs.Peek("order")) == "height.desc" {
+			heightOrder = view.ORDER_DESC
+		}
+	}
+
 	blockHeightParam := ctx.UserValue("height")
 	blockHeight, err := strconv.ParseInt(blockHeightParam.(string), 10, 64)
 	if err != nil {
@@ -110,8 +145,10 @@ func (handler *Blocks) ListEventsByHeight(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	blocks, paginationResult, err := handler.blockEventsView.List(view.BlockEventsListFilter{
+	blocks, paginationResult, err := handler.blockEventsView.List(blockevent_view.BlockEventsListFilter{
 		MaybeBlockHeight: &blockHeight,
+	}, blockevent_view.BlockEventsListOrder{
+		Height: heightOrder,
 	}, pagination)
 	if err != nil {
 		handler.logger.Errorf("error listing events: %v", err)

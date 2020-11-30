@@ -56,7 +56,7 @@ func (tracker *BlockHeightTracker) Run() {
 			select {
 			case subscription <- height:
 			default:
-				tracker.logger.Error("block subscription channel is blocked")
+				tracker.logger.Info("block subscription channel is blocked, maybe busy?")
 			}
 		}
 

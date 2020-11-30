@@ -2,6 +2,7 @@ package view
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/crypto-com/chainindex/appinterface/pagination"
 
@@ -31,6 +32,7 @@ func (view *Validators) Insert(validator *ValidatorRow) error {
 		"initial_delegator_address",
 		"status",
 		"jailed",
+		"joined_at_block_height",
 		"power",
 		"unbonding_height",
 		"unbonding_completion_time",
@@ -43,7 +45,7 @@ func (view *Validators) Insert(validator *ValidatorRow) error {
 		"commission_max_rate",
 		"commission_max_change_rate",
 		"min_self_delegation",
-	).Values("?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?").ToSql()
+	).Values("?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?").ToSql()
 	if err != nil {
 		return fmt.Errorf("error building blocks insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
@@ -54,6 +56,7 @@ func (view *Validators) Insert(validator *ValidatorRow) error {
 		validator.InitialDelegatorAddress,
 		validator.Status,
 		validator.Jailed,
+		validator.JoinedAtBlockHeight,
 		validator.Power,
 		validator.MaybeUnbondingHeight,
 		validator.MaybeUnbondingCompletionTime,
@@ -78,9 +81,6 @@ func (view *Validators) Insert(validator *ValidatorRow) error {
 }
 
 func (view *Validators) Update(validator *ValidatorRow) error {
-	//row, _, err := view.List(pagination.NewOffsetPagination(1, 20))
-	//fmt.Println(row, err)
-
 	var unbondingCompletionTime interface{} = nil
 	if validator.MaybeUnbondingCompletionTime != nil {
 		unbondingCompletionTime = view.rdb.Tton(validator.MaybeUnbondingCompletionTime)
@@ -101,7 +101,7 @@ func (view *Validators) Update(validator *ValidatorRow) error {
 		"details":                   validator.Details,
 		"commission_rate":           validator.CommissionRate,
 	}).Where(
-		"id = ?", validator.Id,
+		"id = ?", validator.MaybeId,
 	).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building validator update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -126,6 +126,7 @@ func (view *Validators) List(pagination *pagination.Pagination) ([]ValidatorRow,
 		"initial_delegator_address",
 		"status",
 		"jailed",
+		"joined_at_block_height",
 		"power",
 		"unbonding_height",
 		"unbonding_completion_time",
@@ -144,14 +145,13 @@ func (view *Validators) List(pagination *pagination.Pagination) ([]ValidatorRow,
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
-		view.rdb.Runner,
+		view.rdb,
 	).BuildStmt(stmtBuilder)
 	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
 	if err != nil {
 		return nil, nil, fmt.Errorf("error building blocks select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	fmt.Println(sql, sqlArgs)
 	rowsResult, err := view.rdb.Query(sql, sqlArgs...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error executing blocks select SQL: %v: %w", err, rdb.ErrQuery)
@@ -162,12 +162,13 @@ func (view *Validators) List(pagination *pagination.Pagination) ([]ValidatorRow,
 		var validator ValidatorRow
 		unbondingCompletionTimeReader := view.rdb.NtotReader()
 		if err = rowsResult.Scan(
-			&validator.Id,
+			&validator.MaybeId,
 			&validator.OperatorAddress,
 			&validator.ConsensusNodeAddress,
 			&validator.InitialDelegatorAddress,
 			&validator.Status,
 			&validator.Jailed,
+			&validator.JoinedAtBlockHeight,
 			&validator.Power,
 			&validator.MaybeUnbondingHeight,
 			unbondingCompletionTimeReader.ScannableArg(),
@@ -206,6 +207,88 @@ func (view *Validators) List(pagination *pagination.Pagination) ([]ValidatorRow,
 	return validators, paginationResult, nil
 }
 
+func (view *Validators) Search(keyword string) ([]ValidatorRow, error) {
+	keyword = strings.ToLower(keyword)
+	sql, sqlArgs, err := view.rdb.StmtBuilder.Select(
+		"id",
+		"operator_address",
+		"consensus_node_address",
+		"initial_delegator_address",
+		"status",
+		"jailed",
+		"joined_at_block_height",
+		"power",
+		"unbonding_height",
+		"unbonding_completion_time",
+		"moniker",
+		"identity",
+		"website",
+		"security_contact",
+		"details",
+		"commission_rate",
+		"commission_max_rate",
+		"commission_max_change_rate",
+		"min_self_delegation",
+	).From(
+		"view_validators",
+	).Where(
+		"operator_address = ? OR consensus_node_address = ? OR LOWER(moniker) LIKE ?",
+		keyword, keyword, fmt.Sprintf("%%%s%%", keyword),
+	).OrderBy("id").ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("error building blocks select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	rowsResult, err := view.rdb.Query(sql, sqlArgs...)
+	if err != nil {
+		return nil, fmt.Errorf("error executing blocks select SQL: %v: %w", err, rdb.ErrQuery)
+	}
+
+	validators := make([]ValidatorRow, 0)
+	for rowsResult.Next() {
+		var validator ValidatorRow
+		unbondingCompletionTimeReader := view.rdb.NtotReader()
+		if err = rowsResult.Scan(
+			&validator.MaybeId,
+			&validator.OperatorAddress,
+			&validator.ConsensusNodeAddress,
+			&validator.InitialDelegatorAddress,
+			&validator.Status,
+			&validator.Jailed,
+			&validator.JoinedAtBlockHeight,
+			&validator.Power,
+			&validator.MaybeUnbondingHeight,
+			unbondingCompletionTimeReader.ScannableArg(),
+			&validator.Moniker,
+			&validator.Identity,
+			&validator.Website,
+			&validator.SecurityContact,
+			&validator.Details,
+			&validator.CommissionRate,
+			&validator.CommissionMaxRate,
+			&validator.CommissionMaxChangeRate,
+			&validator.MinSelfDelegation,
+		); err != nil {
+			if err == rdb.ErrNoRows {
+				return nil, rdb.ErrNoRows
+			}
+			return nil, fmt.Errorf("error scanning validator row: %v: %w", err, rdb.ErrQuery)
+		}
+		unbondingCompletionTime, parseErr := unbondingCompletionTimeReader.Parse()
+		if parseErr != nil {
+			return nil, fmt.Errorf("error parsing validator time: %v: %w", parseErr, rdb.ErrQuery)
+		}
+		if unbondingCompletionTime != nil {
+			validator.MaybeUnbondingCompletionTime = unbondingCompletionTime
+		}
+
+		validators = append(validators, validator)
+	}
+	rowsResult.Close()
+
+	return validators, nil
+}
+
 func (view *Validators) FindBy(identity ValidatorIdentity) (*ValidatorRow, error) {
 	var err error
 
@@ -216,6 +299,7 @@ func (view *Validators) FindBy(identity ValidatorIdentity) (*ValidatorRow, error
 		"initial_delegator_address",
 		"status",
 		"jailed",
+		"joined_at_block_height",
 		"power",
 		"unbonding_height",
 		"unbonding_completion_time",
@@ -248,12 +332,13 @@ func (view *Validators) FindBy(identity ValidatorIdentity) (*ValidatorRow, error
 	var validator ValidatorRow
 	unbondingCompletionTimeReader := view.rdb.NtotReader()
 	if err = view.rdb.QueryRow(sql, sqlArgs...).Scan(
-		&validator.Id,
+		&validator.MaybeId,
 		&validator.OperatorAddress,
 		&validator.ConsensusNodeAddress,
 		&validator.InitialDelegatorAddress,
 		&validator.Status,
 		&validator.Jailed,
+		&validator.JoinedAtBlockHeight,
 		&validator.Power,
 		&validator.MaybeUnbondingHeight,
 		unbondingCompletionTimeReader.ScannableArg(),
@@ -283,18 +368,27 @@ func (view *Validators) FindBy(identity ValidatorIdentity) (*ValidatorRow, error
 	return &validator, nil
 }
 
+func (view *Validators) Count() (int64, error) {
+	var count int64
+	if err := view.rdb.QueryRow("SELECT COUNT(*) FROM view_validators").Scan(&count); err != nil {
+		return int64(0), fmt.Errorf("error getting validators count: %v", err)
+	}
+	return count, nil
+}
+
 type ValidatorIdentity struct {
 	MaybeConsensusNodeAddress *string
 	MaybeOperatorAddress      *string
 }
 
 type ValidatorRow struct {
-	Id                           int64            `json:"-"`
+	MaybeId                      *int64           `json:"-"`
 	OperatorAddress              string           `json:"operatorAddress"`
 	ConsensusNodeAddress         string           `json:"consensusNodeAddress"`
 	InitialDelegatorAddress      string           `json:"initialDelegatorAddress"`
 	Status                       string           `json:"status"`
 	Jailed                       bool             `json:"jailed"`
+	JoinedAtBlockHeight          int64            `json:"joinedAtBlockHeight"`
 	Power                        string           `json:"power"`
 	MaybeUnbondingHeight         *int64           `json:"unbondingHeight"`
 	MaybeUnbondingCompletionTime *utctime.UTCTime `json:"unbondingCompletionTime"`

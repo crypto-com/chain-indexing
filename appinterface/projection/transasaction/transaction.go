@@ -1,12 +1,13 @@
-package projection
+package transasaction
 
 import (
 	"fmt"
 
+	view2 "github.com/crypto-com/chainindex/appinterface/projection/transasaction/view"
+
 	projection_entity "github.com/crypto-com/chainindex/entity/projection"
 
 	"github.com/crypto-com/chainindex/appinterface/projection/rdbbase"
-	"github.com/crypto-com/chainindex/appinterface/projection/view"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
 	event_entity "github.com/crypto-com/chainindex/entity/event"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
@@ -45,26 +46,31 @@ func (projection *Transaction) OnInit() error {
 }
 
 func (projection *Transaction) HandleEvents(height int64, events []event_entity.Event) error {
-	var err error
-
-	var rdbTx rdb.Tx
-	rdbTx, err = projection.rdbConn.Begin()
+	rdbTx, err := projection.rdbConn.Begin()
 	if err != nil {
 		return fmt.Errorf("error beginning transaction: %v", err)
 	}
+
+	committed := false
+	defer func() {
+		if !committed {
+			_ = rdbTx.Rollback()
+		}
+	}()
+
 	rdbTxHandle := rdbTx.ToHandle()
-	transactionsView := view.NewTransactions(rdbTxHandle)
+	transactionsView := view2.NewTransactions(rdbTxHandle)
 
 	var blockTime utctime.UTCTime
 	var blockHash string
-	txs := make([]view.TransactionRow, 0)
+	txs := make([]view2.TransactionRow, 0)
 	txMsgs := make(map[string][]event_usecase.MsgEvent)
 	for _, event := range events {
 		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
 			blockTime = blockCreatedEvent.Block.Time
 			blockHash = blockCreatedEvent.Block.Hash
 		} else if transactionCreatedEvent, ok := event.(*event_usecase.TransactionCreated); ok {
-			txs = append(txs, view.TransactionRow{
+			txs = append(txs, view2.TransactionRow{
 				BlockHeight:   height,
 				BlockTime:     utctime.UTCTime{}, // placeholder
 				Hash:          transactionCreatedEvent.TxHash,
@@ -78,10 +84,10 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 				GasUsed:       transactionCreatedEvent.GasUsed,
 				Memo:          transactionCreatedEvent.Memo,
 				TimeoutHeight: transactionCreatedEvent.TimeoutHeight,
-				Messages:      make([]view.TransactionRowMessage, 0),
+				Messages:      make([]view2.TransactionRowMessage, 0),
 			})
 		} else if transactionFailedEvent, ok := event.(*event_usecase.TransactionFailed); ok {
-			txs = append(txs, view.TransactionRow{
+			txs = append(txs, view2.TransactionRow{
 				BlockHeight:   height,
 				BlockTime:     utctime.UTCTime{}, // placeholder
 				Hash:          transactionFailedEvent.TxHash,
@@ -95,7 +101,7 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 				GasUsed:       transactionFailedEvent.GasUsed,
 				Memo:          transactionFailedEvent.Memo,
 				TimeoutHeight: transactionFailedEvent.TimeoutHeight,
-				Messages:      make([]view.TransactionRowMessage, 0),
+				Messages:      make([]view2.TransactionRowMessage, 0),
 			})
 		} else if msgEvent, ok := event.(event_usecase.MsgEvent); ok {
 			if _, exist := txMsgs[msgEvent.TxHash()]; !exist {
@@ -111,26 +117,24 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 		mutTx.BlockHash = blockHash
 
 		for _, msg := range txMsgs[mutTx.Hash] {
-			mutTx.Messages = append(mutTx.Messages, view.TransactionRowMessage{
+			mutTx.Messages = append(mutTx.Messages, view2.TransactionRowMessage{
 				Type:    msg.MsgType(),
 				Content: msg,
 			})
 		}
 
 		if insertErr := transactionsView.Insert(&mutTx); insertErr != nil {
-			_ = rdbTx.Rollback()
 			return fmt.Errorf("error inserting transaction into view: %v", insertErr)
 		}
 	}
 
-	if err = projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
-		_ = rdbTx.Rollback()
+	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
 		return fmt.Errorf("error updating last handled event height: %v", err)
 	}
 
-	if err = rdbTx.Commit(); err != nil {
-		_ = rdbTx.Rollback()
+	if err := rdbTx.Commit(); err != nil {
 		return fmt.Errorf("error committing changes: %v", err)
 	}
+	committed = true
 	return nil
 }

@@ -5,6 +5,7 @@ CREATE TABLE view_validators (
     initial_delegator_address VARCHAR NOT NULL,
     status VARCHAR NOT NULL,
     jailed BOOL NOT NULL,
+    joined_at_block_height BIGINT NOT NULL,
     power VARCHAR NOT NULL,
     unbonding_height BIGINT NULL,
     unbonding_completion_time BIGINT NULL,
@@ -19,4 +20,4 @@ CREATE TABLE view_validators (
     min_self_delegation VARCHAR NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (operator_address, consensus_node_address)
-)
+);

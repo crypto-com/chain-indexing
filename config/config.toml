@@ -22,7 +22,7 @@ listening_address = "0.0.0.0:8080"
 host = "localhost"
 port = 5432
 username = "postgres"
-# password can only be provided through Environment variable `DB_PASS`
+# password can only be provided through CLI or Environment variable `DB_PASS`
 name = "postgres"
 schema = "public"
 ssl = true
@@ -33,3 +33,8 @@ pool_min_conns = 0
 pool_max_conn_lifetime = "1h"
 pool_max_conn_idle_time = "30m"
 pool_health_check_interval = "1m"
+
+[logger]
+# comma separated log levels. possible values: debug,info,error,panic
+level = "info"
+color = false

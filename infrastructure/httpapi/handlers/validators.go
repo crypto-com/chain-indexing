@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"strings"
+
 	"github.com/valyala/fasthttp"
 
-	"github.com/crypto-com/chainindex/appinterface/projection/view"
+	validator_view "github.com/crypto-com/chainindex/appinterface/projection/validator/view"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
 	"github.com/crypto-com/chainindex/infrastructure/httpapi"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
@@ -12,26 +14,45 @@ import (
 type Validators struct {
 	logger applogger.Logger
 
-	validatorsView *view.Validators
+	validatorAddressPrefix string
+	consNodeAddressPrefix  string
+
+	validatorsView          *validator_view.Validators
+	validatorActivitiesView *validator_view.ValidatorActivities
 }
 
-func NewValidators(logger applogger.Logger, rdbHandle *rdb.Handle) *Validators {
+func NewValidators(
+	logger applogger.Logger,
+	validatorAddressPrefix string,
+	consNodeAddressPrefix string,
+	rdbHandle *rdb.Handle,
+) *Validators {
 	return &Validators{
 		logger.WithFields(applogger.LogFields{
 			"module": "ValidatorsHandler",
 		}),
 
-		view.NewValidators(rdbHandle),
+		validatorAddressPrefix,
+		consNodeAddressPrefix,
+
+		validator_view.NewValidators(rdbHandle),
+		validator_view.NewValidatorActivities(rdbHandle),
 	}
 }
 
 func (handler *Validators) FindBy(ctx *fasthttp.RequestCtx) {
-	// TODO: support find by consensus node address
-	operatorAddress, _ := ctx.UserValue("operator_address").(string)
-
-	identity := view.ValidatorIdentity{
-		MaybeOperatorAddress: &operatorAddress,
+	addressParams, _ := ctx.UserValue("address").(string)
+	var identity validator_view.ValidatorIdentity
+	if strings.HasPrefix(addressParams, handler.validatorAddressPrefix) {
+		identity = validator_view.ValidatorIdentity{
+			MaybeOperatorAddress: &addressParams,
+		}
+	} else if strings.HasPrefix(addressParams, handler.consNodeAddressPrefix) {
+		identity = validator_view.ValidatorIdentity{
+			MaybeConsensusNodeAddress: &addressParams,
+		}
 	}
+
 	validator, err := handler.validatorsView.FindBy(identity)
 	if err != nil {
 		if err == rdb.ErrNoRows {
@@ -65,28 +86,31 @@ func (handler *Validators) List(ctx *fasthttp.RequestCtx) {
 	httpapi.SuccessWithPagination(ctx, validators, paginationResult)
 }
 
-func (handler *Validators) ListActivities(_ *fasthttp.RequestCtx) {
-	//pagination, err := httpapi.ParsePagination(ctx)
-	//if err != nil {
-	//    httpapi.BadRequest(ctx, err)
-	//    return
-	//}
-	//
-	//blockHeightParam := ctx.UserValue("height")
-	//blockHeight, err := strconv.ParseInt(blockHeightParam.(string), 10, 64)
-	//if err != nil {
-	//    httpapi.BadRequest(ctx, errors.New("invalid block height"))
-	//    return
-	//}
-	//
-	//blocks, paginationResult, err := handler.transactionsView.List(view.TransactionsListFilter{
-	//    MaybeBlockHeight: &blockHeight,
-	//}, pagination)
-	//if err != nil {
-	//    handler.logger.Errorf("error listing transactions: %v", err)
-	//    httpapi.InternalServerError(ctx)
-	//    return
-	//}
-	//
-	//httpapi.SuccessWithPagination(ctx, blocks, paginationResult)
+func (handler *Validators) ListActivities(ctx *fasthttp.RequestCtx) {
+	pagination, err := httpapi.ParsePagination(ctx)
+	if err != nil {
+		httpapi.BadRequest(ctx, err)
+		return
+	}
+
+	addressParams, _ := ctx.UserValue("address").(string)
+	var filter validator_view.ValidatorActivitiesListFilter
+	if strings.HasPrefix(addressParams, handler.validatorAddressPrefix) {
+		filter = validator_view.ValidatorActivitiesListFilter{
+			MaybeOperatorAddress: &addressParams,
+		}
+	} else if strings.HasPrefix(addressParams, handler.consNodeAddressPrefix) {
+		filter = validator_view.ValidatorActivitiesListFilter{
+			MaybeConsensusNodeAddress: &addressParams,
+		}
+	}
+
+	blocks, paginationResult, err := handler.validatorActivitiesView.List(filter, pagination)
+	if err != nil {
+		handler.logger.Errorf("error listing activities: %v", err)
+		httpapi.InternalServerError(ctx)
+		return
+	}
+
+	httpapi.SuccessWithPagination(ctx, blocks, paginationResult)
 }

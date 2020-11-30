@@ -1,0 +1,2 @@
+DROP INDEX IF EXISTS view_validators_operator_address_btree_index;
+DROP INDEX IF EXISTS view_validators_consensus_node_address_btree_index;

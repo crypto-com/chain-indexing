@@ -8,5 +8,3 @@ CREATE TABLE view_blocks (
     UNIQUE(hash),
     PRIMARY KEY(height)
 );
-
-CREATE INDEX view_blocks_hash_index ON view_blocks(hash);

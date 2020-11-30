@@ -1,7 +1,11 @@
 package handlers
 
 import (
-	"github.com/crypto-com/chainindex/appinterface/projection/view"
+	block_view "github.com/crypto-com/chainindex/appinterface/projection/block/view"
+	transaction_view "github.com/crypto-com/chainindex/appinterface/projection/transasaction/view"
+	validator_view "github.com/crypto-com/chainindex/appinterface/projection/validator/view"
+	"github.com/crypto-com/chainindex/appinterface/projection/validatorstats"
+	validatorstats_view "github.com/crypto-com/chainindex/appinterface/projection/validatorstats/view"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
 	"github.com/crypto-com/chainindex/infrastructure/httpapi"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
@@ -11,8 +15,10 @@ import (
 type StatusHandler struct {
 	logger applogger.Logger
 
-	blocksView       *view.Blocks
-	transactionsView *view.BlockTransactions
+	blocksView         *block_view.Blocks
+	transactionsView   *transaction_view.BlockTransactions
+	validatorsView     *validator_view.Validators
+	validatorStatsView *validatorstats_view.ValidatorStats
 }
 
 func NewStatusHandler(logger applogger.Logger, rdbHandle *rdb.Handle) *StatusHandler {
@@ -21,14 +27,15 @@ func NewStatusHandler(logger applogger.Logger, rdbHandle *rdb.Handle) *StatusHan
 			"module": "StatusHandler",
 		}),
 
-		view.NewBlocks(rdbHandle),
-		view.NewTransactions(rdbHandle),
+		block_view.NewBlocks(rdbHandle),
+		transaction_view.NewTransactions(rdbHandle),
+		validator_view.NewValidators(rdbHandle),
+		validatorstats_view.NewValidatorStats(rdbHandle),
 	}
 }
 
 func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 	blockCount, err := handler.blocksView.Count()
-
 	if err != nil {
 		handler.logger.Errorf("error fetching block count: %v", err)
 		httpapi.InternalServerError(ctx)
@@ -36,9 +43,29 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 	}
 
 	transactionCount, err := handler.transactionsView.Count()
-
 	if err != nil {
 		handler.logger.Errorf("error fetching transaction count: %v", err)
+		httpapi.InternalServerError(ctx)
+		return
+	}
+
+	totalDelegated, err := handler.validatorStatsView.FindBy(validatorstats.TOTAL_DELEGATE)
+	if err != nil {
+		handler.logger.Errorf("error fetching total delegate: %v", err)
+		httpapi.InternalServerError(ctx)
+		return
+	}
+
+	totalReward, err := handler.validatorStatsView.FindBy(validatorstats.TOTAL_REWARD)
+	if err != nil {
+		handler.logger.Errorf("error fetching total reward: %v", err)
+		httpapi.InternalServerError(ctx)
+		return
+	}
+
+	validatorCount, err := handler.validatorsView.Count()
+	if err != nil {
+		handler.logger.Errorf("error fetching validators count: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
 	}
@@ -46,13 +73,18 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 	status := Status{
 		BlockCount:       blockCount,
 		TransactionCount: transactionCount,
+		TotalDelegated:   totalDelegated,
+		TotalReward:      totalReward,
+		ValiatorCount:    validatorCount,
 	}
 
 	httpapi.Success(ctx, status)
 }
 
 type Status struct {
-	BlockCount       int64 `json:"blockCount"`
-	TransactionCount int64 `json:"transactionCount"`
-	// TODO: Add more items when available in projections
+	BlockCount       int64  `json:"blockCount"`
+	TransactionCount int64  `json:"transactionCount"`
+	TotalDelegated   string `json:"totalDelegated"`
+	TotalReward      string `json:"totalReward"`
+	ValiatorCount    int64  `json:"validatorCount"`
 }

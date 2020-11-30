@@ -7,6 +7,7 @@ type MsgEvent interface {
 
 	MsgType() string
 	TxHash() string
+	TxSuccess() bool
 }
 
 var MSG_EVENTS = []string{

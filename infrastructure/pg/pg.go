@@ -4,7 +4,7 @@ import "fmt"
 
 type ConnConfig struct {
 	Host          string
-	Port          uint32
+	Port          int32
 	MaybeUsername *string
 	MaybePassword *string
 	Database      string

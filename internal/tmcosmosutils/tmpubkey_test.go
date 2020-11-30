@@ -48,5 +48,6 @@ var _ = Describe("tmcosmosutils", func() {
 				"tcrocnclcons", consensusNodePubKey,
 			)).To(Equal(consensusNodeAddress))
 		})
+
 	})
 })

@@ -2,6 +2,11 @@ package view
 
 import (
 	"fmt"
+	"strings"
+
+	"github.com/crypto-com/chainindex/appinterface/projection/view"
+
+	sq "github.com/Masterminds/squirrel"
 
 	"github.com/crypto-com/chainindex/appinterface/pagination"
 
@@ -23,11 +28,11 @@ func NewBlocks(handle *rdb.Handle) *Blocks {
 	}
 }
 
-func (view *Blocks) Insert(block *Block) error {
+func (blocksView *Blocks) Insert(block *Block) error {
 	var err error
 
 	var sql string
-	sql, _, err = view.rdb.StmtBuilder.Insert(
+	sql, _, err = blocksView.rdb.StmtBuilder.Insert(
 		"view_blocks",
 	).Columns(
 		"height",
@@ -46,10 +51,10 @@ func (view *Blocks) Insert(block *Block) error {
 		return fmt.Errorf("error JSON marshalling blocks committed council nodes for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := view.rdb.Exec(sql,
+	result, err := blocksView.rdb.Exec(sql,
 		block.Height,
 		block.Hash,
-		view.rdb.Tton(&block.Time),
+		blocksView.rdb.Tton(&block.Time),
 		block.AppHash,
 		committedCouncilNodesJSON,
 		block.TransactionCount,
@@ -64,8 +69,8 @@ func (view *Blocks) Insert(block *Block) error {
 	return nil
 }
 
-func (view *Blocks) List(pagination *pagination.Pagination) ([]Block, *pagination.PaginationResult, error) {
-	stmtBuilder := view.rdb.StmtBuilder.Select(
+func (blocksView *Blocks) List(order BlocksListOrder, pagination *pagination.Pagination) ([]Block, *pagination.PaginationResult, error) {
+	stmtBuilder := blocksView.rdb.StmtBuilder.Select(
 		"height",
 		"hash",
 		"time",
@@ -74,20 +79,32 @@ func (view *Blocks) List(pagination *pagination.Pagination) ([]Block, *paginatio
 		"transaction_count",
 	).From(
 		"view_blocks",
-	).OrderBy(
-		"id",
 	)
+
+	if order.Height == view.ORDER_DESC {
+		stmtBuilder = stmtBuilder.OrderBy("height DESC")
+	} else {
+		stmtBuilder = stmtBuilder.OrderBy("height")
+	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
-		view.rdb.Runner,
+		blocksView.rdb,
+	).WithCustomTotalQueryFn(
+		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
+			var total int64
+			if err := rdbHandle.QueryRow("SELECT height FROM view_blocks ORDER BY height DESC LIMIT 1").Scan(&total); err != nil {
+				return int64(0), err
+			}
+			return total, nil
+		},
 	).BuildStmt(stmtBuilder)
 	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
 	if err != nil {
 		return nil, nil, fmt.Errorf("error building blocks select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	rowsResult, err := view.rdb.Query(sql, sqlArgs...)
+	rowsResult, err := blocksView.rdb.Query(sql, sqlArgs...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error executing blocks select SQL: %v: %w", err, rdb.ErrQuery)
 	}
@@ -96,7 +113,7 @@ func (view *Blocks) List(pagination *pagination.Pagination) ([]Block, *paginatio
 	for rowsResult.Next() {
 		var block Block
 		var committedCouncilNodesJSON *string
-		timeReader := view.rdb.NtotReader()
+		timeReader := blocksView.rdb.NtotReader()
 		if err = rowsResult.Scan(
 			&block.Height,
 			&block.Hash,
@@ -134,10 +151,10 @@ func (view *Blocks) List(pagination *pagination.Pagination) ([]Block, *paginatio
 	return blocks, paginationResult, nil
 }
 
-func (view *Blocks) FindBy(identity *BlockIdentity) (*Block, error) {
+func (blocksView *Blocks) FindBy(identity *BlockIdentity) (*Block, error) {
 	var err error
 
-	selectStmtBuilder := view.rdb.StmtBuilder.Select(
+	selectStmtBuilder := blocksView.rdb.StmtBuilder.Select(
 		"height", "hash", "time", "app_hash", "committed_council_nodes", "transaction_count",
 	).From("view_blocks")
 	if identity.MaybeHash != nil {
@@ -153,8 +170,8 @@ func (view *Blocks) FindBy(identity *BlockIdentity) (*Block, error) {
 
 	var block Block
 	var committedCouncilNodesJSON *string
-	timeReader := view.rdb.NtotReader()
-	if err = view.rdb.QueryRow(sql, sqlArgs...).Scan(
+	timeReader := blocksView.rdb.NtotReader()
+	if err = blocksView.rdb.QueryRow(sql, sqlArgs...).Scan(
 		&block.Height,
 		&block.Hash,
 		timeReader.ScannableArg(),
@@ -183,15 +200,79 @@ func (view *Blocks) FindBy(identity *BlockIdentity) (*Block, error) {
 	return &block, nil
 }
 
-func (view *Blocks) Count() (int64, error) {
-	sql, _, err := view.rdb.StmtBuilder.Select("MAX(height)").From(
+func (blocksView *Blocks) Search(
+	keyword string,
+) ([]Block, error) {
+	keyword = strings.ToUpper(keyword)
+	sql, sqlArgs, err := blocksView.rdb.StmtBuilder.Select(
+		"height",
+		"hash",
+		"time",
+		"app_hash",
+		"committed_council_nodes",
+		"transaction_count",
+	).From(
+		"view_blocks",
+	).Where(
+		"height::TEXT = ? OR hash = ?", keyword, keyword,
+	).OrderBy(
+		"height",
+	).Limit(5).ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("error building blocks select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	rowsResult, err := blocksView.rdb.Query(sql, sqlArgs...)
+	if err != nil {
+		return nil, fmt.Errorf("error executing blocks select SQL: %v: %w", err, rdb.ErrQuery)
+	}
+
+	blocks := make([]Block, 0)
+	for rowsResult.Next() {
+		var block Block
+		var committedCouncilNodesJSON *string
+		timeReader := blocksView.rdb.NtotReader()
+		if err = rowsResult.Scan(
+			&block.Height,
+			&block.Hash,
+			timeReader.ScannableArg(),
+			&block.AppHash,
+			&committedCouncilNodesJSON,
+			&block.TransactionCount,
+		); err != nil {
+			if err == rdb.ErrNoRows {
+				return nil, rdb.ErrNoRows
+			}
+			return nil, fmt.Errorf("error scanning block row: %v: %w", err, rdb.ErrQuery)
+		}
+		blockTime, parseErr := timeReader.Parse()
+		if parseErr != nil {
+			return nil, fmt.Errorf("error parsing block time: %v: %w", parseErr, rdb.ErrQuery)
+		}
+		block.Time = *blockTime
+
+		var committedCouncilNodes []BlockCommittedCouncilNode
+		if unmarshalErr := jsoniter.Unmarshal([]byte(*committedCouncilNodesJSON), &committedCouncilNodes); unmarshalErr != nil {
+			return nil, fmt.Errorf("error unmarshalling block council nodes JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
+		}
+
+		block.CommittedCouncilNodes = committedCouncilNodes
+
+		blocks = append(blocks, block)
+	}
+
+	return blocks, nil
+}
+
+func (blocksView *Blocks) Count() (int64, error) {
+	sql, _, err := blocksView.rdb.StmtBuilder.Select("MAX(height)").From(
 		"view_blocks",
 	).ToSql()
 	if err != nil {
 		return 0, fmt.Errorf("error building blocks count selection sql: %v", err)
 	}
 
-	result := view.rdb.QueryRow(sql)
+	result := blocksView.rdb.QueryRow(sql)
 	var count *int64
 	if err := result.Scan(&count); err != nil {
 		return 0, fmt.Errorf("error scanning blocks count selection query: %v", err)
@@ -222,29 +303,33 @@ func (node *RdbBlockCommittedCouncilNode) ToRaw() *BlockCommittedCouncilNode {
 }
 
 type Block struct {
-	Height                int64                       `json:"height" fake:"{+int64}"`
-	Hash                  string                      `json:"hash" fake:"{blockhash}"`
-	Time                  utctime.UTCTime             `json:"time" fake:"{utctime}"`
-	AppHash               string                      `json:"app_hash" fake:"{apphash}"`
-	TransactionCount      int                         `json:"transaction_count" fake:"{number:0,2147483647}"`
-	CommittedCouncilNodes []BlockCommittedCouncilNode `json:"committed_council_nodes" fakesize:"3"`
+	Height                int64                       `json:"blockHeight" fake:"{+int64}"`
+	Hash                  string                      `json:"blockHash" fake:"{blockhash}"`
+	Time                  utctime.UTCTime             `json:"blockTime" fake:"{utctime}"`
+	AppHash               string                      `json:"appHash" fake:"{apphash}"`
+	TransactionCount      int                         `json:"transactionCount" fake:"{number:0,2147483647}"`
+	CommittedCouncilNodes []BlockCommittedCouncilNode `json:"committedCouncilNodes" fakesize:"3"`
 }
 
 type BlockCommittedCouncilNode struct {
 	Address    string          `json:"address" fake:"{validatoraddress}"`
 	Time       utctime.UTCTime `json:"time" fake:"{utctime}"`
 	Signature  string          `json:"signature" fake:"{commitsignature}"`
-	IsProposer bool            `json:"is_proposer" fake:"{bool}"`
+	IsProposer bool            `json:"isProposer" fake:"{bool}"`
 }
 
 type RdbBlockCommittedCouncilNode struct {
 	Address    string `json:"address"`
 	Time       int64  `json:"time"`
 	Signature  string `json:"signature"`
-	IsProposer bool   `json:"is_proposer"`
+	IsProposer bool   `json:"isProposer"`
 }
 
 type BlockIdentity struct {
 	MaybeHeight *int64
 	MaybeHash   *string
+}
+
+type BlocksListOrder struct {
+	Height view.ORDER
 }

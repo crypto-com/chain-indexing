@@ -17,7 +17,3 @@ CREATE TABLE view_transactions (
     messages JSONB NOT NULL,
     PRIMARY KEY(id)
 );
-
-CREATE INDEX view_transactions_block_height_index ON view_transactions(block_height);
-
-CREATE INDEX view_transactions_order_by_block_height_desc_index ON view_transactions(block_height DESC);

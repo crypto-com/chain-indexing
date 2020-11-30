@@ -53,33 +53,33 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 				command_usecase.NewCreateBlockProposerReward(
 					expectedBlockHeight,
 					"tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
-					"868550031.392766344419273056basetcro",
+					"868550031.392766344419273056",
 				),
 				command_usecase.NewCreateBlockCommission(
 					expectedBlockHeight,
 					"tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
-					"86855003.139276634441927306basetcro",
+					"86855003.139276634441927306",
 				),
 				command_usecase.NewCreateBlockCommission(
 					expectedBlockHeight,
 					"tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6",
-					"459938524.284156813832125321basetcro",
+					"459938524.284156813832125321",
 				),
 				command_usecase.NewCreateBlockReward(
 					expectedBlockHeight,
 					"tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6",
-					"919877048.568313627664250642basetcro",
+					"919877048.568313627664250642",
 				),
 				// proposer get both proposer reward and block reward
 				command_usecase.NewCreateBlockCommission(
 					expectedBlockHeight,
 					"tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
-					"59324118.921629850151833479basetcro",
+					"59324118.921629850151833479",
 				),
 				command_usecase.NewCreateBlockReward(
 					expectedBlockHeight,
 					"tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
-					"593241189.216298501518334791basetcro",
+					"593241189.216298501518334791",
 				),
 			}))
 		})

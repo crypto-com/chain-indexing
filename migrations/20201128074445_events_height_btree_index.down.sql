@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS events_block_height_btree_index;

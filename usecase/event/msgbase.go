@@ -7,6 +7,9 @@ import (
 	"github.com/crypto-com/chainindex/entity/event"
 )
 
+const MSG_SUCCESS_SUFFIX = "Created"
+const MSG_FAILED_SUFFIX = "Failed"
+
 // MsgBase composes of Base except it has logical switch between succeeded and failed
 type MsgBase struct {
 	event.Base
@@ -17,7 +20,7 @@ type MsgBase struct {
 }
 
 func NewMsgBase(params MsgBaseParams) MsgBase {
-	if strings.HasSuffix(params.MsgName, "Created") || strings.HasSuffix(params.MsgName, "Failed") {
+	if strings.HasSuffix(params.MsgName, MSG_SUCCESS_SUFFIX) || strings.HasSuffix(params.MsgName, MSG_FAILED_SUFFIX) {
 		panic("msg name should not have Created or Failed keyword")
 	}
 
@@ -42,11 +45,18 @@ func (base *MsgBase) TxHash() string {
 	return base.MsgTxHash
 }
 
+func (base *MsgBase) TxSuccess() bool {
+	return strings.HasSuffix(base.Name(), MSG_SUCCESS_SUFFIX)
+}
+
 func eventName(msgName string, txSuccess bool) string {
+	var suffix string
 	if txSuccess {
-		return fmt.Sprintf("%sCreated", msgName)
+		suffix = MSG_SUCCESS_SUFFIX
+	} else {
+		suffix = MSG_FAILED_SUFFIX
 	}
-	return fmt.Sprintf("%sFailed", msgName)
+	return fmt.Sprintf("%s%s", msgName, suffix)
 }
 
 type MsgBaseParams struct {

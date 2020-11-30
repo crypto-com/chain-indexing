@@ -2,8 +2,11 @@ package view
 
 import (
 	"fmt"
-	"time"
+	"strconv"
 
+	"github.com/crypto-com/chainindex/appinterface/projection/view"
+
+	sq "github.com/Masterminds/squirrel"
 	pagination_interface "github.com/crypto-com/chainindex/appinterface/pagination"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
 	"github.com/crypto-com/chainindex/internal/utctime"
@@ -21,11 +24,11 @@ func NewBlockEvents(handle *rdb.Handle) *BlockEvents {
 	}
 }
 
-func (view *BlockEvents) Insert(blockEvent *BlockEventRow) error {
+func (eventsView *BlockEvents) Insert(blockEvent *BlockEventRow) error {
 	var err error
 
 	var sql string
-	sql, _, err = view.rdb.StmtBuilder.Insert(
+	sql, _, err = eventsView.rdb.StmtBuilder.Insert(
 		"view_block_events",
 	).Columns(
 		"block_height",
@@ -42,10 +45,10 @@ func (view *BlockEvents) Insert(blockEvent *BlockEventRow) error {
 		return fmt.Errorf("error JSON marshalling block transation messages for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := view.rdb.Exec(sql,
+	result, err := eventsView.rdb.Exec(sql,
 		blockEvent.BlockHeight,
 		blockEvent.BlockHash,
-		view.rdb.Tton(&blockEvent.BlockTime),
+		eventsView.rdb.Tton(&blockEvent.BlockTime),
 		blockEventDataJSON,
 	)
 	if err != nil {
@@ -58,12 +61,12 @@ func (view *BlockEvents) Insert(blockEvent *BlockEventRow) error {
 	return nil
 }
 
-func (view *BlockEvents) InsertAll(blockEvents []BlockEventRow) error {
+func (eventsView *BlockEvents) InsertAll(blockEvents []BlockEventRow) error {
 	if len(blockEvents) == 0 {
 		return nil
 	}
 
-	stmtBuilder := view.rdb.StmtBuilder.Insert(
+	stmtBuilder := eventsView.rdb.StmtBuilder.Insert(
 		"view_block_events",
 	).Columns(
 		"block_height",
@@ -83,7 +86,7 @@ func (view *BlockEvents) InsertAll(blockEvents []BlockEventRow) error {
 		stmtBuilder = stmtBuilder.Values(
 			blockEvent.BlockHeight,
 			blockEvent.BlockHash,
-			view.rdb.Tton(&blockEvent.BlockTime),
+			eventsView.rdb.Tton(&blockEvent.BlockTime),
 			blockEventDataJSON,
 		)
 	}
@@ -93,7 +96,7 @@ func (view *BlockEvents) InsertAll(blockEvents []BlockEventRow) error {
 		return fmt.Errorf("error building events batch insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := view.rdb.Exec(sql, sqlArgs...)
+	result, err := eventsView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
 		return fmt.Errorf("error inserting block transaction into the table: %v: %w", err, rdb.ErrWrite)
 	}
@@ -107,10 +110,10 @@ func (view *BlockEvents) InsertAll(blockEvents []BlockEventRow) error {
 	return nil
 }
 
-func (view *BlockEvents) FindById(id int64) (*BlockEventRow, error) {
+func (eventsView *BlockEvents) FindById(id int64) (*BlockEventRow, error) {
 	var err error
 
-	selectStmtBuilder := view.rdb.StmtBuilder.Select(
+	selectStmtBuilder := eventsView.rdb.StmtBuilder.Select(
 		"id",
 		"block_height",
 		"block_hash",
@@ -129,9 +132,9 @@ func (view *BlockEvents) FindById(id int64) (*BlockEventRow, error) {
 
 	var blockEvent BlockEventRow
 	var blockEventDataJSON *string
-	blockTimeReader := view.rdb.NtotReader()
+	blockTimeReader := eventsView.rdb.NtotReader()
 
-	if err = view.rdb.QueryRow(sql, sqlArgs...).Scan(
+	if err = eventsView.rdb.QueryRow(sql, sqlArgs...).Scan(
 		&blockEvent.MaybeId,
 		&blockEvent.BlockHeight,
 		&blockEvent.BlockHash,
@@ -158,11 +161,12 @@ func (view *BlockEvents) FindById(id int64) (*BlockEventRow, error) {
 	return &blockEvent, nil
 }
 
-func (view *BlockEvents) List(
+func (eventsView *BlockEvents) List(
 	filter BlockEventsListFilter,
+	order BlockEventsListOrder,
 	pagination *pagination_interface.Pagination,
 ) ([]BlockEventRow, *pagination_interface.PaginationResult, error) {
-	stmtBuilder := view.rdb.StmtBuilder.Select(
+	stmtBuilder := eventsView.rdb.StmtBuilder.Select(
 		"id",
 		"block_height",
 		"block_hash",
@@ -170,9 +174,13 @@ func (view *BlockEvents) List(
 		"data",
 	).From(
 		"view_block_events",
-	).OrderBy(
-		"id",
 	)
+
+	if order.Height == view.ORDER_DESC {
+		stmtBuilder = stmtBuilder.OrderBy("block_height DESC, id DESC")
+	} else {
+		stmtBuilder = stmtBuilder.OrderBy("block_height, id")
+	}
 
 	if filter.MaybeBlockHeight != nil {
 		stmtBuilder = stmtBuilder.Where("block_height = ?", *filter.MaybeBlockHeight)
@@ -180,24 +188,36 @@ func (view *BlockEvents) List(
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
-		view.rdb.Runner,
+		eventsView.rdb,
+	).WithCustomTotalQueryFn(
+		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
+			identity := "-"
+			if filter.MaybeBlockHeight != nil {
+				identity = strconv.FormatInt(*filter.MaybeBlockHeight, 10)
+			}
+			totalView := NewBlockEventsTotal(rdbHandle)
+			total, err := totalView.FindBy(identity)
+			if err != nil {
+				return int64(0), err
+			}
+			return total, nil
+		},
 	).BuildStmt(stmtBuilder)
 	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
 	if err != nil {
 		return nil, nil, fmt.Errorf("error building transactions select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	rowsResult, err := view.rdb.Query(sql, sqlArgs...)
+	rowsResult, err := eventsView.rdb.Query(sql, sqlArgs...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error executing transactions select SQL: %v: %w", err, rdb.ErrQuery)
 	}
 
 	blockEvents := make([]BlockEventRow, 0)
 	for rowsResult.Next() {
-		fmt.Println(time.Now())
 		var blockEvent BlockEventRow
 		var blockEventDataJSON *string
-		blockTimeReader := view.rdb.NtotReader()
+		blockTimeReader := eventsView.rdb.NtotReader()
 
 		if err = rowsResult.Scan(
 			&blockEvent.MaybeId,
@@ -236,6 +256,10 @@ func (view *BlockEvents) List(
 
 type BlockEventsListFilter struct {
 	MaybeBlockHeight *int64
+}
+
+type BlockEventsListOrder struct {
+	Height view.ORDER
 }
 
 type BlockEventRow struct {

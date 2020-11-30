@@ -1,12 +1,13 @@
-package projection
+package block
 
 import (
 	"fmt"
 
+	view2 "github.com/crypto-com/chainindex/appinterface/projection/block/view"
+
 	entity_projection "github.com/crypto-com/chainindex/entity/projection"
 
 	"github.com/crypto-com/chainindex/appinterface/projection/rdbbase"
-	"github.com/crypto-com/chainindex/appinterface/projection/view"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
 	event_entity "github.com/crypto-com/chainindex/entity/event"
 	applogger "github.com/crypto-com/chainindex/internal/logger"
@@ -41,43 +42,45 @@ func (projection *Block) OnInit() error {
 }
 
 func (projection *Block) HandleEvents(height int64, events []event_entity.Event) error {
-	var err error
-
-	var rdbTx rdb.Tx
-	rdbTx, err = projection.rdbConn.Begin()
+	rdbTx, err := projection.rdbConn.Begin()
 	if err != nil {
 		return fmt.Errorf("error beginning transaction: %v", err)
 	}
+
+	committed := false
+	defer func() {
+		if !committed {
+			_ = rdbTx.Rollback()
+		}
+	}()
+
 	rdbTxHandle := rdbTx.ToHandle()
-	blocksView := view.NewBlocks(rdbTxHandle)
+	blocksView := view2.NewBlocks(rdbTxHandle)
 
 	for _, event := range events {
 		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
-			if err = projection.handleBlockCreatedEvent(blocksView, blockCreatedEvent); err != nil {
-				_ = rdbTx.Rollback()
-				return fmt.Errorf("error handling BlockCreatedEvent: %v", err)
+			if handleErr := projection.handleBlockCreatedEvent(blocksView, blockCreatedEvent); handleErr != nil {
+				return fmt.Errorf("error handling BlockCreatedEvent: %v", handleErr)
 			}
 		} else {
-			_ = rdbTx.Rollback()
 			return fmt.Errorf("received unexpected event %sV%d(%s)", event.Name(), event.Version(), event.UUID())
 		}
 	}
 	if err = projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
-		_ = rdbTx.Rollback()
 		return fmt.Errorf("error updating last handled event height: %v", err)
 	}
 
 	if err = rdbTx.Commit(); err != nil {
-		_ = rdbTx.Rollback()
 		return fmt.Errorf("error committing changes: %v", err)
 	}
+	committed = true
 	return nil
 }
 
-func (projection *Block) handleBlockCreatedEvent(blocksView *view.Blocks, event *event_usecase.BlockCreated) error {
-	committedCouncilNodes := make([]view.BlockCommittedCouncilNode, 0)
+func (projection *Block) handleBlockCreatedEvent(blocksView *view2.Blocks, event *event_usecase.BlockCreated) error {
+	committedCouncilNodes := make([]view2.BlockCommittedCouncilNode, 0)
 	for _, signature := range event.Block.Signatures {
-		committedCouncilNodes = append(committedCouncilNodes, view.BlockCommittedCouncilNode{
+		committedCouncilNodes = append(committedCouncilNodes, view2.BlockCommittedCouncilNode{
 			Address:    signature.ValidatorAddress,
 			Time:       signature.Timestamp,
 			Signature:  signature.Signature,
@@ -85,7 +88,7 @@ func (projection *Block) handleBlockCreatedEvent(blocksView *view.Blocks, event 
 		})
 	}
 
-	if err := blocksView.Insert(&view.Block{
+	if err := blocksView.Insert(&view2.Block{
 		Height:                event.Block.Height,
 		Hash:                  event.Block.Hash,
 		Time:                  event.Block.Time,

@@ -69,7 +69,7 @@ func ParseBlockResultsTxsMsgToCommands(
 			case "/cosmos.staking.v1beta1.MsgDelegate":
 				msgCommands = parseMsgDelegate(msgCommonParams, msg)
 			case "/cosmos.staking.v1beta1.MsgUndelegate":
-				msgCommands = parseMsgUndelegate(msgCommonParams, msg)
+				msgCommands = parseMsgUndelegate(txsResult, msgIndex, msgCommonParams, msg)
 			case "/cosmos.staking.v1beta1.MsgBeginRedelegate":
 				msgCommands = parseMsgBeginRedelegate(msgCommonParams, msg)
 			case "/cosmos.slashing.v1beta1.MsgUnjail":
@@ -543,11 +543,24 @@ func parseMsgDelegate(
 }
 
 func parseMsgUndelegate(
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 ) []command.Command {
 	amountValue, _ := msg["amount"].(map[string]interface{})
 	amount := coin.MustNewCoinFromString(amountValue["amount"].(string))
+
+	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	// When there is no reward withdrew, `transfer` event would not exist
+	event := log.GetEventByType("unbond")
+	if event == nil {
+		panic("missing `unbond` event in TxsResult log")
+	}
+	unbondCompletionTime, err := utctime.Parse("2006-01-02T15:04:05Z", event.MustGetAttributeByKey("completion_time"))
+	if err != nil {
+		panic(fmt.Sprintf("error parsing unbond completion time: %v", err))
+	}
 
 	return []command.Command{command_usecase.NewCreateMsgUndelegate(
 		msgCommonParams,
@@ -555,6 +568,7 @@ func parseMsgUndelegate(
 		model.MsgUndelegateParams{
 			DelegatorAddress: msg["delegator_address"].(string),
 			ValidatorAddress: msg["validator_address"].(string),
+			UnbondCompleteAt: unbondCompletionTime,
 			Amount:           amount,
 		},
 	)}

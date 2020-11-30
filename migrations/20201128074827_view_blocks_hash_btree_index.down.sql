@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS view_blocks_hash_btree_index;

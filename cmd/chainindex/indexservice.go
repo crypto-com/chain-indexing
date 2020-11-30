@@ -20,7 +20,7 @@ type IndexService struct {
 }
 
 // NewIndexService creates a new server instance for polling and indexing
-func NewIndexService(logger applogger.Logger, rdbConn rdb.Conn, config *FileConfig) *IndexService {
+func NewIndexService(logger applogger.Logger, rdbConn rdb.Conn, config *Config) *IndexService {
 	return &IndexService{
 		logger:  logger,
 		rdbConn: rdbConn,

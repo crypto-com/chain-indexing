@@ -1,13 +1,14 @@
-package projection
+package validator
 
 import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/crypto-com/chainindex/appinterface/pagination"
+	"github.com/crypto-com/chainindex/internal/utctime"
 
+	"github.com/crypto-com/chainindex/appinterface/pagination"
 	"github.com/crypto-com/chainindex/appinterface/projection/rdbbase"
-	"github.com/crypto-com/chainindex/appinterface/projection/view"
+	"github.com/crypto-com/chainindex/appinterface/projection/validator/view"
 	"github.com/crypto-com/chainindex/appinterface/rdb"
 	event_entity "github.com/crypto-com/chainindex/entity/event"
 	projection_entity "github.com/crypto-com/chainindex/entity/projection"
@@ -46,10 +47,27 @@ func NewValidator(logger applogger.Logger, rdbConn rdb.Conn, conNodeAddressPrefi
 
 func (_ *Validator) GetEventsToListen() []string {
 	return []string{
+		event_usecase.BLOCK_CREATED,
 		event_usecase.MSG_CREATE_VALIDATOR_CREATED,
 		event_usecase.MSG_EDIT_VALIDATOR_CREATED,
+		event_usecase.MSG_EDIT_VALIDATOR_FAILED,
+		event_usecase.MSG_DELEGATE_CREATED,
+		event_usecase.MSG_DELEGATE_FAILED,
+		event_usecase.MSG_BEGIN_REDELEGATE_CREATED,
+		event_usecase.MSG_BEGIN_REDELEGATE_FAILED,
+		event_usecase.MSG_UNDELEGATE_CREATED,
+		event_usecase.MSG_UNDELEGATE_FAILED,
+		event_usecase.MSG_WITHDRAW_DELEGATOR_REWARD_CREATED,
+		event_usecase.MSG_WITHDRAW_DELEGATOR_REWARD_FAILED,
+		event_usecase.MSG_WITHDRAW_VALIDATOR_COMMISSION_CREATED,
+		event_usecase.MSG_WITHDRAW_VALIDATOR_COMMISSION_FAILED,
+		event_usecase.BLOCK_PROPOSER_REWARDED,
+		event_usecase.BLOCK_REWARDED,
+		event_usecase.BLOCK_COMMISSIONED,
 		event_usecase.VALIDATOR_JAILED,
+		event_usecase.VALIDATOR_SLASHED,
 		event_usecase.MSG_UNJAIL_CREATED,
+		event_usecase.MSG_UNJAIL_FAILED,
 		event_usecase.POWER_CHANGED,
 	}
 }
@@ -66,7 +84,6 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 
 	committed := false
 	defer func() {
-		fmt.Println("rrrrrrrrrrrrrrrrrun here")
 		if !committed {
 			_ = rdbTx.Rollback()
 		}
@@ -74,17 +91,58 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 
 	rdbTxHandle := rdbTx.ToHandle()
 	validatorsView := view.NewValidators(rdbTxHandle)
+	validatorActivitiesView := view.NewValidatorActivities(rdbTxHandle)
+	validatorActivitiesTotalView := view.NewValidatorActivitiesTotal(rdbTxHandle)
 
+	var blockTime utctime.UTCTime
+	var blockHash string
 	for _, event := range events {
-		rows, _, err := validatorsView.List(pagination.NewOffsetPagination(1, 20))
-		fmt.Println(rows, err)
+		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
+			blockTime = blockCreatedEvent.Block.Time
+			blockHash = blockCreatedEvent.Block.Hash
+		}
+	}
+
+	if err := projection.projectValidatorView(validatorsView, height, events); err != nil {
+		return fmt.Errorf("error projecting validator view: %v", err)
+	}
+
+	if err := projection.projectValidatorActivitiesView(
+		validatorsView,
+		validatorActivitiesView,
+		validatorActivitiesTotalView,
+		blockHash,
+		blockTime,
+		events,
+	); err != nil {
+		return fmt.Errorf("error projecting validator activities view: %v", err)
+	}
+
+	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
+		return fmt.Errorf("error updating last handled event height: %v", err)
+	}
+
+	if err := rdbTx.Commit(); err != nil {
+		return fmt.Errorf("error committing changes: %v", err)
+	}
+	committed = true
+	return nil
+}
+
+func (projection *Validator) projectValidatorView(
+	validatorsView *view.Validators,
+	blockHeight int64,
+	events []event_entity.Event,
+) error {
+	// MsgCreateValidator should be handled first
+	for _, event := range events {
 		if msgCreateValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
 			projection.logger.Debug("handling MsgCreateValidator event")
 
-			consensusNodeAddress, convErr := tmcosmosutils.ConsensusNodeAddressFromPubKey(
+			consensusNodeAddress, err := tmcosmosutils.ConsensusNodeAddressFromPubKey(
 				projection.conNodeAddressPrefix, msgCreateValidatorEvent.Pubkey,
 			)
-			if convErr != nil {
+			if err != nil {
 				return fmt.Errorf("error converting consensus node pubkey to address: %v", err)
 			}
 			validatorRow := view.ValidatorRow{
@@ -94,6 +152,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 				MinSelfDelegation:            msgCreateValidatorEvent.MinSelfDelegation,
 				Status:                       BONDED,
 				Jailed:                       false,
+				JoinedAtBlockHeight:          blockHeight,
 				MaybeUnbondingHeight:         nil,
 				MaybeUnbondingCompletionTime: nil,
 				Moniker:                      msgCreateValidatorEvent.Description.Moniker,
@@ -109,7 +168,11 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 			if err := validatorsView.Insert(&validatorRow); err != nil {
 				return fmt.Errorf("error inserting new validator into view: %v", err)
 			}
-		} else if msgEditValidatorEvent, ok := event.(*event_usecase.MsgEditValidator); ok {
+		}
+	}
+
+	for _, event := range events {
+		if msgEditValidatorEvent, ok := event.(*event_usecase.MsgEditValidator); ok {
 			projection.logger.Debug("handling MsgEditValidator event")
 
 			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
@@ -207,23 +270,14 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 				mutValidatorRow.Status = UNBONDED
 			}
 
-			//execResult, err := rdbTx.Exec("UPDATE view_validators SET power = $1 WHERE consensus_node_address = $2", "10000000", mutValidatorRow.ConsensusNodeAddress)
-			//fmt.Println(execResult.IsUpdate(), execResult.RowsAffected(), err)
 			if err := validatorsView.Update(mutValidatorRow); err != nil {
 				rows, _, err := validatorsView.List(pagination.NewOffsetPagination(1, 20))
 				fmt.Println(rows, err)
 				return fmt.Errorf("error updating validator into view: %v", err)
 			}
 		}
+
 	}
 
-	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
-		return fmt.Errorf("error updating last handled event height: %v", err)
-	}
-
-	if err := rdbTx.Commit(); err != nil {
-		return fmt.Errorf("error committing changes: %v", err)
-	}
-	committed = true
 	return nil
 }
