@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/crypto-com/chainindex/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 )
 
 // A "Total" compatible table should have the follow table schema

@@ -1,6 +1,6 @@
 package event
 
-import "github.com/crypto-com/chainindex/entity/event"
+import "github.com/crypto-com/chain-indexing/entity/event"
 
 type MsgEvent interface {
 	event.Event

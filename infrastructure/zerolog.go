@@ -7,7 +7,7 @@ import (
 
 	"github.com/rs/zerolog"
 
-	applogger "github.com/crypto-com/chainindex/internal/logger"
+	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 
 // ZerologLogger implements applogger.Logger interface and provide logging service

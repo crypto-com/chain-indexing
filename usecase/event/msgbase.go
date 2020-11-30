@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/crypto-com/chainindex/entity/event"
+	"github.com/crypto-com/chain-indexing/entity/event"
 )
 
 const MSG_SUCCESS_SUFFIX = "Created"

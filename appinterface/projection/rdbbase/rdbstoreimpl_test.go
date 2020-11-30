@@ -3,14 +3,14 @@ package rdbbase_test
 import (
 	"fmt"
 
-	. "github.com/crypto-com/chainindex/test"
+	. "github.com/crypto-com/chain-indexing/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/crypto-com/chainindex/infrastructure/pg"
-	"github.com/crypto-com/chainindex/internal/primptr"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
 
-	"github.com/crypto-com/chainindex/appinterface/projection/rdbbase"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbbase"
 )
 
 var _ = Describe("RdbStoreImpl", func() {

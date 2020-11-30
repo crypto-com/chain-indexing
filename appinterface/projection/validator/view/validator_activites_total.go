@@ -1,8 +1,8 @@
 package view
 
 import (
-	"github.com/crypto-com/chainindex/appinterface/projection/view"
-	"github.com/crypto-com/chainindex/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 )
 
 type ValidatorActivitiesTotal struct {

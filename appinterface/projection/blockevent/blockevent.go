@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/crypto-com/chainindex/appinterface/projection/blockevent/view"
-	"github.com/crypto-com/chainindex/appinterface/projection/rdbbase"
-	"github.com/crypto-com/chainindex/appinterface/rdb"
-	event_entity "github.com/crypto-com/chainindex/entity/event"
-	applogger "github.com/crypto-com/chainindex/internal/logger"
-	"github.com/crypto-com/chainindex/internal/utctime"
-	event_usecase "github.com/crypto-com/chainindex/usecase/event"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/blockevent/view"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbbase"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	event_entity "github.com/crypto-com/chain-indexing/entity/event"
+	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
+	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
 type BlockEvent struct {

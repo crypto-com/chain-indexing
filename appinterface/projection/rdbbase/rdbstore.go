@@ -1,6 +1,6 @@
 package rdbbase
 
-import "github.com/crypto-com/chainindex/appinterface/rdb"
+import "github.com/crypto-com/chain-indexing/appinterface/rdb"
 
 // Projection store is a projection handling record store interface. An interface allows easy
 // testing

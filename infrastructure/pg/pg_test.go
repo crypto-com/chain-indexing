@@ -4,8 +4,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/crypto-com/chainindex/infrastructure/pg"
-	"github.com/crypto-com/chainindex/internal/primptr"
+	. "github.com/crypto-com/chain-indexing/infrastructure/pg"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
 )
 
 var _ = Describe("ConnConfig", func() {
@@ -16,11 +16,11 @@ var _ = Describe("ConnConfig", func() {
 				Port:          5432,
 				MaybeUsername: nil,
 				MaybePassword: nil,
-				Database:      "chainindex",
+				Database:      "chain-indexing",
 				SSL:           false,
 			}
 
-			Expect(config.ToURL()).To(Equal("postgres://127.0.0.1:5432/chainindex?sslmode=disable"))
+			Expect(config.ToURL()).To(Equal("postgres://127.0.0.1:5432/chain-indexing?sslmode=disable"))
 		})
 
 		It("should return Postgres connection string without auth when username and password is provided", func() {
@@ -29,11 +29,11 @@ var _ = Describe("ConnConfig", func() {
 				Port:          5432,
 				MaybeUsername: primptr.String("user"),
 				MaybePassword: primptr.String("password"),
-				Database:      "chainindex",
+				Database:      "chain-indexing",
 				SSL:           false,
 			}
 
-			Expect(config.ToURL()).To(Equal("postgres://user:password@127.0.0.1:5432/chainindex?sslmode=disable"))
+			Expect(config.ToURL()).To(Equal("postgres://user:password@127.0.0.1:5432/chain-indexing?sslmode=disable"))
 		})
 
 		It("should return Postgres connection string when SSL is enabled", func() {
@@ -42,11 +42,11 @@ var _ = Describe("ConnConfig", func() {
 				Port:          5432,
 				MaybeUsername: primptr.String("user"),
 				MaybePassword: primptr.String("password"),
-				Database:      "chainindex",
+				Database:      "chain-indexing",
 				SSL:           true,
 			}
 
-			Expect(config.ToURL()).To(Equal("postgres://user:password@127.0.0.1:5432/chainindex"))
+			Expect(config.ToURL()).To(Equal("postgres://user:password@127.0.0.1:5432/chain-indexing"))
 		})
 	})
 })

@@ -8,11 +8,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/crypto-com/chainindex/usecase/model/genesis"
+	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 
-	"github.com/crypto-com/chainindex/internal/tmcosmosutils"
+	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 
-	"github.com/crypto-com/chainindex/usecase/model"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	jsoniter "github.com/json-iterator/go"
 )
 

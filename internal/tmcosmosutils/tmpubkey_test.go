@@ -3,7 +3,7 @@ package tmcosmosutils_test
 import (
 	"encoding/base64"
 
-	"github.com/crypto-com/chainindex/internal/tmcosmosutils"
+	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

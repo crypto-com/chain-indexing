@@ -1,7 +1,7 @@
 package httpapi
 
 import (
-	pagination_interface "github.com/crypto-com/chainindex/appinterface/pagination"
+	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/valyala/fasthttp"
 
 	jsoniter "github.com/json-iterator/go"

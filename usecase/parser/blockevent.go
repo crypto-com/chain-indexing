@@ -3,7 +3,7 @@ package parser
 import (
 	"fmt"
 
-	"github.com/crypto-com/chainindex/usecase/model"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 // ParsedTxsResultLogEvent is only usable in txs_results log because it has unique attribute key.

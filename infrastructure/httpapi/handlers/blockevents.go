@@ -4,14 +4,14 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/crypto-com/chainindex/appinterface/projection/view"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 
 	"github.com/valyala/fasthttp"
 
-	blockevents_view "github.com/crypto-com/chainindex/appinterface/projection/blockevent/view"
-	"github.com/crypto-com/chainindex/appinterface/rdb"
-	"github.com/crypto-com/chainindex/infrastructure/httpapi"
-	applogger "github.com/crypto-com/chainindex/internal/logger"
+	blockevents_view "github.com/crypto-com/chain-indexing/appinterface/projection/blockevent/view"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
+	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 
 type BlockEvents struct {

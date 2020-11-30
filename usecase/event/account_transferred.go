@@ -5,9 +5,9 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 
-	event_entity "github.com/crypto-com/chainindex/entity/event"
-	"github.com/crypto-com/chainindex/usecase/coin"
-	"github.com/crypto-com/chainindex/usecase/model"
+	event_entity "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	"github.com/luci/go-render/render"
 )
 

@@ -4,10 +4,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/crypto-com/chainindex/internal/primptr"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
 
-	"github.com/crypto-com/chainindex/appinterface/tendermint"
-	applogger "github.com/crypto-com/chainindex/internal/logger"
+	"github.com/crypto-com/chain-indexing/appinterface/tendermint"
+	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 
 const DEFAULT_POLLING_INTERVAL = 5 * time.Second

@@ -1,6 +1,6 @@
 package rdbstatusstore
 
-import "github.com/crypto-com/chainindex/appinterface/rdb"
+import "github.com/crypto-com/chain-indexing/appinterface/rdb"
 
 type RDbStatusStore interface {
 	// UpdateLastHandledEventHeight update last indexed block height

@@ -3,10 +3,10 @@ package parser
 import (
 	"fmt"
 
-	"github.com/crypto-com/chainindex/entity/command"
-	command_usecase "github.com/crypto-com/chainindex/usecase/command"
-	"github.com/crypto-com/chainindex/usecase/event"
-	"github.com/crypto-com/chainindex/usecase/model/genesis"
+	"github.com/crypto-com/chain-indexing/entity/command"
+	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
+	"github.com/crypto-com/chain-indexing/usecase/event"
+	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 )
 
 func ParseGenesisCommands(genesis *genesis.Genesis) ([]command.Command, error) {

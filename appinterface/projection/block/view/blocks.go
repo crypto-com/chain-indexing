@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/crypto-com/chainindex/appinterface/projection/view"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 
 	sq "github.com/Masterminds/squirrel"
 
-	"github.com/crypto-com/chainindex/appinterface/pagination"
+	"github.com/crypto-com/chain-indexing/appinterface/pagination"
 
 	jsoniter "github.com/json-iterator/go"
 
-	"github.com/crypto-com/chainindex/appinterface/rdb"
-	"github.com/crypto-com/chainindex/internal/utctime"
-	_ "github.com/crypto-com/chainindex/test/factory"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
+	_ "github.com/crypto-com/chain-indexing/test/factory"
 )
 
 // Block projection view implemented by relational database

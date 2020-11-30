@@ -7,8 +7,8 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 
-	entity_event "github.com/crypto-com/chainindex/entity/event"
-	usecase_model "github.com/crypto-com/chainindex/usecase/model"
+	entity_event "github.com/crypto-com/chain-indexing/entity/event"
+	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 const BLOCK_CREATED = "BlockCreated"

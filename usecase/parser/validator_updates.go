@@ -1,9 +1,9 @@
 package parser
 
 import (
-	"github.com/crypto-com/chainindex/entity/command"
-	command_usecase "github.com/crypto-com/chainindex/usecase/command"
-	"github.com/crypto-com/chainindex/usecase/model"
+	"github.com/crypto-com/chain-indexing/entity/command"
+	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 func ParseValidatorUpdatesCommands(

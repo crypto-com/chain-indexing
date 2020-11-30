@@ -1,14 +1,14 @@
 package handlers
 
 import (
-	block_view "github.com/crypto-com/chainindex/appinterface/projection/block/view"
-	transaction_view "github.com/crypto-com/chainindex/appinterface/projection/transasaction/view"
-	validator_view "github.com/crypto-com/chainindex/appinterface/projection/validator/view"
-	"github.com/crypto-com/chainindex/appinterface/projection/validatorstats"
-	validatorstats_view "github.com/crypto-com/chainindex/appinterface/projection/validatorstats/view"
-	"github.com/crypto-com/chainindex/appinterface/rdb"
-	"github.com/crypto-com/chainindex/infrastructure/httpapi"
-	applogger "github.com/crypto-com/chainindex/internal/logger"
+	block_view "github.com/crypto-com/chain-indexing/appinterface/projection/block/view"
+	transaction_view "github.com/crypto-com/chain-indexing/appinterface/projection/transasaction/view"
+	validator_view "github.com/crypto-com/chain-indexing/appinterface/projection/validator/view"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/validatorstats"
+	validatorstats_view "github.com/crypto-com/chain-indexing/appinterface/projection/validatorstats/view"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
+	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/valyala/fasthttp"
 )
 

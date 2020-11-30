@@ -1,8 +1,8 @@
 package model
 
 import (
-	"github.com/crypto-com/chainindex/internal/utctime"
-	"github.com/crypto-com/chainindex/usecase/coin"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
 )
 
 type MsgUndelegateParams struct {

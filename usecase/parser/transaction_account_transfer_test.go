@@ -1,15 +1,15 @@
 package parser_test
 
 import (
-	"github.com/crypto-com/chainindex/usecase/model"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/crypto-com/chainindex/entity/command"
-	"github.com/crypto-com/chainindex/usecase/coin"
-	command_usecase "github.com/crypto-com/chainindex/usecase/command"
-	"github.com/crypto-com/chainindex/usecase/parser"
-	usecase_parser_test "github.com/crypto-com/chainindex/usecase/parser/test"
+	"github.com/crypto-com/chain-indexing/entity/command"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
+	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
+	"github.com/crypto-com/chain-indexing/usecase/parser"
+	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
 )
 
 var _ = Describe("ParseTxAccountTransferCommands", func() {

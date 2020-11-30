@@ -5,10 +5,10 @@ import (
 	"path"
 	"runtime"
 
-	"github.com/crypto-com/chainindex/infrastructure/pg"
-	. "github.com/crypto-com/chainindex/internal/logger/test"
-	"github.com/crypto-com/chainindex/internal/primptr"
-	"github.com/crypto-com/chainindex/internal/typeconv"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	. "github.com/crypto-com/chain-indexing/internal/logger/test"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
+	"github.com/crypto-com/chain-indexing/internal/typeconv"
 )
 
 func WithTestPgConnConfig(body func(*pg.ConnConfig)) bool {

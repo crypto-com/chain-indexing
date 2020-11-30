@@ -1,14 +1,15 @@
 package infrastructure_test
 
 import (
-	"github.com/crypto-com/chainindex/infrastructure"
 	"io"
+
+	"github.com/crypto-com/chain-indexing/infrastructure"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
 
-	applogger "github.com/crypto-com/chainindex/internal/logger"
+	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 
 const RFC3339_TIME_REGEX = `\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}`

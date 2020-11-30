@@ -2,12 +2,12 @@ package view_test
 
 import (
 	random "github.com/brianvoe/gofakeit/v5"
-	"github.com/crypto-com/chainindex/appinterface/projection/block/view"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/block/view"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/crypto-com/chainindex/infrastructure/pg"
-	. "github.com/crypto-com/chainindex/test"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	. "github.com/crypto-com/chain-indexing/test"
 )
 
 var _ = Describe("Blocks", func() {

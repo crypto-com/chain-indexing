@@ -1,9 +1,9 @@
 package command
 
 import (
-	entity_event "github.com/crypto-com/chainindex/entity/event"
-	"github.com/crypto-com/chainindex/usecase/event"
-	"github.com/crypto-com/chainindex/usecase/model/genesis"
+	entity_event "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/usecase/event"
+	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 )
 
 type CreateGenesis struct {

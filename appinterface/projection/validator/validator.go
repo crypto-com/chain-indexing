@@ -4,17 +4,17 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/crypto-com/chainindex/internal/utctime"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
 
-	"github.com/crypto-com/chainindex/appinterface/pagination"
-	"github.com/crypto-com/chainindex/appinterface/projection/rdbbase"
-	"github.com/crypto-com/chainindex/appinterface/projection/validator/view"
-	"github.com/crypto-com/chainindex/appinterface/rdb"
-	event_entity "github.com/crypto-com/chainindex/entity/event"
-	projection_entity "github.com/crypto-com/chainindex/entity/projection"
-	applogger "github.com/crypto-com/chainindex/internal/logger"
-	"github.com/crypto-com/chainindex/internal/tmcosmosutils"
-	event_usecase "github.com/crypto-com/chainindex/usecase/event"
+	"github.com/crypto-com/chain-indexing/appinterface/pagination"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbbase"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/validator/view"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	event_entity "github.com/crypto-com/chain-indexing/entity/event"
+	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
+	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
+	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
 var _ projection_entity.Projection = &Validator{}

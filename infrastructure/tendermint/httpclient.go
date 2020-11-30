@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/crypto-com/chainindex/usecase/model/genesis"
+	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 
-	usecase_model "github.com/crypto-com/chainindex/usecase/model"
+	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 type HTTPClient struct {

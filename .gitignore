@@ -33,7 +33,7 @@ log/
 *.log
 
 config/config.yml
-chainindex
-!chainindex/
+chain-indexing
+!chain-indexing/
 
 pgdata*

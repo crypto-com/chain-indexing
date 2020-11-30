@@ -3,12 +3,12 @@ package event
 import (
 	"bytes"
 
-	"github.com/crypto-com/chainindex/usecase/coin"
-	"github.com/crypto-com/chainindex/usecase/model"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/luci/go-render/render"
 
-	entity_event "github.com/crypto-com/chainindex/entity/event"
+	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 )
 
 const TRANSACTION_FAILED = "TransactionFailed"

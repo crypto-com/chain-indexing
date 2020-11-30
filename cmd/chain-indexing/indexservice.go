@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 
-	"github.com/crypto-com/chainindex/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 
-	applogger "github.com/crypto-com/chainindex/internal/logger"
-	"github.com/crypto-com/chainindex/usecase/parser"
+	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	"github.com/crypto-com/chain-indexing/usecase/parser"
 )
 
 type IndexService struct {

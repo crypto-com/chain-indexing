@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/crypto-com/chainindex/appinterface/pagination"
+	"github.com/crypto-com/chain-indexing/appinterface/pagination"
 
-	"github.com/crypto-com/chainindex/appinterface/rdb"
-	"github.com/crypto-com/chainindex/internal/utctime"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
 )
 
 type Validators struct {

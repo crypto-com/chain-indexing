@@ -1,7 +1,7 @@
 package httpapi
 
 import (
-	applogger "github.com/crypto-com/chainindex/internal/logger"
+	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/fasthttp/router"
 	"github.com/lab259/cors"
 	"github.com/valyala/fasthttp"

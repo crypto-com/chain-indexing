@@ -6,8 +6,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/crypto-com/chainindex/infrastructure/pg"
-	"github.com/crypto-com/chainindex/internal/primptr"
+	. "github.com/crypto-com/chain-indexing/infrastructure/pg"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
 )
 
 var _ = Describe("PgxConnPoolConfig", func() {
@@ -20,7 +20,7 @@ var _ = Describe("PgxConnPoolConfig", func() {
 						Port:          5432,
 						MaybeUsername: nil,
 						MaybePassword: nil,
-						Database:      "chainindex",
+						Database:      "chain-indexing",
 						SSL:           false,
 					},
 					MaybeMaxConns:          nil,
@@ -30,7 +30,7 @@ var _ = Describe("PgxConnPoolConfig", func() {
 					MaybeHealthCheckPeriod: nil,
 				}
 
-				Expect(config.ToURL()).To(Equal("postgres://127.0.0.1:5432/chainindex?sslmode=disable"))
+				Expect(config.ToURL()).To(Equal("postgres://127.0.0.1:5432/chain-indexing?sslmode=disable"))
 			})
 
 			It("should return Postgres connection string without auth when username and password is provided", func() {
@@ -40,7 +40,7 @@ var _ = Describe("PgxConnPoolConfig", func() {
 						Port:          5432,
 						MaybeUsername: primptr.String("user"),
 						MaybePassword: primptr.String("password"),
-						Database:      "chainindex",
+						Database:      "chain-indexing",
 						SSL:           false,
 					},
 					MaybeMaxConns:          nil,
@@ -50,7 +50,7 @@ var _ = Describe("PgxConnPoolConfig", func() {
 					MaybeHealthCheckPeriod: nil,
 				}
 
-				Expect(config.ToURL()).To(Equal("postgres://user:password@127.0.0.1:5432/chainindex?sslmode=disable"))
+				Expect(config.ToURL()).To(Equal("postgres://user:password@127.0.0.1:5432/chain-indexing?sslmode=disable"))
 			})
 
 			It("should return Postgres connection string when SSL is enabled", func() {
@@ -60,7 +60,7 @@ var _ = Describe("PgxConnPoolConfig", func() {
 						Port:          5432,
 						MaybeUsername: primptr.String("user"),
 						MaybePassword: primptr.String("password"),
-						Database:      "chainindex",
+						Database:      "chain-indexing",
 						SSL:           true,
 					},
 					MaybeMaxConns:          nil,
@@ -70,7 +70,7 @@ var _ = Describe("PgxConnPoolConfig", func() {
 					MaybeHealthCheckPeriod: nil,
 				}
 
-				Expect(config.ToURL()).To(Equal("postgres://user:password@127.0.0.1:5432/chainindex"))
+				Expect(config.ToURL()).To(Equal("postgres://user:password@127.0.0.1:5432/chain-indexing"))
 			})
 		})
 
@@ -82,7 +82,7 @@ var _ = Describe("PgxConnPoolConfig", func() {
 						Port:          5432,
 						MaybeUsername: primptr.String("user"),
 						MaybePassword: primptr.String("password"),
-						Database:      "chainindex",
+						Database:      "chain-indexing",
 						SSL:           true,
 					},
 					MaybeMaxConns:          primptr.Int32(50),
@@ -92,7 +92,7 @@ var _ = Describe("PgxConnPoolConfig", func() {
 					MaybeHealthCheckPeriod: primptr.Duration(30 * time.Second),
 				}
 
-				Expect(config.ToURL()).To(Equal("postgres://user:password@127.0.0.1:5432/chainindex?pool_health_check_period=30s&pool_max_conn_idle_time=1m0s&pool_max_conn_lifetime=5m0s&pool_max_conns=50&pool_min_conns=1"))
+				Expect(config.ToURL()).To(Equal("postgres://user:password@127.0.0.1:5432/chain-indexing?pool_health_check_period=30s&pool_max_conn_idle_time=1m0s&pool_max_conn_lifetime=5m0s&pool_max_conns=50&pool_min_conns=1"))
 			})
 		})
 	})

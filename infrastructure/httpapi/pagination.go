@@ -5,7 +5,7 @@ import (
 
 	"github.com/valyala/fasthttp"
 
-	pagination_interface "github.com/crypto-com/chainindex/appinterface/pagination"
+	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
 )
 
 func ParsePagination(ctx *fasthttp.RequestCtx) (*pagination_interface.Pagination, error) {

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"math/big"
 
-	usecase_coin "github.com/crypto-com/chainindex/usecase/coin"
+	usecase_coin "github.com/crypto-com/chain-indexing/usecase/coin"
 
 	jsoniter "github.com/json-iterator/go"
 	. "github.com/onsi/ginkgo"

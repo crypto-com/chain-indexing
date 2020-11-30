@@ -1,7 +1,7 @@
 package projection
 
 import (
-	entity_event "github.com/crypto-com/chainindex/entity/event"
+	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 )
 
 // Projection interface defines the necessary methods of to create a projection
