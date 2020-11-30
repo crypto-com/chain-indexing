@@ -27,6 +27,7 @@ var _ = Describe("RdbEventStore", func() {
 			It("should insert an event properly without any error", func() {
 				registry := event.NewRegistry()
 				store := appinterface_event.NewRDbStore(pgxConn.ToHandle(), registry)
+				_ = store.EnsurePartitionTableExists(0)
 
 				event := test.NewFakeEvent()
 				err := store.Insert(event)
@@ -38,6 +39,7 @@ var _ = Describe("RdbEventStore", func() {
 			It("should insert multiple events properly without any error", func() {
 				registry := event.NewRegistry()
 				store := appinterface_event.NewRDbStore(pgxConn.ToHandle(), registry)
+				_ = store.EnsurePartitionTableExists(0)
 
 				events := []event.Event{test.NewFakeEvent(), test.NewFakeEvent()}
 				err := store.InsertAll(events)
@@ -49,6 +51,7 @@ var _ = Describe("RdbEventStore", func() {
 			It("should return nil when events table does not have any record", func() {
 				registry := event.NewRegistry()
 				store := appinterface_event.NewRDbStore(pgxConn.ToHandle(), registry)
+				_ = store.EnsurePartitionTableExists(0)
 
 				actual, err := store.GetLatestHeight()
 				Expect(err).To(BeNil())
@@ -58,6 +61,7 @@ var _ = Describe("RdbEventStore", func() {
 			It("should get 1 after insert fake event with height 1", func() {
 				registry := event.NewRegistry()
 				store := appinterface_event.NewRDbStore(pgxConn.ToHandle(), registry)
+				_ = store.EnsurePartitionTableExists(0)
 
 				// Insert an event with latestHeight 1
 				mockEvent := test.NewMockEvent()

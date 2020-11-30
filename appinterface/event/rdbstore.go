@@ -10,6 +10,9 @@ import (
 
 const DEFAULT_TABLE = "events"
 
+// block heights per partition table
+const PARTITION_SIZE = 5000
+
 // Events table should have the following schema
 // | Field   | Data Type | Constraint  |
 // | ------- | --------- | ----------- |
@@ -174,5 +177,15 @@ func (store *RDbStore) InsertAll(events []entity_event.Event) error {
 		return errors.New("error executing event insertion SQL: mismatched number of rows inserted")
 	}
 
+	return nil
+}
+
+// EnsurePartitionTableExists creates events partition table for height, assuming caller calls with increasing height argument.
+func (store *RDbStore) EnsurePartitionTableExists(height int64) error {
+	if height%PARTITION_SIZE == 0 {
+		idx := height / PARTITION_SIZE
+		_, err := store.rdbHandle.Exec(fmt.Sprintf("create table if not exists events_%d partition of events for values from (%d) to (%d)", idx, idx*PARTITION_SIZE, (idx+1)*PARTITION_SIZE))
+		return err
+	}
 	return nil
 }

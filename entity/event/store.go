@@ -10,4 +10,6 @@ type Store interface {
 
 	// InsertAll insert all events into store. It will rollback when the insert fails at any point.
 	InsertAll(evt []Event) error
+
+	EnsurePartitionTableExists(height int64) error
 }

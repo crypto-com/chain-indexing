@@ -36,3 +36,8 @@ func (manager *MockEventStore) InsertAll(evts []entity_event.Event) error {
 
 	return mockArgs.Error(0)
 }
+
+func (manager *MockEventStore) EnsurePartitionTableExists(height int64) error {
+	mockArgs := manager.Called(height)
+	return mockArgs.Error(0)
+}

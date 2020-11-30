@@ -119,6 +119,9 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
 			if err := executor.ExecAllCommands(); err != nil {
 				return fmt.Errorf("error generating all events%v", err)
 			}
+			if err := eventStore.EnsurePartitionTableExists(blockHeight); err != nil {
+				return fmt.Errorf("error creating events partition table%v", err)
+			}
 			if err := executor.StoreAllEvents(eventStore); err != nil {
 				return fmt.Errorf("error storing all events%v", err)
 			}

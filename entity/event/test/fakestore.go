@@ -25,3 +25,7 @@ func (manager *FakeEventStore) Insert(evt entity_event.Event) error {
 func (manager *FakeEventStore) InsertAll(evts []entity_event.Event) error {
 	return nil
 }
+
+func (manager *FakeEventStore) EnsurePartitionTableExists(height int64) error {
+	return nil
+}
