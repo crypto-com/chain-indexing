@@ -39,8 +39,9 @@ func (validatorsView *Validators) Upsert(validator *ValidatorRow) error {
 	).From(
 		"view_validators",
 	).Where(
-		"operator_address = ?", validator.OperatorAddress,
-		"consensus_node_address = ?", validator.ConsensusNodeAddress,
+		"operator_address = ? AND consensus_node_address = ?",
+		validator.OperatorAddress,
+		validator.ConsensusNodeAddress,
 	).ToSql(); err != nil {
 		return fmt.Errorf("error building validator existencen query sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
