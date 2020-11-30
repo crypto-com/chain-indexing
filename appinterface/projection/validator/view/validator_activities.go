@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
+
 	sq "github.com/Masterminds/squirrel"
 
 	"github.com/crypto-com/chain-indexing/internal/utctime"
@@ -23,11 +25,11 @@ func NewValidatorActivities(handle *rdb.Handle) *ValidatorActivities {
 	}
 }
 
-func (view *ValidatorActivities) Insert(validatorActivity *ValidatorActivityRow) error {
+func (validatorActivitiesView *ValidatorActivities) Insert(validatorActivity *ValidatorActivityRow) error {
 	var err error
 
 	var sql string
-	sql, _, err = view.rdb.StmtBuilder.Insert(
+	sql, _, err = validatorActivitiesView.rdb.StmtBuilder.Insert(
 		"view_validator_activities",
 	).Columns(
 		"block_height",
@@ -42,10 +44,10 @@ func (view *ValidatorActivities) Insert(validatorActivity *ValidatorActivityRow)
 		return fmt.Errorf("error building valiator activity insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := view.rdb.Exec(sql,
+	result, err := validatorActivitiesView.rdb.Exec(sql,
 		validatorActivity.BlockHeight,
 		validatorActivity.BlockHash,
-		view.rdb.Tton(&validatorActivity.BlockTime),
+		validatorActivitiesView.rdb.Tton(&validatorActivity.BlockTime),
 		validatorActivity.MaybeTransactionHash,
 		validatorActivity.OperatorAddress,
 		validatorActivity.Success,
@@ -61,11 +63,12 @@ func (view *ValidatorActivities) Insert(validatorActivity *ValidatorActivityRow)
 	return nil
 }
 
-func (view *ValidatorActivities) List(
+func (validatorActivitiesView *ValidatorActivities) List(
 	filter ValidatorActivitiesListFilter,
+	order ValidatorActivitiesListOrder,
 	pagination *pagination_interface.Pagination,
 ) ([]ValidatorActivityRow, *pagination_interface.PaginationResult, error) {
-	stmtBuilder := view.rdb.StmtBuilder.Select(
+	stmtBuilder := validatorActivitiesView.rdb.StmtBuilder.Select(
 		"block_height",
 		"block_hash",
 		"block_time",
@@ -75,9 +78,15 @@ func (view *ValidatorActivities) List(
 		"data",
 	).From(
 		"view_validator_activities",
-	).OrderBy(
-		"id",
 	)
+
+	if order.MaybeBlockHeight == nil {
+		stmtBuilder = stmtBuilder.OrderBy("id")
+	} else if *order.MaybeBlockHeight == view.ORDER_ASC {
+		stmtBuilder = stmtBuilder.OrderBy("block_height")
+	} else if *order.MaybeBlockHeight == view.ORDER_DESC {
+		stmtBuilder = stmtBuilder.OrderBy("block_height DESC")
+	}
 
 	if filter.MaybeOperatorAddress != nil {
 		stmtBuilder = stmtBuilder.Where("operator_address = ?", *filter.MaybeOperatorAddress)
@@ -85,7 +94,7 @@ func (view *ValidatorActivities) List(
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
-		view.rdb,
+		validatorActivitiesView.rdb,
 	).WithCustomTotalQueryFn(
 		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
 			identity := "-"
@@ -114,7 +123,7 @@ func (view *ValidatorActivities) List(
 		return nil, nil, fmt.Errorf("error building transactions select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	rowsResult, err := view.rdb.Query(sql, sqlArgs...)
+	rowsResult, err := validatorActivitiesView.rdb.Query(sql, sqlArgs...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error executing transactions select SQL: %v: %w", err, rdb.ErrQuery)
 	}
@@ -123,7 +132,7 @@ func (view *ValidatorActivities) List(
 	for rowsResult.Next() {
 		var validatorActivity ValidatorActivityRow
 
-		blockTimeParser := view.rdb.NtotReader()
+		blockTimeParser := validatorActivitiesView.rdb.NtotReader()
 		if scanErr := rowsResult.Scan(
 			&validatorActivity.BlockHeight,
 			&validatorActivity.BlockHash,
@@ -159,6 +168,10 @@ func (view *ValidatorActivities) List(
 type ValidatorActivitiesListFilter struct {
 	MaybeOperatorAddress      *string
 	MaybeConsensusNodeAddress *string
+}
+
+type ValidatorActivitiesListOrder struct {
+	MaybeBlockHeight *view.ORDER
 }
 
 type ValidatorActivityRow struct {

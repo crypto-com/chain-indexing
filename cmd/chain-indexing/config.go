@@ -34,6 +34,9 @@ func (config *Config) OverrideByCLIConfig(cliConfig *CLIConfig) {
 	if cliConfig.TendermintHTTPRPCURL != "" {
 		config.Tendermint.HTTPRPCURL = cliConfig.TendermintHTTPRPCURL
 	}
+	if cliConfig.CosmosHTTPRPCURL != "" {
+		config.CosmosApp.HTTPRPCUL = cliConfig.CosmosHTTPRPCURL
+	}
 }
 
 type CLIConfig struct {
@@ -49,6 +52,7 @@ type CLIConfig struct {
 	DatabaseSchema   string
 
 	TendermintHTTPRPCURL string
+	CosmosHTTPRPCURL     string
 }
 
 // FileConfig is the struct matches config.toml
@@ -56,6 +60,7 @@ type FileConfig struct {
 	Blockchain BlockchainConfig
 	Sync       SyncConfig
 	Tendermint TendermintConfig
+	CosmosApp  CosmosAppConfig `toml:"cosmosapp"`
 	HTTP       HTTPConfig
 	Database   DatabaseConfig
 	Postgres   PostgresConfig
@@ -85,6 +90,10 @@ type HTTPConfig struct {
 
 type TendermintConfig struct {
 	HTTPRPCURL string `toml:"http_rpc_url"`
+}
+
+type CosmosAppConfig struct {
+	HTTPRPCUL string `toml:"http_rpc_url"`
 }
 
 type DatabaseConfig struct {

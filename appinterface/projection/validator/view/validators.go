@@ -167,8 +167,8 @@ func (validatorsView *Validators) List(
 				"status": status,
 			})
 		}
+		cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.Where(statusOrCondition)
 	}
-	cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.Where(statusOrCondition)
 	cumulativePowerSql, cumulativePowerSqlArgs, err := cumulativePowerStmtBuilder.ToSql()
 	if err != nil {
 		return nil, nil, fmt.Errorf(
@@ -235,7 +235,10 @@ func (validatorsView *Validators) List(
 		// DESC order
 		stmtBuilder = stmtBuilder.OrderBy("power DESC")
 	}
-	stmtBuilder = stmtBuilder.Where(statusOrCondition)
+
+	if statusOrCondition != nil {
+		stmtBuilder = stmtBuilder.Where(statusOrCondition)
+	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
@@ -546,6 +549,6 @@ type ValidatorRow struct {
 type ListValidatorRow struct {
 	ValidatorRow
 
-	PowerPercentage           string `json:"power_percentage"`
-	CumulativePowerPercentage string `json:"cumulative_power_percentage"`
+	PowerPercentage           string `json:"powerPercentage"`
+	CumulativePowerPercentage string `json:"cumulativePowerPercentage"`
 }
