@@ -12,13 +12,14 @@ DB_HOST=${DB_HOST:-localhost}
 DB_PORT=${DB_PORT:-5432}
 DB_NAME=${DB_NAME:-postgres}
 DB_SCHEMA=${DB_SCHEMA:-public}
+DB_SSL=${DB_SSL:-require}
 
 # main
 RET_VALUE=0
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
-DB_DRIVER_URL="${DB_PROTOCOL}://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?options=--search_path=${DB_SCHEMA}"
+DB_DRIVER_URL="${DB_PROTOCOL}://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=${DB_SSL}&options=--search_path=${DB_SCHEMA}"
 
 echoerr() { echo "$@" 1>&2; }
 
