@@ -1,7 +1,13 @@
 package handlers
 
 import (
+	"errors"
 	"strings"
+
+	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
+
+	"github.com/crypto-com/chain-indexing/appinterface/projection/validator/constants"
 
 	"github.com/valyala/fasthttp"
 
@@ -55,7 +61,7 @@ func (handler *Validators) FindBy(ctx *fasthttp.RequestCtx) {
 
 	validator, err := handler.validatorsView.FindBy(identity)
 	if err != nil {
-		if err == rdb.ErrNoRows {
+		if errors.Is(err, rdb.ErrNoRows) {
 			httpapi.NotFound(ctx)
 			return
 		}
@@ -76,7 +82,62 @@ func (handler *Validators) List(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	validators, paginationResult, err := handler.validatorsView.List(pagination)
+	queryArgs := ctx.QueryArgs()
+	var order validator_view.ValidatorsListOrder
+	if queryArgs.Has("order") {
+		orderArg := string(queryArgs.Peek("order"))
+		if orderArg == "power" {
+			order.MaybePower = primptr.String(view.ORDER_ASC)
+		} else if orderArg == "power.desc" {
+			order.MaybePower = primptr.String(view.ORDER_DESC)
+		} else {
+			httpapi.BadRequest(ctx, errors.New("invalid order"))
+			return
+		}
+	}
+
+	validators, paginationResult, err := handler.validatorsView.List(
+		validator_view.ValidatorsListFilter{}, order, pagination,
+	)
+	if err != nil {
+		handler.logger.Errorf("error listing validators: %v", err)
+		httpapi.InternalServerError(ctx)
+		return
+	}
+
+	httpapi.SuccessWithPagination(ctx, validators, paginationResult)
+}
+
+func (handler *Validators) ListActive(ctx *fasthttp.RequestCtx) {
+	var err error
+
+	pagination, err := httpapi.ParsePagination(ctx)
+	if err != nil {
+		ctx.SetStatusCode(fasthttp.StatusBadRequest)
+		return
+	}
+
+	queryArgs := ctx.QueryArgs()
+	var order validator_view.ValidatorsListOrder
+	if queryArgs.Has("order") {
+		orderArg := string(queryArgs.Peek("order"))
+		if orderArg == "power" {
+			order.MaybePower = primptr.String(view.ORDER_ASC)
+		} else if orderArg == "power.desc" {
+			order.MaybePower = primptr.String(view.ORDER_DESC)
+		} else {
+			httpapi.BadRequest(ctx, errors.New("invalid order"))
+			return
+		}
+	}
+
+	validators, paginationResult, err := handler.validatorsView.List(validator_view.ValidatorsListFilter{
+		MaybeStatuses: []constants.Status{
+			constants.BONDED,
+			constants.JAILED,
+			constants.UNBONDING,
+		},
+	}, order, pagination)
 	if err != nil {
 		handler.logger.Errorf("error listing validators: %v", err)
 		httpapi.InternalServerError(ctx)

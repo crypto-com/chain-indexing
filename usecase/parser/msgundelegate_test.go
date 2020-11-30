@@ -1,6 +1,7 @@
 package parser_test
 
 import (
+	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -16,7 +17,6 @@ import (
 
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgDelegate", func() {
-
 		It("should parse Msg commands when there is staking.MsgUndelegate in the transaction", func() {
 			txDecoder := parser.NewTxDecoder("basetrcro")
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_UNDELEGATE_BLOCK_RESP)
@@ -37,10 +37,38 @@ var _ = Describe("ParseMsgCommands", func() {
 					MsgIndex:    0,
 				},
 				model.MsgUndelegateParams{
-					DelegatorAddress: "tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64",
-					ValidatorAddress: "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
-					Amount:           coin.MustNewCoinFromString("1000000000"),
-					UnbondCompleteAt: utctime.FromUnixNano(int64(1605152654000000000)),
+					DelegatorAddress:      "tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64",
+					ValidatorAddress:      "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
+					Amount:                coin.MustNewCoinFromString("1000000000"),
+					MaybeUnbondCompleteAt: primptr.UTCTime(utctime.FromUnixNano(int64(1605152654000000000))),
+				},
+			)}))
+		})
+
+		It("should parse MsgUndelegate command in failed transaction", func() {
+			txDecoder := parser.NewTxDecoder("basetrcro")
+			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_MSG_UNDELEGATE_BLOCK_RESP)
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_MSG_UNDELEGATE_BLOCK_RESULTS_RESP)
+
+			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
+				txDecoder,
+				block,
+				blockResults,
+			)
+			Expect(err).To(BeNil())
+			Expect(cmds).To(HaveLen(1))
+			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateMsgUndelegate(
+				event.MsgCommonParams{
+					BlockHeight: int64(184399),
+					TxHash:      "5285A9B475157E01540536299A2B5F505AC900159C268B3D90652557F9ACDE1E",
+					TxSuccess:   false,
+					MsgIndex:    0,
+				},
+				model.MsgUndelegateParams{
+					DelegatorAddress:      "tcro1llst0cguh5azl9t8wr6mz5yzjuwukz7f67z7f6",
+					ValidatorAddress:      "tcrocncl15e69kdrtczajjdlzyt2qgs5q2anc5qpmk2c68z",
+					Amount:                coin.MustNewCoinFromString("50000000000000"),
+					MaybeUnbondCompleteAt: nil,
 				},
 			)}))
 		})

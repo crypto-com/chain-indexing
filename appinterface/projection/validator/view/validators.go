@@ -1,10 +1,19 @@
 package view
 
 import (
+	"errors"
 	"fmt"
+	"math/big"
 	"strings"
 
+	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
+
+	sq "github.com/Masterminds/squirrel"
+
+	"github.com/crypto-com/chain-indexing/appinterface/projection/validator/constants"
+
 	"github.com/crypto-com/chain-indexing/appinterface/pagination"
+	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
@@ -20,11 +29,11 @@ func NewValidators(handle *rdb.Handle) *Validators {
 	}
 }
 
-func (view *Validators) Insert(validator *ValidatorRow) error {
+func (validatorsView *Validators) Insert(validator *ValidatorRow) error {
 	var err error
 
 	var sql string
-	sql, _, err = view.rdb.StmtBuilder.Insert(
+	sql, _, err = validatorsView.rdb.StmtBuilder.Insert(
 		"view_validators",
 	).Columns(
 		"operator_address",
@@ -50,7 +59,7 @@ func (view *Validators) Insert(validator *ValidatorRow) error {
 		return fmt.Errorf("error building blocks insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := view.rdb.Exec(sql,
+	result, err := validatorsView.rdb.Exec(sql,
 		validator.OperatorAddress,
 		validator.ConsensusNodeAddress,
 		validator.InitialDelegatorAddress,
@@ -80,12 +89,12 @@ func (view *Validators) Insert(validator *ValidatorRow) error {
 	return nil
 }
 
-func (view *Validators) Update(validator *ValidatorRow) error {
+func (validatorsView *Validators) Update(validator *ValidatorRow) error {
 	var unbondingCompletionTime interface{} = nil
 	if validator.MaybeUnbondingCompletionTime != nil {
-		unbondingCompletionTime = view.rdb.Tton(validator.MaybeUnbondingCompletionTime)
+		unbondingCompletionTime = validatorsView.rdb.Tton(validator.MaybeUnbondingCompletionTime)
 	}
-	sql, sqlArgs, err := view.rdb.StmtBuilder.Update(
+	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Update(
 		"view_validators",
 	).SetMap(map[string]interface{}{
 		"initial_delegator_address": validator.InitialDelegatorAddress,
@@ -107,7 +116,7 @@ func (view *Validators) Update(validator *ValidatorRow) error {
 		return fmt.Errorf("error building validator update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := view.rdb.Exec(sql, sqlArgs...)
+	result, err := validatorsView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
 		return fmt.Errorf("error updating validator into the table: %v: %w", err, rdb.ErrWrite)
 	}
@@ -118,8 +127,84 @@ func (view *Validators) Update(validator *ValidatorRow) error {
 	return nil
 }
 
-func (view *Validators) List(pagination *pagination.Pagination) ([]ValidatorRow, *pagination.PaginationResult, error) {
-	stmtBuilder := view.rdb.StmtBuilder.Select(
+type ValidatorsListFilter struct {
+	MaybeStatuses []constants.Status
+}
+
+type ValidatorsListOrder struct {
+	MaybePower *view.ORDER
+}
+
+func (validatorsView *Validators) List(
+	filter ValidatorsListFilter,
+	order ValidatorsListOrder,
+	pagination *pagination_interface.Pagination,
+) ([]ListValidatorRow, *pagination.PaginationResult, error) {
+	if pagination.Type() != pagination_interface.PAGINATION_OFFSET {
+		panic(fmt.Sprintf("unsupported pagination type: %s", pagination.Type()))
+	}
+	cumulativePowerStmtBuilder := validatorsView.rdb.StmtBuilder.Select(
+		"power",
+	).From(
+		"view_validators",
+	).Offset(0).Limit(
+		uint64(pagination.OffsetParams().Offset()),
+	)
+	if order.MaybePower == nil {
+		cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.OrderBy("id")
+	} else if *order.MaybePower == view.ORDER_ASC {
+		cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.OrderBy("power")
+	} else {
+		// DESC order
+		cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.OrderBy("power DESC")
+	}
+
+	var statusOrCondition sq.Or
+	if filter.MaybeStatuses != nil {
+		statusOrCondition = make(sq.Or, 0)
+		for _, status := range filter.MaybeStatuses {
+			statusOrCondition = append(statusOrCondition, sq.Eq{
+				"status": status,
+			})
+		}
+	}
+	cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.Where(statusOrCondition)
+	cumulativePowerSql, cumulativePowerSqlArgs, err := cumulativePowerStmtBuilder.ToSql()
+	if err != nil {
+		return nil, nil, fmt.Errorf(
+			"error building validators cumulative power SQL: %v, %w", err, rdb.ErrBuildSQLStmt,
+		)
+	}
+	rowsResult, err := validatorsView.rdb.Query(cumulativePowerSql, cumulativePowerSqlArgs...)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error preparing cumulative power SQL: %v", err)
+	}
+
+	cumulativePower := new(big.Float).SetInt64(int64(0))
+	for rowsResult.Next() {
+		var powerStr string
+		if scanErr := rowsResult.Scan(&powerStr); scanErr != nil {
+			if errors.Is(scanErr, rdb.ErrNoRows) {
+				return nil, nil, fmt.Errorf(
+					"error executing validators cumulative power SQL: %v, %w", scanErr, rdb.ErrQuery,
+				)
+			}
+			powerStr = "0"
+		}
+		power, ok := new(big.Float).SetString(powerStr)
+		if !ok {
+			return nil, nil, fmt.Errorf(
+				"error parsing validators power: %v, %w", err, rdb.ErrTypeConv,
+			)
+		}
+		cumulativePower = new(big.Float).Add(cumulativePower, power)
+	}
+	totalPower, err := validatorsView.totalPower()
+	if err != nil {
+		return nil, nil, fmt.Errorf("error getting total power: %v", err)
+	}
+
+	stmtBuilder := validatorsView.rdb.StmtBuilder.Select(
 		"id",
 		"operator_address",
 		"consensus_node_address",
@@ -141,26 +226,36 @@ func (view *Validators) List(pagination *pagination.Pagination) ([]ValidatorRow,
 		"min_self_delegation",
 	).From(
 		"view_validators",
-	).OrderBy("id")
+	)
+	if order.MaybePower == nil {
+		stmtBuilder = stmtBuilder.OrderBy("id")
+	} else if *order.MaybePower == view.ORDER_ASC {
+		stmtBuilder = stmtBuilder.OrderBy("power")
+	} else {
+		// DESC order
+		stmtBuilder = stmtBuilder.OrderBy("power DESC")
+	}
+	stmtBuilder = stmtBuilder.Where(statusOrCondition)
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
-		view.rdb,
+		validatorsView.rdb,
 	).BuildStmt(stmtBuilder)
 	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
 	if err != nil {
 		return nil, nil, fmt.Errorf("error building blocks select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	rowsResult, err := view.rdb.Query(sql, sqlArgs...)
+	rowsResult, err = validatorsView.rdb.Query(sql, sqlArgs...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error executing blocks select SQL: %v: %w", err, rdb.ErrQuery)
 	}
+	defer rowsResult.Close()
 
-	validators := make([]ValidatorRow, 0)
+	validators := make([]ListValidatorRow, 0)
 	for rowsResult.Next() {
 		var validator ValidatorRow
-		unbondingCompletionTimeReader := view.rdb.NtotReader()
+		unbondingCompletionTimeReader := validatorsView.rdb.NtotReader()
 		if err = rowsResult.Scan(
 			&validator.MaybeId,
 			&validator.OperatorAddress,
@@ -182,7 +277,7 @@ func (view *Validators) List(pagination *pagination.Pagination) ([]ValidatorRow,
 			&validator.CommissionMaxChangeRate,
 			&validator.MinSelfDelegation,
 		); err != nil {
-			if err == rdb.ErrNoRows {
+			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
 			}
 			return nil, nil, fmt.Errorf("error scanning validator row: %v: %w", err, rdb.ErrQuery)
@@ -195,9 +290,30 @@ func (view *Validators) List(pagination *pagination.Pagination) ([]ValidatorRow,
 			validator.MaybeUnbondingCompletionTime = unbondingCompletionTime
 		}
 
-		validators = append(validators, validator)
+		power, ok := new(big.Float).SetString(validator.Power)
+		if !ok {
+			return nil, nil, errors.New("error parsing validator power as float")
+		}
+
+		if totalPower.Cmp(new(big.Float).SetInt64(int64(0))) == 0 {
+			validators = append(validators, ListValidatorRow{
+				validator,
+
+				"0",
+				"0",
+			})
+		} else {
+			cumulativePower = new(big.Float).Add(cumulativePower, power)
+			cumulativePowerPercentage := new(big.Float).Quo(cumulativePower, totalPower)
+			powerPercentage := new(big.Float).Quo(power, totalPower)
+			validators = append(validators, ListValidatorRow{
+				validator,
+
+				powerPercentage.String(),
+				cumulativePowerPercentage.String(),
+			})
+		}
 	}
-	rowsResult.Close()
 
 	paginationResult, err := rDbPagination.Result()
 	if err != nil {
@@ -207,9 +323,33 @@ func (view *Validators) List(pagination *pagination.Pagination) ([]ValidatorRow,
 	return validators, paginationResult, nil
 }
 
-func (view *Validators) Search(keyword string) ([]ValidatorRow, error) {
+func (validatorsView *Validators) totalPower() (*big.Float, error) {
+	sql, _, _ := validatorsView.rdb.StmtBuilder.Select("power").From("view_validators").ToSql()
+	rowsResult, err := validatorsView.rdb.Query(sql)
+	if err != nil {
+		return nil, fmt.Errorf("error getting validators from table: %v", err)
+	}
+	defer rowsResult.Close()
+
+	totalPower := new(big.Float).SetInt64(int64(0))
+	for rowsResult.Next() {
+		var powerStr string
+		if scanErr := rowsResult.Scan(&powerStr); scanErr != nil {
+			return nil, fmt.Errorf("error scanning power from validators: %v", scanErr)
+		}
+		power, ok := new(big.Float).SetString(powerStr)
+		if !ok {
+			return nil, fmt.Errorf("error creating big.Float from power retrieved: %v", err)
+		}
+		totalPower = new(big.Float).Add(totalPower, power)
+	}
+
+	return totalPower, nil
+}
+
+func (validatorsView *Validators) Search(keyword string) ([]ValidatorRow, error) {
 	keyword = strings.ToLower(keyword)
-	sql, sqlArgs, err := view.rdb.StmtBuilder.Select(
+	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Select(
 		"id",
 		"operator_address",
 		"consensus_node_address",
@@ -239,7 +379,7 @@ func (view *Validators) Search(keyword string) ([]ValidatorRow, error) {
 		return nil, fmt.Errorf("error building blocks select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	rowsResult, err := view.rdb.Query(sql, sqlArgs...)
+	rowsResult, err := validatorsView.rdb.Query(sql, sqlArgs...)
 	if err != nil {
 		return nil, fmt.Errorf("error executing blocks select SQL: %v: %w", err, rdb.ErrQuery)
 	}
@@ -247,7 +387,7 @@ func (view *Validators) Search(keyword string) ([]ValidatorRow, error) {
 	validators := make([]ValidatorRow, 0)
 	for rowsResult.Next() {
 		var validator ValidatorRow
-		unbondingCompletionTimeReader := view.rdb.NtotReader()
+		unbondingCompletionTimeReader := validatorsView.rdb.NtotReader()
 		if err = rowsResult.Scan(
 			&validator.MaybeId,
 			&validator.OperatorAddress,
@@ -269,7 +409,7 @@ func (view *Validators) Search(keyword string) ([]ValidatorRow, error) {
 			&validator.CommissionMaxChangeRate,
 			&validator.MinSelfDelegation,
 		); err != nil {
-			if err == rdb.ErrNoRows {
+			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, rdb.ErrNoRows
 			}
 			return nil, fmt.Errorf("error scanning validator row: %v: %w", err, rdb.ErrQuery)
@@ -289,10 +429,10 @@ func (view *Validators) Search(keyword string) ([]ValidatorRow, error) {
 	return validators, nil
 }
 
-func (view *Validators) FindBy(identity ValidatorIdentity) (*ValidatorRow, error) {
+func (validatorsView *Validators) FindBy(identity ValidatorIdentity) (*ValidatorRow, error) {
 	var err error
 
-	selectStmtBuilder := view.rdb.StmtBuilder.Select(
+	selectStmtBuilder := validatorsView.rdb.StmtBuilder.Select(
 		"id",
 		"operator_address",
 		"consensus_node_address",
@@ -330,8 +470,8 @@ func (view *Validators) FindBy(identity ValidatorIdentity) (*ValidatorRow, error
 	}
 
 	var validator ValidatorRow
-	unbondingCompletionTimeReader := view.rdb.NtotReader()
-	if err = view.rdb.QueryRow(sql, sqlArgs...).Scan(
+	unbondingCompletionTimeReader := validatorsView.rdb.NtotReader()
+	if err = validatorsView.rdb.QueryRow(sql, sqlArgs...).Scan(
 		&validator.MaybeId,
 		&validator.OperatorAddress,
 		&validator.ConsensusNodeAddress,
@@ -352,7 +492,7 @@ func (view *Validators) FindBy(identity ValidatorIdentity) (*ValidatorRow, error
 		&validator.CommissionMaxChangeRate,
 		&validator.MinSelfDelegation,
 	); err != nil {
-		if err == rdb.ErrNoRows {
+		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
 		}
 		return nil, fmt.Errorf("error scanning validator row: %v: %w", err, rdb.ErrQuery)
@@ -368,9 +508,9 @@ func (view *Validators) FindBy(identity ValidatorIdentity) (*ValidatorRow, error
 	return &validator, nil
 }
 
-func (view *Validators) Count() (int64, error) {
+func (validatorsView *Validators) Count() (int64, error) {
 	var count int64
-	if err := view.rdb.QueryRow("SELECT COUNT(*) FROM view_validators").Scan(&count); err != nil {
+	if err := validatorsView.rdb.QueryRow("SELECT COUNT(*) FROM view_validators").Scan(&count); err != nil {
 		return int64(0), fmt.Errorf("error getting validators count: %v", err)
 	}
 	return count, nil
@@ -401,4 +541,11 @@ type ValidatorRow struct {
 	CommissionMaxRate            string           `json:"commissionMaxRate"`
 	CommissionMaxChangeRate      string           `json:"commissionMaxChangeRate"`
 	MinSelfDelegation            string           `json:"minSelfDelegation"`
+}
+
+type ListValidatorRow struct {
+	ValidatorRow
+
+	PowerPercentage           string `json:"power_percentage"`
+	CumulativePowerPercentage string `json:"cumulative_power_percentage"`
 }

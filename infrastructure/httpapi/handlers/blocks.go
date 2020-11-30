@@ -46,7 +46,7 @@ func (handler *Blocks) FindBy(ctx *fasthttp.RequestCtx) {
 	}
 	block, err := handler.blocksView.FindBy(&identity)
 	if err != nil {
-		if err == rdb.ErrNoRows {
+		if errors.Is(err, rdb.ErrNoRows) {
 			httpapi.NotFound(ctx)
 			return
 		}

@@ -39,7 +39,7 @@ func (handler *BlockEvents) FindById(ctx *fasthttp.RequestCtx) {
 	}
 	blockEvents, err := handler.blockEventsView.FindById(id)
 	if err != nil {
-		if err == rdb.ErrNoRows {
+		if errors.Is(err, rdb.ErrNoRows) {
 			httpapi.NotFound(ctx)
 			return
 		}

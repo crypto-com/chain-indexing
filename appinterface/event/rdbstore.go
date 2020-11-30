@@ -51,7 +51,7 @@ func (store *RDbStore) GetLatestHeight() (*int64, error) {
 
 	var latestEventHeight *int64
 	if err := store.rdbHandle.QueryRow(sql, args...).Scan(&latestEventHeight); err != nil {
-		if err == rdb.ErrNoRows {
+		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, nil
 		} else {
 			return nil, fmt.Errorf("error executing latest event height selection SQL: %v", err)
@@ -88,7 +88,7 @@ func (store *RDbStore) GetAllByHeight(height int64) ([]entity_event.Event, error
 		)
 
 		if err := rows.Scan(&uuid, &height, &name, &version, &payload); err != nil {
-			if err == rdb.ErrNoRows {
+			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil
 			} else {
 				return nil, fmt.Errorf("error executing get each event by height selection SQL: %v", err)

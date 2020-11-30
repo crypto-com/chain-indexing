@@ -1,6 +1,7 @@
 package view
 
 import (
+	"errors"
 	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
@@ -132,7 +133,7 @@ func (view *ValidatorActivities) List(
 			&validatorActivity.Success,
 			&validatorActivity.Data,
 		); scanErr != nil {
-			if scanErr == rdb.ErrNoRows {
+			if errors.Is(scanErr, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
 			}
 			return nil, nil, fmt.Errorf("error scanning transaction row: %v: %w", scanErr, rdb.ErrQuery)

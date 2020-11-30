@@ -24,6 +24,7 @@ func addGoTypesFuncLookup() {
 		Example:     "0",
 		Output:      "int64",
 		Call: func(m *map[string][]string, info *random.Info) (interface{}, error) {
+			// nolint:gosec
 			return rand.Int63(), nil
 		},
 	})
@@ -34,6 +35,7 @@ func addGoTypesFuncLookup() {
 		Example:     "0",
 		Output:      "int32",
 		Call: func(m *map[string][]string, info *random.Info) (interface{}, error) {
+			// nolint:gosec
 			return rand.Int31(), nil
 		},
 	})

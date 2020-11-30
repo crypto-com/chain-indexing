@@ -2,6 +2,7 @@ package pg
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -239,7 +240,7 @@ func (result *PgxRDbRowsResult) Next() bool {
 func (result *PgxRDbRowsResult) Scan(dest ...interface{}) error {
 	err := result.rows.Scan(dest...)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return rdb.ErrNoRows
 		}
 		return err
@@ -254,7 +255,7 @@ type PgxRDbRowResult struct {
 func (result *PgxRDbRowResult) Scan(dest ...interface{}) error {
 	err := result.row.Scan(dest...)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return rdb.ErrNoRows
 		}
 		return err

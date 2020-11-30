@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-GOLANGCI_LINT_VERSION=1.27
+GOLANGCI_LINT_VERSION=1.33
 GOLANGCI_LINT_PATH=${GOLANGCI_LINT_PATH:-golangci-lint}
 
 RET_VALUE=0
@@ -31,4 +31,4 @@ if [[ "${RET_VALUE}" != 0 ]]; then
     echo "Warning: You are running a different golangci-lint from ours (${GOLANGCI_LINT_VERSION}). The linting result may have some differences."
 fi
 
-"${GOLANGCI_LINT_PATH}" run
+"${GOLANGCI_LINT_PATH}" run --config .golangci.yml

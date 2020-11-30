@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"errors"
+
 	validator_view "github.com/crypto-com/chain-indexing/appinterface/projection/validator/view"
 
 	"github.com/valyala/fasthttp"
@@ -39,7 +41,7 @@ func (search *Search) Search(ctx *fasthttp.RequestCtx) {
 
 	blocks, err := search.blocksView.Search(keyword)
 	if err != nil {
-		if err == rdb.ErrNoRows {
+		if errors.Is(err, rdb.ErrNoRows) {
 			blocks = []block_view.Block{}
 		} else {
 			search.logger.Errorf("error searching block: %v", err)
@@ -50,7 +52,7 @@ func (search *Search) Search(ctx *fasthttp.RequestCtx) {
 
 	transactions, err := search.transactionsView.Search(keyword)
 	if err != nil {
-		if err == rdb.ErrNoRows {
+		if errors.Is(err, rdb.ErrNoRows) {
 			transactions = []transaction_view.TransactionRow{}
 		} else {
 			search.logger.Errorf("error searching transaction: %v", err)
@@ -61,7 +63,7 @@ func (search *Search) Search(ctx *fasthttp.RequestCtx) {
 
 	validators, err := search.validatorsView.Search(keyword)
 	if err != nil {
-		if err == rdb.ErrNoRows {
+		if errors.Is(err, rdb.ErrNoRows) {
 			validators = []validator_view.ValidatorRow{}
 		} else {
 			search.logger.Errorf("error searching validator: %v", err)

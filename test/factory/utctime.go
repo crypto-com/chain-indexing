@@ -20,5 +20,6 @@ func addUTCTimeFuncLookup() {
 }
 
 func RandomUTCTime() utctime.UTCTime {
+	// nolint:gosec
 	return utctime.FromUnixNano(rand.Int63())
 }

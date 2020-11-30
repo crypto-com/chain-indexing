@@ -80,6 +80,7 @@ type SyncConfig struct {
 
 type HTTPConfig struct {
 	ListeningAddress string `toml:"listening_address"`
+	RoutePrefix      string `toml:"route_prefix"`
 }
 
 type TendermintConfig struct {

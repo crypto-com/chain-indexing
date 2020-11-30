@@ -36,7 +36,7 @@ func (view *ValidatorStats) Set(metrics string, value string) error {
 	var placeholder int
 	err = view.rdbHandle.QueryRow(sql, sqlArgs...).Scan(&placeholder)
 	if err != nil {
-		if err != rdb.ErrNoRows {
+		if !errors.Is(err, rdb.ErrNoRows) {
 			return fmt.Errorf("error scanning metrics: %v", err)
 		}
 		sql, sqlArgs, err = view.rdbHandle.StmtBuilder.Insert(
@@ -96,7 +96,7 @@ func (view *ValidatorStats) FindBy(metrics string) (string, error) {
 
 	var value string
 	if err := view.rdbHandle.QueryRow(sql, sqlArgs...).Scan(&value); err != nil {
-		if err == rdb.ErrNoRows {
+		if errors.Is(err, rdb.ErrNoRows) {
 			return "", nil
 		}
 		return "", fmt.Errorf("error getting metrics: %v", err)

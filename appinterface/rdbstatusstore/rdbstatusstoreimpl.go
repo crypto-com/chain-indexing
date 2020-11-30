@@ -114,7 +114,7 @@ func (impl *RDbStatusStoreImpl) GetLastIndexedBlockHeight() (*int64, error) {
 
 	var lastIndexedBlockHeight *int64
 	if err := impl.selectRDbHandle.QueryRow(sql, args...).Scan(&lastIndexedBlockHeight); err != nil {
-		if err == rdb.ErrNoRows {
+		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, nil
 		} else {
 			return nil, fmt.Errorf("error querying last indexed block height: %v", err)
