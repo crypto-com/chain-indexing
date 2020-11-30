@@ -160,7 +160,7 @@ func (projection *Validator) projectValidatorView(
 				CommissionMaxChangeRate:      msgCreateValidatorEvent.CommissionRates.MaxChangeRate,
 			}
 
-			if err := validatorsView.Insert(&validatorRow); err != nil {
+			if err := validatorsView.Upsert(&validatorRow); err != nil {
 				return fmt.Errorf("error inserting new validator into view: %v", err)
 			}
 		}

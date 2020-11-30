@@ -29,6 +29,43 @@ func NewValidators(handle *rdb.Handle) *Validators {
 	}
 }
 
+func (validatorsView *Validators) Upsert(validator *ValidatorRow) error {
+	var err error
+
+	var sql string
+	var sqlArgs []interface{}
+	if sql, sqlArgs, err = validatorsView.rdb.StmtBuilder.Select(
+		"id",
+	).From(
+		"view_validators",
+	).Where(
+		"operator_address = ?", validator.OperatorAddress,
+		"consensus_node_address = ?", validator.ConsensusNodeAddress,
+	).ToSql(); err != nil {
+		return fmt.Errorf("error building validator existencen query sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	var existingValidatorId int64
+	if err = validatorsView.rdb.QueryRow(sql, sqlArgs...).Scan(&existingValidatorId); err != nil {
+		if errors.Is(err, rdb.ErrNoRows) {
+			if err = validatorsView.Insert(validator); err != nil {
+				return err
+			}
+		} else {
+			return fmt.Errorf("error checking validator existence: %v", err)
+		}
+		return nil
+	}
+	// Do update
+	mutValidator := *validator
+	mutValidator.MaybeId = &existingValidatorId
+	if updateErr := validatorsView.Update(&mutValidator); updateErr != nil {
+		return updateErr
+	}
+
+	return nil
+}
+
 func (validatorsView *Validators) Insert(validator *ValidatorRow) error {
 	var err error
 
@@ -56,9 +93,13 @@ func (validatorsView *Validators) Insert(validator *ValidatorRow) error {
 		"min_self_delegation",
 	).Values("?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?").ToSql()
 	if err != nil {
-		return fmt.Errorf("error building blocks insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		return fmt.Errorf("error building validator insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
+	var unbondingCompletionTime interface{} = nil
+	if validator.MaybeUnbondingCompletionTime != nil {
+		unbondingCompletionTime = validatorsView.rdb.Tton(validator.MaybeUnbondingCompletionTime)
+	}
 	result, err := validatorsView.rdb.Exec(sql,
 		validator.OperatorAddress,
 		validator.ConsensusNodeAddress,
@@ -68,7 +109,7 @@ func (validatorsView *Validators) Insert(validator *ValidatorRow) error {
 		validator.JoinedAtBlockHeight,
 		validator.Power,
 		validator.MaybeUnbondingHeight,
-		validator.MaybeUnbondingCompletionTime,
+		unbondingCompletionTime,
 		validator.Moniker,
 		validator.Identity,
 		validator.Website,
@@ -97,18 +138,21 @@ func (validatorsView *Validators) Update(validator *ValidatorRow) error {
 	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Update(
 		"view_validators",
 	).SetMap(map[string]interface{}{
-		"initial_delegator_address": validator.InitialDelegatorAddress,
-		"status":                    validator.Status,
-		"jailed":                    validator.Jailed,
-		"power":                     validator.Power,
-		"unbonding_height":          validator.MaybeUnbondingHeight,
-		"unbonding_completion_time": unbondingCompletionTime,
-		"moniker":                   validator.Moniker,
-		"identity":                  validator.Identity,
-		"website":                   validator.Website,
-		"security_contact":          validator.SecurityContact,
-		"details":                   validator.Details,
-		"commission_rate":           validator.CommissionRate,
+		"initial_delegator_address":  validator.InitialDelegatorAddress,
+		"status":                     validator.Status,
+		"jailed":                     validator.Jailed,
+		"power":                      validator.Power,
+		"unbonding_height":           validator.MaybeUnbondingHeight,
+		"unbonding_completion_time":  unbondingCompletionTime,
+		"moniker":                    validator.Moniker,
+		"identity":                   validator.Identity,
+		"website":                    validator.Website,
+		"security_contact":           validator.SecurityContact,
+		"details":                    validator.Details,
+		"commission_rate":            validator.CommissionRate,
+		"commission_max_rate":        validator.CommissionMaxRate,
+		"commission_max_change_rate": validator.CommissionMaxChangeRate,
+		"min_self_delegation":        validator.MinSelfDelegation,
 	}).Where(
 		"id = ?", validator.MaybeId,
 	).ToSql()
