@@ -73,7 +73,7 @@ func NewSyncManager(
 		consNodeAddressPrefix: consNodeAddressPrefix,
 		windowSize:            windowSize,
 
-		shouldSyncCh: make(chan bool),
+		shouldSyncCh: make(chan bool, 1),
 
 		txDecoder:          txDecoder,
 		windowSyncStrategy: syncstrategy.NewWindow(logger, windowSize),
@@ -256,7 +256,7 @@ func (manager *SyncManager) Run() error {
 
 	tracker := chainfeed.NewBlockHeightTracker(manager.logger, manager.client)
 	manager.latestBlockHeight = tracker.GetLatestBlockHeight()
-	blockHeightCh := make(chan int64)
+	blockHeightCh := make(chan int64, 1)
 	go func() {
 		latestBlockHeight := <-blockHeightCh
 		manager.latestBlockHeight = &latestBlockHeight
