@@ -214,69 +214,69 @@ func (projection *Validator) projectValidatorActivitiesView(
 			totalIncrementalMap.IncrementByOne(
 				fmt.Sprintf("-:%s", withdrawValidatorCommissionEvent.Name()),
 			)
-		} else if blockProposerRewardedEvent, ok := event.(*event_usecase.BlockProposerRewarded); ok {
-			activityRows = append(activityRows, view.ValidatorActivityRow{
-				BlockHeight:          blockProposerRewardedEvent.BlockHeight,
-				BlockHash:            blockHash,
-				BlockTime:            blockTime,
-				MaybeTransactionHash: nil,
-				OperatorAddress:      blockProposerRewardedEvent.Validator,
-				Success:              true,
-				Data: view.ValidatorActivityRowData{
-					Type:    blockProposerRewardedEvent.Name(),
-					Content: blockProposerRewardedEvent,
-				},
-			})
-
-			totalIncrementalMap.IncrementByOne("-")
-			totalIncrementalMap.IncrementByOne(blockProposerRewardedEvent.Validator)
-			totalIncrementalMap.IncrementByOne(
-				fmt.Sprintf("%s:%s",
-					blockProposerRewardedEvent.Validator,
-					blockProposerRewardedEvent.Name(),
-				),
-			)
-			totalIncrementalMap.IncrementByOne(fmt.Sprintf("-:%s", blockProposerRewardedEvent.Name()))
-		} else if blockRewardedEvent, ok := event.(*event_usecase.BlockRewarded); ok {
-			activityRows = append(activityRows, view.ValidatorActivityRow{
-				BlockHeight:          blockRewardedEvent.BlockHeight,
-				BlockHash:            blockHash,
-				BlockTime:            blockTime,
-				MaybeTransactionHash: nil,
-				OperatorAddress:      blockRewardedEvent.Validator,
-				Success:              true,
-				Data: view.ValidatorActivityRowData{
-					Type:    blockRewardedEvent.Name(),
-					Content: blockRewardedEvent,
-				},
-			})
-
-			totalIncrementalMap.IncrementByOne("-")
-			totalIncrementalMap.IncrementByOne(blockRewardedEvent.Validator)
-			totalIncrementalMap.IncrementByOne(
-				fmt.Sprintf("%s:%s", blockRewardedEvent.Validator, blockRewardedEvent.Name()),
-			)
-			totalIncrementalMap.IncrementByOne(fmt.Sprintf("-:%s", blockRewardedEvent.Name()))
-		} else if blockCommissionedEvent, ok := event.(*event_usecase.BlockCommissioned); ok {
-			activityRows = append(activityRows, view.ValidatorActivityRow{
-				BlockHeight:          blockCommissionedEvent.BlockHeight,
-				BlockHash:            blockHash,
-				BlockTime:            blockTime,
-				MaybeTransactionHash: nil,
-				OperatorAddress:      blockCommissionedEvent.Validator,
-				Success:              true,
-				Data: view.ValidatorActivityRowData{
-					Type:    blockCommissionedEvent.Name(),
-					Content: blockCommissionedEvent,
-				},
-			})
-
-			totalIncrementalMap.IncrementByOne("-")
-			totalIncrementalMap.IncrementByOne(blockCommissionedEvent.Validator)
-			totalIncrementalMap.IncrementByOne(
-				fmt.Sprintf("%s:%s", blockCommissionedEvent.Validator, blockCommissionedEvent.Name()),
-			)
-			totalIncrementalMap.IncrementByOne(fmt.Sprintf("-:%s", blockCommissionedEvent.Name()))
+			//} else if blockProposerRewardedEvent, ok := event.(*event_usecase.BlockProposerRewarded); ok {
+			//	activityRows = append(activityRows, view.ValidatorActivityRow{
+			//		BlockHeight:          blockProposerRewardedEvent.BlockHeight,
+			//		BlockHash:            blockHash,
+			//		BlockTime:            blockTime,
+			//		MaybeTransactionHash: nil,
+			//		OperatorAddress:      blockProposerRewardedEvent.Validator,
+			//		Success:              true,
+			//		Data: view.ValidatorActivityRowData{
+			//			Type:    blockProposerRewardedEvent.Name(),
+			//			Content: blockProposerRewardedEvent,
+			//		},
+			//	})
+			//
+			//	totalIncrementalMap.IncrementByOne("-")
+			//	totalIncrementalMap.IncrementByOne(blockProposerRewardedEvent.Validator)
+			//	totalIncrementalMap.IncrementByOne(
+			//		fmt.Sprintf("%s:%s",
+			//			blockProposerRewardedEvent.Validator,
+			//			blockProposerRewardedEvent.Name(),
+			//		),
+			//	)
+			//	totalIncrementalMap.IncrementByOne(fmt.Sprintf("-:%s", blockProposerRewardedEvent.Name()))
+			//} else if blockRewardedEvent, ok := event.(*event_usecase.BlockRewarded); ok {
+			//	activityRows = append(activityRows, view.ValidatorActivityRow{
+			//		BlockHeight:          blockRewardedEvent.BlockHeight,
+			//		BlockHash:            blockHash,
+			//		BlockTime:            blockTime,
+			//		MaybeTransactionHash: nil,
+			//		OperatorAddress:      blockRewardedEvent.Validator,
+			//		Success:              true,
+			//		Data: view.ValidatorActivityRowData{
+			//			Type:    blockRewardedEvent.Name(),
+			//			Content: blockRewardedEvent,
+			//		},
+			//	})
+			//
+			//	totalIncrementalMap.IncrementByOne("-")
+			//	totalIncrementalMap.IncrementByOne(blockRewardedEvent.Validator)
+			//	totalIncrementalMap.IncrementByOne(
+			//		fmt.Sprintf("%s:%s", blockRewardedEvent.Validator, blockRewardedEvent.Name()),
+			//	)
+			//	totalIncrementalMap.IncrementByOne(fmt.Sprintf("-:%s", blockRewardedEvent.Name()))
+			//} else if blockCommissionedEvent, ok := event.(*event_usecase.BlockCommissioned); ok {
+			//	activityRows = append(activityRows, view.ValidatorActivityRow{
+			//		BlockHeight:          blockCommissionedEvent.BlockHeight,
+			//		BlockHash:            blockHash,
+			//		BlockTime:            blockTime,
+			//		MaybeTransactionHash: nil,
+			//		OperatorAddress:      blockCommissionedEvent.Validator,
+			//		Success:              true,
+			//		Data: view.ValidatorActivityRowData{
+			//			Type:    blockCommissionedEvent.Name(),
+			//			Content: blockCommissionedEvent,
+			//		},
+			//	})
+			//
+			//	totalIncrementalMap.IncrementByOne("-")
+			//	totalIncrementalMap.IncrementByOne(blockCommissionedEvent.Validator)
+			//	totalIncrementalMap.IncrementByOne(
+			//		fmt.Sprintf("%s:%s", blockCommissionedEvent.Validator, blockCommissionedEvent.Name()),
+			//	)
+			//	totalIncrementalMap.IncrementByOne(fmt.Sprintf("-:%s", blockCommissionedEvent.Name()))
 		} else if validatorJailedEvent, ok := event.(*event_usecase.ValidatorJailed); ok {
 			validatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
 				MaybeConsensusNodeAddress: &validatorJailedEvent.ConsensusNodeAddress,

@@ -29,6 +29,35 @@ func NewValidators(handle *rdb.Handle) *Validators {
 	}
 }
 
+func (validatorsView *Validators) LastJoinedBlockHeight(
+	operatorAddress string,
+	consensusNodeAddress string,
+) (bool, int64, error) {
+	var err error
+
+	var sql string
+	var sqlArgs []interface{}
+	if sql, sqlArgs, err = validatorsView.rdb.StmtBuilder.Select(
+		"joined_at_block_height",
+	).From(
+		"view_validators",
+	).Where(
+		"operator_address = ? AND consensus_node_address = ?", operatorAddress, consensusNodeAddress,
+	).ToSql(); err != nil {
+		return false, int64(0), fmt.Errorf("error building validator existencen query sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	var joinedAtBlockHeight int64
+	if err = validatorsView.rdb.QueryRow(sql, sqlArgs...).Scan(&joinedAtBlockHeight); err != nil {
+		if errors.Is(err, rdb.ErrNoRows) {
+			return false, int64(0), nil
+		}
+		return false, int64(0), fmt.Errorf("error query validator existence: %v", err)
+	}
+
+	return true, joinedAtBlockHeight, nil
+}
+
 func (validatorsView *Validators) Upsert(validator *ValidatorRow) error {
 	var err error
 

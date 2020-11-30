@@ -161,6 +161,16 @@ func (projection *Validator) projectValidatorView(
 				CommissionMaxChangeRate:      msgCreateValidatorEvent.CommissionRates.MaxChangeRate,
 			}
 
+			isJoined, joinedAtBlockHeight, err := validatorsView.LastJoinedBlockHeight(
+				validatorRow.OperatorAddress, validatorRow.ConsensusNodeAddress,
+			)
+			if err != nil {
+				return fmt.Errorf("error querying validator last joined block height: %v", err)
+			}
+			if isJoined {
+				validatorRow.JoinedAtBlockHeight = joinedAtBlockHeight
+			}
+
 			if err := validatorsView.Upsert(&validatorRow); err != nil {
 				return fmt.Errorf("error inserting new validator into view: %v", err)
 			}
