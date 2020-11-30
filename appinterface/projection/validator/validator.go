@@ -145,9 +145,10 @@ func (projection *Validator) projectValidatorView(
 				OperatorAddress:              msgCreateValidatorEvent.ValidatorAddress,
 				InitialDelegatorAddress:      msgCreateValidatorEvent.DelegatorAddress,
 				MinSelfDelegation:            msgCreateValidatorEvent.MinSelfDelegation,
-				Status:                       constants.BONDED,
+				Status:                       constants.UNBONDED,
 				Jailed:                       false,
 				JoinedAtBlockHeight:          blockHeight,
+				Power:                        "0",
 				MaybeUnbondingHeight:         nil,
 				MaybeUnbondingCompletionTime: nil,
 				Moniker:                      msgCreateValidatorEvent.Description.Moniker,
@@ -263,6 +264,8 @@ func (projection *Validator) projectValidatorView(
 			mutValidatorRow.Power = powerChangedEvent.Power
 			if powerChangedEvent.Power == "0" && !mutValidatorRow.Jailed {
 				mutValidatorRow.Status = constants.UNBONDED
+			} else if powerChangedEvent.Power != "0" {
+				mutValidatorRow.Status = constants.BONDED
 			}
 
 			if err := validatorsView.Update(mutValidatorRow); err != nil {

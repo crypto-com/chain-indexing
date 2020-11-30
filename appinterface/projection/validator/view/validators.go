@@ -387,7 +387,7 @@ func (validatorsView *Validators) totalPower() (*big.Float, error) {
 		}
 		power, ok := new(big.Float).SetString(powerStr)
 		if !ok {
-			return nil, fmt.Errorf("error creating big.Float from power retrieved: %v", err)
+			return nil, fmt.Errorf("error creating big.Float from power retrieved: %s", powerStr)
 		}
 		totalPower = new(big.Float).Add(totalPower, power)
 	}
