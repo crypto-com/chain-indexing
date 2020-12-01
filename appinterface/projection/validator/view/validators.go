@@ -59,38 +59,77 @@ func (validatorsView *Validators) LastJoinedBlockHeight(
 }
 
 func (validatorsView *Validators) Upsert(validator *ValidatorRow) error {
-	var err error
-
-	var sql string
-	var sqlArgs []interface{}
-	if sql, sqlArgs, err = validatorsView.rdb.StmtBuilder.Select(
-		"id",
-	).From(
+	var unbondingCompletionTime interface{} = nil
+	if validator.MaybeUnbondingCompletionTime != nil {
+		unbondingCompletionTime = validatorsView.rdb.Tton(validator.MaybeUnbondingCompletionTime)
+	}
+	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Insert(
 		"view_validators",
-	).Where(
-		"operator_address = ? AND consensus_node_address = ?",
+	).Columns(
+		"operator_address",
+		"consensus_node_address",
+		"initial_delegator_address",
+		"status",
+		"jailed",
+		"joined_at_block_height",
+		"power",
+		"unbonding_height",
+		"unbonding_completion_time",
+		"moniker",
+		"identity",
+		"website",
+		"security_contact",
+		"details",
+		"commission_rate",
+		"commission_max_rate",
+		"commission_max_change_rate",
+		"min_self_delegation",
+	).Values(
 		validator.OperatorAddress,
 		validator.ConsensusNodeAddress,
-	).ToSql(); err != nil {
-		return fmt.Errorf("error building validator existencen query sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		validator.InitialDelegatorAddress,
+		validator.Status,
+		validator.Jailed,
+		validator.JoinedAtBlockHeight,
+		validator.Power,
+		validator.MaybeUnbondingHeight,
+		unbondingCompletionTime,
+		validator.Moniker,
+		validator.Identity,
+		validator.Website,
+		validator.SecurityContact,
+		validator.Details,
+		validator.CommissionRate,
+		validator.CommissionMaxRate,
+		validator.CommissionMaxChangeRate,
+		validator.MinSelfDelegation,
+	).Suffix(`ON CONFLICT (operator_address, consensus_node_address) DO UPDATE SET
+		initial_delegator_address = EXCLUDED.initial_delegator_address,
+		status = EXCLUDED.status,
+		jailed = EXCLUDED.jailed,
+		joined_at_block_height = EXCLUDED.joined_at_block_height,
+		power = EXCLUDED.power,
+		unbonding_height = EXCLUDED.unbonding_height,
+		unbonding_completion_time = EXCLUDED.unbonding_completion_time,
+		moniker = EXCLUDED.moniker,
+		identity = EXCLUDED.identity,
+		website = EXCLUDED.website,
+		security_contact = EXCLUDED.security_contact,
+		details = EXCLUDED.details,
+		commission_rate = EXCLUDED.commission_rate,
+		commission_max_rate = EXCLUDED.commission_max_rate,
+		commission_max_change_rate = EXCLUDED.commission_max_change_rate,
+		min_self_delegation = EXCLUDED.min_self_delegation
+	`).ToSql()
+	if err != nil {
+		return fmt.Errorf("error building validator upsertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
-
-	var existingValidatorId int64
-	if err = validatorsView.rdb.QueryRow(sql, sqlArgs...).Scan(&existingValidatorId); err != nil {
-		if errors.Is(err, rdb.ErrNoRows) {
-			if err = validatorsView.Insert(validator); err != nil {
-				return err
-			}
-		} else {
-			return fmt.Errorf("error checking validator existence: %v", err)
-		}
-		return nil
+	result, err := validatorsView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error upserting validator into the table: %v: %w", err, rdb.ErrWrite)
 	}
-	// Do update
-	mutValidator := *validator
-	mutValidator.MaybeId = &existingValidatorId
-	if updateErr := validatorsView.Update(&mutValidator); updateErr != nil {
-		return updateErr
+	if result.RowsAffected() != 1 {
+		return fmt.Errorf("error upserting validator into the table: no rows inserted: %w", rdb.ErrWrite)
 	}
 
 	return nil
