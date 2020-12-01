@@ -113,6 +113,8 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 		}
 	}
 
+	var totalTxs int64 = 0
+
 	for _, tx := range txs {
 		mutTx := tx
 		mutTx.BlockTime = blockTime
@@ -125,17 +127,18 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 			})
 		}
 
-		if insertErr := transactionsView.Insert(&mutTx); insertErr != nil {
+		rowsAffected, insertErr := transactionsView.Insert(&mutTx, true)
+		if insertErr != nil {
 			return fmt.Errorf("error inserting transaction into view: %v", insertErr)
 		}
+		totalTxs += rowsAffected
 	}
 
-	totalTxs := int64(len(txs))
 	if err := transactionsTotalView.Increment("-", totalTxs); err != nil {
-		return fmt.Errorf("error incremnting total transactions: %w", err)
+		return fmt.Errorf("error incrementing total transactions: %w", err)
 	}
 	if err := transactionsTotalView.Set(strconv.FormatInt(height, 10), totalTxs); err != nil {
-		return fmt.Errorf("error setting total blcok transactions: %w", err)
+		return fmt.Errorf("error setting total block transactions: %w", err)
 	}
 
 	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {

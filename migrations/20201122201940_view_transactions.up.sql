@@ -15,5 +15,6 @@ CREATE TABLE view_transactions (
     memo VARCHAR NOT NULL,
     timeout_height BIGINT NOT NULL,
     messages JSONB NOT NULL,
-    PRIMARY KEY(id)
+    PRIMARY KEY(id),
+    UNIQUE(hash)
 );

@@ -32,13 +32,47 @@ var _ = Describe("Blocks", func() {
 
 				Expect(blocksView.Count()).To(Equal(int64(0)))
 
-				err = blocksView.Insert(&block)
+				err = blocksView.Insert(&block, false)
 				Expect(err).To(BeNil())
 
 				var actual *view.Block
 				actual, err = blocksView.FindBy(&view.BlockIdentity{
 					MaybeHeight: &block.Height,
 				})
+				Expect(err).To(BeNil())
+				Expect(*actual).To(Equal(block))
+			})
+		})
+
+		Describe("Ignore if exists", func() {
+			It("should ignore if block already exists in view", func() {
+				var err error
+
+				var block view.Block
+				random.Struct(&block)
+
+				blocksView := view.NewBlocks(conn.ToHandle())
+
+				Expect(blocksView.Count()).To(Equal(int64(0)))
+
+				err = blocksView.Insert(&block, false)
+				Expect(err).To(BeNil())
+
+				var actual *view.Block
+				actual, err = blocksView.FindBy(&view.BlockIdentity{
+					MaybeHeight: &block.Height,
+				})
+				Expect(err).To(BeNil())
+				Expect(*actual).To(Equal(block))
+
+				block.TransactionCount += 1
+				err = blocksView.Insert(&block, true)
+				Expect(err).To(BeNil())
+
+				actual, err = blocksView.FindBy(&view.BlockIdentity{
+					MaybeHeight: &block.Height,
+				})
+				block.TransactionCount -= 1
 				Expect(err).To(BeNil())
 				Expect(*actual).To(Equal(block))
 			})

@@ -95,7 +95,7 @@ func (projection *Block) handleBlockCreatedEvent(blocksView *view2.Blocks, event
 		AppHash:               event.Block.AppHash,
 		TransactionCount:      len(event.Block.Txs),
 		CommittedCouncilNodes: committedCouncilNodes,
-	}); err != nil {
+	}, false); err != nil {
 		return err
 	}
 

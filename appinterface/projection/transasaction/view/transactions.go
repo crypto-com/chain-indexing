@@ -29,36 +29,60 @@ func NewTransactions(handle *rdb.Handle) *BlockTransactions {
 	}
 }
 
-func (transactionsView *BlockTransactions) Insert(transaction *TransactionRow) error {
+func (transactionsView *BlockTransactions) Insert(transaction *TransactionRow, ignoreIfExists bool) (int64, error) {
 	var err error
 
 	var sql string
-	sql, _, err = transactionsView.rdb.StmtBuilder.Insert(
-		"view_transactions",
-	).Columns(
-		"block_height",
-		"block_hash",
-		"block_time",
-		"hash",
-		"success",
-		"code",
-		"log",
-		"fee",
-		"fee_payer",
-		"fee_granter",
-		"gas_wanted",
-		"gas_used",
-		"memo",
-		"timeout_height",
-		"messages",
-	).Values("?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?").ToSql()
+
+	if ignoreIfExists {
+		sql, _, err = transactionsView.rdb.StmtBuilder.Insert(
+			"view_transactions",
+		).Columns(
+			"block_height",
+			"block_hash",
+			"block_time",
+			"hash",
+			"success",
+			"code",
+			"log",
+			"fee",
+			"fee_payer",
+			"fee_granter",
+			"gas_wanted",
+			"gas_used",
+			"memo",
+			"timeout_height",
+			"messages",
+		).Values("?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?").Suffix("ON CONFLICT (hash) DO NOTHING").ToSql()
+	} else {
+		sql, _, err = transactionsView.rdb.StmtBuilder.Insert(
+			"view_transactions",
+		).Columns(
+			"block_height",
+			"block_hash",
+			"block_time",
+			"hash",
+			"success",
+			"code",
+			"log",
+			"fee",
+			"fee_payer",
+			"fee_granter",
+			"gas_wanted",
+			"gas_used",
+			"memo",
+			"timeout_height",
+			"messages",
+		).Values("?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?").ToSql()
+	}
+
 	if err != nil {
-		return fmt.Errorf("error building block transactions insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		return 0, fmt.Errorf("error building block transactions insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
 	var transactionMessagesJSON string
 	if transactionMessagesJSON, err = jsoniter.MarshalToString(transaction.Messages); err != nil {
-		return fmt.Errorf("error JSON marshalling block transation messages for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
+		return 0, fmt.Errorf("error JSON marshalling block transation messages for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
 	result, err := transactionsView.rdb.Exec(sql,
@@ -79,13 +103,16 @@ func (transactionsView *BlockTransactions) Insert(transaction *TransactionRow) e
 		transactionMessagesJSON,
 	)
 	if err != nil {
-		return fmt.Errorf("error inserting block transaction into the table: %v: %w", err, rdb.ErrWrite)
-	}
-	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error inserting block transaction into the table: no rows inserted: %w", rdb.ErrWrite)
+		return 0, fmt.Errorf("error inserting block transaction into the table: %v: %w", err, rdb.ErrWrite)
 	}
 
-	return nil
+	rowsAffected := result.RowsAffected()
+
+	if !ignoreIfExists && rowsAffected != 1 {
+		return 0, fmt.Errorf("error inserting block transaction into the table: no rows inserted: %w", rdb.ErrWrite)
+	}
+
+	return rowsAffected, nil
 }
 
 func (transactionsView *BlockTransactions) FindByHash(txHash string) (*TransactionRow, error) {

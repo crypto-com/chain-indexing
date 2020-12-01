@@ -29,20 +29,35 @@ func NewBlocks(handle *rdb.Handle) *Blocks {
 	}
 }
 
-func (blocksView *Blocks) Insert(block *Block) error {
+func (blocksView *Blocks) Insert(block *Block, ignoreIfExists bool) error {
 	var err error
 
 	var sql string
-	sql, _, err = blocksView.rdb.StmtBuilder.Insert(
-		"view_blocks",
-	).Columns(
-		"height",
-		"hash",
-		"time",
-		"app_hash",
-		"committed_council_nodes",
-		"transaction_count",
-	).Values("?", "?", "?", "?", "?", "?").ToSql()
+
+	if ignoreIfExists {
+		sql, _, err = blocksView.rdb.StmtBuilder.Insert(
+			"view_blocks",
+		).Columns(
+			"height",
+			"hash",
+			"time",
+			"app_hash",
+			"committed_council_nodes",
+			"transaction_count",
+		).Values("?", "?", "?", "?", "?", "?").Suffix("ON CONFLICT (height) DO NOTHING").ToSql()
+	} else {
+		sql, _, err = blocksView.rdb.StmtBuilder.Insert(
+			"view_blocks",
+		).Columns(
+			"height",
+			"hash",
+			"time",
+			"app_hash",
+			"committed_council_nodes",
+			"transaction_count",
+		).Values("?", "?", "?", "?", "?", "?").ToSql()
+	}
+
 	if err != nil {
 		return fmt.Errorf("error building blocks insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
@@ -63,7 +78,7 @@ func (blocksView *Blocks) Insert(block *Block) error {
 	if err != nil {
 		return fmt.Errorf("error inserting block into the table: %v: %w", err, rdb.ErrWrite)
 	}
-	if result.RowsAffected() != 1 {
+	if !ignoreIfExists && result.RowsAffected() != 1 {
 		return fmt.Errorf("error inserting block into the table: no rows inserted: %w", rdb.ErrWrite)
 	}
 
