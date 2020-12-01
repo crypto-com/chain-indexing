@@ -258,11 +258,15 @@ func (manager *SyncManager) Run() error {
 	manager.latestBlockHeight = tracker.GetLatestBlockHeight()
 	blockHeightCh := make(chan int64, 1)
 	go func() {
+		manager.logger.Debug("debugblock - syncheight - before latestBlockHeight := <-blockHeightCh")
 		latestBlockHeight := <-blockHeightCh
+		manager.logger.Debug("debugblock - syncheight - after latestBlockHeight := <-blockHeightCh")
 		manager.latestBlockHeight = &latestBlockHeight
 		manager.logger.Infof("updated latest block height to %d", *manager.latestBlockHeight)
 		manager.drainShouldSyncCh()
+		manager.logger.Debug("debugblock - syncheight - before manager.shouldSyncCh <- true")
 		manager.shouldSyncCh <- true
+		manager.logger.Debug("debugblock - syncheight - after manager.shouldSyncCh <- true")
 	}()
 	tracker.Subscribe(blockHeightCh)
 
@@ -275,10 +279,12 @@ func (manager *SyncManager) Run() error {
 			}
 		}
 
+		manager.logger.Debug("debugblock - run - before select")
 		select {
 		case <-manager.shouldSyncCh:
 		case <-time.After(manager.pollingInterval):
 		}
+		manager.logger.Debug("debugblock - run - after select")
 	}
 }
 
