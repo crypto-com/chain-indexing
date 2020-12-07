@@ -29,6 +29,112 @@ func NewValidators(handle *rdb.Handle) *Validators {
 	}
 }
 
+func (validatorsView *Validators) LastJoinedBlockHeight(
+	operatorAddress string,
+	consensusNodeAddress string,
+) (bool, int64, error) {
+	var err error
+
+	var sql string
+	var sqlArgs []interface{}
+	if sql, sqlArgs, err = validatorsView.rdb.StmtBuilder.Select(
+		"joined_at_block_height",
+	).From(
+		"view_validators",
+	).Where(
+		"operator_address = ? AND consensus_node_address = ?", operatorAddress, consensusNodeAddress,
+	).ToSql(); err != nil {
+		return false, int64(0), fmt.Errorf("error building validator existencen query sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	var joinedAtBlockHeight int64
+	if err = validatorsView.rdb.QueryRow(sql, sqlArgs...).Scan(&joinedAtBlockHeight); err != nil {
+		if errors.Is(err, rdb.ErrNoRows) {
+			return false, int64(0), nil
+		}
+		return false, int64(0), fmt.Errorf("error query validator existence: %v", err)
+	}
+
+	return true, joinedAtBlockHeight, nil
+}
+
+func (validatorsView *Validators) Upsert(validator *ValidatorRow) error {
+	var unbondingCompletionTime interface{} = nil
+	if validator.MaybeUnbondingCompletionTime != nil {
+		unbondingCompletionTime = validatorsView.rdb.Tton(validator.MaybeUnbondingCompletionTime)
+	}
+	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Insert(
+		"view_validators",
+	).Columns(
+		"operator_address",
+		"consensus_node_address",
+		"initial_delegator_address",
+		"status",
+		"jailed",
+		"joined_at_block_height",
+		"power",
+		"unbonding_height",
+		"unbonding_completion_time",
+		"moniker",
+		"identity",
+		"website",
+		"security_contact",
+		"details",
+		"commission_rate",
+		"commission_max_rate",
+		"commission_max_change_rate",
+		"min_self_delegation",
+	).Values(
+		validator.OperatorAddress,
+		validator.ConsensusNodeAddress,
+		validator.InitialDelegatorAddress,
+		validator.Status,
+		validator.Jailed,
+		validator.JoinedAtBlockHeight,
+		validator.Power,
+		validator.MaybeUnbondingHeight,
+		unbondingCompletionTime,
+		validator.Moniker,
+		validator.Identity,
+		validator.Website,
+		validator.SecurityContact,
+		validator.Details,
+		validator.CommissionRate,
+		validator.CommissionMaxRate,
+		validator.CommissionMaxChangeRate,
+		validator.MinSelfDelegation,
+	).Suffix(`ON CONFLICT (operator_address, consensus_node_address) DO UPDATE SET
+		initial_delegator_address = EXCLUDED.initial_delegator_address,
+		status = EXCLUDED.status,
+		jailed = EXCLUDED.jailed,
+		joined_at_block_height = EXCLUDED.joined_at_block_height,
+		power = EXCLUDED.power,
+		unbonding_height = EXCLUDED.unbonding_height,
+		unbonding_completion_time = EXCLUDED.unbonding_completion_time,
+		moniker = EXCLUDED.moniker,
+		identity = EXCLUDED.identity,
+		website = EXCLUDED.website,
+		security_contact = EXCLUDED.security_contact,
+		details = EXCLUDED.details,
+		commission_rate = EXCLUDED.commission_rate,
+		commission_max_rate = EXCLUDED.commission_max_rate,
+		commission_max_change_rate = EXCLUDED.commission_max_change_rate,
+		min_self_delegation = EXCLUDED.min_self_delegation
+	`).ToSql()
+	if err != nil {
+		return fmt.Errorf("error building validator upsertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+	result, err := validatorsView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error upserting validator into the table: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() != 1 {
+		return fmt.Errorf("error upserting validator into the table: no rows inserted: %w", rdb.ErrWrite)
+	}
+
+	return nil
+}
+
 func (validatorsView *Validators) Insert(validator *ValidatorRow) error {
 	var err error
 
@@ -56,9 +162,13 @@ func (validatorsView *Validators) Insert(validator *ValidatorRow) error {
 		"min_self_delegation",
 	).Values("?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?").ToSql()
 	if err != nil {
-		return fmt.Errorf("error building blocks insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		return fmt.Errorf("error building validator insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
+	var unbondingCompletionTime interface{} = nil
+	if validator.MaybeUnbondingCompletionTime != nil {
+		unbondingCompletionTime = validatorsView.rdb.Tton(validator.MaybeUnbondingCompletionTime)
+	}
 	result, err := validatorsView.rdb.Exec(sql,
 		validator.OperatorAddress,
 		validator.ConsensusNodeAddress,
@@ -68,7 +178,7 @@ func (validatorsView *Validators) Insert(validator *ValidatorRow) error {
 		validator.JoinedAtBlockHeight,
 		validator.Power,
 		validator.MaybeUnbondingHeight,
-		validator.MaybeUnbondingCompletionTime,
+		unbondingCompletionTime,
 		validator.Moniker,
 		validator.Identity,
 		validator.Website,
@@ -97,18 +207,21 @@ func (validatorsView *Validators) Update(validator *ValidatorRow) error {
 	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Update(
 		"view_validators",
 	).SetMap(map[string]interface{}{
-		"initial_delegator_address": validator.InitialDelegatorAddress,
-		"status":                    validator.Status,
-		"jailed":                    validator.Jailed,
-		"power":                     validator.Power,
-		"unbonding_height":          validator.MaybeUnbondingHeight,
-		"unbonding_completion_time": unbondingCompletionTime,
-		"moniker":                   validator.Moniker,
-		"identity":                  validator.Identity,
-		"website":                   validator.Website,
-		"security_contact":          validator.SecurityContact,
-		"details":                   validator.Details,
-		"commission_rate":           validator.CommissionRate,
+		"initial_delegator_address":  validator.InitialDelegatorAddress,
+		"status":                     validator.Status,
+		"jailed":                     validator.Jailed,
+		"power":                      validator.Power,
+		"unbonding_height":           validator.MaybeUnbondingHeight,
+		"unbonding_completion_time":  unbondingCompletionTime,
+		"moniker":                    validator.Moniker,
+		"identity":                   validator.Identity,
+		"website":                    validator.Website,
+		"security_contact":           validator.SecurityContact,
+		"details":                    validator.Details,
+		"commission_rate":            validator.CommissionRate,
+		"commission_max_rate":        validator.CommissionMaxRate,
+		"commission_max_change_rate": validator.CommissionMaxChangeRate,
+		"min_self_delegation":        validator.MinSelfDelegation,
 	}).Where(
 		"id = ?", validator.MaybeId,
 	).ToSql()
@@ -342,7 +455,7 @@ func (validatorsView *Validators) totalPower() (*big.Float, error) {
 		}
 		power, ok := new(big.Float).SetString(powerStr)
 		if !ok {
-			return nil, fmt.Errorf("error creating big.Float from power retrieved: %v", err)
+			return nil, fmt.Errorf("error creating big.Float from power retrieved: %s", powerStr)
 		}
 		totalPower = new(big.Float).Add(totalPower, power)
 	}
