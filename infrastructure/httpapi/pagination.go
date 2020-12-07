@@ -37,13 +37,19 @@ func ParsePagination(ctx *fasthttp.RequestCtx) (*pagination_interface.Pagination
 		}
 	}
 
+
+	var defaultLimit int64 = int64(20)
+
 	limitQuery := queryArgs.Get("limit")
 	if limitQuery == "" {
-		limit = int64(20)
+		limit = defaultLimit
 	} else {
 		limit, err = strconv.ParseInt(limitQuery, 10, 64)
 		if err != nil {
 			return nil, ErrInvalidPage
+		}
+		if limit <= 0 {
+			limit= defaultLimit
 		}
 	}
 
