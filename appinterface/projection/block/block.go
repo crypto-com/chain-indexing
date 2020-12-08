@@ -7,7 +7,7 @@ import (
 
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
 
-	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbbase"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
@@ -18,7 +18,7 @@ var _ entity_projection.Projection = &Block{}
 
 // TODO: Listen to council node related events and project council node
 type Block struct {
-	*rdbbase.RDbBase
+	*rdbprojectionbase.Base
 
 	rdbConn rdb.Conn
 	logger  applogger.Logger
@@ -26,7 +26,7 @@ type Block struct {
 
 func NewBlock(logger applogger.Logger, rdbConn rdb.Conn) *Block {
 	return &Block{
-		rdbbase.NewRDbBase(rdbConn.ToHandle(), "Block"),
+		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Block"),
 
 		rdbConn,
 		logger,

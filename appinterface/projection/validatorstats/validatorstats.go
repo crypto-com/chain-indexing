@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbbase"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/validatorstats/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
@@ -20,7 +20,7 @@ const TOTAL_REWARD = "total_reward"
 const TOTAL_DELEGATE = "total_delegate"
 
 type ValidatorStats struct {
-	*rdbbase.RDbBase
+	*rdbprojectionbase.Base
 
 	rdbConn rdb.Conn
 	logger  applogger.Logger
@@ -28,7 +28,7 @@ type ValidatorStats struct {
 
 func NewValidatorStats(logger applogger.Logger, rdbConn rdb.Conn) *ValidatorStats {
 	return &ValidatorStats{
-		rdbbase.NewRDbBase(rdbConn.ToHandle(), "ValidatorStats"),
+		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "ValidatorStats"),
 
 		rdbConn,
 		logger,

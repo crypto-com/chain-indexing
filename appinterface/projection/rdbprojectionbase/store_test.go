@@ -1,4 +1,4 @@
-package rdbbase_test
+package rdbprojectionbase_test
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/crypto-com/chain-indexing/internal/primptr"
 
-	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbbase"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 )
 
 var _ = Describe("RdbStoreImpl", func() {
@@ -26,7 +26,7 @@ var _ = Describe("RdbStoreImpl", func() {
 
 		Describe("UpdateLastHandledEventHeight", func() {
 			It("should insert projection record when the projection id does not have record", func() {
-				store := rdbbase.NewRDbStoreImpl(rdbbase.DEFAULT_TABLE)
+				store := rdbprojectionbase.NewStore(rdbprojectionbase.DEFAULT_TABLE)
 
 				anyNonExistingProjectionId := "not_exist"
 				anyHeight := int64(100)
@@ -42,7 +42,7 @@ var _ = Describe("RdbStoreImpl", func() {
 
 		Describe("GetLastHandledEventHeight", func() {
 			It("should return nil when the projection id does not have record", func() {
-				store := rdbbase.NewRDbStoreImpl(rdbbase.DEFAULT_TABLE)
+				store := rdbprojectionbase.NewStore(rdbprojectionbase.DEFAULT_TABLE)
 
 				anyNonExistingProjectionId := "not_exist"
 
@@ -55,7 +55,7 @@ var _ = Describe("RdbStoreImpl", func() {
 		It("should update projection last handled height when record already exist", func() {
 			var err error
 
-			store := rdbbase.NewRDbStoreImpl(rdbbase.DEFAULT_TABLE)
+			store := rdbprojectionbase.NewStore(rdbprojectionbase.DEFAULT_TABLE)
 
 			anyProjectionId := "projection"
 			initHeight := int64(1)
@@ -79,7 +79,7 @@ func IsProjectionRowExist(pgxConn *pg.PgxConn, projectionId string) bool {
 	var rowCount int64
 	if err := pgxConn.QueryRow(
 		// nolint:gosec
-		fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE id='%s'", rdbbase.DEFAULT_TABLE, projectionId),
+		fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE id='%s'", rdbprojectionbase.DEFAULT_TABLE, projectionId),
 	).Scan(&rowCount); err != nil {
 		panic(err)
 	}

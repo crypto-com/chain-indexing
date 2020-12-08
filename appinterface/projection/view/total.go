@@ -40,7 +40,7 @@ func (view *Total) Set(identity string, total int64) error {
 		return fmt.Errorf("error building total insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	_, err = view.rdbHandle.Exec(sql, sqlArgs)
+	_, err = view.rdbHandle.Exec(sql, sqlArgs...)
 
 	if err != nil {
 		return fmt.Errorf("error inserting total: %v: %w", err, rdb.ErrWrite)
@@ -61,7 +61,7 @@ func (view *Total) Increment(identity string, total int64) error {
 		return fmt.Errorf("error building total insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	_, err = view.rdbHandle.Exec(sql, sqlArgs)
+	_, err = view.rdbHandle.Exec(sql, sqlArgs...)
 
 	if err != nil {
 		return fmt.Errorf("error inserting total: %v: %w", err, rdb.ErrWrite)

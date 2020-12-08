@@ -139,11 +139,16 @@ func (store *RDbStore) Insert(event entity_event.Event) error {
 
 // InsertAll insert all events into store. It will rollback when the insert fails at any point.
 func (store *RDbStore) InsertAll(events []entity_event.Event) error {
+	return store.InsertAllWithRDbHandle(store.rdbHandle, events)
+}
+
+// InsertAll insert all events into store. It will rollback when the insert fails at any point.
+func (store *RDbStore) InsertAllWithRDbHandle(rdbHandle *rdb.Handle, events []entity_event.Event) error {
 	if len(events) == 0 {
 		return nil
 	}
 
-	stmtBuilder := store.rdbHandle.StmtBuilder.Insert(
+	stmtBuilder := rdbHandle.StmtBuilder.Insert(
 		store.table,
 	).Columns(
 		"uuid", "height", "name", "version", "payload",
@@ -166,7 +171,7 @@ func (store *RDbStore) InsertAll(events []entity_event.Event) error {
 		return fmt.Errorf("error building event insertion SQL: %v", err)
 	}
 
-	execResult, err := store.rdbHandle.Exec(sql, args...)
+	execResult, err := rdbHandle.Exec(sql, args...)
 	if err != nil {
 		return fmt.Errorf("error exectuing event insertion SQL: %v", err)
 	}

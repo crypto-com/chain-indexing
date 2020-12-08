@@ -15,10 +15,10 @@ import (
 	"github.com/crypto-com/chain-indexing/internal/primptr"
 )
 
-var _ = Describe("Manager", func() {
+var _ = Describe("StoreBasedManager", func() {
 	Describe("RegisterProjection", func() {
 		It("should return Error when the projection with the same Id already exists", func() {
-			manager := projection.NewManager(NewFakeLogger(), NewFakeEventStore())
+			manager := projection.NewStoreBasedManager(NewFakeLogger(), NewFakeEventStore())
 
 			anyProjection := NewFakeProjection()
 			Expect(manager.RegisterProjection(anyProjection)).To(BeNil())
@@ -26,7 +26,7 @@ var _ = Describe("Manager", func() {
 		})
 
 		It("should register projection to the manager", func() {
-			manager := projection.NewManager(NewFakeLogger(), NewFakeEventStore())
+			manager := projection.NewStoreBasedManager(NewFakeLogger(), NewFakeEventStore())
 
 			anyProjection := NewFakeProjection()
 
@@ -40,7 +40,7 @@ var _ = Describe("Manager", func() {
 		It("should pass only listening events to projection", func() {
 			// Setup
 			mockEventStore := NewMockEventStore()
-			manager := projection.NewManager(NewFakeLogger(), mockEventStore)
+			manager := projection.NewStoreBasedManager(NewFakeLogger(), mockEventStore)
 			mockProjection := NewMockProjection()
 
 			// BlockEvent setup
@@ -73,8 +73,8 @@ var _ = Describe("Manager", func() {
 				return typedEvents[0].Name() == anyEvent.Name()
 			})).Once().Return(nil)
 
-			// Run the manager
-			manager.Run()
+			// RunInBackground the manager
+			manager.RunInBackground()
 			// Since manager create goroutines for Projection, we have to give up the CPU for
 			// events channel to happen
 			<-time.After(time.Second)
@@ -86,7 +86,7 @@ var _ = Describe("Manager", func() {
 		It("should pass all the unhandled events to projection", func() {
 			// Setup
 			mockEventStore := NewMockEventStore()
-			manager := projection.NewManager(NewFakeLogger(), mockEventStore)
+			manager := projection.NewStoreBasedManager(NewFakeLogger(), mockEventStore)
 			mockProjection := NewMockProjection()
 
 			// BlockEvent setup
@@ -126,8 +126,8 @@ var _ = Describe("Manager", func() {
 				return len(typedEvents) == 1 && typedEvents[0].Name() == anyOtherEvent.Name()
 			})).Once().Return(nil)
 
-			// Run the manager
-			manager.Run()
+			// RunInBackground the manager
+			manager.RunInBackground()
 			// Since manager create goroutines for Projection, we have to give up the CPU for
 			// events channel to happen
 			<-time.After(time.Second)
@@ -141,7 +141,7 @@ var _ = Describe("Manager", func() {
 
 			// Setup
 			mockEventStore := NewMockEventStore()
-			manager := projection.NewManager(NewFakeLogger(), mockEventStore)
+			manager := projection.NewStoreBasedManager(NewFakeLogger(), mockEventStore)
 			anyProjection := NewMockProjection()
 			anyOtherProjection := NewMockProjection()
 
@@ -187,8 +187,8 @@ var _ = Describe("Manager", func() {
 				return len(typedEvents) == 1 && typedEvents[0].Name() == anyOtherEvent.Name()
 			})).Once().Return(nil)
 
-			// Run the manager
-			manager.Run()
+			// RunInBackground the manager
+			manager.RunInBackground()
 			// Since manager create goroutines for Projection, we have to give up the CPU for
 			// events channel to happen
 			<-time.After(time.Second)
@@ -201,7 +201,7 @@ var _ = Describe("Manager", func() {
 		It("should pass event to projection based on last handled event height", func() {
 			// Setup
 			mockEventStore := NewMockEventStore()
-			manager := projection.NewManager(NewFakeLogger(), mockEventStore)
+			manager := projection.NewStoreBasedManager(NewFakeLogger(), mockEventStore)
 			mockProjection := NewMockProjection()
 
 			// BlockEvent setup
@@ -232,8 +232,8 @@ var _ = Describe("Manager", func() {
 				return len(typedEvents) == 1 && typedEvents[0].Name() == anyEvent.Name()
 			})).Once().Return(nil)
 
-			// Run the manager
-			manager.Run()
+			// RunInBackground the manager
+			manager.RunInBackground()
 			// Since manager create goroutines for Projection, we have to give up the CPU for
 			// events channel to happen
 			<-time.After(time.Second)

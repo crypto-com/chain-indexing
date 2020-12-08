@@ -8,6 +8,13 @@ validator_pubkey_prefix = "tcrocncl"
 connode_address_prefix = "tcrocnclcons"
 connode_pubkey_prefix = "tcrocnclconspub"
 
+[system]
+# mode of the system, possible values: EVENT_STORE,TENDERMINT_DIRECT
+# EVENT_STORE mode: synced blocks are parsed to events and persist to event store. Projections will replay events from
+# event store.
+# TENDERMINT_DIRECT mode: synced blocks are parsed to events and are replayed directly by projections.
+mode = "TENDERMINT_DIRECT"
+
 [sync]
 # how many sync jobs running in parallel
 window_size = 50

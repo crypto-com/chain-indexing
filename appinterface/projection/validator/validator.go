@@ -6,7 +6,7 @@ import (
 
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 
-	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbbase"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/validator/constants"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/validator/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -22,7 +22,7 @@ var _ projection_entity.Projection = &Validator{}
 const DO_NOT_MODIFY = "[do-not-modify]"
 
 type Validator struct {
-	*rdbbase.RDbBase
+	*rdbprojectionbase.Base
 
 	rdbConn rdb.Conn
 	logger  applogger.Logger
@@ -32,7 +32,7 @@ type Validator struct {
 
 func NewValidator(logger applogger.Logger, rdbConn rdb.Conn, conNodeAddressPrefix string) *Validator {
 	return &Validator{
-		rdbbase.NewRDbBase(rdbConn.ToHandle(), "Validator"),
+		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Validator"),
 
 		rdbConn,
 		logger,

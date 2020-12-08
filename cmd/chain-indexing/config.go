@@ -58,6 +58,7 @@ type CLIConfig struct {
 // FileConfig is the struct matches config.toml
 type FileConfig struct {
 	Blockchain BlockchainConfig
+	System     SystemConfig
 	Sync       SyncConfig
 	Tendermint TendermintConfig
 	CosmosApp  CosmosAppConfig `toml:"cosmosapp"`
@@ -77,6 +78,10 @@ type BlockchainConfig struct {
 	ValidatorPubKeyPrefix  string `toml:"validator_pubkey_prefix"`
 	ConNodeAddressPrefix   string `toml:"connode_address_prefix"`
 	ConNodePubKeyPrefix    string `toml:"connode_pubkey_prefix"`
+}
+
+type SystemConfig struct {
+	Mode string `toml:"mode"`
 }
 
 type SyncConfig struct {

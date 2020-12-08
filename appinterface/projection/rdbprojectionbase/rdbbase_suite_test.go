@@ -1,4 +1,4 @@
-package rdbbase_test
+package rdbprojectionbase_test
 
 import (
 	"testing"
@@ -9,5 +9,5 @@ import (
 
 func TestRDbBase(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "RDbBase Suite")
+	RunSpecs(t, "Base Suite")
 }

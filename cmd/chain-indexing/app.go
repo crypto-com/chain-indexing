@@ -15,6 +15,9 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+const SYSTEM_MODE_EVENT_STORE = "EVENT_STORE"
+const SYSTEM_MODE_TENDERMINT_DIRECT = "TENDERMINT_DIRECT"
+
 func CliApp(args []string) error {
 	cliApp := &cli.App{
 		Name:                 filepath.Base(args[0]),
@@ -136,6 +139,10 @@ func CliApp(args []string) error {
 			logger.SetLogLevel(logLevel)
 
 			// Setup system
+			if config.System.Mode != SYSTEM_MODE_EVENT_STORE && config.System.Mode != SYSTEM_MODE_TENDERMINT_DIRECT {
+				logger.Panicf("unrecognized system mode: %s", config.System.Mode)
+			}
+
 			rdbConn, err := SetupRDbConn(&config, logger)
 			if err != nil {
 				logger.Panicf("error setting up RDb connection: %v", err)
@@ -143,15 +150,17 @@ func CliApp(args []string) error {
 
 			httpAPIServer := NewHTTPAPIServer(logger, rdbConn, &config)
 			go func() {
-				if err := httpAPIServer.Run(); err != nil {
-					logger.Panicf("%v", err)
+				if runErr := httpAPIServer.Run(); runErr != nil {
+					logger.Panicf("%v", runErr)
 				}
 			}()
 
-			indexService := NewIndexService(logger, rdbConn, &config)
+			projections := initProjections(logger, rdbConn, config.Blockchain.ConNodeAddressPrefix)
+
+			indexService := NewIndexService(logger, rdbConn, &config, projections)
 			go func() {
-				if err := indexService.Run(); err != nil {
-					logger.Panicf("%v", err)
+				if runErr := indexService.Run(); runErr != nil {
+					logger.Panicf("%v", runErr)
 				}
 			}()
 

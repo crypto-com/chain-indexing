@@ -8,15 +8,16 @@ import (
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 
-type Manager struct {
+// StoreBasedManager is a projection manager relies on replaying events from EventStore
+type StoreBasedManager struct {
 	logger     applogger.Logger
 	eventStore entity_event.Store
 
 	projections []Projection
 }
 
-func NewManager(logger applogger.Logger, eventStore entity_event.Store) *Manager {
-	return &Manager{
+func NewStoreBasedManager(logger applogger.Logger, eventStore entity_event.Store) *StoreBasedManager {
+	return &StoreBasedManager{
 		logger: logger.WithFields(applogger.LogFields{
 			"module": "projectionManager",
 		}),
@@ -26,7 +27,7 @@ func NewManager(logger applogger.Logger, eventStore entity_event.Store) *Manager
 	}
 }
 
-func (manager *Manager) RegisterProjection(projection Projection) error {
+func (manager *StoreBasedManager) RegisterProjection(projection Projection) error {
 	if manager.IsProjectionRegistered(projection) {
 		return fmt.Errorf("projection `%s` already registered", projection.Id())
 	}
@@ -34,7 +35,7 @@ func (manager *Manager) RegisterProjection(projection Projection) error {
 	return nil
 }
 
-func (manager *Manager) IsProjectionRegistered(projection Projection) bool {
+func (manager *StoreBasedManager) IsProjectionRegistered(projection Projection) bool {
 	for _, registeredProjection := range manager.projections {
 		if projection.Id() == registeredProjection.Id() {
 			return true
@@ -44,13 +45,13 @@ func (manager *Manager) IsProjectionRegistered(projection Projection) bool {
 }
 
 // Starts projectionManager by running all registered projection.
-func (manager *Manager) Run() {
+func (manager *StoreBasedManager) RunInBackground() {
 	for _, projection := range manager.projections {
 		go manager.projectionRunner(projection)
 	}
 }
 
-func (manager *Manager) projectionRunner(projection Projection) {
+func (manager *StoreBasedManager) projectionRunner(projection Projection) {
 	eventsToListen := projection.GetEventsToListen()
 	logger := manager.logger.WithFields(applogger.LogFields{
 		"projection": projection.Id(),
