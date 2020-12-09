@@ -18,7 +18,7 @@
 | `toAddress`    | *string* | The destination or the recepient address                |
 | `amount`       | *object* | CRO amount wrapper                                      |
 | `amount.value` | *bigint* | CRO amount in basic unit                                |
-| `msgName`      | *string* | Blockchain Message name. Value: `MsgSend`               |
+| `msgName`      | *string* | Blockchain Message type . Value: `MsgSend`              |
 | `txHash`       | *string* | TxID of the blockchain transaction containing the event |
 | `msgIndex`     | *int*    | message index on the block                              |
 | `name`         | *string* | Specific Event Name. Value: `MSG_SEND_CREATED`          |
