@@ -13,9 +13,13 @@ type Base struct {
 ```
 where 
 `name` : Name for the event
+
 `version` : Numerical version maintained for the event
+
 `height` : Block height of the event
+
 `uuid` : Unique ID that is assigned on event creation
+
 
 ## MsgBase
 `MsgBase` consists of a few properties pertaining to a blockchain event. Refer to below structure for more details.
@@ -29,10 +33,15 @@ type MsgBase struct {
 }
 ```
 where 
+
 `event.Base` : All the properties of `Base` structure explained [here](./README.md#Understanding-an-EVENT)
+
 `msgName` : `msg*` of the Crypto.com blockchain such as `MsgSend` or `MsgCreateValidator` etc.
+
 `txHash` : Blockchain TxID for the transaction containing the event
+
 `msgIndex` : Message Index on the block created
+
 
 ## Categories
 - [Bank](./bank)
