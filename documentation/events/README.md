@@ -1,4 +1,4 @@
-# Events Detailing Documentation
+# Events Documentation
 This documentation explains different events supported on the chain-indexing service.
 
 ## Understanding an EVENT
@@ -12,6 +12,7 @@ type Base struct {
 }
 ```
 where 
+
 `name` : Name for the event
 
 `version` : Numerical version maintained for the event
@@ -20,6 +21,7 @@ where
 
 `uuid` : Unique ID that is assigned on event creation
 
+Before going further let's first understand what a [MsgBase](./README.md#MsgBase) is.
 
 ## MsgBase
 `MsgBase` consists of a few properties pertaining to a blockchain event. Refer to below structure for more details.
