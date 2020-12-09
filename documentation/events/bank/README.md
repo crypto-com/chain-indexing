@@ -1,5 +1,5 @@
 # Bank Module Event List
-- [MSG_SEND_CREATED](./README.md#event::MSG_SEND_CREATED)
+- [MSG_SEND_CREATED](#eventmsg_send_created)
 - [MSG_SEND_FAILED](./README.md)
 - [MSG_MULTI_SEND_CREATED](./README.md)
 - [MSG_MULTI_SEND_FAILED](./README.md)
