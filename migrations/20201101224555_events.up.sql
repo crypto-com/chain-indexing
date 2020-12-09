@@ -6,6 +6,8 @@ CREATE TABLE events (
     version INT NOT NULL,
     payload JSONB NOT NULL,
     PRIMARY KEY(id),
-    UNIQUE(uuid)
+    UNIQUE(uuid),
+    sender VARCHAR,
+    sendersequence VARCHAR
 );
 
