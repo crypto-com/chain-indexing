@@ -1,4 +1,11 @@
-## Event Details
+# Bank Module Event List
+- [MSG_SEND_CREATED](./README.md#MSG_SEND_CREATED)
+- [MSG_SEND_FAILED](./README.md)
+- [MSG_MULTI_SEND_CREATED](./README.md)
+- [MSG_MULTI_SEND_FAILED](./README.md)
+
+
+## MSG_SEND_CREATED
 *Name* : MSG_SEND_CREATED
 
 *Type* : [MsgBase](../README.md#MsgBase)
