@@ -11,16 +11,11 @@ type Base struct {
 	EventUUID    string `json:"uuid"`
 }
 ```
-where 
-
-`name` : Name for the event
-
-`version` : Numerical version maintained for the event
-
-`height` : Block height of the event
-
-`uuid` : Unique ID that is assigned on event creation
-
+where  
+`name` : Name for the event  
+`version` : Numerical version maintained for the event  
+`height` : Block height of the event  
+`uuid` : Unique ID that is assigned on event creation  
 Before going further let's first understand what a [MsgBase](./README.md#MsgBase) is.
 
 ## MsgBase
@@ -35,16 +30,11 @@ type MsgBase struct {
 	MsgIndex  int    `json:"msgIndex"`
 }
 ```
-where 
-
-`event.Base` : All the properties of `Base` structure explained [here](./README.md#Understanding-an-EVENT)
-
-`msgName` : `msg*` of the Crypto.com blockchain such as `MsgSend` or `MsgCreateValidator` etc.
-
-`txHash` : Blockchain TxID for the transaction containing the event
-
+where  
+`event.Base` : `Base` properties as explained [here](./README.md#Understanding-an-EVENT)  
+`msgName` : `msg*` of the Crypto.com blockchain such as `MsgSend` or `MsgCreateValidator` etc.  
+`txHash` : Blockchain TxID for the transaction containing the event  
 `msgIndex` : Message Index on the block created
-
 
 ## Categories
 - [Bank](./bank)
