@@ -24,7 +24,8 @@ where
 Before going further let's first understand what a [MsgBase](./README.md#MsgBase) is.
 
 ## MsgBase
-`MsgBase` consists of a few properties pertaining to a blockchain event. Refer to below structure for more details.
+It extends the `Base` object by enriching it with other blockchain properties. `MsgBase` consists of a few properties pertaining to a blockchain event. Refer to below structure:
+
 ```go
 type MsgBase struct {
 	event.Base
