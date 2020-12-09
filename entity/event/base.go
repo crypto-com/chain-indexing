@@ -4,8 +4,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// Base is a JSON-compatible rdbbase event with sequence and EventUUID support. It is not a must to
-// use this as rdbbase event but to implement your own one rdbbase on your design
+// Base is a JSON-compatible rdbprojectionbase event with sequence and EventUUID support. It is not a must to
+// use this as rdbprojectionbase event but to implement your own one rdbprojectionbase on your design
 type Base struct {
 	EventName    string `json:"name"`
 	EventVersion int    `json:"version"`

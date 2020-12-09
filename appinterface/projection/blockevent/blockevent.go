@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/blockevent/view"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbbase"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
@@ -14,7 +14,7 @@ import (
 )
 
 type BlockEvent struct {
-	*rdbbase.RDbBase
+	*rdbprojectionbase.Base
 
 	rdbConn rdb.Conn
 	logger  applogger.Logger
@@ -22,7 +22,7 @@ type BlockEvent struct {
 
 func NewBlockEvent(logger applogger.Logger, rdbConn rdb.Conn) *BlockEvent {
 	return &BlockEvent{
-		rdbbase.NewRDbBase(rdbConn.ToHandle(), "BlockEvent"),
+		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "BlockEvent"),
 
 		rdbConn,
 		logger,

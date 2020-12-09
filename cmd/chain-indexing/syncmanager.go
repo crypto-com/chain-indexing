@@ -1,88 +1,78 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
-	"github.com/crypto-com/chain-indexing/appinterface/projection/validatorstats"
-
-	"github.com/crypto-com/chain-indexing/appinterface/projection/block"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/transasaction"
-
-	"github.com/crypto-com/chain-indexing/appinterface/projection/blockevent"
-
-	"github.com/crypto-com/chain-indexing/appinterface/projection/validator"
-
-	"github.com/crypto-com/chain-indexing/usecase/executor"
-
-	"github.com/crypto-com/chain-indexing/entity/command"
-	"github.com/crypto-com/chain-indexing/usecase/syncstrategy"
-
-	event_interface "github.com/crypto-com/chain-indexing/appinterface/event"
+	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
-	"github.com/crypto-com/chain-indexing/appinterface/rdbstatusstore"
+	command_entity "github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/entity/event"
-	"github.com/crypto-com/chain-indexing/entity/projection"
 	chainfeed "github.com/crypto-com/chain-indexing/infrastructure/feed/chain"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
-	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
+	"github.com/crypto-com/chain-indexing/usecase/syncstrategy"
 )
 
 const DEFAULT_POLLING_INTERVAL = 5 * time.Second
 
 type SyncManager struct {
-	rdbConn               rdb.Conn
-	client                *tendermint.HTTPClient
-	logger                applogger.Logger
-	pollingInterval       time.Duration
-	consNodeAddressPrefix string
-	windowSize            int
-
-	latestBlockHeight *int64
-	shouldSyncCh      chan bool
+	rdbConn         rdb.Conn
+	client          *tendermint.HTTPClient
+	logger          applogger.Logger
+	pollingInterval time.Duration
 
 	txDecoder          *parser.TxDecoder
 	windowSyncStrategy *syncstrategy.Window
-	statusStore        *rdbstatusstore.RDbStatusStoreImpl
-	eventStore         *event_interface.RDbStore
-	projectionManager  *projection.Manager
-	eventRegistry      *event.Registry
+
+	eventHandler eventhandler_interface.Handler
+
+	// SyncManager state
+	latestBlockHeight *int64
+	shouldSyncCh      chan bool
+}
+
+type SyncManagerParams struct {
+	Logger    applogger.Logger
+	RDbConn   rdb.Conn
+	TxDecoder *parser.TxDecoder
+
+	Config SyncManagerConfig
+}
+
+type SyncManagerConfig struct {
+	WindowSize       int
+	TendermintRPCUrl string
 }
 
 // NewSyncManager creates a new feed with polling for latest block starts at a specific height
 func NewSyncManager(
-	logger applogger.Logger,
-	rdbConn rdb.Conn,
-	consNodeAddressPrefix string,
-	windowSize int,
-	tendermintRPCUrl string,
-	txDecoder *parser.TxDecoder,
+	params SyncManagerParams,
+	eventHandler eventhandler_interface.Handler,
 ) *SyncManager {
-	tendermintClient := tendermint.NewHTTPClient(tendermintRPCUrl)
+	tendermintClient := tendermint.NewHTTPClient(params.Config.TendermintRPCUrl)
 
 	return &SyncManager{
-		rdbConn: rdbConn,
+		rdbConn: params.RDbConn,
 		client:  tendermintClient,
-		logger: logger.WithFields(applogger.LogFields{
+		logger: params.Logger.WithFields(applogger.LogFields{
 			"module": "SyncManager",
 		}),
-		pollingInterval:       DEFAULT_POLLING_INTERVAL,
-		consNodeAddressPrefix: consNodeAddressPrefix,
-		windowSize:            windowSize,
+		pollingInterval: DEFAULT_POLLING_INTERVAL,
 
 		shouldSyncCh: make(chan bool, 1),
 
-		txDecoder:          txDecoder,
-		windowSyncStrategy: syncstrategy.NewWindow(logger, windowSize),
+		txDecoder:          params.TxDecoder,
+		windowSyncStrategy: syncstrategy.NewWindow(params.Logger, params.Config.WindowSize),
+
+		eventHandler: eventHandler,
 	}
 }
 
 // SyncBlocks makes request to tendermint, create and dispatch notifications
 func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
-	maybeLastIndexedHeight, err := manager.statusStore.GetLastIndexedBlockHeight()
+	maybeLastIndexedHeight, err := manager.eventHandler.GetLastHandledEventHeight()
 	if err != nil {
 		return fmt.Errorf("error running GetLastIndexedBlockHeight %v", err)
 	}
@@ -99,36 +89,28 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
 			currentIndexingHeight, latestHeight, manager.syncBlockWorker,
 		)
 		if err != nil {
-			manager.logger.Errorf("error when synchronizing block with window strategy: %v", err)
-			<-time.After(5 * time.Second)
+			return fmt.Errorf("error when synchronizing block with window strategy: %v", err)
 		}
 
-		manager.logger.Debug("start persisting blocks commands")
-		tx, err := manager.rdbConn.Begin()
-		txHandle := tx.ToHandle()
 		if err != nil {
 			return fmt.Errorf("error beginning transaction: %v", err)
 		}
-		eventStore := event_interface.NewRDbStore(txHandle, manager.eventRegistry)
 		for i, commands := range blocksCommands {
 			blockHeight := currentIndexingHeight + int64(i)
-			executor := executor.NewBlockExecutor(manager.logger, blockHeight)
-			executor.AddAllCommands(commands)
 
-			// generate all events, make them persistent
-			if err := executor.ExecAllCommands(); err != nil {
-				return fmt.Errorf("error generating all events%v", err)
+			events := make([]event.Event, 0, len(commands))
+			for _, command := range commands {
+				event, err := command.Exec()
+				if err != nil {
+					return fmt.Errorf("error generating event: %v", err)
+				}
+				events = append(events, event)
 			}
-			if err := executor.StoreAllEvents(eventStore); err != nil {
-				return fmt.Errorf("error storing all events%v", err)
-			}
-		}
-		if err := manager.statusStore.UpdateLastIndexedBlockHeight(txHandle, syncedHeight); err != nil {
-			return fmt.Errorf("error updating last indexed block height to %d: %v", currentIndexingHeight, err)
-		}
 
-		if err := tx.Commit(); err != nil {
-			return fmt.Errorf("error committing block synchronization outcomes: %v", err)
+			err := manager.eventHandler.HandleEvents(blockHeight, events)
+			if err != nil {
+				return fmt.Errorf("error handling events: %v", err)
+			}
 		}
 
 		// If there is any error before, short-circuit return in the error handling
@@ -139,7 +121,7 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
 	return nil
 }
 
-func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command.Command, error) {
+func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity.Command, error) {
 	logger := manager.logger.WithFields(applogger.LogFields{
 		"submodule":   "SyncBlockWorker",
 		"blockHeight": blockHeight,
@@ -180,80 +162,8 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command.Comman
 	return commands, nil
 }
 
-func (manager *SyncManager) InitRegistry() *event.Registry {
-	registry := event.NewRegistry()
-	event_usecase.RegisterEvents(registry)
-	return registry
-}
-
-func (manager *SyncManager) InitStatusStore() *rdbstatusstore.RDbStatusStoreImpl {
-	StatusStore := rdbstatusstore.NewRDbStatusStoreImpl(
-		manager.logger,
-		manager.rdbConn.ToHandle(),
-	)
-	return StatusStore
-}
-
-func (manager *SyncManager) InitEventStore() (*event_interface.RDbStore, error) {
-	if manager.eventRegistry == nil {
-		return nil, errors.New("cannot init event store without an Register instance")
-	}
-	EventStore := event_interface.NewRDbStore(manager.rdbConn.ToHandle(), manager.eventRegistry)
-	return EventStore, nil
-}
-
-func (manager *SyncManager) InitProjectionManager() (*projection.Manager, error) {
-	if manager.eventStore == nil {
-		return nil, errors.New("cannot init projection manager without an eventStore instance")
-	}
-	projectionManager := projection.NewManager(manager.logger, manager.eventStore)
-
-	// register more projections here
-	blockProjection := block.NewBlock(manager.logger, manager.rdbConn)
-	if err := projectionManager.RegisterProjection(blockProjection); err != nil {
-		return nil, fmt.Errorf("error registering block projection to manager %v", err)
-	}
-
-	transactionProjection := transasaction.NewTransaction(manager.logger, manager.rdbConn)
-	if err := projectionManager.RegisterProjection(transactionProjection); err != nil {
-		return nil, fmt.Errorf("error registering transaction projection to manager %v", err)
-	}
-
-	blockEventProjection := blockevent.NewBlockEvent(manager.logger, manager.rdbConn)
-	if err := projectionManager.RegisterProjection(blockEventProjection); err != nil {
-		return nil, fmt.Errorf("error registering block event projection to manager %v", err)
-	}
-
-	validatorProjection := validator.NewValidator(
-		manager.logger, manager.rdbConn, manager.consNodeAddressPrefix,
-	)
-	if err := projectionManager.RegisterProjection(validatorProjection); err != nil {
-		return nil, fmt.Errorf("error registering validator projection to manager %v", err)
-	}
-
-	validatorStatsProjection := validatorstats.NewValidatorStats(manager.logger, manager.rdbConn)
-	if err := projectionManager.RegisterProjection(validatorStatsProjection); err != nil {
-		return nil, fmt.Errorf("error registering validator stats projection to manager %v", err)
-	}
-	return projectionManager, nil
-}
-
 // Run starts the polling service for blocks
 func (manager *SyncManager) Run() error {
-	var err error
-	manager.eventRegistry = manager.InitRegistry()
-	manager.statusStore = manager.InitStatusStore()
-
-	if manager.eventStore, err = manager.InitEventStore(); err != nil {
-		return fmt.Errorf("error init event store %v", err)
-	}
-
-	if manager.projectionManager, err = manager.InitProjectionManager(); err != nil {
-		return fmt.Errorf("error init projection manager %v", err)
-	}
-
-	manager.projectionManager.Run()
-
 	tracker := chainfeed.NewBlockHeightTracker(manager.logger, manager.client)
 	manager.latestBlockHeight = tracker.GetLatestBlockHeight()
 	blockHeightCh := make(chan int64, 1)

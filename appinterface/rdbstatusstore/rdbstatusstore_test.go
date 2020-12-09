@@ -2,7 +2,6 @@ package rdbstatusstore_test
 
 import (
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	test_logger "github.com/crypto-com/chain-indexing/internal/logger/test"
 	"github.com/crypto-com/chain-indexing/internal/primptr"
 	. "github.com/crypto-com/chain-indexing/test"
 	. "github.com/onsi/ginkgo"
@@ -24,8 +23,7 @@ var _ = Describe("RdbStatusStore", func() {
 
 		Describe("GetLastIndexedBlockHeight", func() {
 			It("should return the nil with no error on first run", func() {
-				store := rdbstatusstore.NewRDbStatusStoreImpl(
-					test_logger.NewFakeLogger(),
+				store := rdbstatusstore.NewRDbStatusStore(
 					pgxConn.ToHandle(),
 				)
 				height, err := store.GetLastIndexedBlockHeight()
@@ -35,15 +33,14 @@ var _ = Describe("RdbStatusStore", func() {
 			})
 		})
 
-		Describe("UpdateLastIndexedBlockHeight", func() {
+		Describe("UpdateLastIndexedBlockHeightWithRDbHandle", func() {
 			It("should return the updated last indexed block height properly with no error", func() {
-				store := rdbstatusstore.NewRDbStatusStoreImpl(
-					test_logger.NewFakeLogger(),
+				store := rdbstatusstore.NewRDbStatusStore(
 					pgxConn.ToHandle(),
 				)
 
 				newHeight := int64(100)
-				err := store.UpdateLastIndexedBlockHeight(pgxConn.ToHandle(), newHeight)
+				err := store.UpdateLastIndexedBlockHeightWithRDbHandle(pgxConn.ToHandle(), newHeight)
 				Expect(err).To(BeNil())
 
 				currentHeight, err := store.GetLastIndexedBlockHeight()

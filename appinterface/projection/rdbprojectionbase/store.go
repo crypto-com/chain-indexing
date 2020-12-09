@@ -1,4 +1,4 @@
-package rdbbase
+package rdbprojectionbase
 
 import (
 	"errors"
@@ -8,18 +8,20 @@ import (
 	"github.com/crypto-com/chain-indexing/internal/primptr"
 )
 
-// RDbStoreImpl is an implementation of the RDbStore
-type RDbStoreImpl struct {
+// Store is an implementation of the RDbStore
+type Store struct {
 	table string
 }
 
-func NewRDbStoreImpl(table string) *RDbStoreImpl {
-	return &RDbStoreImpl{
+func NewStore(table string) *Store {
+	return &Store{
 		table,
 	}
 }
 
-func (impl *RDbStoreImpl) UpdateLastHandledEventHeight(rdbHandle *rdb.Handle, projectionId string, height int64) error {
+// UpdateLastHandledEventHeight update last handled event height of projection id to provided
+// height
+func (impl *Store) UpdateLastHandledEventHeight(rdbHandle *rdb.Handle, projectionId string, height int64) error {
 	lastHandledEventHeight, err := impl.GetLastHandledEventHeight(rdbHandle, projectionId)
 	if err != nil {
 		return fmt.Errorf("error checking projection record existence: %v", err)
@@ -73,7 +75,7 @@ func (impl *RDbStoreImpl) UpdateLastHandledEventHeight(rdbHandle *rdb.Handle, pr
 
 // GetLastHandledEventHeight returns the last handled event height, nil if no event has been
 // handled
-func (impl *RDbStoreImpl) GetLastHandledEventHeight(rdbHandle *rdb.Handle, projectionId string) (*int64, error) {
+func (impl *Store) GetLastHandledEventHeight(rdbHandle *rdb.Handle, projectionId string) (*int64, error) {
 	sql, args, err := rdbHandle.StmtBuilder.Select(
 		"last_handled_event_height",
 	).From(

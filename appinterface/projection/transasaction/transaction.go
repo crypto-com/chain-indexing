@@ -8,7 +8,7 @@ import (
 
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 
-	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbbase"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
@@ -19,7 +19,7 @@ import (
 var _ projection_entity.Projection = &Transaction{}
 
 type Transaction struct {
-	*rdbbase.RDbBase
+	*rdbprojectionbase.Base
 
 	rdbConn rdb.Conn
 	logger  applogger.Logger
@@ -27,7 +27,7 @@ type Transaction struct {
 
 func NewTransaction(logger applogger.Logger, rdbConn rdb.Conn) *Transaction {
 	return &Transaction{
-		rdbbase.NewRDbBase(rdbConn.ToHandle(), "Transaction"),
+		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Transaction"),
 
 		rdbConn,
 		logger,
