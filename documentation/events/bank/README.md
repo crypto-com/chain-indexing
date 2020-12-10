@@ -15,7 +15,7 @@
 | Key           | Type     | Description                                             |
 | ------------- | -------- | ------------------------------------------------------- |
 | `fromAddress` | *string* | The source or the origin address                        |
-| `toAddress`   | *string* | The destination or the recepient address                |
+| `toAddress`   | *string* | The destination or the recipient address                |
 | `amount`      | *object* | CRO amount in basic unit                                |
 | `msgName`     | *string* | Blockchain Message type . Value: `MsgSend`              |
 | `txHash`      | *string* | TxID of the blockchain transaction containing the event |
@@ -52,7 +52,7 @@
 | Key           | Type     | Description                                             |
 | ------------- | -------- | ------------------------------------------------------- |
 | `fromAddress` | *string* | The source or the origin address                        |
-| `toAddress`   | *string* | The destination or the recepient address                |
+| `toAddress`   | *string* | The destination or the recipient address                |
 | `amount`      | *object* | CRO amount in basic unit                                |
 | `msgName`     | *string* | Blockchain Message type . Value: `MsgSend`              |
 | `txHash`      | *string* | TxID of the blockchain transaction containing the event |
