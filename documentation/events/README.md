@@ -20,7 +20,7 @@ where
 Associated functions with the structure:  
 * `Name()` : returns name of the event as `string`  
 * `Version()` : returns the event version as `int`  
-* `Height()` : returns the height of the block containing the event  
+* `Height()` : returns the height of the block containing the event as `int64`
 * `UUID()` : returns the unique event ID as `string`  
 
 Before going further let's first understand [MsgBase](./README.md#MsgBase).
