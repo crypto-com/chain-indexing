@@ -1,12 +1,10 @@
 # Bank Module Event List
-- [MSG_SEND_CREATED](#eventmsg_send_created)
-- [MSG_SEND_FAILED](./README.md)
-- [MSG_MULTI_SEND_CREATED](./README.md)
-- [MSG_MULTI_SEND_FAILED](./README.md)
+  - [event::MSG_SEND_CREATED](#eventmsg_send_created)
+  - [event::MSG_SEND_FAILED](#eventmsg_send_failed)
 
 
 ## event::MSG_SEND_CREATED
-*Name* : MSG_SEND_CREATED
+*Name* : MsgSendCreated
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
@@ -20,7 +18,7 @@
 | `msgName`     | *string* | Blockchain Message type . Value: `MsgSend`              |
 | `txHash`      | *string* | TxID of the blockchain transaction containing the event |
 | `msgIndex`    | *int*    | message index on the block                              |
-| `name`        | *string* | Specific Event Name. Value: `MsgSendCreated`          |
+| `name`        | *string* | Specific Event Name. Value: `MsgSendCreated`            |
 | `version`     | *int*    | Event Version. Value: `1`                               |
 | `height`      | *int64*  | Height of the block containing the transaction          |
 | `uuid`        | *string* | Unique ID that is assigned on event creation            |
@@ -39,5 +37,42 @@
     "msgIndex": 0,
     "toAddress": "tcro1j7pej8kplem4wt50p4hfvndhuw5jprxxn5625q",
     "fromAddress": "tcro1nj7zlmkuek5rl67ew2k8cle7cyalp3p6a9tj5t"
+}
+```
+
+## event::MSG_SEND_FAILED
+*Name* : MsgSendFailed
+
+*Type* : [MsgBase](../README.md#MsgBase)
+
+*Structure* : 
+
+| Key           | Type     | Description                                             |
+| ------------- | -------- | ------------------------------------------------------- |
+| `fromAddress` | *string* | The source or the origin address                        |
+| `toAddress`   | *string* | The destination or the recepient address                |
+| `amount`      | *object* | CRO amount in basic unit                                |
+| `msgName`     | *string* | Blockchain Message type . Value: `MsgSend`              |
+| `txHash`      | *string* | TxID of the blockchain transaction containing the event |
+| `msgIndex`    | *int*    | message index on the block                              |
+| `name`        | *string* | Specific Event Name. Value: `MsgSendFailed`             |
+| `version`     | *int*    | Event Version. Value: `1`                               |
+| `height`      | *int64*  | Height of the block containing the transaction          |
+| `uuid`        | *string* | Unique ID that is assigned on event creation            |
+
+*Example* :
+
+```json
+{
+    "name": "MsgSendFailed",
+    "uuid": "f2f00a5b-0cef-4652-b12f-e31bac7cb927",
+    "amount": "1000000000",
+    "height": 115930,
+    "txHash": "B2D15532E2DD5160EA9CA137E96AF0142E86E6A89C0C24C01C0F5AF49689C901",
+    "msgName": "MsgSend",
+    "version": 1,
+    "msgIndex": 0,
+    "toAddress": "tcro1pet9pezper24qmf5k23wkews8ha68xs2vz00q9",
+    "fromAddress": "tcro17wnekjfsllm8au3e8yuptxd24zll3m55655wl9"
 }
 ```
