@@ -53,7 +53,7 @@ In addition to the above there are different methods available which can be desc
 ## Categories
 - [Bank](./bank)
 - Staking
-- Distribution
+- [Distribution](./distribution)
 - Genesis
 - Governance
 - Validator
