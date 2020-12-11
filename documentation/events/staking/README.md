@@ -208,7 +208,7 @@
 | `msgName`                     | *string* | Blockchain Message type . Value: `MsgEditValidator`                        |
 | `txHash`                      | *string* | TxID of the blockchain transaction containing the event                    |
 | `msgIndex`                    | *int*    | message index on the block                                                 |
-| `name`                        | *string* | Specific Event Name. Value: `MsgEditValidatorFailed`                      |
+| `name`                        | *string* | Specific Event Name. Value: `MsgEditValidatorFailed`                       |
 | `version`                     | *int*    | Event Version. Value: `1`                                                  |
 | `height`                      | *int64*  | Height of the block containing the transaction                             |
 | `uuid`                        | *string* | Unique ID that is assigned on event creation                               |
@@ -234,5 +234,42 @@
     "commissionRate": "0.150000000000000000",
     "validatorAddress": "tcrocncl122w9fhc0pu3ey9r6hekznd2fkl5jswl5aqsvgy",
     "minSelfDelegation": null
+}
+```  
+
+## event::MSG_DELEGATE_CREATED
+*Name* : MsgDelegateCreated
+
+*Type* : [MsgBase](../README.md#MsgBase)
+
+*Structure* : 
+
+| Key                | Type     | Description                                             |
+| ------------------ | -------- | ------------------------------------------------------- |
+| `delegatorAddress` | *string* | Delegator address                                       |
+| `validatorAddress` | *string* | Validator address                                       |
+| `amount`           | *bigint* | CRO Amount in base unit                                 |
+| `msgName`          | *string* | Blockchain Message type . Value: `MsgDelegate`          |
+| `txHash`           | *string* | TxID of the blockchain transaction containing the event |
+| `msgIndex`         | *int*    | message index on the block                              |
+| `name`             | *string* | Specific Event Name. Value: `MsgDelegateCreated`        |
+| `version`          | *int*    | Event Version. Value: `1`                               |
+| `height`           | *int64*  | Height of the block containing the transaction          |
+| `uuid`             | *string* | Unique ID that is assigned on event creation            |
+
+*Example* :
+
+```json
+{
+    "name": "MsgDelegateCreated",
+    "uuid": "c51d9e37-3c8c-46eb-b2de-9e79137dfe8a",
+    "amount": "24077737755",
+    "height": 80190,
+    "txHash": "DD148B9B34A215B3FD15097579E4F45237C0DBD0A7983A043F1A3BA436F1590A",
+    "msgName": "MsgDelegate",
+    "version": 1,
+    "msgIndex": 0,
+    "delegatorAddress": "tcro152ena75gh5nqnu2nlarwmpzxa2czxs8y9e3slh",
+    "validatorAddress": "tcrocncl152ena75gh5nqnu2nlarwmpzxa2czxs8ysxjf85"
 }
 ```  
