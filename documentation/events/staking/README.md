@@ -273,3 +273,40 @@
     "validatorAddress": "tcrocncl152ena75gh5nqnu2nlarwmpzxa2czxs8ysxjf85"
 }
 ```  
+
+## event::MSG_DELEGATE_FAILED
+*Name* : MsgDelegateFailed
+
+*Type* : [MsgBase](../README.md#MsgBase)
+
+*Structure* : 
+
+| Key                | Type     | Description                                             |
+| ------------------ | -------- | ------------------------------------------------------- |
+| `delegatorAddress` | *string* | Delegator address                                       |
+| `validatorAddress` | *string* | Validator address                                       |
+| `amount`           | *bigint* | CRO Amount in base unit                                 |
+| `msgName`          | *string* | Blockchain Message type . Value: `MsgDelegate`          |
+| `txHash`           | *string* | TxID of the blockchain transaction containing the event |
+| `msgIndex`         | *int*    | message index on the block                              |
+| `name`             | *string* | Specific Event Name. Value: `MsgDelegateFailed`         |
+| `version`          | *int*    | Event Version. Value: `1`                               |
+| `height`           | *int64*  | Height of the block containing the transaction          |
+| `uuid`             | *string* | Unique ID that is assigned on event creation            |
+
+*Example* :
+
+```json
+{
+    "name": "MsgDelegateFailed",
+    "uuid": "e6324f2f-ce4b-41d5-b91d-cf46c7ea31ba",
+    "amount": "29700000000",
+    "height": 84771,
+    "txHash": "701D8B249B10AF9F0EE7E991262F296C9C9B747424CC58C068A693D019EB8FD1",
+    "msgName": "MsgDelegate",
+    "version": 1,
+    "msgIndex": 0,
+    "delegatorAddress": "tcro1urmrrmmt6gdf077dmgt95cmj6tc0z9045d5xmw",
+    "validatorAddress": "tcrocncl1urmrrmmt6gdf077dmgt95cmj6tc0z904pjhlrd"
+}
+```  
