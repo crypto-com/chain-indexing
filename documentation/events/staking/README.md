@@ -411,3 +411,26 @@
 | `uuid`                | *string* | Unique ID that is assigned on event creation            |
 
 *Example* : T.B.D  
+
+## event::MSG_BEGIN_REDELEGATE_FAILED
+*Name* : MsgBeginRedelegateFailed
+
+*Type* : [MsgBase](../README.md#MsgBase)
+
+*Structure* : 
+
+| Key                   | Type     | Description                                             |
+| --------------------- | -------- | ------------------------------------------------------- |
+| `delegatorAddress`    | *string* | Delegator address                                       |
+| `validatorSrcAddress` | *string* | Source Validator address                                |
+| `validatorDstAddress` | *string* | Destination Validator address                           |
+| `amount`              | *bigint* | CRO Amount in base unit                                 |
+| `msgName`             | *string* | Blockchain Message type . Value: `MsgBeginRedelegate`   |
+| `txHash`              | *string* | TxID of the blockchain transaction containing the event |
+| `msgIndex`            | *int*    | message index on the block                              |
+| `name`                | *string* | Specific Event Name. Value: `MsgBeginRedelegateFailed` |
+| `version`             | *int*    | Event Version. Value: `1`                               |
+| `height`              | *int64*  | Height of the block containing the transaction          |
+| `uuid`                | *string* | Unique ID that is assigned on event creation            |
+
+*Example* : T.B.D  
