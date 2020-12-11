@@ -156,3 +156,34 @@
 | `uuid`                     | *string* | Unique ID that is assigned on event creation                            |
 
 *Example* : T.B.D  
+
+## event::MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_CREATED
+*Name* : MsgSubmitSoftwareUpgradeProposalCreated
+
+*Type* : [MsgBase](../README.md#MsgBase)
+
+*Structure* : 
+
+| Key                   | Type     | Description                                                           |
+| --------------------- | -------- | --------------------------------------------------------------------- |
+| `proposalId`          | *string* | *(Optional)* Proposal ID                                              |
+| `proposerAddress`     | *string* | Proposer blockchain address                                           |
+| `initialDeposit`      | *string* | Initially deposited CRO Amount in base unit                           |
+| `content`             | *object* | Content wrapper                                                       |
+| `content.@type`       | *string* | Cosmos SDK type URL                                                   |
+| `content.title`       | *string* | Content title indicating the change                                   |
+| `content.description` | *string* | Action description                                                    |
+| `content.plan`        | *object* | Content plan details wrapper                                          |
+| `content.plan.name`   | *string* | Plan name                                                             |
+| `content.plan.title`  | *int64*  | Plan Title. Golang type: `utctime.UTCTime`                            |
+| `content.plan.height` | *int64*  | Plan proposal block height                                            |
+| `content.plan.info`   | *string* | Plan information                                                      |
+| `msgName`             | *string* | Blockchain Message type . Value: `MsgSubmitSoftwareUpgradeProposal`   |
+| `txHash`              | *string* | TxID of the blockchain transaction containing the event               |
+| `msgIndex`            | *int*    | message index on the block                                            |
+| `name`                | *string* | Specific Event Name. Value: `MsgSubmitSoftwareUpgradeProposalCreated` |
+| `version`             | *int*    | Event Version. Value: `1`                                             |
+| `height`              | *int64*  | Height of the block containing the transaction                        |
+| `uuid`                | *string* | Unique ID that is assigned on event creation                          |
+
+*Example* : T.B.D  
