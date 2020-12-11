@@ -324,7 +324,7 @@
 | `validatorAddress` | *string* | Validator address                                                            |
 | `amount`           | *bigint* | CRO Amount in base unit                                                      |
 | `unbondCompleteAt` | *string* | *(Optional)* Unbonding completion timestamp. Golang type: `*utctime.UTCTime` |
-| `msgName`          | *string* | Blockchain Message type . Value: `MsgDelegate`                               |
+| `msgName`          | *string* | Blockchain Message type . Value: `MsgUndelegate`                               |
 | `txHash`           | *string* | TxID of the blockchain transaction containing the event                      |
 | `msgIndex`         | *int*    | message index on the block                                                   |
 | `name`             | *string* | Specific Event Name. Value: `MsgUndelegateCreated`                           |
@@ -347,5 +347,44 @@
     "delegatorAddress": "tcro15e69kdrtczajjdlzyt2qgs5q2anc5qpmr4mrlp",
     "unbondCompleteAt": "2020-10-29T03:40:20Z",
     "validatorAddress": "tcrocncl15e69kdrtczajjdlzyt2qgs5q2anc5qpmk2c68z"
+}
+```  
+
+## event::MSG_UNDELEGATE_FAILED
+*Name* : MsgUndelegateFailed
+
+*Type* : [MsgBase](../README.md#MsgBase)
+
+*Structure* : 
+
+| Key                | Type     | Description                                                                  |
+| ------------------ | -------- | ---------------------------------------------------------------------------- |
+| `delegatorAddress` | *string* | Delegator address                                                            |
+| `validatorAddress` | *string* | Validator address                                                            |
+| `amount`           | *bigint* | CRO Amount in base unit                                                      |
+| `unbondCompleteAt` | *string* | *(Optional)* Unbonding completion timestamp. Golang type: `*utctime.UTCTime` |
+| `msgName`          | *string* | Blockchain Message type . Value: `MsgUndelegate`                               |
+| `txHash`           | *string* | TxID of the blockchain transaction containing the event                      |
+| `msgIndex`         | *int*    | message index on the block                                                   |
+| `name`             | *string* | Specific Event Name. Value: `MsgUndelegateFailed`                           |
+| `version`          | *int*    | Event Version. Value: `1`                                                    |
+| `height`           | *int64*  | Height of the block containing the transaction                               |
+| `uuid`             | *string* | Unique ID that is assigned on event creation                                 |
+
+*Example* :
+
+```json
+{
+    "name": "MsgUndelegateFailed",
+    "uuid": "d5ddb893-2ce7-4fbd-b85f-e8749dbe8d2e",
+    "amount": "50000000000000",
+    "height": 185255,
+    "txHash": "257D324CE4ED85357126FA82B9CD31CDE301BA5109945D27968A8A5D87C7B6BD",
+    "msgName": "MsgUndelegate",
+    "version": 1,
+    "msgIndex": 0,
+    "delegatorAddress": "tcro15e69kdrtczajjdlzyt2qgs5q2anc5qpmr4mrlp",
+    "unbondCompleteAt": null,
+    "validatorAddress": "tcrocncl1llst0cguh5azl9t8wr6mz5yzjuwukz7f0pp83e"
 }
 ```  
