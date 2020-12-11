@@ -55,6 +55,6 @@ In addition to the above there are different methods available which can be desc
 - Staking
 - Distribution
 - Genesis
-- [Governance](./governance/README.md)
+- [Governance](./governance)
 - Validator
 - Slashing
