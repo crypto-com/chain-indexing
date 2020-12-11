@@ -310,3 +310,42 @@
     "validatorAddress": "tcrocncl1urmrrmmt6gdf077dmgt95cmj6tc0z904pjhlrd"
 }
 ```  
+
+## event::MSG_UNDELEGATE_CREATED
+*Name* : MsgUndelegateCreated
+
+*Type* : [MsgBase](../README.md#MsgBase)
+
+*Structure* : 
+
+| Key                | Type     | Description                                                                  |
+| ------------------ | -------- | ---------------------------------------------------------------------------- |
+| `delegatorAddress` | *string* | Delegator address                                                            |
+| `validatorAddress` | *string* | Validator address                                                            |
+| `amount`           | *bigint* | CRO Amount in base unit                                                      |
+| `unbondCompleteAt` | *string* | *(Optional)* Unbonding completion timestamp. Golang type: `*utctime.UTCTime` |
+| `msgName`          | *string* | Blockchain Message type . Value: `MsgDelegate`                               |
+| `txHash`           | *string* | TxID of the blockchain transaction containing the event                      |
+| `msgIndex`         | *int*    | message index on the block                                                   |
+| `name`             | *string* | Specific Event Name. Value: `MsgUndelegateCreated`                           |
+| `version`          | *int*    | Event Version. Value: `1`                                                    |
+| `height`           | *int64*  | Height of the block containing the transaction                               |
+| `uuid`             | *string* | Unique ID that is assigned on event creation                                 |
+
+*Example* :
+
+```json
+{
+    "name": "MsgUndelegateCreated",
+    "uuid": "13e87da9-2ca9-4510-a1b3-f99decefb718",
+    "amount": "50000000000000",
+    "height": 192744,
+    "txHash": "D6B15F498A1E31452738F43AF124FAE7007EB3344E66A5423941667B46EA41EE",
+    "msgName": "MsgUndelegate",
+    "version": 1,
+    "msgIndex": 0,
+    "delegatorAddress": "tcro15e69kdrtczajjdlzyt2qgs5q2anc5qpmr4mrlp",
+    "unbondCompleteAt": "2020-10-29T03:40:20Z",
+    "validatorAddress": "tcrocncl15e69kdrtczajjdlzyt2qgs5q2anc5qpmk2c68z"
+}
+```  
