@@ -136,3 +136,53 @@
     "minSelfDelegation": "1"
 }
 ```  
+
+## event::MSG_EDIT_VALIDATOR_CREATED
+*Name* : MsgEditValidatorCreated
+
+*Type* : [MsgBase](../README.md#MsgBase)
+
+*Structure* : 
+
+| Key                           | Type     | Description                                                                |
+| ----------------------------- | -------- | -------------------------------------------------------------------------- |
+| `validatorAddress`            | *string* | Validator address                                                          |
+| `minSelfDelegation`           | *string* | *(Optional)* New minimum Self Delegation amount.                           |
+| `commissionRate`              | *string* | *(Optional)* New commission rate                                           |
+| `description`                 | *object* | Validator description wrapper                                              |
+| `description.moniker`         | *string* | *(Optional)* New validator node public moniker. Default: `[do-not-modify]` |
+| `description.identity`        | *string* | *(Optional)* New validator node identity. Default: `[do-not-modify]`       |
+| `description.website`         | *string* | *(Optional)* New website domain name. Default: `[do-not-modify]`           |
+| `description.securityContact` | *string* | *(Optional)* New Validator node email contact. Default: `[do-not-modify]`  |
+| `description.details`         | *string* | *(Optional)* New Validator node details. Default: `[do-not-modify]`        |
+| `msgName`                     | *string* | Blockchain Message type . Value: `MsgEditValidator`                        |
+| `txHash`                      | *string* | TxID of the blockchain transaction containing the event                    |
+| `msgIndex`                    | *int*    | message index on the block                                                 |
+| `name`                        | *string* | Specific Event Name. Value: `MsgEditValidatorCreated`                      |
+| `version`                     | *int*    | Event Version. Value: `1`                                                  |
+| `height`                      | *int64*  | Height of the block containing the transaction                             |
+| `uuid`                        | *string* | Unique ID that is assigned on event creation                               |
+
+*Example* :
+
+```json
+{
+    "name": "MsgEditValidatorCreated",
+    "uuid": "7ea5034f-0ccf-45ea-be46-9f2f82caa9a2",
+    "height": 82066,
+    "txHash": "8D0AA51BA31B2BCF3A8D7658B421476E614A24B9D8E5A9BD0BC23A1D2F9B5FAD",
+    "msgName": "MsgEditValidator",
+    "version": 1,
+    "msgIndex": 0,
+    "description": {
+        "details": "[do-not-modify]",
+        "moniker": "1NP_SirJN",
+        "website": "[do-not-modify]",
+        "identity": "[do-not-modify]",
+        "securityContact": "[do-not-modify]"
+    },
+    "commissionRate": null,
+    "validatorAddress": "tcrocncl1pm27djcs5djxjsxw3unrkv3m3jtxdexktw5epu",
+    "minSelfDelegation": null
+}
+```  
