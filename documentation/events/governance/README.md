@@ -432,3 +432,21 @@
 | `uuid`       | *string* | Unique ID that is assigned on event creation   |
 
 *Example* :  T.B.D  
+
+## event::PROPOSAL_INACTIVED
+*Name* : ProposalInactived
+
+*Type* : [Base](../README.md#Understanding_an_EVENT)
+
+*Structure* : 
+
+| Key          | Type     | Description                                    |
+| ------------ | -------- | ---------------------------------------------- |
+| `proposalId` | *string* | Proposal ID                                    |
+| `result`     | *string* | Proposal end result                            |
+| `name`       | *string* | Specific Event Name. Value: `ProposalInactived`    |
+| `version`    | *int*    | Event Version. Value: `1`                      |
+| `height`     | *int64*  | Height of the block containing the transaction |
+| `uuid`       | *string* | Unique ID that is assigned on event creation   |
+
+*Example* :  T.B.D  
