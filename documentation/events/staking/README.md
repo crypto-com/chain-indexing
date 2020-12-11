@@ -428,9 +428,28 @@
 | `msgName`             | *string* | Blockchain Message type . Value: `MsgBeginRedelegate`   |
 | `txHash`              | *string* | TxID of the blockchain transaction containing the event |
 | `msgIndex`            | *int*    | message index on the block                              |
-| `name`                | *string* | Specific Event Name. Value: `MsgBeginRedelegateFailed` |
+| `name`                | *string* | Specific Event Name. Value: `MsgBeginRedelegateFailed`  |
 | `version`             | *int*    | Event Version. Value: `1`                               |
 | `height`              | *int64*  | Height of the block containing the transaction          |
 | `uuid`                | *string* | Unique ID that is assigned on event creation            |
+
+*Example* : T.B.D  
+
+## event::BONDING_COMPLETED
+*Name* : BondingCompleted
+
+*Type* : [MsgBase](../README.md#MsgBase)
+
+*Structure* : 
+
+| Key         | Type     | Description                                    |
+| ----------- | -------- | ---------------------------------------------- |
+| `delegator` | *string* | Delegator address                              |
+| `validator` | *string* | Validator address                              |
+| `amount`    | *bigint* | CRO Amount in base unit                        |
+| `name`      | *string* | Specific Event Name. Value: `BondingCompleted` |
+| `version`   | *int*    | Event Version. Value: `1`                      |
+| `height`    | *int64*  | Height of the block containing the transaction |
+| `uuid`      | *string* | Unique ID that is assigned on event creation   |
 
 *Example* : T.B.D  
