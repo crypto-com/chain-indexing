@@ -187,7 +187,7 @@
 }
 ```  
 
-## event::MSG_EDIT_VALIDATOR_CREATED
+## event::MSG_EDIT_VALIDATOR_FAILED
 *Name* : MsgEditValidatorFailed
 
 *Type* : [MsgBase](../README.md#MsgBase)
