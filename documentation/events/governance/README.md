@@ -352,7 +352,7 @@
 
 | Key          | Type     | Description                                             |
 | ------------ | -------- | ------------------------------------------------------- |
-| `proposalId` | *string* | *(Optional)* Proposal ID                                |
+| `proposalId` | *string* | Proposal ID                                             |
 | `voter`      | *string* | Voter blockchain address                                |
 | `option`     | *string* | Voter option selected                                   |
 | `msgName`    | *string* | Blockchain Message type . Value: `MsgVote`              |
@@ -388,7 +388,7 @@
 
 | Key          | Type     | Description                                             |
 | ------------ | -------- | ------------------------------------------------------- |
-| `proposalId` | *string* | *(Optional)* Proposal ID                                |
+| `proposalId` | *string* | Proposal ID                                             |
 | `voter`      | *string* | Voter blockchain address                                |
 | `option`     | *string* | Voter option selected                                   |
 | `msgName`    | *string* | Blockchain Message type . Value: `MsgVote`              |
@@ -415,3 +415,20 @@
 }
 ```
 
+## event::PROPOSAL_ENDED
+*Name* : ProposalEnded
+
+*Type* : [Base](../README.md#Understanding_an_EVENT)
+
+*Structure* : 
+
+| Key          | Type     | Description                                    |
+| ------------ | -------- | ---------------------------------------------- |
+| `proposalId` | *string* | Proposal ID                                    |
+| `result`     | *string* | Proposal end result                            |
+| `name`       | *string* | Specific Event Name. Value: `ProposalEnded`    |
+| `version`    | *int*    | Event Version. Value: `1`                      |
+| `height`     | *int64*  | Height of the block containing the transaction |
+| `uuid`       | *string* | Unique ID that is assigned on event creation   |
+
+*Example* :  T.B.D  
