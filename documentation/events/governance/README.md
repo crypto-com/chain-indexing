@@ -219,3 +219,29 @@
 
 *Example* : T.B.D  
 
+## event::MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_CREATED
+*Name* : MsgSubmitCancelSoftwareUpgradeProposalCreated
+
+*Type* : [MsgBase](../README.md#MsgBase)
+
+*Structure* : 
+
+| Key                   | Type     | Description                                                                 |
+| --------------------- | -------- | --------------------------------------------------------------------------- |
+| `proposalId`          | *string* | *(Optional)* Proposal ID                                                    |
+| `proposerAddress`     | *string* | Proposer blockchain address                                                 |
+| `initialDeposit`      | *string* | Initially deposited CRO Amount in base unit                                 |
+| `content`             | *object* | Content wrapper                                                             |
+| `content.@type`       | *string* | Cosmos SDK type URL                                                         |
+| `content.title`       | *string* | Content title indicating the change                                         |
+| `content.description` | *string* | Action description                                                          |
+| `msgName`             | *string* | Blockchain Message type . Value: `MsgSubmitCancelSoftwareUpgradeProposal`   |
+| `txHash`              | *string* | TxID of the blockchain transaction containing the event                     |
+| `msgIndex`            | *int*    | message index on the block                                                  |
+| `name`                | *string* | Specific Event Name. Value: `MsgSubmitCancelSoftwareUpgradeProposalCreated` |
+| `version`             | *int*    | Event Version. Value: `1`                                                   |
+| `height`              | *int64*  | Height of the block containing the transaction                              |
+| `uuid`                | *string* | Unique ID that is assigned on event creation                                |
+
+*Example* : T.B.D  
+
