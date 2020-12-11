@@ -322,7 +322,7 @@
 | `msgName`    | *string* | Blockchain Message type . Value: `MsgDeposit`           |
 | `txHash`     | *string* | TxID of the blockchain transaction containing the event |
 | `msgIndex`   | *int*    | message index on the block                              |
-| `name`       | *string* | Specific Event Name. Value: `MsgDepositFailed`         |
+| `name`       | *string* | Specific Event Name. Value: `MsgDepositFailed`          |
 | `version`    | *int*    | Event Version. Value: `1`                               |
 | `height`     | *int64*  | Height of the block containing the transaction          |
 | `uuid`       | *string* | Unique ID that is assigned on event creation            |
@@ -339,6 +339,42 @@
     "version": 1,
     "msgIndex": 0,
     "depositor": "tcro1j7pej8kplem4wt50p4hfvndhuw5jprxxn5625q",
+    "proposalId": "1"
+}
+```
+
+## event::MSG_VOTE_CREATED
+*Name* : MsgVoteCreated
+
+*Type* : [MsgBase](../README.md#MsgBase)
+
+*Structure* : 
+
+| Key          | Type     | Description                                             |
+| ------------ | -------- | ------------------------------------------------------- |
+| `proposalId` | *string* | *(Optional)* Proposal ID                                |
+| `voter`      | *string* | Voter blockchain address                                |
+| `option`     | *string* | Voter option selected                                   |
+| `msgName`    | *string* | Blockchain Message type . Value: `MsgVote`              |
+| `txHash`     | *string* | TxID of the blockchain transaction containing the event |
+| `msgIndex`   | *int*    | message index on the block                              |
+| `name`       | *string* | Specific Event Name. Value: `MsgVoteCreated`            |
+| `version`    | *int*    | Event Version. Value: `1`                               |
+| `height`     | *int64*  | Height of the block containing the transaction          |
+| `uuid`       | *string* | Unique ID that is assigned on event creation            |
+
+*Example* :  
+```json
+{
+    "name": "MsgVoteCreated",
+    "uuid": "a160ce23-b8e2-4ccd-90a4-a6cf51d67687",
+    "voter": "tcro16yzcz3ty94awr7nr2txek9dp2klp2av9egkgxn",
+    "height": 673,
+    "option": "VOTE_OPTION_YES",
+    "txHash": "2FBACF3315B481316ADB1DF739E4151E4533ACAC60A08A402430988B6BA9D557",
+    "msgName": "MsgVote",
+    "version": 1,
+    "msgIndex": 0,
     "proposalId": "1"
 }
 ```
