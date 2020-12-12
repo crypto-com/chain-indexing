@@ -263,13 +263,23 @@ func (validatorsView *Validators) List(
 	).Offset(0).Limit(
 		uint64(pagination.OffsetParams().Offset()),
 	)
+	statusOrder := `CASE UPPER(status)
+WHEN 'BONDED' THEN 1
+WHEN 'UNBONDING' THEN 2
+WHEN 'JAILED' THEN 3
+WHEN 'UNBONDED' THEN 4
+ELSE 5 END`
 	if order.MaybePower == nil {
-		cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.OrderBy("id")
+		cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.OrderBy("joined_at_block_height")
 	} else if *order.MaybePower == view.ORDER_ASC {
-		cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.OrderBy("power")
+		cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.OrderBy(
+			statusOrder, "CAST(power AS BIGINT)", "joined_at_block_height",
+		)
 	} else {
 		// DESC order
-		cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.OrderBy("power DESC")
+		cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.OrderBy(
+			statusOrder, "CAST(power AS BIGINT) DESC", "joined_at_block_height",
+		)
 	}
 
 	var statusOrCondition sq.Or
