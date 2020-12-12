@@ -256,13 +256,8 @@ func (validatorsView *Validators) List(
 	if pagination.Type() != pagination_interface.PAGINATION_OFFSET {
 		panic(fmt.Sprintf("unsupported pagination type: %s", pagination.Type()))
 	}
-	cumulativePowerStmtBuilder := validatorsView.rdb.StmtBuilder.Select(
-		"power",
-	).From(
-		"view_validators",
-	).Offset(0).Limit(
-		uint64(pagination.OffsetParams().Offset()),
-	)
+
+	orderClauses := make([]string, 0)
 	statusOrder := `CASE UPPER(status)
 WHEN 'BONDED' THEN 1
 WHEN 'UNBONDING' THEN 2
@@ -270,17 +265,26 @@ WHEN 'JAILED' THEN 3
 WHEN 'UNBONDED' THEN 4
 ELSE 5 END`
 	if order.MaybePower == nil {
-		cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.OrderBy("joined_at_block_height")
+		orderClauses = append(orderClauses, "joined_at_block_height")
 	} else if *order.MaybePower == view.ORDER_ASC {
-		cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.OrderBy(
-			statusOrder, "CAST(power AS BIGINT)", "joined_at_block_height",
-		)
+		orderClauses = append(orderClauses, statusOrder)
+		orderClauses = append(orderClauses, "CAST(power AS BIGINT)")
+		orderClauses = append(orderClauses, "joined_at_block_height")
 	} else {
 		// DESC order
-		cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.OrderBy(
-			statusOrder, "CAST(power AS BIGINT) DESC", "joined_at_block_height",
-		)
+		orderClauses = append(orderClauses, statusOrder)
+		orderClauses = append(orderClauses, "CAST(power AS BIGINT) DESC")
+		orderClauses = append(orderClauses, "joined_at_block_height")
 	}
+
+	cumulativePowerStmtBuilder := validatorsView.rdb.StmtBuilder.Select(
+		"power",
+	).From(
+		"view_validators",
+	).Offset(0).Limit(
+		uint64(pagination.OffsetParams().Offset()),
+	)
+	cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.OrderBy(orderClauses...)
 
 	var statusOrCondition sq.Or
 	if filter.MaybeStatuses != nil {
@@ -350,14 +354,7 @@ ELSE 5 END`
 	).From(
 		"view_validators",
 	)
-	if order.MaybePower == nil {
-		stmtBuilder = stmtBuilder.OrderBy("id")
-	} else if *order.MaybePower == view.ORDER_ASC {
-		stmtBuilder = stmtBuilder.OrderBy("power")
-	} else {
-		// DESC order
-		stmtBuilder = stmtBuilder.OrderBy("power DESC")
-	}
+	stmtBuilder = stmtBuilder.OrderBy(orderClauses...)
 
 	if statusOrCondition != nil {
 		stmtBuilder = stmtBuilder.Where(statusOrCondition)
