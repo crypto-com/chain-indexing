@@ -1,4 +1,4 @@
-# Block Module Event List
+# Block Related Events
   - [event::BLOCK_CREATED](#event_block_created)
   - [event::RAW_BLOCK_CREATED](#event_raw_block_created)
   - [event::BLOCK_PROPOSER_REWARDED](#event_block_proposer_rewarded)
@@ -207,14 +207,14 @@
 
 *Structure* : 
 
-| Key         | Type     | Description                                    |
-| ----------- | -------- | ---------------------------------------------- |
-| `validator` | *string* | Validator address                              |
-| `amount`    | *string* | Reward amount in decimals                      |
-| `name`      | *string* | Specific Event Name. Value: `BlockCommissioned`    |
-| `version`   | *int*    | Event Version. Value: `1`                      |
-| `height`    | *int64*  | Height of the block containing the transaction |
-| `uuid`      | *string* | Unique ID that is assigned on event creation   |
+| Key         | Type     | Description                                     |
+| ----------- | -------- | ----------------------------------------------- |
+| `validator` | *string* | Validator address                               |
+| `amount`    | *string* | Reward amount in decimals                       |
+| `name`      | *string* | Specific Event Name. Value: `BlockCommissioned` |
+| `version`   | *int*    | Event Version. Value: `1`                       |
+| `height`    | *int64*  | Height of the block containing the transaction  |
+| `uuid`      | *string* | Unique ID that is assigned on event creation    |
 
 *Example* :  
 ```json
