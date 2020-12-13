@@ -58,10 +58,10 @@
     "msgIndex": 0,
     "description": {
         "details": "",
-        "moniker": "jerome-node",
+        "moniker": "jer-node",
         "website": "",
         "identity": "",
-        "securityContact": "Jerome@crypto.bzh"
+        "securityContact": "Jme@cry.bzh"
     },
     "commissionRates": {
         "rate": "0.100000000000000000",
@@ -121,10 +121,10 @@
     "msgIndex": 0,
     "description": {
         "details": "",
-        "moniker": "Fierydev-MCLB",
+        "moniker": "FasdfydeCLB",
         "website": "",
         "identity": "",
-        "securityContact": "fierydev@gmail.com"
+        "securityContact": "fdsryddev@gxmail.com"
     },
     "commissionRates": {
         "rate": "0.100000000000000000",
@@ -176,7 +176,7 @@
     "msgIndex": 0,
     "description": {
         "details": "[do-not-modify]",
-        "moniker": "1NP_SirJN",
+        "moniker": "1asP_asJN",
         "website": "[do-not-modify]",
         "identity": "[do-not-modify]",
         "securityContact": "[do-not-modify]"
@@ -228,7 +228,7 @@
         "details": "[do-not-modify]",
         "moniker": "[do-not-modify]",
         "website": "[do-not-modify]",
-        "identity": "D0257C0290F50419",
+        "identity": "random0290Frandom",
         "securityContact": "[do-not-modify]"
     },
     "commissionRate": "0.150000000000000000",

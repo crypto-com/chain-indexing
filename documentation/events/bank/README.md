@@ -1,6 +1,8 @@
 # Bank Module Event List
   - [event::MSG_SEND_CREATED](#eventmsg_send_created)
   - [event::MSG_SEND_FAILED](#eventmsg_send_failed)
+  - [event::MSG_MULTI_SEND_CREATED](#eventmsg_multi_send_created)
+  - [event::MSG_MULTI_SEND_FAILED](#eventmsg_multi_send_failed)
 
 
 ## event::MSG_SEND_CREATED
@@ -13,7 +15,7 @@
 | Key           | Type     | Description                                             |
 | ------------- | -------- | ------------------------------------------------------- |
 | `fromAddress` | *string* | The source or the origin address                        |
-| `toAddress`   | *string* | The destination or the recepient address                |
+| `toAddress`   | *string* | The destination or the recipient address                |
 | `amount`      | *object* | CRO amount in basic unit                                |
 | `msgName`     | *string* | Blockchain Message type . Value: `MsgSend`              |
 | `txHash`      | *string* | TxID of the blockchain transaction containing the event |
@@ -50,7 +52,7 @@
 | Key           | Type     | Description                                             |
 | ------------- | -------- | ------------------------------------------------------- |
 | `fromAddress` | *string* | The source or the origin address                        |
-| `toAddress`   | *string* | The destination or the recepient address                |
+| `toAddress`   | *string* | The destination or the recipient address                |
 | `amount`      | *object* | CRO amount in basic unit                                |
 | `msgName`     | *string* | Blockchain Message type . Value: `MsgSend`              |
 | `txHash`      | *string* | TxID of the blockchain transaction containing the event |
@@ -76,3 +78,54 @@
     "fromAddress": "tcro17wnekjfsllm8au3e8yuptxd24zll3m55655wl9"
 }
 ```
+
+## event::MSG_MULTI_SEND_CREATED
+*Name* : MsgMultiSendCreated
+
+*Type* : [MsgBase](../README.md#MsgBase)
+
+*Structure* : 
+
+| Key                 | Type            | Description                                             |
+| ------------------- | --------------- | ------------------------------------------------------- |
+| `inputs`            | *array(object)* | Inputs array for the multisig tx                        |
+| `inputs[].address`  | *string*        | Participating Input blockchain address                  |
+| `inputs[].amount`   | *bigint*        | Participating Input amount                              |
+| `outputs`           | *array(object)* | Outputs array for the multisig tx                       |
+| `outputs[].address` | *string*        | Participating Input blockchain address                  |
+| `outputs[].amount`  | *bigint*        | Participating Input amount                              |
+| `msgName`           | *string*        | Blockchain Message type. Value: `MsgMultiSend`         |
+| `txHash`            | *string*        | TxID of the blockchain transaction containing the event |
+| `msgIndex`          | *int*           | message index on the block                              |
+| `name`              | *string*        | Specific Event Name. Value: `MsgMultiSendCreated`       |
+| `version`           | *int*           | Event Version. Value: `1`                               |
+| `height`            | *int64*         | Height of the block containing the transaction          |
+| `uuid`              | *string*        | Unique ID that is assigned on event creation            |
+
+*Example* :  T.B.D  
+
+## event::MSG_MULTI_SEND_FAILED 
+*Name* : MsgMultiSendFailed
+
+*Type* : [MsgBase](../README.md#MsgBase)
+
+*Structure* : 
+
+| Key                 | Type            | Description                                             |
+| ------------------- | --------------- | ------------------------------------------------------- |
+| `inputs`            | *array(object)* | Inputs array for the multisig tx                        |
+| `inputs[].address`  | *string*        | Participating Input blockchain address                  |
+| `inputs[].amount`   | *bigint*        | Participating Input amount                              |
+| `outputs`           | *array(object)* | Outputs array for the multisig tx                       |
+| `outputs[].address` | *string*        | Participating Input blockchain address                  |
+| `outputs[].amount`  | *bigint*        | Participating Input amount                              |
+| `msgName`           | *string*        | Blockchain Message type. Value: `MsgMultiSend`         |
+| `txHash`            | *string*        | TxID of the blockchain transaction containing the event |
+| `msgIndex`          | *int*           | message index on the block                              |
+| `name`              | *string*        | Specific Event Name. Value: `MsgMultiSendFailed`        |
+| `version`           | *int*           | Event Version. Value: `1`                               |
+| `height`            | *int64*         | Height of the block containing the transaction          |
+| `uuid`              | *string*        | Unique ID that is assigned on event creation            |
+
+
+*Example* : T.B.D  
