@@ -58,3 +58,4 @@ In addition to the above there are different methods available which can be desc
 - [Governance](./governance)
 - Validator
 - Slashing
+- [Block](./block)
