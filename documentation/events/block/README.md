@@ -143,3 +143,31 @@
     }
 }
 ```  
+
+## event::BLOCK_PROPOSER_REWARDED
+*Name* : BlockProposerRewarded
+
+*Type* : [Base](../README.md#understanding_an_event)
+
+*Structure* : 
+
+| Key         | Type     | Description                                         |
+| ----------- | -------- | --------------------------------------------------- |
+| `validator` | *string* | Validator address                                   |
+| `amount`    | *string* | Reward amount in decimals                           |
+| `name`      | *string* | Specific Event Name. Value: `BlockProposerRewarded` |
+| `version`   | *int*    | Event Version. Value: `1`                           |
+| `height`    | *int64*  | Height of the block containing the transaction      |
+| `uuid`      | *string* | Unique ID that is assigned on event creation        |
+
+*Example* :  
+```json
+{
+    "name": "BlockProposerRewarded",
+    "uuid": "88dfc53a-3c2e-4d29-a1b6-c910f2a9bc5f",
+    "amount": "833034152.277599639227521390",
+    "height": 69090,
+    "version": 1,
+    "validator": "tcrocncl18ylchgmxyphw3ctsl75n53ujequkmmag2n6x3f"
+}
+```  
