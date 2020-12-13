@@ -109,8 +109,8 @@
 | Key         | Type     | Description                                      |
 | ----------- | -------- | ------------------------------------------------ |
 | `sender`    | *string* | Sender account blockchain address                |
-| `recipient` | *bigint* | Recipient account blockchain address             |
-| `amount`    | *string* | CRO Amount in base unit                          |
+| `recipient` | *string* | Recipient account blockchain address             |
+| `amount`    | *bigint* | CRO Amount in base unit                          |
 | `name`      | *string* | Specific Event Name. Value: `AccountTransferred` |
 | `version`   | *int*    | Event Version. Value: `1`                        |
 | `height`    | *int64*  | Height of the block containing the transaction   |
@@ -126,5 +126,37 @@
     "sender": "tcro1m3h30wlvsf8llruxtpukdvsy0km2kum87lx9mq",
     "version": 1,
     "recipient": "tcro17xpfvakm2amg962yls6f84z3kell8c5lxhzaha"
+}
+```  
+
+## event::MINTED
+*Name* : Minted
+
+*Type* : [Base](../README.md#understanding_an_event)
+
+*Structure* : 
+
+| Key                | Type     | Description                                      |
+| ------------------ | -------- | ------------------------------------------------ |
+| `bondedRatio`      | *string* | Bonded amount ratio                              |
+| `inflation`        | *string* | Inflation rate                                   |
+| `annualProvisions` | *string* | Annual provision amount in decimals.             |
+| `amount`           | *bigint* | CRO Amount in base unit                          |
+| `name`             | *string* | Specific Event Name. Value: `AccountTransferred` |
+| `version`          | *int*    | Event Version. Value: `1`                        |
+| `height`           | *int64*  | Height of the block containing the transaction   |
+| `uuid`             | *string* | Unique ID that is assigned on event creation     |
+
+*Example* :  
+```json
+{
+    "name": "Minted",
+    "uuid": "ee8a2343-d1ae-4c41-b193-1e2c571b1263",
+    "amount": "16660835015",
+    "height": 69147,
+    "version": 1,
+    "inflation": "0.013142418719954419",
+    "bondedRatio": "0.000138899065098120",
+    "annualProvisions": "105155193416362459.373093290420476865"
 }
 ```  
