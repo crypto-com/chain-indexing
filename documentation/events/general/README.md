@@ -218,3 +218,31 @@
     "consensusNodeAddress": "tcrocnclcons1u4jfqxk5femyyt0s5s55xuywv8ehnu34gcuaad"
 }
 ```  
+
+## event::VALIDATOR_JAILED
+*Name* : ValidatorJailed
+
+*Type* : [Base](../README.md#understanding_an_event)
+
+*Structure* : 
+
+| Key                    | Type     | Description                                    |
+| ---------------------- | -------- | ---------------------------------------------- |
+| `consensusNodeAddress` | *string* | Consensus Node Blockchain address              |
+| `reason`               | *string* | User readable slashing reason                  |
+| `name`                 | *string* | Specific Event Name. Value: `ValidatorJailed` |
+| `version`              | *int*    | Event Version. Value: `1`                      |
+| `height`               | *int64*  | Height of the block containing the transaction |
+| `uuid`                 | *string* | Unique ID that is assigned on event creation   |
+
+*Example* :  
+```json
+{
+    "name": "ValidatorJailed",
+    "uuid": "b744783c-c39c-4254-8b07-cab72eb2a988",
+    "height": 79763,
+    "reason": "missing_signature",
+    "version": 1,
+    "consensusNodeAddress": "tcrocnclcons19x54ug0yfepj8q6m0rxfuhd8nlajy5mwm0tkm3"
+}
+```  
