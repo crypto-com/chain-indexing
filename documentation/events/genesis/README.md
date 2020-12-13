@@ -204,7 +204,7 @@ More about genesis [here](https://chain.crypto.com/docs/chain-details/genesis_fi
                                     },
                                     "description": {
                                         "details": "",
-                                        "moniker": "jotaro",
+                                        "moniker": "jotasdfsdro",
                                         "website": "",
                                         "identity": "",
                                         "security_contact": ""
@@ -234,7 +234,7 @@ More about genesis [here](https://chain.crypto.com/docs/chain-details/genesis_fi
                                         }
                                     },
                                     "public_key": {
-                                        "key": "AqdoWLPCuN3Jf1FSrsvadkqaUcfK+/0Q2Eo0wCZA7aVC",
+                                        "key": "AqdoWLPCuN3Jf1FSrsvadkq0Q2Eo0wCZA7aVC",
                                         "@type": "/cosmos.crypto.secp256k1.PubKey"
                                     }
                                 }
