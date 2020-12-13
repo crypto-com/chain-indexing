@@ -199,3 +199,31 @@
     "validator": "tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6"
 }
 ```  
+
+## event::BLOCK_COMMISSIONED
+*Name* : BlockCommissioned
+
+*Type* : [Base](../README.md#understanding_an_event)
+
+*Structure* : 
+
+| Key         | Type     | Description                                    |
+| ----------- | -------- | ---------------------------------------------- |
+| `validator` | *string* | Validator address                              |
+| `amount`    | *string* | Reward amount in decimals                      |
+| `name`      | *string* | Specific Event Name. Value: `BlockCommissioned`    |
+| `version`   | *int*    | Event Version. Value: `1`                      |
+| `height`    | *int64*  | Height of the block containing the transaction |
+| `uuid`      | *string* | Unique ID that is assigned on event creation   |
+
+*Example* :  
+```json
+{
+    "name": "BlockCommissioned",
+    "uuid": "c51c82db-f43b-40c8-b2f8-dd333f2880fd",
+    "amount": "83303415.227759963922752139",
+    "height": 69090,
+    "version": 1,
+    "validator": "tcrocncl18ylchgmxyphw3ctsl75n53ujequkmmag2n6x3f"
+}
+```  
