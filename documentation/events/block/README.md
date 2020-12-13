@@ -171,3 +171,31 @@
     "validator": "tcrocncl18ylchgmxyphw3ctsl75n53ujequkmmag2n6x3f"
 }
 ```  
+
+## event::BLOCK_REWARDED
+*Name* : BlockRewarded
+
+*Type* : [Base](../README.md#understanding_an_event)
+
+*Structure* : 
+
+| Key         | Type     | Description                                    |
+| ----------- | -------- | ---------------------------------------------- |
+| `validator` | *string* | Validator address                              |
+| `amount`    | *string* | Reward amount in decimals                      |
+| `name`      | *string* | Specific Event Name. Value: `BlockRewarded`    |
+| `version`   | *int*    | Event Version. Value: `1`                      |
+| `height`    | *int64*  | Height of the block containing the transaction |
+| `uuid`      | *string* | Unique ID that is assigned on event creation   |
+
+*Example* :  
+```json
+{
+    "name": "BlockRewarded",
+    "uuid": "d20be8fc-a2df-430c-9a33-9527b1fa7964",
+    "amount": "1521432571.172691693837460632",
+    "height": 69090,
+    "version": 1,
+    "validator": "tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6"
+}
+```  
