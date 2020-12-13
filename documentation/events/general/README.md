@@ -188,3 +188,33 @@
     "tendermintPubkey": "i0NL59+ZEKyqSrqvXBwD7UhVQ3y68kxxTZerEe7APAg="
 }
 ```  
+
+## event::VALIDATOR_SLASHED
+*Name* : ValidatorSlashed
+
+*Type* : [Base](../README.md#understanding_an_event)
+
+*Structure* : 
+
+| Key                    | Type     | Description                                    |
+| ---------------------- | -------- | ---------------------------------------------- |
+| `consensusNodeAddress` | *string* | Consensus Node Blockchain address              |
+| `slashedPower`         | *string* | Power of the network slashed                   |
+| `reason`               | *string* | User readable slashing reason                  |
+| `name`                 | *string* | Specific Event Name. Value: `ValidatorSlashed` |
+| `version`              | *int*    | Event Version. Value: `1`                      |
+| `height`               | *int64*  | Height of the block containing the transaction |
+| `uuid`                 | *string* | Unique ID that is assigned on event creation   |
+
+*Example* :  
+```json
+{
+    "name": "ValidatorSlashed",
+    "uuid": "332a1f51-2932-4932-a50a-c0b1192efb5e",
+    "height": 70058,
+    "reason": "missing_signature",
+    "version": 1,
+    "slashedPower": "99",
+    "consensusNodeAddress": "tcrocnclcons1u4jfqxk5femyyt0s5s55xuywv8ehnu34gcuaad"
+}
+```  
