@@ -136,16 +136,16 @@
 
 *Structure* : 
 
-| Key                | Type     | Description                                      |
-| ------------------ | -------- | ------------------------------------------------ |
-| `bondedRatio`      | *string* | Bonded amount ratio                              |
-| `inflation`        | *string* | Inflation rate                                   |
-| `annualProvisions` | *string* | Annual provision amount in decimals.             |
-| `amount`           | *bigint* | CRO Amount in base unit                          |
-| `name`             | *string* | Specific Event Name. Value: `AccountTransferred` |
-| `version`          | *int*    | Event Version. Value: `1`                        |
-| `height`           | *int64*  | Height of the block containing the transaction   |
-| `uuid`             | *string* | Unique ID that is assigned on event creation     |
+| Key                | Type     | Description                                    |
+| ------------------ | -------- | ---------------------------------------------- |
+| `bondedRatio`      | *string* | Bonded amount ratio                            |
+| `inflation`        | *string* | Inflation rate                                 |
+| `annualProvisions` | *string* | Annual provision amount in decimals.           |
+| `amount`           | *bigint* | CRO Amount in base unit                        |
+| `name`             | *string* | Specific Event Name. Value: `Minted`           |
+| `version`          | *int*    | Event Version. Value: `1`                      |
+| `height`           | *int64*  | Height of the block containing the transaction |
+| `uuid`             | *string* | Unique ID that is assigned on event creation   |
 
 *Example* :  
 ```json
@@ -158,5 +158,33 @@
     "inflation": "0.013142418719954419",
     "bondedRatio": "0.000138899065098120",
     "annualProvisions": "105155193416362459.373093290420476865"
+}
+```  
+
+## event::POWER_CHANGED
+*Name* : PowerChanged
+
+*Type* : [Base](../README.md#understanding_an_event)
+
+*Structure* : 
+
+| Key                | Type     | Description                                    |
+| ------------------ | -------- | ---------------------------------------------- |
+| `tendermintPubkey` | *string* | Tendermint publick key                         |
+| `power`            | *string* | Network power                                  |
+| `name`             | *string* | Specific Event Name. Value: `PowerChanged`     |
+| `version`          | *int*    | Event Version. Value: `1`                      |
+| `height`           | *int64*  | Height of the block containing the transaction |
+| `uuid`             | *string* | Unique ID that is assigned on event creation   |
+
+*Example* :  
+```json
+{
+    "name": "PowerChanged",
+    "uuid": "05038568-411a-4a8a-bea0-c7dcdb1998f9",
+    "power": "106987984",
+    "height": 69166,
+    "version": 1,
+    "tendermintPubkey": "i0NL59+ZEKyqSrqvXBwD7UhVQ3y68kxxTZerEe7APAg="
 }
 ```  
