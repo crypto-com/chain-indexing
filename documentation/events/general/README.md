@@ -98,3 +98,33 @@
     "timeoutHeight": 0
 }
 ```  
+
+## event::ACCOUNT_TRANSFERRED
+*Name* : AccountTransferred
+
+*Type* : [Base](../README.md#understanding_an_event)
+
+*Structure* : 
+
+| Key         | Type     | Description                                      |
+| ----------- | -------- | ------------------------------------------------ |
+| `sender`    | *string* | Sender account blockchain address                |
+| `recipient` | *bigint* | Recipient account blockchain address             |
+| `amount`    | *string* | CRO Amount in base unit                          |
+| `name`      | *string* | Specific Event Name. Value: `AccountTransferred` |
+| `version`   | *int*    | Event Version. Value: `1`                        |
+| `height`    | *int64*  | Height of the block containing the transaction   |
+| `uuid`      | *string* | Unique ID that is assigned on event creation     |
+
+*Example* :  
+```json
+{
+    "name": "AccountTransferred",
+    "uuid": "fe84916e-d257-4ebf-8e0c-9b9a15fd548d",
+    "amount": "16660835015",
+    "height": 69147,
+    "sender": "tcro1m3h30wlvsf8llruxtpukdvsy0km2kum87lx9mq",
+    "version": 1,
+    "recipient": "tcro17xpfvakm2amg962yls6f84z3kell8c5lxhzaha"
+}
+```  
