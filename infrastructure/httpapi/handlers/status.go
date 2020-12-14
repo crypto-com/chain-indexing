@@ -3,6 +3,7 @@ package handlers
 import (
 	block_view "github.com/crypto-com/chain-indexing/appinterface/projection/block/view"
 	transaction_view "github.com/crypto-com/chain-indexing/appinterface/projection/transasaction/view"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/validator/constants"
 	validator_view "github.com/crypto-com/chain-indexing/appinterface/projection/validator/view"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/validatorstats"
 	validatorstats_view "github.com/crypto-com/chain-indexing/appinterface/projection/validatorstats/view"
@@ -63,28 +64,41 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	validatorCount, err := handler.validatorsView.Count()
+	validatorCount, err := handler.validatorsView.Count(validator_view.CountFilter{
+		MaybeStatus: []string{},
+	})
 	if err != nil {
 		handler.logger.Errorf("error fetching validators count: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
 	}
 
+	activeValidatorCount, err := handler.validatorsView.Count(validator_view.CountFilter{
+		MaybeStatus: []string{constants.BONDED, constants.UNBONDING},
+	})
+	if err != nil {
+		handler.logger.Errorf("error fetching active validators count: %v", err)
+		httpapi.InternalServerError(ctx)
+		return
+	}
+
 	status := Status{
-		BlockCount:       blockCount,
-		TransactionCount: transactionCount,
-		TotalDelegated:   totalDelegated,
-		TotalReward:      totalReward,
-		ValiatorCount:    validatorCount,
+		BlockCount:           blockCount,
+		TransactionCount:     transactionCount,
+		TotalDelegated:       totalDelegated,
+		TotalReward:          totalReward,
+		ValidatorCount:       validatorCount,
+		ActiveValidatorCount: activeValidatorCount,
 	}
 
 	httpapi.Success(ctx, status)
 }
 
 type Status struct {
-	BlockCount       int64  `json:"blockCount"`
-	TransactionCount int64  `json:"transactionCount"`
-	TotalDelegated   string `json:"totalDelegated"`
-	TotalReward      string `json:"totalReward"`
-	ValiatorCount    int64  `json:"validatorCount"`
+	BlockCount           int64  `json:"blockCount"`
+	TransactionCount     int64  `json:"transactionCount"`
+	TotalDelegated       string `json:"totalDelegated"`
+	TotalReward          string `json:"totalReward"`
+	ValidatorCount       int64  `json:"validatorCount"`
+	ActiveValidatorCount int64  `json:"activeValidatorCount"`
 }
