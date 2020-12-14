@@ -15,6 +15,7 @@ type RouteRegistry struct {
 	transactionHandler *handlers.Transactions
 	blockEventHandler  *handlers.BlockEvents
 	validatorsHandler  *handlers.Validators
+	accountsHandler    *handlers.Accounts
 }
 
 func NewRoutesRegistry(
@@ -24,6 +25,7 @@ func NewRoutesRegistry(
 	transactionHandler *handlers.Transactions,
 	blockEventHandler *handlers.BlockEvents,
 	validatorsHandler *handlers.Validators,
+	accountsHandler *handlers.Accounts,
 ) *RouteRegistry {
 	return &RouteRegistry{
 		searchHandler,
@@ -32,6 +34,7 @@ func NewRoutesRegistry(
 		transactionHandler,
 		blockEventHandler,
 		validatorsHandler,
+		accountsHandler,
 	}
 }
 
@@ -58,5 +61,7 @@ func (registry *RouteRegistry) Register(server *httpapi.Server, routePrefix stri
 	server.GET(fmt.Sprintf("%s/api/v1/validators/active", routePrefix), registry.validatorsHandler.ListActive)
 	server.GET(fmt.Sprintf("%s/api/v1/validators/{address}", routePrefix), registry.validatorsHandler.FindBy)
 	server.GET(fmt.Sprintf("%s/api/v1/validators/{address}/activities", routePrefix), registry.validatorsHandler.ListActivities)
+	server.GET(fmt.Sprintf("%s/api/v1/accounts", routePrefix), registry.accountsHandler.List)
+	server.GET(fmt.Sprintf("%s/api/v1/accounts/{address}", routePrefix), registry.accountsHandler.FindBy)
 
 }

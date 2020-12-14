@@ -62,6 +62,8 @@ func (server *HTTPAPIServer) Run() error {
 		server.cosmosAppClient,
 		server.rdbConn.ToHandle(),
 	)
+	accountsHandler := handlers.NewAccounts(server.logger, server.rdbConn.ToHandle())
+
 	routeRegistry := routes.NewRoutesRegistry(
 		searchHandler,
 		blocksHandler,
@@ -69,6 +71,7 @@ func (server *HTTPAPIServer) Run() error {
 		transactionsHandler,
 		blockEventsHandler,
 		validatorsHandler,
+		accountsHandler,
 	)
 	routeRegistry.Register(httpServer, server.routePrefix)
 
