@@ -16,10 +16,10 @@ import (
 type StatusHandler struct {
 	logger applogger.Logger
 
-	blocksView         *block_view.Blocks
-	transactionsView   *transaction_view.BlockTransactions
-	validatorsView     *validator_view.Validators
-	validatorStatsView *validatorstats_view.ValidatorStats
+	blocksView            *block_view.Blocks
+	transactionsTotalView *transaction_view.TransactionsTotal
+	validatorsView        *validator_view.Validators
+	validatorStatsView    *validatorstats_view.ValidatorStats
 }
 
 func NewStatusHandler(logger applogger.Logger, rdbHandle *rdb.Handle) *StatusHandler {
@@ -29,7 +29,7 @@ func NewStatusHandler(logger applogger.Logger, rdbHandle *rdb.Handle) *StatusHan
 		}),
 
 		block_view.NewBlocks(rdbHandle),
-		transaction_view.NewTransactions(rdbHandle),
+		transaction_view.NewTransactionsTotal(rdbHandle),
 		validator_view.NewValidators(rdbHandle),
 		validatorstats_view.NewValidatorStats(rdbHandle),
 	}
@@ -43,7 +43,7 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	transactionCount, err := handler.transactionsView.Count()
+	transactionCount, err := handler.transactionsTotalView.FindBy("-")
 	if err != nil {
 		handler.logger.Errorf("error fetching transaction count: %v", err)
 		httpapi.InternalServerError(ctx)
