@@ -2,8 +2,10 @@ package cosmosapp
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
@@ -32,9 +34,101 @@ func NewHTTPClient(rpcUrl string) *HTTPClient {
 	}
 }
 
+func (client *HTTPClient) Account(accountAddress string) (*cosmosapp_interface.Account, error) {
+	rawRespBody, err := client.request(
+		fmt.Sprintf("%s/%s", client.url("auth", "accounts"), accountAddress), "",
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rawRespBody.Close()
+
+	outputbytes, readerr := ioutil.ReadAll(rawRespBody)
+	if readerr != nil {
+		return nil, fmt.Errorf("GetAccountInfo error ioutil.ReadAll %v", readerr)
+	}
+
+	var myjson map[string]interface{}
+
+	if err := json.Unmarshal(outputbytes, &myjson); err != nil {
+		return nil, fmt.Errorf("GetAccountInfo error json.Unmarshal %v", err)
+	}
+
+	var thisAccountType string
+	var thisAddress string
+	var thisPubkeyContainer map[string]interface{}
+	var thisPubkey string
+	var thisAccountNumber string
+	var thisSequenceNumber string
+
+	thisAccount := myjson["account"].(map[string]interface{})
+	thisAccountTypeMeta := thisAccount["@type"].(string)
+	thisAccountTypeName, thisAccountTypeNameOk := thisAccount["name"].(string)
+	if !thisAccountTypeNameOk {
+		thisAccountTypeName = ""
+	}
+	thisAccountType = fmt.Sprintf("%s %s", thisAccountTypeMeta, thisAccountTypeName)
+	thisBaseAccount, thisBaseAccountOk := thisAccount["base_account"].(map[string]interface{})
+
+	if !thisBaseAccountOk {
+		// normal account
+		thisAddress = thisAccount["address"].(string)
+		thisPubkeyContainer = thisAccount["pub_key"].(map[string]interface{})
+		thisPubkey = thisPubkeyContainer["key"].(string)
+		thisAccountNumber = thisAccount["account_number"].(string)
+		thisSequenceNumber = thisAccount["sequence"].(string)
+
+	} else {
+		// module account
+		thisAddress = thisBaseAccount["address"].(string)
+		thisAccountNumber = thisBaseAccount["account_number"].(string)
+		thisSequenceNumber = thisBaseAccount["sequence"].(string)
+
+	}
+
+	var accountResp AccountResp
+	accountResp.Account.AccountType = thisAccountType
+	accountResp.Account.AccountAddress = thisAddress
+	accountResp.Account.Pubkey = thisPubkey
+	accountResp.Account.AccountNumber = thisAccountNumber
+	accountResp.Account.SequenceNumber = thisSequenceNumber
+
+	return &accountResp.Account, nil
+}
+
+func (client *HTTPClient) Balance(targetAddress string, targetDenom string) (*cosmosapp_interface.AccountBalance, error) {
+	rawRespBody, err := client.request(
+		fmt.Sprintf("%s/%s/%s", client.url("bank", "balances"), targetAddress, targetDenom), "",
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rawRespBody.Close()
+
+	outputbytes, readerr := ioutil.ReadAll(rawRespBody)
+	if readerr != nil {
+		return nil, fmt.Errorf("GetAccountInfo error ioutil.ReadAll %v", readerr)
+	}
+	var thisJson map[string]interface{}
+
+	if err := json.Unmarshal(outputbytes, &thisJson); err != nil {
+		return nil, err
+	}
+
+	thisBalance := thisJson["balance"].(map[string]interface{})
+	thisAmount := thisBalance["amount"].(string)
+	thisDenom := thisBalance["denom"].(string)
+
+	var accountBalanceResp AccountBalanceResp
+	accountBalanceResp.AccountBalace.AccountAmount = thisAmount
+	accountBalanceResp.AccountBalace.AccountDenom = thisDenom
+
+	return &accountBalanceResp.AccountBalace, nil
+
+}
 func (client *HTTPClient) Validator(validatorAddress string) (*cosmosapp_interface.Validator, error) {
 	rawRespBody, err := client.request(
-		fmt.Sprintf("%s/%s", client.url("staking", "validators"), validatorAddress),
+		fmt.Sprintf("%s/%s", client.url("staking", "validators"), validatorAddress), "",
 	)
 	if err != nil {
 		return nil, err
@@ -125,4 +219,12 @@ type ValidatorResp struct {
 type DelegationResp struct {
 	DelegationResponses []cosmosapp_interface.DelegationResponse `json:"delegation_responses"`
 	Pagination          cosmosapp_interface.Pagination           `json:"pagination"`
+}
+
+type AccountResp struct {
+	Account cosmosapp_interface.Account
+}
+
+type AccountBalanceResp struct {
+	AccountBalace cosmosapp_interface.AccountBalance
 }
