@@ -57,4 +57,4 @@ In addition to the above there are different methods available which can be desc
 - Genesis
 - [Governance](./governance)
 - Validator
-- Slashing
+- [Slashing](./slashing)
