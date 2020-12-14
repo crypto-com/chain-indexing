@@ -65,7 +65,7 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 	}
 
 	validatorCount, err := handler.validatorsView.Count(validator_view.CountFilter{
-		MaybeStatus: []string{},
+		MaybeStatus: nil,
 	})
 	if err != nil {
 		handler.logger.Errorf("error fetching validators count: %v", err)
