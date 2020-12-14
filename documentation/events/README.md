@@ -51,12 +51,12 @@ In addition to the above there are different methods available which can be desc
 
 
 ## Categories
+- [General](./general)
 - [Bank](./bank)
-- Staking
+- [Staking](./staking)
 - [Distribution](./distribution)
 - Genesis
 - [Governance](./governance)
 - Validator
-- Slashing
 - [Block](./block)
-- [General](./general)
+- [Slashing](./slashing)
