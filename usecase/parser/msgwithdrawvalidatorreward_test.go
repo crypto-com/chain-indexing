@@ -65,6 +65,53 @@ var _ = Describe("ParseMsgCommands", func() {
 			}))
 		})
 
+		It("should parse failed MsgWithdrawValidatorCommission in the transaction", func() {
+			txDecoder := parser.NewTxDecoder("basetrcro")
+			block, _ := mustParseBlockResp(
+				usecase_parser_test.TX_FAILED_MSG_WITHDRAW_VALIDATOR_COMMISSION_BLOCK_RESP,
+			)
+			blockResults := mustParseBlockResultsResp(
+				usecase_parser_test.TX_FAILED_MSG_WITHDRAW_VALIDATOR_COMMISSION_BLOCK_RESULTS_RESP,
+			)
+
+			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
+				txDecoder,
+				block,
+				blockResults,
+			)
+			Expect(err).To(BeNil())
+			Expect(cmds).To(HaveLen(2))
+			Expect(cmds).To(Equal([]command.Command{
+				command_usecase.NewCreateMsgWithdrawDelegatorReward(
+					event.MsgCommonParams{
+						BlockHeight: int64(804969),
+						TxHash:      "CC5EE77B6CBCEA4DF26F5AC8FA06BA893D018602F03A09E9E02B8417B12C46ED",
+						TxSuccess:   false,
+						MsgIndex:    0,
+					},
+					model.MsgWithdrawDelegatorRewardParams{
+						DelegatorAddress: "tcro1pm27djcs5djxjsxw3unrkv3m3jtxdexk73hqel",
+						ValidatorAddress: "tcrocncl1pm27djcs5djxjsxw3unrkv3m3jtxdexktw5epu",
+						RecipientAddress: "tcro1pm27djcs5djxjsxw3unrkv3m3jtxdexk73hqel",
+						Amount:           coin.Zero(),
+					},
+				),
+				command_usecase.NewCreateMsgWithdrawValidatorCommission(
+					event.MsgCommonParams{
+						BlockHeight: int64(804969),
+						TxHash:      "CC5EE77B6CBCEA4DF26F5AC8FA06BA893D018602F03A09E9E02B8417B12C46ED",
+						TxSuccess:   false,
+						MsgIndex:    1,
+					},
+					model.MsgWithdrawValidatorCommissionParams{
+						ValidatorAddress: "tcrocncl1pm27djcs5djxjsxw3unrkv3m3jtxdexktw5epu",
+						RecipientAddress: "",
+						Amount:           coin.Zero(),
+					},
+				),
+			}))
+		})
+
 		It("should parse Msg commands when there is no reward withdraw in the MsgWithdrawDelegatorReward", func() {
 			txDecoder := parser.NewTxDecoder("basetrcro")
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(

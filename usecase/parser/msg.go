@@ -208,7 +208,7 @@ func parseMsgWithdrawValidatorCommission(
 
 			model.MsgWithdrawValidatorCommissionParams{
 				ValidatorAddress: msg["validator_address"].(string),
-				RecipientAddress: msg["delegator_address"].(string),
+				RecipientAddress: "",
 				Amount:           coin.Zero(),
 			},
 		)}
