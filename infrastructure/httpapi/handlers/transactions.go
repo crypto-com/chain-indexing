@@ -5,7 +5,7 @@ import (
 
 	"github.com/valyala/fasthttp"
 
-	transaction_view "github.com/crypto-com/chain-indexing/appinterface/projection/transasaction/view"
+	transaction_view "github.com/crypto-com/chain-indexing/appinterface/projection/transaction/view"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"

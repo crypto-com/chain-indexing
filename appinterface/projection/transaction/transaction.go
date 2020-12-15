@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	transaction_view "github.com/crypto-com/chain-indexing/appinterface/projection/transasaction/view"
+	transaction_view "github.com/crypto-com/chain-indexing/appinterface/projection/transaction/view"
 
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 
