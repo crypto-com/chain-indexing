@@ -39,6 +39,8 @@ func (_ *BlockEvent) GetEventsToListen() []string {
 		event_usecase.MINTED,
 		event_usecase.PROPOSAL_ENDED,
 		event_usecase.PROPOSAL_INACTIVED,
+		event_usecase.VALIDATOR_SLASHED,
+		event_usecase.VALIDATOR_JAILED,
 	}
 }
 
