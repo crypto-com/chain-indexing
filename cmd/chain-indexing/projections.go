@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/crypto-com/chain-indexing/appinterface/projection/block"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/blockevent"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/transasaction"
+	transasaction "github.com/crypto-com/chain-indexing/appinterface/projection/transaction"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/validator"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/validatorstats"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"

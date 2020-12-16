@@ -2,7 +2,7 @@ package handlers
 
 import (
 	block_view "github.com/crypto-com/chain-indexing/appinterface/projection/block/view"
-	transaction_view "github.com/crypto-com/chain-indexing/appinterface/projection/transasaction/view"
+	transaction_view "github.com/crypto-com/chain-indexing/appinterface/projection/transaction/view"
 	validator_view "github.com/crypto-com/chain-indexing/appinterface/projection/validator/view"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/validatorstats"
 	validatorstats_view "github.com/crypto-com/chain-indexing/appinterface/projection/validatorstats/view"

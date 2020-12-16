@@ -8,7 +8,7 @@ import (
 	"github.com/valyala/fasthttp"
 
 	block_view "github.com/crypto-com/chain-indexing/appinterface/projection/block/view"
-	transaction_view "github.com/crypto-com/chain-indexing/appinterface/projection/transasaction/view"
+	transaction_view "github.com/crypto-com/chain-indexing/appinterface/projection/transaction/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
