@@ -1,4 +1,4 @@
-package transasaction_test
+package transaction_test
 
 import (
 	"github.com/crypto-com/chain-indexing/appinterface/projection/block"
