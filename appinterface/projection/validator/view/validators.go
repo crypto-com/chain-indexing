@@ -631,12 +631,36 @@ func (validatorsView *Validators) FindBy(identity ValidatorIdentity) (*Validator
 	return &validator, nil
 }
 
-func (validatorsView *Validators) Count() (int64, error) {
+func (validatorsView *Validators) Count(filter CountFilter) (int64, error) {
 	var count int64
-	if err := validatorsView.rdb.QueryRow("SELECT COUNT(*) FROM view_validators").Scan(&count); err != nil {
+
+	stmt := validatorsView.rdb.StmtBuilder.Select(
+		"COUNT(*)",
+	).From(
+		"view_validators",
+	)
+
+	if filter.MaybeStatus != nil {
+		orClause := make(sq.Or, 0, len(filter.MaybeStatus))
+		for _, status := range filter.MaybeStatus {
+			orClause = append(orClause, sq.Eq{"status": status})
+		}
+		stmt = stmt.Where(orClause)
+	}
+
+	sql, sqlArgs, err := stmt.ToSql()
+	if err != nil {
+		return int64(0), fmt.Errorf("error building validator count sql: %v: %w", err, rdb.ErrPrepare)
+	}
+
+	if err := validatorsView.rdb.QueryRow(sql, sqlArgs...).Scan(&count); err != nil {
 		return int64(0), fmt.Errorf("error getting validators count: %v", err)
 	}
 	return count, nil
+}
+
+type CountFilter struct {
+	MaybeStatus []string
 }
 
 type ValidatorIdentity struct {
