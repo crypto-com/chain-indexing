@@ -18,7 +18,7 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgSubmitCommunityPoolSpendProposal", func() {
 		It("should parse Msg commands when there is gov.MsgSubmitCommunityPoolSpendProposal in the transaction", func() {
-			txDecoder := parser.NewTxDecoder("basetrcro")
+			txDecoder := parser.NewTxDecoder("basetcro")
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_BLOCK_RESULTS_RESP,
