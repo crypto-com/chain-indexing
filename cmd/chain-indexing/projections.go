@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/crypto-com/chain-indexing/appinterface/projection/account_message"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/block"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/blockevent"
 	transasaction "github.com/crypto-com/chain-indexing/appinterface/projection/transaction"
@@ -24,6 +25,7 @@ func initProjections(
 			logger, rdbConn, consNodeAddressPrefix,
 		),
 		validatorstats.NewValidatorStats(logger, rdbConn),
+		account_message.NewAccountMessage(logger, rdbConn),
 
 		// register more projections here
 	}
