@@ -9,7 +9,7 @@ import (
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 
-const INFO_DEFAULT_POLLING_INTERVAL = 1 * time.Second
+const INFO_DEFAULT_POLLING_INTERVAL = 5 * time.Second
 
 type InfoManager struct {
 	rdbConn         rdb.Conn
