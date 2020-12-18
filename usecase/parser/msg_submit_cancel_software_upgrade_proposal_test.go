@@ -18,7 +18,7 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgSubmitCancelSoftwareUpgradeProposal", func() {
 		It("should parse gov.MsgSubmitCancelSoftwareUpgradeProposal command  in the transaction", func() {
-			txDecoder := parser.NewTxDecoder("basetrcro")
+			txDecoder := parser.NewTxDecoder("basetcro")
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_BLOCK_RESULTS_RESP,
