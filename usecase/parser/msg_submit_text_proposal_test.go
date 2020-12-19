@@ -35,20 +35,20 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(cmds).To(Equal([]command.Command{
 				command_usecase.NewCreateMsgSubmitTextProposal(
 					event.MsgCommonParams{
-						BlockHeight: int64(490470),
-						TxHash:      "EE7D914AB846DF0D2E96F2EB32A843D3F8CCB0234962F53D6A8EBE7F024F9231",
+						BlockHeight: int64(874207),
+						TxHash:      "579B97CD5B947C2FA0EC87EDD4DAA8BECF422B96A82E2C9DBFE15F9F6DB4109B",
 						TxSuccess:   true,
 						MsgIndex:    0,
 					},
 					model.MsgSubmitTextProposalParams{
-						MaybeProposalId: primptr.String("9"),
+						MaybeProposalId: primptr.String("10"),
 						Content: model.MsgSubmitTextProposalContent{
 							Type:        "/cosmos.gov.v1beta1.TextProposal",
-							Title:       "Text Title",
-							Description: "Text Description",
+							Title:       "A proposal test from crypto.bzh",
+							Description: "This a description for the proposal",
 						},
-						ProposerAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-						InitialDeposit:  coin.MustNewCoinFromString("2"),
+						ProposerAddress: "tcro14fnzv5g92s6f8dg534lccp4x5tylkvth7zcq0u",
+						InitialDeposit:  coin.MustNewCoinFromString("1000000"),
 					},
 				),
 			}))
