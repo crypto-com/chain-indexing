@@ -99,3 +99,15 @@ type MsgSubmitCancelSoftwareUpgradeProposalContent struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 }
+
+type MsgSubmitTextProposalParams struct {
+	MaybeProposalId *string                      `json:"proposalId"`
+	Content         MsgSubmitTextProposalContent `json:"content"`
+	ProposerAddress string                       `json:"proposerAddress"`
+	InitialDeposit  coin.Coin                    `json:"initialDeposit"`
+}
+type MsgSubmitTextProposalContent struct {
+	Type        string `json:"@type"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}

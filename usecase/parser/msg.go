@@ -275,6 +275,8 @@ func parseMsgSubmitProposal(
 		return parseMsgSubmitSoftwareUpgradeProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal" {
 		return parseMsgSubmitCancelSoftwareUpgradeProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
+	} else if proposalContent.Type == "/cosmos.gov.v1beta1.TextProposal" {
+		return parseMsgSubmitTextProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
 	}
 	panic(fmt.Sprintf("unrecognzied govenance proposal type `%s`", proposalContent.Type))
 }
@@ -486,6 +488,54 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 		msgCommonParams,
 
 		model.MsgSubmitCancelSoftwareUpgradeProposalParams{
+			MaybeProposalId: proposalId,
+			Content:         proposalContent,
+			ProposerAddress: msg["proposer"].(string),
+			InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+		},
+	)}
+}
+
+func parseMsgSubmitTextProposal(
+	txSuccess bool,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+	rawContent []byte,
+) []command.Command {
+	var proposalContent model.MsgSubmitTextProposalContent
+	if err := jsoniter.Unmarshal(rawContent, &proposalContent); err != nil {
+		panic("error decoding text proposal content")
+	}
+
+	if !txSuccess {
+		return []command.Command{command_usecase.NewCreateMsgSubmitTextProposal(
+			msgCommonParams,
+
+			model.MsgSubmitTextProposalParams{
+				MaybeProposalId: nil,
+				Content:         proposalContent,
+				ProposerAddress: msg["proposer"].(string),
+				InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+			},
+		)}
+	}
+	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	// When there is no reward withdrew, `transfer` event would not exist
+	event := log.GetEventByType("submit_proposal")
+	if event == nil {
+		panic("missing `submit_proposal` event in TxsResult log")
+	}
+	proposalId := event.GetAttributeByKey("proposal_id")
+	if proposalId == nil {
+		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgSubmitTextProposal(
+		msgCommonParams,
+
+		model.MsgSubmitTextProposalParams{
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
 			ProposerAddress: msg["proposer"].(string),
