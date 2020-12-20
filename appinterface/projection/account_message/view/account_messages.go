@@ -70,12 +70,16 @@ func (accountMessagesView *AccountMessages) Insert(messageRow *AccountMessageRow
 		"account",
 		"transaction_hash",
 		"message_index",
+		"message_type",
+		"success",
 	)
 	for _, account := range accounts {
 		accountInsertStmt = accountInsertStmt.Values(
 			account,
 			messageRow.TransactionHash,
 			messageRow.MessageIndex,
+			messageRow.MessageType,
+			messageRow.Success,
 		)
 	}
 	sql, sqlArgs, err = accountInsertStmt.ToSql()
@@ -112,10 +116,10 @@ func (accountMessagesView *AccountMessages) List(
 		"view_account_messages.data",
 	).From(
 		"view_account_messages",
-	).Join(`
-view_account_message_ids ON
-view_account_messages.transaction_hash = view_account_message_ids.transaction_hash AND
-view_account_messages.message_index = view_account_message_ids.message_index`,
+	).Join(
+		"view_account_message_ids ON "+
+			"view_account_messages.transaction_hash = view_account_message_ids.transaction_hash AND "+
+			"view_account_messages.message_index = view_account_message_ids.message_index",
 	).Where(
 		"view_account_message_ids.account = ?", filter.Account,
 	)
@@ -125,7 +129,7 @@ view_account_messages.message_index = view_account_message_ids.message_index`,
 		totalIdentities = []string{fmt.Sprintf("%s:-", filter.Account)}
 	} else {
 		totalIdentities = make([]string, 0)
-		stmtBuilder = stmtBuilder.Where(sq.Eq{"view_account_messages.message_type": filter.MaybeMsgTypes})
+		stmtBuilder = stmtBuilder.Where(sq.Eq{"view_account_message_ids.message_type": filter.MaybeMsgTypes})
 		for _, msgType := range filter.MaybeMsgTypes {
 			totalIdentities = append(totalIdentities, fmt.Sprintf("%s:%s", filter.Account, msgType))
 		}

@@ -258,12 +258,12 @@ func (validatorsView *Validators) List(
 	}
 
 	orderClauses := make([]string, 0)
-	statusOrder := `CASE UPPER(status)
-WHEN 'BONDED' THEN 1
-WHEN 'UNBONDING' THEN 2
-WHEN 'JAILED' THEN 3
-WHEN 'UNBONDED' THEN 4
-ELSE 5 END`
+	statusOrder := "CASE UPPER(status) " +
+		"WHEN 'BONDED' THEN 1" +
+		"WHEN 'UNBONDING' THEN 2" +
+		"WHEN 'JAILED' THEN 3" +
+		"WHEN 'UNBONDED' THEN 4" +
+		"ELSE 5 END"
 	if order.MaybePower == nil {
 		orderClauses = append(orderClauses, "joined_at_block_height")
 	} else if *order.MaybePower == view.ORDER_ASC {
