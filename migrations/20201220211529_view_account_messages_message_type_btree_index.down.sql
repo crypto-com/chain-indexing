@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS view_account_messages_message_type_btree_index;

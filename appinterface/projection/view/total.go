@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 )
 
@@ -77,6 +79,29 @@ func (view *Total) FindBy(identity string) (int64, error) {
 		view.tableName,
 	).Where(
 		"identity = ?", identity,
+	).ToSql()
+	if err != nil {
+		return int64(0), fmt.Errorf("error preparing total selection SQL: %v", err)
+	}
+
+	var total int64
+	if err := view.rdbHandle.QueryRow(sql, sqlArgs...).Scan(&total); err != nil {
+		if errors.Is(err, rdb.ErrNoRows) {
+			return int64(0), nil
+		}
+		return int64(0), fmt.Errorf("error getting total: %v", err)
+	}
+
+	return total, nil
+}
+
+func (view *Total) SumBy(identities []string) (int64, error) {
+	sql, sqlArgs, err := view.rdbHandle.StmtBuilder.Select(
+		"SUM(total)",
+	).From(
+		view.tableName,
+	).Where(
+		sq.Eq{"identity": identities},
 	).ToSql()
 	if err != nil {
 		return int64(0), fmt.Errorf("error preparing total selection SQL: %v", err)

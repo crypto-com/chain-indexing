@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"strings"
+
 	"github.com/valyala/fasthttp"
 
 	account_message_view "github.com/crypto-com/chain-indexing/appinterface/projection/account_message/view"
@@ -36,8 +38,16 @@ func (handler *AccountMessages) ListByAccount(ctx *fasthttp.RequestCtx) {
 	}
 
 	account := ctx.UserValue("account").(string)
-	idOrder := view.ORDER_ASC
+	filter := account_message_view.AccountMessagesListFilter{
+		Account:       account,
+		MaybeMsgTypes: nil,
+	}
 	queryArgs := ctx.QueryArgs()
+	if queryArgs.Has("filter.msgType") {
+		filter.MaybeMsgTypes = strings.Split(string(queryArgs.Peek("filter.msgType")), ",")
+	}
+
+	idOrder := view.ORDER_ASC
 	if queryArgs.Has("order") {
 		if string(queryArgs.Peek("order")) == "height.desc" {
 			idOrder = view.ORDER_DESC
@@ -45,7 +55,7 @@ func (handler *AccountMessages) ListByAccount(ctx *fasthttp.RequestCtx) {
 	}
 
 	blocks, paginationResult, err := handler.accountMessagesView.List(
-		account, account_message_view.AccountMessagesListOrder{Id: idOrder}, pagination,
+		filter, account_message_view.AccountMessagesListOrder{Id: idOrder}, pagination,
 	)
 	if err != nil {
 		handler.logger.Errorf("error listing account messages: %v", err)

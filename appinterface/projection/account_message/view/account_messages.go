@@ -96,7 +96,7 @@ func (accountMessagesView *AccountMessages) Insert(messageRow *AccountMessageRow
 }
 
 func (accountMessagesView *AccountMessages) List(
-	account string,
+	filter AccountMessagesListFilter,
 	order AccountMessagesListOrder,
 	pagination *pagination_interface.Pagination,
 ) ([]AccountMessageRow, *pagination_interface.PaginationResult, error) {
@@ -117,8 +117,19 @@ view_account_message_ids ON
 view_account_messages.transaction_hash = view_account_message_ids.transaction_hash AND
 view_account_messages.message_index = view_account_message_ids.message_index`,
 	).Where(
-		"view_account_message_ids.account = ?", account,
+		"view_account_message_ids.account = ?", filter.Account,
 	)
+
+	var totalIdentities []string
+	if filter.MaybeMsgTypes == nil {
+		totalIdentities = []string{fmt.Sprintf("%s:-", filter.Account)}
+	} else {
+		totalIdentities = make([]string, 0)
+		stmtBuilder = stmtBuilder.Where(sq.Eq{"view_account_messages.message_type": filter.MaybeMsgTypes})
+		for _, msgType := range filter.MaybeMsgTypes {
+			totalIdentities = append(totalIdentities, fmt.Sprintf("%s:%s", filter.Account, msgType))
+		}
+	}
 
 	if order.Id == view.ORDER_DESC {
 		stmtBuilder = stmtBuilder.OrderBy("id DESC")
@@ -131,9 +142,8 @@ view_account_messages.message_index = view_account_message_ids.message_index`,
 		accountMessagesView.rdb,
 	).WithCustomTotalQueryFn(
 		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
-			identity := fmt.Sprintf("%s:-", account)
 			totalView := NewAccountMessagesTotal(rdbHandle)
-			total, err := totalView.FindBy(identity)
+			total, err := totalView.SumBy(totalIdentities)
 			if err != nil {
 				return int64(0), err
 			}
@@ -216,6 +226,14 @@ type AccountMessageRow struct {
 	MessageIndex    int             `json:"messageIndex"`
 	MessageType     string          `json:"messageType"`
 	Data            interface{}     `json:"data"`
+}
+
+type AccountMessagesListFilter struct {
+	// Required account filter
+	Account string
+
+	// Optional filtering
+	MaybeMsgTypes []string
 }
 
 type AccountMessagesListOrder struct {
