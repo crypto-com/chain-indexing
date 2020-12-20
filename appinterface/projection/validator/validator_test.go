@@ -81,7 +81,7 @@ var _ = Describe("Validator Events", func() {
 			Expect(projection.GetLastHandledEventHeight()).To(Equal(primptr.Int64(anyHeight)))
 		})
 
-		It("should verify the List length before and after handling event", func() {
+		It("should verify the validator view count before and after handling MsgCreateValidator event", func() {
 			validatorView := view2.NewValidators(pgConn.ToHandle())
 			blocksView := viewBlock.NewBlocks(pgConn.ToHandle())
 
@@ -134,7 +134,7 @@ var _ = Describe("Validator Events", func() {
 				},
 			})
 
-			eventPowerChanged := event_usecase.NewMsgCreateValidator(event_usecase.MsgCommonParams{
+			eventNewValidatorCreated := event_usecase.NewMsgCreateValidator(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
 				TxHash:      "E69985AC8168383A81B7952DBE03EB9B3400FF80AEC0F362369DD7F38B1C2FE9",
 				TxSuccess:   false,
@@ -153,26 +153,26 @@ var _ = Describe("Validator Events", func() {
 			projection := block.NewBlock(fakeLogger, pgConn)
 			projectionValidator := validator.NewValidator(fakeLogger, pgConn, prefixConsensusAddress)
 
-			blockEventRow, err := validatorView.Count(countFilter)
+			validatorViewCountBeforeHandling, err := validatorView.Count(countFilter)
 
 			//check before handling event
-			Expect(blockEventRow).To(Equal(int64(0)))
+			Expect(validatorViewCountBeforeHandling).To(Equal(int64(0)))
 			Expect(err).To(BeNil())
 
 			//handle event below
 			errHandleEvents := projection.HandleEvents(anyHeight, []event_entity.Event{event})
-			errHandleBlockEvent := projectionValidator.HandleEvents(anyHeight, []event_entity.Event{eventPowerChanged})
+			errHandleBlockEvent := projectionValidator.HandleEvents(anyHeight, []event_entity.Event{eventNewValidatorCreated})
 			Expect(errHandleEvents).To(BeNil())
 			Expect(errHandleBlockEvent).To(BeNil())
 
 			//check the list after event handling
-			validatorRow, errAfterHandling := validatorView.Count(countFilter)
+			validatorViewCountAfterHandling, errAfterHandling := validatorView.Count(countFilter)
 
 			//check before handling event
+			Expect(errAfterHandling).To(BeNil())
 			Expect(blocksView.Count()).To(Equal(int64(1)))
 			Expect(projectionValidator.GetLastHandledEventHeight()).To(Equal(primptr.Int64(anyHeight)))
-			Expect(validatorRow).To(Equal(int64(1)))
-			Expect(errAfterHandling).To(BeNil())
+			Expect(validatorViewCountAfterHandling).To(Equal(int64(1)))
 		})
 
 		It("should update projection last handled event height when there is no event at the height", func() {
