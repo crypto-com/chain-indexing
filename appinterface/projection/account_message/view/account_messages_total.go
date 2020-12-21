@@ -11,6 +11,6 @@ type AccountMessagesTotal struct {
 
 func NewAccountMessagesTotal(rdbHandle *rdb.Handle) *AccountMessagesTotal {
 	return &AccountMessagesTotal{
-		view.NewTotal(rdbHandle, "view_account_message_ids_total"),
+		view.NewTotal(rdbHandle, "view_account_messages_total"),
 	}
 }

@@ -31,64 +31,45 @@ func (accountMessagesView *AccountMessages) Insert(messageRow *AccountMessageRow
 	if err != nil {
 		return fmt.Errorf("error JSON marshalling account message for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
-	sql, sqlArgs, err := accountMessagesView.rdb.StmtBuilder.Insert(
+
+	stmtBuilder := accountMessagesView.rdb.StmtBuilder.Insert(
 		"view_account_messages",
 	).Columns(
 		"block_height",
 		"block_hash",
 		"block_time",
+		"account",
 		"transaction_hash",
 		"success",
 		"message_index",
 		"message_type",
 		"data",
-	).Values(
-		messageRow.BlockHeight,
-		messageRow.BlockHash,
-		accountMessagesView.rdb.Tton(&messageRow.BlockTime),
-		messageRow.TransactionHash,
-		messageRow.Success,
-		messageRow.MessageIndex,
-		messageRow.MessageType,
-		accountMessageDataJSON,
-	).ToSql()
-	if err != nil {
-		return fmt.Errorf("error building account message insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
-
-	result, err := accountMessagesView.rdb.Exec(sql, sqlArgs...)
-	if err != nil {
-		return fmt.Errorf("error inserting account message into the table: %v: %w", err, rdb.ErrWrite)
-	}
-	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error inserting account message into the table: no rows inserted: %w", rdb.ErrWrite)
-	}
-
-	accountInsertStmt := accountMessagesView.rdb.StmtBuilder.Insert(
-		"view_account_message_ids",
-	).Columns(
-		"account",
-		"transaction_hash",
-		"message_index",
 	)
+	blockTime := accountMessagesView.rdb.Tton(&messageRow.BlockTime)
 	for _, account := range accounts {
-		accountInsertStmt = accountInsertStmt.Values(
+		stmtBuilder = stmtBuilder.Values(
+			messageRow.BlockHeight,
+			messageRow.BlockHash,
+			blockTime,
 			account,
 			messageRow.TransactionHash,
+			messageRow.Success,
 			messageRow.MessageIndex,
+			messageRow.MessageType,
+			accountMessageDataJSON,
 		)
 	}
-	sql, sqlArgs, err = accountInsertStmt.ToSql()
+	sql, sqlArgs, err := stmtBuilder.ToSql()
 	if err != nil {
 		return fmt.Errorf("error building account message id insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
-	result, err = accountMessagesView.rdb.Exec(sql, sqlArgs...)
+	result, err := accountMessagesView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
-		return fmt.Errorf("error inserting block transaction into the table: %v: %w", err, rdb.ErrWrite)
+		return fmt.Errorf("error inserting account messages into the table: %v: %w", err, rdb.ErrWrite)
 	}
 	if result.RowsAffected() != int64(len(accounts)) {
 		return fmt.Errorf(
-			"error inserting account message id into the table: mismatched rows inserted: %w", rdb.ErrWrite,
+			"error inserting account messages into the table: mismatched rows inserted: %w", rdb.ErrWrite,
 		)
 	}
 
@@ -101,7 +82,7 @@ func (accountMessagesView *AccountMessages) List(
 	pagination *pagination_interface.Pagination,
 ) ([]AccountMessageRow, *pagination_interface.PaginationResult, error) {
 	stmtBuilder := accountMessagesView.rdb.StmtBuilder.Select(
-		"view_account_message_ids.account",
+		"view_account_messages.account",
 		"view_account_messages.block_height",
 		"view_account_messages.block_hash",
 		"view_account_messages.block_time",
@@ -112,12 +93,8 @@ func (accountMessagesView *AccountMessages) List(
 		"view_account_messages.data",
 	).From(
 		"view_account_messages",
-	).Join(`
-view_account_message_ids ON
-view_account_messages.transaction_hash = view_account_message_ids.transaction_hash AND
-view_account_messages.message_index = view_account_message_ids.message_index`,
 	).Where(
-		"view_account_message_ids.account = ?", filter.Account,
+		"view_account_messages.account = ?", filter.Account,
 	)
 
 	var totalIdentities []string

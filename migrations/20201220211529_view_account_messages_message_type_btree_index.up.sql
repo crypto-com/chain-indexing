@@ -1,1 +1,0 @@
-CREATE INDEX view_account_messages_message_type_btree_index ON view_account_messages USING btree (message_type);
