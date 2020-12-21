@@ -107,13 +107,16 @@ func (view *Total) SumBy(identities []string) (int64, error) {
 		return int64(0), fmt.Errorf("error preparing total selection SQL: %v", err)
 	}
 
-	var total int64
+	var total *int64
 	if err := view.rdbHandle.QueryRow(sql, sqlArgs...).Scan(&total); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			return int64(0), nil
 		}
 		return int64(0), fmt.Errorf("error getting total: %v", err)
 	}
+	if total == nil {
+		return int64(0), nil
+	}
 
-	return total, nil
+	return *total, nil
 }
