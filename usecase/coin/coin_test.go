@@ -39,22 +39,6 @@ var _ = Describe("Coin", func() {
 
 		})
 
-		It("should return Error when the string exceeds maximum supply", func() {
-			exceedTotalSupply := "10000000000000000001"
-			_, err := usecase_coin.NewCoinFromString(exceedTotalSupply)
-
-			Expect(err).NotTo(BeNil())
-			Expect(errors.Is(err, usecase_coin.ErrCoinExceedSupply)).To(BeTrue())
-		})
-
-		It("should return Error when the string negatively exceeds maximum supply", func() {
-			exceedTotalSupply := "-10000000000000000001"
-			_, err := usecase_coin.NewCoinFromString(exceedTotalSupply)
-
-			Expect(err).NotTo(BeNil())
-			Expect(errors.Is(err, usecase_coin.ErrCoinExceedSupply)).To(BeTrue())
-		})
-
 		It("should return the Coin representation of the string", func() {
 			anyCoin := "100000000"
 			coin, err := usecase_coin.NewCoinFromString(anyCoin)
@@ -65,25 +49,11 @@ var _ = Describe("Coin", func() {
 	})
 
 	Describe("NewCoinFromCRO", func() {
-		It("should return Error when the CRO has more than 8 decimal places", func() {
+		It("should return false when the CRO has more than 8 decimal places", func() {
 			_, err := usecase_coin.NewCoinFromCRO("1.123456789")
 
 			Expect(err).NotTo(BeNil())
 			Expect(errors.Is(err, usecase_coin.ErrCoinInvalid)).To(BeTrue())
-		})
-
-		It("should return Error when the CRO exceed maximum supply", func() {
-			_, err := usecase_coin.NewCoinFromCRO("100000000000.1")
-
-			Expect(err).NotTo(BeNil())
-			Expect(errors.Is(err, usecase_coin.ErrCoinExceedSupply)).To(BeTrue())
-		})
-
-		It("should return Error when the CRO negatively exceed maximum supply", func() {
-			_, err := usecase_coin.NewCoinFromCRO("-100000000000.1")
-
-			Expect(err).NotTo(BeNil())
-			Expect(errors.Is(err, usecase_coin.ErrCoinExceedSupply)).To(BeTrue())
 		})
 
 		It("should return the Coin representation of a negative CRO", func() {
@@ -152,19 +122,50 @@ var _ = Describe("Coin", func() {
 		})
 	})
 
-	Describe("Add", func() {
-		It("should return Error and do not change the coin value when the result exceeds total supply", func() {
+	Describe("WithinTotalSupply", func() {
+		It("should return Error when the string exceeds maximum supply", func() {
+			exceedTotalSupply := "10000000000000000001"
+			result, err := usecase_coin.NewCoinFromString(exceedTotalSupply)
+
+			Expect(err).To(BeNil())
+			Expect(result.WithinTotalSupply()).To(BeFalse())
+		})
+
+		It("should return Error when the string negatively exceeds maximum supply", func() {
+			exceedTotalSupply := "-10000000000000000001"
+			result, err := usecase_coin.NewCoinFromString(exceedTotalSupply)
+
+			Expect(err).To(BeNil())
+			Expect(result.WithinTotalSupply()).To(BeFalse())
+		})
+
+		It("should return false when the CRO exceed maximum supply", func() {
+			result, err := usecase_coin.NewCoinFromCRO("100000000000.1")
+
+			Expect(err).To(BeNil())
+			Expect(result.WithinTotalSupply()).To(BeFalse())
+		})
+
+		It("should return false when the CRO negatively exceed maximum supply", func() {
+			result, err := usecase_coin.NewCoinFromCRO("-100000000000.1")
+
+			Expect(err).To(BeNil())
+			Expect(result.WithinTotalSupply()).To(BeFalse())
+		})
+		It("should return false when the add result exceeds total supply", func() {
 			anyAmount := "10000000000000000000"
 			coin, _ := usecase_coin.NewCoinFromString(anyAmount)
 
 			oneUnit := "1"
 			oneCoin, _ := usecase_coin.NewCoinFromString(oneUnit)
 
-			_, err := coin.Add(oneCoin)
-			Expect(err).NotTo(BeNil())
-			Expect(errors.Is(err, usecase_coin.ErrCoinExceedSupply)).To(BeTrue())
+			result, err := coin.Add(oneCoin)
+			Expect(err).To(BeNil())
+			Expect(result.WithinTotalSupply()).To(BeFalse())
 		})
+	})
 
+	Describe("Add", func() {
 		It("should return the sum of the two coin values", func() {
 			anyAmount := "10000000"
 			coin, _ := usecase_coin.NewCoinFromString(anyAmount)

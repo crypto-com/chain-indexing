@@ -31,9 +31,8 @@ var (
 )
 
 var (
-	ErrCoinNil          = errors.New("big.Int has nil value")
-	ErrCoinInvalid      = errors.New("invalid coin")
-	ErrCoinExceedSupply = errors.New("exceed total supply")
+	ErrCoinNil     = errors.New("big.Int has nil value")
+	ErrCoinInvalid = errors.New("invalid coin")
 )
 
 // MustNewCoin() returns a new Coin from the provided big.Int. Any error would
@@ -51,9 +50,6 @@ func MustNewCoin(value *big.Int) Coin {
 func NewCoin(value *big.Int) (Coin, error) {
 	if value == nil {
 		return Coin{}, ErrCoinNil
-	}
-	if value.CmpAbs(TOTAL_COIN_SUPPLY_BIGINT) == 1 {
-		return Coin{}, ErrCoinExceedSupply
 	}
 
 	return Coin{
@@ -178,9 +174,6 @@ func NewCoinFromCRO(value string) (Coin, error) {
 // Add() add y to the coin receiver and returns a new coin value
 func (coin *Coin) Add(y Coin) (Coin, error) {
 	z := new(big.Int).Add(coin.value, y.value)
-	if z.CmpAbs(TOTAL_COIN_SUPPLY_BIGINT) > 0 {
-		return Coin{}, ErrCoinExceedSupply
-	}
 
 	return MustNewCoin(z), nil
 }
@@ -189,6 +182,11 @@ func (coin *Coin) Add(y Coin) (Coin, error) {
 func (coin *Coin) Negate() Coin {
 	z := new(big.Int).Neg(coin.value)
 	return MustNewCoin(z)
+}
+
+// WithinTotalSupply() returns true if the Coin is within total supply. false otherwise.
+func (coin *Coin) WithinTotalSupply() bool {
+	return coin.value.CmpAbs(TOTAL_COIN_SUPPLY_BIGINT) <= 0
 }
 
 // String() returns the string representation of the Coin
