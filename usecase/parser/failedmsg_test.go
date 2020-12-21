@@ -15,7 +15,7 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("Failed Msg", func() {
 		It("should parse Msg Failed commands when the transaction has failed", func() {
-			txDecoder := parser.NewTxDecoder("basetrcro")
+			txDecoder := parser.NewTxDecoder("basetcro")
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESULTS_RESP)
 

@@ -1,4 +1,4 @@
-package transasaction
+package transaction
 
 import (
 	"fmt"

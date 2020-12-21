@@ -45,24 +45,17 @@ func (_ *Validator) GetEventsToListen() []string {
 		event_usecase.BLOCK_CREATED,
 		event_usecase.MSG_CREATE_VALIDATOR_CREATED,
 		event_usecase.MSG_EDIT_VALIDATOR_CREATED,
-		event_usecase.MSG_EDIT_VALIDATOR_FAILED,
 		event_usecase.MSG_DELEGATE_CREATED,
-		event_usecase.MSG_DELEGATE_FAILED,
 		event_usecase.MSG_BEGIN_REDELEGATE_CREATED,
-		event_usecase.MSG_BEGIN_REDELEGATE_FAILED,
 		event_usecase.MSG_UNDELEGATE_CREATED,
-		event_usecase.MSG_UNDELEGATE_FAILED,
 		event_usecase.MSG_WITHDRAW_DELEGATOR_REWARD_CREATED,
-		event_usecase.MSG_WITHDRAW_DELEGATOR_REWARD_FAILED,
 		event_usecase.MSG_WITHDRAW_VALIDATOR_COMMISSION_CREATED,
-		event_usecase.MSG_WITHDRAW_VALIDATOR_COMMISSION_FAILED,
 		event_usecase.BLOCK_PROPOSER_REWARDED,
 		event_usecase.BLOCK_REWARDED,
 		event_usecase.BLOCK_COMMISSIONED,
 		event_usecase.VALIDATOR_JAILED,
 		event_usecase.VALIDATOR_SLASHED,
 		event_usecase.MSG_UNJAIL_CREATED,
-		event_usecase.MSG_UNJAIL_FAILED,
 		event_usecase.POWER_CHANGED,
 	}
 }
@@ -186,7 +179,7 @@ func (projection *Validator) projectValidatorView(
 			})
 			if err != nil {
 				return fmt.Errorf(
-					"error getting existing valiadtor %s from view", msgEditValidatorEvent.ValidatorAddress,
+					"error getting existing validator %s from view", msgEditValidatorEvent.ValidatorAddress,
 				)
 			}
 

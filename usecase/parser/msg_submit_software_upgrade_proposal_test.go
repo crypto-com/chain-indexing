@@ -19,7 +19,7 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgSubmitSoftwareUpgradeProposal", func() {
 		It("should parse gov.MsgSubmitCommunityPoolSpendProposal command with effective height in the transaction", func() {
-			txDecoder := parser.NewTxDecoder("basetrcro")
+			txDecoder := parser.NewTxDecoder("basetcro")
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_HEIGHT_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_HEIGHT_BLOCK_RESULTS_RESP,
@@ -62,7 +62,7 @@ var _ = Describe("ParseMsgCommands", func() {
 		})
 
 		It("should parse gov.MsgSubmitCommunityPoolSpendProposal command with effective time in the transaction", func() {
-			txDecoder := parser.NewTxDecoder("basetrcro")
+			txDecoder := parser.NewTxDecoder("basetcro")
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_TIME_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_TIME_BLOCK_RESULTS_RESP,

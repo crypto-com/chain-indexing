@@ -4,7 +4,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/projection/account_message"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/block"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/blockevent"
-	transasaction "github.com/crypto-com/chain-indexing/appinterface/projection/transaction"
+	transaction "github.com/crypto-com/chain-indexing/appinterface/projection/transaction"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/validator"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/validatorstats"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -19,7 +19,7 @@ func initProjections(
 ) []projection_entity.Projection {
 	return []projection_entity.Projection{
 		block.NewBlock(logger, rdbConn),
-		transasaction.NewTransaction(logger, rdbConn),
+		transaction.NewTransaction(logger, rdbConn),
 		blockevent.NewBlockEvent(logger, rdbConn),
 		validator.NewValidator(
 			logger, rdbConn, consNodeAddressPrefix,
