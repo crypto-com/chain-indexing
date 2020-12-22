@@ -21,7 +21,6 @@ type Tx interface {
 	ToHandle() *Handle
 }
 
-// RDb handle
 type Handle struct {
 	Runner
 	TypeConv
