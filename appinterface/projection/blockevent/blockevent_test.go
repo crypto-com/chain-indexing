@@ -132,7 +132,7 @@ var _ = Describe("Block Events", func() {
 
 			//handle event below
 			errHandleEvents := projection.HandleEvents(anyHeight, []event_entity.Event{event})
-			errHandleBlockEvent := projectionBlockEvent.HandleEvents(anyHeight, []event_entity.Event{eventBlockEvent})
+			errHandleBlockEvent := projectionBlockEvent.HandleEvents(anyHeight, []event_entity.Event{event, eventBlockEvent})
 			Expect(errHandleEvents).To(BeNil())
 			Expect(errHandleBlockEvent).To(BeNil())
 
@@ -143,6 +143,10 @@ var _ = Describe("Block Events", func() {
 			Expect(blocksView.Count()).To(Equal(int64(1)))
 			Expect(projectionBlockEvent.GetLastHandledEventHeight()).To(Equal(primptr.Int64(anyHeight)))
 			Expect(blockEventRowAfterHandling).To(HaveLen(1))
+			Expect(blockEventRowAfterHandling[0].BlockHeight).To(Equal(anyHeight))
+			Expect(blockEventRowAfterHandling[0].BlockTime).To(Equal(utctime.FromUnixNano(int64(1000000))))
+			Expect(blockEventRowAfterHandling[0].MaybeId).To(Equal(primptr.Int64(1)))
+			Expect(blockEventRowAfterHandling[0].BlockHash).To(Equal("B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48"))
 			Expect(mayBePaginationResultAfterHandling).To(BeNil())
 			Expect(errAfterHandling).To(BeNil())
 		})
