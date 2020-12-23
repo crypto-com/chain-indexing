@@ -41,7 +41,7 @@ var _ = Describe("Block Events", func() {
 			_ = pgMigrate.Reset()
 		})
 
-		It("should match the last projection handled block height with the fired event blockheight", func() {
+		It("should update the last projection handled block height with the fired event block height", func() {
 
 			anyHeight := int64(1)
 			event := event_usecase.NewBlockCreated(&usecase_model.Block{
