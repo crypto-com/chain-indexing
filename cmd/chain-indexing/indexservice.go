@@ -46,6 +46,14 @@ func NewIndexService(
 }
 
 func (service *IndexService) Run() error {
+	// run polling tendermint manager, update view tables directly
+	infoManager := NewInfoManager(
+		service.logger,
+		service.rdbConn,
+		service.tendermintHTTPRPCURL,
+	)
+	infoManager.Run()
+
 	var err error
 	switch service.systemMode {
 	case SYSTEM_MODE_EVENT_STORE:
@@ -76,6 +84,7 @@ func (service *IndexService) RunEventStoreMode() error {
 	projectionManager.RunInBackground()
 
 	eventStoreHandler := eventhandler_interface.NewRDbEventStoreHandler(
+
 		service.logger,
 		service.rdbConn,
 		eventRegistry,

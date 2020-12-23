@@ -9,12 +9,13 @@ import (
 )
 
 type RouteRegistry struct {
-	searchHandler      *handlers.Search
-	blocksHandler      *handlers.Blocks
-	statusHandler      *handlers.StatusHandler
-	transactionHandler *handlers.Transactions
-	blockEventHandler  *handlers.BlockEvents
-	validatorsHandler  *handlers.Validators
+	searchHandler          *handlers.Search
+	blocksHandler          *handlers.Blocks
+	statusHandler          *handlers.StatusHandler
+	transactionHandler     *handlers.Transactions
+	blockEventHandler      *handlers.BlockEvents
+	validatorsHandler      *handlers.Validators
+	accountMessagesHandler *handlers.AccountMessages
 }
 
 func NewRoutesRegistry(
@@ -24,6 +25,7 @@ func NewRoutesRegistry(
 	transactionHandler *handlers.Transactions,
 	blockEventHandler *handlers.BlockEvents,
 	validatorsHandler *handlers.Validators,
+	accountMessagesHandler *handlers.AccountMessages,
 ) *RouteRegistry {
 	return &RouteRegistry{
 		searchHandler,
@@ -32,6 +34,7 @@ func NewRoutesRegistry(
 		transactionHandler,
 		blockEventHandler,
 		validatorsHandler,
+		accountMessagesHandler,
 	}
 }
 
@@ -54,8 +57,10 @@ func (registry *RouteRegistry) Register(server *httpapi.Server, routePrefix stri
 	server.GET(fmt.Sprintf("%s/api/v1/transactions/{hash}", routePrefix), registry.transactionHandler.FindByHash)
 	server.GET(fmt.Sprintf("%s/api/v1/events", routePrefix), registry.blockEventHandler.List)
 	server.GET(fmt.Sprintf("%s/api/v1/events/{id}", routePrefix), registry.blockEventHandler.FindById)
+	server.GET(fmt.Sprintf("%s/api/v1/accounts/{account}/messages", routePrefix), registry.accountMessagesHandler.ListByAccount)
 	server.GET(fmt.Sprintf("%s/api/v1/validators", routePrefix), registry.validatorsHandler.List)
 	server.GET(fmt.Sprintf("%s/api/v1/validators/active", routePrefix), registry.validatorsHandler.ListActive)
 	server.GET(fmt.Sprintf("%s/api/v1/validators/{address}", routePrefix), registry.validatorsHandler.FindBy)
 	server.GET(fmt.Sprintf("%s/api/v1/validators/{address}/activities", routePrefix), registry.validatorsHandler.ListActivities)
+
 }

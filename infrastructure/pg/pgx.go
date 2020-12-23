@@ -57,6 +57,8 @@ func (config *PgxConnPoolConfig) ToURL() string {
 	return connStr + "?" + queryStr
 }
 
+var _ rdb.Conn = &PgxConn{}
+
 type PgxConn struct {
 	// pgxConn could be simple connection or connetion pool
 	pgxConn PgxConnLike
@@ -152,6 +154,8 @@ func (conn *PgxConn) ToHandle() *rdb.Handle {
 		StmtBuilder: PostgresStmtBuilder,
 	}
 }
+
+var _ rdb.Tx = &PgxRDbTx{}
 
 type PgxRDbTx struct {
 	tx pgx.Tx

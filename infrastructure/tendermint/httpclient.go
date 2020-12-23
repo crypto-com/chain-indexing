@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"io/ioutil"
+	"encoding/json"
 
 	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 
@@ -125,6 +127,26 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 	}
 
 	return rawResp.Body, nil
+}
+
+
+
+func (client *HTTPClient) Status() (*map[string]interface{}, error){
+	rawRespBody, err := client.request("status")
+	if err != nil {
+		return nil, err
+	}
+	defer rawRespBody.Close()
+
+	body, _ := ioutil.ReadAll(rawRespBody)
+	jsonMap := make(map[string]interface{})
+	errread := json.Unmarshal([]byte(body), &jsonMap)
+	if errread != nil {
+		return nil, fmt.Errorf("error requesting Status : %v", errread)	
+	}
+
+
+	return &jsonMap, nil
 }
 
 type GenesisResp struct {
