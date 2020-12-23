@@ -77,7 +77,7 @@ var _ = Describe("Block Events", func() {
 			Expect(projection.GetLastHandledEventHeight()).To(Equal(primptr.Int64(anyHeight)))
 		})
 
-		It("should verify the List length before and after handling event", func() {
+		It("should insert the block event record after handling event", func() {
 			blockEventsView := view2.NewBlockEvents(pgConn.ToHandle())
 			blocksView := viewBlock.NewBlocks(pgConn.ToHandle())
 
