@@ -81,7 +81,7 @@ var _ = Describe("Validator Events", func() {
 			Expect(projection.GetLastHandledEventHeight()).To(Equal(primptr.Int64(anyHeight)))
 		})
 
-		It("should verify the validator view count before and after handling MsgCreateValidator event", func() {
+		It("should increment the validator view count after handling MsgCreateValidator event", func() {
 			validatorView := view2.NewValidators(pgConn.ToHandle())
 			blocksView := viewBlock.NewBlocks(pgConn.ToHandle())
 
