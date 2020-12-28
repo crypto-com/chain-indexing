@@ -11,7 +11,7 @@ type CrossfireChainStats struct {
 	rdbHandle *rdb.Handle
 }
 
-const crossfireChainStatsViewTableName = "view_crossfire_validators_stats"
+const crossfireChainStatsViewTableName = "crossfire_chain_stats"
 
 func NewCrossfireChainStats(handle *rdb.Handle) *CrossfireChainStats {
 	return &CrossfireChainStats{
