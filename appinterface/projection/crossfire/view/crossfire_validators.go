@@ -27,7 +27,7 @@ func (validatorsView *CrossfireValidators) LastJoinedBlockHeight(
 	if sql, sqlArgs, err = validatorsView.rdb.StmtBuilder.Select(
 		"joined_at_block_height",
 	).From(
-		"view_validators",
+		"view_crossfire_validators",
 	).Where(
 		"operator_address = ? AND consensus_node_address = ?", operatorAddress, consensusNodeAddress,
 	).ToSql(); err != nil {
@@ -47,7 +47,7 @@ func (validatorsView *CrossfireValidators) LastJoinedBlockHeight(
 
 func (validatorsView *CrossfireValidators) Upsert(validator *ValidatorRow) error {
 	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Insert(
-		"view_validators",
+		"view_crossfire_validators",
 	).Columns(
 		"operator_address",
 		"consensus_node_address",
@@ -111,7 +111,7 @@ func (validatorsView *CrossfireValidators) Upsert(validator *ValidatorRow) error
 		phase_2_task_network_upgrade_block_commit = EXCLUDED.phase_2_task_network_upgrade_block_commit,
 		phase_1_2_task_commitment_count_rank = EXCLUDED.phase_1_2_task_commitment_count_rank,
 		phase_3_task_commitment_count_rank = EXCLUDED.phase_3_task_commitment_count_rank,
-		task_highest_sequence_rank = EXCLUDED.task_highest_sequence_rank,
+		task_highest_sequence_rank = EXCLUDED.task_highest_sequence_rank
 	`).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building validator upsertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -125,6 +125,26 @@ func (validatorsView *CrossfireValidators) Upsert(validator *ValidatorRow) error
 	}
 
 	return nil
+}
+
+func (validatorsView *CrossfireValidators) Count() (int64, error) {
+	var count int64
+
+	stmt := validatorsView.rdb.StmtBuilder.Select(
+		"COUNT(*)",
+	).From(
+		"view_crossfire_validators",
+	)
+
+	sql, sqlArgs, err := stmt.ToSql()
+	if err != nil {
+		return int64(0), fmt.Errorf("error building validator count sql: %v: %w", err, rdb.ErrPrepare)
+	}
+
+	if err := validatorsView.rdb.QueryRow(sql, sqlArgs...).Scan(&count); err != nil {
+		return int64(0), fmt.Errorf("error getting validators count: %v", err)
+	}
+	return count, nil
 }
 
 type ValidatorRow struct {
