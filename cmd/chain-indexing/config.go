@@ -66,6 +66,7 @@ type FileConfig struct {
 	Database   DatabaseConfig
 	Postgres   PostgresConfig
 	Logger     LoggerConfig
+	Crossfire  CrossfireConfig
 }
 
 type BlockchainConfig struct {
@@ -122,4 +123,12 @@ type PostgresConfig struct {
 type LoggerConfig struct {
 	Level string `toml:"level"`
 	Color bool   `toml:"color"`
+}
+
+type CrossfireConfig struct {
+	PhaseOneStartTime   string `toml:"phase_one_start_time"`
+	PhaseTwoStartTime   string `toml:"phase_two_start_time"`
+	PhaseThreeStartTime string `toml:"phase_three_start_time"`
+	CrossfireEndTime    string `toml:"crossfire_end_time"`
+	AdminAddress        string `toml:"admin_address"`
 }
