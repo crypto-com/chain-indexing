@@ -34,21 +34,6 @@ func NewCrossfire(logger applogger.Logger, rdbConn rdb.Conn, conNodeAddressPrefi
 func (_ *Crossfire) GetEventsToListen() []string {
 	return []string{
 		event_usecase.BLOCK_CREATED,
-
-		event_usecase.MSG_CREATE_VALIDATOR_CREATED,
-		event_usecase.MSG_EDIT_VALIDATOR_CREATED,
-		event_usecase.MSG_DELEGATE_CREATED,
-		event_usecase.MSG_BEGIN_REDELEGATE_CREATED,
-		event_usecase.MSG_UNDELEGATE_CREATED,
-		event_usecase.MSG_WITHDRAW_DELEGATOR_REWARD_CREATED,
-		event_usecase.MSG_WITHDRAW_VALIDATOR_COMMISSION_CREATED,
-		event_usecase.BLOCK_PROPOSER_REWARDED,
-		event_usecase.BLOCK_REWARDED,
-		event_usecase.BLOCK_COMMISSIONED,
-		event_usecase.VALIDATOR_JAILED,
-		event_usecase.VALIDATOR_SLASHED,
-		event_usecase.MSG_UNJAIL_CREATED,
-		event_usecase.POWER_CHANGED,
 	}
 }
 
@@ -101,7 +86,7 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 }
 
 func (projection *Crossfire) projectCrossfireValidatorView(
-	validatorsView *view.CrossfireValidators,
+	crossfireValidatorsView *view.CrossfireValidators,
 	blockHeight int64,
 	events []event_entity.Event,
 ) error {
@@ -140,7 +125,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 				TaskHighestSequenceRank:             0,
 			}
 
-			isJoined, joinedAtBlockHeight, err := validatorsView.LastJoinedBlockHeight(
+			isJoined, joinedAtBlockHeight, err := crossfireValidatorsView.LastJoinedBlockHeight(
 				validatorRow.OperatorAddress, validatorRow.ConsensusNodeAddress,
 			)
 			if err != nil {
@@ -150,7 +135,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 				validatorRow.JoinedAtBlockHeight = joinedAtBlockHeight
 			}
 
-			if err := validatorsView.Upsert(&validatorRow); err != nil {
+			if err := crossfireValidatorsView.Upsert(&validatorRow); err != nil {
 				return fmt.Errorf("error inserting new validator into view: %v", err)
 			}
 		}
