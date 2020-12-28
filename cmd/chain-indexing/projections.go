@@ -6,6 +6,9 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/projection/blockevent"
 	transaction "github.com/crypto-com/chain-indexing/appinterface/projection/transaction"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/validator"
+
+	// crossfire "github.com/crypto-com/chain-indexing/appinterface/projection/crossfire"
+
 	"github.com/crypto-com/chain-indexing/appinterface/projection/validatorstats"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
@@ -26,6 +29,8 @@ func initProjections(
 		),
 		validatorstats.NewValidatorStats(logger, rdbConn),
 		account_message.NewAccountMessage(logger, rdbConn),
+
+		// TODO: crossfire projection to be registered here
 
 		// register more projections here
 	}
