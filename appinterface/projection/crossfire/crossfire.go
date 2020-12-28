@@ -101,7 +101,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			if err != nil {
 				return fmt.Errorf("error converting consensus node pubkey to address: %v", err)
 			}
-			validatorRow := view.ValidatorRow{
+			validatorRow := view.CrossfireValidatorRow{
 				ConsensusNodeAddress:                consensusNodeAddress,
 				OperatorAddress:                     msgCreateValidatorEvent.ValidatorAddress,
 				InitialDelegatorAddress:             msgCreateValidatorEvent.DelegatorAddress,

@@ -1,9 +1,6 @@
 package crossfire_test
 
 import (
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/view"
 	. "github.com/crypto-com/chain-indexing/appinterface/rdb/test"
@@ -15,6 +12,8 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Crossfire", func() {
@@ -69,9 +68,44 @@ var _ = Describe("Crossfire", func() {
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
 
+			// insert one
 			err := projection.HandleEvents(anyHeight, []event_entity.Event{event})
 			Expect(err).To(BeNil())
-			Expect(crossfireValidatorsView.Count()).To(Equal(int64(1)))
+
+			count, err := crossfireValidatorsView.Count()
+			Expect(err).To(BeNil())
+			Expect(count).To(Equal(int64(1)))
+
+			// list all
+			list, err := crossfireValidatorsView.List()
+			Expect(err).To(BeNil())
+			var targetList []view.CrossfireValidatorRow
+			id := int64(1)
+			targetList = append(targetList, view.CrossfireValidatorRow{
+				MaybeId:                             &id,
+				OperatorAddress:                     "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
+				ConsensusNodeAddress:                "tcrocnclcons1u4jfqxk5femyyt0s5s55xuywv8ehnu34gcuaad",
+				InitialDelegatorAddress:             "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+				Status:                              "Unbonded",
+				Jailed:                              false,
+				JoinedAtBlockHeight:                 1,
+				Moniker:                             "Jail_Testing",
+				Identity:                            "foo",
+				Website:                             "www.example.com",
+				SecurityContact:                     "foo@example.com",
+				Details:                             "example",
+				Phase0TaskRegistration:              "Incompleted",
+				Phase1TaskNodeSetup:                 "Incompleted",
+				Phase1TaskBlockValidCommit:          "Incompleted",
+				Phase2TaskKeepNodeActive:            "Incompleted",
+				Phase2TaskProposalVote:              "Incompleted",
+				Phase2TaskNetworkUpgrade:            "Incompleted",
+				Phase2TaskNetworkUpgradeBlockCommit: "Incompleted",
+				Phase1n2TaskCommitmentCountRank:     0,
+				Phase3TaskCommitmentCountRank:       0,
+				TaskHighestSequenceRank:             0,
+			})
+			Expect(list).To(Equal(targetList))
 		})
 	})
 })

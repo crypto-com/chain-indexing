@@ -6,6 +6,8 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 )
 
+const TABLE_NAME = "view_crossfire_validators"
+
 type CrossfireValidators struct {
 	rdb *rdb.Handle
 }
@@ -27,7 +29,7 @@ func (validatorsView *CrossfireValidators) LastJoinedBlockHeight(
 	if sql, sqlArgs, err = validatorsView.rdb.StmtBuilder.Select(
 		"joined_at_block_height",
 	).From(
-		"view_crossfire_validators",
+		TABLE_NAME,
 	).Where(
 		"operator_address = ? AND consensus_node_address = ?", operatorAddress, consensusNodeAddress,
 	).ToSql(); err != nil {
@@ -45,9 +47,9 @@ func (validatorsView *CrossfireValidators) LastJoinedBlockHeight(
 	return true, joinedAtBlockHeight, nil
 }
 
-func (validatorsView *CrossfireValidators) Upsert(validator *ValidatorRow) error {
+func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorRow) error {
 	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Insert(
-		"view_crossfire_validators",
+		TABLE_NAME,
 	).Columns(
 		"operator_address",
 		"consensus_node_address",
@@ -133,7 +135,7 @@ func (validatorsView *CrossfireValidators) Count() (int64, error) {
 	stmt := validatorsView.rdb.StmtBuilder.Select(
 		"COUNT(*)",
 	).From(
-		"view_crossfire_validators",
+		TABLE_NAME,
 	)
 
 	sql, sqlArgs, err := stmt.ToSql()
@@ -147,7 +149,85 @@ func (validatorsView *CrossfireValidators) Count() (int64, error) {
 	return count, nil
 }
 
-type ValidatorRow struct {
+func (validatorsView *CrossfireValidators) List() ([]CrossfireValidatorRow, error) {
+	stmtBuilder := validatorsView.rdb.StmtBuilder.Select(
+		"id",
+		"operator_address",
+		"consensus_node_address",
+		"initial_delegator_address",
+		"status",
+		"jailed",
+		"joined_at_block_height",
+		"moniker",
+		"identity",
+		"website",
+		"security_contact",
+		"details",
+		"phase_0_task_registration",
+		"phase_1_task_node_setup",
+		"phase_1_task_block_valid_commit",
+		"phase_2_task_keep_node_active",
+		"phase_2_task_proposal_vote",
+		"phase_2_task_network_upgrade",
+		"phase_2_task_network_upgrade_block_commit",
+		"phase_1_2_task_commitment_count_rank",
+		"phase_3_task_commitment_count_rank",
+		"task_highest_sequence_rank",
+	).From(
+		TABLE_NAME,
+	)
+
+	sql, sqlArgs, err := stmtBuilder.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("error building blocks select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	rowsResult, err := validatorsView.rdb.Query(sql, sqlArgs...)
+	if err != nil {
+		return nil, fmt.Errorf("error executing blocks select SQL: %v: %w", err, rdb.ErrQuery)
+	}
+	defer rowsResult.Close()
+
+	validators := make([]CrossfireValidatorRow, 0)
+	for rowsResult.Next() {
+		var validator CrossfireValidatorRow
+		if err = rowsResult.Scan(
+			&validator.MaybeId,
+			&validator.OperatorAddress,
+			&validator.ConsensusNodeAddress,
+			&validator.InitialDelegatorAddress,
+			&validator.Status,
+			&validator.Jailed,
+			&validator.JoinedAtBlockHeight,
+			&validator.Moniker,
+			&validator.Identity,
+			&validator.Website,
+			&validator.SecurityContact,
+			&validator.Details,
+			&validator.Phase0TaskRegistration,
+			&validator.Phase1TaskNodeSetup,
+			&validator.Phase1TaskBlockValidCommit,
+			&validator.Phase2TaskKeepNodeActive,
+			&validator.Phase2TaskProposalVote,
+			&validator.Phase2TaskNetworkUpgrade,
+			&validator.Phase2TaskNetworkUpgradeBlockCommit,
+			&validator.Phase1n2TaskCommitmentCountRank,
+			&validator.Phase3TaskCommitmentCountRank,
+			&validator.TaskHighestSequenceRank,
+		); err != nil {
+			if errors.Is(err, rdb.ErrNoRows) {
+				return nil, rdb.ErrNoRows
+			}
+			return nil, fmt.Errorf("error scanning crossfire validator row: %v: %w", err, rdb.ErrQuery)
+		} else {
+			validators = append(validators, validator)
+		}
+	}
+
+	return validators, nil
+}
+
+type CrossfireValidatorRow struct {
 	MaybeId                             *int64 `json:"-"`
 	OperatorAddress                     string `json:"operatorAddress"`
 	ConsensusNodeAddress                string `json:"consensusNodeAddress"`
