@@ -10,7 +10,7 @@ import (
 	. "github.com/onsi/ginkgo"
 )
 
-var _ = Describe("Block", func() {
+var _ = Describe("Crossfire", func() {
 	It("should implement projection", func() {
 		fakeLogger := NewFakeLogger()
 		fakeRdbConn := NewFakeRDbConn()
@@ -27,7 +27,7 @@ var _ = Describe("Block", func() {
 			_ = pgMigrate.Reset()
 		})
 
-		It("should project crossfire_validators view when event is BlockCreated", func() {
+		It("should project crossfire_validators view when event is MsgCreateValidator", func() {
 		})
 	})
 })

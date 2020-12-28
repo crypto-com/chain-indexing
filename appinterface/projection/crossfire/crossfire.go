@@ -2,21 +2,22 @@ package crossfire
 
 import (
 	"fmt"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/constants"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/view"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
-const DO_NOT_MODIFY = "[do-not-modify]"
-
 type Crossfire struct {
 	*rdbprojectionbase.Base
 
-	rdbConn rdb.Conn
-	logger  applogger.Logger
+	rdbConn              rdb.Conn
+	logger               applogger.Logger
 	conNodeAddressPrefix string
 }
 
@@ -69,8 +70,7 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 	}()
 
 	rdbTxHandle := rdbTx.ToHandle()
-	//crossfireValidatorsView := view.NewCrossfireValidators(rdbTxHandle)
-	//crossfireValidatorsView := "foobar"
+	crossfireValidatorsView := view.NewCrossfireValidators(rdbTxHandle)
 
 	var blockTime utctime.UTCTime
 	var blockHash string
@@ -80,13 +80,13 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 			blockHash = blockCreatedEvent.Block.Hash
 		}
 	}
-	// TODO: remove print
+	// TODO: remove print for projectValidatorTx view
 	fmt.Println(blockTime, blockHash)
 
 	// TODO: views preparation starts
-	//if err := projection.projectCrossfireValidatorView(crossfireValidatorsView, height, events); err != nil {
-	//	return fmt.Errorf("error projecting validator view: %v", err)
-	//}
+	if err := projection.projectCrossfireValidatorView(crossfireValidatorsView, height, events); err != nil {
+		return fmt.Errorf("error projecting validator view: %v", err)
+	}
 	// TODO ends: views preparation ends and update current height as handled
 
 	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
@@ -100,166 +100,61 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 	return nil
 }
 
-// TODO: update with crossfire_validators view
-//func (projection *Crossfire) projectCrossfireValidatorView(
-//	validatorsView *view.Validators,
-//	blockHeight int64,
-//	events []event_entity.Event,
-//) error {
-//	// MsgCreateValidator should be handled first
-//	for _, event := range events {
-//		if msgCreateValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
-//			projection.logger.Debug("handling MsgCreateValidator event")
-//
-//			consensusNodeAddress, err := tmcosmosutils.ConsensusNodeAddressFromPubKey(
-//				projection.conNodeAddressPrefix, msgCreateValidatorEvent.Pubkey,
-//			)
-//			if err != nil {
-//				return fmt.Errorf("error converting consensus node pubkey to address: %v", err)
-//			}
-//			validatorRow := view.ValidatorRow{
-//				ConsensusNodeAddress:         consensusNodeAddress,
-//				OperatorAddress:              msgCreateValidatorEvent.ValidatorAddress,
-//				InitialDelegatorAddress:      msgCreateValidatorEvent.DelegatorAddress,
-//				MinSelfDelegation:            msgCreateValidatorEvent.MinSelfDelegation,
-//				Status:                       constants.UNBONDED,
-//				Jailed:                       false,
-//				JoinedAtBlockHeight:          blockHeight,
-//				Power:                        "0",
-//				MaybeUnbondingHeight:         nil,
-//				MaybeUnbondingCompletionTime: nil,
-//				Moniker:                      msgCreateValidatorEvent.Description.Moniker,
-//				Identity:                     msgCreateValidatorEvent.Description.Identity,
-//				Website:                      msgCreateValidatorEvent.Description.Website,
-//				SecurityContact:              msgCreateValidatorEvent.Description.SecurityContact,
-//				Details:                      msgCreateValidatorEvent.Description.Details,
-//				CommissionRate:               msgCreateValidatorEvent.CommissionRates.Rate,
-//				CommissionMaxRate:            msgCreateValidatorEvent.CommissionRates.MaxRate,
-//				CommissionMaxChangeRate:      msgCreateValidatorEvent.CommissionRates.MaxChangeRate,
-//			}
-//
-//			isJoined, joinedAtBlockHeight, err := validatorsView.LastJoinedBlockHeight(
-//				validatorRow.OperatorAddress, validatorRow.ConsensusNodeAddress,
-//			)
-//			if err != nil {
-//				return fmt.Errorf("error querying validator last joined block height: %v", err)
-//			}
-//			if isJoined {
-//				validatorRow.JoinedAtBlockHeight = joinedAtBlockHeight
-//			}
-//
-//			if err := validatorsView.Upsert(&validatorRow); err != nil {
-//				return fmt.Errorf("error inserting new validator into view: %v", err)
-//			}
-//		}
-//	}
-//
-//	for _, event := range events {
-//		if msgEditValidatorEvent, ok := event.(*event_usecase.MsgEditValidator); ok {
-//			projection.logger.Debug("handling MsgEditValidator event")
-//
-//			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
-//				MaybeOperatorAddress: &msgEditValidatorEvent.ValidatorAddress,
-//			})
-//			if err != nil {
-//				return fmt.Errorf(
-//					"error getting existing validator %s from view", msgEditValidatorEvent.ValidatorAddress,
-//				)
-//			}
-//
-//			if msgEditValidatorEvent.Description.Moniker != DO_NOT_MODIFY {
-//				mutValidatorRow.Moniker = msgEditValidatorEvent.Description.Moniker
-//			}
-//			if msgEditValidatorEvent.Description.Identity != DO_NOT_MODIFY {
-//				mutValidatorRow.Identity = msgEditValidatorEvent.Description.Identity
-//			}
-//			if msgEditValidatorEvent.Description.Details != DO_NOT_MODIFY {
-//				mutValidatorRow.Details = msgEditValidatorEvent.Description.Details
-//			}
-//			if msgEditValidatorEvent.Description.SecurityContact != DO_NOT_MODIFY {
-//				mutValidatorRow.SecurityContact = msgEditValidatorEvent.Description.SecurityContact
-//			}
-//			if msgEditValidatorEvent.Description.Website != DO_NOT_MODIFY {
-//				mutValidatorRow.Website = msgEditValidatorEvent.Description.Website
-//			}
-//
-//			if msgEditValidatorEvent.MaybeCommissionRate != nil {
-//				mutValidatorRow.CommissionRate = *msgEditValidatorEvent.MaybeCommissionRate
-//			}
-//			if msgEditValidatorEvent.MaybeMinSelfDelegation != nil {
-//				mutValidatorRow.MinSelfDelegation = *msgEditValidatorEvent.MaybeMinSelfDelegation
-//			}
-//
-//			if err := validatorsView.Update(mutValidatorRow); err != nil {
-//				return fmt.Errorf("error updating validator into view: %v", err)
-//			}
-//		} else if validatorJailedEvent, ok := event.(*event_usecase.ValidatorJailed); ok {
-//			projection.logger.Debug("handling ValidatorJailed event")
-//
-//			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
-//				MaybeConsensusNodeAddress: &validatorJailedEvent.ConsensusNodeAddress,
-//			})
-//			if err != nil {
-//				return fmt.Errorf(
-//					"error getting existing validator `%s` from view", validatorJailedEvent.ConsensusNodeAddress,
-//				)
-//			}
-//
-//			mutValidatorRow.Status = constants.JAILED
-//			mutValidatorRow.Jailed = true
-//
-//			if err := validatorsView.Update(mutValidatorRow); err != nil {
-//				return fmt.Errorf("error updating validator into view: %v", err)
-//			}
-//		} else if msgUnjailEvent, ok := event.(*event_usecase.MsgUnjail); ok {
-//			projection.logger.Debug("handling MsgUnjail event")
-//
-//			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
-//				MaybeOperatorAddress: &msgUnjailEvent.ValidatorAddr,
-//			})
-//			if err != nil {
-//				return fmt.Errorf("error getting existing validator `%s` from view", msgUnjailEvent.ValidatorAddr)
-//			}
-//
-//			mutValidatorRow.Status = constants.BONDED
-//			mutValidatorRow.Jailed = false
-//
-//			if err := validatorsView.Update(mutValidatorRow); err != nil {
-//				return fmt.Errorf("error updating validator into view: %v", err)
-//			}
-//		} else if powerChangedEvent, ok := event.(*event_usecase.PowerChanged); ok {
-//			projection.logger.Debug("handling PowerChange event")
-//
-//			pubkey, convErr := base64.StdEncoding.DecodeString(powerChangedEvent.TendermintPubkey)
-//			if convErr != nil {
-//				return fmt.Errorf("error base64 decoding tendermint pubkey")
-//			}
-//			consensusNodeAddress, convErr := tmcosmosutils.ConsensusNodeAddressFromTmPubKey(
-//				projection.conNodeAddressPrefix, pubkey,
-//			)
-//			if convErr != nil {
-//				return fmt.Errorf("error converting tendermint pubkey to consensus pubkey")
-//			}
-//
-//			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
-//				MaybeConsensusNodeAddress: &consensusNodeAddress,
-//			})
-//			if err != nil {
-//				return fmt.Errorf("error getting existing validator `%s` from view", consensusNodeAddress)
-//			}
-//
-//			mutValidatorRow.Power = powerChangedEvent.Power
-//			if powerChangedEvent.Power == "0" && !mutValidatorRow.Jailed {
-//				mutValidatorRow.Status = constants.UNBONDED
-//			} else if powerChangedEvent.Power != "0" {
-//				mutValidatorRow.Status = constants.BONDED
-//			}
-//
-//			if err := validatorsView.Update(mutValidatorRow); err != nil {
-//				return fmt.Errorf("error updating validator into view: %v", err)
-//			}
-//		}
-//	}
-//
-//	return nil
-//}
+func (projection *Crossfire) projectCrossfireValidatorView(
+	validatorsView *view.CrossfireValidators,
+	blockHeight int64,
+	events []event_entity.Event,
+) error {
+	// MsgCreateValidator should be handled first
+	for _, event := range events {
+		if msgCreateValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
+			projection.logger.Debug("handling MsgCreateValidator event")
+
+			consensusNodeAddress, err := tmcosmosutils.ConsensusNodeAddressFromPubKey(
+				projection.conNodeAddressPrefix, msgCreateValidatorEvent.Pubkey,
+			)
+			if err != nil {
+				return fmt.Errorf("error converting consensus node pubkey to address: %v", err)
+			}
+			validatorRow := view.ValidatorRow{
+				ConsensusNodeAddress:                consensusNodeAddress,
+				OperatorAddress:                     msgCreateValidatorEvent.ValidatorAddress,
+				InitialDelegatorAddress:             msgCreateValidatorEvent.DelegatorAddress,
+				Status:                              constants.UNBONDED,
+				Jailed:                              false,
+				JoinedAtBlockHeight:                 blockHeight,
+				Moniker:                             msgCreateValidatorEvent.Description.Moniker,
+				Identity:                            msgCreateValidatorEvent.Description.Identity,
+				Website:                             msgCreateValidatorEvent.Description.Website,
+				SecurityContact:                     msgCreateValidatorEvent.Description.SecurityContact,
+				Details:                             msgCreateValidatorEvent.Description.Details,
+				Phase0TaskRegistration:              constants.INCOMPLETED,
+				Phase1TaskNodeSetup:                 constants.INCOMPLETED,
+				Phase1TaskBlockValidCommit:          constants.INCOMPLETED,
+				Phase2TaskKeepNodeActive:            constants.INCOMPLETED,
+				Phase2TaskProposalVote:              constants.INCOMPLETED,
+				Phase2TaskNetworkUpgrade:            constants.INCOMPLETED,
+				Phase2TaskNetworkUpgradeBlockCommit: constants.INCOMPLETED,
+				Phase1n2TaskCommitmentCountRank:     0,
+				Phase3TaskCommitmentCountRank:       0,
+				TaskHighestSequenceRank:             0,
+			}
+
+			isJoined, joinedAtBlockHeight, err := validatorsView.LastJoinedBlockHeight(
+				validatorRow.OperatorAddress, validatorRow.ConsensusNodeAddress,
+			)
+			if err != nil {
+				return fmt.Errorf("error querying validator last joined block height: %v", err)
+			}
+			if isJoined {
+				validatorRow.JoinedAtBlockHeight = joinedAtBlockHeight
+			}
+
+			if err := validatorsView.Upsert(&validatorRow); err != nil {
+				return fmt.Errorf("error inserting new validator into view: %v", err)
+			}
+		}
+	}
+
+	return nil
+}
