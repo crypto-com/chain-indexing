@@ -126,9 +126,9 @@ type LoggerConfig struct {
 }
 
 type CrossfireConfig struct {
-	PhaseOneStartTime   string `toml:"phase_one_start_time"`
-	PhaseTwoStartTime   string `toml:"phase_two_start_time"`
-	PhaseThreeStartTime string `toml:"phase_three_start_time"`
-	CrossfireEndTime    string `toml:"crossfire_end_time"`
+	PhaseOneStartTime   int64  `toml:"phase_one_start_time"`
+	PhaseTwoStartTime   int64  `toml:"phase_two_start_time"`
+	PhaseThreeStartTime int64  `toml:"phase_three_start_time"`
+	CrossfireEndTime    int64  `toml:"crossfire_end_time"`
 	AdminAddress        string `toml:"admin_address"`
 }
