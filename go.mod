@@ -30,6 +30,6 @@ require (
 
 replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.2-alpha.regen.4
 
-replace github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.40.0-rc1
+replace github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.40.0-rc3
 
-replace github.com/calvinlauco/cosmostxdecoder => github.com/calvinlauco/cosmostxdecoder v0.0.1-rc1
+replace github.com/calvinlauco/cosmostxdecoder => github.com/calvinlauco/cosmostxdecoder v0.0.1-rc3
