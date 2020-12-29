@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
 )
 
 const TABLE_NAME = "view_crossfire_validators"
@@ -28,6 +29,7 @@ func (validatorsView *CrossfireValidators) LastJoinedBlockHeight(
 	var sqlArgs []interface{}
 	if sql, sqlArgs, err = validatorsView.rdb.StmtBuilder.Select(
 		"joined_at_block_height",
+		//"joined_at_block_time",
 	).From(
 		TABLE_NAME,
 	).Where(
@@ -57,6 +59,7 @@ func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorR
 		"status",
 		"jailed",
 		"joined_at_block_height",
+		"joined_at_block_time",
 		"moniker",
 		"identity",
 		"website",
@@ -76,6 +79,7 @@ func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorR
 		validator.Status,
 		validator.Jailed,
 		validator.JoinedAtBlockHeight,
+		validatorsView.rdb.Tton(&validator.JoinedAtBlockTime),
 		validator.Moniker,
 		validator.Identity,
 		validator.Website,
@@ -93,6 +97,7 @@ func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorR
 		status = EXCLUDED.status,
 		jailed = EXCLUDED.jailed,
 		joined_at_block_height = EXCLUDED.joined_at_block_height,
+		joined_at_block_time = EXCLUDED.joined_at_block_time,
 		moniker = EXCLUDED.moniker,
 		identity = EXCLUDED.identity,
 		website = EXCLUDED.website,
@@ -149,6 +154,7 @@ func (validatorsView *CrossfireValidators) List() ([]CrossfireValidatorRow, erro
 		"status",
 		"jailed",
 		"joined_at_block_height",
+		"joined_at_block_time",
 		"moniker",
 		"identity",
 		"website",
@@ -179,6 +185,7 @@ func (validatorsView *CrossfireValidators) List() ([]CrossfireValidatorRow, erro
 	validators := make([]CrossfireValidatorRow, 0)
 	for rowsResult.Next() {
 		var validator CrossfireValidatorRow
+		timeReader := validatorsView.rdb.NtotReader()
 		if err = rowsResult.Scan(
 			&validator.MaybeId,
 			&validator.OperatorAddress,
@@ -187,6 +194,7 @@ func (validatorsView *CrossfireValidators) List() ([]CrossfireValidatorRow, erro
 			&validator.Status,
 			&validator.Jailed,
 			&validator.JoinedAtBlockHeight,
+			timeReader.ScannableArg(),
 			&validator.Moniker,
 			&validator.Identity,
 			&validator.Website,
@@ -204,32 +212,38 @@ func (validatorsView *CrossfireValidators) List() ([]CrossfireValidatorRow, erro
 				return nil, rdb.ErrNoRows
 			}
 			return nil, fmt.Errorf("error scanning crossfire validator row: %v: %w", err, rdb.ErrQuery)
-		} else {
-			validators = append(validators, validator)
 		}
+
+		blockTime, parseErr := timeReader.Parse()
+		if parseErr != nil {
+			return nil, fmt.Errorf("error parsing block time: %v: %w", parseErr, rdb.ErrQuery)
+		}
+		validator.JoinedAtBlockTime = *blockTime
+		validators = append(validators, validator)
 	}
 
 	return validators, nil
 }
 
 type CrossfireValidatorRow struct {
-	MaybeId                             *int64 `json:"-"`
-	OperatorAddress                     string `json:"operatorAddress"`
-	ConsensusNodeAddress                string `json:"consensusNodeAddress"`
-	InitialDelegatorAddress             string `json:"initialDelegatorAddress"`
-	Status                              string `json:"status"`
-	Jailed                              bool   `json:"jailed"`
-	JoinedAtBlockHeight                 int64  `json:"joinedAtBlockHeight"`
-	Moniker                             string `json:"moniker"`
-	Identity                            string `json:"identity"`
-	Website                             string `json:"website"`
-	SecurityContact                     string `json:"securityContact"`
-	Details                             string `json:"details"`
-	TaskPhase1NodeSetup                 string `json:"taskPhase1NodeSetup"`
-	TaskPhase2KeepNodeActive            string `json:"taskPhase2KeepNodeActive"`
-	TaskPhase2ProposalVote              string `json:"taskPhase2ProposalVote"`
-	TaskPhase2NetworkUpgrade            string `json:"taskPhase2NetworkUpgrade"`
-	RankTaskPhase1n2CommitmentCount     int64  `json:"taskPhase1n2CommitmentCountRank"`
-	RankTaskPhase3CommitmentCount       int64  `json:"taskPhase3CommitmentCountRank"`
-	RankTaskHighestTxSent               int64  `json:"taskHighestTxSentRank"`
+	MaybeId                         *int64          `json:"-"`
+	OperatorAddress                 string          `json:"operatorAddress"`
+	ConsensusNodeAddress            string          `json:"consensusNodeAddress"`
+	InitialDelegatorAddress         string          `json:"initialDelegatorAddress"`
+	Status                          string          `json:"status"`
+	Jailed                          bool            `json:"jailed"`
+	JoinedAtBlockHeight             int64           `json:"joinedAtBlockHeight"`
+	JoinedAtBlockTime               utctime.UTCTime `json:"joinedAtBlockTime"`
+	Moniker                         string          `json:"moniker"`
+	Identity                        string          `json:"identity"`
+	Website                         string          `json:"website"`
+	SecurityContact                 string          `json:"securityContact"`
+	Details                         string          `json:"details"`
+	TaskPhase1NodeSetup             string          `json:"taskPhase1NodeSetup"`
+	TaskPhase2KeepNodeActive        string          `json:"taskPhase2KeepNodeActive"`
+	TaskPhase2ProposalVote          string          `json:"taskPhase2ProposalVote"`
+	TaskPhase2NetworkUpgrade        string          `json:"taskPhase2NetworkUpgrade"`
+	RankTaskPhase1n2CommitmentCount int64           `json:"taskPhase1n2CommitmentCountRank"`
+	RankTaskPhase3CommitmentCount   int64           `json:"taskPhase3CommitmentCountRank"`
+	RankTaskHighestTxSent           int64           `json:"taskHighestTxSentRank"`
 }

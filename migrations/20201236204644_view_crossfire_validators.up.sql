@@ -6,6 +6,7 @@ CREATE TABLE view_crossfire_validators (
     status VARCHAR NOT NULL,
     jailed BOOL NOT NULL,
     joined_at_block_height BIGINT NOT NULL,
+    joined_at_block_time BIGINT NOT NULL,
     moniker VARCHAR NOT NULL,
     identity VARCHAR NULL,
     website VARCHAR NULL,
