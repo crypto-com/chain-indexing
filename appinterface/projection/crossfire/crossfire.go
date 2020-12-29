@@ -113,7 +113,6 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 				Website:                             msgCreateValidatorEvent.Description.Website,
 				SecurityContact:                     msgCreateValidatorEvent.Description.SecurityContact,
 				Details:                             msgCreateValidatorEvent.Description.Details,
-				Phase0TaskRegistration:              constants.INCOMPLETED,
 				Phase1TaskNodeSetup:                 constants.INCOMPLETED,
 				Phase1TaskBlockValidCommit:          constants.INCOMPLETED,
 				Phase2TaskKeepNodeActive:            constants.INCOMPLETED,
@@ -122,7 +121,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 				Phase2TaskNetworkUpgradeBlockCommit: constants.INCOMPLETED,
 				Phase1n2TaskCommitmentCountRank:     0,
 				Phase3TaskCommitmentCountRank:       0,
-				TaskHighestSequenceRank:             0,
+				TaskHighestTxSentRank:               0,
 			}
 
 			isJoined, joinedAtBlockHeight, err := crossfireValidatorsView.LastJoinedBlockHeight(

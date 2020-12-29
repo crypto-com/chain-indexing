@@ -62,7 +62,6 @@ func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorR
 		"website",
 		"security_contact",
 		"details",
-		"phase_0_task_registration",
 		"phase_1_task_node_setup",
 		"phase_1_task_block_valid_commit",
 		"phase_2_task_keep_node_active",
@@ -71,7 +70,7 @@ func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorR
 		"phase_2_task_network_upgrade_block_commit",
 		"phase_1_2_task_commitment_count_rank",
 		"phase_3_task_commitment_count_rank",
-		"task_highest_sequence_rank",
+		"task_highest_tx_sent_rank",
 	).Values(
 		validator.OperatorAddress,
 		validator.ConsensusNodeAddress,
@@ -84,7 +83,6 @@ func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorR
 		validator.Website,
 		validator.SecurityContact,
 		validator.Details,
-		validator.Phase0TaskRegistration,
 		validator.Phase1TaskNodeSetup,
 		validator.Phase1TaskBlockValidCommit,
 		validator.Phase2TaskKeepNodeActive,
@@ -93,7 +91,7 @@ func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorR
 		validator.Phase2TaskNetworkUpgradeBlockCommit,
 		validator.Phase1n2TaskCommitmentCountRank,
 		validator.Phase3TaskCommitmentCountRank,
-		validator.TaskHighestSequenceRank,
+		validator.TaskHighestTxSentRank,
 	).Suffix(`ON CONFLICT (operator_address, consensus_node_address) DO UPDATE SET
 		initial_delegator_address = EXCLUDED.initial_delegator_address,
 		status = EXCLUDED.status,
@@ -104,7 +102,6 @@ func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorR
 		website = EXCLUDED.website,
 		security_contact = EXCLUDED.security_contact,
 		details = EXCLUDED.details,
-		phase_0_task_registration = EXCLUDED.phase_0_task_registration,
 		phase_1_task_node_setup = EXCLUDED.phase_1_task_node_setup,
 		phase_1_task_block_valid_commit = EXCLUDED.phase_1_task_block_valid_commit,
 		phase_2_task_keep_node_active = EXCLUDED.phase_2_task_keep_node_active,
@@ -113,7 +110,7 @@ func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorR
 		phase_2_task_network_upgrade_block_commit = EXCLUDED.phase_2_task_network_upgrade_block_commit,
 		phase_1_2_task_commitment_count_rank = EXCLUDED.phase_1_2_task_commitment_count_rank,
 		phase_3_task_commitment_count_rank = EXCLUDED.phase_3_task_commitment_count_rank,
-		task_highest_sequence_rank = EXCLUDED.task_highest_sequence_rank
+		task_highest_tx_sent_rank = EXCLUDED.task_highest_tx_sent_rank
 	`).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building validator upsertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -163,7 +160,6 @@ func (validatorsView *CrossfireValidators) List() ([]CrossfireValidatorRow, erro
 		"website",
 		"security_contact",
 		"details",
-		"phase_0_task_registration",
 		"phase_1_task_node_setup",
 		"phase_1_task_block_valid_commit",
 		"phase_2_task_keep_node_active",
@@ -172,7 +168,7 @@ func (validatorsView *CrossfireValidators) List() ([]CrossfireValidatorRow, erro
 		"phase_2_task_network_upgrade_block_commit",
 		"phase_1_2_task_commitment_count_rank",
 		"phase_3_task_commitment_count_rank",
-		"task_highest_sequence_rank",
+		"task_highest_tx_sent_rank",
 	).From(
 		TABLE_NAME,
 	)
@@ -204,7 +200,6 @@ func (validatorsView *CrossfireValidators) List() ([]CrossfireValidatorRow, erro
 			&validator.Website,
 			&validator.SecurityContact,
 			&validator.Details,
-			&validator.Phase0TaskRegistration,
 			&validator.Phase1TaskNodeSetup,
 			&validator.Phase1TaskBlockValidCommit,
 			&validator.Phase2TaskKeepNodeActive,
@@ -213,7 +208,7 @@ func (validatorsView *CrossfireValidators) List() ([]CrossfireValidatorRow, erro
 			&validator.Phase2TaskNetworkUpgradeBlockCommit,
 			&validator.Phase1n2TaskCommitmentCountRank,
 			&validator.Phase3TaskCommitmentCountRank,
-			&validator.TaskHighestSequenceRank,
+			&validator.TaskHighestTxSentRank,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, rdb.ErrNoRows
@@ -240,7 +235,6 @@ type CrossfireValidatorRow struct {
 	Website                             string `json:"website"`
 	SecurityContact                     string `json:"securityContact"`
 	Details                             string `json:"details"`
-	Phase0TaskRegistration              string `json:"phase0TaskRegistration"`
 	Phase1TaskNodeSetup                 string `json:"phase1TaskNodeSetup"`
 	Phase1TaskBlockValidCommit          string `json:"phase1TaskBlockValidCommit"`
 	Phase2TaskKeepNodeActive            string `json:"phase2TaskKeepNodeActive"`
@@ -249,5 +243,5 @@ type CrossfireValidatorRow struct {
 	Phase2TaskNetworkUpgradeBlockCommit string `json:"phase2TaskNetworkUpgradeBlockCommit"`
 	Phase1n2TaskCommitmentCountRank     int64  `json:"phase1n2TaskCommitmentCountRank"`
 	Phase3TaskCommitmentCountRank       int64  `json:"phase3TaskCommitmentCountRank"`
-	TaskHighestSequenceRank             int64  `json:"taskHighestSequenceRank"`
+	TaskHighestTxSentRank               int64  `json:"taskHighestTxSentRank"`
 }

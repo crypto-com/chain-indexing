@@ -94,7 +94,6 @@ var _ = Describe("Crossfire", func() {
 				Website:                             "www.example.com",
 				SecurityContact:                     "foo@example.com",
 				Details:                             "example",
-				Phase0TaskRegistration:              "Incompleted",
 				Phase1TaskNodeSetup:                 "Incompleted",
 				Phase1TaskBlockValidCommit:          "Incompleted",
 				Phase2TaskKeepNodeActive:            "Incompleted",
@@ -103,7 +102,7 @@ var _ = Describe("Crossfire", func() {
 				Phase2TaskNetworkUpgradeBlockCommit: "Incompleted",
 				Phase1n2TaskCommitmentCountRank:     0,
 				Phase3TaskCommitmentCountRank:       0,
-				TaskHighestSequenceRank:             0,
+				TaskHighestTxSentRank:               0,
 			})
 			Expect(list).To(Equal(targetList))
 		})
