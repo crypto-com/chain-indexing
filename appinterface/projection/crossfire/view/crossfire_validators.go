@@ -62,15 +62,15 @@ func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorR
 		"website",
 		"security_contact",
 		"details",
-		"phase_1_task_node_setup",
-		"phase_1_task_block_valid_commit",
-		"phase_2_task_keep_node_active",
-		"phase_2_task_proposal_vote",
-		"phase_2_task_network_upgrade",
-		"phase_2_task_network_upgrade_block_commit",
-		"phase_1_2_task_commitment_count_rank",
-		"phase_3_task_commitment_count_rank",
-		"task_highest_tx_sent_rank",
+		"task_phase_1_node_setup",
+		"task_phase_1_block_valid_commit",
+		"task_phase_2_keep_node_active",
+		"task_phase_2_proposal_vote",
+		"task_phase_2_network_upgrade",
+		"task_phase_2_network_upgrade_block_commit",
+		"rank_task_phase_1_2_commitment_count",
+		"rank_task_phase_3_commitment_count",
+		"rank_task_highest_tx_sent",
 	).Values(
 		validator.OperatorAddress,
 		validator.ConsensusNodeAddress,
@@ -83,15 +83,13 @@ func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorR
 		validator.Website,
 		validator.SecurityContact,
 		validator.Details,
-		validator.Phase1TaskNodeSetup,
-		validator.Phase1TaskBlockValidCommit,
-		validator.Phase2TaskKeepNodeActive,
-		validator.Phase2TaskProposalVote,
-		validator.Phase2TaskNetworkUpgrade,
-		validator.Phase2TaskNetworkUpgradeBlockCommit,
-		validator.Phase1n2TaskCommitmentCountRank,
-		validator.Phase3TaskCommitmentCountRank,
-		validator.TaskHighestTxSentRank,
+		validator.TaskPhase1NodeSetup,
+		validator.TaskPhase2KeepNodeActive,
+		validator.TaskPhase2ProposalVote,
+		validator.TaskPhase2NetworkUpgrade,
+		validator.RankTaskPhase1n2CommitmentCount,
+		validator.RankTaskPhase3CommitmentCount,
+		validator.RankTaskHighestTxSent,
 	).Suffix(`ON CONFLICT (operator_address, consensus_node_address) DO UPDATE SET
 		initial_delegator_address = EXCLUDED.initial_delegator_address,
 		status = EXCLUDED.status,
@@ -102,15 +100,15 @@ func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorR
 		website = EXCLUDED.website,
 		security_contact = EXCLUDED.security_contact,
 		details = EXCLUDED.details,
-		phase_1_task_node_setup = EXCLUDED.phase_1_task_node_setup,
-		phase_1_task_block_valid_commit = EXCLUDED.phase_1_task_block_valid_commit,
-		phase_2_task_keep_node_active = EXCLUDED.phase_2_task_keep_node_active,
-		phase_2_task_proposal_vote = EXCLUDED.phase_2_task_proposal_vote,
-		phase_2_task_network_upgrade = EXCLUDED.phase_2_task_network_upgrade,
-		phase_2_task_network_upgrade_block_commit = EXCLUDED.phase_2_task_network_upgrade_block_commit,
-		phase_1_2_task_commitment_count_rank = EXCLUDED.phase_1_2_task_commitment_count_rank,
-		phase_3_task_commitment_count_rank = EXCLUDED.phase_3_task_commitment_count_rank,
-		task_highest_tx_sent_rank = EXCLUDED.task_highest_tx_sent_rank
+		task_phase_1_node_setup = EXCLUDED.task_phase_1_node_setup,
+		task_phase_1_block_valid_commit = EXCLUDED.task_phase_1_block_valid_commit,
+		task_phase_2_keep_node_active = EXCLUDED.task_phase_2_keep_node_active,
+		task_phase_2_proposal_vote = EXCLUDED.task_phase_2_proposal_vote,
+		task_phase_2_network_upgrade = EXCLUDED.task_phase_2_network_upgrade,
+		task_phase_2_network_upgrade_block_commit = EXCLUDED.task_phase_2_network_upgrade_block_commit,
+		rank_task_phase_1_2_commitment_count = EXCLUDED.rank_task_phase_1_2_commitment_count,
+		rank_task_phase_3_commitment_count = EXCLUDED.rank_task_phase_3_commitment_count,
+		rank_task_highest_tx_sent = EXCLUDED.rank_task_highest_tx_sent
 	`).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building validator upsertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -160,15 +158,15 @@ func (validatorsView *CrossfireValidators) List() ([]CrossfireValidatorRow, erro
 		"website",
 		"security_contact",
 		"details",
-		"phase_1_task_node_setup",
-		"phase_1_task_block_valid_commit",
-		"phase_2_task_keep_node_active",
-		"phase_2_task_proposal_vote",
-		"phase_2_task_network_upgrade",
-		"phase_2_task_network_upgrade_block_commit",
-		"phase_1_2_task_commitment_count_rank",
-		"phase_3_task_commitment_count_rank",
-		"task_highest_tx_sent_rank",
+		"task_phase_1_node_setup",
+		"task_phase_1_block_valid_commit",
+		"task_phase_2_keep_node_active",
+		"task_phase_2_proposal_vote",
+		"task_phase_2_network_upgrade",
+		"task_phase_2_network_upgrade_block_commit",
+		"rank_task_phase_1_2_commitment_count",
+		"rank_task_phase_3_commitment_count",
+		"rank_task_highest_tx_sent",
 	).From(
 		TABLE_NAME,
 	)
@@ -200,15 +198,13 @@ func (validatorsView *CrossfireValidators) List() ([]CrossfireValidatorRow, erro
 			&validator.Website,
 			&validator.SecurityContact,
 			&validator.Details,
-			&validator.Phase1TaskNodeSetup,
-			&validator.Phase1TaskBlockValidCommit,
-			&validator.Phase2TaskKeepNodeActive,
-			&validator.Phase2TaskProposalVote,
-			&validator.Phase2TaskNetworkUpgrade,
-			&validator.Phase2TaskNetworkUpgradeBlockCommit,
-			&validator.Phase1n2TaskCommitmentCountRank,
-			&validator.Phase3TaskCommitmentCountRank,
-			&validator.TaskHighestTxSentRank,
+			&validator.TaskPhase1NodeSetup,
+			&validator.TaskPhase2KeepNodeActive,
+			&validator.TaskPhase2ProposalVote,
+			&validator.TaskPhase2NetworkUpgrade,
+			&validator.RankTaskPhase1n2CommitmentCount,
+			&validator.RankTaskPhase3CommitmentCount,
+			&validator.RankTaskHighestTxSent,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, rdb.ErrNoRows
@@ -235,13 +231,11 @@ type CrossfireValidatorRow struct {
 	Website                             string `json:"website"`
 	SecurityContact                     string `json:"securityContact"`
 	Details                             string `json:"details"`
-	Phase1TaskNodeSetup                 string `json:"phase1TaskNodeSetup"`
-	Phase1TaskBlockValidCommit          string `json:"phase1TaskBlockValidCommit"`
-	Phase2TaskKeepNodeActive            string `json:"phase2TaskKeepNodeActive"`
-	Phase2TaskProposalVote              string `json:"phase2TaskProposalVote"`
-	Phase2TaskNetworkUpgrade            string `json:"phase2TaskNetworkUpgrade"`
-	Phase2TaskNetworkUpgradeBlockCommit string `json:"phase2TaskNetworkUpgradeBlockCommit"`
-	Phase1n2TaskCommitmentCountRank     int64  `json:"phase1n2TaskCommitmentCountRank"`
-	Phase3TaskCommitmentCountRank       int64  `json:"phase3TaskCommitmentCountRank"`
-	TaskHighestTxSentRank               int64  `json:"taskHighestTxSentRank"`
+	TaskPhase1NodeSetup                 string `json:"taskPhase1NodeSetup"`
+	TaskPhase2KeepNodeActive            string `json:"taskPhase2KeepNodeActive"`
+	TaskPhase2ProposalVote              string `json:"taskPhase2ProposalVote"`
+	TaskPhase2NetworkUpgrade            string `json:"taskPhase2NetworkUpgrade"`
+	RankTaskPhase1n2CommitmentCount     int64  `json:"taskPhase1n2CommitmentCountRank"`
+	RankTaskPhase3CommitmentCount       int64  `json:"taskPhase3CommitmentCountRank"`
+	RankTaskHighestTxSent               int64  `json:"taskHighestTxSentRank"`
 }
