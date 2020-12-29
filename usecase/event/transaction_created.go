@@ -3,13 +3,11 @@ package event
 import (
 	"bytes"
 
-	"github.com/crypto-com/chain-indexing/usecase/model"
-
-	"github.com/crypto-com/chain-indexing/usecase/coin"
-
 	"github.com/luci/go-render/render"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -18,17 +16,25 @@ const TRANSACTION_CREATED = "TransactionCreated"
 type TransactionCreated struct {
 	entity_event.Base
 
-	TxHash        string    `json:"txHash"`
-	Code          int       `json:"code"`
-	Log           string    `json:"log"`
-	MsgCount      int       `json:"msgCount"`
-	Fee           coin.Coin `json:"fee"`
-	FeePayer      string    `json:"feePayer"`
-	FeeGranter    string    `json:"feeGranter"`
-	GasWanted     int       `json:"gasWanted"`
-	GasUsed       int       `json:"gasUsed"`
-	Memo          string    `json:"memo"`
-	TimeoutHeight int64     `json:"timeoutHeight"`
+	TxHash        string              `json:"txHash"`
+	Code          int                 `json:"code"`
+	Log           string              `json:"log"`
+	MsgCount      int                 `json:"msgCount"`
+	Senders       []TransactionSigner `json:"senders"`
+	Fee           coin.Coin           `json:"fee"`
+	FeePayer      string              `json:"feePayer"`
+	FeeGranter    string              `json:"feeGranter"`
+	GasWanted     int                 `json:"gasWanted"`
+	GasUsed       int                 `json:"gasUsed"`
+	Memo          string              `json:"memo"`
+	TimeoutHeight int64               `json:"timeoutHeight"`
+}
+
+type TransactionSigner struct {
+	Type            string   `json:"type"`
+	Pubkeys         []string `json:"pubkeys"`
+	MaybeThreshold  *int     `json:"threshold,omitempty"`
+	AccountSequence uint64   `json:"accountSequence"`
 }
 
 func NewTransactionCreated(blockHeight int64, params model.CreateTransactionParams) *TransactionCreated {
@@ -43,6 +49,7 @@ func NewTransactionCreated(blockHeight int64, params model.CreateTransactionPara
 		Code:          params.Code,
 		Log:           params.Log,
 		MsgCount:      params.MsgCount,
+		Senders:       parseSenders(params.Signers),
 		Fee:           params.Fee,
 		FeePayer:      params.FeePayer,
 		FeeGranter:    params.FeeGranter,
@@ -51,6 +58,21 @@ func NewTransactionCreated(blockHeight int64, params model.CreateTransactionPara
 		Memo:          params.Memo,
 		TimeoutHeight: params.TimeoutHeight,
 	}
+}
+
+func parseSenders(signers []model.TransactionSigner) []TransactionSigner {
+	parsedSenders := make([]TransactionSigner, 0, len(signers))
+
+	for _, signer := range signers {
+		parsedSenders = append(parsedSenders, TransactionSigner{
+			Type:            signer.Type,
+			Pubkeys:         signer.Pubkeys,
+			MaybeThreshold:  signer.MaybeThreshold,
+			AccountSequence: signer.AccountSequence,
+		})
+	}
+
+	return parsedSenders
 }
 
 func (event *TransactionCreated) ToJSON() (string, error) {
