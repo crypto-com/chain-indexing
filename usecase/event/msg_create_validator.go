@@ -23,7 +23,7 @@ type MsgCreateValidator struct {
 	MinSelfDelegation string                        `json:"minSelfDelegation"`
 	DelegatorAddress  string                        `json:"delegatorAddress"`
 	ValidatorAddress  string                        `json:"validatorAddress"`
-	Pubkey            string                        `json:"pubkey"`
+	TendermintPubkey  string                        `json:"tendermintPubkey"`
 	Amount            coin.Coin                     `json:"amount"`
 }
 
@@ -39,7 +39,7 @@ func NewMsgCreateValidator(msgCommonParams MsgCommonParams, params model.MsgCrea
 		params.MinSelfDelegation,
 		params.DelegatorAddress,
 		params.ValidatorAddress,
-		params.Pubkey,
+		params.TendermintPubkey,
 		params.Amount,
 	}
 }

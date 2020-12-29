@@ -1,13 +1,6 @@
 package validator_test
 
 import (
-	"github.com/crypto-com/chain-indexing/appinterface/projection/block"
-	viewBlock "github.com/crypto-com/chain-indexing/appinterface/projection/block/view"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/validator"
-	view2 "github.com/crypto-com/chain-indexing/appinterface/projection/validator/view"
-	"github.com/crypto-com/chain-indexing/usecase/coin"
-	"github.com/crypto-com/chain-indexing/usecase/model"
-
 	. "github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	. "github.com/crypto-com/chain-indexing/entity/event/test"
 	. "github.com/crypto-com/chain-indexing/internal/logger/test"
@@ -16,13 +9,18 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/crypto-com/chain-indexing/appinterface/projection/block"
+	block_view "github.com/crypto-com/chain-indexing/appinterface/projection/block/view"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/validator"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/validator/constants"
+	validator_view "github.com/crypto-com/chain-indexing/appinterface/projection/validator/view"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
-
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/crypto-com/chain-indexing/internal/primptr"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 )
 
@@ -82,8 +80,8 @@ var _ = Describe("Validator Events", func() {
 		})
 
 		It("should increment the validator view count after handling MsgCreateValidator event", func() {
-			validatorView := view2.NewValidators(pgConn.ToHandle())
-			blocksView := viewBlock.NewBlocks(pgConn.ToHandle())
+			validatorView := validator_view.NewValidators(pgConn.ToHandle())
+			blocksView := block_view.NewBlocks(pgConn.ToHandle())
 
 			anyHeight := int64(1)
 
@@ -106,7 +104,7 @@ var _ = Describe("Validator Events", func() {
 				MinSelfDelegation: "1",
 				DelegatorAddress:  "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 				ValidatorAddress:  "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
-				Pubkey:            "tcrocnclconspub1zcjduepqa5rksn4ds9u6jmmg4n86d9wct7wmj23pyqe6p7e252lffzqsgcvqxm5lc2",
+				TendermintPubkey:  "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
 				Amount:            coin.MustNewCoinFromString("10"),
 			}
 			event := event_usecase.NewBlockCreated(&usecase_model.Block{
@@ -140,7 +138,7 @@ var _ = Describe("Validator Events", func() {
 				TxSuccess:   false,
 				MsgIndex:    0,
 			}, createValidatorParams)
-			countFilter := view2.CountFilter{
+			countFilter := validator_view.CountFilter{
 				MaybeStatus: []string{
 					constants.UNBONDED,
 					constants.BONDED,
@@ -190,7 +188,7 @@ var _ = Describe("Validator Events", func() {
 		})
 
 		It("should not persist projection nor last handled event height on handling error", func() {
-			blocksView := viewBlock.NewBlocks(pgConn.ToHandle())
+			blocksView := block_view.NewBlocks(pgConn.ToHandle())
 
 			anyHeight := int64(1)
 			event := NewFakeEvent()

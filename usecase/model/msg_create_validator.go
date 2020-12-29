@@ -10,6 +10,6 @@ type MsgCreateValidatorParams struct {
 	MinSelfDelegation string                  `json:"minSelfDelegation"`
 	DelegatorAddress  string                  `json:"delegatorAddress"`
 	ValidatorAddress  string                  `json:"validatorAddress"`
-	Pubkey            string                  `json:"pubkey"`
+	TendermintPubkey  string                  `json:"tendermintPubkey"`
 	Amount            coin.Coin               `json:"amount"`
 }

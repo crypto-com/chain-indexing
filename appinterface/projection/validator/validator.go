@@ -126,15 +126,15 @@ func (projection *Validator) projectValidatorView(
 	for _, event := range events {
 		if msgCreateValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
 			projection.logger.Debug("handling MsgCreateValidator event")
-			pubKey, err := base64.StdEncoding.DecodeString(msgCreateValidatorEvent.Pubkey)
+			pubKey, err := base64.StdEncoding.DecodeString(msgCreateValidatorEvent.TendermintPubkey)
 			if err != nil {
-				return fmt.Errorf("error base64 decode tm node pubkey: %v", err)
+				return fmt.Errorf("error base64 decoding Tendermint node pubkey: %v", err)
 			}
 			consensusNodeAddress, err := tmcosmosutils.ConsensusNodeAddressFromTmPubKey(
 				projection.conNodeAddressPrefix, pubKey,
 			)
 			if err != nil {
-				return fmt.Errorf("error converting consensus node pubkey to address: %v", err)
+				return fmt.Errorf("error converting Tendermint node pubkey to address: %v", err)
 			}
 			validatorRow := view.ValidatorRow{
 				ConsensusNodeAddress:         consensusNodeAddress,

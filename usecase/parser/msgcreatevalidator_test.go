@@ -29,12 +29,12 @@ var _ = Describe("ParseMsgCommands", func() {
 				blockResults,
 			)
 			Expect(err).To(BeNil())
-			Expect(cmds).To(HaveLen(5))
-			thiscmd := cmds[2]
+			Expect(cmds).To(HaveLen(1))
+			thiscmd := cmds[0]
 			Expect(thiscmd.Name()).To(Equal("CreateMsgCreateValidator"))
 
 			description := model.MsgValidatorDescription{
-				Moniker:         "Calvin Test Node",
+				Moniker:         "leo-node",
 				Identity:        "",
 				Website:         "",
 				SecurityContact: "",
@@ -48,8 +48,8 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			Expect(thiscmd).To(Equal(command_usecase.NewCreateMsgCreateValidator(
 				event.MsgCommonParams{
-					BlockHeight: int64(503978),
-					TxHash:      "E69985AC8168383A81B7952DBE03EB9B3400FF80AEC0F362369DD7F38B1C2FE9",
+					BlockHeight: int64(76550),
+					TxHash:      "1FE830F23A3C542547700AAB3D0E5106A0131B393260910F63EE3B5542E281EF",
 					TxSuccess:   true,
 					MsgIndex:    0,
 				},
@@ -57,10 +57,10 @@ var _ = Describe("ParseMsgCommands", func() {
 					Description:       description,
 					Commission:        commissionRates,
 					MinSelfDelegation: "1",
-					DelegatorAddress:  "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-					ValidatorAddress:  "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
-					Pubkey:            "tcrocnclconspub1zcjduepqa5rksn4ds9u6jmmg4n86d9wct7wmj23pyqe6p7e252lffzqsgcvqxm5lc2",
-					Amount:            coin.MustNewCoinFromString("10"),
+					DelegatorAddress:  "tcro109ww3ss92v4vsaq470vvgw528mtqp98mq0vvp9",
+					ValidatorAddress:  "tcrocncl109ww3ss92v4vsaq470vvgw528mtqp98m4s04ex",
+					TendermintPubkey:  "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
+					Amount:            coin.MustNewCoinFromString("10000000000000"),
 				},
 			)))
 		})
