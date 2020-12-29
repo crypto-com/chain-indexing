@@ -1,326 +1,235 @@
 package view
 
-// import (
-// 	"errors"
-// 	"fmt"
-// 	"strings"
+import (
+	"errors"
+	"fmt"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+)
 
-// 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
+const TABLE_NAME = "view_crossfire_validators"
 
-// 	sq "github.com/Masterminds/squirrel"
+type CrossfireValidators struct {
+	rdb *rdb.Handle
+}
 
-// 	"github.com/crypto-com/chain-indexing/appinterface/pagination"
+func NewCrossfireValidators(handle *rdb.Handle) *CrossfireValidators {
+	return &CrossfireValidators{
+		handle,
+	}
+}
 
-// 	jsoniter "github.com/json-iterator/go"
+func (validatorsView *CrossfireValidators) LastJoinedBlockHeight(
+	operatorAddress string,
+	consensusNodeAddress string,
+) (bool, int64, error) {
+	var err error
 
-// 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
-// 	"github.com/crypto-com/chain-indexing/internal/utctime"
-// 	_ "github.com/crypto-com/chain-indexing/test/factory"
-// )
+	var sql string
+	var sqlArgs []interface{}
+	if sql, sqlArgs, err = validatorsView.rdb.StmtBuilder.Select(
+		"joined_at_block_height",
+	).From(
+		TABLE_NAME,
+	).Where(
+		"operator_address = ? AND consensus_node_address = ?", operatorAddress, consensusNodeAddress,
+	).ToSql(); err != nil {
+		return false, int64(0), fmt.Errorf("error building validator existencen query sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
 
-// type CrossfireValidators struct {
-// 	rdb *rdb.Handle
-// }
+	var joinedAtBlockHeight int64
+	if err = validatorsView.rdb.QueryRow(sql, sqlArgs...).Scan(&joinedAtBlockHeight); err != nil {
+		if errors.Is(err, rdb.ErrNoRows) {
+			return false, int64(0), nil
+		}
+		return false, int64(0), fmt.Errorf("error query validator existence: %v", err)
+	}
 
-// func NewCrossfireValidators(handle *rdb.Handle) *CrossfireValidators {
-// 	return &CrossfireValidators{
-// 		handle,
-// 	}
-// }
+	return true, joinedAtBlockHeight, nil
+}
 
-// func (crossfireValidatorsView *CrossfireValidators) Insert(block *Block) error {
-// 	var err error
+func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorRow) error {
+	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Insert(
+		TABLE_NAME,
+	).Columns(
+		"operator_address",
+		"consensus_node_address",
+		"initial_delegator_address",
+		"status",
+		"jailed",
+		"joined_at_block_height",
+		"moniker",
+		"identity",
+		"website",
+		"security_contact",
+		"details",
+		"task_phase_1_node_setup",
+		"task_phase_2_keep_node_active",
+		"task_phase_2_proposal_vote",
+		"task_phase_2_network_upgrade",
+		"rank_task_phase_1_2_commitment_count",
+		"rank_task_phase_3_commitment_count",
+		"rank_task_highest_tx_sent",
+	).Values(
+		validator.OperatorAddress,
+		validator.ConsensusNodeAddress,
+		validator.InitialDelegatorAddress,
+		validator.Status,
+		validator.Jailed,
+		validator.JoinedAtBlockHeight,
+		validator.Moniker,
+		validator.Identity,
+		validator.Website,
+		validator.SecurityContact,
+		validator.Details,
+		validator.TaskPhase1NodeSetup,
+		validator.TaskPhase2KeepNodeActive,
+		validator.TaskPhase2ProposalVote,
+		validator.TaskPhase2NetworkUpgrade,
+		validator.RankTaskPhase1n2CommitmentCount,
+		validator.RankTaskPhase3CommitmentCount,
+		validator.RankTaskHighestTxSent,
+	).Suffix(`ON CONFLICT (operator_address, consensus_node_address) DO UPDATE SET
+		initial_delegator_address = EXCLUDED.initial_delegator_address,
+		status = EXCLUDED.status,
+		jailed = EXCLUDED.jailed,
+		joined_at_block_height = EXCLUDED.joined_at_block_height,
+		moniker = EXCLUDED.moniker,
+		identity = EXCLUDED.identity,
+		website = EXCLUDED.website,
+		security_contact = EXCLUDED.security_contact,
+		details = EXCLUDED.details,
+		task_phase_1_node_setup = EXCLUDED.task_phase_1_node_setup,
+		task_phase_2_keep_node_active = EXCLUDED.task_phase_2_keep_node_active,
+		task_phase_2_proposal_vote = EXCLUDED.task_phase_2_proposal_vote,
+		task_phase_2_network_upgrade = EXCLUDED.task_phase_2_network_upgrade,
+		rank_task_phase_1_2_commitment_count = EXCLUDED.rank_task_phase_1_2_commitment_count,
+		rank_task_phase_3_commitment_count = EXCLUDED.rank_task_phase_3_commitment_count,
+		rank_task_highest_tx_sent = EXCLUDED.rank_task_highest_tx_sent
+	`).ToSql()
+	if err != nil {
+		return fmt.Errorf("error building validator upsertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+	result, err := validatorsView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error upserting validator into the table: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() != 1 {
+		return fmt.Errorf("error upserting validator into the table: no rows inserted: %w", rdb.ErrWrite)
+	}
 
-// 	var sql string
-// 	sql, _, err = crossfireValidatorsView.rdb.StmtBuilder.Insert(
-// 		"view_blocks",
-// 	).Columns(
-// 		"height",
-// 		"hash",
-// 		"time",
-// 		"app_hash",
-// 		"committed_council_nodes",
-// 		"transaction_count",
-// 	).Values("?", "?", "?", "?", "?", "?").ToSql()
-// 	if err != nil {
-// 		return fmt.Errorf("error building blocks insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
-// 	}
+	return nil
+}
 
-// 	var committedCouncilNodesJSON string
-// 	if committedCouncilNodesJSON, err = jsoniter.MarshalToString(block.CommittedCouncilNodes); err != nil {
-// 		return fmt.Errorf("error JSON marshalling blocks committed council nodes for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
-// 	}
+func (validatorsView *CrossfireValidators) Count() (int64, error) {
+	var count int64
 
-// 	result, err := crossfireValidatorsView.rdb.Exec(sql,
-// 		block.Height,
-// 		block.Hash,
-// 		crossfireValidatorsView.rdb.Tton(&block.Time),
-// 		block.AppHash,
-// 		committedCouncilNodesJSON,
-// 		block.TransactionCount,
-// 	)
-// 	if err != nil {
-// 		return fmt.Errorf("error inserting block into the table: %v: %w", err, rdb.ErrWrite)
-// 	}
-// 	if result.RowsAffected() != 1 {
-// 		return fmt.Errorf("error inserting block into the table: no rows inserted: %w", rdb.ErrWrite)
-// 	}
+	stmt := validatorsView.rdb.StmtBuilder.Select(
+		"COUNT(*)",
+	).From(
+		TABLE_NAME,
+	)
 
-// 	return nil
-// }
+	sql, sqlArgs, err := stmt.ToSql()
+	if err != nil {
+		return int64(0), fmt.Errorf("error building validator count sql: %v: %w", err, rdb.ErrPrepare)
+	}
 
-// func (crossfireValidatorsView *CrossfireValidators) List(order BlocksListOrder, pagination *pagination.Pagination) ([]Block, *pagination.PaginationResult, error) {
-// 	stmtBuilder := crossfireValidatorsView.rdb.StmtBuilder.Select(
-// 		"height",
-// 		"hash",
-// 		"time",
-// 		"app_hash",
-// 		"committed_council_nodes",
-// 		"transaction_count",
-// 	).From(
-// 		"view_blocks",
-// 	)
+	if err := validatorsView.rdb.QueryRow(sql, sqlArgs...).Scan(&count); err != nil {
+		return int64(0), fmt.Errorf("error getting validators count: %v", err)
+	}
+	return count, nil
+}
 
-// 	if order.Height == view.ORDER_DESC {
-// 		stmtBuilder = stmtBuilder.OrderBy("height DESC")
-// 	} else {
-// 		stmtBuilder = stmtBuilder.OrderBy("height")
-// 	}
+func (validatorsView *CrossfireValidators) List() ([]CrossfireValidatorRow, error) {
+	stmtBuilder := validatorsView.rdb.StmtBuilder.Select(
+		"id",
+		"operator_address",
+		"consensus_node_address",
+		"initial_delegator_address",
+		"status",
+		"jailed",
+		"joined_at_block_height",
+		"moniker",
+		"identity",
+		"website",
+		"security_contact",
+		"details",
+		"task_phase_1_node_setup",
+		"task_phase_2_keep_node_active",
+		"task_phase_2_proposal_vote",
+		"task_phase_2_network_upgrade",
+		"rank_task_phase_1_2_commitment_count",
+		"rank_task_phase_3_commitment_count",
+		"rank_task_highest_tx_sent",
+	).From(
+		TABLE_NAME,
+	)
 
-// 	rDbPagination := rdb.NewRDbPaginationBuilder(
-// 		pagination,
-// 		crossfireValidatorsView.rdb,
-// 	).WithCustomTotalQueryFn(
-// 		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
-// 			var total int64
-// 			if err := rdbHandle.QueryRow("SELECT height FROM view_blocks ORDER BY height DESC LIMIT 1").Scan(&total); err != nil {
-// 				return int64(0), err
-// 			}
-// 			return total, nil
-// 		},
-// 	).BuildStmt(stmtBuilder)
-// 	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
-// 	if err != nil {
-// 		return nil, nil, fmt.Errorf("error building blocks select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
-// 	}
+	sql, sqlArgs, err := stmtBuilder.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("error building blocks select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
+	}
 
-// 	rowsResult, err := crossfireValidatorsView.rdb.Query(sql, sqlArgs...)
-// 	if err != nil {
-// 		return nil, nil, fmt.Errorf("error executing blocks select SQL: %v: %w", err, rdb.ErrQuery)
-// 	}
+	rowsResult, err := validatorsView.rdb.Query(sql, sqlArgs...)
+	if err != nil {
+		return nil, fmt.Errorf("error executing blocks select SQL: %v: %w", err, rdb.ErrQuery)
+	}
+	defer rowsResult.Close()
 
-// 	blocks := make([]Block, 0)
-// 	for rowsResult.Next() {
-// 		var block Block
-// 		var committedCouncilNodesJSON *string
-// 		timeReader := crossfireValidatorsView.rdb.NtotReader()
-// 		if err = rowsResult.Scan(
-// 			&block.Height,
-// 			&block.Hash,
-// 			timeReader.ScannableArg(),
-// 			&block.AppHash,
-// 			&committedCouncilNodesJSON,
-// 			&block.TransactionCount,
-// 		); err != nil {
-// 			if errors.Is(err, rdb.ErrNoRows) {
-// 				return nil, nil, rdb.ErrNoRows
-// 			}
-// 			return nil, nil, fmt.Errorf("error scanning block row: %v: %w", err, rdb.ErrQuery)
-// 		}
-// 		blockTime, parseErr := timeReader.Parse()
-// 		if parseErr != nil {
-// 			return nil, nil, fmt.Errorf("error parsing block time: %v: %w", parseErr, rdb.ErrQuery)
-// 		}
-// 		block.Time = *blockTime
+	validators := make([]CrossfireValidatorRow, 0)
+	for rowsResult.Next() {
+		var validator CrossfireValidatorRow
+		if err = rowsResult.Scan(
+			&validator.MaybeId,
+			&validator.OperatorAddress,
+			&validator.ConsensusNodeAddress,
+			&validator.InitialDelegatorAddress,
+			&validator.Status,
+			&validator.Jailed,
+			&validator.JoinedAtBlockHeight,
+			&validator.Moniker,
+			&validator.Identity,
+			&validator.Website,
+			&validator.SecurityContact,
+			&validator.Details,
+			&validator.TaskPhase1NodeSetup,
+			&validator.TaskPhase2KeepNodeActive,
+			&validator.TaskPhase2ProposalVote,
+			&validator.TaskPhase2NetworkUpgrade,
+			&validator.RankTaskPhase1n2CommitmentCount,
+			&validator.RankTaskPhase3CommitmentCount,
+			&validator.RankTaskHighestTxSent,
+		); err != nil {
+			if errors.Is(err, rdb.ErrNoRows) {
+				return nil, rdb.ErrNoRows
+			}
+			return nil, fmt.Errorf("error scanning crossfire validator row: %v: %w", err, rdb.ErrQuery)
+		} else {
+			validators = append(validators, validator)
+		}
+	}
 
-// 		var committedCouncilNodes []BlockCommittedCouncilNode
-// 		if unmarshalErr := jsoniter.Unmarshal([]byte(*committedCouncilNodesJSON), &committedCouncilNodes); unmarshalErr != nil {
-// 			return nil, nil, fmt.Errorf("error unmarshalling block council nodes JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
-// 		}
+	return validators, nil
+}
 
-// 		block.CommittedCouncilNodes = committedCouncilNodes
-
-// 		blocks = append(blocks, block)
-// 	}
-
-// 	paginationResult, err := rDbPagination.Result()
-// 	if err != nil {
-// 		return nil, nil, fmt.Errorf("error preparing pagination result: %v", err)
-// 	}
-
-// 	return blocks, paginationResult, nil
-// }
-
-// func (crossfireValidatorsView *CrossfireValidators) FindBy(identity *BlockIdentity) (*Block, error) {
-// 	var err error
-
-// 	selectStmtBuilder := crossfireValidatorsView.rdb.StmtBuilder.Select(
-// 		"height", "hash", "time", "app_hash", "committed_council_nodes", "transaction_count",
-// 	).From("view_blocks")
-// 	if identity.MaybeHash != nil {
-// 		selectStmtBuilder = selectStmtBuilder.Where("hash = ?", *identity.MaybeHash)
-// 	} else {
-// 		selectStmtBuilder = selectStmtBuilder.Where("height = ?", *identity.MaybeHeight)
-// 	}
-
-// 	sql, sqlArgs, err := selectStmtBuilder.ToSql()
-// 	if err != nil {
-// 		return nil, fmt.Errorf("error building block selection sql: %v: %w", err, rdb.ErrPrepare)
-// 	}
-
-// 	var block Block
-// 	var committedCouncilNodesJSON *string
-// 	timeReader := crossfireValidatorsView.rdb.NtotReader()
-// 	if err = crossfireValidatorsView.rdb.QueryRow(sql, sqlArgs...).Scan(
-// 		&block.Height,
-// 		&block.Hash,
-// 		timeReader.ScannableArg(),
-// 		&block.AppHash,
-// 		&committedCouncilNodesJSON,
-// 		&block.TransactionCount,
-// 	); err != nil {
-// 		if errors.Is(err, rdb.ErrNoRows) {
-// 			return nil, rdb.ErrNoRows
-// 		}
-// 		return nil, fmt.Errorf("error scanning block row: %v: %w", err, rdb.ErrQuery)
-// 	}
-// 	blockTime, err := timeReader.Parse()
-// 	if err != nil {
-// 		return nil, fmt.Errorf("error parsing block time: %v: %w", err, rdb.ErrQuery)
-// 	}
-// 	block.Time = *blockTime
-
-// 	var committedCouncilNodes []BlockCommittedCouncilNode
-// 	if err = jsoniter.Unmarshal([]byte(*committedCouncilNodesJSON), &committedCouncilNodes); err != nil {
-// 		return nil, fmt.Errorf("error unmarshalling block council nodes JSON: %v: %w", err, rdb.ErrQuery)
-// 	}
-
-// 	block.CommittedCouncilNodes = committedCouncilNodes
-
-// 	return &block, nil
-// }
-
-// func (crossfireValidatorsView *CrossfireValidators) Search(
-// 	keyword string,
-// ) ([]Block, error) {
-// 	keyword = strings.ToUpper(keyword)
-// 	sql, sqlArgs, err := crossfireValidatorsView.rdb.StmtBuilder.Select(
-// 		"height",
-// 		"hash",
-// 		"time",
-// 		"app_hash",
-// 		"committed_council_nodes",
-// 		"transaction_count",
-// 	).From(
-// 		"view_blocks",
-// 	).Where(
-// 		"height::TEXT = ? OR hash = ?", keyword, keyword,
-// 	).OrderBy(
-// 		"height",
-// 	).Limit(5).ToSql()
-// 	if err != nil {
-// 		return nil, fmt.Errorf("error building blocks select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
-// 	}
-
-// 	rowsResult, err := crossfireValidatorsView.rdb.Query(sql, sqlArgs...)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("error executing blocks select SQL: %v: %w", err, rdb.ErrQuery)
-// 	}
-
-// 	blocks := make([]Block, 0)
-// 	for rowsResult.Next() {
-// 		var block Block
-// 		var committedCouncilNodesJSON *string
-// 		timeReader := crossfireValidatorsView.rdb.NtotReader()
-// 		if err = rowsResult.Scan(
-// 			&block.Height,
-// 			&block.Hash,
-// 			timeReader.ScannableArg(),
-// 			&block.AppHash,
-// 			&committedCouncilNodesJSON,
-// 			&block.TransactionCount,
-// 		); err != nil {
-// 			if errors.Is(err, rdb.ErrNoRows) {
-// 				return nil, rdb.ErrNoRows
-// 			}
-// 			return nil, fmt.Errorf("error scanning block row: %v: %w", err, rdb.ErrQuery)
-// 		}
-// 		blockTime, parseErr := timeReader.Parse()
-// 		if parseErr != nil {
-// 			return nil, fmt.Errorf("error parsing block time: %v: %w", parseErr, rdb.ErrQuery)
-// 		}
-// 		block.Time = *blockTime
-
-// 		var committedCouncilNodes []BlockCommittedCouncilNode
-// 		if unmarshalErr := jsoniter.Unmarshal([]byte(*committedCouncilNodesJSON), &committedCouncilNodes); unmarshalErr != nil {
-// 			return nil, fmt.Errorf("error unmarshalling block council nodes JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
-// 		}
-
-// 		block.CommittedCouncilNodes = committedCouncilNodes
-
-// 		blocks = append(blocks, block)
-// 	}
-
-// 	return blocks, nil
-// }
-
-// func (crossfireValidatorsView *CrossfireValidators) Count() (int64, error) {
-// 	sql, _, err := crossfireValidatorsView.rdb.StmtBuilder.Select("MAX(height)").From(
-// 		"view_blocks",
-// 	).ToSql()
-// 	if err != nil {
-// 		return 0, fmt.Errorf("error building blocks count selection sql: %v", err)
-// 	}
-
-// 	result := crossfireValidatorsView.rdb.QueryRow(sql)
-// 	var count *int64
-// 	if err := result.Scan(&count); err != nil {
-// 		return 0, fmt.Errorf("error scanning blocks count selection query: %v", err)
-// 	}
-
-// 	if count == nil {
-// 		return 0, nil
-// 	}
-// 	return *count, nil
-// }
-
-// func (node *RdbBlockCommittedCouncilNode) ToRaw() *BlockCommittedCouncilNode {
-// 	return &BlockCommittedCouncilNode{
-// 		Address:    node.Address,
-// 		Time:       utctime.FromUnixNano(node.Time),
-// 		Signature:  node.Signature,
-// 		IsProposer: node.IsProposer,
-// 	}
-// }
-
-// type Block struct {
-// 	Height                int64                       `json:"blockHeight" fake:"{+int64}"`
-// 	Hash                  string                      `json:"blockHash" fake:"{blockhash}"`
-// 	Time                  utctime.UTCTime             `json:"blockTime" fake:"{utctime}"`
-// 	AppHash               string                      `json:"appHash" fake:"{apphash}"`
-// 	TransactionCount      int                         `json:"transactionCount" fake:"{number:0,2147483647}"`
-// 	CommittedCouncilNodes []BlockCommittedCouncilNode `json:"committedCouncilNodes" fakesize:"3"`
-// }
-
-// type BlockCommittedCouncilNode struct {
-// 	Address    string          `json:"address" fake:"{validatoraddress}"`
-// 	Time       utctime.UTCTime `json:"time" fake:"{utctime}"`
-// 	Signature  string          `json:"signature" fake:"{commitsignature}"`
-// 	IsProposer bool            `json:"isProposer" fake:"{bool}"`
-// }
-
-// type RdbBlockCommittedCouncilNode struct {
-// 	Address    string `json:"address"`
-// 	Time       int64  `json:"time"`
-// 	Signature  string `json:"signature"`
-// 	IsProposer bool   `json:"isProposer"`
-// }
-
-// type BlockIdentity struct {
-// 	MaybeHeight *int64
-// 	MaybeHash   *string
-// }
-
-// type BlocksListOrder struct {
-// 	Height view.ORDER
-// }
+type CrossfireValidatorRow struct {
+	MaybeId                             *int64 `json:"-"`
+	OperatorAddress                     string `json:"operatorAddress"`
+	ConsensusNodeAddress                string `json:"consensusNodeAddress"`
+	InitialDelegatorAddress             string `json:"initialDelegatorAddress"`
+	Status                              string `json:"status"`
+	Jailed                              bool   `json:"jailed"`
+	JoinedAtBlockHeight                 int64  `json:"joinedAtBlockHeight"`
+	Moniker                             string `json:"moniker"`
+	Identity                            string `json:"identity"`
+	Website                             string `json:"website"`
+	SecurityContact                     string `json:"securityContact"`
+	Details                             string `json:"details"`
+	TaskPhase1NodeSetup                 string `json:"taskPhase1NodeSetup"`
+	TaskPhase2KeepNodeActive            string `json:"taskPhase2KeepNodeActive"`
+	TaskPhase2ProposalVote              string `json:"taskPhase2ProposalVote"`
+	TaskPhase2NetworkUpgrade            string `json:"taskPhase2NetworkUpgrade"`
+	RankTaskPhase1n2CommitmentCount     int64  `json:"taskPhase1n2CommitmentCountRank"`
+	RankTaskPhase3CommitmentCount       int64  `json:"taskPhase3CommitmentCountRank"`
+	RankTaskHighestTxSent               int64  `json:"taskHighestTxSentRank"`
+}

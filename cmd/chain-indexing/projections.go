@@ -4,6 +4,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/projection/account_message"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/block"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/blockevent"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire"
 	transaction "github.com/crypto-com/chain-indexing/appinterface/projection/transaction"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/validator"
 
@@ -30,7 +31,11 @@ func initProjections(
 		validatorstats.NewValidatorStats(logger, rdbConn),
 		account_message.NewAccountMessage(logger, rdbConn),
 
-		// TODO: crossfire projection to be registered here
+		// NOTICE: crossfire dry-run projection is only for main-net competition
+		// the logic and view tables could be removed after the competition is ended.
+		crossfire.NewCrossfire(
+			logger, rdbConn, consNodeAddressPrefix,
+		),
 
 		// register more projections here
 	}
