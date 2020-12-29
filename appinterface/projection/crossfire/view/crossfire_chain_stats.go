@@ -11,7 +11,7 @@ type CrossfireChainStats struct {
 	rdbHandle *rdb.Handle
 }
 
-const CrossfireChainStatsViewTableName = "view_crossfire_chain_stats"
+const CROSSFIRE_CHAIN_STATS_VIEW_TABLENAME = "view_crossfire_chain_stats"
 
 func NewCrossfireChainStats(handle *rdb.Handle) *CrossfireChainStats {
 	return &CrossfireChainStats{
@@ -22,7 +22,7 @@ func NewCrossfireChainStats(handle *rdb.Handle) *CrossfireChainStats {
 func (crossfireChainStatsView *CrossfireChainStats) Set(key string, value string) error {
 	// UPSERT STATEMENT
 	sql, sqlArgs, err := crossfireChainStatsView.rdbHandle.StmtBuilder.
-		Insert(CrossfireChainStatsViewTableName).
+		Insert(CROSSFIRE_CHAIN_STATS_VIEW_TABLENAME).
 		Columns("key", "value").
 		Values(key, value).
 		Suffix("ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value").
@@ -51,7 +51,7 @@ func (crossfireChainStatsView *CrossfireChainStats) Increment(key string, value 
 		return fmt.Errorf("Got empty value!")
 	}
 	sql, sqlArgs, err := crossfireChainStatsView.rdbHandle.StmtBuilder.
-		Insert(CrossfireChainStatsViewTableName+" AS totals").
+		Insert(CROSSFIRE_CHAIN_STATS_VIEW_TABLENAME+" AS totals").
 		Columns("key", "value").
 		Values(key, value).
 		Suffix("ON CONFLICT (key) DO UPDATE SET value = totals.value + EXCLUDED.value").
@@ -73,7 +73,7 @@ func (crossfireChainStatsView *CrossfireChainStats) FindBy(key string) (string, 
 	sql, sqlArgs, err := crossfireChainStatsView.rdbHandle.StmtBuilder.Select(
 		"value",
 	).From(
-		CrossfireChainStatsViewTableName,
+		CROSSFIRE_CHAIN_STATS_VIEW_TABLENAME,
 	).Where(
 		"key = ?", key,
 	).ToSql()
