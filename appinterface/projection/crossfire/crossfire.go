@@ -34,6 +34,7 @@ func NewCrossfire(logger applogger.Logger, rdbConn rdb.Conn, conNodeAddressPrefi
 func (_ *Crossfire) GetEventsToListen() []string {
 	return []string{
 		event_usecase.BLOCK_CREATED,
+		event_usecase.MSG_CREATE_VALIDATOR_CREATED,
 	}
 }
 
