@@ -11,7 +11,7 @@ type CrossfireValidatorsStats struct {
 	rdbHandle *rdb.Handle
 }
 
-const CrossfireValidatorStatsViewTableName = "view_crossfire_validators_stats"
+const CROSSFIRE_VALIDATOR_STATS_VIEW_TABLENAME = "view_crossfire_validators_stats"
 
 func NewCrossfireValidatorsStats(handle *rdb.Handle) *CrossfireValidatorsStats {
 	return &CrossfireValidatorsStats{
@@ -22,7 +22,7 @@ func NewCrossfireValidatorsStats(handle *rdb.Handle) *CrossfireValidatorsStats {
 func (crossfireValidatorsStatsView *CrossfireValidatorsStats) Set(key string, value string) error {
 	// UPSERT STATEMENT
 	sql, sqlArgs, err := crossfireValidatorsStatsView.rdbHandle.StmtBuilder.
-		Insert(CrossfireValidatorStatsViewTableName).
+		Insert(CROSSFIRE_VALIDATOR_STATS_VIEW_TABLENAME).
 		Columns("key", "value").
 		Values(key, value).
 		Suffix("ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value").
@@ -51,7 +51,7 @@ func (crossfireValidatorsStatsView *CrossfireValidatorsStats) Increment(key stri
 		return fmt.Errorf("Got empty value!")
 	}
 	sql, sqlArgs, err := crossfireValidatorsStatsView.rdbHandle.StmtBuilder.
-		Insert(CrossfireValidatorStatsViewTableName+" AS totals").
+		Insert(CROSSFIRE_VALIDATOR_STATS_VIEW_TABLENAME+" AS totals").
 		Columns("key", "value").
 		Values(key, value).
 		Suffix("ON CONFLICT (key) DO UPDATE SET value = totals.value + EXCLUDED.value").
@@ -73,7 +73,7 @@ func (crossfireValidatorsStatsView *CrossfireValidatorsStats) FindBy(key string)
 	sql, sqlArgs, err := crossfireValidatorsStatsView.rdbHandle.StmtBuilder.Select(
 		"value",
 	).From(
-		CrossfireValidatorStatsViewTableName,
+		CROSSFIRE_VALIDATOR_STATS_VIEW_TABLENAME,
 	).Where(
 		"key = ?", key,
 	).ToSql()
