@@ -6,8 +6,6 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/view"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
-	"time"
-
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
@@ -19,10 +17,10 @@ type Crossfire struct {
 	*rdbprojectionbase.Base
 
 	conNodeAddressPrefix string
-	phaseOneStartTime    time.Time
-	phaseTwoStartTime    time.Time
-	phaseThreeStartTime  time.Time
-	competitionEndTime   time.Time
+	phaseOneStartTime    utctime.UTCTime
+	phaseTwoStartTime    utctime.UTCTime
+	phaseThreeStartTime  utctime.UTCTime
+	competitionEndTime   utctime.UTCTime
 	adminAddress         string
 
 	rdbConn rdb.Conn
@@ -43,14 +41,14 @@ func NewCrossfire(
 		Base: rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Crossfire"),
 
 		conNodeAddressPrefix: conNodeAddressPrefix,
-		phaseOneStartTime: time.Unix(unixPhaseOneStartTime, 0),
-		phaseTwoStartTime: time.Unix(unixPhaseTwoStartTime, 0),
-		phaseThreeStartTime: time.Unix(unixPhaseThreeStartTime, 0),
-		competitionEndTime: time.Unix(unixCompetitionEndTime, 0),
-		adminAddress: adminAddress,
+		phaseOneStartTime:    utctime.FromUnixNano(unixPhaseOneStartTime),
+		phaseTwoStartTime:    utctime.FromUnixNano(unixPhaseTwoStartTime),
+		phaseThreeStartTime:  utctime.FromUnixNano(unixPhaseThreeStartTime),
+		competitionEndTime:   utctime.FromUnixNano(unixCompetitionEndTime),
+		adminAddress:         adminAddress,
 
 		rdbConn: rdbConn,
-		logger: logger,
+		logger:  logger,
 	}
 }
 
@@ -133,7 +131,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 				Status:                          constants.UNBONDED,
 				Jailed:                          false,
 				JoinedAtBlockHeight:             blockHeight,
-				JoinedAtBlockTime:				 blockTime,
+				JoinedAtBlockTime:               blockTime,
 				Moniker:                         msgCreateValidatorEvent.Description.Moniker,
 				Identity:                        msgCreateValidatorEvent.Description.Identity,
 				Website:                         msgCreateValidatorEvent.Description.Website,
@@ -148,7 +146,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 				RankTaskHighestTxSent:           0,
 			}
 
-			isJoined, joinedAtBlockHeight, err := crossfireValidatorsView.LastJoinedBlockHeight(
+			isJoined, joinedAtBlockHeight, joinedAtBlockTime, err := crossfireValidatorsView.LastJoinedBlockHeight(
 				validatorRow.OperatorAddress, validatorRow.ConsensusNodeAddress,
 			)
 			if err != nil {
@@ -156,6 +154,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			}
 			if isJoined {
 				validatorRow.JoinedAtBlockHeight = joinedAtBlockHeight
+				validatorRow.JoinedAtBlockTime = joinedAtBlockTime
 			}
 
 			if err := crossfireValidatorsView.Upsert(&validatorRow); err != nil {
@@ -163,6 +162,14 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			}
 
 			// checkTaskSetup
+			if err := projection.checkTaskSetup(
+				crossfireValidatorsView,
+				validatorRow.OperatorAddress,
+				validatorRow.ConsensusNodeAddress,
+				validatorRow.JoinedAtBlockTime,
+			); err != nil {
+				return fmt.Errorf("error check Setup task for new validator: %v", err)
+			}
 		}
 	}
 
@@ -170,8 +177,33 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 }
 
 // checkTaskSetup checks if node joins before phase 2 and update task_phase_1_node_setup
-func (projection *Crossfire) checkTaskSetup (
+func (projection *Crossfire) checkTaskSetup(
 	crossfireValidatorsView *view.CrossfireValidators,
+	operatorAddress string,
+	consensusNodeAddress string,
+	joinedAtBlockTime utctime.UTCTime,
 ) error {
+	if joinedAtBlockTime.Before(projection.phaseTwoStartTime) {
+		if err := crossfireValidatorsView.UpdateTask(
+			"task_phase_1_node_setup",
+			constants.COMPLETED,
+			operatorAddress,
+			consensusNodeAddress,
+		); err != nil {
+			return fmt.Errorf("error updating validator TaskPhase1NodeSetup as completed: s%v", err)
+		}
+	}
+
+	if joinedAtBlockTime.After(projection.phaseTwoStartTime) {
+		if err := crossfireValidatorsView.UpdateTask(
+			"task_phase_1_node_setup",
+			constants.MISSED,
+			operatorAddress,
+			consensusNodeAddress,
+		); err != nil {
+			return fmt.Errorf("error updating validator TaskPhase1NodeSetup as completed: s%v", err)
+		}
+	}
+
 	return nil
 }

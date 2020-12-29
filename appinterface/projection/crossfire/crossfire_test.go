@@ -140,7 +140,7 @@ var _ = Describe("Crossfire", func() {
 				Website:                         "www.example.com",
 				SecurityContact:                 "foo@example.com",
 				Details:                         "example",
-				TaskPhase1NodeSetup:             "Incompleted",
+				TaskPhase1NodeSetup:             "Completed",
 				TaskPhase2KeepNodeActive:        "Incompleted",
 				TaskPhase2ProposalVote:          "Incompleted",
 				TaskPhase2NetworkUpgrade:        "Incompleted",

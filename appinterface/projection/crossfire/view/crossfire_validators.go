@@ -22,31 +22,40 @@ func NewCrossfireValidators(handle *rdb.Handle) *CrossfireValidators {
 func (validatorsView *CrossfireValidators) LastJoinedBlockHeight(
 	operatorAddress string,
 	consensusNodeAddress string,
-) (bool, int64, error) {
+) (bool, int64, utctime.UTCTime, error) {
 	var err error
 
 	var sql string
 	var sqlArgs []interface{}
 	if sql, sqlArgs, err = validatorsView.rdb.StmtBuilder.Select(
 		"joined_at_block_height",
-		//"joined_at_block_time",
+		"joined_at_block_time",
 	).From(
 		TABLE_NAME,
 	).Where(
 		"operator_address = ? AND consensus_node_address = ?", operatorAddress, consensusNodeAddress,
 	).ToSql(); err != nil {
-		return false, int64(0), fmt.Errorf("error building validator existencen query sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		return false, int64(0), utctime.Now(), fmt.Errorf("error building validator existencen query sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
 	var joinedAtBlockHeight int64
-	if err = validatorsView.rdb.QueryRow(sql, sqlArgs...).Scan(&joinedAtBlockHeight); err != nil {
+	timeReader := validatorsView.rdb.NtotReader()
+	if err = validatorsView.rdb.QueryRow(sql, sqlArgs...).Scan(
+		&joinedAtBlockHeight,
+		timeReader.ScannableArg(),
+	); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
-			return false, int64(0), nil
+			return false, int64(0), utctime.Now(), nil
 		}
-		return false, int64(0), fmt.Errorf("error query validator existence: %v", err)
+		return false, int64(0), utctime.Now(), fmt.Errorf("error query validator existence: %v", err)
 	}
 
-	return true, joinedAtBlockHeight, nil
+	joinedAtBlockTime, parseErr := timeReader.Parse()
+	if parseErr != nil {
+		return false, int64(0), utctime.Now(), fmt.Errorf("error parsing block time: %v: %w", parseErr, rdb.ErrQuery)
+	}
+
+	return true, joinedAtBlockHeight, *joinedAtBlockTime, nil
 }
 
 func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorRow) error {
@@ -120,6 +129,34 @@ func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorR
 	}
 	if result.RowsAffected() != 1 {
 		return fmt.Errorf("error upserting validator into the table: no rows inserted: %w", rdb.ErrWrite)
+	}
+
+	return nil
+}
+
+func (validatorsView *CrossfireValidators) UpdateTask(
+	taskColumnName string,
+	status string,
+	operatorAddress string,
+	consensusNodeAddress string,
+) error {
+	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Update(
+		TABLE_NAME,
+	).Set(
+		taskColumnName, status,
+	).Where(
+		"operator_address = ? AND consensus_node_address = ?", operatorAddress, consensusNodeAddress,
+	).ToSql()
+	if err != nil {
+		return fmt.Errorf("error building metrics update sql: %v", err)
+	}
+
+	var execResult rdb.ExecResult
+	if execResult, err = validatorsView.rdb.Exec(sql, sqlArgs...); err != nil {
+		return fmt.Errorf("error updating task: %v", err)
+	}
+	if execResult.RowsAffected() != 1 {
+		return errors.New("error updating task: no rows updated")
 	}
 
 	return nil
