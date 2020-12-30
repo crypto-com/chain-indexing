@@ -41,7 +41,7 @@ func initProjections(
 			config.Crossfire.PhaseThreeStartTime,
 			config.Crossfire.CompetitionEndTime,
 			config.Crossfire.AdminAddress,
-			config.Crossfire.NetworkUpgradeProposalID
+			config.Crossfire.NetworkUpgradeProposalID,
 		),
 
 		// register more projections here

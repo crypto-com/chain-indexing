@@ -91,8 +91,3 @@ func (crossfireChainStatsView *CrossfireChainStats) FindBy(metric string) (strin
 
 	return value, nil
 }
-
-type CrossfireChainStatsRow struct {
-	metric string
-	Value  string
-}
