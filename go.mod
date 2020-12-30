@@ -22,9 +22,9 @@ require (
 	github.com/nxadm/tail v1.4.5 // indirect
 	github.com/onsi/ginkgo v1.14.2
 	github.com/onsi/gomega v1.10.2
-	github.com/rs/zerolog v1.15.0
+	github.com/rs/zerolog v1.20.0
 	github.com/stretchr/testify v1.6.1
-	github.com/tendermint/tendermint v0.34.0-rc6
+	github.com/tendermint/tendermint v0.34.0
 	github.com/urfave/cli/v2 v2.2.0
 	github.com/valyala/fasthttp v1.17.0
 	golang.org/x/sys v0.0.0-20201214210602-f9fddec55a1e // indirect
@@ -32,6 +32,6 @@ require (
 
 replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.2-alpha.regen.4
 
-replace github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.40.0-rc3
+replace github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.40.0-rc5
 
-replace github.com/calvinlauco/cosmostxdecoder => github.com/calvinlauco/cosmostxdecoder v0.0.1-rc3
+replace github.com/calvinlauco/cosmostxdecoder => github.com/calvinlauco/cosmostxdecoder v0.0.2-rc5

@@ -3,16 +3,15 @@ package tmcosmosutils
 import (
 	"fmt"
 
-	"github.com/tendermint/tendermint/crypto"
-
 	"github.com/btcsuite/btcutil/bech32"
 	"github.com/cosmos/cosmos-sdk/codec/legacy"
-	ed255192 "github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
-	"github.com/tendermint/tendermint/crypto/ed25519"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
+	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
+	tmed25519 "github.com/tendermint/tendermint/crypto/ed25519"
 )
 
 func TmAddressFromTmPubKey(pubKey []byte) string {
-	key := make(ed25519.PubKey, ed25519.PubKeySize)
+	key := make(tmed25519.PubKey, ed25519.PubKeySize)
 	copy(key, pubKey)
 
 	return key.Address().String()
@@ -28,7 +27,7 @@ func MustConsensusAddressFromTmPubKey(bech32Prefix string, pubKey []byte) string
 }
 
 func ConsensusNodeAddressFromTmPubKey(bech32Prefix string, pubKey []byte) (string, error) {
-	cosmosPubKey := &ed255192.PubKey{
+	cosmosPubKey := &ed25519.PubKey{
 		Key: pubKey,
 	}
 
@@ -55,10 +54,7 @@ func MustConsensusNodePubKeyFromTmPubKey(bech32Prefix string, pubKey []byte) str
 }
 
 func ConsensusNodePubKeyFromTmPubKey(bech32Prefix string, pubKey []byte) (string, error) {
-	cosmosPubKey := &ed255192.PubKey{
-		Key: pubKey,
-	}
-	pkToMarshal := cosmosPubKey.AsTmPubKey()
+	pkToMarshal := ed25519.PubKey{Key: pubKey}
 
 	conv, err := bech32.ConvertBits(legacy.Cdc.MustMarshalBinaryBare(pkToMarshal), 8, 5, true)
 	if err != nil {
@@ -82,7 +78,7 @@ func ConsensusNodeAddressFromPubKey(bech32Prefix string, consensusNodePubKey str
 	if err != nil {
 		return "", fmt.Errorf("error converting bech32 bits to tendermint public key: %v", err)
 	}
-	var pubKey crypto.PubKey
+	var pubKey cryptotypes.PubKey
 	legacy.Cdc.MustUnmarshalBinaryBare(pkToUnmarshal, &pubKey)
 
 	conv, err = bech32.ConvertBits(pubKey.Address().Bytes(), 8, 5, true)
