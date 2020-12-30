@@ -138,22 +138,33 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 ) error {
 	// increment phase block number
 	if blockTime.After(projection.phaseOneStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
-		// increment phase 1 blocks
+		err := crossfireChainStatsView.Increment(constants.PHASE1_COMMIT_COUNT)
+		if err != nil {
+			return fmt.Errorf("error increment PHASE1_COMMIT_COUNT")
+		}
 	} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
-		// increment phase 2 blocks
+		err := crossfireChainStatsView.Increment(constants.PHASE2_COMMIT_COUNT)
+		if err != nil {
+			return fmt.Errorf("error increment PHASE2_COMMIT_COUNT")
+		}
 	} else if blockTime.After(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
-		// increment phase 3 blocks
+		err := crossfireChainStatsView.Increment(constants.PHASE3_COMMIT_COUNT)
+		if err != nil {
+			return fmt.Errorf("error increment PHASE3_COMMIT_COUNT")
+		}
 	}
 
-	committedCouncilNodes := make([]block_view.BlockCommittedCouncilNode, 0)
-	for _, signature := range event.Block.Signatures {
-		committedCouncilNodes = append(committedCouncilNodes, block_view.BlockCommittedCouncilNode{
-			Address:    signature.ValidatorAddress,
-			Time:       signature.Timestamp,
-			Signature:  signature.Signature,
-			IsProposer: event.Block.ProposerAddress == signature.ValidatorAddress,
-		})
-	}
+	fmt.Println(crossfireValidatorsStatsView, event)
+
+	//committedCouncilNodes := make([]block_view.BlockCommittedCouncilNode, 0)
+	//for _, signature := range event.Block.Signatures {
+	//	committedCouncilNodes = append(committedCouncilNodes, block_view.BlockCommittedCouncilNode{
+	//		Address:    signature.ValidatorAddress,
+	//		Time:       signature.Timestamp,
+	//		Signature:  signature.Signature,
+	//		IsProposer: event.Block.ProposerAddress == signature.ValidatorAddress,
+	//	})
+	//}
 
 	return nil
 }

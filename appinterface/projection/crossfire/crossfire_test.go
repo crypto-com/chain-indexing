@@ -120,7 +120,7 @@ var _ = Describe("Crossfire", func() {
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
 
-			// project two events
+			// project two events foo
 			err := projection.HandleEvents(anyHeight, []event_entity.Event{blockCreatedEvent, validatorCreatedEvent})
 			Expect(err).To(BeNil())
 
