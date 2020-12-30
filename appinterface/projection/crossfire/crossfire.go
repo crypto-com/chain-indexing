@@ -2,6 +2,8 @@ package crossfire
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/constants"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/view"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
@@ -16,15 +18,15 @@ import (
 type Crossfire struct {
 	*rdbprojectionbase.Base
 
-	conNodeAddressPrefix string
-	phaseOneStartTime    utctime.UTCTime
-	phaseTwoStartTime    utctime.UTCTime
-	phaseThreeStartTime  utctime.UTCTime
-	competitionEndTime   utctime.UTCTime
-	adminAddress         string
-
-	rdbConn rdb.Conn
-	logger  applogger.Logger
+	conNodeAddressPrefix     string
+	phaseOneStartTime        utctime.UTCTime
+	phaseTwoStartTime        utctime.UTCTime
+	phaseThreeStartTime      utctime.UTCTime
+	competitionEndTime       utctime.UTCTime
+	adminAddress             string
+	networkUpgradeProposalID string
+	rdbConn                  rdb.Conn
+	logger                   applogger.Logger
 }
 
 func NewCrossfire(
@@ -36,19 +38,20 @@ func NewCrossfire(
 	unixPhaseThreeStartTime int64,
 	unixCompetitionEndTime int64,
 	adminAddress string,
+	networkUpgradeProposalID string,
 ) *Crossfire {
 	return &Crossfire{
 		Base: rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Crossfire"),
 
-		conNodeAddressPrefix: conNodeAddressPrefix,
-		phaseOneStartTime:    utctime.FromUnixNano(unixPhaseOneStartTime),
-		phaseTwoStartTime:    utctime.FromUnixNano(unixPhaseTwoStartTime),
-		phaseThreeStartTime:  utctime.FromUnixNano(unixPhaseThreeStartTime),
-		competitionEndTime:   utctime.FromUnixNano(unixCompetitionEndTime),
-		adminAddress:         adminAddress, // TODO: address prefix check
-
-		rdbConn: rdbConn,
-		logger:  logger,
+		conNodeAddressPrefix:     conNodeAddressPrefix,
+		phaseOneStartTime:        utctime.FromUnixNano(unixPhaseOneStartTime),
+		phaseTwoStartTime:        utctime.FromUnixNano(unixPhaseTwoStartTime),
+		phaseThreeStartTime:      utctime.FromUnixNano(unixPhaseThreeStartTime),
+		competitionEndTime:       utctime.FromUnixNano(unixCompetitionEndTime),
+		adminAddress:             adminAddress, // TODO: address prefix check
+		networkUpgradeProposalID: networkUpgradeProposalID,
+		rdbConn:                  rdbConn,
+		logger:                   logger,
 	}
 }
 
@@ -56,6 +59,8 @@ func (_ *Crossfire) GetEventsToListen() []string {
 	return []string{
 		event_usecase.BLOCK_CREATED,
 		event_usecase.MSG_CREATE_VALIDATOR_CREATED,
+		event_usecase.MSG_VOTE_CREATED,
+		event_usecase.MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_CREATED,
 	}
 }
 
@@ -78,7 +83,7 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 
 	rdbTxHandle := rdbTx.ToHandle()
 	crossfireValidatorsView := view.NewCrossfireValidators(rdbTxHandle)
-
+	crossfireChainStatsView := view.NewCrossfireChainStats(rdbTxHandle)
 	var blockTime utctime.UTCTime
 	var blockHash string
 	for _, event := range events {
@@ -91,7 +96,7 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 	fmt.Println(blockTime, blockHash)
 
 	// TODO: views preparation starts
-	if err := projection.projectCrossfireValidatorView(crossfireValidatorsView, height, blockTime, events); err != nil {
+	if err := projection.projectCrossfireValidatorView(crossfireValidatorsView, crossfireChainStatsView, height, blockTime, events); err != nil {
 		return fmt.Errorf("error projecting validator view: %v", err)
 	}
 	// TODO ends: views preparation ends and update current height as handled
@@ -109,6 +114,7 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 
 func (projection *Crossfire) projectCrossfireValidatorView(
 	crossfireValidatorsView *view.CrossfireValidators,
+	crossfireChainStatsView *view.CrossfireChainStats,
 	blockHeight int64,
 	blockTime utctime.UTCTime,
 	events []event_entity.Event,
@@ -119,7 +125,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			projection.logger.Debug("handling MsgCreateValidator event")
 
 			consensusNodeAddress, err := tmcosmosutils.ConsensusNodeAddressFromPubKey(
-				projection.conNodeAddressPrefix, msgCreateValidatorEvent.Pubkey,
+				projection.conNodeAddressPrefix, msgCreateValidatorEvent.TendermintPubkey,
 			)
 			if err != nil {
 				return fmt.Errorf("error converting consensus node pubkey to address: %v", err)
@@ -170,6 +176,34 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			); err != nil {
 				return fmt.Errorf("error check Setup task for new validator: %v", err)
 			}
+		} else if msgSubmitSoftwareUpgradeProposalEvent, ok := event.(*event_usecase.MsgSubmitSoftwareUpgradeProposal); ok {
+			projection.logger.Debug("handling MsgSubmitSoftwareUpgradeProposal event")
+			if blockTime.After(projection.competitionEndTime) {
+				return fmt.Errorf("error Competition has already ended")
+			}
+
+			if msgSubmitSoftwareUpgradeProposalEvent.ProposerAddress != projection.adminAddress {
+				return fmt.Errorf("error checking proposer address equals admin address")
+			}
+			if msgSubmitSoftwareUpgradeProposalEvent.MaybeProposalId != nil && *msgSubmitSoftwareUpgradeProposalEvent.MaybeProposalId != projection.networkUpgradeProposalID {
+				return fmt.Errorf("error checking Proposal ID in proposal")
+			}
+			networkUpgradeTimestamp := msgSubmitSoftwareUpgradeProposalEvent.MsgSubmitSoftwareUpgradeProposalParams.Content.Plan.Time
+			networkUpgradeBlockheight := msgSubmitSoftwareUpgradeProposalEvent.MsgSubmitSoftwareUpgradeProposalParams.Content.Plan.Height
+
+			// Update Network upgrade target Timestamp in DB
+			errTSUpdate := crossfireChainStatsView.Set("network_upgrade:timestamp", networkUpgradeTimestamp.String())
+			if errTSUpdate != nil {
+				return fmt.Errorf("error updating network_upgrade timestamp: %v", errTSUpdate)
+			}
+
+			// Update Network upgrade target Blockheight in DB
+			errBlockheightUpdate := crossfireChainStatsView.Set("network_upgrade:blockheight", strconv.FormatInt(networkUpgradeBlockheight, 10))
+
+			if errBlockheightUpdate != nil {
+				return fmt.Errorf("error updating network_upgrade blockheight: %v", errBlockheightUpdate)
+			}
+
 		}
 	}
 
@@ -178,6 +212,38 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 
 // checkTaskSetup checks if node joins before phase 2 and update task_phase_1_node_setup
 func (projection *Crossfire) checkTaskSetup(
+	crossfireValidatorsView *view.CrossfireValidators,
+	operatorAddress string,
+	consensusNodeAddress string,
+	joinedAtBlockTime utctime.UTCTime,
+) error {
+	if joinedAtBlockTime.Before(projection.phaseTwoStartTime) {
+		if err := crossfireValidatorsView.UpdateTask(
+			"task_phase_1_node_setup",
+			constants.COMPLETED,
+			operatorAddress,
+			consensusNodeAddress,
+		); err != nil {
+			return fmt.Errorf("error updating validator TaskPhase1NodeSetup as completed: s%v", err)
+		}
+	}
+
+	if joinedAtBlockTime.After(projection.phaseTwoStartTime) {
+		if err := crossfireValidatorsView.UpdateTask(
+			"task_phase_1_node_setup",
+			constants.MISSED,
+			operatorAddress,
+			consensusNodeAddress,
+		); err != nil {
+			return fmt.Errorf("error updating validator TaskPhase1NodeSetup as missed: s%v", err)
+		}
+	}
+
+	return nil
+}
+
+// checkTaskSetup checks if node joins before phase 2 and update task_phase_1_node_setup
+func (projection *Crossfire) checkTaskNetworkProposalVote(
 	crossfireValidatorsView *view.CrossfireValidators,
 	operatorAddress string,
 	consensusNodeAddress string,
