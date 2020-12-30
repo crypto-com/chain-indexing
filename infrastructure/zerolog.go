@@ -80,6 +80,7 @@ func zerologLevelToLogLevel(logLevel zerolog.Level) applogger.LogLevel {
 	case zerolog.InfoLevel:
 		return applogger.LOG_LEVEL_INFO
 	case zerolog.DebugLevel:
+	case zerolog.TraceLevel:
 	case zerolog.NoLevel:
 		return applogger.LOG_LEVEL_DEBUG
 	default:
