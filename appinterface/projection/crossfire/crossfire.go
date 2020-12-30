@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	block_view "github.com/crypto-com/chain-indexing/appinterface/projection/block/view"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/constants"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/view"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
@@ -89,7 +90,8 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 	rdbTxHandle := rdbTx.ToHandle()
 	crossfireValidatorsView := view.NewCrossfireValidators(rdbTxHandle)
 	crossfireChainStatsView := view.NewCrossfireChainStats(rdbTxHandle)
-	crossfireValidatorStatsView := view.NewCrossfireValidatorsStats(rdbTxHandle)
+	crossfireValidatorsStatsView := view.NewCrossfireValidatorsStats(rdbTxHandle)
+
 	var blockTime utctime.UTCTime
 	var blockHash string
 	for _, event := range events {
@@ -102,7 +104,17 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 	fmt.Println(blockTime, blockHash)
 
 	// TODO: views preparation starts
-	if err := projection.projectCrossfireValidatorView(crossfireValidatorsView, crossfireChainStatsView, crossfireValidatorStatsView, height, blockTime, events); err != nil {
+	// handle block created event
+	for _, event := range events {
+		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
+			if handleErr := projection.handleBlockCreatedEvent(crossfireChainStatsView, crossfireValidatorsStatsView, blockTime, blockCreatedEvent); handleErr != nil {
+				return fmt.Errorf("error handling BlockCreatedEvent: %v", handleErr)
+			}
+		} else {
+			return fmt.Errorf("received unexpected event %sV%d(%s)", event.Name(), event.Version(), event.UUID())
+		}
+	}
+	if err := projection.projectCrossfireValidatorView(crossfireValidatorsView, crossfireChainStatsView, crossfireValidatorsStatsView, height, blockTime, events); err != nil {
 		return fmt.Errorf("error projecting validator view: %v", err)
 	}
 	// TODO ends: views preparation ends and update current height as handled
@@ -115,6 +127,36 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 		return fmt.Errorf("error committing changes: %v", err)
 	}
 	committed = true
+	return nil
+}
+
+func (projection *Crossfire) handleBlockCreatedEvent(
+	crossfireChainStatsView *view.CrossfireChainStats,
+	crossfireValidatorsStatsView *view.CrossfireValidatorsStats,
+	blockTime utctime.UTCTime,
+	event *event_usecase.BlockCreated,
+) error {
+	committedCouncilNodes := make([]block_view.BlockCommittedCouncilNode, 0)
+	for _, signature := range event.Block.Signatures {
+		committedCouncilNodes = append(committedCouncilNodes, block_view.BlockCommittedCouncilNode{
+			Address:    signature.ValidatorAddress,
+			Time:       signature.Timestamp,
+			Signature:  signature.Signature,
+			IsProposer: event.Block.ProposerAddress == signature.ValidatorAddress,
+		})
+	}
+
+	//if err := blocksView.Insert(&block_view.Block{
+	//	Height:                event.Block.Height,
+	//	Hash:                  event.Block.Hash,
+	//	Time:                  event.Block.Time,
+	//	AppHash:               event.Block.AppHash,
+	//	TransactionCount:      len(event.Block.Txs),
+	//	CommittedCouncilNodes: committedCouncilNodes,
+	//}); err != nil {
+	//	return err
+	//}
+
 	return nil
 }
 

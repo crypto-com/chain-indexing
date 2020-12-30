@@ -42,7 +42,6 @@ func (crossfireChainStatsView *CrossfireChainStats) Set(metric string, value int
 
 func (crossfireChainStatsView *CrossfireChainStats) Increment(metric string, value int64) error {
 	// Postgres UPSERT statement
-
 	getMetric, err := crossfireChainStatsView.FindBy(metric)
 	if err != nil {
 		return fmt.Errorf("error getting value: %v: %w", err, rdb.ErrBuildSQLStmt)
