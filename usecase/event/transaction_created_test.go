@@ -2,6 +2,7 @@ package event_test
 
 import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/test/factory"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -20,10 +21,27 @@ var _ = Describe("Event", func() {
 			anyTxHash := factory.RandomTxHash()
 			anyHeight := int64(1000)
 			anyParams := model.CreateTransactionParams{
-				TxHash:        anyTxHash,
-				Code:          0,
-				Log:           "{\"events\":[]}",
-				MsgCount:      1,
+				TxHash:   anyTxHash,
+				Code:     0,
+				Log:      "{\"events\":[]}",
+				MsgCount: 1,
+				Signers: []model.TransactionSigner{
+					{
+						Type:            "/cosmos.crypto.secp256k1.PubKey",
+						Pubkeys:         []string{"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"},
+						AccountSequence: uint64(1),
+					},
+					{
+						Type: "/cosmos.crypto.multisig.LegacyAminoPubKey",
+						Pubkeys: []string{
+							"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+							"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+							"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+						},
+						MaybeThreshold:  primptr.Int(2),
+						AccountSequence: uint64(1),
+					},
+				},
 				Fee:           coin.MustNewCoinFromString("1000"),
 				FeePayer:      "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 				FeeGranter:    "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",

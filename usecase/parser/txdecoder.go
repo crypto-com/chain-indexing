@@ -79,6 +79,14 @@ type CosmosTx struct {
 	Signatures []string `json:"signatures"`
 }
 
+type Body struct {
+	Messages                    []map[string]interface{} `json:"messages"`
+	Memo                        string                   `json:"memo"`
+	TimeoutHeight               string                   `json:"timeout_height"`
+	ExtensionOptions            []interface{}            `json:"extension_options"`
+	NonCriticalExtensionOptions []interface{}            `json:"non_critical_extension_options"`
+}
+
 type AuthInfo struct {
 	SignerInfos []SignerInfo `json:"signer_infos"`
 	Fee         Fee          `json:"fee"`
@@ -97,17 +105,16 @@ type Amount struct {
 }
 
 type SignerInfo struct {
-	PublicKey PublicKey `json:"public_key"`
-	ModeInfo  ModeInfo  `json:"mode_info"`
-	Sequence  string    `json:"sequence"`
+	PublicKey SignerInfoPublicKey `json:"public_key"`
+	ModeInfo  ModeInfo            `json:"mode_info"`
+	Sequence  string              `json:"sequence"`
 }
 
-type ModeInfo struct {
-	Single Single `json:"single"`
-}
-
-type Single struct {
-	Mode string `json:"mode"`
+type SignerInfoPublicKey struct {
+	Type            string      `json:"@type"`
+	MaybeThreshold  *int64      `json:"threshold,omitempty"`
+	MaybePublicKeys []PublicKey `json:"public_keys,omitempty"`
+	MaybeKey        *string     `json:"key,omitempty"`
 }
 
 type PublicKey struct {
@@ -115,21 +122,25 @@ type PublicKey struct {
 	Key  string `json:"key"`
 }
 
-type Body struct {
-	Messages                    []map[string]interface{} `json:"messages"`
-	Memo                        string                   `json:"memo"`
-	TimeoutHeight               string                   `json:"timeout_height"`
-	ExtensionOptions            []interface{}            `json:"extension_options"`
-	NonCriticalExtensionOptions []interface{}            `json:"non_critical_extension_options"`
+type ModeInfo struct {
+	MaybeSingle *Single `json:"single,omitempty"`
+	MaybeMulti  *Multi  `json:"multi,omitempty"`
 }
 
-type Message struct {
-	Type string `json:"@type"`
+type Single struct {
+	Mode string `json:"mode"`
 }
 
-type MsgSend struct {
-	Type        string   `json:"@type"`
-	FromAddress string   `json:"from_address"`
-	ToAddress   string   `json:"to_address"`
-	Amount      []Amount `json:"amount"`
+type Multi struct {
+	Bitarray  Bitarray         `json:"bitarray"`
+	ModeInfos []SingleModeInfo `json:"mode_infos"`
+}
+
+type SingleModeInfo struct {
+	Single Single `json:"single"`
+}
+
+type Bitarray struct {
+	ExtraBitsStored int64  `json:"extra_bits_stored"`
+	Elems           string `json:"elems"`
 }

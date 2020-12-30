@@ -7,7 +7,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/crypto-com/chain-indexing/entity/command"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
 	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
@@ -19,8 +18,9 @@ var _ = Describe("Parse Genesis", func() {
 
 		cmds, err := parser.ParseGenesisCommands(genesis)
 		Expect(err).To(BeNil())
-		Expect(cmds).To(Equal([]command.Command{
-			command_usecase.NewCreateGenesis(*genesis),
+		Expect(cmds).To(HaveLen(4))
+		Expect(cmds[0]).To(Equal(command_usecase.NewCreateGenesis(*genesis)))
+		Expect(cmds[1]).To(Equal(
 			command_usecase.NewCreateMsgCreateValidator(
 				event.MsgCommonParams{
 					BlockHeight: 0,
@@ -30,7 +30,7 @@ var _ = Describe("Parse Genesis", func() {
 				},
 				model.MsgCreateValidatorParams{
 					Description: model.MsgValidatorDescription{
-						Moniker:         "jotaro",
+						Moniker:         "node0",
 						Identity:        "",
 						Website:         "",
 						SecurityContact: "",
@@ -42,12 +42,14 @@ var _ = Describe("Parse Genesis", func() {
 						MaxChangeRate: "0.010000000000000000",
 					},
 					MinSelfDelegation: "1",
-					DelegatorAddress:  "tcro16kqr009ptgken6qsxnzfnyjfsq6q97g3fxwppq",
-					ValidatorAddress:  "tcrocncl16kqr009ptgken6qsxnzfnyjfsq6q97g3uedcer",
-					Pubkey:            "tcrocnclconspub1zcjduepq5xp88wqmrhkg3xuyl6vcey3d93kw6cdglkmq4ley3ysvjfx90jnqlvaxpc",
+					DelegatorAddress:  "tcro1n4t5q77kn9vf73s7ljs96m85jgg49yqpasmwm3",
+					ValidatorAddress:  "tcrocncl1n4t5q77kn9vf73s7ljs96m85jgg49yqpg0chrj",
+					TendermintPubkey:  "Og8ZfQTHFgTBGD5qoyo5NpyJCJRddC+WuSPtyZtlE7E=",
 					Amount:            coin.MustNewCoinFromString("10000000000000"),
 				},
 			),
+		))
+		Expect(cmds[2]).To(Equal(
 			command_usecase.NewCreateMsgCreateValidator(
 				event.MsgCommonParams{
 					BlockHeight: 0,
@@ -57,7 +59,7 @@ var _ = Describe("Parse Genesis", func() {
 				},
 				model.MsgCreateValidatorParams{
 					Description: model.MsgValidatorDescription{
-						Moniker:         "Stater",
+						Moniker:         "node2",
 						Identity:        "",
 						Website:         "",
 						SecurityContact: "",
@@ -69,12 +71,14 @@ var _ = Describe("Parse Genesis", func() {
 						MaxChangeRate: "0.010000000000000000",
 					},
 					MinSelfDelegation: "1",
-					DelegatorAddress:  "tcro1fja5nsxz7gsqw4zccuuy8r7pjnjmc7dsdjun5p",
-					ValidatorAddress:  "tcrocncl1fja5nsxz7gsqw4zccuuy8r7pjnjmc7dscdl2vz",
-					Pubkey:            "tcrocnclconspub1zcjduepqp6el28dgz0fs6pm2265v4xmx0uys65zf5s2av6r5gh0hmcv5j64qg6zj4w",
+					DelegatorAddress:  "tcro15xr8daqzpu0wf8t6hx95zlxmqwzmf4eaph3yzv",
+					ValidatorAddress:  "tcrocncl15xr8daqzpu0wf8t6hx95zlxmqwzmf4ea5gja60",
+					TendermintPubkey:  "BuuPYme7R4eH/nWs2p+sS1UpCQwy+QJgBZuhGICH8Es=",
 					Amount:            coin.MustNewCoinFromString("10000000000000"),
 				},
 			),
+		))
+		Expect(cmds[3]).To(Equal(
 			command_usecase.NewCreateMsgCreateValidator(
 				event.MsgCommonParams{
 					BlockHeight: 0,
@@ -84,7 +88,7 @@ var _ = Describe("Parse Genesis", func() {
 				},
 				model.MsgCreateValidatorParams{
 					Description: model.MsgValidatorDescription{
-						Moniker:         "Argenteus",
+						Moniker:         "node1",
 						Identity:        "",
 						Website:         "",
 						SecurityContact: "",
@@ -96,12 +100,12 @@ var _ = Describe("Parse Genesis", func() {
 						MaxChangeRate: "0.010000000000000000",
 					},
 					MinSelfDelegation: "1",
-					DelegatorAddress:  "tcro16yzcz3ty94awr7nr2txek9dp2klp2av9egkgxn",
-					ValidatorAddress:  "tcrocncl16yzcz3ty94awr7nr2txek9dp2klp2av9vh437s",
-					Pubkey:            "tcrocnclconspub1zcjduepq9y742s8duh0eqenjdpc24k785c4en90gypn2vs2x3gxjd45xpp5svldq9u",
+					DelegatorAddress:  "tcro197ujxhaeyyv309f39c0s2gn0af0pps5pden6h7",
+					ValidatorAddress:  "tcrocncl197ujxhaeyyv309f39c0s2gn0af0pps5pcxsr0a",
+					TendermintPubkey:  "wWw0e9tZcVmev/NyJlZv5Apd7U5IONoyx3U/9rD5fHI=",
 					Amount:            coin.MustNewCoinFromString("10000000000000"),
 				},
 			),
-		}))
+		))
 	})
 })

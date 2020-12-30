@@ -56,11 +56,38 @@ func ParseTransactionCommands(
 		if err != nil {
 			return nil, fmt.Errorf("error parsing timeout height: %v", err)
 		}
+
+		signers := make([]model.TransactionSigner, 0)
+		for _, signer := range tx.AuthInfo.SignerInfos {
+			sequence, parseErr := strconv.ParseUint(signer.Sequence, 10, 64)
+			if parseErr != nil {
+				return nil, fmt.Errorf("error parsing account sequence: %v", parseErr)
+			}
+			if signer.ModeInfo.MaybeSingle != nil {
+				signers = append(signers, model.TransactionSigner{
+					Type:            signer.PublicKey.Type,
+					Pubkeys:         []string{*signer.PublicKey.MaybeKey},
+					AccountSequence: sequence,
+				})
+			} else {
+				pubkeys := make([]string, 0, len(signer.PublicKey.MaybePublicKeys))
+				for _, pubkey := range signer.PublicKey.MaybePublicKeys {
+					pubkeys = append(pubkeys, pubkey.Key)
+				}
+				signers = append(signers, model.TransactionSigner{
+					Type:            signer.PublicKey.Type,
+					Pubkeys:         pubkeys,
+					AccountSequence: sequence,
+				})
+			}
+		}
+
 		cmds = append(cmds, command_usecase.NewCreateTransaction(blockHeight, model.CreateTransactionParams{
 			TxHash:        TxHash(txHex),
 			Code:          txsResult.Code,
 			Log:           log,
 			MsgCount:      len(tx.Body.Messages),
+			Signers:       signers,
 			Fee:           fee,
 			FeePayer:      tx.AuthInfo.Fee.Payer,
 			FeeGranter:    tx.AuthInfo.Fee.Granter,

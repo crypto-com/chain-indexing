@@ -673,9 +673,10 @@ func parseMsgCreateValidator(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 ) []command.Command {
+	// TODO: add checking
 	amountValue, _ := msg["value"].(map[string]interface{})
 	amount := coin.MustNewCoinFromString(amountValue["amount"].(string))
-
+	tendermintPubkey, _ := msg["pubkey"].(map[string]interface{})
 	description := model.MsgValidatorDescription{
 		Moniker:         "",
 		Identity:        "",
@@ -716,7 +717,7 @@ func parseMsgCreateValidator(
 			MinSelfDelegation: msg["min_self_delegation"].(string),
 			DelegatorAddress:  msg["delegator_address"].(string),
 			ValidatorAddress:  msg["validator_address"].(string),
-			Pubkey:            msg["pubkey"].(string),
+			TendermintPubkey:  tendermintPubkey["key"].(string),
 			Amount:            amount,
 		},
 	)}
