@@ -14,11 +14,6 @@ jobs:
     - uses: actions/setup-go@v2
       with:
         go-version: '1.14'
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
-        override: true
     - name: Install golangci-lint
       run: |
         # binary will be $(go env GOPATH)/bin/golangci-lint
@@ -26,12 +21,8 @@ jobs:
     - name: Env
       run: |
         go version
-        cargo --version
-        rustc --version
         golangci-lint --version
     - uses: actions/checkout@v2
-    # - name: Build TxAuxDecoder
-    #   run: make txauxdecoder
     - name: Run check linting
       run: GOLANGCI_LINT_PATH="$(go env GOPATH)/bin/golangci-lint" ./lint.sh
 
@@ -42,19 +33,12 @@ jobs:
     - uses: actions/setup-go@v2
       with:
         go-version: '1.14'
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
-        override: true
     - name: Env
       run: |
         go version
         cargo --version
         rustc --version
     - uses: actions/checkout@v2
-    # - name: Build TxAuxDecoder
-    #   run: make txauxdecoder
     - name: Run test cases
       run: ./test.sh run --install-dependency
 
