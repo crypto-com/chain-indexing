@@ -7,6 +7,7 @@ type CreateTransactionParams struct {
 	Code          int
 	Log           string
 	MsgCount      int
+	Signers       []TransactionSigner
 	Fee           coin.Coin
 	FeePayer      string
 	FeeGranter    string
@@ -14,4 +15,11 @@ type CreateTransactionParams struct {
 	GasUsed       int
 	Memo          string
 	TimeoutHeight int64
+}
+
+type TransactionSigner struct {
+	Type            string
+	Pubkeys         []string
+	MaybeThreshold  *int
+	AccountSequence uint64
 }
