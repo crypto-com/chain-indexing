@@ -35,6 +35,7 @@ func initProjections(
 			logger,
 			rdbConn,
 			config.Blockchain.ConNodeAddressPrefix,
+			config.Blockchain.ValidatorAddressPrefix,
 			config.Crossfire.PhaseOneStartTime,
 			config.Crossfire.PhaseTwoStartTime,
 			config.Crossfire.PhaseThreeStartTime,
