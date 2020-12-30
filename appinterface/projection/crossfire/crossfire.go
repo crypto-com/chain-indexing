@@ -1,6 +1,7 @@
 package crossfire
 
 import (
+	"encoding/base64"
 	"fmt"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/constants"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/view"
@@ -117,9 +118,12 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 	for _, event := range events {
 		if msgCreateValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
 			projection.logger.Debug("handling MsgCreateValidator event")
-
-			consensusNodeAddress, err := tmcosmosutils.ConsensusNodeAddressFromPubKey(
-				projection.conNodeAddressPrefix, msgCreateValidatorEvent.Pubkey,
+			pubKey, err := base64.StdEncoding.DecodeString(msgCreateValidatorEvent.TendermintPubkey)
+			if err != nil {
+				return fmt.Errorf("error base64 decoding Tendermint node pubkey: %v", err)
+			}
+			consensusNodeAddress, err := tmcosmosutils.ConsensusNodeAddressFromTmPubKey(
+				projection.conNodeAddressPrefix, pubKey,
 			)
 			if err != nil {
 				return fmt.Errorf("error converting consensus node pubkey to address: %v", err)
