@@ -19,13 +19,13 @@ func NewCrossfireChainStats(handle *rdb.Handle) *CrossfireChainStats {
 	}
 }
 
-func (crossfireChainStatsView *CrossfireChainStats) Set(key string, value string) error {
+func (crossfireChainStatsView *CrossfireChainStats) Set(metric string, value string) error {
 	// UPSERT STATEMENT
 	sql, sqlArgs, err := crossfireChainStatsView.rdbHandle.StmtBuilder.
 		Insert(CROSSFIRE_CHAIN_STATS_VIEW_TABLENAME).
-		Columns("key", "value").
-		Values(key, value).
-		Suffix("ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value").
+		Columns("metric", "value").
+		Values(metric, value).
+		Suffix("ON CONFLICT (metric) DO UPDATE SET value = EXCLUDED.value").
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("error building value insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -40,10 +40,10 @@ func (crossfireChainStatsView *CrossfireChainStats) Set(key string, value string
 	return nil
 }
 
-func (crossfireChainStatsView *CrossfireChainStats) Increment(key string, value string) error {
+func (crossfireChainStatsView *CrossfireChainStats) Increment(metric string, value string) error {
 	// Postgres UPSERT statement
 
-	getMetric, err := crossfireChainStatsView.FindBy(key)
+	getMetric, err := crossfireChainStatsView.FindBy(metric)
 	if err != nil {
 		return fmt.Errorf("error getting value: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
@@ -52,9 +52,9 @@ func (crossfireChainStatsView *CrossfireChainStats) Increment(key string, value 
 	}
 	sql, sqlArgs, err := crossfireChainStatsView.rdbHandle.StmtBuilder.
 		Insert(CROSSFIRE_CHAIN_STATS_VIEW_TABLENAME+" AS totals").
-		Columns("key", "value").
-		Values(key, value).
-		Suffix("ON CONFLICT (key) DO UPDATE SET value = totals.value + EXCLUDED.value").
+		Columns("metric", "value").
+		Values(metric, value).
+		Suffix("ON CONFLICT (metric) DO UPDATE SET value = totals.value + EXCLUDED.value").
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("error building value insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -69,16 +69,16 @@ func (crossfireChainStatsView *CrossfireChainStats) Increment(key string, value 
 	return nil
 }
 
-func (crossfireChainStatsView *CrossfireChainStats) FindBy(key string) (string, error) {
+func (crossfireChainStatsView *CrossfireChainStats) FindBy(metric string) (string, error) {
 	sql, sqlArgs, err := crossfireChainStatsView.rdbHandle.StmtBuilder.Select(
 		"value",
 	).From(
 		CROSSFIRE_CHAIN_STATS_VIEW_TABLENAME,
 	).Where(
-		"key = ?", key,
+		"metric = ?", metric,
 	).ToSql()
 	if err != nil {
-		return "", fmt.Errorf("error preparing key selection SQL: %v", err)
+		return "", fmt.Errorf("error preparing metric selection SQL: %v", err)
 	}
 
 	var value string
@@ -86,13 +86,13 @@ func (crossfireChainStatsView *CrossfireChainStats) FindBy(key string) (string, 
 		if errors.Is(err, rdb.ErrNoRows) {
 			return "", nil
 		}
-		return "", fmt.Errorf("error getting key: %v", err)
+		return "", fmt.Errorf("error getting metric: %v", err)
 	}
 
 	return value, nil
 }
 
 type CrossfireChainStatsRow struct {
-	Key   string
-	Value string
+	metric string
+	Value  string
 }
