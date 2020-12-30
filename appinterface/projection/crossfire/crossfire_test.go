@@ -100,7 +100,7 @@ var _ = Describe("Crossfire", func() {
 				MinSelfDelegation: "1",
 				DelegatorAddress:  "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
 				ValidatorAddress:  "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
-				TendermintPubkey:  "na51D8RmKXyWrid9I6wtdxgP6f1Nl3EyNNEzqxVquoM=",
+				TendermintPubkey:  "BuuPYme7R4eH/nWs2p+sS1UpCQwy+QJgBZuhGICH8Es=",
 				Amount:            anyCoin,
 			})
 
@@ -136,8 +136,9 @@ var _ = Describe("Crossfire", func() {
 			targetList = append(targetList, view.CrossfireValidatorRow{
 				MaybeId:                         &id,
 				OperatorAddress:                 "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
-				ConsensusNodeAddress:            "tcrocnclcons1khkxmphc7sv0fqrej3rltsslrstud78cam9ekl",
+				ConsensusNodeAddress:            "tcrocnclcons146s02kxfv948pzter5dwfsydchmf5zstw3362e",
 				InitialDelegatorAddress:         "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+				TendermintPubkey:                "BuuPYme7R4eH/nWs2p+sS1UpCQwy+QJgBZuhGICH8Es=",
 				Status:                          "Unbonded",
 				Jailed:                          false,
 				JoinedAtBlockHeight:             1,
@@ -196,7 +197,7 @@ var _ = Describe("Crossfire", func() {
 				MinSelfDelegation: "1",
 				DelegatorAddress:  "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
 				ValidatorAddress:  "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
-				TendermintPubkey:  "na51D8RmKXyWrid9I6wtdxgP6f1Nl3EyNNEzqxVquoM=",
+				TendermintPubkey:  "BuuPYme7R4eH/nWs2p+sS1UpCQwy+QJgBZuhGICH8Es=",
 				Amount:            anyCoin,
 			})
 
@@ -228,8 +229,9 @@ var _ = Describe("Crossfire", func() {
 			targetList = append(targetList, view.CrossfireValidatorRow{
 				MaybeId:                         &id,
 				OperatorAddress:                 "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
-				ConsensusNodeAddress:            "tcrocnclcons1khkxmphc7sv0fqrej3rltsslrstud78cam9ekl",
+				ConsensusNodeAddress:            "tcrocnclcons146s02kxfv948pzter5dwfsydchmf5zstw3362e",
 				InitialDelegatorAddress:         "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+				TendermintPubkey:                "BuuPYme7R4eH/nWs2p+sS1UpCQwy+QJgBZuhGICH8Es=",
 				Status:                          "Unbonded",
 				Jailed:                          false,
 				JoinedAtBlockHeight:             1,
@@ -248,6 +250,7 @@ var _ = Describe("Crossfire", func() {
 				RankTaskHighestTxSent:           0,
 			})
 			Expect(list).To(Equal(targetList))
+			//
 		})
 
 		It("should project crossfire_validators view when event is MsgSubmitSoftwareUpgradeProposal", func() {

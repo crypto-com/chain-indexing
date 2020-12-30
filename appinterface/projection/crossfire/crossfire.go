@@ -136,6 +136,15 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 	blockTime utctime.UTCTime,
 	event *event_usecase.BlockCreated,
 ) error {
+	// increment phase block number
+	if blockTime.After(projection.phaseOneStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
+		// increment phase 1 blocks
+	} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
+		// increment phase 2 blocks
+	} else if blockTime.After(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
+		// increment phase 3 blocks
+	}
+
 	committedCouncilNodes := make([]block_view.BlockCommittedCouncilNode, 0)
 	for _, signature := range event.Block.Signatures {
 		committedCouncilNodes = append(committedCouncilNodes, block_view.BlockCommittedCouncilNode{
@@ -145,17 +154,6 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 			IsProposer: event.Block.ProposerAddress == signature.ValidatorAddress,
 		})
 	}
-
-	//if err := blocksView.Insert(&block_view.Block{
-	//	Height:                event.Block.Height,
-	//	Hash:                  event.Block.Hash,
-	//	Time:                  event.Block.Time,
-	//	AppHash:               event.Block.AppHash,
-	//	TransactionCount:      len(event.Block.Txs),
-	//	CommittedCouncilNodes: committedCouncilNodes,
-	//}); err != nil {
-	//	return err
-	//}
 
 	return nil
 }
@@ -186,6 +184,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 				ConsensusNodeAddress:            consensusNodeAddress,
 				OperatorAddress:                 msgCreateValidatorEvent.ValidatorAddress,
 				InitialDelegatorAddress:         msgCreateValidatorEvent.DelegatorAddress,
+				TendermintPubkey:                msgCreateValidatorEvent.TendermintPubkey,
 				Status:                          constants.UNBONDED,
 				Jailed:                          false,
 				JoinedAtBlockHeight:             blockHeight,

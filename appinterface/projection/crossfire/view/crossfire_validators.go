@@ -66,6 +66,7 @@ func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorR
 		"operator_address",
 		"consensus_node_address",
 		"initial_delegator_address",
+		"tendermint_pubkey",
 		"status",
 		"jailed",
 		"joined_at_block_height",
@@ -86,6 +87,7 @@ func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorR
 		validator.OperatorAddress,
 		validator.ConsensusNodeAddress,
 		validator.InitialDelegatorAddress,
+		validator.TendermintPubkey,
 		validator.Status,
 		validator.Jailed,
 		validator.JoinedAtBlockHeight,
@@ -104,6 +106,7 @@ func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorR
 		validator.RankTaskHighestTxSent,
 	).Suffix(`ON CONFLICT (operator_address, consensus_node_address) DO UPDATE SET
 		initial_delegator_address = EXCLUDED.initial_delegator_address,
+		tendermint_pubkey = EXCLUDED.tendermint_pubkey,
 		status = EXCLUDED.status,
 		jailed = EXCLUDED.jailed,
 		joined_at_block_height = EXCLUDED.joined_at_block_height,
@@ -217,6 +220,7 @@ func (validatorsView *CrossfireValidators) List() ([]CrossfireValidatorRow, erro
 		"operator_address",
 		"consensus_node_address",
 		"initial_delegator_address",
+		"tendermint_pubkey",
 		"status",
 		"jailed",
 		"joined_at_block_height",
@@ -257,6 +261,7 @@ func (validatorsView *CrossfireValidators) List() ([]CrossfireValidatorRow, erro
 			&validator.OperatorAddress,
 			&validator.ConsensusNodeAddress,
 			&validator.InitialDelegatorAddress,
+			&validator.TendermintPubkey,
 			&validator.Status,
 			&validator.Jailed,
 			&validator.JoinedAtBlockHeight,
@@ -296,6 +301,7 @@ type CrossfireValidatorRow struct {
 	OperatorAddress                 string          `json:"operatorAddress"`
 	ConsensusNodeAddress            string          `json:"consensusNodeAddress"`
 	InitialDelegatorAddress         string          `json:"initialDelegatorAddress"`
+	TendermintPubkey                string          `json:"tendermintPubkey"`
 	Status                          string          `json:"status"`
 	Jailed                          bool            `json:"jailed"`
 	JoinedAtBlockHeight             int64           `json:"joinedAtBlockHeight"`
