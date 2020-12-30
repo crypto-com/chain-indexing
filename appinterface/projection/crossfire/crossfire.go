@@ -45,7 +45,7 @@ func NewCrossfire(
 		phaseTwoStartTime:    utctime.FromUnixNano(unixPhaseTwoStartTime),
 		phaseThreeStartTime:  utctime.FromUnixNano(unixPhaseThreeStartTime),
 		competitionEndTime:   utctime.FromUnixNano(unixCompetitionEndTime),
-		adminAddress:         adminAddress,
+		adminAddress:         adminAddress, // TODO: address prefix check
 
 		rdbConn: rdbConn,
 		logger:  logger,
@@ -201,7 +201,7 @@ func (projection *Crossfire) checkTaskSetup(
 			operatorAddress,
 			consensusNodeAddress,
 		); err != nil {
-			return fmt.Errorf("error updating validator TaskPhase1NodeSetup as completed: s%v", err)
+			return fmt.Errorf("error updating validator TaskPhase1NodeSetup as missed: s%v", err)
 		}
 	}
 

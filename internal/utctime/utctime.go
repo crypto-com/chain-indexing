@@ -71,5 +71,5 @@ func (t *UTCTime) Before(target UTCTime) bool {
 }
 
 func (t *UTCTime) After(target UTCTime) bool {
-	return t.unixNano > target.unixNano
+	return t.unixNano >= target.unixNano
 }
