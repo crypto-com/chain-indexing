@@ -256,7 +256,7 @@ var _ = Describe("Crossfire", func() {
 			blockCreatedEvent := event_usecase.NewBlockCreated(&usecase_model.Block{
 				Height:          anyHeight,
 				Hash:            "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
-				Time:            utctime.FromUnixNano(int64(1000000)),
+				Time:            utctime.FromUnixNano(int64(1612056800000000000)),
 				AppHash:         "24474D86CBFA7E6328D473C17A9E46CD5A80FFE82A348A74844BF3E2BA2B3AF1",
 				ProposerAddress: "F9E6FFB9B536956201AA138224FD888D03775AB4",
 				Txs: []string{

@@ -182,16 +182,27 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			}
 		} else if msgSubmitSoftwareUpgradeProposalEvent, ok := event.(*event_usecase.MsgSubmitSoftwareUpgradeProposal); ok {
 			projection.logger.Debug("handling MsgSubmitSoftwareUpgradeProposal event")
+
+			// Check if proposed after competition has ended
 			if blockTime.After(projection.competitionEndTime) {
 				return fmt.Errorf("error Competition has already ended")
 			}
 
+			// Check if proposed before OR after Phase 2
+			if blockTime.Before(projection.phaseTwoStartTime) || blockTime.After(projection.phaseThreeStartTime) {
+				return fmt.Errorf("error This proposal does not occur in Phase 2")
+			}
+
+			// Check if proposed by NOT an admin
 			if msgSubmitSoftwareUpgradeProposalEvent.ProposerAddress != projection.adminAddress {
 				return fmt.Errorf("error checking proposer address equals admin address")
 			}
+
+			// Check if proposal ID does not match the required ID
 			if msgSubmitSoftwareUpgradeProposalEvent.MaybeProposalId != nil && *msgSubmitSoftwareUpgradeProposalEvent.MaybeProposalId != projection.networkUpgradeProposalID {
 				return fmt.Errorf("error checking Proposal ID in proposal")
 			}
+
 			networkUpgradeTimestamp := msgSubmitSoftwareUpgradeProposalEvent.MsgSubmitSoftwareUpgradeProposalParams.Content.Plan.Time
 			networkUpgradeBlockheight := msgSubmitSoftwareUpgradeProposalEvent.MsgSubmitSoftwareUpgradeProposalParams.Content.Plan.Height
 
