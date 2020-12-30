@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/constants"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/view"
@@ -20,6 +21,7 @@ type Crossfire struct {
 	*rdbprojectionbase.Base
 
 	conNodeAddressPrefix     string
+	validatorAddressPrefix   string
 	phaseOneStartTime        utctime.UTCTime
 	phaseTwoStartTime        utctime.UTCTime
 	phaseThreeStartTime      utctime.UTCTime
@@ -34,6 +36,7 @@ func NewCrossfire(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	conNodeAddressPrefix string,
+	validatorAddressPrefix string,
 	unixPhaseOneStartTime int64,
 	unixPhaseTwoStartTime int64,
 	unixPhaseThreeStartTime int64,
@@ -45,6 +48,7 @@ func NewCrossfire(
 		Base: rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Crossfire"),
 
 		conNodeAddressPrefix:     conNodeAddressPrefix,
+		validatorAddressPrefix:   validatorAddressPrefix,
 		phaseOneStartTime:        utctime.FromUnixNano(unixPhaseOneStartTime),
 		phaseTwoStartTime:        utctime.FromUnixNano(unixPhaseTwoStartTime),
 		phaseThreeStartTime:      utctime.FromUnixNano(unixPhaseThreeStartTime),
@@ -85,6 +89,7 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 	rdbTxHandle := rdbTx.ToHandle()
 	crossfireValidatorsView := view.NewCrossfireValidators(rdbTxHandle)
 	crossfireChainStatsView := view.NewCrossfireChainStats(rdbTxHandle)
+	crossfireValidatorStatsView := view.NewCrossfireValidatorsStats(rdbTxHandle)
 	var blockTime utctime.UTCTime
 	var blockHash string
 	for _, event := range events {
@@ -97,7 +102,7 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 	fmt.Println(blockTime, blockHash)
 
 	// TODO: views preparation starts
-	if err := projection.projectCrossfireValidatorView(crossfireValidatorsView, crossfireChainStatsView, height, blockTime, events); err != nil {
+	if err := projection.projectCrossfireValidatorView(crossfireValidatorsView, crossfireChainStatsView, crossfireValidatorStatsView, height, blockTime, events); err != nil {
 		return fmt.Errorf("error projecting validator view: %v", err)
 	}
 	// TODO ends: views preparation ends and update current height as handled
@@ -116,6 +121,7 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 func (projection *Crossfire) projectCrossfireValidatorView(
 	crossfireValidatorsView *view.CrossfireValidators,
 	crossfireChainStatsView *view.CrossfireChainStats,
+	crossfireValidatorStatsView *view.CrossfireValidatorsStats,
 	blockHeight int64,
 	blockTime utctime.UTCTime,
 	events []event_entity.Event,
@@ -180,7 +186,10 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			); err != nil {
 				return fmt.Errorf("error check Setup task for new validator: %v", err)
 			}
-		} else if msgSubmitSoftwareUpgradeProposalEvent, ok := event.(*event_usecase.MsgSubmitSoftwareUpgradeProposal); ok {
+		}
+	}
+	for _, event := range events {
+		if msgSubmitSoftwareUpgradeProposalEvent, ok := event.(*event_usecase.MsgSubmitSoftwareUpgradeProposal); ok {
 			projection.logger.Debug("handling MsgSubmitSoftwareUpgradeProposal event")
 
 			// Check if proposed after competition has ended
@@ -207,21 +216,70 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			networkUpgradeBlockheight := msgSubmitSoftwareUpgradeProposalEvent.MsgSubmitSoftwareUpgradeProposalParams.Content.Plan.Height
 
 			// Update Network upgrade target Timestamp in DB
-			errTSUpdate := crossfireChainStatsView.Set("network_upgrade:timestamp", networkUpgradeTimestamp.String())
+			network_upgrade_timestamp_dbkey := constants.NETWORK_UPGRADE + constants.DB_KEY_SEPARATOR + "timestamp"
+			errTSUpdate := crossfireChainStatsView.Set(network_upgrade_timestamp_dbkey, networkUpgradeTimestamp.String())
 			if errTSUpdate != nil {
 				return fmt.Errorf("error updating network_upgrade timestamp: %v", errTSUpdate)
 			}
 
 			// Update Network upgrade target Blockheight in DB
-			errBlockheightUpdate := crossfireChainStatsView.Set("network_upgrade:blockheight", strconv.FormatInt(networkUpgradeBlockheight, 10))
+			network_upgrade_blockheight_dbkey := constants.NETWORK_UPGRADE + constants.DB_KEY_SEPARATOR + "blockheight"
+			errBlockheightUpdate := crossfireChainStatsView.Set(network_upgrade_blockheight_dbkey, strconv.FormatInt(networkUpgradeBlockheight, 10))
 
 			if errBlockheightUpdate != nil {
 				return fmt.Errorf("error updating network_upgrade blockheight: %v", errBlockheightUpdate)
 			}
 
+		} else if msgVoteCreated, ok := event.(*event_usecase.MsgVote); ok {
+			projection.logger.Debug("handling MsgVote event")
+
+			// Check if proposed after competition has ended
+			if blockTime.After(projection.competitionEndTime) {
+				return fmt.Errorf("error Competition has already ended")
+			}
+
+			// Check if proposed before OR after Phase 2
+			if blockTime.Before(projection.phaseTwoStartTime) || blockTime.After(projection.phaseThreeStartTime) {
+				return fmt.Errorf("error Ineligible vote as it does not occur in Phase 2")
+			}
+
+			// Check if proposal ID does not match the required ID
+			if msgVoteCreated.ProposalId != "" && msgVoteCreated.ProposalId != projection.networkUpgradeProposalID {
+				return fmt.Errorf("error checking Proposal ID in Vote not matching")
+			}
+
+			// Check if proposal ID does not match the required ID
+			if msgVoteCreated.ProposalId != "" && msgVoteCreated.ProposalId != projection.networkUpgradeProposalID {
+				return fmt.Errorf("error checking Proposal ID in Vote not matching")
+			}
+
+			// Check if Vote is NOT Yes or Abstain
+			// TODO: Whether keep VOTE_OPTION_UNSPECIFIED or not?
+			if !(strings.ToUpper(msgVoteCreated.Option) == constants.VOTE_OPTION_YES || strings.ToUpper(msgVoteCreated.Option) == constants.VOTE_OPTION_ABSTAIN || strings.ToUpper(msgVoteCreated.Option) == constants.VOTE_OPTION_UNSPECIFIED) {
+				return fmt.Errorf("error Ineligible Vote. Casted vote: %s", msgVoteCreated.Option)
+			}
+
+			//TODO: Is this assumption correct? How to fetch operatorAddress / consensusAddress
+			operatorAddress, errConverting := tmcosmosutils.ValidatorAddressFromPubAddress(projection.validatorAddressPrefix, msgVoteCreated.Voter)
+
+			if errConverting != nil {
+				return fmt.Errorf("error In converting voter address to validator address: s%v", errConverting)
+			}
+
+			errCheckingTask := projection.checkTaskNetworkProposalVote(crossfireValidatorsView, operatorAddress, blockTime)
+
+			if errCheckingTask != nil {
+				return fmt.Errorf("error In checking Network proposal vote: s%v", errCheckingTask)
+			}
+			// Update the proposed ID against the voter in Database
+			voted_proposal_id_db_key := constants.VOTED_PROPOSAL_ID + constants.DB_KEY_SEPARATOR + msgVoteCreated.Voter
+			errUpdateValidatorStats := crossfireValidatorStatsView.Set(voted_proposal_id_db_key, msgVoteCreated.ProposalId)
+
+			if errUpdateValidatorStats != nil {
+				return fmt.Errorf("error Updating ProposalID for the voter: s%v", errUpdateValidatorStats)
+			}
 		}
 	}
-
 	return nil
 }
 
@@ -257,32 +315,29 @@ func (projection *Crossfire) checkTaskSetup(
 	return nil
 }
 
-// checkTaskSetup checks if node joins before phase 2 and update task_phase_1_node_setup
+// checkTaskNetworkProposalVote
 func (projection *Crossfire) checkTaskNetworkProposalVote(
 	crossfireValidatorsView *view.CrossfireValidators,
-	operatorAddress string,
-	consensusNodeAddress string,
-	joinedAtBlockTime utctime.UTCTime,
+	voterAddress string,
+	txBlockTime utctime.UTCTime,
 ) error {
-	if joinedAtBlockTime.Before(projection.phaseTwoStartTime) {
-		if err := crossfireValidatorsView.UpdateTask(
-			"task_phase_1_node_setup",
+	if txBlockTime.Before(projection.phaseThreeStartTime) && txBlockTime.After(projection.phaseTwoStartTime) {
+		if err := crossfireValidatorsView.UpdateTaskForOperatorAddress(
+			constants.TASK_PHASE_2_PROPOSAL_VOTE_COLUMN_NAME,
 			constants.COMPLETED,
-			operatorAddress,
-			consensusNodeAddress,
+			voterAddress,
 		); err != nil {
-			return fmt.Errorf("error updating validator TaskPhase1NodeSetup as completed: s%v", err)
+			return fmt.Errorf("error updating validator Phase_2 Task_1 as completed s%v", err)
 		}
 	}
 
-	if joinedAtBlockTime.After(projection.phaseTwoStartTime) {
-		if err := crossfireValidatorsView.UpdateTask(
-			"task_phase_1_node_setup",
+	if txBlockTime.After(projection.phaseThreeStartTime) {
+		if err := crossfireValidatorsView.UpdateTaskForOperatorAddress(
+			constants.TASK_PHASE_2_PROPOSAL_VOTE_COLUMN_NAME,
 			constants.MISSED,
-			operatorAddress,
-			consensusNodeAddress,
+			voterAddress,
 		); err != nil {
-			return fmt.Errorf("error updating validator TaskPhase1NodeSetup as missed: s%v", err)
+			return fmt.Errorf("error updating validator Phase_2 Task_1 as missed: s%v", err)
 		}
 	}
 
