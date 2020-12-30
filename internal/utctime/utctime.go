@@ -65,3 +65,11 @@ func (t *UTCTime) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
+
+func (t *UTCTime) Before(target UTCTime) bool {
+	return t.unixNano < target.unixNano
+}
+
+func (t *UTCTime) After(target UTCTime) bool {
+	return t.unixNano >= target.unixNano
+}

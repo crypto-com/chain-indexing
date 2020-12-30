@@ -155,7 +155,7 @@ func CliApp(args []string) error {
 				}
 			}()
 
-			projections := initProjections(logger, rdbConn, config.Blockchain.ConNodeAddressPrefix)
+			projections := initProjections(logger, rdbConn, &config)
 
 			indexService := NewIndexService(logger, rdbConn, &config, projections)
 			go func() {

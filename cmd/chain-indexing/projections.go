@@ -5,10 +5,8 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/projection/block"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/blockevent"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire"
-	transaction "github.com/crypto-com/chain-indexing/appinterface/projection/transaction"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/transaction"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/validator"
-
-	// crossfire "github.com/crypto-com/chain-indexing/appinterface/projection/crossfire"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/validatorstats"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -19,14 +17,14 @@ import (
 func initProjections(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
-	consNodeAddressPrefix string,
+	config *Config,
 ) []projection_entity.Projection {
 	return []projection_entity.Projection{
 		block.NewBlock(logger, rdbConn),
 		transaction.NewTransaction(logger, rdbConn),
 		blockevent.NewBlockEvent(logger, rdbConn),
 		validator.NewValidator(
-			logger, rdbConn, consNodeAddressPrefix,
+			logger, rdbConn, config.Blockchain.ConNodeAddressPrefix,
 		),
 		validatorstats.NewValidatorStats(logger, rdbConn),
 		account_message.NewAccountMessage(logger, rdbConn),
@@ -34,7 +32,14 @@ func initProjections(
 		// NOTICE: crossfire dry-run projection is only for main-net competition
 		// the logic and view tables could be removed after the competition is ended.
 		crossfire.NewCrossfire(
-			logger, rdbConn, consNodeAddressPrefix,
+			logger,
+			rdbConn,
+			config.Blockchain.ConNodeAddressPrefix,
+			config.Crossfire.PhaseOneStartTime,
+			config.Crossfire.PhaseTwoStartTime,
+			config.Crossfire.PhaseThreeStartTime,
+			config.Crossfire.CompetitionEndTime,
+			config.Crossfire.AdminAddress,
 		),
 
 		// register more projections here

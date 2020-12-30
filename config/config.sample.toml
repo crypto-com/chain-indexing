@@ -51,9 +51,9 @@ level = "debug"
 color = false
 
 [crossfire]
-phase_one_start_time = 1610942400 # "2021-01-18T04:00:00Z"
-phase_two_start_time = 1611547200 # "2021-01-25T04:00:00Z"
-phase_three_start_time = 1612756800 # "2021-02-08T04:00:00Z"
-crossfire_end_time = 1613361599 # "2021-02-15T03:59:59Z"
+phase_one_start_time = 1610942400000000000 # "2021-01-18T04:00:00Z"
+phase_two_start_time = 1611547200000000000 # "2021-01-25T04:00:00Z"
+phase_three_start_time = 1612756800000000000 # "2021-02-08T04:00:00Z"
+competition_end_time = 1613361599000000000 # "2021-02-15T03:59:59Z"
 # check admin address transaction for network upgrade proposal
 admin_address = "tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4"
