@@ -12,16 +12,21 @@ type Genesis struct {
 type AppState struct {
 	Auth         Auth             `json:"auth"`
 	Bank         Bank             `json:"bank"`
+	Capability   Capability       `json:"capability"`
 	Chainmain    Chainmain        `json:"chainmain"`
 	Distribution Distribution     `json:"distribution"`
 	Evidence     AppStateEvidence `json:"evidence"`
 	Genutil      Genutil          `json:"genutil"`
 	Gov          Gov              `json:"gov"`
+	Ibc          Ibc              `json:"ibc"`
 	Mint         Mint             `json:"mint"`
 	Params       interface{}      `json:"params"`
 	Slashing     Slashing         `json:"slashing"`
 	Staking      Staking          `json:"staking"`
-	Upgrade      Chainmain        `json:"upgrade"`
+	Supply       Supply           `json:"supply"`
+	Transfer     Transfer         `json:"transfer"`
+	Upgrade      Upgrade          `json:"upgrade"`
+	Vesting      Vesting          `json:"vesting"`
 }
 
 type Auth struct {
@@ -94,6 +99,11 @@ type DenomUnit struct {
 type BankParams struct {
 	SendEnabled        []interface{} `json:"send_enabled"`
 	DefaultSendEnabled bool          `json:"default_send_enabled"`
+}
+
+type Capability struct {
+	Index  string        `json:"index"`
+	Owners []interface{} `json:"owners"`
 }
 
 type Chainmain struct {
@@ -201,6 +211,42 @@ type VotingParams struct {
 	VotingPeriod string `json:"voting_period"`
 }
 
+type Ibc struct {
+	ChannelGenesis    ChannelGenesis    `json:"channel_genesis"`
+	ClientGenesis     ClientGenesis     `json:"client_genesis"`
+	ConnectionGenesis ConnectionGenesis `json:"connection_genesis"`
+}
+
+type ChannelGenesis struct {
+	ACKSequences        []interface{} `json:"ack_sequences"`
+	Acknowledgements    []interface{} `json:"acknowledgements"`
+	Channels            []interface{} `json:"channels"`
+	Commitments         []interface{} `json:"commitments"`
+	NextChannelSequence string        `json:"next_channel_sequence"`
+	Receipts            []interface{} `json:"receipts"`
+	RecvSequences       []interface{} `json:"recv_sequences"`
+	SendSequences       []interface{} `json:"send_sequences"`
+}
+
+type ClientGenesis struct {
+	Clients            []interface{}       `json:"clients"`
+	ClientsConsensus   []interface{}       `json:"clients_consensus"`
+	ClientsMetadata    []interface{}       `json:"clients_metadata"`
+	CreateLocalhost    bool                `json:"create_localhost"`
+	NextClientSequence string              `json:"next_client_sequence"`
+	Params             ClientGenesisParams `json:"params"`
+}
+
+type ClientGenesisParams struct {
+	AllowedClients []string `json:"allowed_clients"`
+}
+
+type ConnectionGenesis struct {
+	ClientConnectionPaths  []interface{} `json:"client_connection_paths"`
+	Connections            []interface{} `json:"connections"`
+	NextConnectionSequence string        `json:"next_connection_sequence"`
+}
+
 type Mint struct {
 	Minter Minter     `json:"minter"`
 	Params MintParams `json:"params"`
@@ -245,6 +291,26 @@ type Staking struct {
 	Validators           []interface{} `json:"validators"`
 }
 
+type Supply struct {
+}
+
+type Transfer struct {
+	DenomTraces []interface{}  `json:"denom_traces"`
+	Params      TransferParams `json:"params"`
+	PortID      string         `json:"port_id"`
+}
+
+type TransferParams struct {
+	ReceiveEnabled bool `json:"receive_enabled"`
+	SendEnabled    bool `json:"send_enabled"`
+}
+
+type Upgrade struct {
+}
+
+type Vesting struct {
+}
+
 type StakingParams struct {
 	BondDenom         string `json:"bond_denom"`
 	HistoricalEntries int64  `json:"historical_entries"`
@@ -269,6 +335,7 @@ type Block struct {
 type ConsensusParamsEvidence struct {
 	MaxAgeNumBlocks string `json:"max_age_num_blocks"`
 	MaxAgeDuration  string `json:"max_age_duration"`
+	MaxBytes        string `json:"max_bytes"`
 }
 
 type Validator struct {
