@@ -100,7 +100,7 @@ var _ = Describe("Crossfire", func() {
 				MinSelfDelegation: "1",
 				DelegatorAddress:  "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
 				ValidatorAddress:  "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
-				TendermintPubkey:  "tcrocnclconspub1zcjduepq673fv82rsss7um343qems34uxjquwealhrntcq4naj83kk9d8syqdswgxv",
+				TendermintPubkey:  "na51D8RmKXyWrid9I6wtdxgP6f1Nl3EyNNEzqxVquoM=",
 				Amount:            anyCoin,
 			})
 
@@ -135,7 +135,7 @@ var _ = Describe("Crossfire", func() {
 			targetList = append(targetList, view.CrossfireValidatorRow{
 				MaybeId:                         &id,
 				OperatorAddress:                 "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
-				ConsensusNodeAddress:            "tcrocnclcons1u4jfqxk5femyyt0s5s55xuywv8ehnu34gcuaad",
+				ConsensusNodeAddress:            "tcrocnclcons1khkxmphc7sv0fqrej3rltsslrstud78cam9ekl",
 				InitialDelegatorAddress:         "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
 				Status:                          "Unbonded",
 				Jailed:                          false,
@@ -195,7 +195,7 @@ var _ = Describe("Crossfire", func() {
 				MinSelfDelegation: "1",
 				DelegatorAddress:  "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
 				ValidatorAddress:  "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
-				TendermintPubkey:  "tcrocnclconspub1zcjduepq673fv82rsss7um343qems34uxjquwealhrntcq4naj83kk9d8syqdswgxv",
+				TendermintPubkey:  "na51D8RmKXyWrid9I6wtdxgP6f1Nl3EyNNEzqxVquoM=",
 				Amount:            anyCoin,
 			})
 
@@ -226,7 +226,7 @@ var _ = Describe("Crossfire", func() {
 			targetList = append(targetList, view.CrossfireValidatorRow{
 				MaybeId:                         &id,
 				OperatorAddress:                 "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
-				ConsensusNodeAddress:            "tcrocnclcons1u4jfqxk5femyyt0s5s55xuywv8ehnu34gcuaad",
+				ConsensusNodeAddress:            "tcrocnclcons1khkxmphc7sv0fqrej3rltsslrstud78cam9ekl",
 				InitialDelegatorAddress:         "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
 				Status:                          "Unbonded",
 				Jailed:                          false,
