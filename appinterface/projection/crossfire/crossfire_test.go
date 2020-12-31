@@ -1,8 +1,6 @@
 package crossfire_test
 
 import (
-	"fmt"
-
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/constants"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/view"
@@ -325,12 +323,12 @@ var _ = Describe("Crossfire", func() {
 			//Check updated blockheight
 			targetBlockheight, err := crossfireChainStatsView.FindBy("network_upgrade:blockheight")
 			Expect(err).To(BeNil())
-			Expect(targetBlockheight).To(Equal(fmt.Sprint(100000000)))
+			Expect(targetBlockheight).To(Equal(int64(100000000)))
 
 			//Check updated timestamp
 			targetTimestamp, err := crossfireChainStatsView.FindBy("network_upgrade:timestamp")
 			Expect(err).To(BeNil())
-			Expect(targetTimestamp).To(Equal(utctime.FromUnixNano(int64(-6795364578871345152)).String()))
+			Expect(targetTimestamp).To(Equal(int64(-6795364578871345152)))
 		})
 
 		It("should project crossfire_validators view when event is MsgVoteCreated", func() {
@@ -433,7 +431,7 @@ var _ = Describe("Crossfire", func() {
 			//Check voted proposal id for voter
 			voted_proposal_id, err := crossfireValidatorStatsView.FindBy("voted_proposal_id:tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh")
 			Expect(err).To(BeNil())
-			Expect(voted_proposal_id).To(Equal("14"))
+			Expect(voted_proposal_id).To(Equal(int64(14)))
 
 		})
 	})

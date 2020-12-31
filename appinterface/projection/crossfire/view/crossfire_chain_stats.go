@@ -19,7 +19,7 @@ func NewCrossfireChainStats(handle *rdb.Handle) *CrossfireChainStats {
 	}
 }
 
-func (crossfireChainStatsView *CrossfireChainStats) Set(metric string, value string) error {
+func (crossfireChainStatsView *CrossfireChainStats) Set(metric string, value int64) error {
 	// UPSERT STATEMENT
 	sql, sqlArgs, err := crossfireChainStatsView.rdbHandle.StmtBuilder.
 		Insert(CROSSFIRE_CHAIN_STATS_VIEW_TABLENAME).
@@ -40,15 +40,15 @@ func (crossfireChainStatsView *CrossfireChainStats) Set(metric string, value str
 	return nil
 }
 
-func (crossfireChainStatsView *CrossfireChainStats) Increment(metric string, value string) error {
+func (crossfireChainStatsView *CrossfireChainStats) Increment(metric string, value int64) error {
 	// Postgres UPSERT statement
 
 	getMetric, err := crossfireChainStatsView.FindBy(metric)
 	if err != nil {
 		return fmt.Errorf("error getting value: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
-	if len(getMetric) == 0 {
-		return fmt.Errorf("Got empty value!")
+	if getMetric <= 0 {
+		return fmt.Errorf("Got empty value! :%v", getMetric)
 	}
 	sql, sqlArgs, err := crossfireChainStatsView.rdbHandle.StmtBuilder.
 		Insert(CROSSFIRE_CHAIN_STATS_VIEW_TABLENAME+" AS totals").
@@ -69,7 +69,7 @@ func (crossfireChainStatsView *CrossfireChainStats) Increment(metric string, val
 	return nil
 }
 
-func (crossfireChainStatsView *CrossfireChainStats) FindBy(metric string) (string, error) {
+func (crossfireChainStatsView *CrossfireChainStats) FindBy(metric string) (int64, error) {
 	sql, sqlArgs, err := crossfireChainStatsView.rdbHandle.StmtBuilder.Select(
 		"value",
 	).From(
@@ -78,15 +78,15 @@ func (crossfireChainStatsView *CrossfireChainStats) FindBy(metric string) (strin
 		"metric = ?", metric,
 	).ToSql()
 	if err != nil {
-		return "", fmt.Errorf("error preparing metric selection SQL: %v", err)
+		return -1, fmt.Errorf("error preparing metric selection SQL: %v", err)
 	}
 
-	var value string
+	var value int64
 	if err := crossfireChainStatsView.rdbHandle.QueryRow(sql, sqlArgs...).Scan(&value); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
-			return "", nil
+			return -1, nil
 		}
-		return "", fmt.Errorf("error getting metric: %v", err)
+		return -1, fmt.Errorf("error getting metric: %v", err)
 	}
 
 	return value, nil

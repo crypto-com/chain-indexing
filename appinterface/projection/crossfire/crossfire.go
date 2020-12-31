@@ -217,14 +217,14 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 
 			// Update Network upgrade target Timestamp in DB
 			network_upgrade_timestamp_dbkey := constants.NETWORK_UPGRADE + constants.DB_KEY_SEPARATOR + "timestamp"
-			errTSUpdate := crossfireChainStatsView.Set(network_upgrade_timestamp_dbkey, networkUpgradeTimestamp.String())
+			errTSUpdate := crossfireChainStatsView.Set(network_upgrade_timestamp_dbkey, networkUpgradeTimestamp.UnixNano())
 			if errTSUpdate != nil {
 				return fmt.Errorf("error updating network_upgrade timestamp: %v", errTSUpdate)
 			}
 
 			// Update Network upgrade target Blockheight in DB
 			network_upgrade_blockheight_dbkey := constants.NETWORK_UPGRADE + constants.DB_KEY_SEPARATOR + "blockheight"
-			errBlockheightUpdate := crossfireChainStatsView.Set(network_upgrade_blockheight_dbkey, strconv.FormatInt(networkUpgradeBlockheight, 10))
+			errBlockheightUpdate := crossfireChainStatsView.Set(network_upgrade_blockheight_dbkey, networkUpgradeBlockheight)
 
 			if errBlockheightUpdate != nil {
 				return fmt.Errorf("error updating network_upgrade blockheight: %v", errBlockheightUpdate)
@@ -268,7 +268,12 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			}
 			// Update the proposed ID against the voter in Database
 			voted_proposal_id_db_key := constants.VOTED_PROPOSAL_ID + constants.DB_KEY_SEPARATOR + msgVoteCreated.Voter
-			errUpdateValidatorStats := crossfireValidatorStatsView.Set(voted_proposal_id_db_key, msgVoteCreated.ProposalId)
+
+			proposalIdAsInt64, errConversion := strconv.ParseInt(msgVoteCreated.ProposalId, 10, 64)
+			if errConversion != nil {
+				return fmt.Errorf("error converting ProposalID to int64: s%v", errConversion)
+			}
+			errUpdateValidatorStats := crossfireValidatorStatsView.Set(voted_proposal_id_db_key, proposalIdAsInt64)
 
 			if errUpdateValidatorStats != nil {
 				return fmt.Errorf("error Updating ProposalID for the voter: s%v", errUpdateValidatorStats)
