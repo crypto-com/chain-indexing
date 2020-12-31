@@ -248,11 +248,6 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 				return fmt.Errorf("error checking Proposal ID in Vote not matching")
 			}
 
-			// Check if proposal ID does not match the required ID
-			if msgVoteCreated.ProposalId != "" && msgVoteCreated.ProposalId != projection.networkUpgradeProposalID {
-				return fmt.Errorf("error checking Proposal ID in Vote not matching")
-			}
-
 			// Check if Vote is NOT Yes or Abstain
 			// TODO: Whether keep VOTE_OPTION_UNSPECIFIED or not?
 			if !(strings.ToUpper(msgVoteCreated.Option) == constants.VOTE_OPTION_YES || strings.ToUpper(msgVoteCreated.Option) == constants.VOTE_OPTION_ABSTAIN || strings.ToUpper(msgVoteCreated.Option) == constants.VOTE_OPTION_UNSPECIFIED) {
