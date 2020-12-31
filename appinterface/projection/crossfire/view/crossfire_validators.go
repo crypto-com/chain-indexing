@@ -3,6 +3,7 @@ package view
 import (
 	"errors"
 	"fmt"
+
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 )
@@ -156,6 +157,34 @@ func (validatorsView *CrossfireValidators) UpdateTask(
 		return fmt.Errorf("error updating task: %v", err)
 	}
 	if execResult.RowsAffected() != 1 {
+		return errors.New("error updating task: no rows updated")
+	}
+
+	return nil
+}
+
+func (validatorsView *CrossfireValidators) UpdateTaskForOperatorAddress(
+	taskColumnName string,
+	status string,
+	operatorAddress string,
+) error {
+	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Update(
+		TABLE_NAME,
+	).Set(
+		taskColumnName, status,
+	).Where(
+		"operator_address = ?", operatorAddress,
+	).ToSql()
+	if err != nil {
+		return fmt.Errorf("error building metrics update sql: %v", err)
+	}
+
+	var execResult rdb.ExecResult
+	if execResult, err = validatorsView.rdb.Exec(sql, sqlArgs...); err != nil {
+		return fmt.Errorf("error updating task: %v", err)
+	}
+	if execResult.RowsAffected() != 1 {
+		fmt.Println(execResult.String())
 		return errors.New("error updating task: no rows updated")
 	}
 

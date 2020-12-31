@@ -11,6 +11,8 @@ import (
 
 const tendermintPubKey = "na51D8RmKXyWrid9I6wtdxgP6f1Nl3EyNNEzqxVquoM="
 const tendermintAddress = "B5EC6D86F8F418F480799447F5C21F1C17C6F8F8"
+const validatorAddress = "tcrocncl1khkxmphc7sv0fqrej3rltsslrstud78c6dur8e"
+const primaryAddress = "tcro1khkxmphc7sv0fqrej3rltsslrstud78c0jl6l6"
 const consensusNodeAddress = "tcrocnclcons1khkxmphc7sv0fqrej3rltsslrstud78cam9ekl"
 const consensusNodePubKey = "tcrocnclconspub1zcjduepqnkh82r7yvc5he94wya7j8tpdwuvql60afkthzv356ye6k9t2h2psr3u067"
 
@@ -42,12 +44,21 @@ var _ = Describe("tmcosmosutils", func() {
 		})
 	})
 
-	Describe("ConsensusNodeAddressFromPubKey", func() {
-		It("should work", func() {
-			Expect(tmcosmosutils.ConsensusNodeAddressFromPubKey(
-				"tcrocnclcons", consensusNodePubKey,
+	Describe("ValidatorAddressFromPubAddress", func() {
+		It("should work from council node address", func() {
+			Expect(tmcosmosutils.ValidatorAddressFromPubAddress(
+				"tcrocncl", consensusNodeAddress,
+			)).To(Equal(validatorAddress))
+		})
+		It("should work from tcro.. address to validator address", func() {
+			Expect(tmcosmosutils.ValidatorAddressFromPubAddress(
+				"tcrocncl", primaryAddress,
+			)).To(Equal(validatorAddress))
+		})
+		It("should work from tcro.. address to council node address", func() {
+			Expect(tmcosmosutils.ValidatorAddressFromPubAddress(
+				"tcrocnclcons", primaryAddress,
 			)).To(Equal(consensusNodeAddress))
 		})
-
 	})
 })

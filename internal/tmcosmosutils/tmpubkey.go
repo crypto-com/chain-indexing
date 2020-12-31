@@ -68,6 +68,18 @@ func ConsensusNodePubKeyFromTmPubKey(bech32Prefix string, pubKey []byte) (string
 	return address, nil
 }
 
+func ValidatorAddressFromPubAddress(bech32Prefix string, userAddress string) (string, error) {
+	_, conv, err := bech32.Decode(userAddress)
+	if err != nil {
+		return "", fmt.Errorf("error Decoding provided address: %v", err)
+	}
+	validatorAddress, err := bech32.Encode(bech32Prefix, conv)
+	if err != nil {
+		return "", fmt.Errorf("error encoding tendermint public key bits to consensus address: %v", err)
+	}
+
+	return validatorAddress, nil
+}
 func ConsensusNodeAddressFromPubKey(bech32Prefix string, consensusNodePubKey string) (string, error) {
 	_, conv, err := bech32.Decode(consensusNodePubKey)
 	if err != nil {

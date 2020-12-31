@@ -57,3 +57,4 @@ phase_three_start_time = 1612756800000000000 # "2021-02-08T04:00:00Z"
 competition_end_time = 1613361599000000000 # "2021-02-15T03:59:59Z"
 # check admin address transaction for network upgrade proposal
 admin_address = "tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4"
+network_upgrade_proposal_id = "14"
