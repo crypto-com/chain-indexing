@@ -258,25 +258,25 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			operatorAddress, errConverting := tmcosmosutils.ValidatorAddressFromPubAddress(projection.validatorAddressPrefix, msgVoteCreated.Voter)
 
 			if errConverting != nil {
-				return fmt.Errorf("error In converting voter address to validator address: s%v", errConverting)
+				return fmt.Errorf("error In converting voter address to validator address: %v", errConverting)
 			}
 
 			errCheckingTask := projection.checkTaskNetworkProposalVote(crossfireValidatorsView, operatorAddress, blockTime)
 
 			if errCheckingTask != nil {
-				return fmt.Errorf("error In checking Network proposal vote: s%v", errCheckingTask)
+				return fmt.Errorf("error In checking Network proposal vote: %v", errCheckingTask)
 			}
 			// Update the proposed ID against the voter in Database
 			voted_proposal_id_db_key := constants.VOTED_PROPOSAL_ID + constants.DB_KEY_SEPARATOR + msgVoteCreated.Voter
 
 			proposalIdAsInt64, errConversion := strconv.ParseInt(msgVoteCreated.ProposalId, 10, 64)
 			if errConversion != nil {
-				return fmt.Errorf("error converting ProposalID to int64: s%v", errConversion)
+				return fmt.Errorf("error converting ProposalID to int64: %v", errConversion)
 			}
 			errUpdateValidatorStats := crossfireValidatorStatsView.Set(voted_proposal_id_db_key, proposalIdAsInt64)
 
 			if errUpdateValidatorStats != nil {
-				return fmt.Errorf("error Updating ProposalID for the voter: s%v", errUpdateValidatorStats)
+				return fmt.Errorf("error Updating ProposalID for the voter: %v", errUpdateValidatorStats)
 			}
 		} else if msgTransactionCreated, ok := event.(*event_usecase.TransactionCreated); ok {
 			projection.logger.Debug("handling TransactionCreated event")
@@ -289,7 +289,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			// Update the Tx Count
 			errUpdateTxCount := projection.updateTxSentCount(crossfireValidatorStatsView, blockTime, msgTransactionCreated)
 			if errUpdateTxCount != nil {
-				return fmt.Errorf("error Updating tx sent count: s%v", errUpdateTxCount)
+				return fmt.Errorf("error Updating tx sent count: %v", errUpdateTxCount)
 			}
 		}
 	}
@@ -310,7 +310,7 @@ func (projection *Crossfire) checkTaskSetup(
 			operatorAddress,
 			consensusNodeAddress,
 		); err != nil {
-			return fmt.Errorf("error updating validator TaskPhase1NodeSetup as completed: s%v", err)
+			return fmt.Errorf("error updating validator TaskPhase1NodeSetup as completed: %v", err)
 		}
 	}
 
@@ -321,7 +321,7 @@ func (projection *Crossfire) checkTaskSetup(
 			operatorAddress,
 			consensusNodeAddress,
 		); err != nil {
-			return fmt.Errorf("error updating validator TaskPhase1NodeSetup as missed: s%v", err)
+			return fmt.Errorf("error updating validator TaskPhase1NodeSetup as missed: %v", err)
 		}
 	}
 
@@ -340,7 +340,7 @@ func (projection *Crossfire) checkTaskNetworkProposalVote(
 			constants.COMPLETED,
 			voterAddress,
 		); err != nil {
-			return fmt.Errorf("error updating validator Phase_2 Task_1 as completed s%v", err)
+			return fmt.Errorf("error updating validator Phase_2 Task_1 as completed %v", err)
 		}
 	}
 
@@ -350,7 +350,7 @@ func (projection *Crossfire) checkTaskNetworkProposalVote(
 			constants.MISSED,
 			voterAddress,
 		); err != nil {
-			return fmt.Errorf("error updating validator Phase_2 Task_1 as missed: s%v", err)
+			return fmt.Errorf("error updating validator Phase_2 Task_1 as missed: %v", err)
 		}
 	}
 
@@ -380,14 +380,14 @@ func (projection *Crossfire) updateTxSentCount(
 			phaseAddressCountDbKey := phaseNumberPrefix + constants.DB_KEY_SEPARATOR + sender.Pubkeys[0]
 			errIncrementing := crossfireValidatorStatsView.Increment(phaseAddressCountDbKey, 1)
 			if errIncrementing != nil {
-				return fmt.Errorf("error Phase wise tx sent count increment: s%v", errIncrementing)
+				return fmt.Errorf("error Phase wise tx sent count increment: %v", errIncrementing)
 			}
 
 			// Increment TOTAL count for address
 			totalAddressCountDbKey := constants.TOTAL_TX_SENT_PREFIX + constants.DB_KEY_SEPARATOR + sender.Pubkeys[0]
 			errIncrementingTotal := crossfireValidatorStatsView.Increment(totalAddressCountDbKey, 1)
 			if errIncrementingTotal != nil {
-				return fmt.Errorf("error Incrementing tx sent count: s%v", errIncrementingTotal)
+				return fmt.Errorf("error Incrementing tx sent count: %v", errIncrementingTotal)
 			}
 
 		}
