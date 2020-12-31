@@ -85,7 +85,9 @@ is_postgres_ready() {
 
 run_test() {
     set +e
-    ginkgo -r
+    # ginkgo -r
+    ginkgo -r appinterface/projection/crossfire
+    # ginkgo -r internal/tmcosmosutils
     RET_VALUE=$?
     set -e
 }
