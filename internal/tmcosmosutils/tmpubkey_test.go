@@ -50,10 +50,15 @@ var _ = Describe("tmcosmosutils", func() {
 				"tcrocncl", consensusNodeAddress,
 			)).To(Equal(validatorAddress))
 		})
-		It("should work from tcro.. address", func() {
+		It("should work from tcro.. address to validator address", func() {
 			Expect(tmcosmosutils.ValidatorAddressFromPubAddress(
 				"tcrocncl", primaryAddress,
 			)).To(Equal(validatorAddress))
+		})
+		It("should work from tcro.. address to council node address", func() {
+			Expect(tmcosmosutils.ValidatorAddressFromPubAddress(
+				"tcrocnclcons", primaryAddress,
+			)).To(Equal(consensusNodeAddress))
 		})
 	})
 })
