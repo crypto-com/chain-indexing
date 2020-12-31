@@ -67,6 +67,7 @@ func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorR
 		"consensus_node_address",
 		"initial_delegator_address",
 		"tendermint_pubkey",
+		"tendermint_address",
 		"status",
 		"jailed",
 		"joined_at_block_height",
@@ -88,6 +89,7 @@ func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorR
 		validator.ConsensusNodeAddress,
 		validator.InitialDelegatorAddress,
 		validator.TendermintPubkey,
+		validator.TendermintAddress,
 		validator.Status,
 		validator.Jailed,
 		validator.JoinedAtBlockHeight,
@@ -107,6 +109,7 @@ func (validatorsView *CrossfireValidators) Upsert(validator *CrossfireValidatorR
 	).Suffix(`ON CONFLICT (operator_address, consensus_node_address) DO UPDATE SET
 		initial_delegator_address = EXCLUDED.initial_delegator_address,
 		tendermint_pubkey = EXCLUDED.tendermint_pubkey,
+		tendermint_address = EXCLUDED.tendermint_address,
 		status = EXCLUDED.status,
 		jailed = EXCLUDED.jailed,
 		joined_at_block_height = EXCLUDED.joined_at_block_height,
@@ -221,6 +224,7 @@ func (validatorsView *CrossfireValidators) List() ([]CrossfireValidatorRow, erro
 		"consensus_node_address",
 		"initial_delegator_address",
 		"tendermint_pubkey",
+		"tendermint_address",
 		"status",
 		"jailed",
 		"joined_at_block_height",
@@ -262,6 +266,7 @@ func (validatorsView *CrossfireValidators) List() ([]CrossfireValidatorRow, erro
 			&validator.ConsensusNodeAddress,
 			&validator.InitialDelegatorAddress,
 			&validator.TendermintPubkey,
+			&validator.TendermintAddress,
 			&validator.Status,
 			&validator.Jailed,
 			&validator.JoinedAtBlockHeight,
@@ -302,6 +307,7 @@ type CrossfireValidatorRow struct {
 	ConsensusNodeAddress            string          `json:"consensusNodeAddress"`
 	InitialDelegatorAddress         string          `json:"initialDelegatorAddress"`
 	TendermintPubkey                string          `json:"tendermintPubkey"`
+	TendermintAddress               string          `json:"tendermintAddress"`
 	Status                          string          `json:"status"`
 	Jailed                          bool            `json:"jailed"`
 	JoinedAtBlockHeight             int64           `json:"joinedAtBlockHeight"`

@@ -100,7 +100,7 @@ var _ = Describe("Crossfire", func() {
 				MinSelfDelegation: "1",
 				DelegatorAddress:  "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
 				ValidatorAddress:  "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
-				TendermintPubkey:  "BuuPYme7R4eH/nWs2p+sS1UpCQwy+QJgBZuhGICH8Es=",
+				TendermintPubkey:  "na51D8RmKXyWrid9I6wtdxgP6f1Nl3EyNNEzqxVquoM=",
 				Amount:            anyCoin,
 			})
 
@@ -120,7 +120,7 @@ var _ = Describe("Crossfire", func() {
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
 
-			// project two events foo
+			// project two events
 			err := projection.HandleEvents(anyHeight, []event_entity.Event{blockCreatedEvent, validatorCreatedEvent})
 			Expect(err).To(BeNil())
 
@@ -136,9 +136,10 @@ var _ = Describe("Crossfire", func() {
 			targetList = append(targetList, view.CrossfireValidatorRow{
 				MaybeId:                         &id,
 				OperatorAddress:                 "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
-				ConsensusNodeAddress:            "tcrocnclcons146s02kxfv948pzter5dwfsydchmf5zstw3362e",
+				ConsensusNodeAddress:            "tcrocnclcons1khkxmphc7sv0fqrej3rltsslrstud78cam9ekl",
 				InitialDelegatorAddress:         "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
-				TendermintPubkey:                "BuuPYme7R4eH/nWs2p+sS1UpCQwy+QJgBZuhGICH8Es=",
+				TendermintPubkey:                "na51D8RmKXyWrid9I6wtdxgP6f1Nl3EyNNEzqxVquoM=",
+				TendermintAddress:               "B5EC6D86F8F418F480799447F5C21F1C17C6F8F8",
 				Status:                          "Unbonded",
 				Jailed:                          false,
 				JoinedAtBlockHeight:             1,
@@ -197,7 +198,7 @@ var _ = Describe("Crossfire", func() {
 				MinSelfDelegation: "1",
 				DelegatorAddress:  "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
 				ValidatorAddress:  "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
-				TendermintPubkey:  "BuuPYme7R4eH/nWs2p+sS1UpCQwy+QJgBZuhGICH8Es=",
+				TendermintPubkey:  "na51D8RmKXyWrid9I6wtdxgP6f1Nl3EyNNEzqxVquoM=",
 				Amount:            anyCoin,
 			})
 
@@ -229,9 +230,10 @@ var _ = Describe("Crossfire", func() {
 			targetList = append(targetList, view.CrossfireValidatorRow{
 				MaybeId:                         &id,
 				OperatorAddress:                 "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
-				ConsensusNodeAddress:            "tcrocnclcons146s02kxfv948pzter5dwfsydchmf5zstw3362e",
+				ConsensusNodeAddress:            "tcrocnclcons1khkxmphc7sv0fqrej3rltsslrstud78cam9ekl",
 				InitialDelegatorAddress:         "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
-				TendermintPubkey:                "BuuPYme7R4eH/nWs2p+sS1UpCQwy+QJgBZuhGICH8Es=",
+				TendermintPubkey:                "na51D8RmKXyWrid9I6wtdxgP6f1Nl3EyNNEzqxVquoM=",
+				TendermintAddress:               "B5EC6D86F8F418F480799447F5C21F1C17C6F8F8",
 				Status:                          "Unbonded",
 				Jailed:                          false,
 				JoinedAtBlockHeight:             1,
@@ -250,7 +252,6 @@ var _ = Describe("Crossfire", func() {
 				RankTaskHighestTxSent:           0,
 			})
 			Expect(list).To(Equal(targetList))
-			//
 		})
 
 		It("should project crossfire_validators view when event is MsgSubmitSoftwareUpgradeProposal", func() {

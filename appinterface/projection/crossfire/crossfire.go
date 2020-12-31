@@ -181,21 +181,26 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 	for _, event := range events {
 		if msgCreateValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
 			projection.logger.Debug("handling MsgCreateValidator event")
+
 			pubKey, err := base64.StdEncoding.DecodeString(msgCreateValidatorEvent.TendermintPubkey)
 			if err != nil {
 				return fmt.Errorf("error base64 decoding Tendermint node pubkey: %v", err)
 			}
+			tendermintAddress := tmcosmosutils.TmAddressFromTmPubKey(pubKey)
+
 			consensusNodeAddress, err := tmcosmosutils.ConsensusNodeAddressFromTmPubKey(
 				projection.conNodeAddressPrefix, pubKey,
 			)
 			if err != nil {
 				return fmt.Errorf("error converting consensus node pubkey to address: %v", err)
 			}
+
 			validatorRow := view.CrossfireValidatorRow{
 				ConsensusNodeAddress:            consensusNodeAddress,
 				OperatorAddress:                 msgCreateValidatorEvent.ValidatorAddress,
 				InitialDelegatorAddress:         msgCreateValidatorEvent.DelegatorAddress,
 				TendermintPubkey:                msgCreateValidatorEvent.TendermintPubkey,
+				TendermintAddress:				 tendermintAddress,
 				Status:                          constants.UNBONDED,
 				Jailed:                          false,
 				JoinedAtBlockHeight:             blockHeight,

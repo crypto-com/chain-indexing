@@ -4,6 +4,7 @@ CREATE TABLE view_crossfire_validators (
     consensus_node_address VARCHAR,
     initial_delegator_address VARCHAR NOT NULL,
     tendermint_pubkey VARCHAR NOT NULL,
+    tendermint_address VARCHAR NOT NULL,
     status VARCHAR NOT NULL,
     jailed BOOL NOT NULL,
     joined_at_block_height BIGINT NOT NULL,
