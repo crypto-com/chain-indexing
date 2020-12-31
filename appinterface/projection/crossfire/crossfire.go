@@ -278,6 +278,19 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			if errUpdateValidatorStats != nil {
 				return fmt.Errorf("error Updating ProposalID for the voter: s%v", errUpdateValidatorStats)
 			}
+		} else if msgTransactionCreated, ok := event.(*event_usecase.TransactionCreated); ok {
+			projection.logger.Debug("handling TransactionCreated event")
+
+			// Check if proposed after competition has ended
+			if blockTime.After(projection.competitionEndTime) {
+				return fmt.Errorf("error Competition has already ended")
+			}
+
+			// Update the Tx Count
+			errUpdateTxCount := projection.updateTxSentCount(crossfireValidatorStatsView, blockTime, msgTransactionCreated)
+			if errUpdateTxCount != nil {
+				return fmt.Errorf("error Updating tx sent count: s%v", errUpdateTxCount)
+			}
 		}
 	}
 	return nil
@@ -341,5 +354,43 @@ func (projection *Crossfire) checkTaskNetworkProposalVote(
 		}
 	}
 
+	return nil
+}
+
+// Update Tx sent count for sender
+func (projection *Crossfire) updateTxSentCount(
+	crossfireValidatorStatsView *view.CrossfireValidatorsStats,
+	blockTime utctime.UTCTime,
+	msgTransactionCreated *event_usecase.TransactionCreated,
+) error {
+	var phaseNumberPrefix string
+	if blockTime.After(projection.phaseOneStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
+		phaseNumberPrefix = constants.PHASE_1_TX_SENT_PREFIX
+	} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
+		phaseNumberPrefix = constants.PHASE_2_TX_SENT_PREFIX
+	} else if blockTime.After(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
+		phaseNumberPrefix = constants.PHASE_3_TX_SENT_PREFIX
+	}
+	for _, sender := range msgTransactionCreated.Senders {
+
+		// Only considering Pubkey address for now
+		if sender.Type == constants.TYPE_URL_PUBKEY && sender.MaybeThreshold == nil {
+
+			// Increment count for address as per PHASE
+			phaseAddressCountDbKey := phaseNumberPrefix + constants.DB_KEY_SEPARATOR + sender.Pubkeys[0]
+			errIncrementing := crossfireValidatorStatsView.Increment(phaseAddressCountDbKey, 1)
+			if errIncrementing != nil {
+				return fmt.Errorf("error Phase wise tx sent count increment: s%v", errIncrementing)
+			}
+
+			// Increment TOTAL count for address
+			totalAddressCountDbKey := constants.TOTAL_TX_SENT_PREFIX + constants.DB_KEY_SEPARATOR + sender.Pubkeys[0]
+			errIncrementingTotal := crossfireValidatorStatsView.Increment(totalAddressCountDbKey, 1)
+			if errIncrementingTotal != nil {
+				return fmt.Errorf("error Incrementing tx sent count: s%v", errIncrementingTotal)
+			}
+
+		}
+	}
 	return nil
 }
