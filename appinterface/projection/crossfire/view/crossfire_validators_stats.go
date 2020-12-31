@@ -41,15 +41,8 @@ func (crossfireValidatorsStatsView *CrossfireValidatorsStats) Set(key string, va
 }
 
 func (crossfireValidatorsStatsView *CrossfireValidatorsStats) Increment(key string, value int64) error {
-	// Postgres UPSERT statement
 
-	getMetric, err := crossfireValidatorsStatsView.FindBy(key)
-	if err != nil {
-		return fmt.Errorf("error getting value: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
-	if getMetric <= 0 {
-		return fmt.Errorf("Got empty value! : %v", getMetric)
-	}
+	// Postgres UPSERT statement
 	sql, sqlArgs, err := crossfireValidatorsStatsView.rdbHandle.StmtBuilder.
 		Insert(CROSSFIRE_VALIDATOR_STATS_VIEW_TABLENAME+" AS totals").
 		Columns("key", "value").
