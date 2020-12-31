@@ -145,6 +145,7 @@ var _ = Describe("HTTPClient", func() {
 						Signature:        "jQd4JNrvX6DKmqDZ9VqoKtxRIxQHrvPWd4XW+ayrtVakiIMCWoVf1GMvxLbXYg68CyjmbuAX2VhCD0gSnj3pAw==",
 					},
 				},
+				Evidences: []usecase_model.BlockEvidence{},
 			}))
 		})
 	})
