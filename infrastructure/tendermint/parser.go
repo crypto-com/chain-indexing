@@ -51,6 +51,7 @@ func ParseBlockResp(rawRespReader io.Reader) (*model.Block, *model.RawBlock, err
 		ProposerAddress: resp.Result.Block.Header.ProposerAddress,
 		Txs:             resp.Result.Block.Data.Txs,
 		Signatures:      parseBlockSignatures(resp.Result.Block.LastCommit.Signatures),
+		Evidences:       resp.Result.Block.Evidence.Evidence,
 	}, &resp.Result, nil
 }
 
