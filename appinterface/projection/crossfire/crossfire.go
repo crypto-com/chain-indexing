@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"errors"
 
-	block_view "github.com/crypto-com/chain-indexing/appinterface/projection/block/view"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/constants"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/view"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
@@ -92,28 +92,18 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 	crossfireChainStatsView := view.NewCrossfireChainStats(rdbTxHandle)
 	crossfireValidatorsStatsView := view.NewCrossfireValidatorsStats(rdbTxHandle)
 
+	// TODO: views preparation starts
+	// handle block created event
 	var blockTime utctime.UTCTime
-	var blockHash string
 	for _, event := range events {
 		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
 			blockTime = blockCreatedEvent.Block.Time
-			blockHash = blockCreatedEvent.Block.Hash
-		}
-	}
-	// TODO: remove print for projectValidatorTx view
-	fmt.Println(blockTime, blockHash)
-
-	// TODO: views preparation starts
-	// handle block created event
-	for _, event := range events {
-		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
-			if handleErr := projection.handleBlockCreatedEvent(crossfireChainStatsView, crossfireValidatorsStatsView, blockTime, blockCreatedEvent); handleErr != nil {
+			if handleErr := projection.handleBlockCreatedEvent(crossfireChainStatsView, crossfireValidatorsView, crossfireValidatorsStatsView, blockCreatedEvent); handleErr != nil {
 				return fmt.Errorf("error handling BlockCreatedEvent: %v", handleErr)
 			}
-		} else {
-			return fmt.Errorf("received unexpected event %sV%d(%s)", event.Name(), event.Version(), event.UUID())
 		}
 	}
+
 	if err := projection.projectCrossfireValidatorView(crossfireValidatorsView, crossfireChainStatsView, crossfireValidatorsStatsView, height, blockTime, events); err != nil {
 		return fmt.Errorf("error projecting validator view: %v", err)
 	}
@@ -132,39 +122,68 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 
 func (projection *Crossfire) handleBlockCreatedEvent(
 	crossfireChainStatsView *view.CrossfireChainStats,
+	crossfireValidatorsView *view.CrossfireValidators,
 	crossfireValidatorsStatsView *view.CrossfireValidatorsStats,
-	blockTime utctime.UTCTime,
 	event *event_usecase.BlockCreated,
 ) error {
-	// increment phase block number
+	blockTime := event.Block.Time
+
+	// increment current phase block number
 	if blockTime.After(projection.phaseOneStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
-		err := crossfireChainStatsView.Increment(constants.PHASE1_COMMIT_COUNT)
+		err := crossfireChainStatsView.Increment(constants.PHASE1_BLOCK_COUNT)
 		if err != nil {
-			return fmt.Errorf("error increment PHASE1_COMMIT_COUNT")
+			return fmt.Errorf("error increment phase1 block count")
 		}
 	} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
-		err := crossfireChainStatsView.Increment(constants.PHASE2_COMMIT_COUNT)
+		err := crossfireChainStatsView.Increment(constants.PHASE2_BLOCK_COUNT)
 		if err != nil {
-			return fmt.Errorf("error increment PHASE2_COMMIT_COUNT")
+			return fmt.Errorf("error increment phase2 block count")
 		}
 	} else if blockTime.After(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
-		err := crossfireChainStatsView.Increment(constants.PHASE3_COMMIT_COUNT)
+		err := crossfireChainStatsView.Increment(constants.PHASE3_BLOCK_COUNT)
 		if err != nil {
-			return fmt.Errorf("error increment PHASE3_COMMIT_COUNT")
+			return fmt.Errorf("error increment phase3 block count")
 		}
 	}
 
-	fmt.Println(crossfireValidatorsStatsView, event)
+	// increment current block validator commitment number
+	for _, signature := range event.Block.Signatures {
+		validator, err := crossfireValidatorsView.FindBy(view.CrossfireValidatorIdentity{
+			MaybeTendermintAddress: &signature.ValidatorAddress,
+		})
+		if errors.Is(err, rdb.ErrNoRows) {
+			// no validator found by tendermint address
+			continue
+		}
+		if err != nil {
+			return fmt.Errorf(
+				"error getting existing validator by block commitment of %s from view %s", signature.ValidatorAddress, err,
+			)
+		}
 
-	//committedCouncilNodes := make([]block_view.BlockCommittedCouncilNode, 0)
-	//for _, signature := range event.Block.Signatures {
-	//	committedCouncilNodes = append(committedCouncilNodes, block_view.BlockCommittedCouncilNode{
-	//		Address:    signature.ValidatorAddress,
-	//		Time:       signature.Timestamp,
-	//		Signature:  signature.Signature,
-	//		IsProposer: event.Block.ProposerAddress == signature.ValidatorAddress,
-	//	})
-	//}
+		if blockTime.After(projection.phaseOneStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
+			validatorCommitmentKey := fmt.Sprintf("%s%s%s", validator.OperatorAddress, constants.DB_KEY_SEPARATOR, constants.PHASE1_COMMIT_COUNT)
+			if err := crossfireValidatorsStatsView.Increment(validatorCommitmentKey); err != nil {
+				return fmt.Errorf(
+					"error increment validator commitment count %s", validatorCommitmentKey,
+				)
+			}
+		} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
+			validatorCommitmentKey := fmt.Sprintf("%s%s%s", validator.OperatorAddress, constants.DB_KEY_SEPARATOR, constants.PHASE2_COMMIT_COUNT)
+			if err := crossfireValidatorsStatsView.Increment(validatorCommitmentKey); err != nil {
+				return fmt.Errorf(
+					"error increment validator commitment count %s", validatorCommitmentKey,
+				)
+			}
+		} else if blockTime.After(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
+			validatorCommitmentKey := fmt.Sprintf("%s%s%s", validator.OperatorAddress, constants.DB_KEY_SEPARATOR, constants.PHASE3_COMMIT_COUNT)
+			if err := crossfireValidatorsStatsView.Increment(validatorCommitmentKey); err != nil {
+				return fmt.Errorf(
+					"error increment validator commitment count %s", validatorCommitmentKey,
+				)
+			}
+		}
+	}
 
 	return nil
 }

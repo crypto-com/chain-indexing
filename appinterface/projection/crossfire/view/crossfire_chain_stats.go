@@ -19,9 +19,9 @@ func NewCrossfireChainStats(handle *rdb.Handle) *CrossfireChainStats {
 	}
 }
 
-func (crossfireChainStatsView *CrossfireChainStats) Set(metric string, value int64) error {
+func (view *CrossfireChainStats) Set(metric string, value int64) error {
 	// UPSERT STATEMENT
-	sql, sqlArgs, err := crossfireChainStatsView.rdbHandle.StmtBuilder.
+	sql, sqlArgs, err := view.rdbHandle.StmtBuilder.
 		Insert(CROSSFIRE_CHAIN_STATS_VIEW_TABLENAME).
 		Columns("metric", "value").
 		Values(metric, value).
@@ -31,7 +31,7 @@ func (crossfireChainStatsView *CrossfireChainStats) Set(metric string, value int
 		return fmt.Errorf("error building value insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	_, err = crossfireChainStatsView.rdbHandle.Exec(sql, sqlArgs...)
+	_, err = view.rdbHandle.Exec(sql, sqlArgs...)
 
 	if err != nil {
 		return fmt.Errorf("error inserting value: %v: %w", err, rdb.ErrWrite)
@@ -41,8 +41,8 @@ func (crossfireChainStatsView *CrossfireChainStats) Set(metric string, value int
 }
 
 
-func (crossfireChainStatsView *CrossfireChainStats) FindBy(metric string) (int64, error) {
-	sql, sqlArgs, err := crossfireChainStatsView.rdbHandle.StmtBuilder.Select(
+func (view *CrossfireChainStats) FindBy(metric string) (int64, error) {
+	sql, sqlArgs, err := view.rdbHandle.StmtBuilder.Select(
 		"value",
 	).From(
 		CROSSFIRE_CHAIN_STATS_VIEW_TABLENAME,
@@ -54,7 +54,7 @@ func (crossfireChainStatsView *CrossfireChainStats) FindBy(metric string) (int64
 	}
 
 	var value int64
-	if err := crossfireChainStatsView.rdbHandle.QueryRow(sql, sqlArgs...).Scan(&value); err != nil {
+	if err := view.rdbHandle.QueryRow(sql, sqlArgs...).Scan(&value); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			return 0, nil
 		}
@@ -64,13 +64,13 @@ func (crossfireChainStatsView *CrossfireChainStats) FindBy(metric string) (int64
 	return value, nil
 }
 
-func (crossfireChainStatsView *CrossfireChainStats) Increment(key string) error {
-	value, err := crossfireChainStatsView.FindBy(key)
+func (view *CrossfireChainStats) Increment(key string) error {
+	value, err := view.FindBy(key)
 	if err != nil {
 		return fmt.Errorf("error getting value for %v: %v", key, err)
 	}
 
-	err = crossfireChainStatsView.Set(key, value + 1)
+	err = view.Set(key, value + 1)
 	if err != nil {
 		return fmt.Errorf("error setting increment for %v: %v", key, err)
 	}
