@@ -3,10 +3,7 @@ package crossfire
 import (
 	"encoding/base64"
 	"fmt"
-	"strconv"
-	"strings"
 	"errors"
-
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/constants"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/view"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
@@ -16,6 +13,8 @@ import (
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	"strconv"
+	"strings"
 )
 
 type Crossfire struct {

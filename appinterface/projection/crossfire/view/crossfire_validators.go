@@ -328,7 +328,7 @@ func (view *CrossfireValidators) FindBy(identity CrossfireValidatorIdentity) (*C
 		"rank_task_phase_3_commitment_count",
 		"rank_task_highest_tx_sent",
 	).From(
-		"view_validators",
+		TABLE_NAME,
 	).OrderBy("id DESC")
 	if identity.MaybeConsensusNodeAddress != nil {
 		selectStmtBuilder = selectStmtBuilder.Where(
@@ -379,11 +379,11 @@ func (view *CrossfireValidators) FindBy(identity CrossfireValidatorIdentity) (*C
 		return nil, fmt.Errorf("error scanning crossfire validator row: %v: %w", err, rdb.ErrQuery)
 	}
 
-	blockTime, parseErr := timeReader.Parse()
+	joinedAtBlockTime, parseErr := timeReader.Parse()
 	if parseErr != nil {
 		return nil, fmt.Errorf("error parsing block time: %v: %w", parseErr, rdb.ErrQuery)
 	}
-	validator.JoinedAtBlockTime = *blockTime
+	validator.JoinedAtBlockTime = *joinedAtBlockTime
 
 	return &validator, nil
 }
