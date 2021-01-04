@@ -20,14 +20,20 @@ mode = "TENDERMINT_DIRECT"
 window_size = 50
 
 [tendermint]
-http_rpc_url = "https://testnet-croeseid-1.crypto.com:26657"
+http_rpc_url = "https://testnet-croeseid.crypto.com:26657"
 
 [cosmosapp]
-http_rpc_url = "https://testnet-croeseid-1.crypto.com:1317"
+http_rpc_url = "https://testnet-croeseid.crypto.com:1317"
 
 [http]
 listening_address = "0.0.0.0:8080"
 route_prefix = "/"
+# A list of origins a cross-domain request is allowed to be requested from
+# Default value '[]' disables CORS support
+# Use '["*"]' to allow request from any origin
+cors_allowed_origins = []
+cors_allowed_methods = ["HEAD", "GET"]
+cors_allowed_headers = ["Origin", "Accept", "Content-Type", "X-Requested-With", "X-Server-Time"]
 
 [database]
 host = "localhost"

@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 
+	"github.com/lab259/cors"
+
 	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
@@ -26,6 +28,10 @@ type HTTPAPIServer struct {
 
 	listeningAddress string
 	routePrefix      string
+
+	corsAllowedOrigins []string
+	corsAllowedMethods []string
+	corsAllowedHeaders []string
 }
 
 // NewIndexService creates a new server instance for polling and indexing
@@ -39,6 +45,10 @@ func NewHTTPAPIServer(logger applogger.Logger, rdbConn rdb.Conn, config *Config)
 		conNodeAddressPrefix:   config.Blockchain.ConNodeAddressPrefix,
 		listeningAddress:       config.HTTP.ListeningAddress,
 		routePrefix:            config.HTTP.RoutePrefix,
+
+		corsAllowedOrigins: config.HTTP.CorsAllowedOrigins,
+		corsAllowedMethods: config.HTTP.CorsAllowedMethods,
+		corsAllowedHeaders: config.HTTP.CorsAllowedHeaders,
 	}
 }
 
@@ -49,6 +59,15 @@ func (server *HTTPAPIServer) Run() error {
 	).WithLogger(
 		server.logger,
 	)
+
+	if len(server.corsAllowedOrigins) != 0 {
+		httpServer = httpServer.WithCors(cors.Options{
+			AllowedOrigins: server.corsAllowedOrigins,
+			AllowedMethods: server.corsAllowedMethods,
+			AllowedHeaders: server.corsAllowedHeaders,
+			Debug:          true,
+		})
+	}
 
 	searchHandler := handlers.NewSearch(server.logger, server.rdbConn.ToHandle())
 	blocksHandler := handlers.NewBlocks(server.logger, server.rdbConn.ToHandle())
