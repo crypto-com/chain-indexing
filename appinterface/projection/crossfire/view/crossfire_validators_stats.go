@@ -63,7 +63,7 @@ func (view *CrossfireValidatorsStats) FindBy(key string) (int64, error) {
 	return value, nil
 }
 
-func (view *CrossfireValidatorsStats) Increment(key string) error {
+func (view *CrossfireValidatorsStats) IncrementOne(key string) error {
 	value, err := view.FindBy(key)
 	if err != nil {
 		return fmt.Errorf("error getting value for %v: %v", key, err)

@@ -29,7 +29,7 @@ var _ = Describe("Crossfire Chain Stats", func() {
 				crossfireChainStatsView := view.NewCrossfireChainStats(conn.ToHandle())
 
 				// increment
-				err = crossfireChainStatsView.Increment(key)
+				err = crossfireChainStatsView.IncrementOne(key)
 				Expect(err).To(BeNil())
 				// should be 1
 				actual, err := crossfireChainStatsView.FindBy(key)
@@ -37,7 +37,7 @@ var _ = Describe("Crossfire Chain Stats", func() {
 				Expect(actual).To(Equal(int64(1)))
 
 				// increment
-				err = crossfireChainStatsView.Increment(key)
+				err = crossfireChainStatsView.IncrementOne(key)
 				Expect(err).To(BeNil())
 				// should be 2
 				actual, err = crossfireChainStatsView.FindBy(key)

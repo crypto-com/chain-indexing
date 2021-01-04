@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestBlock(t *testing.T) {
+func TestCrossfire(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Crossfire DryRun Suite")
 }

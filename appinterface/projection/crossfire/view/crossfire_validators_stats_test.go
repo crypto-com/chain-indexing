@@ -30,7 +30,7 @@ var _ = Describe("Crossfire Validators Stats", func() {
 				crossfireValidatorsStatsView := view.NewCrossfireValidatorsStats(conn.ToHandle())
 
 				// increment
-				err = crossfireValidatorsStatsView.Increment(key)
+				err = crossfireValidatorsStatsView.IncrementOne(key)
 				Expect(err).To(BeNil())
 				// should be 1
 				actual, err := crossfireValidatorsStatsView.FindBy(key)
@@ -38,7 +38,7 @@ var _ = Describe("Crossfire Validators Stats", func() {
 				Expect(actual).To(Equal(int64(1)))
 
 				// increment
-				err = crossfireValidatorsStatsView.Increment(key)
+				err = crossfireValidatorsStatsView.IncrementOne(key)
 				Expect(err).To(BeNil())
 				// should be 2
 				actual, err = crossfireValidatorsStatsView.FindBy(key)

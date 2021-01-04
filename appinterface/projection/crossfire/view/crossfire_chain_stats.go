@@ -64,7 +64,7 @@ func (view *CrossfireChainStats) FindBy(metric string) (int64, error) {
 	return value, nil
 }
 
-func (view *CrossfireChainStats) Increment(key string) error {
+func (view *CrossfireChainStats) IncrementOne(key string) error {
 	value, err := view.FindBy(key)
 	if err != nil {
 		return fmt.Errorf("error getting value for %v: %v", key, err)

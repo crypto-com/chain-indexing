@@ -130,12 +130,12 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 
 	// increment current phase block number
 	if blockTime.After(projection.phaseOneStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
-		err := crossfireChainStatsView.Increment(constants.PHASE1_BLOCK_COUNT)
+		err := crossfireChainStatsView.IncrementOne(constants.PHASE1_BLOCK_COUNT)
 		if err != nil {
 			return fmt.Errorf("error increment phase1 block count")
 		}
 	} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
-		err := crossfireChainStatsView.Increment(constants.PHASE2_BLOCK_COUNT)
+		err := crossfireChainStatsView.IncrementOne(constants.PHASE2_BLOCK_COUNT)
 		if err != nil {
 			return fmt.Errorf("error increment phase2 block count")
 		}
@@ -147,7 +147,7 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 			}
 		}
 
-		err := crossfireChainStatsView.Increment(constants.PHASE3_BLOCK_COUNT)
+		err := crossfireChainStatsView.IncrementOne(constants.PHASE3_BLOCK_COUNT)
 		if err != nil {
 			return fmt.Errorf("error increment phase3 block count")
 		}
@@ -170,21 +170,21 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 
 		if blockTime.After(projection.phaseOneStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
 			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE1_COMMIT)
-			if err := crossfireValidatorsStatsView.Increment(key); err != nil {
+			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
 				return fmt.Errorf(
 					"error increment validator commitment count %s", key,
 				)
 			}
 		} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
 			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE2_COMMIT)
-			if err := crossfireValidatorsStatsView.Increment(key); err != nil {
+			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
 				return fmt.Errorf(
 					"error increment validator commitment count %s", key,
 				)
 			}
 		} else if blockTime.After(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
 			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE3_COMMIT)
-			if err := crossfireValidatorsStatsView.Increment(key); err != nil {
+			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
 				return fmt.Errorf(
 					"error increment validator commitment count %s", key,
 				)

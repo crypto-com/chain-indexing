@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestView(t *testing.T) {
+func TestCrossfireView(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "View Suite")
 }
