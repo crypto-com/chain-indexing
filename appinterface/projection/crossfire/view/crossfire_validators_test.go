@@ -10,7 +10,7 @@ import (
 	. "github.com/crypto-com/chain-indexing/test"
 )
 
-var _ = Describe("Blocks", func() {
+var _ = Describe("Crossfire Validators", func() {
 	WithTestPgxConn(func(conn *pg.PgxConn, migrate *pg.Migrate) {
 		BeforeEach(func() {
 			_ = migrate.Reset()
