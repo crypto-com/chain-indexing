@@ -1,7 +1,6 @@
 package view_test
 
 import (
-	"fmt"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/constants"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/view"
 	. "github.com/onsi/ginkgo"
@@ -27,7 +26,7 @@ var _ = Describe("Crossfire Validators Stats", func() {
 				var err error
 
 				operatorAddress := "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5"
-				key := fmt.Sprintf("%s%s%s", operatorAddress, constants.DB_KEY_SEPARATOR, constants.PHASE1_COMMIT_COUNT)
+				key := constants.ValidatorCommitmentKey(operatorAddress, constants.PHASE1_COMMIT)
 				crossfireValidatorsStatsView := view.NewCrossfireValidatorsStats(conn.ToHandle())
 
 				// increment

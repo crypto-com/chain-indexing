@@ -126,6 +126,7 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 	event *event_usecase.BlockCreated,
 ) error {
 	blockTime := event.Block.Time
+	blockHeight := event.Block.Height
 
 	// increment current phase block number
 	if blockTime.After(projection.phaseOneStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
@@ -139,7 +140,13 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 			return fmt.Errorf("error increment phase2 block count")
 		}
 	} else if blockTime.After(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
-		// check the keep active task
+		// check the keep active task, throttling with every 10 blocks
+		if blockHeight % 10 == 0 {
+			if err := projection.checkTaskKeepActive(crossfireChainStatsView, crossfireValidatorsView, crossfireValidatorsStatsView); err != nil {
+				return fmt.Errorf("error checkTaskKeepActive: %v", err)
+			}
+		}
+
 		err := crossfireChainStatsView.Increment(constants.PHASE3_BLOCK_COUNT)
 		if err != nil {
 			return fmt.Errorf("error increment phase3 block count")
@@ -162,24 +169,24 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 		}
 
 		if blockTime.After(projection.phaseOneStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
-			validatorCommitmentKey := fmt.Sprintf("%s%s%s", validator.OperatorAddress, constants.DB_KEY_SEPARATOR, constants.PHASE1_COMMIT_COUNT)
-			if err := crossfireValidatorsStatsView.Increment(validatorCommitmentKey); err != nil {
+			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE1_COMMIT)
+			if err := crossfireValidatorsStatsView.Increment(key); err != nil {
 				return fmt.Errorf(
-					"error increment validator commitment count %s", validatorCommitmentKey,
+					"error increment validator commitment count %s", key,
 				)
 			}
 		} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
-			validatorCommitmentKey := fmt.Sprintf("%s%s%s", validator.OperatorAddress, constants.DB_KEY_SEPARATOR, constants.PHASE2_COMMIT_COUNT)
-			if err := crossfireValidatorsStatsView.Increment(validatorCommitmentKey); err != nil {
+			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE2_COMMIT)
+			if err := crossfireValidatorsStatsView.Increment(key); err != nil {
 				return fmt.Errorf(
-					"error increment validator commitment count %s", validatorCommitmentKey,
+					"error increment validator commitment count %s", key,
 				)
 			}
 		} else if blockTime.After(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
-			validatorCommitmentKey := fmt.Sprintf("%s%s%s", validator.OperatorAddress, constants.DB_KEY_SEPARATOR, constants.PHASE3_COMMIT_COUNT)
-			if err := crossfireValidatorsStatsView.Increment(validatorCommitmentKey); err != nil {
+			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE3_COMMIT)
+			if err := crossfireValidatorsStatsView.Increment(key); err != nil {
 				return fmt.Errorf(
-					"error increment validator commitment count %s", validatorCommitmentKey,
+					"error increment validator commitment count %s", key,
 				)
 			}
 		}
@@ -373,7 +380,7 @@ func (projection *Crossfire) checkTaskSetup(
 			operatorAddress,
 			consensusNodeAddress,
 		); err != nil {
-			return fmt.Errorf("error updating validator TaskPhase1NodeSetup as completed: s%v", err)
+			return fmt.Errorf("error updating validator TaskPhase1NodeSetup as completed: %v", err)
 		}
 	}
 
@@ -384,7 +391,45 @@ func (projection *Crossfire) checkTaskSetup(
 			operatorAddress,
 			consensusNodeAddress,
 		); err != nil {
-			return fmt.Errorf("error updating validator TaskPhase1NodeSetup as missed: s%v", err)
+			return fmt.Errorf("error updating validator TaskPhase1NodeSetup as missed: %v", err)
+		}
+	}
+
+	return nil
+}
+
+// checkTaskKeepActive checks if a validator has over half of commitments of phase 2
+func (projection *Crossfire) checkTaskKeepActive(
+	crossfireChainStatsView *view.CrossfireChainStats,
+	crossfireValidatorsView *view.CrossfireValidators,
+	crossfireValidatorsStatsView *view.CrossfireValidatorsStats,
+) error {
+	phase2TotalBlockCount, err := crossfireChainStatsView.FindBy(constants.PHASE2_BLOCK_COUNT)
+	if err != nil {
+		return fmt.Errorf("error getting PHASE2_BLOCK_COUNT: %v", err)
+	}
+
+	validators, err := crossfireValidatorsView.List()
+	if err != nil {
+		return fmt.Errorf("error listing all validators for checkTaskKeepActive: %v", err)
+	}
+
+	for _, validator := range validators {
+		key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE2_COMMIT)
+		validatorPhase2CommitCount, err := crossfireValidatorsStatsView.FindBy(key)
+		if err != nil {
+			return fmt.Errorf("error find current validator's phase commit count: %v %s", err, validator.OperatorAddress)
+		}
+		// over 50% of the commitments
+		if validatorPhase2CommitCount >= phase2TotalBlockCount / 2 {
+			if err := crossfireValidatorsView.UpdateTask(
+				"task_phase_2_keep_node_active",
+				constants.COMPLETED,
+				validator.OperatorAddress,
+				validator.ConsensusNodeAddress,
+			); err != nil {
+				return fmt.Errorf("error updating validator task_phase_2_keep_node_active as completed for validator: %v %s", err, validator.OperatorAddress)
+			}
 		}
 	}
 
