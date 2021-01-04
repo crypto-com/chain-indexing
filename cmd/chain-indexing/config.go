@@ -89,8 +89,11 @@ type SyncConfig struct {
 }
 
 type HTTPConfig struct {
-	ListeningAddress string `toml:"listening_address"`
-	RoutePrefix      string `toml:"route_prefix"`
+	ListeningAddress   string   `toml:"listening_address"`
+	RoutePrefix        string   `toml:"route_prefix"`
+	CorsAllowedOrigins []string `toml:"cors_allowed_origins"`
+	CorsAllowedMethods []string `toml:"cors_allowed_methods"`
+	CorsAllowedHeaders []string `toml:"cors_allowed_headers"`
 }
 
 type TendermintConfig struct {
