@@ -1,4 +1,4 @@
-package crossfire_test
+package view_test
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestCrossfire(t *testing.T) {
+func TestCrossfireView(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Crossfire DryRun Suite")
+	RunSpecs(t, "View Suite")
 }

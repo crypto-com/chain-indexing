@@ -19,9 +19,9 @@ func NewCrossfireValidatorsStats(handle *rdb.Handle) *CrossfireValidatorsStats {
 	}
 }
 
-func (crossfireValidatorsStatsView *CrossfireValidatorsStats) Set(key string, value int64) error {
+func (view *CrossfireValidatorsStats) Set(key string, value int64) error {
 	// UPSERT STATEMENT
-	sql, sqlArgs, err := crossfireValidatorsStatsView.rdbHandle.StmtBuilder.
+	sql, sqlArgs, err := view.rdbHandle.StmtBuilder.
 		Insert(CROSSFIRE_VALIDATOR_STATS_VIEW_TABLENAME).
 		Columns("key", "value").
 		Values(key, value).
@@ -31,7 +31,7 @@ func (crossfireValidatorsStatsView *CrossfireValidatorsStats) Set(key string, va
 		return fmt.Errorf("error building value insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	_, err = crossfireValidatorsStatsView.rdbHandle.Exec(sql, sqlArgs...)
+	_, err = view.rdbHandle.Exec(sql, sqlArgs...)
 
 	if err != nil {
 		return fmt.Errorf("error inserting value: %v: %w", err, rdb.ErrWrite)
@@ -40,37 +40,8 @@ func (crossfireValidatorsStatsView *CrossfireValidatorsStats) Set(key string, va
 	return nil
 }
 
-func (crossfireValidatorsStatsView *CrossfireValidatorsStats) Increment(key string, value int64) error {
-	// Postgres UPSERT statement
-
-	getMetric, err := crossfireValidatorsStatsView.FindBy(key)
-	if err != nil {
-		return fmt.Errorf("error getting value: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
-	if getMetric <= 0 {
-		return fmt.Errorf("Got empty value! : %v", getMetric)
-	}
-	sql, sqlArgs, err := crossfireValidatorsStatsView.rdbHandle.StmtBuilder.
-		Insert(CROSSFIRE_VALIDATOR_STATS_VIEW_TABLENAME+" AS totals").
-		Columns("key", "value").
-		Values(key, value).
-		Suffix("ON CONFLICT (key) DO UPDATE SET value = totals.value + EXCLUDED.value").
-		ToSql()
-	if err != nil {
-		return fmt.Errorf("error building value insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
-
-	_, err = crossfireValidatorsStatsView.rdbHandle.Exec(sql, sqlArgs...)
-
-	if err != nil {
-		return fmt.Errorf("error inserting value: %v: %w", err, rdb.ErrWrite)
-	}
-
-	return nil
-}
-
-func (crossfireValidatorsStatsView *CrossfireValidatorsStats) FindBy(key string) (int64, error) {
-	sql, sqlArgs, err := crossfireValidatorsStatsView.rdbHandle.StmtBuilder.Select(
+func (view *CrossfireValidatorsStats) FindBy(key string) (int64, error) {
+	sql, sqlArgs, err := view.rdbHandle.StmtBuilder.Select(
 		"value",
 	).From(
 		CROSSFIRE_VALIDATOR_STATS_VIEW_TABLENAME,
@@ -78,18 +49,32 @@ func (crossfireValidatorsStatsView *CrossfireValidatorsStats) FindBy(key string)
 		"key = ?", key,
 	).ToSql()
 	if err != nil {
-		return -1, fmt.Errorf("error preparing key selection SQL: %v", err)
+		return 0, fmt.Errorf("error preparing key selection SQL: %v", err)
 	}
 
 	var value int64
-	if err := crossfireValidatorsStatsView.rdbHandle.QueryRow(sql, sqlArgs...).Scan(&value); err != nil {
+	if err := view.rdbHandle.QueryRow(sql, sqlArgs...).Scan(&value); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
-			return -1, nil
+			return 0, nil
 		}
-		return -1, fmt.Errorf("error getting key: %v", err)
+		return 0, fmt.Errorf("error getting key: %v", err)
 	}
 
 	return value, nil
+}
+
+func (view *CrossfireValidatorsStats) IncrementOne(key string) error {
+	value, err := view.FindBy(key)
+	if err != nil {
+		return fmt.Errorf("error getting value for %v: %v", key, err)
+	}
+
+	err = view.Set(key, value + 1)
+	if err != nil {
+		return fmt.Errorf("error setting increment for %v: %v", key, err)
+	}
+
+	return nil
 }
 
 type CrossfireValidatorsStatsRow struct {
