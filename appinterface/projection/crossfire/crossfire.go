@@ -139,6 +139,7 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 			return fmt.Errorf("error increment phase2 block count")
 		}
 	} else if blockTime.After(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
+		// check the keep active task
 		err := crossfireChainStatsView.Increment(constants.PHASE3_BLOCK_COUNT)
 		if err != nil {
 			return fmt.Errorf("error increment phase3 block count")

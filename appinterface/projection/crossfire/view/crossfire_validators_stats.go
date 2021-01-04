@@ -49,15 +49,15 @@ func (view *CrossfireValidatorsStats) FindBy(key string) (int64, error) {
 		"key = ?", key,
 	).ToSql()
 	if err != nil {
-		return -1, fmt.Errorf("error preparing key selection SQL: %v", err)
+		return 0, fmt.Errorf("error preparing key selection SQL: %v", err)
 	}
 
 	var value int64
 	if err := view.rdbHandle.QueryRow(sql, sqlArgs...).Scan(&value); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
-			return -1, nil
+			return 0, nil
 		}
-		return -1, fmt.Errorf("error getting key: %v", err)
+		return 0, fmt.Errorf("error getting key: %v", err)
 	}
 
 	return value, nil
