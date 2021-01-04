@@ -28,6 +28,7 @@ type Crossfire struct {
 	competitionEndTime       utctime.UTCTime
 	adminAddress             string
 	networkUpgradeProposalID string
+	participantsListUrl      string
 	rdbConn                  rdb.Conn
 	logger                   applogger.Logger
 }
@@ -43,6 +44,7 @@ func NewCrossfire(
 	unixCompetitionEndTime int64,
 	adminAddress string,
 	networkUpgradeProposalID string,
+	participantsListUrl string,
 ) *Crossfire {
 	return &Crossfire{
 		Base: rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Crossfire"),
@@ -55,6 +57,7 @@ func NewCrossfire(
 		competitionEndTime:       utctime.FromUnixNano(unixCompetitionEndTime),
 		adminAddress:             adminAddress, // TODO: address prefix check
 		networkUpgradeProposalID: networkUpgradeProposalID,
+		participantsListUrl:      participantsListUrl,
 		rdbConn:                  rdbConn,
 		logger:                   logger,
 	}
@@ -393,4 +396,40 @@ func (projection *Crossfire) updateTxSentCount(
 		}
 	}
 	return nil
+}
+
+// Compute Tx Sent Rank for participating validators
+
+func (projection *Crossfire) computeTxSentRank(
+	crossfireValidatorStatsView *view.CrossfireValidatorsStats,
+	blockTime utctime.UTCTime,
+) error {
+	participantsList := []ParticipantDetail{
+		{
+			OperatorAddress:         "someAddress",
+			InitialDelegatorAddress: "initialAddress",
+			Moniker:                 "myMoniker",
+			IsPrimaryNode:           true,
+		},
+		{
+			OperatorAddress:         "someAddress1",
+			InitialDelegatorAddress: "initialAddress1",
+			Moniker:                 "myMoniker1",
+			IsPrimaryNode:           true,
+		},
+	}
+
+	for _, participant := range participantsList {
+		fmt.Sprintf("Do something with %v", participant)
+	}
+	// Compute rank first
+	crossfireValidatorStatsView.FindBy(constants.TOTAL_TX_SENT_PREFIX)
+	return nil
+}
+
+type ParticipantDetail struct {
+	OperatorAddress         string `json:"operatorAddress"`
+	InitialDelegatorAddress string `json:"initialDelegatorAddress"`
+	Moniker                 string `json:"moniker"`
+	IsPrimaryNode           bool   `json:"isPrimaryNode"`
 }
