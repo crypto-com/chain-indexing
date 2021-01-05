@@ -2,8 +2,8 @@ package crossfire
 
 import (
 	"encoding/base64"
-	"fmt"
 	"errors"
+	"fmt"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/constants"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/view"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
@@ -20,6 +20,7 @@ import (
 type Crossfire struct {
 	*rdbprojectionbase.Base
 
+	Client               *HTTPClient
 	conNodeAddressPrefix     string
 	validatorAddressPrefix   string
 	phaseOneStartTime        utctime.UTCTime
@@ -43,10 +44,12 @@ func NewCrossfire(
 	unixCompetitionEndTime int64,
 	adminAddress string,
 	networkUpgradeProposalID string,
+	participantsListURL string,
 ) *Crossfire {
 	return &Crossfire{
 		Base: rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Crossfire"),
 
+		Client:               NewHTTPClient(participantsListURL),
 		conNodeAddressPrefix:     conNodeAddressPrefix,
 		validatorAddressPrefix:   validatorAddressPrefix,
 		phaseOneStartTime:        utctime.FromUnixNano(unixPhaseOneStartTime),
@@ -141,7 +144,7 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 		}
 	} else if blockTime.After(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
 		// check the keep active task, throttling with every 10 blocks
-		if blockHeight % 10 == 0 {
+		if blockHeight%10 == 0 {
 			if err := projection.checkTaskKeepActive(crossfireChainStatsView, crossfireValidatorsView, crossfireValidatorsStatsView); err != nil {
 				return fmt.Errorf("error checkTaskKeepActive: %v", err)
 			}
@@ -226,7 +229,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 				OperatorAddress:                 msgCreateValidatorEvent.ValidatorAddress,
 				InitialDelegatorAddress:         msgCreateValidatorEvent.DelegatorAddress,
 				TendermintPubkey:                msgCreateValidatorEvent.TendermintPubkey,
-				TendermintAddress:				 tendermintAddress,
+				TendermintAddress:               tendermintAddress,
 				Status:                          constants.UNBONDED,
 				Jailed:                          false,
 				JoinedAtBlockHeight:             blockHeight,
@@ -421,7 +424,7 @@ func (projection *Crossfire) checkTaskKeepActive(
 			return fmt.Errorf("error find current validator's phase commit count: %v %s", err, validator.OperatorAddress)
 		}
 		// over 50% of the commitments
-		if validatorPhase2CommitCount >= phase2TotalBlockCount / 2 {
+		if validatorPhase2CommitCount >= phase2TotalBlockCount/2 {
 			if err := crossfireValidatorsView.UpdateTask(
 				"task_phase_2_keep_node_active",
 				constants.COMPLETED,

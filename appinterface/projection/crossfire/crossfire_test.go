@@ -35,6 +35,7 @@ var _ = Describe("Crossfire", func() {
 			1,
 			"foo",
 			"14",
+			"https://example.com/participants.json",
 		)
 	})
 
@@ -116,6 +117,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
+				"https://example.com/participants.json",
 			)
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
@@ -214,6 +216,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
+				"https://example.com/participants.json",
 			)
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
@@ -318,6 +321,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
+				"https://example.com/participants.json",
 			)
 
 			// Fire both events
@@ -415,6 +419,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
+				"https://example.com/participants.json",
 			)
 
 			// Fire both events
