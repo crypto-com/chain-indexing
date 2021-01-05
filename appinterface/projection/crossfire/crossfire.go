@@ -2,6 +2,7 @@ package crossfire
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -92,20 +93,21 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 	rdbTxHandle := rdbTx.ToHandle()
 	crossfireValidatorsView := view.NewCrossfireValidators(rdbTxHandle)
 	crossfireChainStatsView := view.NewCrossfireChainStats(rdbTxHandle)
-	crossfireValidatorStatsView := view.NewCrossfireValidatorsStats(rdbTxHandle)
+	crossfireValidatorsStatsView := view.NewCrossfireValidatorsStats(rdbTxHandle)
+
+	// TODO: views preparation starts
+	// handle block created event
 	var blockTime utctime.UTCTime
-	var blockHash string
 	for _, event := range events {
 		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
 			blockTime = blockCreatedEvent.Block.Time
-			blockHash = blockCreatedEvent.Block.Hash
+			if handleErr := projection.handleBlockCreatedEvent(crossfireChainStatsView, crossfireValidatorsView, crossfireValidatorsStatsView, blockCreatedEvent); handleErr != nil {
+				return fmt.Errorf("error handling BlockCreatedEvent: %v", handleErr)
+			}
 		}
 	}
-	// TODO: remove print for projectValidatorTx view
-	fmt.Println(blockTime, blockHash)
 
-	// TODO: views preparation starts
-	if err := projection.projectCrossfireValidatorView(crossfireValidatorsView, crossfireChainStatsView, crossfireValidatorStatsView, height, blockTime, events); err != nil {
+	if err := projection.projectCrossfireValidatorView(crossfireValidatorsView, crossfireChainStatsView, crossfireValidatorsStatsView, height, blockTime, events); err != nil {
 		return fmt.Errorf("error projecting validator view: %v", err)
 	}
 	// TODO ends: views preparation ends and update current height as handled
@@ -121,6 +123,82 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 	return nil
 }
 
+func (projection *Crossfire) handleBlockCreatedEvent(
+	crossfireChainStatsView *view.CrossfireChainStats,
+	crossfireValidatorsView *view.CrossfireValidators,
+	crossfireValidatorsStatsView *view.CrossfireValidatorsStats,
+	event *event_usecase.BlockCreated,
+) error {
+	blockTime := event.Block.Time
+	blockHeight := event.Block.Height
+
+	// increment current phase block number
+	if blockTime.After(projection.phaseOneStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
+		err := crossfireChainStatsView.IncrementOne(constants.PHASE1_BLOCK_COUNT)
+		if err != nil {
+			return fmt.Errorf("error increment phase1 block count")
+		}
+	} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
+		err := crossfireChainStatsView.IncrementOne(constants.PHASE2_BLOCK_COUNT)
+		if err != nil {
+			return fmt.Errorf("error increment phase2 block count")
+		}
+	} else if blockTime.After(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
+		// check the keep active task, throttling with every 10 blocks
+		if blockHeight%10 == 0 {
+			if err := projection.checkTaskKeepActive(crossfireChainStatsView, crossfireValidatorsView, crossfireValidatorsStatsView); err != nil {
+				return fmt.Errorf("error checkTaskKeepActive: %v", err)
+			}
+		}
+
+		err := crossfireChainStatsView.IncrementOne(constants.PHASE3_BLOCK_COUNT)
+		if err != nil {
+			return fmt.Errorf("error increment phase3 block count")
+		}
+	}
+
+	// increment current block validator commitment number
+	for _, signature := range event.Block.Signatures {
+		validator, err := crossfireValidatorsView.FindBy(view.CrossfireValidatorIdentity{
+			MaybeTendermintAddress: &signature.ValidatorAddress,
+		})
+		if errors.Is(err, rdb.ErrNoRows) {
+			// no validator found by tendermint address
+			continue
+		}
+		if err != nil {
+			return fmt.Errorf(
+				"error getting existing validator by block commitment of %s from view %s", signature.ValidatorAddress, err,
+			)
+		}
+
+		if blockTime.After(projection.phaseOneStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
+			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE1_COMMIT)
+			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
+				return fmt.Errorf(
+					"error increment validator commitment count %s", key,
+				)
+			}
+		} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
+			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE2_COMMIT)
+			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
+				return fmt.Errorf(
+					"error increment validator commitment count %s", key,
+				)
+			}
+		} else if blockTime.After(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
+			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE3_COMMIT)
+			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
+				return fmt.Errorf(
+					"error increment validator commitment count %s", key,
+				)
+			}
+		}
+	}
+
+	return nil
+}
+
 func (projection *Crossfire) projectCrossfireValidatorView(
 	crossfireValidatorsView *view.CrossfireValidators,
 	crossfireChainStatsView *view.CrossfireChainStats,
@@ -133,20 +211,26 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 	for _, event := range events {
 		if msgCreateValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
 			projection.logger.Debug("handling MsgCreateValidator event")
+
 			pubKey, err := base64.StdEncoding.DecodeString(msgCreateValidatorEvent.TendermintPubkey)
 			if err != nil {
 				return fmt.Errorf("error base64 decoding Tendermint node pubkey: %v", err)
 			}
+			tendermintAddress := tmcosmosutils.TmAddressFromTmPubKey(pubKey)
+
 			consensusNodeAddress, err := tmcosmosutils.ConsensusNodeAddressFromTmPubKey(
 				projection.conNodeAddressPrefix, pubKey,
 			)
 			if err != nil {
 				return fmt.Errorf("error converting consensus node pubkey to address: %v", err)
 			}
+
 			validatorRow := view.CrossfireValidatorRow{
 				ConsensusNodeAddress:            consensusNodeAddress,
 				OperatorAddress:                 msgCreateValidatorEvent.ValidatorAddress,
 				InitialDelegatorAddress:         msgCreateValidatorEvent.DelegatorAddress,
+				TendermintPubkey:                msgCreateValidatorEvent.TendermintPubkey,
+				TendermintAddress:               tendermintAddress,
 				Status:                          constants.UNBONDED,
 				Jailed:                          false,
 				JoinedAtBlockHeight:             blockHeight,
@@ -325,6 +409,44 @@ func (projection *Crossfire) checkTaskSetup(
 			consensusNodeAddress,
 		); err != nil {
 			return fmt.Errorf("error updating validator TaskPhase1NodeSetup as missed: %v", err)
+		}
+	}
+
+	return nil
+}
+
+// checkTaskKeepActive checks if a validator has over half of commitments of phase 2
+func (projection *Crossfire) checkTaskKeepActive(
+	crossfireChainStatsView *view.CrossfireChainStats,
+	crossfireValidatorsView *view.CrossfireValidators,
+	crossfireValidatorsStatsView *view.CrossfireValidatorsStats,
+) error {
+	phase2TotalBlockCount, err := crossfireChainStatsView.FindBy(constants.PHASE2_BLOCK_COUNT)
+	if err != nil {
+		return fmt.Errorf("error getting PHASE2_BLOCK_COUNT: %v", err)
+	}
+
+	validators, err := crossfireValidatorsView.List()
+	if err != nil {
+		return fmt.Errorf("error listing all validators for checkTaskKeepActive: %v", err)
+	}
+
+	for _, validator := range validators {
+		key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE2_COMMIT)
+		validatorPhase2CommitCount, err := crossfireValidatorsStatsView.FindBy(key)
+		if err != nil {
+			return fmt.Errorf("error find current validator's phase commit count: %v %s", err, validator.OperatorAddress)
+		}
+		// over 50% of the commitments
+		if validatorPhase2CommitCount >= phase2TotalBlockCount/2 {
+			if err := crossfireValidatorsView.UpdateTask(
+				"task_phase_2_keep_node_active",
+				constants.COMPLETED,
+				validator.OperatorAddress,
+				validator.ConsensusNodeAddress,
+			); err != nil {
+				return fmt.Errorf("error updating validator task_phase_2_keep_node_active as completed for validator: %v %s", err, validator.OperatorAddress)
+			}
 		}
 	}
 

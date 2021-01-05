@@ -4,4 +4,3 @@ CREATE TABLE view_crossfire_chain_stats
     value BIGINT NOT NULL DEFAULT 0,
     PRIMARY KEY (metric)
 )
-

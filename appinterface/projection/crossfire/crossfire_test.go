@@ -35,6 +35,7 @@ var _ = Describe("Crossfire", func() {
 			1,
 			"foo",
 			"14",
+			"someRandomLink",
 		)
 	})
 
@@ -116,6 +117,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
+				"someRandomLink",
 			)
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
@@ -138,6 +140,8 @@ var _ = Describe("Crossfire", func() {
 				OperatorAddress:                 "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
 				ConsensusNodeAddress:            "tcrocnclcons1khkxmphc7sv0fqrej3rltsslrstud78cam9ekl",
 				InitialDelegatorAddress:         "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+				TendermintPubkey:                "na51D8RmKXyWrid9I6wtdxgP6f1Nl3EyNNEzqxVquoM=",
+				TendermintAddress:               "B5EC6D86F8F418F480799447F5C21F1C17C6F8F8",
 				Status:                          "Unbonded",
 				Jailed:                          false,
 				JoinedAtBlockHeight:             1,
@@ -212,6 +216,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
+				"someRandomLink",
 			)
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
@@ -230,6 +235,8 @@ var _ = Describe("Crossfire", func() {
 				OperatorAddress:                 "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
 				ConsensusNodeAddress:            "tcrocnclcons1khkxmphc7sv0fqrej3rltsslrstud78cam9ekl",
 				InitialDelegatorAddress:         "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+				TendermintPubkey:                "na51D8RmKXyWrid9I6wtdxgP6f1Nl3EyNNEzqxVquoM=",
+				TendermintAddress:               "B5EC6D86F8F418F480799447F5C21F1C17C6F8F8",
 				Status:                          "Unbonded",
 				Jailed:                          false,
 				JoinedAtBlockHeight:             1,
@@ -314,6 +321,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
+				"someRandomLink",
 			)
 
 			// Fire both events
@@ -411,6 +419,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
+				"someRandomLink",
 			)
 
 			// Fire both events
@@ -570,6 +579,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
+				"someRandomLink",
 			)
 
 			// Fire both events
