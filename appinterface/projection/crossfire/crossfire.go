@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -194,6 +195,12 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 				)
 			}
 		}
+	}
+
+	// Recompute TxSentRank
+	errTxSentRank := projection.computeTxSentRank(crossfireValidatorsStatsView, crossfireValidatorsView, blockTime)
+	if errTxSentRank != nil {
+		return fmt.Errorf("[error] Updating TxSentTask Rank %w", errTxSentRank)
 	}
 
 	return nil
@@ -521,37 +528,85 @@ func (projection *Crossfire) updateTxSentCount(
 }
 
 // Compute Tx Sent Rank for participating validators
-
 func (projection *Crossfire) computeTxSentRank(
 	crossfireValidatorStatsView *view.CrossfireValidatorsStats,
+	crossfireValidatorView *view.CrossfireValidators,
 	blockTime utctime.UTCTime,
 ) error {
+	// Using dummy list for development
 	participantsList := []ParticipantDetail{
 		{
-			OperatorAddress:         "someAddress",
-			InitialDelegatorAddress: "initialAddress",
-			Moniker:                 "myMoniker",
-			IsPrimaryNode:           true,
+			OperatorAddress: "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
+			PrimaryAddress:  "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+			Moniker:         "myMoniker",
 		},
 		{
-			OperatorAddress:         "someAddress1",
-			InitialDelegatorAddress: "initialAddress1",
-			Moniker:                 "myMoniker1",
-			IsPrimaryNode:           true,
+			OperatorAddress: "tcro1khkxmphc7sv0fqrej3rltsslrstud78c0jl6l6",
+			PrimaryAddress:  "tcro1khkxmphc7sv0fqrej3rltsslrstud78c0jl6l6",
+			Moniker:         "myMoniker1",
 		},
 	}
 
-	for _, participant := range participantsList {
-		fmt.Sprintf("Do something with %v", participant)
+	// Get All Tx Count Sorted
+	dbParticipantWithCountList, errDbCount := crossfireValidatorStatsView.FindAllBy(constants.TOTAL_TX_SENT_PREFIX)
+	if errDbCount != nil {
+		return fmt.Errorf("[error] Database Participant With Total Count %w", errDbCount)
 	}
-	// Compute rank first
-	crossfireValidatorStatsView.FindBy(constants.TOTAL_TX_SENT_PREFIX)
+	if len(dbParticipantWithCountList) < 1 {
+		// No Participants to Rank
+		return nil
+	}
+	rankedParticipants := []RankedParticipant{}
+
+	// Sort With Most Tx Sent First
+	sort.SliceStable(dbParticipantWithCountList, func(i, j int) bool {
+		return dbParticipantWithCountList[i].Value > dbParticipantWithCountList[j].Value
+	})
+
+	var rank int = 1
+	for _, dbParticipant := range dbParticipantWithCountList {
+		dbParticipantPrimaryAddress := strings.Split(dbParticipant.Key, constants.DB_KEY_SEPARATOR)[1]
+
+		// Check for each Participant in URL
+		for _, participant := range participantsList {
+
+			// Check if the primary address match
+			if participant.PrimaryAddress == dbParticipantPrimaryAddress {
+
+				// Check if Participant is a Registered Crossfire Validator
+				registeredCrossfireValidator, errFindingValidator := crossfireValidatorView.FindBy(view.CrossfireValidatorIdentity{
+					MaybeOperatorAddress: &participant.OperatorAddress,
+				})
+				if errFindingValidator != nil || registeredCrossfireValidator == nil {
+					break
+				}
+
+				// Add to the RankedParticipants List
+				rankedParticipants = append(rankedParticipants, RankedParticipant{
+					PrimaryAddress: dbParticipantPrimaryAddress,
+					Count:          dbParticipant.Value,
+					Rank:           rank,
+				})
+
+				// Update Ranks with specific Validator
+				errUpdating := crossfireValidatorView.UpdateTxSentRank(rank, participant.PrimaryAddress, participant.OperatorAddress)
+				if errUpdating != nil {
+					return fmt.Errorf("[error] Updating TX SENT Task Rank %w", errUpdating)
+				}
+				rank++
+			}
+		}
+	}
 	return nil
 }
 
 type ParticipantDetail struct {
-	OperatorAddress         string `json:"operatorAddress"`
-	InitialDelegatorAddress string `json:"initialDelegatorAddress"`
-	Moniker                 string `json:"moniker"`
-	IsPrimaryNode           bool   `json:"isPrimaryNode"`
+	OperatorAddress string `json:"operatorAddress"`
+	PrimaryAddress  string `json:"primaryAddress"`
+	Moniker         string `json:"moniker"`
+}
+type RankedParticipant struct {
+	PrimaryAddress string `json:"primaryAddress"`
+	Count          int64  `json:"txSentCount"`
+	Rank           int    `json:"rank"`
 }
