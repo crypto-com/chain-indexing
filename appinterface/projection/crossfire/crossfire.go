@@ -503,14 +503,14 @@ func (projection *Crossfire) updateTxSentCount(
 
 			// Increment count for address as per PHASE
 			phaseAddressCountDbKey := phaseNumberPrefix + constants.DB_KEY_SEPARATOR + sender.Pubkeys[0]
-			errIncrementing := crossfireValidatorStatsView.Increment(phaseAddressCountDbKey, 1)
+			errIncrementing := crossfireValidatorStatsView.IncrementOne(phaseAddressCountDbKey)
 			if errIncrementing != nil {
 				return fmt.Errorf("error Phase wise tx sent count increment: %v", errIncrementing)
 			}
 
 			// Increment TOTAL count for address
 			totalAddressCountDbKey := constants.TOTAL_TX_SENT_PREFIX + constants.DB_KEY_SEPARATOR + sender.Pubkeys[0]
-			errIncrementingTotal := crossfireValidatorStatsView.Increment(totalAddressCountDbKey, 1)
+			errIncrementingTotal := crossfireValidatorStatsView.IncrementOne(totalAddressCountDbKey)
 			if errIncrementingTotal != nil {
 				return fmt.Errorf("error Incrementing tx sent count: %v", errIncrementingTotal)
 			}
