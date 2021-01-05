@@ -58,3 +58,4 @@ competition_end_time = 1613361599000000000 # "2021-02-15T03:59:59Z"
 # check admin address transaction for network upgrade proposal
 admin_address = "tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4"
 network_upgrade_proposal_id = "14"
+participants_list_url = "https://raw.githubusercontent.com/foreseaz/random/master/participants.json"
