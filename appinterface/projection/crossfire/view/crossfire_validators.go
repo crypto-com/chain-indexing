@@ -190,7 +190,6 @@ func (view *CrossfireValidators) UpdateTaskForOperatorAddress(
 		return fmt.Errorf("error updating task: %v", err)
 	}
 	if execResult.RowsAffected() != 1 {
-		fmt.Println(execResult.String())
 		return errors.New("error updating task: no rows updated")
 	}
 
@@ -386,6 +385,37 @@ func (view *CrossfireValidators) FindBy(identity CrossfireValidatorIdentity) (*C
 	validator.JoinedAtBlockTime = *joinedAtBlockTime
 
 	return &validator, nil
+}
+
+/**
+UpdateTxSentRank : Updates the participating validator rank
+**/
+func (view *CrossfireValidators) UpdateTxSentRank(
+	rank int,
+	primaryAddress string,
+	operatorAddress string,
+) error {
+	sql, sqlArgs, err := view.rdb.StmtBuilder.Update(
+		TABLE_NAME,
+	).Set(
+		"rank_task_highest_tx_sent", rank,
+	).Where(
+		"operator_address = ? AND initial_delegator_address = ?",
+		operatorAddress, primaryAddress,
+	).ToSql()
+	if err != nil {
+		return fmt.Errorf("error building UpdateTxSentRank update sql: %v", err)
+	}
+
+	var execResult rdb.ExecResult
+	if execResult, err = view.rdb.Exec(sql, sqlArgs...); err != nil {
+		return fmt.Errorf("error updating Tx Sent task Rank: %v", err)
+	}
+	if execResult.RowsAffected() != 1 {
+		return errors.New("error updating task: no rows updated")
+	}
+
+	return nil
 }
 
 type CrossfireValidatorIdentity struct {
