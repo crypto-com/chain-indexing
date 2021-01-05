@@ -35,7 +35,7 @@ var _ = Describe("Crossfire", func() {
 			1,
 			"foo",
 			"14",
-			"https://example.com/participants.json",
+			"https://raw.githubusercontent.com/foreseaz/random/master/participants.json",
 		)
 	})
 
@@ -117,7 +117,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				"https://example.com/participants.json",
+				"https://raw.githubusercontent.com/foreseaz/random/master/participants.json",
 			)
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
@@ -216,7 +216,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				"https://example.com/participants.json",
+				"https://raw.githubusercontent.com/foreseaz/random/master/participants.json",
 			)
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
@@ -321,7 +321,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				"https://example.com/participants.json",
+				"https://raw.githubusercontent.com/foreseaz/random/master/participants.json",
 			)
 
 			// Fire both events
@@ -419,7 +419,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				"https://example.com/participants.json",
+				"https://raw.githubusercontent.com/foreseaz/random/master/participants.json",
 			)
 
 			// Fire both events
@@ -579,7 +579,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				"someRandomLink",
+				"https://raw.githubusercontent.com/foreseaz/random/master/participants.json",
 			)
 
 			// Fire both events
