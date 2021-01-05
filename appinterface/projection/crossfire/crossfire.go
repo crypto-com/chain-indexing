@@ -550,7 +550,6 @@ func (projection *Crossfire) computeTxSentRank(
 		// No Participants to Rank
 		return nil
 	}
-	rankedParticipants := []RankedParticipant{}
 
 	// Sort With Most Tx Sent First
 	sort.SliceStable(dbParticipantWithCountList, func(i, j int) bool {
@@ -574,13 +573,6 @@ func (projection *Crossfire) computeTxSentRank(
 				if errFindingValidator != nil || registeredCrossfireValidator == nil {
 					break
 				}
-
-				// Add to the RankedParticipants List
-				rankedParticipants = append(rankedParticipants, RankedParticipant{
-					PrimaryAddress: dbParticipantPrimaryAddress,
-					Count:          dbParticipant.Value,
-					Rank:           rank,
-				})
 
 				// Update Ranks with specific Validator
 				errUpdating := crossfireValidatorView.UpdateTxSentRank(rank, participant.PrimaryAddress, participant.OperatorAddress)
