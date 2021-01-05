@@ -200,7 +200,7 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 	}
 
 	// Recompute TxSentRank
-	errTxSentRank := projection.computeTxSentRank(crossfireValidatorsStatsView, crossfireValidatorsView, blockTime)
+	errTxSentRank := projection.computeTxSentRank(crossfireValidatorsStatsView, crossfireValidatorsView)
 	if errTxSentRank != nil {
 		return fmt.Errorf("[error] Updating TxSentTask Rank %w", errTxSentRank)
 	}
@@ -533,7 +533,6 @@ func (projection *Crossfire) updateTxSentCount(
 func (projection *Crossfire) computeTxSentRank(
 	crossfireValidatorStatsView *view.CrossfireValidatorsStats,
 	crossfireValidatorView *view.CrossfireValidators,
-	blockTime utctime.UTCTime,
 ) error {
 	// Using dummy list for development
 	participantsList, errGetRequest := projection.Client.Participants()

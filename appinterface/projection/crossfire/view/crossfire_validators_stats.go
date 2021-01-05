@@ -77,6 +77,7 @@ func (view *CrossfireValidatorsStats) FindAllBy(key string) ([]CrossfireValidato
 
 	valueRows, err1 := view.rdbHandle.Query(sql, sqlArgs...)
 	if err1 != nil {
+		return nil, fmt.Errorf("Error %w", err)
 	}
 	returnResults := []CrossfireValidatorsStatsRow{}
 	for valueRows.Next() {
