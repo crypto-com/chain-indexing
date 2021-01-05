@@ -132,5 +132,5 @@ type CrossfireConfig struct {
 	CompetitionEndTime       int64  `toml:"competition_end_time"`
 	AdminAddress             string `toml:"admin_address"`
 	NetworkUpgradeProposalID string `toml:"network_upgrade_proposal_id"`
-	ParticipantsListUrl      string `toml:"participants_list_url"`
+	ParticipantsListURL      string `toml:"participants_list_url"`
 }

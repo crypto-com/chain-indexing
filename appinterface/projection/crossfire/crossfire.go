@@ -22,6 +22,7 @@ import (
 type Crossfire struct {
 	*rdbprojectionbase.Base
 
+	Client                   *HTTPClient
 	conNodeAddressPrefix     string
 	validatorAddressPrefix   string
 	phaseOneStartTime        utctime.UTCTime
@@ -46,11 +47,12 @@ func NewCrossfire(
 	unixCompetitionEndTime int64,
 	adminAddress string,
 	networkUpgradeProposalID string,
-	participantsListUrl string,
+	participantsListURL string,
 ) *Crossfire {
 	return &Crossfire{
 		Base: rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Crossfire"),
 
+		Client:                   NewHTTPClient(participantsListURL),
 		conNodeAddressPrefix:     conNodeAddressPrefix,
 		validatorAddressPrefix:   validatorAddressPrefix,
 		phaseOneStartTime:        utctime.FromUnixNano(unixPhaseOneStartTime),
@@ -59,7 +61,7 @@ func NewCrossfire(
 		competitionEndTime:       utctime.FromUnixNano(unixCompetitionEndTime),
 		adminAddress:             adminAddress, // TODO: address prefix check
 		networkUpgradeProposalID: networkUpgradeProposalID,
-		participantsListUrl:      participantsListUrl,
+		participantsListUrl:      participantsListURL,
 		rdbConn:                  rdbConn,
 		logger:                   logger,
 	}
@@ -534,17 +536,9 @@ func (projection *Crossfire) computeTxSentRank(
 	blockTime utctime.UTCTime,
 ) error {
 	// Using dummy list for development
-	participantsList := []ParticipantDetail{
-		{
-			OperatorAddress: "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
-			PrimaryAddress:  "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
-			Moniker:         "myMoniker",
-		},
-		{
-			OperatorAddress: "tcro1khkxmphc7sv0fqrej3rltsslrstud78c0jl6l6",
-			PrimaryAddress:  "tcro1khkxmphc7sv0fqrej3rltsslrstud78c0jl6l6",
-			Moniker:         "myMoniker1",
-		},
+	participantsList, errGetRequest := projection.Client.Participants()
+	if errGetRequest != nil {
+		return fmt.Errorf("[error] Getting Participants list %w", errGetRequest)
 	}
 
 	// Get All Tx Count Sorted
@@ -568,7 +562,7 @@ func (projection *Crossfire) computeTxSentRank(
 		dbParticipantPrimaryAddress := strings.Split(dbParticipant.Key, constants.DB_KEY_SEPARATOR)[1]
 
 		// Check for each Participant in URL
-		for _, participant := range participantsList {
+		for _, participant := range *participantsList {
 
 			// Check if the primary address match
 			if participant.PrimaryAddress == dbParticipantPrimaryAddress {

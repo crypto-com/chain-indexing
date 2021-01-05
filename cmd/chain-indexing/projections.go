@@ -42,6 +42,7 @@ func initProjections(
 			config.Crossfire.CompetitionEndTime,
 			config.Crossfire.AdminAddress,
 			config.Crossfire.NetworkUpgradeProposalID,
+			config.Crossfire.ParticipantsListURL,
 		),
 
 		// register more projections here
