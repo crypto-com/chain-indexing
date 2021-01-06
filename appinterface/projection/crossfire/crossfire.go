@@ -542,7 +542,7 @@ func (projection *Crossfire) computeTxSentRank(
 	}
 
 	// Get All Tx Count Sorted
-	dbParticipantWithCountList, errDbCount := crossfireValidatorStatsView.FindAllBy(constants.TOTAL_TX_SENT_PREFIX)
+	dbParticipantWithCountList, errDbCount := crossfireValidatorStatsView.FindAllLike(constants.TOTAL_TX_SENT_PREFIX)
 	if errDbCount != nil {
 		return fmt.Errorf("[error] Database Participant With Total Count %w", errDbCount)
 	}

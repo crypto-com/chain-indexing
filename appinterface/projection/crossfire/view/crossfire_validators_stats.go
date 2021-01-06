@@ -63,7 +63,7 @@ func (view *CrossfireValidatorsStats) FindBy(key string) (int64, error) {
 	return value, nil
 }
 
-func (view *CrossfireValidatorsStats) FindAllBy(key string) ([]CrossfireValidatorsStatsRow, error) {
+func (view *CrossfireValidatorsStats) FindAllLike(key string) ([]CrossfireValidatorsStatsRow, error) {
 	sql, sqlArgs, err := view.rdbHandle.StmtBuilder.Select(
 		"key", "value",
 	).From(
