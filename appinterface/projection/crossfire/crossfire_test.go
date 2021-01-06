@@ -1,6 +1,8 @@
 package crossfire_test
 
 import (
+	"net/http"
+
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/constants"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/view"
@@ -18,9 +20,11 @@ import (
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/ghttp"
 )
 
 var _ = Describe("Crossfire", func() {
+
 	It("should implement projection", func() {
 		fakeLogger := NewFakeLogger()
 		fakeRdbConn := NewFakeRDbConn()
@@ -35,12 +39,11 @@ var _ = Describe("Crossfire", func() {
 			1,
 			"foo",
 			"14",
-			"https://raw.githubusercontent.com/foreseaz/random/master/participants.json",
+			"https://raw.githubusercontent.com/foreseaz/random/master/",
 		)
 	})
 
 	WithTestPgxConn(func(pgConn *pg.PgxConn, pgMigrate *pg.Migrate) {
-
 		anyHeight := int64(1)
 
 		validatorCreatedEvent := event_usecase.NewMsgCreateValidator(event_usecase.MsgCommonParams{
@@ -89,7 +92,7 @@ var _ = Describe("Crossfire", func() {
 			MinSelfDelegation: "1",
 			DelegatorAddress:  "tcro1f6qcvp33dc79xzpuwll7mln5lnepuqv8d7led9",
 			ValidatorAddress:  "tcrocncl1f6qcvp33dc79xzpuwll7mln5lnepuqv8cpuq4x",
-			TendermintPubkey:  "na51D8RmKXyWrid9I6wtdxgP6f1Nl3EyNNEzqxVquoM=",
+			TendermintPubkey:  "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
 			Amount:            coin.MustNewCoinFromString("222"),
 		})
 
@@ -195,6 +198,8 @@ var _ = Describe("Crossfire", func() {
 		}
 
 		transactionCreatedEvent := event_usecase.NewTransactionCreated(anyHeight, txCreatedParams)
+		var server *ghttp.Server
+
 		BeforeEach(func() {
 			_ = pgMigrate.Reset()
 			pgMigrate.MustUp()
@@ -244,7 +249,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				"https://raw.githubusercontent.com/foreseaz/random/master/participants.json",
+				"https://raw.githubusercontent.com/foreseaz/random/master/",
 			)
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
@@ -316,7 +321,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				"https://raw.githubusercontent.com/foreseaz/random/master/participants.json",
+				"https://raw.githubusercontent.com/foreseaz/random/master/",
 			)
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
@@ -419,7 +424,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				"https://raw.githubusercontent.com/foreseaz/random/master/participants.json",
+				"https://raw.githubusercontent.com/foreseaz/random/master/",
 			)
 
 			// Fire both events
@@ -489,7 +494,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				"https://raw.githubusercontent.com/foreseaz/random/master/participants.json",
+				"https://raw.githubusercontent.com/foreseaz/random/master/",
 			)
 
 			// Fire both events
@@ -530,7 +535,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				"https://raw.githubusercontent.com/foreseaz/random/master/participants.json",
+				"https://raw.githubusercontent.com/foreseaz/random/master/",
 			)
 
 			// Fire both events
@@ -587,7 +592,8 @@ var _ = Describe("Crossfire", func() {
 
 		It("should correctly compute Tx Sent Rank and update in DB", func() {
 			crossfireValidatorView := view.NewCrossfireValidators(pgConn.ToHandle())
-
+			crossfireValidatorStatsView := view.NewCrossfireValidatorsStats(pgConn.ToHandle())
+			server = ghttp.NewServer()
 			fakeLogger := NewFakeLogger()
 			projection := crossfire.NewCrossfire(
 				fakeLogger,
@@ -600,19 +606,50 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				"https://raw.githubusercontent.com/foreseaz/random/master/participants.json",
+				server.URL(),
 			)
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/participants.json"),
+					ghttp.RespondWith(http.StatusOK, `[{
+						"operatorAddress": "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
+						"primaryAddress": "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+						"moniker": "Bambarello"
+					  },
+					  {
+						"operatorAddress": "tcrocncl1f6qcvp33dc79xzpuwll7mln5lnepuqv8cpuq4x",
+						"primaryAddress": "tcro1f6qcvp33dc79xzpuwll7mln5lnepuqv8d7led9",
+						"moniker": "eric-node"
+					  }]`,
+					),
+				))
+
+			Expect(server.ReceivedRequests()).To(HaveLen(0))
 
 			// Fire both events
 			err := projection.HandleEvents(anyHeight, []event_entity.Event{phaseOneBlockCreatedEvent, validatorCreatedEvent, validator2CreatedEvent, transactionCreatedEvent})
-			// errHandleNewBlock := projection.HandleEvents(anyHeight, []event_entity.Event{phaseTwoBlockCreatedEvent, transactionCreatedEvent})
+
 			Expect(err).To(BeNil())
-			// Expect(errHandleNewBlock).To(BeNil())
+
+			Expect(server.ReceivedRequests()).To(HaveLen(1))
+			Expect(server.AllowUnhandledRequests).To(BeFalse())
+			Expect(server.ReceivedRequests()[0].URL.RawPath).To(Equal(""))
 
 			//Check validators view count
 			validatorViewCount, err := crossfireValidatorView.Count()
 			Expect(err).To(BeNil())
 			Expect(validatorViewCount).To(Equal(int64(2)))
+
+			// total count for both address
+			totalCountByAddress1, errTotalCountAddress1 := crossfireValidatorStatsView.FindBy("total_tx_sent:tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh")
+			totalCountByAddress2, errTotalCountAddress2 := crossfireValidatorStatsView.FindBy("total_tx_sent:tcro1432x4lc5mrgm30c9xx35unmn9ultemm5nt40vq")
+			Expect(errTotalCountAddress1).To(BeNil())
+			Expect(errTotalCountAddress2).To(BeNil())
+
+			//Total Count checks
+			Expect(totalCountByAddress1).To(Equal(int64(2)))
+			Expect(totalCountByAddress2).To(Equal(int64(0)))
 
 			//check Validator status
 			crossfireValidatorList, err := crossfireValidatorView.List()
@@ -620,14 +657,13 @@ var _ = Describe("Crossfire", func() {
 			Expect(crossfireValidatorList).To(HaveLen(2))
 			Expect(crossfireValidatorList[0].TaskPhase1NodeSetup).To(Equal(constants.COMPLETED))
 
-			Expect(crossfireValidatorList[0].OperatorAddress).To(Equal("tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5"))
-			Expect(crossfireValidatorList[0].InitialDelegatorAddress).To(Equal("tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh"))
-			Expect(crossfireValidatorList[0].RankTaskHighestTxSent).To(Equal(int64(0)))
-
 			Expect(crossfireValidatorList[1].OperatorAddress).To(Equal("tcrocncl1f6qcvp33dc79xzpuwll7mln5lnepuqv8cpuq4x"))
 			Expect(crossfireValidatorList[1].InitialDelegatorAddress).To(Equal("tcro1f6qcvp33dc79xzpuwll7mln5lnepuqv8d7led9"))
-			Expect(crossfireValidatorList[1].RankTaskHighestTxSent).To(Equal(int64(0)))
+			Expect(crossfireValidatorList[1].RankTaskHighestTxSent).To(Equal(int64(2)))
 
+			Expect(crossfireValidatorList[0].OperatorAddress).To(Equal("tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5"))
+			Expect(crossfireValidatorList[0].InitialDelegatorAddress).To(Equal("tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh"))
+			Expect(crossfireValidatorList[0].RankTaskHighestTxSent).To(Equal(int64(1)))
 		})
 	})
 })
