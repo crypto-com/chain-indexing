@@ -91,9 +91,34 @@ var _ = Describe("Crossfire", func() {
 			},
 			MinSelfDelegation: "1",
 			DelegatorAddress:  "tcro1f6qcvp33dc79xzpuwll7mln5lnepuqv8d7led9",
-			ValidatorAddress:  "tcrocncl1f6qcvp33dc79xzpuwll7mln5lnepuqv8cpuq4x",
+			ValidatorAddress:  "tcrocncl1n4t5q77kn9vf73s7ljs96m85jgg49yqpg0chrj",
 			TendermintPubkey:  "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
 			Amount:            coin.MustNewCoinFromString("222"),
+		})
+
+		validator3CreatedEvent := event_usecase.NewMsgCreateValidator(event_usecase.MsgCommonParams{
+			BlockHeight: anyHeight,
+			TxHash:      "A6D4C1F59A9D232747CA4F8A484F1F3B14A0075E801DF2A25F472B4280505B74",
+			TxSuccess:   true,
+			MsgIndex:    0,
+		}, usecase_model.MsgCreateValidatorParams{
+			Description: usecase_model.MsgValidatorDescription{
+				Moniker:         "nebksdfas.ro",
+				Identity:        "foo",
+				Website:         "www.example.com",
+				SecurityContact: "foo@example.com",
+				Details:         "example",
+			},
+			Commission: usecase_model.MsgValidatorCommission{
+				Rate:          "0.100000000000000000",
+				MaxRate:       "0.200000000000000000",
+				MaxChangeRate: "0.010000000000000000",
+			},
+			MinSelfDelegation: "1",
+			DelegatorAddress:  "tcro1432x4lc5mrgm30c9xx35unmn9ultemm5nt40vq",
+			ValidatorAddress:  "tcrocncl1f6qcvp33dc79xzpuwll7mln5lnepuqv8cpuq4x",
+			TendermintPubkey:  "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsAE=",
+			Amount:            coin.MustNewCoinFromString("333"),
 		})
 
 		phaseOneBlockCreatedEvent := event_usecase.NewBlockCreated(&usecase_model.Block{
@@ -165,7 +190,22 @@ var _ = Describe("Crossfire", func() {
 				{
 					Type:            "/cosmos.crypto.secp256k1.PubKey",
 					Pubkeys:         []string{"tcro1khkxmphc7sv0fqrej3rltsslrstud78c0jl6l6"},
+					AccountSequence: uint64(2),
+				},
+				{
+					Type:            "/cosmos.crypto.secp256k1.PubKey",
+					Pubkeys:         []string{"tcro1432x4lc5mrgm30c9xx35unmn9ultemm5nt40vq"},
 					AccountSequence: uint64(1),
+				},
+				{
+					Type:            "/cosmos.crypto.secp256k1.PubKey",
+					Pubkeys:         []string{"tcro1432x4lc5mrgm30c9xx35unmn9ultemm5nt40vq"},
+					AccountSequence: uint64(2),
+				},
+				{
+					Type:            "/cosmos.crypto.secp256k1.PubKey",
+					Pubkeys:         []string{"tcro1432x4lc5mrgm30c9xx35unmn9ultemm5nt40vq"},
+					AccountSequence: uint64(3),
 				},
 				{
 					Type:            "/cosmos.crypto.secp256k1.PubKey",
@@ -618,9 +658,14 @@ var _ = Describe("Crossfire", func() {
 						"moniker": "Bambarello"
 					  },
 					  {
-						"operatorAddress": "tcrocncl1f6qcvp33dc79xzpuwll7mln5lnepuqv8cpuq4x",
+						"operatorAddress": "tcrocncl1n4t5q77kn9vf73s7ljs96m85jgg49yqpg0chrj",
 						"primaryAddress": "tcro1f6qcvp33dc79xzpuwll7mln5lnepuqv8d7led9",
 						"moniker": "eric-node"
+					  },
+					  {
+						"operatorAddress": "tcrocncl1f6qcvp33dc79xzpuwll7mln5lnepuqv8cpuq4x",
+						"primaryAddress": "tcro1432x4lc5mrgm30c9xx35unmn9ultemm5nt40vq",
+						"moniker": "erasde"
 					  }]`,
 					),
 				))
@@ -628,7 +673,7 @@ var _ = Describe("Crossfire", func() {
 			Expect(server.ReceivedRequests()).To(HaveLen(0))
 
 			// Fire both events
-			err := projection.HandleEvents(anyHeight, []event_entity.Event{phaseOneBlockCreatedEvent, validatorCreatedEvent, validator2CreatedEvent, transactionCreatedEvent})
+			err := projection.HandleEvents(anyHeight, []event_entity.Event{phaseOneBlockCreatedEvent, validatorCreatedEvent, validator2CreatedEvent, validator3CreatedEvent, transactionCreatedEvent})
 
 			Expect(err).To(BeNil())
 
@@ -639,31 +684,41 @@ var _ = Describe("Crossfire", func() {
 			//Check validators view count
 			validatorViewCount, err := crossfireValidatorView.Count()
 			Expect(err).To(BeNil())
-			Expect(validatorViewCount).To(Equal(int64(2)))
+			Expect(validatorViewCount).To(Equal(int64(3)))
 
 			// total count for both address
 			totalCountByAddress1, errTotalCountAddress1 := crossfireValidatorStatsView.FindBy("total_tx_sent:tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh")
 			totalCountByAddress2, errTotalCountAddress2 := crossfireValidatorStatsView.FindBy("total_tx_sent:tcro1432x4lc5mrgm30c9xx35unmn9ultemm5nt40vq")
+			totalCountByAddress3, errTotalCountAddress3 := crossfireValidatorStatsView.FindBy("total_tx_sent:tcro1f6qcvp33dc79xzpuwll7mln5lnepuqv8d7led9")
 			Expect(errTotalCountAddress1).To(BeNil())
 			Expect(errTotalCountAddress2).To(BeNil())
+			Expect(errTotalCountAddress3).To(BeNil())
 
 			//Total Count checks
 			Expect(totalCountByAddress1).To(Equal(int64(2)))
-			Expect(totalCountByAddress2).To(Equal(int64(0)))
+			Expect(totalCountByAddress2).To(Equal(int64(3)))
+			Expect(totalCountByAddress3).To(Equal(int64(2)))
 
 			//check Validator status
 			crossfireValidatorList, err := crossfireValidatorView.List()
 			Expect(err).To(BeNil())
-			Expect(crossfireValidatorList).To(HaveLen(2))
+			Expect(crossfireValidatorList).To(HaveLen(3))
 			Expect(crossfireValidatorList[0].TaskPhase1NodeSetup).To(Equal(constants.COMPLETED))
 
-			Expect(crossfireValidatorList[1].OperatorAddress).To(Equal("tcrocncl1f6qcvp33dc79xzpuwll7mln5lnepuqv8cpuq4x"))
-			Expect(crossfireValidatorList[1].InitialDelegatorAddress).To(Equal("tcro1f6qcvp33dc79xzpuwll7mln5lnepuqv8d7led9"))
+			//check Validator status
+			Expect(crossfireValidatorList[1].OperatorAddress).To(Equal("tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5"))
+			Expect(crossfireValidatorList[1].InitialDelegatorAddress).To(Equal("tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh"))
 			Expect(crossfireValidatorList[1].RankTaskHighestTxSent).To(Equal(int64(2)))
 
-			Expect(crossfireValidatorList[0].OperatorAddress).To(Equal("tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5"))
-			Expect(crossfireValidatorList[0].InitialDelegatorAddress).To(Equal("tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh"))
+			//check Validator status
+			Expect(crossfireValidatorList[0].OperatorAddress).To(Equal("tcrocncl1f6qcvp33dc79xzpuwll7mln5lnepuqv8cpuq4x"))
+			Expect(crossfireValidatorList[0].InitialDelegatorAddress).To(Equal("tcro1432x4lc5mrgm30c9xx35unmn9ultemm5nt40vq"))
 			Expect(crossfireValidatorList[0].RankTaskHighestTxSent).To(Equal(int64(1)))
+
+			//check Validator status
+			Expect(crossfireValidatorList[2].OperatorAddress).To(Equal("tcrocncl1n4t5q77kn9vf73s7ljs96m85jgg49yqpg0chrj"))
+			Expect(crossfireValidatorList[2].InitialDelegatorAddress).To(Equal("tcro1f6qcvp33dc79xzpuwll7mln5lnepuqv8d7led9"))
+			Expect(crossfireValidatorList[2].RankTaskHighestTxSent).To(Equal(int64(2)))
 		})
 	})
 })
