@@ -113,6 +113,13 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 	if err := projection.projectCrossfireValidatorView(crossfireValidatorsView, crossfireChainStatsView, crossfireValidatorsStatsView, height, blockTime, events); err != nil {
 		return fmt.Errorf("error projecting validator view: %v", err)
 	}
+
+	// Recompute TxSentRank
+	errTxSentRank := projection.computeTxSentRank(crossfireValidatorsStatsView, crossfireValidatorsView)
+	if errTxSentRank != nil {
+		return fmt.Errorf("[error] Updating TxSentTask Rank %w", errTxSentRank)
+	}
+
 	// TODO ends: views preparation ends and update current height as handled
 
 	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
@@ -197,12 +204,6 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 				)
 			}
 		}
-	}
-
-	// Recompute TxSentRank
-	errTxSentRank := projection.computeTxSentRank(crossfireValidatorsStatsView, crossfireValidatorsView)
-	if errTxSentRank != nil {
-		return fmt.Errorf("[error] Updating TxSentTask Rank %w", errTxSentRank)
 	}
 
 	return nil
@@ -558,7 +559,6 @@ func (projection *Crossfire) computeTxSentRank(
 	var rank int = 1
 	for _, dbParticipant := range dbParticipantWithCountList {
 		dbParticipantPrimaryAddress := strings.Split(dbParticipant.Key, constants.DB_KEY_SEPARATOR)[1]
-
 		// Check for each Participant in URL
 		for _, participant := range *participantsList {
 
