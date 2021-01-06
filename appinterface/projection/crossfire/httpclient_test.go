@@ -23,7 +23,7 @@ var _ = Describe("Crossfire Chain Stats", func() {
 			1,
 			"foo",
 			"14",
-			"https://raw.githubusercontent.com/foreseaz/random/master/participants.json",
+			"https://raw.githubusercontent.com/foreseaz/random/master/",
 		)
 
 		participants, err := projection.Client.Participants()
