@@ -557,7 +557,7 @@ func (projection *Crossfire) computeTxSentRank(
 	})
 
 	var rank int = 1
-	for _, dbParticipant := range dbParticipantWithCountList {
+	for index, dbParticipant := range dbParticipantWithCountList {
 		dbParticipantPrimaryAddress := strings.Split(dbParticipant.Key, constants.DB_KEY_SEPARATOR)[1]
 		// Check for each Participant in URL
 		for _, participant := range *participantsList {
@@ -578,7 +578,9 @@ func (projection *Crossfire) computeTxSentRank(
 				if errUpdating != nil {
 					return fmt.Errorf("[error] Updating TX SENT Task Rank %w", errUpdating)
 				}
-				rank++
+				if index+1 < len(dbParticipantWithCountList) && dbParticipantWithCountList[index].Value != dbParticipantWithCountList[index+1].Value {
+					rank++
+				}
 			}
 		}
 	}
