@@ -149,7 +149,7 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 		if err != nil {
 			return fmt.Errorf("error increment phase1 block count")
 		}
-	} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
+	} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
 		err := crossfireChainStatsView.IncrementOne(constants.PHASE2_BLOCK_COUNT)
 		if err != nil {
 			return fmt.Errorf("error increment phase2 block count")
@@ -190,7 +190,7 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 					"error increment validator commitment count %s", key,
 				)
 			}
-		} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
+		} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
 			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE2_COMMIT)
 			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
 				return fmt.Errorf(
