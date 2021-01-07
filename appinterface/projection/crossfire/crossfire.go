@@ -4,6 +4,9 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/constants"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/view"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
@@ -13,14 +16,12 @@ import (
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
-	"strconv"
-	"strings"
 )
 
 type Crossfire struct {
 	*rdbprojectionbase.Base
 
-	Client               *HTTPClient
+	Client                   *HTTPClient
 	conNodeAddressPrefix     string
 	validatorAddressPrefix   string
 	phaseOneStartTime        utctime.UTCTime
@@ -49,7 +50,7 @@ func NewCrossfire(
 	return &Crossfire{
 		Base: rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Crossfire"),
 
-		Client:               NewHTTPClient(participantsListURL),
+		Client:                   NewHTTPClient(participantsListURL),
 		conNodeAddressPrefix:     conNodeAddressPrefix,
 		validatorAddressPrefix:   validatorAddressPrefix,
 		phaseOneStartTime:        utctime.FromUnixNano(unixPhaseOneStartTime),
@@ -178,11 +179,19 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 					"error increment validator commitment count %s", key,
 				)
 			}
-		} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
+		} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
 			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE2_COMMIT)
 			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
 				return fmt.Errorf(
 					"error increment validator commitment count %s", key,
+				)
+			}
+
+			//Check task network upgrade
+			errUpdatingTask := projection.checkTaskNetworkUpgrade(crossfireValidatorsView, crossfireChainStatsView, validator, blockTime, blockHeight)
+			if errUpdatingTask != nil {
+				return fmt.Errorf(
+					"error Updating crossfire task completion %s", errUpdatingTask,
 				)
 			}
 		} else if blockTime.After(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
@@ -302,15 +311,15 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			networkUpgradeBlockheight := msgSubmitSoftwareUpgradeProposalEvent.MsgSubmitSoftwareUpgradeProposalParams.Content.Plan.Height
 
 			// Update Network upgrade target Timestamp in DB
-			network_upgrade_timestamp_dbkey := constants.NETWORK_UPGRADE + constants.DB_KEY_SEPARATOR + "timestamp"
-			errTSUpdate := crossfireChainStatsView.Set(network_upgrade_timestamp_dbkey, networkUpgradeTimestamp.UnixNano())
+			networkUpgradeTimestampDBKey := fmt.Sprintf("%s%s%s", constants.NETWORK_UPGRADE, constants.DB_KEY_SEPARATOR, "timestamp")
+			errTSUpdate := crossfireChainStatsView.Set(networkUpgradeTimestampDBKey, networkUpgradeTimestamp.UnixNano())
 			if errTSUpdate != nil {
 				return fmt.Errorf("error updating network_upgrade timestamp: %v", errTSUpdate)
 			}
 
 			// Update Network upgrade target Blockheight in DB
-			network_upgrade_blockheight_dbkey := constants.NETWORK_UPGRADE + constants.DB_KEY_SEPARATOR + "blockheight"
-			errBlockheightUpdate := crossfireChainStatsView.Set(network_upgrade_blockheight_dbkey, networkUpgradeBlockheight)
+			networkUpgradeBlockheightDBKey := fmt.Sprintf("%s%s%s", constants.NETWORK_UPGRADE, constants.DB_KEY_SEPARATOR, "blockheight")
+			errBlockheightUpdate := crossfireChainStatsView.Set(networkUpgradeBlockheightDBKey, networkUpgradeBlockheight)
 
 			if errBlockheightUpdate != nil {
 				return fmt.Errorf("error updating network_upgrade blockheight: %v", errBlockheightUpdate)
@@ -463,6 +472,45 @@ func (projection *Crossfire) checkTaskNetworkProposalVote(
 		); err != nil {
 			return fmt.Errorf("error updating validator Phase_2 Task_1 as missed: s%v", err)
 		}
+	}
+
+	return nil
+}
+
+// checkTaskNetworkUpgrade
+func (projection *Crossfire) checkTaskNetworkUpgrade(
+	crossfireValidatorsView *view.CrossfireValidators,
+	crossfireChainStatsView *view.CrossfireChainStats,
+	validator *view.CrossfireValidatorRow,
+	blockTime utctime.UTCTime,
+	blockHeight int64,
+) error {
+
+	// Check if Validator's upgrade is already successful
+	if validator.TaskPhase2NetworkUpgrade == constants.COMPLETED {
+		return nil
+	}
+
+	targetTimestampDBKey := fmt.Sprintf("%s%s%s", constants.NETWORK_UPGRADE, constants.DB_KEY_SEPARATOR, "timestamp")
+	targetBlockHeightDBKey := fmt.Sprintf("%s%s%s", constants.NETWORK_UPGRADE, constants.DB_KEY_SEPARATOR, "blockheight")
+
+	networkUpgradeTimestampNanoSec, errTimestamp := crossfireChainStatsView.FindBy(targetTimestampDBKey)
+	if errTimestamp != nil {
+		return fmt.Errorf("error getting network Upgrade timestamp: %v", errTimestamp)
+	}
+
+	networkUpgradeBlockheight, errBlockheight := crossfireChainStatsView.FindBy(targetBlockHeightDBKey)
+	if errBlockheight != nil {
+		return fmt.Errorf("error getting network Upgrade Blockheight: %v", errBlockheight)
+	}
+
+	// Check if current block is before the network upgrade
+	if blockTime.Before(utctime.FromUnixNano(networkUpgradeTimestampNanoSec)) && blockHeight <= networkUpgradeBlockheight {
+		return nil
+	}
+	errUpdatingTaskCompletion := crossfireValidatorsView.UpdateTaskForOperatorAddress("task_phase_2_network_upgrade", constants.COMPLETED, validator.OperatorAddress)
+	if errUpdatingTaskCompletion != nil {
+		return fmt.Errorf("error Updating Task completion: %v", errUpdatingTaskCompletion)
 	}
 
 	return nil
