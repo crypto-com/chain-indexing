@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
@@ -12,7 +13,7 @@ import (
 
 type HTTPClient struct {
 	httpClient *http.Client
-	url     string
+	url        string
 }
 
 // NewHTTPClient returns a new HTTPClient for external request
@@ -23,7 +24,7 @@ func NewHTTPClient(participantsListURL string) *HTTPClient {
 
 	return &HTTPClient{
 		httpClient,
-		participantsListURL,
+		strings.TrimSuffix(participantsListURL, "/"),
 	}
 }
 
@@ -33,12 +34,10 @@ func (client *HTTPClient) Participants() (*[]Participant, error) {
 		return nil, err
 	}
 	defer rawRespBody.Close()
-
 	var participants []Participant
 	if err := jsoniter.NewDecoder(rawRespBody).Decode(&participants); err != nil {
 		return nil, err
 	}
-
 	return &participants, nil
 }
 
@@ -47,7 +46,7 @@ func (client *HTTPClient) Participants() (*[]Participant, error) {
 func (client *HTTPClient) request(method string, queryString ...string) (io.ReadCloser, error) {
 	var err error
 
-	url := client.url
+	url := client.url //+ "/" + method
 	if len(queryString) > 0 {
 		url += "?" + queryString[0]
 	}

@@ -63,13 +63,43 @@ func (view *CrossfireValidatorsStats) FindBy(key string) (int64, error) {
 	return value, nil
 }
 
+func (view *CrossfireValidatorsStats) FindAllLike(key string) ([]CrossfireValidatorsStatsRow, error) {
+	sql, sqlArgs, err := view.rdbHandle.StmtBuilder.Select(
+		"key", "value",
+	).From(
+		CROSSFIRE_VALIDATOR_STATS_VIEW_TABLENAME,
+	).Where(
+		"key LIKE ?", fmt.Sprint(key, "%"),
+	).OrderBy("value DESC").ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("error preparing key selection SQL: %v", err)
+	}
+
+	valueRows, err1 := view.rdbHandle.Query(sql, sqlArgs...)
+	if err1 != nil {
+		return nil, fmt.Errorf("Error %w", err)
+	}
+	returnResults := []CrossfireValidatorsStatsRow{}
+	for valueRows.Next() {
+
+		var xfireValidatorsStatsRow CrossfireValidatorsStatsRow
+		err := valueRows.Scan(&xfireValidatorsStatsRow.Key, &xfireValidatorsStatsRow.Value)
+
+		if err != nil {
+			return nil, fmt.Errorf("Error %w", err)
+		}
+		returnResults = append(returnResults, xfireValidatorsStatsRow)
+	}
+	return returnResults, nil
+}
+
 func (view *CrossfireValidatorsStats) IncrementOne(key string) error {
 	value, err := view.FindBy(key)
 	if err != nil {
 		return fmt.Errorf("error getting value for %v: %v", key, err)
 	}
 
-	err = view.Set(key, value + 1)
+	err = view.Set(key, value+1)
 	if err != nil {
 		return fmt.Errorf("error setting increment for %v: %v", key, err)
 	}
