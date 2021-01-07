@@ -23,11 +23,18 @@ import (
 	"github.com/onsi/gomega/ghttp"
 )
 
+var server *ghttp.Server
 var _ = Describe("Crossfire", func() {
 
 	It("should implement projection", func() {
 		fakeLogger := NewFakeLogger()
 		fakeRdbConn := NewFakeRDbConn()
+		server = ghttp.NewServer()
+		server.AppendHandlers(
+			ghttp.CombineHandlers(
+				ghttp.VerifyRequest("GET", "/"),
+				ghttp.RespondWith(http.StatusOK, `[]`),
+			))
 		var _ entity_projection.Projection = crossfire.NewCrossfire(
 			fakeLogger,
 			fakeRdbConn,
@@ -39,7 +46,7 @@ var _ = Describe("Crossfire", func() {
 			1,
 			"foo",
 			"14",
-			"https://raw.githubusercontent.com/foreseaz/random/master/",
+			server.URL(),
 		)
 	})
 
@@ -238,15 +245,22 @@ var _ = Describe("Crossfire", func() {
 		}
 
 		transactionCreatedEvent := event_usecase.NewTransactionCreated(anyHeight, txCreatedParams)
-		var server *ghttp.Server
 
 		BeforeEach(func() {
 			_ = pgMigrate.Reset()
 			pgMigrate.MustUp()
+			server = ghttp.NewServer()
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/"),
+					ghttp.RespondWith(http.StatusOK, `[]`),
+				))
 		})
 
 		AfterEach(func() {
 			_ = pgMigrate.Reset()
+			server.Close()
 		})
 
 		It("should project crossfire_validators view when event is MsgCreateValidator", func() {
@@ -289,7 +303,8 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				"https://raw.githubusercontent.com/foreseaz/random/master/",
+				// server.URL(),
+				server.URL(),
 			)
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
@@ -361,7 +376,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				"https://raw.githubusercontent.com/foreseaz/random/master/",
+				server.URL(),
 			)
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
@@ -464,7 +479,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				"https://raw.githubusercontent.com/foreseaz/random/master/",
+				server.URL(),
 			)
 
 			// Fire both events
@@ -534,7 +549,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				"https://raw.githubusercontent.com/foreseaz/random/master/",
+				server.URL(),
 			)
 
 			// Fire both events
@@ -564,6 +579,11 @@ var _ = Describe("Crossfire", func() {
 			crossfireValidatorView := view.NewCrossfireValidators(pgConn.ToHandle())
 
 			fakeLogger := NewFakeLogger()
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/"),
+					ghttp.RespondWith(http.StatusOK, `[]`),
+				))
 			projection := crossfire.NewCrossfire(
 				fakeLogger,
 				pgConn,
@@ -575,7 +595,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				"https://raw.githubusercontent.com/foreseaz/random/master/",
+				server.URL(),
 			)
 
 			// Fire both events
@@ -633,25 +653,11 @@ var _ = Describe("Crossfire", func() {
 		It("should correctly compute Tx Sent Rank and update in DB", func() {
 			crossfireValidatorView := view.NewCrossfireValidators(pgConn.ToHandle())
 			crossfireValidatorStatsView := view.NewCrossfireValidatorsStats(pgConn.ToHandle())
-			server = ghttp.NewServer()
 			fakeLogger := NewFakeLogger()
-			projection := crossfire.NewCrossfire(
-				fakeLogger,
-				pgConn,
-				"tcrocnclcons",
-				"tcrocncl",
-				1610942400000000000,
-				1611547200000000000,
-				1612756800000000000,
-				1613361599000000000,
-				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
-				"14",
-				server.URL(),
-			)
-
+			server = ghttp.NewServer()
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/participants.json"),
+					ghttp.VerifyRequest("GET", "/"),
 					ghttp.RespondWith(http.StatusOK, `[{
 						"operatorAddress": "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
 						"primaryAddress": "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
@@ -670,6 +676,19 @@ var _ = Describe("Crossfire", func() {
 					),
 				))
 
+			projection := crossfire.NewCrossfire(
+				fakeLogger,
+				pgConn,
+				"tcrocnclcons",
+				"tcrocncl",
+				1610942400000000000,
+				1611547200000000000,
+				1612756800000000000,
+				1613361599000000000,
+				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
+				"14",
+				server.URL(),
+			)
 			Expect(server.ReceivedRequests()).To(HaveLen(0))
 
 			// Fire both events
