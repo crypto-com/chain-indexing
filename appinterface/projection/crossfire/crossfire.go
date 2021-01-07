@@ -182,7 +182,6 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 				"error getting existing validator by block commitment of %s from view %s", signature.ValidatorAddress, err,
 			)
 		}
-
 		if blockTime.After(projection.phaseOneStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
 			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE1_COMMIT)
 			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
@@ -624,7 +623,7 @@ func (projection *Crossfire) checkTaskNetworkUpgrade(
 	}
 
 	// Check if current block is before the network upgrade
-	if blockTime.Before(utctime.FromUnixNano(networkUpgradeTimestampNanoSec)) && blockHeight <= networkUpgradeBlockheight {
+	if blockTime.Before(utctime.FromUnixNano(networkUpgradeTimestampNanoSec)) || blockHeight < networkUpgradeBlockheight {
 		return nil
 	}
 	errUpdatingTaskCompletion := crossfireValidatorsView.UpdateTaskForOperatorAddress("task_phase_2_network_upgrade", constants.COMPLETED, validator.OperatorAddress)
