@@ -73,6 +73,7 @@ func (_ *Crossfire) GetEventsToListen() []string {
 		event_usecase.MSG_CREATE_VALIDATOR_CREATED,
 		event_usecase.MSG_VOTE_CREATED,
 		event_usecase.MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_CREATED,
+		event_usecase.TRANSACTION_CREATED,
 	}
 }
 
@@ -375,7 +376,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			if errUpdateValidatorStats != nil {
 				return fmt.Errorf("error Updating ProposalID for the voter: %v", errUpdateValidatorStats)
 			}
-		} else if msgTransactionCreated, ok := event.(*event_usecase.TransactionCreated); ok {
+		} else if transactionCreatedEvent, ok := event.(*event_usecase.TransactionCreated); ok {
 			projection.logger.Debug("handling TransactionCreated event")
 
 			// Check if proposed after competition has ended
@@ -384,7 +385,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			}
 
 			// Update the Tx Count
-			errUpdateTxCount := projection.updateTxSentCount(crossfireValidatorStatsView, blockTime, msgTransactionCreated)
+			errUpdateTxCount := projection.updateTxSentCount(crossfireValidatorStatsView, blockTime, transactionCreatedEvent)
 			if errUpdateTxCount != nil {
 				return fmt.Errorf("error Updating tx sent count: %v", errUpdateTxCount)
 			}
