@@ -149,7 +149,7 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 		if err != nil {
 			return fmt.Errorf("error increment phase1 block count")
 		}
-	} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
+	} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
 		err := crossfireChainStatsView.IncrementOne(constants.PHASE2_BLOCK_COUNT)
 		if err != nil {
 			return fmt.Errorf("error increment phase2 block count")
@@ -336,7 +336,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 				return fmt.Errorf("error updating network_upgrade blockheight: %v", errBlockheightUpdate)
 			}
 
-		} else if msgVoteCreated, ok := event.(*event_usecase.MsgVote); ok {
+		} else if msgVoteCreatedEvent, ok := event.(*event_usecase.MsgVote); ok {
 			projection.logger.Debug("handling MsgVote event")
 
 			// Check if proposed after competition has ended
@@ -350,18 +350,18 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			}
 
 			// Check if proposal ID does not match the required ID
-			if msgVoteCreated.ProposalId != "" && msgVoteCreated.ProposalId != projection.networkUpgradeProposalID {
+			if msgVoteCreatedEvent.ProposalId != "" && msgVoteCreatedEvent.ProposalId != projection.networkUpgradeProposalID {
 				return fmt.Errorf("error checking Proposal ID in Vote not matching")
 			}
 
 			// Check if Vote is NOT Yes or Abstain
 			// TODO: Whether keep VOTE_OPTION_UNSPECIFIED or not?
-			if !(strings.ToUpper(msgVoteCreated.Option) == constants.VOTE_OPTION_YES || strings.ToUpper(msgVoteCreated.Option) == constants.VOTE_OPTION_ABSTAIN || strings.ToUpper(msgVoteCreated.Option) == constants.VOTE_OPTION_UNSPECIFIED) {
-				return fmt.Errorf("error Ineligible Vote. Casted vote: %s", msgVoteCreated.Option)
+			if !(strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_YES || strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_ABSTAIN || strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_UNSPECIFIED) {
+				return fmt.Errorf("error Ineligible Vote. Casted vote: %s", msgVoteCreatedEvent.Option)
 			}
 
 			//TODO: Is this assumption correct? How to fetch operatorAddress / consensusAddress
-			operatorAddress, errConverting := tmcosmosutils.ValidatorAddressFromPubAddress(projection.validatorAddressPrefix, msgVoteCreated.Voter)
+			operatorAddress, errConverting := tmcosmosutils.ValidatorAddressFromPubAddress(projection.validatorAddressPrefix, msgVoteCreatedEvent.Voter)
 
 			if errConverting != nil {
 				return fmt.Errorf("error In converting voter address to validator address: %v", errConverting)
@@ -373,9 +373,9 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 				return fmt.Errorf("error In checking Network proposal vote: %v", errCheckingTask)
 			}
 			// Update the proposed ID against the voter in Database
-			voted_proposal_id_db_key := constants.VOTED_PROPOSAL_ID + constants.DB_KEY_SEPARATOR + msgVoteCreated.Voter
+			voted_proposal_id_db_key := constants.VOTED_PROPOSAL_ID + constants.DB_KEY_SEPARATOR + msgVoteCreatedEvent.Voter
 
-			proposalIdAsInt64, errConversion := strconv.ParseInt(msgVoteCreated.ProposalId, 10, 64)
+			proposalIdAsInt64, errConversion := strconv.ParseInt(msgVoteCreatedEvent.ProposalId, 10, 64)
 			if errConversion != nil {
 				return fmt.Errorf("error converting ProposalID to int64: %v", errConversion)
 			}
