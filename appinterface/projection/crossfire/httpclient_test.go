@@ -13,8 +13,8 @@ import (
 
 var _ = Describe("Crossfire Chain Stats", func() {
 	It("should get participants correctly", func() {
-		var server *ghttp.Server
-		server = ghttp.NewServer()
+
+		server := ghttp.NewServer()
 
 		server.AppendHandlers(
 			ghttp.CombineHandlers(
