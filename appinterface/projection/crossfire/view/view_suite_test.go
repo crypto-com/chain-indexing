@@ -9,5 +9,5 @@ import (
 
 func TestCrossfireView(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "View Suite")
+	RunSpecs(t, "Crossfire View Suite")
 }
