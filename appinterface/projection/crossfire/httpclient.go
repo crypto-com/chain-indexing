@@ -29,7 +29,7 @@ func NewHTTPClient(participantsListURL string) *HTTPClient {
 }
 
 func (client *HTTPClient) Participants() (*[]Participant, error) {
-	rawRespBody, err := client.request("participants.json")
+	rawRespBody, err := client.request(client.url)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (client *HTTPClient) Participants() (*[]Participant, error) {
 func (client *HTTPClient) request(method string, queryString ...string) (io.ReadCloser, error) {
 	var err error
 
-	url := client.url + "/" + method
+	url := client.url //+ "/" + method
 	if len(queryString) > 0 {
 		url += "?" + queryString[0]
 	}
