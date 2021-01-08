@@ -115,8 +115,10 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 	}
 
 	// Ranks computation at the end of event projection
-	if err := projection.computeTxSentRank(crossfireValidatorsStatsView, crossfireValidatorsView); err != nil {
-		return fmt.Errorf("error Updating TxSentTask Rank %v", err)
+	if blockTime.Before(projection.competitionEndTime) {
+		if err := projection.computeTxSentRank(crossfireValidatorsStatsView, crossfireValidatorsView); err != nil {
+			return fmt.Errorf("error Updating TxSentTask Rank %v", err)
+		}
 	}
 	if blockTime.Before(projection.phaseThreeStartTime) {
 		if err := projection.computeCommitmentRank(

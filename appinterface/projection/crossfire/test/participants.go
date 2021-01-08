@@ -1,7 +1,7 @@
 package crossfire_test
 
 // 3 participants for unit test
-const SAMPLE_3_PARTICIPANTS_JSON = `[
+const THREE_PARTICIPANTS_SAMPLE_JSON = `[
   {
 	"operatorAddress": "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
 	"primaryAddress": "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
@@ -19,8 +19,30 @@ const SAMPLE_3_PARTICIPANTS_JSON = `[
   }
 ]`
 
+// sample participants with corresponding tendermint address
+// 1. tcrocncl1n4t5q77kn9vf73s7ljs96m85jgg49yqpg0chrj: 703B26AEA0867B03572719D22F4B8E6D93CA838C
+// 2. tcrocncl15xr8daqzpu0wf8t6hx95zlxmqwzmf4ea5gja60: AEA0F558C9616A7089791D1AE4C08DC5F69A0A0B
+// 3. tcrocncl197ujxhaeyyv309f39c0s2gn0af0pps5pcxsr0a: 0FB7AE9AC2E3F148CA130341B6CD4DB3682E2D54
+const COMMIT_RANK_PARTICIPANTS_SAMPLE_JSON = `[
+  {
+	"operatorAddress": "tcrocncl1n4t5q77kn9vf73s7ljs96m85jgg49yqpg0chrj",
+	"primaryAddress": "tcro1n4t5q77kn9vf73s7ljs96m85jgg49yqpasmwm3",
+	"moniker": "node1"
+  },
+  {
+	"operatorAddress": "tcrocncl15xr8daqzpu0wf8t6hx95zlxmqwzmf4ea5gja60",
+	"primaryAddress": "tcro15xr8daqzpu0wf8t6hx95zlxmqwzmf4eaph3yzv",
+	"moniker": "node2"
+  },
+  {
+	"operatorAddress": "tcrocncl197ujxhaeyyv309f39c0s2gn0af0pps5pcxsr0a",
+	"primaryAddress": "tcro197ujxhaeyyv309f39c0s2gn0af0pps5pden6h7",
+	"moniker": "node3"
+  }
+]`
+
 // full participants sample
-const SAMPLE_PARTICIPANTS_JSON = `[
+const PARTICIPANTS_SAMPLE_JSON = `[
   {
     "operatorAddress": "tcrocncl197ujxhaeyyv309f39c0s2gn0af0pps5pcxsr0a",
     "primaryAddress": "tcro197ujxhaeyyv309f39c0s2gn0af0pps5pden6h7",

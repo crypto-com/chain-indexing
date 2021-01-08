@@ -26,17 +26,9 @@ import (
 
 var server *ghttp.Server
 var _ = Describe("Crossfire", func() {
-
 	It("should implement projection", func() {
 		fakeLogger := NewFakeLogger()
 		fakeRdbConn := NewFakeRDbConn()
-		server = ghttp.NewServer()
-		server.AppendHandlers(
-			ghttp.CombineHandlers(
-				ghttp.VerifyRequest("GET", "/"),
-				ghttp.RespondWith(http.StatusOK, `[]`),
-			),
-		)
 		var _ entity_projection.Projection = crossfire.NewCrossfire(
 			fakeLogger,
 			fakeRdbConn,
@@ -48,7 +40,7 @@ var _ = Describe("Crossfire", func() {
 			1,
 			"foo",
 			"14",
-			server.URL(),
+			"/participants.json",
 		)
 	})
 
@@ -261,7 +253,7 @@ var _ = Describe("Crossfire", func() {
 			server.RouteToHandler(
 				"GET",
 				"/participants.json",
-				ghttp.RespondWith(http.StatusOK, crossfire_test.SAMPLE_PARTICIPANTS_JSON),
+				ghttp.RespondWith(http.StatusOK, crossfire_test.PARTICIPANTS_SAMPLE_JSON),
 			)
 		})
 
@@ -310,7 +302,6 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				//"https://raw.githubusercontent.com/foreseaz/random/master/participants.json",
 				server.URL()+"/participants.json",
 			)
 
@@ -666,7 +657,7 @@ var _ = Describe("Crossfire", func() {
 			fakeServer.RouteToHandler(
 				"GET",
 				"/participants.json",
-				ghttp.RespondWith(http.StatusOK, crossfire_test.SAMPLE_3_PARTICIPANTS_JSON),
+				ghttp.RespondWith(http.StatusOK, crossfire_test.THREE_PARTICIPANTS_SAMPLE_JSON),
 			)
 
 			projection := crossfire.NewCrossfire(
