@@ -321,14 +321,14 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			networkUpgradeBlockheight := msgSubmitSoftwareUpgradeProposalEvent.MsgSubmitSoftwareUpgradeProposalParams.Content.Plan.Height
 
 			// Update Network upgrade target Timestamp in DB
-			networkUpgradeTimestampDBKey := fmt.Sprintf("%s%s%s", constants.NETWORK_UPGRADE, constants.DB_KEY_SEPARATOR, "timestamp")
+			networkUpgradeTimestampDBKey := constants.NETWORK_UPGRADE_TARGET_TIMESTAMP_KEY()
 			errTSUpdate := crossfireChainStatsView.Set(networkUpgradeTimestampDBKey, networkUpgradeTimestamp.UnixNano())
 			if errTSUpdate != nil {
 				return fmt.Errorf("error updating network_upgrade timestamp: %v", errTSUpdate)
 			}
 
 			// Update Network upgrade target Blockheight in DB
-			networkUpgradeBlockheightDBKey := fmt.Sprintf("%s%s%s", constants.NETWORK_UPGRADE, constants.DB_KEY_SEPARATOR, "blockheight")
+			networkUpgradeBlockheightDBKey := constants.NETWORK_UPGRADE_TARGET_BLOCKHEIGHT_KEY()
 			errBlockheightUpdate := crossfireChainStatsView.Set(networkUpgradeBlockheightDBKey, networkUpgradeBlockheight)
 
 			if errBlockheightUpdate != nil {
@@ -609,8 +609,8 @@ func (projection *Crossfire) checkTaskNetworkUpgrade(
 		return nil
 	}
 
-	targetTimestampDBKey := fmt.Sprintf("%s%s%s", constants.NETWORK_UPGRADE, constants.DB_KEY_SEPARATOR, "timestamp")
-	targetBlockHeightDBKey := fmt.Sprintf("%s%s%s", constants.NETWORK_UPGRADE, constants.DB_KEY_SEPARATOR, "blockheight")
+	targetTimestampDBKey := constants.NETWORK_UPGRADE_TARGET_TIMESTAMP_KEY()
+	targetBlockHeightDBKey := constants.NETWORK_UPGRADE_TARGET_BLOCKHEIGHT_KEY()
 
 	networkUpgradeTimestampNanoSec, errTimestamp := crossfireChainStatsView.FindBy(targetTimestampDBKey)
 	if errTimestamp != nil {

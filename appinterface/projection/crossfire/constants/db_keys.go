@@ -27,3 +27,11 @@ type CommitPhaseKey = string
 func ValidatorCommitmentKey(operatorAddress string, phase CommitPhaseKey) ChainStatsKey {
 	return fmt.Sprintf("%s%s%s", operatorAddress, DB_KEY_SEPARATOR, phase)
 }
+
+func NETWORK_UPGRADE_TARGET_TIMESTAMP_KEY() string {
+	return fmt.Sprintf("%s%s%s", NETWORK_UPGRADE, DB_KEY_SEPARATOR, "timestamp")
+}
+
+func NETWORK_UPGRADE_TARGET_BLOCKHEIGHT_KEY() string {
+	return fmt.Sprintf("%s%s%s", NETWORK_UPGRADE, DB_KEY_SEPARATOR, "blockheight")
+}
