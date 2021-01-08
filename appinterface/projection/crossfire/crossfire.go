@@ -99,8 +99,7 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 	crossfireChainStatsView := view.NewCrossfireChainStats(rdbTxHandle)
 	crossfireValidatorsStatsView := view.NewCrossfireValidatorsStats(rdbTxHandle)
 
-	// TODO: views preparation starts
-	// handle block created event
+	// Event projection
 	var blockTime utctime.UTCTime
 	for _, event := range events {
 		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
@@ -120,16 +119,27 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 		return fmt.Errorf("error Updating TxSentTask Rank %v", err)
 	}
 	if blockTime.Before(projection.phaseThreeStartTime) {
-		if err := projection.computePhase1n2CommitmentRank(crossfireValidatorsStatsView, crossfireValidatorsView); err != nil {
-			return fmt.Errorf("error compute TxSentTask Rank %v", err)
+		if err := projection.computeCommitmentRank(
+			"rank_task_phase_1_2_commitment_count",
+			constants.PHASE1N2_COMMIT_PREFIX,
+			crossfireValidatorsStatsView,
+			crossfireValidatorsView,
+		); err != nil {
+			return fmt.Errorf("error compute rank_task_phase_1_2_commitment_count %v", err)
 		}
 	}
-	// if blockTime.After(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
-	// 	// TODO: phase3 commit rank
-	// }
+	if blockTime.After(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
+		if err := projection.computeCommitmentRank(
+			"rank_task_phase_3_commitment_count",
+			constants.PHASE3_COMMIT_PREFIX,
+			crossfireValidatorsStatsView,
+			crossfireValidatorsView,
+		); err != nil {
+			return fmt.Errorf("error compute rank_task_phase_3_commitment_count %v", err)
+		}
+	}
 
-	// TODO ends: views preparation ends and update current height as handled
-
+	// Done current height projection and ranking computation
 	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
 		return fmt.Errorf("error updating last handled event height: %v", err)
 	}
@@ -548,7 +558,9 @@ func (projection *Crossfire) updateTxSentCount(
 	return nil
 }
 
-func (projection *Crossfire) computePhase1n2CommitmentRank(
+func (projection *Crossfire) computeCommitmentRank(
+	rankKey string,
+	crossfireValidatorStatsPrefix string,
 	crossfireValidatorStatsView *view.CrossfireValidatorsStats,
 	crossfireValidatorView *view.CrossfireValidators,
 ) error {
@@ -561,9 +573,9 @@ func (projection *Crossfire) computePhase1n2CommitmentRank(
 		participantsMap[p.OperatorAddress] = true
 	}
 
-	validatorCommits, err := crossfireValidatorStatsView.FindAllLike(constants.PHASE1N2_COMMIT_PREFIX)
+	validatorCommits, err := crossfireValidatorStatsView.FindAllLike(crossfireValidatorStatsPrefix)
 	if err != nil {
-		return fmt.Errorf("error getting validators' PHASE1N2_COMMIT number from stats %v", err)
+		return fmt.Errorf("error getting validators' %s number from stats %v", crossfireValidatorStatsPrefix, err)
 	}
 
 	var participatedValidatorCommits []view.CrossfireValidatorsStatsRow
@@ -587,11 +599,11 @@ func (projection *Crossfire) computePhase1n2CommitmentRank(
 
 		statsOperatorAddress := strings.Split(v.Key, constants.DB_KEY_SEPARATOR)[1]
 		if err := crossfireValidatorView.UpdateRank(
-			"rank_task_phase_1_2_commitment_count",
+			rankKey,
 			int64(rank),
 			statsOperatorAddress,
 		); err != nil {
-			return fmt.Errorf("error UpdateRank for rank_task_phase_1_2_commitment_count %v", err)
+			return fmt.Errorf("error UpdateRank for %s %v", rankKey, err)
 		}
 	}
 
