@@ -568,7 +568,8 @@ func (projection *Crossfire) computeCommitmentRank(
 	if err != nil {
 		return fmt.Errorf("error getting participants list %v", err)
 	}
-	var participantsMap map[string]bool
+
+	participantsMap := make(map[string]bool)
 	for _, p := range *participants {
 		participantsMap[p.OperatorAddress] = true
 	}
