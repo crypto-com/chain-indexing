@@ -22,6 +22,11 @@ DB_DRIVER_URL="${DB_PROTOCOL}://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PO
 
 echoerr() { echo "$@" 1>&2; }
 
+
+check_password() {
+	echo "check password"
+	go run ./util/checkpassword.go
+}
 check_migrate() {
     set +e
     command -v migrate > /dev/null
@@ -35,6 +40,8 @@ run_migrate() {
     exit $?
 }
 
+
+check_password
 INSTALL_DEPENDENCY=0
 while [[ $# > 0 ]]; do
     case "$1" in
