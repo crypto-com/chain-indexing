@@ -154,7 +154,7 @@ var _ = Describe("Crossfire", func() {
 		})
 
 		phaseTwoBlockCreatedEvent := event_usecase.NewBlockCreated(&usecase_model.Block{
-			Height:          anyHeight,
+			Height:          int64(100000000),
 			Hash:            "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
 			Time:            utctime.FromUnixNano(int64(1611547500000000000)),
 			AppHash:         "24474D86CBFA7E6328D473C17A9E46CD5A80FFE82A348A74844BF3E2BA2B3AF1",
@@ -172,6 +172,12 @@ var _ = Describe("Crossfire", func() {
 				{
 					BlockIdFlag:      2,
 					ValidatorAddress: "031E3891DDB94FC7C7C132B7CD9736738110C889",
+					Timestamp:        utctime.FromUnixNano(int64(2000000)),
+					Signature:        "uhWDC9NDT86FbRVGbOM2lGY8sVkWU51JJ9F8gPwTfK0ebcui1R34oM+jhPKdStn/4sq4qDgzbsN66cQ5kl8NAw==",
+				},
+				{
+					BlockIdFlag:      2,
+					ValidatorAddress: "B5EC6D86F8F418F480799447F5C21F1C17C6F8F8",
 					Timestamp:        utctime.FromUnixNano(int64(2000000)),
 					Signature:        "uhWDC9NDT86FbRVGbOM2lGY8sVkWU51JJ9F8gPwTfK0ebcui1R34oM+jhPKdStn/4sq4qDgzbsN66cQ5kl8NAw==",
 				},
@@ -738,6 +744,73 @@ var _ = Describe("Crossfire", func() {
 			Expect(crossfireValidatorList[2].OperatorAddress).To(Equal("tcrocncl1n4t5q77kn9vf73s7ljs96m85jgg49yqpg0chrj"))
 			Expect(crossfireValidatorList[2].InitialDelegatorAddress).To(Equal("tcro1f6qcvp33dc79xzpuwll7mln5lnepuqv8d7led9"))
 			Expect(crossfireValidatorList[2].RankTaskHighestTxSent).To(Equal(int64(2)))
+		})
+
+		It("should correctly check and update NetworkUpgradeTask", func() {
+			crossfireValidatorView := view.NewCrossfireValidators(pgConn.ToHandle())
+
+			fakeLogger := NewFakeLogger()
+
+			server = ghttp.NewServer()
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/"),
+					ghttp.RespondWith(http.StatusOK, `[]`),
+				))
+
+			softwareUpgradeEvent := event_usecase.NewMsgSubmitSoftwareUpgradeProposal(event_usecase.MsgCommonParams{
+				BlockHeight: anyHeight,
+				TxHash:      "A6D4C1F59A9D232747CA4F8A484F1F3B14A0075E801DF2A25F472B4280505B74",
+				TxSuccess:   true,
+				MsgIndex:    0,
+			}, usecase_model.MsgSubmitSoftwareUpgradeProposalParams{
+				MaybeProposalId: primptr.String("14"),
+				Content: model.MsgSubmitSoftwareUpgradeProposalContent{
+					Type:        "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal",
+					Title:       "Upgrade Title",
+					Description: "Upgrade Description",
+					Plan: model.MsgSubmitSoftwareUpgradeProposalPlan{
+						Name:   "Upgrade Name",
+						Time:   utctime.FromUnixNano(int64(-6795364578871345152)),
+						Height: 100000000,
+						Info:   "Upgrade Info",
+					},
+				},
+				ProposerAddress: "tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
+				InitialDeposit:  coin.Zero(),
+			})
+
+			projection := crossfire.NewCrossfire(
+				fakeLogger,
+				pgConn,
+				"tcrocnclcons",
+				"tcrocncl",
+				1610942400000000000,
+				1611547200000000000,
+				1612756800000000000,
+				1613361599000000000,
+				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
+				"14",
+				"https://raw.githubusercontent.com/foreseaz/random/master/participants.json",
+			)
+
+			// Fire both events
+			err := projection.HandleEvents(anyHeight, []event_entity.Event{phaseTwoBlockCreatedEvent, validatorCreatedEvent, softwareUpgradeEvent})
+			errPhaseTwoBlock := projection.HandleEvents(anyHeight, []event_entity.Event{phaseTwoBlockCreatedEvent})
+
+			Expect(err).To(BeNil())
+			Expect(errPhaseTwoBlock).To(BeNil())
+
+			crossfireValidatorList, err := crossfireValidatorView.List()
+			Expect(err).To(BeNil())
+			Expect(crossfireValidatorList).To(HaveLen(1))
+
+			//check Validator status
+			Expect(crossfireValidatorList[0].OperatorAddress).To(Equal("tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5"))
+			Expect(crossfireValidatorList[0].InitialDelegatorAddress).To(Equal("tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh"))
+			Expect(crossfireValidatorList[0].TendermintAddress).To(Equal("B5EC6D86F8F418F480799447F5C21F1C17C6F8F8"))
+			Expect(crossfireValidatorList[0].RankTaskHighestTxSent).To(Equal(int64(0)))
+			Expect(crossfireValidatorList[0].TaskPhase2NetworkUpgrade).To(Equal(constants.COMPLETED))
 		})
 	})
 })
