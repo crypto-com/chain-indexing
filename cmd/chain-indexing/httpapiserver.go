@@ -82,6 +82,8 @@ func (server *HTTPAPIServer) Run() error {
 		server.rdbConn.ToHandle(),
 	)
 	accountMessagesHandler := handlers.NewAccountMessages(server.logger, server.rdbConn.ToHandle())
+	accountsHandler := handlers.NewAccounts(server.logger, server.rdbConn.ToHandle())
+
 	routeRegistry := routes.NewRoutesRegistry(
 		searchHandler,
 		blocksHandler,
@@ -90,6 +92,7 @@ func (server *HTTPAPIServer) Run() error {
 		blockEventsHandler,
 		validatorsHandler,
 		accountMessagesHandler,
+		accountsHandler,
 	)
 	routeRegistry.Register(httpServer, server.routePrefix)
 

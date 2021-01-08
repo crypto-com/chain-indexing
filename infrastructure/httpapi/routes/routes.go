@@ -16,6 +16,7 @@ type RouteRegistry struct {
 	blockEventHandler      *handlers.BlockEvents
 	validatorsHandler      *handlers.Validators
 	accountMessagesHandler *handlers.AccountMessages
+	accountsHandler        *handlers.Accounts
 }
 
 func NewRoutesRegistry(
@@ -26,6 +27,7 @@ func NewRoutesRegistry(
 	blockEventHandler *handlers.BlockEvents,
 	validatorsHandler *handlers.Validators,
 	accountMessagesHandler *handlers.AccountMessages,
+	accountsHandler *handlers.Accounts,
 ) *RouteRegistry {
 	return &RouteRegistry{
 		searchHandler,
@@ -35,6 +37,7 @@ func NewRoutesRegistry(
 		blockEventHandler,
 		validatorsHandler,
 		accountMessagesHandler,
+		accountsHandler,
 	}
 }
 
@@ -62,5 +65,8 @@ func (registry *RouteRegistry) Register(server *httpapi.Server, routePrefix stri
 	server.GET(fmt.Sprintf("%s/api/v1/validators/active", routePrefix), registry.validatorsHandler.ListActive)
 	server.GET(fmt.Sprintf("%s/api/v1/validators/{address}", routePrefix), registry.validatorsHandler.FindBy)
 	server.GET(fmt.Sprintf("%s/api/v1/validators/{address}/activities", routePrefix), registry.validatorsHandler.ListActivities)
+	// Account number, sequence number, balance are fetched from the latest state (regardless of current replayed height)
+	server.GET(fmt.Sprintf("%s/api/v1/accounts/info", routePrefix), registry.accountsHandler.List)
+	server.GET(fmt.Sprintf("%s/api/v1/accounts/info/{address}", routePrefix), registry.accountsHandler.FindBy)
 
 }

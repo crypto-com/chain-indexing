@@ -58,3 +58,16 @@ type Pagination struct {
 	MaybeNextKey *string `json:"next_key"`
 	Total        string  `json:"total"`
 }
+
+// Account number, sequence number, balance are fetched from the latest state (regardless of current replayed height)
+type Account struct {
+	AccountType    string `json:"account_type"`
+	AccountAddress string `json:"account_address"`
+	Pubkey         string `json:"account_pubkey"`
+	AccountNumber  string `json:"account_number"`
+	SequenceNumber string `json:"sequence_number"`
+}
+type AccountBalance struct {
+	AccountAmount string `json:"account_amount"`
+	AccountDenom  string `json:"account_denom"`
+}
