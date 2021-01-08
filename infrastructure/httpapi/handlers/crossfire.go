@@ -111,35 +111,28 @@ func (handler *Crossfire) getValidatorStats(operatorAddress string) (*ValidatorS
 		return nil, fmt.Errorf("[error-crossfire] Fetching Validator Stats, %v", err)
 	}
 
-	var finalValidatorStats ValidatorStats
+	var finalValidatorStats *ValidatorStats
 	for _, validatorStatRow := range validatorStatRows {
 		switch strings.Split(validatorStatRow.Key, crossfire_constants.DB_KEY_SEPARATOR)[0] {
 		case crossfire_constants.TOTAL_TX_SENT_PREFIX:
-			finalValidatorStats.totalTxSent = &validatorStatRow.Value
-			break
+			*finalValidatorStats.totalTxSent = validatorStatRow.Value
 		case crossfire_constants.PHASE_1_TX_SENT_PREFIX:
-			finalValidatorStats.txSentPhase1 = &validatorStatRow.Value
-			break
+			*finalValidatorStats.txSentPhase1 = validatorStatRow.Value
 		case crossfire_constants.PHASE_2_TX_SENT_PREFIX:
-			finalValidatorStats.txSentPhase2 = &validatorStatRow.Value
-			break
+			*finalValidatorStats.txSentPhase2 = validatorStatRow.Value
 		case crossfire_constants.PHASE_3_TX_SENT_PREFIX:
-			finalValidatorStats.txSentPhase3 = &validatorStatRow.Value
-			break
+			*finalValidatorStats.txSentPhase3 = validatorStatRow.Value
 		case crossfire_constants.PHASE3_COMMIT:
-			finalValidatorStats.commitCountPhase3 = &validatorStatRow.Value
-			break
+			*finalValidatorStats.commitCountPhase3 = validatorStatRow.Value
 		case crossfire_constants.PHASE2_COMMIT:
-			finalValidatorStats.commitCountPhase2 = &validatorStatRow.Value
-			break
+			*finalValidatorStats.commitCountPhase2 = validatorStatRow.Value
 		case crossfire_constants.PHASE1_COMMIT:
-			finalValidatorStats.commitCountPhase1 = &validatorStatRow.Value
-			break
+			*finalValidatorStats.commitCountPhase1 = validatorStatRow.Value
 		default:
 			break
 		}
 	}
-	return &finalValidatorStats, nil
+	return finalValidatorStats, nil
 }
 
 // ValidatorStats Validator statistics
