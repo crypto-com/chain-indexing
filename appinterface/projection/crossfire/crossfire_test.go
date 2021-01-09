@@ -1,17 +1,18 @@
 package crossfire_test
 
 import (
+	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/constants"
+	crossfire_test "github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/test"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"net/http"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/constants"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/view"
 	. "github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	. "github.com/crypto-com/chain-indexing/internal/logger/test"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	. "github.com/crypto-com/chain-indexing/test"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
@@ -25,16 +26,9 @@ import (
 
 var server *ghttp.Server
 var _ = Describe("Crossfire", func() {
-
 	It("should implement projection", func() {
 		fakeLogger := NewFakeLogger()
 		fakeRdbConn := NewFakeRDbConn()
-		server = ghttp.NewServer()
-		server.AppendHandlers(
-			ghttp.CombineHandlers(
-				ghttp.VerifyRequest("GET", "/"),
-				ghttp.RespondWith(http.StatusOK, `[]`),
-			))
 		var _ entity_projection.Projection = crossfire.NewCrossfire(
 			fakeLogger,
 			fakeRdbConn,
@@ -46,7 +40,7 @@ var _ = Describe("Crossfire", func() {
 			1,
 			"foo",
 			"14",
-			server.URL(),
+			"/participants.json",
 		)
 	})
 
@@ -256,12 +250,11 @@ var _ = Describe("Crossfire", func() {
 			_ = pgMigrate.Reset()
 			pgMigrate.MustUp()
 			server = ghttp.NewServer()
-
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/"),
-					ghttp.RespondWith(http.StatusOK, `[]`),
-				))
+			server.RouteToHandler(
+				"GET",
+				"/participants.json",
+				ghttp.RespondWith(http.StatusOK, crossfire_test.PARTICIPANTS_SAMPLE_JSON),
+			)
 		})
 
 		AfterEach(func() {
@@ -309,8 +302,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				// server.URL(),
-				server.URL(),
+				server.URL()+"/participants.json",
 			)
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
@@ -382,7 +374,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				server.URL(),
+				server.URL()+"/participants.json",
 			)
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
@@ -485,7 +477,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				server.URL(),
+				server.URL()+"/participants.json",
 			)
 
 			// Fire both events
@@ -555,7 +547,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				server.URL(),
+				server.URL()+"/participants.json",
 			)
 
 			// Fire both events
@@ -601,7 +593,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				server.URL(),
+				server.URL()+"/participants.json",
 			)
 
 			// Fire both events
@@ -660,27 +652,13 @@ var _ = Describe("Crossfire", func() {
 			crossfireValidatorView := view.NewCrossfireValidators(pgConn.ToHandle())
 			crossfireValidatorStatsView := view.NewCrossfireValidatorsStats(pgConn.ToHandle())
 			fakeLogger := NewFakeLogger()
-			server = ghttp.NewServer()
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/"),
-					ghttp.RespondWith(http.StatusOK, `[{
-						"operatorAddress": "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
-						"primaryAddress": "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
-						"moniker": "Bambarello"
-					  },
-					  {
-						"operatorAddress": "tcrocncl1n4t5q77kn9vf73s7ljs96m85jgg49yqpg0chrj",
-						"primaryAddress": "tcro1f6qcvp33dc79xzpuwll7mln5lnepuqv8d7led9",
-						"moniker": "eric-node"
-					  },
-					  {
-						"operatorAddress": "tcrocncl1f6qcvp33dc79xzpuwll7mln5lnepuqv8cpuq4x",
-						"primaryAddress": "tcro1432x4lc5mrgm30c9xx35unmn9ultemm5nt40vq",
-						"moniker": "erasde"
-					  }]`,
-					),
-				))
+
+			fakeServer := ghttp.NewServer()
+			fakeServer.RouteToHandler(
+				"GET",
+				"/participants.json",
+				ghttp.RespondWith(http.StatusOK, crossfire_test.THREE_PARTICIPANTS_SAMPLE_JSON),
+			)
 
 			projection := crossfire.NewCrossfire(
 				fakeLogger,
@@ -693,18 +671,12 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				server.URL(),
+				fakeServer.URL() + "/participants.json",
 			)
-			Expect(server.ReceivedRequests()).To(HaveLen(0))
 
 			// Fire both events
 			err := projection.HandleEvents(anyHeight, []event_entity.Event{phaseOneBlockCreatedEvent, validatorCreatedEvent, validator2CreatedEvent, validator3CreatedEvent, transactionCreatedEvent})
-
 			Expect(err).To(BeNil())
-
-			Expect(server.ReceivedRequests()).To(HaveLen(1))
-			Expect(server.AllowUnhandledRequests).To(BeFalse())
-			Expect(server.ReceivedRequests()[0].URL.RawPath).To(Equal(""))
 
 			//Check validators view count
 			validatorViewCount, err := crossfireValidatorView.Count()
@@ -748,15 +720,7 @@ var _ = Describe("Crossfire", func() {
 
 		It("should correctly check and update NetworkUpgradeTask", func() {
 			crossfireValidatorView := view.NewCrossfireValidators(pgConn.ToHandle())
-
 			fakeLogger := NewFakeLogger()
-
-			server = ghttp.NewServer()
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/"),
-					ghttp.RespondWith(http.StatusOK, `[]`),
-				))
 
 			softwareUpgradeEvent := event_usecase.NewMsgSubmitSoftwareUpgradeProposal(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
@@ -791,7 +755,7 @@ var _ = Describe("Crossfire", func() {
 				1613361599000000000,
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
-				"https://raw.githubusercontent.com/foreseaz/random/master/participants.json",
+				server.URL()+"/participants.json",
 			)
 
 			// Fire both events
