@@ -2,7 +2,7 @@ package view_test
 
 import (
 	random "github.com/brianvoe/gofakeit/v5"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/block/view"
+	"github.com/crypto-com/chain-indexing/projection/block/view"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 

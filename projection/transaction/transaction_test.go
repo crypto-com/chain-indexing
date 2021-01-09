@@ -1,11 +1,11 @@
 package transaction_test
 
 import (
-	"github.com/crypto-com/chain-indexing/appinterface/projection/block"
-	view2 "github.com/crypto-com/chain-indexing/appinterface/projection/block/view"
 	. "github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	. "github.com/crypto-com/chain-indexing/entity/event/test"
 	. "github.com/crypto-com/chain-indexing/internal/logger/test"
+	"github.com/crypto-com/chain-indexing/projection/block"
+	view2 "github.com/crypto-com/chain-indexing/projection/block/view"
 	. "github.com/crypto-com/chain-indexing/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

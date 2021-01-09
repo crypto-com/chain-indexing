@@ -3,10 +3,10 @@ package validator
 import (
 	"fmt"
 
-	"github.com/crypto-com/chain-indexing/appinterface/projection/validator/view"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
+	"github.com/crypto-com/chain-indexing/projection/validator/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 

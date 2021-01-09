@@ -55,3 +55,14 @@ pool_health_check_interval = "1m"
 # comma separated log levels. possible values: debug,info,error,panic
 level = "debug"
 color = false
+
+[projection]
+enables = [
+    "Account",
+    "AccountMessage",
+    "Block",
+    "BlockEvent",
+    "Transaction",
+    "Validator",
+    "ValidatorStats",
+]

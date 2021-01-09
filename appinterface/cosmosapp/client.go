@@ -1,6 +1,8 @@
 package cosmosapp
 
 type Client interface {
+	Account(accountAddress string) (*Account, error)
+	Balance(targetAddress string, targetDenom string) (*AccountBalance, error)
 	Validator(validatorAddress string) (*Validator, error)
 	Delegation(delegator string, validator string) (*DelegationResponse, error)
 }
@@ -59,7 +61,6 @@ type Pagination struct {
 	Total        string  `json:"total"`
 }
 
-// Account number, sequence number, balance are fetched from the latest state (regardless of current replayed height)
 type Account struct {
 	AccountType    string `json:"account_type"`
 	AccountAddress string `json:"account_address"`

@@ -1,18 +1,13 @@
 package main
 
 import (
-	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
+	"strings"
 
-	"github.com/crypto-com/chain-indexing/appinterface/projection/account"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/account_message"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/block"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/blockevent"
-	transaction "github.com/crypto-com/chain-indexing/appinterface/projection/transaction"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/validator"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/validatorstats"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
+	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	"github.com/crypto-com/chain-indexing/projection"
 )
 
 func initProjections(
@@ -20,19 +15,23 @@ func initProjections(
 	rdbConn rdb.Conn,
 	config *Config,
 ) []projection_entity.Projection {
-	var consNodeAddressPrefix = config.Blockchain.ConNodeAddressPrefix
 	var cosmosAppClient = cosmosapp_infrastructure.NewHTTPClient(config.CosmosApp.HTTPRPCUL)
-	return []projection_entity.Projection{
-		block.NewBlock(logger, rdbConn),
-		transaction.NewTransaction(logger, rdbConn),
-		blockevent.NewBlockEvent(logger, rdbConn),
-		validator.NewValidator(
-			logger, rdbConn, consNodeAddressPrefix,
-		),
-		validatorstats.NewValidatorStats(logger, rdbConn),
-		account_message.NewAccountMessage(logger, rdbConn),
-		account.NewAccount(logger, rdbConn, cosmosAppClient, config.Blockchain.BaseDenom),
 
-		// register more projections here
+	projections := make([]projection_entity.Projection, 0, len(config.Projection.Enables))
+	initParams := projection.InitParams{
+		Logger:                logger,
+		RdbConn:               rdbConn,
+		CosmosAppClient:       cosmosAppClient,
+		ConsNodeAddressPrefix: config.Blockchain.ConNodeAddressPrefix,
+		BaseDenom:             config.Blockchain.BaseDenom,
 	}
+	for _, projectionName := range config.Projection.Enables {
+		projections = append(projections, projection.InitProjection(
+			projectionName, initParams,
+		))
+	}
+
+	logger.Infof("Enabled the follow projections: [%s]", strings.Join(config.Projection.Enables, ", "))
+
+	return projections
 }

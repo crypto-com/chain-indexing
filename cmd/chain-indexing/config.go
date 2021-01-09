@@ -66,6 +66,7 @@ type FileConfig struct {
 	Database   DatabaseConfig
 	Postgres   PostgresConfig
 	Logger     LoggerConfig
+	Projection ProjectionConfig
 }
 
 type BlockchainConfig struct {
@@ -125,4 +126,8 @@ type PostgresConfig struct {
 type LoggerConfig struct {
 	Level string `toml:"level"`
 	Color bool   `toml:"color"`
+}
+
+type ProjectionConfig struct {
+	Enables []string `toml:"enables"`
 }

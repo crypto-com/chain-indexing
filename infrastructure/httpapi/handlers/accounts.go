@@ -5,11 +5,11 @@ import (
 
 	"github.com/valyala/fasthttp"
 
-	account_view "github.com/crypto-com/chain-indexing/appinterface/projection/account/view"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	account_view "github.com/crypto-com/chain-indexing/projection/account/view"
 )
 
 type Accounts struct {

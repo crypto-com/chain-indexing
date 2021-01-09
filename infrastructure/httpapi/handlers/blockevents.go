@@ -8,10 +8,10 @@ import (
 
 	"github.com/valyala/fasthttp"
 
-	blockevents_view "github.com/crypto-com/chain-indexing/appinterface/projection/blockevent/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	blockevents_view "github.com/crypto-com/chain-indexing/projection/blockevent/view"
 )
 
 type BlockEvents struct {
