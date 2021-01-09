@@ -169,6 +169,33 @@ func (view *CrossfireValidators) UpdateTask(
 	return nil
 }
 
+func (view *CrossfireValidators) UpdateRank(
+	taskColumnName string,
+	rank int64,
+	operatorAddress string,
+) error {
+	sql, sqlArgs, err := view.rdb.StmtBuilder.Update(
+		TABLE_NAME,
+	).Set(
+		taskColumnName, rank,
+	).Where(
+		"operator_address = ?", operatorAddress,
+	).ToSql()
+	if err != nil {
+		return fmt.Errorf("error building metrics update sql: %v", err)
+	}
+
+	var execResult rdb.ExecResult
+	if execResult, err = view.rdb.Exec(sql, sqlArgs...); err != nil {
+		return fmt.Errorf("error updating task: %v", err)
+	}
+	if execResult.RowsAffected() != 1 {
+		return errors.New("error updating task: no rows updated")
+	}
+
+	return nil
+}
+
 func (view *CrossfireValidators) UpdateTaskForOperatorAddress(
 	taskColumnName string,
 	status string,
