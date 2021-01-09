@@ -122,12 +122,12 @@ func (handler *Crossfire) getValidatorStats(operatorAddress string) (*ValidatorS
 			*finalValidatorStats.txSentPhase2 = validatorStatRow.Value
 		case crossfire_constants.PHASE_3_TX_SENT_PREFIX:
 			*finalValidatorStats.txSentPhase3 = validatorStatRow.Value
-		case crossfire_constants.PHASE3_COMMIT:
+		case crossfire_constants.PHASE_3_COMMIT_PREFIX:
 			*finalValidatorStats.commitCountPhase3 = validatorStatRow.Value
-		case crossfire_constants.PHASE2_COMMIT:
+		case crossfire_constants.PHASE_2_COMMIT_PREFIX:
 			*finalValidatorStats.commitCountPhase2 = validatorStatRow.Value
-		case crossfire_constants.PHASE1_COMMIT:
-			*finalValidatorStats.commitCountPhase1 = validatorStatRow.Value
+		case crossfire_constants.PHASE_1N2_COMMIT_PREFIX:
+			*finalValidatorStats.commitCountPhase1n2 = validatorStatRow.Value
 		default:
 			break
 		}
@@ -137,13 +137,13 @@ func (handler *Crossfire) getValidatorStats(operatorAddress string) (*ValidatorS
 
 // ValidatorStats Validator statistics
 type ValidatorStats struct {
-	totalTxSent       *int64
-	txSentPhase1      *int64
-	txSentPhase2      *int64
-	txSentPhase3      *int64
-	commitCountPhase1 *int64
-	commitCountPhase2 *int64
-	commitCountPhase3 *int64
+	totalTxSent         *int64
+	txSentPhase1        *int64
+	txSentPhase2        *int64
+	txSentPhase3        *int64
+	commitCountPhase1n2 *int64
+	commitCountPhase2   *int64
+	commitCountPhase3   *int64
 }
 
 // CrossfireValidatorDetails response object
