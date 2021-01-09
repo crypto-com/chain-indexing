@@ -25,7 +25,7 @@ var _ = Describe("Crossfire Chain Stats", func() {
 			It("should run increment correctly", func() {
 				var err error
 
-				key := constants.PHASE1_BLOCK_COUNT
+				key := constants.PHASE_1_BLOCK_COUNT
 				crossfireChainStatsView := view.NewCrossfireChainStats(conn.ToHandle())
 
 				// increment

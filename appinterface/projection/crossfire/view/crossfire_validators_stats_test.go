@@ -26,7 +26,7 @@ var _ = Describe("Crossfire Validators Stats", func() {
 				var err error
 
 				operatorAddress := "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5"
-				key := constants.ValidatorCommitmentKey(operatorAddress, constants.PHASE1N2_COMMIT_PREFIX)
+				key := constants.ValidatorCommitmentKey(operatorAddress, constants.PHASE_1N2_COMMIT_PREFIX)
 				crossfireValidatorsStatsView := view.NewCrossfireValidatorsStats(conn.ToHandle())
 
 				// increment

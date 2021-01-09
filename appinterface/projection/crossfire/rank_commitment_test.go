@@ -270,14 +270,14 @@ var _ = Describe("Crossfire", func() {
 			err = projection.HandleEvents(anyHeight, []event_entity.Event{phaseOneBlockCreatedEvent})
 			Expect(err).To(BeNil())
 
-			phase1BlockCount, err := crossfireChainStatsView.FindBy(constants.PHASE1_BLOCK_COUNT)
+			phase1BlockCount, err := crossfireChainStatsView.FindBy(constants.PHASE_1_BLOCK_COUNT)
 			Expect(err).To(BeNil())
 			Expect(phase1BlockCount).To(Equal(int64(1)))
 
 			node1CommitCount, err := crossfireValidatorsStatsView.FindBy(
 				constants.ValidatorCommitmentKey(
 					actual1.OperatorAddress,
-					constants.PHASE1N2_COMMIT_PREFIX,
+					constants.PHASE_1N2_COMMIT_PREFIX,
 				),
 			)
 			Expect(err).To(BeNil())
@@ -286,7 +286,7 @@ var _ = Describe("Crossfire", func() {
 			node2CommitCount, err := crossfireValidatorsStatsView.FindBy(
 				constants.ValidatorCommitmentKey(
 					actual2.OperatorAddress,
-					constants.PHASE1N2_COMMIT_PREFIX,
+					constants.PHASE_1N2_COMMIT_PREFIX,
 				),
 			)
 			Expect(err).To(BeNil())
@@ -308,14 +308,14 @@ var _ = Describe("Crossfire", func() {
 			err = projection.HandleEvents(anyHeight, []event_entity.Event{phaseTwoBlockCreatedEvent})
 			Expect(err).To(BeNil())
 
-			phase2BlockCount, err := crossfireChainStatsView.FindBy(constants.PHASE2_BLOCK_COUNT)
+			phase2BlockCount, err := crossfireChainStatsView.FindBy(constants.PHASE_2_BLOCK_COUNT)
 			Expect(err).To(BeNil())
 			Expect(phase2BlockCount).To(Equal(int64(1)))
 
 			node1CommitCount, err = crossfireValidatorsStatsView.FindBy(
 				constants.ValidatorCommitmentKey(
 					actual1.OperatorAddress,
-					constants.PHASE1N2_COMMIT_PREFIX,
+					constants.PHASE_1N2_COMMIT_PREFIX,
 				),
 			)
 			Expect(err).To(BeNil())
@@ -324,7 +324,7 @@ var _ = Describe("Crossfire", func() {
 			node2CommitCount, err = crossfireValidatorsStatsView.FindBy(
 				constants.ValidatorCommitmentKey(
 					actual2.OperatorAddress,
-					constants.PHASE1N2_COMMIT_PREFIX,
+					constants.PHASE_1N2_COMMIT_PREFIX,
 				),
 			)
 			Expect(err).To(BeNil())
@@ -333,7 +333,7 @@ var _ = Describe("Crossfire", func() {
 			node3CommitCount, err := crossfireValidatorsStatsView.FindBy(
 				constants.ValidatorCommitmentKey(
 					actual3.OperatorAddress,
-					constants.PHASE1N2_COMMIT_PREFIX,
+					constants.PHASE_1N2_COMMIT_PREFIX,
 				),
 			)
 			Expect(err).To(BeNil())
@@ -407,14 +407,14 @@ var _ = Describe("Crossfire", func() {
 			err = projection.HandleEvents(anyHeight, []event_entity.Event{phaseThreeBlockCreatedEvent1})
 			Expect(err).To(BeNil())
 
-			phase3BlockCount, err := crossfireChainStatsView.FindBy(constants.PHASE3_BLOCK_COUNT)
+			phase3BlockCount, err := crossfireChainStatsView.FindBy(constants.PHASE_3_BLOCK_COUNT)
 			Expect(err).To(BeNil())
 			Expect(phase3BlockCount).To(Equal(int64(1)))
 
 			node1CommitCount, err := crossfireValidatorsStatsView.FindBy(
 				constants.ValidatorCommitmentKey(
 					actual1.OperatorAddress,
-					constants.PHASE3_COMMIT_PREFIX,
+					constants.PHASE_3_COMMIT_PREFIX,
 				),
 			)
 			Expect(err).To(BeNil())
@@ -423,7 +423,7 @@ var _ = Describe("Crossfire", func() {
 			node3CommitCount, err := crossfireValidatorsStatsView.FindBy(
 				constants.ValidatorCommitmentKey(
 					actual3.OperatorAddress,
-					constants.PHASE3_COMMIT_PREFIX,
+					constants.PHASE_3_COMMIT_PREFIX,
 				),
 			)
 			Expect(err).To(BeNil())
@@ -445,14 +445,14 @@ var _ = Describe("Crossfire", func() {
 			err = projection.HandleEvents(anyHeight, []event_entity.Event{phaseThreeBlockCreatedEvent2})
 			Expect(err).To(BeNil())
 
-			phase2BlockCount, err := crossfireChainStatsView.FindBy(constants.PHASE3_BLOCK_COUNT)
+			phase2BlockCount, err := crossfireChainStatsView.FindBy(constants.PHASE_3_BLOCK_COUNT)
 			Expect(err).To(BeNil())
 			Expect(phase2BlockCount).To(Equal(int64(2)))
 
 			node1CommitCount, err = crossfireValidatorsStatsView.FindBy(
 				constants.ValidatorCommitmentKey(
 					actual1.OperatorAddress,
-					constants.PHASE3_COMMIT_PREFIX,
+					constants.PHASE_3_COMMIT_PREFIX,
 				),
 			)
 			Expect(err).To(BeNil())
@@ -461,7 +461,7 @@ var _ = Describe("Crossfire", func() {
 			node2CommitCount, err := crossfireValidatorsStatsView.FindBy(
 				constants.ValidatorCommitmentKey(
 					actual2.OperatorAddress,
-					constants.PHASE3_COMMIT_PREFIX,
+					constants.PHASE_3_COMMIT_PREFIX,
 				),
 			)
 			Expect(err).To(BeNil())
@@ -470,7 +470,7 @@ var _ = Describe("Crossfire", func() {
 			node3CommitCount, err = crossfireValidatorsStatsView.FindBy(
 				constants.ValidatorCommitmentKey(
 					actual3.OperatorAddress,
-					constants.PHASE3_COMMIT_PREFIX,
+					constants.PHASE_3_COMMIT_PREFIX,
 				),
 			)
 			Expect(err).To(BeNil())

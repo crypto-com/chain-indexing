@@ -12,15 +12,15 @@ const PHASE_3_TX_SENT_PREFIX = "phase_3_tx_sent"
 const TOTAL_TX_SENT_PREFIX = "total_tx_sent"
 const TYPE_URL_PUBKEY = "/cosmos.crypto.secp256k1.PubKey"
 
-const PHASE1_BLOCK_COUNT ChainStatsKey = "phase1_block_count"
-const PHASE2_BLOCK_COUNT ChainStatsKey = "phase2_block_count"
-const PHASE3_BLOCK_COUNT ChainStatsKey = "phase3_block_count"
+const PHASE_1_BLOCK_COUNT ChainStatsKey = "phase1_block_count"
+const PHASE_2_BLOCK_COUNT ChainStatsKey = "phase2_block_count"
+const PHASE_3_BLOCK_COUNT ChainStatsKey = "phase3_block_count"
 
 type ChainStatsKey = string
 
-const PHASE1N2_COMMIT_PREFIX CommitPhaseKey = "phase1n2_commit_count"
-const PHASE2_COMMIT_PREFIX CommitPhaseKey = "phase2_commit_count"
-const PHASE3_COMMIT_PREFIX CommitPhaseKey = "phase3_commit_count"
+const PHASE_1N2_COMMIT_PREFIX CommitPhaseKey = "phase_1n2_commit_count"
+const PHASE_2_COMMIT_PREFIX CommitPhaseKey = "phase_2_commit_count"
+const PHASE_3_COMMIT_PREFIX CommitPhaseKey = "phase_3_commit_count"
 
 type CommitPhaseKey = string
 
