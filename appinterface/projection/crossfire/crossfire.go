@@ -572,8 +572,8 @@ func (projection *Crossfire) computeCommitmentRank(
 	}
 
 	participantsMap := make(map[string]bool)
-	for _, p := range *participants {
-		participantsMap[p.OperatorAddress] = true
+	for _, participant := range *participants {
+		participantsMap[participant.OperatorAddress] = true
 	}
 
 	validatorCommits, err := crossfireValidatorStatsView.FindAllLike(crossfireValidatorStatsPrefix)
@@ -582,10 +582,10 @@ func (projection *Crossfire) computeCommitmentRank(
 	}
 
 	var participatedValidatorCommits []view.CrossfireValidatorsStatsRow
-	for _, v := range validatorCommits {
-		statsOperatorAddress := strings.Split(v.Key, constants.DB_KEY_SEPARATOR)[1]
+	for _, validatorCommit := range validatorCommits {
+		statsOperatorAddress := strings.Split(validatorCommit.Key, constants.DB_KEY_SEPARATOR)[1]
 		if participantsMap[statsOperatorAddress] {
-			participatedValidatorCommits = append(participatedValidatorCommits, v)
+			participatedValidatorCommits = append(participatedValidatorCommits, validatorCommit)
 		}
 	}
 
@@ -594,13 +594,13 @@ func (projection *Crossfire) computeCommitmentRank(
 	})
 
 	rank := 1
-	for index, v := range participatedValidatorCommits {
+	for index, validatorCommit := range participatedValidatorCommits {
 		// current value smaller than previous value, increment rank
-		if index > 0 && v.Value != participatedValidatorCommits[index-1].Value {
+		if index > 0 && validatorCommit.Value != participatedValidatorCommits[index-1].Value {
 			rank++
 		}
 
-		statsOperatorAddress := strings.Split(v.Key, constants.DB_KEY_SEPARATOR)[1]
+		statsOperatorAddress := strings.Split(validatorCommit.Key, constants.DB_KEY_SEPARATOR)[1]
 		if err := crossfireValidatorView.UpdateRank(
 			rankKey,
 			int64(rank),
