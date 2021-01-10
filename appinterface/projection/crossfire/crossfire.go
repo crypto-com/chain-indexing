@@ -540,16 +540,21 @@ func (projection *Crossfire) updateTxSentCount(
 
 		// Only considering Pubkey address for now
 		if sender.Type == constants.TYPE_URL_PUBKEY && sender.MaybeThreshold == nil {
+			pubKey, _ := base64.StdEncoding.DecodeString(sender.Pubkeys[0])
+			primaryAddress, err := tmcosmosutils.AccountAddressFromPubKey("tcro", pubKey)
+			if err != nil {
+				continue
+			}
 
 			// Increment count for address as per PHASE
-			phaseAddressCountDbKey := phaseNumberPrefix + constants.DB_KEY_SEPARATOR + sender.Pubkeys[0]
+			phaseAddressCountDbKey := phaseNumberPrefix + constants.DB_KEY_SEPARATOR + primaryAddress
 			errIncrementing := crossfireValidatorStatsView.IncrementOne(phaseAddressCountDbKey)
 			if errIncrementing != nil {
 				return fmt.Errorf("error Phase wise tx sent count increment: %v", errIncrementing)
 			}
 
 			// Increment TOTAL count for address
-			totalAddressCountDbKey := constants.TOTAL_TX_SENT_PREFIX + constants.DB_KEY_SEPARATOR + sender.Pubkeys[0]
+			totalAddressCountDbKey := constants.TOTAL_TX_SENT_PREFIX + constants.DB_KEY_SEPARATOR + primaryAddress
 			errIncrementingTotal := crossfireValidatorStatsView.IncrementOne(totalAddressCountDbKey)
 			if errIncrementingTotal != nil {
 				return fmt.Errorf("error Incrementing tx sent count: %v", errIncrementingTotal)
