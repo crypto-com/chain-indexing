@@ -21,7 +21,7 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 			anyValidatorAddress := "tcrocncl15grftg88l0gdw4mg9t9pwnl0pde2asjzekz0ek"
 			anyRecipientAddress := "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh"
-			anyAmount := coin.MustNewCoinFromString("123456")
+			anyAmount := coin.MustParseCoinsNormalized("123456basetcro,456789tcro")
 			anyParams := model.MsgWithdrawValidatorCommissionParams{
 				ValidatorAddress: anyValidatorAddress,
 				RecipientAddress: anyRecipientAddress,
@@ -59,7 +59,7 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 			anyValidatorAddress := "tcrocncl15grftg88l0gdw4mg9t9pwnl0pde2asjzekz0ek"
 			anyRecipientAddress := "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh"
-			anyAmount := coin.MustNewCoinFromString("123456")
+			anyAmount := coin.MustParseCoinsNormalized("123456basetcro,456789tcro")
 			anyParams := model.MsgWithdrawValidatorCommissionParams{
 				ValidatorAddress: anyValidatorAddress,
 				RecipientAddress: anyRecipientAddress,

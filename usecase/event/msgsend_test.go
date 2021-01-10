@@ -20,7 +20,7 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 			anyFromAddress := "tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3"
 			anyToAddress := "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3"
-			anyAmount := coin.MustNewCoinFromString("123456")
+			anyAmount := coin.MustParseCoinsNormalized("123456basetcro,456789tcro")
 			anyParams := event_usecase.MsgSendCreatedParams{
 				FromAddress: anyFromAddress,
 				ToAddress:   anyToAddress,
@@ -58,7 +58,7 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 			anyFromAddress := "tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3"
 			anyToAddress := "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3"
-			anyAmount := coin.MustNewCoinFromString("123456")
+			anyAmount := coin.MustParseCoinsNormalized("123456basetcro,456789tcro")
 			anyParams := event_usecase.MsgSendCreatedParams{
 				FromAddress: anyFromAddress,
 				ToAddress:   anyToAddress,

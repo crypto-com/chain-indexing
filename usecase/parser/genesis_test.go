@@ -45,7 +45,7 @@ var _ = Describe("Parse Genesis", func() {
 					DelegatorAddress:  "tcro1n4t5q77kn9vf73s7ljs96m85jgg49yqpasmwm3",
 					ValidatorAddress:  "tcrocncl1n4t5q77kn9vf73s7ljs96m85jgg49yqpg0chrj",
 					TendermintPubkey:  "Og8ZfQTHFgTBGD5qoyo5NpyJCJRddC+WuSPtyZtlE7E=",
-					Amount:            coin.MustNewCoinFromString("10000000000000"),
+					Amount:            coin.MustParseCoinNormalized("10000000000000basetcro"),
 				},
 			),
 		))
@@ -74,7 +74,7 @@ var _ = Describe("Parse Genesis", func() {
 					DelegatorAddress:  "tcro15xr8daqzpu0wf8t6hx95zlxmqwzmf4eaph3yzv",
 					ValidatorAddress:  "tcrocncl15xr8daqzpu0wf8t6hx95zlxmqwzmf4ea5gja60",
 					TendermintPubkey:  "BuuPYme7R4eH/nWs2p+sS1UpCQwy+QJgBZuhGICH8Es=",
-					Amount:            coin.MustNewCoinFromString("10000000000000"),
+					Amount:            coin.MustParseCoinNormalized("10000000000000basetcro"),
 				},
 			),
 		))
@@ -103,7 +103,7 @@ var _ = Describe("Parse Genesis", func() {
 					DelegatorAddress:  "tcro197ujxhaeyyv309f39c0s2gn0af0pps5pden6h7",
 					ValidatorAddress:  "tcrocncl197ujxhaeyyv309f39c0s2gn0af0pps5pcxsr0a",
 					TendermintPubkey:  "wWw0e9tZcVmev/NyJlZv5Apd7U5IONoyx3U/9rD5fHI=",
-					Amount:            coin.MustNewCoinFromString("10000000000000"),
+					Amount:            coin.MustParseCoinNormalized("10000000000000basetcro"),
 				},
 			),
 		))

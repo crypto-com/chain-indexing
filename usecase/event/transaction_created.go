@@ -21,7 +21,7 @@ type TransactionCreated struct {
 	Log           string              `json:"log"`
 	MsgCount      int                 `json:"msgCount"`
 	Senders       []TransactionSigner `json:"senders"`
-	Fee           coin.Coin           `json:"fee"`
+	Fee           coin.Coins          `json:"fee"`
 	FeePayer      string              `json:"feePayer"`
 	FeeGranter    string              `json:"feeGranter"`
 	GasWanted     int                 `json:"gasWanted"`

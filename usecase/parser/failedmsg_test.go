@@ -15,7 +15,7 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("Failed Msg", func() {
 		It("should parse Msg Failed commands when the transaction has failed", func() {
-			txDecoder := parser.NewTxDecoder("basetcro")
+			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESULTS_RESP)
 
@@ -36,7 +36,7 @@ var _ = Describe("ParseMsgCommands", func() {
 				event.MsgSendCreatedParams{
 					FromAddress: "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
 					ToAddress:   "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
-					Amount:      coin.MustNewCoinFromString("1000000000"),
+					Amount:      coin.MustParseCoinsNormalized("1000000000basetcro"),
 				},
 			)}))
 		})

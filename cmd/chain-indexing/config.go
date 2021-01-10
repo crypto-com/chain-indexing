@@ -70,9 +70,6 @@ type FileConfig struct {
 }
 
 type BlockchainConfig struct {
-	CRODenom  string `toml:"cro_denom"`
-	BaseDenom string `toml:"base_denom"`
-
 	AccountAddressPrefix   string `toml:"account_address_prefix"`
 	AccountPubKeyPrefix    string `toml:"account_pubkey_prefix"`
 	ValidatorAddressPrefix string `toml:"validator_address_prefix"`

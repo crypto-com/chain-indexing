@@ -18,9 +18,9 @@ const BONDING_COMPLETED = "BondingCompleted"
 type BondingCompleted struct {
 	event_entity.Base
 
-	Delegator string    `json:"delegator"`
-	Validator string    `json:"validator"`
-	Amount    coin.Coin `json:"amount"`
+	Delegator string     `json:"delegator"`
+	Validator string     `json:"validator"`
+	Amount    coin.Coins `json:"amount"`
 }
 
 func NewBondingCompleted(blockHeight int64, params model.CompleteBondingParams) *BondingCompleted {

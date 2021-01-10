@@ -18,8 +18,8 @@ const MSG_FUND_COMMUNITY_POOL_FAILED = "MsgFundCommunityPoolFailed"
 type MsgFundCommunityPool struct {
 	MsgBase
 
-	Depositor string    `json:"depositor"`
-	Amount    coin.Coin `json:"amount"`
+	Depositor string     `json:"depositor"`
+	Amount    coin.Coins `json:"amount"`
 }
 
 func NewMsgFundCommunityPool(msgCommonParams MsgCommonParams, params model.MsgFundCommunityPoolParams) *MsgFundCommunityPool {

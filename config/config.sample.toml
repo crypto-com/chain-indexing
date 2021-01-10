@@ -1,6 +1,4 @@
 [blockchain]
-cro_denom = "tcro"
-base_denom = "basetcro"
 account_address_prefix = "tcro"
 account_pubkey_prefix = "tcro"
 validator_address_prefix = "tcrocncl"

@@ -19,7 +19,7 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgCreateValidator", func() {
 
 		It("should parse Msg commands when there is staking.MsgCreateValidator in the transaction", func() {
-			txDecoder := parser.NewTxDecoder("basetcro")
+			txDecoder := parser.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_MSG_CREATE_VALIDATOR_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_MSG_CREATE_VALIDATOR_BLOCK_RESULTS_RESP))
 
@@ -60,7 +60,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					DelegatorAddress:  "tcro109ww3ss92v4vsaq470vvgw528mtqp98mq0vvp9",
 					ValidatorAddress:  "tcrocncl109ww3ss92v4vsaq470vvgw528mtqp98m4s04ex",
 					TendermintPubkey:  "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
-					Amount:            coin.MustNewCoinFromString("10000000000000"),
+					Amount:            coin.MustParseCoinNormalized("10000000000000basetcro"),
 				},
 			)))
 		})

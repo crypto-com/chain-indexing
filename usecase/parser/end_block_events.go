@@ -22,7 +22,7 @@ func ParseEndBlockEventsCommands(blockHeight int64, endBlockEvents []model.Block
 				blockHeight, model.AccountTransferParams{
 					Recipient: transferEvent.MustGetAttributeByKey("recipient"),
 					Sender:    transferEvent.MustGetAttributeByKey("sender"),
-					Amount:    coin.MustNewCoinFromString(TrimAmountDenom(amount)),
+					Amount:    coin.MustParseCoinsNormalized(amount),
 				}))
 		} else if event.Type == "complete_unbonding" {
 			completeBondingEvent := NewParsedTxsResultLogEvent(&endBlockEvents[i])
@@ -33,7 +33,7 @@ func ParseEndBlockEventsCommands(blockHeight int64, endBlockEvents []model.Block
 				model.CompleteBondingParams{
 					Delegator: completeBondingEvent.MustGetAttributeByKey("delegator"),
 					Validator: completeBondingEvent.MustGetAttributeByKey("validator"),
-					Amount:    coin.MustNewCoinFromString(TrimAmountDenom(amountValue)),
+					Amount:    coin.MustParseCoinsNormalized(amountValue),
 				},
 			))
 		} else if event.Type == "active_proposal" {

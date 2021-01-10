@@ -16,7 +16,7 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgSend", func() {
 
 		It("should parse Msg commands when there is bank.MsgSend in the transaction", func() {
-			txDecoder := parser.NewTxDecoder("basetcro")
+			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_SEND_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MSG_SEND_BLOCK_RESULTS_RESP)
 
@@ -37,13 +37,13 @@ var _ = Describe("ParseMsgCommands", func() {
 				event.MsgSendCreatedParams{
 					FromAddress: "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
 					ToAddress:   "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
-					Amount:      coin.MustNewCoinFromString("1000000000"),
+					Amount:      coin.MustParseCoinsNormalized("1000000000basetcro"),
 				},
 			)}))
 		})
 
 		It("should parse Msg commands when there are multiple bank.MsgSend in one transaction", func() {
-			txDecoder := parser.NewTxDecoder("basetcro")
+			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.ONE_TX_TWO_MSG_SEND_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.ONE_TX_TWO_MSG_SEND_BLOCK_RESULTS_RESP)
 
@@ -64,7 +64,7 @@ var _ = Describe("ParseMsgCommands", func() {
 				event.MsgSendCreatedParams{
 					FromAddress: "tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3",
 					ToAddress:   "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3",
-					Amount:      coin.MustNewCoinFromString("1000"),
+					Amount:      coin.MustParseCoinsNormalized("1000basetcro"),
 				},
 			), command_usecase.NewCreateMsgSend(
 				event.MsgCommonParams{
@@ -76,7 +76,7 @@ var _ = Describe("ParseMsgCommands", func() {
 				event.MsgSendCreatedParams{
 					FromAddress: "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3",
 					ToAddress:   "tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3",
-					Amount:      coin.MustNewCoinFromString("2000"),
+					Amount:      coin.MustParseCoinsNormalized("2000basetcro"),
 				},
 			)}))
 		})

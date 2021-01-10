@@ -3,6 +3,8 @@ package event
 import (
 	"bytes"
 
+	"github.com/crypto-com/chain-indexing/usecase/coin"
+
 	jsoniter "github.com/json-iterator/go"
 
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
@@ -14,11 +16,11 @@ const BLOCK_REWARDED = "BlockRewarded"
 type BlockRewarded struct {
 	event_entity.Base
 
-	Validator string `json:"validator"`
-	Amount    string `json:"amount"`
+	Validator string        `json:"validator"`
+	Amount    coin.DecCoins `json:"amount"`
 }
 
-func NewBlockRewarded(blockHeight int64, validator string, amount string) *BlockRewarded {
+func NewBlockRewarded(blockHeight int64, validator string, amount coin.DecCoins) *BlockRewarded {
 	return &BlockRewarded{
 		event_entity.NewBase(event_entity.BaseParams{
 			Name:        BLOCK_REWARDED,

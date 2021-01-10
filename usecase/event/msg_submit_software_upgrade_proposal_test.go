@@ -32,7 +32,7 @@ var _ = Describe("Event", func() {
 					Info:   "any info",
 				},
 			}
-			anyInitialDeposit := coin.MustNewCoinFromString("1000")
+			anyInitialDeposit := coin.MustParseCoinsNormalized("1000basetcro,2000tcro")
 			anyParams := model.MsgSubmitSoftwareUpgradeProposalParams{
 				ProposerAddress: anyProposerAddress,
 				Content:         anyContent,
@@ -80,7 +80,7 @@ var _ = Describe("Event", func() {
 					Info:   "any info",
 				},
 			}
-			anyInitialDeposit := coin.MustNewCoinFromString("1000")
+			anyInitialDeposit := coin.MustParseCoinsNormalized("1000basetcro,2000tcro")
 			anyParams := model.MsgSubmitSoftwareUpgradeProposalParams{
 				ProposerAddress: anyProposerAddress,
 				Content:         anyContent,

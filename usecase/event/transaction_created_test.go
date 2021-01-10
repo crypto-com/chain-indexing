@@ -42,7 +42,7 @@ var _ = Describe("Event", func() {
 						AccountSequence: uint64(1),
 					},
 				},
-				Fee:           coin.MustNewCoinFromString("1000"),
+				Fee:           coin.MustParseCoinsNormalized("1000basetcro,2000tcro"),
 				FeePayer:      "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 				FeeGranter:    "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 				GasWanted:     200000,

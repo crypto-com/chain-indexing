@@ -105,7 +105,7 @@ var _ = Describe("Validator Events", func() {
 				DelegatorAddress:  "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 				ValidatorAddress:  "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
 				TendermintPubkey:  "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
-				Amount:            coin.MustNewCoinFromString("10"),
+				Amount:            coin.MustParseCoinNormalized("10basetcro"),
 			}
 			event := event_usecase.NewBlockCreated(&usecase_model.Block{
 				Height:          anyHeight,

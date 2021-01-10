@@ -17,7 +17,7 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgFundCommunityPool", func() {
 		It("should parse Msg commands when there is distribution.MsgFundCommunityPool in the transaction", func() {
-			txDecoder := parser.NewTxDecoder("basetcro")
+			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_FUND_COMMUNITY_POOL_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_FUND_COMMUNITY_POOL_BLOCK_RESULTS_RESP,
@@ -39,7 +39,7 @@ var _ = Describe("ParseMsgCommands", func() {
 				},
 				model.MsgFundCommunityPoolParams{
 					Depositor: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-					Amount:    coin.MustNewCoinFromString("1"),
+					Amount:    coin.MustParseCoinsNormalized("1basetcro"),
 				},
 			)}))
 		})

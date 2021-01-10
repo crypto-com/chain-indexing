@@ -19,7 +19,7 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgWithdrawDelegatorReward and MsgWithdrawValidatorCommission", func() {
 		It("should parse Msg commands when there is distribution.MsgWithdrawDelegatorReward and MsgWithdrawValidatorCommission in the transaction", func() {
-			txDecoder := parser.NewTxDecoder("basetcro")
+			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(
 				usecase_parser_test.TX_MSGS_WITHDRAW_DELEGATOR_REWARD_WITHDRAW_VALIDATOR_COMMISSION_BLOCK_RESP,
 			)
@@ -46,7 +46,7 @@ var _ = Describe("ParseMsgCommands", func() {
 						DelegatorAddress: "tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 						ValidatorAddress: "tcrocncl15grftg88l0gdw4mg9t9pwnl0pde2asjzekz0ek",
 						RecipientAddress: "tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
-						Amount:           coin.MustNewCoinFromString("33934701990"),
+						Amount:           coin.MustParseCoinsNormalized("33934701990basetcro"),
 					},
 				),
 				command_usecase.NewCreateMsgWithdrawValidatorCommission(
@@ -59,14 +59,14 @@ var _ = Describe("ParseMsgCommands", func() {
 					model.MsgWithdrawValidatorCommissionParams{
 						ValidatorAddress: "tcrocncl15grftg88l0gdw4mg9t9pwnl0pde2asjzekz0ek",
 						RecipientAddress: "tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
-						Amount:           coin.MustNewCoinFromString("4161370358"),
+						Amount:           coin.MustParseCoinsNormalized("4161370358basetcro"),
 					},
 				),
 			}))
 		})
 
 		It("should parse failed MsgWithdrawValidatorCommission in the transaction", func() {
-			txDecoder := parser.NewTxDecoder("basetcro")
+			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(
 				usecase_parser_test.TX_FAILED_MSG_WITHDRAW_VALIDATOR_COMMISSION_BLOCK_RESP,
 			)
@@ -93,7 +93,7 @@ var _ = Describe("ParseMsgCommands", func() {
 						DelegatorAddress: "tcro1pm27djcs5djxjsxw3unrkv3m3jtxdexk73hqel",
 						ValidatorAddress: "tcrocncl1pm27djcs5djxjsxw3unrkv3m3jtxdexktw5epu",
 						RecipientAddress: "tcro1pm27djcs5djxjsxw3unrkv3m3jtxdexk73hqel",
-						Amount:           coin.Zero(),
+						Amount:           coin.NewEmptyCoins(),
 					},
 				),
 				command_usecase.NewCreateMsgWithdrawValidatorCommission(
@@ -106,14 +106,14 @@ var _ = Describe("ParseMsgCommands", func() {
 					model.MsgWithdrawValidatorCommissionParams{
 						ValidatorAddress: "tcrocncl1pm27djcs5djxjsxw3unrkv3m3jtxdexktw5epu",
 						RecipientAddress: "",
-						Amount:           coin.Zero(),
+						Amount:           coin.NewEmptyCoins(),
 					},
 				),
 			}))
 		})
 
 		It("should parse Msg commands when there is no reward withdraw in the MsgWithdrawDelegatorReward", func() {
-			txDecoder := parser.NewTxDecoder("basetcro")
+			txDecoder := parser.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_WITHDRAW_DELEGATOR_REWARD_NO_REWARD_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
@@ -139,7 +139,7 @@ var _ = Describe("ParseMsgCommands", func() {
 						DelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 						ValidatorAddress: "tcrocncl15grftg88l0gdw4mg9t9pwnl0pde2asjzekz0ek",
 						RecipientAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-						Amount:           coin.Zero(),
+						Amount:           coin.NewEmptyCoins(),
 					},
 				),
 			}))

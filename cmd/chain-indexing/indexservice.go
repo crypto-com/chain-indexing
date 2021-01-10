@@ -19,7 +19,6 @@ type IndexService struct {
 	projections []projection_entity.Projection
 
 	systemMode            string
-	baseDenom             string
 	consNodeAddressPrefix string
 	windowSize            int
 	tendermintHTTPRPCURL  string
@@ -38,7 +37,6 @@ func NewIndexService(
 		projections: projections,
 
 		systemMode:            config.System.Mode,
-		baseDenom:             config.Blockchain.BaseDenom,
 		consNodeAddressPrefix: config.Blockchain.ConNodeAddressPrefix,
 		windowSize:            config.Sync.WindowSize,
 		tendermintHTTPRPCURL:  config.Tendermint.HTTPRPCURL,
@@ -89,7 +87,7 @@ func (service *IndexService) RunEventStoreMode() error {
 		service.rdbConn,
 		eventRegistry,
 	)
-	txDecoder := parser.NewTxDecoder(service.baseDenom)
+	txDecoder := parser.NewTxDecoder()
 	syncManager := NewSyncManager(
 		SyncManagerParams{
 			Logger:    service.logger,
@@ -110,7 +108,7 @@ func (service *IndexService) RunEventStoreMode() error {
 }
 
 func (service *IndexService) RunTendermintDirectMode() error {
-	txDecoder := parser.NewTxDecoder(service.baseDenom)
+	txDecoder := parser.NewTxDecoder()
 
 	for i := range service.projections {
 		go func(projection projection_entity.Projection) {

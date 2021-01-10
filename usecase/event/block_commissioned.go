@@ -6,6 +6,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/luci/go-render/render"
 )
 
@@ -14,11 +15,15 @@ const BLOCK_COMMISSIONED = "BlockCommissioned"
 type BlockCommissioned struct {
 	event_entity.Base
 
-	Validator string `json:"validator"`
-	Amount    string `json:"amount"`
+	Validator string        `json:"validator"`
+	Amount    coin.DecCoins `json:"amount"`
 }
 
-func NewBlockCommissioned(blockHeight int64, validator string, amount string) *BlockCommissioned {
+func NewBlockCommissioned(
+	blockHeight int64,
+	validator string,
+	amount coin.DecCoins,
+) *BlockCommissioned {
 	return &BlockCommissioned{
 		event_entity.NewBase(event_entity.BaseParams{
 			Name:        BLOCK_COMMISSIONED,

@@ -69,47 +69,34 @@ func (projection *ValidatorStats) HandleEvents(height int64, events []event_enti
 	if err != nil {
 		return fmt.Errorf("error getting total reward metrics: %v", err)
 	}
-	if rawTotalReward == "" {
-		rawTotalReward = "0"
-	}
-	totalReward := coin.MustNewCoinFromString(rawTotalReward)
+	totalReward := coin.MustParseDecCoins(rawTotalReward)
 
 	rawTotalDelegate, err := validatorStatsView.FindBy(TOTAL_DELEGATE)
 	if err != nil {
 		return fmt.Errorf("error getting total reward metrics: %v", err)
 	}
-	if rawTotalDelegate == "" {
-		rawTotalDelegate = "0"
-	}
-	totalDelegate := coin.MustNewCoinFromString(rawTotalDelegate)
+	totalDelegate := coin.MustParseCoinsNormalized(rawTotalDelegate)
 
 	for _, event := range events {
 		if createValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
-			totalDelegate, err = totalReward.Add(createValidatorEvent.Amount)
-			if err != nil {
-				return fmt.Errorf("error adding validator initial delegate: %v", err)
-			}
+			totalDelegate = totalDelegate.Add(createValidatorEvent.Amount)
 		} else if blockProposerRewardedEvent, ok := event.(*event_usecase.BlockProposerRewarded); ok {
-			totalReward, err = totalReward.Add(
-				coin.MustNewCoinFromString(TrimDecimalPlaces(blockProposerRewardedEvent.Amount)),
-			)
+			totalReward = totalReward.Add(blockProposerRewardedEvent.Amount...)
 			if err != nil {
 				return fmt.Errorf("error adding rewards: %v", err)
 			}
 		} else if blockRewardedEvent, ok := event.(*event_usecase.BlockRewarded); ok {
-			totalReward, err = totalReward.Add(
-				coin.MustNewCoinFromString(TrimDecimalPlaces(blockRewardedEvent.Amount)),
-			)
+			totalReward = totalReward.Add(blockRewardedEvent.Amount...)
 			if err != nil {
 				return fmt.Errorf("error adding rewards: %v", err)
 			}
 		} else if delegateEvent, ok := event.(*event_usecase.MsgDelegate); ok {
-			totalDelegate, err = totalDelegate.Add(delegateEvent.Amount)
+			totalDelegate = totalDelegate.Add(delegateEvent.Amount)
 			if err != nil {
 				return fmt.Errorf("error adding delegate: %v", err)
 			}
 		} else if undelegateEvent, ok := event.(*event_usecase.MsgUndelegate); ok {
-			totalDelegate, err = totalDelegate.Add(undelegateEvent.Amount.Negate())
+			totalDelegate = totalDelegate.Add(undelegateEvent.Amount.Neg())
 			if err != nil {
 				return fmt.Errorf("error subtracting delegate: %v", err)
 			}

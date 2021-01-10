@@ -32,7 +32,7 @@ var _ = Describe("ParseTxAccountTransferCommands", func() {
 					model.AccountTransferParams{
 						Recipient: "tcro17xpfvakm2amg962yls6f84z3kell8c5lxhzaha",
 						Sender:    "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
-						Amount:    coin.MustNewCoinFromString("8000000"),
+						Amount:    coin.MustParseCoinsNormalized("8000000basetcro"),
 					},
 				),
 				// MsgSend
@@ -41,7 +41,7 @@ var _ = Describe("ParseTxAccountTransferCommands", func() {
 					model.AccountTransferParams{
 						Recipient: "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
 						Sender:    "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
-						Amount:    coin.MustNewCoinFromString("1000000000"),
+						Amount:    coin.MustParseCoinsNormalized("1000000000basetcro"),
 					},
 				),
 			}))
@@ -64,7 +64,7 @@ var _ = Describe("ParseTxAccountTransferCommands", func() {
 					model.AccountTransferParams{
 						Recipient: "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3",
 						Sender:    "tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3",
-						Amount:    coin.MustNewCoinFromString("1000"),
+						Amount:    coin.MustParseCoinsNormalized("1000basetcro"),
 					},
 				),
 				// MsgSend
@@ -73,7 +73,7 @@ var _ = Describe("ParseTxAccountTransferCommands", func() {
 					model.AccountTransferParams{
 						Recipient: "tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3",
 						Sender:    "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3",
-						Amount:    coin.MustNewCoinFromString("2000"),
+						Amount:    coin.MustParseCoinsNormalized("2000basetcro"),
 					},
 				),
 			}))

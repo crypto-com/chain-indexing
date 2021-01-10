@@ -17,9 +17,9 @@ const MSG_SEND_FAILED = "MsgSendFailed"
 type MsgSend struct {
 	MsgBase
 
-	FromAddress string    `json:"fromAddress"`
-	ToAddress   string    `json:"toAddress"`
-	Amount      coin.Coin `json:"amount"`
+	FromAddress string     `json:"fromAddress"`
+	ToAddress   string     `json:"toAddress"`
+	Amount      coin.Coins `json:"amount"`
 }
 
 func NewMsgSend(msgCommonParams MsgCommonParams, params MsgSendCreatedParams) *MsgSend {
@@ -39,7 +39,7 @@ func NewMsgSend(msgCommonParams MsgCommonParams, params MsgSendCreatedParams) *M
 type MsgSendCreatedParams struct {
 	FromAddress string
 	ToAddress   string
-	Amount      coin.Coin
+	Amount      coin.Coins
 }
 
 func (event *MsgSend) ToJSON() (string, error) {

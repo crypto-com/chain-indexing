@@ -19,9 +19,9 @@ const MSG_DEPOSIT_FAILED = "MsgDepositFailed"
 type MsgDeposit struct {
 	MsgBase
 
-	ProposalId string    `json:"proposalId"`
-	Depositor  string    `json:"depositor"`
-	Amount     coin.Coin `json:"amount"`
+	ProposalId string     `json:"proposalId"`
+	Depositor  string     `json:"depositor"`
+	Amount     coin.Coins `json:"amount"`
 }
 
 func NewMsgDeposit(msgCommonParams MsgCommonParams, params model.MsgDepositParams) *MsgDeposit {

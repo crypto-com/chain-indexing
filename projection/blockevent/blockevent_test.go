@@ -5,6 +5,7 @@ import (
 	viewBlock "github.com/crypto-com/chain-indexing/projection/block/view"
 	"github.com/crypto-com/chain-indexing/projection/blockevent"
 	view2 "github.com/crypto-com/chain-indexing/projection/blockevent/view"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
 
 	. "github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	. "github.com/crypto-com/chain-indexing/entity/event/test"
@@ -107,7 +108,8 @@ var _ = Describe("Block Events", func() {
 				},
 			})
 
-			eventBlockEvent := event_usecase.NewBlockRewarded(anyHeight, "validator", "1000")
+			anyAmount := coin.MustParseDecCoins("1000basetcro")
+			eventBlockEvent := event_usecase.NewBlockRewarded(anyHeight, "validator", anyAmount)
 			blockEventListFilter := view2.BlockEventsListFilter{
 				MaybeBlockHeight: primptr.Int64(anyHeight),
 			}

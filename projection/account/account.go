@@ -2,7 +2,8 @@ package account
 
 import (
 	"fmt"
-	"strconv"
+
+	"github.com/crypto-com/chain-indexing/usecase/coin"
 
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 
@@ -15,14 +16,6 @@ import (
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
-func ConvertToInt64(s string) int64 {
-	i, err := strconv.ParseInt(s, 10, 64)
-	if err != nil {
-		return 0
-	}
-	return i
-}
-
 // Account number, sequence number, balance are fetched from the latest state (regardless of current replayed height)
 type Account struct {
 	*rdbprojectionbase.Base
@@ -30,21 +23,18 @@ type Account struct {
 	rdbConn      rdb.Conn
 	logger       applogger.Logger
 	cosmosClient cosmosapp_interface.Client // cosmos light client deamon port : 1317 (default)
-	baseDenom    string                     // tbasecro, basecro
 }
 
 func NewAccount(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	cosmosClient cosmosapp_interface.Client,
-	baseDenom string,
 ) *Account {
 	return &Account{
 		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Account"),
 		rdbConn,
 		logger,
 		cosmosClient,
-		baseDenom,
 	}
 }
 
@@ -109,54 +99,46 @@ func (projection *Account) handleAccountCreatedEvent(accountsView *account_view.
 }
 
 func (projection *Account) getAccountInfo(address string) (*cosmosapp_interface.Account, error) {
-
 	var accountInfo, accountInfoError = projection.cosmosClient.Account(address)
 	if accountInfoError != nil {
 		return nil, accountInfoError
 	}
 
 	return accountInfo, nil
-
 }
 
-func (projection *Account) getAccountBalance(targetAddress string, targetDenom string) (*cosmosapp_interface.AccountBalance, error) {
-
-	var balanceInfo, balanceInfoError = projection.cosmosClient.Balance(targetAddress, targetDenom)
+func (projection *Account) getAccountBalances(targetAddress string) (coin.Coins, error) {
+	var balanceInfo, balanceInfoError = projection.cosmosClient.Balances(targetAddress)
 	if balanceInfoError != nil {
 		return nil, balanceInfoError
 	}
 
 	return balanceInfo, nil
-
 }
 
-func (projection *Account) writeAccountInfo(accountsView *account_view.Accounts, whichaddress string) error {
+func (projection *Account) writeAccountInfo(accountsView *account_view.Accounts, address string) error {
+	accountInfo, err := projection.getAccountInfo(address)
+	if err != nil {
+		return err
+	}
 
-	accountinfo, accounterror := projection.getAccountInfo(whichaddress)
-	if accounterror != nil {
-		return accounterror
+	accountType := accountInfo.AccountType
+	accountAddress := accountInfo.AccountAddress
+	pubkey := accountInfo.Pubkey
+	accountNumber := accountInfo.AccountNumber
+	sequenceNumber := accountInfo.SequenceNumber
+
+	balances, err := projection.getAccountBalances(address)
+	if err != nil {
+		return err
 	}
-	atype := accountinfo.AccountType
-	aaddress := accountinfo.AccountAddress
-	pubkey := accountinfo.Pubkey
-	aaccountnumber := accountinfo.AccountNumber
-	asequenenumber := accountinfo.SequenceNumber
-	//atype, aaddress, pubkey, aaccountnumber, asequenenumber
-	// basetcro or basecro
-	balanceinfo, balanceinfoerror := projection.getAccountBalance(whichaddress, projection.baseDenom)
-	if balanceinfoerror != nil {
-		return balanceinfoerror
-	}
-	abalance := balanceinfo.AccountAmount
-	adenom := balanceinfo.AccountDenom
-	if err := accountsView.Upsert(&account_view.Account{
-		AccountType:    atype,
-		AccountAddress: aaddress,
+	if err := accountsView.Upsert(&account_view.AccountRow{
+		Type:           accountType,
+		Address:        accountAddress,
 		Pubkey:         pubkey,
-		AccountNumber:  ConvertToInt64(aaccountnumber),
-		SequenceNumber: ConvertToInt64(asequenenumber),
-		AccountBalance: ConvertToInt64(abalance),
-		AccountDenom:   adenom,
+		AccountNumber:  accountNumber,
+		SequenceNumber: sequenceNumber,
+		Balance:        balances,
 	}); err != nil {
 		return err
 	}

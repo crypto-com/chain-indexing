@@ -150,7 +150,7 @@ func (transactionsView *BlockTransactions) FindByHash(txHash string) (*Transacti
 		return nil, fmt.Errorf("error parsing transaction block time: %v: %w", parseErr, rdb.ErrQuery)
 	}
 	transaction.BlockTime = *blockTime
-	transaction.Fee = coin.MustNewCoinFromString(fee)
+	transaction.Fee = coin.MustParseCoinsNormalized(fee)
 
 	var messages []TransactionRowMessage
 	if unmarshalErr := jsoniter.Unmarshal([]byte(*messagesJSON), &messages); unmarshalErr != nil {
@@ -257,7 +257,7 @@ func (transactionsView *BlockTransactions) List(
 			return nil, nil, fmt.Errorf("error parsing transaction block time: %v: %w", parseErr, rdb.ErrQuery)
 		}
 		transaction.BlockTime = *blockTime
-		transaction.Fee = coin.MustNewCoinFromString(fee)
+		transaction.Fee = coin.MustParseCoinsNormalized(fee)
 
 		var messages []TransactionRowMessage
 		if unmarshalErr := jsoniter.Unmarshal([]byte(*messagesJSON), &messages); unmarshalErr != nil {
@@ -344,7 +344,7 @@ func (transactionsView *BlockTransactions) Search(keyword string) ([]Transaction
 			return nil, fmt.Errorf("error parsing transaction block time: %v: %w", parseErr, rdb.ErrQuery)
 		}
 		transaction.BlockTime = *blockTime
-		transaction.Fee = coin.MustNewCoinFromString(fee)
+		transaction.Fee = coin.MustParseCoinsNormalized(fee)
 
 		var messages []TransactionRowMessage
 		if unmarshalErr := jsoniter.Unmarshal([]byte(*messagesJSON), &messages); unmarshalErr != nil {
@@ -383,7 +383,7 @@ type TransactionRow struct {
 	Success       bool                    `json:"success"`
 	Code          int                     `json:"code"`
 	Log           string                  `json:"log"`
-	Fee           coin.Coin               `json:"fee"`
+	Fee           coin.Coins              `json:"fee"`
 	FeePayer      string                  `json:"feePayer"`
 	FeeGranter    string                  `json:"feeGranter"`
 	GasWanted     int                     `json:"gasWanted"`

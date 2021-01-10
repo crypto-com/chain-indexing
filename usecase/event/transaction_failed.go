@@ -16,17 +16,17 @@ const TRANSACTION_FAILED = "TransactionFailed"
 type TransactionFailed struct {
 	entity_event.Base
 
-	TxHash        string    `json:"txHash"`
-	Code          int       `json:"code"`
-	Log           string    `json:"log"`
-	MsgCount      int       `json:"msgCount"`
-	Fee           coin.Coin `json:"fee"`
-	FeePayer      string    `json:"feePayer"`
-	FeeGranter    string    `json:"feeGranter"`
-	GasWanted     int       `json:"gasWanted"`
-	GasUsed       int       `json:"gasUsed"`
-	Memo          string    `json:"memo"`
-	TimeoutHeight int64     `json:"timeoutHeight"`
+	TxHash        string     `json:"txHash"`
+	Code          int        `json:"code"`
+	Log           string     `json:"log"`
+	MsgCount      int        `json:"msgCount"`
+	Fee           coin.Coins `json:"fee"`
+	FeePayer      string     `json:"feePayer"`
+	FeeGranter    string     `json:"feeGranter"`
+	GasWanted     int        `json:"gasWanted"`
+	GasUsed       int        `json:"gasUsed"`
+	Memo          string     `json:"memo"`
+	TimeoutHeight int64      `json:"timeoutHeight"`
 }
 
 func NewTransactionFailed(blockHeight int64, params model.CreateTransactionParams) *TransactionFailed {

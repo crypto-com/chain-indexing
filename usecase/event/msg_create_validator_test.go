@@ -44,7 +44,7 @@ var _ = Describe("Event", func() {
 					DelegatorAddress:  "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 					ValidatorAddress:  "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
 					TendermintPubkey:  "BuuPYme7R4eH/nWs2p+sS1UpCQwy+QJgBZuhGICH8Es=",
-					Amount:            coin.MustNewCoinFromString("10"),
+					Amount:            coin.MustNewCoinFromString("basetcro", "10"),
 				},
 			)
 
@@ -84,7 +84,7 @@ var _ = Describe("Event", func() {
 					DelegatorAddress:  "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 					ValidatorAddress:  "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
 					TendermintPubkey:  "BuuPYme7R4eH/nWs2p+sS1UpCQwy+QJgBZuhGICH8Es=",
-					Amount:            coin.MustNewCoinFromString("10"),
+					Amount:            coin.MustNewCoinFromString("basetcro", "10"),
 				},
 			)
 			encoded, err := event.ToJSON()

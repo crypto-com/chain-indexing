@@ -19,7 +19,7 @@ import (
 func InitProjection(name string, params InitParams) projection_entity.Projection {
 	switch name {
 	case "Account":
-		return account.NewAccount(params.Logger, params.RdbConn, params.CosmosAppClient, params.BaseDenom)
+		return account.NewAccount(params.Logger, params.RdbConn, params.CosmosAppClient)
 	case "AccountMessage":
 		return account_message.NewAccountMessage(params.Logger, params.RdbConn)
 	case "Block":
@@ -46,6 +46,4 @@ type InitParams struct {
 
 	CosmosAppClient       cosmosapp.Client
 	ConsNodeAddressPrefix string
-	// TODO: support multiple denominations
-	BaseDenom string
 }
