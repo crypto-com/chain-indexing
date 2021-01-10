@@ -42,12 +42,21 @@ var _ = Describe("tmcosmosutils", func() {
 		})
 	})
 
-	Describe("ConsensusNodeAddressFromPubKey", func() {
+	Describe("ConsensusNodeAddressFromConsensusNodePubKey", func() {
 		It("should work", func() {
-			Expect(tmcosmosutils.ConsensusNodeAddressFromPubKey(
+			Expect(tmcosmosutils.ConsensusNodeAddressFromConsensusNodePubKey(
 				"tcrocnclcons", consensusNodePubKey,
 			)).To(Equal(consensusNodeAddress))
 		})
 
+	})
+
+	Describe("AddressFromPubKey", func() {
+		It("should work", func() {
+			pubkey, _ := base64.StdEncoding.DecodeString("A3ill3YNyWvcMstrbssC9SpzhMm+tCMWPB7bgOqWQZYk")
+			Expect(tmcosmosutils.AccountAddressFromPubKey(
+				"tcro", pubkey,
+			)).To(Equal("tcro1p4fzn6ta24c6ek4v2qls6y5uug44ku9tnypcaf"))
+		})
 	})
 })
