@@ -42,6 +42,7 @@ var _ = Describe("Crossfire", func() {
 			"foo",
 			"14",
 			"/participants.json",
+			"tcro",
 		)
 	})
 
@@ -178,64 +179,64 @@ var _ = Describe("Crossfire", func() {
 				},
 			},
 		})
-
-		txCreatedParams := model.CreateTransactionParams{
-			TxHash:   "A6D4C1F59A9D232747CA4F8A484F1F3B14A0075E801DF2A25F472B4280505B74",
-			Code:     0,
-			Log:      "{\"events\":[]}",
-			MsgCount: 1,
-			Signers: []model.TransactionSigner{
-				{
-					Type:            "/cosmos.crypto.secp256k1.PubKey",
-					Pubkeys:         []string{"tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh"},
-					AccountSequence: uint64(1),
-				},
-				{
-					Type:            "/cosmos.crypto.secp256k1.PubKey",
-					Pubkeys:         []string{"A+TPvYAt4YQ7+KAh7IY63x3q+srlfWCn9GyhTBShz47C"},
-					AccountSequence: uint64(2),
-				},
-				{
-					Type:            "/cosmos.crypto.secp256k1.PubKey",
-					Pubkeys:         []string{"tcro1khkxmphc7sv0fqrej3rltsslrstud78c0jl6l6"},
-					AccountSequence: uint64(2),
-				},
-				{
-					Type:            "/cosmos.crypto.secp256k1.PubKey",
-					Pubkeys:         []string{"tcro1432x4lc5mrgm30c9xx35unmn9ultemm5nt40vq"},
-					AccountSequence: uint64(1),
-				},
-				{
-					Type:            "/cosmos.crypto.secp256k1.PubKey",
-					Pubkeys:         []string{"tcro1432x4lc5mrgm30c9xx35unmn9ultemm5nt40vq"},
-					AccountSequence: uint64(2),
-				},
-				{
-					Type:            "/cosmos.crypto.secp256k1.PubKey",
-					Pubkeys:         []string{"tcro1432x4lc5mrgm30c9xx35unmn9ultemm5nt40vq"},
-					AccountSequence: uint64(3),
-				},
-				{
-					Type: "/cosmos.crypto.multisig.LegacyAminoPubKey",
-					Pubkeys: []string{
-						"tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
-						"tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
-						"tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+		/*
+			txCreatedParams := model.CreateTransactionParams{
+				TxHash:   "A6D4C1F59A9D232747CA4F8A484F1F3B14A0075E801DF2A25F472B4280505B74",
+				Code:     0,
+				Log:      "{\"events\":[]}",
+				MsgCount: 1,
+				Signers: []model.TransactionSigner{
+					{
+						Type:            "/cosmos.crypto.secp256k1.PubKey",
+						Pubkeys:         []string{"A3ill3YNyWvcMstrbssC9SpzhMm+tCMWPB7bgOqWQZYk"},
+						AccountSequence: uint64(1),
 					},
-					MaybeThreshold:  primptr.Int(2),
-					AccountSequence: uint64(1),
+					{
+						Type:            "/cosmos.crypto.secp256k1.PubKey",
+						Pubkeys:         []string{"A3ill3YNyWvcMstrbssC9SpzhMm+tCMWPB7bgOqWQZYk+TPvYAt4YQ7+KAh7IY63x3q+srlfWCn9GyhTBShz47C"},
+						AccountSequence: uint64(2),
+					},
+					{
+						Type:            "/cosmos.crypto.secp256k1.PubKey",
+						Pubkeys:         []string{"A3ill3YNyWvcMstrbssC9SpzhMm+tCMWPB7bgOqWQZYk"},
+						AccountSequence: uint64(2),
+					},
+					{
+						Type:            "/cosmos.crypto.secp256k1.PubKey",
+						Pubkeys:         []string{"A3ill3YNyWvcMstrbssC9SpzhMm+tCMWPB7bgOqWQZYk"},
+						AccountSequence: uint64(1),
+					},
+					{
+						Type:            "/cosmos.crypto.secp256k1.PubKey",
+						Pubkeys:         []string{"A3ill3YNyWvcMstrbssC9SpzhMm+tCMWPB7bgOqWQZYk"},
+						AccountSequence: uint64(2),
+					},
+					{
+						Type:            "/cosmos.crypto.secp256k1.PubKey",
+						Pubkeys:         []string{"A3ill3YNyWvcMstrbssC9SpzhMm+tCMWPB7bgOqWQZYk"},
+						AccountSequence: uint64(3),
+					},
+					{
+						Type: "/cosmos.crypto.multisig.LegacyAminoPubKey",
+						Pubkeys: []string{
+							"tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+							"tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+							"tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+						},
+						MaybeThreshold:  primptr.Int(2),
+						AccountSequence: uint64(1),
+					},
 				},
-			},
-			Fee:           coin.MustNewCoinFromString("1000"),
-			FeePayer:      "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
-			FeeGranter:    "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
-			GasWanted:     200000,
-			GasUsed:       10000,
-			Memo:          "Test memo",
-			TimeoutHeight: int64(10),
-		}
+				Fee:           coin.MustNewCoinFromString("1000"),
+				FeePayer:      "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+				FeeGranter:    "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+				GasWanted:     200000,
+				GasUsed:       10000,
+				Memo:          "Test memo",
+				TimeoutHeight: int64(10),
+			}
 
-		transactionCreatedEvent := event_usecase.NewTransactionCreated(anyHeight, txCreatedParams)
+			transactionCreatedEvent := event_usecase.NewTransactionCreated(anyHeight, txCreatedParams)*/
 
 		BeforeEach(func() {
 			_ = pgMigrate.Reset()
@@ -294,6 +295,7 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				server.URL()+"/participants.json",
+				"tcro",
 			)
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
@@ -366,6 +368,7 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				server.URL()+"/participants.json",
+				"tcro",
 			)
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
@@ -469,6 +472,7 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				server.URL()+"/participants.json",
+				"tcro",
 			)
 
 			// Fire both events
@@ -539,6 +543,7 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				server.URL()+"/participants.json",
+				"tcro",
 			)
 
 			// Fire both events
@@ -585,11 +590,12 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				server.URL()+"/participants.json",
+				"tcro",
 			)
 
 			// Fire both events
-			err := projection.HandleEvents(anyHeight, []event_entity.Event{phaseOneBlockCreatedEvent, validatorCreatedEvent, transactionCreatedEvent})
-			errHandleNewBlock := projection.HandleEvents(anyHeight, []event_entity.Event{phaseTwoBlockCreatedEvent, transactionCreatedEvent})
+			err := projection.HandleEvents(anyHeight, []event_entity.Event{phaseOneBlockCreatedEvent, validatorCreatedEvent /* transactionCreatedEvent*/})
+			errHandleNewBlock := projection.HandleEvents(anyHeight, []event_entity.Event{phaseTwoBlockCreatedEvent /* transactionCreatedEvent*/})
 			Expect(err).To(BeNil())
 			Expect(errHandleNewBlock).To(BeNil())
 
@@ -663,10 +669,11 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				fakeServer.URL()+"/participants.json",
+				"tcro",
 			)
 
 			// Fire both events
-			err := projection.HandleEvents(anyHeight, []event_entity.Event{phaseOneBlockCreatedEvent, validatorCreatedEvent, validator2CreatedEvent, validator3CreatedEvent, transactionCreatedEvent})
+			err := projection.HandleEvents(anyHeight, []event_entity.Event{phaseOneBlockCreatedEvent, validatorCreatedEvent, validator2CreatedEvent, validator3CreatedEvent /* transactionCreatedEvent*/})
 			Expect(err).To(BeNil())
 
 			//Check validators view count
@@ -747,6 +754,7 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				server.URL()+"/participants.json",
+				"tcro",
 			)
 
 			// Fire both events

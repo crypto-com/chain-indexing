@@ -1,10 +1,11 @@
 package crossfire_test
 
 import (
+	"net/http"
+
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/constants"
 	crossfire_test "github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/test"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
-	"net/http"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire/view"
@@ -239,6 +240,7 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				rankServer.URL()+"/participants.json",
+				"tcro",
 			)
 
 			err := projection.HandleEvents(anyHeight, []event_entity.Event{validator1CreatedEvent, validator2CreatedEvent, validator3CreatedEvent})
@@ -376,6 +378,7 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				rankServer.URL()+"/participants.json",
+				"tcro",
 			)
 
 			err := projection.HandleEvents(anyHeight, []event_entity.Event{validator1CreatedEvent, validator2CreatedEvent, validator3CreatedEvent})

@@ -25,6 +25,7 @@ type Crossfire struct {
 	Client                   *HTTPClient
 	conNodeAddressPrefix     string
 	validatorAddressPrefix   string
+	primaryAddressPrefix     string
 	phaseOneStartTime        utctime.UTCTime
 	phaseTwoStartTime        utctime.UTCTime
 	phaseThreeStartTime      utctime.UTCTime
@@ -48,6 +49,7 @@ func NewCrossfire(
 	adminAddress string,
 	networkUpgradeProposalID string,
 	participantsListURL string,
+	primaryAddressPrefix string,
 ) *Crossfire {
 	return &Crossfire{
 		Base: rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Crossfire"),
@@ -64,6 +66,7 @@ func NewCrossfire(
 		participantsListUrl:      participantsListURL,
 		rdbConn:                  rdbConn,
 		logger:                   logger,
+		primaryAddressPrefix:     primaryAddressPrefix,
 	}
 }
 
@@ -541,7 +544,7 @@ func (projection *Crossfire) updateTxSentCount(
 		// Only considering Pubkey address for now
 		if sender.Type == constants.TYPE_URL_PUBKEY && sender.MaybeThreshold == nil {
 			pubKey, _ := base64.StdEncoding.DecodeString(sender.Pubkeys[0])
-			primaryAddress, err := tmcosmosutils.AccountAddressFromPubKey("tcro", pubKey)
+			primaryAddress, err := tmcosmosutils.AccountAddressFromPubKey(projection.primaryAddressPrefix, pubKey)
 			if err != nil {
 				continue
 			}

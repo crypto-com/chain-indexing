@@ -7,7 +7,6 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/transaction"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/validator"
-
 	"github.com/crypto-com/chain-indexing/appinterface/projection/validatorstats"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
@@ -43,6 +42,7 @@ func initProjections(
 			config.Crossfire.AdminAddress,
 			config.Crossfire.NetworkUpgradeProposalID,
 			config.Crossfire.ParticipantsListURL,
+			config.Blockchain.AccountAddressPrefix,
 		),
 
 		// register more projections here

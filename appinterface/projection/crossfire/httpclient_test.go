@@ -50,6 +50,7 @@ var _ = Describe("Crossfire Chain Stats", func() {
 			"foo",
 			"14",
 			server.URL(),
+			"tcro",
 		)
 
 		participants, err := projection.Client.Participants()
