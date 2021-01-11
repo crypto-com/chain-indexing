@@ -97,6 +97,8 @@ func (handler *Crossfire) ListAllCrossfireValidators(ctx *fasthttp.RequestCtx) {
 					stats:                      validatorStats,
 				}
 				finalList = append(finalList, validatorDetail)
+			} else {
+				finalList = append(finalList, getDefaultCrossfireValidatorDetailsResponse(participant))
 			}
 		}
 	}
@@ -137,6 +139,33 @@ func (handler *Crossfire) getValidatorStats(operatorAddress string, dbValidator 
 		}
 	}
 	return finalValidatorStats, nil
+}
+
+func getDefaultCrossfireValidatorDetailsResponse(remoteParticipant crossfire.Participant) CrossfireValidatorDetails {
+
+	return CrossfireValidatorDetails{
+		operatorAddress:            remoteParticipant.OperatorAddress,
+		initialDelegatorAddress:    remoteParticipant.PrimaryAddress,
+		moniker:                    remoteParticipant.Moniker,
+		taskSetup:                  crossfire_constants.INCOMPLETED,
+		taskKeepActive:             crossfire_constants.INCOMPLETED,
+		taskProposalVote:           crossfire_constants.INCOMPLETED,
+		taskNetworkUpgrade:         crossfire_constants.INCOMPLETED,
+		rankPhase1n2CommitmentRank: 0,
+		rankPhase3CommitmentRank:   0,
+		rankTxSentRank:             0,
+		stats: &ValidatorStats{
+			totalTxSent:         new(int64),
+			txSentPhase1:        new(int64),
+			txSentPhase2:        new(int64),
+			txSentPhase3:        new(int64),
+			commitCountPhase1n2: new(int64),
+			commitCountPhase2:   new(int64),
+			commitCountPhase3:   new(int64),
+			joinedAtBlockHeight: new(int64),
+			joinedAtTimestamp:   new(utctime.UTCTime),
+		},
+	}
 }
 
 // ValidatorStats Validator statistics
