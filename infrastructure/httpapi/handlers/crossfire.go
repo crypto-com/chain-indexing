@@ -14,6 +14,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
 )
 
 type Crossfire struct {
@@ -78,7 +79,7 @@ func (handler *Crossfire) ListAllCrossfireValidators(ctx *fasthttp.RequestCtx) {
 			// For each matching participant create a return object
 			if dbValidator.OperatorAddress == participant.OperatorAddress && dbValidator.InitialDelegatorAddress == participant.PrimaryAddress {
 
-				validatorStats, err := handler.getValidatorStats(participant.OperatorAddress)
+				validatorStats, err := handler.getValidatorStats(participant.OperatorAddress, dbValidator)
 				if err != nil {
 					continue
 				}
@@ -103,7 +104,7 @@ func (handler *Crossfire) ListAllCrossfireValidators(ctx *fasthttp.RequestCtx) {
 	httpapi.Success(ctx, finalList)
 }
 
-func (handler *Crossfire) getValidatorStats(operatorAddress string) (*ValidatorStats, error) {
+func (handler *Crossfire) getValidatorStats(operatorAddress string, dbValidator crossfire_validator_view.CrossfireValidatorRow) (*ValidatorStats, error) {
 	// Fetch Validator Stats
 	key := fmt.Sprintf("%s%s", "%", operatorAddress)
 	validatorStatRows, err := handler.crossfireValidatorsStatsView.FindAllLike(key)
@@ -113,6 +114,9 @@ func (handler *Crossfire) getValidatorStats(operatorAddress string) (*ValidatorS
 
 	var finalValidatorStats *ValidatorStats
 	for _, validatorStatRow := range validatorStatRows {
+		*finalValidatorStats.joinedAtBlockHeight = dbValidator.JoinedAtBlockHeight
+		*finalValidatorStats.joinedAtTimestamp = dbValidator.JoinedAtBlockTime
+
 		switch strings.Split(validatorStatRow.Key, crossfire_constants.DB_KEY_SEPARATOR)[0] {
 		case crossfire_constants.TOTAL_TX_SENT_PREFIX:
 			*finalValidatorStats.totalTxSent = validatorStatRow.Value
@@ -144,6 +148,8 @@ type ValidatorStats struct {
 	commitCountPhase1n2 *int64
 	commitCountPhase2   *int64
 	commitCountPhase3   *int64
+	joinedAtBlockHeight *int64
+	joinedAtTimestamp   *utctime.UTCTime
 }
 
 // CrossfireValidatorDetails response object
