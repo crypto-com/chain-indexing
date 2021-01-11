@@ -3,7 +3,7 @@ package block
 import (
 	"fmt"
 
-	view2 "github.com/crypto-com/chain-indexing/appinterface/projection/block/view"
+	view2 "github.com/crypto-com/chain-indexing/projection/block/view"
 
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
 

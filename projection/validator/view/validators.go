@@ -10,7 +10,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 
-	"github.com/crypto-com/chain-indexing/appinterface/projection/validator/constants"
+	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 
 	"github.com/crypto-com/chain-indexing/appinterface/pagination"
 	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"

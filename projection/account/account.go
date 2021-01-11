@@ -5,9 +5,8 @@ import (
 	"strconv"
 
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
-	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 
-	account_view "github.com/crypto-com/chain-indexing/appinterface/projection/account/view"
+	account_view "github.com/crypto-com/chain-indexing/projection/account/view"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -24,21 +23,27 @@ func ConvertToInt64(s string) int64 {
 	return i
 }
 
+// Account number, sequence number, balance are fetched from the latest state (regardless of current replayed height)
 type Account struct {
 	*rdbprojectionbase.Base
 
-	rdbConn    rdb.Conn
-	logger     applogger.Logger
-	httpclinet *cosmosapp_infrastructure.HTTPClient // cosmos light client deaemon port : 1317 (default)
-	baseDenom  string                               // tbasecro, basecro
+	rdbConn      rdb.Conn
+	logger       applogger.Logger
+	cosmosClient cosmosapp_interface.Client // cosmos light client deamon port : 1317 (default)
+	baseDenom    string                     // tbasecro, basecro
 }
 
-func NewAccount(logger applogger.Logger, rdbConn rdb.Conn, httpclient *cosmosapp_infrastructure.HTTPClient, baseDenom string) *Account {
+func NewAccount(
+	logger applogger.Logger,
+	rdbConn rdb.Conn,
+	cosmosClient cosmosapp_interface.Client,
+	baseDenom string,
+) *Account {
 	return &Account{
 		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Account"),
 		rdbConn,
 		logger,
-		httpclient,
+		cosmosClient,
 		baseDenom,
 	}
 }
@@ -105,7 +110,7 @@ func (projection *Account) handleAccountCreatedEvent(accountsView *account_view.
 
 func (projection *Account) getAccountInfo(address string) (*cosmosapp_interface.Account, error) {
 
-	var accountInfo, accountInfoError = projection.httpclinet.Account(address)
+	var accountInfo, accountInfoError = projection.cosmosClient.Account(address)
 	if accountInfoError != nil {
 		return nil, accountInfoError
 	}
@@ -116,7 +121,7 @@ func (projection *Account) getAccountInfo(address string) (*cosmosapp_interface.
 
 func (projection *Account) getAccountBalance(targetAddress string, targetDenom string) (*cosmosapp_interface.AccountBalance, error) {
 
-	var balanceInfo, balanceInfoError = projection.httpclinet.Balance(targetAddress, targetDenom)
+	var balanceInfo, balanceInfoError = projection.cosmosClient.Balance(targetAddress, targetDenom)
 	if balanceInfoError != nil {
 		return nil, balanceInfoError
 	}

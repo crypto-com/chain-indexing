@@ -3,7 +3,7 @@ package account_message
 import (
 	"fmt"
 
-	"github.com/crypto-com/chain-indexing/appinterface/projection/account_message/view"
+	"github.com/crypto-com/chain-indexing/projection/account_message/view"
 
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 
