@@ -37,6 +37,7 @@ func NewHTTPClient(rpcUrl string) *HTTPClient {
 }
 
 func (client *HTTPClient) Account(accountAddress string) (*cosmosapp_interface.Account, error) {
+	fmt.Println(accountAddress)
 	rawRespBody, err := client.request(
 		fmt.Sprintf("%s/%s", client.url("auth", "accounts"), accountAddress), "",
 	)
@@ -58,33 +59,38 @@ func (client *HTTPClient) Account(accountAddress string) (*cosmosapp_interface.A
 
 	var accountType string
 	var address string
-	var pubKeyKVPair map[string]interface{}
 	var pubKey string
 	var accountNumber string
 	var sequenceNumber string
 
 	accountKVPair := rawResp["account"].(map[string]interface{})
 	accountTypeMeta := accountKVPair["@type"].(string)
-	accountTypeName, ok := accountKVPair["name"].(string)
-	if !ok {
-		accountTypeName = ""
+	accountName, hasAccountName := accountKVPair["name"].(string)
+	if !hasAccountName {
+		accountName = ""
 	}
-	accountType = fmt.Sprintf("%s %s", accountTypeMeta, accountTypeName)
-	thisBaseAccount, thisBaseAccountOk := accountKVPair["base_account"].(map[string]interface{})
+	accountType = fmt.Sprintf("%s %s", accountTypeMeta, accountName)
+	baseAccount, isBaseAccount := accountKVPair["base_account"].(map[string]interface{})
 
-	if !thisBaseAccountOk {
+	if !isBaseAccount {
 		// normal account
 		address = accountKVPair["address"].(string)
-		pubKeyKVPair = accountKVPair["pub_key"].(map[string]interface{})
+		// FIXME: account may not have pubkey (genesis account?)
+		pubKeyKVPair, ok := accountKVPair["pub_key"].(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf(
+				"error asserting account %s public key: %v", accountAddress, accountKVPair["pub_key"],
+			)
+		}
 		pubKey = pubKeyKVPair["key"].(string)
 		accountNumber = accountKVPair["account_number"].(string)
 		sequenceNumber = accountKVPair["sequence"].(string)
 
 	} else {
 		// module account
-		address = thisBaseAccount["address"].(string)
-		accountNumber = thisBaseAccount["account_number"].(string)
-		sequenceNumber = thisBaseAccount["sequence"].(string)
+		address = baseAccount["address"].(string)
+		accountNumber = baseAccount["account_number"].(string)
+		sequenceNumber = baseAccount["sequence"].(string)
 
 	}
 

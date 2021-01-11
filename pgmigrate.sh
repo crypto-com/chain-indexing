@@ -22,11 +22,11 @@ DB_DRIVER_URL="${DB_PROTOCOL}://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PO
 
 echoerr() { echo "$@" 1>&2; }
 
-
-check_password() {
-	echo "check password"
-	go run ./util/checkpassword.go
+check_password_strength() {
+	  echo "checking password strength"
+	  go run ./cmd/check-password-strength/main.go
 }
+
 check_migrate() {
     set +e
     command -v migrate > /dev/null
@@ -40,9 +40,8 @@ run_migrate() {
     exit $?
 }
 
-
-check_password
 INSTALL_DEPENDENCY=0
+INSECURE=0
 while [[ $# > 0 ]]; do
     case "$1" in
         --install-dependency)
@@ -51,6 +50,10 @@ while [[ $# > 0 ]]; do
         ;;
         --no-ssl)
             DB_DRIVER_URL="${DB_DRIVER_URL}&sslmode=disable"
+            shift 1
+        ;;
+        --insecure)
+            INSECURE=1
             shift 1
         ;;
         --)
@@ -63,6 +66,12 @@ while [[ $# > 0 ]]; do
         ;;
     esac
 done
+
+if [[ $INSECURE == 1 ]]; then
+    echo "WARNING! You are running in insecure mode. This is not recommended."
+else
+    check_password_strength
+fi
 
 check_migrate
 if [[ "${RET_VALUE}" != 0 ]]; then

@@ -61,6 +61,11 @@ func (transactionsView *BlockTransactions) Insert(transaction *TransactionRow) e
 		return fmt.Errorf("error JSON marshalling block transation messages for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
+	var feeJSON string
+	if feeJSON, err = jsoniter.MarshalToString(transaction.Fee); err != nil {
+		return fmt.Errorf("error JSON marshalling block transation fee for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
 	result, err := transactionsView.rdb.Exec(sql,
 		transaction.BlockHeight,
 		transaction.BlockHash,
@@ -69,7 +74,7 @@ func (transactionsView *BlockTransactions) Insert(transaction *TransactionRow) e
 		transaction.Success,
 		transaction.Code,
 		transaction.Log,
-		transaction.Fee.String(),
+		feeJSON,
 		transaction.FeePayer,
 		transaction.FeeGranter,
 		transaction.GasWanted,
@@ -119,9 +124,9 @@ func (transactionsView *BlockTransactions) FindByHash(txHash string) (*Transacti
 	}
 
 	var transaction TransactionRow
+	var feeJSON *string
 	var messagesJSON *string
 	blockTimeReader := transactionsView.rdb.NtotReader()
-	var fee string
 
 	if err = transactionsView.rdb.QueryRow(sql, sqlArgs...).Scan(
 		&transaction.BlockHeight,
@@ -131,7 +136,7 @@ func (transactionsView *BlockTransactions) FindByHash(txHash string) (*Transacti
 		&transaction.Success,
 		&transaction.Code,
 		&transaction.Log,
-		&fee,
+		&feeJSON,
 		&transaction.FeePayer,
 		&transaction.FeeGranter,
 		&transaction.GasWanted,
@@ -150,10 +155,15 @@ func (transactionsView *BlockTransactions) FindByHash(txHash string) (*Transacti
 		return nil, fmt.Errorf("error parsing transaction block time: %v: %w", parseErr, rdb.ErrQuery)
 	}
 	transaction.BlockTime = *blockTime
-	transaction.Fee = coin.MustParseCoinsNormalized(fee)
+
+	var fee coin.Coins
+	if unmarshalErr := jsoniter.UnmarshalFromString(*feeJSON, &fee); unmarshalErr != nil {
+		return nil, fmt.Errorf("error unmarshalling transaction fee JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
+	}
+	transaction.Fee = fee
 
 	var messages []TransactionRowMessage
-	if unmarshalErr := jsoniter.Unmarshal([]byte(*messagesJSON), &messages); unmarshalErr != nil {
+	if unmarshalErr := jsoniter.UnmarshalFromString(*messagesJSON, &messages); unmarshalErr != nil {
 		return nil, fmt.Errorf("error unmarshalling transaction messages JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 	}
 	transaction.Messages = messages
@@ -226,9 +236,9 @@ func (transactionsView *BlockTransactions) List(
 	transactions := make([]TransactionRow, 0)
 	for rowsResult.Next() {
 		var transaction TransactionRow
+		var feeJSON *string
 		var messagesJSON *string
 		blockTimeReader := transactionsView.rdb.NtotReader()
-		var fee string
 
 		if err = rowsResult.Scan(
 			&transaction.BlockHeight,
@@ -238,7 +248,7 @@ func (transactionsView *BlockTransactions) List(
 			&transaction.Success,
 			&transaction.Code,
 			&transaction.Log,
-			&fee,
+			&feeJSON,
 			&transaction.FeePayer,
 			&transaction.FeeGranter,
 			&transaction.GasWanted,
@@ -257,10 +267,15 @@ func (transactionsView *BlockTransactions) List(
 			return nil, nil, fmt.Errorf("error parsing transaction block time: %v: %w", parseErr, rdb.ErrQuery)
 		}
 		transaction.BlockTime = *blockTime
-		transaction.Fee = coin.MustParseCoinsNormalized(fee)
+
+		var fee coin.Coins
+		if unmarshalErr := jsoniter.UnmarshalFromString(*feeJSON, &fee); unmarshalErr != nil {
+			return nil, nil, fmt.Errorf("error unmarshalling transaction fee JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
+		}
+		transaction.Fee = fee
 
 		var messages []TransactionRowMessage
-		if unmarshalErr := jsoniter.Unmarshal([]byte(*messagesJSON), &messages); unmarshalErr != nil {
+		if unmarshalErr := jsoniter.UnmarshalFromString(*messagesJSON, &messages); unmarshalErr != nil {
 			return nil, nil, fmt.Errorf("error unmarshalling transaction messages JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 		}
 		transaction.Messages = messages
@@ -313,9 +328,9 @@ func (transactionsView *BlockTransactions) Search(keyword string) ([]Transaction
 	transactions := make([]TransactionRow, 0)
 	for rowsResult.Next() {
 		var transaction TransactionRow
+		var feeJSON *string
 		var messagesJSON *string
 		blockTimeReader := transactionsView.rdb.NtotReader()
-		var fee string
 
 		if err = rowsResult.Scan(
 			&transaction.BlockHeight,
@@ -325,7 +340,7 @@ func (transactionsView *BlockTransactions) Search(keyword string) ([]Transaction
 			&transaction.Success,
 			&transaction.Code,
 			&transaction.Log,
-			&fee,
+			&feeJSON,
 			&transaction.FeePayer,
 			&transaction.FeeGranter,
 			&transaction.GasWanted,
@@ -344,10 +359,15 @@ func (transactionsView *BlockTransactions) Search(keyword string) ([]Transaction
 			return nil, fmt.Errorf("error parsing transaction block time: %v: %w", parseErr, rdb.ErrQuery)
 		}
 		transaction.BlockTime = *blockTime
-		transaction.Fee = coin.MustParseCoinsNormalized(fee)
+
+		var fee coin.Coins
+		if unmarshalErr := jsoniter.UnmarshalFromString(*feeJSON, &fee); unmarshalErr != nil {
+			return nil, fmt.Errorf("error unmarshalling transaction fee JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
+		}
+		transaction.Fee = fee
 
 		var messages []TransactionRowMessage
-		if unmarshalErr := jsoniter.Unmarshal([]byte(*messagesJSON), &messages); unmarshalErr != nil {
+		if unmarshalErr := jsoniter.UnmarshalFromString(*messagesJSON, &messages); unmarshalErr != nil {
 			return nil, fmt.Errorf("error unmarshalling transaction messages JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 		}
 		transaction.Messages = messages

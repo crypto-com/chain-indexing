@@ -1,7 +1,7 @@
 CREATE TABLE view_accounts (
     id BIGSERIAL,
     address VARCHAR NOT NULL,
-    type VARCHAR,
+    account_type VARCHAR,
     pubkey VARCHAR,
     account_number BIGINT,
     sequence_number BIGINT,

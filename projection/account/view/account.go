@@ -40,14 +40,14 @@ func (accountsView *Accounts) Upsert(account *AccountRow) error {
 		).
 		Columns(
 			"account_type",
-			"account_address",
+			"address",
 			"pubkey",
 			"account_number",
 			"sequence_number",
 			"balance",
 		).
 		Values("?", "?", "?", "?", "?", "?").
-		Suffix("ON CONFLICT(account_address) DO UPDATE SET balance = EXCLUDED.balance").
+		Suffix("ON CONFLICT(address) DO UPDATE SET balance = EXCLUDED.balance").
 		ToSql()
 
 	if err != nil {
@@ -77,7 +77,7 @@ func (accountsView *Accounts) FindBy(identity *AccountIdentity) (*AccountRow, er
 
 	selectStmtBuilder := accountsView.rdb.StmtBuilder.Select(
 		"account_type",
-		"account_address",
+		"address",
 		"pubkey",
 		"account_number",
 		"sequence_number",
@@ -85,7 +85,7 @@ func (accountsView *Accounts) FindBy(identity *AccountIdentity) (*AccountRow, er
 		"account_balance", "account_denom",
 	).From("view_accounts")
 
-	selectStmtBuilder = selectStmtBuilder.Where("account_address = ?", identity.MaybeAddress)
+	selectStmtBuilder = selectStmtBuilder.Where("address = ?", identity.MaybeAddress)
 
 	sql, sqlArgs, err := selectStmtBuilder.ToSql()
 	if err != nil {
@@ -116,7 +116,7 @@ func (accountsView *Accounts) List(
 	pagination *pagination.Pagination,
 ) ([]AccountRow, *pagination.PaginationResult, error) {
 	stmtBuilder := accountsView.rdb.StmtBuilder.Select(
-		"type",
+		"account_type",
 		"address",
 		"pubkey",
 		"account_number",
