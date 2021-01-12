@@ -23,9 +23,11 @@ import (
 var rankServer *ghttp.Server
 var _ = Describe("Crossfire", func() {
 	WithTestPgxConn(func(pgConn *pg.PgxConn, pgMigrate *pg.Migrate) {
-		anyHeight := int64(1)
+		phase1Height := int64(1000)
+		phase2Height := int64(2000)
+		//phase3Height := int64(3000)
 		validator1CreatedEvent := event_usecase.NewMsgCreateValidator(event_usecase.MsgCommonParams{
-			BlockHeight: anyHeight,
+			BlockHeight: phase1Height,
 			TxHash:      "A6D4C1F59A9D232747CA4F8A484F1F3B14A0075E801DF2A25F472B4280505B74",
 			TxSuccess:   true,
 			MsgIndex:    0,
@@ -50,7 +52,7 @@ var _ = Describe("Crossfire", func() {
 		})
 
 		validator2CreatedEvent := event_usecase.NewMsgCreateValidator(event_usecase.MsgCommonParams{
-			BlockHeight: anyHeight,
+			BlockHeight: phase1Height,
 			TxHash:      "A6D4C1F59A9D232747CA4F8A484F1F3B14A0075E801DF2A25F472B4280505B74",
 			TxSuccess:   true,
 			MsgIndex:    0,
@@ -75,7 +77,7 @@ var _ = Describe("Crossfire", func() {
 		})
 
 		validator3CreatedEvent := event_usecase.NewMsgCreateValidator(event_usecase.MsgCommonParams{
-			BlockHeight: anyHeight,
+			BlockHeight: phase1Height,
 			TxHash:      "A6D4C1F59A9D232747CA4F8A484F1F3B14A0075E801DF2A25F472B4280505B74",
 			TxSuccess:   true,
 			MsgIndex:    0,
@@ -99,8 +101,33 @@ var _ = Describe("Crossfire", func() {
 			Amount:            coin.MustNewCoinFromString("333"),
 		})
 
+		lateJoinValidatorCreatedEvent := event_usecase.NewMsgCreateValidator(event_usecase.MsgCommonParams{
+			BlockHeight: phase2Height,
+			TxHash:      "A6D4C1F59A9D232747CA4F8A484F1F3B14A0075E801DF2A25F472B4280505B74",
+			TxSuccess:   true,
+			MsgIndex:    0,
+		}, usecase_model.MsgCreateValidatorParams{
+			Description: usecase_model.MsgValidatorDescription{
+				Moniker:         "LATE",
+				Identity:        "late_joined",
+				Website:         "www.i_am_late.com",
+				SecurityContact: "foo@i_am_late.com",
+				Details:         "i_am_late",
+			},
+			Commission: usecase_model.MsgValidatorCommission{
+				Rate:          "0.100000000000000000",
+				MaxRate:       "0.200000000000000000",
+				MaxChangeRate: "0.010000000000000000",
+			},
+			MinSelfDelegation: "1",
+			DelegatorAddress:  "tcro1khkxmphc7sv0fqrej3rltsslrstud78c0jl6l6",
+			ValidatorAddress:  "tcrocncl1khkxmphc7sv0fqrej3rltsslrstud78c6dur8e",
+			TendermintPubkey:  "na51D8RmKXyWrid9I6wtdxgP6f1Nl3EyNNEzqxVquoM=", // B5EC6D86F8F418F480799447F5C21F1C17C6F8F8
+			Amount:            coin.MustNewCoinFromString("333"),
+		})
+
 		phaseOneBlockCreatedEvent := event_usecase.NewBlockCreated(&usecase_model.Block{
-			Height:          int64(1),
+			Height:          int64(1000),
 			Hash:            "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
 			Time:            utctime.FromUnixNano(int64(1610942500000000000)),
 			AppHash:         "24474D86CBFA7E6328D473C17A9E46CD5A80FFE82A348A74844BF3E2BA2B3AF1",
@@ -125,7 +152,7 @@ var _ = Describe("Crossfire", func() {
 		})
 
 		phaseTwoBlockCreatedEvent := event_usecase.NewBlockCreated(&usecase_model.Block{
-			Height:          int64(100000000),
+			Height:          int64(2000),
 			Hash:            "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
 			Time:            utctime.FromUnixNano(int64(1611547500000000000)),
 			AppHash:         "24474D86CBFA7E6328D473C17A9E46CD5A80FFE82A348A74844BF3E2BA2B3AF1",
@@ -156,7 +183,7 @@ var _ = Describe("Crossfire", func() {
 		})
 
 		phaseThreeBlockCreatedEvent1 := event_usecase.NewBlockCreated(&usecase_model.Block{
-			Height:          int64(100000000),
+			Height:          int64(3000),
 			Hash:            "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
 			Time:            utctime.FromUnixNano(int64(1612756900000000000)),
 			AppHash:         "24474D86CBFA7E6328D473C17A9E46CD5A80FFE82A348A74844BF3E2BA2B3AF1",
@@ -177,11 +204,17 @@ var _ = Describe("Crossfire", func() {
 					Timestamp:        utctime.FromUnixNano(int64(2000000)),
 					Signature:        "uhWDC9NDT86FbRVGbOM2lGY8sVkWU51JJ9F8gPwTfK0ebcui1R34oM+jhPKdStn/4sq4qDgzbsN66cQ5kl8NAw==",
 				},
+				{
+					BlockIdFlag:      2,
+					ValidatorAddress: "B5EC6D86F8F418F480799447F5C21F1C17C6F8F8", // late node
+					Timestamp:        utctime.FromUnixNano(int64(2000000)),
+					Signature:        "uhWDC9NDT86FbRVGbOM2lGY8sVkWU51JJ9F8gPwTfK0ebcui1R34oM+jhPKdStn/4sq4qDgzbsN66cQ5kl8NAw==",
+				},
 			},
 		})
 
 		phaseThreeBlockCreatedEvent2 := event_usecase.NewBlockCreated(&usecase_model.Block{
-			Height:          int64(100000000),
+			Height:          int64(3001),
 			Hash:            "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
 			Time:            utctime.FromUnixNano(int64(1612757000000000000)),
 			AppHash:         "24474D86CBFA7E6328D473C17A9E46CD5A80FFE82A348A74844BF3E2BA2B3AF1",
@@ -241,7 +274,7 @@ var _ = Describe("Crossfire", func() {
 				rankServer.URL()+"/participants.json",
 			)
 
-			err := projection.HandleEvents(anyHeight, []event_entity.Event{validator1CreatedEvent, validator2CreatedEvent, validator3CreatedEvent})
+			err := projection.HandleEvents(phase1Height, []event_entity.Event{validator1CreatedEvent, validator2CreatedEvent, validator3CreatedEvent})
 			Expect(err).To(BeNil())
 
 			// 1. store 3 validators
@@ -267,7 +300,7 @@ var _ = Describe("Crossfire", func() {
 			Expect(actual3.TendermintAddress).To(Equal("0FB7AE9AC2E3F148CA130341B6CD4DB3682E2D54"))
 
 			// 2. store a phase 1 block that contains validator 1 & 2's commitment
-			err = projection.HandleEvents(anyHeight, []event_entity.Event{phaseOneBlockCreatedEvent})
+			err = projection.HandleEvents(phase1Height, []event_entity.Event{phaseOneBlockCreatedEvent})
 			Expect(err).To(BeNil())
 
 			phase1BlockCount, err := crossfireChainStatsView.FindBy(constants.PHASE_1_BLOCK_COUNT)
@@ -305,7 +338,7 @@ var _ = Describe("Crossfire", func() {
 			Expect(actual2.RankTaskPhase1n2CommitmentCount).To(Equal(int64(1))) // node2 rank #1
 
 			// 3. store a phase 2 block that contains validator 1, 2 & 3's commitment
-			err = projection.HandleEvents(anyHeight, []event_entity.Event{phaseTwoBlockCreatedEvent})
+			err = projection.HandleEvents(phase1Height, []event_entity.Event{phaseTwoBlockCreatedEvent})
 			Expect(err).To(BeNil())
 
 			phase2BlockCount, err := crossfireChainStatsView.FindBy(constants.PHASE_2_BLOCK_COUNT)
@@ -378,7 +411,7 @@ var _ = Describe("Crossfire", func() {
 				rankServer.URL()+"/participants.json",
 			)
 
-			err := projection.HandleEvents(anyHeight, []event_entity.Event{validator1CreatedEvent, validator2CreatedEvent, validator3CreatedEvent})
+			err := projection.HandleEvents(phase1Height, []event_entity.Event{validator1CreatedEvent, validator2CreatedEvent, validator3CreatedEvent})
 			Expect(err).To(BeNil())
 
 			// 1. store 3 validators
@@ -404,7 +437,7 @@ var _ = Describe("Crossfire", func() {
 			Expect(actual3.TendermintAddress).To(Equal("0FB7AE9AC2E3F148CA130341B6CD4DB3682E2D54"))
 
 			// 2. store a phase 3 block that contains validator 1 & 3's commitment
-			err = projection.HandleEvents(anyHeight, []event_entity.Event{phaseThreeBlockCreatedEvent1})
+			err = projection.HandleEvents(phase1Height, []event_entity.Event{phaseThreeBlockCreatedEvent1})
 			Expect(err).To(BeNil())
 
 			phase3BlockCount, err := crossfireChainStatsView.FindBy(constants.PHASE_3_BLOCK_COUNT)
@@ -442,7 +475,7 @@ var _ = Describe("Crossfire", func() {
 			Expect(actual3.RankTaskPhase3CommitmentCount).To(Equal(int64(1))) // node3 rank #1
 
 			// 3. store a phase 3 block that contains validator 1 & 2's commitment
-			err = projection.HandleEvents(anyHeight, []event_entity.Event{phaseThreeBlockCreatedEvent2})
+			err = projection.HandleEvents(phase1Height, []event_entity.Event{phaseThreeBlockCreatedEvent2})
 			Expect(err).To(BeNil())
 
 			phase2BlockCount, err := crossfireChainStatsView.FindBy(constants.PHASE_3_BLOCK_COUNT)
@@ -493,6 +526,94 @@ var _ = Describe("Crossfire", func() {
 			})
 			Expect(err).To(BeNil())
 			Expect(actual3.RankTaskPhase3CommitmentCount).To(Equal(int64(2))) // node3 rank #2
+		})
+
+		It("should correctly filter out late-join validators for commitment rank", func() {
+			crossfireValidatorsView := view.NewCrossfireValidators(pgConn.ToHandle())
+			crossfireValidatorsStatsView := view.NewCrossfireValidatorsStats(pgConn.ToHandle())
+			crossfireChainStatsView := view.NewCrossfireChainStats(pgConn.ToHandle())
+			fakeLogger := NewFakeLogger()
+
+			projection := crossfire.NewCrossfire(
+				fakeLogger,
+				pgConn,
+				"tcrocnclcons",
+				"tcrocncl",
+				1610942400000000000,
+				1611547200000000000,
+				1612756800000000000,
+				1613361599000000000,
+				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
+				"14",
+				rankServer.URL()+"/participants.json",
+			)
+
+			err := projection.HandleEvents(phase1Height, []event_entity.Event{validator1CreatedEvent, validator2CreatedEvent, phaseOneBlockCreatedEvent})
+			Expect(err).To(BeNil())
+
+			err = projection.HandleEvents(phase2Height, []event_entity.Event{lateJoinValidatorCreatedEvent, phaseTwoBlockCreatedEvent})
+			Expect(err).To(BeNil())
+
+			// 1. store 3 validators and check validator 3 taskSetup is MISSED
+			opAddr1 := "tcrocncl1n4t5q77kn9vf73s7ljs96m85jgg49yqpg0chrj" // 703B26AEA0867B03572719D22F4B8E6D93CA838C
+			actual1, err := crossfireValidatorsView.FindBy(view.CrossfireValidatorIdentity{
+				MaybeOperatorAddress: &opAddr1,
+			})
+			Expect(err).To(BeNil())
+			Expect(actual1.TendermintAddress).To(Equal("703B26AEA0867B03572719D22F4B8E6D93CA838C"))
+
+			opAddr2 := "tcrocncl15xr8daqzpu0wf8t6hx95zlxmqwzmf4ea5gja60" // AEA0F558C9616A7089791D1AE4C08DC5F69A0A0B
+			actual2, err := crossfireValidatorsView.FindBy(view.CrossfireValidatorIdentity{
+				MaybeOperatorAddress: &opAddr2,
+			})
+			Expect(err).To(BeNil())
+			Expect(actual2.TendermintAddress).To(Equal("AEA0F558C9616A7089791D1AE4C08DC5F69A0A0B"))
+
+			opAddr3 := "tcrocncl1khkxmphc7sv0fqrej3rltsslrstud78c6dur8e" // B5EC6D86F8F418F480799447F5C21F1C17C6F8F8
+			actual3, err := crossfireValidatorsView.FindBy(view.CrossfireValidatorIdentity{
+				MaybeOperatorAddress: &opAddr3,
+			})
+			Expect(err).To(BeNil())
+			Expect(actual3.TendermintAddress).To(Equal("B5EC6D86F8F418F480799447F5C21F1C17C6F8F8"))
+			Expect(actual3.TaskPhase1NodeSetup).To(Equal(constants.MISSED))
+
+			// 2. store a phase 3 block that contains validator 1, 3 & late node's commitments
+			err = projection.HandleEvents(phase1Height, []event_entity.Event{phaseThreeBlockCreatedEvent1})
+			Expect(err).To(BeNil())
+
+			phase3BlockCount, err := crossfireChainStatsView.FindBy(constants.PHASE_3_BLOCK_COUNT)
+			Expect(err).To(BeNil())
+			Expect(phase3BlockCount).To(Equal(int64(1)))
+
+			node1CommitCount, err := crossfireValidatorsStatsView.FindBy(
+				constants.ValidatorCommitmentKey(
+					actual1.OperatorAddress,
+					constants.PHASE_3_COMMIT_PREFIX,
+				),
+			)
+			Expect(err).To(BeNil())
+			Expect(node1CommitCount).To(Equal(int64(1)))
+
+			lateNodeCommitCount, err := crossfireValidatorsStatsView.FindBy(
+				constants.ValidatorCommitmentKey(
+					actual3.OperatorAddress,
+					constants.PHASE_3_COMMIT_PREFIX,
+				),
+			)
+			Expect(err).To(BeNil())
+			Expect(lateNodeCommitCount).To(Equal(int64(1)))
+
+			actual1, err = crossfireValidatorsView.FindBy(view.CrossfireValidatorIdentity{
+				MaybeOperatorAddress: &opAddr1,
+			})
+			Expect(err).To(BeNil())
+			Expect(actual1.RankTaskPhase3CommitmentCount).To(Equal(int64(1))) // node1 rank #1
+
+			actual3, err = crossfireValidatorsView.FindBy(view.CrossfireValidatorIdentity{
+				MaybeOperatorAddress: &opAddr3,
+			})
+			Expect(err).To(BeNil())
+			Expect(actual3.RankTaskPhase3CommitmentCount).To(Equal(int64(0))) // late node rank #0
 		})
 	})
 })

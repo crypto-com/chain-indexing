@@ -472,6 +472,12 @@ func (projection *Crossfire) checkTaskKeepActive(
 	}
 
 	for _, validator := range validators {
+		// If validator missed the task 1, it cannot complete the active task
+		if validator.TaskPhase1NodeSetup == constants.MISSED {
+			projection.logger.Debugf("Won't handle task keepActive for %s because it missed taskSetup", validator.OperatorAddress)
+			continue
+		}
+
 		key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE_2_COMMIT_PREFIX)
 		validatorPhase2CommitCount, err := crossfireValidatorsStatsView.FindBy(key)
 		if err != nil {
@@ -581,9 +587,28 @@ func (projection *Crossfire) computeCommitmentRank(
 		return fmt.Errorf("error getting validators' %s number from stats %v", crossfireValidatorStatsPrefix, err)
 	}
 
+	// filter out validators that not on list and missed taskSetup
 	var participatedValidatorCommits []view.CrossfireValidatorsStatsRow
 	for _, validatorCommit := range validatorCommits {
 		statsOperatorAddress := strings.Split(validatorCommit.Key, constants.DB_KEY_SEPARATOR)[1]
+
+		// check whether validator missed taskSetup or not
+		validatorRow, err := crossfireValidatorView.FindBy(view.CrossfireValidatorIdentity{
+			MaybeOperatorAddress: &statsOperatorAddress,
+		})
+		if errors.Is(err, rdb.ErrNoRows) {
+			// no validator found by tendermint address
+			continue
+		}
+		if err != nil {
+			return fmt.Errorf("error getting validator with operator addr %s %v", statsOperatorAddress, err)
+		}
+		if validatorRow.TaskPhase1NodeSetup == constants.MISSED {
+			projection.logger.Debugf("Won't handle commit rank for %s because it missed taskSetup", statsOperatorAddress)
+			continue
+		}
+
+		// check whether validator is on list or not
 		if participantsMap[statsOperatorAddress] {
 			participatedValidatorCommits = append(participatedValidatorCommits, validatorCommit)
 		}
