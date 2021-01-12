@@ -16,6 +16,7 @@ type RouteRegistry struct {
 	blockEventHandler      *handlers.BlockEvents
 	validatorsHandler      *handlers.Validators
 	accountMessagesHandler *handlers.AccountMessages
+	crossfireHandler       *handlers.Crossfire
 }
 
 func NewRoutesRegistry(
@@ -26,6 +27,7 @@ func NewRoutesRegistry(
 	blockEventHandler *handlers.BlockEvents,
 	validatorsHandler *handlers.Validators,
 	accountMessagesHandler *handlers.AccountMessages,
+	crossfireHandler *handlers.Crossfire,
 ) *RouteRegistry {
 	return &RouteRegistry{
 		searchHandler,
@@ -35,6 +37,7 @@ func NewRoutesRegistry(
 		blockEventHandler,
 		validatorsHandler,
 		accountMessagesHandler,
+		crossfireHandler,
 	}
 }
 
@@ -62,7 +65,6 @@ func (registry *RouteRegistry) Register(server *httpapi.Server, routePrefix stri
 	server.GET(fmt.Sprintf("%s/api/v1/validators/active", routePrefix), registry.validatorsHandler.ListActive)
 	server.GET(fmt.Sprintf("%s/api/v1/validators/{address}", routePrefix), registry.validatorsHandler.FindBy)
 	server.GET(fmt.Sprintf("%s/api/v1/validators/{address}/activities", routePrefix), registry.validatorsHandler.ListActivities)
-	// TODO: Add Crossfire Endpoints here
-	// server.GET(fmt.Sprintf("%s/api/v1/crossfire/", routePrefix), registry.validatorsHandler.ListActivities)
+	server.GET(fmt.Sprintf("%s/api/v1/crossfire/validators", routePrefix), registry.crossfireHandler.ListAllCrossfireValidators)
 
 }

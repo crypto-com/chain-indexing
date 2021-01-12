@@ -6,6 +6,7 @@ import (
 	"github.com/btcsuite/btcutil/bech32"
 	"github.com/cosmos/cosmos-sdk/codec/legacy"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	tmed25519 "github.com/tendermint/tendermint/crypto/ed25519"
 )
@@ -94,6 +95,21 @@ func ConsensusNodeAddressFromPubKey(bech32Prefix string, consensusNodePubKey str
 	legacy.Cdc.MustUnmarshalBinaryBare(pkToUnmarshal, &pubKey)
 
 	conv, err = bech32.ConvertBits(pubKey.Address().Bytes(), 8, 5, true)
+	if err != nil {
+		return "", fmt.Errorf("error converting tendermint public key to bech32 bits: %v", err)
+	}
+	address, err := bech32.Encode(bech32Prefix, conv)
+	if err != nil {
+		return "", fmt.Errorf("error encoding tendermint public key bits to consensus address: %v", err)
+	}
+
+	return address, nil
+}
+
+func AccountAddressFromPubKey(bech32Prefix string, pubKey []byte) (string, error) {
+	pkToMarshal := secp256k1.PubKey{Key: pubKey}
+
+	conv, err := bech32.ConvertBits(pkToMarshal.Address().Bytes(), 8, 5, true)
 	if err != nil {
 		return "", fmt.Errorf("error converting tendermint public key to bech32 bits: %v", err)
 	}

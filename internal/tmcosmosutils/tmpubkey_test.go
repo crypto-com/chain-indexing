@@ -2,6 +2,7 @@ package tmcosmosutils_test
 
 import (
 	"encoding/base64"
+
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 
 	. "github.com/onsi/ginkgo"
@@ -58,6 +59,14 @@ var _ = Describe("tmcosmosutils", func() {
 			Expect(tmcosmosutils.ValidatorAddressFromPubAddress(
 				"tcrocnclcons", primaryAddress,
 			)).To(Equal(consensusNodeAddress))
+		})
+	})
+	Describe("AddressFromPubKey", func() {
+		It("should work", func() {
+			pubkey, _ := base64.StdEncoding.DecodeString("A3ill3YNyWvcMstrbssC9SpzhMm+tCMWPB7bgOqWQZYk")
+			Expect(tmcosmosutils.AccountAddressFromPubKey(
+				"tcro", pubkey,
+			)).To(Equal("tcro1p4fzn6ta24c6ek4v2qls6y5uug44ku9tnypcaf"))
 		})
 	})
 })

@@ -26,6 +26,7 @@ type HTTPAPIServer struct {
 
 	listeningAddress string
 	routePrefix      string
+	participantsURL  string
 }
 
 // NewIndexService creates a new server instance for polling and indexing
@@ -39,6 +40,7 @@ func NewHTTPAPIServer(logger applogger.Logger, rdbConn rdb.Conn, config *Config)
 		conNodeAddressPrefix:   config.Blockchain.ConNodeAddressPrefix,
 		listeningAddress:       config.HTTP.ListeningAddress,
 		routePrefix:            config.HTTP.RoutePrefix,
+		participantsURL:        config.Crossfire.ParticipantsListURL,
 	}
 }
 
@@ -63,6 +65,7 @@ func (server *HTTPAPIServer) Run() error {
 		server.rdbConn.ToHandle(),
 	)
 	accountMessagesHandler := handlers.NewAccountMessages(server.logger, server.rdbConn.ToHandle())
+	crossfireHandler := handlers.NewCrossfire(server.logger, server.validatorAddressPrefix, server.conNodeAddressPrefix, server.cosmosAppClient, server.rdbConn.ToHandle(), server.participantsURL)
 	routeRegistry := routes.NewRoutesRegistry(
 		searchHandler,
 		blocksHandler,
@@ -71,6 +74,7 @@ func (server *HTTPAPIServer) Run() error {
 		blockEventsHandler,
 		validatorsHandler,
 		accountMessagesHandler,
+		crossfireHandler,
 	)
 	routeRegistry.Register(httpServer, server.routePrefix)
 
