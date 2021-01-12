@@ -67,12 +67,6 @@ while [[ $# > 0 ]]; do
     esac
 done
 
-if [[ $INSECURE == 1 ]]; then
-    echo "WARNING! You are running in insecure mode. This is not recommended."
-else
-    check_password_strength
-fi
-
 check_migrate
 if [[ "${RET_VALUE}" != 0 ]]; then
     if [[ "${INSTALL_DEPENDENCY}" = 0 ]]; then
@@ -100,6 +94,11 @@ while [[ $# > 0 ]]; do
             run_migrate "${ARGS}" create --dir "${DB_MIGRATIONS_FOLDER}" --ext sql "$@"
         ;;
         goto | up | down | drop | force)
+            if [[ $INSECURE == 1 ]]; then
+                echo "WARNING! You are running in insecure mode. This is not recommended."
+            else
+                check_password_strength
+            fi
             run_migrate -source "file://${DB_MIGRATIONS_FOLDER}" -database "${DB_DRIVER_URL}" "${ARGS}" "$@"
         ;;
         version)
