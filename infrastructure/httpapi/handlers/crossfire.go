@@ -55,7 +55,6 @@ func NewCrossfire(
 // ListAllCrossfireValidators Fetch all validators and combine them
 func (handler *Crossfire) ListAllCrossfireValidators(ctx *fasthttp.RequestCtx) {
 	var err error
-
 	// Fetch Remote List
 	participantList, errFetching := handler.httpClient.Participants()
 	if errFetching != nil {
@@ -71,69 +70,72 @@ func (handler *Crossfire) ListAllCrossfireValidators(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	var finalList = []CrossfireValidatorDetails{}
+	var dbParticipantsMap = make(map[string]int)
+	for idx, dbParticipant := range crossfireValidatorsDB {
+		dbParticipantsMap[dbParticipant.OperatorAddress] = idx
+	}
 
-	for _, participant := range *participantList {
-		for _, dbValidator := range crossfireValidatorsDB {
+	var finalList = make([]CrossfireValidatorDetails, 0)
 
-			// For each matching participant create a return object
-			if dbValidator.OperatorAddress == participant.OperatorAddress && dbValidator.InitialDelegatorAddress == participant.PrimaryAddress {
+	for _, participantRemote := range *participantList {
 
-				validatorStats, err := handler.getValidatorStats(participant.OperatorAddress, dbValidator)
-				if err != nil {
-					continue
-				}
-				validatorDetail := CrossfireValidatorDetails{
-					operatorAddress:            participant.OperatorAddress,
-					initialDelegatorAddress:    dbValidator.InitialDelegatorAddress,
-					moniker:                    dbValidator.Moniker,
-					taskSetup:                  dbValidator.TaskPhase1NodeSetup,
-					taskKeepActive:             dbValidator.TaskPhase2KeepNodeActive,
-					taskProposalVote:           dbValidator.TaskPhase2ProposalVote,
-					taskNetworkUpgrade:         dbValidator.TaskPhase2NetworkUpgrade,
-					rankPhase1n2CommitmentRank: dbValidator.RankTaskPhase1n2CommitmentCount,
-					rankPhase3CommitmentRank:   dbValidator.RankTaskPhase3CommitmentCount,
-					rankTxSentRank:             dbValidator.RankTaskHighestTxSent,
-					stats:                      validatorStats,
-				}
-				finalList = append(finalList, validatorDetail)
-			} else {
-				finalList = append(finalList, getDefaultCrossfireValidatorDetailsResponse(participant))
+		if idx, ok := dbParticipantsMap[participantRemote.OperatorAddress]; !ok {
+			defaultValidator := getDefaultCrossfireValidatorDetailsResponse(participantRemote)
+			finalList = append(finalList, defaultValidator)
+		} else {
+			validatorStats, err := handler.getValidatorStats(participantRemote.OperatorAddress, crossfireValidatorsDB[idx])
+			if err != nil {
+				continue
 			}
+			validatorDetail := CrossfireValidatorDetails{
+				OperatorAddress:            participantRemote.OperatorAddress,
+				InitialDelegatorAddress:    crossfireValidatorsDB[idx].InitialDelegatorAddress,
+				Moniker:                    crossfireValidatorsDB[idx].Moniker,
+				TaskSetup:                  crossfireValidatorsDB[idx].TaskPhase1NodeSetup,
+				TaskKeepActive:             crossfireValidatorsDB[idx].TaskPhase2KeepNodeActive,
+				TaskProposalVote:           crossfireValidatorsDB[idx].TaskPhase2ProposalVote,
+				TaskNetworkUpgrade:         crossfireValidatorsDB[idx].TaskPhase2NetworkUpgrade,
+				RankPhase1n2CommitmentRank: crossfireValidatorsDB[idx].RankTaskPhase1n2CommitmentCount,
+				RankPhase3CommitmentRank:   crossfireValidatorsDB[idx].RankTaskPhase3CommitmentCount,
+				RankTxSentRank:             crossfireValidatorsDB[idx].RankTaskHighestTxSent,
+				Stats:                      validatorStats,
+			}
+
+			finalList = append(finalList, validatorDetail)
 		}
 	}
 
 	httpapi.Success(ctx, finalList)
 }
 
-func (handler *Crossfire) getValidatorStats(operatorAddress string, dbValidator crossfire_validator_view.CrossfireValidatorRow) (*ValidatorStats, error) {
+func (handler *Crossfire) getValidatorStats(operatorAddress string, dbValidator crossfire_validator_view.CrossfireValidatorRow) (ValidatorStats, error) {
 	// Fetch Validator Stats
 	key := fmt.Sprintf("%s%s", "%", operatorAddress)
 	validatorStatRows, err := handler.crossfireValidatorsStatsView.FindAllLike(key)
 	if err != nil {
-		return nil, fmt.Errorf("[error-crossfire] Fetching Validator Stats, %v", err)
+		return ValidatorStats{}, fmt.Errorf("[error-crossfire] Fetching Validator Stats, %v", err)
 	}
 
-	var finalValidatorStats *ValidatorStats
+	var finalValidatorStats ValidatorStats
 	for _, validatorStatRow := range validatorStatRows {
-		*finalValidatorStats.joinedAtBlockHeight = dbValidator.JoinedAtBlockHeight
-		*finalValidatorStats.joinedAtTimestamp = dbValidator.JoinedAtBlockTime
+		finalValidatorStats.JoinedAtBlockHeight = dbValidator.JoinedAtBlockHeight
+		finalValidatorStats.JoinedAtTimestamp = dbValidator.JoinedAtBlockTime
 
 		switch strings.Split(validatorStatRow.Key, crossfire_constants.DB_KEY_SEPARATOR)[0] {
 		case crossfire_constants.TOTAL_TX_SENT_PREFIX:
-			*finalValidatorStats.totalTxSent = validatorStatRow.Value
+			finalValidatorStats.TotalTxSent = validatorStatRow.Value
 		case crossfire_constants.PHASE_1_TX_SENT_PREFIX:
-			*finalValidatorStats.txSentPhase1 = validatorStatRow.Value
+			finalValidatorStats.TxSentPhase1 = validatorStatRow.Value
 		case crossfire_constants.PHASE_2_TX_SENT_PREFIX:
-			*finalValidatorStats.txSentPhase2 = validatorStatRow.Value
+			finalValidatorStats.TxSentPhase2 = validatorStatRow.Value
 		case crossfire_constants.PHASE_3_TX_SENT_PREFIX:
-			*finalValidatorStats.txSentPhase3 = validatorStatRow.Value
+			finalValidatorStats.TxSentPhase3 = validatorStatRow.Value
 		case crossfire_constants.PHASE_3_COMMIT_PREFIX:
-			*finalValidatorStats.commitCountPhase3 = validatorStatRow.Value
+			finalValidatorStats.CommitCountPhase3 = validatorStatRow.Value
 		case crossfire_constants.PHASE_2_COMMIT_PREFIX:
-			*finalValidatorStats.commitCountPhase2 = validatorStatRow.Value
+			finalValidatorStats.CommitCountPhase2 = validatorStatRow.Value
 		case crossfire_constants.PHASE_1N2_COMMIT_PREFIX:
-			*finalValidatorStats.commitCountPhase1n2 = validatorStatRow.Value
+			finalValidatorStats.CommitCountPhase1n2 = validatorStatRow.Value
 		default:
 			break
 		}
@@ -144,54 +146,54 @@ func (handler *Crossfire) getValidatorStats(operatorAddress string, dbValidator 
 func getDefaultCrossfireValidatorDetailsResponse(remoteParticipant crossfire.Participant) CrossfireValidatorDetails {
 
 	return CrossfireValidatorDetails{
-		operatorAddress:            remoteParticipant.OperatorAddress,
-		initialDelegatorAddress:    remoteParticipant.PrimaryAddress,
-		moniker:                    remoteParticipant.Moniker,
-		taskSetup:                  crossfire_constants.INCOMPLETED,
-		taskKeepActive:             crossfire_constants.INCOMPLETED,
-		taskProposalVote:           crossfire_constants.INCOMPLETED,
-		taskNetworkUpgrade:         crossfire_constants.INCOMPLETED,
-		rankPhase1n2CommitmentRank: 0,
-		rankPhase3CommitmentRank:   0,
-		rankTxSentRank:             0,
-		stats: &ValidatorStats{
-			totalTxSent:         new(int64),
-			txSentPhase1:        new(int64),
-			txSentPhase2:        new(int64),
-			txSentPhase3:        new(int64),
-			commitCountPhase1n2: new(int64),
-			commitCountPhase2:   new(int64),
-			commitCountPhase3:   new(int64),
-			joinedAtBlockHeight: new(int64),
-			joinedAtTimestamp:   new(utctime.UTCTime),
+		OperatorAddress:            remoteParticipant.OperatorAddress,
+		InitialDelegatorAddress:    remoteParticipant.PrimaryAddress,
+		Moniker:                    remoteParticipant.Moniker,
+		TaskSetup:                  crossfire_constants.INCOMPLETED,
+		TaskKeepActive:             crossfire_constants.INCOMPLETED,
+		TaskProposalVote:           crossfire_constants.INCOMPLETED,
+		TaskNetworkUpgrade:         crossfire_constants.INCOMPLETED,
+		RankPhase1n2CommitmentRank: 0,
+		RankPhase3CommitmentRank:   0,
+		RankTxSentRank:             0,
+		Stats: ValidatorStats{
+			TotalTxSent:         0,
+			TxSentPhase1:        0,
+			TxSentPhase2:        0,
+			TxSentPhase3:        0,
+			CommitCountPhase1n2: 0,
+			CommitCountPhase2:   0,
+			CommitCountPhase3:   0,
+			JoinedAtBlockHeight: 0,
+			JoinedAtTimestamp:   utctime.FromUnixNano(0),
 		},
 	}
 }
 
 // ValidatorStats Validator statistics
 type ValidatorStats struct {
-	totalTxSent         *int64
-	txSentPhase1        *int64
-	txSentPhase2        *int64
-	txSentPhase3        *int64
-	commitCountPhase1n2 *int64
-	commitCountPhase2   *int64
-	commitCountPhase3   *int64
-	joinedAtBlockHeight *int64
-	joinedAtTimestamp   *utctime.UTCTime
+	TotalTxSent         int64           `json:"totalTxSent"`
+	TxSentPhase1        int64           `json:"txSentPhase1"`
+	TxSentPhase2        int64           `json:"txSentPhase2"`
+	TxSentPhase3        int64           `json:"txSentPhase3"`
+	CommitCountPhase1n2 int64           `json:"commitCountPhase1n2"`
+	CommitCountPhase2   int64           `json:"commitCountPhase2"`
+	CommitCountPhase3   int64           `json:"commitCountPhase3"`
+	JoinedAtBlockHeight int64           `json:"joinedAtBlockHeight"`
+	JoinedAtTimestamp   utctime.UTCTime `json:"joinedAtTimestamp"`
 }
 
 // CrossfireValidatorDetails response object
 type CrossfireValidatorDetails struct {
-	operatorAddress            string
-	initialDelegatorAddress    string
-	moniker                    string
-	taskSetup                  crossfire_constants.TaskStatus
-	taskKeepActive             crossfire_constants.TaskStatus
-	taskProposalVote           crossfire_constants.TaskStatus
-	taskNetworkUpgrade         crossfire_constants.TaskStatus
-	rankPhase1n2CommitmentRank int64
-	rankPhase3CommitmentRank   int64
-	rankTxSentRank             int64
-	stats                      *ValidatorStats
+	OperatorAddress            string                         `json:"operatorAddress"`
+	InitialDelegatorAddress    string                         `json:"initialDelegatorAddress"`
+	Moniker                    string                         `json:"moniker"`
+	TaskSetup                  crossfire_constants.TaskStatus `json:"taskSetup"`
+	TaskKeepActive             crossfire_constants.TaskStatus `json:"taskKeepActive"`
+	TaskProposalVote           crossfire_constants.TaskStatus `json:"taskProposalVote"`
+	TaskNetworkUpgrade         crossfire_constants.TaskStatus `json:"taskNetworkUpgrade"`
+	RankPhase1n2CommitmentRank int64                          `json:"rankPhase1n2CommitmentRank"`
+	RankPhase3CommitmentRank   int64                          `json:"rankPhase3CommitmentRank"`
+	RankTxSentRank             int64                          `json:"rankTxSentRank"`
+	Stats                      ValidatorStats                 `json:"stats"`
 }
