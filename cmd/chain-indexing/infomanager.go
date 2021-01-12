@@ -16,7 +16,7 @@ type InfoManager struct {
 	client          *tendermint.HTTPClient
 	pollingInterval time.Duration
 	viewStatus      *polling.Status
-	logger 			applogger.Logger
+	logger          applogger.Logger
 }
 
 func NewInfoManager(
@@ -28,25 +28,38 @@ func NewInfoManager(
 
 	viewStatus := polling.NewStatus(rdbConn.ToHandle())
 	return &InfoManager{
-		logger: logger,
-		rdbConn:    rdbConn,
-		client:     tendermintClient,
-		viewStatus: viewStatus,
+		logger: logger.WithFields(applogger.LogFields{
+			"module": "InfoManager",
+		}),
+		rdbConn:         rdbConn,
+		client:          tendermintClient,
+		viewStatus:      viewStatus,
 		pollingInterval: INFO_DEFAULT_POLLING_INTERVAL,
 	}
 
 }
 
 func (manager *InfoManager) Run() {
-	manager.logger.Infof("infomanager started")
+	manager.logger.Infof("InfoManager started")
 	go func() {
 		for {
-			status, _ := manager.client.Status()
+			status, err := manager.client.Status()
+			if err != nil {
+				manager.logger.Errorf("error querying Tendermint status: %v", err)
+				time.Sleep(manager.pollingInterval)
+				continue
+			}
 			result := (*status)["result"]
 			syncInfo := result.(map[string]interface{})["sync_info"]
 			latestHeight := syncInfo.(map[string]interface{})["latest_block_height"].(string)
-			// upsert
-			_= manager.viewStatus.Insert("LatestHeight", latestHeight)
+
+			err = manager.viewStatus.Upsert("LatestHeight", latestHeight)
+			if err != nil {
+				manager.logger.Errorf("error upserting latest height: %v", err)
+				time.Sleep(manager.pollingInterval)
+				continue
+			}
+
 			time.Sleep(manager.pollingInterval)
 		}
 	}()
