@@ -87,6 +87,12 @@ run_test() {
     set +e
     ginkgo -r
     RET_VALUE=$?
+    if [[ "${RET_VALUE}" != 0 ]]; then
+      return
+    fi
+    # TODO: Migrate coin test cases to Ginkgo
+    go test ./usecase/coin/...
+    RET_VALUE=$?
     set -e
 }
 

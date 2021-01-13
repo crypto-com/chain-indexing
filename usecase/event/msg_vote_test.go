@@ -59,7 +59,7 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 			anyProposalId := "1"
 			anyDepositor := "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3"
-			anyAmount := coin.MustNewCoinFromString("123456")
+			anyAmount := coin.MustParseCoinsNormalized("123456basetcro,456789tcro")
 			anyParams := model.MsgDepositParams{
 				ProposalId: anyProposalId,
 				Depositor:  anyDepositor,

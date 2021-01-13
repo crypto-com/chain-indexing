@@ -19,7 +19,7 @@ var _ = Describe("Event", func() {
 			anyHeight := int64(1000)
 			anySender := "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"
 			anyRecipient := "tcro1782gn9hzqavecukdaqqclvsnpck4mtz3vwzpxl"
-			anyAmount := coin.MustNewCoinFromString("123456")
+			anyAmount := coin.MustParseCoinsNormalized("123456basetcro,456789tcro")
 			anyParams := model.AccountTransferParams{
 				Sender:    anySender,
 				Recipient: anyRecipient,

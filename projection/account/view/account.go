@@ -4,23 +4,14 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/crypto-com/chain-indexing/usecase/coin"
+
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 
 	"github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	_ "github.com/crypto-com/chain-indexing/test/factory"
 )
-
-type Account struct {
-	AccountType    string `json:"accountType"`
-	AccountAddress string `json:"accountAddress"`
-	Pubkey         string `json:"pubkey"`
-	AccountNumber  int64  `json:"accountNumber"`
-	SequenceNumber int64  `json:"sequenceNumber"`
-
-	AccountBalance int64  `json:"accountBalance"`
-	AccountDenom   string `json:"accountDenom"`
-}
 
 type Accounts struct {
 	rdb *rdb.Handle
@@ -40,10 +31,8 @@ func NewAccounts(handle *rdb.Handle) *Accounts {
 	}
 }
 
-func (accountsView *Accounts) Upsert(account *Account) error {
-
+func (accountsView *Accounts) Upsert(account *AccountRow) error {
 	var err error
-
 	var sql string
 	sql, _, err = accountsView.rdb.StmtBuilder.
 		Insert(
@@ -51,16 +40,14 @@ func (accountsView *Accounts) Upsert(account *Account) error {
 		).
 		Columns(
 			"account_type",
-			"account_address",
+			"address",
 			"pubkey",
 			"account_number",
 			"sequence_number",
-
-			"account_balance",
-			"account_denom",
+			"balance",
 		).
-		Values("?", "?", "?", "?", "?", "?", "?").
-		Suffix("ON CONFLICT(account_address) DO UPDATE SET account_balance = EXCLUDED.account_balance").
+		Values("?", "?", "?", "?", "?", "?").
+		Suffix("ON CONFLICT(address) DO UPDATE SET balance = EXCLUDED.balance").
 		ToSql()
 
 	if err != nil {
@@ -68,14 +55,12 @@ func (accountsView *Accounts) Upsert(account *Account) error {
 	}
 
 	result, err := accountsView.rdb.Exec(sql,
-		account.AccountType,
-		account.AccountAddress,
+		account.Type,
+		account.Address,
 		account.Pubkey,
 		account.AccountNumber,
 		account.SequenceNumber,
-
-		account.AccountBalance,
-		account.AccountDenom,
+		account.Balance.String(),
 	)
 	if err != nil {
 		return fmt.Errorf("error inserting block into the table: %v: %w", err, rdb.ErrWrite)
@@ -87,12 +72,12 @@ func (accountsView *Accounts) Upsert(account *Account) error {
 	return nil
 }
 
-func (accountsView *Accounts) FindBy(identity *AccountIdentity) (*Account, error) {
+func (accountsView *Accounts) FindBy(identity *AccountIdentity) (*AccountRow, error) {
 	var err error
 
 	selectStmtBuilder := accountsView.rdb.StmtBuilder.Select(
 		"account_type",
-		"account_address",
+		"address",
 		"pubkey",
 		"account_number",
 		"sequence_number",
@@ -100,51 +85,51 @@ func (accountsView *Accounts) FindBy(identity *AccountIdentity) (*Account, error
 		"account_balance", "account_denom",
 	).From("view_accounts")
 
-	selectStmtBuilder = selectStmtBuilder.Where("account_address = ?", identity.MaybeAddress)
+	selectStmtBuilder = selectStmtBuilder.Where("address = ?", identity.MaybeAddress)
 
 	sql, sqlArgs, err := selectStmtBuilder.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("error building account selection sql: %v: %w", err, rdb.ErrPrepare)
 	}
 
-	var account Account
+	var account AccountRow
+	var balance string
 	if err = accountsView.rdb.QueryRow(sql, sqlArgs...).Scan(
-		&account.AccountType,
-		&account.AccountAddress,
+		&account.Type,
+		&account.Address,
 		&account.Pubkey,
 		&account.AccountNumber,
 		&account.SequenceNumber,
-
-		&account.AccountBalance,
-		&account.AccountDenom,
+		&balance,
 	); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
 		}
 		return nil, fmt.Errorf("error scanning account row: %v: %w", err, rdb.ErrQuery)
 	}
+	account.Balance = coin.MustParseCoinsNormalized(balance)
 	return &account, nil
 }
 
-func (accountsView *Accounts) List(order AccountsListOrder, pagination *pagination.Pagination) ([]Account, *pagination.PaginationResult, error) {
+func (accountsView *Accounts) List(
+	order AccountsListOrder,
+	pagination *pagination.Pagination,
+) ([]AccountRow, *pagination.PaginationResult, error) {
 	stmtBuilder := accountsView.rdb.StmtBuilder.Select(
-
 		"account_type",
-		"account_address",
+		"address",
 		"pubkey",
 		"account_number",
 		"sequence_number",
-
-		"account_balance",
-		"account_denom",
+		"balance",
 	).From(
 		"view_accounts",
 	)
 
 	if order.AccountAddress == view.ORDER_DESC {
-		stmtBuilder = stmtBuilder.OrderBy("account_address DESC")
+		stmtBuilder = stmtBuilder.OrderBy("address DESC")
 	} else {
-		stmtBuilder = stmtBuilder.OrderBy("account_address")
+		stmtBuilder = stmtBuilder.OrderBy("address")
 	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
@@ -161,18 +146,17 @@ func (accountsView *Accounts) List(order AccountsListOrder, pagination *paginati
 		return nil, nil, fmt.Errorf("error executing blocks select SQL: %v: %w", err, rdb.ErrQuery)
 	}
 
-	accounts := make([]Account, 0)
+	accounts := make([]AccountRow, 0)
 	for rowsResult.Next() {
-		var account Account
+		var account AccountRow
+		var balance string
 		if err = rowsResult.Scan(
-			&account.AccountType,
-			&account.AccountAddress,
+			&account.Type,
+			&account.Address,
 			&account.Pubkey,
 			&account.AccountNumber,
 			&account.SequenceNumber,
-
-			&account.AccountBalance,
-			&account.AccountDenom,
+			&balance,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
@@ -180,6 +164,7 @@ func (accountsView *Accounts) List(order AccountsListOrder, pagination *paginati
 			return nil, nil, fmt.Errorf("error scanning account row: %v: %w", err, rdb.ErrQuery)
 		}
 
+		account.Balance = coin.MustParseCoinsNormalized(balance)
 		accounts = append(accounts, account)
 	}
 
@@ -189,4 +174,13 @@ func (accountsView *Accounts) List(order AccountsListOrder, pagination *paginati
 	}
 
 	return accounts, paginationResult, nil
+}
+
+type AccountRow struct {
+	Type           string     `json:"type"`
+	Address        string     `json:"address"`
+	Pubkey         string     `json:"pubkey"`
+	AccountNumber  string     `json:"accountNumber"`
+	SequenceNumber string     `json:"sequenceNumber"`
+	Balance        coin.Coins `json:"balance"`
 }

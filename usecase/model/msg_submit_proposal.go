@@ -22,14 +22,14 @@ type MsgSubmitCommunityPoolSpendProposalParams struct {
 	MaybeProposalId *string                                    `json:"proposalId"`
 	Content         MsgSubmitCommunityPoolSpendProposalContent `json:"content"`
 	ProposerAddress string                                     `json:"proposerAddress"`
-	InitialDeposit  coin.Coin                                  `json:"initialDeposit"`
+	InitialDeposit  coin.Coins                                 `json:"initialDeposit"`
 }
 type MsgSubmitCommunityPoolSpendProposalContent struct {
-	Type             string    `json:"@type"`
-	Title            string    `json:"title"`
-	Description      string    `json:"description"`
-	RecipientAddress string    `json:"recipientAddress"`
-	Amount           coin.Coin `json:"amount"`
+	Type             string     `json:"@type"`
+	Title            string     `json:"title"`
+	Description      string     `json:"description"`
+	RecipientAddress string     `json:"recipientAddress"`
+	Amount           coin.Coins `json:"amount"`
 }
 type RawMsgSubmitCommunityPoolSpendProposalContent struct {
 	Type             string        `json:"@type"`
@@ -43,7 +43,7 @@ type MsgSubmitParamChangeProposalParams struct {
 	MaybeProposalId *string                             `json:"proposalId"`
 	Content         MsgSubmitParamChangeProposalContent `json:"content"`
 	ProposerAddress string                              `json:"proposerAddress"`
-	InitialDeposit  coin.Coin                           `json:"initialDeposit"`
+	InitialDeposit  coin.Coins                          `json:"initialDeposit"`
 }
 type MsgSubmitParamChangeProposalContent struct {
 	Type        string                               `json:"@type"`
@@ -61,7 +61,7 @@ type MsgSubmitSoftwareUpgradeProposalParams struct {
 	MaybeProposalId *string                                 `json:"proposalId"`
 	Content         MsgSubmitSoftwareUpgradeProposalContent `json:"content"`
 	ProposerAddress string                                  `json:"proposerAddress"`
-	InitialDeposit  coin.Coin                               `json:"initialDeposit"`
+	InitialDeposit  coin.Coins                              `json:"initialDeposit"`
 }
 type MsgSubmitSoftwareUpgradeProposalContent struct {
 	Type        string                               `json:"@type"`
@@ -92,7 +92,7 @@ type MsgSubmitCancelSoftwareUpgradeProposalParams struct {
 	MaybeProposalId *string                                       `json:"proposalId"`
 	Content         MsgSubmitCancelSoftwareUpgradeProposalContent `json:"content"`
 	ProposerAddress string                                        `json:"proposerAddress"`
-	InitialDeposit  coin.Coin                                     `json:"initialDeposit"`
+	InitialDeposit  coin.Coins                                    `json:"initialDeposit"`
 }
 type MsgSubmitCancelSoftwareUpgradeProposalContent struct {
 	Type        string `json:"@type"`
@@ -104,7 +104,7 @@ type MsgSubmitTextProposalParams struct {
 	MaybeProposalId *string                      `json:"proposalId"`
 	Content         MsgSubmitTextProposalContent `json:"content"`
 	ProposerAddress string                       `json:"proposerAddress"`
-	InitialDeposit  coin.Coin                    `json:"initialDeposit"`
+	InitialDeposit  coin.Coins                   `json:"initialDeposit"`
 }
 type MsgSubmitTextProposalContent struct {
 	Type        string `json:"@type"`

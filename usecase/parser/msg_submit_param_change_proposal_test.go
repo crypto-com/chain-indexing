@@ -20,7 +20,7 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgSubmitParamChangeProposal", func() {
 		It("should parse Msg commands when there is gov.MsgSubmitParamChangeProposal in the transaction", func() {
-			txDecoder := parser.NewTxDecoder("basetcro")
+			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_BLOCK_RESULTS_RESP,
@@ -56,14 +56,14 @@ var _ = Describe("ParseMsgCommands", func() {
 							},
 						},
 						ProposerAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-						InitialDeposit:  coin.MustNewCoinFromString("10"),
+						InitialDeposit:  coin.MustParseCoinsNormalized("10basetcro"),
 					},
 				),
 			}))
 		})
 
 		It("should return a command with nil proposal id when the gov.MsgSubmitParamChangeProposal transaction failed", func() {
-			txDecoder := parser.NewTxDecoder("basetcro")
+			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_FAILED_MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_BLOCK_RESULTS_RESP,
@@ -99,7 +99,7 @@ var _ = Describe("ParseMsgCommands", func() {
 							},
 						},
 						ProposerAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-						InitialDeposit:  coin.MustNewCoinFromString("10"),
+						InitialDeposit:  coin.MustParseCoinsNormalized("10basetcro"),
 					},
 				),
 			}))

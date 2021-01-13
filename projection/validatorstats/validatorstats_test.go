@@ -104,7 +104,7 @@ var _ = Describe("Validator Events", func() {
 				DelegatorAddress:  "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 				ValidatorAddress:  "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
 				TendermintPubkey:  "wWw0e9tZcVmev/NyJlZv5Apd7U5IONoyx3U/9rD5fHI=",
-				Amount:            coin.MustNewCoinFromString("10"),
+				Amount:            coin.MustParseCoinNormalized("10basetcro"),
 			}
 			event := event_usecase.NewBlockCreated(&usecase_model.Block{
 				Height:          anyHeight,
@@ -161,7 +161,7 @@ var _ = Describe("Validator Events", func() {
 			//check before handling event
 			Expect(blocksView.Count()).To(Equal(int64(1)))
 			Expect(projectionValidator.GetLastHandledEventHeight()).To(Equal(primptr.Int64(anyHeight)))
-			Expect(totalDelegateAfterHandling).To(Equal("10"))
+			Expect(totalDelegateAfterHandling).To(Equal("10basetcro"))
 			Expect(errAfterHandling).To(BeNil())
 		})
 

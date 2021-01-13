@@ -1,8 +1,11 @@
 package cosmosapp
 
+import "github.com/crypto-com/chain-indexing/usecase/coin"
+
 type Client interface {
 	Account(accountAddress string) (*Account, error)
-	Balance(targetAddress string, targetDenom string) (*AccountBalance, error)
+	Balances(accountAddress string) (coin.Coins, error)
+	BalanceByDenom(accountAddress string, denom string) (*coin.Coin, error)
 	Validator(validatorAddress string) (*Validator, error)
 	Delegation(delegator string, validator string) (*DelegationResponse, error)
 }
@@ -68,7 +71,8 @@ type Account struct {
 	AccountNumber  string `json:"account_number"`
 	SequenceNumber string `json:"sequence_number"`
 }
-type AccountBalance struct {
-	AccountAmount string `json:"account_amount"`
-	AccountDenom  string `json:"account_denom"`
+
+type BankBalance struct {
+	Amount string `json:"amount"`
+	Denom  string `json:"denom"`
 }

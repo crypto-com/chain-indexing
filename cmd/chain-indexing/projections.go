@@ -23,7 +23,6 @@ func initProjections(
 		RdbConn:               rdbConn,
 		CosmosAppClient:       cosmosAppClient,
 		ConsNodeAddressPrefix: config.Blockchain.ConNodeAddressPrefix,
-		BaseDenom:             config.Blockchain.BaseDenom,
 	}
 	for _, projectionName := range config.Projection.Enables {
 		projections = append(projections, projection.InitProjection(

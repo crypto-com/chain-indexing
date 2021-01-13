@@ -16,9 +16,9 @@ const ACCOUNT_TRANSFERRED = "AccountTransferred"
 type AccountTransferred struct {
 	event_entity.Base
 
-	Sender    string    `json:"sender"`
-	Recipient string    `json:"recipient"`
-	Amount    coin.Coin `json:"amount"`
+	Sender    string     `json:"sender"`
+	Recipient string     `json:"recipient"`
+	Amount    coin.Coins `json:"amount"`
 }
 
 func NewAccountTransferred(blockHeight int64, params model.AccountTransferParams) *AccountTransferred {

@@ -17,7 +17,7 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgDelegate", func() {
 
 		It("should parse Msg commands when there is staking.MsgDelegate in the transaction", func() {
-			txDecoder := parser.NewTxDecoder("basetcro")
+			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_DELEGATE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MSG_DELEGATE_BLOCK_RESULTS_RESP)
 
@@ -38,7 +38,7 @@ var _ = Describe("ParseMsgCommands", func() {
 				model.MsgDelegateParams{
 					DelegatorAddress: "tcro1fs8r6zxmr5nc86j8cpcmjmccf8s2cafxh5hy8r",
 					ValidatorAddress: "tcrocncl1fs8r6zxmr5nc86j8cpcmjmccf8s2cafxzt5alq",
-					Amount:           coin.MustNewCoinFromString("27464382775"),
+					Amount:           coin.MustParseCoinNormalized("27464382775basetcro"),
 				},
 			)}))
 		})

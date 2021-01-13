@@ -21,7 +21,7 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 			anyDelegatorAddress := "tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3"
 			anyValidatorAddress := "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3"
-			anyAmount := coin.MustNewCoinFromString("123456")
+			anyAmount := coin.MustNewCoinFromString("basetcro", "123456")
 			anyParams := model.MsgUndelegateParams{
 				DelegatorAddress: anyDelegatorAddress,
 				ValidatorAddress: anyValidatorAddress,
@@ -59,7 +59,7 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 			anyDelegatorAddress := "tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3"
 			anyValidatorAddress := "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3"
-			anyAmount := coin.MustNewCoinFromString("123456")
+			anyAmount := coin.MustNewCoinFromString("basetcro", "123456")
 			anyParams := model.MsgUndelegateParams{
 				DelegatorAddress: anyDelegatorAddress,
 				ValidatorAddress: anyValidatorAddress,

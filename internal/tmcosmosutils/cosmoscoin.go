@@ -6,30 +6,57 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 )
 
-func SumAmount(baseDenom string, amounts []Amount) (coin.Coin, error) {
-	var err error
-
-	sum := coin.Zero()
-	for _, amount := range amounts {
-		if amount.Denom != baseDenom {
-			return coin.Coin{}, fmt.Errorf("unrecognized denom %s when parsing amount", amount.Denom)
-		}
-
-		var amountCoin coin.Coin
-		amountCoin, err = coin.NewCoinFromString(amount.Amount)
-		if err != nil {
-			return coin.Coin{}, fmt.Errorf("error parsing amount %s to coin: %v", amount.Amount, err)
-		}
-		sum, err = sum.Add(amountCoin)
-		if err != nil {
-			return coin.Coin{}, fmt.Errorf("error adding amount togetehr: %v", err)
-		}
+// MustNewCoinFromAmountInterface returns a Coin from the amount map in the form of
+// map[string]interface{}. It panics when the amount is invalid.
+func MustNewCoinFromAmountInterface(amount map[string]interface{}) coin.Coin {
+	result, err := NewCoinFromAmountInterface(amount)
+	if err != nil {
+		panic(err)
 	}
 
-	return sum, nil
+	return result
 }
 
-type Amount struct {
-	Denom  string `json:"denom"`
-	Amount string `json:"amount"`
+// NewCoinFromAmountInterface returns a Coin from the amount in the form of
+// map[string]interface{}. It returns error when the amount is invalid.
+func NewCoinFromAmountInterface(amount map[string]interface{}) (coin.Coin, error) {
+	result, err := coin.NewCoinFromString(amount["denom"].(string), amount["amount"].(string))
+	if err != nil {
+		return coin.Coin{}, err
+	}
+
+	return result, nil
+}
+
+// NewCoinsFromAmountInterface returns Coins from the list of amount in the
+// from of []interface{}. It behaves the same as NewCoinsFromAmountInterface
+// except it panics on any error.
+func MustNewCoinsFromAmountInterface(amounts []interface{}) coin.Coins {
+	result, err := NewCoinsFromAmountInterface(amounts)
+	if err != nil {
+		panic(err)
+	}
+
+	return result
+}
+
+// NewCoinsFromAmountInterface returns Coins from the list of amount in the
+// from of []interface{}. It returns error when any of the amount inside is
+// invalid
+func NewCoinsFromAmountInterface(amounts []interface{}) (coin.Coins, error) {
+	coins := coin.NewCoins()
+	for _, rawAmount := range amounts {
+		amount, ok := rawAmount.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("invalid coin in the amount list: %v", rawAmount)
+		}
+		coinUnit, err := NewCoinFromAmountInterface(amount)
+		if err != nil {
+			return nil, err
+		}
+
+		coins = coins.Add(coinUnit)
+	}
+
+	return coins, nil
 }

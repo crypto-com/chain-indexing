@@ -10,15 +10,11 @@ import (
 
 type TxDecoder struct {
 	decoder *cosmostxdecoder.Decoder
-
-	baseDenom string
 }
 
-func NewTxDecoder(baseDenom string) *TxDecoder {
+func NewTxDecoder() *TxDecoder {
 	return &TxDecoder{
 		cosmostxdecoder.DefaultDecoder,
-
-		baseDenom,
 	}
 }
 
@@ -41,36 +37,29 @@ func (decoder *TxDecoder) Decode(base64Tx string) (*CosmosTx, error) {
 	return tx, nil
 }
 
-func (decoder *TxDecoder) GetFee(base64Tx string) (coin.Coin, error) {
+func (decoder *TxDecoder) GetFee(base64Tx string) (coin.Coins, error) {
 	tx, err := decoder.Decode(base64Tx)
 	if err != nil {
-		return coin.Coin{}, fmt.Errorf("error decoding transaction: %v", err)
+		return nil, fmt.Errorf("error decoding transaction: %v", err)
 	}
 
 	return decoder.sumAmount(tx.AuthInfo.Fee.Amount)
 }
 
-func (decoder *TxDecoder) sumAmount(amounts []Amount) (coin.Coin, error) {
+func (decoder *TxDecoder) sumAmount(amounts []Amount) (coin.Coins, error) {
 	var err error
 
-	sum := coin.Zero()
+	coins := coin.NewEmptyCoins()
 	for _, amount := range amounts {
-		if amount.Denom != decoder.baseDenom {
-			return coin.Coin{}, fmt.Errorf("unrecognized denom %s when parsing amount", amount.Denom)
-		}
-
 		var amountCoin coin.Coin
-		amountCoin, err = coin.NewCoinFromString(amount.Amount)
+		amountCoin, err = coin.NewCoinFromString(amount.Denom, amount.Amount)
 		if err != nil {
-			return coin.Coin{}, fmt.Errorf("error parsing amount %s to coin: %v", amount.Amount, err)
+			return nil, fmt.Errorf("error parsing amount %s to Coin: %v", amount.Amount, err)
 		}
-		sum, err = sum.Add(amountCoin)
-		if err != nil {
-			return coin.Coin{}, fmt.Errorf("error adding amount togetehr: %v", err)
-		}
+		coins = coins.Add(amountCoin)
 	}
 
-	return sum, nil
+	return coins, nil
 }
 
 type CosmosTx struct {

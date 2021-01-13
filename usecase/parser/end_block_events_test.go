@@ -71,7 +71,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 				model.CompleteBondingParams{
 					Delegator: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 					Validator: "tcrocncl1sruzd529lhjju6hfcwd2fxp3v0e7p0vqqtme76",
-					Amount:    coin.MustNewCoinFromString("5"),
+					Amount:    coin.MustParseCoinsNormalized("5basetcro"),
 				},
 			),
 		}))

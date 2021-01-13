@@ -5,16 +5,12 @@ import (
 
 	"github.com/lab259/cors"
 
-	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
-
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
-
-	"github.com/crypto-com/chain-indexing/infrastructure/httpapi/routes"
-
-	"github.com/crypto-com/chain-indexing/infrastructure/httpapi/handlers"
-
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
+	"github.com/crypto-com/chain-indexing/infrastructure/httpapi/handlers"
+	"github.com/crypto-com/chain-indexing/infrastructure/httpapi/routes"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 

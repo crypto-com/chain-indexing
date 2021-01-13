@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/crypto-com/chain-indexing/usecase/coin"
+
 	jsoniter "github.com/json-iterator/go"
 
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
@@ -35,6 +37,7 @@ func NewHTTPClient(rpcUrl string) *HTTPClient {
 }
 
 func (client *HTTPClient) Account(accountAddress string) (*cosmosapp_interface.Account, error) {
+	fmt.Println(accountAddress)
 	rawRespBody, err := client.request(
 		fmt.Sprintf("%s/%s", client.url("auth", "accounts"), accountAddress), "",
 	)
@@ -43,89 +46,132 @@ func (client *HTTPClient) Account(accountAddress string) (*cosmosapp_interface.A
 	}
 	defer rawRespBody.Close()
 
-	outputbytes, readerr := ioutil.ReadAll(rawRespBody)
-	if readerr != nil {
-		return nil, fmt.Errorf("GetAccountInfo error ioutil.ReadAll %v", readerr)
+	outputBytes, readErr := ioutil.ReadAll(rawRespBody)
+	if readErr != nil {
+		return nil, fmt.Errorf("error reading account info raw response: %v", readErr)
 	}
 
-	var myjson map[string]interface{}
+	var rawResp map[string]interface{}
 
-	if err := json.Unmarshal(outputbytes, &myjson); err != nil {
-		return nil, fmt.Errorf("GetAccountInfo error json.Unmarshal %v", err)
+	if err := json.Unmarshal(outputBytes, &rawResp); err != nil {
+		return nil, fmt.Errorf("error unmarshalling account info raw response: %v", err)
 	}
 
-	var thisAccountType string
-	var thisAddress string
-	var thisPubkeyContainer map[string]interface{}
-	var thisPubkey string
-	var thisAccountNumber string
-	var thisSequenceNumber string
+	var accountType string
+	var address string
+	var pubKey string
+	var accountNumber string
+	var sequenceNumber string
 
-	thisAccount := myjson["account"].(map[string]interface{})
-	thisAccountTypeMeta := thisAccount["@type"].(string)
-	thisAccountTypeName, thisAccountTypeNameOk := thisAccount["name"].(string)
-	if !thisAccountTypeNameOk {
-		thisAccountTypeName = ""
+	accountKVPair := rawResp["account"].(map[string]interface{})
+	accountTypeMeta := accountKVPair["@type"].(string)
+	accountName, hasAccountName := accountKVPair["name"].(string)
+	if !hasAccountName {
+		accountName = ""
 	}
-	thisAccountType = fmt.Sprintf("%s %s", thisAccountTypeMeta, thisAccountTypeName)
-	thisBaseAccount, thisBaseAccountOk := thisAccount["base_account"].(map[string]interface{})
+	accountType = fmt.Sprintf("%s %s", accountTypeMeta, accountName)
+	baseAccount, isBaseAccount := accountKVPair["base_account"].(map[string]interface{})
 
-	if !thisBaseAccountOk {
+	if !isBaseAccount {
 		// normal account
-		thisAddress = thisAccount["address"].(string)
-		thisPubkeyContainer = thisAccount["pub_key"].(map[string]interface{})
-		thisPubkey = thisPubkeyContainer["key"].(string)
-		thisAccountNumber = thisAccount["account_number"].(string)
-		thisSequenceNumber = thisAccount["sequence"].(string)
+		address = accountKVPair["address"].(string)
+		// FIXME: account may not have pubkey (genesis account?)
+		pubKeyKVPair, ok := accountKVPair["pub_key"].(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf(
+				"error asserting account %s public key: %v", accountAddress, accountKVPair["pub_key"],
+			)
+		}
+		pubKey = pubKeyKVPair["key"].(string)
+		accountNumber = accountKVPair["account_number"].(string)
+		sequenceNumber = accountKVPair["sequence"].(string)
 
 	} else {
 		// module account
-		thisAddress = thisBaseAccount["address"].(string)
-		thisAccountNumber = thisBaseAccount["account_number"].(string)
-		thisSequenceNumber = thisBaseAccount["sequence"].(string)
+		address = baseAccount["address"].(string)
+		accountNumber = baseAccount["account_number"].(string)
+		sequenceNumber = baseAccount["sequence"].(string)
 
 	}
 
 	var accountResp AccountResp
-	accountResp.Account.AccountType = thisAccountType
-	accountResp.Account.AccountAddress = thisAddress
-	accountResp.Account.Pubkey = thisPubkey
-	accountResp.Account.AccountNumber = thisAccountNumber
-	accountResp.Account.SequenceNumber = thisSequenceNumber
+	accountResp.Account.AccountType = accountType
+	accountResp.Account.AccountAddress = address
+	accountResp.Account.Pubkey = pubKey
+	accountResp.Account.AccountNumber = accountNumber
+	accountResp.Account.SequenceNumber = sequenceNumber
 
 	return &accountResp.Account, nil
 }
 
-func (client *HTTPClient) Balance(targetAddress string, targetDenom string) (*cosmosapp_interface.AccountBalance, error) {
+func (client *HTTPClient) Balances(accountAddress string) (coin.Coins, error) {
+	resp := &BankBalancesResp{
+		Pagination: cosmosapp_interface.Pagination{
+			MaybeNextKey: nil,
+			Total:        "",
+		},
+	}
+	balances := coin.NewEmptyCoins()
+	for {
+		url := fmt.Sprintf("%s/%s", client.url("bank", "balances"), accountAddress)
+		if resp.Pagination.MaybeNextKey != nil {
+			url = fmt.Sprintf("%s?pagination.key=%s", url, *resp.Pagination.MaybeNextKey)
+		}
+
+		rawRespBody, err := client.request(url)
+		if err != nil {
+			return nil, err
+		}
+		defer rawRespBody.Close()
+
+		if err := jsoniter.NewDecoder(rawRespBody).Decode(&resp); err != nil {
+			return nil, err
+		}
+		for _, balanceKVPair := range resp.BankBalanceResponses {
+			balance, coinErr := coin.NewCoinFromString(balanceKVPair.Denom, balanceKVPair.Amount)
+			if coinErr != nil {
+				return nil, coinErr
+			}
+			balances = balances.Add(balance)
+		}
+
+		if resp.Pagination.MaybeNextKey == nil {
+			break
+		}
+	}
+
+	return balances, nil
+}
+
+func (client *HTTPClient) BalanceByDenom(accountAddress string, denom string) (*coin.Coin, error) {
 	rawRespBody, err := client.request(
-		fmt.Sprintf("%s/%s/%s", client.url("bank", "balances"), targetAddress, targetDenom), "",
+		fmt.Sprintf("%s/%s/%s", client.url("bank", "balances"), accountAddress, denom), "",
 	)
 	if err != nil {
 		return nil, err
 	}
 	defer rawRespBody.Close()
 
-	outputbytes, readerr := ioutil.ReadAll(rawRespBody)
-	if readerr != nil {
-		return nil, fmt.Errorf("GetAccountInfo error ioutil.ReadAll %v", readerr)
+	outputBytes, readErr := ioutil.ReadAll(rawRespBody)
+	if readErr != nil {
+		return nil, fmt.Errorf("GetAccountInfo error ioutil.ReadAll %v", readErr)
 	}
-	var thisJson map[string]interface{}
+	var rawResp map[string]interface{}
 
-	if err := json.Unmarshal(outputbytes, &thisJson); err != nil {
+	if unmarshalErr := json.Unmarshal(outputBytes, &rawResp); unmarshalErr != nil {
+		return nil, unmarshalErr
+	}
+
+	rawBalance := rawResp["balance"].(map[string]interface{})
+	amount := rawBalance["amount"].(string)
+
+	balance, err := coin.NewCoinFromString(denom, amount)
+	if err != nil {
 		return nil, err
 	}
-
-	thisBalance := thisJson["balance"].(map[string]interface{})
-	thisAmount := thisBalance["amount"].(string)
-	thisDenom := thisBalance["denom"].(string)
-
-	var accountBalanceResp AccountBalanceResp
-	accountBalanceResp.AccountBalace.AccountAmount = thisAmount
-	accountBalanceResp.AccountBalace.AccountDenom = thisDenom
-
-	return &accountBalanceResp.AccountBalace, nil
-
+	return &balance, nil
 }
+
 func (client *HTTPClient) Validator(validatorAddress string) (*cosmosapp_interface.Validator, error) {
 	rawRespBody, err := client.request(
 		fmt.Sprintf("%s/%s", client.url("staking", "validators"), validatorAddress), "",
@@ -225,6 +271,7 @@ type AccountResp struct {
 	Account cosmosapp_interface.Account
 }
 
-type AccountBalanceResp struct {
-	AccountBalace cosmosapp_interface.AccountBalance
+type BankBalancesResp struct {
+	BankBalanceResponses []cosmosapp_interface.BankBalance `json:"balances"`
+	Pagination           cosmosapp_interface.Pagination    `json:"pagination"`
 }

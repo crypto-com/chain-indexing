@@ -16,7 +16,7 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgDeposit", func() {
 		It("should parse gov.MsgDeposit command with effective height in the transaction", func() {
-			txDecoder := parser.NewTxDecoder("basetcro")
+			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_DEPOSIT_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_DEPOSIT_BLOCK_RESULTS_RESP,
@@ -41,7 +41,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					model.MsgDepositParams{
 						ProposalId: "9",
 						Depositor:  "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-						Amount:     coin.MustNewCoinFromString("2"),
+						Amount:     coin.MustParseCoinsNormalized("2basetcro"),
 					},
 				),
 			}))

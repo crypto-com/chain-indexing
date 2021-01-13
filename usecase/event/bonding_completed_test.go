@@ -19,7 +19,7 @@ var _ = Describe("Event", func() {
 			anyHeight := int64(1000)
 			anyDelegator := "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"
 			anyValidator := "tcrocncl1sruzd529lhjju6hfcwd2fxp3v0e7p0vqqtme76"
-			anyAmount := coin.MustNewCoinFromString("123456")
+			anyAmount := coin.MustParseCoinsNormalized("123456basetcro,456789tcro")
 			event := event_usecase.NewBondingCompleted(anyHeight, model.CompleteBondingParams{
 				Delegator: anyDelegator,
 				Validator: anyValidator,

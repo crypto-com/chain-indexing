@@ -7,7 +7,7 @@ CREATE TABLE view_transactions (
     success BOOLEAN NOT NULL,
     code INT NOT NULL,
     log VARCHAR NOT NULL,
-    fee VARCHAR NOT NULL,
+    fee JSONB NOT NULL,
     fee_payer VARCHAR NOT NULL,
     fee_granter VARCHAR NOT NULL,
     gas_wanted BIGINT NOT NULL,

@@ -25,9 +25,9 @@ var _ = Describe("Event", func() {
 				Title:            "Community Pool Spend",
 				Description:      "Pay me some CRO!",
 				RecipientAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-				Amount:           coin.MustNewCoinFromString("123456"),
+				Amount:           coin.MustParseCoinsNormalized("123456basetcro,456789tcro"),
 			}
-			anyInitialDeposit := coin.MustNewCoinFromString("1000")
+			anyInitialDeposit := coin.MustParseCoinsNormalized("1000basetcro,2000tcro")
 			anyParams := model.MsgSubmitCommunityPoolSpendProposalParams{
 				ProposerAddress: anyProposerAddress,
 				Content:         anyContent,
@@ -69,9 +69,9 @@ var _ = Describe("Event", func() {
 				Title:            "Community Pool Spend",
 				Description:      "Pay me some CRO!",
 				RecipientAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-				Amount:           coin.MustNewCoinFromString("123456"),
+				Amount:           coin.MustParseCoinsNormalized("123456basetcro,456789tcro"),
 			}
-			anyInitialDeposit := coin.MustNewCoinFromString("1000")
+			anyInitialDeposit := coin.MustParseCoinsNormalized("1000basetcro,2000tcro")
 			anyParams := model.MsgSubmitCommunityPoolSpendProposalParams{
 				ProposerAddress: anyProposerAddress,
 				Content:         anyContent,

@@ -19,7 +19,7 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgMultiSend", func() {
 
 		It("should parse Msg commands when there is bank.MsgMultiSend in the transaction", func() {
-			txDecoder := parser.NewTxDecoder("basetcro")
+			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_MULTI_SEND_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MSG_MULTI_SEND_BLOCK_RESULTS_RESP)
 
@@ -41,21 +41,21 @@ var _ = Describe("ParseMsgCommands", func() {
 					Inputs: []model.MsgMultiSendInput{
 						{
 							Address: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-							Amount:  coin.MustNewCoinFromString("51"),
+							Amount:  coin.MustParseCoinsNormalized("51basetcro"),
 						},
 					},
 					Outputs: []model.MsgMultiSendOutput{
 						{
 							Address: "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
-							Amount:  coin.MustNewCoinFromString("1"),
+							Amount:  coin.MustParseCoinsNormalized("1basetcro"),
 						},
 						{
 							Address: "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
-							Amount:  coin.MustNewCoinFromString("20"),
+							Amount:  coin.MustParseCoinsNormalized("20basetcro"),
 						},
 						{
 							Address: "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
-							Amount:  coin.MustNewCoinFromString("30"),
+							Amount:  coin.MustParseCoinsNormalized("30basetcro"),
 						},
 					},
 				},
