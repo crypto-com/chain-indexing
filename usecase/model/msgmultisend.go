@@ -10,11 +10,11 @@ type MsgMultiSendParams struct {
 }
 
 type MsgMultiSendInput struct {
-	Address string    `json:"address"`
-	Amount  coin.Coin `json:"amount"`
+	Address string     `json:"address"`
+	Amount  coin.Coins `json:"amount"`
 }
 
 type MsgMultiSendOutput struct {
-	Address string    `json:"address"`
-	Amount  coin.Coin `json:"amount"`
+	Address string     `json:"address"`
+	Amount  coin.Coins `json:"amount"`
 }

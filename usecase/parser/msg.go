@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
+
 	"github.com/crypto-com/chain-indexing/internal/primptr"
 
 	"github.com/crypto-com/chain-indexing/internal/utctime"
@@ -97,7 +99,7 @@ func parseMsgSend(
 		event.MsgSendCreatedParams{
 			FromAddress: msg["from_address"].(string),
 			ToAddress:   msg["to_address"].(string),
-			Amount:      sumAmountInterfaces(msg["amount"].([]interface{})),
+			Amount:      tmcosmosutils.MustNewCoinsFromAmountInterface(msg["amount"].([]interface{})),
 		},
 	)}
 }
@@ -112,7 +114,7 @@ func parseMsgMultiSend(
 		input, _ := rawInput.(map[string]interface{})
 		inputs = append(inputs, model.MsgMultiSendInput{
 			Address: input["address"].(string),
-			Amount:  sumAmountInterfaces(input["coins"].([]interface{})),
+			Amount:  tmcosmosutils.MustNewCoinsFromAmountInterface(input["coins"].([]interface{})),
 		})
 	}
 
@@ -122,7 +124,7 @@ func parseMsgMultiSend(
 		output, _ := rawOutput.(map[string]interface{})
 		outputs = append(outputs, model.MsgMultiSendOutput{
 			Address: output["address"].(string),
-			Amount:  sumAmountInterfaces(output["coins"].([]interface{})),
+			Amount:  tmcosmosutils.MustNewCoinsFromAmountInterface(output["coins"].([]interface{})),
 		})
 	}
 
@@ -166,21 +168,21 @@ func parseMsgWithdrawDelegatorReward(
 				DelegatorAddress: delegatorAddress,
 				ValidatorAddress: msg["validator_address"].(string),
 				RecipientAddress: delegatorAddress,
-				Amount:           coin.Zero(),
+				Amount:           coin.NewEmptyCoins(),
 			},
 		)}
 	}
 	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	var recipient string
-	var amount coin.Coin
+	var amount coin.Coins
 	// When there is no reward withdrew, `transfer` event would not exist
 	if event := log.GetEventByType("transfer"); event == nil {
 		recipient, _ = msg["delegator_address"].(string)
-		amount = coin.Zero()
+		amount = coin.NewEmptyCoins()
 	} else {
 		recipient = event.MustGetAttributeByKey("recipient")
 		amountValue := event.MustGetAttributeByKey("amount")
-		amount = coin.MustNewCoinFromString(TrimAmountDenom(amountValue))
+		amount = coin.MustParseCoinsNormalized(amountValue)
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgWithdrawDelegatorReward(
@@ -209,21 +211,21 @@ func parseMsgWithdrawValidatorCommission(
 			model.MsgWithdrawValidatorCommissionParams{
 				ValidatorAddress: msg["validator_address"].(string),
 				RecipientAddress: "",
-				Amount:           coin.Zero(),
+				Amount:           coin.NewEmptyCoins(),
 			},
 		)}
 	}
 	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	var recipient string
-	var amount coin.Coin
+	var amount coin.Coins
 	// When there is no reward withdrew, `transfer` event would not exist
 	if event := log.GetEventByType("transfer"); event == nil {
 		recipient, _ = msg["delegator_address"].(string)
-		amount = coin.Zero()
+		amount = coin.NewEmptyCoins()
 	} else {
 		recipient = event.MustGetAttributeByKey("recipient")
 		amountValue := event.MustGetAttributeByKey("amount")
-		amount = coin.MustNewCoinFromString(TrimAmountDenom(amountValue))
+		amount = coin.MustParseCoinsNormalized(amountValue)
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgWithdrawValidatorCommission(
@@ -246,7 +248,7 @@ func parseMsgFundCommunityPool(
 
 		model.MsgFundCommunityPoolParams{
 			Depositor: msg["depositor"].(string),
-			Amount:    sumAmountInterfaces(msg["amount"].([]interface{})),
+			Amount:    tmcosmosutils.MustNewCoinsFromAmountInterface(msg["amount"].([]interface{})),
 		},
 	)}
 }
@@ -302,7 +304,9 @@ func parseMsgSubmitParamChangeProposal(
 				MaybeProposalId: nil,
 				Content:         proposalContent,
 				ProposerAddress: msg["proposer"].(string),
-				InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+				InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
+					msg["initial_deposit"].([]interface{}),
+				),
 			},
 		)}
 	}
@@ -324,7 +328,9 @@ func parseMsgSubmitParamChangeProposal(
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
 			ProposerAddress: msg["proposer"].(string),
-			InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+			InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
+				msg["initial_deposit"].([]interface{}),
+			),
 		},
 	)}
 }
@@ -346,7 +352,7 @@ func parseMsgSubmitCommunityFundSpendProposal(
 		Title:            rawProposalContent.Title,
 		Description:      rawProposalContent.Description,
 		RecipientAddress: rawProposalContent.RecipientAddress,
-		Amount:           sumAmountInterfaces(rawProposalContent.Amount),
+		Amount:           tmcosmosutils.MustNewCoinsFromAmountInterface(rawProposalContent.Amount),
 	}
 
 	if !txSuccess {
@@ -357,7 +363,9 @@ func parseMsgSubmitCommunityFundSpendProposal(
 				MaybeProposalId: nil,
 				Content:         proposalContent,
 				ProposerAddress: msg["proposer"].(string),
-				InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+				InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
+					msg["initial_deposit"].([]interface{}),
+				),
 			},
 		)}
 	}
@@ -379,7 +387,9 @@ func parseMsgSubmitCommunityFundSpendProposal(
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
 			ProposerAddress: msg["proposer"].(string),
-			InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+			InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
+				msg["initial_deposit"].([]interface{}),
+			),
 		},
 	)}
 }
@@ -421,7 +431,9 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 				MaybeProposalId: nil,
 				Content:         proposalContent,
 				ProposerAddress: msg["proposer"].(string),
-				InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+				InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
+					msg["initial_deposit"].([]interface{}),
+				),
 			},
 		)}
 	}
@@ -443,7 +455,9 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
 			ProposerAddress: msg["proposer"].(string),
-			InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+			InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
+				msg["initial_deposit"].([]interface{}),
+			),
 		},
 	)}
 }
@@ -469,7 +483,9 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 				MaybeProposalId: nil,
 				Content:         proposalContent,
 				ProposerAddress: msg["proposer"].(string),
-				InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+				InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
+					msg["initial_deposit"].([]interface{}),
+				),
 			},
 		)}
 	}
@@ -491,7 +507,9 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
 			ProposerAddress: msg["proposer"].(string),
-			InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+			InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
+				msg["initial_deposit"].([]interface{}),
+			),
 		},
 	)}
 }
@@ -517,7 +535,9 @@ func parseMsgSubmitTextProposal(
 				MaybeProposalId: nil,
 				Content:         proposalContent,
 				ProposerAddress: msg["proposer"].(string),
-				InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+				InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
+					msg["initial_deposit"].([]interface{}),
+				),
 			},
 		)}
 	}
@@ -539,7 +559,9 @@ func parseMsgSubmitTextProposal(
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
 			ProposerAddress: msg["proposer"].(string),
-			InitialDeposit:  sumAmountInterfaces(msg["initial_deposit"].([]interface{})),
+			InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
+				msg["initial_deposit"].([]interface{}),
+			),
 		},
 	)}
 }
@@ -569,7 +591,7 @@ func parseMsgDeposit(
 		model.MsgDepositParams{
 			ProposalId: msg["proposal_id"].(string),
 			Depositor:  msg["depositor"].(string),
-			Amount:     sumAmountInterfaces(msg["amount"].([]interface{})),
+			Amount:     tmcosmosutils.MustNewCoinsFromAmountInterface(msg["amount"].([]interface{})),
 		},
 	)}
 }
@@ -579,7 +601,7 @@ func parseMsgDelegate(
 	msg map[string]interface{},
 ) []command.Command {
 	amountValue, _ := msg["amount"].(map[string]interface{})
-	amount := coin.MustNewCoinFromString(amountValue["amount"].(string))
+	amount := tmcosmosutils.MustNewCoinFromAmountInterface(amountValue)
 
 	return []command.Command{command_usecase.NewCreateMsgDelegate(
 		msgCommonParams,
@@ -600,7 +622,7 @@ func parseMsgUndelegate(
 	msg map[string]interface{},
 ) []command.Command {
 	amountValue, _ := msg["amount"].(map[string]interface{})
-	amount := coin.MustNewCoinFromString(amountValue["amount"].(string))
+	amount := tmcosmosutils.MustNewCoinFromAmountInterface(amountValue)
 
 	if !txSuccess {
 		return []command.Command{command_usecase.NewCreateMsgUndelegate(
@@ -642,7 +664,7 @@ func parseMsgBeginRedelegate(
 	msg map[string]interface{},
 ) []command.Command {
 	amountValue, _ := msg["amount"].(map[string]interface{})
-	amount := coin.MustNewCoinFromString(amountValue["amount"].(string))
+	amount := tmcosmosutils.MustNewCoinFromAmountInterface(amountValue)
 
 	return []command.Command{command_usecase.NewCreateMsgBeginRedelegate(
 		msgCommonParams,
@@ -673,9 +695,8 @@ func parseMsgCreateValidator(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 ) []command.Command {
-	// TODO: add checking
 	amountValue, _ := msg["value"].(map[string]interface{})
-	amount := coin.MustNewCoinFromString(amountValue["amount"].(string))
+	amount := tmcosmosutils.MustNewCoinFromAmountInterface(amountValue)
 	tendermintPubkey, _ := msg["pubkey"].(map[string]interface{})
 	description := model.MsgValidatorDescription{
 		Moniker:         "",
@@ -758,14 +779,4 @@ func parseMsgEditValidator(
 			MaybeMinSelfDelegation: maybeMinSelfDelegation,
 		},
 	)}
-}
-
-func sumAmountInterfaces(amounts []interface{}) coin.Coin {
-	sum := coin.Zero()
-	for _, rawAmount := range amounts {
-		amount, _ := rawAmount.(map[string]interface{})
-		sum, _ = sum.Add(coin.MustNewCoinFromString(amount["amount"].(string)))
-	}
-
-	return sum
 }

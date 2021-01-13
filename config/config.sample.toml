@@ -1,6 +1,4 @@
 [blockchain]
-cro_denom = "tcro"
-base_denom = "basetcro"
 account_address_prefix = "tcro"
 account_pubkey_prefix = "tcro"
 validator_address_prefix = "tcrocncl"
@@ -28,6 +26,12 @@ http_rpc_url = "https://testnet-croeseid.crypto.com:1317"
 [http]
 listening_address = "0.0.0.0:8080"
 route_prefix = "/"
+# A list of origins a cross-domain request is allowed to be requested from
+# Default value '[]' disables CORS support
+# Use '["*"]' to allow request from any origin
+cors_allowed_origins = []
+cors_allowed_methods = ["HEAD", "GET"]
+cors_allowed_headers = ["Origin", "Accept", "Content-Type", "X-Requested-With", "X-Server-Time"]
 
 [database]
 host = "localhost"
@@ -49,6 +53,18 @@ pool_health_check_interval = "1m"
 # comma separated log levels. possible values: debug,info,error,panic
 level = "debug"
 color = false
+
+[projection]
+enables = [
+    "Account",
+    "AccountMessage",
+    "Block",
+    "BlockEvent",
+    "Transaction",
+    "Validator",
+    "ValidatorStats",
+    "Crossfire",
+]
 
 [crossfire]
 phase_one_start_time = 1610942400000000000 # "2021-01-18T04:00:00Z"

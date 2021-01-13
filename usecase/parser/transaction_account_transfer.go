@@ -38,7 +38,7 @@ func ParseTxAccountTransferCommands(
 					blockHeight, model.AccountTransferParams{
 						Recipient: transferEvent.MustGetAttributeByKey("recipient"),
 						Sender:    sender,
-						Amount:    coin.MustNewCoinFromString(TrimAmountDenom(amount)),
+						Amount:    coin.MustParseCoinsNormalized(amount),
 					}))
 			}
 		}

@@ -63,12 +63,15 @@ This will start the following docker instances on your local network when you us
 
 ### 2.4 Execute Database Migration
 
+for DB_PASSWORD, never use common word such as "postgres" , "admin", "password", choose at least 16 characters including number, special character, capital letters even in testing environment.
+if you don't use strong password, pgmigrate will stop further processing
+
 #### Docker (Not working yet)
 
 ```bash
 docker run -it \
     --env DB_USERNAME=postgres \
-    --env DB_PASSWORD=postgres \
+    --env DB_PASSWORD=your_postgresql_password \
     --env DB_HOST=host.docker.internal \
     --env DB_PORT=5432 \
     --env DB_NAME=postgres \
@@ -90,14 +93,14 @@ docker run -it \
 docker run \
     -v `pwd`/config:/app/config --read-only \
     -p 28857:28857 \
-    --env DB_PASSWORD=postgres \
+    --env DB_PASSWORD=your_postgresql_password \
     chain-indexing /app/chain-indexing
 ```
 
 #### Manual build
 
 ```bash
-env DB_PASSWORD=postgres ./chain-indexing
+env DB_PASSWORD=your_postgresql_password ./chain-indexing
 ```
 
 ## 3. Test

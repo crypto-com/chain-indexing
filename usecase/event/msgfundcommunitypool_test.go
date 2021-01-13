@@ -20,7 +20,7 @@ var _ = Describe("Event", func() {
 			anyTxHash := "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416"
 			anyMsgIndex := 2
 			anyDepositor := "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"
-			anyAmount := coin.MustNewCoinFromString("123456")
+			anyAmount := coin.MustParseCoinsNormalized("123456basetcro,456789tcro")
 			anyParams := model.MsgFundCommunityPoolParams{
 				Depositor: anyDepositor,
 				Amount:    anyAmount,
@@ -55,7 +55,7 @@ var _ = Describe("Event", func() {
 			anyTxHash := "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416"
 			anyMsgIndex := 2
 			anyDepositor := "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"
-			anyAmount := coin.MustNewCoinFromString("123456")
+			anyAmount := coin.MustParseCoinsNormalized("123456basetcro,456789tcro")
 			anyParams := model.MsgFundCommunityPoolParams{
 				Depositor: anyDepositor,
 				Amount:    anyAmount,

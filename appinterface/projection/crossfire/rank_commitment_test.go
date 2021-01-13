@@ -49,7 +49,7 @@ var _ = Describe("Crossfire", func() {
 			DelegatorAddress:  "tcro1n4t5q77kn9vf73s7ljs96m85jgg49yqpasmwm3",
 			ValidatorAddress:  "tcrocncl1n4t5q77kn9vf73s7ljs96m85jgg49yqpg0chrj",
 			TendermintPubkey:  "Og8ZfQTHFgTBGD5qoyo5NpyJCJRddC+WuSPtyZtlE7E=",
-			Amount:            coin.MustNewCoinFromString("100"),
+			Amount:            coin.MustNewCoinFromString("basetcro", "100"),
 		})
 
 		validator2CreatedEvent := event_usecase.NewMsgCreateValidator(event_usecase.MsgCommonParams{
@@ -74,7 +74,7 @@ var _ = Describe("Crossfire", func() {
 			DelegatorAddress:  "tcro15xr8daqzpu0wf8t6hx95zlxmqwzmf4eaph3yzv",
 			ValidatorAddress:  "tcrocncl15xr8daqzpu0wf8t6hx95zlxmqwzmf4ea5gja60",
 			TendermintPubkey:  "BuuPYme7R4eH/nWs2p+sS1UpCQwy+QJgBZuhGICH8Es=",
-			Amount:            coin.MustNewCoinFromString("222"),
+			Amount:            coin.MustNewCoinFromString("basetcro", "222"),
 		})
 
 		validator3CreatedEvent := event_usecase.NewMsgCreateValidator(event_usecase.MsgCommonParams{
@@ -99,7 +99,7 @@ var _ = Describe("Crossfire", func() {
 			DelegatorAddress:  "tcro197ujxhaeyyv309f39c0s2gn0af0pps5pden6h7",
 			ValidatorAddress:  "tcrocncl197ujxhaeyyv309f39c0s2gn0af0pps5pcxsr0a",
 			TendermintPubkey:  "wWw0e9tZcVmev/NyJlZv5Apd7U5IONoyx3U/9rD5fHI=",
-			Amount:            coin.MustNewCoinFromString("333"),
+			Amount:            coin.MustNewCoinFromString("basetcro", "333"),
 		})
 
 		lateJoinValidatorCreatedEvent := event_usecase.NewMsgCreateValidator(event_usecase.MsgCommonParams{
@@ -124,7 +124,7 @@ var _ = Describe("Crossfire", func() {
 			DelegatorAddress:  "tcro1khkxmphc7sv0fqrej3rltsslrstud78c0jl6l6",
 			ValidatorAddress:  "tcrocncl1khkxmphc7sv0fqrej3rltsslrstud78c6dur8e",
 			TendermintPubkey:  "na51D8RmKXyWrid9I6wtdxgP6f1Nl3EyNNEzqxVquoM=", // B5EC6D86F8F418F480799447F5C21F1C17C6F8F8
-			Amount:            coin.MustNewCoinFromString("333"),
+			Amount:            coin.MustNewCoinFromString("basetcro", "333"),
 		})
 
 		phaseOneBlockCreatedEvent := event_usecase.NewBlockCreated(&usecase_model.Block{
@@ -266,6 +266,7 @@ var _ = Describe("Crossfire", func() {
 				pgConn,
 				"tcrocnclcons",
 				"tcrocncl",
+				"tcro",
 				1610942400000000000,
 				1611547200000000000,
 				1612756800000000000,
@@ -273,7 +274,6 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				rankServer.URL()+"/participants.json",
-				"tcro",
 			)
 
 			err := projection.HandleEvents(phase1Height, []event_entity.Event{validator1CreatedEvent, validator2CreatedEvent, validator3CreatedEvent})
@@ -404,6 +404,7 @@ var _ = Describe("Crossfire", func() {
 				pgConn,
 				"tcrocnclcons",
 				"tcrocncl",
+				"tcro",
 				1610942400000000000,
 				1611547200000000000,
 				1612756800000000000,
@@ -411,7 +412,6 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				rankServer.URL()+"/participants.json",
-				"tcro",
 			)
 
 			err := projection.HandleEvents(phase1Height, []event_entity.Event{validator1CreatedEvent, validator2CreatedEvent, validator3CreatedEvent})
@@ -542,6 +542,7 @@ var _ = Describe("Crossfire", func() {
 				pgConn,
 				"tcrocnclcons",
 				"tcrocncl",
+				"tcro",
 				1610942400000000000,
 				1611547200000000000,
 				1612756800000000000,
@@ -549,7 +550,6 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				rankServer.URL()+"/participants.json",
-				"tcro",
 			)
 
 			err := projection.HandleEvents(phase1Height, []event_entity.Event{validator1CreatedEvent, validator2CreatedEvent, phaseOneBlockCreatedEvent})

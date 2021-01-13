@@ -1,16 +1,12 @@
 package main
 
 import (
-	"github.com/crypto-com/chain-indexing/appinterface/projection/account_message"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/block"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/blockevent"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/transaction"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/validator"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/validatorstats"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
+	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	"github.com/crypto-com/chain-indexing/projection"
+	"strings"
 )
 
 func initProjections(
@@ -18,33 +14,33 @@ func initProjections(
 	rdbConn rdb.Conn,
 	config *Config,
 ) []projection_entity.Projection {
-	return []projection_entity.Projection{
-		block.NewBlock(logger, rdbConn),
-		transaction.NewTransaction(logger, rdbConn),
-		blockevent.NewBlockEvent(logger, rdbConn),
-		validator.NewValidator(
-			logger, rdbConn, config.Blockchain.ConNodeAddressPrefix,
-		),
-		validatorstats.NewValidatorStats(logger, rdbConn),
-		account_message.NewAccountMessage(logger, rdbConn),
+	var cosmosAppClient = cosmosapp_infrastructure.NewHTTPClient(config.CosmosApp.HTTPRPCUL)
 
-		// NOTICE: crossfire dry-run projection is only for main-net competition
-		// the logic and view tables could be removed after the competition is ended.
-		crossfire.NewCrossfire(
-			logger,
-			rdbConn,
-			config.Blockchain.ConNodeAddressPrefix,
-			config.Blockchain.ValidatorAddressPrefix,
-			config.Crossfire.PhaseOneStartTime,
-			config.Crossfire.PhaseTwoStartTime,
-			config.Crossfire.PhaseThreeStartTime,
-			config.Crossfire.CompetitionEndTime,
-			config.Crossfire.AdminAddress,
-			config.Crossfire.NetworkUpgradeProposalID,
-			config.Crossfire.ParticipantsListURL,
-			config.Blockchain.AccountAddressPrefix,
-		),
+	projections := make([]projection_entity.Projection, 0, len(config.Projection.Enables))
+	initParams := projection.InitParams{
+		Logger:                logger,
+		RdbConn:               rdbConn,
+		CosmosAppClient:       cosmosAppClient,
+		ConsNodeAddressPrefix: config.Blockchain.ConNodeAddressPrefix,
 
-		// register more projections here
+		ValidatorAddressPrefix: config.Blockchain.ValidatorAddressPrefix,
+		AccountAddressPrefix:   config.Blockchain.ValidatorAddressPrefix,
+
+		PhaseOneStartTime:        config.Crossfire.PhaseOneStartTime,
+		PhaseTwoStartTime:        config.Crossfire.PhaseTwoStartTime,
+		PhaseThreeStartTime:      config.Crossfire.PhaseThreeStartTime,
+		CompetitionEndTime:       config.Crossfire.CompetitionEndTime,
+		AdminAddress:             config.Crossfire.AdminAddress,
+		NetworkUpgradeProposalID: config.Crossfire.NetworkUpgradeProposalID,
+		ParticipantsListURL:      config.Crossfire.ParticipantsListURL,
 	}
+	for _, projectionName := range config.Projection.Enables {
+		projections = append(projections, projection.InitProjection(
+			projectionName, initParams,
+		))
+	}
+
+	logger.Infof("Enabled the follow projections: [%s]", strings.Join(config.Projection.Enables, ", "))
+
+	return projections
 }

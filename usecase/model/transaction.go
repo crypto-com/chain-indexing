@@ -8,7 +8,7 @@ type CreateTransactionParams struct {
 	Log           string
 	MsgCount      int
 	Signers       []TransactionSigner
-	Fee           coin.Coin
+	Fee           coin.Coins
 	FeePayer      string
 	FeeGranter    string
 	GasWanted     int

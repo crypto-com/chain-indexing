@@ -2,6 +2,7 @@ package event_test
 
 import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -16,7 +17,7 @@ var _ = Describe("Event", func() {
 		It("should able to encode and decode to the same event", func() {
 			anyHeight := int64(1000)
 			anyValidator := "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"
-			anyAmount := "123456"
+			anyAmount := coin.MustParseDecCoins("123456basetcro,456789tcro")
 			event := event_usecase.NewProposerRewarded(anyHeight, anyValidator, anyAmount)
 
 			encoded, err := event.ToJSON()

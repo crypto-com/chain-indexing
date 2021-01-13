@@ -42,6 +42,7 @@ func NewCrossfire(
 	rdbConn rdb.Conn,
 	conNodeAddressPrefix string,
 	validatorAddressPrefix string,
+	primaryAddressPrefix string,
 	unixPhaseOneStartTime int64,
 	unixPhaseTwoStartTime int64,
 	unixPhaseThreeStartTime int64,
@@ -49,7 +50,6 @@ func NewCrossfire(
 	adminAddress string,
 	networkUpgradeProposalID string,
 	participantsListURL string,
-	primaryAddressPrefix string,
 ) *Crossfire {
 	return &Crossfire{
 		Base: rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Crossfire"),
@@ -57,6 +57,7 @@ func NewCrossfire(
 		Client:                   NewHTTPClient(participantsListURL),
 		conNodeAddressPrefix:     conNodeAddressPrefix,
 		validatorAddressPrefix:   validatorAddressPrefix,
+		primaryAddressPrefix:     primaryAddressPrefix,
 		phaseOneStartTime:        utctime.FromUnixNano(unixPhaseOneStartTime),
 		phaseTwoStartTime:        utctime.FromUnixNano(unixPhaseTwoStartTime),
 		phaseThreeStartTime:      utctime.FromUnixNano(unixPhaseThreeStartTime),
@@ -66,7 +67,6 @@ func NewCrossfire(
 		participantsListUrl:      participantsListURL,
 		rdbConn:                  rdbConn,
 		logger:                   logger,
-		primaryAddressPrefix:     primaryAddressPrefix,
 	}
 }
 

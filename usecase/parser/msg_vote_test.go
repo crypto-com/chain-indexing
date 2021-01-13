@@ -15,7 +15,7 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgVote", func() {
 		It("should parse gov.MsgVote command in the transaction", func() {
-			txDecoder := parser.NewTxDecoder("basecro")
+			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_VOTE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_VOTE_BLOCK_RESULTS_RESP,

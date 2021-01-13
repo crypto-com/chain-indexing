@@ -43,47 +43,7 @@ type RawBlock struct {
 			Txs []string `json:"txs"`
 		} `json:"data"`
 		Evidence struct {
-			Evidence []struct {
-				Type  string `json:"type"`
-				Value struct {
-					PubKey struct {
-						Type  string `json:"type"`
-						Value string `json:"value"`
-					} `json:"Pubkey"`
-					VoteA struct {
-						Type    int    `json:"type"`
-						Height  string `json:"height"`
-						Round   int    `json:"round"`
-						BlockID struct {
-							Hash  string `json:"hash"`
-							Parts struct {
-								Total int    `json:"total"`
-								Hash  string `json:"hash"`
-							} `json:"parts"`
-						} `json:"block_id"`
-						Timestamp        utctime.UTCTime `json:"timestamp"`
-						ValidatorAddress string          `json:"validator_address"`
-						ValidatorIndex   string          `json:"validator_index"`
-						Signature        string          `json:"signature"`
-					} `json:"VoteA"`
-					VoteB struct {
-						Type    int    `json:"type"`
-						Height  string `json:"height"`
-						Round   int    `json:"round"`
-						BlockID struct {
-							Hash  string `json:"hash"`
-							Parts struct {
-								Total int    `json:"total"`
-								Hash  string `json:"hash"`
-							} `json:"parts"`
-						} `json:"block_id"`
-						Timestamp        utctime.UTCTime `json:"timestamp"`
-						ValidatorAddress string          `json:"validator_address"`
-						ValidatorIndex   string          `json:"validator_index"`
-						Signature        string          `json:"signature"`
-					} `json:"VoteB"`
-				} `json:"value"`
-			} `json:"evidence"`
+			Evidence []BlockEvidence `json:"evidence"`
 		} `json:"evidence"`
 		LastCommit struct {
 			Height  string `json:"height"`

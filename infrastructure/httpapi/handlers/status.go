@@ -2,18 +2,18 @@ package handlers
 
 import (
 	"strconv"
-	block_view "github.com/crypto-com/chain-indexing/appinterface/projection/block/view"
-	transaction_view "github.com/crypto-com/chain-indexing/appinterface/projection/transaction/view"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/validator/constants"
-	validator_view "github.com/crypto-com/chain-indexing/appinterface/projection/validator/view"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/validatorstats"
-	validatorstats_view "github.com/crypto-com/chain-indexing/appinterface/projection/validatorstats/view"
+
+	status_polling "github.com/crypto-com/chain-indexing/appinterface/polling"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	block_view "github.com/crypto-com/chain-indexing/projection/block/view"
+	transaction_view "github.com/crypto-com/chain-indexing/projection/transaction/view"
+	"github.com/crypto-com/chain-indexing/projection/validator/constants"
+	validator_view "github.com/crypto-com/chain-indexing/projection/validator/view"
+	"github.com/crypto-com/chain-indexing/projection/validatorstats"
+	validatorstats_view "github.com/crypto-com/chain-indexing/projection/validatorstats/view"
 	"github.com/valyala/fasthttp"
-	status_polling "github.com/crypto-com/chain-indexing/appinterface/polling"
-
 )
 
 type StatusHandler struct {
@@ -23,8 +23,7 @@ type StatusHandler struct {
 	transactionsTotalView *transaction_view.TransactionsTotal
 	validatorsView        *validator_view.Validators
 	validatorStatsView    *validatorstats_view.ValidatorStats
-	statusView         *status_polling.Status
-
+	statusView            *status_polling.Status
 }
 
 func NewStatusHandler(logger applogger.Logger, rdbHandle *rdb.Handle) *StatusHandler {
@@ -95,10 +94,9 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-
-	var latestHeightValue int64 =0
-	if n, err := strconv.ParseInt(latestHeight,10,64); err == nil {
-		latestHeightValue= n
+	var latestHeightValue int64 = 0
+	if n, err := strconv.ParseInt(latestHeight, 10, 64); err == nil {
+		latestHeightValue = n
 	} else {
 		handler.logger.Errorf("error convert latest height from string to int64: %v", err)
 		httpapi.InternalServerError(ctx)
@@ -111,8 +109,7 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 		TotalReward:          totalReward,
 		ValidatorCount:       validatorCount,
 		ActiveValidatorCount: activeValidatorCount,
-		LatestHeight: latestHeightValue,
-
+		LatestHeight:         latestHeightValue,
 	}
 
 	httpapi.Success(ctx, status)
@@ -125,5 +122,5 @@ type Status struct {
 	TotalReward          string `json:"totalReward"`
 	ValidatorCount       int64  `json:"validatorCount"`
 	ActiveValidatorCount int64  `json:"activeValidatorCount"`
-	LatestHeight    int64   `json:"latestHeight"`
+	LatestHeight         int64  `json:"latestHeight"`
 }

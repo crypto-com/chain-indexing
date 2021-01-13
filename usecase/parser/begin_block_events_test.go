@@ -29,7 +29,7 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 					model.AccountTransferParams{
 						Recipient: "tcro17xpfvakm2amg962yls6f84z3kell8c5lxhzaha",
 						Sender:    "tcro1m3h30wlvsf8llruxtpukdvsy0km2kum87lx9mq",
-						Amount:    coin.MustNewCoinFromString("17477215277"),
+						Amount:    coin.MustParseCoinsNormalized("17477215277basetcro"),
 					},
 				),
 				command_usecase.NewCreateMint(
@@ -46,40 +46,40 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 					model.AccountTransferParams{
 						Recipient: "tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l",
 						Sender:    "tcro17xpfvakm2amg962yls6f84z3kell8c5lxhzaha",
-						Amount:    coin.MustNewCoinFromString("17477255277"),
+						Amount:    coin.MustParseCoinsNormalized("17477255277basetcro"),
 					},
 				),
 				// should not double count proposer reward and the same amount block reward events
 				command_usecase.NewCreateBlockProposerReward(
 					expectedBlockHeight,
 					"tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
-					"868550031.392766344419273056",
+					coin.MustParseDecCoins("868550031.392766344419273056basetcro"),
 				),
 				command_usecase.NewCreateBlockCommission(
 					expectedBlockHeight,
 					"tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
-					"86855003.139276634441927306",
+					coin.MustParseDecCoins("86855003.139276634441927306basetcro"),
 				),
 				command_usecase.NewCreateBlockCommission(
 					expectedBlockHeight,
 					"tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6",
-					"459938524.284156813832125321",
+					coin.MustParseDecCoins("459938524.284156813832125321basetcro"),
 				),
 				command_usecase.NewCreateBlockReward(
 					expectedBlockHeight,
 					"tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6",
-					"919877048.568313627664250642",
+					coin.MustParseDecCoins("919877048.568313627664250642basetcro"),
 				),
 				// proposer get both proposer reward and block reward
 				command_usecase.NewCreateBlockCommission(
 					expectedBlockHeight,
 					"tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
-					"59324118.921629850151833479",
+					coin.MustParseDecCoins("59324118.921629850151833479basetcro"),
 				),
 				command_usecase.NewCreateBlockReward(
 					expectedBlockHeight,
 					"tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
-					"593241189.216298501518334791",
+					coin.MustParseDecCoins("593241189.216298501518334791basetcro"),
 				),
 			}))
 		})

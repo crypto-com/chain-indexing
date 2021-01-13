@@ -9,14 +9,14 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/internal/primptr"
 
-	"github.com/crypto-com/chain-indexing/appinterface/projection/validator/constants"
+	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 
 	"github.com/valyala/fasthttp"
 
-	validator_view "github.com/crypto-com/chain-indexing/appinterface/projection/validator/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	validator_view "github.com/crypto-com/chain-indexing/projection/validator/view"
 )
 
 type Validators struct {

@@ -25,7 +25,7 @@ var _ = Describe("Event", func() {
 				Title:       "any time",
 				Description: "any description",
 			}
-			anyInitialDeposit := coin.MustNewCoinFromString("1000")
+			anyInitialDeposit := coin.MustParseCoinsNormalized("1000basetcro,2000tcro")
 			anyParams := model.MsgSubmitCancelSoftwareUpgradeProposalParams{
 				ProposerAddress: anyProposerAddress,
 				Content:         anyContent,
@@ -66,7 +66,7 @@ var _ = Describe("Event", func() {
 				Title:       "any time",
 				Description: "any description",
 			}
-			anyInitialDeposit := coin.MustNewCoinFromString("1000")
+			anyInitialDeposit := coin.MustParseCoinsNormalized("1000basetcro,2000tcro")
 			anyParams := model.MsgSubmitCancelSoftwareUpgradeProposalParams{
 				ProposerAddress: anyProposerAddress,
 				Content:         anyContent,

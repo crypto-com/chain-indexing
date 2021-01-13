@@ -16,7 +16,7 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgSetWithdrawAddress", func() {
 		It("should parse Msg commands when there is distribution.MsgSetWithdrawAddress in the transaction", func() {
-			txDecoder := parser.NewTxDecoder("basetcro")
+			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_SET_WITHDRAW_ADDRESS_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_SET_WITHDRAW_ADDRESS_BLOCK_RESULTS_RESP,

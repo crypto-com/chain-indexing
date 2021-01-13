@@ -66,13 +66,11 @@ type FileConfig struct {
 	Database   DatabaseConfig
 	Postgres   PostgresConfig
 	Logger     LoggerConfig
+	Projection ProjectionConfig
 	Crossfire  CrossfireConfig
 }
 
 type BlockchainConfig struct {
-	CRODenom  string `toml:"cro_denom"`
-	BaseDenom string `toml:"base_denom"`
-
 	AccountAddressPrefix   string `toml:"account_address_prefix"`
 	AccountPubKeyPrefix    string `toml:"account_pubkey_prefix"`
 	ValidatorAddressPrefix string `toml:"validator_address_prefix"`
@@ -90,8 +88,11 @@ type SyncConfig struct {
 }
 
 type HTTPConfig struct {
-	ListeningAddress string `toml:"listening_address"`
-	RoutePrefix      string `toml:"route_prefix"`
+	ListeningAddress   string   `toml:"listening_address"`
+	RoutePrefix        string   `toml:"route_prefix"`
+	CorsAllowedOrigins []string `toml:"cors_allowed_origins"`
+	CorsAllowedMethods []string `toml:"cors_allowed_methods"`
+	CorsAllowedHeaders []string `toml:"cors_allowed_headers"`
 }
 
 type TendermintConfig struct {
@@ -123,6 +124,10 @@ type PostgresConfig struct {
 type LoggerConfig struct {
 	Level string `toml:"level"`
 	Color bool   `toml:"color"`
+}
+
+type ProjectionConfig struct {
+	Enables []string `toml:"enables"`
 }
 
 type CrossfireConfig struct {

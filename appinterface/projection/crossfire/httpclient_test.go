@@ -43,6 +43,7 @@ var _ = Describe("Crossfire Chain Stats", func() {
 			fakeRdbConn,
 			"tcrocnclcons",
 			"tcrocncl",
+			"tcro",
 			1,
 			1,
 			1,
@@ -50,7 +51,6 @@ var _ = Describe("Crossfire Chain Stats", func() {
 			"foo",
 			"14",
 			server.URL(),
-			"tcro",
 		)
 
 		participants, err := projection.Client.Participants()

@@ -35,7 +35,7 @@ var _ = Describe("Event", func() {
 					},
 				},
 			}
-			anyInitialDeposit := coin.MustNewCoinFromString("1000")
+			anyInitialDeposit := coin.MustParseCoinsNormalized("1000basetcro,2000tcro")
 			anyParams := model.MsgSubmitParamChangeProposalParams{
 				MaybeProposalId: &anyProposalId,
 				ProposerAddress: anyProposerAddress,
@@ -86,7 +86,7 @@ var _ = Describe("Event", func() {
 					},
 				},
 			}
-			anyInitialDeposit := coin.MustNewCoinFromString("1000")
+			anyInitialDeposit := coin.MustParseCoinsNormalized("1000basetcro,2000tcro")
 			anyParams := model.MsgSubmitParamChangeProposalParams{
 				ProposerAddress: anyProposerAddress,
 				Content:         anyContent,

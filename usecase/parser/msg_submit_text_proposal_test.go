@@ -18,7 +18,7 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgSubmitTextProposal", func() {
 		It("should parse gov.MsgSubmitTextProposal command  in the transaction", func() {
-			txDecoder := parser.NewTxDecoder("basetrcro")
+			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_SUBMIT_TEXT_PROPOSAL_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_SUBMIT_TEXT_PROPOSAL_BLOCK_RESULTS_RESP,
@@ -48,7 +48,7 @@ var _ = Describe("ParseMsgCommands", func() {
 							Description: "This a description for the proposal",
 						},
 						ProposerAddress: "tcro14fnzv5g92s6f8dg534lccp4x5tylkvth7zcq0u",
-						InitialDeposit:  coin.MustNewCoinFromString("1000000"),
+						InitialDeposit:  coin.MustParseCoinsNormalized("1000000basetcro"),
 					},
 				),
 			}))

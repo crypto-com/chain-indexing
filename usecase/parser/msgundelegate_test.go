@@ -18,7 +18,7 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgDelegate", func() {
 		It("should parse Msg commands when there is staking.MsgUndelegate in the transaction", func() {
-			txDecoder := parser.NewTxDecoder("basetcro")
+			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_UNDELEGATE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MSG_UNDELEGATE_BLOCK_RESULTS_RESP)
 
@@ -39,14 +39,14 @@ var _ = Describe("ParseMsgCommands", func() {
 				model.MsgUndelegateParams{
 					DelegatorAddress:      "tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64",
 					ValidatorAddress:      "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
-					Amount:                coin.MustNewCoinFromString("1000000000"),
+					Amount:                coin.MustParseCoinNormalized("1000000000basetcro"),
 					MaybeUnbondCompleteAt: primptr.UTCTime(utctime.FromUnixNano(int64(1605152654000000000))),
 				},
 			)}))
 		})
 
 		It("should parse MsgUndelegate command in failed transaction", func() {
-			txDecoder := parser.NewTxDecoder("basetcro")
+			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_MSG_UNDELEGATE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_MSG_UNDELEGATE_BLOCK_RESULTS_RESP)
 
@@ -67,7 +67,7 @@ var _ = Describe("ParseMsgCommands", func() {
 				model.MsgUndelegateParams{
 					DelegatorAddress:      "tcro1llst0cguh5azl9t8wr6mz5yzjuwukz7f67z7f6",
 					ValidatorAddress:      "tcrocncl15e69kdrtczajjdlzyt2qgs5q2anc5qpmk2c68z",
-					Amount:                coin.MustNewCoinFromString("50000000000000"),
+					Amount:                coin.MustParseCoinNormalized("50000000000000basetcro"),
 					MaybeUnbondCompleteAt: nil,
 				},
 			)}))

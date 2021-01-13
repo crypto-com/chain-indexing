@@ -3,16 +3,14 @@ package main
 import (
 	"fmt"
 
-	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
+	"github.com/lab259/cors"
 
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
-
-	"github.com/crypto-com/chain-indexing/infrastructure/httpapi/routes"
-
-	"github.com/crypto-com/chain-indexing/infrastructure/httpapi/handlers"
-
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
+	"github.com/crypto-com/chain-indexing/infrastructure/httpapi/handlers"
+	"github.com/crypto-com/chain-indexing/infrastructure/httpapi/routes"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 
@@ -24,9 +22,13 @@ type HTTPAPIServer struct {
 	validatorAddressPrefix string
 	conNodeAddressPrefix   string
 
-	listeningAddress string
-	routePrefix      string
-	participantsURL  string
+	listeningAddress   string
+	routePrefix        string
+	corsAllowedOrigins []string
+	corsAllowedMethods []string
+	corsAllowedHeaders []string
+
+	participantsURL string
 }
 
 // NewIndexService creates a new server instance for polling and indexing
@@ -40,7 +42,12 @@ func NewHTTPAPIServer(logger applogger.Logger, rdbConn rdb.Conn, config *Config)
 		conNodeAddressPrefix:   config.Blockchain.ConNodeAddressPrefix,
 		listeningAddress:       config.HTTP.ListeningAddress,
 		routePrefix:            config.HTTP.RoutePrefix,
-		participantsURL:        config.Crossfire.ParticipantsListURL,
+
+		corsAllowedOrigins: config.HTTP.CorsAllowedOrigins,
+		corsAllowedMethods: config.HTTP.CorsAllowedMethods,
+		corsAllowedHeaders: config.HTTP.CorsAllowedHeaders,
+
+		participantsURL: config.Crossfire.ParticipantsListURL,
 	}
 }
 
@@ -51,6 +58,15 @@ func (server *HTTPAPIServer) Run() error {
 	).WithLogger(
 		server.logger,
 	)
+
+	if len(server.corsAllowedOrigins) != 0 {
+		httpServer = httpServer.WithCors(cors.Options{
+			AllowedOrigins: server.corsAllowedOrigins,
+			AllowedMethods: server.corsAllowedMethods,
+			AllowedHeaders: server.corsAllowedHeaders,
+			Debug:          true,
+		})
+	}
 
 	searchHandler := handlers.NewSearch(server.logger, server.rdbConn.ToHandle())
 	blocksHandler := handlers.NewBlocks(server.logger, server.rdbConn.ToHandle())
@@ -66,6 +82,8 @@ func (server *HTTPAPIServer) Run() error {
 	)
 	accountMessagesHandler := handlers.NewAccountMessages(server.logger, server.rdbConn.ToHandle())
 	crossfireHandler := handlers.NewCrossfire(server.logger, server.validatorAddressPrefix, server.conNodeAddressPrefix, server.cosmosAppClient, server.rdbConn.ToHandle(), server.participantsURL)
+	accountsHandler := handlers.NewAccounts(server.logger, server.rdbConn.ToHandle())
+
 	routeRegistry := routes.NewRoutesRegistry(
 		searchHandler,
 		blocksHandler,
@@ -74,6 +92,7 @@ func (server *HTTPAPIServer) Run() error {
 		blockEventsHandler,
 		validatorsHandler,
 		accountMessagesHandler,
+		accountsHandler,
 		crossfireHandler,
 	)
 	routeRegistry.Register(httpServer, server.routePrefix)

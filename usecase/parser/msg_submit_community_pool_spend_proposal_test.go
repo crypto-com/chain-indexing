@@ -18,7 +18,7 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgSubmitCommunityPoolSpendProposal", func() {
 		It("should parse Msg commands when there is gov.MsgSubmitCommunityPoolSpendProposal in the transaction", func() {
-			txDecoder := parser.NewTxDecoder("basetcro")
+			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_BLOCK_RESULTS_RESP,
@@ -46,10 +46,10 @@ var _ = Describe("ParseMsgCommands", func() {
 							Title:            "Community Pool Spend",
 							Description:      "Pay me some Cro!",
 							RecipientAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-							Amount:           coin.MustNewCoinFromString("1"),
+							Amount:           coin.MustParseCoinsNormalized("1basetcro"),
 						},
 						ProposerAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-						InitialDeposit:  coin.MustNewCoinFromString("2"),
+						InitialDeposit:  coin.MustParseCoinsNormalized("2basetcro"),
 					},
 				),
 			}))

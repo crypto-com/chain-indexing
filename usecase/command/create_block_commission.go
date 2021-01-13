@@ -2,16 +2,17 @@ package command
 
 import (
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/event"
 )
 
 type CreateBlockCommission struct {
 	blockHeight int64
 	validator   string
-	amount      string
+	amount      coin.DecCoins
 }
 
-func NewCreateBlockCommission(blockHeight int64, validator string, amount string) *CreateBlockCommission {
+func NewCreateBlockCommission(blockHeight int64, validator string, amount coin.DecCoins) *CreateBlockCommission {
 	return &CreateBlockCommission{
 		blockHeight,
 		validator,

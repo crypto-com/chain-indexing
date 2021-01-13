@@ -35,6 +35,7 @@ var _ = Describe("Crossfire", func() {
 			fakeRdbConn,
 			"tcrocnclcons",
 			"tcrocncl",
+			"tcro",
 			1,
 			1,
 			1,
@@ -42,7 +43,6 @@ var _ = Describe("Crossfire", func() {
 			"foo",
 			"14",
 			"/participants.json",
-			"tcro",
 		)
 	})
 
@@ -71,7 +71,7 @@ var _ = Describe("Crossfire", func() {
 			DelegatorAddress:  "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
 			ValidatorAddress:  "tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5",
 			TendermintPubkey:  "na51D8RmKXyWrid9I6wtdxgP6f1Nl3EyNNEzqxVquoM=",
-			Amount:            coin.MustNewCoinFromString("100"),
+			Amount:            coin.MustNewCoinFromString("basetcro", "100"),
 		})
 
 		validator2CreatedEvent := event_usecase.NewMsgCreateValidator(event_usecase.MsgCommonParams{
@@ -96,7 +96,7 @@ var _ = Describe("Crossfire", func() {
 			DelegatorAddress:  "tcro1f6qcvp33dc79xzpuwll7mln5lnepuqv8d7led9",
 			ValidatorAddress:  "tcrocncl1n4t5q77kn9vf73s7ljs96m85jgg49yqpg0chrj",
 			TendermintPubkey:  "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
-			Amount:            coin.MustNewCoinFromString("222"),
+			Amount:            coin.MustNewCoinFromString("basetcro", "222"),
 		})
 
 		validator3CreatedEvent := event_usecase.NewMsgCreateValidator(event_usecase.MsgCommonParams{
@@ -121,7 +121,7 @@ var _ = Describe("Crossfire", func() {
 			DelegatorAddress:  "tcro1432x4lc5mrgm30c9xx35unmn9ultemm5nt40vq",
 			ValidatorAddress:  "tcrocncl1f6qcvp33dc79xzpuwll7mln5lnepuqv8cpuq4x",
 			TendermintPubkey:  "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsAE=",
-			Amount:            coin.MustNewCoinFromString("333"),
+			Amount:            coin.MustNewCoinFromString("basetcro", "333"),
 		})
 
 		phaseOneBlockCreatedEvent := event_usecase.NewBlockCreated(&usecase_model.Block{
@@ -227,7 +227,7 @@ var _ = Describe("Crossfire", func() {
 						AccountSequence: uint64(1),
 					},
 				},
-				Fee:           coin.MustNewCoinFromString("1000"),
+				Fee:           coin.MustNewCoinFromString("basetcro", "1000"),
 				FeePayer:      "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
 				FeeGranter:    "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
 				GasWanted:     200000,
@@ -288,6 +288,7 @@ var _ = Describe("Crossfire", func() {
 				pgConn,
 				"tcrocnclcons",
 				"tcrocncl",
+				"tcro",
 				1610942400000000000,
 				1611547200000000000,
 				1612756800000000000,
@@ -295,7 +296,6 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				server.URL()+"/participants.json",
-				"tcro",
 			)
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
@@ -361,6 +361,7 @@ var _ = Describe("Crossfire", func() {
 				pgConn,
 				"tcrocnclcons",
 				"tcrocncl",
+				"tcro",
 				1610942400000000000,
 				1611547200000000000,
 				1612756800000000000,
@@ -368,7 +369,6 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				server.URL()+"/participants.json",
-				"tcro",
 			)
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
@@ -456,7 +456,7 @@ var _ = Describe("Crossfire", func() {
 					},
 				},
 				ProposerAddress: "tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
-				InitialDeposit:  coin.Zero(),
+				InitialDeposit:  coin.MustParseCoinsNormalized("1000basetcro,2000tcro"),
 			})
 
 			fakeLogger := NewFakeLogger()
@@ -465,6 +465,7 @@ var _ = Describe("Crossfire", func() {
 				pgConn,
 				"tcrocnclcons",
 				"tcrocncl",
+				"tcro",
 				1610942400000000000,
 				1611547200000000000,
 				1612756800000000000,
@@ -472,7 +473,6 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				server.URL()+"/participants.json",
-				"tcro",
 			)
 
 			// Fire both events
@@ -536,6 +536,7 @@ var _ = Describe("Crossfire", func() {
 				pgConn,
 				"tcrocnclcons",
 				"tcrocncl",
+				"tcro",
 				1610942400000000000,
 				1611547200000000000,
 				1612756800000000000,
@@ -543,7 +544,6 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				server.URL()+"/participants.json",
-				"tcro",
 			)
 
 			// Fire both events
@@ -583,6 +583,7 @@ var _ = Describe("Crossfire", func() {
 				pgConn,
 				"tcrocnclcons",
 				"tcrocncl",
+				"tcro",
 				1610942400000000000,
 				1611547200000000000,
 				1612756800000000000,
@@ -590,7 +591,6 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				server.URL()+"/participants.json",
-				"tcro",
 			)
 
 			// Fire both events
@@ -662,6 +662,7 @@ var _ = Describe("Crossfire", func() {
 				pgConn,
 				"tcrocnclcons",
 				"tcrocncl",
+				"tcro",
 				1610942400000000000,
 				1611547200000000000,
 				1612756800000000000,
@@ -669,7 +670,6 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				fakeServer.URL()+"/participants.json",
-				"tcro",
 			)
 
 			// Fire both events
@@ -739,7 +739,7 @@ var _ = Describe("Crossfire", func() {
 					},
 				},
 				ProposerAddress: "tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
-				InitialDeposit:  coin.Zero(),
+				InitialDeposit:  coin.MustParseCoinsNormalized("1000basetcro,2000tcro"),
 			})
 
 			projection := crossfire.NewCrossfire(
@@ -747,6 +747,7 @@ var _ = Describe("Crossfire", func() {
 				pgConn,
 				"tcrocnclcons",
 				"tcrocncl",
+				"tcro",
 				1610942400000000000,
 				1611547200000000000,
 				1612756800000000000,
@@ -754,7 +755,6 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				server.URL()+"/participants.json",
-				"tcro",
 			)
 
 			// Fire both events

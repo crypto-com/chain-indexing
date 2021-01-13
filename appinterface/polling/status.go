@@ -1,8 +1,9 @@
 package polling
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
+
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 )
 
@@ -16,7 +17,7 @@ func NewStatus(handle *rdb.Handle) *Status {
 	}
 }
 
-func (view *Status) Insert(statusid string, statusvalue string) error {
+func (view *Status) Upsert(statusId string, statusValue string) error {
 	var err error
 
 	var sql string
@@ -30,7 +31,7 @@ func (view *Status) Insert(statusid string, statusvalue string) error {
 	if err != nil {
 		return fmt.Errorf("error building blocks insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
-	result, err := view.rdb.Exec(sql, statusid, statusvalue)
+	result, err := view.rdb.Exec(sql, statusId, statusValue)
 	if err != nil {
 		return fmt.Errorf("error inserting view_status into the table: %v: %w", err, rdb.ErrWrite)
 	}
@@ -57,7 +58,7 @@ func (view *Status) FindBy(statusid string) (string, error) {
 	if err = view.rdb.QueryRow(sql, sqlArgs...).Scan(
 		&found,
 	); err != nil {
-		if errors.Is(err,rdb.ErrNoRows) {
+		if errors.Is(err, rdb.ErrNoRows) {
 			return "", rdb.ErrNoRows
 		}
 		return "", fmt.Errorf("error scanning block row: %v: %w", err, rdb.ErrQuery)

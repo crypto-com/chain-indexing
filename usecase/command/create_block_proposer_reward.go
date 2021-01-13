@@ -2,16 +2,17 @@ package command
 
 import (
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/event"
 )
 
 type CreateBlockProposerReward struct {
 	blockHeight int64
 	validator   string
-	amount      string
+	amount      coin.DecCoins
 }
 
-func NewCreateBlockProposerReward(blockHeight int64, validator string, amount string) *CreateBlockProposerReward {
+func NewCreateBlockProposerReward(blockHeight int64, validator string, amount coin.DecCoins) *CreateBlockProposerReward {
 	return &CreateBlockProposerReward{
 		blockHeight,
 		validator,

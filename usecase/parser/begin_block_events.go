@@ -34,7 +34,7 @@ func ParseBeginBlockEventsCommands(blockHeight int64, beginBlockEvents []model.B
 				blockHeight, model.AccountTransferParams{
 					Recipient: transferEvent.MustGetAttributeByKey("recipient"),
 					Sender:    transferEvent.MustGetAttributeByKey("sender"),
-					Amount:    coin.MustNewCoinFromString(TrimAmountDenom(amount)),
+					Amount:    coin.MustParseCoinsNormalized(amount),
 				}))
 		} else if event.Type == "mint" {
 			mintEvent := NewParsedTxsResultLogEvent(&beginBlockEvents[i])
@@ -56,7 +56,7 @@ func ParseBeginBlockEventsCommands(blockHeight int64, beginBlockEvents []model.B
 
 			validator := proposerRewardEvent.MustGetAttributeByKey("validator")
 			commands = append(commands, command_usecase.NewCreateBlockProposerReward(
-				blockHeight, validator, TrimAmountDenom(amount),
+				blockHeight, validator, coin.MustParseDecCoins(amount),
 			))
 		} else if event.Type == "rewards" {
 			proposerRewardEvent := NewParsedTxsResultLogEvent(&beginBlockEvents[i])
@@ -73,7 +73,7 @@ func ParseBeginBlockEventsCommands(blockHeight int64, beginBlockEvents []model.B
 			}
 
 			commands = append(commands, command_usecase.NewCreateBlockReward(
-				blockHeight, validator, TrimAmountDenom(amount),
+				blockHeight, validator, coin.MustParseDecCoins(amount),
 			))
 		} else if event.Type == "commission" {
 			proposerRewardEvent := NewParsedTxsResultLogEvent(&beginBlockEvents[i])
@@ -84,7 +84,7 @@ func ParseBeginBlockEventsCommands(blockHeight int64, beginBlockEvents []model.B
 
 			validator := proposerRewardEvent.MustGetAttributeByKey("validator")
 			commands = append(commands, command_usecase.NewCreateBlockCommission(
-				blockHeight, validator, TrimAmountDenom(amount),
+				blockHeight, validator, coin.MustParseDecCoins(amount),
 			))
 		} else if event.Type == "slash" {
 			slashEvent := NewParsedTxsResultLogEvent(&beginBlockEvents[i])

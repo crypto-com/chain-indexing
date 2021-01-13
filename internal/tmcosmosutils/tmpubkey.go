@@ -81,7 +81,8 @@ func ValidatorAddressFromPubAddress(bech32Prefix string, userAddress string) (st
 
 	return validatorAddress, nil
 }
-func ConsensusNodeAddressFromPubKey(bech32Prefix string, consensusNodePubKey string) (string, error) {
+
+func ConsensusNodeAddressFromConsensusNodePubKey(bech32Prefix string, consensusNodePubKey string) (string, error) {
 	_, conv, err := bech32.Decode(consensusNodePubKey)
 	if err != nil {
 		return "", fmt.Errorf("error converting consensus node pubkey to address")
