@@ -94,7 +94,7 @@ func (handler *Crossfire) ListAllCrossfireValidators(ctx *fasthttp.RequestCtx) {
 				TaskSetup:                  crossfireValidatorsDB[idx].TaskPhase1NodeSetup,
 				TaskKeepActive:             crossfireValidatorsDB[idx].TaskPhase2KeepNodeActive,
 				TaskProposalVote:           crossfireValidatorsDB[idx].TaskPhase2ProposalVote,
-				TaskNetworkUpgrade:         crossfireValidatorsDB[idx].TaskPhase2NetworkUpgrade,
+				TaskNetworkUpgrade:         validatorStats.TaskNetworkUpgrade,
 				RankPhase1n2CommitmentRank: crossfireValidatorsDB[idx].RankTaskPhase1n2CommitmentCount,
 				RankPhase3CommitmentRank:   crossfireValidatorsDB[idx].RankTaskPhase3CommitmentCount,
 				RankTxSentRank:             crossfireValidatorsDB[idx].RankTaskHighestTxSent,
@@ -136,6 +136,13 @@ func (handler *Crossfire) getValidatorStats(operatorAddress string, dbValidator 
 			finalValidatorStats.CommitCountPhase2 = validatorStatRow.Value
 		case crossfire_constants.PHASE_1N2_COMMIT_PREFIX:
 			finalValidatorStats.CommitCountPhase1n2 = validatorStatRow.Value
+		case crossfire_constants.VOTED_PROPOSAL_ID:
+			{
+				finalValidatorStats.TaskNetworkUpgrade = crossfire_constants.INCOMPLETED
+				if validatorStatRow.Value > 0 {
+					finalValidatorStats.TaskNetworkUpgrade = crossfire_constants.COMPLETED
+				}
+			}
 		default:
 			break
 		}
@@ -181,6 +188,7 @@ type ValidatorStats struct {
 	CommitCountPhase3   int64           `json:"commitCountPhase3"`
 	JoinedAtBlockHeight int64           `json:"joinedAtBlockHeight"`
 	JoinedAtTimestamp   utctime.UTCTime `json:"joinedAtTimestamp"`
+	TaskNetworkUpgrade  crossfire_constants.TaskStatus
 }
 
 // CrossfireValidatorDetails response object
