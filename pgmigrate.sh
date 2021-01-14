@@ -24,7 +24,10 @@ echoerr() { echo "$@" 1>&2; }
 
 check_password_strength() {
 	  echo "checking password strength"
-	  go run ./cmd/check-password-strength/main.go
+	  if [[ ! -f ./check-password-strength ]]; then
+	      make check-password-strength
+	  fi
+	  ./check-password-strength
 }
 
 check_migrate() {
