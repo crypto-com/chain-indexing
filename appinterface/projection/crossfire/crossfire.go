@@ -222,7 +222,7 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 			}
 
 			//Check task network upgrade
-			errUpdatingTask := projection.checkTaskNetworkUpgrade(crossfireValidatorsView, crossfireChainStatsView, validator, blockTime, blockHeight)
+			errUpdatingTask := projection.checkTaskNetworkUpgrade(crossfireValidatorsView, crossfireChainStatsView, validator, blockTime)
 			if errUpdatingTask != nil {
 				return fmt.Errorf(
 					"error Updating crossfire task completion %s", errUpdatingTask,
@@ -697,7 +697,6 @@ func (projection *Crossfire) checkTaskNetworkUpgrade(
 	crossfireChainStatsView *view.CrossfireChainStats,
 	validator *view.CrossfireValidatorRow,
 	blockTime utctime.UTCTime,
-	blockHeight int64,
 ) error {
 
 	// Check if Validator's upgrade is already successful
