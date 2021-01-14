@@ -593,7 +593,7 @@ func (projection *Crossfire) updateTxSentCount(
 			}
 
 			//Increment count for Weekly Jackpot (If Applicable)
-			if len(weeklyJackpotDBKey) <= 0 {
+			if weeklyJackpotDBKey == "" {
 				continue
 			}
 			key := fmt.Sprintf("%s%s%s", weeklyJackpotDBKey, constants.DB_KEY_SEPARATOR, primaryAddress)
