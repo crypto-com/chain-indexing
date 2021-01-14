@@ -77,6 +77,7 @@ func (server *HTTPAPIServer) Run() error {
 		server.cosmosAppClient,
 		server.rdbConn.ToHandle(),
 	)
+	accountTransactionsHandler := handlers.NewAccountTransactions(server.logger, server.rdbConn.ToHandle())
 	accountMessagesHandler := handlers.NewAccountMessages(server.logger, server.rdbConn.ToHandle())
 	accountsHandler := handlers.NewAccounts(server.logger, server.rdbConn.ToHandle())
 
@@ -87,6 +88,7 @@ func (server *HTTPAPIServer) Run() error {
 		transactionsHandler,
 		blockEventsHandler,
 		validatorsHandler,
+		accountTransactionsHandler,
 		accountMessagesHandler,
 		accountsHandler,
 	)

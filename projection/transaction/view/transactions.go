@@ -29,17 +29,15 @@ func NewTransactions(handle *rdb.Handle) *BlockTransactions {
 	}
 }
 
-func (transactionsView *BlockTransactions) Insert(transaction *TransactionRow) error {
-	var err error
-
-	var sql string
-	sql, _, err = transactionsView.rdb.StmtBuilder.Insert(
+func (transactionsView *BlockTransactions) InsertAll(transactions []TransactionRow) error {
+	stmtBuilder := transactionsView.rdb.StmtBuilder.Insert(
 		"view_transactions",
 	).Columns(
 		"block_height",
 		"block_hash",
 		"block_time",
 		"hash",
+		"index",
 		"success",
 		"code",
 		"log",
@@ -51,7 +49,83 @@ func (transactionsView *BlockTransactions) Insert(transaction *TransactionRow) e
 		"memo",
 		"timeout_height",
 		"messages",
-	).Values("?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?").ToSql()
+	)
+
+	for _, transaction := range transactions {
+		var transactionMessagesJSON string
+		var marshalErr error
+		if transactionMessagesJSON, marshalErr = jsoniter.MarshalToString(transaction.Messages); marshalErr != nil {
+			return fmt.Errorf(
+				"error JSON marshalling block transation messages for insertion: %v: %w", marshalErr, rdb.ErrBuildSQLStmt,
+			)
+		}
+
+		var feeJSON string
+		if feeJSON, marshalErr = jsoniter.MarshalToString(transaction.Fee); marshalErr != nil {
+			return fmt.Errorf(
+				"error JSON marshalling block transation fee for insertion: %v: %w", marshalErr, rdb.ErrBuildSQLStmt,
+			)
+		}
+
+		stmtBuilder = stmtBuilder.Values(
+			transaction.BlockHeight,
+			transaction.BlockHash,
+			transactionsView.rdb.Tton(&transaction.BlockTime),
+			transaction.Hash,
+			transaction.Index,
+			transaction.Success,
+			transaction.Code,
+			transaction.Log,
+			feeJSON,
+			transaction.FeePayer,
+			transaction.FeeGranter,
+			transaction.GasWanted,
+			transaction.GasUsed,
+			transaction.Memo,
+			transaction.TimeoutHeight,
+			transactionMessagesJSON,
+		)
+	}
+	sql, sqlArgs, err := stmtBuilder.ToSql()
+	if err != nil {
+		return fmt.Errorf("error building block transactions insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	result, err := transactionsView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error inserting block transaction into the table: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() != int64(len(transactions)) {
+		return fmt.Errorf("error inserting block transaction into the table: no rows inserted: %w", rdb.ErrWrite)
+	}
+
+	return nil
+}
+
+func (transactionsView *BlockTransactions) Insert(transaction *TransactionRow) error {
+	var err error
+
+	var sql string
+	sql, _, err = transactionsView.rdb.StmtBuilder.Insert(
+		"view_transactions",
+	).Columns(
+		"block_height",
+		"block_hash",
+		"block_time",
+		"hash",
+		"index",
+		"success",
+		"code",
+		"log",
+		"fee",
+		"fee_payer",
+		"fee_granter",
+		"gas_wanted",
+		"gas_used",
+		"memo",
+		"timeout_height",
+		"messages",
+	).Values("?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?").ToSql()
 	if err != nil {
 		return fmt.Errorf("error building block transactions insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
@@ -71,6 +145,7 @@ func (transactionsView *BlockTransactions) Insert(transaction *TransactionRow) e
 		transaction.BlockHash,
 		transactionsView.rdb.Tton(&transaction.BlockTime),
 		transaction.Hash,
+		transaction.Index,
 		transaction.Success,
 		transaction.Code,
 		transaction.Log,
@@ -312,7 +387,7 @@ func (transactionsView *BlockTransactions) Search(keyword string) ([]Transaction
 	).From(
 		"view_transactions",
 	).Where(
-		"block_height::TEXT = ? OR block_hash = ? OR hash = ?", keyword, keyword, keyword,
+		"hash = ?", keyword,
 	).OrderBy(
 		"block_height",
 	).Limit(5).ToSql()
@@ -400,6 +475,7 @@ type TransactionRow struct {
 	BlockHash     string                  `json:"blockHash"`
 	BlockTime     utctime.UTCTime         `json:"blockTime"`
 	Hash          string                  `json:"hash"`
+	Index         int                     `json:"index"`
 	Success       bool                    `json:"success"`
 	Code          int                     `json:"code"`
 	Log           string                  `json:"log"`

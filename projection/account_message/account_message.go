@@ -44,11 +44,6 @@ func (projection *AccountMessage) OnInit() error {
 }
 
 func (projection *AccountMessage) HandleEvents(height int64, events []event_entity.Event) error {
-	// TODO: Handle genesis transaction
-	if height == int64(0) {
-		return nil
-	}
-
 	rdbTx, err := projection.rdbConn.Begin()
 	if err != nil {
 		return fmt.Errorf("error beginning transaction: %v", err)
@@ -62,6 +57,20 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 	}()
 
 	rdbTxHandle := rdbTx.ToHandle()
+
+	// TODO: Handle genesis transaction
+	if height == int64(0) {
+		if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
+			return fmt.Errorf("error updating last handled event height: %v", err)
+		}
+
+		if err := rdbTx.Commit(); err != nil {
+			return fmt.Errorf("error committing changes: %v", err)
+		}
+		committed = true
+		return nil
+	}
+
 	accountMessagesView := view.NewAccountMessages(rdbTxHandle)
 	accountMessagesTotalView := view.NewAccountMessagesTotal(rdbTxHandle)
 

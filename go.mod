@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/BurntSushi/toml v0.3.1
-	github.com/Masterminds/squirrel v1.4.0
+	github.com/Masterminds/squirrel v1.5.0
 	github.com/brianvoe/gofakeit/v5 v5.10.1
 	github.com/btcsuite/btcutil v1.0.2
 	github.com/calvinlauco/cosmostxdecoder v0.0.1-rc3
@@ -26,11 +26,11 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.20.0
 	github.com/stretchr/testify v1.6.1
-	github.com/tendermint/tendermint v0.34.0
+	github.com/tendermint/tendermint v0.34.1
 	github.com/urfave/cli/v2 v2.2.0
 	github.com/valyala/fasthttp v1.17.0
 	golang.org/x/sys v0.0.0-20201214210602-f9fddec55a1e // indirect
-	gopkg.in/yaml.v2 v2.3.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.2-alpha.regen.4

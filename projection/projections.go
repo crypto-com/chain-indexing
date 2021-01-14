@@ -9,6 +9,7 @@ import (
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/crypto-com/chain-indexing/projection/account"
 	"github.com/crypto-com/chain-indexing/projection/account_message"
+	"github.com/crypto-com/chain-indexing/projection/account_transaction"
 	"github.com/crypto-com/chain-indexing/projection/block"
 	"github.com/crypto-com/chain-indexing/projection/blockevent"
 	"github.com/crypto-com/chain-indexing/projection/transaction"
@@ -20,6 +21,8 @@ func InitProjection(name string, params InitParams) projection_entity.Projection
 	switch name {
 	case "Account":
 		return account.NewAccount(params.Logger, params.RdbConn, params.CosmosAppClient)
+	case "AccountTransaction":
+		return account_transaction.NewAccountTransaction(params.Logger, params.RdbConn, params.AccountAddressPrefix)
 	case "AccountMessage":
 		return account_message.NewAccountMessage(params.Logger, params.RdbConn)
 	case "Block":
@@ -45,5 +48,6 @@ type InitParams struct {
 	RdbConn rdb.Conn
 
 	CosmosAppClient       cosmosapp.Client
+	AccountAddressPrefix  string
 	ConsNodeAddressPrefix string
 }
