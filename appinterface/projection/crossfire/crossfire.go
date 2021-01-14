@@ -239,7 +239,7 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 			}
 
 			//Check task network upgrade
-			errUpdatingTask := projection.checkTaskNetworkUpgrade(crossfireValidatorsView, crossfireChainStatsView, validator, blockTime, blockHeight)
+			errUpdatingTask := projection.checkTaskNetworkUpgrade(crossfireValidatorsView, crossfireChainStatsView, validator, blockTime)
 			if errUpdatingTask != nil {
 				return fmt.Errorf(
 					"error Updating crossfire task completion %s", errUpdatingTask,
@@ -395,24 +395,11 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 				return fmt.Errorf("error checking Proposal ID in Vote not matching")
 			}
 
-			// Check if Vote is NOT Yes or Abstain
-			// TODO: Whether keep VOTE_OPTION_UNSPECIFIED or not?
-			if !(strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_YES || strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_ABSTAIN || strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_UNSPECIFIED) {
+			// Check if Vote is Casted
+			if !(strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_YES || strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_ABSTAIN || strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_UNSPECIFIED || strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_NO || strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_NO_WITH_VETO) {
 				return fmt.Errorf("error Ineligible Vote. Casted vote: %s", msgVoteCreatedEvent.Option)
 			}
 
-			//TODO: Is this assumption correct? How to fetch operatorAddress / consensusAddress
-			operatorAddress, errConverting := tmcosmosutils.ValidatorAddressFromPubAddress(projection.validatorAddressPrefix, msgVoteCreatedEvent.Voter)
-
-			if errConverting != nil {
-				return fmt.Errorf("error In converting voter address to validator address: %v", errConverting)
-			}
-
-			errCheckingTask := projection.checkTaskNetworkProposalVote(crossfireValidatorsView, operatorAddress, blockTime)
-
-			if errCheckingTask != nil {
-				return fmt.Errorf("error In checking Network proposal vote: %v", errCheckingTask)
-			}
 			// Update the proposed ID against the voter in Database
 			voted_proposal_id_db_key := constants.VOTED_PROPOSAL_ID + constants.DB_KEY_SEPARATOR + msgVoteCreatedEvent.Voter
 
@@ -519,6 +506,7 @@ func (projection *Crossfire) checkTaskKeepActive(
 	return nil
 }
 
+/*
 // checkTaskNetworkProposalVote
 func (projection *Crossfire) checkTaskNetworkProposalVote(
 	crossfireValidatorsView *view.CrossfireValidators,
@@ -546,7 +534,7 @@ func (projection *Crossfire) checkTaskNetworkProposalVote(
 	}
 
 	return nil
-}
+}*/
 
 // Update Tx sent count for sender
 func (projection *Crossfire) updateTxSentCount(
@@ -753,7 +741,6 @@ func (projection *Crossfire) checkTaskNetworkUpgrade(
 	crossfireChainStatsView *view.CrossfireChainStats,
 	validator *view.CrossfireValidatorRow,
 	blockTime utctime.UTCTime,
-	blockHeight int64,
 ) error {
 
 	// Check if Validator's upgrade is already successful
@@ -762,20 +749,14 @@ func (projection *Crossfire) checkTaskNetworkUpgrade(
 	}
 
 	targetTimestampDBKey := constants.NETWORK_UPGRADE_TARGET_TIMESTAMP_KEY()
-	targetBlockHeightDBKey := constants.NETWORK_UPGRADE_TARGET_BLOCKHEIGHT_KEY()
 
 	networkUpgradeTimestampNanoSec, errTimestamp := crossfireChainStatsView.FindBy(targetTimestampDBKey)
 	if errTimestamp != nil {
 		return fmt.Errorf("error getting network Upgrade timestamp: %v", errTimestamp)
 	}
 
-	networkUpgradeBlockheight, errBlockheight := crossfireChainStatsView.FindBy(targetBlockHeightDBKey)
-	if errBlockheight != nil {
-		return fmt.Errorf("error getting network Upgrade Blockheight: %v", errBlockheight)
-	}
-
 	// Check if current block is before the network upgrade
-	if blockTime.Before(utctime.FromUnixNano(networkUpgradeTimestampNanoSec)) || blockHeight < networkUpgradeBlockheight {
+	if blockTime.Before(utctime.FromUnixNano(networkUpgradeTimestampNanoSec)) {
 		return nil
 	}
 	errUpdatingTaskCompletion := crossfireValidatorsView.UpdateTaskForOperatorAddress("task_phase_2_network_upgrade", constants.COMPLETED, validator.OperatorAddress)

@@ -584,7 +584,7 @@ var _ = Describe("Crossfire", func() {
 			crossfireValidatorList, err := crossfireValidatorView.List()
 			Expect(err).To(BeNil())
 			Expect(crossfireValidatorList).To(HaveLen(1))
-			Expect(crossfireValidatorList[0].TaskPhase2ProposalVote).To(Equal(constants.COMPLETED))
+			Expect(crossfireValidatorList[0].TaskPhase2ProposalVote).To(Equal(constants.INCOMPLETED))
 
 			//Check voted proposal id for voter
 			voted_proposal_id, err := crossfireValidatorStatsView.FindBy("voted_proposal_id:tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh")
