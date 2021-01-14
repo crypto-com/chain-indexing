@@ -136,6 +136,14 @@ func (handler *Crossfire) getValidatorStats(operatorAddress string, dbValidator 
 			finalValidatorStats.CommitCountPhase2 = validatorStatRow.Value
 		case crossfire_constants.PHASE_1N2_COMMIT_PREFIX:
 			finalValidatorStats.CommitCountPhase1n2 = validatorStatRow.Value
+		case crossfire_constants.JACKPOT_1_TX_SENT_PREFIX:
+			finalValidatorStats.JackpotTxCountWeek1 = validatorStatRow.Value
+		case crossfire_constants.JACKPOT_2_TX_SENT_PREFIX:
+			finalValidatorStats.JackpotTxCountWeek2 = validatorStatRow.Value
+		case crossfire_constants.JACKPOT_3_TX_SENT_PREFIX:
+			finalValidatorStats.JackpotTxCountWeek3 = validatorStatRow.Value
+		case crossfire_constants.JACKPOT_4_TX_SENT_PREFIX:
+			finalValidatorStats.JackpotTxCountWeek4 = validatorStatRow.Value
 		default:
 			break
 		}
@@ -161,6 +169,10 @@ func getDefaultCrossfireValidatorDetailsResponse(remoteParticipant crossfire.Par
 			TxSentPhase1:        0,
 			TxSentPhase2:        0,
 			TxSentPhase3:        0,
+			JackpotTxCountWeek1: 0,
+			JackpotTxCountWeek2: 0,
+			JackpotTxCountWeek3: 0,
+			JackpotTxCountWeek4: 0,
 			CommitCountPhase1n2: 0,
 			CommitCountPhase2:   0,
 			CommitCountPhase3:   0,
@@ -179,6 +191,10 @@ type ValidatorStats struct {
 	CommitCountPhase1n2 int64           `json:"commitCountPhase1n2"`
 	CommitCountPhase2   int64           `json:"commitCountPhase2"`
 	CommitCountPhase3   int64           `json:"commitCountPhase3"`
+	JackpotTxCountWeek1 int64           `json:"jackpotTxCountWeek1"`
+	JackpotTxCountWeek2 int64           `json:"jackpotTxCountWeek2"`
+	JackpotTxCountWeek3 int64           `json:"jackpotTxCountWeek3"`
+	JackpotTxCountWeek4 int64           `json:"jackpotTxCountWeek4"`
 	JoinedAtBlockHeight int64           `json:"joinedAtBlockHeight"`
 	JoinedAtTimestamp   utctime.UTCTime `json:"joinedAtTimestamp"`
 }

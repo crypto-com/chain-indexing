@@ -30,6 +30,11 @@ type Crossfire struct {
 	phaseTwoStartTime        utctime.UTCTime
 	phaseThreeStartTime      utctime.UTCTime
 	competitionEndTime       utctime.UTCTime
+	JackpotOneStartTime      utctime.UTCTime
+	JackpotTwoStartTime      utctime.UTCTime
+	JackpotThreeStartTime    utctime.UTCTime
+	JackpotFourStartTime     utctime.UTCTime
+	JackpotFourEndTime       utctime.UTCTime
 	adminAddress             string
 	networkUpgradeProposalID string
 	participantsListUrl      string
@@ -50,18 +55,30 @@ func NewCrossfire(
 	adminAddress string,
 	networkUpgradeProposalID string,
 	participantsListURL string,
+	JackpotOneStartTime int64,
+	JackpotTwoStartTime int64,
+	JackpotThreeStartTime int64,
+	JackpotFourStartTime int64,
+	JackpotFourEndTime int64,
 ) *Crossfire {
 	return &Crossfire{
 		Base: rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Crossfire"),
 
-		Client:                   NewHTTPClient(participantsListURL),
-		conNodeAddressPrefix:     conNodeAddressPrefix,
-		validatorAddressPrefix:   validatorAddressPrefix,
-		primaryAddressPrefix:     primaryAddressPrefix,
-		phaseOneStartTime:        utctime.FromUnixNano(unixPhaseOneStartTime),
-		phaseTwoStartTime:        utctime.FromUnixNano(unixPhaseTwoStartTime),
-		phaseThreeStartTime:      utctime.FromUnixNano(unixPhaseThreeStartTime),
-		competitionEndTime:       utctime.FromUnixNano(unixCompetitionEndTime),
+		Client:                 NewHTTPClient(participantsListURL),
+		conNodeAddressPrefix:   conNodeAddressPrefix,
+		validatorAddressPrefix: validatorAddressPrefix,
+		primaryAddressPrefix:   primaryAddressPrefix,
+		phaseOneStartTime:      utctime.FromUnixNano(unixPhaseOneStartTime),
+		phaseTwoStartTime:      utctime.FromUnixNano(unixPhaseTwoStartTime),
+		phaseThreeStartTime:    utctime.FromUnixNano(unixPhaseThreeStartTime),
+		competitionEndTime:     utctime.FromUnixNano(unixCompetitionEndTime),
+
+		JackpotOneStartTime:   utctime.FromUnixNano(JackpotOneStartTime),
+		JackpotTwoStartTime:   utctime.FromUnixNano(JackpotTwoStartTime),
+		JackpotThreeStartTime: utctime.FromUnixNano(JackpotThreeStartTime),
+		JackpotFourStartTime:  utctime.FromUnixNano(JackpotFourStartTime),
+		JackpotFourEndTime:    utctime.FromUnixNano(JackpotFourEndTime),
+
 		adminAddress:             adminAddress, // TODO: address prefix check
 		networkUpgradeProposalID: networkUpgradeProposalID,
 		participantsListUrl:      participantsListURL,
@@ -538,6 +555,7 @@ func (projection *Crossfire) updateTxSentCount(
 	msgTransactionCreated *event_usecase.TransactionCreated,
 ) error {
 	var phaseNumberPrefix string
+	var weeklyJackpotDBKey string
 	if blockTime.After(projection.phaseOneStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
 		phaseNumberPrefix = constants.PHASE_1_TX_SENT_PREFIX
 	} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
@@ -545,6 +563,23 @@ func (projection *Crossfire) updateTxSentCount(
 	} else if blockTime.After(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
 		phaseNumberPrefix = constants.PHASE_3_TX_SENT_PREFIX
 	}
+
+	if blockTime.After(projection.JackpotOneStartTime) && blockTime.Before(projection.JackpotTwoStartTime) {
+		//Jackpot Week 1
+		weeklyJackpotDBKey = constants.JACKPOT_1_TX_SENT_PREFIX
+	} else if blockTime.After(projection.JackpotTwoStartTime) && blockTime.Before(projection.JackpotThreeStartTime) {
+		//Jackpot Week 2
+		weeklyJackpotDBKey = constants.JACKPOT_2_TX_SENT_PREFIX
+
+	} else if blockTime.After(projection.JackpotThreeStartTime) && blockTime.Before(projection.JackpotFourStartTime) {
+		//Jackpot Week 3
+		weeklyJackpotDBKey = constants.JACKPOT_3_TX_SENT_PREFIX
+
+	} else if blockTime.After(projection.JackpotFourStartTime) && blockTime.Before(projection.JackpotFourEndTime) {
+		//Jackpot Week 4
+		weeklyJackpotDBKey = constants.JACKPOT_4_TX_SENT_PREFIX
+	}
+
 	for _, sender := range msgTransactionCreated.Senders {
 
 		// Only considering Pubkey address for now
@@ -569,6 +604,15 @@ func (projection *Crossfire) updateTxSentCount(
 				return fmt.Errorf("error Incrementing tx sent count: %v", errIncrementingTotal)
 			}
 
+			//Increment count for Weekly Jackpot (If Applicable)
+			if len(weeklyJackpotDBKey) <= 0 {
+				continue
+			}
+			key := fmt.Sprintf("%s%s%s", weeklyJackpotDBKey, constants.DB_KEY_SEPARATOR, primaryAddress)
+			errIncrementingJackpotTxSentCount := crossfireValidatorStatsView.IncrementOne(key)
+			if errIncrementingJackpotTxSentCount != nil {
+				return fmt.Errorf("error Incrementing Weekly tx sent count: %v", errIncrementingJackpotTxSentCount)
+			}
 		}
 	}
 	return nil

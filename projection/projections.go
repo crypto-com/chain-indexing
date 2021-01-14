@@ -2,6 +2,7 @@ package projection
 
 import (
 	"fmt"
+
 	"github.com/crypto-com/chain-indexing/appinterface/projection/crossfire"
 
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
@@ -49,6 +50,11 @@ func InitProjection(name string, params InitParams) projection_entity.Projection
 			params.AdminAddress,
 			params.NetworkUpgradeProposalID,
 			params.ParticipantsListURL,
+			params.JackpotOneStartTime,
+			params.JackpotTwoStartTime,
+			params.JackpotThreeStartTime,
+			params.JackpotFourStartTime,
+			params.JackpotFourEndTime,
 		)
 	// register more projections here
 	default:
@@ -66,6 +72,11 @@ type InitParams struct {
 	AccountAddressPrefix   string
 
 	// Crossfire related fields
+	JackpotOneStartTime      int64
+	JackpotTwoStartTime      int64
+	JackpotThreeStartTime    int64
+	JackpotFourStartTime     int64
+	JackpotFourEndTime       int64
 	PhaseOneStartTime        int64
 	PhaseTwoStartTime        int64
 	PhaseThreeStartTime      int64
