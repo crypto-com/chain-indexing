@@ -219,7 +219,7 @@ type ValidatorStats struct {
 	JackpotTxCountWeek4 int64                          `json:"jackpotTxCountWeek4"`
 	JoinedAtBlockHeight int64                          `json:"joinedAtBlockHeight"`
 	JoinedAtTimestamp   utctime.UTCTime                `json:"joinedAtTimestamp"`
-	taskVote            crossfire_constants.TaskStatus `default:"Incompleted" json:"-"`
+	taskVote            crossfire_constants.TaskStatus `default:"Incompleted"`
 }
 
 // CrossfireValidatorDetails response object
