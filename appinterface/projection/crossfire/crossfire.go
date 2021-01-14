@@ -378,24 +378,11 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 				return fmt.Errorf("error checking Proposal ID in Vote not matching")
 			}
 
-			// Check if Vote is NOT Yes or Abstain
-			// TODO: Whether keep VOTE_OPTION_UNSPECIFIED or not?
-			if !(strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_YES || strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_ABSTAIN || strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_UNSPECIFIED) {
+			// Check if Vote is Casted
+			if !(strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_YES || strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_ABSTAIN || strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_UNSPECIFIED || strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_NO || strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_NO_WITH_VETO) {
 				return fmt.Errorf("error Ineligible Vote. Casted vote: %s", msgVoteCreatedEvent.Option)
 			}
 
-			//TODO: Is this assumption correct? How to fetch operatorAddress / consensusAddress
-			operatorAddress, errConverting := tmcosmosutils.ValidatorAddressFromPubAddress(projection.validatorAddressPrefix, msgVoteCreatedEvent.Voter)
-
-			if errConverting != nil {
-				return fmt.Errorf("error In converting voter address to validator address: %v", errConverting)
-			}
-
-			errCheckingTask := projection.checkTaskNetworkProposalVote(crossfireValidatorsView, operatorAddress, blockTime)
-
-			if errCheckingTask != nil {
-				return fmt.Errorf("error In checking Network proposal vote: %v", errCheckingTask)
-			}
 			// Update the proposed ID against the voter in Database
 			voted_proposal_id_db_key := constants.VOTED_PROPOSAL_ID + constants.DB_KEY_SEPARATOR + msgVoteCreatedEvent.Voter
 
