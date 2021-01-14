@@ -25,7 +25,7 @@ func initProjections(
 		ConsNodeAddressPrefix: config.Blockchain.ConNodeAddressPrefix,
 
 		ValidatorAddressPrefix: config.Blockchain.ValidatorAddressPrefix,
-		AccountAddressPrefix:   config.Blockchain.ValidatorAddressPrefix,
+		AccountAddressPrefix:   config.Blockchain.AccountAddressPrefix,
 
 		PhaseOneStartTime:   config.Crossfire.PhaseOneStartTime,
 		PhaseTwoStartTime:   config.Crossfire.PhaseTwoStartTime,
