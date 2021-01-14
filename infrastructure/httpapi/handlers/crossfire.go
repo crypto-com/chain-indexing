@@ -26,6 +26,7 @@ type Crossfire struct {
 	cosmosAppClient              cosmosapp.Client
 	crossfireValidatorsView      *crossfire_validator_view.CrossfireValidators
 	crossfireValidatorsStatsView *crossfire_validator_view.CrossfireValidatorsStats
+	crossfireChainStatsView      *crossfire_validator_view.CrossfireChainStats
 	httpClient                   *crossfire.HTTPClient
 }
 
@@ -39,7 +40,7 @@ func NewCrossfire(
 ) *Crossfire {
 	return &Crossfire{
 		logger.WithFields(applogger.LogFields{
-			"module": "CrossfireHTTPHander",
+			"module": "CrossfireHTTPHandler",
 		}),
 
 		validatorAddressPrefix,
@@ -48,6 +49,7 @@ func NewCrossfire(
 		cosmosAppClient,
 		crossfire_validator_view.NewCrossfireValidators(rdbHandle),
 		crossfire_validator_view.NewCrossfireValidatorsStats(rdbHandle),
+		crossfire_validator_view.NewCrossfireChainStats(rdbHandle),
 		crossfire.NewHTTPClient(participantsListURL),
 	}
 }
@@ -58,14 +60,14 @@ func (handler *Crossfire) ListAllCrossfireValidators(ctx *fasthttp.RequestCtx) {
 	// Fetch Remote List
 	participantList, errFetching := handler.httpClient.Participants()
 	if errFetching != nil {
-		handler.logger.Errorf("error listing validators: %v", errFetching)
+		handler.logger.Errorf("[Crossfire] error listing validators: %v", errFetching)
 		httpapi.InternalServerError(ctx)
 	}
 
 	// Fetch DB Crossfire Validators List
 	crossfireValidatorsDB, err := handler.crossfireValidatorsView.List()
 	if err != nil {
-		handler.logger.Errorf("error listing validators: %v", err)
+		handler.logger.Errorf("[Crossfire] error listing validators: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
 	}
@@ -77,6 +79,20 @@ func (handler *Crossfire) ListAllCrossfireValidators(ctx *fasthttp.RequestCtx) {
 
 	var finalList = make([]CrossfireValidatorDetails, 0)
 
+	// Fetch total block count
+	phase1BlockCount, err := handler.crossfireChainStatsView.FindBy(crossfire_constants.PHASE_1_BLOCK_COUNT)
+	if err != nil {
+		handler.logger.Errorf("[Crossfire] Fetching phase 1 block count, %v", err)
+	}
+	phase2BlockCount, err := handler.crossfireChainStatsView.FindBy(crossfire_constants.PHASE_2_BLOCK_COUNT)
+	if err != nil {
+		handler.logger.Errorf("[Crossfire] Fetching phase 2 block count, %v", err)
+	}
+	phase3BlockCount, err := handler.crossfireChainStatsView.FindBy(crossfire_constants.PHASE_3_BLOCK_COUNT)
+	if err != nil {
+		handler.logger.Errorf("[Crossfire] Fetching phase 3 block count, %v", err)
+	}
+
 	for _, participantRemote := range *participantList {
 		if idx, ok := dbParticipantsMap[participantRemote.OperatorAddress]; !ok {
 			defaultValidator := getDefaultCrossfireValidatorDetailsResponse(participantRemote)
@@ -86,6 +102,9 @@ func (handler *Crossfire) ListAllCrossfireValidators(ctx *fasthttp.RequestCtx) {
 			if err != nil {
 				continue
 			}
+			validatorStats.Phase1BlockCount = phase1BlockCount
+			validatorStats.Phase2BlockCount = phase2BlockCount
+			validatorStats.Phase3BlockCount = phase3BlockCount
 			validatorDetail := CrossfireValidatorDetails{
 				OperatorAddress:            participantRemote.OperatorAddress,
 				InitialDelegatorAddress:    crossfireValidatorsDB[idx].InitialDelegatorAddress,
@@ -112,14 +131,14 @@ func (handler *Crossfire) getValidatorStats(operatorAddress string, primaryAddre
 	key := fmt.Sprintf("%s%s", "%", operatorAddress)
 	validatorStatRows, err := handler.crossfireValidatorsStatsView.FindAllLike(key)
 	if err != nil {
-		return ValidatorStats{}, fmt.Errorf("[error-crossfire] Fetching Validator Stats, %v", err)
+		return ValidatorStats{}, fmt.Errorf("[Crossfire] Fetching Validator Stats, %v", err)
 	}
 
 	// Fetch Primary Address
 	keyPrimary := fmt.Sprintf("%s%s", "%", primaryAddress)
 	primaryAddressStatRows, err := handler.crossfireValidatorsStatsView.FindAllLike(keyPrimary)
 	if err != nil {
-		return ValidatorStats{}, fmt.Errorf("[error-crossfire] Fetching Primary Address Stats, %v", err)
+		return ValidatorStats{}, fmt.Errorf("[Crossfire] Fetching Primary Address Stats, %v", err)
 	}
 
 	var finalValidatorStats ValidatorStats
@@ -209,6 +228,9 @@ type ValidatorStats struct {
 	CommitCountPhase1n2 int64           `json:"commitCountPhase1n2"`
 	CommitCountPhase2   int64           `json:"commitCountPhase2"`
 	CommitCountPhase3   int64           `json:"commitCountPhase3"`
+	Phase1BlockCount    int64           `json:"phase1BlockCount"`
+	Phase2BlockCount    int64           `json:"phase2BlockCount"`
+	Phase3BlockCount    int64           `json:"phase3BlockCount"`
 	JackpotTxCountWeek1 int64           `json:"jackpotTxCountWeek1"`
 	JackpotTxCountWeek2 int64           `json:"jackpotTxCountWeek2"`
 	JackpotTxCountWeek3 int64           `json:"jackpotTxCountWeek3"`

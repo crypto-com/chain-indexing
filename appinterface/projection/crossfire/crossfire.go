@@ -104,7 +104,7 @@ func (projection *Crossfire) OnInit() error {
 func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Event) error {
 	rdbTx, err := projection.rdbConn.Begin()
 	if err != nil {
-		return fmt.Errorf("error beginning transaction: %v", err)
+		return fmt.Errorf("[Crossfire] error beginning transaction: %v", err)
 	}
 
 	committed := false
@@ -125,19 +125,19 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
 			blockTime = blockCreatedEvent.Block.Time
 			if handleErr := projection.handleBlockCreatedEvent(crossfireChainStatsView, crossfireValidatorsView, crossfireValidatorsStatsView, blockCreatedEvent); handleErr != nil {
-				return fmt.Errorf("error handling BlockCreatedEvent: %v", handleErr)
+				return fmt.Errorf("[Crossfire] error handling BlockCreatedEvent: %v", handleErr)
 			}
 		}
 	}
 
 	if err := projection.projectCrossfireValidatorView(crossfireValidatorsView, crossfireChainStatsView, crossfireValidatorsStatsView, height, blockTime, events); err != nil {
-		return fmt.Errorf("error projecting validator view: %v", err)
+		return fmt.Errorf("[Crossfire] error projecting validator view: %v", err)
 	}
 
 	// Ranks computation at the end of event projection
 	if blockTime.Before(projection.competitionEndTime) {
 		if err := projection.computeTxSentRank(crossfireValidatorsStatsView, crossfireValidatorsView); err != nil {
-			return fmt.Errorf("error Updating TxSentTask Rank %v", err)
+			return fmt.Errorf("[Crossfire] error Updating TxSentTask Rank %v", err)
 		}
 	}
 	if blockTime.Before(projection.phaseThreeStartTime) {
@@ -147,7 +147,7 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 			crossfireValidatorsStatsView,
 			crossfireValidatorsView,
 		); err != nil {
-			return fmt.Errorf("error compute rank_task_phase_1_2_commitment_count %v", err)
+			return fmt.Errorf("[Crossfire] error compute rank_task_phase_1_2_commitment_count %v", err)
 		}
 	}
 	if blockTime.AfterOrEqual(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
@@ -157,17 +157,17 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 			crossfireValidatorsStatsView,
 			crossfireValidatorsView,
 		); err != nil {
-			return fmt.Errorf("error compute rank_task_phase_3_commitment_count %v", err)
+			return fmt.Errorf("[Crossfire] error compute rank_task_phase_3_commitment_count %v", err)
 		}
 	}
 
 	// Done current height projection and ranking computation
 	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
-		return fmt.Errorf("error updating last handled event height: %v", err)
+		return fmt.Errorf("[Crossfire] error updating last handled event height: %v", err)
 	}
 
 	if err := rdbTx.Commit(); err != nil {
-		return fmt.Errorf("error committing changes: %v", err)
+		return fmt.Errorf("[Crossfire] error committing changes: %v", err)
 	}
 	committed = true
 	return nil
@@ -186,24 +186,24 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 	if blockTime.AfterOrEqual(projection.phaseOneStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
 		err := crossfireChainStatsView.IncrementOne(constants.PHASE_1_BLOCK_COUNT)
 		if err != nil {
-			return fmt.Errorf("error increment phase1 block count")
+			return fmt.Errorf("[Crossfire] error increment phase1 block count")
 		}
 	} else if blockTime.AfterOrEqual(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
 		err := crossfireChainStatsView.IncrementOne(constants.PHASE_2_BLOCK_COUNT)
 		if err != nil {
-			return fmt.Errorf("error increment phase2 block count")
+			return fmt.Errorf("[Crossfire] error increment phase2 block count")
 		}
 	} else if blockTime.AfterOrEqual(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
 		// check the keep active task, throttling with every 10 blocks
 		if blockHeight%10 == 0 {
 			if err := projection.checkTaskKeepActive(crossfireChainStatsView, crossfireValidatorsView, crossfireValidatorsStatsView); err != nil {
-				return fmt.Errorf("error checkTaskKeepActive: %v", err)
+				return fmt.Errorf("[Crossfire] error checkTaskKeepActive: %v", err)
 			}
 		}
 
 		err := crossfireChainStatsView.IncrementOne(constants.PHASE_3_BLOCK_COUNT)
 		if err != nil {
-			return fmt.Errorf("error increment phase3 block count")
+			return fmt.Errorf("[Crossfire] error increment phase3 block count")
 		}
 	}
 
@@ -214,12 +214,12 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 		})
 		if errors.Is(err, rdb.ErrNoRows) {
 			// no validator found by tendermint address
-			projection.logger.Errorf("error updating validator commitment number: not found: %s", signature.ValidatorAddress)
+			projection.logger.Errorf("[Crossfire] error updating validator commitment number: not found: %s", signature.ValidatorAddress)
 			continue
 		}
 		if err != nil {
 			return fmt.Errorf(
-				"error getting existing validator by block commitment of %s from view %s", signature.ValidatorAddress, err,
+				"[Crossfire] error getting existing validator by block commitment of %s from view %s", signature.ValidatorAddress, err,
 			)
 		}
 
@@ -227,7 +227,7 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE_1N2_COMMIT_PREFIX)
 			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
 				return fmt.Errorf(
-					"error increment validator commitment count %s", key,
+					"[Crossfire] error increment validator commitment count %s", key,
 				)
 			}
 		}
@@ -235,7 +235,7 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE_2_COMMIT_PREFIX)
 			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
 				return fmt.Errorf(
-					"error increment validator commitment count %s", key,
+					"[Crossfire] error increment validator commitment count %s", key,
 				)
 			}
 
@@ -243,7 +243,7 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 			errUpdatingTask := projection.checkTaskNetworkUpgrade(crossfireValidatorsView, crossfireChainStatsView, validator, blockTime)
 			if errUpdatingTask != nil {
 				return fmt.Errorf(
-					"error Updating crossfire task completion %s", errUpdatingTask,
+					"[Crossfire] error Updating crossfire task completion %s", errUpdatingTask,
 				)
 			}
 		}
@@ -251,7 +251,7 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE_3_COMMIT_PREFIX)
 			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
 				return fmt.Errorf(
-					"error increment validator commitment count %s", key,
+					"[Crossfire] error increment validator commitment count %s", key,
 				)
 			}
 		}
@@ -271,11 +271,11 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 	// MsgCreateValidator should be handled first
 	for _, event := range events {
 		if msgCreateValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
-			projection.logger.Debug("handling MsgCreateValidator event")
+			projection.logger.Debug("[Crossfire] handling MsgCreateValidator event")
 
 			pubKey, err := base64.StdEncoding.DecodeString(msgCreateValidatorEvent.TendermintPubkey)
 			if err != nil {
-				return fmt.Errorf("error base64 decoding Tendermint node pubkey: %v", err)
+				return fmt.Errorf("[Crossfire] error base64 decoding Tendermint node pubkey: %v", err)
 			}
 			tendermintAddress := tmcosmosutils.TmAddressFromTmPubKey(pubKey)
 
@@ -283,7 +283,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 				projection.conNodeAddressPrefix, pubKey,
 			)
 			if err != nil {
-				return fmt.Errorf("error converting consensus node pubkey to address: %v", err)
+				return fmt.Errorf("[Crossfire] error converting consensus node pubkey to address: %v", err)
 			}
 
 			validatorRow := view.CrossfireValidatorRow{
@@ -314,7 +314,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 				validatorRow.OperatorAddress, validatorRow.ConsensusNodeAddress,
 			)
 			if err != nil {
-				return fmt.Errorf("error querying validator last joined block height: %v", err)
+				return fmt.Errorf("[Crossfire] error querying validator last joined block height: %v", err)
 			}
 			if isJoined {
 				validatorRow.JoinedAtBlockHeight = joinedAtBlockHeight
@@ -322,7 +322,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			}
 
 			if err := crossfireValidatorsView.Upsert(&validatorRow); err != nil {
-				return fmt.Errorf("error inserting new validator into view: %v", err)
+				return fmt.Errorf("[Crossfire] error inserting new validator into view: %v", err)
 			}
 
 			// checkTaskSetup
@@ -332,35 +332,35 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 				validatorRow.ConsensusNodeAddress,
 				validatorRow.JoinedAtBlockTime,
 			); err != nil {
-				return fmt.Errorf("error check Setup task for new validator: %v", err)
+				return fmt.Errorf("[Crossfire] error check Setup task for new validator: %v", err)
 			}
 		}
 	}
 	for _, event := range events {
 		if msgSubmitSoftwareUpgradeProposalEvent, ok := event.(*event_usecase.MsgSubmitSoftwareUpgradeProposal); ok {
-			projection.logger.Debug("handling MsgSubmitSoftwareUpgradeProposal event")
+			projection.logger.Debug("[Crossfire] handling MsgSubmitSoftwareUpgradeProposal event")
 
 			// Check if proposed after competition has ended
 			if blockTime.AfterOrEqual(projection.competitionEndTime) {
-				projection.logger.Debug("error Competition has already ended")
+				projection.logger.Debug("[Crossfire] error Competition has already ended")
 				continue
 			}
 
 			// Check if proposed before OR after Phase 2
 			if blockTime.Before(projection.phaseTwoStartTime) || blockTime.AfterOrEqual(projection.phaseThreeStartTime) {
-				projection.logger.Debug("error This proposal does not occur in Phase 2")
+				projection.logger.Debug("[Crossfire] error This proposal does not occur in Phase 2")
 				continue
 			}
 
 			// Check if proposed by NOT an admin
 			if msgSubmitSoftwareUpgradeProposalEvent.ProposerAddress != projection.adminAddress {
-				projection.logger.Debug("error checking proposer address equals admin address")
+				projection.logger.Debug("[Crossfire] error checking proposer address equals admin address")
 				continue
 			}
 
 			// Check if proposal ID does not match the required ID
 			if msgSubmitSoftwareUpgradeProposalEvent.MaybeProposalId != nil && *msgSubmitSoftwareUpgradeProposalEvent.MaybeProposalId != projection.networkUpgradeProposalID {
-				projection.logger.Debug("error checking Proposal ID in proposal")
+				projection.logger.Debug("[Crossfire] error checking Proposal ID in proposal")
 				continue
 			}
 
@@ -371,7 +371,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			networkUpgradeTimestampDBKey := constants.NETWORK_UPGRADE_TARGET_TIMESTAMP_KEY()
 			errTSUpdate := crossfireChainStatsView.Set(networkUpgradeTimestampDBKey, networkUpgradeTimestamp.UnixNano())
 			if errTSUpdate != nil {
-				return fmt.Errorf("error updating network_upgrade timestamp: %v", errTSUpdate)
+				return fmt.Errorf("[Crossfire] error updating network_upgrade timestamp: %v", errTSUpdate)
 			}
 
 			// Update Network upgrade target Blockheight in DB
@@ -379,27 +379,27 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			errBlockheightUpdate := crossfireChainStatsView.Set(networkUpgradeBlockheightDBKey, networkUpgradeBlockheight)
 
 			if errBlockheightUpdate != nil {
-				return fmt.Errorf("error updating network_upgrade blockheight: %v", errBlockheightUpdate)
+				return fmt.Errorf("[Crossfire] error updating network_upgrade blockheight: %v", errBlockheightUpdate)
 			}
 
 		} else if msgVoteCreatedEvent, ok := event.(*event_usecase.MsgVote); ok {
-			projection.logger.Debug("handling MsgVote event")
+			projection.logger.Debug("[Crossfire] handling MsgVote event")
 
 			// Check if proposed after competition has ended
 			if blockTime.AfterOrEqual(projection.competitionEndTime) {
-				projection.logger.Debug("error Competition has already ended")
+				projection.logger.Debug("[Crossfire] error Competition has already ended")
 				continue
 			}
 
 			// Check if proposed before OR after Phase 2
 			if blockTime.Before(projection.phaseTwoStartTime) || blockTime.AfterOrEqual(projection.phaseThreeStartTime) {
-				projection.logger.Debug("error Ineligible vote as it does not occur in Phase 2")
+				projection.logger.Debug("[Crossfire] error Ineligible vote as it does not occur in Phase 2")
 				continue
 			}
 
 			// Check if proposal ID does not match the required ID
 			if msgVoteCreatedEvent.ProposalId != "" && msgVoteCreatedEvent.ProposalId != projection.networkUpgradeProposalID {
-				projection.logger.Debug("error checking Proposal ID in Vote not matching")
+				projection.logger.Debug("[Crossfire] error checking Proposal ID in Vote not matching")
 				continue
 			}
 
@@ -408,25 +408,25 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 
 			proposalIdAsInt64, errConversion := strconv.ParseInt(msgVoteCreatedEvent.ProposalId, 10, 64)
 			if errConversion != nil {
-				return fmt.Errorf("error converting ProposalID to int64: %v", errConversion)
+				return fmt.Errorf("[Crossfire] error converting ProposalID to int64: %v", errConversion)
 			}
 			errUpdateValidatorStats := crossfireValidatorStatsView.Set(votedProposalIdDbKey, proposalIdAsInt64)
 
 			if errUpdateValidatorStats != nil {
-				return fmt.Errorf("error Updating ProposalID for the voter: %v", errUpdateValidatorStats)
+				return fmt.Errorf("[Crossfire] error Updating ProposalID for the voter: %v", errUpdateValidatorStats)
 			}
 		} else if transactionCreatedEvent, ok := event.(*event_usecase.TransactionCreated); ok {
-			projection.logger.Debug("handling TransactionCreated event")
+			projection.logger.Debug("[Crossfire] handling TransactionCreated event")
 
 			// Check if proposed after competition has ended
 			if blockTime.AfterOrEqual(projection.competitionEndTime) {
-				return fmt.Errorf("error Competition has already ended")
+				return fmt.Errorf("[Crossfire] error Competition has already ended")
 			}
 
 			// Update the Tx Count
 			errUpdateTxCount := projection.updateTxSentCount(crossfireValidatorStatsView, blockTime, transactionCreatedEvent)
 			if errUpdateTxCount != nil {
-				return fmt.Errorf("error Updating tx sent count: %v", errUpdateTxCount)
+				return fmt.Errorf("[Crossfire] error Updating tx sent count: %v", errUpdateTxCount)
 			}
 		}
 	}
@@ -484,7 +484,7 @@ func (projection *Crossfire) checkTaskKeepActive(
 	for _, validator := range validators {
 		// If validator missed the task 1, it cannot complete the active task
 		if validator.TaskPhase1NodeSetup == constants.MISSED {
-			projection.logger.Debugf("Won't handle task keepActive for %s because it missed taskSetup", validator.OperatorAddress)
+			projection.logger.Debugf("[Crossfire] Won't handle task keepActive for %s because it missed taskSetup", validator.OperatorAddress)
 			continue
 		}
 
@@ -579,7 +579,7 @@ func (projection *Crossfire) updateTxSentCount(
 			// TODO: Support MultiSig address
 			primaryAddress, err := tmcosmosutils.AccountAddressFromPubKey(projection.primaryAddressPrefix, pubKey)
 			if err != nil {
-				projection.logger.Errorf("error getting account address from transaction sender pubkey: %v", err)
+				projection.logger.Errorf("[Crossfire] error getting account address from transaction sender pubkey: %v", err)
 				continue
 			}
 
@@ -594,7 +594,7 @@ func (projection *Crossfire) updateTxSentCount(
 			totalAddressCountDbKey := constants.TOTAL_TX_SENT_PREFIX + constants.DB_KEY_SEPARATOR + primaryAddress
 			errIncrementingTotal := crossfireValidatorStatsView.IncrementOne(totalAddressCountDbKey)
 			if errIncrementingTotal != nil {
-				return fmt.Errorf("error Incrementing tx sent count: %v", errIncrementingTotal)
+				return fmt.Errorf("[Crossfire] error Incrementing tx sent count: %v", errIncrementingTotal)
 			}
 
 			//Increment count for Weekly Jackpot (If Applicable)
@@ -604,7 +604,7 @@ func (projection *Crossfire) updateTxSentCount(
 			key := fmt.Sprintf("%s%s%s", weeklyJackpotDBKey, constants.DB_KEY_SEPARATOR, primaryAddress)
 			errIncrementingJackpotTxSentCount := crossfireValidatorStatsView.IncrementOne(key)
 			if errIncrementingJackpotTxSentCount != nil {
-				return fmt.Errorf("error Incrementing Weekly tx sent count: %v", errIncrementingJackpotTxSentCount)
+				return fmt.Errorf("[Crossfire] error Incrementing Weekly tx sent count: %v", errIncrementingJackpotTxSentCount)
 			}
 		}
 	}
@@ -643,13 +643,14 @@ func (projection *Crossfire) computeCommitmentRank(
 		})
 		if errors.Is(err, rdb.ErrNoRows) {
 			// no validator found by tendermint address
+			projection.logger.Error("[Crossfire] error finding participant when computing commitment rank: record not found")
 			continue
 		}
 		if err != nil {
-			return fmt.Errorf("error getting validator with operator addr %s %v", statsOperatorAddress, err)
+			return fmt.Errorf("[Crossfire] error getting validator with operator addr %s %v", statsOperatorAddress, err)
 		}
-		if validatorRow.TaskPhase1NodeSetup == constants.MISSED {
-			projection.logger.Debugf("Won't handle commit rank for %s because it missed taskSetup", statsOperatorAddress)
+		if validatorRow.TaskPhase1NodeSetup == constants.MISSED || validatorRow.TaskPhase1NodeSetup == constants.INCOMPLETED {
+			projection.logger.Debugf("[Crossfire] Won't handle commit rank for %s because it missed taskSetup", statsOperatorAddress)
 			continue
 		}
 
@@ -691,17 +692,31 @@ func (projection *Crossfire) computeTxSentRank(
 	// Using dummy list for development
 	participantsList, errGetRequest := projection.Client.Participants()
 	if errGetRequest != nil {
-		return fmt.Errorf("[error] Getting Participants list %w", errGetRequest)
+		return fmt.Errorf("[Crossfire] error getting Participants list %w", errGetRequest)
+	}
+
+	participantsMap := make(map[string]Participant)
+	for _, participant := range *participantsList {
+		participantsMap[participant.PrimaryAddress] = participant
 	}
 
 	// Get All Tx Count Sorted
-	dbParticipantWithCountList, errDbCount := crossfireValidatorStatsView.FindAllLike(constants.TOTAL_TX_SENT_PREFIX)
+	dbTxSendersWithCountList, errDbCount := crossfireValidatorStatsView.FindAllLike(constants.TOTAL_TX_SENT_PREFIX)
 	if errDbCount != nil {
-		return fmt.Errorf("[error] Database Participant With Total Count %w", errDbCount)
+		return fmt.Errorf("[Crossfire] error Database Participant With Total Count %w", errDbCount)
 	}
-	if len(dbParticipantWithCountList) < 1 {
+	if len(dbTxSendersWithCountList) < 1 {
 		// No Participants to Rank
 		return nil
+	}
+
+	// Filter only participants from tx senders list
+	dbParticipantWithCountList := make([]view.CrossfireValidatorsStatsRow, 0)
+	for _, dbTxSender := range dbTxSendersWithCountList {
+		dbParticipantPrimaryAddress := strings.Split(dbTxSender.Key, constants.DB_KEY_SEPARATOR)[1]
+		if _, ok := participantsMap[dbParticipantPrimaryAddress]; ok {
+			dbParticipantWithCountList = append(dbParticipantWithCountList, dbTxSender)
+		}
 	}
 
 	// Sort With Most Tx Sent First
@@ -712,29 +727,28 @@ func (projection *Crossfire) computeTxSentRank(
 	var rank int = 1
 	for index, dbParticipant := range dbParticipantWithCountList {
 		dbParticipantPrimaryAddress := strings.Split(dbParticipant.Key, constants.DB_KEY_SEPARATOR)[1]
-		// Check for each Participant in URL
-		for _, participant := range *participantsList {
 
-			// Check if the primary address match
-			if participant.PrimaryAddress == dbParticipantPrimaryAddress {
+		participant := participantsMap[dbParticipantPrimaryAddress]
+		// Check if Participant is a Registered Crossfire Validator
+		_, errFindingValidator := crossfireValidatorView.FindBy(view.CrossfireValidatorIdentity{
+			MaybeOperatorAddress: &participant.OperatorAddress,
+		})
+		if errors.Is(errFindingValidator, rdb.ErrNoRows) {
+			// no validator found by tendermint address
+			projection.logger.Error("[Crossfire] error finding participant when computing tx rank: record not found")
+			continue
+		}
+		if errFindingValidator != nil {
+			return fmt.Errorf("[Crossfire] error getting validator when computing tx rank with operator addr %s %v", participant.OperatorAddress, errFindingValidator)
+		}
 
-				// Check if Participant is a Registered Crossfire Validator
-				registeredCrossfireValidator, errFindingValidator := crossfireValidatorView.FindBy(view.CrossfireValidatorIdentity{
-					MaybeOperatorAddress: &participant.OperatorAddress,
-				})
-				if errFindingValidator != nil || registeredCrossfireValidator == nil {
-					break
-				}
-
-				// Update Ranks with specific Validator
-				errUpdating := crossfireValidatorView.UpdateTxSentRank(rank, participant.PrimaryAddress, participant.OperatorAddress)
-				if errUpdating != nil {
-					return fmt.Errorf("[error] Updating TX SENT Task Rank %w", errUpdating)
-				}
-				if index+1 < len(dbParticipantWithCountList) && dbParticipantWithCountList[index].Value != dbParticipantWithCountList[index+1].Value {
-					rank++
-				}
-			}
+		// Update Ranks with specific Validator
+		errUpdating := crossfireValidatorView.UpdateTxSentRank(rank, participant.PrimaryAddress, participant.OperatorAddress)
+		if errUpdating != nil {
+			return fmt.Errorf("[Crossfire] error updating TX SENT Task Rank %w", errUpdating)
+		}
+		if index+1 < len(dbTxSendersWithCountList) && dbTxSendersWithCountList[index].Value != dbTxSendersWithCountList[index+1].Value {
+			rank++
 		}
 	}
 	return nil
@@ -757,7 +771,7 @@ func (projection *Crossfire) checkTaskNetworkUpgrade(
 
 	networkUpgradeTimestampNanoSec, errTimestamp := crossfireChainStatsView.FindBy(targetTimestampDBKey)
 	if errTimestamp != nil {
-		return fmt.Errorf("error getting network Upgrade timestamp: %v", errTimestamp)
+		return fmt.Errorf("[Crossfire] error getting network Upgrade timestamp: %v", errTimestamp)
 	}
 
 	// Check if current block is before the network upgrade
@@ -766,7 +780,7 @@ func (projection *Crossfire) checkTaskNetworkUpgrade(
 	}
 	errUpdatingTaskCompletion := crossfireValidatorsView.UpdateTaskForOperatorAddress("task_phase_2_network_upgrade", constants.COMPLETED, validator.OperatorAddress)
 	if errUpdatingTaskCompletion != nil {
-		return fmt.Errorf("error Updating Task completion: %v", errUpdatingTaskCompletion)
+		return fmt.Errorf("[Crossfire] error Updating Task completion: %v", errUpdatingTaskCompletion)
 	}
 
 	return nil
