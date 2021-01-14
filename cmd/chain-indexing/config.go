@@ -135,6 +135,11 @@ type CrossfireConfig struct {
 	PhaseTwoStartTime        int64  `toml:"phase_two_start_time"`
 	PhaseThreeStartTime      int64  `toml:"phase_three_start_time"`
 	CompetitionEndTime       int64  `toml:"competition_end_time"`
+	JackpotOneStartTime      int64  `toml:"jackpot_one_start_time"`
+	JackpotTwoStartTime      int64  `toml:"jackpot_two_start_time"`
+	JackpotThreeStartTime    int64  `toml:"jackpot_three_start_time"`
+	JackpotFourStartTime     int64  `toml:"jackpot_four_start_time"`
+	JackpotFourEndTime       int64  `toml:"jackpot_four_end_time"`
 	AdminAddress             string `toml:"admin_address"`
 	NetworkUpgradeProposalID string `toml:"network_upgrade_proposal_id"`
 	ParticipantsListURL      string `toml:"participants_list_url"`

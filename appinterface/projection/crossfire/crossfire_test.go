@@ -43,6 +43,11 @@ var _ = Describe("Crossfire", func() {
 			"foo",
 			"14",
 			"/participants.json",
+			1,
+			1,
+			1,
+			1,
+			1,
 		)
 	})
 
@@ -296,6 +301,11 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				server.URL()+"/participants.json",
+				1,
+				1,
+				1,
+				1,
+				1,
 			)
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
@@ -369,6 +379,11 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				server.URL()+"/participants.json",
+				1,
+				1,
+				1,
+				1,
+				1,
 			)
 
 			Expect(crossfireValidatorsView.Count()).To(Equal(int64(0)))
@@ -473,6 +488,11 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				server.URL()+"/participants.json",
+				1,
+				1,
+				1,
+				1,
+				1,
 			)
 
 			// Fire both events
@@ -544,6 +564,11 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				server.URL()+"/participants.json",
+				1,
+				1,
+				1,
+				1,
+				1,
 			)
 
 			// Fire both events
@@ -559,7 +584,7 @@ var _ = Describe("Crossfire", func() {
 			crossfireValidatorList, err := crossfireValidatorView.List()
 			Expect(err).To(BeNil())
 			Expect(crossfireValidatorList).To(HaveLen(1))
-			Expect(crossfireValidatorList[0].TaskPhase2ProposalVote).To(Equal(constants.COMPLETED))
+			Expect(crossfireValidatorList[0].TaskPhase2ProposalVote).To(Equal(constants.INCOMPLETED))
 
 			//Check voted proposal id for voter
 			voted_proposal_id, err := crossfireValidatorStatsView.FindBy("voted_proposal_id:tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh")
@@ -591,6 +616,11 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				server.URL()+"/participants.json",
+				1,
+				1,
+				1,
+				1,
+				1,
 			)
 
 			// Fire both events
@@ -670,6 +700,11 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				fakeServer.URL()+"/participants.json",
+				1,
+				1,
+				1,
+				1,
+				1,
 			)
 
 			// Fire both events
@@ -755,6 +790,11 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				server.URL()+"/participants.json",
+				1,
+				1,
+				1,
+				1,
+				1,
 			)
 
 			// Fire both events

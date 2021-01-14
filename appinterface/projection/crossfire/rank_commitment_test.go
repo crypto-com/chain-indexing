@@ -274,6 +274,11 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				rankServer.URL()+"/participants.json",
+				1,
+				1,
+				1,
+				1,
+				1,
 			)
 
 			err := projection.HandleEvents(phase1Height, []event_entity.Event{validator1CreatedEvent, validator2CreatedEvent, validator3CreatedEvent})
@@ -412,6 +417,11 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				rankServer.URL()+"/participants.json",
+				1,
+				1,
+				1,
+				1,
+				1,
 			)
 
 			err := projection.HandleEvents(phase1Height, []event_entity.Event{validator1CreatedEvent, validator2CreatedEvent, validator3CreatedEvent})
@@ -550,6 +560,11 @@ var _ = Describe("Crossfire", func() {
 				"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
 				"14",
 				rankServer.URL()+"/participants.json",
+				1,
+				1,
+				1,
+				1,
+				1,
 			)
 
 			err := projection.HandleEvents(phase1Height, []event_entity.Event{validator1CreatedEvent, validator2CreatedEvent, phaseOneBlockCreatedEvent})

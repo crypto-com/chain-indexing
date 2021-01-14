@@ -78,12 +78,11 @@ func (handler *Crossfire) ListAllCrossfireValidators(ctx *fasthttp.RequestCtx) {
 	var finalList = make([]CrossfireValidatorDetails, 0)
 
 	for _, participantRemote := range *participantList {
-
 		if idx, ok := dbParticipantsMap[participantRemote.OperatorAddress]; !ok {
 			defaultValidator := getDefaultCrossfireValidatorDetailsResponse(participantRemote)
 			finalList = append(finalList, defaultValidator)
 		} else {
-			validatorStats, err := handler.getValidatorStats(participantRemote.OperatorAddress, crossfireValidatorsDB[idx])
+			validatorStats, err := handler.getValidatorStats(participantRemote.OperatorAddress, participantRemote.PrimaryAddress, crossfireValidatorsDB[idx])
 			if err != nil {
 				continue
 			}
@@ -93,7 +92,7 @@ func (handler *Crossfire) ListAllCrossfireValidators(ctx *fasthttp.RequestCtx) {
 				Moniker:                    crossfireValidatorsDB[idx].Moniker,
 				TaskSetup:                  crossfireValidatorsDB[idx].TaskPhase1NodeSetup,
 				TaskKeepActive:             crossfireValidatorsDB[idx].TaskPhase2KeepNodeActive,
-				TaskProposalVote:           crossfireValidatorsDB[idx].TaskPhase2ProposalVote,
+				TaskProposalVote:           validatorStats.taskVote,
 				TaskNetworkUpgrade:         crossfireValidatorsDB[idx].TaskPhase2NetworkUpgrade,
 				RankPhase1n2CommitmentRank: crossfireValidatorsDB[idx].RankTaskPhase1n2CommitmentCount,
 				RankPhase3CommitmentRank:   crossfireValidatorsDB[idx].RankTaskPhase3CommitmentCount,
@@ -108,7 +107,7 @@ func (handler *Crossfire) ListAllCrossfireValidators(ctx *fasthttp.RequestCtx) {
 	httpapi.Success(ctx, finalList)
 }
 
-func (handler *Crossfire) getValidatorStats(operatorAddress string, dbValidator crossfire_validator_view.CrossfireValidatorRow) (ValidatorStats, error) {
+func (handler *Crossfire) getValidatorStats(operatorAddress string, primaryAddress string, dbValidator crossfire_validator_view.CrossfireValidatorRow) (ValidatorStats, error) {
 	// Fetch Validator Stats
 	key := fmt.Sprintf("%s%s", "%", operatorAddress)
 	validatorStatRows, err := handler.crossfireValidatorsStatsView.FindAllLike(key)
@@ -116,26 +115,53 @@ func (handler *Crossfire) getValidatorStats(operatorAddress string, dbValidator 
 		return ValidatorStats{}, fmt.Errorf("[error-crossfire] Fetching Validator Stats, %v", err)
 	}
 
+	// Fetch Primary Address
+	keyPrimary := fmt.Sprintf("%s%s", "%", primaryAddress)
+	primaryAddressStatRows, err := handler.crossfireValidatorsStatsView.FindAllLike(keyPrimary)
+	if err != nil {
+		return ValidatorStats{}, fmt.Errorf("[error-crossfire] Fetching Primary Address Stats, %v", err)
+	}
+
 	var finalValidatorStats ValidatorStats
+	finalValidatorStats.JoinedAtBlockHeight = dbValidator.JoinedAtBlockHeight
+	finalValidatorStats.JoinedAtTimestamp = dbValidator.JoinedAtBlockTime
+	finalValidatorStats.taskVote = crossfire_constants.INCOMPLETED
+
 	for _, validatorStatRow := range validatorStatRows {
-		finalValidatorStats.JoinedAtBlockHeight = dbValidator.JoinedAtBlockHeight
-		finalValidatorStats.JoinedAtTimestamp = dbValidator.JoinedAtBlockTime
 
 		switch strings.Split(validatorStatRow.Key, crossfire_constants.DB_KEY_SEPARATOR)[0] {
-		case crossfire_constants.TOTAL_TX_SENT_PREFIX:
-			finalValidatorStats.TotalTxSent = validatorStatRow.Value
-		case crossfire_constants.PHASE_1_TX_SENT_PREFIX:
-			finalValidatorStats.TxSentPhase1 = validatorStatRow.Value
-		case crossfire_constants.PHASE_2_TX_SENT_PREFIX:
-			finalValidatorStats.TxSentPhase2 = validatorStatRow.Value
-		case crossfire_constants.PHASE_3_TX_SENT_PREFIX:
-			finalValidatorStats.TxSentPhase3 = validatorStatRow.Value
 		case crossfire_constants.PHASE_3_COMMIT_PREFIX:
 			finalValidatorStats.CommitCountPhase3 = validatorStatRow.Value
 		case crossfire_constants.PHASE_2_COMMIT_PREFIX:
 			finalValidatorStats.CommitCountPhase2 = validatorStatRow.Value
 		case crossfire_constants.PHASE_1N2_COMMIT_PREFIX:
 			finalValidatorStats.CommitCountPhase1n2 = validatorStatRow.Value
+		default:
+			break
+		}
+	}
+
+	for _, primaryAddressStatRow := range primaryAddressStatRows {
+
+		switch strings.Split(primaryAddressStatRow.Key, crossfire_constants.DB_KEY_SEPARATOR)[0] {
+		case crossfire_constants.TOTAL_TX_SENT_PREFIX:
+			finalValidatorStats.TotalTxSent = primaryAddressStatRow.Value
+		case crossfire_constants.PHASE_1_TX_SENT_PREFIX:
+			finalValidatorStats.TxSentPhase1 = primaryAddressStatRow.Value
+		case crossfire_constants.PHASE_2_TX_SENT_PREFIX:
+			finalValidatorStats.TxSentPhase2 = primaryAddressStatRow.Value
+		case crossfire_constants.PHASE_3_TX_SENT_PREFIX:
+			finalValidatorStats.TxSentPhase3 = primaryAddressStatRow.Value
+		case crossfire_constants.JACKPOT_1_TX_SENT_PREFIX:
+			finalValidatorStats.JackpotTxCountWeek1 = primaryAddressStatRow.Value
+		case crossfire_constants.JACKPOT_2_TX_SENT_PREFIX:
+			finalValidatorStats.JackpotTxCountWeek2 = primaryAddressStatRow.Value
+		case crossfire_constants.JACKPOT_3_TX_SENT_PREFIX:
+			finalValidatorStats.JackpotTxCountWeek3 = primaryAddressStatRow.Value
+		case crossfire_constants.JACKPOT_4_TX_SENT_PREFIX:
+			finalValidatorStats.JackpotTxCountWeek4 = primaryAddressStatRow.Value
+		case crossfire_constants.VOTED_PROPOSAL_ID:
+			finalValidatorStats.taskVote = crossfire_constants.COMPLETED
 		default:
 			break
 		}
@@ -161,6 +187,10 @@ func getDefaultCrossfireValidatorDetailsResponse(remoteParticipant crossfire.Par
 			TxSentPhase1:        0,
 			TxSentPhase2:        0,
 			TxSentPhase3:        0,
+			JackpotTxCountWeek1: 0,
+			JackpotTxCountWeek2: 0,
+			JackpotTxCountWeek3: 0,
+			JackpotTxCountWeek4: 0,
 			CommitCountPhase1n2: 0,
 			CommitCountPhase2:   0,
 			CommitCountPhase3:   0,
@@ -179,8 +209,13 @@ type ValidatorStats struct {
 	CommitCountPhase1n2 int64           `json:"commitCountPhase1n2"`
 	CommitCountPhase2   int64           `json:"commitCountPhase2"`
 	CommitCountPhase3   int64           `json:"commitCountPhase3"`
+	JackpotTxCountWeek1 int64           `json:"jackpotTxCountWeek1"`
+	JackpotTxCountWeek2 int64           `json:"jackpotTxCountWeek2"`
+	JackpotTxCountWeek3 int64           `json:"jackpotTxCountWeek3"`
+	JackpotTxCountWeek4 int64           `json:"jackpotTxCountWeek4"`
 	JoinedAtBlockHeight int64           `json:"joinedAtBlockHeight"`
 	JoinedAtTimestamp   utctime.UTCTime `json:"joinedAtTimestamp"`
+	taskVote            crossfire_constants.TaskStatus
 }
 
 // CrossfireValidatorDetails response object
