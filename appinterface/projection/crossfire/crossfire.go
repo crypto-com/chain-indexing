@@ -150,7 +150,7 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 			return fmt.Errorf("error compute rank_task_phase_1_2_commitment_count %v", err)
 		}
 	}
-	if blockTime.After(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
+	if blockTime.AfterOrEqual(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
 		if err := projection.computeCommitmentRank(
 			"rank_task_phase_3_commitment_count",
 			constants.PHASE_3_COMMIT_PREFIX,
@@ -183,17 +183,17 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 	blockHeight := event.Block.Height
 
 	// increment current phase block number
-	if blockTime.After(projection.phaseOneStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
+	if blockTime.AfterOrEqual(projection.phaseOneStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
 		err := crossfireChainStatsView.IncrementOne(constants.PHASE_1_BLOCK_COUNT)
 		if err != nil {
 			return fmt.Errorf("error increment phase1 block count")
 		}
-	} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
+	} else if blockTime.AfterOrEqual(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
 		err := crossfireChainStatsView.IncrementOne(constants.PHASE_2_BLOCK_COUNT)
 		if err != nil {
 			return fmt.Errorf("error increment phase2 block count")
 		}
-	} else if blockTime.After(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
+	} else if blockTime.AfterOrEqual(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
 		// check the keep active task, throttling with every 10 blocks
 		if blockHeight%10 == 0 {
 			if err := projection.checkTaskKeepActive(crossfireChainStatsView, crossfireValidatorsView, crossfireValidatorsStatsView); err != nil {
@@ -214,6 +214,7 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 		})
 		if errors.Is(err, rdb.ErrNoRows) {
 			// no validator found by tendermint address
+			projection.logger.Errorf("error updating validator commitment number: not found: %s", signature.ValidatorAddress)
 			continue
 		}
 		if err != nil {
@@ -222,7 +223,7 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 			)
 		}
 
-		if blockTime.After(projection.phaseOneStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
+		if blockTime.AfterOrEqual(projection.phaseOneStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
 			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE_1N2_COMMIT_PREFIX)
 			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
 				return fmt.Errorf(
@@ -230,7 +231,7 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 				)
 			}
 		}
-		if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
+		if blockTime.AfterOrEqual(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
 			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE_2_COMMIT_PREFIX)
 			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
 				return fmt.Errorf(
@@ -246,7 +247,7 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 				)
 			}
 		}
-		if blockTime.After(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
+		if blockTime.AfterOrEqual(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
 			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE_3_COMMIT_PREFIX)
 			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
 				return fmt.Errorf(
@@ -340,23 +341,27 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			projection.logger.Debug("handling MsgSubmitSoftwareUpgradeProposal event")
 
 			// Check if proposed after competition has ended
-			if blockTime.After(projection.competitionEndTime) {
-				return fmt.Errorf("error Competition has already ended")
+			if blockTime.AfterOrEqual(projection.competitionEndTime) {
+				projection.logger.Debug("error Competition has already ended")
+				continue
 			}
 
 			// Check if proposed before OR after Phase 2
-			if blockTime.Before(projection.phaseTwoStartTime) || blockTime.After(projection.phaseThreeStartTime) {
-				return fmt.Errorf("error This proposal does not occur in Phase 2")
+			if blockTime.Before(projection.phaseTwoStartTime) || blockTime.AfterOrEqual(projection.phaseThreeStartTime) {
+				projection.logger.Debug("error This proposal does not occur in Phase 2")
+				continue
 			}
 
 			// Check if proposed by NOT an admin
 			if msgSubmitSoftwareUpgradeProposalEvent.ProposerAddress != projection.adminAddress {
-				return fmt.Errorf("error checking proposer address equals admin address")
+				projection.logger.Debug("error checking proposer address equals admin address")
+				continue
 			}
 
 			// Check if proposal ID does not match the required ID
 			if msgSubmitSoftwareUpgradeProposalEvent.MaybeProposalId != nil && *msgSubmitSoftwareUpgradeProposalEvent.MaybeProposalId != projection.networkUpgradeProposalID {
-				return fmt.Errorf("error checking Proposal ID in proposal")
+				projection.logger.Debug("error checking Proposal ID in proposal")
+				continue
 			}
 
 			networkUpgradeTimestamp := msgSubmitSoftwareUpgradeProposalEvent.MsgSubmitSoftwareUpgradeProposalParams.Content.Plan.Time
@@ -381,33 +386,31 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			projection.logger.Debug("handling MsgVote event")
 
 			// Check if proposed after competition has ended
-			if blockTime.After(projection.competitionEndTime) {
-				return fmt.Errorf("error Competition has already ended")
+			if blockTime.AfterOrEqual(projection.competitionEndTime) {
+				projection.logger.Debug("error Competition has already ended")
+				continue
 			}
 
 			// Check if proposed before OR after Phase 2
-			if blockTime.Before(projection.phaseTwoStartTime) || blockTime.After(projection.phaseThreeStartTime) {
-				return fmt.Errorf("error Ineligible vote as it does not occur in Phase 2")
+			if blockTime.Before(projection.phaseTwoStartTime) || blockTime.AfterOrEqual(projection.phaseThreeStartTime) {
+				projection.logger.Debug("error Ineligible vote as it does not occur in Phase 2")
+				continue
 			}
 
 			// Check if proposal ID does not match the required ID
 			if msgVoteCreatedEvent.ProposalId != "" && msgVoteCreatedEvent.ProposalId != projection.networkUpgradeProposalID {
-				return fmt.Errorf("error checking Proposal ID in Vote not matching")
-			}
-
-			// Check if Vote is Casted
-			if !(strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_YES || strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_ABSTAIN || strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_UNSPECIFIED || strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_NO || strings.ToUpper(msgVoteCreatedEvent.Option) == constants.VOTE_OPTION_NO_WITH_VETO) {
-				return fmt.Errorf("error Ineligible Vote. Casted vote: %s", msgVoteCreatedEvent.Option)
+				projection.logger.Debug("error checking Proposal ID in Vote not matching")
+				continue
 			}
 
 			// Update the proposed ID against the voter in Database
-			voted_proposal_id_db_key := constants.VOTED_PROPOSAL_ID + constants.DB_KEY_SEPARATOR + msgVoteCreatedEvent.Voter
+			votedProposalIdDbKey := constants.VOTED_PROPOSAL_ID + constants.DB_KEY_SEPARATOR + msgVoteCreatedEvent.Voter
 
 			proposalIdAsInt64, errConversion := strconv.ParseInt(msgVoteCreatedEvent.ProposalId, 10, 64)
 			if errConversion != nil {
 				return fmt.Errorf("error converting ProposalID to int64: %v", errConversion)
 			}
-			errUpdateValidatorStats := crossfireValidatorStatsView.Set(voted_proposal_id_db_key, proposalIdAsInt64)
+			errUpdateValidatorStats := crossfireValidatorStatsView.Set(votedProposalIdDbKey, proposalIdAsInt64)
 
 			if errUpdateValidatorStats != nil {
 				return fmt.Errorf("error Updating ProposalID for the voter: %v", errUpdateValidatorStats)
@@ -416,7 +419,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			projection.logger.Debug("handling TransactionCreated event")
 
 			// Check if proposed after competition has ended
-			if blockTime.After(projection.competitionEndTime) {
+			if blockTime.AfterOrEqual(projection.competitionEndTime) {
 				return fmt.Errorf("error Competition has already ended")
 			}
 
@@ -448,7 +451,7 @@ func (projection *Crossfire) checkTaskSetup(
 		}
 	}
 
-	if joinedAtBlockTime.After(projection.phaseTwoStartTime) {
+	if joinedAtBlockTime.AfterOrEqual(projection.phaseTwoStartTime) {
 		if err := crossfireValidatorsView.UpdateTask(
 			"task_phase_1_node_setup",
 			constants.MISSED,
@@ -513,7 +516,7 @@ func (projection *Crossfire) checkTaskNetworkProposalVote(
 	voterAddress string,
 	txBlockTime utctime.UTCTime,
 ) error {
-	if txBlockTime.Before(projection.phaseThreeStartTime) && txBlockTime.After(projection.phaseTwoStartTime) {
+	if txBlockTime.Before(projection.phaseThreeStartTime) && txBlockTime.AfterOrEqual(projection.phaseTwoStartTime) {
 		if err := crossfireValidatorsView.UpdateTaskForOperatorAddress(
 			constants.TASK_PHASE_2_PROPOSAL_VOTE_COLUMN_NAME,
 			constants.COMPLETED,
@@ -523,7 +526,7 @@ func (projection *Crossfire) checkTaskNetworkProposalVote(
 		}
 	}
 
-	if txBlockTime.After(projection.phaseThreeStartTime) {
+	if txBlockTime.AfterOrEqual(projection.phaseThreeStartTime) {
 		if err := crossfireValidatorsView.UpdateTaskForOperatorAddress(
 			constants.TASK_PHASE_2_PROPOSAL_VOTE_COLUMN_NAME,
 			constants.MISSED,
@@ -544,26 +547,26 @@ func (projection *Crossfire) updateTxSentCount(
 ) error {
 	var phaseNumberPrefix string
 	var weeklyJackpotDBKey string
-	if blockTime.After(projection.phaseOneStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
+	if blockTime.AfterOrEqual(projection.phaseOneStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
 		phaseNumberPrefix = constants.PHASE_1_TX_SENT_PREFIX
-	} else if blockTime.After(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
+	} else if blockTime.AfterOrEqual(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
 		phaseNumberPrefix = constants.PHASE_2_TX_SENT_PREFIX
-	} else if blockTime.After(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
+	} else if blockTime.AfterOrEqual(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
 		phaseNumberPrefix = constants.PHASE_3_TX_SENT_PREFIX
 	}
 
-	if blockTime.After(projection.JackpotOneStartTime) && blockTime.Before(projection.JackpotTwoStartTime) {
+	if blockTime.AfterOrEqual(projection.JackpotOneStartTime) && blockTime.Before(projection.JackpotTwoStartTime) {
 		//Jackpot Week 1
 		weeklyJackpotDBKey = constants.JACKPOT_1_TX_SENT_PREFIX
-	} else if blockTime.After(projection.JackpotTwoStartTime) && blockTime.Before(projection.JackpotThreeStartTime) {
+	} else if blockTime.AfterOrEqual(projection.JackpotTwoStartTime) && blockTime.Before(projection.JackpotThreeStartTime) {
 		//Jackpot Week 2
 		weeklyJackpotDBKey = constants.JACKPOT_2_TX_SENT_PREFIX
 
-	} else if blockTime.After(projection.JackpotThreeStartTime) && blockTime.Before(projection.JackpotFourStartTime) {
+	} else if blockTime.AfterOrEqual(projection.JackpotThreeStartTime) && blockTime.Before(projection.JackpotFourStartTime) {
 		//Jackpot Week 3
 		weeklyJackpotDBKey = constants.JACKPOT_3_TX_SENT_PREFIX
 
-	} else if blockTime.After(projection.JackpotFourStartTime) && blockTime.Before(projection.JackpotFourEndTime) {
+	} else if blockTime.AfterOrEqual(projection.JackpotFourStartTime) && blockTime.Before(projection.JackpotFourEndTime) {
 		//Jackpot Week 4
 		weeklyJackpotDBKey = constants.JACKPOT_4_TX_SENT_PREFIX
 	}
@@ -573,8 +576,10 @@ func (projection *Crossfire) updateTxSentCount(
 		// Only considering Pubkey address for now
 		if sender.Type == constants.TYPE_URL_PUBKEY && sender.MaybeThreshold == nil {
 			pubKey, _ := base64.StdEncoding.DecodeString(sender.Pubkeys[0])
+			// TODO: Support MultiSig address
 			primaryAddress, err := tmcosmosutils.AccountAddressFromPubKey(projection.primaryAddressPrefix, pubKey)
 			if err != nil {
+				projection.logger.Errorf("error getting account address from transaction sender pubkey: %v", err)
 				continue
 			}
 
