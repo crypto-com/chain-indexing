@@ -40,7 +40,6 @@ func (view *CrossfireChainStats) Set(metric string, value int64) error {
 	return nil
 }
 
-
 func (view *CrossfireChainStats) FindBy(metric string) (int64, error) {
 	sql, sqlArgs, err := view.rdbHandle.StmtBuilder.Select(
 		"value",
@@ -70,7 +69,7 @@ func (view *CrossfireChainStats) IncrementOne(key string) error {
 		return fmt.Errorf("error getting value for %v: %v", key, err)
 	}
 
-	err = view.Set(key, value + 1)
+	err = view.Set(key, value+1)
 	if err != nil {
 		return fmt.Errorf("error setting increment for %v: %v", key, err)
 	}

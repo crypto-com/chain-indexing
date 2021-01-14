@@ -382,6 +382,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 				return fmt.Errorf("[Crossfire] error updating network_upgrade blockheight: %v", errBlockheightUpdate)
 			}
 
+			projection.logger.Infof("[Crossfire] updated network upgrade proposal to id: %s, time: %s", *msgSubmitSoftwareUpgradeProposalEvent.MaybeProposalId, networkUpgradeTimestamp)
 		} else if msgVoteCreatedEvent, ok := event.(*event_usecase.MsgVote); ok {
 			projection.logger.Debug("[Crossfire] handling MsgVote event")
 
@@ -471,6 +472,8 @@ func (projection *Crossfire) checkTaskKeepActive(
 	crossfireValidatorsView *view.CrossfireValidators,
 	crossfireValidatorsStatsView *view.CrossfireValidatorsStats,
 ) error {
+	// This should only be called during phase 3, otherwise the default value of FindBy is 0 and
+	// will make all nodes be treated as completed.
 	phase2TotalBlockCount, err := crossfireChainStatsView.FindBy(constants.PHASE_2_BLOCK_COUNT)
 	if err != nil {
 		return fmt.Errorf("error getting phase 2 block count: %v", err)
@@ -772,6 +775,9 @@ func (projection *Crossfire) checkTaskNetworkUpgrade(
 	networkUpgradeTimestampNanoSec, errTimestamp := crossfireChainStatsView.FindBy(targetTimestampDBKey)
 	if errTimestamp != nil {
 		return fmt.Errorf("[Crossfire] error getting network Upgrade timestamp: %v", errTimestamp)
+	}
+	if networkUpgradeTimestampNanoSec == 0 {
+		return nil
 	}
 
 	// Check if current block is before the network upgrade
