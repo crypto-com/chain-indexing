@@ -120,6 +120,7 @@ func (handler *Crossfire) getValidatorStats(operatorAddress string, dbValidator 
 	for _, validatorStatRow := range validatorStatRows {
 		finalValidatorStats.JoinedAtBlockHeight = dbValidator.JoinedAtBlockHeight
 		finalValidatorStats.JoinedAtTimestamp = dbValidator.JoinedAtBlockTime
+		finalValidatorStats.TaskVote = crossfire_constants.INCOMPLETED
 
 		switch strings.Split(validatorStatRow.Key, crossfire_constants.DB_KEY_SEPARATOR)[0] {
 		case crossfire_constants.TOTAL_TX_SENT_PREFIX:
@@ -137,12 +138,7 @@ func (handler *Crossfire) getValidatorStats(operatorAddress string, dbValidator 
 		case crossfire_constants.PHASE_1N2_COMMIT_PREFIX:
 			finalValidatorStats.CommitCountPhase1n2 = validatorStatRow.Value
 		case crossfire_constants.VOTED_PROPOSAL_ID:
-			{
-				finalValidatorStats.TaskVote = crossfire_constants.INCOMPLETED
-				if validatorStatRow.Value > 0 {
-					finalValidatorStats.TaskVote = crossfire_constants.COMPLETED
-				}
-			}
+			finalValidatorStats.TaskVote = crossfire_constants.COMPLETED
 		default:
 			break
 		}

@@ -384,13 +384,13 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			}
 
 			// Update the proposed ID against the voter in Database
-			voted_proposal_id_db_key := constants.VOTED_PROPOSAL_ID + constants.DB_KEY_SEPARATOR + msgVoteCreatedEvent.Voter
+			votedProposalIdDbKey := constants.VOTED_PROPOSAL_ID + constants.DB_KEY_SEPARATOR + msgVoteCreatedEvent.Voter
 
 			proposalIdAsInt64, errConversion := strconv.ParseInt(msgVoteCreatedEvent.ProposalId, 10, 64)
 			if errConversion != nil {
 				return fmt.Errorf("error converting ProposalID to int64: %v", errConversion)
 			}
-			errUpdateValidatorStats := crossfireValidatorStatsView.Set(voted_proposal_id_db_key, proposalIdAsInt64)
+			errUpdateValidatorStats := crossfireValidatorStatsView.Set(votedProposalIdDbKey, proposalIdAsInt64)
 
 			if errUpdateValidatorStats != nil {
 				return fmt.Errorf("error Updating ProposalID for the voter: %v", errUpdateValidatorStats)
