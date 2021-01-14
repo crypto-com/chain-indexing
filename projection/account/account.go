@@ -16,7 +16,7 @@ import (
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
-// Account number, sequence number, balance are fetched from the latest state (regardless of current replayed height)
+// Account number, sequence number, balances are fetched from the latest state (regardless of current replaying height)
 type Account struct {
 	*rdbprojectionbase.Base
 
@@ -39,7 +39,10 @@ func NewAccount(
 }
 
 func (_ *Account) GetEventsToListen() []string {
-	return []string{event_usecase.ACCOUNT_TRANSFERRED}
+	return []string{
+		// TODO: Genesis account
+		event_usecase.ACCOUNT_TRANSFERRED,
+	}
 }
 
 func (projection *Account) OnInit() error {
@@ -122,11 +125,17 @@ func (projection *Account) writeAccountInfo(accountsView *account_view.Accounts,
 		return err
 	}
 
-	accountType := accountInfo.AccountType
-	accountAddress := accountInfo.AccountAddress
-	pubkey := accountInfo.Pubkey
+	accountType := accountInfo.Type
+	var name *string
+	if accountInfo.Type == cosmosapp_interface.ACCOUNT_MODULE {
+		name = &accountInfo.MaybeModuleAccount.Name
+	}
+	var pubkey *string
+	if accountInfo.MaybePubkey != nil {
+		pubkey = &accountInfo.MaybePubkey.Key
+	}
 	accountNumber := accountInfo.AccountNumber
-	sequenceNumber := accountInfo.SequenceNumber
+	sequenceNumber := accountInfo.Sequence
 
 	balances, err := projection.getAccountBalances(address)
 	if err != nil {
@@ -134,8 +143,9 @@ func (projection *Account) writeAccountInfo(accountsView *account_view.Accounts,
 	}
 	if err := accountsView.Upsert(&account_view.AccountRow{
 		Type:           accountType,
-		Address:        accountAddress,
-		Pubkey:         pubkey,
+		Address:        address,
+		MaybeName:      name,
+		MaybePubkey:    pubkey,
 		AccountNumber:  accountNumber,
 		SequenceNumber: sequenceNumber,
 		Balance:        balances,
