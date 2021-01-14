@@ -125,6 +125,7 @@ func (handler *Crossfire) getValidatorStats(operatorAddress string, primaryAddre
 	var finalValidatorStats ValidatorStats
 	finalValidatorStats.JoinedAtBlockHeight = dbValidator.JoinedAtBlockHeight
 	finalValidatorStats.JoinedAtTimestamp = dbValidator.JoinedAtBlockTime
+	finalValidatorStats.taskVote = crossfire_constants.INCOMPLETED
 
 	for _, validatorStatRow := range validatorStatRows {
 
@@ -201,20 +202,20 @@ func getDefaultCrossfireValidatorDetailsResponse(remoteParticipant crossfire.Par
 
 // ValidatorStats Validator statistics
 type ValidatorStats struct {
-	TotalTxSent         int64                          `json:"totalTxSent"`
-	TxSentPhase1        int64                          `json:"txSentPhase1"`
-	TxSentPhase2        int64                          `json:"txSentPhase2"`
-	TxSentPhase3        int64                          `json:"txSentPhase3"`
-	CommitCountPhase1n2 int64                          `json:"commitCountPhase1n2"`
-	CommitCountPhase2   int64                          `json:"commitCountPhase2"`
-	CommitCountPhase3   int64                          `json:"commitCountPhase3"`
-	JackpotTxCountWeek1 int64                          `json:"jackpotTxCountWeek1"`
-	JackpotTxCountWeek2 int64                          `json:"jackpotTxCountWeek2"`
-	JackpotTxCountWeek3 int64                          `json:"jackpotTxCountWeek3"`
-	JackpotTxCountWeek4 int64                          `json:"jackpotTxCountWeek4"`
-	JoinedAtBlockHeight int64                          `json:"joinedAtBlockHeight"`
-	JoinedAtTimestamp   utctime.UTCTime                `json:"joinedAtTimestamp"`
-	taskVote            crossfire_constants.TaskStatus `default:"Incompleted"`
+	TotalTxSent         int64           `json:"totalTxSent"`
+	TxSentPhase1        int64           `json:"txSentPhase1"`
+	TxSentPhase2        int64           `json:"txSentPhase2"`
+	TxSentPhase3        int64           `json:"txSentPhase3"`
+	CommitCountPhase1n2 int64           `json:"commitCountPhase1n2"`
+	CommitCountPhase2   int64           `json:"commitCountPhase2"`
+	CommitCountPhase3   int64           `json:"commitCountPhase3"`
+	JackpotTxCountWeek1 int64           `json:"jackpotTxCountWeek1"`
+	JackpotTxCountWeek2 int64           `json:"jackpotTxCountWeek2"`
+	JackpotTxCountWeek3 int64           `json:"jackpotTxCountWeek3"`
+	JackpotTxCountWeek4 int64           `json:"jackpotTxCountWeek4"`
+	JoinedAtBlockHeight int64           `json:"joinedAtBlockHeight"`
+	JoinedAtTimestamp   utctime.UTCTime `json:"joinedAtTimestamp"`
+	taskVote            crossfire_constants.TaskStatus
 }
 
 // CrossfireValidatorDetails response object
