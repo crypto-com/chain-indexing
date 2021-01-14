@@ -419,7 +419,6 @@ UpdateTxSentRank : Updates the participating validator rank
 **/
 func (view *CrossfireValidators) UpdateTxSentRank(
 	rank int,
-	primaryAddress string,
 	operatorAddress string,
 ) error {
 	sql, sqlArgs, err := view.rdb.StmtBuilder.Update(
@@ -427,8 +426,7 @@ func (view *CrossfireValidators) UpdateTxSentRank(
 	).Set(
 		"rank_task_highest_tx_sent", rank,
 	).Where(
-		"operator_address = ? AND initial_delegator_address = ?",
-		operatorAddress, primaryAddress,
+		"operator_address = ?", operatorAddress,
 	).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building UpdateTxSentRank update sql: %v", err)

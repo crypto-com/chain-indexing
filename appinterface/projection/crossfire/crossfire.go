@@ -735,7 +735,7 @@ func (projection *Crossfire) computeTxSentRank(
 		})
 		if errors.Is(errFindingValidator, rdb.ErrNoRows) {
 			// no validator found by tendermint address
-			projection.logger.Error("[Crossfire] error finding participant when computing tx rank: record not found")
+			projection.logger.Errorf("[Crossfire] error finding participant when computing tx rank: record not found: %s", participant.OperatorAddress)
 			continue
 		}
 		if errFindingValidator != nil {
@@ -743,11 +743,11 @@ func (projection *Crossfire) computeTxSentRank(
 		}
 
 		// Update Ranks with specific Validator
-		errUpdating := crossfireValidatorView.UpdateTxSentRank(rank, participant.PrimaryAddress, participant.OperatorAddress)
+		errUpdating := crossfireValidatorView.UpdateTxSentRank(rank, participant.OperatorAddress)
 		if errUpdating != nil {
 			return fmt.Errorf("[Crossfire] error updating TX SENT Task Rank %w", errUpdating)
 		}
-		if index+1 < len(dbTxSendersWithCountList) && dbTxSendersWithCountList[index].Value != dbTxSendersWithCountList[index+1].Value {
+		if index+1 < len(dbTxSendersWithCountList) && dbParticipantWithCountList[index].Value != dbParticipantWithCountList[index+1].Value {
 			rank++
 		}
 	}
