@@ -160,12 +160,7 @@ func (handler *Crossfire) getValidatorStats(operatorAddress string, primaryAddre
 		case crossfire_constants.JACKPOT_4_TX_SENT_PREFIX:
 			finalValidatorStats.JackpotTxCountWeek4 = primaryAddressStatRow.Value
 		case crossfire_constants.VOTED_PROPOSAL_ID:
-			{
-				finalValidatorStats.taskVote = crossfire_constants.INCOMPLETED
-				if primaryAddressStatRow.Value > 0 {
-					finalValidatorStats.taskVote = crossfire_constants.COMPLETED
-				}
-			}
+			finalValidatorStats.taskVote = crossfire_constants.COMPLETED
 		default:
 			break
 		}
