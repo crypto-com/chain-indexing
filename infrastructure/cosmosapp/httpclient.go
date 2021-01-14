@@ -46,62 +46,106 @@ func (client *HTTPClient) Account(accountAddress string) (*cosmosapp_interface.A
 	}
 	defer rawRespBody.Close()
 
-	outputBytes, readErr := ioutil.ReadAll(rawRespBody)
-	if readErr != nil {
-		return nil, fmt.Errorf("error reading account info raw response: %v", readErr)
-	}
-
-	var rawResp map[string]interface{}
-
-	if err := json.Unmarshal(outputBytes, &rawResp); err != nil {
-		return nil, fmt.Errorf("error unmarshalling account info raw response: %v", err)
-	}
-
-	var accountType string
-	var address string
-	var pubKey string
-	var accountNumber string
-	var sequenceNumber string
-
-	accountKVPair := rawResp["account"].(map[string]interface{})
-	accountTypeMeta := accountKVPair["@type"].(string)
-	accountName, hasAccountName := accountKVPair["name"].(string)
-	if !hasAccountName {
-		accountName = ""
-	}
-	accountType = fmt.Sprintf("%s %s", accountTypeMeta, accountName)
-	baseAccount, isBaseAccount := accountKVPair["base_account"].(map[string]interface{})
-
-	if !isBaseAccount {
-		// normal account
-		address = accountKVPair["address"].(string)
-		// FIXME: account may not have pubkey (genesis account?)
-		pubKeyKVPair, ok := accountKVPair["pub_key"].(map[string]interface{})
-		if !ok {
-			return nil, fmt.Errorf(
-				"error asserting account %s public key: %v", accountAddress, accountKVPair["pub_key"],
-			)
-		}
-		pubKey = pubKeyKVPair["key"].(string)
-		accountNumber = accountKVPair["account_number"].(string)
-		sequenceNumber = accountKVPair["sequence"].(string)
-
-	} else {
-		// module account
-		address = baseAccount["address"].(string)
-		accountNumber = baseAccount["account_number"].(string)
-		sequenceNumber = baseAccount["sequence"].(string)
-
-	}
-
 	var accountResp AccountResp
-	accountResp.Account.AccountType = accountType
-	accountResp.Account.AccountAddress = address
-	accountResp.Account.Pubkey = pubKey
-	accountResp.Account.AccountNumber = accountNumber
-	accountResp.Account.SequenceNumber = sequenceNumber
+	if err := jsoniter.NewDecoder(rawRespBody).Decode(&accountResp); err != nil {
+		return nil, err
+	}
+	rawAccount := accountResp.Account
 
-	return &accountResp.Account, nil
+	var account cosmosapp_interface.Account
+	switch rawAccount.Type {
+	case cosmosapp_interface.ACCOUNT_BASE:
+		account = cosmosapp_interface.Account{
+			Type:          rawAccount.Type,
+			Address:       *rawAccount.MaybeAddress,
+			MaybePubkey:   rawAccount.MaybePubKey,
+			AccountNumber: *rawAccount.MaybeAccountNumber,
+			Sequence:      *rawAccount.MaybeSequence,
+
+			MaybeModuleAccount:            nil,
+			MaybeDelayedVestingAccount:    nil,
+			MaybeContinuousVestingAccount: nil,
+			MaybePeriodicVestingAccount:   nil,
+		}
+	case cosmosapp_interface.ACCOUNT_MODULE:
+		account = cosmosapp_interface.Account{
+			Type:          rawAccount.Type,
+			Address:       rawAccount.MaybeBaseAccount.Address,
+			MaybePubkey:   nil,
+			AccountNumber: rawAccount.MaybeBaseAccount.AccountNumber,
+			Sequence:      rawAccount.MaybeBaseAccount.Sequence,
+			MaybeModuleAccount: &cosmosapp_interface.ModuleAccount{
+				Name:        *rawAccount.MaybeName,
+				Permissions: rawAccount.MaybePermissions,
+			},
+
+			MaybeDelayedVestingAccount:    nil,
+			MaybeContinuousVestingAccount: nil,
+			MaybePeriodicVestingAccount:   nil,
+		}
+	case "/cosmos.vesting.v1beta1.DelayedVestingAccount":
+		account = cosmosapp_interface.Account{
+			Type:          rawAccount.Type,
+			Address:       rawAccount.MaybeBaseVestingAccount.BaseAccount.Address,
+			MaybePubkey:   rawAccount.MaybeBaseVestingAccount.BaseAccount.MaybePubKey,
+			AccountNumber: rawAccount.MaybeBaseVestingAccount.BaseAccount.AccountNumber,
+			Sequence:      rawAccount.MaybeBaseVestingAccount.BaseAccount.Sequence,
+
+			MaybeModuleAccount: nil,
+			MaybeDelayedVestingAccount: &cosmosapp_interface.DelayedVestingAccount{
+				OriginalVesting:  rawAccount.MaybeBaseVestingAccount.OriginalVesting,
+				DelegatedFree:    rawAccount.MaybeBaseVestingAccount.DelegatedFree,
+				DelegatedVesting: rawAccount.MaybeBaseVestingAccount.DelegatedVesting,
+				EndTime:          rawAccount.MaybeBaseVestingAccount.EndTime,
+			},
+			MaybeContinuousVestingAccount: nil,
+			MaybePeriodicVestingAccount:   nil,
+		}
+
+	case "/cosmos.vesting.v1beta1.ContinuousVestingAccount":
+		account = cosmosapp_interface.Account{
+			Type:          rawAccount.Type,
+			Address:       rawAccount.MaybeBaseVestingAccount.BaseAccount.Address,
+			MaybePubkey:   rawAccount.MaybeBaseVestingAccount.BaseAccount.MaybePubKey,
+			AccountNumber: rawAccount.MaybeBaseVestingAccount.BaseAccount.AccountNumber,
+			Sequence:      rawAccount.MaybeBaseVestingAccount.BaseAccount.Sequence,
+
+			MaybeModuleAccount:         nil,
+			MaybeDelayedVestingAccount: nil,
+			MaybeContinuousVestingAccount: &cosmosapp_interface.ContinuousVestingAccount{
+				OriginalVesting:  rawAccount.MaybeBaseVestingAccount.OriginalVesting,
+				DelegatedFree:    rawAccount.MaybeBaseVestingAccount.DelegatedFree,
+				DelegatedVesting: rawAccount.MaybeBaseVestingAccount.DelegatedVesting,
+				StartTime:        *rawAccount.MaybeStartTime,
+				EndTime:          rawAccount.MaybeBaseVestingAccount.EndTime,
+			},
+			MaybePeriodicVestingAccount: nil,
+		}
+	case cosmosapp_interface.ACCOUNT_VESTING_PERIODIC:
+		account = cosmosapp_interface.Account{
+			Type:          rawAccount.Type,
+			Address:       rawAccount.MaybeBaseVestingAccount.BaseAccount.Address,
+			MaybePubkey:   rawAccount.MaybeBaseVestingAccount.BaseAccount.MaybePubKey,
+			AccountNumber: rawAccount.MaybeBaseVestingAccount.BaseAccount.AccountNumber,
+			Sequence:      rawAccount.MaybeBaseVestingAccount.BaseAccount.Sequence,
+
+			MaybeModuleAccount:            nil,
+			MaybeDelayedVestingAccount:    nil,
+			MaybeContinuousVestingAccount: nil,
+			MaybePeriodicVestingAccount: &cosmosapp_interface.PeriodicVestingAccount{
+				OriginalVesting:  rawAccount.MaybeBaseVestingAccount.OriginalVesting,
+				DelegatedFree:    rawAccount.MaybeBaseVestingAccount.DelegatedFree,
+				DelegatedVesting: rawAccount.MaybeBaseVestingAccount.DelegatedVesting,
+				StartTime:        *rawAccount.MaybeStartTime,
+				EndTime:          rawAccount.MaybeBaseVestingAccount.EndTime,
+				VestingPeriods:   rawAccount.MaybeVestingPeriods,
+			},
+		}
+	default:
+		return nil, fmt.Errorf("unrecognized account type: %s", rawAccount.Type)
+	}
+
+	return &account, nil
 }
 
 func (client *HTTPClient) Balances(accountAddress string) (coin.Coins, error) {
@@ -268,7 +312,45 @@ type DelegationResp struct {
 }
 
 type AccountResp struct {
-	Account cosmosapp_interface.Account
+	Account Account
+}
+
+type Account struct {
+	// Common fields
+	Type string `json:"@type"`
+
+	// Module account
+	MaybeName        *string      `json:"name"`
+	MaybeBaseAccount *BaseAccount `json:"base_account"`
+	MaybePermissions []string     `json:"permissions"`
+
+	// Vesting account common fields
+	MaybeBaseVestingAccount *BaseVestingAccount `json:"base_vesting_account"`
+	// Continuous vesting account
+	MaybeStartTime *string `json:"start_time"`
+	// Periodic vesting account
+	MaybeVestingPeriods []cosmosapp_interface.VestingPeriod `json:"vesting_periods"`
+
+	// User account
+	MaybeAddress       *string                     `json:"address"`
+	MaybePubKey        *cosmosapp_interface.PubKey `json:"pub_key"`
+	MaybeAccountNumber *string                     `json:"account_number"`
+	MaybeSequence      *string                     `json:"sequence"`
+}
+
+type BaseVestingAccount struct {
+	BaseAccount      BaseAccount                          `json:"base_account"`
+	OriginalVesting  []cosmosapp_interface.VestingBalance `json:"original_vesting"`
+	DelegatedFree    []cosmosapp_interface.VestingBalance `json:"delegated_free"`
+	DelegatedVesting []cosmosapp_interface.VestingBalance `json:"delegated_vesting"`
+	EndTime          string                               `json:"end_time"`
+}
+
+type BaseAccount struct {
+	Address       string                      `json:"address"`
+	MaybePubKey   *cosmosapp_interface.PubKey `json:"pub_key"`
+	AccountNumber string                      `json:"account_number"`
+	Sequence      string                      `json:"sequence"`
 }
 
 type BankBalancesResp struct {

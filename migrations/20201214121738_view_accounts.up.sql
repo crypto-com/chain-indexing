@@ -1,11 +1,10 @@
 CREATE TABLE view_accounts (
-    id BIGSERIAL,
-    address VARCHAR NOT NULL,
+    address VARCHAR,
     account_type VARCHAR,
-    pubkey VARCHAR,
+    name VARCHAR NULL,
+    pubkey VARCHAR NULL,
     account_number BIGINT,
     sequence_number BIGINT,
-    balance VARCHAR,
-    PRIMARY KEY(id),
-    UNIQUE(address)
+    balance JSONB,
+    PRIMARY KEY(address)
 );

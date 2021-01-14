@@ -31,7 +31,7 @@ func NewAccounts(logger applogger.Logger, rdbHandle *rdb.Handle) *Accounts {
 func (handler *Accounts) FindBy(ctx *fasthttp.RequestCtx) {
 	accountparam, _ := ctx.UserValue("address").(string)
 	var identity account_view.AccountIdentity
-	identity.MaybeAddress = accountparam
+	identity.Address = accountparam
 
 	account, err := handler.accountsView.FindBy(&identity)
 	if err != nil {
