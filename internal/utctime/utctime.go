@@ -70,6 +70,6 @@ func (t *UTCTime) Before(target UTCTime) bool {
 	return t.unixNano < target.unixNano
 }
 
-func (t *UTCTime) After(target UTCTime) bool {
+func (t *UTCTime) AfterOrEqual(target UTCTime) bool {
 	return t.unixNano >= target.unixNano
 }
