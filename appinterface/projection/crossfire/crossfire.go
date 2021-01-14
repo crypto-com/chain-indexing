@@ -489,6 +489,7 @@ func (projection *Crossfire) checkTaskKeepActive(
 	return nil
 }
 
+/*
 // checkTaskNetworkProposalVote
 func (projection *Crossfire) checkTaskNetworkProposalVote(
 	crossfireValidatorsView *view.CrossfireValidators,
@@ -516,7 +517,7 @@ func (projection *Crossfire) checkTaskNetworkProposalVote(
 	}
 
 	return nil
-}
+}*/
 
 // Update Tx sent count for sender
 func (projection *Crossfire) updateTxSentCount(
@@ -705,20 +706,14 @@ func (projection *Crossfire) checkTaskNetworkUpgrade(
 	}
 
 	targetTimestampDBKey := constants.NETWORK_UPGRADE_TARGET_TIMESTAMP_KEY()
-	targetBlockHeightDBKey := constants.NETWORK_UPGRADE_TARGET_BLOCKHEIGHT_KEY()
 
 	networkUpgradeTimestampNanoSec, errTimestamp := crossfireChainStatsView.FindBy(targetTimestampDBKey)
 	if errTimestamp != nil {
 		return fmt.Errorf("error getting network Upgrade timestamp: %v", errTimestamp)
 	}
 
-	networkUpgradeBlockheight, errBlockheight := crossfireChainStatsView.FindBy(targetBlockHeightDBKey)
-	if errBlockheight != nil {
-		return fmt.Errorf("error getting network Upgrade Blockheight: %v", errBlockheight)
-	}
-
 	// Check if current block is before the network upgrade
-	if blockTime.Before(utctime.FromUnixNano(networkUpgradeTimestampNanoSec)) || blockHeight < networkUpgradeBlockheight {
+	if blockTime.Before(utctime.FromUnixNano(networkUpgradeTimestampNanoSec)) {
 		return nil
 	}
 	errUpdatingTaskCompletion := crossfireValidatorsView.UpdateTaskForOperatorAddress("task_phase_2_network_upgrade", constants.COMPLETED, validator.OperatorAddress)
