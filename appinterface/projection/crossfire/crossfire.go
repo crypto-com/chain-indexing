@@ -750,7 +750,7 @@ func (projection *Crossfire) computeTxSentRank(
 		if errUpdating != nil {
 			return fmt.Errorf("[Crossfire] error updating TX SENT Task Rank %w", errUpdating)
 		}
-		if index+1 < len(dbTxSendersWithCountList) && dbParticipantWithCountList[index].Value != dbParticipantWithCountList[index+1].Value {
+		if index+1 < len(dbParticipantWithCountList) && dbParticipantWithCountList[index].Value != dbParticipantWithCountList[index+1].Value {
 			rank++
 		}
 	}
