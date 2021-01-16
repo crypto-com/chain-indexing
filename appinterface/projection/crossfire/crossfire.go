@@ -139,15 +139,14 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 	}
 	projection.profile("end projecting validator view")
 
-	// Ranks computation at the end of event projection
-	if blockTime.Before(projection.competitionEndTime) {
+	// Ranks computation every 100 blocks and/or at the end of event projection
+	if height%100 == 0 {
 		projection.profile("begin computing transaction sent rank")
 		if err := projection.computeTxSentRank(crossfireValidatorsStatsView, crossfireValidatorsView); err != nil {
 			return fmt.Errorf("[Crossfire] error Updating TxSentTask Rank %v", err)
 		}
 		projection.profile("end computing transaction sent rank")
-	}
-	if blockTime.Before(projection.phaseThreeStartTime) {
+
 		projection.profile("begin phase 1 and 2 computing commitment rank")
 		if err := projection.computeCommitmentRank(
 			"rank_task_phase_1_2_commitment_count",
@@ -158,18 +157,19 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 			return fmt.Errorf("[Crossfire] error compute rank_task_phase_1_2_commitment_count %v", err)
 		}
 		projection.profile("end phase 1 and 2 computing commitment rank")
-	}
-	if blockTime.AfterOrEqual(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
-		projection.profile("begin phase 3 computing commitment rank")
-		if err := projection.computeCommitmentRank(
-			"rank_task_phase_3_commitment_count",
-			constants.PHASE_3_COMMIT_PREFIX,
-			crossfireValidatorsStatsView,
-			crossfireValidatorsView,
-		); err != nil {
-			return fmt.Errorf("[Crossfire] error compute rank_task_phase_3_commitment_count %v", err)
+
+		if blockTime.AfterOrEqual(projection.phaseThreeStartTime) {
+			projection.profile("begin phase 3 computing commitment rank")
+			if err := projection.computeCommitmentRank(
+				"rank_task_phase_3_commitment_count",
+				constants.PHASE_3_COMMIT_PREFIX,
+				crossfireValidatorsStatsView,
+				crossfireValidatorsView,
+			); err != nil {
+				return fmt.Errorf("[Crossfire] error compute rank_task_phase_3_commitment_count %v", err)
+			}
+			projection.profile("end phase 3 computing commitment rank")
 		}
-		projection.profile("end phase 3 computing commitment rank")
 	}
 
 	// Done current height projection and ranking computation
@@ -195,21 +195,19 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 
 	// increment current phase block number
 	if blockTime.AfterOrEqual(projection.phaseOneStartTime) && blockTime.Before(projection.phaseTwoStartTime) {
-		projection.profile("begin incrementing phase 1 block count")
 		err := crossfireChainStatsView.IncrementOne(constants.PHASE_1_BLOCK_COUNT)
 		if err != nil {
 			return fmt.Errorf("[Crossfire] error increment phase1 block count")
 		}
-		projection.profile("end incrementing phase 1 block count")
 	} else if blockTime.AfterOrEqual(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
-		projection.profile("begin incrementing phase 2 block count")
 		err := crossfireChainStatsView.IncrementOne(constants.PHASE_2_BLOCK_COUNT)
 		if err != nil {
 			return fmt.Errorf("[Crossfire] error increment phase2 block count")
 		}
-		projection.profile("end incrementing phase 2 block count")
 	} else if blockTime.AfterOrEqual(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
 		// check the keep active task, throttling with every 10 blocks
+		// keep active task is only counting commitments during phase 2, so checking it in phase 3
+		// guarantees correctness
 		if blockHeight%10 == 0 {
 			projection.profile("begin checking keep alive task")
 			if err := projection.checkTaskKeepActive(crossfireChainStatsView, crossfireValidatorsView, crossfireValidatorsStatsView); err != nil {
@@ -218,16 +216,14 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 			projection.profile("end checking keep alive task")
 		}
 
-		projection.profile("begin incrementing phase 3 block count")
 		err := crossfireChainStatsView.IncrementOne(constants.PHASE_3_BLOCK_COUNT)
 		if err != nil {
 			return fmt.Errorf("[Crossfire] error increment phase3 block count")
 		}
-		projection.profile("end incrementing phase 3 block count")
 	}
 
 	// increment current block validator commitment number
-	projection.profile("begin looping validator commitment number")
+	projection.profile("begin looping block validator commitment")
 	for _, signature := range event.Block.Signatures {
 		validator, err := crossfireValidatorsView.FindBy(view.CrossfireValidatorIdentity{
 			MaybeTendermintAddress: &signature.ValidatorAddress,
@@ -244,27 +240,22 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 		}
 
 		if blockTime.AfterOrEqual(projection.phaseOneStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
-			projection.profile("begin incrementing phase 1 and 2 validator commitment number")
 			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE_1N2_COMMIT_PREFIX)
 			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
 				return fmt.Errorf(
 					"[Crossfire] error increment validator commitment count %s", key,
 				)
 			}
-			projection.profile("end incrementing phase 1 and 2 validator commitment number")
 		}
 
 		if blockTime.AfterOrEqual(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
-			projection.profile("begin incrementing phase 2 validator commitment number")
 			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE_2_COMMIT_PREFIX)
 			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
 				return fmt.Errorf(
 					"[Crossfire] error increment validator commitment count %s", key,
 				)
 			}
-			projection.profile("end incrementing phase 2 validator commitment number")
 
-			projection.profile("begin checking network upgrade task")
 			//Check task network upgrade
 			errUpdatingTask := projection.checkTaskNetworkUpgrade(crossfireValidatorsView, crossfireChainStatsView, validator, blockTime)
 			if errUpdatingTask != nil {
@@ -272,20 +263,17 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 					"[Crossfire] error Updating crossfire task completion %s", errUpdatingTask,
 				)
 			}
-			projection.profile("end checking network upgrade task")
 		}
 		if blockTime.AfterOrEqual(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
-			projection.profile("begin incrementing phase 3 validator commitment number")
 			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE_3_COMMIT_PREFIX)
 			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
 				return fmt.Errorf(
 					"[Crossfire] error increment validator commitment count %s", key,
 				)
 			}
-			projection.profile("end incrementing phase 3 validator commitment number")
 		}
 	}
-	projection.profile("end looping validator commitment number")
+	projection.profile("end looping block validator commitments")
 
 	return nil
 }
@@ -301,8 +289,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 	// MsgCreateValidator should be handled first
 	for _, event := range events {
 		if msgCreateValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
-			projection.profile("begin projecting validator view handling create validator")
-			projection.logger.Debug("[Crossfire] handling MsgCreateValidator event")
+			projection.logger.Info("[Crossfire] handling MsgCreateValidator")
 
 			pubKey, err := base64.StdEncoding.DecodeString(msgCreateValidatorEvent.TendermintPubkey)
 			if err != nil {
@@ -365,13 +352,11 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			); err != nil {
 				return fmt.Errorf("[Crossfire] error check Setup task for new validator: %v", err)
 			}
-			projection.profile("end projecting validator view handling create validator")
 		}
 	}
 	for _, event := range events {
 		if msgSubmitSoftwareUpgradeProposalEvent, ok := event.(*event_usecase.MsgSubmitSoftwareUpgradeProposal); ok {
 			projection.logger.Debug("[Crossfire] handling MsgSubmitSoftwareUpgradeProposal event")
-			projection.profile("begin projecting validator view handling submit proposal")
 
 			// Check if proposed after competition has ended
 			if blockTime.AfterOrEqual(projection.competitionEndTime) {
@@ -416,10 +401,8 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			}
 
 			projection.logger.Infof("[Crossfire] updated network upgrade proposal to id: %s, time: %s", *msgSubmitSoftwareUpgradeProposalEvent.MaybeProposalId, networkUpgradeTimestamp)
-			projection.profile("end projecting validator view handling submit proposal")
 		} else if msgVoteCreatedEvent, ok := event.(*event_usecase.MsgVote); ok {
 			projection.logger.Debug("[Crossfire] handling MsgVote event")
-			projection.profile("begin projecting validator view handling proposal vote")
 
 			// Check if proposed after competition has ended
 			if blockTime.AfterOrEqual(projection.competitionEndTime) {
@@ -451,11 +434,7 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			if errUpdateValidatorStats != nil {
 				return fmt.Errorf("[Crossfire] error Updating ProposalID for the voter: %v", errUpdateValidatorStats)
 			}
-			projection.profile("end projecting validator view handling proposal vote")
 		} else if transactionCreatedEvent, ok := event.(*event_usecase.TransactionCreated); ok {
-			projection.logger.Debug("[Crossfire] handling TransactionCreated event")
-			projection.profile("begin projecting validator view handling transaction created")
-
 			// Check if proposed after competition has ended
 			if blockTime.AfterOrEqual(projection.competitionEndTime) {
 				return fmt.Errorf("[Crossfire] error Competition has already ended")
@@ -466,7 +445,6 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 			if errUpdateTxCount != nil {
 				return fmt.Errorf("[Crossfire] error Updating tx sent count: %v", errUpdateTxCount)
 			}
-			projection.profile("end projecting validator view handling transaction created")
 		}
 	}
 	return nil
