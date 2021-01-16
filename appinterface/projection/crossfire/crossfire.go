@@ -224,6 +224,8 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 
 	// increment current block validator commitment number
 	projection.profile("begin looping block validator commitment")
+	keysToIncrementByOne := make([]string, 0, len(event.Block.Signatures))
+	validatorsMap := make(map[string]*view.CrossfireValidatorRow)
 	for _, signature := range event.Block.Signatures {
 		validator, err := crossfireValidatorsView.FindBy(view.CrossfireValidatorIdentity{
 			MaybeTendermintAddress: &signature.ValidatorAddress,
@@ -241,21 +243,52 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 
 		if blockTime.AfterOrEqual(projection.phaseOneStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
 			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE_1N2_COMMIT_PREFIX)
-			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
-				return fmt.Errorf(
-					"[Crossfire] error increment validator commitment count %s", key,
-				)
-			}
+			keysToIncrementByOne = append(keysToIncrementByOne, key)
+			//if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
+			//	return fmt.Errorf(
+			//		"[Crossfire] error increment validator commitment count %s", key,
+			//	)
+			//}
 		}
 
 		if blockTime.AfterOrEqual(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
 			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE_2_COMMIT_PREFIX)
-			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
-				return fmt.Errorf(
-					"[Crossfire] error increment validator commitment count %s", key,
-				)
-			}
+			keysToIncrementByOne = append(keysToIncrementByOne, key)
+			//if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
+			//	return fmt.Errorf(
+			//		"[Crossfire] error increment validator commitment count %s", key,
+			//	)
+			//}
 
+			validatorsMap[signature.ValidatorAddress] = validator
+			////Check task network upgrade
+			//errUpdatingTask := projection.checkTaskNetworkUpgrade(crossfireValidatorsView, crossfireChainStatsView, validator, blockTime)
+			//if errUpdatingTask != nil {
+			//	return fmt.Errorf(
+			//		"[Crossfire] error Updating crossfire task completion %s", errUpdatingTask,
+			//	)
+			//}
+		}
+		if blockTime.AfterOrEqual(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
+			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE_3_COMMIT_PREFIX)
+			keysToIncrementByOne = append(keysToIncrementByOne, key)
+			//if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
+			//	return fmt.Errorf(
+			//		"[Crossfire] error increment validator commitment count %s", key,
+			//	)
+			//}
+		}
+	}
+	if err := crossfireValidatorsStatsView.IncrementAllByOne(keysToIncrementByOne); err != nil {
+		return fmt.Errorf(
+			"[Crossfire] error increment validator commitment counts: %v", err,
+		)
+	}
+
+	for _, signature := range event.Block.Signatures {
+		validator := validatorsMap[signature.ValidatorAddress]
+
+		if blockTime.AfterOrEqual(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
 			//Check task network upgrade
 			errUpdatingTask := projection.checkTaskNetworkUpgrade(crossfireValidatorsView, crossfireChainStatsView, validator, blockTime)
 			if errUpdatingTask != nil {
@@ -264,15 +297,8 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 				)
 			}
 		}
-		if blockTime.AfterOrEqual(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
-			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE_3_COMMIT_PREFIX)
-			if err := crossfireValidatorsStatsView.IncrementOne(key); err != nil {
-				return fmt.Errorf(
-					"[Crossfire] error increment validator commitment count %s", key,
-				)
-			}
-		}
 	}
+
 	projection.profile("end looping block validator commitments")
 
 	return nil
@@ -592,8 +618,12 @@ func (projection *Crossfire) updateTxSentCount(
 		weeklyJackpotDBKey = constants.JACKPOT_4_TX_SENT_PREFIX
 	}
 
-	for _, sender := range msgTransactionCreated.Senders {
+	if phaseNumberPrefix == "" {
+		// competition not start yet
+		return nil
+	}
 
+	for _, sender := range msgTransactionCreated.Senders {
 		// Only considering Pubkey address for now
 		if sender.Type == constants.TYPE_URL_PUBKEY && sender.MaybeThreshold == nil {
 			pubKey, _ := base64.StdEncoding.DecodeString(sender.Pubkeys[0])
@@ -604,28 +634,29 @@ func (projection *Crossfire) updateTxSentCount(
 				continue
 			}
 
-			// Increment count for address as per PHASE
-			phaseAddressCountDbKey := phaseNumberPrefix + constants.DB_KEY_SEPARATOR + primaryAddress
-			errIncrementing := crossfireValidatorStatsView.IncrementOne(phaseAddressCountDbKey)
-			if errIncrementing != nil {
-				return fmt.Errorf("error Phase wise tx sent count increment: %v", errIncrementing)
-			}
+			if phaseNumberPrefix != "" {
+				// Increment count for address as per PHASE
+				phaseAddressCountDbKey := phaseNumberPrefix + constants.DB_KEY_SEPARATOR + primaryAddress
+				errIncrementing := crossfireValidatorStatsView.IncrementOne(phaseAddressCountDbKey)
+				if errIncrementing != nil {
+					return fmt.Errorf("error Phase wise tx sent count increment: %v", errIncrementing)
+				}
 
-			// Increment TOTAL count for address
-			totalAddressCountDbKey := constants.TOTAL_TX_SENT_PREFIX + constants.DB_KEY_SEPARATOR + primaryAddress
-			errIncrementingTotal := crossfireValidatorStatsView.IncrementOne(totalAddressCountDbKey)
-			if errIncrementingTotal != nil {
-				return fmt.Errorf("[Crossfire] error Incrementing tx sent count: %v", errIncrementingTotal)
+				// Increment TOTAL count for address
+				totalAddressCountDbKey := constants.TOTAL_TX_SENT_PREFIX + constants.DB_KEY_SEPARATOR + primaryAddress
+				errIncrementingTotal := crossfireValidatorStatsView.IncrementOne(totalAddressCountDbKey)
+				if errIncrementingTotal != nil {
+					return fmt.Errorf("[Crossfire] error Incrementing tx sent count: %v", errIncrementingTotal)
+				}
 			}
 
 			//Increment count for Weekly Jackpot (If Applicable)
-			if weeklyJackpotDBKey == "" {
-				continue
-			}
-			key := fmt.Sprintf("%s%s%s", weeklyJackpotDBKey, constants.DB_KEY_SEPARATOR, primaryAddress)
-			errIncrementingJackpotTxSentCount := crossfireValidatorStatsView.IncrementOne(key)
-			if errIncrementingJackpotTxSentCount != nil {
-				return fmt.Errorf("[Crossfire] error Incrementing Weekly tx sent count: %v", errIncrementingJackpotTxSentCount)
+			if weeklyJackpotDBKey != "" {
+				key := fmt.Sprintf("%s%s%s", weeklyJackpotDBKey, constants.DB_KEY_SEPARATOR, primaryAddress)
+				errIncrementingJackpotTxSentCount := crossfireValidatorStatsView.IncrementOne(key)
+				if errIncrementingJackpotTxSentCount != nil {
+					return fmt.Errorf("[Crossfire] error Incrementing Weekly tx sent count: %v", errIncrementingJackpotTxSentCount)
+				}
 			}
 		}
 	}
