@@ -205,10 +205,10 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 			return fmt.Errorf("[Crossfire] error increment phase2 block count")
 		}
 	} else if blockTime.AfterOrEqual(projection.phaseThreeStartTime) && blockTime.Before(projection.competitionEndTime) {
-		// check the keep active task, throttling with every 10 blocks
+		// check the keep active task, throttling with every 100 blocks
 		// keep active task is only counting commitments during phase 2, so checking it in phase 3
 		// guarantees correctness
-		if blockHeight%10 == 0 {
+		if blockHeight%100 == 0 {
 			projection.profile("begin checking keep alive task")
 			if err := projection.checkTaskKeepActive(crossfireChainStatsView, crossfireValidatorsView, crossfireValidatorsStatsView); err != nil {
 				return fmt.Errorf("[Crossfire] error checkTaskKeepActive: %v", err)
