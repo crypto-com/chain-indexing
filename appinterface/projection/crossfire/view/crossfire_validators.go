@@ -3,6 +3,7 @@ package view
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
@@ -321,6 +322,111 @@ func (view *CrossfireValidators) List() ([]CrossfireValidatorRow, error) {
 			return nil, fmt.Errorf("error parsing block time: %v: %w", parseErr, rdb.ErrQuery)
 		}
 		validator.JoinedAtBlockTime = *blockTime
+		validators = append(validators, validator)
+	}
+
+	return validators, nil
+}
+
+func (view *CrossfireValidators) FindAllBy(
+	identityType string,
+	identities []CrossfireValidatorIdentity,
+) ([]CrossfireValidatorRow, error) {
+	var err error
+
+	selectStmtBuilder := view.rdb.StmtBuilder.Select(
+		"id",
+		"operator_address",
+		"consensus_node_address",
+		"initial_delegator_address",
+		"tendermint_pubkey",
+		"tendermint_address",
+		"status",
+		"jailed",
+		"joined_at_block_height",
+		"joined_at_block_time",
+		"moniker",
+		"identity",
+		"website",
+		"security_contact",
+		"details",
+		"task_phase_1_node_setup",
+		"task_phase_2_keep_node_active",
+		"task_phase_2_proposal_vote",
+		"task_phase_2_network_upgrade",
+		"rank_task_phase_1_2_commitment_count",
+		"rank_task_phase_3_commitment_count",
+		"rank_task_highest_tx_sent",
+	).From(
+		TABLE_NAME,
+	).OrderBy("id DESC")
+
+	validators := make([]CrossfireValidatorRow, 0, len(identities))
+	conditions := make([]interface{}, 0, len(identities))
+	for _, identity := range identities {
+		if identity.MaybeConsensusNodeAddress != nil {
+			conditions = append(conditions, *identity.MaybeConsensusNodeAddress)
+		}
+		if identity.MaybeOperatorAddress != nil {
+			conditions = append(conditions, *identity.MaybeOperatorAddress)
+		}
+		if identity.MaybeTendermintAddress != nil {
+			conditions = append(conditions, *identity.MaybeTendermintAddress)
+		}
+	}
+
+	inPlaceHolder := strings.TrimRight(strings.Repeat("?,", len(identities)), ",")
+	selectStmtBuilder = selectStmtBuilder.Where(fmt.Sprintf("%s IN (%s)", identityType, inPlaceHolder), conditions...)
+
+	sql, sqlArgs, err := selectStmtBuilder.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("error building validator selection sql: %v: %w", err, rdb.ErrPrepare)
+	}
+
+	result, err := view.rdb.Query(sql, sqlArgs...)
+	if err != nil {
+		if errors.Is(err, rdb.ErrNoRows) {
+			return nil, rdb.ErrNoRows
+		}
+		return nil, fmt.Errorf("error scanning crossfire validator row: %v: %w", err, rdb.ErrQuery)
+	}
+
+	for result.Next() {
+		var validator CrossfireValidatorRow
+		timeReader := view.rdb.NtotReader()
+		if err = result.Scan(
+			&validator.MaybeId,
+			&validator.OperatorAddress,
+			&validator.ConsensusNodeAddress,
+			&validator.InitialDelegatorAddress,
+			&validator.TendermintPubkey,
+			&validator.TendermintAddress,
+			&validator.Status,
+			&validator.Jailed,
+			&validator.JoinedAtBlockHeight,
+			timeReader.ScannableArg(),
+			&validator.Moniker,
+			&validator.Identity,
+			&validator.Website,
+			&validator.SecurityContact,
+			&validator.Details,
+			&validator.TaskPhase1NodeSetup,
+			&validator.TaskPhase2KeepNodeActive,
+			&validator.TaskPhase2ProposalVote,
+			&validator.TaskPhase2NetworkUpgrade,
+			&validator.RankTaskPhase1n2CommitmentCount,
+			&validator.RankTaskPhase3CommitmentCount,
+			&validator.RankTaskHighestTxSent,
+		); err != nil {
+			return nil, fmt.Errorf("error scanning crossfire validator row: %v: %w", err, rdb.ErrQuery)
+		}
+
+		joinedAtBlockTime, parseErr := timeReader.Parse()
+		if parseErr != nil {
+			return nil, fmt.Errorf("error parsing block time: %v: %w", parseErr, rdb.ErrQuery)
+		}
+		validator.JoinedAtBlockTime = *joinedAtBlockTime
+
 		validators = append(validators, validator)
 	}
 

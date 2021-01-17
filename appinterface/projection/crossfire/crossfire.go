@@ -225,22 +225,39 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 	// increment current block validator commitment number
 	projection.profile("begin looping block validator commitment")
 	keysToIncrementByOne := make([]string, 0, len(event.Block.Signatures))
-	validatorsMap := make(map[string]*view.CrossfireValidatorRow)
-	for _, signature := range event.Block.Signatures {
-		validator, err := crossfireValidatorsView.FindBy(view.CrossfireValidatorIdentity{
-			MaybeTendermintAddress: &signature.ValidatorAddress,
+	identityType := "tendermint_address"
+	identities := make([]view.CrossfireValidatorIdentity, 0, len(event.Block.Signatures))
+	for i := range event.Block.Signatures {
+		identities = append(identities, view.CrossfireValidatorIdentity{
+			MaybeTendermintAddress: &event.Block.Signatures[i].ValidatorAddress,
 		})
-		if errors.Is(err, rdb.ErrNoRows) {
-			// no validator found by tendermint address
-			projection.logger.Errorf("[Crossfire] error updating validator commitment number: not found: %s", signature.ValidatorAddress)
+	}
+
+	if len(identities) == 0 {
+		// No signatures in block
+		projection.logger.Debugf("[Crossfire] non-critical error: no signatures in block: %s", event.BlockHeight)
+		return nil
+	}
+	projection.profile("begin finding all block validators")
+	validators, err := crossfireValidatorsView.FindAllBy(identityType, identities)
+	if err != nil {
+		return fmt.Errorf(
+			"[Crossfire] error getting existing validators by block commitments: %v", err,
+		)
+	}
+	projection.profile("end finding all block validators")
+
+	validatorsMap := make(map[string]*view.CrossfireValidatorRow)
+	for i, validator := range validators {
+		validatorsMap[validator.TendermintAddress] = &validators[i]
+	}
+
+	for _, signature := range event.Block.Signatures {
+		validator, exist := validatorsMap[signature.ValidatorAddress]
+		if !exist {
+			projection.logger.Errorf("[Crossfire] non-fatal error updating validator commitment number: not found, %s", signature.ValidatorAddress)
 			continue
 		}
-		if err != nil {
-			return fmt.Errorf(
-				"[Crossfire] error getting existing validator by block commitment of %s from view %s", signature.ValidatorAddress, err,
-			)
-		}
-
 		if blockTime.AfterOrEqual(projection.phaseOneStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
 			key := constants.ValidatorCommitmentKey(validator.OperatorAddress, constants.PHASE_1N2_COMMIT_PREFIX)
 			keysToIncrementByOne = append(keysToIncrementByOne, key)
@@ -260,7 +277,6 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 			//	)
 			//}
 
-			validatorsMap[signature.ValidatorAddress] = validator
 			////Check task network upgrade
 			//errUpdatingTask := projection.checkTaskNetworkUpgrade(crossfireValidatorsView, crossfireChainStatsView, validator, blockTime)
 			//if errUpdatingTask != nil {
@@ -278,6 +294,11 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 			//	)
 			//}
 		}
+	}
+	if len(keysToIncrementByOne) == 0 {
+		// No signatures in block
+		projection.logger.Debugf("[Crossfire] non-critical error: no validators need to increment commitment count in block height, perhaps competition not started?: %s", event.BlockHeight)
+		return nil
 	}
 	projection.profile("begin persisting validator commitments")
 	if err := crossfireValidatorsStatsView.IncrementAllByOne(keysToIncrementByOne); err != nil {
