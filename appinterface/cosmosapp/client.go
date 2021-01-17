@@ -12,7 +12,7 @@ type Client interface {
 
 type Validator struct {
 	OperatorAddress   string               `json:"operator_address"`
-	ConsensusPubkey   string               `json:"consensus_pubkey"`
+	ConsensusPubkey   ValidatorPubkey      `json:"consensus_pubkey"`
 	Jailed            bool                 `json:"jailed"`
 	Status            string               `json:"status"`
 	Tokens            string               `json:"tokens"`
@@ -22,6 +22,11 @@ type Validator struct {
 	UnbondingTime     string               `json:"unbonding_time"`
 	Commission        ValidatorCommission  `json:"commission"`
 	MinSelfDelegation string               `json:"min_self_delegation"`
+}
+
+type ValidatorPubkey struct {
+	Type string `json:"@type"`
+	Key  string `json:"key"`
 }
 
 type ValidatorCommission struct {

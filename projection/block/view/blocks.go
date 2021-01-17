@@ -215,7 +215,7 @@ func (blocksView *Blocks) Search(
 	).From(
 		"view_blocks",
 	).Where(
-		"height::TEXT = ? OR hash = ?", keyword, keyword,
+		"height = ? OR hash = ?", keyword, keyword,
 	).OrderBy(
 		"height",
 	).Limit(5).ToSql()

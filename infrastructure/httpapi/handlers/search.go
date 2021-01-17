@@ -2,8 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
-	"time"
 
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 
@@ -47,7 +45,6 @@ func (search *Search) Search(ctx *fasthttp.RequestCtx) {
 
 	var results SearchResults
 
-	fmt.Println(time.Now().UnixNano())
 	blocks, err := search.blocksView.Search(keyword)
 	if err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
@@ -58,7 +55,6 @@ func (search *Search) Search(ctx *fasthttp.RequestCtx) {
 			return
 		}
 	}
-	fmt.Println(time.Now().UnixNano())
 
 	transactions, err := search.transactionsView.Search(keyword)
 	if err != nil {
@@ -70,7 +66,6 @@ func (search *Search) Search(ctx *fasthttp.RequestCtx) {
 			return
 		}
 	}
-	fmt.Println(time.Now().UnixNano())
 
 	validators, err := search.validatorsView.Search(keyword)
 	if err != nil {
@@ -82,7 +77,6 @@ func (search *Search) Search(ctx *fasthttp.RequestCtx) {
 			return
 		}
 	}
-	fmt.Println(time.Now().UnixNano())
 
 	results.Accounts = make([]string, 0)
 	if tmcosmosutils.IsValidCosmosAddress(keyword) {
@@ -96,7 +90,6 @@ func (search *Search) Search(ctx *fasthttp.RequestCtx) {
 			results.Accounts = []string{keyword}
 		}
 	}
-	fmt.Println(time.Now().UnixNano())
 
 	results.Blocks = blocks
 	results.Transactions = transactions
