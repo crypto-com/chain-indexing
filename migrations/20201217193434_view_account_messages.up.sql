@@ -9,6 +9,5 @@ CREATE TABLE view_account_messages (
     message_index INT NOT NULL,
     message_type VARCHAR NOT nULL,
     data JSONB NOT NULL,
-    PRIMARY KEY (id),
-    UNIQUE (account, transaction_hash, message_index)
+    PRIMARY KEY (id)
 )
