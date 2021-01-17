@@ -4,6 +4,7 @@ import "github.com/crypto-com/chain-indexing/usecase/coin"
 
 type CreateTransactionParams struct {
 	TxHash        string
+	Index         int
 	Code          int
 	Log           string
 	MsgCount      int
@@ -19,6 +20,7 @@ type CreateTransactionParams struct {
 
 type TransactionSigner struct {
 	Type            string
+	IsMultiSig      bool
 	Pubkeys         []string
 	MaybeThreshold  *int
 	AccountSequence uint64

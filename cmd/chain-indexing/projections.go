@@ -19,13 +19,14 @@ func initProjections(
 
 	projections := make([]projection_entity.Projection, 0, len(config.Projection.Enables))
 	initParams := projection.InitParams{
-		Logger:                logger,
-		RdbConn:               rdbConn,
+		Logger:  logger,
+		RdbConn: rdbConn,
+
 		CosmosAppClient:       cosmosAppClient,
+		AccountAddressPrefix:  config.Blockchain.AccountAddressPrefix,
 		ConsNodeAddressPrefix: config.Blockchain.ConNodeAddressPrefix,
 
 		ValidatorAddressPrefix: config.Blockchain.ValidatorAddressPrefix,
-		AccountAddressPrefix:   config.Blockchain.AccountAddressPrefix,
 
 		PhaseOneStartTime:   config.Crossfire.PhaseOneStartTime,
 		PhaseTwoStartTime:   config.Crossfire.PhaseTwoStartTime,

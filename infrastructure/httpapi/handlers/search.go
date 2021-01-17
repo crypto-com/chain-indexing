@@ -3,6 +3,10 @@ package handlers
 import (
 	"errors"
 
+	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
+
+	account_transaction_view "github.com/crypto-com/chain-indexing/projection/account_transaction/view"
+
 	validator_view "github.com/crypto-com/chain-indexing/projection/validator/view"
 
 	"github.com/valyala/fasthttp"
@@ -17,9 +21,10 @@ import (
 type Search struct {
 	logger applogger.Logger
 
-	blocksView       *block_view.Blocks
-	transactionsView *transaction_view.BlockTransactions
-	validatorsView   *validator_view.Validators
+	blocksView                   *block_view.Blocks
+	transactionsView             *transaction_view.BlockTransactions
+	validatorsView               *validator_view.Validators
+	accountTransactionsTotalView *account_transaction_view.AccountTransactionsTotal
 }
 
 func NewSearch(logger applogger.Logger, rdbHandle *rdb.Handle) *Search {
@@ -31,6 +36,7 @@ func NewSearch(logger applogger.Logger, rdbHandle *rdb.Handle) *Search {
 		block_view.NewBlocks(rdbHandle),
 		transaction_view.NewTransactions(rdbHandle),
 		validator_view.NewValidators(rdbHandle),
+		account_transaction_view.NewAccountTransactionsTotal(rdbHandle),
 	}
 }
 
@@ -72,6 +78,19 @@ func (search *Search) Search(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
+	results.Accounts = make([]string, 0)
+	if tmcosmosutils.IsValidCosmosAddress(keyword) {
+		isAccountExist, err := search.accountTransactionsTotalView.Search(keyword)
+		if err != nil {
+			search.logger.Errorf("error searching account: %v", err)
+			httpapi.InternalServerError(ctx)
+			return
+		}
+		if isAccountExist {
+			results.Accounts = []string{keyword}
+		}
+	}
+
 	results.Blocks = blocks
 	results.Transactions = transactions
 	results.Validators = validators
@@ -83,4 +102,5 @@ type SearchResults struct {
 	Blocks       []block_view.Block                `json:"blocks"`
 	Transactions []transaction_view.TransactionRow `json:"transactions"`
 	Validators   []validator_view.ValidatorRow     `json:"validators"`
+	Accounts     []string                          `json:"accounts"`
 }

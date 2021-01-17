@@ -58,6 +58,7 @@ color = false
 enables = [
     "Account",
     "AccountMessage",
+    "AccountTransaction",
     "Block",
     "BlockEvent",
     "Transaction",

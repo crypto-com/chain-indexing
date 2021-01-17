@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS view_account_transaction_data;

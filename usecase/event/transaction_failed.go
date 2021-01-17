@@ -16,17 +16,19 @@ const TRANSACTION_FAILED = "TransactionFailed"
 type TransactionFailed struct {
 	entity_event.Base
 
-	TxHash        string     `json:"txHash"`
-	Code          int        `json:"code"`
-	Log           string     `json:"log"`
-	MsgCount      int        `json:"msgCount"`
-	Fee           coin.Coins `json:"fee"`
-	FeePayer      string     `json:"feePayer"`
-	FeeGranter    string     `json:"feeGranter"`
-	GasWanted     int        `json:"gasWanted"`
-	GasUsed       int        `json:"gasUsed"`
-	Memo          string     `json:"memo"`
-	TimeoutHeight int64      `json:"timeoutHeight"`
+	TxHash        string              `json:"txHash"`
+	Index         int                 `json:"index"`
+	Code          int                 `json:"code"`
+	Log           string              `json:"log"`
+	MsgCount      int                 `json:"msgCount"`
+	Senders       []TransactionSigner `json:"senders"`
+	Fee           coin.Coins          `json:"fee"`
+	FeePayer      string              `json:"feePayer"`
+	FeeGranter    string              `json:"feeGranter"`
+	GasWanted     int                 `json:"gasWanted"`
+	GasUsed       int                 `json:"gasUsed"`
+	Memo          string              `json:"memo"`
+	TimeoutHeight int64               `json:"timeoutHeight"`
 }
 
 func NewTransactionFailed(blockHeight int64, params model.CreateTransactionParams) *TransactionFailed {
@@ -38,9 +40,11 @@ func NewTransactionFailed(blockHeight int64, params model.CreateTransactionParam
 		}),
 
 		TxHash:        params.TxHash,
+		Index:         params.Index,
 		Code:          params.Code,
 		Log:           params.Log,
 		MsgCount:      params.MsgCount,
+		Senders:       parseSenders(params.Signers),
 		Fee:           params.Fee,
 		FeePayer:      params.FeePayer,
 		FeeGranter:    params.FeeGranter,
@@ -49,6 +53,22 @@ func NewTransactionFailed(blockHeight int64, params model.CreateTransactionParam
 		Memo:          params.Memo,
 		TimeoutHeight: params.TimeoutHeight,
 	}
+}
+
+func parseSenders(signers []model.TransactionSigner) []TransactionSigner {
+	parsedSenders := make([]TransactionSigner, 0, len(signers))
+
+	for _, signer := range signers {
+		parsedSenders = append(parsedSenders, TransactionSigner{
+			Type:            signer.Type,
+			IsMultiSig:      signer.IsMultiSig,
+			Pubkeys:         signer.Pubkeys,
+			MaybeThreshold:  signer.MaybeThreshold,
+			AccountSequence: signer.AccountSequence,
+		})
+	}
+
+	return parsedSenders
 }
 
 func (event *TransactionFailed) ToJSON() (string, error) {

@@ -76,6 +76,7 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 				BlockHeight:   height,
 				BlockTime:     utctime.UTCTime{}, // placeholder
 				Hash:          transactionCreatedEvent.TxHash,
+				Index:         transactionCreatedEvent.Index,
 				Success:       true,
 				Code:          transactionCreatedEvent.Code,
 				Log:           transactionCreatedEvent.Log,
@@ -93,6 +94,7 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 				BlockHeight:   height,
 				BlockTime:     utctime.UTCTime{}, // placeholder
 				Hash:          transactionFailedEvent.TxHash,
+				Index:         transactionFailedEvent.Index,
 				Success:       false,
 				Code:          transactionFailedEvent.Code,
 				Log:           transactionFailedEvent.Log,
@@ -113,21 +115,31 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 		}
 	}
 
-	for _, tx := range txs {
-		mutTx := tx
-		mutTx.BlockTime = blockTime
-		mutTx.BlockHash = blockHash
+	if len(txs) == 0 {
+		if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
+			return fmt.Errorf("error updating last handled event height: %v", err)
+		}
 
-		for _, msg := range txMsgs[mutTx.Hash] {
-			mutTx.Messages = append(mutTx.Messages, transaction_view.TransactionRowMessage{
+		if err := rdbTx.Commit(); err != nil {
+			return fmt.Errorf("error committing changes: %v", err)
+		}
+		committed = true
+		return nil
+	}
+
+	for i, tx := range txs {
+		txs[i].BlockTime = blockTime
+		txs[i].BlockHash = blockHash
+
+		for _, msg := range txMsgs[tx.Hash] {
+			txs[i].Messages = append(txs[i].Messages, transaction_view.TransactionRowMessage{
 				Type:    msg.MsgType(),
 				Content: msg,
 			})
 		}
-
-		if insertErr := transactionsView.Insert(&mutTx); insertErr != nil {
-			return fmt.Errorf("error inserting transaction into view: %v", insertErr)
-		}
+	}
+	if insertErr := transactionsView.InsertAll(txs); insertErr != nil {
+		return fmt.Errorf("error inserting transaction into view: %v", insertErr)
 	}
 
 	totalTxs := int64(len(txs))

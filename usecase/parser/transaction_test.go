@@ -48,7 +48,8 @@ var _ = Describe("TransactionParser", func() {
 					MsgCount: 2,
 					Signers: []model.TransactionSigner{
 						{
-							Type: "/cosmos.crypto.secp256k1.PubKey",
+							Type:       "/cosmos.crypto.secp256k1.PubKey",
+							IsMultiSig: false,
 							Pubkeys: []string{
 								"AgiLen9uwpvsreYibwgnQtzupil7kyNJl4oTG3Wl6oIE",
 							},
@@ -56,7 +57,8 @@ var _ = Describe("TransactionParser", func() {
 							AccountSequence: 10167,
 						},
 						{
-							Type: "/cosmos.crypto.secp256k1.PubKey",
+							Type:       "/cosmos.crypto.secp256k1.PubKey",
+							IsMultiSig: false,
 							Pubkeys: []string{
 								"A8PSgaKFkq3Ogb7jCU8A6uJpMsvGgvuiObkPR9rJ/nA2",
 							},
@@ -97,7 +99,8 @@ var _ = Describe("TransactionParser", func() {
 					MsgCount: 1,
 					Signers: []model.TransactionSigner{
 						{
-							Type: "/cosmos.crypto.secp256k1.PubKey",
+							Type:       "/cosmos.crypto.secp256k1.PubKey",
+							IsMultiSig: false,
 							Pubkeys: []string{
 								"Ax+Rgmd2ta8FxUOoFJ9Dvo3782nMWJzdYP0Jcyrk5XwO",
 							},
@@ -139,7 +142,8 @@ var _ = Describe("TransactionParser", func() {
 					MsgCount: 1,
 					Signers: []model.TransactionSigner{
 						{
-							Type: "/cosmos.crypto.secp256k1.PubKey",
+							Type:       "/cosmos.crypto.secp256k1.PubKey",
+							IsMultiSig: false,
 							Pubkeys: []string{
 								"Ax+Rgmd2ta8FxUOoFJ9Dvo3782nMWJzdYP0Jcyrk5XwO",
 							},
@@ -180,7 +184,8 @@ var _ = Describe("TransactionParser", func() {
 					MsgCount: 5,
 					Signers: []model.TransactionSigner{
 						{
-							Type: "/cosmos.crypto.secp256k1.PubKey",
+							Type:       "/cosmos.crypto.secp256k1.PubKey",
+							IsMultiSig: false,
 							Pubkeys: []string{
 								"AhLYCDVbpM12Jafqp0poKEdIEpeTn03mJ5+mIgRz4PWa",
 							},
@@ -221,7 +226,8 @@ var _ = Describe("TransactionParser", func() {
 					MsgCount: 1,
 					Signers: []model.TransactionSigner{
 						{
-							Type: "/cosmos.crypto.secp256k1.PubKey",
+							Type:       "/cosmos.crypto.secp256k1.PubKey",
+							IsMultiSig: false,
 							Pubkeys: []string{
 								"A1mhVLohDEidpGYmpNYxxvikcaL72jQhZN1fxKFYkB8m",
 							},
@@ -262,7 +268,8 @@ var _ = Describe("TransactionParser", func() {
 					MsgCount: 1,
 					Signers: []model.TransactionSigner{
 						{
-							Type: "/cosmos.crypto.secp256k1.PubKey",
+							Type:       "/cosmos.crypto.secp256k1.PubKey",
+							IsMultiSig: false,
 							Pubkeys: []string{
 								"A1mhVLohDEidpGYmpNYxxvikcaL72jQhZN1fxKFYkB8m",
 							},
@@ -303,7 +310,8 @@ var _ = Describe("TransactionParser", func() {
 					MsgCount: 1,
 					Signers: []model.TransactionSigner{
 						{
-							Type: "/cosmos.crypto.multisig.LegacyAminoPubKey",
+							Type:       "/cosmos.crypto.multisig.LegacyAminoPubKey",
+							IsMultiSig: true,
 							Pubkeys: []string{
 								"AyYeIUDy4m8rW6DgbRbX+k8uJn46trwyyuBE871lRsDE",
 								"Ahe94UU90Bzry7/CnxzKJJ5XFJJqJ4u8cOv9rq632B/Z",
