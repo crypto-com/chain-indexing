@@ -191,7 +191,7 @@ func (transactionsView *BlockTransactions) FindByHash(txHash string) (*Transacti
 		"view_transactions",
 	).Where(
 		"hash = ?", txHash,
-	)
+	).OrderBy("id DESC")
 
 	sql, sqlArgs, err := selectStmtBuilder.ToSql()
 	if err != nil {
