@@ -19,9 +19,11 @@ func initProjections(
 
 	projections := make([]projection_entity.Projection, 0, len(config.Projection.Enables))
 	initParams := projection.InitParams{
-		Logger:                logger,
-		RdbConn:               rdbConn,
+		Logger:  logger,
+		RdbConn: rdbConn,
+
 		CosmosAppClient:       cosmosAppClient,
+		AccountAddressPrefix:  config.Blockchain.AccountAddressPrefix,
 		ConsNodeAddressPrefix: config.Blockchain.ConNodeAddressPrefix,
 	}
 	for _, projectionName := range config.Projection.Enables {

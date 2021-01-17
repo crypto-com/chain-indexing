@@ -17,6 +17,7 @@ type TransactionCreated struct {
 	entity_event.Base
 
 	TxHash        string              `json:"txHash"`
+	Index         int                 `json:"index"`
 	Code          int                 `json:"code"`
 	Log           string              `json:"log"`
 	MsgCount      int                 `json:"msgCount"`
@@ -30,8 +31,12 @@ type TransactionCreated struct {
 	TimeoutHeight int64               `json:"timeoutHeight"`
 }
 
+const TRANSACTION_SIGNER_SECP256K1 = "/cosmos.crypto.secp256k1.PubKey"
+const TRANSACTION_SIGNER_MULTISIG_LEGACY_AMINO = "/cosmos.crypto.multisig.LegacyAminoPubKey"
+
 type TransactionSigner struct {
 	Type            string   `json:"type"`
+	IsMultiSig      bool     `json:"isMultiSig"`
 	Pubkeys         []string `json:"pubkeys"`
 	MaybeThreshold  *int     `json:"threshold,omitempty"`
 	AccountSequence uint64   `json:"accountSequence"`
@@ -46,6 +51,7 @@ func NewTransactionCreated(blockHeight int64, params model.CreateTransactionPara
 		}),
 
 		TxHash:        params.TxHash,
+		Index:         params.Index,
 		Code:          params.Code,
 		Log:           params.Log,
 		MsgCount:      params.MsgCount,
@@ -58,21 +64,6 @@ func NewTransactionCreated(blockHeight int64, params model.CreateTransactionPara
 		Memo:          params.Memo,
 		TimeoutHeight: params.TimeoutHeight,
 	}
-}
-
-func parseSenders(signers []model.TransactionSigner) []TransactionSigner {
-	parsedSenders := make([]TransactionSigner, 0, len(signers))
-
-	for _, signer := range signers {
-		parsedSenders = append(parsedSenders, TransactionSigner{
-			Type:            signer.Type,
-			Pubkeys:         signer.Pubkeys,
-			MaybeThreshold:  signer.MaybeThreshold,
-			AccountSequence: signer.AccountSequence,
-		})
-	}
-
-	return parsedSenders
 }
 
 func (event *TransactionCreated) ToJSON() (string, error) {

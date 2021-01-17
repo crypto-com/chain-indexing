@@ -66,6 +66,7 @@ func ParseTransactionCommands(
 			if signer.ModeInfo.MaybeSingle != nil {
 				signers = append(signers, model.TransactionSigner{
 					Type:            signer.PublicKey.Type,
+					IsMultiSig:      false,
 					Pubkeys:         []string{*signer.PublicKey.MaybeKey},
 					AccountSequence: sequence,
 				})
@@ -76,6 +77,7 @@ func ParseTransactionCommands(
 				}
 				signers = append(signers, model.TransactionSigner{
 					Type:            signer.PublicKey.Type,
+					IsMultiSig:      true,
 					Pubkeys:         pubkeys,
 					AccountSequence: sequence,
 				})
@@ -84,6 +86,7 @@ func ParseTransactionCommands(
 
 		cmds = append(cmds, command_usecase.NewCreateTransaction(blockHeight, model.CreateTransactionParams{
 			TxHash:        TxHash(txHex),
+			Index:         i,
 			Code:          txsResult.Code,
 			Log:           log,
 			MsgCount:      len(tx.Body.Messages),

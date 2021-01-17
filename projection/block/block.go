@@ -3,14 +3,12 @@ package block
 import (
 	"fmt"
 
-	view2 "github.com/crypto-com/chain-indexing/projection/block/view"
-
-	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
-
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
+	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	"github.com/crypto-com/chain-indexing/projection/block/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
@@ -55,7 +53,7 @@ func (projection *Block) HandleEvents(height int64, events []event_entity.Event)
 	}()
 
 	rdbTxHandle := rdbTx.ToHandle()
-	blocksView := view2.NewBlocks(rdbTxHandle)
+	blocksView := view.NewBlocks(rdbTxHandle)
 
 	for _, event := range events {
 		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
@@ -77,10 +75,10 @@ func (projection *Block) HandleEvents(height int64, events []event_entity.Event)
 	return nil
 }
 
-func (projection *Block) handleBlockCreatedEvent(blocksView *view2.Blocks, event *event_usecase.BlockCreated) error {
-	committedCouncilNodes := make([]view2.BlockCommittedCouncilNode, 0)
+func (projection *Block) handleBlockCreatedEvent(blocksView *view.Blocks, event *event_usecase.BlockCreated) error {
+	committedCouncilNodes := make([]view.BlockCommittedCouncilNode, 0)
 	for _, signature := range event.Block.Signatures {
-		committedCouncilNodes = append(committedCouncilNodes, view2.BlockCommittedCouncilNode{
+		committedCouncilNodes = append(committedCouncilNodes, view.BlockCommittedCouncilNode{
 			Address:    signature.ValidatorAddress,
 			Time:       signature.Timestamp,
 			Signature:  signature.Signature,
@@ -88,7 +86,7 @@ func (projection *Block) handleBlockCreatedEvent(blocksView *view2.Blocks, event
 		})
 	}
 
-	if err := blocksView.Insert(&view2.Block{
+	if err := blocksView.Insert(&view.Block{
 		Height:                event.Block.Height,
 		Hash:                  event.Block.Hash,
 		Time:                  event.Block.Time,

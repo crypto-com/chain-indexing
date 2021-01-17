@@ -10,29 +10,29 @@ import (
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
-// a simple tool to keep record of incremntal record
-type pTotalIncrementalMap struct {
+// a simple tool to keep record of incremental record
+type privTotalIncrementalMap struct {
 	data map[string]int64
 }
 
-func pNewTotalIncrementalMap() *pTotalIncrementalMap {
-	return &pTotalIncrementalMap{
+func privNewTotalIncrementalMap() *privTotalIncrementalMap {
+	return &privTotalIncrementalMap{
 		data: make(map[string]int64),
 	}
 }
-func (totalMap *pTotalIncrementalMap) Increment(key string, value int64) {
+func (totalMap *privTotalIncrementalMap) Increment(key string, value int64) {
 	if _, ok := totalMap.data[key]; !ok {
 		totalMap.data[key] = int64(0)
 	}
 	totalMap.data[key] += value
 }
-func (totalMap *pTotalIncrementalMap) IncrementByOne(key string) {
+func (totalMap *privTotalIncrementalMap) IncrementByOne(key string) {
 	totalMap.Increment(key, int64(1))
 }
-func (totalMap *pTotalIncrementalMap) Set(key string, value int64) {
+func (totalMap *privTotalIncrementalMap) Set(key string, value int64) {
 	totalMap.data[key] = value
 }
-func (totalMap *pTotalIncrementalMap) Persist(validatorActivitiesTotalView *view.ValidatorActivitiesTotal) error {
+func (totalMap *privTotalIncrementalMap) Persist(validatorActivitiesTotalView *view.ValidatorActivitiesTotal) error {
 	for key, value := range totalMap.data {
 		if err := validatorActivitiesTotalView.Increment(key, value); err != nil {
 			return fmt.Errorf("error incrementing total of `%s`: %w", key, err)
@@ -50,7 +50,7 @@ func (projection *Validator) projectValidatorActivitiesView(
 	events []event_entity.Event,
 ) error {
 	activityRows := make([]view.ValidatorActivityRow, 0)
-	totalIncrementalMap := pNewTotalIncrementalMap()
+	totalIncrementalMap := privNewTotalIncrementalMap()
 	for _, event := range events {
 		if createValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
 			activityRows = append(activityRows, view.ValidatorActivityRow{

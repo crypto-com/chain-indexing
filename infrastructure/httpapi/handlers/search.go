@@ -2,6 +2,12 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
+	"time"
+
+	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
+
+	account_transaction_view "github.com/crypto-com/chain-indexing/projection/account_transaction/view"
 
 	validator_view "github.com/crypto-com/chain-indexing/projection/validator/view"
 
@@ -17,9 +23,10 @@ import (
 type Search struct {
 	logger applogger.Logger
 
-	blocksView       *block_view.Blocks
-	transactionsView *transaction_view.BlockTransactions
-	validatorsView   *validator_view.Validators
+	blocksView                   *block_view.Blocks
+	transactionsView             *transaction_view.BlockTransactions
+	validatorsView               *validator_view.Validators
+	accountTransactionsTotalView *account_transaction_view.AccountTransactionsTotal
 }
 
 func NewSearch(logger applogger.Logger, rdbHandle *rdb.Handle) *Search {
@@ -31,6 +38,7 @@ func NewSearch(logger applogger.Logger, rdbHandle *rdb.Handle) *Search {
 		block_view.NewBlocks(rdbHandle),
 		transaction_view.NewTransactions(rdbHandle),
 		validator_view.NewValidators(rdbHandle),
+		account_transaction_view.NewAccountTransactionsTotal(rdbHandle),
 	}
 }
 
@@ -39,6 +47,7 @@ func (search *Search) Search(ctx *fasthttp.RequestCtx) {
 
 	var results SearchResults
 
+	fmt.Println(time.Now().UnixNano())
 	blocks, err := search.blocksView.Search(keyword)
 	if err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
@@ -49,6 +58,7 @@ func (search *Search) Search(ctx *fasthttp.RequestCtx) {
 			return
 		}
 	}
+	fmt.Println(time.Now().UnixNano())
 
 	transactions, err := search.transactionsView.Search(keyword)
 	if err != nil {
@@ -60,6 +70,7 @@ func (search *Search) Search(ctx *fasthttp.RequestCtx) {
 			return
 		}
 	}
+	fmt.Println(time.Now().UnixNano())
 
 	validators, err := search.validatorsView.Search(keyword)
 	if err != nil {
@@ -71,6 +82,21 @@ func (search *Search) Search(ctx *fasthttp.RequestCtx) {
 			return
 		}
 	}
+	fmt.Println(time.Now().UnixNano())
+
+	results.Accounts = make([]string, 0)
+	if tmcosmosutils.IsValidCosmosAddress(keyword) {
+		isAccountExist, err := search.accountTransactionsTotalView.Search(keyword)
+		if err != nil {
+			search.logger.Errorf("error searching account: %v", err)
+			httpapi.InternalServerError(ctx)
+			return
+		}
+		if isAccountExist {
+			results.Accounts = []string{keyword}
+		}
+	}
+	fmt.Println(time.Now().UnixNano())
 
 	results.Blocks = blocks
 	results.Transactions = transactions
@@ -83,4 +109,5 @@ type SearchResults struct {
 	Blocks       []block_view.Block                `json:"blocks"`
 	Transactions []transaction_view.TransactionRow `json:"transactions"`
 	Validators   []validator_view.ValidatorRow     `json:"validators"`
+	Accounts     []string                          `json:"accounts"`
 }
