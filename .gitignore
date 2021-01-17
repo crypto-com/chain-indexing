@@ -35,5 +35,7 @@ log/
 config/config.toml
 chain-indexing
 !chain-indexing/
+check-password-strength
+!check-password-strength/
 
 pgdata*
