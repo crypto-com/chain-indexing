@@ -7,6 +7,9 @@ const JAILED NodeStatus = "Jailed"
 const UNBONDED NodeStatus = "Unbonded"
 const UNBONDING NodeStatus = "Unbonding"
 
+const PRIMARY NodeStatus = "Primary"
+const SECONDARY NodeStatus = "Secondary"
+
 type NodeStatus = string
 
 const INCOMPLETED TaskStatus = "Incompleted"
@@ -21,4 +24,3 @@ const VOTE_OPTION_NO_WITH_VETO = "VOTE_OPTION_NO_WITH_VETO"
 const VOTE_OPTION_YES = "VOTE_OPTION_YES"
 const VOTE_OPTION_ABSTAIN = "VOTE_OPTION_ABSTAIN"
 const VOTE_OPTION_UNSPECIFIED = "VOTE_OPTION_UNSPECIFIED"
-

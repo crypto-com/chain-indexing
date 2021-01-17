@@ -309,7 +309,11 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 	projection.profile("end persisting validator commitments")
 
 	for _, signature := range event.Block.Signatures {
-		validator := validatorsMap[signature.ValidatorAddress]
+		validator, exist := validatorsMap[signature.ValidatorAddress]
+		if !exist {
+			projection.logger.Errorf("[Crossfire] non-fatal error preparing to checkTaskNetworkUpgrade: not found, %s", signature.ValidatorAddress)
+			continue
+		}
 
 		if blockTime.AfterOrEqual(projection.phaseTwoStartTime) && blockTime.Before(projection.phaseThreeStartTime) {
 			//Check task network upgrade
@@ -353,13 +357,17 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 				return fmt.Errorf("[Crossfire] error converting consensus node pubkey to address: %v", err)
 			}
 
+			if markErr := crossfireValidatorsView.MarkOldValidatorSecondary(msgCreateValidatorEvent.ValidatorAddress); markErr != nil {
+				return fmt.Errorf("[Crossfire] error marking old validator as secondary into view: %v", err)
+			}
+
 			validatorRow := view.CrossfireValidatorRow{
 				ConsensusNodeAddress:            consensusNodeAddress,
 				OperatorAddress:                 msgCreateValidatorEvent.ValidatorAddress,
 				InitialDelegatorAddress:         msgCreateValidatorEvent.DelegatorAddress,
 				TendermintPubkey:                msgCreateValidatorEvent.TendermintPubkey,
 				TendermintAddress:               tendermintAddress,
-				Status:                          constants.UNBONDED,
+				Status:                          constants.PRIMARY,
 				Jailed:                          false,
 				JoinedAtBlockHeight:             blockHeight,
 				JoinedAtBlockTime:               blockTime,
@@ -506,7 +514,7 @@ func (projection *Crossfire) checkTaskSetup(
 	consensusNodeAddress string,
 	joinedAtBlockTime utctime.UTCTime,
 ) error {
-	if joinedAtBlockTime.Before(projection.phaseTwoStartTime) {
+	if joinedAtBlockTime.AfterOrEqual(projection.phaseOneStartTime) && joinedAtBlockTime.Before(projection.phaseTwoStartTime) {
 		if err := crossfireValidatorsView.UpdateTask(
 			"task_phase_1_node_setup",
 			constants.COMPLETED,
@@ -829,7 +837,7 @@ func (projection *Crossfire) computeTxSentRank(
 		// Update Ranks with specific Validator
 		errUpdating := crossfireValidatorView.UpdateTxSentRank(rank, participant.OperatorAddress)
 		if errUpdating != nil {
-			return fmt.Errorf("[Crossfire] error updating TX SENT Task Rank %w", errUpdating)
+			return fmt.Errorf("[Crossfire] error updating transaction sent Task Rank %w", errUpdating)
 		}
 		if index+1 < len(dbParticipantWithCountList) && dbParticipantWithCountList[index].Value != dbParticipantWithCountList[index+1].Value {
 			rank++

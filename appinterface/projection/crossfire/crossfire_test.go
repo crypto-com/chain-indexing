@@ -166,13 +166,13 @@ var _ = Describe("Crossfire", func() {
 			Signatures: []usecase_model.BlockSignature{
 				{
 					BlockIdFlag:      2,
-					ValidatorAddress: "F9E6FFB9B536956201AA138224FD888D03775AB4",
+					ValidatorAddress: "6B26ECB33BC875DFD4457867C183F6370D192B69",
 					Timestamp:        utctime.FromUnixNano(int64(1000000)),
 					Signature:        "ZW2pUcKFN/oPQCmdCouchXmgpPyd/Ddo45dhHEMwsBeHTBuSJh15zUMmfl5FZsPHeKC8citFvOm/52bgl5XHCw==",
 				},
 				{
 					BlockIdFlag:      2,
-					ValidatorAddress: "031E3891DDB94FC7C7C132B7CD9736738110C889",
+					ValidatorAddress: "9560478E0AB29C60D08E5C0660ECA42FDE538FF8",
 					Timestamp:        utctime.FromUnixNano(int64(2000000)),
 					Signature:        "uhWDC9NDT86FbRVGbOM2lGY8sVkWU51JJ9F8gPwTfK0ebcui1R34oM+jhPKdStn/4sq4qDgzbsN66cQ5kl8NAw==",
 				},
@@ -184,64 +184,64 @@ var _ = Describe("Crossfire", func() {
 				},
 			},
 		})
-		/*
-			txCreatedParams := model.CreateTransactionParams{
-				TxHash:   "A6D4C1F59A9D232747CA4F8A484F1F3B14A0075E801DF2A25F472B4280505B74",
-				Code:     0,
-				Log:      "{\"events\":[]}",
-				MsgCount: 1,
-				Signers: []model.TransactionSigner{
-					{
-						Type:            "/cosmos.crypto.secp256k1.PubKey",
-						Pubkeys:         []string{"A3ill3YNyWvcMstrbssC9SpzhMm+tCMWPB7bgOqWQZYk"},
-						AccountSequence: uint64(1),
-					},
-					{
-						Type:            "/cosmos.crypto.secp256k1.PubKey",
-						Pubkeys:         []string{"A3ill3YNyWvcMstrbssC9SpzhMm+tCMWPB7bgOqWQZYk+TPvYAt4YQ7+KAh7IY63x3q+srlfWCn9GyhTBShz47C"},
-						AccountSequence: uint64(2),
-					},
-					{
-						Type:            "/cosmos.crypto.secp256k1.PubKey",
-						Pubkeys:         []string{"A3ill3YNyWvcMstrbssC9SpzhMm+tCMWPB7bgOqWQZYk"},
-						AccountSequence: uint64(2),
-					},
-					{
-						Type:            "/cosmos.crypto.secp256k1.PubKey",
-						Pubkeys:         []string{"A3ill3YNyWvcMstrbssC9SpzhMm+tCMWPB7bgOqWQZYk"},
-						AccountSequence: uint64(1),
-					},
-					{
-						Type:            "/cosmos.crypto.secp256k1.PubKey",
-						Pubkeys:         []string{"A3ill3YNyWvcMstrbssC9SpzhMm+tCMWPB7bgOqWQZYk"},
-						AccountSequence: uint64(2),
-					},
-					{
-						Type:            "/cosmos.crypto.secp256k1.PubKey",
-						Pubkeys:         []string{"A3ill3YNyWvcMstrbssC9SpzhMm+tCMWPB7bgOqWQZYk"},
-						AccountSequence: uint64(3),
-					},
-					{
-						Type: "/cosmos.crypto.multisig.LegacyAminoPubKey",
-						Pubkeys: []string{
-							"tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
-							"tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
-							"tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
-						},
-						MaybeThreshold:  primptr.Int(2),
-						AccountSequence: uint64(1),
-					},
-				},
-				Fee:           coin.MustNewCoinFromString("basetcro", "1000"),
-				FeePayer:      "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
-				FeeGranter:    "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
-				GasWanted:     200000,
-				GasUsed:       10000,
-				Memo:          "Test memo",
-				TimeoutHeight: int64(10),
-			}
 
-			transactionCreatedEvent := event_usecase.NewTransactionCreated(anyHeight, txCreatedParams)*/
+		//txCreatedParams := model.CreateTransactionParams{
+		//	TxHash:   "A6D4C1F59A9D232747CA4F8A484F1F3B14A0075E801DF2A25F472B4280505B74",
+		//	Code:     0,
+		//	Log:      "{\"events\":[]}",
+		//	MsgCount: 1,
+		//	Signers: []model.TransactionSigner{
+		//		{
+		//			Type:            "/cosmos.crypto.secp256k1.PubKey",
+		//			Pubkeys:         []string{"A3ill3YNyWvcMstrbssC9SpzhMm+tCMWPB7bgOqWQZYk"},
+		//			AccountSequence: uint64(1),
+		//		},
+		//		{
+		//			Type:            "/cosmos.crypto.secp256k1.PubKey",
+		//			Pubkeys:         []string{"A3ill3YNyWvcMstrbssC9SpzhMm+tCMWPB7bgOqWQZYk+TPvYAt4YQ7+KAh7IY63x3q+srlfWCn9GyhTBShz47C"},
+		//			AccountSequence: uint64(2),
+		//		},
+		//		{
+		//			Type:            "/cosmos.crypto.secp256k1.PubKey",
+		//			Pubkeys:         []string{"A3ill3YNyWvcMstrbssC9SpzhMm+tCMWPB7bgOqWQZYk"},
+		//			AccountSequence: uint64(2),
+		//		},
+		//		{
+		//			Type:            "/cosmos.crypto.secp256k1.PubKey",
+		//			Pubkeys:         []string{"A3ill3YNyWvcMstrbssC9SpzhMm+tCMWPB7bgOqWQZYk"},
+		//			AccountSequence: uint64(1),
+		//		},
+		//		{
+		//			Type:            "/cosmos.crypto.secp256k1.PubKey",
+		//			Pubkeys:         []string{"A3ill3YNyWvcMstrbssC9SpzhMm+tCMWPB7bgOqWQZYk"},
+		//			AccountSequence: uint64(2),
+		//		},
+		//		{
+		//			Type:            "/cosmos.crypto.secp256k1.PubKey",
+		//			Pubkeys:         []string{"A3ill3YNyWvcMstrbssC9SpzhMm+tCMWPB7bgOqWQZYk"},
+		//			AccountSequence: uint64(3),
+		//		},
+		//		{
+		//			Type: "/cosmos.crypto.multisig.LegacyAminoPubKey",
+		//			Pubkeys: []string{
+		//				"tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+		//				"tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+		//				"tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+		//			},
+		//			MaybeThreshold:  primptr.Int(2),
+		//			AccountSequence: uint64(1),
+		//		},
+		//	},
+		//	Fee:           coin.MustNewCoinFromString("basetcro", "1000"),
+		//	FeePayer:      "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+		//	FeeGranter:    "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+		//	GasWanted:     200000,
+		//	GasUsed:       10000,
+		//	Memo:          "Test memo",
+		//	TimeoutHeight: int64(10),
+		//}
+		//
+		//transactionCreatedEvent := event_usecase.NewTransactionCreated(anyHeight, txCreatedParams)
 
 		BeforeEach(func() {
 			_ = pgMigrate.Reset()
@@ -294,7 +294,7 @@ var _ = Describe("Crossfire", func() {
 				"tcrocnclcons",
 				"tcrocncl",
 				"tcro",
-				1610942400000000000,
+				100000,
 				1611547200000000000,
 				1612756800000000000,
 				1613361599000000000,
@@ -330,7 +330,7 @@ var _ = Describe("Crossfire", func() {
 				InitialDelegatorAddress:         "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
 				TendermintPubkey:                "na51D8RmKXyWrid9I6wtdxgP6f1Nl3EyNNEzqxVquoM=",
 				TendermintAddress:               "B5EC6D86F8F418F480799447F5C21F1C17C6F8F8",
-				Status:                          "Unbonded",
+				Status:                          "Primary",
 				Jailed:                          false,
 				JoinedAtBlockHeight:             1,
 				JoinedAtBlockTime:               utctime.FromUnixNano(int64(1000000)),
@@ -404,7 +404,7 @@ var _ = Describe("Crossfire", func() {
 				InitialDelegatorAddress:         "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
 				TendermintPubkey:                "na51D8RmKXyWrid9I6wtdxgP6f1Nl3EyNNEzqxVquoM=",
 				TendermintAddress:               "B5EC6D86F8F418F480799447F5C21F1C17C6F8F8",
-				Status:                          "Unbonded",
+				Status:                          "Primary",
 				Jailed:                          false,
 				JoinedAtBlockHeight:             1,
 				JoinedAtBlockTime:               utctime.FromUnixNano(int64(1611547300000000000)),
@@ -624,7 +624,13 @@ var _ = Describe("Crossfire", func() {
 			)
 
 			// Fire both events
-			err := projection.HandleEvents(anyHeight, []event_entity.Event{phaseOneBlockCreatedEvent, validatorCreatedEvent /* transactionCreatedEvent*/})
+			err := projection.HandleEvents(anyHeight, []event_entity.Event{
+				phaseOneBlockCreatedEvent,
+				validatorCreatedEvent,
+				validator2CreatedEvent,
+				validator3CreatedEvent,
+				//transactionCreatedEvent,
+			})
 			errHandleNewBlock := projection.HandleEvents(anyHeight, []event_entity.Event{phaseTwoBlockCreatedEvent /* transactionCreatedEvent*/})
 			Expect(err).To(BeNil())
 			Expect(errHandleNewBlock).To(BeNil())
@@ -632,13 +638,15 @@ var _ = Describe("Crossfire", func() {
 			//Check validators view count
 			validatorViewCount, err := crossfireValidatorView.Count()
 			Expect(err).To(BeNil())
-			Expect(validatorViewCount).To(Equal(int64(1)))
+			Expect(validatorViewCount).To(Equal(int64(3)))
 
 			//check Validator status
 			crossfireValidatorList, err := crossfireValidatorView.List()
 			Expect(err).To(BeNil())
-			Expect(crossfireValidatorList).To(HaveLen(1))
+			Expect(crossfireValidatorList).To(HaveLen(3))
 			Expect(crossfireValidatorList[0].TaskPhase1NodeSetup).To(Equal(constants.COMPLETED))
+			Expect(crossfireValidatorList[1].TaskPhase1NodeSetup).To(Equal(constants.COMPLETED))
+			Expect(crossfireValidatorList[2].TaskPhase1NodeSetup).To(Equal(constants.COMPLETED))
 
 			// // total count for both address
 			// totalCountByAddress1, errTotalCountAddress1 := crossfireValidatorStatsView.FindBy("total_tx_sent:tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh")
@@ -798,7 +806,13 @@ var _ = Describe("Crossfire", func() {
 			)
 
 			// Fire both events
-			err := projection.HandleEvents(anyHeight, []event_entity.Event{phaseTwoBlockCreatedEvent, validatorCreatedEvent, softwareUpgradeEvent})
+			err := projection.HandleEvents(anyHeight, []event_entity.Event{
+				phaseTwoBlockCreatedEvent,
+				validatorCreatedEvent,
+				validator2CreatedEvent,
+				validator3CreatedEvent,
+				softwareUpgradeEvent,
+			})
 			errPhaseTwoBlock := projection.HandleEvents(anyHeight, []event_entity.Event{phaseTwoBlockCreatedEvent})
 
 			Expect(err).To(BeNil())
@@ -806,14 +820,26 @@ var _ = Describe("Crossfire", func() {
 
 			crossfireValidatorList, err := crossfireValidatorView.List()
 			Expect(err).To(BeNil())
-			Expect(crossfireValidatorList).To(HaveLen(1))
+			Expect(crossfireValidatorList).To(HaveLen(3))
 
 			//check Validator status
-			Expect(crossfireValidatorList[0].OperatorAddress).To(Equal("tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5"))
-			Expect(crossfireValidatorList[0].InitialDelegatorAddress).To(Equal("tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh"))
-			Expect(crossfireValidatorList[0].TendermintAddress).To(Equal("B5EC6D86F8F418F480799447F5C21F1C17C6F8F8"))
+			Expect(crossfireValidatorList[0].OperatorAddress).To(Equal("tcrocncl1n4t5q77kn9vf73s7ljs96m85jgg49yqpg0chrj"))
+			Expect(crossfireValidatorList[0].InitialDelegatorAddress).To(Equal("tcro1f6qcvp33dc79xzpuwll7mln5lnepuqv8d7led9"))
+			Expect(crossfireValidatorList[0].TendermintAddress).To(Equal("6B26ECB33BC875DFD4457867C183F6370D192B69"))
 			Expect(crossfireValidatorList[0].RankTaskHighestTxSent).To(Equal(int64(0)))
 			Expect(crossfireValidatorList[0].TaskPhase2NetworkUpgrade).To(Equal(constants.COMPLETED))
+
+			Expect(crossfireValidatorList[1].OperatorAddress).To(Equal("tcrocncl1f6qcvp33dc79xzpuwll7mln5lnepuqv8cpuq4x"))
+			Expect(crossfireValidatorList[1].InitialDelegatorAddress).To(Equal("tcro1432x4lc5mrgm30c9xx35unmn9ultemm5nt40vq"))
+			Expect(crossfireValidatorList[1].TendermintAddress).To(Equal("9560478E0AB29C60D08E5C0660ECA42FDE538FF8"))
+			Expect(crossfireValidatorList[1].RankTaskHighestTxSent).To(Equal(int64(0)))
+			Expect(crossfireValidatorList[1].TaskPhase2NetworkUpgrade).To(Equal(constants.COMPLETED))
+
+			Expect(crossfireValidatorList[2].OperatorAddress).To(Equal("tcrocncl14m5a4kxt2e82uqqs5gtqza29dm5wqzyalddug5"))
+			Expect(crossfireValidatorList[2].InitialDelegatorAddress).To(Equal("tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh"))
+			Expect(crossfireValidatorList[2].TendermintAddress).To(Equal("B5EC6D86F8F418F480799447F5C21F1C17C6F8F8"))
+			Expect(crossfireValidatorList[2].RankTaskHighestTxSent).To(Equal(int64(0)))
+			Expect(crossfireValidatorList[2].TaskPhase2NetworkUpgrade).To(Equal(constants.COMPLETED))
 		})
 	})
 })
