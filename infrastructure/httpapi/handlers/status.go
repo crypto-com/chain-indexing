@@ -3,6 +3,9 @@ package handlers
 import (
 	"strconv"
 
+	"github.com/crypto-com/chain-indexing/internal/json"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
+
 	status_polling "github.com/crypto-com/chain-indexing/appinterface/polling"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
@@ -55,19 +58,23 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	totalDelegated, err := handler.validatorStatsView.FindBy(validatorstats.TOTAL_DELEGATE)
+	rawTotalDelegated, err := handler.validatorStatsView.FindBy(validatorstats.TOTAL_DELEGATE)
 	if err != nil {
 		handler.logger.Errorf("error fetching total delegate: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
 	}
+	var totalDelegated coin.Coins
+	json.MustUnmarshalFromString(rawTotalDelegated, &totalDelegated)
 
-	totalReward, err := handler.validatorStatsView.FindBy(validatorstats.TOTAL_REWARD)
+	rawTotalReward, err := handler.validatorStatsView.FindBy(validatorstats.TOTAL_REWARD)
 	if err != nil {
 		handler.logger.Errorf("error fetching total reward: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
 	}
+	var totalReward coin.DecCoins
+	json.MustUnmarshalFromString(rawTotalReward, &totalReward)
 
 	validatorCount, err := handler.validatorsView.Count(validator_view.CountFilter{
 		MaybeStatus: nil,
@@ -116,11 +123,11 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 }
 
 type Status struct {
-	BlockCount           int64  `json:"blockCount"`
-	TransactionCount     int64  `json:"transactionCount"`
-	TotalDelegated       string `json:"totalDelegated"`
-	TotalReward          string `json:"totalReward"`
-	ValidatorCount       int64  `json:"validatorCount"`
-	ActiveValidatorCount int64  `json:"activeValidatorCount"`
-	LatestHeight         int64  `json:"latestHeight"`
+	BlockCount           int64         `json:"blockCount"`
+	TransactionCount     int64         `json:"transactionCount"`
+	TotalDelegated       coin.Coins    `json:"totalDelegated"`
+	TotalReward          coin.DecCoins `json:"totalReward"`
+	ValidatorCount       int64         `json:"validatorCount"`
+	ActiveValidatorCount int64         `json:"activeValidatorCount"`
+	LatestHeight         int64         `json:"latestHeight"`
 }
