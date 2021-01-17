@@ -279,11 +279,13 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 			//}
 		}
 	}
+	projection.profile("begin persisting validator commitments")
 	if err := crossfireValidatorsStatsView.IncrementAllByOne(keysToIncrementByOne); err != nil {
 		return fmt.Errorf(
 			"[Crossfire] error increment validator commitment counts: %v", err,
 		)
 	}
+	projection.profile("end persisting validator commitments")
 
 	for _, signature := range event.Block.Signatures {
 		validator := validatorsMap[signature.ValidatorAddress]
