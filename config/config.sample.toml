@@ -71,15 +71,15 @@ enables = [
 phase_one_start_time = 1610942400000000000 # "2021-01-18T04:00:00Z"
 phase_two_start_time = 1611547200000000000 # "2021-01-25T04:00:00Z"
 phase_three_start_time = 1612756800000000000 # "2021-02-08T04:00:00Z"
-competition_end_time = 1613361599000000000 # "2021-02-15T03:59:59Z"
+competition_end_time = 1613361600000000000 # "2021-02-15T04:00:00Z"
 # check admin address transaction for network upgrade proposal
-admin_address = "tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4"
-network_upgrade_proposal_id = "14"
-participants_list_url = "https://raw.githubusercontent.com/foreseaz/random/master/participants.json"
+admin_address = "cro1wyalz8r630ghkk3egk20h2gw7hgh5rchwadkrr"
+network_upgrade_proposal_id = "18"
+participants_list_url = "https://chain.crypto.com/testnet-participants.json"
 
 #Jackpot specific timestamps
 jackpot_one_start_time = 1610942400000000000 # "2021-01-18T04:00:00Z"
 jackpot_two_start_time = 1611288000000000000 # "2021-01-22T04:00:00Z"
 jackpot_three_start_time = 1611892800000000000 # "2021-01-29T04:00:00Z"
-jackpot_four_start_time = 1612497600000000000 # "2021-02-05T03:59:59Z"
-jackpot_four_end_time = 1612497600000000000 # "2021-02-12T03:59:59Z"
+jackpot_four_start_time = 1612497600000000000 # "2021-02-05T04:00:00Z"
+jackpot_four_end_time = 1613102400000000000 # "2021-02-12T04:00:00Z"

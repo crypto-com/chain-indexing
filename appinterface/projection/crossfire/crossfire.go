@@ -433,12 +433,6 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 				continue
 			}
 
-			// Check if proposal ID does not match the required ID
-			if msgSubmitSoftwareUpgradeProposalEvent.MaybeProposalId != nil && *msgSubmitSoftwareUpgradeProposalEvent.MaybeProposalId != projection.networkUpgradeProposalID {
-				projection.logger.Debug("[Crossfire] error checking Proposal ID in proposal")
-				continue
-			}
-
 			networkUpgradeTimestamp := msgSubmitSoftwareUpgradeProposalEvent.MsgSubmitSoftwareUpgradeProposalParams.Content.Plan.Time
 			networkUpgradeBlockheight := msgSubmitSoftwareUpgradeProposalEvent.MsgSubmitSoftwareUpgradeProposalParams.Content.Plan.Height
 
