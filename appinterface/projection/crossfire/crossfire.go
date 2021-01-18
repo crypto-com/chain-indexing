@@ -297,7 +297,7 @@ func (projection *Crossfire) handleBlockCreatedEvent(
 	}
 	if len(keysToIncrementByOne) == 0 {
 		// No signatures in block
-		projection.logger.Debugf("[Crossfire] non-critical error: no validators need to increment commitment count in block height, perhaps competition not started?: %s", event.BlockHeight)
+		projection.logger.Debugf("[Crossfire] non-critical error: no validators need to increment commitment count in block height, perhaps competition not started or ended?: %s", event.BlockHeight)
 		return nil
 	}
 	projection.profile("begin persisting validator commitments")
@@ -488,7 +488,8 @@ func (projection *Crossfire) projectCrossfireValidatorView(
 		} else if transactionCreatedEvent, ok := event.(*event_usecase.TransactionCreated); ok {
 			// Check if proposed after competition has ended
 			if blockTime.AfterOrEqual(projection.competitionEndTime) {
-				return fmt.Errorf("[Crossfire] error Competition has already ended")
+				projection.logger.Debug("[Crossfire] error Competition has already ended")
+				continue
 			}
 
 			// Update the Tx Count
