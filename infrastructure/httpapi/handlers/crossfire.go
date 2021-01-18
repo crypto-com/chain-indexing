@@ -108,7 +108,7 @@ func (handler *Crossfire) ListAllCrossfireValidators(ctx *fasthttp.RequestCtx) {
 			validatorDetail := CrossfireValidatorDetails{
 				OperatorAddress:            participantRemote.OperatorAddress,
 				InitialDelegatorAddress:    crossfireValidatorsDB[idx].InitialDelegatorAddress,
-				Moniker:                    crossfireValidatorsDB[idx].Moniker,
+				Moniker:                    participantRemote.Moniker,
 				TaskSetup:                  crossfireValidatorsDB[idx].TaskPhase1NodeSetup,
 				TaskKeepActive:             crossfireValidatorsDB[idx].TaskPhase2KeepNodeActive,
 				TaskProposalVote:           validatorStats.taskVote,

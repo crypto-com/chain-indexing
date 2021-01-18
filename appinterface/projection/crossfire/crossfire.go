@@ -139,8 +139,8 @@ func (projection *Crossfire) HandleEvents(height int64, events []event_entity.Ev
 	}
 	projection.profile("end projecting validator view")
 
-	// Ranks computation every 100 blocks and/or at the end of event projection
-	if height%100 == 0 {
+	// Ranks computation every 10 blocks and/or at the end of event projection
+	if height%10 == 0 {
 		projection.profile("begin computing transaction sent rank")
 		if err := projection.computeTxSentRank(crossfireValidatorsStatsView, crossfireValidatorsView); err != nil {
 			return fmt.Errorf("[Crossfire] error Updating TxSentTask Rank %v", err)
