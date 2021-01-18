@@ -161,7 +161,7 @@ var _ = Describe("Validator Events", func() {
 			//check before handling event
 			Expect(blocksView.Count()).To(Equal(int64(1)))
 			Expect(projectionValidator.GetLastHandledEventHeight()).To(Equal(primptr.Int64(anyHeight)))
-			Expect(totalDelegateAfterHandling).To(Equal("10basetcro"))
+			Expect(totalDelegateAfterHandling).To(Equal("[{\"denom\":\"basetcro\",\"amount\":\"10\"}]"))
 			Expect(errAfterHandling).To(BeNil())
 		})
 

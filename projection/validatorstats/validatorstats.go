@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/crypto-com/chain-indexing/internal/json"
+
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
@@ -69,13 +71,24 @@ func (projection *ValidatorStats) HandleEvents(height int64, events []event_enti
 	if err != nil {
 		return fmt.Errorf("error getting total reward metrics: %v", err)
 	}
-	totalReward := coin.MustParseDecCoins(rawTotalReward)
+	var totalReward coin.DecCoins
+	if rawTotalReward == "" {
+		totalReward = coin.NewEmptyDecCoins()
+	} else {
+		json.MustUnmarshalFromString(rawTotalReward, &totalReward)
+	}
 
 	rawTotalDelegate, err := validatorStatsView.FindBy(TOTAL_DELEGATE)
 	if err != nil {
 		return fmt.Errorf("error getting total reward metrics: %v", err)
 	}
-	totalDelegate := coin.MustParseCoinsNormalized(rawTotalDelegate)
+	//totalDelegate := coin.MustParseCoinsNormalized(rawTotalDelegate)
+	var totalDelegate coin.Coins
+	if rawTotalDelegate == "" {
+		totalDelegate = coin.NewEmptyCoins()
+	} else {
+		json.MustUnmarshalFromString(rawTotalDelegate, &totalDelegate)
+	}
 
 	for _, event := range events {
 		if createValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
@@ -103,10 +116,10 @@ func (projection *ValidatorStats) HandleEvents(height int64, events []event_enti
 		}
 	}
 
-	if err = validatorStatsView.Set(TOTAL_REWARD, totalReward.String()); err != nil {
+	if err = validatorStatsView.Set(TOTAL_REWARD, json.MustMarshalToString(totalReward)); err != nil {
 		return fmt.Errorf("error updating total reward")
 	}
-	if err = validatorStatsView.Set(TOTAL_DELEGATE, totalDelegate.String()); err != nil {
+	if err = validatorStatsView.Set(TOTAL_DELEGATE, json.MustMarshalToString(totalDelegate)); err != nil {
 		return fmt.Errorf("error updating total delegate")
 	}
 
