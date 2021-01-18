@@ -71,9 +71,12 @@ func (projection *ValidatorStats) HandleEvents(height int64, events []event_enti
 	if err != nil {
 		return fmt.Errorf("error getting total reward metrics: %v", err)
 	}
-	//totalReward := coin.MustParseDecCoins(rawTotalReward)
 	var totalReward coin.DecCoins
-	json.MustUnmarshalFromString(rawTotalReward, &totalReward)
+	if rawTotalReward == "" {
+		totalReward = coin.NewEmptyDecCoins()
+	} else {
+		json.MustUnmarshalFromString(rawTotalReward, &totalReward)
+	}
 
 	rawTotalDelegate, err := validatorStatsView.FindBy(TOTAL_DELEGATE)
 	if err != nil {
@@ -81,7 +84,11 @@ func (projection *ValidatorStats) HandleEvents(height int64, events []event_enti
 	}
 	//totalDelegate := coin.MustParseCoinsNormalized(rawTotalDelegate)
 	var totalDelegate coin.Coins
-	json.MustUnmarshalFromString(rawTotalDelegate, &totalDelegate)
+	if rawTotalDelegate == "" {
+		totalDelegate = coin.NewEmptyCoins()
+	} else {
+		json.MustUnmarshalFromString(rawTotalDelegate, &totalDelegate)
+	}
 
 	for _, event := range events {
 		if createValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {

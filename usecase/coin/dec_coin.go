@@ -184,6 +184,11 @@ func sanitizeDecCoins(decCoins []DecCoin) DecCoins {
 	return newDecCoins.Sort()
 }
 
+// NewEmptyDecCoins constructs an empty decimal coin set.
+func NewEmptyDecCoins() DecCoins {
+	return DecCoins{}
+}
+
 // NewDecCoinsFromCoins constructs a new coin set with decimal values
 // from regular Coins.
 func NewDecCoinsFromCoins(coins ...Coin) DecCoins {
