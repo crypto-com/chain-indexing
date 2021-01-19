@@ -30,28 +30,33 @@ func NewTransactions(handle *rdb.Handle) *BlockTransactions {
 }
 
 func (transactionsView *BlockTransactions) InsertAll(transactions []TransactionRow) error {
-	stmtBuilder := transactionsView.rdb.StmtBuilder.Insert(
-		"view_transactions",
-	).Columns(
-		"block_height",
-		"block_hash",
-		"block_time",
-		"hash",
-		"index",
-		"success",
-		"code",
-		"log",
-		"fee",
-		"fee_payer",
-		"fee_granter",
-		"gas_wanted",
-		"gas_used",
-		"memo",
-		"timeout_height",
-		"messages",
-	)
+	pendingRowCount := 0
+	var stmtBuilder sq.InsertBuilder
 
-	for _, transaction := range transactions {
+	transactionCount := len(transactions)
+	for i, transaction := range transactions {
+		if pendingRowCount == 0 {
+			stmtBuilder = transactionsView.rdb.StmtBuilder.Insert(
+				"view_transactions",
+			).Columns(
+				"block_height",
+				"block_hash",
+				"block_time",
+				"hash",
+				"index",
+				"success",
+				"code",
+				"log",
+				"fee",
+				"fee_payer",
+				"fee_granter",
+				"gas_wanted",
+				"gas_used",
+				"memo",
+				"timeout_height",
+				"messages",
+			)
+		}
 		var transactionMessagesJSON string
 		var marshalErr error
 		if transactionMessagesJSON, marshalErr = jsoniter.MarshalToString(transaction.Messages); marshalErr != nil {
@@ -85,18 +90,24 @@ func (transactionsView *BlockTransactions) InsertAll(transactions []TransactionR
 			transaction.TimeoutHeight,
 			transactionMessagesJSON,
 		)
-	}
-	sql, sqlArgs, err := stmtBuilder.ToSql()
-	if err != nil {
-		return fmt.Errorf("error building block transactions insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
+		pendingRowCount += 1
 
-	result, err := transactionsView.rdb.Exec(sql, sqlArgs...)
-	if err != nil {
-		return fmt.Errorf("error inserting block transaction into the table: %v: %w", err, rdb.ErrWrite)
-	}
-	if result.RowsAffected() != int64(len(transactions)) {
-		return fmt.Errorf("error inserting block transaction into the table: no rows inserted: %w", rdb.ErrWrite)
+		// Postgres has a limit of 65536 parameters.
+		if pendingRowCount == 500 || i+1 == transactionCount {
+			sql, sqlArgs, err := stmtBuilder.ToSql()
+			if err != nil {
+				return fmt.Errorf("error building block transactions insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+			}
+
+			result, err := transactionsView.rdb.Exec(sql, sqlArgs...)
+			if err != nil {
+				return fmt.Errorf("error inserting block transaction into the table: %v: %w", err, rdb.ErrWrite)
+			}
+			if result.RowsAffected() != int64(pendingRowCount) {
+				return fmt.Errorf("error inserting block transaction into the table: no rows inserted: %w", rdb.ErrWrite)
+			}
+			pendingRowCount = 0
+		}
 	}
 
 	return nil

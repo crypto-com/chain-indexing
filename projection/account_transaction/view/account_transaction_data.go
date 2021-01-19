@@ -3,6 +3,8 @@ package view
 import (
 	"fmt"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 
 	jsoniter "github.com/json-iterator/go"
@@ -24,38 +26,40 @@ func NewAccountTransactionData(handle *rdb.Handle) *AccountTransactionData {
 }
 
 func (transactionsView *AccountTransactionData) InsertAll(transactions []TransactionRow) error {
-	var err error
+	pendingRowCount := 0
+	var stmtBuilder sq.InsertBuilder
 
-	var sql string
-	stmtBuilder := transactionsView.rdb.StmtBuilder.Insert(
-		"view_account_transaction_data",
-	).Columns(
-		"block_height",
-		"block_hash",
-		"block_time",
-		"hash",
-		"index",
-		"success",
-		"code",
-		"log",
-		"fee",
-		"fee_payer",
-		"fee_granter",
-		"gas_wanted",
-		"gas_used",
-		"memo",
-		"timeout_height",
-		"messages",
-	)
-
-	for _, transaction := range transactions {
-		var transactionMessagesJSON string
-		if transactionMessagesJSON, err = jsoniter.MarshalToString(transaction.Messages); err != nil {
+	transactionCount := len(transactions)
+	for i, transaction := range transactions {
+		if pendingRowCount == 0 {
+			stmtBuilder = transactionsView.rdb.StmtBuilder.Insert(
+				"view_account_transaction_data",
+			).Columns(
+				"block_height",
+				"block_hash",
+				"block_time",
+				"hash",
+				"index",
+				"success",
+				"code",
+				"log",
+				"fee",
+				"fee_payer",
+				"fee_granter",
+				"gas_wanted",
+				"gas_used",
+				"memo",
+				"timeout_height",
+				"messages",
+			)
+		}
+		transactionMessagesJSON, err := jsoniter.MarshalToString(transaction.Messages)
+		if err != nil {
 			return fmt.Errorf("error JSON marshalling block transation messages for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 		}
 
-		var feeJSON string
-		if feeJSON, err = jsoniter.MarshalToString(transaction.Fee); err != nil {
+		feeJSON, err := jsoniter.MarshalToString(transaction.Fee)
+		if err != nil {
 			return fmt.Errorf("error JSON marshalling block transation fee for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 		}
 
@@ -77,17 +81,23 @@ func (transactionsView *AccountTransactionData) InsertAll(transactions []Transac
 			transaction.TimeoutHeight,
 			transactionMessagesJSON,
 		)
-	}
-	sql, sqlArgs, err := stmtBuilder.ToSql()
-	if err != nil {
-		return fmt.Errorf("error building account transactions data insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
-	result, err := transactionsView.rdb.Exec(sql, sqlArgs...)
-	if err != nil {
-		return fmt.Errorf("error inserting block transaction into the table: %v: %w", err, rdb.ErrWrite)
-	}
-	if result.RowsAffected() != int64(len(transactions)) {
-		return fmt.Errorf("error inserting account transaction data into the table: mismatch rows inserted: %w", rdb.ErrWrite)
+		pendingRowCount += 1
+
+		// Postgres has a limit of 65536 parameters.
+		if pendingRowCount == 500 || i+1 == transactionCount {
+			sql, sqlArgs, err := stmtBuilder.ToSql()
+			if err != nil {
+				return fmt.Errorf("error building account transactions data insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+			}
+			result, err := transactionsView.rdb.Exec(sql, sqlArgs...)
+			if err != nil {
+				return fmt.Errorf("error inserting block transaction into the table: %v: %w", err, rdb.ErrWrite)
+			}
+			if result.RowsAffected() != int64(pendingRowCount) {
+				return fmt.Errorf("error inserting account transaction data into the table: mismatch rows inserted: %w", rdb.ErrWrite)
+			}
+			pendingRowCount = 0
+		}
 	}
 
 	return nil

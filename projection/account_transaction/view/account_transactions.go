@@ -33,19 +33,25 @@ func NewAccountTransactions(handle *rdb.Handle) *AccountTransactions {
 func (accountMessagesView *AccountTransactions) InsertAll(
 	rows []AccountTransactionBaseRow,
 ) error {
-	stmtBuilder := accountMessagesView.rdb.StmtBuilder.Insert(
-		"view_account_transactions",
-	).Columns(
-		"block_height",
-		"block_hash",
-		"block_time",
-		"account",
-		"transaction_hash",
-		"success",
-		"message_types",
-	)
+	pendingRowCount := 0
+	var stmtBuilder sq.InsertBuilder
 
-	for _, row := range rows {
+	rowCount := len(rows)
+	for i, row := range rows {
+		if pendingRowCount == 0 {
+			stmtBuilder = accountMessagesView.rdb.StmtBuilder.Insert(
+				"view_account_transactions",
+			).Columns(
+				"block_height",
+				"block_hash",
+				"block_time",
+				"account",
+				"transaction_hash",
+				"success",
+				"message_types",
+			)
+		}
+
 		blockTime := accountMessagesView.rdb.Tton(&row.BlockTime)
 		stmtBuilder = stmtBuilder.Values(
 			row.BlockHeight,
@@ -56,20 +62,26 @@ func (accountMessagesView *AccountTransactions) InsertAll(
 			row.Success,
 			json.MustMarshalToString(row.MessageTypes),
 		)
-	}
-	sql, sqlArgs, err := stmtBuilder.ToSql()
-	if err != nil {
-		return fmt.Errorf("error building account transaction id insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
+		pendingRowCount += 1
 
-	result, err := accountMessagesView.rdb.Exec(sql, sqlArgs...)
-	if err != nil {
-		return fmt.Errorf("error inserting account transactions into the table: %v: %w", err, rdb.ErrWrite)
-	}
-	if result.RowsAffected() != int64(len(rows)) {
-		return fmt.Errorf(
-			"error inserting account transactions into the table: mismatch rows inserted: %w", rdb.ErrWrite,
-		)
+		// Postgres has a limit of 65536 parameters.
+		if pendingRowCount == 500 || i+1 == rowCount {
+			sql, sqlArgs, err := stmtBuilder.ToSql()
+			if err != nil {
+				return fmt.Errorf("error building account transaction id insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+			}
+
+			result, err := accountMessagesView.rdb.Exec(sql, sqlArgs...)
+			if err != nil {
+				return fmt.Errorf("error inserting account transactions into the table: %v: %w", err, rdb.ErrWrite)
+			}
+			if result.RowsAffected() != int64(pendingRowCount) {
+				return fmt.Errorf(
+					"error inserting account transactions into the table: mismatch rows inserted: %w", rdb.ErrWrite,
+				)
+			}
+			pendingRowCount = 0
+		}
 	}
 
 	return nil
