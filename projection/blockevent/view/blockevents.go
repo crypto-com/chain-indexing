@@ -67,15 +67,22 @@ func (eventsView *BlockEvents) InsertAll(blockEvents []BlockEventRow) error {
 		return nil
 	}
 
-	stmtBuilder := eventsView.rdb.StmtBuilder.Insert(
-		"view_block_events",
-	).Columns(
-		"block_height",
-		"block_hash",
-		"block_time",
-		"data",
-	)
-	for _, blockEvent := range blockEvents {
+	pendingRowCount := 0
+	var stmtBuilder sq.InsertBuilder
+
+	blockEventCount := len(blockEvents)
+	for i, blockEvent := range blockEvents {
+		if pendingRowCount == 0 {
+			stmtBuilder = eventsView.rdb.StmtBuilder.Insert(
+				"view_block_events",
+			).Columns(
+				"block_height",
+				"block_hash",
+				"block_time",
+				"data",
+			)
+		}
+
 		blockEventDataJSON, marshalErr := jsoniter.MarshalToString(blockEvent.Data)
 		if marshalErr != nil {
 			return fmt.Errorf(
@@ -90,22 +97,28 @@ func (eventsView *BlockEvents) InsertAll(blockEvents []BlockEventRow) error {
 			eventsView.rdb.Tton(&blockEvent.BlockTime),
 			blockEventDataJSON,
 		)
-	}
+		pendingRowCount += 1
 
-	sql, sqlArgs, err := stmtBuilder.ToSql()
-	if err != nil {
-		return fmt.Errorf("error building events batch insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
+		// Postgres has a limit of 65536 parameters.
+		if pendingRowCount == 500 || i+1 == blockEventCount {
+			sql, sqlArgs, err := stmtBuilder.ToSql()
+			if err != nil {
+				return fmt.Errorf("error building events batch insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+			}
 
-	result, err := eventsView.rdb.Exec(sql, sqlArgs...)
-	if err != nil {
-		return fmt.Errorf("error inserting block transaction into the table: %v: %w", err, rdb.ErrWrite)
-	}
-	if result.RowsAffected() != int64(len(blockEvents)) {
-		return fmt.Errorf(
-			"error batch inserting block transaction into the table: mismatched number of rows inserted: %w",
-			rdb.ErrWrite,
-		)
+			result, err := eventsView.rdb.Exec(sql, sqlArgs...)
+			if err != nil {
+				return fmt.Errorf("error inserting block transaction into the table: %v: %w", err, rdb.ErrWrite)
+			}
+			if result.RowsAffected() != int64(pendingRowCount) {
+				return fmt.Errorf(
+					"error batch inserting block transaction into the table: mismatched number of rows inserted: %w",
+					rdb.ErrWrite,
+				)
+			}
+			pendingRowCount = 0
+		}
+
 	}
 
 	return nil
