@@ -1,4 +1,5 @@
 CREATE TABLE view_account_transaction_data (
+   id BIGSERIAL,
    block_height BIGINT,
    block_hash VARCHAR NOT NULL,
    block_time BIGINT NOT NULL,
@@ -15,5 +16,5 @@ CREATE TABLE view_account_transaction_data (
    memo VARCHAR NOT NULL,
    timeout_height BIGINT NOT NULL,
    messages JSONB NOT NULL,
-   PRIMARY KEY (hash)
+   PRIMARY KEY (id)
 )

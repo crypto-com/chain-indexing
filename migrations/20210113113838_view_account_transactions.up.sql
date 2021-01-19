@@ -7,6 +7,5 @@ CREATE TABLE view_account_transactions (
    transaction_hash VARCHAR NOT NULL,
    success BOOLEAN NOT NULL,
    message_types JSONB NOT NULL,
-   PRIMARY KEY (id),
-   UNIQUE (account, transaction_hash)
+   PRIMARY KEY (id)
 )
