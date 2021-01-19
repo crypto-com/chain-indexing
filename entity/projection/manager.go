@@ -70,7 +70,7 @@ func (manager *StoreBasedManager) projectionRunner(projection Projection) {
 		}
 
 		logger.Infof("error getting last handled event height from projection")
-		<-waitToRetry(5 * time.Second)
+		<-waitFor(5 * time.Second)
 	}
 
 	var nextEventHeight int64
@@ -84,7 +84,7 @@ func (manager *StoreBasedManager) projectionRunner(projection Projection) {
 		latestEventHeight, _ := manager.eventStore.GetLatestHeight()
 		if latestEventHeight == nil {
 			logger.Debugf("no event in in the system yet")
-			<-waitToRetry(5 * time.Second)
+			<-waitFor(5 * time.Second)
 			continue
 		}
 		for nextEventHeight <= *latestEventHeight {
@@ -97,7 +97,7 @@ func (manager *StoreBasedManager) projectionRunner(projection Projection) {
 			var eventsAtHeight []entity_event.Event
 			if eventsAtHeight, err = manager.eventStore.GetAllByHeight(nextEventHeight); err != nil {
 				eventLogger.Errorf("error getting all events by height: %v", err)
-				<-waitToRetry(time.Second)
+				<-waitFor(time.Second)
 				continue
 			}
 
@@ -119,14 +119,14 @@ func (manager *StoreBasedManager) projectionRunner(projection Projection) {
 				eventLogger.WithFields(applogger.LogFields{
 					"events": events,
 				}).Errorf("error handling events: %v", err)
-				<-waitToRetry(time.Second)
+				<-waitFor(5 * time.Second)
 				continue
 			}
 
 			eventLogger.Infof("successfully handled events")
 			nextEventHeight += 1
 		}
-		<-waitToRetry(5 * time.Second)
+		<-waitFor(5 * time.Second)
 	}
 }
 
@@ -141,6 +141,6 @@ func isListeningEvent(event entity_event.Event, eventsToListen []string) bool {
 	return false
 }
 
-func waitToRetry(wait time.Duration) <-chan time.Time {
+func waitFor(wait time.Duration) <-chan time.Time {
 	return time.After(wait)
 }
