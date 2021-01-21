@@ -29,7 +29,7 @@ type HTTPAPIServer struct {
 	corsAllowedMethods []string
 	corsAllowedHeaders []string
 
-	pprofPath string
+	pprof DebugConfig
 }
 
 // NewIndexService creates a new server instance for polling and indexing
@@ -48,7 +48,7 @@ func NewHTTPAPIServer(logger applogger.Logger, rdbConn rdb.Conn, config *Config)
 		corsAllowedMethods: config.HTTP.CorsAllowedMethods,
 		corsAllowedHeaders: config.HTTP.CorsAllowedHeaders,
 
-		pprofPath: config.Debug.PprofPath,
+		pprof: config.Debug,
 	}
 }
 
@@ -60,8 +60,19 @@ func (server *HTTPAPIServer) Run() error {
 		server.logger,
 	)
 
-	if server.pprofPath != "" {
-		httpServer = httpServer.WithPprof(server.pprofPath)
+	if server.pprof.PprofEnable {
+		pprofServer := httpapi.NewServer(
+			server.pprof.PprofListeningAddress,
+		).WithLogger(
+			server.logger,
+		)
+		pprofServer = pprofServer.WithPprof(server.pprof.PprofPath)
+		go func() {
+			server.logger.Infof("pprof server start listening on: %s", server.pprof.PprofListeningAddress)
+			if err := pprofServer.ListenAndServe(); err != nil {
+				panic(fmt.Errorf("error listening and serving HTTP pprof server: %w", err))
+			}
+		}()
 	}
 
 	if len(server.corsAllowedOrigins) != 0 {
