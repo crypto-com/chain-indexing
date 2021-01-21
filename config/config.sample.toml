@@ -33,6 +33,10 @@ cors_allowed_origins = []
 cors_allowed_methods = ["HEAD", "GET"]
 cors_allowed_headers = ["Origin", "Accept", "Content-Type", "X-Requested-With", "X-Server-Time"]
 
+# Path to serve pprof data. Default value '' disables pprof
+[debug]
+pprof_path = ""
+
 [database]
 host = "localhost"
 port = 5432

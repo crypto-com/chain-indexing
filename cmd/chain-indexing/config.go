@@ -63,6 +63,7 @@ type FileConfig struct {
 	Tendermint TendermintConfig
 	CosmosApp  CosmosAppConfig `toml:"cosmosapp"`
 	HTTP       HTTPConfig
+	Debug      DebugConfig
 	Database   DatabaseConfig
 	Postgres   PostgresConfig
 	Logger     LoggerConfig
@@ -92,6 +93,10 @@ type HTTPConfig struct {
 	CorsAllowedOrigins []string `toml:"cors_allowed_origins"`
 	CorsAllowedMethods []string `toml:"cors_allowed_methods"`
 	CorsAllowedHeaders []string `toml:"cors_allowed_headers"`
+}
+
+type DebugConfig struct {
+	PprofPath string `toml:"pprof_path"`
 }
 
 type TendermintConfig struct {
