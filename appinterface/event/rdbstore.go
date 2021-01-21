@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 )
@@ -148,12 +150,18 @@ func (store *RDbStore) InsertAllWithRDbHandle(rdbHandle *rdb.Handle, events []en
 		return nil
 	}
 
-	stmtBuilder := rdbHandle.StmtBuilder.Insert(
-		store.table,
-	).Columns(
-		"uuid", "height", "name", "version", "payload",
-	)
-	for _, event := range events {
+	pendingRowCount := 0
+	var stmtBuilder sq.InsertBuilder
+
+	eventCount := len(events)
+	for i, event := range events {
+		if pendingRowCount == 0 {
+			stmtBuilder = rdbHandle.StmtBuilder.Insert(
+				store.table,
+			).Columns(
+				"uuid", "height", "name", "version", "payload",
+			)
+		}
 		encodedEvent, err := event.ToJSON()
 		if err != nil {
 			return fmt.Errorf("error encoding event to json: %v", err)
@@ -165,18 +173,23 @@ func (store *RDbStore) InsertAllWithRDbHandle(rdbHandle *rdb.Handle, events []en
 			event.Version(),
 			encodedEvent,
 		)
-	}
-	sql, args, err := stmtBuilder.ToSql()
-	if err != nil {
-		return fmt.Errorf("error building event insertion SQL: %v", err)
-	}
+		pendingRowCount += 1
 
-	execResult, err := rdbHandle.Exec(sql, args...)
-	if err != nil {
-		return fmt.Errorf("error exectuing event insertion SQL: %v", err)
-	}
-	if execResult.RowsAffected() != int64(len(events)) {
-		return errors.New("error executing event insertion SQL: mismatched number of rows inserted")
+		if pendingRowCount == 500 || i+1 == eventCount {
+			sql, args, err := stmtBuilder.ToSql()
+			if err != nil {
+				return fmt.Errorf("error building event insertion SQL: %v", err)
+			}
+
+			execResult, err := rdbHandle.Exec(sql, args...)
+			if err != nil {
+				return fmt.Errorf("error exectuing event insertion SQL: %v", err)
+			}
+			if execResult.RowsAffected() != int64(pendingRowCount) {
+				return errors.New("error executing event insertion SQL: mismatched number of rows inserted")
+			}
+			pendingRowCount = 0
+		}
 	}
 
 	return nil
