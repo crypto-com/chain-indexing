@@ -101,7 +101,7 @@ type SignerInfo struct {
 
 type SignerInfoPublicKey struct {
 	Type            string      `json:"@type"`
-	MaybeThreshold  *int64      `json:"threshold,omitempty"`
+	MaybeThreshold  *int        `json:"threshold,omitempty"`
 	MaybePublicKeys []PublicKey `json:"public_keys,omitempty"`
 	MaybeKey        *string     `json:"key,omitempty"`
 }
