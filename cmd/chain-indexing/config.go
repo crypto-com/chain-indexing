@@ -97,7 +97,8 @@ type HTTPConfig struct {
 }
 
 type DebugConfig struct {
-	PprofPath string `toml:"pprof_path"`
+	PprofEnable           bool   `toml:"pprof_enable"`
+	PprofListeningAddress string `toml:"pprof_listening_address"`
 }
 
 type TendermintConfig struct {

@@ -28,7 +28,7 @@ type HTTPAPIServer struct {
 	corsAllowedMethods []string
 	corsAllowedHeaders []string
 
-	pprofPath string
+	pprof DebugConfig
 
 	participantsURL string
 }
@@ -49,7 +49,7 @@ func NewHTTPAPIServer(logger applogger.Logger, rdbConn rdb.Conn, config *Config)
 		corsAllowedMethods: config.HTTP.CorsAllowedMethods,
 		corsAllowedHeaders: config.HTTP.CorsAllowedHeaders,
 
-		pprofPath: config.Debug.PprofPath,
+		pprof: config.Debug,
 
 		participantsURL: config.Crossfire.ParticipantsListURL,
 	}
@@ -63,8 +63,20 @@ func (server *HTTPAPIServer) Run() error {
 		server.logger,
 	)
 
-	if server.pprofPath != "" {
-		httpServer = httpServer.WithPprof(server.pprofPath)
+	if server.pprof.PprofEnable {
+		pprofServer := httpapi.NewServer(
+			server.pprof.PprofListeningAddress,
+		).WithLogger(
+			server.logger,
+		)
+		fixPath := "/debug/pprof"
+		pprofServer = pprofServer.WithPprof(fixPath)
+		go func() {
+			server.logger.Infof("pprof server start listening on: %s%s", server.pprof.PprofListeningAddress, fixPath)
+			if err := pprofServer.ListenAndServe(); err != nil {
+				panic(fmt.Errorf("error listening and serving HTTP pprof server: %w", err))
+			}
+		}()
 	}
 
 	if len(server.corsAllowedOrigins) != 0 {

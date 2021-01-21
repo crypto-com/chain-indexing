@@ -79,6 +79,7 @@ func ParseTransactionCommands(
 					Type:            signer.PublicKey.Type,
 					IsMultiSig:      true,
 					Pubkeys:         pubkeys,
+					MaybeThreshold:  signer.PublicKey.MaybeThreshold,
 					AccountSequence: sequence,
 				})
 			}
