@@ -68,19 +68,25 @@ func (validatorActivitiesView *ValidatorActivities) InsertAll(validatorActivitie
 		return nil
 	}
 
-	stmtBuilder := validatorActivitiesView.rdb.StmtBuilder.Insert(
-		"view_validator_activities",
-	).Columns(
-		"block_height",
-		"block_hash",
-		"block_time",
-		"transaction_hash",
-		"operator_address",
-		"success",
-		"data",
-	)
+	pendingRowCount := 0
+	var stmtBuilder sq.InsertBuilder
 
-	for _, validatorActivity := range validatorActivities {
+	validatorActivityCount := len(validatorActivities)
+	for i, validatorActivity := range validatorActivities {
+		if pendingRowCount == 0 {
+			stmtBuilder = validatorActivitiesView.rdb.StmtBuilder.Insert(
+				"view_validator_activities",
+			).Columns(
+				"block_height",
+				"block_hash",
+				"block_time",
+				"transaction_hash",
+				"operator_address",
+				"success",
+				"data",
+			)
+		}
+
 		stmtBuilder = stmtBuilder.Values(
 			validatorActivity.BlockHeight,
 			validatorActivity.BlockHash,
@@ -90,19 +96,24 @@ func (validatorActivitiesView *ValidatorActivities) InsertAll(validatorActivitie
 			validatorActivity.Success,
 			validatorActivity.Data,
 		)
-	}
+		pendingRowCount += 1
 
-	sql, sqlArgs, err := stmtBuilder.ToSql()
-	if err != nil {
-		return fmt.Errorf("error building valiator activity insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
+		if pendingRowCount == 500 || i+1 == validatorActivityCount {
+			sql, sqlArgs, err := stmtBuilder.ToSql()
+			if err != nil {
+				return fmt.Errorf("error building valiator activity insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+			}
 
-	result, err := validatorActivitiesView.rdb.Exec(sql, sqlArgs...)
-	if err != nil {
-		return fmt.Errorf("error inserting validator activity into the table: %v: %w", err, rdb.ErrWrite)
-	}
-	if result.RowsAffected() != int64(len(validatorActivities)) {
-		return fmt.Errorf("error inserting validator activities into the table: no rows inserted: %w", rdb.ErrWrite)
+			result, err := validatorActivitiesView.rdb.Exec(sql, sqlArgs...)
+			if err != nil {
+				return fmt.Errorf("error inserting validator activity into the table: %v: %w", err, rdb.ErrWrite)
+			}
+			if result.RowsAffected() != int64(len(validatorActivities)) {
+				return fmt.Errorf("error inserting validator activities into the table: no rows inserted: %w", rdb.ErrWrite)
+			}
+
+			pendingRowCount = 0
+		}
 	}
 
 	return nil
