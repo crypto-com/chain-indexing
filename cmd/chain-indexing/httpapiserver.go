@@ -66,9 +66,10 @@ func (server *HTTPAPIServer) Run() error {
 		).WithLogger(
 			server.logger,
 		)
-		pprofServer = pprofServer.WithPprof(server.pprof.PprofPath)
+		fixPath := "/debug/pprof"
+		pprofServer = pprofServer.WithPprof(fixPath)
 		go func() {
-			server.logger.Infof("pprof server start listening on: %s", server.pprof.PprofListeningAddress)
+			server.logger.Infof("pprof server start listening on: %s%s", server.pprof.PprofListeningAddress, fixPath)
 			if err := pprofServer.ListenAndServe(); err != nil {
 				panic(fmt.Errorf("error listening and serving HTTP pprof server: %w", err))
 			}
