@@ -28,6 +28,8 @@ type HTTPAPIServer struct {
 	corsAllowedMethods []string
 	corsAllowedHeaders []string
 
+	pprofPath string
+
 	participantsURL string
 }
 
@@ -47,7 +49,11 @@ func NewHTTPAPIServer(logger applogger.Logger, rdbConn rdb.Conn, config *Config)
 		corsAllowedMethods: config.HTTP.CorsAllowedMethods,
 		corsAllowedHeaders: config.HTTP.CorsAllowedHeaders,
 
+<<<<<<< HEAD
 		participantsURL: config.Crossfire.ParticipantsListURL,
+=======
+		pprofPath: config.Debug.PprofPath,
+>>>>>>> master
 	}
 }
 
@@ -58,6 +64,10 @@ func (server *HTTPAPIServer) Run() error {
 	).WithLogger(
 		server.logger,
 	)
+
+	if server.pprofPath != "" {
+		httpServer = httpServer.WithPprof(server.pprofPath)
+	}
 
 	if len(server.corsAllowedOrigins) != 0 {
 		httpServer = httpServer.WithCors(cors.Options{

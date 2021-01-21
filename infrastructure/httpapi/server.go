@@ -1,10 +1,14 @@
 package httpapi
 
 import (
+	"fmt"
+	"strings"
+
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/fasthttp/router"
 	"github.com/lab259/cors"
 	"github.com/valyala/fasthttp"
+	"github.com/valyala/fasthttp/pprofhandler"
 )
 
 type Server struct {
@@ -29,12 +33,14 @@ func NewServer(listeningAddress string) *Server {
 	}
 }
 
-func (server *Server) GET(path string, handler fasthttp.RequestHandler) {
+func (server *Server) GET(path string, handler fasthttp.RequestHandler) *Server {
 	server.router.GET(path, handler)
+	return server
 }
 
-func (server *Server) Use(middleware Middleware) {
+func (server *Server) Use(middleware Middleware) *Server {
 	server.middlewares = append(server.middlewares, middleware)
+	return server
 }
 
 func (server *Server) WithCors(options cors.Options) *Server {
@@ -63,6 +69,11 @@ func (server *Server) WithLogger(logger applogger.Logger) *Server {
 
 func (server *Server) WithPanicHandler(handler func(ctx *fasthttp.RequestCtx, err interface{})) *Server {
 	server.router.PanicHandler = handler
+	return server
+}
+
+func (server *Server) WithPprof(path string) *Server {
+	server.router.ANY(fmt.Sprintf("%s/{path:*}", strings.TrimRight(path, "/")), pprofhandler.PprofHandler)
 	return server
 }
 
