@@ -49,11 +49,9 @@ func NewHTTPAPIServer(logger applogger.Logger, rdbConn rdb.Conn, config *Config)
 		corsAllowedMethods: config.HTTP.CorsAllowedMethods,
 		corsAllowedHeaders: config.HTTP.CorsAllowedHeaders,
 
-<<<<<<< HEAD
-		participantsURL: config.Crossfire.ParticipantsListURL,
-=======
 		pprofPath: config.Debug.PprofPath,
->>>>>>> master
+
+		participantsURL: config.Crossfire.ParticipantsListURL,
 	}
 }
 
