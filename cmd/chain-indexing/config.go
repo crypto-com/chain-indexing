@@ -97,7 +97,6 @@ type HTTPConfig struct {
 
 type DebugConfig struct {
 	PprofEnable           bool   `toml:"pprof_enable"`
-	PprofPath             string `toml:"pprof_path"`
 	PprofListeningAddress string `toml:"pprof_listening_address"`
 }
 

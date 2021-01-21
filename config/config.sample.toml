@@ -36,7 +36,6 @@ cors_allowed_headers = ["Origin", "Accept", "Content-Type", "X-Requested-With", 
 # Path to serve pprof data. Default value '' disables pprof
 [debug]
 pprof_enable = false
-pprof_path = "/debug/pprof"
 pprof_listening_address = "0.0.0.0:3000"
 
 [database]
