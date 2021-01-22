@@ -72,15 +72,15 @@ func main() {
 		}
 	}
 
-	participantMap := make(map[string]string)
+	participantMap := make(map[string]crossfire.Participant)
 	for _, participant := range *participants {
-		participantMap[participant.PrimaryAddress] = participant.Moniker
+		participantMap[participant.PrimaryAddress] = participant
 	}
 
-	winners := make([]string, 0)
+	winners := make([]crossfire.Participant, 0)
 	for address := range winnerSet {
-		if moniker, exist := participantMap[address]; exist {
-			winners = append(winners, moniker)
+		if participant, exist := participantMap[address]; exist {
+			winners = append(winners, participant)
 		}
 	}
 
