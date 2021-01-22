@@ -88,7 +88,9 @@ func main() {
 	if err != nil {
 		panic(fmt.Errorf("error creating output file to write: %v", err))
 	}
-	if err := jsoniter.NewEncoder(fd).Encode(winners); err != nil {
+	encoder := jsoniter.NewEncoder(fd)
+	encoder.SetIndent("", "  ")
+	if err := encoder.Encode(winners); err != nil {
 		panic(fmt.Errorf("error encoding JSON to file: %v", err))
 	}
 	fmt.Println("Done")
