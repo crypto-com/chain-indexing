@@ -8,6 +8,7 @@ import (
 
 	"github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -310,8 +311,9 @@ var _ = Describe("TransactionParser", func() {
 					MsgCount: 1,
 					Signers: []model.TransactionSigner{
 						{
-							Type:       "/cosmos.crypto.multisig.LegacyAminoPubKey",
-							IsMultiSig: true,
+							Type:           "/cosmos.crypto.multisig.LegacyAminoPubKey",
+							IsMultiSig:     true,
+							MaybeThreshold: primptr.Int(3),
 							Pubkeys: []string{
 								"AyYeIUDy4m8rW6DgbRbX+k8uJn46trwyyuBE871lRsDE",
 								"Ahe94UU90Bzry7/CnxzKJJ5XFJJqJ4u8cOv9rq632B/Z",
