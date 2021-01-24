@@ -22,10 +22,12 @@ var _ cosmosapp_interface.Client = &HTTPClient{}
 type HTTPClient struct {
 	httpClient *http.Client
 	rpcUrl     string
+
+	bondingDenom string
 }
 
 // NewHTTPClient returns a new HTTPClient for tendermint request
-func NewHTTPClient(rpcUrl string) *HTTPClient {
+func NewHTTPClient(rpcUrl string, bondingDenom string) *HTTPClient {
 	httpClient := &http.Client{
 		Timeout: 10 * time.Second,
 	}
@@ -33,11 +35,12 @@ func NewHTTPClient(rpcUrl string) *HTTPClient {
 	return &HTTPClient{
 		httpClient,
 		strings.TrimSuffix(rpcUrl, "/"),
+
+		bondingDenom,
 	}
 }
 
 func (client *HTTPClient) Account(accountAddress string) (*cosmosapp_interface.Account, error) {
-	fmt.Println(accountAddress)
 	rawRespBody, err := client.request(
 		fmt.Sprintf("%s/%s", client.url("auth", "accounts"), accountAddress), "",
 	)
@@ -150,7 +153,7 @@ func (client *HTTPClient) Account(accountAddress string) (*cosmosapp_interface.A
 
 func (client *HTTPClient) Balances(accountAddress string) (coin.Coins, error) {
 	resp := &BankBalancesResp{
-		Pagination: cosmosapp_interface.Pagination{
+		Pagination: Pagination{
 			MaybeNextKey: nil,
 			Total:        "",
 		},
@@ -216,6 +219,160 @@ func (client *HTTPClient) BalanceByDenom(accountAddress string, denom string) (*
 	return &balance, nil
 }
 
+func (client *HTTPClient) BondedBalance(accountAddress string) (coin.Coins, error) {
+	resp := &DelegationResp{
+		Pagination: Pagination{
+			MaybeNextKey: nil,
+			Total:        "",
+		},
+	}
+	balance := coin.NewEmptyCoins()
+	for {
+		url := fmt.Sprintf("%s/%s", client.url("staking", "delegations"), accountAddress)
+		if resp.Pagination.MaybeNextKey != nil {
+			url = fmt.Sprintf("%s?pagination.key=%s", url, *resp.Pagination.MaybeNextKey)
+		}
+
+		rawRespBody, err := client.request(url)
+		if err != nil {
+			return nil, err
+		}
+		defer rawRespBody.Close()
+
+		if err := jsoniter.NewDecoder(rawRespBody).Decode(&resp); err != nil {
+			return nil, err
+		}
+		for _, delegation := range resp.DelegationResponses {
+			delegatedCoin, coinErr := coin.NewCoinFromString(delegation.Balance.Denom, delegation.Balance.Amount)
+			if coinErr != nil {
+				return nil, fmt.Errorf("error parsing Coin from delegation balance: %v", coinErr)
+			}
+			balance = balance.Add(delegatedCoin)
+		}
+
+		if resp.Pagination.MaybeNextKey == nil {
+			break
+		}
+	}
+
+	return balance, nil
+}
+
+func (client *HTTPClient) RedelegatingBalance(accountAddress string) (coin.Coins, error) {
+	resp := &UnbondingResp{
+		Pagination: Pagination{
+			MaybeNextKey: nil,
+			Total:        "",
+		},
+	}
+	balance := coin.NewEmptyCoins()
+	for {
+		url := fmt.Sprintf(
+			"%s/%s/redelegations", client.url("staking", "delegators"), accountAddress,
+		)
+		if resp.Pagination.MaybeNextKey != nil {
+			url = fmt.Sprintf("%s?pagination.key=%s", url, *resp.Pagination.MaybeNextKey)
+		}
+
+		rawRespBody, err := client.request(url)
+		if err != nil {
+			return nil, err
+		}
+		defer rawRespBody.Close()
+
+		if err := jsoniter.NewDecoder(rawRespBody).Decode(&resp); err != nil {
+			return nil, err
+		}
+		for _, unbonding := range resp.UnbondingResponses {
+			for _, entry := range unbonding.Entries {
+				unbondingCoin, coinErr := coin.NewCoinFromString(client.bondingDenom, entry.Balance)
+				if coinErr != nil {
+					return nil, fmt.Errorf("error parsing Coin from unbonding balance: %v", coinErr)
+				}
+				balance = balance.Add(unbondingCoin)
+			}
+		}
+
+		if resp.Pagination.MaybeNextKey == nil {
+			break
+		}
+	}
+
+	return balance, nil
+}
+
+func (client *HTTPClient) UnbondingBalance(accountAddress string) (coin.Coins, error) {
+	resp := &UnbondingResp{
+		Pagination: Pagination{
+			MaybeNextKey: nil,
+			Total:        "",
+		},
+	}
+	balance := coin.NewEmptyCoins()
+	for {
+		url := fmt.Sprintf(
+			"%s/%s/unbonding_delegations", client.url("staking", "delegators"), accountAddress,
+		)
+		if resp.Pagination.MaybeNextKey != nil {
+			url = fmt.Sprintf("%s?pagination.key=%s", url, *resp.Pagination.MaybeNextKey)
+		}
+
+		rawRespBody, err := client.request(url)
+		if err != nil {
+			return nil, err
+		}
+		defer rawRespBody.Close()
+
+		if err := jsoniter.NewDecoder(rawRespBody).Decode(&resp); err != nil {
+			return nil, err
+		}
+		for _, unbonding := range resp.UnbondingResponses {
+			for _, entry := range unbonding.Entries {
+				unbondingCoin, coinErr := coin.NewCoinFromString(client.bondingDenom, entry.Balance)
+				if coinErr != nil {
+					return nil, fmt.Errorf("error parsing Coin from unbonding balance: %v", coinErr)
+				}
+				balance = balance.Add(unbondingCoin)
+			}
+		}
+
+		if resp.Pagination.MaybeNextKey == nil {
+			break
+		}
+	}
+
+	return balance, nil
+}
+
+func (client *HTTPClient) TotalRewards(accountAddress string) (coin.DecCoins, error) {
+	rawRespBody, err := client.request(
+		fmt.Sprintf(
+			"%s/%s/rewards",
+			client.url("distribution", "delegators"),
+			accountAddress,
+		), "",
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rawRespBody.Close()
+
+	var delegatorRewardResp DelegatorRewardResp
+	if err := jsoniter.NewDecoder(rawRespBody).Decode(&delegatorRewardResp); err != nil {
+		return nil, err
+	}
+
+	rewards := coin.NewEmptyDecCoins()
+	for _, total := range delegatorRewardResp.Total {
+		rewardCoin, coinErr := coin.NewDecCoinFromString(total.Denom, total.Amount)
+		if coinErr != nil {
+			return nil, fmt.Errorf("error parsing Coin from total reward: %v", coinErr)
+		}
+		rewards = rewards.Add(rewardCoin)
+	}
+	return rewards, nil
+}
+
 func (client *HTTPClient) Validator(validatorAddress string) (*cosmosapp_interface.Validator, error) {
 	rawRespBody, err := client.request(
 		fmt.Sprintf("%s/%s", client.url("staking", "validators"), validatorAddress), "",
@@ -237,7 +394,7 @@ func (client *HTTPClient) Delegation(
 	delegator string, validator string,
 ) (*cosmosapp_interface.DelegationResponse, error) {
 	resp := &DelegationResp{
-		Pagination: cosmosapp_interface.Pagination{
+		Pagination: Pagination{
 			MaybeNextKey: nil,
 			Total:        "",
 		},
@@ -291,69 +448,18 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 	}
 	rawResp, err := client.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("error requesting Tendermint %s endpoint: %v", url, err)
+		return nil, fmt.Errorf("error requesting Cosmos %s endpoint: %v", url, err)
 	}
 
 	if rawResp.StatusCode != 200 {
 		rawResp.Body.Close()
-		return nil, fmt.Errorf("error requesting Tendermint %s endpoint: %s", method, rawResp.Status)
+		return nil, fmt.Errorf("error requesting Cosmos %s endpoint: %s", method, rawResp.Status)
 	}
 
 	return rawResp.Body, nil
 }
 
-type ValidatorResp struct {
-	Validator cosmosapp_interface.Validator `json:"validator"`
-}
-
-type DelegationResp struct {
-	DelegationResponses []cosmosapp_interface.DelegationResponse `json:"delegation_responses"`
-	Pagination          cosmosapp_interface.Pagination           `json:"pagination"`
-}
-
-type AccountResp struct {
-	Account Account
-}
-
-type Account struct {
-	// Common fields
-	Type string `json:"@type"`
-
-	// Module account
-	MaybeName        *string      `json:"name"`
-	MaybeBaseAccount *BaseAccount `json:"base_account"`
-	MaybePermissions []string     `json:"permissions"`
-
-	// Vesting account common fields
-	MaybeBaseVestingAccount *BaseVestingAccount `json:"base_vesting_account"`
-	// Continuous vesting account
-	MaybeStartTime *string `json:"start_time"`
-	// Periodic vesting account
-	MaybeVestingPeriods []cosmosapp_interface.VestingPeriod `json:"vesting_periods"`
-
-	// User account
-	MaybeAddress       *string                     `json:"address"`
-	MaybePubKey        *cosmosapp_interface.PubKey `json:"pub_key"`
-	MaybeAccountNumber *string                     `json:"account_number"`
-	MaybeSequence      *string                     `json:"sequence"`
-}
-
-type BaseVestingAccount struct {
-	BaseAccount      BaseAccount                          `json:"base_account"`
-	OriginalVesting  []cosmosapp_interface.VestingBalance `json:"original_vesting"`
-	DelegatedFree    []cosmosapp_interface.VestingBalance `json:"delegated_free"`
-	DelegatedVesting []cosmosapp_interface.VestingBalance `json:"delegated_vesting"`
-	EndTime          string                               `json:"end_time"`
-}
-
-type BaseAccount struct {
-	Address       string                      `json:"address"`
-	MaybePubKey   *cosmosapp_interface.PubKey `json:"pub_key"`
-	AccountNumber string                      `json:"account_number"`
-	Sequence      string                      `json:"sequence"`
-}
-
-type BankBalancesResp struct {
-	BankBalanceResponses []cosmosapp_interface.BankBalance `json:"balances"`
-	Pagination           cosmosapp_interface.Pagination    `json:"pagination"`
+type Pagination struct {
+	MaybeNextKey *string `json:"next_key"`
+	Total        string  `json:"total"`
 }
