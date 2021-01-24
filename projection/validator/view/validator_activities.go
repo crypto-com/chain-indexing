@@ -108,8 +108,8 @@ func (validatorActivitiesView *ValidatorActivities) InsertAll(validatorActivitie
 			if err != nil {
 				return fmt.Errorf("error inserting validator activity into the table: %v: %w", err, rdb.ErrWrite)
 			}
-			if result.RowsAffected() != int64(len(validatorActivities)) {
-				return fmt.Errorf("error inserting validator activities into the table: no rows inserted: %w", rdb.ErrWrite)
+			if result.RowsAffected() != int64(pendingRowCount) {
+				return fmt.Errorf("error inserting validator activities into the table: mismatch rows inserted: %w", rdb.ErrWrite)
 			}
 
 			pendingRowCount = 0
