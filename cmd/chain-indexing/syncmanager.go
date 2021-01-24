@@ -84,7 +84,7 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
 	}
 
 	manager.logger.Infof("going to synchronized blocks from %d to %d", currentIndexingHeight, latestHeight)
-	for currentIndexingHeight < latestHeight {
+	for currentIndexingHeight <= latestHeight {
 		blocksCommands, syncedHeight, err := manager.windowSyncStrategy.Sync(
 			currentIndexingHeight, latestHeight, manager.syncBlockWorker,
 		)
