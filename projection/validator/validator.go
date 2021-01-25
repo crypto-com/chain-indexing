@@ -4,14 +4,13 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/crypto-com/chain-indexing/internal/utctime"
-
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 	"github.com/crypto-com/chain-indexing/projection/validator/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
@@ -126,35 +125,36 @@ func (projection *Validator) projectValidatorView(
 	for _, event := range events {
 		if msgCreateValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
 			projection.logger.Debug("handling MsgCreateValidator event")
-			pubKey, err := base64.StdEncoding.DecodeString(msgCreateValidatorEvent.TendermintPubkey)
+			tendermintPubkey, err := base64.StdEncoding.DecodeString(msgCreateValidatorEvent.TendermintPubkey)
 			if err != nil {
 				return fmt.Errorf("error base64 decoding Tendermint node pubkey: %v", err)
 			}
 			consensusNodeAddress, err := tmcosmosutils.ConsensusNodeAddressFromTmPubKey(
-				projection.conNodeAddressPrefix, pubKey,
+				projection.conNodeAddressPrefix, tendermintPubkey,
 			)
 			if err != nil {
 				return fmt.Errorf("error converting Tendermint node pubkey to address: %v", err)
 			}
+			tendermintAddress := tmcosmosutils.TmAddressFromTmPubKey(tendermintPubkey)
 			validatorRow := view.ValidatorRow{
-				ConsensusNodeAddress:         consensusNodeAddress,
-				OperatorAddress:              msgCreateValidatorEvent.ValidatorAddress,
-				InitialDelegatorAddress:      msgCreateValidatorEvent.DelegatorAddress,
-				MinSelfDelegation:            msgCreateValidatorEvent.MinSelfDelegation,
-				Status:                       constants.UNBONDED,
-				Jailed:                       false,
-				JoinedAtBlockHeight:          blockHeight,
-				Power:                        "0",
-				MaybeUnbondingHeight:         nil,
-				MaybeUnbondingCompletionTime: nil,
-				Moniker:                      msgCreateValidatorEvent.Description.Moniker,
-				Identity:                     msgCreateValidatorEvent.Description.Identity,
-				Website:                      msgCreateValidatorEvent.Description.Website,
-				SecurityContact:              msgCreateValidatorEvent.Description.SecurityContact,
-				Details:                      msgCreateValidatorEvent.Description.Details,
-				CommissionRate:               msgCreateValidatorEvent.CommissionRates.Rate,
-				CommissionMaxRate:            msgCreateValidatorEvent.CommissionRates.MaxRate,
-				CommissionMaxChangeRate:      msgCreateValidatorEvent.CommissionRates.MaxChangeRate,
+				ConsensusNodeAddress:    consensusNodeAddress,
+				OperatorAddress:         msgCreateValidatorEvent.ValidatorAddress,
+				InitialDelegatorAddress: msgCreateValidatorEvent.DelegatorAddress,
+				TendermintAddress:       tendermintAddress,
+				TendermintPubkey:        msgCreateValidatorEvent.TendermintPubkey,
+				MinSelfDelegation:       msgCreateValidatorEvent.MinSelfDelegation,
+				Status:                  constants.UNBONDED,
+				Jailed:                  false,
+				JoinedAtBlockHeight:     blockHeight,
+				Power:                   "0",
+				Moniker:                 msgCreateValidatorEvent.Description.Moniker,
+				Identity:                msgCreateValidatorEvent.Description.Identity,
+				Website:                 msgCreateValidatorEvent.Description.Website,
+				SecurityContact:         msgCreateValidatorEvent.Description.SecurityContact,
+				Details:                 msgCreateValidatorEvent.Description.Details,
+				CommissionRate:          msgCreateValidatorEvent.CommissionRates.Rate,
+				CommissionMaxRate:       msgCreateValidatorEvent.CommissionRates.MaxRate,
+				CommissionMaxChangeRate: msgCreateValidatorEvent.CommissionRates.MaxChangeRate,
 			}
 
 			isJoined, joinedAtBlockHeight, err := validatorsView.LastJoinedBlockHeight(

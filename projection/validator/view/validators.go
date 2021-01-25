@@ -59,22 +59,18 @@ func (validatorsView *Validators) LastJoinedBlockHeight(
 }
 
 func (validatorsView *Validators) Upsert(validator *ValidatorRow) error {
-	var unbondingCompletionTime interface{} = nil
-	if validator.MaybeUnbondingCompletionTime != nil {
-		unbondingCompletionTime = validatorsView.rdb.Tton(validator.MaybeUnbondingCompletionTime)
-	}
 	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Insert(
 		"view_validators",
 	).Columns(
 		"operator_address",
 		"consensus_node_address",
 		"initial_delegator_address",
+		"tendermint_pubkey",
+		"tendermint_address",
 		"status",
 		"jailed",
 		"joined_at_block_height",
 		"power",
-		"unbonding_height",
-		"unbonding_completion_time",
 		"moniker",
 		"identity",
 		"website",
@@ -88,12 +84,12 @@ func (validatorsView *Validators) Upsert(validator *ValidatorRow) error {
 		validator.OperatorAddress,
 		validator.ConsensusNodeAddress,
 		validator.InitialDelegatorAddress,
+		validator.TendermintPubkey,
+		validator.TendermintAddress,
 		validator.Status,
 		validator.Jailed,
 		validator.JoinedAtBlockHeight,
 		validator.Power,
-		validator.MaybeUnbondingHeight,
-		unbondingCompletionTime,
 		validator.Moniker,
 		validator.Identity,
 		validator.Website,
@@ -109,8 +105,6 @@ func (validatorsView *Validators) Upsert(validator *ValidatorRow) error {
 		jailed = EXCLUDED.jailed,
 		joined_at_block_height = EXCLUDED.joined_at_block_height,
 		power = EXCLUDED.power,
-		unbonding_height = EXCLUDED.unbonding_height,
-		unbonding_completion_time = EXCLUDED.unbonding_completion_time,
 		moniker = EXCLUDED.moniker,
 		identity = EXCLUDED.identity,
 		website = EXCLUDED.website,
@@ -145,6 +139,8 @@ func (validatorsView *Validators) Insert(validator *ValidatorRow) error {
 		"operator_address",
 		"consensus_node_address",
 		"initial_delegator_address",
+		"tendermint_pubkey",
+		"tendermint_address",
 		"status",
 		"jailed",
 		"joined_at_block_height",
@@ -173,6 +169,8 @@ func (validatorsView *Validators) Insert(validator *ValidatorRow) error {
 		validator.OperatorAddress,
 		validator.ConsensusNodeAddress,
 		validator.InitialDelegatorAddress,
+		validator.TendermintPubkey,
+		validator.TendermintAddress,
 		validator.Status,
 		validator.Jailed,
 		validator.JoinedAtBlockHeight,
@@ -336,6 +334,8 @@ func (validatorsView *Validators) List(
 		"operator_address",
 		"consensus_node_address",
 		"initial_delegator_address",
+		"tendermint_pubkey",
+		"tendermint_address",
 		"status",
 		"jailed",
 		"joined_at_block_height",
@@ -384,6 +384,8 @@ func (validatorsView *Validators) List(
 			&validator.OperatorAddress,
 			&validator.ConsensusNodeAddress,
 			&validator.InitialDelegatorAddress,
+			&validator.TendermintPubkey,
+			&validator.TendermintAddress,
 			&validator.Status,
 			&validator.Jailed,
 			&validator.JoinedAtBlockHeight,
@@ -477,6 +479,8 @@ func (validatorsView *Validators) Search(keyword string) ([]ValidatorRow, error)
 		"operator_address",
 		"consensus_node_address",
 		"initial_delegator_address",
+		"tendermint_pubkey",
+		"tendermint_address",
 		"status",
 		"jailed",
 		"joined_at_block_height",
@@ -516,6 +520,8 @@ func (validatorsView *Validators) Search(keyword string) ([]ValidatorRow, error)
 			&validator.OperatorAddress,
 			&validator.ConsensusNodeAddress,
 			&validator.InitialDelegatorAddress,
+			&validator.TendermintPubkey,
+			&validator.TendermintAddress,
 			&validator.Status,
 			&validator.Jailed,
 			&validator.JoinedAtBlockHeight,
@@ -560,6 +566,8 @@ func (validatorsView *Validators) FindBy(identity ValidatorIdentity) (*Validator
 		"operator_address",
 		"consensus_node_address",
 		"initial_delegator_address",
+		"tendermint_pubkey",
+		"tendermint_address",
 		"status",
 		"jailed",
 		"joined_at_block_height",
@@ -599,6 +607,8 @@ func (validatorsView *Validators) FindBy(identity ValidatorIdentity) (*Validator
 		&validator.OperatorAddress,
 		&validator.ConsensusNodeAddress,
 		&validator.InitialDelegatorAddress,
+		&validator.TendermintPubkey,
+		&validator.TendermintAddress,
 		&validator.Status,
 		&validator.Jailed,
 		&validator.JoinedAtBlockHeight,
@@ -673,6 +683,8 @@ type ValidatorRow struct {
 	OperatorAddress              string           `json:"operatorAddress"`
 	ConsensusNodeAddress         string           `json:"consensusNodeAddress"`
 	InitialDelegatorAddress      string           `json:"initialDelegatorAddress"`
+	TendermintPubkey             string           `json:"tendermintPubkey"`
+	TendermintAddress            string           `json:"tendermintAddress"`
 	Status                       string           `json:"status"`
 	Jailed                       bool             `json:"jailed"`
 	JoinedAtBlockHeight          int64            `json:"joinedAtBlockHeight"`
