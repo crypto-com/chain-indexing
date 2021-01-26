@@ -1,4 +1,5 @@
 [blockchain]
+bonding_denom = "tcro"
 account_address_prefix = "tcro"
 account_pubkey_prefix = "tcro"
 validator_address_prefix = "tcrocncl"
@@ -33,7 +34,6 @@ cors_allowed_origins = []
 cors_allowed_methods = ["HEAD", "GET"]
 cors_allowed_headers = ["Origin", "Accept", "Content-Type", "X-Requested-With", "X-Server-Time"]
 
-# Path to serve pprof data. Default value '' disables pprof
 [debug]
 pprof_enable = false
 pprof_listening_address = "0.0.0.0:3000"

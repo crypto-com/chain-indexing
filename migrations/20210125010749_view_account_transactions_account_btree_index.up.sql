@@ -1,0 +1,1 @@
+CREATE INDEX view_account_transactions_account_btree_index ON view_account_transactions USING btree (account);
