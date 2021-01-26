@@ -109,7 +109,10 @@ func (handler *Validators) List(ctx *fasthttp.RequestCtx) {
 	}
 
 	queryArgs := ctx.QueryArgs()
-	var order validator_view.ValidatorsListOrder
+	order := validator_view.ValidatorsListOrder{
+		MaybeStatus:              primptr.String(view.ORDER_ASC),
+		MaybeJoinedAtBlockHeight: primptr.String(view.ORDER_ASC),
+	}
 	if queryArgs.Has("order") {
 		orderArg := string(queryArgs.Peek("order"))
 		if orderArg == "power" {
@@ -144,7 +147,10 @@ func (handler *Validators) ListActive(ctx *fasthttp.RequestCtx) {
 	}
 
 	queryArgs := ctx.QueryArgs()
-	var order validator_view.ValidatorsListOrder
+	order := validator_view.ValidatorsListOrder{
+		MaybeStatus:              primptr.String(view.ORDER_ASC),
+		MaybeJoinedAtBlockHeight: primptr.String(view.ORDER_ASC),
+	}
 	if queryArgs.Has("order") {
 		orderArg := string(queryArgs.Peek("order"))
 		if orderArg == "power" {

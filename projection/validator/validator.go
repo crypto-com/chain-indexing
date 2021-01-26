@@ -2,7 +2,9 @@ package validator
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -78,6 +80,8 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 
 	rdbTxHandle := rdbTx.ToHandle()
 	validatorsView := view.NewValidators(rdbTxHandle)
+	validatorBlockCommitmentsView := view.NewValidatorBlockCommitments(rdbTxHandle)
+	validatorBlockCommitmentsTotalView := view.NewValidatorBlockCommitmentsTotal(rdbTxHandle)
 	validatorActivitiesView := view.NewValidatorActivities(rdbTxHandle)
 	validatorActivitiesTotalView := view.NewValidatorActivitiesTotal(rdbTxHandle)
 
@@ -90,19 +94,63 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 		}
 	}
 
-	if err := projection.projectValidatorView(validatorsView, height, events); err != nil {
+	if projectErr := projection.projectValidatorView(validatorsView, height, events); projectErr != nil {
 		return fmt.Errorf("error projecting validator view: %v", err)
 	}
 
-	if err := projection.projectValidatorActivitiesView(
+	if projectErr := projection.projectValidatorActivitiesView(
 		validatorsView,
 		validatorActivitiesView,
 		validatorActivitiesTotalView,
 		blockHash,
 		blockTime,
 		events,
-	); err != nil {
+	); projectErr != nil {
 		return fmt.Errorf("error projecting validator activities view: %v", err)
+	}
+
+	validatorList, listValidatorErr := validatorsView.ListAll(view.ValidatorsListFilter{
+		MaybeStatuses: nil,
+	}, view.ValidatorsListOrder{MaybePower: nil})
+	if listValidatorErr != nil {
+		return fmt.Errorf("error retrieving validator list: %v", listValidatorErr)
+	}
+	validatorMap := make(map[string]*view.ValidatorRow)
+	for i, validator := range validatorList {
+		validatorMap[validator.TendermintAddress] = &validatorList[i]
+	}
+
+	for _, event := range events {
+		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
+			signatureCount := len(blockCreatedEvent.Block.Signatures)
+			commitmentRows := make([]view.ValidatorBlockCommitmentRow, 0, signatureCount)
+			for _, signature := range blockCreatedEvent.Block.Signatures {
+				signedValidator, exist := validatorMap[signature.ValidatorAddress]
+				if !exist {
+					return errors.New("error looking for signing validator details: not found")
+				}
+				commitmentRows = append(commitmentRows, view.ValidatorBlockCommitmentRow{
+					ConsensusNodeAddress: signedValidator.ConsensusNodeAddress,
+					BlockHeight:          height,
+					Signature:            signature.Signature,
+					Timestamp:            signature.Timestamp,
+				})
+			}
+
+			if err := validatorBlockCommitmentsView.InsertAll(commitmentRows); err != nil {
+				return fmt.Errorf("error incrementing validator block commitment rows: %v", err)
+			}
+			if err := validatorBlockCommitmentsTotalView.Set(
+				strconv.FormatInt(height, 10), int64(signatureCount),
+			); err != nil {
+				return fmt.Errorf("error incrementing all validator block commitments total: %v", err)
+			}
+			if err := validatorBlockCommitmentsTotalView.Increment(
+				"-", int64(signatureCount),
+			); err != nil {
+				return fmt.Errorf("error incrementing overall validator block commitments total: %v", err)
+			}
+		}
 	}
 
 	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {

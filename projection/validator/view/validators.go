@@ -16,7 +16,6 @@ import (
 	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
-	"github.com/crypto-com/chain-indexing/internal/utctime"
 )
 
 type Validators struct {
@@ -145,8 +144,6 @@ func (validatorsView *Validators) Insert(validator *ValidatorRow) error {
 		"jailed",
 		"joined_at_block_height",
 		"power",
-		"unbonding_height",
-		"unbonding_completion_time",
 		"moniker",
 		"identity",
 		"website",
@@ -156,15 +153,11 @@ func (validatorsView *Validators) Insert(validator *ValidatorRow) error {
 		"commission_max_rate",
 		"commission_max_change_rate",
 		"min_self_delegation",
-	).Values("?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?").ToSql()
+	).Values("?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?").ToSql()
 	if err != nil {
 		return fmt.Errorf("error building validator insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	var unbondingCompletionTime interface{} = nil
-	if validator.MaybeUnbondingCompletionTime != nil {
-		unbondingCompletionTime = validatorsView.rdb.Tton(validator.MaybeUnbondingCompletionTime)
-	}
 	result, err := validatorsView.rdb.Exec(sql,
 		validator.OperatorAddress,
 		validator.ConsensusNodeAddress,
@@ -175,8 +168,6 @@ func (validatorsView *Validators) Insert(validator *ValidatorRow) error {
 		validator.Jailed,
 		validator.JoinedAtBlockHeight,
 		validator.Power,
-		validator.MaybeUnbondingHeight,
-		unbondingCompletionTime,
 		validator.Moniker,
 		validator.Identity,
 		validator.Website,
@@ -198,10 +189,6 @@ func (validatorsView *Validators) Insert(validator *ValidatorRow) error {
 }
 
 func (validatorsView *Validators) Update(validator *ValidatorRow) error {
-	var unbondingCompletionTime interface{} = nil
-	if validator.MaybeUnbondingCompletionTime != nil {
-		unbondingCompletionTime = validatorsView.rdb.Tton(validator.MaybeUnbondingCompletionTime)
-	}
 	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Update(
 		"view_validators",
 	).SetMap(map[string]interface{}{
@@ -209,8 +196,6 @@ func (validatorsView *Validators) Update(validator *ValidatorRow) error {
 		"status":                     validator.Status,
 		"jailed":                     validator.Jailed,
 		"power":                      validator.Power,
-		"unbonding_height":           validator.MaybeUnbondingHeight,
-		"unbonding_completion_time":  unbondingCompletionTime,
 		"moniker":                    validator.Moniker,
 		"identity":                   validator.Identity,
 		"website":                    validator.Website,
@@ -243,7 +228,138 @@ type ValidatorsListFilter struct {
 }
 
 type ValidatorsListOrder struct {
-	MaybePower *view.ORDER
+	MaybeStatus              *view.ORDER
+	MaybePower               *view.ORDER
+	MaybeJoinedAtBlockHeight *view.ORDER
+}
+
+func (validatorsView *Validators) ListAll(
+	filter ValidatorsListFilter,
+	order ValidatorsListOrder,
+) ([]ValidatorRow, error) {
+	orderClauses := make([]string, 0)
+
+	if order.MaybeJoinedAtBlockHeight != nil {
+		if *order.MaybeStatus == view.ORDER_ASC {
+			statusOrder := "CASE UPPER(status) " +
+				"WHEN 'BONDED' THEN 1" +
+				"WHEN 'UNBONDING' THEN 2" +
+				"WHEN 'JAILED' THEN 3" +
+				"WHEN 'UNBONDED' THEN 4" +
+				"ELSE 5 END"
+			orderClauses = append(orderClauses, statusOrder)
+		} else if *order.MaybeStatus == view.ORDER_DESC {
+			statusOrder := "CASE UPPER(status) " +
+				"WHEN 'UNBONDED' THEN 1" +
+				"WHEN 'JAILED' THEN 2" +
+				"WHEN 'UNBONDING' THEN 3" +
+				"WHEN 'BONDED' THEN 4" +
+				"ELSE 5 END"
+			orderClauses = append(orderClauses, statusOrder)
+		}
+	}
+
+	if order.MaybePower != nil {
+		if *order.MaybePower == view.ORDER_ASC {
+			orderClauses = append(orderClauses, "CAST(power AS BIGINT)")
+		} else if *order.MaybePower == view.ORDER_DESC {
+			// DESC order
+			orderClauses = append(orderClauses, "CAST(power AS BIGINT) DESC")
+		}
+	}
+
+	if order.MaybeJoinedAtBlockHeight != nil {
+		if *order.MaybeJoinedAtBlockHeight == view.ORDER_ASC {
+			orderClauses = append(orderClauses, "joined_at_block_height")
+		} else if *order.MaybeJoinedAtBlockHeight == view.ORDER_DESC {
+			// DESC order
+			orderClauses = append(orderClauses, "joined_at_block_height DESC")
+		}
+	}
+
+	var statusOrCondition sq.Or
+	if filter.MaybeStatuses != nil {
+		statusOrCondition = make(sq.Or, 0)
+		for _, status := range filter.MaybeStatuses {
+			statusOrCondition = append(statusOrCondition, sq.Eq{
+				"status": status,
+			})
+		}
+	}
+
+	stmtBuilder := validatorsView.rdb.StmtBuilder.Select(
+		"id",
+		"operator_address",
+		"consensus_node_address",
+		"initial_delegator_address",
+		"tendermint_pubkey",
+		"tendermint_address",
+		"status",
+		"jailed",
+		"joined_at_block_height",
+		"power",
+		"moniker",
+		"identity",
+		"website",
+		"security_contact",
+		"details",
+		"commission_rate",
+		"commission_max_rate",
+		"commission_max_change_rate",
+		"min_self_delegation",
+	).From(
+		"view_validators",
+	)
+	stmtBuilder = stmtBuilder.OrderBy(orderClauses...)
+
+	if statusOrCondition != nil {
+		stmtBuilder = stmtBuilder.Where(statusOrCondition)
+	}
+	sql, sqlArgs, err := stmtBuilder.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("error building validators select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	rowsResult, err := validatorsView.rdb.Query(sql, sqlArgs...)
+	if err != nil {
+		return nil, fmt.Errorf("error executing validators select SQL: %v: %w", err, rdb.ErrQuery)
+	}
+	defer rowsResult.Close()
+
+	validators := make([]ValidatorRow, 0)
+	for rowsResult.Next() {
+		var validator ValidatorRow
+		if err = rowsResult.Scan(
+			&validator.MaybeId,
+			&validator.OperatorAddress,
+			&validator.ConsensusNodeAddress,
+			&validator.InitialDelegatorAddress,
+			&validator.TendermintPubkey,
+			&validator.TendermintAddress,
+			&validator.Status,
+			&validator.Jailed,
+			&validator.JoinedAtBlockHeight,
+			&validator.Power,
+			&validator.Moniker,
+			&validator.Identity,
+			&validator.Website,
+			&validator.SecurityContact,
+			&validator.Details,
+			&validator.CommissionRate,
+			&validator.CommissionMaxRate,
+			&validator.CommissionMaxChangeRate,
+			&validator.MinSelfDelegation,
+		); err != nil {
+			if errors.Is(err, rdb.ErrNoRows) {
+				return nil, rdb.ErrNoRows
+			}
+			return nil, fmt.Errorf("error scanning validator row: %v: %w", err, rdb.ErrQuery)
+		}
+
+		validators = append(validators, validator)
+	}
+
+	return validators, nil
 }
 
 func (validatorsView *Validators) List(
@@ -256,23 +372,43 @@ func (validatorsView *Validators) List(
 	}
 
 	orderClauses := make([]string, 0)
-	statusOrder := "CASE UPPER(status) " +
-		"WHEN 'BONDED' THEN 1" +
-		"WHEN 'UNBONDING' THEN 2" +
-		"WHEN 'JAILED' THEN 3" +
-		"WHEN 'UNBONDED' THEN 4" +
-		"ELSE 5 END"
-	if order.MaybePower == nil {
-		orderClauses = append(orderClauses, "joined_at_block_height")
-	} else if *order.MaybePower == view.ORDER_ASC {
-		orderClauses = append(orderClauses, statusOrder)
-		orderClauses = append(orderClauses, "CAST(power AS BIGINT)")
-		orderClauses = append(orderClauses, "joined_at_block_height")
-	} else {
-		// DESC order
-		orderClauses = append(orderClauses, statusOrder)
-		orderClauses = append(orderClauses, "CAST(power AS BIGINT) DESC")
-		orderClauses = append(orderClauses, "joined_at_block_height")
+
+	if order.MaybeJoinedAtBlockHeight != nil {
+		if *order.MaybeStatus == view.ORDER_ASC {
+			statusOrder := "CASE UPPER(status) " +
+				"WHEN 'BONDED' THEN 1" +
+				"WHEN 'UNBONDING' THEN 2" +
+				"WHEN 'JAILED' THEN 3" +
+				"WHEN 'UNBONDED' THEN 4" +
+				"ELSE 5 END"
+			orderClauses = append(orderClauses, statusOrder)
+		} else if *order.MaybeStatus == view.ORDER_DESC {
+			statusOrder := "CASE UPPER(status) " +
+				"WHEN 'UNBONDED' THEN 1" +
+				"WHEN 'JAILED' THEN 2" +
+				"WHEN 'UNBONDING' THEN 3" +
+				"WHEN 'BONDED' THEN 4" +
+				"ELSE 5 END"
+			orderClauses = append(orderClauses, statusOrder)
+		}
+	}
+
+	if order.MaybePower != nil {
+		if *order.MaybePower == view.ORDER_ASC {
+			orderClauses = append(orderClauses, "CAST(power AS BIGINT)")
+		} else if *order.MaybePower == view.ORDER_DESC {
+			// DESC order
+			orderClauses = append(orderClauses, "CAST(power AS BIGINT) DESC")
+		}
+	}
+
+	if order.MaybeJoinedAtBlockHeight != nil {
+		if *order.MaybeJoinedAtBlockHeight == view.ORDER_ASC {
+			orderClauses = append(orderClauses, "joined_at_block_height")
+		} else if *order.MaybeJoinedAtBlockHeight == view.ORDER_DESC {
+			// DESC order
+			orderClauses = append(orderClauses, "joined_at_block_height DESC")
+		}
 	}
 
 	cumulativePowerStmtBuilder := validatorsView.rdb.StmtBuilder.Select(
@@ -340,8 +476,6 @@ func (validatorsView *Validators) List(
 		"jailed",
 		"joined_at_block_height",
 		"power",
-		"unbonding_height",
-		"unbonding_completion_time",
 		"moniker",
 		"identity",
 		"website",
@@ -378,7 +512,6 @@ func (validatorsView *Validators) List(
 	validators := make([]ListValidatorRow, 0)
 	for rowsResult.Next() {
 		var validator ValidatorRow
-		unbondingCompletionTimeReader := validatorsView.rdb.NtotReader()
 		if err = rowsResult.Scan(
 			&validator.MaybeId,
 			&validator.OperatorAddress,
@@ -390,8 +523,6 @@ func (validatorsView *Validators) List(
 			&validator.Jailed,
 			&validator.JoinedAtBlockHeight,
 			&validator.Power,
-			&validator.MaybeUnbondingHeight,
-			unbondingCompletionTimeReader.ScannableArg(),
 			&validator.Moniker,
 			&validator.Identity,
 			&validator.Website,
@@ -406,13 +537,6 @@ func (validatorsView *Validators) List(
 				return nil, nil, rdb.ErrNoRows
 			}
 			return nil, nil, fmt.Errorf("error scanning validator row: %v: %w", err, rdb.ErrQuery)
-		}
-		unbondingCompletionTime, parseErr := unbondingCompletionTimeReader.Parse()
-		if parseErr != nil {
-			return nil, nil, fmt.Errorf("error parsing validator time: %v: %w", parseErr, rdb.ErrQuery)
-		}
-		if unbondingCompletionTime != nil {
-			validator.MaybeUnbondingCompletionTime = unbondingCompletionTime
 		}
 
 		power, ok := new(big.Float).SetString(validator.Power)
@@ -485,8 +609,6 @@ func (validatorsView *Validators) Search(keyword string) ([]ValidatorRow, error)
 		"jailed",
 		"joined_at_block_height",
 		"power",
-		"unbonding_height",
-		"unbonding_completion_time",
 		"moniker",
 		"identity",
 		"website",
@@ -514,7 +636,6 @@ func (validatorsView *Validators) Search(keyword string) ([]ValidatorRow, error)
 	validators := make([]ValidatorRow, 0)
 	for rowsResult.Next() {
 		var validator ValidatorRow
-		unbondingCompletionTimeReader := validatorsView.rdb.NtotReader()
 		if err = rowsResult.Scan(
 			&validator.MaybeId,
 			&validator.OperatorAddress,
@@ -526,8 +647,6 @@ func (validatorsView *Validators) Search(keyword string) ([]ValidatorRow, error)
 			&validator.Jailed,
 			&validator.JoinedAtBlockHeight,
 			&validator.Power,
-			&validator.MaybeUnbondingHeight,
-			unbondingCompletionTimeReader.ScannableArg(),
 			&validator.Moniker,
 			&validator.Identity,
 			&validator.Website,
@@ -542,13 +661,6 @@ func (validatorsView *Validators) Search(keyword string) ([]ValidatorRow, error)
 				return nil, rdb.ErrNoRows
 			}
 			return nil, fmt.Errorf("error scanning validator row: %v: %w", err, rdb.ErrQuery)
-		}
-		unbondingCompletionTime, parseErr := unbondingCompletionTimeReader.Parse()
-		if parseErr != nil {
-			return nil, fmt.Errorf("error parsing validator time: %v: %w", parseErr, rdb.ErrQuery)
-		}
-		if unbondingCompletionTime != nil {
-			validator.MaybeUnbondingCompletionTime = unbondingCompletionTime
 		}
 
 		validators = append(validators, validator)
@@ -572,8 +684,6 @@ func (validatorsView *Validators) FindBy(identity ValidatorIdentity) (*Validator
 		"jailed",
 		"joined_at_block_height",
 		"power",
-		"unbonding_height",
-		"unbonding_completion_time",
 		"moniker",
 		"identity",
 		"website",
@@ -601,7 +711,6 @@ func (validatorsView *Validators) FindBy(identity ValidatorIdentity) (*Validator
 	}
 
 	var validator ValidatorRow
-	unbondingCompletionTimeReader := validatorsView.rdb.NtotReader()
 	if err = validatorsView.rdb.QueryRow(sql, sqlArgs...).Scan(
 		&validator.MaybeId,
 		&validator.OperatorAddress,
@@ -613,8 +722,6 @@ func (validatorsView *Validators) FindBy(identity ValidatorIdentity) (*Validator
 		&validator.Jailed,
 		&validator.JoinedAtBlockHeight,
 		&validator.Power,
-		&validator.MaybeUnbondingHeight,
-		unbondingCompletionTimeReader.ScannableArg(),
 		&validator.Moniker,
 		&validator.Identity,
 		&validator.Website,
@@ -629,13 +736,6 @@ func (validatorsView *Validators) FindBy(identity ValidatorIdentity) (*Validator
 			return nil, rdb.ErrNoRows
 		}
 		return nil, fmt.Errorf("error scanning validator row: %v: %w", err, rdb.ErrQuery)
-	}
-	unbondingCompletionTime, err := unbondingCompletionTimeReader.Parse()
-	if err != nil {
-		return nil, fmt.Errorf("error parsing validator time: %v: %w", err, rdb.ErrQuery)
-	}
-	if unbondingCompletionTime != nil {
-		validator.MaybeUnbondingCompletionTime = unbondingCompletionTime
 	}
 
 	return &validator, nil
@@ -679,27 +779,25 @@ type ValidatorIdentity struct {
 }
 
 type ValidatorRow struct {
-	MaybeId                      *int64           `json:"-"`
-	OperatorAddress              string           `json:"operatorAddress"`
-	ConsensusNodeAddress         string           `json:"consensusNodeAddress"`
-	InitialDelegatorAddress      string           `json:"initialDelegatorAddress"`
-	TendermintPubkey             string           `json:"tendermintPubkey"`
-	TendermintAddress            string           `json:"tendermintAddress"`
-	Status                       string           `json:"status"`
-	Jailed                       bool             `json:"jailed"`
-	JoinedAtBlockHeight          int64            `json:"joinedAtBlockHeight"`
-	Power                        string           `json:"power"`
-	MaybeUnbondingHeight         *int64           `json:"unbondingHeight"`
-	MaybeUnbondingCompletionTime *utctime.UTCTime `json:"unbondingCompletionTime"`
-	Moniker                      string           `json:"moniker"`
-	Identity                     string           `json:"identity"`
-	Website                      string           `json:"website"`
-	SecurityContact              string           `json:"securityContact"`
-	Details                      string           `json:"details"`
-	CommissionRate               string           `json:"commissionRate"`
-	CommissionMaxRate            string           `json:"commissionMaxRate"`
-	CommissionMaxChangeRate      string           `json:"commissionMaxChangeRate"`
-	MinSelfDelegation            string           `json:"minSelfDelegation"`
+	MaybeId                 *int64 `json:"-"`
+	OperatorAddress         string `json:"operatorAddress"`
+	ConsensusNodeAddress    string `json:"consensusNodeAddress"`
+	InitialDelegatorAddress string `json:"initialDelegatorAddress"`
+	TendermintPubkey        string `json:"tendermintPubkey"`
+	TendermintAddress       string `json:"tendermintAddress"`
+	Status                  string `json:"status"`
+	Jailed                  bool   `json:"jailed"`
+	JoinedAtBlockHeight     int64  `json:"joinedAtBlockHeight"`
+	Power                   string `json:"power"`
+	Moniker                 string `json:"moniker"`
+	Identity                string `json:"identity"`
+	Website                 string `json:"website"`
+	SecurityContact         string `json:"securityContact"`
+	Details                 string `json:"details"`
+	CommissionRate          string `json:"commissionRate"`
+	CommissionMaxRate       string `json:"commissionMaxRate"`
+	CommissionMaxChangeRate string `json:"commissionMaxChangeRate"`
+	MinSelfDelegation       string `json:"minSelfDelegation"`
 }
 
 type ListValidatorRow struct {
