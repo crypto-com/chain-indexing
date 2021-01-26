@@ -4,6 +4,8 @@ import (
 	"errors"
 	"strconv"
 
+	validator_view "github.com/crypto-com/chain-indexing/projection/validator/view"
+
 	"github.com/valyala/fasthttp"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
@@ -18,9 +20,10 @@ import (
 type Blocks struct {
 	logger applogger.Logger
 
-	blocksView       *block_view.Blocks
-	transactionsView *transaction_view.BlockTransactions
-	blockEventsView  *blockevent_view.BlockEvents
+	blocksView                    *block_view.Blocks
+	transactionsView              *transaction_view.BlockTransactions
+	blockEventsView               *blockevent_view.BlockEvents
+	validatorBlockCommitmentsView *validator_view.ValidatorBlockCommitments
 }
 
 func NewBlocks(logger applogger.Logger, rdbHandle *rdb.Handle) *Blocks {
@@ -32,6 +35,7 @@ func NewBlocks(logger applogger.Logger, rdbHandle *rdb.Handle) *Blocks {
 		block_view.NewBlocks(rdbHandle),
 		transaction_view.NewTransactions(rdbHandle),
 		blockevent_view.NewBlockEvents(rdbHandle),
+		validator_view.NewValidatorBlockCommitments(rdbHandle),
 	}
 }
 
@@ -152,6 +156,33 @@ func (handler *Blocks) ListEventsByHeight(ctx *fasthttp.RequestCtx) {
 	}, pagination)
 	if err != nil {
 		handler.logger.Errorf("error listing events: %v", err)
+		httpapi.InternalServerError(ctx)
+		return
+	}
+
+	httpapi.SuccessWithPagination(ctx, blocks, paginationResult)
+}
+
+func (handler *Blocks) ListCommitmentsByHeight(ctx *fasthttp.RequestCtx) {
+	pagination, err := httpapi.ParsePagination(ctx)
+	if err != nil {
+		httpapi.BadRequest(ctx, err)
+		return
+	}
+
+	blockHeightParam := ctx.UserValue("height")
+	blockHeight, err := strconv.ParseInt(blockHeightParam.(string), 10, 64)
+	if err != nil {
+		httpapi.BadRequest(ctx, errors.New("invalid block height"))
+		return
+	}
+
+	blocks, paginationResult, err := handler.validatorBlockCommitmentsView.List(
+		validator_view.ValidatorBlockCommitmentsListFilter{
+			MaybeBlockHeight: &blockHeight,
+		}, pagination)
+	if err != nil {
+		handler.logger.Errorf("error listing block commitments: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
 	}

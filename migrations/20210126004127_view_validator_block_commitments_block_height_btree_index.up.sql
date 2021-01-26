@@ -1,0 +1,1 @@
+CREATE INDEX view_validator_block_commitments_block_height_btree_index ON view_validator_block_commitments USING btree(block_height);

@@ -42,10 +42,12 @@ func (view *Total) Set(identity string, total int64) error {
 		return fmt.Errorf("error building total insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	_, err = view.rdbHandle.Exec(sql, sqlArgs...)
-
+	result, err := view.rdbHandle.Exec(sql, sqlArgs...)
 	if err != nil {
 		return fmt.Errorf("error inserting total: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() != 1 {
+		return fmt.Errorf("error updating total: no row updated: %w", rdb.ErrWrite)
 	}
 
 	return nil
@@ -63,10 +65,49 @@ func (view *Total) Increment(identity string, total int64) error {
 		return fmt.Errorf("error building total insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	_, err = view.rdbHandle.Exec(sql, sqlArgs...)
-
+	result, err := view.rdbHandle.Exec(sql, sqlArgs...)
 	if err != nil {
 		return fmt.Errorf("error inserting total: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() != 1 {
+		return fmt.Errorf("error inserting total: no row inserted: %w", rdb.ErrWrite)
+	}
+
+	return nil
+}
+
+func (view *Total) IncrementAll(identities []string, total int64) error {
+	pendingRowCount := 0
+	var stmtBuilder sq.InsertBuilder
+
+	totalIdentityCount := len(identities)
+	for i, identity := range identities {
+		if pendingRowCount == 0 {
+			// Postgres UPSERT statement
+			stmtBuilder = view.rdbHandle.StmtBuilder.
+				Insert(view.tableName+" AS totals").
+				Columns("identity", "total").
+				Suffix("ON CONFLICT (identity) DO UPDATE SET total = totals.total + EXCLUDED.total")
+		}
+
+		stmtBuilder = stmtBuilder.Values(identity, total)
+		pendingRowCount += 1
+
+		if pendingRowCount == 500 || i+1 == totalIdentityCount {
+			sql, sqlArgs, err := stmtBuilder.ToSql()
+			if err != nil {
+				return fmt.Errorf("error building total insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+			}
+
+			result, err := view.rdbHandle.Exec(sql, sqlArgs...)
+			if err != nil {
+				return fmt.Errorf("error inserting total: %v: %w", err, rdb.ErrWrite)
+			}
+			if result.RowsAffected() != int64(totalIdentityCount) {
+				return fmt.Errorf("error inserting total: no row inserted: %w", rdb.ErrWrite)
+			}
+			pendingRowCount = 0
+		}
 	}
 
 	return nil
