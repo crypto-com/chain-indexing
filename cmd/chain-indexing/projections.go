@@ -15,7 +15,7 @@ func initProjections(
 	rdbConn rdb.Conn,
 	config *Config,
 ) []projection_entity.Projection {
-	var cosmosAppClient = cosmosapp_infrastructure.NewHTTPClient(config.CosmosApp.HTTPRPCUL)
+	var cosmosAppClient = cosmosapp_infrastructure.NewHTTPClient(config.CosmosApp.HTTPRPCUL, config.Blockchain.BondingDenom)
 
 	projections := make([]projection_entity.Projection, 0, len(config.Projection.Enables))
 	initParams := projection.InitParams{

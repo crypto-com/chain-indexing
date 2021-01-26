@@ -1,23 +1,20 @@
 package validator_test
 
 import (
-	. "github.com/crypto-com/chain-indexing/appinterface/rdb/test"
-	. "github.com/crypto-com/chain-indexing/entity/event/test"
-	. "github.com/crypto-com/chain-indexing/internal/logger/test"
-	"github.com/crypto-com/chain-indexing/internal/utctime"
-	. "github.com/crypto-com/chain-indexing/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	. "github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	. "github.com/crypto-com/chain-indexing/internal/logger/test"
 	"github.com/crypto-com/chain-indexing/internal/primptr"
-	"github.com/crypto-com/chain-indexing/projection/block"
-	block_view "github.com/crypto-com/chain-indexing/projection/block/view"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
 	"github.com/crypto-com/chain-indexing/projection/validator"
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 	validator_view "github.com/crypto-com/chain-indexing/projection/validator/view"
+	. "github.com/crypto-com/chain-indexing/test"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -43,9 +40,31 @@ var _ = Describe("Validator Events", func() {
 			_ = pgMigrate.Reset()
 		})
 
-		It("should match the last projection handled block height with the fired event blockheight", func() {
-
+		It("should match the last projection handled block height with the fired event block height", func() {
 			anyHeight := int64(1)
+
+			description := model.MsgValidatorDescription{
+				Moniker:         "mymonicker",
+				Identity:        "myidentity",
+				Website:         "mywebsite",
+				SecurityContact: "mysecuritycontact",
+				Details:         "mydetails",
+			}
+			commission := model.MsgValidatorCommission{
+				Rate:          "0.100000000000000000",
+				MaxRate:       "0.200000000000000000",
+				MaxChangeRate: "0.010000000000000000",
+			}
+
+			createValidatorParams := usecase_model.MsgCreateValidatorParams{
+				Description:       description,
+				Commission:        commission,
+				MinSelfDelegation: "1",
+				DelegatorAddress:  "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+				ValidatorAddress:  "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+				TendermintPubkey:  "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
+				Amount:            coin.MustParseCoinNormalized("10basetcro"),
+			}
 			event := event_usecase.NewBlockCreated(&usecase_model.Block{
 				Height:          anyHeight,
 				Hash:            "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
@@ -58,22 +77,27 @@ var _ = Describe("Validator Events", func() {
 				Signatures: []usecase_model.BlockSignature{
 					{
 						BlockIdFlag:      2,
-						ValidatorAddress: "F9E6FFB9B536956201AA138224FD888D03775AB4",
+						ValidatorAddress: "6B26ECB33BC875DFD4457867C183F6370D192B69",
 						Timestamp:        utctime.FromUnixNano(int64(1000000)),
 						Signature:        "ZW2pUcKFN/oPQCmdCouchXmgpPyd/Ddo45dhHEMwsBeHTBuSJh15zUMmfl5FZsPHeKC8citFvOm/52bgl5XHCw==",
-					},
-					{
-						BlockIdFlag:      2,
-						ValidatorAddress: "031E3891DDB94FC7C7C132B7CD9736738110C889",
-						Timestamp:        utctime.FromUnixNano(int64(2000000)),
-						Signature:        "uhWDC9NDT86FbRVGbOM2lGY8sVkWU51JJ9F8gPwTfK0ebcui1R34oM+jhPKdStn/4sq4qDgzbsN66cQ5kl8NAw==",
 					},
 				},
 			})
 
+			eventNewValidatorCreated := event_usecase.NewMsgCreateValidator(event_usecase.MsgCommonParams{
+				BlockHeight: anyHeight,
+				TxHash:      "E69985AC8168383A81B7952DBE03EB9B3400FF80AEC0F362369DD7F38B1C2FE9",
+				TxSuccess:   true,
+				MsgIndex:    0,
+			}, createValidatorParams)
 			fakeLogger := NewFakeLogger()
+
 			projection := validator.NewValidator(fakeLogger, pgConn, prefixConsensusAddress)
-			err := projection.HandleEvents(anyHeight, []event_entity.Event{event})
+
+			err := projection.HandleEvents(anyHeight, []event_entity.Event{
+				event,
+				eventNewValidatorCreated,
+			})
 			Expect(err).To(BeNil())
 
 			Expect(projection.GetLastHandledEventHeight()).To(Equal(primptr.Int64(anyHeight)))
@@ -81,7 +105,6 @@ var _ = Describe("Validator Events", func() {
 
 		It("should increment the validator view count after handling MsgCreateValidator event", func() {
 			validatorView := validator_view.NewValidators(pgConn.ToHandle())
-			blocksView := block_view.NewBlocks(pgConn.ToHandle())
 
 			anyHeight := int64(1)
 
@@ -119,15 +142,9 @@ var _ = Describe("Validator Events", func() {
 				Signatures: []usecase_model.BlockSignature{
 					{
 						BlockIdFlag:      2,
-						ValidatorAddress: "F9E6FFB9B536956201AA138224FD888D03775AB4",
+						ValidatorAddress: "6B26ECB33BC875DFD4457867C183F6370D192B69",
 						Timestamp:        utctime.FromUnixNano(int64(1000000)),
 						Signature:        "ZW2pUcKFN/oPQCmdCouchXmgpPyd/Ddo45dhHEMwsBeHTBuSJh15zUMmfl5FZsPHeKC8citFvOm/52bgl5XHCw==",
-					},
-					{
-						BlockIdFlag:      2,
-						ValidatorAddress: "031E3891DDB94FC7C7C132B7CD9736738110C889",
-						Timestamp:        utctime.FromUnixNano(int64(2000000)),
-						Signature:        "uhWDC9NDT86FbRVGbOM2lGY8sVkWU51JJ9F8gPwTfK0ebcui1R34oM+jhPKdStn/4sq4qDgzbsN66cQ5kl8NAw==",
 					},
 				},
 			})
@@ -135,7 +152,7 @@ var _ = Describe("Validator Events", func() {
 			eventNewValidatorCreated := event_usecase.NewMsgCreateValidator(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
 				TxHash:      "E69985AC8168383A81B7952DBE03EB9B3400FF80AEC0F362369DD7F38B1C2FE9",
-				TxSuccess:   false,
+				TxSuccess:   true,
 				MsgIndex:    0,
 			}, createValidatorParams)
 			countFilter := validator_view.CountFilter{
@@ -148,8 +165,7 @@ var _ = Describe("Validator Events", func() {
 			}
 			fakeLogger := NewFakeLogger()
 
-			projection := block.NewBlock(fakeLogger, pgConn)
-			projectionValidator := validator.NewValidator(fakeLogger, pgConn, prefixConsensusAddress)
+			projection := validator.NewValidator(fakeLogger, pgConn, prefixConsensusAddress)
 
 			validatorViewCountBeforeHandling, err := validatorView.Count(countFilter)
 
@@ -158,18 +174,15 @@ var _ = Describe("Validator Events", func() {
 			Expect(err).To(BeNil())
 
 			//handle event below
-			errHandleEvents := projection.HandleEvents(anyHeight, []event_entity.Event{event})
-			errHandleBlockEvent := projectionValidator.HandleEvents(anyHeight, []event_entity.Event{eventNewValidatorCreated})
-			Expect(errHandleEvents).To(BeNil())
-			Expect(errHandleBlockEvent).To(BeNil())
+			err = projection.HandleEvents(anyHeight, []event_entity.Event{event, eventNewValidatorCreated})
+			Expect(err).To(BeNil())
 
 			//check the list after event handling
 			validatorViewCountAfterHandling, errAfterHandling := validatorView.Count(countFilter)
 
 			//check before handling event
 			Expect(errAfterHandling).To(BeNil())
-			Expect(blocksView.Count()).To(Equal(int64(1)))
-			Expect(projectionValidator.GetLastHandledEventHeight()).To(Equal(primptr.Int64(anyHeight)))
+			Expect(projection.GetLastHandledEventHeight()).To(Equal(primptr.Int64(anyHeight)))
 			Expect(validatorViewCountAfterHandling).To(Equal(int64(1)))
 		})
 
@@ -186,21 +199,5 @@ var _ = Describe("Validator Events", func() {
 
 			Expect(projection.GetLastHandledEventHeight()).To(Equal(primptr.Int64(anyHeight)))
 		})
-
-		It("should not persist projection nor last handled event height on handling error", func() {
-			blocksView := block_view.NewBlocks(pgConn.ToHandle())
-
-			anyHeight := int64(1)
-			event := NewFakeEvent()
-
-			fakeLogger := NewFakeLogger()
-			projection := block.NewBlock(fakeLogger, pgConn)
-			Expect(blocksView.Count()).To(Equal(int64(0)))
-
-			err := projection.HandleEvents(anyHeight, []event_entity.Event{event})
-			Expect(err).NotTo(BeNil())
-			Expect(blocksView.Count()).To(Equal(int64(0)))
-		})
 	})
-
 })

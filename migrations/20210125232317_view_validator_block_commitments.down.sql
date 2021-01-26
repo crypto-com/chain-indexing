@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS view_validator_block_commitments;
