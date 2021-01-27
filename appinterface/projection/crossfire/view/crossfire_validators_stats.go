@@ -69,7 +69,7 @@ func (view *CrossfireValidatorsStats) FindAllLike(key string) ([]CrossfireValida
 	).From(
 		CROSSFIRE_VALIDATOR_STATS_VIEW_TABLENAME,
 	).Where(
-		"key LIKE ?", fmt.Sprint(key, "%"),
+		"key LIKE ?", fmt.Sprint(key),
 	).OrderBy("value DESC").ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("error preparing key selection SQL: %v", err)
