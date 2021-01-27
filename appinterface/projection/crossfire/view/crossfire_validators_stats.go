@@ -136,6 +136,35 @@ func (view *CrossfireValidatorsStats) IncrementAllByOne(keys []string) error {
 	return nil
 }
 
+func (view *CrossfireValidatorsStats) IncrementAllByCumulativeCount(keyCountMap map[string]int64) error {
+	stmtBuilder := view.rdbHandle.StmtBuilder.Insert(
+		CROSSFIRE_VALIDATOR_STATS_VIEW_TABLENAME,
+	).Columns(
+		"key", "value",
+	)
+
+	for key, value := range keyCountMap {
+		stmtBuilder = stmtBuilder.Values(key, value)
+	}
+
+	sql, sqlArgs, err := stmtBuilder.Suffix(
+		fmt.Sprintf("ON CONFLICT (key) DO UPDATE SET value = %s.value + EXCLUDED.value", CROSSFIRE_VALIDATOR_STATS_VIEW_TABLENAME),
+	).ToSql()
+	if err != nil {
+		return fmt.Errorf("error preparing keys selection SQL: %v", err)
+	}
+
+	result, err := view.rdbHandle.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error inserting values: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() != int64(len(keyCountMap)) {
+		return fmt.Errorf("error inserting values: mismatch row inserted: %w", rdb.ErrWrite)
+	}
+
+	return nil
+}
+
 type CrossfireValidatorsStatsRow struct {
 	Key   string
 	Value int64
