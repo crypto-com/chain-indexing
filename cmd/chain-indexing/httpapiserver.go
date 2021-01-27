@@ -28,16 +28,20 @@ type HTTPAPIServer struct {
 	corsAllowedMethods []string
 	corsAllowedHeaders []string
 
+	pprof DebugConfig
+
 	participantsURL string
-	pprof           DebugConfig
 }
 
 // NewIndexService creates a new server instance for polling and indexing
 func NewHTTPAPIServer(logger applogger.Logger, rdbConn rdb.Conn, config *Config) *HTTPAPIServer {
 	return &HTTPAPIServer{
-		logger:          logger,
-		rdbConn:         rdbConn,
-		cosmosAppClient: cosmosapp_infrastructure.NewHTTPClient(config.CosmosApp.HTTPRPCUL),
+		logger:  logger,
+		rdbConn: rdbConn,
+		cosmosAppClient: cosmosapp_infrastructure.NewHTTPClient(
+			config.CosmosApp.HTTPRPCUL,
+			config.Blockchain.BondingDenom,
+		),
 
 		validatorAddressPrefix: config.Blockchain.ValidatorAddressPrefix,
 		conNodeAddressPrefix:   config.Blockchain.ConNodeAddressPrefix,
@@ -48,8 +52,9 @@ func NewHTTPAPIServer(logger applogger.Logger, rdbConn rdb.Conn, config *Config)
 		corsAllowedMethods: config.HTTP.CorsAllowedMethods,
 		corsAllowedHeaders: config.HTTP.CorsAllowedHeaders,
 
+		pprof: config.Debug,
+
 		participantsURL: config.Crossfire.ParticipantsListURL,
-		pprof:           config.Debug,
 	}
 }
 
@@ -100,8 +105,8 @@ func (server *HTTPAPIServer) Run() error {
 	)
 	accountTransactionsHandler := handlers.NewAccountTransactions(server.logger, server.rdbConn.ToHandle())
 	accountMessagesHandler := handlers.NewAccountMessages(server.logger, server.rdbConn.ToHandle())
+	accountsHandler := handlers.NewAccounts(server.logger, server.rdbConn.ToHandle(), server.cosmosAppClient)
 	crossfireHandler := handlers.NewCrossfire(server.logger, server.validatorAddressPrefix, server.conNodeAddressPrefix, server.cosmosAppClient, server.rdbConn.ToHandle(), server.participantsURL)
-	accountsHandler := handlers.NewAccounts(server.logger, server.rdbConn.ToHandle())
 
 	routeRegistry := routes.NewRoutesRegistry(
 		searchHandler,

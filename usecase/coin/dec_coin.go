@@ -26,6 +26,18 @@ func NewDecCoin(denom string, amount Int) DecCoin {
 	}
 }
 
+// NewDecCoinFromString creates a new DecCoin instance from a string.
+func NewDecCoinFromString(denom string, amountStr string) (DecCoin, error) {
+	mustValidateDenom(denom)
+
+	amount, err := NewDecFromStr(amountStr)
+	if err != nil {
+		return DecCoin{}, fmt.Errorf("invalid Dec coin amount: %s", amountStr)
+	}
+
+	return NewDecCoinFromDec(denom, amount), nil
+}
+
 // NewDecCoinFromDec creates a new DecCoin instance from a Dec.
 func NewDecCoinFromDec(denom string, amount Dec) DecCoin {
 	mustValidateDenom(denom)

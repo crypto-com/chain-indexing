@@ -118,9 +118,9 @@ func (accountMessagesView *AccountTransactions) List(
 	)
 
 	if order.Id == view.ORDER_DESC {
-		stmtBuilder = stmtBuilder.OrderBy("id DESC")
+		stmtBuilder = stmtBuilder.OrderBy("view_account_transactions.id DESC")
 	} else {
-		stmtBuilder = stmtBuilder.OrderBy("id")
+		stmtBuilder = stmtBuilder.OrderBy("view_account_transactions.id")
 	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
