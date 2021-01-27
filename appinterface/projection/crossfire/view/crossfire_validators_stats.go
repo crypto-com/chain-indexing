@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 )
 
@@ -137,31 +138,44 @@ func (view *CrossfireValidatorsStats) IncrementAllByOne(keys []string) error {
 }
 
 func (view *CrossfireValidatorsStats) IncrementAllByCumulativeCount(keyCountMap map[string]int64) error {
-	stmtBuilder := view.rdbHandle.StmtBuilder.Insert(
-		CROSSFIRE_VALIDATOR_STATS_VIEW_TABLENAME,
-	).Columns(
-		"key", "value",
-	)
+	pendingRowCount := 0
+	var stmtBuilder sq.InsertBuilder
 
+	rowCount := len(keyCountMap)
+	i := 0
 	for key, value := range keyCountMap {
+		if pendingRowCount == 0 {
+
+			stmtBuilder = view.rdbHandle.StmtBuilder.Insert(
+				CROSSFIRE_VALIDATOR_STATS_VIEW_TABLENAME,
+			).Columns(
+				"key", "value",
+			)
+		}
+
 		stmtBuilder = stmtBuilder.Values(key, value)
-	}
+		pendingRowCount += 1
 
-	sql, sqlArgs, err := stmtBuilder.Suffix(
-		fmt.Sprintf("ON CONFLICT (key) DO UPDATE SET value = %s.value + EXCLUDED.value", CROSSFIRE_VALIDATOR_STATS_VIEW_TABLENAME),
-	).ToSql()
-	if err != nil {
-		return fmt.Errorf("error preparing keys selection SQL: %v", err)
-	}
+		// Postgres has a limit of 65536 parameters.
+		if pendingRowCount == 500 || i+1 == rowCount {
+			sql, sqlArgs, err := stmtBuilder.Suffix(
+				fmt.Sprintf("ON CONFLICT (key) DO UPDATE SET value = %s.value + EXCLUDED.value", CROSSFIRE_VALIDATOR_STATS_VIEW_TABLENAME),
+			).ToSql()
+			if err != nil {
+				return fmt.Errorf("error preparing keys selection SQL: %v", err)
+			}
 
-	result, err := view.rdbHandle.Exec(sql, sqlArgs...)
-	if err != nil {
-		return fmt.Errorf("error inserting values: %v: %w", err, rdb.ErrWrite)
+			result, err := view.rdbHandle.Exec(sql, sqlArgs...)
+			if err != nil {
+				return fmt.Errorf("error inserting values: %v: %w", err, rdb.ErrWrite)
+			}
+			if result.RowsAffected() != int64(len(keyCountMap)) {
+				return fmt.Errorf("error inserting values: mismatch row inserted: %w", rdb.ErrWrite)
+			}
+			pendingRowCount = 0
+		}
+		i += 1
 	}
-	if result.RowsAffected() != int64(len(keyCountMap)) {
-		return fmt.Errorf("error inserting values: mismatch row inserted: %w", rdb.ErrWrite)
-	}
-
 	return nil
 }
 
