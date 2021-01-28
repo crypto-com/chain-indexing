@@ -740,7 +740,7 @@ func (projection *Crossfire) computeCommitmentRank(
 	}
 
 	projection.profile("begin filtering participants commitment records")
-	validatorCommits, err := crossfireValidatorStatsView.FindAllLike(crossfireValidatorStatsPrefix)
+	validatorCommits, err := crossfireValidatorStatsView.FindAllLike(crossfireValidatorStatsPrefix + "%")
 	if err != nil {
 		return fmt.Errorf("error getting validators' %s number from stats %v", crossfireValidatorStatsPrefix, err)
 	}
@@ -818,7 +818,7 @@ func (projection *Crossfire) computeTxSentRank(
 
 	projection.profile("begin getting all transaction sent records")
 	// Get All Tx Count Sorted
-	dbTxSendersWithCountList, errDbCount := crossfireValidatorStatsView.FindAllLike(constants.TOTAL_TX_SENT_PREFIX)
+	dbTxSendersWithCountList, errDbCount := crossfireValidatorStatsView.FindAllLike(constants.TOTAL_TX_SENT_PREFIX + "%")
 	if errDbCount != nil {
 		return fmt.Errorf("[Crossfire] error Database Participant With Total Count %w", errDbCount)
 	}
