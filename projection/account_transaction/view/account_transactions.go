@@ -112,7 +112,7 @@ func (accountMessagesView *AccountTransactions) List(
 	).From(
 		"view_account_transactions",
 	).InnerJoin(
-		"view_account_transaction_data ON view_account_transactions.transaction_hash = view_account_transaction_data.hash",
+		"view_account_transaction_data ON view_account_transactions.block_height = view_account_transaction_data.block_height AND view_account_transactions.transaction_hash = view_account_transaction_data.hash",
 	).Where(
 		"view_account_transactions.account = ?", filter.Account,
 	)

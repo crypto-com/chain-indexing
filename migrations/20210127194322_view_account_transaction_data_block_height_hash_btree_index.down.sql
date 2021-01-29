@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS view_account_transaction_data_block_height_hash_btree_index;
