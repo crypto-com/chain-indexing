@@ -109,6 +109,7 @@ func (blocksView *Blocks) List(order BlocksListOrder, pagination *pagination.Pag
 	if err != nil {
 		return nil, nil, fmt.Errorf("error executing blocks select SQL: %v: %w", err, rdb.ErrQuery)
 	}
+	defer rowsResult.Close()
 
 	blocks := make([]Block, 0)
 	for rowsResult.Next() {
@@ -227,6 +228,7 @@ func (blocksView *Blocks) Search(
 	if err != nil {
 		return nil, fmt.Errorf("error executing blocks select SQL: %v: %w", err, rdb.ErrQuery)
 	}
+	defer rowsResult.Close()
 
 	blocks := make([]Block, 0)
 	for rowsResult.Next() {

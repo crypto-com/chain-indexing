@@ -183,6 +183,7 @@ func (manager *SyncManager) Run() error {
 		} else {
 			if err := manager.SyncBlocks(*manager.latestBlockHeight); err != nil {
 				manager.logger.Errorf("error synchronizing blocks to latest height %d: %v", *manager.latestBlockHeight, err)
+				<-time.After(5 * time.Second)
 			}
 		}
 

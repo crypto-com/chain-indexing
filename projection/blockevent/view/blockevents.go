@@ -226,6 +226,7 @@ func (eventsView *BlockEvents) List(
 	if err != nil {
 		return nil, nil, fmt.Errorf("error executing transactions select SQL: %v: %w", err, rdb.ErrQuery)
 	}
+	defer rowsResult.Close()
 
 	blockEvents := make([]BlockEventRow, 0)
 	for rowsResult.Next() {

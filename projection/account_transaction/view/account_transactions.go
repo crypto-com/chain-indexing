@@ -148,6 +148,7 @@ func (accountMessagesView *AccountTransactions) List(
 	if err != nil {
 		return nil, nil, fmt.Errorf("error executing account transactions select SQL: %v: %w", err, rdb.ErrQuery)
 	}
+	defer rowsResult.Close()
 
 	accountMessages := make([]AccountTransactionReadRow, 0)
 	for rowsResult.Next() {

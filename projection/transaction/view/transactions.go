@@ -318,6 +318,7 @@ func (transactionsView *BlockTransactions) List(
 	if err != nil {
 		return nil, nil, fmt.Errorf("error executing transactions select SQL: %v: %w", err, rdb.ErrQuery)
 	}
+	defer rowsResult.Close()
 
 	transactions := make([]TransactionRow, 0)
 	for rowsResult.Next() {
@@ -410,6 +411,7 @@ func (transactionsView *BlockTransactions) Search(keyword string) ([]Transaction
 	if err != nil {
 		return nil, fmt.Errorf("error executing transactions select SQL: %v: %w", err, rdb.ErrQuery)
 	}
+	defer rowsResult.Close()
 
 	transactions := make([]TransactionRow, 0)
 	for rowsResult.Next() {
