@@ -1,0 +1,1 @@
+DROP INDEX view_validator_activities_operator_address_btree_index;

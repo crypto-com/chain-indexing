@@ -75,11 +75,13 @@ func (store *RDbStore) GetAllByHeight(height int64) ([]entity_event.Event, error
 		return nil, fmt.Errorf("error building get all events by height selection SQL: %v", err)
 	}
 
-	var events = make([]entity_event.Event, 0)
 	rows, err := store.rdbHandle.Query(sql, args...)
 	if err != nil {
 		return nil, fmt.Errorf("error executing get all events by height selection SQL: %v", err)
 	}
+	defer rows.Close()
+
+	events := make([]entity_event.Event, 0)
 	for rows.Next() {
 		var (
 			uuid    string

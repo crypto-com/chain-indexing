@@ -153,6 +153,7 @@ func (commitmentsView *ValidatorBlockCommitments) List(
 	if err != nil {
 		return nil, nil, fmt.Errorf("error executing validator block commitments select SQL: %v: %w", err, rdb.ErrQuery)
 	}
+	defer rowsResult.Close()
 
 	validatorBlockCommitments := make([]ListValidatorBlockCommitmentRow, 0)
 	for rowsResult.Next() {

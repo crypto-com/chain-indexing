@@ -280,13 +280,13 @@ func NewPgxLoggerAdapter(l logger.Logger) *PgxLoggerAdapter {
 }
 
 func (logger *PgxLoggerAdapter) Log(ctx context.Context, level pgx.LogLevel, msg string, data map[string]interface{}) {
-	contextedLogger := logger.logger.WithFields(data)
+	contextLogger := logger.logger.WithFields(data)
 
 	switch level {
 	case pgx.LogLevelError:
-		contextedLogger.Error(msg)
+		contextLogger.Error(msg)
 	case pgx.LogLevelWarn:
-		contextedLogger.Info(msg)
+		contextLogger.Info(msg)
 	case pgx.LogLevelInfo:
 		fallthrough
 	case pgx.LogLevelDebug:
@@ -294,6 +294,6 @@ func (logger *PgxLoggerAdapter) Log(ctx context.Context, level pgx.LogLevel, msg
 	case pgx.LogLevelNone:
 		fallthrough
 	default:
-		contextedLogger.Debug(msg)
+		contextLogger.Debug(msg)
 	}
 }
