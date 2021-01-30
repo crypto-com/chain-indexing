@@ -79,6 +79,8 @@ func (view *CrossfireValidatorsStats) FindAllLike(key string) ([]CrossfireValida
 	if err1 != nil {
 		return nil, fmt.Errorf("Error %w", err)
 	}
+	defer valueRows.Close()
+
 	returnResults := []CrossfireValidatorsStatsRow{}
 	for valueRows.Next() {
 
