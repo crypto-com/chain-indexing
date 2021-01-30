@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS view_validator_activities_opaddr_block_height_btree_index;

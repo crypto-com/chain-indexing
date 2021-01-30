@@ -1,0 +1,3 @@
+CREATE INDEX view_validator_activities_opaddr_block_height_btree_index
+ON view_validator_activities
+USING btree (operator_address, block_height);
