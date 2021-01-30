@@ -82,7 +82,6 @@ func (service *IndexService) RunEventStoreMode() error {
 	projectionManager.RunInBackground()
 
 	eventStoreHandler := eventhandler_interface.NewRDbEventStoreHandler(
-
 		service.logger,
 		service.rdbConn,
 		eventRegistry,

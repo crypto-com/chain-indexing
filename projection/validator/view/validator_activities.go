@@ -183,6 +183,7 @@ func (validatorActivitiesView *ValidatorActivities) List(
 	if err != nil {
 		return nil, nil, fmt.Errorf("error executing transactions select SQL: %v: %w", err, rdb.ErrQuery)
 	}
+	defer rowsResult.Close()
 
 	validatorActivities := make([]ValidatorActivityRow, 0)
 	for rowsResult.Next() {

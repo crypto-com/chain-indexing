@@ -151,6 +151,7 @@ func (accountsView *Accounts) List(
 	if err != nil {
 		return nil, nil, fmt.Errorf("error executing accounts select SQL: %v: %w", err, rdb.ErrQuery)
 	}
+	defer rowsResult.Close()
 
 	accounts := make([]AccountRow, 0)
 	for rowsResult.Next() {

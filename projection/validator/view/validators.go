@@ -440,6 +440,7 @@ func (validatorsView *Validators) List(
 	if err != nil {
 		return nil, nil, fmt.Errorf("error preparing cumulative power SQL: %v", err)
 	}
+	defer rowsResult.Close()
 
 	cumulativePower := new(big.Float).SetInt64(int64(0))
 	for rowsResult.Next() {
@@ -632,6 +633,7 @@ func (validatorsView *Validators) Search(keyword string) ([]ValidatorRow, error)
 	if err != nil {
 		return nil, fmt.Errorf("error executing blocks select SQL: %v: %w", err, rdb.ErrQuery)
 	}
+	defer rowsResult.Close()
 
 	validators := make([]ValidatorRow, 0)
 	for rowsResult.Next() {
