@@ -58,7 +58,7 @@ func (accountMessagesView *AccountTransactions) InsertAll(
 			row.BlockHash,
 			blockTime,
 			row.Account,
-			row.TransactionHash,
+			row.Hash,
 			row.Success,
 			json.MustMarshalToString(row.MessageTypes),
 		)
@@ -108,6 +108,7 @@ func (accountMessagesView *AccountTransactions) List(
 		"view_account_transaction_data.gas_used",
 		"view_account_transaction_data.memo",
 		"view_account_transaction_data.timeout_height",
+		"view_account_transactions.message_types",
 		"view_account_transaction_data.messages",
 	).From(
 		"view_account_transactions",
@@ -155,6 +156,7 @@ func (accountMessagesView *AccountTransactions) List(
 		var accountMessage AccountTransactionReadRow
 		var feeJSON *string
 		var messagesJSON *string
+		var messageTypesJSON *string
 		blockTimeReader := accountMessagesView.rdb.NtotReader()
 
 		if err = rowsResult.Scan(
@@ -162,7 +164,7 @@ func (accountMessagesView *AccountTransactions) List(
 			&accountMessage.BlockHeight,
 			&accountMessage.BlockHash,
 			blockTimeReader.ScannableArg(),
-			&accountMessage.TransactionHash,
+			&accountMessage.Hash,
 			&accountMessage.Success,
 
 			&accountMessage.Code,
@@ -174,6 +176,7 @@ func (accountMessagesView *AccountTransactions) List(
 			&accountMessage.GasUsed,
 			&accountMessage.Memo,
 			&accountMessage.TimeoutHeight,
+			&messageTypesJSON,
 			&messagesJSON,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
@@ -194,6 +197,12 @@ func (accountMessagesView *AccountTransactions) List(
 			return nil, nil, fmt.Errorf("error unmarshalling account transaction fee JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 		}
 		accountMessage.Fee = fee
+
+		var messageTypes []string
+		if unmarshalErr := jsoniter.UnmarshalFromString(*messageTypesJSON, &messageTypes); unmarshalErr != nil {
+			return nil, nil, fmt.Errorf("error unmarshalling account transaction message types JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
+		}
+		accountMessage.MessageTypes = messageTypes
 
 		var messages []TransactionRowMessage
 		if unmarshalErr := jsoniter.UnmarshalFromString(*messagesJSON, &messages); unmarshalErr != nil {
@@ -218,13 +227,13 @@ type AccountTransactionRecord struct {
 }
 
 type AccountTransactionBaseRow struct {
-	Account         string          `json:"account,omitempty"`
-	BlockHeight     int64           `json:"blockHeight"`
-	BlockHash       string          `json:"blockHash"`
-	BlockTime       utctime.UTCTime `json:"blockTime"`
-	TransactionHash string          `json:"transactionHash"`
-	MessageTypes    []string        `json:"messageTypes"`
-	Success         bool            `json:"success"`
+	Account      string          `json:"account,omitempty"`
+	BlockHeight  int64           `json:"blockHeight"`
+	BlockHash    string          `json:"blockHash"`
+	BlockTime    utctime.UTCTime `json:"blockTime"`
+	Hash         string          `json:"hash"`
+	MessageTypes []string        `json:"messageTypes"`
+	Success      bool            `json:"success"`
 }
 
 type AccountTransactionReadRow struct {

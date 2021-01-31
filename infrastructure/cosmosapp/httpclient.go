@@ -390,6 +390,33 @@ func (client *HTTPClient) Validator(validatorAddress string) (*cosmosapp_interfa
 	return &validatorResp.Validator, nil
 }
 
+func (client *HTTPClient) Commission(validatorAddress string) (coin.DecCoins, error) {
+	rawRespBody, err := client.request(
+		fmt.Sprintf("%s/%s/commission",
+			client.url("distribution", "validators"), validatorAddress,
+		), "",
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rawRespBody.Close()
+
+	var commissionResp ValidatorCommissionResp
+	if err := jsoniter.NewDecoder(rawRespBody).Decode(&commissionResp); err != nil {
+		return nil, err
+	}
+
+	totalCommission := coin.NewEmptyDecCoins()
+	for _, commission := range commissionResp.Commissions.Commission {
+		commissionCoin, coinErr := coin.NewDecCoinFromString(commission.Denom, commission.Amount)
+		if coinErr != nil {
+			return nil, fmt.Errorf("error parsing Coin from commission: %v", coinErr)
+		}
+		totalCommission = totalCommission.Add(commissionCoin)
+	}
+	return totalCommission, nil
+}
+
 func (client *HTTPClient) Delegation(
 	delegator string, validator string,
 ) (*cosmosapp_interface.DelegationResponse, error) {
