@@ -102,7 +102,12 @@ func (server *HTTPAPIServer) Run() error {
 	)
 	accountTransactionsHandler := handlers.NewAccountTransactions(server.logger, server.rdbConn.ToHandle())
 	accountMessagesHandler := handlers.NewAccountMessages(server.logger, server.rdbConn.ToHandle())
-	accountsHandler := handlers.NewAccounts(server.logger, server.rdbConn.ToHandle(), server.cosmosAppClient)
+	accountsHandler := handlers.NewAccounts(
+		server.logger,
+		server.rdbConn.ToHandle(),
+		server.cosmosAppClient,
+		server.validatorAddressPrefix,
+	)
 
 	routeRegistry := routes.NewRoutesRegistry(
 		searchHandler,
