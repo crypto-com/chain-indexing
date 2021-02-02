@@ -1,6 +1,10 @@
 package cosmosapp
 
-import "github.com/crypto-com/chain-indexing/usecase/coin"
+import (
+	"errors"
+
+	"github.com/crypto-com/chain-indexing/usecase/coin"
+)
 
 type Client interface {
 	Account(accountAddress string) (*Account, error)
@@ -14,3 +18,5 @@ type Client interface {
 	Validator(validatorAddress string) (*Validator, error)
 	Delegation(delegator string, validator string) (*DelegationResponse, error)
 }
+
+var ErrAccountNotFound = errors.New("account not found")
