@@ -8,12 +8,6 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 )
 
-type MsgSubmitProposalParams struct {
-	Content         string    `json:"content"`
-	ProposerAddress string    `json:"proposerAddress"`
-	InitialDeposit  coin.Coin `json:"initialDeposit"`
-}
-
 type MsgSubmitProposalContent struct {
 	Type string `json:"@type"`
 }

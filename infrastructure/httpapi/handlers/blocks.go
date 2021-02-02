@@ -171,6 +171,10 @@ func (handler *Blocks) ListCommitmentsByHeight(ctx *fasthttp.RequestCtx) {
 	}
 
 	blockHeightParam := ctx.UserValue("height")
+	if blockHeightParam == nil {
+		httpapi.BadRequest(ctx, errors.New("missing block height"))
+		return
+	}
 	blockHeight, err := strconv.ParseInt(blockHeightParam.(string), 10, 64)
 	if err != nil {
 		httpapi.BadRequest(ctx, errors.New("invalid block height"))
@@ -180,6 +184,33 @@ func (handler *Blocks) ListCommitmentsByHeight(ctx *fasthttp.RequestCtx) {
 	blocks, paginationResult, err := handler.validatorBlockCommitmentsView.List(
 		validator_view.ValidatorBlockCommitmentsListFilter{
 			MaybeBlockHeight: &blockHeight,
+		}, pagination)
+	if err != nil {
+		handler.logger.Errorf("error listing block commitments: %v", err)
+		httpapi.InternalServerError(ctx)
+		return
+	}
+
+	httpapi.SuccessWithPagination(ctx, blocks, paginationResult)
+}
+
+func (handler *Blocks) ListCommitmentsByConsensusNodeAddress(ctx *fasthttp.RequestCtx) {
+	pagination, err := httpapi.ParsePagination(ctx)
+	if err != nil {
+		httpapi.BadRequest(ctx, err)
+		return
+	}
+
+	addressParam := ctx.UserValue("address")
+	if addressParam == nil {
+		httpapi.BadRequest(ctx, errors.New("missing consensus node address"))
+		return
+	}
+	address := addressParam.(string)
+
+	blocks, paginationResult, err := handler.validatorBlockCommitmentsView.List(
+		validator_view.ValidatorBlockCommitmentsListFilter{
+			MaybeConsensusNodeAddress: &address,
 		}, pagination)
 	if err != nil {
 		handler.logger.Errorf("error listing block commitments: %v", err)
