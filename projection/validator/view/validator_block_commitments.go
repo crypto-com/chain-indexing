@@ -37,6 +37,7 @@ func (commitmentsView *ValidatorBlockCommitments) InsertAll(commitments []Valida
 			).Columns(
 				"consensus_node_address",
 				"block_height",
+				"is_proposer",
 				"signature",
 				"timestamp",
 			)
@@ -45,6 +46,7 @@ func (commitmentsView *ValidatorBlockCommitments) InsertAll(commitments []Valida
 		stmtBuilder = stmtBuilder.Values(
 			commitment.ConsensusNodeAddress,
 			commitment.BlockHeight,
+			commitment.IsProposer,
 			commitment.Signature,
 			commitmentsView.rdb.Tton(&commitment.Timestamp),
 		)
@@ -77,11 +79,13 @@ func (commitmentsView *ValidatorBlockCommitments) Insert(commitment ValidatorBlo
 	).Columns(
 		"consensus_node_address",
 		"block_height",
+		"is_proposer",
 		"signature",
 		"timestamp",
 	).Values(
 		commitment.ConsensusNodeAddress,
 		commitment.BlockHeight,
+		commitment.IsProposer,
 		commitment.Signature,
 		commitmentsView.rdb.Tton(&commitment.Timestamp),
 	).ToSql()
@@ -112,6 +116,7 @@ func (commitmentsView *ValidatorBlockCommitments) List(
 	stmtBuilder := commitmentsView.rdb.StmtBuilder.Select(
 		"view_validator_block_commitments.consensus_node_address",
 		"view_validator_block_commitments.block_height",
+		"view_validator_block_commitments.is_proposer",
 		"view_validator_block_commitments.signature",
 		"view_validator_block_commitments.timestamp",
 		"view_validators.moniker",
@@ -125,6 +130,9 @@ func (commitmentsView *ValidatorBlockCommitments) List(
 
 	if filter.MaybeBlockHeight != nil {
 		stmtBuilder = stmtBuilder.Where("block_height = ?", *filter.MaybeBlockHeight)
+	}
+	if filter.MaybeConsensusNodeAddress != nil {
+		stmtBuilder = stmtBuilder.Where("view_validator_block_commitments.consensus_node_address = ?", *filter.MaybeConsensusNodeAddress)
 	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
@@ -163,6 +171,7 @@ func (commitmentsView *ValidatorBlockCommitments) List(
 		if scanErr := rowsResult.Scan(
 			&validatorBlockCommitment.ConsensusNodeAddress,
 			&validatorBlockCommitment.BlockHeight,
+			&validatorBlockCommitment.IsProposer,
 			&validatorBlockCommitment.Signature,
 			timestampParser.ScannableArg(),
 			&validatorBlockCommitment.Moniker,
@@ -191,13 +200,16 @@ func (commitmentsView *ValidatorBlockCommitments) List(
 }
 
 type ValidatorBlockCommitmentsListFilter struct {
-	MaybeBlockHeight *int64
+	MaybeBlockHeight            *int64
+	MaybeGreaterThanBlockHeight *int64 // TODO
+	MaybeConsensusNodeAddress   *string
 }
 
 type ValidatorBlockCommitmentRow struct {
 	MaybeId              *int64          `json:"-"`
 	ConsensusNodeAddress string          `json:"consensusNodeAddress"`
 	BlockHeight          int64           `json:"blockHeight"`
+	IsProposer           bool            `json:"isProposer"`
 	Signature            string          `json:"signature"`
 	Timestamp            utctime.UTCTime `json:"timestamp"`
 }

@@ -1,0 +1,1 @@
+ALTER TABLE view_validator_block_commitments DROP COLUMN is_proposer;

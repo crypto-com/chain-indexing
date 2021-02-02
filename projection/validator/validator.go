@@ -87,10 +87,12 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 
 	var blockTime utctime.UTCTime
 	var blockHash string
+	var blockProposer string
 	for _, event := range events {
 		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
 			blockTime = blockCreatedEvent.Block.Time
 			blockHash = blockCreatedEvent.Block.Hash
+			blockProposer = blockCreatedEvent.Block.ProposerAddress
 		}
 	}
 
@@ -132,6 +134,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 				commitmentRows = append(commitmentRows, view.ValidatorBlockCommitmentRow{
 					ConsensusNodeAddress: signedValidator.ConsensusNodeAddress,
 					BlockHeight:          height,
+					IsProposer:           blockProposer == signature.ValidatorAddress,
 					Signature:            signature.Signature,
 					Timestamp:            signature.Timestamp,
 				})
