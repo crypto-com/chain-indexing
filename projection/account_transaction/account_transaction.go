@@ -115,13 +115,13 @@ func (projection *AccountTransaction) HandleEvents(height int64, events []event_
 
 			transactionInfos[transactionCreatedEvent.TxHash] = NewTransactionInfo(
 				view.AccountTransactionBaseRow{
-					Account:         "", // placeholder
-					BlockHeight:     height,
-					BlockHash:       "",                // placeholder
-					BlockTime:       utctime.UTCTime{}, // placeholder
-					TransactionHash: transactionCreatedEvent.TxHash,
-					MessageTypes:    []string{},
-					Success:         true,
+					Account:      "", // placeholder
+					BlockHeight:  height,
+					BlockHash:    "",                // placeholder
+					BlockTime:    utctime.UTCTime{}, // placeholder
+					Hash:         transactionCreatedEvent.TxHash,
+					MessageTypes: []string{},
+					Success:      true,
 				},
 			)
 			senders := projection.ParseSenderAddresses(transactionCreatedEvent.Senders)
@@ -150,13 +150,13 @@ func (projection *AccountTransaction) HandleEvents(height int64, events []event_
 
 			transactionInfos[transactionFailedEvent.TxHash] = NewTransactionInfo(
 				view.AccountTransactionBaseRow{
-					Account:         "", // placeholder
-					BlockHeight:     height,
-					BlockHash:       "",                // placeholder
-					BlockTime:       utctime.UTCTime{}, // placeholder
-					TransactionHash: transactionFailedEvent.TxHash,
-					MessageTypes:    []string{},
-					Success:         false,
+					Account:      "", // placeholder
+					BlockHeight:  height,
+					BlockHash:    "",                // placeholder
+					BlockTime:    utctime.UTCTime{}, // placeholder
+					Hash:         transactionFailedEvent.TxHash,
+					MessageTypes: []string{},
+					Success:      false,
 				},
 			)
 			senders := projection.ParseSenderAddresses(transactionFailedEvent.Senders)

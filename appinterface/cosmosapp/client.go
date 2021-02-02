@@ -10,6 +10,7 @@ type Client interface {
 	RedelegatingBalance(accountAddress string) (coin.Coins, error)
 	UnbondingBalance(accountAddress string) (coin.Coins, error)
 	TotalRewards(accountAddress string) (coin.DecCoins, error)
+	Commission(validatorAddress string) (coin.DecCoins, error)
 	Validator(validatorAddress string) (*Validator, error)
 	Delegation(delegator string, validator string) (*DelegationResponse, error)
 }
