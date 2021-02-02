@@ -221,7 +221,7 @@ func (client *HTTPClient) BalanceByDenom(accountAddress string, denom string) (*
 
 func (client *HTTPClient) BondedBalance(accountAddress string) (coin.Coins, error) {
 	resp := &DelegationResp{
-		Pagination: Pagination{
+		MaybePagination: &Pagination{
 			MaybeNextKey: nil,
 			Total:        "",
 		},
@@ -229,20 +229,26 @@ func (client *HTTPClient) BondedBalance(accountAddress string) (coin.Coins, erro
 	balance := coin.NewEmptyCoins()
 	for {
 		url := fmt.Sprintf("%s/%s", client.url("staking", "delegations"), accountAddress)
-		if resp.Pagination.MaybeNextKey != nil {
-			url = fmt.Sprintf("%s?pagination.key=%s", url, *resp.Pagination.MaybeNextKey)
+		if resp.MaybePagination.MaybeNextKey != nil {
+			url = fmt.Sprintf("%s?pagination.key=%s", url, *resp.MaybePagination.MaybeNextKey)
 		}
 
-		rawRespBody, err := client.request(url)
+		rawRespBody, statusCode, err := client.rawRequest(url)
 		if err != nil {
 			return nil, err
 		}
 		defer rawRespBody.Close()
 
-		if err := jsoniter.NewDecoder(rawRespBody).Decode(&resp); err != nil {
-			return nil, err
+		if decodeErr := jsoniter.NewDecoder(rawRespBody).Decode(&resp); decodeErr != nil {
+			return nil, decodeErr
 		}
-		for _, delegation := range resp.DelegationResponses {
+		if resp.MaybeCode != nil && *resp.MaybeCode == 2 {
+			return nil, cosmosapp_interface.ErrAccountNotFound
+		}
+		if statusCode != 200 {
+			return nil, fmt.Errorf("error requesting Cosmos %s endpoint: %v", url, err)
+		}
+		for _, delegation := range resp.MaybeDelegationResponses {
 			delegatedCoin, coinErr := coin.NewCoinFromString(delegation.Balance.Denom, delegation.Balance.Amount)
 			if coinErr != nil {
 				return nil, fmt.Errorf("error parsing Coin from delegation balance: %v", coinErr)
@@ -250,7 +256,7 @@ func (client *HTTPClient) BondedBalance(accountAddress string) (coin.Coins, erro
 			balance = balance.Add(delegatedCoin)
 		}
 
-		if resp.Pagination.MaybeNextKey == nil {
+		if resp.MaybePagination.MaybeNextKey == nil {
 			break
 		}
 	}
@@ -421,33 +427,40 @@ func (client *HTTPClient) Delegation(
 	delegator string, validator string,
 ) (*cosmosapp_interface.DelegationResponse, error) {
 	resp := &DelegationResp{
-		Pagination: Pagination{
+		MaybePagination: &Pagination{
 			MaybeNextKey: nil,
 			Total:        "",
 		},
 	}
 	for {
 		url := fmt.Sprintf("%s/%s", client.url("staking", "delegations"), delegator)
-		if resp.Pagination.MaybeNextKey != nil {
-			url = fmt.Sprintf("%s?pagination.key=%s", url, *resp.Pagination.MaybeNextKey)
+		if resp.MaybePagination.MaybeNextKey != nil {
+			url = fmt.Sprintf("%s?pagination.key=%s", url, *resp.MaybePagination.MaybeNextKey)
 		}
 
-		rawRespBody, err := client.request(url)
+		rawRespBody, statusCode, err := client.rawRequest(url)
 		if err != nil {
 			return nil, err
 		}
 		defer rawRespBody.Close()
 
-		if err := jsoniter.NewDecoder(rawRespBody).Decode(&resp); err != nil {
-			return nil, err
+		if decodeErr := jsoniter.NewDecoder(rawRespBody).Decode(&resp); decodeErr != nil {
+			return nil, decodeErr
 		}
-		for _, delegation := range resp.DelegationResponses {
+		if resp.MaybeCode != nil && *resp.MaybeCode == 2 {
+			return nil, cosmosapp_interface.ErrAccountNotFound
+		}
+		if statusCode != 200 {
+			return nil, fmt.Errorf("error requesting Cosmos %s endpoint: %v", url, err)
+		}
+
+		for _, delegation := range resp.MaybeDelegationResponses {
 			if delegation.Delegation.DelegatorAddress == delegator && delegation.Delegation.ValidatorAddress == validator {
 				return &delegation, nil
 			}
 		}
 
-		if resp.Pagination.MaybeNextKey == nil {
+		if resp.MaybePagination.MaybeNextKey == nil {
 			break
 		}
 	}
@@ -484,6 +497,29 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 	}
 
 	return rawResp.Body, nil
+}
+
+// rawRequest construct tendermint url and issues an HTTP request
+// returns the http Body with any status code
+func (client *HTTPClient) rawRequest(method string, queryString ...string) (io.ReadCloser, int, error) {
+	var err error
+
+	url := client.rpcUrl + "/" + method
+	if len(queryString) > 0 {
+		url += "?" + queryString[0]
+	}
+
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
+	if err != nil {
+		return nil, 0, fmt.Errorf("error creating HTTP request with context: %v", err)
+	}
+	// nolint:bodyclose
+	rawResp, err := client.httpClient.Do(req)
+	if err != nil {
+		return nil, 0, fmt.Errorf("error requesting Cosmos %s endpoint: %v", url, err)
+	}
+
+	return rawResp.Body, rawResp.StatusCode, nil
 }
 
 type Pagination struct {
