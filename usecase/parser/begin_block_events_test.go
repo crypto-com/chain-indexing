@@ -91,33 +91,20 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 				blockResults.BeginBlockEvents,
 			)
 			Expect(err).To(BeNil())
-			expectedBlockHeight := int64(28)
+			expectedBlockHeight := int64(156320)
 			Expect(cmds).To(Equal([]command.Command{
 				command_usecase.NewSlashValidator(
 					expectedBlockHeight,
 					model.SlashValidatorParams{
-						ConsensusNodeAddress: "crocnclcons1548f5hydddg0ea4sdgxse7t7j4jn84zp6y954e",
-						SlashedPower:         "312",
-						Reason:               "missing_signature",
+						ConsensusNodeAddress: "crocnclcons16sa9cfnevll0recwa5h7semqfptzdqur7vqrl4",
+						SlashedPower:         "16543780",
+						Reason:               "double_sign",
 					},
 				),
 				command_usecase.NewJailValidator(
 					expectedBlockHeight,
-					"crocnclcons1548f5hydddg0ea4sdgxse7t7j4jn84zp6y954e",
-					"missing_signature",
-				),
-				command_usecase.NewSlashValidator(
-					expectedBlockHeight,
-					model.SlashValidatorParams{
-						ConsensusNodeAddress: "crocnclcons1nftg2n9gzjr2l7lemcshk0v8wdmuuzq8nulnvs",
-						SlashedPower:         "212",
-						Reason:               "missing_signature",
-					},
-				),
-				command_usecase.NewJailValidator(
-					expectedBlockHeight,
-					"crocnclcons1nftg2n9gzjr2l7lemcshk0v8wdmuuzq8nulnvs",
-					"missing_signature",
+					"crocnclcons16sa9cfnevll0recwa5h7semqfptzdqur7vqrl4",
+					"same_reason_as_slashed",
 				),
 			}))
 		})
