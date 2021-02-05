@@ -4,25 +4,25 @@ var BEGIN_BLOCK_SLASH_EVENT_BLOCK_RESULTS_RESP = `{
   "jsonrpc": "2.0",
   "id": -1,
   "result": {
-    "height": "28",
-    "txs_results": null,
+    "height": "156320",
+    "txs_results": [],
     "begin_block_events": [
       {
-        "type": "liveness",
+        "type": "slash",
         "attributes": [
           {
             "key": "YWRkcmVzcw==",
-            "value": "Y3JvY25jbGNvbnMxNTQ4ZjVoeWRkZGcwZWE0c2RneHNlN3Q3ajRqbjg0enA2eTk1NGU=",
+            "value": "Y3JvY25jbGNvbnMxNnNhOWNmbmV2bGwwcmVjd2E1aDdzZW1xZnB0emRxdXI3dnFybDQ=",
             "index": true
           },
           {
-            "key": "bWlzc2VkX2Jsb2Nrcw==",
-            "value": "OQ==",
+            "key": "cG93ZXI=",
+            "value": "MTY1NDM3ODA=",
             "index": true
           },
           {
-            "key": "aGVpZ2h0",
-            "value": "Mjg=",
+            "key": "cmVhc29u",
+            "value": "ZG91YmxlX3NpZ24=",
             "index": true
           }
         ]
@@ -31,68 +31,8 @@ var BEGIN_BLOCK_SLASH_EVENT_BLOCK_RESULTS_RESP = `{
         "type": "slash",
         "attributes": [
           {
-            "key": "YWRkcmVzcw==",
-            "value": "Y3JvY25jbGNvbnMxNTQ4ZjVoeWRkZGcwZWE0c2RneHNlN3Q3ajRqbjg0enA2eTk1NGU=",
-            "index": true
-          },
-          {
-            "key": "cG93ZXI=",
-            "value": "MzEy",
-            "index": true
-          },
-          {
-            "key": "cmVhc29u",
-            "value": "bWlzc2luZ19zaWduYXR1cmU=",
-            "index": true
-          },
-          {
             "key": "amFpbGVk",
-            "value": "Y3JvY25jbGNvbnMxNTQ4ZjVoeWRkZGcwZWE0c2RneHNlN3Q3ajRqbjg0enA2eTk1NGU=",
-            "index": true
-          }
-        ]
-      },
-      {
-        "type": "liveness",
-        "attributes": [
-          {
-            "key": "YWRkcmVzcw==",
-            "value": "Y3JvY25jbGNvbnMxbmZ0ZzJuOWd6anIybDdsZW1jc2hrMHY4d2RtdXV6cThudWxudnM=",
-            "index": true
-          },
-          {
-            "key": "bWlzc2VkX2Jsb2Nrcw==",
-            "value": "OQ==",
-            "index": true
-          },
-          {
-            "key": "aGVpZ2h0",
-            "value": "Mjg=",
-            "index": true
-          }
-        ]
-      },
-      {
-        "type": "slash",
-        "attributes": [
-          {
-            "key": "YWRkcmVzcw==",
-            "value": "Y3JvY25jbGNvbnMxbmZ0ZzJuOWd6anIybDdsZW1jc2hrMHY4d2RtdXV6cThudWxudnM=",
-            "index": true
-          },
-          {
-            "key": "cG93ZXI=",
-            "value": "MjEy",
-            "index": true
-          },
-          {
-            "key": "cmVhc29u",
-            "value": "bWlzc2luZ19zaWduYXR1cmU=",
-            "index": true
-          },
-          {
-            "key": "amFpbGVk",
-            "value": "Y3JvY25jbGNvbnMxbmZ0ZzJuOWd6anIybDdsZW1jc2hrMHY4d2RtdXV6cThudWxudnM=",
+            "value": "Y3JvY25jbGNvbnMxNnNhOWNmbmV2bGwwcmVjd2E1aDdzZW1xZnB0emRxdXI3dnFybDQ=",
             "index": true
           }
         ]
@@ -114,7 +54,7 @@ var BEGIN_BLOCK_SLASH_EVENT_BLOCK_RESULTS_RESP = `{
           },
           {
             "key": "YW1vdW50",
-            "value": "NTE5NDUxMzU2YmFzZWNybw==",
+            "value": "MTU3MTY1OTEwNjIyMTFiYXNldGNybw==",
             "index": true
           }
         ]
@@ -136,17 +76,7 @@ var BEGIN_BLOCK_SLASH_EVENT_BLOCK_RESULTS_RESP = `{
           "Sum": {
             "type": "tendermint.crypto.PublicKey_Ed25519",
             "value": {
-              "ed25519": "jZmiyA+S/yVqVuN2Px/9OqB/xgMPaj4mPdHpUOg/Kj0="
-            }
-          }
-        }
-      },
-      {
-        "pub_key": {
-          "Sum": {
-            "type": "tendermint.crypto.PublicKey_Ed25519",
-            "value": {
-              "ed25519": "LNa+qkaUeJ97z/uLAKv1YTLMspaGxSkQyipkAmtwivo="
+              "ed25519": "6e3k6KCzT+VXMyM34i6LrKZT3YM3oByTsXj0OtLApg8="
             }
           }
         }
