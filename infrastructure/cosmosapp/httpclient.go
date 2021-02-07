@@ -29,7 +29,7 @@ type HTTPClient struct {
 // NewHTTPClient returns a new HTTPClient for tendermint request
 func NewHTTPClient(rpcUrl string, bondingDenom string) *HTTPClient {
 	httpClient := &http.Client{
-		Timeout: 10 * time.Second,
+		Timeout: 30 * time.Second,
 	}
 
 	return &HTTPClient{
