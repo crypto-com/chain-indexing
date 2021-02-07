@@ -2,14 +2,14 @@ package tendermint
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
-	"io/ioutil"
-	"encoding/json"
 
 	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 
@@ -24,7 +24,7 @@ type HTTPClient struct {
 // NewHTTPClient returns a new HTTPClient for tendermint request
 func NewHTTPClient(tendermintRPCUrl string) *HTTPClient {
 	httpClient := &http.Client{
-		Timeout: 10 * time.Second,
+		Timeout: 30 * time.Second,
 	}
 
 	return &HTTPClient{
@@ -129,9 +129,7 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 	return rawResp.Body, nil
 }
 
-
-
-func (client *HTTPClient) Status() (*map[string]interface{}, error){
+func (client *HTTPClient) Status() (*map[string]interface{}, error) {
 	rawRespBody, err := client.request("status")
 	if err != nil {
 		return nil, err
@@ -142,9 +140,8 @@ func (client *HTTPClient) Status() (*map[string]interface{}, error){
 	jsonMap := make(map[string]interface{})
 	errread := json.Unmarshal([]byte(body), &jsonMap)
 	if errread != nil {
-		return nil, fmt.Errorf("error requesting Status : %v", errread)	
+		return nil, fmt.Errorf("error requesting Status : %v", errread)
 	}
-
 
 	return &jsonMap, nil
 }
