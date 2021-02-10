@@ -84,27 +84,65 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 			}))
 		})
 
-		It("should return ValidatorSlashed and ValidatorJailed command base on events", func() {
-			blockResults := mustParseBlockResultsResp(usecase_parser_test.BEGIN_BLOCK_SLASH_EVENT_BLOCK_RESULTS_RESP)
+		It("should return ValidatorSlashed and ValidatorJailed command base on missing signature events", func() {
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.BEGIN_BLOCK_SLASH_MISSING_SIGNATURES_EVENT_BLOCK_RESULTS_RESP)
 			cmds, err := parser.ParseBeginBlockEventsCommands(
 				blockResults.Height,
 				blockResults.BeginBlockEvents,
 			)
 			Expect(err).To(BeNil())
-			expectedBlockHeight := int64(156320)
+			expectedBlockHeight := int64(168481)
 			Expect(cmds).To(Equal([]command.Command{
 				command_usecase.NewSlashValidator(
 					expectedBlockHeight,
 					model.SlashValidatorParams{
-						ConsensusNodeAddress: "crocnclcons16sa9cfnevll0recwa5h7semqfptzdqur7vqrl4",
-						SlashedPower:         "16543780",
+						ConsensusNodeAddress: "crocnclcons18vyrj3se6cvdryk3vp09x88n46894ukjywnfmy",
+						SlashedPower:         "17274617",
+						Reason:               "missing_signature",
+					},
+				),
+				command_usecase.NewJailValidator(
+					expectedBlockHeight,
+					"crocnclcons18vyrj3se6cvdryk3vp09x88n46894ukjywnfmy",
+					"missing_signature",
+				),
+				command_usecase.NewSlashValidator(
+					expectedBlockHeight,
+					model.SlashValidatorParams{
+						ConsensusNodeAddress: "crocnclcons10wy4k3dkjd3htgleaxlzmakh0k4h8ql23cpusx",
+						SlashedPower:         "9902032",
+						Reason:               "missing_signature",
+					},
+				),
+				command_usecase.NewJailValidator(
+					expectedBlockHeight,
+					"crocnclcons10wy4k3dkjd3htgleaxlzmakh0k4h8ql23cpusx",
+					"missing_signature",
+				),
+			}))
+		})
+
+		It("should return ValidatorSlashed and ValidatorJailed command base on double sign events", func() {
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.BEGIN_BLOCK_SLASH_DOUBLE_SIGN_EVENT_BLOCK_RESULTS_RESP)
+			cmds, err := parser.ParseBeginBlockEventsCommands(
+				blockResults.Height,
+				blockResults.BeginBlockEvents,
+			)
+			Expect(err).To(BeNil())
+			expectedBlockHeight := int64(165487)
+			Expect(cmds).To(Equal([]command.Command{
+				command_usecase.NewSlashValidator(
+					expectedBlockHeight,
+					model.SlashValidatorParams{
+						ConsensusNodeAddress: "crocnclcons1fnht46350sxm2e6w8ma3as2l6wdl78rfym8gku",
+						SlashedPower:         "15600000",
 						Reason:               "double_sign",
 					},
 				),
 				command_usecase.NewJailValidator(
 					expectedBlockHeight,
-					"crocnclcons16sa9cfnevll0recwa5h7semqfptzdqur7vqrl4",
-					"same_reason_as_slashed",
+					"crocnclcons1fnht46350sxm2e6w8ma3as2l6wdl78rfym8gku",
+					"double_sign",
 				),
 			}))
 		})
