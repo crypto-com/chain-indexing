@@ -89,8 +89,7 @@ func ParseBeginBlockEventsCommands(blockHeight int64, beginBlockEvents []model.B
 		} else if event.Type == "slash" {
 			slashEvent := NewParsedTxsResultLogEvent(&beginBlockEvents[i])
 
-			// slash event has no jailed attributes
-			if !slashEvent.HasAttribute("jailed") {
+			if slashEvent.HasAttribute("address") {
 				commands = append(commands, command_usecase.NewSlashValidator(
 					blockHeight,
 					model.SlashValidatorParams{
@@ -99,13 +98,11 @@ func ParseBeginBlockEventsCommands(blockHeight int64, beginBlockEvents []model.B
 						Reason:               slashEvent.MustGetAttributeByKey("reason"),
 					},
 				))
-			}
-
-			if slashEvent.HasAttribute("jailed") {
+				// Slash is always accompanied by jailed
 				commands = append(commands, command_usecase.NewJailValidator(
 					blockHeight,
-					*slashEvent.GetAttributeByKey("jailed"),
-					"same_reason_as_slashed",
+					slashEvent.MustGetAttributeByKey("address"),
+					slashEvent.MustGetAttributeByKey("reason"),
 				))
 			}
 		}
