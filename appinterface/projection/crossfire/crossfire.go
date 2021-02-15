@@ -649,6 +649,8 @@ func (projection *Crossfire) updateTxSentCount(
 		return nil
 	}
 
+	keyToCountMap := make(map[string]int64)
+
 	for _, sender := range msgTransactionCreated.Senders {
 		// Only considering Pubkey address for now
 		if sender.Type == constants.TYPE_URL_PUBKEY && sender.MaybeThreshold == nil {
@@ -663,29 +665,61 @@ func (projection *Crossfire) updateTxSentCount(
 			if phaseNumberPrefix != "" {
 				// Increment count for address as per PHASE
 				phaseAddressCountDbKey := phaseNumberPrefix + constants.DB_KEY_SEPARATOR + primaryAddress
-				errIncrementing := crossfireValidatorStatsView.IncrementOne(phaseAddressCountDbKey)
-				if errIncrementing != nil {
-					return fmt.Errorf("error Phase wise tx sent count increment: %v", errIncrementing)
+				if keyToCountMap[phaseAddressCountDbKey] > 0 {
+					keyToCountMap[phaseAddressCountDbKey] = keyToCountMap[phaseAddressCountDbKey] + 1
+				} else {
+					keyToCountMap[phaseAddressCountDbKey] = 1
 				}
+				/*
+					errIncrementing := crossfireValidatorStatsView.IncrementOne(phaseAddressCountDbKey)
+					if errIncrementing != nil {
+						return fmt.Errorf("error Phase wise tx sent count increment: %v", errIncrementing)
+					}*/
 
 				// Increment TOTAL count for address
 				totalAddressCountDbKey := constants.TOTAL_TX_SENT_PREFIX + constants.DB_KEY_SEPARATOR + primaryAddress
-				errIncrementingTotal := crossfireValidatorStatsView.IncrementOne(totalAddressCountDbKey)
-				if errIncrementingTotal != nil {
-					return fmt.Errorf("[Crossfire] error Incrementing tx sent count: %v", errIncrementingTotal)
+				if keyToCountMap[totalAddressCountDbKey] > 0 {
+					keyToCountMap[totalAddressCountDbKey] = keyToCountMap[totalAddressCountDbKey] + 1
+				} else {
+					keyToCountMap[totalAddressCountDbKey] = 1
 				}
+				// errIncrementingTotal := crossfireValidatorStatsView.IncrementOne(totalAddressCountDbKey)
+				// if errIncrementingTotal != nil {
+				// 	return fmt.Errorf("[Crossfire] error Incrementing tx sent count: %v", errIncrementingTotal)
+				// }
 			}
 
 			//Increment count for Weekly Jackpot (If Applicable)
 			if weeklyJackpotDBKey != "" {
 				key := fmt.Sprintf("%s%s%s", weeklyJackpotDBKey, constants.DB_KEY_SEPARATOR, primaryAddress)
-				errIncrementingJackpotTxSentCount := crossfireValidatorStatsView.IncrementOne(key)
+				/*errIncrementingJackpotTxSentCount := crossfireValidatorStatsView.IncrementOne(key)
 				if errIncrementingJackpotTxSentCount != nil {
 					return fmt.Errorf("[Crossfire] error Incrementing Weekly tx sent count: %v", errIncrementingJackpotTxSentCount)
+				}*/
+				if keyToCountMap[key] > 0 {
+					keyToCountMap[key] = keyToCountMap[key] + 1
+				} else {
+					keyToCountMap[key] = 1
 				}
 			}
 		}
 	}
+
+	// Insert/Update all at once
+	projection.profile("begin persisting tx sent counts")
+
+	// If no tx sent count to increment
+	if len(keyToCountMap) < 1 {
+		projection.logger.Debug("No tx sent counts to be updated")
+		return nil
+	}
+	if errUpdatingCumulativeCounts := crossfireValidatorStatsView.IncrementAllByCumulativeCount(keyToCountMap); errUpdatingCumulativeCounts != nil {
+		return fmt.Errorf(
+			"[Crossfire] error increment tx sent counts: %v", errUpdatingCumulativeCounts,
+		)
+	}
+	projection.profile("end persisting tx sent counts")
+
 	return nil
 }
 
@@ -706,7 +740,7 @@ func (projection *Crossfire) computeCommitmentRank(
 	}
 
 	projection.profile("begin filtering participants commitment records")
-	validatorCommits, err := crossfireValidatorStatsView.FindAllLike(crossfireValidatorStatsPrefix)
+	validatorCommits, err := crossfireValidatorStatsView.FindAllLike(crossfireValidatorStatsPrefix + "%")
 	if err != nil {
 		return fmt.Errorf("error getting validators' %s number from stats %v", crossfireValidatorStatsPrefix, err)
 	}
@@ -784,7 +818,7 @@ func (projection *Crossfire) computeTxSentRank(
 
 	projection.profile("begin getting all transaction sent records")
 	// Get All Tx Count Sorted
-	dbTxSendersWithCountList, errDbCount := crossfireValidatorStatsView.FindAllLike(constants.TOTAL_TX_SENT_PREFIX)
+	dbTxSendersWithCountList, errDbCount := crossfireValidatorStatsView.FindAllLike(constants.TOTAL_TX_SENT_PREFIX + "%")
 	if errDbCount != nil {
 		return fmt.Errorf("[Crossfire] error Database Participant With Total Count %w", errDbCount)
 	}
