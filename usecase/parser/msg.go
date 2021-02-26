@@ -80,6 +80,7 @@ func ParseBlockResultsTxsMsgToCommands(
 				msgCommands = parseMsgCreateValidator(msgCommonParams, msg)
 			case "/cosmos.staking.v1beta1.MsgEditValidator":
 				msgCommands = parseMsgEditValidator(msgCommonParams, msg)
+				// TODO: IBC commands
 			}
 
 			commands = append(commands, msgCommands...)

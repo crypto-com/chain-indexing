@@ -3,18 +3,18 @@ package parser
 import (
 	"fmt"
 
-	"github.com/calvinlauco/cosmostxdecoder"
+	"github.com/calvinlauyh/cosmosutils"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	jsoniter "github.com/json-iterator/go"
 )
 
 type TxDecoder struct {
-	decoder *cosmostxdecoder.Decoder
+	decoder *cosmosutils.Decoder
 }
 
 func NewTxDecoder() *TxDecoder {
 	return &TxDecoder{
-		cosmostxdecoder.DefaultDecoder,
+		cosmosutils.DefaultDecoder,
 	}
 }
 
