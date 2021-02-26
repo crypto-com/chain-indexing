@@ -7,8 +7,8 @@ require (
 	github.com/Masterminds/squirrel v1.5.0
 	github.com/brianvoe/gofakeit/v5 v5.10.1
 	github.com/btcsuite/btcutil v1.0.2
-	github.com/calvinlauco/cosmostxdecoder v0.0.1-rc3
-	github.com/cosmos/cosmos-sdk v0.39.1
+	github.com/calvinlauyh/cosmosutils v0.0.5
+	github.com/cosmos/cosmos-sdk v0.41.0
 	github.com/fasthttp/router v1.3.3
 	github.com/golang-migrate/migrate/v4 v4.12.2
 	github.com/google/go-querystring v1.0.0
@@ -25,8 +25,8 @@ require (
 	github.com/onsi/gomega v1.10.2
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.20.0
-	github.com/stretchr/testify v1.6.1
-	github.com/tendermint/tendermint v0.34.1
+	github.com/stretchr/testify v1.7.0
+	github.com/tendermint/tendermint v0.34.3
 	github.com/urfave/cli/v2 v2.2.0
 	github.com/valyala/fasthttp v1.17.0
 	golang.org/x/sys v0.0.0-20201214210602-f9fddec55a1e // indirect
@@ -34,7 +34,3 @@ require (
 )
 
 replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.2-alpha.regen.4
-
-replace github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.40.0
-
-replace github.com/calvinlauco/cosmostxdecoder => github.com/calvinlauco/cosmostxdecoder v0.0.2-rc5
