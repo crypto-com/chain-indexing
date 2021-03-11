@@ -154,15 +154,15 @@ type AuthInfo struct {
 
 type Fee struct {
 	Amount   []interface{} `json:"amount"`
-	GasLimit string        `json:"gas_limit"`
+	GasLimit interface{}   `json:"gas_limit"`
 	Payer    string        `json:"payer"`
 	Granter  string        `json:"granter"`
 }
 
 type SignerInfo struct {
-	PublicKey PublicKey `json:"public_key"`
-	ModeInfo  ModeInfo  `json:"mode_info"`
-	Sequence  string    `json:"sequence"`
+	PublicKey PublicKey   `json:"public_key"`
+	ModeInfo  ModeInfo    `json:"mode_info"`
+	Sequence  interface{} `json:"sequence"`
 }
 
 type ModeInfo struct {
@@ -181,7 +181,7 @@ type PublicKey struct {
 type Body struct {
 	Messages                    []map[string]interface{} `json:"messages"`
 	Memo                        string                   `json:"memo"`
-	TimeoutHeight               string                   `json:"timeout_height"`
+	TimeoutHeight               interface{}              `json:"timeout_height"`
 	ExtensionOptions            []interface{}            `json:"extension_options"`
 	NonCriticalExtensionOptions []interface{}            `json:"non_critical_extension_options"`
 }
