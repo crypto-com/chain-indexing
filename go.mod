@@ -7,7 +7,7 @@ require (
 	github.com/Masterminds/squirrel v1.5.0
 	github.com/brianvoe/gofakeit/v5 v5.10.1
 	github.com/btcsuite/btcutil v1.0.2
-	github.com/calvinlauyh/cosmosutils v0.0.5
+	github.com/calvinlauyh/cosmosutils v0.0.6
 	github.com/cosmos/cosmos-sdk v0.41.0
 	github.com/fasthttp/router v1.3.3
 	github.com/golang-migrate/migrate/v4 v4.12.2
