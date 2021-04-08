@@ -22,14 +22,6 @@ DB_DRIVER_URL="${DB_PROTOCOL}://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PO
 
 echoerr() { echo "$@" 1>&2; }
 
-check_password_strength() {
-	  echo "checking password strength"
-	  if [[ ! -f ./check-password-strength ]]; then
-	      make check-password-strength
-	  fi
-	  ./check-password-strength
-}
-
 check_migrate() {
     set +e
     command -v migrate > /dev/null
@@ -53,10 +45,6 @@ while [[ $# > 0 ]]; do
         ;;
         --no-ssl)
             DB_DRIVER_URL="${DB_DRIVER_URL}&sslmode=disable"
-            shift 1
-        ;;
-        --insecure)
-            INSECURE=1
             shift 1
         ;;
         --)
@@ -97,11 +85,6 @@ while [[ $# > 0 ]]; do
             run_migrate "${ARGS}" create --dir "${DB_MIGRATIONS_FOLDER}" --ext sql "$@"
         ;;
         goto | up | down | drop | force)
-            if [[ $INSECURE == 1 ]]; then
-                echo "WARNING! You are running in insecure mode. This is not recommended."
-            else
-                check_password_strength
-            fi
             run_migrate -source "file://${DB_MIGRATIONS_FOLDER}" -database "${DB_DRIVER_URL}" "${ARGS}" "$@"
         ;;
         version)

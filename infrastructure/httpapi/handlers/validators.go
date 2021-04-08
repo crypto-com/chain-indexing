@@ -62,6 +62,9 @@ func (handler *Validators) FindBy(ctx *fasthttp.RequestCtx) {
 		identity = validator_view.ValidatorIdentity{
 			MaybeConsensusNodeAddress: &addressParams,
 		}
+	} else {
+		httpapi.BadRequest(ctx, errors.New("invalid address"))
+		return
 	}
 
 	rawValidator, err := handler.validatorsView.FindBy(identity)
@@ -196,6 +199,9 @@ func (handler *Validators) ListActivities(ctx *fasthttp.RequestCtx) {
 		filter = validator_view.ValidatorActivitiesListFilter{
 			MaybeConsensusNodeAddress: &addressParams,
 		}
+	} else {
+		httpapi.BadRequest(ctx, errors.New("invalid address"))
+		return
 	}
 
 	order := validator_view.ValidatorActivitiesListOrder{}
