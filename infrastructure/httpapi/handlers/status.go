@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"math/big"
 	"strconv"
+
+	"github.com/crypto-com/chain-indexing/projection/chainstats"
 
 	"github.com/crypto-com/chain-indexing/internal/json"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
@@ -11,6 +14,7 @@ import (
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	block_view "github.com/crypto-com/chain-indexing/projection/block/view"
+	chainstats_view "github.com/crypto-com/chain-indexing/projection/chainstats/view"
 	transaction_view "github.com/crypto-com/chain-indexing/projection/transaction/view"
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 	validator_view "github.com/crypto-com/chain-indexing/projection/validator/view"
@@ -23,6 +27,7 @@ type StatusHandler struct {
 	logger applogger.Logger
 
 	blocksView            *block_view.Blocks
+	chainStatsView        *chainstats_view.ChainStats
 	transactionsTotalView *transaction_view.TransactionsTotal
 	validatorsView        *validator_view.Validators
 	validatorStatsView    *validatorstats_view.ValidatorStats
@@ -36,6 +41,7 @@ func NewStatusHandler(logger applogger.Logger, rdbHandle *rdb.Handle) *StatusHan
 		}),
 
 		block_view.NewBlocks(rdbHandle),
+		chainstats_view.NewChainStats(rdbHandle),
 		transaction_view.NewTransactionsTotal(rdbHandle),
 		validator_view.NewValidators(rdbHandle),
 		validatorstats_view.NewValidatorStats(rdbHandle),
@@ -65,7 +71,9 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	var totalDelegated coin.Coins
-	json.MustUnmarshalFromString(rawTotalDelegated, &totalDelegated)
+	if rawTotalDelegated != "" {
+		json.MustUnmarshalFromString(rawTotalDelegated, &totalDelegated)
+	}
 
 	rawTotalReward, err := handler.validatorStatsView.FindBy(validatorstats.TOTAL_REWARD)
 	if err != nil {
@@ -74,7 +82,9 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	var totalReward coin.DecCoins
-	json.MustUnmarshalFromString(rawTotalReward, &totalReward)
+	if rawTotalReward != "" {
+		json.MustUnmarshalFromString(rawTotalReward, &totalReward)
+	}
 
 	validatorCount, err := handler.validatorsView.Count(validator_view.CountFilter{
 		MaybeStatus: nil,
@@ -94,40 +104,87 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	latestHeight, err := handler.statusView.FindBy("LatestHeight")
+	rawLatestHeight, err := handler.statusView.FindBy("LatestHeight")
 	if err != nil {
 		handler.logger.Errorf("error fetching latest height: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
 	}
 
-	var latestHeightValue int64 = 0
-	if n, err := strconv.ParseInt(latestHeight, 10, 64); err == nil {
-		latestHeightValue = n
-	} else {
-		handler.logger.Errorf("error convert latest height from string to int64: %v", err)
-		httpapi.InternalServerError(ctx)
+	var latestHeight int64 = 0
+	if rawLatestHeight != "" {
+		// TODO: Use big.Int
+		if n, err := strconv.ParseInt(rawLatestHeight, 10, 64); err != nil {
+			handler.logger.Errorf("error converting latest height from string to int64: %v", err)
+			httpapi.InternalServerError(ctx)
+			return
+		} else {
+			latestHeight = n
+		}
 	}
 
+	var totalBlockTime = new(big.Int).SetInt64(int64(0))
+	var totalBlockCount = new(big.Int).SetInt64(int64(1))
+	if rawTotalBlockTime, err := handler.chainStatsView.FindBy(chainstats.TOTAL_BLOCK_TIME); err != nil {
+		handler.logger.Errorf("error fetching total block time: %v", err)
+		httpapi.InternalServerError(ctx)
+		return
+	} else {
+		if rawTotalBlockTime != "" {
+			var ok bool
+			if totalBlockTime, ok = new(big.Int).SetString(rawTotalBlockTime, 10); !ok {
+				handler.logger.Error("error converting total block time from string to big.Int")
+				httpapi.InternalServerError(ctx)
+				return
+			}
+		}
+
+		if rawTotalBlockCount, err := handler.chainStatsView.FindBy(chainstats.TOTAL_BLOCK_COUNT); err != nil {
+			handler.logger.Errorf("error fetching total block time: %v", err)
+			httpapi.InternalServerError(ctx)
+			return
+		} else {
+			if rawTotalBlockCount != "" {
+				var ok bool
+				if totalBlockCount, ok = new(big.Int).SetString(rawTotalBlockCount, 10); !ok {
+					handler.logger.Error("error converting total block count from string to big.Int")
+					httpapi.InternalServerError(ctx)
+					return
+				}
+			}
+		}
+	}
+
+	totalBlockTimeMilliSecond := new(big.Float).Quo(
+		new(big.Float).SetInt(totalBlockTime),
+		new(big.Float).SetInt64(int64(1000000)),
+	)
+	averageBlockTime := new(big.Float).Quo(
+		totalBlockTimeMilliSecond,
+		new(big.Float).SetInt(totalBlockCount),
+	)
+
 	status := Status{
-		BlockCount:           blockCount,
-		TransactionCount:     transactionCount,
-		TotalDelegated:       totalDelegated,
-		TotalReward:          totalReward,
-		ValidatorCount:       validatorCount,
-		ActiveValidatorCount: activeValidatorCount,
-		LatestHeight:         latestHeightValue,
+		BlockCount:                  blockCount,
+		TransactionCount:            transactionCount,
+		TotalDelegated:              totalDelegated,
+		TotalReward:                 totalReward,
+		ValidatorCount:              validatorCount,
+		ActiveValidatorCount:        activeValidatorCount,
+		LatestHeight:                latestHeight,
+		AverageBlockTimeMillisecond: averageBlockTime.Text('f', 0),
 	}
 
 	httpapi.Success(ctx, status)
 }
 
 type Status struct {
-	BlockCount           int64         `json:"blockCount"`
-	TransactionCount     int64         `json:"transactionCount"`
-	TotalDelegated       coin.Coins    `json:"totalDelegated"`
-	TotalReward          coin.DecCoins `json:"totalReward"`
-	ValidatorCount       int64         `json:"validatorCount"`
-	ActiveValidatorCount int64         `json:"activeValidatorCount"`
-	LatestHeight         int64         `json:"latestHeight"`
+	BlockCount                  int64         `json:"blockCount"`
+	TransactionCount            int64         `json:"transactionCount"`
+	TotalDelegated              coin.Coins    `json:"totalDelegated"`
+	TotalReward                 coin.DecCoins `json:"totalReward"`
+	ValidatorCount              int64         `json:"validatorCount"`
+	ActiveValidatorCount        int64         `json:"activeValidatorCount"`
+	LatestHeight                int64         `json:"latestHeight"`
+	AverageBlockTimeMillisecond string        `json:"averageBlockTimeMillisecond"`
 }

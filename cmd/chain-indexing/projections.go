@@ -27,9 +27,17 @@ func initProjections(
 		ConsNodeAddressPrefix: config.Blockchain.ConNodeAddressPrefix,
 	}
 	for _, projectionName := range config.Projection.Enables {
-		projections = append(projections, projection.InitProjection(
+		projection := projection.InitProjection(
 			projectionName, initParams,
-		))
+		)
+		if onInitErr := projection.OnInit(); onInitErr != nil {
+			logger.Errorf(
+				"error initializing projection %s, system will attempt to initialize the projection again on next restart: %v",
+				projection.Id(), onInitErr,
+			)
+			continue
+		}
+		projections = append(projections, projection)
 	}
 
 	logger.Infof("Enabled the follow projections: [%s]", strings.Join(config.Projection.Enables, ", "))
