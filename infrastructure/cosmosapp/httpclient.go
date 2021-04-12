@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -42,7 +43,7 @@ func NewHTTPClient(rpcUrl string, bondingDenom string) *HTTPClient {
 
 func (client *HTTPClient) Account(accountAddress string) (*cosmosapp_interface.Account, error) {
 	rawRespBody, err := client.request(
-		fmt.Sprintf("%s/%s", client.url("auth", "accounts"), accountAddress), "",
+		fmt.Sprintf("%s/%s", client.getUrl("auth", "accounts"), accountAddress), "",
 	)
 	if err != nil {
 		return nil, err
@@ -160,12 +161,15 @@ func (client *HTTPClient) Balances(accountAddress string) (coin.Coins, error) {
 	}
 	balances := coin.NewEmptyCoins()
 	for {
-		url := fmt.Sprintf("%s/%s", client.url("bank", "balances"), accountAddress)
+		queryUrl := fmt.Sprintf("%s/%s", client.getUrl("bank", "balances"), accountAddress)
 		if resp.Pagination.MaybeNextKey != nil {
-			url = fmt.Sprintf("%s?pagination.key=%s", url, *resp.Pagination.MaybeNextKey)
+			queryUrl = fmt.Sprintf(
+				"%s?pagination.key=%s",
+				queryUrl, url.QueryEscape(*resp.Pagination.MaybeNextKey),
+			)
 		}
 
-		rawRespBody, err := client.request(url)
+		rawRespBody, err := client.request(queryUrl)
 		if err != nil {
 			return nil, err
 		}
@@ -192,7 +196,10 @@ func (client *HTTPClient) Balances(accountAddress string) (coin.Coins, error) {
 
 func (client *HTTPClient) BalanceByDenom(accountAddress string, denom string) (*coin.Coin, error) {
 	rawRespBody, err := client.request(
-		fmt.Sprintf("%s/%s/%s", client.url("bank", "balances"), accountAddress, denom), "",
+		fmt.Sprintf(
+			"%s/%s/%s",
+			client.getUrl("bank", "balances"), accountAddress, denom,
+		), "",
 	)
 	if err != nil {
 		return nil, err
@@ -228,12 +235,15 @@ func (client *HTTPClient) BondedBalance(accountAddress string) (coin.Coins, erro
 	}
 	balance := coin.NewEmptyCoins()
 	for {
-		url := fmt.Sprintf("%s/%s", client.url("staking", "delegations"), accountAddress)
+		queryUrl := fmt.Sprintf("%s/%s", client.getUrl("staking", "delegations"), accountAddress)
 		if resp.MaybePagination.MaybeNextKey != nil {
-			url = fmt.Sprintf("%s?pagination.key=%s", url, *resp.MaybePagination.MaybeNextKey)
+			queryUrl = fmt.Sprintf(
+				"%s?pagination.key=%s",
+				queryUrl, url.QueryEscape(*resp.MaybePagination.MaybeNextKey),
+			)
 		}
 
-		rawRespBody, statusCode, err := client.rawRequest(url)
+		rawRespBody, statusCode, err := client.rawRequest(queryUrl)
 		if err != nil {
 			return nil, err
 		}
@@ -242,11 +252,15 @@ func (client *HTTPClient) BondedBalance(accountAddress string) (coin.Coins, erro
 		if decodeErr := jsoniter.NewDecoder(rawRespBody).Decode(&resp); decodeErr != nil {
 			return nil, decodeErr
 		}
-		if resp.MaybeCode != nil && *resp.MaybeCode == 2 {
-			return nil, cosmosapp_interface.ErrAccountNotFound
+		if resp.MaybeCode != nil {
+			if *resp.MaybeCode == 2 {
+				return nil, cosmosapp_interface.ErrAccountNotFound
+			} else if *resp.MaybeCode == 5 {
+				return nil, cosmosapp_interface.ErrAccountNoDelegation
+			}
 		}
 		if statusCode != 200 {
-			return nil, fmt.Errorf("error requesting Cosmos %s endpoint: %v", url, err)
+			return nil, fmt.Errorf("error requesting Cosmos %s endpoint: status code %d", queryUrl, statusCode)
 		}
 		for _, delegation := range resp.MaybeDelegationResponses {
 			delegatedCoin, coinErr := coin.NewCoinFromString(delegation.Balance.Denom, delegation.Balance.Amount)
@@ -273,14 +287,17 @@ func (client *HTTPClient) RedelegatingBalance(accountAddress string) (coin.Coins
 	}
 	balance := coin.NewEmptyCoins()
 	for {
-		url := fmt.Sprintf(
-			"%s/%s/redelegations", client.url("staking", "delegators"), accountAddress,
+		queryUrl := fmt.Sprintf(
+			"%s/%s/redelegations", client.getUrl("staking", "delegators"), accountAddress,
 		)
 		if resp.Pagination.MaybeNextKey != nil {
-			url = fmt.Sprintf("%s?pagination.key=%s", url, *resp.Pagination.MaybeNextKey)
+			queryUrl = fmt.Sprintf(
+				"%s?pagination.key=%s",
+				queryUrl, url.QueryEscape(*resp.Pagination.MaybeNextKey),
+			)
 		}
 
-		rawRespBody, err := client.request(url)
+		rawRespBody, err := client.request(queryUrl)
 		if err != nil {
 			return nil, err
 		}
@@ -316,14 +333,18 @@ func (client *HTTPClient) UnbondingBalance(accountAddress string) (coin.Coins, e
 	}
 	balance := coin.NewEmptyCoins()
 	for {
-		url := fmt.Sprintf(
-			"%s/%s/unbonding_delegations", client.url("staking", "delegators"), accountAddress,
+		queryUrl := fmt.Sprintf(
+			"%s/%s/unbonding_delegations",
+			client.getUrl("staking", "delegators"), accountAddress,
 		)
 		if resp.Pagination.MaybeNextKey != nil {
-			url = fmt.Sprintf("%s?pagination.key=%s", url, *resp.Pagination.MaybeNextKey)
+			queryUrl = fmt.Sprintf(
+				"%s?pagination.key=%s",
+				queryUrl, url.QueryEscape(*resp.Pagination.MaybeNextKey),
+			)
 		}
 
-		rawRespBody, err := client.request(url)
+		rawRespBody, err := client.request(queryUrl)
 		if err != nil {
 			return nil, err
 		}
@@ -354,7 +375,7 @@ func (client *HTTPClient) TotalRewards(accountAddress string) (coin.DecCoins, er
 	rawRespBody, err := client.request(
 		fmt.Sprintf(
 			"%s/%s/rewards",
-			client.url("distribution", "delegators"),
+			client.getUrl("distribution", "delegators"),
 			accountAddress,
 		), "",
 	)
@@ -381,7 +402,10 @@ func (client *HTTPClient) TotalRewards(accountAddress string) (coin.DecCoins, er
 
 func (client *HTTPClient) Validator(validatorAddress string) (*cosmosapp_interface.Validator, error) {
 	rawRespBody, err := client.request(
-		fmt.Sprintf("%s/%s", client.url("staking", "validators"), validatorAddress), "",
+		fmt.Sprintf(
+			"%s/%s",
+			client.getUrl("staking", "validators"), validatorAddress,
+		), "",
 	)
 	if err != nil {
 		return nil, err
@@ -399,7 +423,7 @@ func (client *HTTPClient) Validator(validatorAddress string) (*cosmosapp_interfa
 func (client *HTTPClient) Commission(validatorAddress string) (coin.DecCoins, error) {
 	rawRespBody, err := client.request(
 		fmt.Sprintf("%s/%s/commission",
-			client.url("distribution", "validators"), validatorAddress,
+			client.getUrl("distribution", "validators"), validatorAddress,
 		), "",
 	)
 	if err != nil {
@@ -433,12 +457,15 @@ func (client *HTTPClient) Delegation(
 		},
 	}
 	for {
-		url := fmt.Sprintf("%s/%s", client.url("staking", "delegations"), delegator)
+		queryUrl := fmt.Sprintf("%s/%s", client.getUrl("staking", "delegations"), delegator)
 		if resp.MaybePagination.MaybeNextKey != nil {
-			url = fmt.Sprintf("%s?pagination.key=%s", url, *resp.MaybePagination.MaybeNextKey)
+			queryUrl = fmt.Sprintf(
+				"%s?pagination.key=%s",
+				queryUrl, url.QueryEscape(*resp.MaybePagination.MaybeNextKey),
+			)
 		}
 
-		rawRespBody, statusCode, err := client.rawRequest(url)
+		rawRespBody, statusCode, err := client.rawRequest(queryUrl)
 		if err != nil {
 			return nil, err
 		}
@@ -451,11 +478,12 @@ func (client *HTTPClient) Delegation(
 			return nil, cosmosapp_interface.ErrAccountNotFound
 		}
 		if statusCode != 200 {
-			return nil, fmt.Errorf("error requesting Cosmos %s endpoint: %v", url, err)
+			return nil, fmt.Errorf("error requesting Cosmos %s endpoint: status code %d", queryUrl, statusCode)
 		}
 
 		for _, delegation := range resp.MaybeDelegationResponses {
-			if delegation.Delegation.DelegatorAddress == delegator && delegation.Delegation.ValidatorAddress == validator {
+			if delegation.Delegation.DelegatorAddress == delegator &&
+				delegation.Delegation.ValidatorAddress == validator {
 				return &delegation, nil
 			}
 		}
@@ -468,27 +496,27 @@ func (client *HTTPClient) Delegation(
 	return nil, nil
 }
 
-func (client *HTTPClient) url(module string, method string) string {
+func (client *HTTPClient) getUrl(module string, method string) string {
 	return fmt.Sprintf("cosmos/%s/v1beta1/%s", module, method)
 }
 
-// request construct tendermint url and issues an HTTP request
+// request construct tendermint getUrl and issues an HTTP request
 // returns the success http Body
 func (client *HTTPClient) request(method string, queryString ...string) (io.ReadCloser, error) {
 	var err error
 
-	url := client.rpcUrl + "/" + method
+	queryUrl := client.rpcUrl + "/" + method
 	if len(queryString) > 0 {
-		url += "?" + queryString[0]
+		queryUrl += "?" + queryString[0]
 	}
 
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, queryUrl, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating HTTP request with context: %v", err)
 	}
 	rawResp, err := client.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("error requesting Cosmos %s endpoint: %v", url, err)
+		return nil, fmt.Errorf("error requesting Cosmos %s endpoint: %v", queryUrl, err)
 	}
 
 	if rawResp.StatusCode != 200 {
@@ -499,24 +527,24 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 	return rawResp.Body, nil
 }
 
-// rawRequest construct tendermint url and issues an HTTP request
+// rawRequest construct tendermint getUrl and issues an HTTP request
 // returns the http Body with any status code
 func (client *HTTPClient) rawRequest(method string, queryString ...string) (io.ReadCloser, int, error) {
 	var err error
 
-	url := client.rpcUrl + "/" + method
+	queryUrl := client.rpcUrl + "/" + method
 	if len(queryString) > 0 {
-		url += "?" + queryString[0]
+		queryUrl += "?" + queryString[0]
 	}
 
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, queryUrl, nil)
 	if err != nil {
 		return nil, 0, fmt.Errorf("error creating HTTP request with context: %v", err)
 	}
 	// nolint:bodyclose
 	rawResp, err := client.httpClient.Do(req)
 	if err != nil {
-		return nil, 0, fmt.Errorf("error requesting Cosmos %s endpoint: %v", url, err)
+		return nil, 0, fmt.Errorf("error requesting Cosmos %s endpoint: %v", queryUrl, err)
 	}
 
 	return rawResp.Body, rawResp.StatusCode, nil
