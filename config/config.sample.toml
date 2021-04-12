@@ -66,6 +66,7 @@ enables = [
     "AccountTransaction",
     "Block",
     "BlockEvent",
+    "ChainStats",
     "Transaction",
     "Validator",
     "ValidatorStats",

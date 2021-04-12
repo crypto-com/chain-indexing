@@ -3,6 +3,8 @@ package projection
 import (
 	"fmt"
 
+	"github.com/crypto-com/chain-indexing/projection/chainstats"
+
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
@@ -29,6 +31,8 @@ func InitProjection(name string, params InitParams) projection_entity.Projection
 		return block.NewBlock(params.Logger, params.RdbConn)
 	case "BlockEvent":
 		return blockevent.NewBlockEvent(params.Logger, params.RdbConn)
+	case "ChainStats":
+		return chainstats.NewChainStats(params.Logger, params.RdbConn)
 	case "Transaction":
 		return transaction.NewTransaction(params.Logger, params.RdbConn)
 	case "Validator":
