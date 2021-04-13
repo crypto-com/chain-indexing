@@ -81,7 +81,7 @@ func (handler *Accounts) FindBy(ctx *fasthttp.RequestCtx) {
 	}
 
 	if bondedBalance, queryErr := handler.cosmosClient.BondedBalance(accountParam); queryErr != nil {
-		if !errors.Is(queryErr, cosmosapp.ErrAccountNotFound) {
+		if !errors.Is(queryErr, cosmosapp.ErrAccountNotFound) && !errors.Is(queryErr, cosmosapp.ErrAccountNoDelegation) {
 			handler.logger.Errorf("error fetching account bonded balance: %v", queryErr)
 			httpapi.InternalServerError(ctx)
 			return

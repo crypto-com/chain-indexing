@@ -20,3 +20,4 @@ type Client interface {
 }
 
 var ErrAccountNotFound = errors.New("account not found")
+var ErrAccountNoDelegation = errors.New("account has no delegation")
