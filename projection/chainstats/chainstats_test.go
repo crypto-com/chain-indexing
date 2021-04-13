@@ -38,14 +38,14 @@ var _ = Describe("Validator Events", func() {
 		It("should parse correctly different variations of time format", func() {
 			Expect(
 				utctime.MustParse(time.RFC3339, "2021-03-25T01:00:00Z").UnixNano(),
-			).To(Equal(1616634000000000000))
+			).To(Equal(int64(1616634000000000000)))
 
 			Expect(
 				utctime.MustParse("2006-01-02T15:04:05.000000Z", "2020-12-23T07:30:28.674523Z").UnixNano(),
-			).To(Equal(1608708628674523000))
+			).To(Equal(int64(1608708628674523000)))
 			Expect(
 				utctime.MustParse(time.RFC3339, "2020-12-23T07:30:28.674523Z").UnixNano(),
-			).To(Equal(1608708628674523000))
+			).To(Equal(int64(1608708628674523000)))
 		})
 	})
 
