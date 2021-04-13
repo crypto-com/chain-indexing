@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/big"
 	"strconv"
+	"time"
 
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	"github.com/pkg/errors"
@@ -103,7 +104,7 @@ func (projection *ChainStats) HandleEvents(height int64, events []event_entity.E
 	var maybeGenesisBlockTime *int64
 	if genesisCreatedEvent, ok := event.(*event_usecase.GenesisCreated); ok {
 		genesisBlockTime, parseErr := utctime.Parse(
-			"2006-01-02T15:04:05.000000Z", genesisCreatedEvent.Genesis.GenesisTime,
+			time.RFC3339, genesisCreatedEvent.Genesis.GenesisTime,
 		)
 		if parseErr != nil {
 			return fmt.Errorf("error pasring genesis block time: %v", parseErr)

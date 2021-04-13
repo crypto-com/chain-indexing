@@ -25,6 +25,15 @@ func FromTime(t gotime.Time) UTCTime {
 	}
 }
 
+func MustParse(layout string, value string) UTCTime {
+	parsed, err := Parse(layout, value)
+	if err != nil {
+		panic(err)
+	}
+
+	return parsed
+}
+
 func Parse(layout string, value string) (UTCTime, error) {
 	t, err := gotime.Parse(layout, value)
 	if err != nil {

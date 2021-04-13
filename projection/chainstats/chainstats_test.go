@@ -1,6 +1,8 @@
 package chainstats_test
 
 import (
+	"time"
+
 	"github.com/crypto-com/chain-indexing/projection/block"
 	viewBlock "github.com/crypto-com/chain-indexing/projection/block/view"
 	"github.com/crypto-com/chain-indexing/projection/validatorstats"
@@ -30,6 +32,21 @@ var _ = Describe("Validator Events", func() {
 		fakeLogger := NewFakeLogger()
 		fakeRdbConn := NewFakeRDbConn()
 		var _ entity_projection.Projection = validatorstats.NewValidatorStats(fakeLogger, fakeRdbConn)
+	})
+
+	Describe("genesis time parsing learning test", func() {
+		It("should parse correctly different variations of time format", func() {
+			Expect(
+				utctime.MustParse(time.RFC3339, "2021-03-25T01:00:00Z").UnixNano(),
+			).To(Equal(1616634000000000000))
+
+			Expect(
+				utctime.MustParse("2006-01-02T15:04:05.000000Z", "2020-12-23T07:30:28.674523Z").UnixNano(),
+			).To(Equal(1608708628674523000))
+			Expect(
+				utctime.MustParse(time.RFC3339, "2020-12-23T07:30:28.674523Z").UnixNano(),
+			).To(Equal(1608708628674523000))
+		})
 	})
 
 	WithTestPgxConn(func(pgConn *pg.PgxConn, pgMigrate *pg.Migrate) {
