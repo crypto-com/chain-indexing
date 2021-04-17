@@ -19,11 +19,6 @@ type Account struct {
 	MaybePeriodicVestingAccount   *PeriodicVestingAccount   `json:"periodic_vesting_account"`
 }
 
-type PubKey struct {
-	Type string `json:"@type"`
-	Key  string `json:"key"`
-}
-
 type ModuleAccount struct {
 	Name        string   `json:"name"`
 	Permissions []string `json:"permissions"`
