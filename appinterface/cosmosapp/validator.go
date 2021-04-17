@@ -2,7 +2,7 @@ package cosmosapp
 
 type Validator struct {
 	OperatorAddress   string               `json:"operator_address"`
-	ConsensusPubkey   string               `json:"consensus_pubkey"`
+	ConsensusPubkey   PubKey               `json:"consensus_pubkey"`
 	Jailed            bool                 `json:"jailed"`
 	Status            string               `json:"status"`
 	Tokens            string               `json:"tokens"`
