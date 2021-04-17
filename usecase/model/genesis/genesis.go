@@ -97,8 +97,13 @@ type DenomUnit struct {
 }
 
 type BankParams struct {
-	SendEnabled        []interface{} `json:"send_enabled"`
-	DefaultSendEnabled bool          `json:"default_send_enabled"`
+	SendEnabled        []BankParamsSendEnabled `json:"send_enabled"`
+	DefaultSendEnabled bool                    `json:"default_send_enabled"`
+}
+
+type BankParamsSendEnabled struct {
+	Denom   string `json:"denom"`
+	Enabled bool   `json:"enabled"`
 }
 
 type Capability struct {
