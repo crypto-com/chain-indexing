@@ -3,6 +3,7 @@ package handlers
 import (
 	"math/big"
 	"strconv"
+	"time"
 
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 
@@ -35,6 +36,9 @@ type StatusHandler struct {
 	validatorsView        *validator_view.Validators
 	validatorStatsView    *validatorstats_view.ValidatorStats
 	statusView            *status_polling.Status
+
+	totalDelegated              coin.Coins
+	totalDelegatedLastUpdatedAt time.Time
 }
 
 func NewStatusHandler(logger applogger.Logger, cosmosAppClient cosmosapp.Client, rdbHandle *rdb.Handle) *StatusHandler {
@@ -50,6 +54,9 @@ func NewStatusHandler(logger applogger.Logger, cosmosAppClient cosmosapp.Client,
 		validator_view.NewValidators(rdbHandle),
 		validatorstats_view.NewValidatorStats(rdbHandle),
 		status_polling.NewStatus(rdbHandle),
+
+		coin.NewEmptyCoins(),
+		time.Unix(int64(0), int64(0)),
 	}
 }
 
@@ -79,13 +86,15 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 	//if rawTotalDelegated != "" {
 	//	json.MustUnmarshalFromString(rawTotalDelegated, &totalDelegated)
 	//}
-	totalBondedBalance, err := handler.cosmosAppClient.TotalBondedBalance()
-	if err != nil {
-		handler.logger.Errorf("error fetching total delegate: %v", err)
-		httpapi.InternalServerError(ctx)
-		return
+	if handler.totalDelegatedLastUpdatedAt.Add(15 * time.Minute).Before(time.Now()) {
+		totalBondedBalance, totalBondedBalanceErr := handler.cosmosAppClient.TotalBondedBalance()
+		if totalBondedBalanceErr != nil {
+			handler.logger.Errorf("error fetching total delegate: %v", totalBondedBalanceErr)
+			httpapi.InternalServerError(ctx)
+			return
+		}
+		handler.totalDelegated = coin.NewCoins(totalBondedBalance)
 	}
-	totalDelegated := coin.NewCoins(totalBondedBalance)
 
 	rawTotalReward, err := handler.validatorStatsView.FindBy(validatorstats.TOTAL_REWARD)
 	if err != nil {
@@ -179,7 +188,7 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 	status := Status{
 		BlockCount:                  blockCount,
 		TransactionCount:            transactionCount,
-		TotalDelegated:              totalDelegated,
+		TotalDelegated:              handler.totalDelegated,
 		TotalReward:                 totalReward,
 		ValidatorCount:              validatorCount,
 		ActiveValidatorCount:        activeValidatorCount,
