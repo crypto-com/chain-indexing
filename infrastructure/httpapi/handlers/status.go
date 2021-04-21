@@ -4,6 +4,8 @@ import (
 	"math/big"
 	"strconv"
 
+	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
+
 	"github.com/crypto-com/chain-indexing/projection/chainstats"
 
 	"github.com/crypto-com/chain-indexing/internal/json"
@@ -26,6 +28,7 @@ import (
 type StatusHandler struct {
 	logger applogger.Logger
 
+	cosmosAppClient       cosmosapp.Client
 	blocksView            *block_view.Blocks
 	chainStatsView        *chainstats_view.ChainStats
 	transactionsTotalView *transaction_view.TransactionsTotal
@@ -34,12 +37,13 @@ type StatusHandler struct {
 	statusView            *status_polling.Status
 }
 
-func NewStatusHandler(logger applogger.Logger, rdbHandle *rdb.Handle) *StatusHandler {
+func NewStatusHandler(logger applogger.Logger, cosmosAppClient cosmosapp.Client, rdbHandle *rdb.Handle) *StatusHandler {
 	return &StatusHandler{
 		logger.WithFields(applogger.LogFields{
 			"module": "StatusHandler",
 		}),
 
+		cosmosAppClient,
 		block_view.NewBlocks(rdbHandle),
 		chainstats_view.NewChainStats(rdbHandle),
 		transaction_view.NewTransactionsTotal(rdbHandle),
@@ -64,16 +68,24 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	rawTotalDelegated, err := handler.validatorStatsView.FindBy(validatorstats.TOTAL_DELEGATE)
+	// TODO: https://github.com/crypto-com/chain-indexing/issues/386
+	//rawTotalDelegated, err := handler.validatorStatsView.FindBy(validatorstats.TOTAL_DELEGATE)
+	//if err != nil {
+	//	handler.logger.Errorf("error fetching total delegate: %v", err)
+	//	httpapi.InternalServerError(ctx)
+	//	return
+	//}
+	//var totalDelegated coin.Coins
+	//if rawTotalDelegated != "" {
+	//	json.MustUnmarshalFromString(rawTotalDelegated, &totalDelegated)
+	//}
+	totalBondedBalance, err := handler.cosmosAppClient.TotalBondedBalance()
 	if err != nil {
 		handler.logger.Errorf("error fetching total delegate: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
 	}
-	var totalDelegated coin.Coins
-	if rawTotalDelegated != "" {
-		json.MustUnmarshalFromString(rawTotalDelegated, &totalDelegated)
-	}
+	totalDelegated := coin.NewCoins(totalBondedBalance)
 
 	rawTotalReward, err := handler.validatorStatsView.FindBy(validatorstats.TOTAL_REWARD)
 	if err != nil {
