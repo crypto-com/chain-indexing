@@ -166,6 +166,7 @@ func (handler *Validators) List(ctx *fasthttp.RequestCtx) {
 			httpapi.InternalServerError(ctx)
 			return
 		}
+		handler.globalAPYLastUpdatedAt = time.Now()
 	}
 	validatorsWithAPY := make([]validatorRowWithAPY, 0, len(validators))
 	for _, validator := range validators {

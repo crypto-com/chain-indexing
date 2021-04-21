@@ -94,6 +94,7 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 			return
 		}
 		handler.totalDelegated = coin.NewCoins(totalBondedBalance)
+		handler.totalDelegatedLastUpdatedAt = time.Now()
 	}
 
 	rawTotalReward, err := handler.validatorStatsView.FindBy(validatorstats.TOTAL_REWARD)
