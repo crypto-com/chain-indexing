@@ -2,7 +2,7 @@ package cosmosapp
 
 import cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 
-type DelegationResp struct {
+type DelegationsResp struct {
 	MaybeDelegationResponses []cosmosapp_interface.DelegationResponse `json:"delegation_responses"`
 	MaybePagination          *Pagination                              `json:"pagination"`
 	// On error

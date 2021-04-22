@@ -17,6 +17,8 @@ type Client interface {
 	Commission(validatorAddress string) (coin.DecCoins, error)
 	Validator(validatorAddress string) (*Validator, error)
 	Delegation(delegator string, validator string) (*DelegationResponse, error)
+	AnnualProvisions() (coin.DecCoin, error)
+	TotalBondedBalance() (coin.Coin, error)
 }
 
 var ErrAccountNotFound = errors.New("account not found")

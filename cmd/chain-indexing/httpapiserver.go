@@ -90,7 +90,7 @@ func (server *HTTPAPIServer) Run() error {
 
 	searchHandler := handlers.NewSearch(server.logger, server.rdbConn.ToHandle())
 	blocksHandler := handlers.NewBlocks(server.logger, server.rdbConn.ToHandle())
-	statusHandler := handlers.NewStatusHandler(server.logger, server.rdbConn.ToHandle())
+	statusHandler := handlers.NewStatusHandler(server.logger, server.cosmosAppClient, server.rdbConn.ToHandle())
 	transactionsHandler := handlers.NewTransactions(server.logger, server.rdbConn.ToHandle())
 	blockEventsHandler := handlers.NewBlockEvents(server.logger, server.rdbConn.ToHandle())
 	validatorsHandler := handlers.NewValidators(

@@ -3,6 +3,9 @@ package handlers
 import (
 	"math/big"
 	"strconv"
+	"time"
+
+	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 
 	"github.com/crypto-com/chain-indexing/projection/chainstats"
 
@@ -26,26 +29,34 @@ import (
 type StatusHandler struct {
 	logger applogger.Logger
 
+	cosmosAppClient       cosmosapp.Client
 	blocksView            *block_view.Blocks
 	chainStatsView        *chainstats_view.ChainStats
 	transactionsTotalView *transaction_view.TransactionsTotal
 	validatorsView        *validator_view.Validators
 	validatorStatsView    *validatorstats_view.ValidatorStats
 	statusView            *status_polling.Status
+
+	totalDelegated              coin.Coins
+	totalDelegatedLastUpdatedAt time.Time
 }
 
-func NewStatusHandler(logger applogger.Logger, rdbHandle *rdb.Handle) *StatusHandler {
+func NewStatusHandler(logger applogger.Logger, cosmosAppClient cosmosapp.Client, rdbHandle *rdb.Handle) *StatusHandler {
 	return &StatusHandler{
 		logger.WithFields(applogger.LogFields{
 			"module": "StatusHandler",
 		}),
 
+		cosmosAppClient,
 		block_view.NewBlocks(rdbHandle),
 		chainstats_view.NewChainStats(rdbHandle),
 		transaction_view.NewTransactionsTotal(rdbHandle),
 		validator_view.NewValidators(rdbHandle),
 		validatorstats_view.NewValidatorStats(rdbHandle),
 		status_polling.NewStatus(rdbHandle),
+
+		coin.NewEmptyCoins(),
+		time.Unix(int64(0), int64(0)),
 	}
 }
 
@@ -64,15 +75,26 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	rawTotalDelegated, err := handler.validatorStatsView.FindBy(validatorstats.TOTAL_DELEGATE)
-	if err != nil {
-		handler.logger.Errorf("error fetching total delegate: %v", err)
-		httpapi.InternalServerError(ctx)
-		return
-	}
-	var totalDelegated coin.Coins
-	if rawTotalDelegated != "" {
-		json.MustUnmarshalFromString(rawTotalDelegated, &totalDelegated)
+	// TODO: https://github.com/crypto-com/chain-indexing/issues/386
+	//rawTotalDelegated, err := handler.validatorStatsView.FindBy(validatorstats.TOTAL_DELEGATE)
+	//if err != nil {
+	//	handler.logger.Errorf("error fetching total delegate: %v", err)
+	//	httpapi.InternalServerError(ctx)
+	//	return
+	//}
+	//var totalDelegated coin.Coins
+	//if rawTotalDelegated != "" {
+	//	json.MustUnmarshalFromString(rawTotalDelegated, &totalDelegated)
+	//}
+	if handler.totalDelegatedLastUpdatedAt.Add(15 * time.Minute).Before(time.Now()) {
+		totalBondedBalance, totalBondedBalanceErr := handler.cosmosAppClient.TotalBondedBalance()
+		if totalBondedBalanceErr != nil {
+			handler.logger.Errorf("error fetching total delegate: %v", totalBondedBalanceErr)
+			httpapi.InternalServerError(ctx)
+			return
+		}
+		handler.totalDelegated = coin.NewCoins(totalBondedBalance)
+		handler.totalDelegatedLastUpdatedAt = time.Now()
 	}
 
 	rawTotalReward, err := handler.validatorStatsView.FindBy(validatorstats.TOTAL_REWARD)
@@ -167,7 +189,7 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 	status := Status{
 		BlockCount:                  blockCount,
 		TransactionCount:            transactionCount,
-		TotalDelegated:              totalDelegated,
+		TotalDelegated:              handler.totalDelegated,
 		TotalReward:                 totalReward,
 		ValidatorCount:              validatorCount,
 		ActiveValidatorCount:        activeValidatorCount,

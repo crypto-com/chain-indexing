@@ -20,6 +20,9 @@ import (
 
 var _ cosmosapp_interface.Client = &HTTPClient{}
 
+const ERR_CODE_ACCOUNT_NOT_FOUND = 2
+const ERR_CODE_ACCOUNT_NO_DELEGATION = 5
+
 type HTTPClient struct {
 	httpClient *http.Client
 	rpcUrl     string
@@ -227,7 +230,7 @@ func (client *HTTPClient) BalanceByDenom(accountAddress string, denom string) (*
 }
 
 func (client *HTTPClient) BondedBalance(accountAddress string) (coin.Coins, error) {
-	resp := &DelegationResp{
+	resp := &DelegationsResp{
 		MaybePagination: &Pagination{
 			MaybeNextKey: nil,
 			Total:        "",
@@ -253,9 +256,9 @@ func (client *HTTPClient) BondedBalance(accountAddress string) (coin.Coins, erro
 			return nil, decodeErr
 		}
 		if resp.MaybeCode != nil {
-			if *resp.MaybeCode == 2 {
+			if *resp.MaybeCode == ERR_CODE_ACCOUNT_NOT_FOUND {
 				return nil, cosmosapp_interface.ErrAccountNotFound
-			} else if *resp.MaybeCode == 5 {
+			} else if *resp.MaybeCode == ERR_CODE_ACCOUNT_NO_DELEGATION {
 				return nil, cosmosapp_interface.ErrAccountNoDelegation
 			}
 		}
@@ -450,7 +453,7 @@ func (client *HTTPClient) Commission(validatorAddress string) (coin.DecCoins, er
 func (client *HTTPClient) Delegation(
 	delegator string, validator string,
 ) (*cosmosapp_interface.DelegationResponse, error) {
-	resp := &DelegationResp{
+	resp := &DelegationsResp{
 		MaybePagination: &Pagination{
 			MaybeNextKey: nil,
 			Total:        "",
@@ -474,7 +477,7 @@ func (client *HTTPClient) Delegation(
 		if decodeErr := jsoniter.NewDecoder(rawRespBody).Decode(&resp); decodeErr != nil {
 			return nil, decodeErr
 		}
-		if resp.MaybeCode != nil && *resp.MaybeCode == 2 {
+		if resp.MaybeCode != nil && *resp.MaybeCode == ERR_CODE_ACCOUNT_NOT_FOUND {
 			return nil, cosmosapp_interface.ErrAccountNotFound
 		}
 		if statusCode != 200 {
@@ -494,6 +497,78 @@ func (client *HTTPClient) Delegation(
 	}
 
 	return nil, nil
+}
+
+func (client *HTTPClient) AnnualProvisions() (coin.DecCoin, error) {
+	rawRespBody, err := client.request(client.getUrl("mint", "annual_provisions"))
+	if err != nil {
+		return coin.DecCoin{}, err
+	}
+	defer rawRespBody.Close()
+
+	var annualProvisionsResp AnnualProvisionsResp
+	if err := jsoniter.NewDecoder(rawRespBody).Decode(&annualProvisionsResp); err != nil {
+		return coin.DecCoin{}, err
+	}
+
+	annualProvisions, coinErr := coin.NewDecCoinFromString(client.bondingDenom, annualProvisionsResp.AnnualProvisions)
+	if coinErr != nil {
+		return coin.DecCoin{}, fmt.Errorf("error parsing coin from annual provision: %v", annualProvisions)
+	}
+
+	return annualProvisions, nil
+}
+
+func (client *HTTPClient) TotalBondedBalance() (coin.Coin, error) {
+	resp := &ValidatorsResp{
+		MaybePagination: &Pagination{
+			MaybeNextKey: nil,
+			Total:        "",
+		},
+	}
+
+	totalBondedBalance := coin.NewCoin(client.bondingDenom, coin.ZeroInt())
+	for {
+		queryUrl := client.getUrl("staking", "validators")
+		if resp.MaybePagination.MaybeNextKey != nil {
+			queryUrl = fmt.Sprintf(
+				"%s?pagination.key=%s",
+				queryUrl, url.QueryEscape(*resp.MaybePagination.MaybeNextKey),
+			)
+		}
+
+		rawRespBody, statusCode, err := client.rawRequest(queryUrl)
+		if err != nil {
+			return coin.Coin{}, err
+		}
+		defer rawRespBody.Close()
+
+		if decodeErr := jsoniter.NewDecoder(rawRespBody).Decode(&resp); decodeErr != nil {
+			return coin.Coin{}, decodeErr
+		}
+		if resp.MaybeCode != nil && *resp.MaybeCode == ERR_CODE_ACCOUNT_NOT_FOUND {
+			return coin.Coin{}, cosmosapp_interface.ErrAccountNotFound
+		}
+		if statusCode != 200 {
+			return coin.Coin{}, fmt.Errorf("error requesting Cosmos %s endpoint: status code %d", queryUrl, statusCode)
+		}
+
+		for _, validator := range resp.MaybeValidatorResponse {
+			bondedCoin, coinErr := coin.NewCoinFromString(client.bondingDenom, validator.Tokens)
+			if coinErr != nil {
+				if coinErr != nil {
+					return coin.Coin{}, fmt.Errorf("error parsing Coin from validator tokens: %v", coinErr)
+				}
+			}
+			totalBondedBalance = totalBondedBalance.Add(bondedCoin)
+		}
+
+		if resp.MaybePagination.MaybeNextKey == nil {
+			break
+		}
+	}
+
+	return totalBondedBalance, nil
 }
 
 func (client *HTTPClient) getUrl(module string, method string) string {

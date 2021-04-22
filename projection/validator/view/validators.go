@@ -230,6 +230,7 @@ type ValidatorsListFilter struct {
 type ValidatorsListOrder struct {
 	MaybeStatus              *view.ORDER
 	MaybePower               *view.ORDER
+	MaybeCommission          *view.ORDER
 	MaybeJoinedAtBlockHeight *view.ORDER
 }
 
@@ -256,6 +257,15 @@ func (validatorsView *Validators) ListAll(
 				"WHEN 'BONDED' THEN 4" +
 				"ELSE 5 END"
 			orderClauses = append(orderClauses, statusOrder)
+		}
+	}
+
+	if order.MaybeCommission != nil {
+		if *order.MaybeCommission == view.ORDER_ASC {
+			orderClauses = append(orderClauses, "CAST(commission_rate AS DECIMAL)")
+		} else if *order.MaybeCommission == view.ORDER_DESC {
+			// DESC order
+			orderClauses = append(orderClauses, "CAST(commission_rate AS DECIMAL) DESC")
 		}
 	}
 
@@ -390,6 +400,15 @@ func (validatorsView *Validators) List(
 				"WHEN 'BONDED' THEN 4" +
 				"ELSE 5 END"
 			orderClauses = append(orderClauses, statusOrder)
+		}
+	}
+
+	if order.MaybeCommission != nil {
+		if *order.MaybeCommission == view.ORDER_ASC {
+			orderClauses = append(orderClauses, "CAST(commission_rate AS DECIMAL)")
+		} else if *order.MaybeCommission == view.ORDER_DESC {
+			// DESC order
+			orderClauses = append(orderClauses, "CAST(commission_rate AS DECIMAL) DESC")
 		}
 	}
 
