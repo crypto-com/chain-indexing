@@ -20,6 +20,9 @@ import (
 
 var _ cosmosapp_interface.Client = &HTTPClient{}
 
+const ERR_CODE_ACCOUNT_NOT_FOUND = 2
+const ERR_CODE_ACCOUNT_NO_DELEGATION = 5
+
 type HTTPClient struct {
 	httpClient *http.Client
 	rpcUrl     string
@@ -253,9 +256,9 @@ func (client *HTTPClient) BondedBalance(accountAddress string) (coin.Coins, erro
 			return nil, decodeErr
 		}
 		if resp.MaybeCode != nil {
-			if *resp.MaybeCode == 2 {
+			if *resp.MaybeCode == ERR_CODE_ACCOUNT_NOT_FOUND {
 				return nil, cosmosapp_interface.ErrAccountNotFound
-			} else if *resp.MaybeCode == 5 {
+			} else if *resp.MaybeCode == ERR_CODE_ACCOUNT_NO_DELEGATION {
 				return nil, cosmosapp_interface.ErrAccountNoDelegation
 			}
 		}
@@ -474,7 +477,7 @@ func (client *HTTPClient) Delegation(
 		if decodeErr := jsoniter.NewDecoder(rawRespBody).Decode(&resp); decodeErr != nil {
 			return nil, decodeErr
 		}
-		if resp.MaybeCode != nil && *resp.MaybeCode == 2 {
+		if resp.MaybeCode != nil && *resp.MaybeCode == ERR_CODE_ACCOUNT_NOT_FOUND {
 			return nil, cosmosapp_interface.ErrAccountNotFound
 		}
 		if statusCode != 200 {
@@ -543,7 +546,7 @@ func (client *HTTPClient) TotalBondedBalance() (coin.Coin, error) {
 		if decodeErr := jsoniter.NewDecoder(rawRespBody).Decode(&resp); decodeErr != nil {
 			return coin.Coin{}, decodeErr
 		}
-		if resp.MaybeCode != nil && *resp.MaybeCode == 2 {
+		if resp.MaybeCode != nil && *resp.MaybeCode == ERR_CODE_ACCOUNT_NOT_FOUND {
 			return coin.Coin{}, cosmosapp_interface.ErrAccountNotFound
 		}
 		if statusCode != 200 {
