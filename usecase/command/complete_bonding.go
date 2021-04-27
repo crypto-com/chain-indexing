@@ -1,4 +1,7 @@
-package command
+
+With current GPG (2.1+), to stop gpg-agent you can use gpgconf --kill, like this:
+
+gpgconf --kill gpg-agentpackage command
 
 import (
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
@@ -6,13 +9,13 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
-type CreateCompleteBonding struct {
+type CreateCompleteUnbonding struct {
 	blockHeight int64
 	params      model.CompleteBondingParams
 }
 
-func NewCreateCompleteBonding(blockHeight int64, params model.CompleteBondingParams) *CreateCompleteBonding {
-	return &CreateCompleteBonding{
+func NewCreateCompleteBonding(blockHeight int64, params model.CompleteBondingParams) *CreateCompleteUnbonding {
+	return &CreateCompleteUnbonding{
 		blockHeight,
 
 		params,
@@ -20,17 +23,17 @@ func NewCreateCompleteBonding(blockHeight int64, params model.CompleteBondingPar
 }
 
 // Name returns name of command
-func (*CreateCompleteBonding) Name() string {
-	return "CreateBlockReward"
+func (*CreateCompleteUnbonding) Name() string {
+	return "CreateCompleteUnbonding"
 }
 
 // Version returns version of command
-func (*CreateCompleteBonding) Version() int {
+func (*CreateCompleteUnbonding) Version() int {
 	return 1
 }
 
 // Exec process the command data and return the event accordingly
-func (cmd *CreateCompleteBonding) Exec() (entity_event.Event, error) {
-	event := event.NewBondingCompleted(cmd.blockHeight, cmd.params)
+func (cmd *CreateCompleteUnbonding) Exec() (entity_event.Event, error) {
+	event := event.NewUnbondingCompleted(cmd.blockHeight, cmd.params)
 	return event, nil
 }

@@ -14,13 +14,13 @@ var _ = Describe("Event", func() {
 	registry := event_entity.NewRegistry()
 	event_usecase.RegisterEvents(registry)
 
-	Describe("En/DecodeBondingCompleted", func() {
+	Describe("En/DecodeUnbondingCompleted", func() {
 		It("should able to encode and decode to the same event", func() {
 			anyHeight := int64(1000)
 			anyDelegator := "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"
 			anyValidator := "tcrocncl1sruzd529lhjju6hfcwd2fxp3v0e7p0vqqtme76"
 			anyAmount := coin.MustParseCoinsNormalized("123456basetcro,456789tcro")
-			event := event_usecase.NewBondingCompleted(anyHeight, model.CompleteBondingParams{
+			event := event_usecase.NewUnbondingCompleted(anyHeight, model.CompleteBondingParams{
 				Delegator: anyDelegator,
 				Validator: anyValidator,
 				Amount:    anyAmount,
@@ -30,12 +30,12 @@ var _ = Describe("Event", func() {
 			Expect(err).To(BeNil())
 
 			decodedEvent, err := registry.DecodeByType(
-				event_usecase.BONDING_COMPLETED, 1, []byte(encoded),
+				event_usecase.UNBONDING_COMPLETED, 1, []byte(encoded),
 			)
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))
 			typedEvent, _ := decodedEvent.(*event_usecase.BondingCompleted)
-			Expect(typedEvent.Name()).To(Equal(event_usecase.BONDING_COMPLETED))
+			Expect(typedEvent.Name()).To(Equal(event_usecase.UNBONDING_COMPLETED))
 			Expect(typedEvent.Version()).To(Equal(1))
 
 			Expect(typedEvent.Validator).To(Equal(anyValidator))

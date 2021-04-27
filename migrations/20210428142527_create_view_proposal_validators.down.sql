@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS view_proposal_validators;
+
+DROP INDEX IF EXISTS view_proposal_validators_initial_delegator_address_btree_index;
+
+DROP INDEX IF EXISTS view_proposal_validators_initial_delegator_address_btree_index;

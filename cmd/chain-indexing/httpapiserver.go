@@ -108,6 +108,11 @@ func (server *HTTPAPIServer) Run() error {
 		server.cosmosAppClient,
 		server.validatorAddressPrefix,
 	)
+	proposalsHandler := handlers.NewProposals(
+		server.logger,
+		server.rdbConn.ToHandle(),
+		server.cosmosAppClient,
+	)
 
 	routeRegistry := routes.NewRoutesRegistry(
 		searchHandler,
@@ -119,6 +124,7 @@ func (server *HTTPAPIServer) Run() error {
 		accountTransactionsHandler,
 		accountMessagesHandler,
 		accountsHandler,
+		proposalsHandler,
 	)
 	routeRegistry.Register(httpServer, server.routePrefix)
 

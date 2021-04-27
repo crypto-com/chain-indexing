@@ -10,7 +10,15 @@ import (
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 )
 
-var _ = Describe("UtcTime", func() {
+var _ = Describe("UTCTime", func() {
+	Describe("Add", func() {
+		It("should work", func() {
+			t := utctime.FromUnixNano(int64(100000))
+			result := t.Add(123 * time.Second)
+			Expect(result.UnixNano()).To(Equal(int64(123000100000)))
+		})
+	})
+
 	Describe("JSON en/decoding", func() {
 		It("should encode to the unix nano time", func() {
 			t := utctime.FromUnixNano(1000000)

@@ -34,6 +34,27 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 		}))
 	})
 
+	It("should return EndProposal commands when end_blocks_events has proposal_active passed event", func() {
+		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_PROPOSAL_PASSED_BLOCK_RESULTS_RESP)
+
+		cmds, err := parser.ParseEndBlockEventsCommands(
+			blockResults.Height,
+			blockResults.EndBlockEvents,
+		)
+		Expect(err).To(BeNil())
+		Expect(cmds).To(HaveLen(1))
+		expectedBlockHeight := int64(520186)
+		expectedProposalId := "7"
+		expectedResult := "proposal_passed"
+		Expect(cmds).To(Equal([]command.Command{
+			command_usecase.NewEndProposal(
+				expectedBlockHeight,
+				expectedProposalId,
+				expectedResult,
+			),
+		}))
+	})
+
 	It("should return InactiveProposal commands when end_blocks_events has proposal_inactive event", func() {
 		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_PROPOSAL_INACTIVED_BLOCK_RESULTS_RESP)
 

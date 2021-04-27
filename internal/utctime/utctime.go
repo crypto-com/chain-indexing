@@ -49,6 +49,11 @@ func Now() UTCTime {
 	}
 }
 
+func (t UTCTime) Add(d gotime.Duration) UTCTime {
+	newTime := gotime.Unix(0, t.unixNano).UTC().Add(d)
+	return FromUnixNano(newTime.UnixNano())
+}
+
 func (t UTCTime) UnixNano() int64 {
 	return t.unixNano
 }

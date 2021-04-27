@@ -13,7 +13,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const BONDING_COMPLETED = "BondingCompleted"
+const UNBONDING_COMPLETED = "UnbondingCompleted"
 
 type BondingCompleted struct {
 	event_entity.Base
@@ -23,10 +23,10 @@ type BondingCompleted struct {
 	Amount    coin.Coins `json:"amount"`
 }
 
-func NewBondingCompleted(blockHeight int64, params model.CompleteBondingParams) *BondingCompleted {
+func NewUnbondingCompleted(blockHeight int64, params model.CompleteBondingParams) *BondingCompleted {
 	return &BondingCompleted{
 		event_entity.NewBase(event_entity.BaseParams{
-			Name:        BONDING_COMPLETED,
+			Name:        UNBONDING_COMPLETED,
 			Version:     1,
 			BlockHeight: blockHeight,
 		}),
@@ -50,7 +50,7 @@ func (event *BondingCompleted) String() string {
 	return render.Render(event)
 }
 
-func DecodeBondingCompleted(encoded []byte) (event_entity.Event, error) {
+func DecodeUnbondingCompleted(encoded []byte) (event_entity.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 

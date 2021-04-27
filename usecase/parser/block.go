@@ -55,13 +55,13 @@ func ParseBlockToCommands(
 
 	beginBlockEventsCommands, parseErr := ParseBeginBlockEventsCommands(block.Height, blockResults.BeginBlockEvents)
 	if parseErr != nil {
-		return nil, fmt.Errorf("error parsing block_results_events commands: %v", parseErr)
+		return nil, fmt.Errorf("error parsing begin_block_events commands: %v", parseErr)
 	}
 	commands = append(commands, beginBlockEventsCommands...)
 
-	endBlockEventsCommands, parseErr := ParseEndBlockEventsCommands(block.Height, blockResults.BeginBlockEvents)
+	endBlockEventsCommands, parseErr := ParseEndBlockEventsCommands(block.Height, blockResults.EndBlockEvents)
 	if parseErr != nil {
-		return nil, fmt.Errorf("error parsing block_results_events commands: %v", parseErr)
+		return nil, fmt.Errorf("error parsing end_block_events commands: %v", parseErr)
 	}
 	commands = append(commands, endBlockEventsCommands...)
 

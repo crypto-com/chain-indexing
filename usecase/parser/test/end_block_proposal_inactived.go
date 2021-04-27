@@ -1,10 +1,10 @@
 package usecase_parser_test
 
-const END_BLOCK_PROPOSAL_REJECTED_BLOCK_RESULTS_RESP = `{
+const END_BLOCK_PROPOSAL_INACTIVED_BLOCK_RESULTS_RESP = `{
   "jsonrpc": "2.0",
   "id": -1,
   "result": {
-    "height": "21575",
+    "height": "21541",
     "txs_results": null,
     "begin_block_events": [
       {
@@ -42,17 +42,17 @@ const END_BLOCK_PROPOSAL_REJECTED_BLOCK_RESULTS_RESP = `{
         "attributes": [
           {
             "key": "Ym9uZGVkX3JhdGlv",
-            "value": "MC4wMzIyNDM3MTU0NTIyMDI0NDg=",
+            "value": "MC4wMzIyNDM3MzgwOTI4MzI4ODg=",
             "index": true
           },
           {
             "key": "aW5mbGF0aW9u",
-            "value": "MC4xMzA0MjI5OTUwMTU5NjU5NzA=",
+            "value": "MC4xMzA0MjIzMjg0MTE0NjI1NTA=",
             "index": true
           },
           {
             "key": "YW5udWFsX3Byb3Zpc2lvbnM=",
-            "value": "ODA4OTgyNDIxNC41Mzg5NzY3ODk4NTYzNDg3ODA=",
+            "value": "ODA4OTc3NzE4Ni4yNTMyNzIyNzM5NzE2MzEwMDA=",
             "index": true
           },
           {
@@ -200,16 +200,16 @@ const END_BLOCK_PROPOSAL_REJECTED_BLOCK_RESULTS_RESP = `{
     ],
     "end_block_events": [
       {
-        "type": "active_proposal",
+        "type": "inactive_proposal",
         "attributes": [
           {
             "key": "cHJvcG9zYWxfaWQ=",
-            "value": "MQ==",
+            "value": "Mg==",
             "index": true
           },
           {
             "key": "cHJvcG9zYWxfcmVzdWx0",
-            "value": "cHJvcG9zYWxfcmVqZWN0ZWQ=",
+            "value": "cHJvcG9zYWxfZHJvcHBlZA==",
             "index": true
           }
         ]

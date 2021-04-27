@@ -62,13 +62,13 @@ color = false
 [projection]
 enables = [
     # "Account",
-    # "AccountMessage",
-    # "AccountTransaction",
-    # "Block",
-    # "BlockEvent",
-    # "ChainStats",
+    "AccountMessage",
+    "AccountTransaction",
+    "Block",
+    "BlockEvent",
+    "ChainStats",
     "Proposal",
-    # "Transaction",
-    # "Validator",
-    # "ValidatorStats",
+    "Transaction",
+    "Validator",
+    "ValidatorStats",
 ]

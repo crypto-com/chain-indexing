@@ -571,6 +571,103 @@ func (client *HTTPClient) TotalBondedBalance() (coin.Coin, error) {
 	return totalBondedBalance, nil
 }
 
+func (client *HTTPClient) Proposals() ([]cosmosapp_interface.Proposal, error) {
+	resp := &ProposalsResp{
+		MaybePagination: &Pagination{
+			MaybeNextKey: nil,
+			Total:        "",
+		},
+	}
+
+	proposals := make([]cosmosapp_interface.Proposal, 0)
+	for {
+		queryUrl := client.getUrl("gov", "proposals")
+		if resp.MaybePagination.MaybeNextKey != nil {
+			queryUrl = fmt.Sprintf(
+				"%s?pagination.key=%s",
+				queryUrl, url.QueryEscape(*resp.MaybePagination.MaybeNextKey),
+			)
+		}
+
+		rawRespBody, statusCode, err := client.rawRequest(queryUrl)
+		if err != nil {
+			return nil, err
+		}
+		defer rawRespBody.Close()
+
+		if decodeErr := jsoniter.NewDecoder(rawRespBody).Decode(&resp); decodeErr != nil {
+			return nil, decodeErr
+		}
+		if statusCode != 200 {
+			return nil, fmt.Errorf("error requesting Cosmos %s endpoint: status code %d", queryUrl, statusCode)
+		}
+
+		proposals = append(proposals, resp.MaybeProposalsResponse...)
+
+		if resp.MaybePagination.MaybeNextKey == nil {
+			break
+		}
+	}
+
+	return proposals, nil
+}
+
+func (client *HTTPClient) ProposalById(id string) (cosmosapp_interface.Proposal, error) {
+	method := fmt.Sprintf(
+		"%s/%s",
+		client.getUrl("gov", "proposals"), id,
+	)
+	rawRespBody, statusCode, err := client.rawRequest(
+		method, "",
+	)
+	if err != nil {
+		return cosmosapp_interface.Proposal{}, err
+	}
+	if statusCode == 404 {
+		return cosmosapp_interface.Proposal{}, cosmosapp_interface.ErrProposalNotFound
+	}
+	if statusCode != 200 {
+		rawRespBody.Close()
+		return cosmosapp_interface.Proposal{}, fmt.Errorf("error requesting Cosmos %s endpoint: %d", method, statusCode)
+	}
+	defer rawRespBody.Close()
+
+	var proposalResp ProposalResp
+	if err := jsoniter.NewDecoder(rawRespBody).Decode(&proposalResp); err != nil {
+		return cosmosapp_interface.Proposal{}, err
+	}
+
+	return proposalResp.Proposal, nil
+}
+
+func (client *HTTPClient) ProposalTally(id string) (cosmosapp_interface.Tally, error) {
+	method := fmt.Sprintf(
+		"%s/%s/tally",
+		client.getUrl("gov", "proposals"), id,
+	)
+	rawRespBody, statusCode, err := client.rawRequest(
+		method, "",
+	)
+	if err != nil {
+		return cosmosapp_interface.Tally{}, err
+	}
+	if statusCode == 404 {
+		return cosmosapp_interface.Tally{}, cosmosapp_interface.ErrProposalNotFound
+	}
+	if statusCode != 200 {
+		rawRespBody.Close()
+		return cosmosapp_interface.Tally{}, fmt.Errorf("error requesting Cosmos %s endpoint: %d", method, statusCode)
+	}
+	defer rawRespBody.Close()
+
+	var tallyResp TallyResp
+	if err := jsoniter.NewDecoder(rawRespBody).Decode(&tallyResp); err != nil {
+		return cosmosapp_interface.Tally{}, err
+	}
+
+	return tallyResp.Tally, nil
+}
+
 func (client *HTTPClient) getUrl(module string, method string) string {
 	return fmt.Sprintf("cosmos/%s/v1beta1/%s", module, method)
 }
