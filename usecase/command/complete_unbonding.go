@@ -1,7 +1,4 @@
-
-With current GPG (2.1+), to stop gpg-agent you can use gpgconf --kill, like this:
-
-gpgconf --kill gpg-agentpackage command
+package command
 
 import (
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
