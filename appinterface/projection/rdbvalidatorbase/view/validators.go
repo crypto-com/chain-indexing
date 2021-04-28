@@ -10,13 +10,13 @@ import (
 // A "Validators" compatible table should have the follow table schema
 // | Column                    | Type      | Constraint           |
 // | ------------------------- | --------- | -------------------- |
-// | id						   | BIGSERIAL | PRIMARY KEY          |
+// | id                        | BIGSERIAL | PRIMARY KEY          |
 // | consensus_node_address    | VARCHAR   | UNIQUE1              |
 // | operator_address          | VARCHAR   | NOT NULL, UNIQUE1    |
 // | initial_delegator_address | VARCHAR   | NOT NULL             |
 // | tendermint_pubkey         | VARCHAR   | NOT NULL             |
 // | tendermint_address        | VARCHAR   | NOT NULL             |
-// | moniker 				   | VARCHAR   | NOT NULL             |
+// | moniker                   | VARCHAR   | NOT NULL             |
 
 // A generic validator view
 type Validators struct {
