@@ -14,7 +14,7 @@ import (
 
 const DO_NOT_MODIFY = "[do-not-modify]"
 
-// a generic Param projection. For table schema refer to view/params.go
+// a generic Validator projection. For table schema refer to view/validators.go
 type Base struct {
 	tableName string
 
