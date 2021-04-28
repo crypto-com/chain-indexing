@@ -67,7 +67,7 @@ func ParseBlockResultsTxsMsgToCommands(
 			case "/cosmos.gov.v1beta1.MsgVote":
 				msgCommands = parseMsgVote(msgCommonParams, msg)
 			case "/cosmos.gov.v1beta1.MsgDeposit":
-				msgCommands = parseMsgDeposit(msgCommonParams, msg)
+				msgCommands = parseMsgDeposit(msgCommonParams, txsResult, msgIndex, msg)
 			case "/cosmos.staking.v1beta1.MsgDelegate":
 				msgCommands = parseMsgDelegate(msgCommonParams, msg)
 			case "/cosmos.staking.v1beta1.MsgUndelegate":
@@ -270,18 +270,36 @@ func parseMsgSubmitProposal(
 		panic(fmt.Sprintf("error decoding proposal content: %v", err))
 	}
 
+	var cmds []command.Command
 	if proposalContent.Type == "/cosmos.params.v1beta1.ParameterChangeProposal" {
-		return parseMsgSubmitParamChangeProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
+		cmds = parseMsgSubmitParamChangeProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal" {
-		return parseMsgSubmitCommunityFundSpendProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
+		cmds = parseMsgSubmitCommunityFundSpendProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal" {
-		return parseMsgSubmitSoftwareUpgradeProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
+		cmds = parseMsgSubmitSoftwareUpgradeProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal" {
-		return parseMsgSubmitCancelSoftwareUpgradeProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
+		cmds = parseMsgSubmitCancelSoftwareUpgradeProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.gov.v1beta1.TextProposal" {
-		return parseMsgSubmitTextProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
+		cmds = parseMsgSubmitTextProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
+	} else {
+		panic(fmt.Sprintf("unrecognzied govenance proposal type `%s`", proposalContent.Type))
 	}
-	panic(fmt.Sprintf("unrecognzied govenance proposal type `%s`", proposalContent.Type))
+
+	if msgCommonParams.TxSuccess {
+		log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+		logEvent := log.GetEventByType("submit_proposal")
+		if logEvent == nil {
+			panic("missing `submit_proposal` event in TxsResult log")
+		}
+
+		if logEvent.HasAttribute("voting_period_start") {
+			cmds = append(cmds, command_usecase.NewStartProposalVotingPeriod(
+				msgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"),
+			))
+		}
+	}
+
+	return cmds
 }
 
 func parseMsgSubmitParamChangeProposal(
@@ -312,7 +330,6 @@ func parseMsgSubmitParamChangeProposal(
 		)}
 	}
 	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
-	// When there is no reward withdrew, `transfer` event would not exist
 	event := log.GetEventByType("submit_proposal")
 	if event == nil {
 		panic("missing `submit_proposal` event in TxsResult log")
@@ -584,9 +601,11 @@ func parseMsgVote(
 
 func parseMsgDeposit(
 	msgCommonParams event.MsgCommonParams,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
 	msg map[string]interface{},
 ) []command.Command {
-	return []command.Command{command_usecase.NewCreateMsgDeposit(
+	cmds := []command.Command{command_usecase.NewCreateMsgDeposit(
 		msgCommonParams,
 
 		model.MsgDepositParams{
@@ -595,6 +614,25 @@ func parseMsgDeposit(
 			Amount:     tmcosmosutils.MustNewCoinsFromAmountInterface(msg["amount"].([]interface{})),
 		},
 	)}
+
+	if msgCommonParams.TxSuccess {
+		log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+		logEvents := log.GetEventsByType("proposal_deposit")
+		if logEvents == nil {
+			panic("missing `proposal_deposit` event in TxsResult log")
+		}
+
+		for _, logEvent := range logEvents {
+			if logEvent.HasAttribute("voting_period_start") {
+				cmds = append(cmds, command_usecase.NewStartProposalVotingPeriod(
+					msgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"),
+				))
+				break
+			}
+		}
+	}
+
+	return cmds
 }
 
 func parseMsgDelegate(

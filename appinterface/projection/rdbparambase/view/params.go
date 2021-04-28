@@ -39,8 +39,8 @@ func (view *Params) Set(accessor types.ParamAccessor, value string) error {
 	sql, sqlArgs, err := view.rdbHandle.StmtBuilder.
 		Insert(view.tableName).
 		Columns("module", "key", "value").
-		Values(accessor, value).
-		Suffix("ON CONFLICT (accessor) DO UPDATE SET value = EXCLUDED.value").
+		Values(accessor.Module, accessor.Key, value).
+		Suffix("ON CONFLICT (module, key) DO UPDATE SET value = EXCLUDED.value").
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("error building param insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -59,7 +59,7 @@ func (view *Params) Set(accessor types.ParamAccessor, value string) error {
 
 func (view *Params) FindBy(accessor types.ParamAccessor) (string, error) {
 	sql, sqlArgs, err := view.rdbHandle.StmtBuilder.Select(
-		"total",
+		"value",
 	).From(
 		view.tableName,
 	).Where(

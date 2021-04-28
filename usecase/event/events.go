@@ -54,6 +54,7 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(MSG_VOTE_CREATED, 1, DecodeMsgVote)
 	registry.Register(MSG_VOTE_FAILED, 1, DecodeMsgVote)
 
+	registry.Register(PROPOSAL_VOTING_PERIOD_STARTED, 1, DecodeProposalVotingPeriodStarted)
 	registry.Register(PROPOSAL_ENDED, 1, DecodeProposalEnded)
 	registry.Register(PROPOSAL_INACTIVED, 1, DecodeProposalInactived)
 
@@ -69,7 +70,7 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(MSG_BEGIN_REDELEGATE_CREATED, 1, DecodeMsgBeginRedelegate)
 	registry.Register(MSG_BEGIN_REDELEGATE_FAILED, 1, DecodeMsgBeginRedelegate)
 
-	registry.Register(BONDING_COMPLETED, 1, DecodeBondingCompleted)
+	registry.Register(UNBONDING_COMPLETED, 1, DecodeUnbondingCompleted)
 
 	// Slashing
 	registry.Register(MSG_UNJAIL_CREATED, 1, DecodeMsgUnjail)

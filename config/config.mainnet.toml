@@ -19,10 +19,10 @@ mode = "TENDERMINT_DIRECT"
 window_size = 50
 
 [tendermint]
-http_rpc_url = "http://127.0.0.1:26657"
+http_rpc_url = "https://mainnet.crypto.org:26657"
 
 [cosmosapp]
-http_rpc_url = "http://127.0.0.1:1317"
+http_rpc_url = "https://mainnet.crypto.org:1317"
 
 [http]
 listening_address = "0.0.0.0:8080"

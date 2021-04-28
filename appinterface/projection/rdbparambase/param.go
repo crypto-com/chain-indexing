@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/crypto-com/chain-indexing/internal/logger"
+
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbparambase/types"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbparambase/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -14,43 +16,53 @@ import (
 )
 
 // a generic Param projection. For table schema refer to view/params.go
-type ParamBase struct {
+type Base struct {
 	tableName string
 
 	paramList []types.ParamAccessor
 }
 
-func NewParamBase(tableName string, paramList []types.ParamAccessor) *ParamBase {
-	return &ParamBase{
+func NewBase(tableName string, paramList []types.ParamAccessor) *Base {
+	return &Base{
 		tableName,
 
 		paramList,
 	}
 }
 
-// Handle
-func (projection *ParamBase) HandleEvent(conn *rdb.Handle, event event_entity.Event) error {
-	// TODO: support ParamChange proposal
-	genesisCreatedEvent, ok := event.(*event_usecase.GenesisCreated)
-	if !ok {
-		return nil
+func (projection *Base) GetEventsToListen() []string {
+	return []string{
+		event_usecase.GENESIS_CREATED,
+		// TODO: Listen to ParamChange proposal and proposal passed event
 	}
+}
 
-	view := view.NewParams(conn, projection.tableName)
-	for _, param := range projection.paramList {
-		if err := projection.persistGenesisParam(view, &genesisCreatedEvent.Genesis, param); err != nil {
-			return err
+// Handle
+func (projection *Base) HandleEvents(conn *rdb.Handle, _ logger.Logger, events []event_entity.Event) error {
+	for _, event := range events {
+		if genesisCreatedEvent, ok := event.(*event_usecase.GenesisCreated); ok {
+			view := view.NewParams(conn, projection.tableName)
+			for _, param := range projection.paramList {
+				if err := projection.persistGenesisParam(view, &genesisCreatedEvent.Genesis, param); err != nil {
+					return err
+				}
+			}
 		}
+		// TODO: support ParamChange proposal
 	}
 
 	return nil
 }
 
-func (projection *ParamBase) persistGenesisParam(
+func (projection *Base) GetView(conn *rdb.Handle) *view.Params {
+	return view.NewParams(conn, projection.tableName)
+}
+
+func (projection *Base) persistGenesisParam(
 	view *view.Params, genesis *genesis.Genesis, param types.ParamAccessor,
 ) error {
 	var value string
-	switch key := param.Module + param.Key; key {
+	switch key := fmt.Sprintf("%s.%s", param.Module, param.Key); key {
 	case "auth.max_memo_characters":
 		value = genesis.AppState.Auth.Params.MaxMemoCharacters
 	case "auth.tx_sig_limit":
@@ -86,7 +98,7 @@ func (projection *ParamBase) persistGenesisParam(
 		value = genesis.AppState.Gov.TallyParams.Quorum
 	case "gov.threshold":
 		value = genesis.AppState.Gov.TallyParams.Threshold
-	case "gov.VetoThreshold":
+	case "gov.veto_threshold":
 		value = genesis.AppState.Gov.TallyParams.VetoThreshold
 
 	case "mint.blocks_per_year":

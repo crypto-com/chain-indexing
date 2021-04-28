@@ -71,7 +71,7 @@ type MsgSubmitSoftwareUpgradeProposalContent struct {
 }
 type MsgSubmitSoftwareUpgradeProposalPlan struct {
 	Name   string          `json:"name"`
-	Time   utctime.UTCTime `json:"title"`
+	Time   utctime.UTCTime `json:"time"`
 	Height int64           `json:"height"`
 	Info   string          `json:"info"`
 }

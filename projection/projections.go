@@ -14,6 +14,7 @@ import (
 	"github.com/crypto-com/chain-indexing/projection/account_transaction"
 	"github.com/crypto-com/chain-indexing/projection/block"
 	"github.com/crypto-com/chain-indexing/projection/blockevent"
+	"github.com/crypto-com/chain-indexing/projection/proposal"
 	"github.com/crypto-com/chain-indexing/projection/transaction"
 	"github.com/crypto-com/chain-indexing/projection/validator"
 	"github.com/crypto-com/chain-indexing/projection/validatorstats"
@@ -33,6 +34,8 @@ func InitProjection(name string, params InitParams) projection_entity.Projection
 		return blockevent.NewBlockEvent(params.Logger, params.RdbConn)
 	case "ChainStats":
 		return chainstats.NewChainStats(params.Logger, params.RdbConn)
+	case "Proposal":
+		return proposal.NewProposal(params.Logger, params.RdbConn, params.ConsNodeAddressPrefix)
 	case "Transaction":
 		return transaction.NewTransaction(params.Logger, params.RdbConn)
 	case "Validator":
