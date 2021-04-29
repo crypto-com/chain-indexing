@@ -1,0 +1,73 @@
+[blockchain]
+bonding_denom = "basetcro"
+account_address_prefix = "tcro"
+account_pubkey_prefix = "tcro"
+validator_address_prefix = "tcrocncl"
+validator_pubkey_prefix = "tcrocncl"
+connode_address_prefix = "tcrocnclcons"
+connode_pubkey_prefix = "tcrocnclconspub"
+
+[system]
+# mode of the system, possible values: EVENT_STORE,TENDERMINT_DIRECT
+# EVENT_STORE mode: synced blocks are parsed to events and persist to event store. Projections will replay events from
+# event store.
+# TENDERMINT_DIRECT mode: synced blocks are parsed to events and are replayed directly by projections.
+mode = "TENDERMINT_DIRECT"
+
+[sync]
+# how many sync jobs running in parallel
+window_size = 50
+
+[tendermint]
+http_rpc_url = "https://testnet-croeseid.crypto.org:26657"
+
+[cosmosapp]
+http_rpc_url = "https://testnet-croeseid.crypto.org:1317"
+
+[http]
+listening_address = "0.0.0.0:8080"
+route_prefix = "/"
+# A list of origins a cross-domain request is allowed to be requested from
+# Default value '[]' disables CORS support
+# Use '["*"]' to allow request from any origin
+cors_allowed_origins = []
+cors_allowed_methods = ["HEAD", "GET"]
+cors_allowed_headers = ["Origin", "Accept", "Content-Type", "X-Requested-With", "X-Server-Time"]
+
+[debug]
+pprof_enable = false
+pprof_listening_address = "0.0.0.0:3000"
+
+[database]
+host = "localhost"
+port = 5432
+username = "postgres"
+# password can only be provided through CLI or Environment variable `DB_PASS`
+name = "postgres"
+schema = "public"
+ssl = true
+
+[postgres]
+pool_max_conns = 100
+pool_min_conns = 0
+pool_max_conn_lifetime = "1h"
+pool_max_conn_idle_time = "30m"
+pool_health_check_interval = "1m"
+
+[logger]
+# comma separated log levels. possible values: debug,info,error,panic
+level = "debug"
+color = false
+
+[projection]
+enables = [
+    "AccountMessage",
+    "AccountTransaction",
+    "Block",
+    "BlockEvent",
+    "ChainStats",
+    "Proposal",
+    "Transaction",
+    "Validator",
+    "ValidatorStats",
+]
