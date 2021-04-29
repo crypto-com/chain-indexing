@@ -279,8 +279,8 @@ type VoteRow struct {
 	VoterAddress              string          `json:"voterAddress"`
 	MaybeVoterOperatorAddress *string         `json:"maybeVoterOperatorAddress"`
 	TransactionHash           string          `json:"transactionHash"`
-	VoteAtBlockHeight         int64           `json:"voteAtBlockTime"`
-	VoteAtBlockTime           utctime.UTCTime `json:"voteAtBlockHeight"`
+	VoteAtBlockHeight         int64           `json:"voteAtBlockHeight"`
+	VoteAtBlockTime           utctime.UTCTime `json:"voteAtBlockTime"`
 	Answer                    string          `json:"answer"`
 	Histories                 []VoteHistory   `json:"histories"`
 }

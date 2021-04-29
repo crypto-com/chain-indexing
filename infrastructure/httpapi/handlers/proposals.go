@@ -61,9 +61,17 @@ func (handler *Proposals) FindById(ctx *fasthttp.RequestCtx) {
 
 	tally, queryTallyErr := handler.cosmosClient.ProposalTally(idParam)
 	if queryTallyErr != nil {
-		handler.logger.Errorf("error retrieving proposal tally: %v", queryTallyErr)
-		httpapi.InternalServerError(ctx)
-		return
+		if !errors.Is(queryTallyErr, cosmosapp.ErrProposalNotFound) {
+			handler.logger.Errorf("error retrieving proposal tally: %v", queryTallyErr)
+			httpapi.InternalServerError(ctx)
+			return
+		}
+		tally = cosmosapp.Tally{
+			Yes:        "0",
+			Abstain:    "0",
+			No:         "0",
+			NoWithVeto: "0",
+		}
 	}
 
 	if handler.totalBondedLastUpdatedAt.Add(1 * time.Hour).Before(time.Now()) {
