@@ -253,6 +253,7 @@ type ValidatorsListOrder struct {
 	MaybePower               *view.ORDER
 	MaybeCommission          *view.ORDER
 	MaybeJoinedAtBlockHeight *view.ORDER
+	MaybeImpreciseUpTime     *view.ORDER
 }
 
 func (validatorsView *Validators) ListAll(
@@ -278,6 +279,15 @@ func (validatorsView *Validators) ListAll(
 				"WHEN 'BONDED' THEN 4" +
 				"ELSE 5 END"
 			orderClauses = append(orderClauses, statusOrder)
+		}
+	}
+
+	if order.MaybeImpreciseUpTime != nil {
+		if *order.MaybeImpreciseUpTime == view.ORDER_ASC {
+			orderClauses = append(orderClauses, "imprecise_up_time")
+		} else if *order.MaybeImpreciseUpTime == view.ORDER_DESC {
+			// DESC order
+			orderClauses = append(orderClauses, "imprecise_up_time DESC")
 		}
 	}
 
@@ -444,6 +454,15 @@ func (validatorsView *Validators) List(
 				"WHEN 'BONDED' THEN 4" +
 				"ELSE 5 END"
 			orderClauses = append(orderClauses, statusOrder)
+		}
+	}
+
+	if order.MaybeImpreciseUpTime != nil {
+		if *order.MaybeImpreciseUpTime == view.ORDER_ASC {
+			orderClauses = append(orderClauses, "imprecise_up_time")
+		} else if *order.MaybeImpreciseUpTime == view.ORDER_DESC {
+			// DESC order
+			orderClauses = append(orderClauses, "imprecise_up_time DESC")
 		}
 	}
 
@@ -938,7 +957,7 @@ type ValidatorRow struct {
 	MinSelfDelegation       string     `json:"minSelfDelegation"`
 	TotalSignedBlock        int64      `json:"totalSignedBlock"`
 	TotalActiveBlock        int64      `json:"totalActiveBlock"`
-	ImpreciseUpTime         *big.Float `json:"imprecise_up_time"`
+	ImpreciseUpTime         *big.Float `json:"impreciseUpTime"`
 	VotedGovProposal        *big.Int   `json:"votedGovProposal"`
 }
 

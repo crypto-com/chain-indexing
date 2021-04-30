@@ -42,8 +42,9 @@ type SyncManagerParams struct {
 }
 
 type SyncManagerConfig struct {
-	WindowSize       int
-	TendermintRPCUrl string
+	WindowSize               int
+	TendermintRPCUrl         string
+	InsecureTendermintClient bool
 }
 
 // NewSyncManager creates a new feed with polling for latest block starts at a specific height
@@ -51,7 +52,12 @@ func NewSyncManager(
 	params SyncManagerParams,
 	eventHandler eventhandler_interface.Handler,
 ) *SyncManager {
-	tendermintClient := tendermint.NewHTTPClient(params.Config.TendermintRPCUrl)
+	var tendermintClient *tendermint.HTTPClient
+	if params.Config.InsecureTendermintClient {
+		tendermintClient = tendermint.NewInsecureHTTPClient(params.Config.TendermintRPCUrl)
+	} else {
+		tendermintClient = tendermint.NewHTTPClient(params.Config.TendermintRPCUrl)
+	}
 
 	return &SyncManager{
 		rdbConn: params.RDbConn,

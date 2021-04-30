@@ -34,13 +34,22 @@ type HTTPAPIServer struct {
 
 // NewIndexService creates a new server instance for polling and indexing
 func NewHTTPAPIServer(logger applogger.Logger, rdbConn rdb.Conn, config *Config) *HTTPAPIServer {
-	return &HTTPAPIServer{
-		logger:  logger,
-		rdbConn: rdbConn,
-		cosmosAppClient: cosmosapp_infrastructure.NewHTTPClient(
+	var cosmosClient cosmosapp.Client
+	if config.CosmosApp.Insecure {
+		cosmosClient = cosmosapp_infrastructure.NewInsecureHTTPClient(
 			config.CosmosApp.HTTPRPCUL,
 			config.Blockchain.BondingDenom,
-		),
+		)
+	} else {
+		cosmosClient = cosmosapp_infrastructure.NewHTTPClient(
+			config.CosmosApp.HTTPRPCUL,
+			config.Blockchain.BondingDenom,
+		)
+	}
+	return &HTTPAPIServer{
+		logger:          logger,
+		rdbConn:         rdbConn,
+		cosmosAppClient: cosmosClient,
 
 		validatorAddressPrefix: config.Blockchain.ValidatorAddressPrefix,
 		conNodeAddressPrefix:   config.Blockchain.ConNodeAddressPrefix,

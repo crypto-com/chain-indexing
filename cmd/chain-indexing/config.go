@@ -103,10 +103,12 @@ type DebugConfig struct {
 
 type TendermintConfig struct {
 	HTTPRPCURL string `toml:"http_rpc_url"`
+	Insecure   bool   `toml:"insecure"`
 }
 
 type CosmosAppConfig struct {
 	HTTPRPCUL string `toml:"http_rpc_url"`
+	Insecure  bool   `toml:"insecure"`
 }
 
 type DatabaseConfig struct {

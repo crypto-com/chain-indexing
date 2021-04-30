@@ -2,6 +2,7 @@ package tendermint
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -25,6 +26,23 @@ type HTTPClient struct {
 func NewHTTPClient(tendermintRPCUrl string) *HTTPClient {
 	httpClient := &http.Client{
 		Timeout: 30 * time.Second,
+	}
+
+	return &HTTPClient{
+		httpClient,
+		strings.TrimSuffix(tendermintRPCUrl, "/"),
+	}
+}
+
+// NewHTTPClient returns a new HTTPClient for tendermint request
+func NewInsecureHTTPClient(tendermintRPCUrl string) *HTTPClient {
+	// nolint:gosec
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	httpClient := &http.Client{
+		Timeout:   30 * time.Second,
+		Transport: transport,
 	}
 
 	return &HTTPClient{

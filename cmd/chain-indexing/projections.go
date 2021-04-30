@@ -3,6 +3,8 @@ package main
 import (
 	"strings"
 
+	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
+
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
@@ -15,7 +17,16 @@ func initProjections(
 	rdbConn rdb.Conn,
 	config *Config,
 ) []projection_entity.Projection {
-	var cosmosAppClient = cosmosapp_infrastructure.NewHTTPClient(config.CosmosApp.HTTPRPCUL, config.Blockchain.BondingDenom)
+	var cosmosAppClient cosmosapp.Client
+	if config.CosmosApp.Insecure {
+		cosmosAppClient = cosmosapp_infrastructure.NewInsecureHTTPClient(
+			config.CosmosApp.HTTPRPCUL, config.Blockchain.BondingDenom,
+		)
+	} else {
+		cosmosAppClient = cosmosapp_infrastructure.NewHTTPClient(
+			config.CosmosApp.HTTPRPCUL, config.Blockchain.BondingDenom,
+		)
+	}
 
 	projections := make([]projection_entity.Projection, 0, len(config.Projection.Enables))
 	initParams := projection.InitParams{
