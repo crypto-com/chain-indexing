@@ -45,6 +45,32 @@ var _ = Describe("PgxTypeConv", func() {
 		})
 	})
 
+	Describe("BFton", func() {
+		It("should return numeric null when bigFloat is nil", func() {
+			var expected pgtype.Numeric
+			_ = expected.Set(nil)
+
+			actual := pgxTypeConv.BFton(nil)
+			Expect(actual).To(Equal(expected))
+		})
+
+		It("should return numeric of the bigFloat value", func() {
+			var expected pgtype.Numeric
+			_ = expected.Scan("10.1234567800")
+
+			actual := pgxTypeConv.BFton(big.NewFloat(10.12345678))
+			Expect(actual).To(Equal(expected))
+		})
+
+		It("should work for negative number", func() {
+			var expected pgtype.Numeric
+			_ = expected.Scan("-10.1234567800")
+
+			actual := pgxTypeConv.BFton(big.NewFloat(-10.12345678))
+			Expect(actual).To(Equal(expected))
+		})
+	})
+
 	Describe("Iton", func() {
 		It("should return numeric representation of the int", func() {
 			var expected pgtype.Numeric
@@ -116,6 +142,66 @@ var _ = Describe("PgxTypeConv", func() {
 			actual, err := ntobReader.Parse()
 			Expect(err).To(BeNil())
 			Expect(*actual).To(Equal(*expected))
+		})
+	})
+
+	Describe("NtobfReader", func() {
+		It("should return nil when numeric is null", func() {
+			var n pgtype.Numeric
+			_ = n.Set(nil)
+
+			ntobfReader := pgxTypeConv.NtobfReader()
+			arg, _ := ntobfReader.ScannableArg().(*pgtype.Numeric)
+			*arg = n
+
+			actual, err := ntobfReader.Parse()
+			Expect(err).To(BeNil())
+			Expect(actual).To(BeNil())
+		})
+
+		It("should return big.Float of the integer value", func() {
+			var n pgtype.Numeric
+			_ = n.Set(10)
+
+			expected := big.NewFloat(10)
+
+			ntobfReader := pgxTypeConv.NtobfReader()
+			arg, _ := ntobfReader.ScannableArg().(*pgtype.Numeric)
+			*arg = n
+
+			actual, err := ntobfReader.Parse()
+			Expect(err).To(BeNil())
+			Expect(actual.Cmp(expected)).To(Equal(0))
+		})
+
+		It("should return big.Float for decimal number", func() {
+			var n pgtype.Numeric
+			_ = n.Set("1.2345678901234567890")
+
+			expected, _ := new(big.Float).SetString("1.2345678901234567890")
+
+			ntobfReader := pgxTypeConv.NtobfReader()
+			arg, _ := ntobfReader.ScannableArg().(*pgtype.Numeric)
+			*arg = n
+
+			actual, err := ntobfReader.Parse()
+			Expect(err).To(BeNil())
+			Expect(actual.Cmp(expected)).To(Equal(0))
+		})
+
+		It("should work for negative number", func() {
+			var n pgtype.Numeric
+			_ = n.Set("-1.2345678901234567890")
+
+			expected, _ := new(big.Float).SetString("-1.2345678901234567890")
+
+			ntobfReader := pgxTypeConv.NtobfReader()
+			arg, _ := ntobfReader.ScannableArg().(*pgtype.Numeric)
+			*arg = n
+
+			actual, err := ntobfReader.Parse()
+			Expect(err).To(BeNil())
+			Expect(actual.Cmp(expected)).To(Equal(0))
 		})
 	})
 

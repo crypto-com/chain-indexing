@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"math/big"
 	"strconv"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
@@ -43,6 +44,7 @@ func NewValidator(logger applogger.Logger, rdbConn rdb.Conn, conNodeAddressPrefi
 
 func (_ *Validator) GetEventsToListen() []string {
 	return []string{
+		event_usecase.GENESIS_CREATED,
 		event_usecase.BLOCK_CREATED,
 		event_usecase.MSG_CREATE_VALIDATOR_CREATED,
 		event_usecase.MSG_EDIT_VALIDATOR_CREATED,
@@ -58,6 +60,7 @@ func (_ *Validator) GetEventsToListen() []string {
 		event_usecase.VALIDATOR_SLASHED,
 		event_usecase.MSG_UNJAIL_CREATED,
 		event_usecase.POWER_CHANGED,
+		event_usecase.MSG_VOTE_CREATED,
 	}
 }
 
@@ -97,7 +100,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 	}
 
 	if projectErr := projection.projectValidatorView(validatorsView, height, events); projectErr != nil {
-		return fmt.Errorf("error projecting validator view: %v", err)
+		return fmt.Errorf("error projecting validator view: %v", projectErr)
 	}
 
 	if projectErr := projection.projectValidatorActivitiesView(
@@ -129,6 +132,8 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 
 			identities := make([]string, 0, len(blockCreatedEvent.Block.Signatures))
 			heightValidatorIdentities := make([]string, 0, len(blockCreatedEvent.Block.Signatures))
+
+			commitmentMap := make(map[string]bool)
 			for _, signature := range blockCreatedEvent.Block.Signatures {
 				signedValidator, exist := validatorMap[signature.ValidatorAddress]
 				if !exist {
@@ -147,6 +152,8 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 					heightValidatorIdentities,
 					fmt.Sprintf("%s:%s", strconv.FormatInt(height, 10), signedValidator.ConsensusNodeAddress),
 				)
+
+				commitmentMap[signedValidator.ConsensusNodeAddress] = true
 			}
 
 			if err := validatorBlockCommitmentsView.InsertAll(commitmentRows); err != nil {
@@ -171,6 +178,58 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 				"-:-", int64(signatureCount),
 			); err != nil {
 				return fmt.Errorf("error incrementing overall validator block commitments total: %v", err)
+			}
+
+			// Update validator up time
+			activeValidators, activeValidatorsQueryErr := validatorsView.ListAll(view.ValidatorsListFilter{
+				MaybeStatuses: []constants.Status{constants.BONDED},
+			}, view.ValidatorsListOrder{})
+			if activeValidatorsQueryErr != nil {
+				return fmt.Errorf("error querying active validators: %v", activeValidatorsQueryErr)
+			}
+
+			for _, activeValidator := range activeValidators {
+				mutActiveValidator := activeValidator
+				if commitmentMap[mutActiveValidator.ConsensusNodeAddress] {
+					mutActiveValidator.TotalSignedBlock += 1
+				} else {
+					// give 10 blocks buffer on validator first join
+					if mutActiveValidator.JoinedAtBlockHeight-height < 10 {
+						mutActiveValidator.TotalSignedBlock += 1
+					}
+				}
+				mutActiveValidator.TotalActiveBlock += 1
+
+				mutActiveValidator.ImpreciseUpTime = new(big.Float).Quo(
+					new(big.Float).SetInt64(mutActiveValidator.TotalSignedBlock),
+					new(big.Float).SetInt64(mutActiveValidator.TotalActiveBlock),
+				)
+
+				if activeValidatorUpdateErr := validatorsView.Update(&mutActiveValidator); activeValidatorUpdateErr != nil {
+					return fmt.Errorf("error updating active validators up time data: %v", activeValidatorUpdateErr)
+				}
+			}
+
+		} else if votedEvent, ok := event.(*event_usecase.MsgVote); ok {
+			projection.logger.Debug("handling MsgVote event")
+
+			mutVotedValidator, votedValidatorQueryErr := validatorsView.FindBy(view.ValidatorIdentity{
+				MaybeConsensusNodeAddress:    nil,
+				MaybeOperatorAddress:         nil,
+				MaybeInitialDelegatorAddress: &votedEvent.Voter,
+			})
+
+			if votedValidatorQueryErr != nil {
+				if errors.Is(votedValidatorQueryErr, rdb.ErrNoRows) {
+					// the vote belongs to a non-validator account
+					break
+				}
+				return fmt.Errorf("error querying voted validator: %v", votedValidatorQueryErr)
+			}
+
+			mutVotedValidator.VotedGovProposal = new(big.Int).Add(mutVotedValidator.VotedGovProposal, big.NewInt(1))
+			if votedValidatorUpdateErr := validatorsView.Update(mutVotedValidator); votedValidatorUpdateErr != nil {
+				return fmt.Errorf("error updating voted validator: %v", votedValidatorUpdateErr)
 			}
 		}
 	}
@@ -206,6 +265,12 @@ func (projection *Validator) projectValidatorView(
 				return fmt.Errorf("error converting Tendermint node pubkey to address: %v", err)
 			}
 			tendermintAddress := tmcosmosutils.TmAddressFromTmPubKey(tendermintPubkey)
+			status := constants.UNBONDED
+			if blockHeight == 0 {
+				// genesis validators are always bonded
+				status = constants.BONDED
+			}
+
 			validatorRow := view.ValidatorRow{
 				ConsensusNodeAddress:    consensusNodeAddress,
 				OperatorAddress:         msgCreateValidatorEvent.ValidatorAddress,
@@ -213,7 +278,7 @@ func (projection *Validator) projectValidatorView(
 				TendermintAddress:       tendermintAddress,
 				TendermintPubkey:        msgCreateValidatorEvent.TendermintPubkey,
 				MinSelfDelegation:       msgCreateValidatorEvent.MinSelfDelegation,
-				Status:                  constants.UNBONDED,
+				Status:                  status,
 				Jailed:                  false,
 				JoinedAtBlockHeight:     blockHeight,
 				Power:                   "0",
@@ -225,8 +290,13 @@ func (projection *Validator) projectValidatorView(
 				CommissionRate:          msgCreateValidatorEvent.CommissionRates.Rate,
 				CommissionMaxRate:       msgCreateValidatorEvent.CommissionRates.MaxRate,
 				CommissionMaxChangeRate: msgCreateValidatorEvent.CommissionRates.MaxChangeRate,
+				TotalSignedBlock:        0,
+				TotalActiveBlock:        0,
+				ImpreciseUpTime:         big.NewFloat(1),
+				VotedGovProposal:        big.NewInt(0),
 			}
 
+			// Validator re-joins
 			isJoined, joinedAtBlockHeight, err := validatorsView.LastJoinedBlockHeight(
 				validatorRow.OperatorAddress, validatorRow.ConsensusNodeAddress,
 			)
@@ -310,7 +380,8 @@ func (projection *Validator) projectValidatorView(
 				return fmt.Errorf("error getting existing validator `%s` from view", msgUnjailEvent.ValidatorAddr)
 			}
 
-			mutValidatorRow.Status = constants.BONDED
+			// Unjailed validator will become inactive first, if there's voting power changes then it becomes bonded
+			mutValidatorRow.Status = constants.INACTIVE
 			mutValidatorRow.Jailed = false
 
 			if err := validatorsView.Update(mutValidatorRow); err != nil {
@@ -339,7 +410,7 @@ func (projection *Validator) projectValidatorView(
 
 			mutValidatorRow.Power = powerChangedEvent.Power
 			if powerChangedEvent.Power == "0" && !mutValidatorRow.Jailed {
-				mutValidatorRow.Status = constants.UNBONDED
+				mutValidatorRow.Status = constants.INACTIVE
 			} else if powerChangedEvent.Power != "0" {
 				mutValidatorRow.Status = constants.BONDED
 			}
