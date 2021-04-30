@@ -23,8 +23,14 @@ func NewInfoManager(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	tendermintRPCUrl string,
+	insecureTendermintClient bool,
 ) *InfoManager {
-	tendermintClient := tendermint.NewHTTPClient(tendermintRPCUrl)
+	var tendermintClient *tendermint.HTTPClient
+	if insecureTendermintClient {
+		tendermintClient = tendermint.NewInsecureHTTPClient(tendermintRPCUrl)
+	} else {
+		tendermintClient = tendermint.NewHTTPClient(tendermintRPCUrl)
+	}
 
 	viewStatus := polling.NewStatus(rdbConn.ToHandle())
 	return &InfoManager{

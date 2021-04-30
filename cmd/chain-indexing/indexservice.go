@@ -18,10 +18,11 @@ type IndexService struct {
 	rdbConn     rdb.Conn
 	projections []projection_entity.Projection
 
-	systemMode            string
-	consNodeAddressPrefix string
-	windowSize            int
-	tendermintHTTPRPCURL  string
+	systemMode               string
+	consNodeAddressPrefix    string
+	windowSize               int
+	tendermintHTTPRPCURL     string
+	insecureTendermintClient bool
 }
 
 // NewIndexService creates a new server instance for polling and indexing
@@ -36,10 +37,11 @@ func NewIndexService(
 		rdbConn:     rdbConn,
 		projections: projections,
 
-		systemMode:            config.System.Mode,
-		consNodeAddressPrefix: config.Blockchain.ConNodeAddressPrefix,
-		windowSize:            config.Sync.WindowSize,
-		tendermintHTTPRPCURL:  config.Tendermint.HTTPRPCURL,
+		systemMode:               config.System.Mode,
+		consNodeAddressPrefix:    config.Blockchain.ConNodeAddressPrefix,
+		windowSize:               config.Sync.WindowSize,
+		tendermintHTTPRPCURL:     config.Tendermint.HTTPRPCURL,
+		insecureTendermintClient: config.Tendermint.Insecure,
 	}
 }
 
@@ -49,6 +51,7 @@ func (service *IndexService) Run() error {
 		service.logger,
 		service.rdbConn,
 		service.tendermintHTTPRPCURL,
+		service.insecureTendermintClient,
 	)
 	infoManager.Run()
 
@@ -93,8 +96,9 @@ func (service *IndexService) RunEventStoreMode() error {
 			RDbConn:   service.rdbConn,
 			TxDecoder: txDecoder,
 			Config: SyncManagerConfig{
-				WindowSize:       service.windowSize,
-				TendermintRPCUrl: service.tendermintHTTPRPCURL,
+				WindowSize:               service.windowSize,
+				TendermintRPCUrl:         service.tendermintHTTPRPCURL,
+				InsecureTendermintClient: service.insecureTendermintClient,
 			},
 		},
 		eventStoreHandler,
@@ -118,8 +122,9 @@ func (service *IndexService) RunTendermintDirectMode() error {
 				RDbConn:   service.rdbConn,
 				TxDecoder: txDecoder,
 				Config: SyncManagerConfig{
-					WindowSize:       service.windowSize,
-					TendermintRPCUrl: service.tendermintHTTPRPCURL,
+					WindowSize:               service.windowSize,
+					TendermintRPCUrl:         service.tendermintHTTPRPCURL,
+					InsecureTendermintClient: service.insecureTendermintClient,
 				},
 			}, eventhandler_interface.NewProjectionHandler(service.logger, projection))
 			if err := syncManager.Run(); err != nil {

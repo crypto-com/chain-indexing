@@ -20,9 +20,11 @@ window_size = 50
 
 [tendermint]
 http_rpc_url = "http://127.0.0.1:26657"
+insecure = false
 
 [cosmosapp]
 http_rpc_url = "http://127.0.0.1:1317"
+insecure = false
 
 [http]
 listening_address = "0.0.0.0:8080"

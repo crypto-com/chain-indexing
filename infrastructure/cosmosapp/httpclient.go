@@ -2,6 +2,7 @@ package cosmosapp
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -34,6 +35,24 @@ type HTTPClient struct {
 func NewHTTPClient(rpcUrl string, bondingDenom string) *HTTPClient {
 	httpClient := &http.Client{
 		Timeout: 30 * time.Second,
+	}
+
+	return &HTTPClient{
+		httpClient,
+		strings.TrimSuffix(rpcUrl, "/"),
+
+		bondingDenom,
+	}
+}
+
+func NewInsecureHTTPClient(rpcUrl string, bondingDenom string) *HTTPClient {
+	// nolint:gosec
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	httpClient := &http.Client{
+		Timeout:   30 * time.Second,
+		Transport: transport,
 	}
 
 	return &HTTPClient{
