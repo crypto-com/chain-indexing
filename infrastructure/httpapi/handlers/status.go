@@ -145,8 +145,8 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
-	var totalBlockTime = new(big.Int).SetInt64(int64(0))
-	var totalBlockCount = new(big.Int).SetInt64(int64(1))
+	var totalBlockTime = big.NewInt(0)
+	var totalBlockCount = big.NewInt(1)
 	if rawTotalBlockTime, err := handler.chainStatsView.FindBy(chainstats.TOTAL_BLOCK_TIME); err != nil {
 		handler.logger.Errorf("error fetching total block time: %v", err)
 		httpapi.InternalServerError(ctx)

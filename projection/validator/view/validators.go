@@ -79,6 +79,10 @@ func (validatorsView *Validators) Upsert(validator *ValidatorRow) error {
 		"commission_max_rate",
 		"commission_max_change_rate",
 		"min_self_delegation",
+		"total_signed_block",
+		"total_active_block",
+		"imprecise_up_time",
+		"voted_gov_proposal",
 	).Values(
 		validator.OperatorAddress,
 		validator.ConsensusNodeAddress,
@@ -98,6 +102,10 @@ func (validatorsView *Validators) Upsert(validator *ValidatorRow) error {
 		validator.CommissionMaxRate,
 		validator.CommissionMaxChangeRate,
 		validator.MinSelfDelegation,
+		validator.TotalSignedBlock,
+		validator.TotalActiveBlock,
+		validatorsView.rdb.BFton(validator.ImpreciseUpTime),
+		validatorsView.rdb.Bton(validator.VotedGovProposal),
 	).Suffix(`ON CONFLICT (operator_address, consensus_node_address) DO UPDATE SET
 		initial_delegator_address = EXCLUDED.initial_delegator_address,
 		status = EXCLUDED.status,
@@ -112,7 +120,11 @@ func (validatorsView *Validators) Upsert(validator *ValidatorRow) error {
 		commission_rate = EXCLUDED.commission_rate,
 		commission_max_rate = EXCLUDED.commission_max_rate,
 		commission_max_change_rate = EXCLUDED.commission_max_change_rate,
-		min_self_delegation = EXCLUDED.min_self_delegation
+		min_self_delegation = EXCLUDED.min_self_delegation,
+		total_signed_block = EXCLUDED.total_signed_block,
+		total_active_block = EXCLUDED.total_active_block,
+		imprecise_up_time = EXCLUDED.imprecise_up_time,
+		voted_gov_proposal = EXCLUDED.voted_gov_proposal
 	`).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building validator upsertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -129,10 +141,7 @@ func (validatorsView *Validators) Upsert(validator *ValidatorRow) error {
 }
 
 func (validatorsView *Validators) Insert(validator *ValidatorRow) error {
-	var err error
-
-	var sql string
-	sql, _, err = validatorsView.rdb.StmtBuilder.Insert(
+	sql, sqlArgs, buildStmtErr := validatorsView.rdb.StmtBuilder.Insert(
 		"view_validators",
 	).Columns(
 		"operator_address",
@@ -153,12 +162,11 @@ func (validatorsView *Validators) Insert(validator *ValidatorRow) error {
 		"commission_max_rate",
 		"commission_max_change_rate",
 		"min_self_delegation",
-	).Values("?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?").ToSql()
-	if err != nil {
-		return fmt.Errorf("error building validator insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
-
-	result, err := validatorsView.rdb.Exec(sql,
+		"total_signed_block",
+		"total_active_block",
+		"imprecise_up_time",
+		"voted_gov_proposal",
+	).Values(
 		validator.OperatorAddress,
 		validator.ConsensusNodeAddress,
 		validator.InitialDelegatorAddress,
@@ -177,9 +185,18 @@ func (validatorsView *Validators) Insert(validator *ValidatorRow) error {
 		validator.CommissionMaxRate,
 		validator.CommissionMaxChangeRate,
 		validator.MinSelfDelegation,
-	)
-	if err != nil {
-		return fmt.Errorf("error inserting validator into the table: %v: %w", err, rdb.ErrWrite)
+		validator.TotalSignedBlock,
+		validator.TotalActiveBlock,
+		validatorsView.rdb.TypeConv.BFton(validator.ImpreciseUpTime),
+		validatorsView.rdb.TypeConv.Bton(validator.VotedGovProposal),
+	).ToSql()
+	if buildStmtErr != nil {
+		return fmt.Errorf("error building validator insertion sql: %v: %w", buildStmtErr, rdb.ErrBuildSQLStmt)
+	}
+
+	result, execErr := validatorsView.rdb.Exec(sql, sqlArgs...)
+	if execErr != nil {
+		return fmt.Errorf("error inserting validator into the table: %v: %w", execErr, rdb.ErrWrite)
 	}
 	if result.RowsAffected() != 1 {
 		return fmt.Errorf("error inserting validator into the table: no rows inserted: %w", rdb.ErrWrite)
@@ -205,6 +222,10 @@ func (validatorsView *Validators) Update(validator *ValidatorRow) error {
 		"commission_max_rate":        validator.CommissionMaxRate,
 		"commission_max_change_rate": validator.CommissionMaxChangeRate,
 		"min_self_delegation":        validator.MinSelfDelegation,
+		"total_signed_block":         validator.TotalSignedBlock,
+		"total_active_block":         validator.TotalActiveBlock,
+		"imprecise_up_time":          validatorsView.rdb.TypeConv.BFton(validator.ImpreciseUpTime),
+		"voted_gov_proposal":         validatorsView.rdb.TypeConv.Bton(validator.VotedGovProposal),
 	}).Where(
 		"id = ?", validator.MaybeId,
 	).ToSql()
@@ -317,6 +338,10 @@ func (validatorsView *Validators) ListAll(
 		"commission_max_rate",
 		"commission_max_change_rate",
 		"min_self_delegation",
+		"total_signed_block",
+		"total_active_block",
+		"imprecise_up_time",
+		"voted_gov_proposal",
 	).From(
 		"view_validators",
 	)
@@ -339,6 +364,9 @@ func (validatorsView *Validators) ListAll(
 	validators := make([]ValidatorRow, 0)
 	for rowsResult.Next() {
 		var validator ValidatorRow
+
+		impreciseUpTimeReader := validatorsView.rdb.TypeConv.NtobfReader()
+		votedGovProposalReader := validatorsView.rdb.TypeConv.NtobReader()
 		if err = rowsResult.Scan(
 			&validator.MaybeId,
 			&validator.OperatorAddress,
@@ -359,12 +387,28 @@ func (validatorsView *Validators) ListAll(
 			&validator.CommissionMaxRate,
 			&validator.CommissionMaxChangeRate,
 			&validator.MinSelfDelegation,
+			&validator.TotalSignedBlock,
+			&validator.TotalActiveBlock,
+			impreciseUpTimeReader.ScannableArg(),
+			votedGovProposalReader.ScannableArg(),
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, rdb.ErrNoRows
 			}
 			return nil, fmt.Errorf("error scanning validator row: %v: %w", err, rdb.ErrQuery)
 		}
+
+		impreciseUpTime, parseImpreciseUpTimeErr := impreciseUpTimeReader.Parse()
+		if parseImpreciseUpTimeErr != nil {
+			return nil, fmt.Errorf("error parsing imprecise up time: %v", parseImpreciseUpTimeErr)
+		}
+		validator.ImpreciseUpTime = impreciseUpTime
+
+		votedGovProposal, votedGovProposalErr := votedGovProposalReader.Parse()
+		if votedGovProposalErr != nil {
+			return nil, fmt.Errorf("error parsing voted gov proposal: %v", votedGovProposalErr)
+		}
+		validator.VotedGovProposal = votedGovProposal
 
 		validators = append(validators, validator)
 	}
@@ -505,6 +549,10 @@ func (validatorsView *Validators) List(
 		"commission_max_rate",
 		"commission_max_change_rate",
 		"min_self_delegation",
+		"total_signed_block",
+		"total_active_block",
+		"imprecise_up_time",
+		"voted_gov_proposal",
 	).From(
 		"view_validators",
 	)
@@ -532,6 +580,9 @@ func (validatorsView *Validators) List(
 	validators := make([]ListValidatorRow, 0)
 	for rowsResult.Next() {
 		var validator ValidatorRow
+
+		impreciseUpTimeReader := validatorsView.rdb.TypeConv.NtobfReader()
+		votedGovProposalReader := validatorsView.rdb.TypeConv.NtobReader()
 		if err = rowsResult.Scan(
 			&validator.MaybeId,
 			&validator.OperatorAddress,
@@ -552,12 +603,28 @@ func (validatorsView *Validators) List(
 			&validator.CommissionMaxRate,
 			&validator.CommissionMaxChangeRate,
 			&validator.MinSelfDelegation,
+			&validator.TotalSignedBlock,
+			&validator.TotalActiveBlock,
+			impreciseUpTimeReader.ScannableArg(),
+			votedGovProposalReader.ScannableArg(),
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
 			}
 			return nil, nil, fmt.Errorf("error scanning validator row: %v: %w", err, rdb.ErrQuery)
 		}
+
+		impreciseUpTime, parseImpreciseUpTimeErr := impreciseUpTimeReader.Parse()
+		if parseImpreciseUpTimeErr != nil {
+			return nil, nil, fmt.Errorf("error parsing imprecise up time: %v", parseImpreciseUpTimeErr)
+		}
+		validator.ImpreciseUpTime = impreciseUpTime
+
+		votedGovProposal, votedGovProposalErr := votedGovProposalReader.Parse()
+		if votedGovProposalErr != nil {
+			return nil, nil, fmt.Errorf("error parsing voted gov proposal: %v", votedGovProposalErr)
+		}
+		validator.VotedGovProposal = votedGovProposal
 
 		power, ok := new(big.Float).SetString(validator.Power)
 		if !ok {
@@ -638,6 +705,10 @@ func (validatorsView *Validators) Search(keyword string) ([]ValidatorRow, error)
 		"commission_max_rate",
 		"commission_max_change_rate",
 		"min_self_delegation",
+		"total_signed_block",
+		"total_active_block",
+		"imprecise_up_time",
+		"voted_gov_proposal",
 	).From(
 		"view_validators",
 	).Where(
@@ -657,6 +728,9 @@ func (validatorsView *Validators) Search(keyword string) ([]ValidatorRow, error)
 	validators := make([]ValidatorRow, 0)
 	for rowsResult.Next() {
 		var validator ValidatorRow
+
+		impreciseUpTimeReader := validatorsView.rdb.TypeConv.NtobfReader()
+		votedGovProposalReader := validatorsView.rdb.TypeConv.NtobReader()
 		if err = rowsResult.Scan(
 			&validator.MaybeId,
 			&validator.OperatorAddress,
@@ -677,12 +751,28 @@ func (validatorsView *Validators) Search(keyword string) ([]ValidatorRow, error)
 			&validator.CommissionMaxRate,
 			&validator.CommissionMaxChangeRate,
 			&validator.MinSelfDelegation,
+			&validator.TotalSignedBlock,
+			&validator.TotalActiveBlock,
+			impreciseUpTimeReader.ScannableArg(),
+			votedGovProposalReader.ScannableArg(),
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, rdb.ErrNoRows
 			}
 			return nil, fmt.Errorf("error scanning validator row: %v: %w", err, rdb.ErrQuery)
 		}
+
+		impreciseUpTime, parseImpreciseUpTimeErr := impreciseUpTimeReader.Parse()
+		if parseImpreciseUpTimeErr != nil {
+			return nil, fmt.Errorf("error parsing imprecise up time: %v", parseImpreciseUpTimeErr)
+		}
+		validator.ImpreciseUpTime = impreciseUpTime
+
+		votedGovProposal, votedGovProposalErr := votedGovProposalReader.Parse()
+		if votedGovProposalErr != nil {
+			return nil, fmt.Errorf("error parsing voted gov proposal: %v", votedGovProposalErr)
+		}
+		validator.VotedGovProposal = votedGovProposal
 
 		validators = append(validators, validator)
 	}
@@ -714,6 +804,10 @@ func (validatorsView *Validators) FindBy(identity ValidatorIdentity) (*Validator
 		"commission_max_rate",
 		"commission_max_change_rate",
 		"min_self_delegation",
+		"total_signed_block",
+		"total_active_block",
+		"imprecise_up_time",
+		"voted_gov_proposal",
 	).From(
 		"view_validators",
 	).OrderBy("id DESC")
@@ -725,6 +819,9 @@ func (validatorsView *Validators) FindBy(identity ValidatorIdentity) (*Validator
 	if identity.MaybeOperatorAddress != nil {
 		selectStmtBuilder = selectStmtBuilder.Where("operator_address = ?", *identity.MaybeOperatorAddress)
 	}
+	if identity.MaybeInitialDelegatorAddress != nil {
+		selectStmtBuilder = selectStmtBuilder.Where("initial_delegator_address = ?", *identity.MaybeInitialDelegatorAddress)
+	}
 
 	sql, sqlArgs, err := selectStmtBuilder.ToSql()
 	if err != nil {
@@ -732,6 +829,9 @@ func (validatorsView *Validators) FindBy(identity ValidatorIdentity) (*Validator
 	}
 
 	var validator ValidatorRow
+
+	impreciseUpTimeReader := validatorsView.rdb.TypeConv.NtobfReader()
+	votedGovProposalReader := validatorsView.rdb.TypeConv.NtobReader()
 	if err = validatorsView.rdb.QueryRow(sql, sqlArgs...).Scan(
 		&validator.MaybeId,
 		&validator.OperatorAddress,
@@ -752,12 +852,28 @@ func (validatorsView *Validators) FindBy(identity ValidatorIdentity) (*Validator
 		&validator.CommissionMaxRate,
 		&validator.CommissionMaxChangeRate,
 		&validator.MinSelfDelegation,
+		&validator.TotalSignedBlock,
+		&validator.TotalActiveBlock,
+		impreciseUpTimeReader.ScannableArg(),
+		votedGovProposalReader.ScannableArg(),
 	); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
 		}
 		return nil, fmt.Errorf("error scanning validator row: %v: %w", err, rdb.ErrQuery)
 	}
+
+	impreciseUpTime, parseImpreciseUpTimeErr := impreciseUpTimeReader.Parse()
+	if parseImpreciseUpTimeErr != nil {
+		return nil, fmt.Errorf("error parsing imprecise up time: %v", parseImpreciseUpTimeErr)
+	}
+	validator.ImpreciseUpTime = impreciseUpTime
+
+	votedGovProposal, votedGovProposalErr := votedGovProposalReader.Parse()
+	if votedGovProposalErr != nil {
+		return nil, fmt.Errorf("error parsing voted gov proposal: %v", votedGovProposalErr)
+	}
+	validator.VotedGovProposal = votedGovProposal
 
 	return &validator, nil
 }
@@ -795,30 +911,35 @@ type CountFilter struct {
 }
 
 type ValidatorIdentity struct {
-	MaybeConsensusNodeAddress *string
-	MaybeOperatorAddress      *string
+	MaybeConsensusNodeAddress    *string
+	MaybeOperatorAddress         *string
+	MaybeInitialDelegatorAddress *string
 }
 
 type ValidatorRow struct {
-	MaybeId                 *int64 `json:"-"`
-	OperatorAddress         string `json:"operatorAddress"`
-	ConsensusNodeAddress    string `json:"consensusNodeAddress"`
-	InitialDelegatorAddress string `json:"initialDelegatorAddress"`
-	TendermintPubkey        string `json:"tendermintPubkey"`
-	TendermintAddress       string `json:"tendermintAddress"`
-	Status                  string `json:"status"`
-	Jailed                  bool   `json:"jailed"`
-	JoinedAtBlockHeight     int64  `json:"joinedAtBlockHeight"`
-	Power                   string `json:"power"`
-	Moniker                 string `json:"moniker"`
-	Identity                string `json:"identity"`
-	Website                 string `json:"website"`
-	SecurityContact         string `json:"securityContact"`
-	Details                 string `json:"details"`
-	CommissionRate          string `json:"commissionRate"`
-	CommissionMaxRate       string `json:"commissionMaxRate"`
-	CommissionMaxChangeRate string `json:"commissionMaxChangeRate"`
-	MinSelfDelegation       string `json:"minSelfDelegation"`
+	MaybeId                 *int64     `json:"-"`
+	OperatorAddress         string     `json:"operatorAddress"`
+	ConsensusNodeAddress    string     `json:"consensusNodeAddress"`
+	InitialDelegatorAddress string     `json:"initialDelegatorAddress"`
+	TendermintPubkey        string     `json:"tendermintPubkey"`
+	TendermintAddress       string     `json:"tendermintAddress"`
+	Status                  string     `json:"status"`
+	Jailed                  bool       `json:"jailed"`
+	JoinedAtBlockHeight     int64      `json:"joinedAtBlockHeight"`
+	Power                   string     `json:"power"`
+	Moniker                 string     `json:"moniker"`
+	Identity                string     `json:"identity"`
+	Website                 string     `json:"website"`
+	SecurityContact         string     `json:"securityContact"`
+	Details                 string     `json:"details"`
+	CommissionRate          string     `json:"commissionRate"`
+	CommissionMaxRate       string     `json:"commissionMaxRate"`
+	CommissionMaxChangeRate string     `json:"commissionMaxChangeRate"`
+	MinSelfDelegation       string     `json:"minSelfDelegation"`
+	TotalSignedBlock        int64      `json:"totalSignedBlock"`
+	TotalActiveBlock        int64      `json:"totalActiveBlock"`
+	ImpreciseUpTime         *big.Float `json:"imprecise_up_time"`
+	VotedGovProposal        *big.Int   `json:"votedGovProposal"`
 }
 
 type ListValidatorRow struct {
