@@ -104,8 +104,7 @@ func (proposalView *Depositors) ListByProposalId(
 	).WithCustomTotalQueryFn(
 		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
 			totalView := NewDepositorsTotal(rdbHandle)
-			identity := fmt.Sprintf("%s:-", proposalId)
-			total, err := totalView.FindBy(identity)
+			total, err := totalView.FindBy(proposalId)
 			if err != nil {
 				return int64(0), err
 			}

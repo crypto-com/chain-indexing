@@ -194,7 +194,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 					mutActiveValidator.TotalSignedBlock += 1
 				} else {
 					// give 10 blocks buffer on validator first join
-					if mutActiveValidator.JoinedAtBlockHeight-height < 10 {
+					if height-mutActiveValidator.JoinedAtBlockHeight < 10 {
 						mutActiveValidator.TotalSignedBlock += 1
 					}
 				}
@@ -214,8 +214,6 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 			projection.logger.Debug("handling MsgVote event")
 
 			mutVotedValidator, votedValidatorQueryErr := validatorsView.FindBy(view.ValidatorIdentity{
-				MaybeConsensusNodeAddress:    nil,
-				MaybeOperatorAddress:         nil,
 				MaybeInitialDelegatorAddress: &votedEvent.Voter,
 			})
 
