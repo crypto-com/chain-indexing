@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+
 	event_interface "github.com/crypto-com/chain-indexing/appinterface/event"
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -10,7 +12,6 @@ import (
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
-	"github.com/crypto-com/chain-indexing/usecase/parser"
 )
 
 type IndexService struct {
@@ -86,7 +87,7 @@ func (service *IndexService) RunEventStoreMode() error {
 		service.rdbConn,
 		eventRegistry,
 	)
-	txDecoder := parser.NewTxDecoder()
+	txDecoder := utils.NewTxDecoder()
 	syncManager := NewSyncManager(
 		SyncManagerParams{
 			Logger:    service.logger,
@@ -107,7 +108,7 @@ func (service *IndexService) RunEventStoreMode() error {
 }
 
 func (service *IndexService) RunTendermintDirectMode() error {
-	txDecoder := parser.NewTxDecoder()
+	txDecoder := utils.NewTxDecoder()
 
 	for i := range service.projections {
 		go func(projection projection_entity.Projection) {

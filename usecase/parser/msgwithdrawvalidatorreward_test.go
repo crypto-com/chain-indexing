@@ -3,6 +3,8 @@ package parser_test
 import (
 	"strings"
 
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -19,7 +21,7 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgWithdrawDelegatorReward and MsgWithdrawValidatorCommission", func() {
 		It("should parse Msg commands when there is distribution.MsgWithdrawDelegatorReward and MsgWithdrawValidatorCommission in the transaction", func() {
-			txDecoder := parser.NewTxDecoder()
+			txDecoder := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(
 				usecase_parser_test.TX_MSGS_WITHDRAW_DELEGATOR_REWARD_WITHDRAW_VALIDATOR_COMMISSION_BLOCK_RESP,
 			)
@@ -66,7 +68,7 @@ var _ = Describe("ParseMsgCommands", func() {
 		})
 
 		It("should parse failed MsgWithdrawValidatorCommission in the transaction", func() {
-			txDecoder := parser.NewTxDecoder()
+			txDecoder := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(
 				usecase_parser_test.TX_FAILED_MSG_WITHDRAW_VALIDATOR_COMMISSION_BLOCK_RESP,
 			)
@@ -113,7 +115,7 @@ var _ = Describe("ParseMsgCommands", func() {
 		})
 
 		It("should parse Msg commands when there is no reward withdraw in the MsgWithdrawDelegatorReward", func() {
-			txDecoder := parser.NewTxDecoder()
+			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_WITHDRAW_DELEGATOR_REWARD_NO_REWARD_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(

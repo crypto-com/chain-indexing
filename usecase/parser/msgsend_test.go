@@ -1,6 +1,7 @@
 package parser_test
 
 import (
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -16,7 +17,7 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgSend", func() {
 
 		It("should parse Msg commands when there is bank.MsgSend in the transaction", func() {
-			txDecoder := parser.NewTxDecoder()
+			txDecoder := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_SEND_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MSG_SEND_BLOCK_RESULTS_RESP)
 
@@ -43,7 +44,7 @@ var _ = Describe("ParseMsgCommands", func() {
 		})
 
 		It("should parse Msg commands when there are multiple bank.MsgSend in one transaction", func() {
-			txDecoder := parser.NewTxDecoder()
+			txDecoder := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.ONE_TX_TWO_MSG_SEND_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.ONE_TX_TWO_MSG_SEND_BLOCK_RESULTS_RESP)
 

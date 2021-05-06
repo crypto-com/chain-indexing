@@ -5,6 +5,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/model"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
 func ParseTxAccountTransferCommands(
@@ -16,12 +17,12 @@ func ParseTxAccountTransferCommands(
 		var lastSender string
 		for i, event := range txsResult.Events {
 			if event.Type == "message" {
-				messageEvent := NewParsedTxsResultLogEvent(&txsResult.Events[i])
+				messageEvent := utils.NewParsedTxsResultLogEvent(&txsResult.Events[i])
 				if messageEvent.HasAttribute("sender") {
 					lastSender = messageEvent.MustGetAttributeByKey("sender")
 				}
 			} else if event.Type == "transfer" {
-				transferEvent := NewParsedTxsResultLogEvent(&txsResult.Events[i])
+				transferEvent := utils.NewParsedTxsResultLogEvent(&txsResult.Events[i])
 
 				amount := transferEvent.MustGetAttributeByKey("amount")
 				if amount == "" {

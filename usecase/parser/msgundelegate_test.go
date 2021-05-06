@@ -3,6 +3,7 @@ package parser_test
 import (
 	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -18,7 +19,7 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgDelegate", func() {
 		It("should parse Msg commands when there is staking.MsgUndelegate in the transaction", func() {
-			txDecoder := parser.NewTxDecoder()
+			txDecoder := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_UNDELEGATE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MSG_UNDELEGATE_BLOCK_RESULTS_RESP)
 
@@ -46,7 +47,7 @@ var _ = Describe("ParseMsgCommands", func() {
 		})
 
 		It("should parse MsgUndelegate command in failed transaction", func() {
-			txDecoder := parser.NewTxDecoder()
+			txDecoder := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_MSG_UNDELEGATE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_MSG_UNDELEGATE_BLOCK_RESULTS_RESP)
 

@@ -75,4 +75,8 @@ func RegisterEvents(registry *event.Registry) {
 	// Slashing
 	registry.Register(MSG_UNJAIL_CREATED, 1, DecodeMsgUnjail)
 	registry.Register(MSG_UNJAIL_FAILED, 1, DecodeMsgUnjail)
+
+	// IBC
+	registry.Register(MSG_CREATE_CLIENT_CREATED, 1, DecodeMsgCreateClient)
+	registry.Register(MSG_CREATE_CLIENT_FAILED, 1, DecodeMsgCreateClient)
 }

@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+
+	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
+
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 
 	"github.com/crypto-com/chain-indexing/internal/primptr"
@@ -20,7 +24,7 @@ import (
 )
 
 func ParseBlockResultsTxsMsgToCommands(
-	txDecoder *TxDecoder,
+	txDecoder *utils.TxDecoder,
 	block *model.Block,
 	blockResults *model.BlockResults,
 ) ([]command.Command, error) {
@@ -80,6 +84,9 @@ func ParseBlockResultsTxsMsgToCommands(
 				msgCommands = parseMsgCreateValidator(msgCommonParams, msg)
 			case "/cosmos.staking.v1beta1.MsgEditValidator":
 				msgCommands = parseMsgEditValidator(msgCommonParams, msg)
+
+			case "/ibc.core.client.v1.MsgCreateClient":
+				msgCommands = ibcmsg.ParseMsgCreateClient(msgCommonParams, txsResult, msgIndex, msg)
 				// TODO: IBC commands
 			}
 
@@ -173,7 +180,7 @@ func parseMsgWithdrawDelegatorReward(
 			},
 		)}
 	}
-	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	var recipient string
 	var amount coin.Coins
 	// When there is no reward withdrew, `transfer` event would not exist
@@ -216,7 +223,7 @@ func parseMsgWithdrawValidatorCommission(
 			},
 		)}
 	}
-	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	var recipient string
 	var amount coin.Coins
 	// When there is no reward withdrew, `transfer` event would not exist
@@ -286,7 +293,7 @@ func parseMsgSubmitProposal(
 	}
 
 	if msgCommonParams.TxSuccess {
-		log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+		log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 		logEvent := log.GetEventByType("submit_proposal")
 		if logEvent == nil {
 			panic("missing `submit_proposal` event in TxsResult log")
@@ -329,7 +336,7 @@ func parseMsgSubmitParamChangeProposal(
 			},
 		)}
 	}
-	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	event := log.GetEventByType("submit_proposal")
 	if event == nil {
 		panic("missing `submit_proposal` event in TxsResult log")
@@ -387,7 +394,7 @@ func parseMsgSubmitCommunityFundSpendProposal(
 			},
 		)}
 	}
-	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
 	event := log.GetEventByType("submit_proposal")
 	if event == nil {
@@ -455,7 +462,7 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 			},
 		)}
 	}
-	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
 	event := log.GetEventByType("submit_proposal")
 	if event == nil {
@@ -507,7 +514,7 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 			},
 		)}
 	}
-	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
 	event := log.GetEventByType("submit_proposal")
 	if event == nil {
@@ -559,7 +566,7 @@ func parseMsgSubmitTextProposal(
 			},
 		)}
 	}
-	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
 	event := log.GetEventByType("submit_proposal")
 	if event == nil {
@@ -616,7 +623,7 @@ func parseMsgDeposit(
 	)}
 
 	if msgCommonParams.TxSuccess {
-		log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+		log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 		logEvents := log.GetEventsByType("proposal_deposit")
 		if logEvents == nil {
 			panic("missing `proposal_deposit` event in TxsResult log")
@@ -675,7 +682,7 @@ func parseMsgUndelegate(
 			},
 		)}
 	}
-	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
 	event := log.GetEventByType("unbond")
 	if event == nil {

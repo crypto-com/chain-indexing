@@ -19,6 +19,7 @@ require (
 	github.com/json-iterator/go v1.1.10
 	github.com/lab259/cors v0.2.0
 	github.com/luci/go-render v0.0.0-20160219211803-9a04cc21af0f
+	github.com/mitchellh/mapstructure v1.1.2
 	github.com/nbutton23/zxcvbn-go v0.0.0-20201221231540-e56b841a3c88
 	github.com/nxadm/tail v1.4.5 // indirect
 	github.com/onsi/ginkgo v1.14.2

@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+
 	"github.com/crypto-com/chain-indexing/entity/command"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -15,7 +17,7 @@ import (
 )
 
 func ParseTransactionCommands(
-	txDecoder *TxDecoder,
+	txDecoder *utils.TxDecoder,
 	block *model.Block,
 	blockResults *model.BlockResults,
 ) ([]command.Command, error) {

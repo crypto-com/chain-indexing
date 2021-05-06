@@ -2,6 +2,7 @@ package parser_test
 
 import (
 	"github.com/crypto-com/chain-indexing/usecase/model"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -17,7 +18,7 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgFundCommunityPool", func() {
 		It("should parse Msg commands when there is distribution.MsgFundCommunityPool in the transaction", func() {
-			txDecoder := parser.NewTxDecoder()
+			txDecoder := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_FUND_COMMUNITY_POOL_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_FUND_COMMUNITY_POOL_BLOCK_RESULTS_RESP,

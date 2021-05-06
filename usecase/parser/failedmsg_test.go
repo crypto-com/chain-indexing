@@ -1,6 +1,7 @@
 package parser_test
 
 import (
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -15,7 +16,7 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("Failed Msg", func() {
 		It("should parse Msg Failed commands when the transaction has failed", func() {
-			txDecoder := parser.NewTxDecoder()
+			txDecoder := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESULTS_RESP)
 
