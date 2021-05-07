@@ -43,11 +43,6 @@ func ParseMsgCreateClient(
 	if err := clientStateDecoder.Decode(msg["client_state"]); err != nil {
 		panic(fmt.Errorf("error decoding client state: %v", err))
 	}
-	//if err := mapstructure.DecodeHookExec(
-	//	mapstructure.StringToTimeDurationHookFunc(), msg["client_state"], &clientState,
-	//	); err != nil {
-	//	panic(fmt.Errorf("error decoding client state: %v", err))
-	//}
 
 	var proofSpecs []ibc_model.TendermintLightClientProofSpec
 	if clientState.ProofSpecs != nil {
@@ -70,16 +65,12 @@ func ParseMsgCreateClient(
 					childOrder = append(childOrder, proofSpec.MaybeInnerSpec.ChildOrder...)
 				}
 
-				var emptyChild []byte
-				if proofSpec.MaybeInnerSpec.EmptyChild != nil {
-					emptyChild = append(emptyChild, proofSpec.MaybeInnerSpec.EmptyChild...)
-				}
 				maybeInnerSpec = &ibc_model.TendermintLightClientInnerSpec{
 					ChildOrder:      childOrder,
 					ChildSize:       proofSpec.MaybeInnerSpec.ChildSize,
 					MinPrefixLength: proofSpec.MaybeInnerSpec.MinPrefixLength,
 					MaxPrefixLength: proofSpec.MaybeInnerSpec.MaxPrefixLength,
-					EmptyChild:      emptyChild,
+					EmptyChild:      proofSpec.MaybeInnerSpec.EmptyChild,
 					Hash:            proofSpec.MaybeInnerSpec.Hash,
 				}
 			}
@@ -151,11 +142,58 @@ func ParseMsgCreateClient(
 			},
 		},
 		Signer:     msg["signer"].(string),
-		ClientId:   event.MustGetAttributeByKey("client_id"),
+		ClientID:   event.MustGetAttributeByKey("client_id"),
 		ClientType: event.MustGetAttributeByKey("client_type"),
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgCreateClient(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
+func ParseMsgConnectionOpenInit(
+	msgCommonParams event.MsgCommonParams,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msg map[string]interface{},
+) []command.Command {
+	var counterParty MsgConnectionOpenInitCounterparty
+	if err := mapstructure.Decode(msg["counterparty"], &counterParty); err != nil {
+		panic(fmt.Errorf("error decoding counterparty: %v", err))
+	}
+
+	var version MsgConnectionOpenInitVersion
+	if err := mapstructure.Decode(msg["version"], &version); err != nil {
+		panic(fmt.Errorf("error decoding version: %v", err))
+	}
+
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	// When there is no reward withdrew, `transfer` event would not exist
+	event := log.GetEventByType("connection_open_init")
+	if event == nil {
+		panic("missing `connection_open_init` event in TxsResult log")
+	}
+	params := ibc_model.MsgConnectionOpenInitParams{
+		ClientID: msg["client_id"].(string),
+		Counterparty: ibc_model.MsgConnectionOpenInitCounterparty{
+			ClientID:     counterParty.ClientID,
+			ConnectionID: counterParty.ConnectionID,
+			Prefix: ibc_model.MsgConnectionOpenInitPrefix{
+				KeyPrefix: []byte(counterParty.Prefix.KeyPrefix),
+			},
+		},
+		ConnectionVersion: ibc_model.MsgConnectionOpenInitVersion{
+			Identifier: version.Identifier,
+			Features:   version.Features,
+		},
+		DelayPeriod:  msg["delay_period"].(string),
+		Signer:       msg["signer"].(string),
+		ConnectionID: event.MustGetAttributeByKey("connection_id"),
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgConnectionOpenInit(
 		msgCommonParams,
 
 		params,

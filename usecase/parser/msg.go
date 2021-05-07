@@ -87,6 +87,8 @@ func ParseBlockResultsTxsMsgToCommands(
 
 			case "/ibc.core.client.v1.MsgCreateClient":
 				msgCommands = ibcmsg.ParseMsgCreateClient(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.core.connection.v1.MsgConnectionOpenInit":
+				msgCommands = ibcmsg.ParseMsgConnectionOpenInit(msgCommonParams, txsResult, msgIndex, msg)
 				// TODO: IBC commands
 			}
 

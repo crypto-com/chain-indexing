@@ -79,4 +79,6 @@ func RegisterEvents(registry *event.Registry) {
 	// IBC
 	registry.Register(MSG_CREATE_CLIENT_CREATED, 1, DecodeMsgCreateClient)
 	registry.Register(MSG_CREATE_CLIENT_FAILED, 1, DecodeMsgCreateClient)
+	registry.Register(MSG_CONNECTION_OPEN_INIT_CREATED, 1, DecodeMsgConnectionOpenInit)
+	registry.Register(MSG_CONNECTION_OPEN_INIT_FAILED, 1, DecodeMsgConnectionOpenInit)
 }

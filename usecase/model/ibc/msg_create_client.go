@@ -9,9 +9,9 @@ import (
 type MsgCreateClientParams struct {
 	MaybeTendermintLightClient *TendermintLightClient `json:"maybeTendermintLightClient"`
 	// TODO: SoloMachine and Localhost LightClient
+	Signer string `json:"signer"`
 
-	Signer     string `json:"signer"`
-	ClientId   string `json:"clientId"`
+	ClientID   string `json:"clientId"`
 	ClientType string `json:"clientType"`
 }
 

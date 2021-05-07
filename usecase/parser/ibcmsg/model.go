@@ -61,3 +61,18 @@ type TendermintLightClientConsensusState struct {
 type TendermintLightClientRoot struct {
 	Hash string `json:"hash" mapstructure:"hash"`
 }
+
+type MsgConnectionOpenInitCounterparty struct {
+	ClientID     string                      `json:"client_id" mapstructure:"client_id"`
+	ConnectionID string                      `json:"connection_id" mapstructure:"connection_id"`
+	Prefix       MsgConnectionOpenInitPrefix `json:"prefix" mapstructure:"prefix"`
+}
+
+type MsgConnectionOpenInitPrefix struct {
+	KeyPrefix string `json:"key_prefix" mapstructure:"key_prefix"`
+}
+
+type MsgConnectionOpenInitVersion struct {
+	Identifier string   `json:"identifier" mapstructure:"identifier"`
+	Features   []string `json:"features" mapstructure:"features"`
+}

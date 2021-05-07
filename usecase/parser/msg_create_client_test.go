@@ -17,7 +17,10 @@ import (
 	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
 )
 
-var expected = `{
+var _ = Describe("ParseMsgCommands", func() {
+	Describe("MsgCreateClient", func() {
+		It("should parse Msg commands when there is MsgCreateClient in the transaction", func() {
+			expected := `{
   "name": "MsgCreateClientCreated",
   "version": 1,
   "height": 5,
@@ -91,10 +94,6 @@ var expected = `{
   "clientType": "07-tendermint"
 }`
 
-var _ = Describe("ParseMsgCommands", func() {
-	Describe("MsgCreateClient", func() {
-
-		It("should parse Msg commands when there is staking.MsgCreateClient in the transaction", func() {
 			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_CREATE_CLIENT_BLOCK_RESP,
