@@ -20,7 +20,6 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 
 			anyParams := ibc_model.MsgConnectionOpenInitParams{
-				Type:     "/ibc.core.connection.v1.MsgConnectionOpenInit",
 				ClientID: "07-tendermint-0",
 				Counterparty: ibc_model.MsgConnectionOpenInitCounterparty{
 					ClientID:     "07-tendermint-0",
@@ -63,8 +62,6 @@ var _ = Describe("Event", func() {
 
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
-			Expect(typedEvent.Type).To(Equal(anyParams.Type))
-			Expect(typedEvent.ClientID).To(Equal(anyParams.ClientID))
 			Expect(typedEvent.ClientID).To(Equal(anyParams.ClientID))
 			Expect(typedEvent.Counterparty).To(Equal(anyParams.Counterparty))
 			Expect(typedEvent.ConnectionVersion).To(Equal(anyParams.ConnectionVersion))
@@ -78,7 +75,6 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 
 			anyParams := ibc_model.MsgConnectionOpenInitParams{
-				Type:     "/ibc.core.connection.v1.MsgConnectionOpenInit",
 				ClientID: "07-tendermint-0",
 				Counterparty: ibc_model.MsgConnectionOpenInitCounterparty{
 					ClientID:     "07-tendermint-0",
@@ -121,8 +117,6 @@ var _ = Describe("Event", func() {
 
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
-			Expect(typedEvent.Type).To(Equal(anyParams.Type))
-			Expect(typedEvent.ClientID).To(Equal(anyParams.ClientID))
 			Expect(typedEvent.ClientID).To(Equal(anyParams.ClientID))
 			Expect(typedEvent.Counterparty).To(Equal(anyParams.Counterparty))
 			Expect(typedEvent.ConnectionVersion).To(Equal(anyParams.ConnectionVersion))
