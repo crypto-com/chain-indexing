@@ -22,12 +22,12 @@ func privNewTotalIncrementalMap() *privTotalIncrementalMap {
 }
 func (totalMap *privTotalIncrementalMap) Increment(key string, value int64) {
 	if _, ok := totalMap.data[key]; !ok {
-		totalMap.data[key] = int64(0)
+		totalMap.data[key] = 0
 	}
 	totalMap.data[key] += value
 }
 func (totalMap *privTotalIncrementalMap) IncrementByOne(key string) {
-	totalMap.Increment(key, int64(1))
+	totalMap.Increment(key, 1)
 }
 func (totalMap *privTotalIncrementalMap) Set(key string, value int64) {
 	totalMap.data[key] = value
@@ -139,7 +139,7 @@ func (projection *Validator) projectValidatorActivitiesView(
 			})
 
 			totalIncrementalMap.Increment("-", int64(2))
-			totalIncrementalMap.IncrementByOne(redelegateEvent.ValidatorDstAddress)
+			totalIncrementalMap.IncrementByOne(redelegateEvent.ValidatorSrcAddress)
 			totalIncrementalMap.IncrementByOne(
 				fmt.Sprintf("%s:%s", redelegateEvent.ValidatorSrcAddress, redelegateEvent.Name()),
 			)
