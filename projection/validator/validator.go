@@ -87,10 +87,12 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 
 	var blockTime utctime.UTCTime
 	var blockHash string
+	var blockProposer string
 	for _, event := range events {
 		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
 			blockTime = blockCreatedEvent.Block.Time
 			blockHash = blockCreatedEvent.Block.Hash
+			blockProposer = blockCreatedEvent.Block.ProposerAddress
 		}
 	}
 
@@ -124,6 +126,9 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
 			signatureCount := len(blockCreatedEvent.Block.Signatures)
 			commitmentRows := make([]view.ValidatorBlockCommitmentRow, 0, signatureCount)
+
+			identities := make([]string, 0, len(blockCreatedEvent.Block.Signatures))
+			heightValidatorIdentities := make([]string, 0, len(blockCreatedEvent.Block.Signatures))
 			for _, signature := range blockCreatedEvent.Block.Signatures {
 				signedValidator, exist := validatorMap[signature.ValidatorAddress]
 				if !exist {
@@ -132,21 +137,38 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 				commitmentRows = append(commitmentRows, view.ValidatorBlockCommitmentRow{
 					ConsensusNodeAddress: signedValidator.ConsensusNodeAddress,
 					BlockHeight:          height,
+					IsProposer:           blockProposer == signature.ValidatorAddress,
 					Signature:            signature.Signature,
 					Timestamp:            signature.Timestamp,
 				})
+
+				identities = append(identities, fmt.Sprintf("-:%s", signedValidator.ConsensusNodeAddress))
+				heightValidatorIdentities = append(
+					heightValidatorIdentities,
+					fmt.Sprintf("%s:%s", strconv.FormatInt(height, 10), signedValidator.ConsensusNodeAddress),
+				)
 			}
 
 			if err := validatorBlockCommitmentsView.InsertAll(commitmentRows); err != nil {
 				return fmt.Errorf("error incrementing validator block commitment rows: %v", err)
 			}
 			if err := validatorBlockCommitmentsTotalView.Set(
-				strconv.FormatInt(height, 10), int64(signatureCount),
+				fmt.Sprintf("%s:-", strconv.FormatInt(height, 10)), int64(signatureCount),
 			); err != nil {
-				return fmt.Errorf("error incrementing all validator block commitments total: %v", err)
+				return fmt.Errorf("error incrementing height validator block commitments total: %v", err)
+			}
+			if err := validatorBlockCommitmentsTotalView.IncrementAll(
+				identities, 1,
+			); err != nil {
+				return fmt.Errorf("error incrementing validator validator block commitments total: %v", err)
+			}
+			if err := validatorBlockCommitmentsTotalView.IncrementAll(
+				heightValidatorIdentities, 1,
+			); err != nil {
+				return fmt.Errorf("error incrementing height-valiadtor block commitments total: %v", err)
 			}
 			if err := validatorBlockCommitmentsTotalView.Increment(
-				"-", int64(signatureCount),
+				"-:-", int64(signatureCount),
 			); err != nil {
 				return fmt.Errorf("error incrementing overall validator block commitments total: %v", err)
 			}
