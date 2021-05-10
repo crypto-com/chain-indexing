@@ -60,7 +60,7 @@ func (service *IndexService) Run() error {
 	switch service.systemMode {
 	case SYSTEM_MODE_EVENT_STORE:
 		err = service.RunEventStoreMode()
-	case :
+	case SYSTEM_MODE_TENDERMINT_DIRECT:
 		err = service.RunTendermintDirectMode()
 	}
 
@@ -97,8 +97,8 @@ func (service *IndexService) RunEventStoreMode() error {
 			RDbConn:   service.rdbConn,
 			TxDecoder: txDecoder,
 			Config: SyncManagerConfig{
-				WindowSize:       service.windowSize,
-				TendermintRPCUrl: service.tendermintHTTPRPCURL,
+				WindowSize:           service.windowSize,
+				TendermintRPCUrl:     service.tendermintHTTPRPCURL,
 				AccountAddressPrefix: service.accountAddressPrefix,
 				BondingDenom:         service.bondingDenom,
 			},
