@@ -61,6 +61,8 @@ func (service *IndexService) Run() error {
 		return service.RunEventStoreMode()
 	case SYSTEM_MODE_TENDERMINT_DIRECT:
 		return service.RunTendermintDirectMode()
+	default:
+		return fmt.Errorf("unsupported system mode: %s", service.systemMode)
 	}
 }
 
