@@ -15,16 +15,19 @@ import (
 
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgBeginRedelegate", func() {
-
-		It("should parse Msg commands when there is staking.MsgBeginRedelegate in the transaction", func() {
+		FIt("should parse Msg commands when there is staking.MsgBeginRedelegate in the transaction", func() {
 			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_BEGIN_REDELEGATE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MSG_BEGIN_REDELEGATE_BLOCK_RESULTS_RESP)
+			accountAddressPrefix := "tcro"
+			bondingDenom := "basetcro"
 
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
+				accountAddressPrefix,
+				bondingDenom,
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
@@ -40,6 +43,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					ValidatorSrcAddress: "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
 					ValidatorDstAddress: "tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6",
 					Amount:              coin.MustParseCoinNormalized("10000000000basetcro"),
+					AutoClaimedReward:   coin.NewCoin("basetcro", coin.NewInt(281334)),
 				},
 			)}))
 		})

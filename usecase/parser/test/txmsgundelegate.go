@@ -376,7 +376,7 @@ const TX_MSG_UNDELEGATE_BLOCK_RESULTS_RESP = `{
             {
                 "code": 0,
                 "data": "CiAKD2JlZ2luX3VuYm9uZGluZxINDAiO37L9BRCdhrnqAQ==",
-                "log": "[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"begin_unbonding\"},{\"key\":\"sender\",\"value\":\"tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l\"},{\"key\":\"sender\",\"value\":\"tcro1fl48vsnmsdzcv85q5d2q4z5ajdha8yu3r4gj9h\"},{\"key\":\"module\",\"value\":\"staking\"},{\"key\":\"sender\",\"value\":\"tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64\"},{\"key\":\"sender\",\"value\":\"tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l\"},{\"key\":\"amount\",\"value\":\"38344basetcro\"},{\"key\":\"recipient\",\"value\":\"tcro1tygms3xhhs3yv487phx3dw4a95jn7t7lh45rnr\"},{\"key\":\"sender\",\"value\":\"tcro1fl48vsnmsdzcv85q5d2q4z5ajdha8yu3r4gj9h\"},{\"key\":\"amount\",\"value\":\"1000000000basetcro\"}]},{\"type\":\"unbond\",\"attributes\":[{\"key\":\"validator\",\"value\":\"tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr\"},{\"key\":\"amount\",\"value\":\"1000000000\"},{\"key\":\"completion_time\",\"value\":\"2020-11-12T03:44:14Z\"}]}]}]",
+                "log": "[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"begin_unbonding\"},{\"key\":\"sender\",\"value\":\"tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l\"},{\"key\":\"sender\",\"value\":\"tcro1fl48vsnmsdzcv85q5d2q4z5ajdha8yu3r4gj9h\"},{\"key\":\"module\",\"value\":\"staking\"},{\"key\":\"sender\",\"value\":\"tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64\"},{\"key\":\"sender\",\"value\":\"tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l\"},{\"key\":\"amount\",\"value\":\"38344basetcro\"},{\"key\":\"recipient\",\"value\":\"tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64\"},{\"key\":\"sender\",\"value\":\"tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l\"},{\"key\":\"amount\",\"value\":\"38344basetcro\"},{\"key\":\"recipient\",\"value\":\"tcro1tygms3xhhs3yv487phx3dw4a95jn7t7lh45rnr\"},{\"key\":\"sender\",\"value\":\"tcro1fl48vsnmsdzcv85q5d2q4z5ajdha8yu3r4gj9h\"},{\"key\":\"amount\",\"value\":\"1000000000basetcro\"}]},{\"type\":\"unbond\",\"attributes\":[{\"key\":\"validator\",\"value\":\"tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr\"},{\"key\":\"amount\",\"value\":\"1000000000\"},{\"key\":\"completion_time\",\"value\":\"2020-11-12T03:44:14Z\"}]}]}]",
                 "info": "",
                 "gas_wanted": "800000",
                 "gas_used": "148475",
@@ -424,6 +424,21 @@ const TX_MSG_UNDELEGATE_BLOCK_RESULTS_RESP = `{
                     {
                         "type": "transfer",
                         "attributes": [
+                            {
+                                "key": "cmVjaXBpZW50",
+                                "value": "dGNybzFnczgwbjhmcGM1bWMzeXdrZ2Z5OTNsMjN0ZzBnZHFqNXcybGw2NA==",
+                                "index": true
+                            },
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "dGNybzFqdjY1czNncnFmNnY2amwzZHA0dDZjOXQ5cms5OWNkODMzOXA0bA==",
+                                "index": true
+                            },
+                            {
+                                "key": "YW1vdW50",
+                                "value": "MzgzNDRiYXNldGNybw==",
+                                "index": true
+                            },
                             {
                                 "key": "cmVjaXBpZW50",
                                 "value": "dGNybzFnczgwbjhmcGM1bWMzeXdrZ2Z5OTNsMjN0ZzBnZHFqNXcybGw2NA==",

@@ -11,24 +11,54 @@ import (
 type ParsedTxsResultLogEvent struct {
 	keyIndex map[string]int
 
-	rawEvent *model.BlockResultsEvent
+	rawEvent model.BlockResultsEvent
 }
 
 func NewParsedTxsResultLogEvent(rawEvent *model.BlockResultsEvent) *ParsedTxsResultLogEvent {
 	event := &ParsedTxsResultLogEvent{
 		make(map[string]int),
 
-		rawEvent,
+		*rawEvent,
 	}
 
 	for i, attribute := range rawEvent.Attributes {
 		if event.HasAttribute(attribute.Key) {
-			panic(fmt.Sprintf("duplciated attribute key %s", attribute.Key))
+			panic(fmt.Sprintf("duplciated attribute key `%s`", attribute.Key))
 		}
 		event.keyIndex[attribute.Key] = i
 	}
 
 	return event
+}
+
+// In the txs_results log, multiple event of the same types are grouped
+// together into single event. This method pars txs_results log and split into
+// a new event when a same key name appears.
+func NewParsedTxsResultLogEventsDeduplicatedByKey(
+	rawEvent *model.BlockResultsEvent,
+) []ParsedTxsResultLogEvent {
+	events := make([]ParsedTxsResultLogEvent, 0)
+	event := ParsedTxsResultLogEvent{
+		make(map[string]int),
+
+		*rawEvent,
+	}
+
+	for i, attribute := range rawEvent.Attributes {
+		if event.HasAttribute(attribute.Key) {
+			events = append(events, event)
+
+			event = ParsedTxsResultLogEvent{
+				make(map[string]int),
+
+				*rawEvent,
+			}
+		}
+		event.keyIndex[attribute.Key] = i
+	}
+	events = append(events, event)
+
+	return events
 }
 
 func (log *ParsedTxsResultLogEvent) HasAttribute(key string) bool {

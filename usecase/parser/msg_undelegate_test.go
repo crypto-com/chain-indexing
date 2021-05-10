@@ -21,11 +21,15 @@ var _ = Describe("ParseMsgCommands", func() {
 			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_UNDELEGATE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MSG_UNDELEGATE_BLOCK_RESULTS_RESP)
+			accountAddressPrefix := "tcro"
+			bondingDenom := "basetcro"
 
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
+				accountAddressPrefix,
+				bondingDenom,
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
@@ -41,6 +45,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					ValidatorAddress:      "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
 					Amount:                coin.MustParseCoinNormalized("1000000000basetcro"),
 					MaybeUnbondCompleteAt: primptr.UTCTime(utctime.FromUnixNano(int64(1605152654000000000))),
+					AutoClaimedReward:     coin.NewCoin("basetcro", coin.NewInt(76688)),
 				},
 			)}))
 		})
@@ -49,11 +54,15 @@ var _ = Describe("ParseMsgCommands", func() {
 			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_MSG_UNDELEGATE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_MSG_UNDELEGATE_BLOCK_RESULTS_RESP)
+			accountAddressPrefix := "tcro"
+			bondingDenom := "basetcro"
 
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
+				accountAddressPrefix,
+				bondingDenom,
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))

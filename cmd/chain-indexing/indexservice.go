@@ -19,7 +19,9 @@ type IndexService struct {
 	projections []projection_entity.Projection
 
 	systemMode            string
+	accountAddressPrefix  string
 	consNodeAddressPrefix string
+	bondingDenom          string
 	windowSize            int
 	tendermintHTTPRPCURL  string
 }
@@ -38,6 +40,8 @@ func NewIndexService(
 
 		systemMode:            config.System.Mode,
 		consNodeAddressPrefix: config.Blockchain.ConNodeAddressPrefix,
+		accountAddressPrefix:  config.Blockchain.AccountAddressPrefix,
+		bondingDenom:          config.Blockchain.BondingDenom,
 		windowSize:            config.Sync.WindowSize,
 		tendermintHTTPRPCURL:  config.Tendermint.HTTPRPCURL,
 	}
@@ -56,7 +60,7 @@ func (service *IndexService) Run() error {
 	switch service.systemMode {
 	case SYSTEM_MODE_EVENT_STORE:
 		err = service.RunEventStoreMode()
-	case SYSTEM_MODE_TENDERMINT_DIRECT:
+	case :
 		err = service.RunTendermintDirectMode()
 	}
 
@@ -95,6 +99,8 @@ func (service *IndexService) RunEventStoreMode() error {
 			Config: SyncManagerConfig{
 				WindowSize:       service.windowSize,
 				TendermintRPCUrl: service.tendermintHTTPRPCURL,
+				AccountAddressPrefix: service.accountAddressPrefix,
+				BondingDenom:         service.bondingDenom,
 			},
 		},
 		eventStoreHandler,
@@ -118,8 +124,10 @@ func (service *IndexService) RunTendermintDirectMode() error {
 				RDbConn:   service.rdbConn,
 				TxDecoder: txDecoder,
 				Config: SyncManagerConfig{
-					WindowSize:       service.windowSize,
-					TendermintRPCUrl: service.tendermintHTTPRPCURL,
+					WindowSize:           service.windowSize,
+					TendermintRPCUrl:     service.tendermintHTTPRPCURL,
+					AccountAddressPrefix: service.accountAddressPrefix,
+					BondingDenom:         service.bondingDenom,
 				},
 			}, eventhandler_interface.NewProjectionHandler(service.logger, projection))
 			if err := syncManager.Run(); err != nil {

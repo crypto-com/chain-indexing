@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 
@@ -23,6 +24,8 @@ func ParseBlockResultsTxsMsgToCommands(
 	txDecoder *TxDecoder,
 	block *model.Block,
 	blockResults *model.BlockResults,
+	accountAddressPrefix string,
+	bondingDenom string,
 ) ([]command.Command, error) {
 	commands := make([]command.Command, 0)
 
@@ -71,9 +74,17 @@ func ParseBlockResultsTxsMsgToCommands(
 			case "/cosmos.staking.v1beta1.MsgDelegate":
 				msgCommands = parseMsgDelegate(msgCommonParams, msg)
 			case "/cosmos.staking.v1beta1.MsgUndelegate":
-				msgCommands = parseMsgUndelegate(txSuccess, txsResult, msgIndex, msgCommonParams, msg)
+				msgCommands = parseMsgUndelegate(
+					accountAddressPrefix,
+					bondingDenom,
+					txSuccess, txsResult, msgIndex, msgCommonParams, msg,
+				)
 			case "/cosmos.staking.v1beta1.MsgBeginRedelegate":
-				msgCommands = parseMsgBeginRedelegate(msgCommonParams, msg)
+				msgCommands = parseMsgBeginRedelegate(
+					accountAddressPrefix,
+					bondingDenom,
+					txSuccess, txsResult, msgIndex, msgCommonParams, msg,
+				)
 			case "/cosmos.slashing.v1beta1.MsgUnjail":
 				msgCommands = parseMsgUnjail(msgCommonParams, msg)
 			case "/cosmos.staking.v1beta1.MsgCreateValidator":
@@ -654,6 +665,8 @@ func parseMsgDelegate(
 }
 
 func parseMsgUndelegate(
+	addressPrefix string,
+	stakingDenom string,
 	txSuccess bool,
 	txsResult model.BlockResultsTxsResult,
 	msgIndex int,
@@ -672,18 +685,39 @@ func parseMsgUndelegate(
 				ValidatorAddress:      msg["validator_address"].(string),
 				MaybeUnbondCompleteAt: nil,
 				Amount:                amount,
+				AutoClaimedReward:     coin.Coin{},
 			},
 		)}
 	}
+
 	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
-	event := log.GetEventByType("unbond")
-	if event == nil {
+	unbondEvent := log.GetEventByType("unbond")
+	if unbondEvent == nil {
 		panic("missing `unbond` event in TxsResult log")
 	}
-	unbondCompletionTime, err := utctime.Parse("2006-01-02T15:04:05Z", event.MustGetAttributeByKey("completion_time"))
-	if err != nil {
-		panic(fmt.Sprintf("error parsing unbond completion time: %v", err))
+	unbondCompletionTime, unbondCompletionTimeErr := utctime.Parse(
+		time.RFC3339, unbondEvent.MustGetAttributeByKey("completion_time"),
+	)
+	if unbondCompletionTimeErr != nil {
+		panic(fmt.Sprintf("error parsing unbond completion time: %v", unbondCompletionTimeErr))
+	}
+
+	moduleAccounts := tmcosmosutils.NewModuleAccounts(addressPrefix)
+	transferEvents := log.GetEventsByType("transfer")
+	autoClaimedReward := coin.NewZeroCoin(stakingDenom)
+	for _, transferEvent := range transferEvents {
+		sender := transferEvent.MustGetAttributeByKey("sender")
+		if sender != moduleAccounts.Distribution {
+			continue
+		}
+
+		amount := transferEvent.MustGetAttributeByKey("amount")
+		coin, coinErr := coin.ParseCoinNormalized(amount)
+		if coinErr != nil {
+			panic(fmt.Errorf("error parsing auto claimed rewards amount: %v", coinErr))
+		}
+		autoClaimedReward = autoClaimedReward.Add(coin)
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgUndelegate(
@@ -694,16 +728,54 @@ func parseMsgUndelegate(
 			ValidatorAddress:      msg["validator_address"].(string),
 			MaybeUnbondCompleteAt: &unbondCompletionTime,
 			Amount:                amount,
+			AutoClaimedReward:     autoClaimedReward,
 		},
 	)}
 }
 
 func parseMsgBeginRedelegate(
+	addressPrefix string,
+	stakingDenom string,
+	txSuccess bool,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 ) []command.Command {
 	amountValue, _ := msg["amount"].(map[string]interface{})
 	amount := tmcosmosutils.MustNewCoinFromAmountInterface(amountValue)
+
+	if !txSuccess {
+		return []command.Command{command_usecase.NewCreateMsgBeginRedelegate(
+			msgCommonParams,
+
+			model.MsgBeginRedelegateParams{
+				DelegatorAddress:    msg["delegator_address"].(string),
+				ValidatorSrcAddress: msg["validator_src_address"].(string),
+				ValidatorDstAddress: msg["validator_dst_address"].(string),
+				Amount:              amount,
+				AutoClaimedReward:   coin.Coin{},
+			},
+		)}
+	}
+
+	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	moduleAccounts := tmcosmosutils.NewModuleAccounts(addressPrefix)
+	transferEvents := log.GetEventsByType("transfer")
+	autoClaimedReward := coin.NewZeroCoin(stakingDenom)
+	for _, transferEvent := range transferEvents {
+		sender := transferEvent.MustGetAttributeByKey("sender")
+		if sender != moduleAccounts.Distribution {
+			continue
+		}
+
+		amount := transferEvent.MustGetAttributeByKey("amount")
+		coin, coinErr := coin.ParseCoinNormalized(amount)
+		if coinErr != nil {
+			panic(fmt.Errorf("error parsing auto claimed rewards amount: %v", coinErr))
+		}
+		autoClaimedReward = autoClaimedReward.Add(coin)
+	}
 
 	return []command.Command{command_usecase.NewCreateMsgBeginRedelegate(
 		msgCommonParams,
@@ -713,6 +785,7 @@ func parseMsgBeginRedelegate(
 			ValidatorSrcAddress: msg["validator_src_address"].(string),
 			ValidatorDstAddress: msg["validator_dst_address"].(string),
 			Amount:              amount,
+			AutoClaimedReward:   autoClaimedReward,
 		},
 	)}
 }

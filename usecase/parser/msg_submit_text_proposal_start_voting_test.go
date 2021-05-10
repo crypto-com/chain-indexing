@@ -23,11 +23,15 @@ var _ = Describe("ParseMsgCommands", func() {
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_SUBMIT_TEXT_PROPOSAL_AND_START_VOTING_BLOCK_RESULTS_RESP,
 			)
+			accountAddressPrefix := "tcro"
+			bondingDenom := "basetcro"
 
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
+				accountAddressPrefix,
+				bondingDenom,
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))

@@ -376,7 +376,7 @@ const TX_MSG_BEGIN_REDELEGATE_BLOCK_RESULTS_RESP = `{
             {
                 "code": 0,
                 "data": "CiEKEGJlZ2luX3JlZGVsZWdhdGUSDQwIo+Cy/QUQgMb/wgI=",
-                "log": "[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"begin_redelegate\"},{\"key\":\"sender\",\"value\":\"tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l\"},{\"key\":\"module\",\"value\":\"staking\"},{\"key\":\"sender\",\"value\":\"tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64\"}]},{\"type\":\"redelegate\",\"attributes\":[{\"key\":\"source_validator\",\"value\":\"tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr\"},{\"key\":\"destination_validator\",\"value\":\"tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6\"},{\"key\":\"amount\",\"value\":\"10000000000\"},{\"key\":\"completion_time\",\"value\":\"2020-11-12T03:46:43Z\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64\"},{\"key\":\"sender\",\"value\":\"tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l\"},{\"key\":\"amount\",\"value\":\"157878basetcro\"}]}]}]",
+                "log": "[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"begin_redelegate\"},{\"key\":\"sender\",\"value\":\"tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l\"},{\"key\":\"module\",\"value\":\"staking\"},{\"key\":\"sender\",\"value\":\"tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64\"}]},{\"type\":\"redelegate\",\"attributes\":[{\"key\":\"source_validator\",\"value\":\"tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr\"},{\"key\":\"destination_validator\",\"value\":\"tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6\"},{\"key\":\"amount\",\"value\":\"10000000000\"},{\"key\":\"completion_time\",\"value\":\"2020-11-12T03:46:43Z\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64\"},{\"key\":\"sender\",\"value\":\"tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l\"},{\"key\":\"amount\",\"value\":\"157878basetcro\"},{\"key\":\"recipient\",\"value\":\"tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64\"},{\"key\":\"sender\",\"value\":\"tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l\"},{\"key\":\"amount\",\"value\":\"123456basetcro\"}]}]}]",
                 "info": "",
                 "gas_wanted": "800000",
                 "gas_used": "191838",
@@ -424,6 +424,21 @@ const TX_MSG_BEGIN_REDELEGATE_BLOCK_RESULTS_RESP = `{
                     {
                         "type": "transfer",
                         "attributes": [
+                            {
+                                "key": "cmVjaXBpZW50",
+                                "value": "dGNybzFnczgwbjhmcGM1bWMzeXdrZ2Z5OTNsMjN0ZzBnZHFqNXcybGw2NA==",
+                                "index": true
+                            },
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "dGNybzFqdjY1czNncnFmNnY2amwzZHA0dDZjOXQ5cms5OWNkODMzOXA0bA==",
+                                "index": true
+                            },
+                            {
+                                "key": "YW1vdW50",
+                                "value": "MTU3ODc4YmFzZXRjcm8=",
+                                "index": true
+                            },
                             {
                                 "key": "cmVjaXBpZW50",
                                 "value": "dGNybzFnczgwbjhmcGM1bWMzeXdrZ2Z5OTNsMjN0ZzBnZHFqNXcybGw2NA==",
