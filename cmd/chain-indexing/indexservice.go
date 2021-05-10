@@ -56,19 +56,12 @@ func (service *IndexService) Run() error {
 	)
 	infoManager.Run()
 
-	var err error
 	switch service.systemMode {
 	case SYSTEM_MODE_EVENT_STORE:
-		err = service.RunEventStoreMode()
+		return service.RunEventStoreMode()
 	case SYSTEM_MODE_TENDERMINT_DIRECT:
-		err = service.RunTendermintDirectMode()
+		return service.RunTendermintDirectMode()
 	}
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (service *IndexService) RunEventStoreMode() error {
