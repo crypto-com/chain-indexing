@@ -15,7 +15,7 @@ import (
 
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgBeginRedelegate", func() {
-		FIt("should parse Msg commands when there is staking.MsgBeginRedelegate in the transaction", func() {
+		It("should parse Msg commands when there is staking.MsgBeginRedelegate in the transaction", func() {
 			txDecoder := parser.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_BEGIN_REDELEGATE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MSG_BEGIN_REDELEGATE_BLOCK_RESULTS_RESP)
