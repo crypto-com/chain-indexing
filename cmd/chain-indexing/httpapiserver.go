@@ -37,12 +37,12 @@ func NewHTTPAPIServer(logger applogger.Logger, rdbConn rdb.Conn, config *Config)
 	var cosmosClient cosmosapp.Client
 	if config.CosmosApp.Insecure {
 		cosmosClient = cosmosapp_infrastructure.NewInsecureHTTPClient(
-			config.CosmosApp.HTTPRPCURL,
+			config.CosmosApp.HTTPRPCUrl,
 			config.Blockchain.BondingDenom,
 		)
 	} else {
 		cosmosClient = cosmosapp_infrastructure.NewHTTPClient(
-			config.CosmosApp.HTTPRPCURL,
+			config.CosmosApp.HTTPRPCUrl,
 			config.Blockchain.BondingDenom,
 		)
 	}

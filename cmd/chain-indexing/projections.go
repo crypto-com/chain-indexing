@@ -20,11 +20,11 @@ func initProjections(
 	var cosmosAppClient cosmosapp.Client
 	if config.CosmosApp.Insecure {
 		cosmosAppClient = cosmosapp_infrastructure.NewInsecureHTTPClient(
-			config.CosmosApp.HTTPRPCURL, config.Blockchain.BondingDenom,
+			config.CosmosApp.HTTPRPCUrl, config.Blockchain.BondingDenom,
 		)
 	} else {
 		cosmosAppClient = cosmosapp_infrastructure.NewHTTPClient(
-			config.CosmosApp.HTTPRPCURL, config.Blockchain.BondingDenom,
+			config.CosmosApp.HTTPRPCUrl, config.Blockchain.BondingDenom,
 		)
 	}
 

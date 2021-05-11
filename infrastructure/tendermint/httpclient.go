@@ -159,9 +159,9 @@ func (client *HTTPClient) Status() (*map[string]interface{}, error) {
 
 	body, _ := ioutil.ReadAll(rawRespBody)
 	jsonMap := make(map[string]interface{})
-	errread := json.Unmarshal([]byte(body), &jsonMap)
-	if errread != nil {
-		return nil, fmt.Errorf("error requesting Status : %v", errread)
+	errRead := json.Unmarshal([]byte(body), &jsonMap)
+	if errRead != nil {
+		return nil, fmt.Errorf("error requesting Status : %v", errRead)
 	}
 
 	return &jsonMap, nil
