@@ -24,12 +24,19 @@ func NewInfoManager(
 	rdbConn rdb.Conn,
 	tendermintRPCUrl string,
 	insecureTendermintClient bool,
+	strictGenesisParsing bool,
 ) *InfoManager {
 	var tendermintClient *tendermint.HTTPClient
 	if insecureTendermintClient {
-		tendermintClient = tendermint.NewInsecureHTTPClient(tendermintRPCUrl)
+		tendermintClient = tendermint.NewInsecureHTTPClient(
+			tendermintRPCUrl,
+			strictGenesisParsing,
+		)
 	} else {
-		tendermintClient = tendermint.NewHTTPClient(tendermintRPCUrl)
+		tendermintClient = tendermint.NewHTTPClient(
+			tendermintRPCUrl,
+			strictGenesisParsing,
+		)
 	}
 
 	viewStatus := polling.NewStatus(rdbConn.ToHandle())

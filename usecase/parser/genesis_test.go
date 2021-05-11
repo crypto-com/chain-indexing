@@ -1,6 +1,9 @@
 package parser_test
 
 import (
+	"strings"
+
+	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -13,8 +16,17 @@ import (
 )
 
 var _ = Describe("Parse Genesis", func() {
+	It("should throw when parsing unknown fields with strict mode on", func() {
+		genesisReader := strings.NewReader(usecase_parser_test.GENESIS_RESP)
+		strict := true
+		_, err := tendermint.ParseGenesisResp(genesisReader, strict)
+		Expect(err).Should(HaveOccurred())
+		Expect(err.Error()).To(ContainSubstring("error decoding Tendermint genesis response"))
+	})
+
 	It("should return genesis command corresponding to genesis response", func() {
-		genesis := mustParseGenesisResp(usecase_parser_test.GENESIS_RESP)
+		strict := false
+		genesis := mustParseGenesisResp(usecase_parser_test.GENESIS_RESP, strict)
 
 		cmds, err := parser.ParseGenesisCommands(genesis)
 		Expect(err).To(BeNil())

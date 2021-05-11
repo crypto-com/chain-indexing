@@ -18,10 +18,11 @@ import (
 const DEFAULT_POLLING_INTERVAL = 5 * time.Second
 
 type SyncManager struct {
-	rdbConn         rdb.Conn
-	client          *tendermint.HTTPClient
-	logger          applogger.Logger
-	pollingInterval time.Duration
+	rdbConn              rdb.Conn
+	client               *tendermint.HTTPClient
+	logger               applogger.Logger
+	pollingInterval      time.Duration
+	strictGenesisParsing bool
 
 	accountAddressPrefix string
 	stakingDenom         string
@@ -48,6 +49,7 @@ type SyncManagerConfig struct {
 	WindowSize               int
 	TendermintRPCUrl         string
 	InsecureTendermintClient bool
+	StrictGenesisParsing     bool
 
 	AccountAddressPrefix string
 	StakingDenom         string
@@ -60,9 +62,15 @@ func NewSyncManager(
 ) *SyncManager {
 	var tendermintClient *tendermint.HTTPClient
 	if params.Config.InsecureTendermintClient {
-		tendermintClient = tendermint.NewInsecureHTTPClient(params.Config.TendermintRPCUrl)
+		tendermintClient = tendermint.NewInsecureHTTPClient(
+			params.Config.TendermintRPCUrl,
+			params.Config.StrictGenesisParsing,
+		)
 	} else {
-		tendermintClient = tendermint.NewHTTPClient(params.Config.TendermintRPCUrl)
+		tendermintClient = tendermint.NewHTTPClient(
+			params.Config.TendermintRPCUrl,
+			params.Config.StrictGenesisParsing,
+		)
 	}
 
 	return &SyncManager{
@@ -71,7 +79,8 @@ func NewSyncManager(
 		logger: params.Logger.WithFields(applogger.LogFields{
 			"module": "SyncManager",
 		}),
-		pollingInterval: DEFAULT_POLLING_INTERVAL,
+		pollingInterval:      DEFAULT_POLLING_INTERVAL,
+		strictGenesisParsing: params.Config.StrictGenesisParsing,
 
 		accountAddressPrefix: params.Config.AccountAddressPrefix,
 		stakingDenom:         params.Config.StakingDenom,

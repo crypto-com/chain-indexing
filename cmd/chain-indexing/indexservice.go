@@ -25,6 +25,7 @@ type IndexService struct {
 	windowSize               int
 	tendermintHTTPRPCURL     string
 	insecureTendermintClient bool
+	strictGenesisParsing     bool
 }
 
 // NewIndexService creates a new server instance for polling and indexing
@@ -46,6 +47,7 @@ func NewIndexService(
 		windowSize:               config.Sync.WindowSize,
 		tendermintHTTPRPCURL:     config.Tendermint.HTTPRPCUrl,
 		insecureTendermintClient: config.Tendermint.Insecure,
+		strictGenesisParsing:     config.Tendermint.StrictGenesisParsing,
 	}
 }
 
@@ -56,6 +58,7 @@ func (service *IndexService) Run() error {
 		service.rdbConn,
 		service.tendermintHTTPRPCURL,
 		service.insecureTendermintClient,
+		service.strictGenesisParsing,
 	)
 	infoManager.Run()
 
@@ -98,6 +101,7 @@ func (service *IndexService) RunEventStoreMode() error {
 				WindowSize:               service.windowSize,
 				TendermintRPCUrl:         service.tendermintHTTPRPCURL,
 				InsecureTendermintClient: service.insecureTendermintClient,
+				StrictGenesisParsing:     service.strictGenesisParsing,
 				AccountAddressPrefix:     service.accountAddressPrefix,
 				StakingDenom:             service.bondingDenom,
 			},

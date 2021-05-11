@@ -102,8 +102,9 @@ type DebugConfig struct {
 }
 
 type TendermintConfig struct {
-	HTTPRPCUrl string `toml:"http_rpc_url"`
-	Insecure   bool   `toml:"insecure"`
+	HTTPRPCUrl           string `toml:"http_rpc_url"`
+	Insecure             bool   `toml:"insecure"`
+	StrictGenesisParsing bool   `toml:"strict_genesis_parsing"`
 }
 
 type CosmosAppConfig struct {
