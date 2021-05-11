@@ -18,10 +18,11 @@ import (
 const DEFAULT_POLLING_INTERVAL = 5 * time.Second
 
 type SyncManager struct {
-	rdbConn         rdb.Conn
-	client          *tendermint.HTTPClient
-	logger          applogger.Logger
-	pollingInterval time.Duration
+	rdbConn              rdb.Conn
+	client               *tendermint.HTTPClient
+	logger               applogger.Logger
+	pollingInterval      time.Duration
+	strictGenesisParsing bool
 
 	accountAddressPrefix string
 	bondingDenom         string
@@ -45,8 +46,9 @@ type SyncManagerParams struct {
 }
 
 type SyncManagerConfig struct {
-	WindowSize       int
-	TendermintRPCUrl string
+	WindowSize           int
+	TendermintRPCUrl     string
+	StrictGenesisParsing bool
 
 	AccountAddressPrefix string
 	BondingDenom         string
@@ -65,7 +67,8 @@ func NewSyncManager(
 		logger: params.Logger.WithFields(applogger.LogFields{
 			"module": "SyncManager",
 		}),
-		pollingInterval: DEFAULT_POLLING_INTERVAL,
+		pollingInterval:      DEFAULT_POLLING_INTERVAL,
+		strictGenesisParsing: params.Config.StrictGenesisParsing,
 
 		shouldSyncCh: make(chan bool, 1),
 

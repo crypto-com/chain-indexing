@@ -20,6 +20,9 @@ window_size = 50
 
 [tendermint]
 http_rpc_url = "https://mainnet.crypto.org:26657"
+# When enabled, genssi parsing will reject any non-Cosmos SDK built-in module
+# inside genesis file.
+strict_genesis_parsing = false
 
 [cosmosapp]
 http_rpc_url = "https://mainnet.crypto.org:1317"

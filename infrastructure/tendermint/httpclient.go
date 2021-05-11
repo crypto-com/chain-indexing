@@ -17,12 +17,13 @@ import (
 )
 
 type HTTPClient struct {
-	httpClient       *http.Client
-	tendermintRPCUrl string
+	httpClient           *http.Client
+	tendermintRPCUrl     string
+	strictGenesisParsing bool
 }
 
 // NewHTTPClient returns a new HTTPClient for tendermint request
-func NewHTTPClient(tendermintRPCUrl string) *HTTPClient {
+func NewHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool) *HTTPClient {
 	httpClient := &http.Client{
 		Timeout: 30 * time.Second,
 	}
@@ -30,6 +31,7 @@ func NewHTTPClient(tendermintRPCUrl string) *HTTPClient {
 	return &HTTPClient{
 		httpClient,
 		strings.TrimSuffix(tendermintRPCUrl, "/"),
+		strictGenesisParsing,
 	}
 }
 
@@ -42,7 +44,7 @@ func (client *HTTPClient) Genesis() (*genesis.Genesis, error) {
 	}
 	defer rawRespBody.Close()
 
-	genesis, err := ParseGenesisResp(rawRespBody)
+	genesis, err := ParseGenesisResp(rawRespBody, client.strictGenesisParsing)
 	if err != nil {
 		return nil, err
 	}

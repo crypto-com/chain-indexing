@@ -17,10 +17,12 @@ import (
 )
 
 // Block related parsing functions
-func ParseGenesisResp(rawRespReader io.Reader) (*genesis.Genesis, error) {
+func ParseGenesisResp(rawRespReader io.Reader, strictParsing bool) (*genesis.Genesis, error) {
 	var genesisResp GenesisResp
 	jsonDecoder := jsoniter.NewDecoder(rawRespReader)
-	jsonDecoder.DisallowUnknownFields()
+	if strictParsing {
+		jsonDecoder.DisallowUnknownFields()
+	}
 	if err := jsonDecoder.Decode(&genesisResp); err != nil {
 		return nil, fmt.Errorf("error decoding Tendermint genesis response: %v", err)
 	}

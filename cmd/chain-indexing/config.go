@@ -102,7 +102,8 @@ type DebugConfig struct {
 }
 
 type TendermintConfig struct {
-	HTTPRPCURL string `toml:"http_rpc_url"`
+	HTTPRPCURL           string `toml:"http_rpc_url"`
+	StrictGenesisParsing bool   `toml:"strict_genesis_parsing"`
 }
 
 type CosmosAppConfig struct {
