@@ -19,7 +19,9 @@ type IndexService struct {
 	projections []projection_entity.Projection
 
 	systemMode               string
+	accountAddressPrefix     string
 	consNodeAddressPrefix    string
+	bondingDenom             string
 	windowSize               int
 	tendermintHTTPRPCURL     string
 	insecureTendermintClient bool
@@ -39,6 +41,8 @@ func NewIndexService(
 
 		systemMode:               config.System.Mode,
 		consNodeAddressPrefix:    config.Blockchain.ConNodeAddressPrefix,
+		accountAddressPrefix:     config.Blockchain.AccountAddressPrefix,
+		bondingDenom:             config.Blockchain.BondingDenom,
 		windowSize:               config.Sync.WindowSize,
 		tendermintHTTPRPCURL:     config.Tendermint.HTTPRPCURL,
 		insecureTendermintClient: config.Tendermint.Insecure,
@@ -55,19 +59,14 @@ func (service *IndexService) Run() error {
 	)
 	infoManager.Run()
 
-	var err error
 	switch service.systemMode {
 	case SYSTEM_MODE_EVENT_STORE:
-		err = service.RunEventStoreMode()
+		return service.RunEventStoreMode()
 	case SYSTEM_MODE_TENDERMINT_DIRECT:
-		err = service.RunTendermintDirectMode()
+		return service.RunTendermintDirectMode()
+	default:
+		return fmt.Errorf("unsupported system mode: %s", service.systemMode)
 	}
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (service *IndexService) RunEventStoreMode() error {
@@ -99,6 +98,8 @@ func (service *IndexService) RunEventStoreMode() error {
 				WindowSize:               service.windowSize,
 				TendermintRPCUrl:         service.tendermintHTTPRPCURL,
 				InsecureTendermintClient: service.insecureTendermintClient,
+				AccountAddressPrefix:     service.accountAddressPrefix,
+				BondingDenom:             service.bondingDenom,
 			},
 		},
 		eventStoreHandler,
@@ -125,6 +126,8 @@ func (service *IndexService) RunTendermintDirectMode() error {
 					WindowSize:               service.windowSize,
 					TendermintRPCUrl:         service.tendermintHTTPRPCURL,
 					InsecureTendermintClient: service.insecureTendermintClient,
+					AccountAddressPrefix:     service.accountAddressPrefix,
+					BondingDenom:             service.bondingDenom,
 				},
 			}, eventhandler_interface.NewProjectionHandler(service.logger, projection))
 			if err := syncManager.Run(); err != nil {

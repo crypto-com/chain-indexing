@@ -23,6 +23,9 @@ type SyncManager struct {
 	logger          applogger.Logger
 	pollingInterval time.Duration
 
+	accountAddressPrefix string
+	bondingDenom         string
+
 	txDecoder          *parser.TxDecoder
 	windowSyncStrategy *syncstrategy.Window
 
@@ -45,6 +48,9 @@ type SyncManagerConfig struct {
 	WindowSize               int
 	TendermintRPCUrl         string
 	InsecureTendermintClient bool
+
+	AccountAddressPrefix string
+	BondingDenom         string
 }
 
 // NewSyncManager creates a new feed with polling for latest block starts at a specific height
@@ -160,6 +166,8 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		block,
 		rawBlock,
 		blockResults,
+		manager.accountAddressPrefix,
+		manager.bondingDenom,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing block data to commands %v", err)
