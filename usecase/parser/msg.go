@@ -685,7 +685,7 @@ func parseMsgUndelegate(
 				ValidatorAddress:      msg["validator_address"].(string),
 				MaybeUnbondCompleteAt: nil,
 				Amount:                amount,
-				AutoClaimedReward:     coin.Coin{},
+				AutoClaimedRewards:    coin.Coin{},
 			},
 		)}
 	}
@@ -705,7 +705,7 @@ func parseMsgUndelegate(
 
 	moduleAccounts := tmcosmosutils.NewModuleAccounts(addressPrefix)
 	transferEvents := log.GetEventsByType("transfer")
-	autoClaimedReward := coin.NewZeroCoin(stakingDenom)
+	autoClaimedRewards := coin.NewZeroCoin(stakingDenom)
 	for _, transferEvent := range transferEvents {
 		sender := transferEvent.MustGetAttributeByKey("sender")
 		if sender != moduleAccounts.Distribution {
@@ -717,7 +717,7 @@ func parseMsgUndelegate(
 		if coinErr != nil {
 			panic(fmt.Errorf("error parsing auto claimed rewards amount: %v", coinErr))
 		}
-		autoClaimedReward = autoClaimedReward.Add(coin)
+		autoClaimedRewards = autoClaimedRewards.Add(coin)
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgUndelegate(
@@ -728,7 +728,7 @@ func parseMsgUndelegate(
 			ValidatorAddress:      msg["validator_address"].(string),
 			MaybeUnbondCompleteAt: &unbondCompletionTime,
 			Amount:                amount,
-			AutoClaimedReward:     autoClaimedReward,
+			AutoClaimedRewards:    autoClaimedRewards,
 		},
 	)}
 }
@@ -754,7 +754,7 @@ func parseMsgBeginRedelegate(
 				ValidatorSrcAddress: msg["validator_src_address"].(string),
 				ValidatorDstAddress: msg["validator_dst_address"].(string),
 				Amount:              amount,
-				AutoClaimedReward:   coin.Coin{},
+				AutoClaimedRewards:  coin.Coin{},
 			},
 		)}
 	}
@@ -762,7 +762,7 @@ func parseMsgBeginRedelegate(
 	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	moduleAccounts := tmcosmosutils.NewModuleAccounts(addressPrefix)
 	transferEvents := log.GetEventsByType("transfer")
-	autoClaimedReward := coin.NewZeroCoin(stakingDenom)
+	autoClaimedRewards := coin.NewZeroCoin(stakingDenom)
 	for _, transferEvent := range transferEvents {
 		sender := transferEvent.MustGetAttributeByKey("sender")
 		if sender != moduleAccounts.Distribution {
@@ -774,7 +774,7 @@ func parseMsgBeginRedelegate(
 		if coinErr != nil {
 			panic(fmt.Errorf("error parsing auto claimed rewards amount: %v", coinErr))
 		}
-		autoClaimedReward = autoClaimedReward.Add(coin)
+		autoClaimedRewards = autoClaimedRewards.Add(coin)
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgBeginRedelegate(
@@ -785,7 +785,7 @@ func parseMsgBeginRedelegate(
 			ValidatorSrcAddress: msg["validator_src_address"].(string),
 			ValidatorDstAddress: msg["validator_dst_address"].(string),
 			Amount:              amount,
-			AutoClaimedReward:   autoClaimedReward,
+			AutoClaimedRewards:  autoClaimedRewards,
 		},
 	)}
 }

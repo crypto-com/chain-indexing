@@ -9,5 +9,5 @@ type MsgBeginRedelegateParams struct {
 	ValidatorSrcAddress string    `json:"validatorSrcAddress"`
 	ValidatorDstAddress string    `json:"validatorDstAddress"`
 	Amount              coin.Coin `json:"amount"`
-	AutoClaimedReward   coin.Coin `json:"autoClaimedReward"`
+	AutoClaimedRewards  coin.Coin `json:"autoClaimedRewards"`
 }

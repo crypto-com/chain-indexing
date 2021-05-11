@@ -10,5 +10,5 @@ type MsgUndelegateParams struct {
 	ValidatorAddress      string           `json:"validatorAddress"`
 	Amount                coin.Coin        `json:"amount"`
 	MaybeUnbondCompleteAt *utctime.UTCTime `json:"unbondCompleteAt"`
-	AutoClaimedReward     coin.Coin        `json:"autoClaimedAmount"`
+	AutoClaimedRewards    coin.Coin        `json:"autoClaimedRewards"`
 }
