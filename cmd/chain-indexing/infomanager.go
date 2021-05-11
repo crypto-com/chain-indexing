@@ -23,8 +23,12 @@ func NewInfoManager(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	tendermintRPCUrl string,
+	strictGenesisParsing bool,
 ) *InfoManager {
-	tendermintClient := tendermint.NewHTTPClient(tendermintRPCUrl)
+	tendermintClient := tendermint.NewHTTPClient(
+		tendermintRPCUrl,
+		strictGenesisParsing,
+	)
 
 	viewStatus := polling.NewStatus(rdbConn.ToHandle())
 	return &InfoManager{

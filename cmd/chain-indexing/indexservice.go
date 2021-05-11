@@ -19,6 +19,7 @@ type IndexService struct {
 	projections []projection_entity.Projection
 
 	systemMode            string
+	strictGenesisParsing  bool
 	accountAddressPrefix  string
 	consNodeAddressPrefix string
 	bondingDenom          string
@@ -39,6 +40,7 @@ func NewIndexService(
 		projections: projections,
 
 		systemMode:            config.System.Mode,
+		strictGenesisParsing:  config.Tendermint.StrictGenesisParsing,
 		consNodeAddressPrefix: config.Blockchain.ConNodeAddressPrefix,
 		accountAddressPrefix:  config.Blockchain.AccountAddressPrefix,
 		bondingDenom:          config.Blockchain.BondingDenom,
@@ -53,6 +55,7 @@ func (service *IndexService) Run() error {
 		service.logger,
 		service.rdbConn,
 		service.tendermintHTTPRPCURL,
+		service.strictGenesisParsing,
 	)
 	infoManager.Run()
 
@@ -94,6 +97,7 @@ func (service *IndexService) RunEventStoreMode() error {
 			Config: SyncManagerConfig{
 				WindowSize:           service.windowSize,
 				TendermintRPCUrl:     service.tendermintHTTPRPCURL,
+				StrictGenesisParsing: service.strictGenesisParsing,
 				AccountAddressPrefix: service.accountAddressPrefix,
 				BondingDenom:         service.bondingDenom,
 			},
