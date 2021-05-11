@@ -59,7 +59,10 @@ func NewSyncManager(
 	params SyncManagerParams,
 	eventHandler eventhandler_interface.Handler,
 ) *SyncManager {
-	tendermintClient := tendermint.NewHTTPClient(params.Config.TendermintRPCUrl)
+	tendermintClient := tendermint.NewHTTPClient(
+		params.Config.TendermintRPCUrl,
+		params.Config.StrictGenesisParsing,
+	)
 
 	return &SyncManager{
 		rdbConn: params.RDbConn,

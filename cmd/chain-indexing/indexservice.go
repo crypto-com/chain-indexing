@@ -55,6 +55,7 @@ func (service *IndexService) Run() error {
 		service.logger,
 		service.rdbConn,
 		service.tendermintHTTPRPCURL,
+		service.strictGenesisParsing,
 	)
 	infoManager.Run()
 
