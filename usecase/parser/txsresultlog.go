@@ -58,7 +58,7 @@ func (log *ParsedTxsResultLog) GetEventsByType(t string) []ParsedTxsResultLogEve
 	for _, index := range log.typeIndex[t] {
 		logEvents = append(
 			logEvents,
-			NewParsedTxsResultLogEventsDeduplicatedByKey(&log.rawLog.Events[index])...,
+			NewParsedTxsResultLogEventsSplitByKey(&log.rawLog.Events[index])...,
 		)
 	}
 

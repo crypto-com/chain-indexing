@@ -34,7 +34,7 @@ func NewParsedTxsResultLogEvent(rawEvent *model.BlockResultsEvent) *ParsedTxsRes
 // In the txs_results log, multiple event of the same types are grouped
 // together into single event. This method pars txs_results log and split into
 // a new event when a same key name appears.
-func NewParsedTxsResultLogEventsDeduplicatedByKey(
+func NewParsedTxsResultLogEventsSplitByKey(
 	rawEvent *model.BlockResultsEvent,
 ) []ParsedTxsResultLogEvent {
 	events := make([]ParsedTxsResultLogEvent, 0)
