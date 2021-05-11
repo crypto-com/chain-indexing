@@ -21,7 +21,7 @@ var _ = Describe("Parse Genesis", func() {
 		strict := true
 		_, err := tendermint.ParseGenesisResp(genesisReader, strict)
 		Expect(err).Should(HaveOccurred())
-		Expect(err).To(ContainSubstring("error decoding Tendermint genesis response"))
+		Expect(err.Error()).To(ContainSubstring("error decoding Tendermint genesis response"))
 	})
 
 	It("should return genesis command corresponding to genesis response", func() {
