@@ -115,8 +115,8 @@ func CliApp(args []string) error {
 				DatabaseName:     ctx.String("dbName"),
 				DatabaseSchema:   ctx.String("dbSchema"),
 
-				TendermintHTTPRPCURL: ctx.String("tendermintURL"),
-				CosmosHTTPRPCURL:     ctx.String("cosmosAppURL"),
+				TendermintHTTPRPCUrl: ctx.String("tendermintURL"),
+				CosmosHTTPRPCUrl:     ctx.String("cosmosAppURL"),
 			}
 			if ctx.IsSet("color") {
 				cliConfig.LoggerColor = primptr.Bool(ctx.Bool("color"))

@@ -31,11 +31,11 @@ func (config *Config) OverrideByCLIConfig(cliConfig *CLIConfig) {
 	if cliConfig.DatabaseSchema != "" {
 		config.Database.Schema = cliConfig.DatabaseSchema
 	}
-	if cliConfig.TendermintHTTPRPCURL != "" {
-		config.Tendermint.HTTPRPCURL = cliConfig.TendermintHTTPRPCURL
+	if cliConfig.TendermintHTTPRPCUrl != "" {
+		config.Tendermint.HTTPRPCUrl = cliConfig.TendermintHTTPRPCUrl
 	}
-	if cliConfig.CosmosHTTPRPCURL != "" {
-		config.CosmosApp.HTTPRPCUL = cliConfig.CosmosHTTPRPCURL
+	if cliConfig.CosmosHTTPRPCUrl != "" {
+		config.CosmosApp.HTTPRPCUrl = cliConfig.CosmosHTTPRPCUrl
 	}
 }
 
@@ -51,8 +51,8 @@ type CLIConfig struct {
 	DatabaseName     string
 	DatabaseSchema   string
 
-	TendermintHTTPRPCURL string
-	CosmosHTTPRPCURL     string
+	TendermintHTTPRPCUrl string
+	CosmosHTTPRPCUrl     string
 }
 
 // FileConfig is the struct matches config.toml
@@ -102,13 +102,13 @@ type DebugConfig struct {
 }
 
 type TendermintConfig struct {
-	HTTPRPCURL string `toml:"http_rpc_url"`
+	HTTPRPCUrl string `toml:"http_rpc_url"`
 	Insecure   bool   `toml:"insecure"`
 }
 
 type CosmosAppConfig struct {
-	HTTPRPCUL string `toml:"http_rpc_url"`
-	Insecure  bool   `toml:"insecure"`
+	HTTPRPCUrl string `toml:"http_rpc_url"`
+	Insecure   bool   `toml:"insecure"`
 }
 
 type DatabaseConfig struct {

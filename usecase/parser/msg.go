@@ -25,7 +25,7 @@ func ParseBlockResultsTxsMsgToCommands(
 	block *model.Block,
 	blockResults *model.BlockResults,
 	accountAddressPrefix string,
-	bondingDenom string,
+	stakingDenom string,
 ) ([]command.Command, error) {
 	commands := make([]command.Command, 0)
 
@@ -76,13 +76,13 @@ func ParseBlockResultsTxsMsgToCommands(
 			case "/cosmos.staking.v1beta1.MsgUndelegate":
 				msgCommands = parseMsgUndelegate(
 					accountAddressPrefix,
-					bondingDenom,
+					stakingDenom,
 					txSuccess, txsResult, msgIndex, msgCommonParams, msg,
 				)
 			case "/cosmos.staking.v1beta1.MsgBeginRedelegate":
 				msgCommands = parseMsgBeginRedelegate(
 					accountAddressPrefix,
-					bondingDenom,
+					stakingDenom,
 					txSuccess, txsResult, msgIndex, msgCommonParams, msg,
 				)
 			case "/cosmos.slashing.v1beta1.MsgUnjail":

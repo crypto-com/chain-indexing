@@ -24,7 +24,7 @@ type SyncManager struct {
 	pollingInterval time.Duration
 
 	accountAddressPrefix string
-	bondingDenom         string
+	stakingDenom         string
 
 	txDecoder          *parser.TxDecoder
 	windowSyncStrategy *syncstrategy.Window
@@ -50,7 +50,7 @@ type SyncManagerConfig struct {
 	InsecureTendermintClient bool
 
 	AccountAddressPrefix string
-	BondingDenom         string
+	StakingDenom         string
 }
 
 // NewSyncManager creates a new feed with polling for latest block starts at a specific height
@@ -72,6 +72,9 @@ func NewSyncManager(
 			"module": "SyncManager",
 		}),
 		pollingInterval: DEFAULT_POLLING_INTERVAL,
+
+		accountAddressPrefix: params.Config.AccountAddressPrefix,
+		stakingDenom:         params.Config.StakingDenom,
 
 		shouldSyncCh: make(chan bool, 1),
 
@@ -167,7 +170,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		rawBlock,
 		blockResults,
 		manager.accountAddressPrefix,
-		manager.bondingDenom,
+		manager.stakingDenom,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing block data to commands %v", err)

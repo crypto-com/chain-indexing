@@ -44,7 +44,7 @@ func NewIndexService(
 		accountAddressPrefix:     config.Blockchain.AccountAddressPrefix,
 		bondingDenom:             config.Blockchain.BondingDenom,
 		windowSize:               config.Sync.WindowSize,
-		tendermintHTTPRPCURL:     config.Tendermint.HTTPRPCURL,
+		tendermintHTTPRPCURL:     config.Tendermint.HTTPRPCUrl,
 		insecureTendermintClient: config.Tendermint.Insecure,
 	}
 }
@@ -99,7 +99,7 @@ func (service *IndexService) RunEventStoreMode() error {
 				TendermintRPCUrl:         service.tendermintHTTPRPCURL,
 				InsecureTendermintClient: service.insecureTendermintClient,
 				AccountAddressPrefix:     service.accountAddressPrefix,
-				BondingDenom:             service.bondingDenom,
+				StakingDenom:             service.bondingDenom,
 			},
 		},
 		eventStoreHandler,
@@ -127,7 +127,7 @@ func (service *IndexService) RunTendermintDirectMode() error {
 					TendermintRPCUrl:         service.tendermintHTTPRPCURL,
 					InsecureTendermintClient: service.insecureTendermintClient,
 					AccountAddressPrefix:     service.accountAddressPrefix,
-					BondingDenom:             service.bondingDenom,
+					StakingDenom:             service.bondingDenom,
 				},
 			}, eventhandler_interface.NewProjectionHandler(service.logger, projection))
 			if err := syncManager.Run(); err != nil {

@@ -15,7 +15,7 @@ func ParseBlockToCommands(
 	rawBlock *usecase_model.RawBlock,
 	blockResults *usecase_model.BlockResults,
 	accountAddressPrefix string,
-	bondingDenom string,
+	stakingDenom string,
 ) ([]entity_command.Command, error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -44,7 +44,7 @@ func ParseBlockToCommands(
 			block,
 			blockResults,
 			accountAddressPrefix,
-			bondingDenom,
+			stakingDenom,
 		)
 		if parseErr != nil {
 			return nil, fmt.Errorf("error parsing message commands: %v", parseErr)
