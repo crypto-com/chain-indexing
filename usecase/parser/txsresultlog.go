@@ -49,14 +49,17 @@ func (log *ParsedTxsResultLog) GetFirstEventByType(t string) *ParsedTxsResultLog
 }
 
 // Get all events by type
-func (log *ParsedTxsResultLog) GetEventsByType(t string) []*ParsedTxsResultLogEvent {
+func (log *ParsedTxsResultLog) GetEventsByType(t string) []ParsedTxsResultLogEvent {
 	if !log.HasEvent(t) {
 		return nil
 	}
 
-	logEvents := make([]*ParsedTxsResultLogEvent, 0, len(log.typeIndex[t]))
+	logEvents := make([]ParsedTxsResultLogEvent, 0, len(log.typeIndex[t]))
 	for _, index := range log.typeIndex[t] {
-		logEvents = append(logEvents, NewParsedTxsResultLogEvent(&log.rawLog.Events[index]))
+		logEvents = append(
+			logEvents,
+			NewParsedTxsResultLogEventsSplitByKey(&log.rawLog.Events[index])...,
+		)
 	}
 
 	return logEvents

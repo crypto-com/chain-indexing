@@ -151,6 +151,28 @@ func AccountAddressFromPubKey(bech32Prefix string, pubKey []byte) (string, error
 	return address, nil
 }
 
+func MustModuleAccountFromBytes(bech32Prefix string, b []byte) string {
+	address, err := ModuleAccountFromBytes(bech32Prefix, b)
+	if err != nil {
+		panic(err)
+	}
+
+	return address
+}
+
+func ModuleAccountFromBytes(bech32Prefix string, b []byte) (string, error) {
+	conv, err := bech32.ConvertBits(b, 8, 5, true)
+	if err != nil {
+		return "", fmt.Errorf("error converting tendermint public key to bech32 bits: %v", err)
+	}
+	address, err := bech32.Encode(bech32Prefix, conv)
+	if err != nil {
+		return "", fmt.Errorf("error encoding tendermint public key bits to consensus address: %v", err)
+	}
+
+	return address, nil
+}
+
 func PubKeyFromCosmosPubKey(accountPubKey string) ([]byte, error) {
 	_, conv, err := bech32.Decode(accountPubKey)
 	if err != nil {
