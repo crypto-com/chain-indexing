@@ -18,13 +18,14 @@ type IndexService struct {
 	rdbConn     rdb.Conn
 	projections []projection_entity.Projection
 
-	systemMode            string
-	strictGenesisParsing  bool
-	accountAddressPrefix  string
-	consNodeAddressPrefix string
-	bondingDenom          string
-	windowSize            int
-	tendermintHTTPRPCURL  string
+	systemMode               string
+	accountAddressPrefix     string
+	consNodeAddressPrefix    string
+	bondingDenom             string
+	windowSize               int
+	tendermintHTTPRPCURL     string
+	insecureTendermintClient bool
+	strictGenesisParsing     bool
 }
 
 // NewIndexService creates a new server instance for polling and indexing
@@ -39,13 +40,14 @@ func NewIndexService(
 		rdbConn:     rdbConn,
 		projections: projections,
 
-		systemMode:            config.System.Mode,
-		strictGenesisParsing:  config.Tendermint.StrictGenesisParsing,
-		consNodeAddressPrefix: config.Blockchain.ConNodeAddressPrefix,
-		accountAddressPrefix:  config.Blockchain.AccountAddressPrefix,
-		bondingDenom:          config.Blockchain.BondingDenom,
-		windowSize:            config.Sync.WindowSize,
-		tendermintHTTPRPCURL:  config.Tendermint.HTTPRPCURL,
+		systemMode:               config.System.Mode,
+		consNodeAddressPrefix:    config.Blockchain.ConNodeAddressPrefix,
+		accountAddressPrefix:     config.Blockchain.AccountAddressPrefix,
+		bondingDenom:             config.Blockchain.BondingDenom,
+		windowSize:               config.Sync.WindowSize,
+		tendermintHTTPRPCURL:     config.Tendermint.HTTPRPCUrl,
+		insecureTendermintClient: config.Tendermint.Insecure,
+		strictGenesisParsing:     config.Tendermint.StrictGenesisParsing,
 	}
 }
 
@@ -55,6 +57,7 @@ func (service *IndexService) Run() error {
 		service.logger,
 		service.rdbConn,
 		service.tendermintHTTPRPCURL,
+		service.insecureTendermintClient,
 		service.strictGenesisParsing,
 	)
 	infoManager.Run()
@@ -95,11 +98,12 @@ func (service *IndexService) RunEventStoreMode() error {
 			RDbConn:   service.rdbConn,
 			TxDecoder: txDecoder,
 			Config: SyncManagerConfig{
-				WindowSize:           service.windowSize,
-				TendermintRPCUrl:     service.tendermintHTTPRPCURL,
-				StrictGenesisParsing: service.strictGenesisParsing,
-				AccountAddressPrefix: service.accountAddressPrefix,
-				BondingDenom:         service.bondingDenom,
+				WindowSize:               service.windowSize,
+				TendermintRPCUrl:         service.tendermintHTTPRPCURL,
+				InsecureTendermintClient: service.insecureTendermintClient,
+				StrictGenesisParsing:     service.strictGenesisParsing,
+				AccountAddressPrefix:     service.accountAddressPrefix,
+				StakingDenom:             service.bondingDenom,
 			},
 		},
 		eventStoreHandler,
@@ -123,10 +127,11 @@ func (service *IndexService) RunTendermintDirectMode() error {
 				RDbConn:   service.rdbConn,
 				TxDecoder: txDecoder,
 				Config: SyncManagerConfig{
-					WindowSize:           service.windowSize,
-					TendermintRPCUrl:     service.tendermintHTTPRPCURL,
-					AccountAddressPrefix: service.accountAddressPrefix,
-					BondingDenom:         service.bondingDenom,
+					WindowSize:               service.windowSize,
+					TendermintRPCUrl:         service.tendermintHTTPRPCURL,
+					InsecureTendermintClient: service.insecureTendermintClient,
+					AccountAddressPrefix:     service.accountAddressPrefix,
+					StakingDenom:             service.bondingDenom,
 				},
 			}, eventhandler_interface.NewProjectionHandler(service.logger, projection))
 			if err := syncManager.Run(); err != nil {

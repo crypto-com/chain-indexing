@@ -2,6 +2,7 @@ package tendermint
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -26,6 +27,24 @@ type HTTPClient struct {
 func NewHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool) *HTTPClient {
 	httpClient := &http.Client{
 		Timeout: 30 * time.Second,
+	}
+
+	return &HTTPClient{
+		httpClient,
+		strings.TrimSuffix(tendermintRPCUrl, "/"),
+		strictGenesisParsing,
+	}
+}
+
+// NewHTTPClient returns a new HTTPClient for tendermint request
+func NewInsecureHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool) *HTTPClient {
+	// nolint:gosec
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	httpClient := &http.Client{
+		Timeout:   30 * time.Second,
+		Transport: transport,
 	}
 
 	return &HTTPClient{
@@ -140,9 +159,9 @@ func (client *HTTPClient) Status() (*map[string]interface{}, error) {
 
 	body, _ := ioutil.ReadAll(rawRespBody)
 	jsonMap := make(map[string]interface{})
-	errread := json.Unmarshal([]byte(body), &jsonMap)
-	if errread != nil {
-		return nil, fmt.Errorf("error requesting Status : %v", errread)
+	errRead := json.Unmarshal([]byte(body), &jsonMap)
+	if errRead != nil {
+		return nil, fmt.Errorf("error requesting Status : %v", errRead)
 	}
 
 	return &jsonMap, nil

@@ -109,7 +109,7 @@ func (handler *Proposals) FindById(ctx *fasthttp.RequestCtx) {
 	}
 	requiredVotingPower := new(big.Float).Mul(totalBonded, quorum)
 
-	totalVotedPower := new(big.Int).SetInt64(int64(0))
+	totalVotedPower := big.NewInt(0)
 	for _, votedPowerStr := range []string{
 		tally.Yes,
 		tally.No,

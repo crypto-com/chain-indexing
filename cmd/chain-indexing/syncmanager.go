@@ -25,7 +25,7 @@ type SyncManager struct {
 	strictGenesisParsing bool
 
 	accountAddressPrefix string
-	bondingDenom         string
+	stakingDenom         string
 
 	txDecoder          *parser.TxDecoder
 	windowSyncStrategy *syncstrategy.Window
@@ -46,12 +46,13 @@ type SyncManagerParams struct {
 }
 
 type SyncManagerConfig struct {
-	WindowSize           int
-	TendermintRPCUrl     string
-	StrictGenesisParsing bool
+	WindowSize               int
+	TendermintRPCUrl         string
+	InsecureTendermintClient bool
+	StrictGenesisParsing     bool
 
 	AccountAddressPrefix string
-	BondingDenom         string
+	StakingDenom         string
 }
 
 // NewSyncManager creates a new feed with polling for latest block starts at a specific height
@@ -59,10 +60,18 @@ func NewSyncManager(
 	params SyncManagerParams,
 	eventHandler eventhandler_interface.Handler,
 ) *SyncManager {
-	tendermintClient := tendermint.NewHTTPClient(
-		params.Config.TendermintRPCUrl,
-		params.Config.StrictGenesisParsing,
-	)
+	var tendermintClient *tendermint.HTTPClient
+	if params.Config.InsecureTendermintClient {
+		tendermintClient = tendermint.NewInsecureHTTPClient(
+			params.Config.TendermintRPCUrl,
+			params.Config.StrictGenesisParsing,
+		)
+	} else {
+		tendermintClient = tendermint.NewHTTPClient(
+			params.Config.TendermintRPCUrl,
+			params.Config.StrictGenesisParsing,
+		)
+	}
 
 	return &SyncManager{
 		rdbConn: params.RDbConn,
@@ -72,6 +81,9 @@ func NewSyncManager(
 		}),
 		pollingInterval:      DEFAULT_POLLING_INTERVAL,
 		strictGenesisParsing: params.Config.StrictGenesisParsing,
+
+		accountAddressPrefix: params.Config.AccountAddressPrefix,
+		stakingDenom:         params.Config.StakingDenom,
 
 		shouldSyncCh: make(chan bool, 1),
 
@@ -167,7 +179,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		rawBlock,
 		blockResults,
 		manager.accountAddressPrefix,
-		manager.bondingDenom,
+		manager.stakingDenom,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing block data to commands %v", err)
