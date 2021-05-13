@@ -7,6 +7,8 @@ import (
 	"math/big"
 	"strconv"
 
+	"github.com/crypto-com/chain-indexing/usecase/coin"
+
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
@@ -279,7 +281,7 @@ func (projection *Validator) projectValidatorView(
 				Status:                  status,
 				Jailed:                  false,
 				JoinedAtBlockHeight:     blockHeight,
-				Power:                   "0",
+				Power:                   msgCreateValidatorEvent.Amount.Amount.Mul(coin.NewInt(100)).String(),
 				Moniker:                 msgCreateValidatorEvent.Description.Moniker,
 				Identity:                msgCreateValidatorEvent.Description.Identity,
 				Website:                 msgCreateValidatorEvent.Description.Website,

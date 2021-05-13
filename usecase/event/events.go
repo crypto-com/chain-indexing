@@ -75,4 +75,16 @@ func RegisterEvents(registry *event.Registry) {
 	// Slashing
 	registry.Register(MSG_UNJAIL_CREATED, 1, DecodeMsgUnjail)
 	registry.Register(MSG_UNJAIL_FAILED, 1, DecodeMsgUnjail)
+
+	// NFT
+	registry.Register(MSG_NFT_ISSUE_DENOM_CREATED, 1, DecodeMsgNFTIssueDenom)
+	registry.Register(MSG_NFT_ISSUE_DENOM_FAILED, 1, DecodeMsgNFTIssueDenom)
+	registry.Register(MSG_NFT_MINT_NFT_CREATED, 1, DecodeMsgNFTMintNFT)
+	registry.Register(MSG_NFT_MINT_NFT_FAILED, 1, DecodeMsgNFTMintNFT)
+	registry.Register(MSG_NFT_TRANSFER_NFT_CREATED, 1, DecodeMsgNFTTransferNFT)
+	registry.Register(MSG_NFT_TRANSFER_NFT_FAILED, 1, DecodeMsgNFTTransferNFT)
+	registry.Register(MSG_NFT_EDIT_NFT_CREATED, 1, DecodeMsgNFTEditNFT)
+	registry.Register(MSG_NFT_EDIT_NFT_FAILED, 1, DecodeMsgNFTEditNFT)
+	registry.Register(MSG_NFT_BURN_NFT_CREATED, 1, DecodeMsgNFTBurnNFT)
+	registry.Register(MSG_NFT_BURN_NFT_FAILED, 1, DecodeMsgNFTBurnNFT)
 }
