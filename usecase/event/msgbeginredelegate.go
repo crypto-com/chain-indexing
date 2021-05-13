@@ -24,6 +24,7 @@ type MsgBeginRedelegate struct {
 	ValidatorSrcAddress string    `json:"validatorSrcAddress"`
 	ValidatorDstAddress string    `json:"validatorDstAddress"`
 	Amount              coin.Coin `json:"amount"`
+	AutoClaimedRewards  coin.Coin `json:"autoClaimedRewards"`
 }
 
 // NewMsgBeginRedelegate creates a new instance of MsgBeginRedelegate
@@ -39,6 +40,7 @@ func NewMsgBeginRedelegate(msgCommonParams MsgCommonParams, params model.MsgBegi
 		params.ValidatorSrcAddress,
 		params.ValidatorDstAddress,
 		params.Amount,
+		params.AutoClaimedRewards,
 	}
 }
 
