@@ -37,14 +37,14 @@ var _ = Describe("ParseMsgCommands", func() {
 			thiscmd := cmds[0]
 			Expect(thiscmd.Name()).To(Equal("CreateMsgCreateValidator"))
 
-			description := model.MsgValidatorDescription{
+			description := model.ValidatorDescription{
 				Moniker:         "leo-node",
 				Identity:        "",
 				Website:         "",
 				SecurityContact: "",
 				Details:         "",
 			}
-			commissionRates := model.MsgValidatorCommission{
+			commissionRates := model.ValidatorCommission{
 				Rate:          "0.100000000000000000",
 				MaxRate:       "0.200000000000000000",
 				MaxChangeRate: "0.010000000000000000",
