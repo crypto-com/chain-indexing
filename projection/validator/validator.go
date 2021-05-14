@@ -269,6 +269,11 @@ func (projection *Validator) projectValidatorView(
 			}
 			tendermintAddress := tmcosmosutils.TmAddressFromTmPubKey(tendermintPubkey)
 
+			power := "0"
+			if createGenesisValidator.Status == constants.BONDED {
+				power = createGenesisValidator.Amount.Amount.QuoRaw(1000000).String()
+			}
+
 			validatorRow := view.ValidatorRow{
 				ConsensusNodeAddress:    consensusNodeAddress,
 				OperatorAddress:         createGenesisValidator.ValidatorAddress,
@@ -280,7 +285,7 @@ func (projection *Validator) projectValidatorView(
 				Jailed:                  createGenesisValidator.Jailed,
 				JoinedAtBlockHeight:     blockHeight,
 				// TODO:  https://github.com/cosmos/cosmos-sdk/pull/8505
-				Power:                   createGenesisValidator.Amount.Amount.QuoRaw(1000000).String(),
+				Power:                   power,
 				Moniker:                 createGenesisValidator.Description.Moniker,
 				Identity:                createGenesisValidator.Description.Identity,
 				Website:                 createGenesisValidator.Description.Website,
