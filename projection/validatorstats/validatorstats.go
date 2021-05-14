@@ -39,6 +39,7 @@ func NewValidatorStats(logger applogger.Logger, rdbConn rdb.Conn) *ValidatorStat
 
 func (_ *ValidatorStats) GetEventsToListen() []string {
 	return []string{
+		event_usecase.GENESIS_VALIDATOR_CREATED,
 		event_usecase.MSG_CREATE_VALIDATOR_CREATED,
 		event_usecase.BLOCK_PROPOSER_REWARDED,
 		event_usecase.BLOCK_REWARDED,
@@ -91,7 +92,9 @@ func (projection *ValidatorStats) HandleEvents(height int64, events []event_enti
 	}
 
 	for _, event := range events {
-		if createValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
+		if createValidatorEvent, ok := event.(*event_usecase.CreateGenesisValidator); ok {
+			totalDelegate = totalDelegate.Add(createValidatorEvent.Amount)
+		} else if createValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
 			totalDelegate = totalDelegate.Add(createValidatorEvent.Amount)
 		} else if blockProposerRewardedEvent, ok := event.(*event_usecase.BlockProposerRewarded); ok {
 			totalReward = totalReward.Add(blockProposerRewardedEvent.Amount...)
@@ -114,6 +117,7 @@ func (projection *ValidatorStats) HandleEvents(height int64, events []event_enti
 				return fmt.Errorf("error subtracting delegate: %v", err)
 			}
 		}
+		// TODO: Handle slashed delegation
 	}
 
 	if err = validatorStatsView.Set(TOTAL_REWARD, json.MustMarshalToString(totalReward)); err != nil {
