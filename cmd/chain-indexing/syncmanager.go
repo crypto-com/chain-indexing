@@ -159,7 +159,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 			return nil, fmt.Errorf("error requesting chain genesis: %v", err)
 		}
 
-		return parser.ParseGenesisCommands(genesis)
+		return parser.ParseGenesisCommands(genesis, manager.accountAddressPrefix)
 	}
 
 	// Request tendermint RPC

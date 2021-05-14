@@ -48,7 +48,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					},
 
 					model.MsgEditValidatorParams{
-						Description: model.MsgValidatorDescription{
+						Description: model.ValidatorDescription{
 							Moniker:         "Edited Calvin Test Node",
 							Identity:        "[do-not-modify]",
 							Website:         "[do-not-modify]",

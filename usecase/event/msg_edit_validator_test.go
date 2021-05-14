@@ -26,7 +26,7 @@ var _ = Describe("Event", func() {
 					MsgIndex:    0,
 				},
 				model.MsgEditValidatorParams{
-					Description: model.MsgValidatorDescription{
+					Description: model.ValidatorDescription{
 						Moniker:         "[do-not-modify]",
 						Identity:        "[do-not-modify]",
 						Website:         "[do-not-modify]",
@@ -68,7 +68,7 @@ var _ = Describe("Event", func() {
 					MsgIndex:    0,
 				},
 				model.MsgEditValidatorParams{
-					Description: model.MsgValidatorDescription{
+					Description: model.ValidatorDescription{
 						Moniker:         "[do-not-modify]",
 						Identity:        "[do-not-modify]",
 						Website:         "[do-not-modify]",

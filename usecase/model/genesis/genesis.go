@@ -7,6 +7,7 @@ type Genesis struct {
 	ConsensusParams ConsensusParams `json:"consensus_params"`
 	AppHash         string          `json:"app_hash"`
 	AppState        AppState        `json:"app_state"`
+	Validators      []Validator     `json:"validators"`
 }
 
 type AppState struct {
@@ -35,12 +36,15 @@ type Auth struct {
 }
 
 type Account struct {
-	Type               string              `json:"@type"`
-	Address            *string             `json:"address,omitempty"`
-	PubKey             interface{}         `json:"pub_key"`
-	AccountNumber      *string             `json:"account_number,omitempty"`
-	Sequence           *string             `json:"sequence,omitempty"`
-	BaseVestingAccount *BaseVestingAccount `json:"base_vesting_account,omitempty"`
+	Type                     string              `json:"@type"`
+	Address                  *string             `json:"address,omitempty"`
+	PubKey                   interface{}         `json:"pub_key"`
+	AccountNumber            *string             `json:"account_number,omitempty"`
+	Sequence                 *string             `json:"sequence,omitempty"`
+	BaseVestingAccount       *BaseVestingAccount `json:"base_vesting_account,omitempty"`
+	BaseAccount              *BaseAccount        `json:"base_account,omitempty"`
+	ModuleAccountName        *string             `json:"name,omitempty"`
+	ModuleAccountPermissions []string            `json:"permissions,omitempty"`
 }
 
 type BaseVestingAccount struct {
@@ -286,14 +290,52 @@ type SlashingParams struct {
 }
 
 type Staking struct {
-	Delegations          []interface{} `json:"delegations"`
-	Exported             bool          `json:"exported"`
-	LastTotalPower       string        `json:"last_total_power"`
-	LastValidatorPowers  []interface{} `json:"last_validator_powers"`
-	Params               StakingParams `json:"params"`
-	Redelegations        []interface{} `json:"redelegations"`
-	UnbondingDelegations []interface{} `json:"unbonding_delegations"`
-	Validators           []interface{} `json:"validators"`
+	Delegations          []interface{}      `json:"delegations"`
+	Exported             bool               `json:"exported"`
+	LastTotalPower       string             `json:"last_total_power"`
+	LastValidatorPowers  []interface{}      `json:"last_validator_powers"`
+	Params               StakingParams      `json:"params"`
+	Redelegations        []interface{}      `json:"redelegations"`
+	UnbondingDelegations []interface{}      `json:"unbonding_delegations"`
+	Validators           []StakingValidator `json:"validators"`
+}
+
+type StakingValidator struct {
+	Commission        Commission      `json:"commission"`
+	ConsensusPubkey   ConsensusPubkey `json:"consensus_pubkey"`
+	DelegatorShares   string          `json:"delegator_shares"`
+	Description       Description     `json:"description"`
+	Jailed            bool            `json:"jailed"`
+	MinSelfDelegation string          `json:"min_self_delegation"`
+	OperatorAddress   string          `json:"operator_address"`
+	Status            string          `json:"status"`
+	Tokens            string          `json:"tokens"`
+	UnbondingHeight   string          `json:"unbonding_height"`
+	UnbondingTime     string          `json:"unbonding_time"`
+}
+
+type Commission struct {
+	CommissionRates CommissionRates `json:"commission_rates"`
+	UpdateTime      string          `json:"update_time"`
+}
+
+type CommissionRates struct {
+	MaxChangeRate string `json:"max_change_rate"`
+	MaxRate       string `json:"max_rate"`
+	Rate          string `json:"rate"`
+}
+
+type ConsensusPubkey struct {
+	Type string `json:"@type"`
+	Key  string `json:"key"`
+}
+
+type Description struct {
+	Details         string `json:"details"`
+	Identity        string `json:"identity"`
+	Moniker         string `json:"moniker"`
+	SecurityContact string `json:"security_contact"`
+	Website         string `json:"website"`
 }
 
 type Supply struct {
@@ -325,10 +367,10 @@ type StakingParams struct {
 }
 
 type ConsensusParams struct {
-	Block     Block                   `json:"block"`
-	Evidence  ConsensusParamsEvidence `json:"evidence"`
-	Validator Validator               `json:"validator"`
-	Version   Chainmain               `json:"version"`
+	Block     Block                    `json:"block"`
+	Evidence  ConsensusParamsEvidence  `json:"evidence"`
+	Validator ConsensusParamsValidator `json:"validator"`
+	Version   Chainmain                `json:"version"`
 }
 
 type Block struct {
@@ -343,6 +385,18 @@ type ConsensusParamsEvidence struct {
 	MaxBytes        string `json:"max_bytes"`
 }
 
-type Validator struct {
+type ConsensusParamsValidator struct {
 	PubKeyTypes []string `json:"pub_key_types"`
+}
+
+type Validator struct {
+	Address string `json:"address"`
+	PubKey  PubKey `json:"pub_key"`
+	Power   string `json:"power"`
+	Name    string `json:"name"`
+}
+
+type PubKey struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
 }
