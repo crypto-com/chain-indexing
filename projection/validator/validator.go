@@ -8,8 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/crypto-com/chain-indexing/usecase/coin"
-
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
