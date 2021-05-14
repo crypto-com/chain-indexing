@@ -94,6 +94,16 @@ func ParseBlockResultsTxsMsgToCommands(
 				msgCommands = parseMsgCreateValidator(msgCommonParams, msg)
 			case "/cosmos.staking.v1beta1.MsgEditValidator":
 				msgCommands = parseMsgEditValidator(msgCommonParams, msg)
+			case "/chainmain.nft.v1.MsgIssueDenom":
+				msgCommands = parseMsgNFTIssueDenom(msgCommonParams, msg)
+			case "/chainmain.nft.v1.MsgMintNFT":
+				msgCommands = parseMsgNFTMintNFT(msgCommonParams, msg)
+			case "/chainmain.nft.v1.MsgTransferNFT":
+				msgCommands = parseMsgNFTTransferNFT(msgCommonParams, msg)
+			case "/chainmain.nft.v1.MsgEditNFT":
+				msgCommands = parseMsgNFTEditNFT(msgCommonParams, msg)
+			case "/chainmain.nft.v1.MsgBurnNFT":
+				msgCommands = parseMsgNFTBurnNFT(msgCommonParams, msg)
 				// TODO: IBC commands
 			}
 
@@ -946,6 +956,90 @@ func parseMsgEditValidator(
 			ValidatorAddress:       msg["validator_address"].(string),
 			MaybeCommissionRate:    maybeCommissionRate,
 			MaybeMinSelfDelegation: maybeMinSelfDelegation,
+		},
+	)}
+}
+
+func parseMsgNFTIssueDenom(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	return []command.Command{command_usecase.NewCreateMsgNFTIssueDenom(
+		msgCommonParams,
+
+		model.MsgNFTIssueDenomParams{
+			DenomId:   msg["id"].(string),
+			DenomName: msg["name"].(string),
+			Schema:    msg["schema"].(string),
+			Sender:    msg["sender"].(string),
+		},
+	)}
+}
+
+func parseMsgNFTMintNFT(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	return []command.Command{command_usecase.NewCreateMsgNFTMintNFT(
+		msgCommonParams,
+
+		model.MsgNFTMintNFTParams{
+			DenomId:   msg["denom_id"].(string),
+			TokenId:   msg["id"].(string),
+			TokenName: msg["name"].(string),
+			URI:       msg["uri"].(string),
+			Data:      msg["data"].(string),
+			Sender:    msg["sender"].(string),
+			Recipient: msg["recipient"].(string),
+		},
+	)}
+}
+
+func parseMsgNFTTransferNFT(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	return []command.Command{command_usecase.NewCreateMsgNFTTransferNFT(
+		msgCommonParams,
+
+		model.MsgNFTTransferNFTParams{
+			TokenId:   msg["id"].(string),
+			DenomId:   msg["denom_id"].(string),
+			Sender:    msg["sender"].(string),
+			Recipient: msg["recipient"].(string),
+		},
+	)}
+}
+
+func parseMsgNFTEditNFT(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	return []command.Command{command_usecase.NewCreateMsgNFTEditNFT(
+		msgCommonParams,
+
+		model.MsgNFTEditNFTParams{
+			DenomId:   msg["denom_id"].(string),
+			TokenId:   msg["id"].(string),
+			TokenName: msg["name"].(string),
+			URI:       msg["uri"].(string),
+			Data:      msg["data"].(string),
+			Sender:    msg["sender"].(string),
+		},
+	)}
+}
+
+func parseMsgNFTBurnNFT(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	return []command.Command{command_usecase.NewCreateMsgNFTBurnNFT(
+		msgCommonParams,
+
+		model.MsgNFTBurnNFTParams{
+			DenomId: msg["denom_id"].(string),
+			TokenId: msg["id"].(string),
+			Sender:  msg["sender"].(string),
 		},
 	)}
 }
