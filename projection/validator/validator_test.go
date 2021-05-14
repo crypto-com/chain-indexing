@@ -43,14 +43,14 @@ var _ = Describe("Validator Events", func() {
 		It("should match the last projection handled block height with the fired event block height", func() {
 			anyHeight := int64(1)
 
-			description := model.MsgValidatorDescription{
+			description := model.ValidatorDescription{
 				Moniker:         "mymonicker",
 				Identity:        "myidentity",
 				Website:         "mywebsite",
 				SecurityContact: "mysecuritycontact",
 				Details:         "mydetails",
 			}
-			commission := model.MsgValidatorCommission{
+			commission := model.ValidatorCommission{
 				Rate:          "0.100000000000000000",
 				MaxRate:       "0.200000000000000000",
 				MaxChangeRate: "0.010000000000000000",
@@ -108,14 +108,14 @@ var _ = Describe("Validator Events", func() {
 
 			anyHeight := int64(1)
 
-			description := model.MsgValidatorDescription{
+			description := model.ValidatorDescription{
 				Moniker:         "mymonicker",
 				Identity:        "myidentity",
 				Website:         "mywebsite",
 				SecurityContact: "mysecuritycontact",
 				Details:         "mydetails",
 			}
-			commission := model.MsgValidatorCommission{
+			commission := model.ValidatorCommission{
 				Rate:          "0.100000000000000000",
 				MaxRate:       "0.200000000000000000",
 				MaxChangeRate: "0.010000000000000000",

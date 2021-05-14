@@ -52,7 +52,27 @@ func (projection *Validator) projectValidatorActivitiesView(
 	activityRows := make([]view.ValidatorActivityRow, 0)
 	totalIncrementalMap := privNewTotalIncrementalMap()
 	for _, event := range events {
-		if createValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
+		if createGenesisValidatorEvent, ok := event.(*event_usecase.CreateGenesisValidator); ok {
+			activityRows = append(activityRows, view.ValidatorActivityRow{
+				BlockHeight:          createGenesisValidatorEvent.BlockHeight,
+				BlockHash:            blockHash,
+				BlockTime:            blockTime,
+				MaybeTransactionHash: nil,
+				OperatorAddress:      createGenesisValidatorEvent.ValidatorAddress,
+				Success:              true,
+				Data: view.ValidatorActivityRowData{
+					Type:    createGenesisValidatorEvent.Name(),
+					Content: createGenesisValidatorEvent,
+				},
+			})
+
+			totalIncrementalMap.IncrementByOne("-")
+			totalIncrementalMap.IncrementByOne(createGenesisValidatorEvent.ValidatorAddress)
+			totalIncrementalMap.IncrementByOne(
+				fmt.Sprintf("%s:%s", createGenesisValidatorEvent.ValidatorAddress, createGenesisValidatorEvent.Name()),
+			)
+			totalIncrementalMap.IncrementByOne(fmt.Sprintf("-:%s", createGenesisValidatorEvent.Name()))
+		} else if createValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
 			activityRows = append(activityRows, view.ValidatorActivityRow{
 				BlockHeight:          createValidatorEvent.BlockHeight,
 				BlockHash:            blockHash,

@@ -268,16 +268,18 @@ func (validatorsView *Validators) ListAll(
 				"WHEN 'BONDED' THEN 1" +
 				"WHEN 'UNBONDING' THEN 2" +
 				"WHEN 'JAILED' THEN 3" +
-				"WHEN 'UNBONDED' THEN 4" +
-				"ELSE 5 END"
+				"WHEN 'INACTIVE' THEN 4" +
+				"WHEN 'UNBONDED' THEN 5" +
+				"ELSE 6 END"
 			orderClauses = append(orderClauses, statusOrder)
 		} else if *order.MaybeStatus == view.ORDER_DESC {
 			statusOrder := "CASE UPPER(status) " +
 				"WHEN 'UNBONDED' THEN 1" +
 				"WHEN 'JAILED' THEN 2" +
 				"WHEN 'UNBONDING' THEN 3" +
-				"WHEN 'BONDED' THEN 4" +
-				"ELSE 5 END"
+				"WHEN 'INACTIVE' THEN 4" +
+				"WHEN 'UNBONDED' THEN 5" +
+				"ELSE 6 END"
 			orderClauses = append(orderClauses, statusOrder)
 		}
 	}
@@ -443,16 +445,18 @@ func (validatorsView *Validators) List(
 				"WHEN 'BONDED' THEN 1" +
 				"WHEN 'UNBONDING' THEN 2" +
 				"WHEN 'JAILED' THEN 3" +
-				"WHEN 'UNBONDED' THEN 4" +
-				"ELSE 5 END"
+				"WHEN 'INACTIVE' THEN 4" +
+				"WHEN 'UNBONDED' THEN 5" +
+				"ELSE 6 END"
 			orderClauses = append(orderClauses, statusOrder)
 		} else if *order.MaybeStatus == view.ORDER_DESC {
 			statusOrder := "CASE UPPER(status) " +
 				"WHEN 'UNBONDED' THEN 1" +
 				"WHEN 'JAILED' THEN 2" +
 				"WHEN 'UNBONDING' THEN 3" +
-				"WHEN 'BONDED' THEN 4" +
-				"ELSE 5 END"
+				"WHEN 'INACTIVE' THEN 4" +
+				"WHEN 'BONDED' THEN 5" +
+				"ELSE 6 END"
 			orderClauses = append(orderClauses, statusOrder)
 		}
 	}
@@ -664,8 +668,8 @@ func (validatorsView *Validators) List(
 			validators = append(validators, ListValidatorRow{
 				validator,
 
-				powerPercentage.String(),
-				cumulativePowerPercentage.String(),
+				powerPercentage.Text('f', 10),
+				cumulativePowerPercentage.Text('f', 10),
 			})
 		}
 	}

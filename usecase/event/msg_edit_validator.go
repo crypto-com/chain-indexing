@@ -17,10 +17,10 @@ const MSG_EDIT_VALIDATOR_FAILED = "MsgEditValidatorFailed"
 type MsgEditValidator struct {
 	MsgBase
 
-	Description            model.MsgValidatorDescription `json:"description"`
-	ValidatorAddress       string                        `json:"validatorAddress"`
-	MaybeCommissionRate    *string                       `json:"commissionRate"`
-	MaybeMinSelfDelegation *string                       `json:"minSelfDelegation"`
+	Description            model.ValidatorDescription `json:"description"`
+	ValidatorAddress       string                     `json:"validatorAddress"`
+	MaybeCommissionRate    *string                    `json:"commissionRate"`
+	MaybeMinSelfDelegation *string                    `json:"minSelfDelegation"`
 }
 
 func NewMsgEditValidator(msgCommonParams MsgCommonParams, params model.MsgEditValidatorParams) *MsgEditValidator {

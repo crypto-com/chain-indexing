@@ -5,6 +5,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/crypto-com/chain-indexing/projection/validator/constants"
+	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
+
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 
 	"github.com/crypto-com/chain-indexing/internal/primptr"
@@ -813,14 +816,13 @@ func parseMsgUnjail(
 	)}
 }
 
-func parseMsgCreateValidator(
-	msgCommonParams event.MsgCommonParams,
+func parseGenesisGenTxsMsgCreateValidator(
 	msg map[string]interface{},
 ) []command.Command {
 	amountValue, _ := msg["value"].(map[string]interface{})
 	amount := tmcosmosutils.MustNewCoinFromAmountInterface(amountValue)
 	tendermintPubkey, _ := msg["pubkey"].(map[string]interface{})
-	description := model.MsgValidatorDescription{
+	description := model.ValidatorDescription{
 		Moniker:         "",
 		Identity:        "",
 		Website:         "",
@@ -829,7 +831,7 @@ func parseMsgCreateValidator(
 	}
 
 	if descriptionJSON, ok := msg["description"].(map[string]interface{}); ok {
-		description = model.MsgValidatorDescription{
+		description = model.ValidatorDescription{
 			Moniker:         descriptionJSON["moniker"].(string),
 			Identity:        descriptionJSON["identity"].(string),
 			Website:         descriptionJSON["website"].(string),
@@ -838,13 +840,68 @@ func parseMsgCreateValidator(
 		}
 	}
 
-	commission := model.MsgValidatorCommission{
+	commission := model.ValidatorCommission{
 		Rate:          "",
 		MaxRate:       "",
 		MaxChangeRate: "",
 	}
 	if commissionJSON, ok := msg["commission"].(map[string]interface{}); ok {
-		commission = model.MsgValidatorCommission{
+		commission = model.ValidatorCommission{
+			Rate:          commissionJSON["rate"].(string),
+			MaxRate:       commissionJSON["max_rate"].(string),
+			MaxChangeRate: commissionJSON["max_change_rate"].(string),
+		}
+	}
+
+	return []command.Command{command_usecase.NewCreateGenesisValidator(
+		genesis.CreateGenesisValidatorParams{
+			// Genesis validator are always bonded
+			// TODO: What if gen_txs contains more validators than maximum validators
+			Status:            constants.BONDED,
+			Description:       description,
+			Commission:        commission,
+			MinSelfDelegation: msg["min_self_delegation"].(string),
+			DelegatorAddress:  msg["delegator_address"].(string),
+			ValidatorAddress:  msg["validator_address"].(string),
+			TendermintPubkey:  tendermintPubkey["key"].(string),
+			Amount:            amount,
+			Jailed:            false,
+		},
+	)}
+}
+
+func parseMsgCreateValidator(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	amountValue, _ := msg["value"].(map[string]interface{})
+	amount := tmcosmosutils.MustNewCoinFromAmountInterface(amountValue)
+	tendermintPubkey, _ := msg["pubkey"].(map[string]interface{})
+	description := model.ValidatorDescription{
+		Moniker:         "",
+		Identity:        "",
+		Website:         "",
+		SecurityContact: "",
+		Details:         "",
+	}
+
+	if descriptionJSON, ok := msg["description"].(map[string]interface{}); ok {
+		description = model.ValidatorDescription{
+			Moniker:         descriptionJSON["moniker"].(string),
+			Identity:        descriptionJSON["identity"].(string),
+			Website:         descriptionJSON["website"].(string),
+			SecurityContact: descriptionJSON["security_contact"].(string),
+			Details:         descriptionJSON["details"].(string),
+		}
+	}
+
+	commission := model.ValidatorCommission{
+		Rate:          "",
+		MaxRate:       "",
+		MaxChangeRate: "",
+	}
+	if commissionJSON, ok := msg["commission"].(map[string]interface{}); ok {
+		commission = model.ValidatorCommission{
 			Rate:          commissionJSON["rate"].(string),
 			MaxRate:       commissionJSON["max_rate"].(string),
 			MaxChangeRate: commissionJSON["max_change_rate"].(string),
@@ -870,9 +927,9 @@ func parseMsgEditValidator(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 ) []command.Command {
-	var description model.MsgValidatorDescription
+	var description model.ValidatorDescription
 	if descriptionJSON, ok := msg["description"].(map[string]interface{}); ok {
-		description = model.MsgValidatorDescription{
+		description = model.ValidatorDescription{
 			Moniker:         descriptionJSON["moniker"].(string),
 			Identity:        descriptionJSON["identity"].(string),
 			Website:         descriptionJSON["website"].(string),

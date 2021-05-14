@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/big"
 	"strconv"
+	"time"
 
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 
@@ -48,6 +49,7 @@ func (_ *Validator) GetEventsToListen() []string {
 	return []string{
 		event_usecase.GENESIS_CREATED,
 		event_usecase.BLOCK_CREATED,
+		event_usecase.GENESIS_VALIDATOR_CREATED,
 		event_usecase.MSG_CREATE_VALIDATOR_CREATED,
 		event_usecase.MSG_EDIT_VALIDATOR_CREATED,
 		event_usecase.MSG_DELEGATE_CREATED,
@@ -94,7 +96,10 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 	var blockHash string
 	var blockProposer string
 	for _, event := range events {
-		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
+		if genesisEvent, ok := event.(*event_usecase.GenesisCreated); ok {
+			blockTime = utctime.MustParse(time.RFC3339, genesisEvent.Genesis.GenesisTime)
+			blockHash = "genesis"
+		} else if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
 			blockTime = blockCreatedEvent.Block.Time
 			blockHash = blockCreatedEvent.Block.Hash
 			blockProposer = blockCreatedEvent.Block.ProposerAddress
@@ -252,7 +257,61 @@ func (projection *Validator) projectValidatorView(
 ) error {
 	// MsgCreateValidator should be handled first
 	for _, event := range events {
-		if msgCreateValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
+		if createGenesisValidator, ok := event.(*event_usecase.CreateGenesisValidator); ok {
+			projection.logger.Debug("handling CreateGenesisValidator event")
+			tendermintPubkey, err := base64.StdEncoding.DecodeString(createGenesisValidator.TendermintPubkey)
+			if err != nil {
+				return fmt.Errorf("error base64 decoding Tendermint node pubkey: %v", err)
+			}
+			consensusNodeAddress, err := tmcosmosutils.ConsensusNodeAddressFromTmPubKey(
+				projection.conNodeAddressPrefix, tendermintPubkey,
+			)
+			if err != nil {
+				return fmt.Errorf("error converting Tendermint node pubkey to address: %v", err)
+			}
+			tendermintAddress := tmcosmosutils.TmAddressFromTmPubKey(tendermintPubkey)
+
+			validatorRow := view.ValidatorRow{
+				ConsensusNodeAddress:    consensusNodeAddress,
+				OperatorAddress:         createGenesisValidator.ValidatorAddress,
+				InitialDelegatorAddress: createGenesisValidator.DelegatorAddress,
+				TendermintAddress:       tendermintAddress,
+				TendermintPubkey:        createGenesisValidator.TendermintPubkey,
+				MinSelfDelegation:       createGenesisValidator.MinSelfDelegation,
+				Status:                  createGenesisValidator.Status,
+				Jailed:                  createGenesisValidator.Jailed,
+				JoinedAtBlockHeight:     blockHeight,
+				// TODO:  https://github.com/cosmos/cosmos-sdk/pull/8505
+				Power:                   createGenesisValidator.Amount.Amount.QuoRaw(1000000).String(),
+				Moniker:                 createGenesisValidator.Description.Moniker,
+				Identity:                createGenesisValidator.Description.Identity,
+				Website:                 createGenesisValidator.Description.Website,
+				SecurityContact:         createGenesisValidator.Description.SecurityContact,
+				Details:                 createGenesisValidator.Description.Details,
+				CommissionRate:          createGenesisValidator.CommissionRates.Rate,
+				CommissionMaxRate:       createGenesisValidator.CommissionRates.MaxRate,
+				CommissionMaxChangeRate: createGenesisValidator.CommissionRates.MaxChangeRate,
+				TotalSignedBlock:        0,
+				TotalActiveBlock:        0,
+				ImpreciseUpTime:         big.NewFloat(1),
+				VotedGovProposal:        big.NewInt(0),
+			}
+
+			// Validator re-joins
+			isJoined, joinedAtBlockHeight, err := validatorsView.LastJoinedBlockHeight(
+				validatorRow.OperatorAddress, validatorRow.ConsensusNodeAddress,
+			)
+			if err != nil {
+				return fmt.Errorf("error querying validator last joined block height: %v", err)
+			}
+			if isJoined {
+				validatorRow.JoinedAtBlockHeight = joinedAtBlockHeight
+			}
+
+			if err := validatorsView.Upsert(&validatorRow); err != nil {
+				return fmt.Errorf("error inserting new validator into view: %v", err)
+			}
+		} else if msgCreateValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
 			projection.logger.Debug("handling MsgCreateValidator event")
 			tendermintPubkey, err := base64.StdEncoding.DecodeString(msgCreateValidatorEvent.TendermintPubkey)
 			if err != nil {
@@ -281,7 +340,8 @@ func (projection *Validator) projectValidatorView(
 				Status:                  status,
 				Jailed:                  false,
 				JoinedAtBlockHeight:     blockHeight,
-				Power:                   msgCreateValidatorEvent.Amount.Amount.Mul(coin.NewInt(100)).String(),
+				// TODO:  https://github.com/cosmos/cosmos-sdk/pull/8505
+				Power:                   msgCreateValidatorEvent.Amount.Amount.QuoRaw(1000000).String(),
 				Moniker:                 msgCreateValidatorEvent.Description.Moniker,
 				Identity:                msgCreateValidatorEvent.Description.Identity,
 				Website:                 msgCreateValidatorEvent.Description.Website,
