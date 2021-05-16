@@ -251,7 +251,7 @@ func (handler *NFTs) ListTransfersByToken(ctx *fasthttp.RequestCtx) {
 	idOrder := view.ORDER_ASC
 	queryArgs := ctx.QueryArgs()
 	if queryArgs.Has("order") {
-		if string(queryArgs.Peek("order")) == "id.desc" {
+		if string(queryArgs.Peek("order")) == "transferredAt.desc" {
 			idOrder = view.ORDER_DESC
 		}
 	}
@@ -290,7 +290,7 @@ func (handler *NFTs) ListTransfersByAccount(ctx *fasthttp.RequestCtx) {
 	idOrder := view.ORDER_ASC
 	queryArgs := ctx.QueryArgs()
 	if queryArgs.Has("order") {
-		if string(queryArgs.Peek("order")) == "id.desc" {
+		if string(queryArgs.Peek("order")) == "transferredAt.desc" {
 			idOrder = view.ORDER_DESC
 		}
 	}
