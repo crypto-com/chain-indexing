@@ -170,6 +170,13 @@ func (handler *Validators) List(ctx *fasthttp.RequestCtx) {
 	}
 	validatorsWithAPY := make([]validatorRowWithAPY, 0, len(validators))
 	for _, validator := range validators {
+		if validator.Status != constants.BONDED {
+			validatorsWithAPY = append(validatorsWithAPY, validatorRowWithAPY{
+				validator,
+				"0",
+			})
+			continue
+		}
 		commissionRate, commissionRateOk := new(big.Float).SetString(validator.CommissionRate)
 		if !commissionRateOk {
 			handler.logger.Errorf("error parsing validator commission rate: %s", validator.CommissionRate)

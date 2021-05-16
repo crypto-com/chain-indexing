@@ -14,6 +14,7 @@ import (
 	"github.com/crypto-com/chain-indexing/projection/account_transaction"
 	"github.com/crypto-com/chain-indexing/projection/block"
 	"github.com/crypto-com/chain-indexing/projection/blockevent"
+	"github.com/crypto-com/chain-indexing/projection/nft"
 	"github.com/crypto-com/chain-indexing/projection/proposal"
 	"github.com/crypto-com/chain-indexing/projection/transaction"
 	"github.com/crypto-com/chain-indexing/projection/validator"
@@ -44,6 +45,16 @@ func InitProjection(name string, params InitParams) projection_entity.Projection
 		)
 	case "ValidatorStats":
 		return validatorstats.NewValidatorStats(params.Logger, params.RdbConn)
+	case "NFT":
+		return nft.NewNFT(params.Logger, params.RdbConn, nft.Config{
+			EnableDrop:       false,
+			DropDataAccessor: "",
+		})
+	case "CryptoComNFT":
+		return nft.NewNFT(params.Logger, params.RdbConn, nft.Config{
+			EnableDrop:       true,
+			DropDataAccessor: "drop",
+		})
 	// register more projections here
 	default:
 		panic(fmt.Sprintf("Unrecognized projection: %s", name))

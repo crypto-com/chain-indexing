@@ -122,6 +122,10 @@ func (server *HTTPAPIServer) Run() error {
 		server.rdbConn.ToHandle(),
 		server.cosmosAppClient,
 	)
+	nftsHandler := handlers.NewNFTs(
+		server.logger,
+		server.rdbConn.ToHandle(),
+	)
 
 	routeRegistry := routes.NewRoutesRegistry(
 		searchHandler,
@@ -134,6 +138,7 @@ func (server *HTTPAPIServer) Run() error {
 		accountMessagesHandler,
 		accountsHandler,
 		proposalsHandler,
+		nftsHandler,
 	)
 	routeRegistry.Register(httpServer, server.routePrefix)
 

@@ -6,16 +6,13 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
-
 	sq "github.com/Masterminds/squirrel"
-
-	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 
 	"github.com/crypto-com/chain-indexing/appinterface/pagination"
 	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
-
+	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 )
 
 type Validators struct {
