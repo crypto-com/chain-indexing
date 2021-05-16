@@ -87,9 +87,9 @@ func (registry *RouteRegistry) Register(server *httpapi.Server, routePrefix stri
 	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms/{denomId}", routePrefix), registry.nftsHandler.FindDenomById)
 	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms/{denomId}/tokens", routePrefix), registry.nftsHandler.ListTokensByDenomId)
 	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms/{denomId}/tokens/{tokenId}", routePrefix), registry.nftsHandler.FindTokenById)
-	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms/{denomId}/tokens/{tokenId}/trasnfers", routePrefix), registry.nftsHandler.ListTransfersByToken)
+	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms/{denomId}/tokens/{tokenId}/transfers", routePrefix), registry.nftsHandler.ListTransfersByToken)
 	server.GET(fmt.Sprintf("%s/api/v1/nfts/drops/{drop}/tokens", routePrefix), registry.nftsHandler.ListTokensByDrop)
 	server.GET(fmt.Sprintf("%s/api/v1/nfts/accounts/{account}/tokens", routePrefix), registry.nftsHandler.ListTokensByAccount)
-	server.GET(fmt.Sprintf("%s/api/v1/nfts/accounts/{account}/tokens/trasnfers", routePrefix), registry.nftsHandler.ListTransfersByAccount)
+	server.GET(fmt.Sprintf("%s/api/v1/nfts/accounts/{account}/tokens/transfers", routePrefix), registry.nftsHandler.ListTransfersByAccount)
 
 }
