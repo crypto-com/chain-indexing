@@ -149,6 +149,23 @@ func (handler *NFTs) FindTokenById(ctx *fasthttp.RequestCtx) {
 	httpapi.Success(ctx, token)
 }
 
+func (handler *NFTs) ListDrops(ctx *fasthttp.RequestCtx) {
+	pagination, paginationErr := httpapi.ParsePagination(ctx)
+	if paginationErr != nil {
+		ctx.SetStatusCode(fasthttp.StatusBadRequest)
+		return
+	}
+
+	drops, paginationResult, err := handler.tokensView.ListDrops(pagination)
+	if err != nil {
+		handler.logger.Errorf("error listing NFT drops: %v", err)
+		httpapi.InternalServerError(ctx)
+		return
+	}
+
+	httpapi.SuccessWithPagination(ctx, drops, paginationResult)
+}
+
 func (handler *NFTs) ListTokensByDrop(ctx *fasthttp.RequestCtx) {
 	dropParam, _ := ctx.UserValue("drop").(string)
 

@@ -295,6 +295,55 @@ func (tokensView *Tokens) List(
 	return rows, paginationResult, nil
 }
 
+func (tokensView *Tokens) ListDrops(
+	pagination *pagination_interface.Pagination,
+) ([]string, *pagination_interface.PaginationResult, error) {
+	stmtBuilder := tokensView.rdb.StmtBuilder.Select(
+		"DISTINCT drop",
+	).From(
+		TOKENS_TABLE_NAME,
+	).Where(
+		"drop IS NOT NULL AND drop <> ''",
+	).OrderBy("drop")
+
+	rDbPagination := rdb.NewRDbPaginationBuilder(
+		pagination,
+		tokensView.rdb,
+	).BuildStmt(stmtBuilder)
+	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
+	if err != nil {
+		return nil, nil, fmt.Errorf("error building NFT drops list SQL: %v: %w", err, rdb.ErrPrepare)
+	}
+
+	rowsResult, err := tokensView.rdb.Query(sql, sqlArgs...)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error executing NFT drops list query: %v: %w", err, rdb.ErrQuery)
+	}
+	defer rowsResult.Close()
+
+	rows := make([]string, 0)
+	for rowsResult.Next() {
+		var drop string
+		if scanErr := rowsResult.Scan(
+			&drop,
+		); scanErr != nil {
+			if errors.Is(scanErr, rdb.ErrNoRows) {
+				return nil, nil, rdb.ErrNoRows
+			}
+			return nil, nil, fmt.Errorf("error scanning NFT drop row: %v: %w", scanErr, rdb.ErrQuery)
+		}
+
+		rows = append(rows, drop)
+	}
+
+	paginationResult, err := rDbPagination.Result()
+	if err != nil {
+		return nil, nil, fmt.Errorf("error preparing pagination result: %v", err)
+	}
+
+	return rows, paginationResult, nil
+}
+
 type TokenListFilter struct {
 	MaybeDenomId *string
 	MaybeDrop    *string
@@ -309,7 +358,7 @@ type TokenListOrder struct {
 type TokenRow struct {
 	DenomId      string          `json:"denomId"`
 	TokenId      string          `json:"tokenId"`
-	Drop         string          `json:"drop,omitempty"`
+	Drop         string          `json:"drop"`
 	Burned       bool            `json:"burned"`
 	Name         string          `json:"name"`
 	URI          string          `json:"uri"`

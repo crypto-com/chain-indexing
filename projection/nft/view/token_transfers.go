@@ -35,6 +35,7 @@ func (tokenTransfersView *TokenTransfers) Insert(
 	).Columns(
 		"denom_id",
 		"token_id",
+		"drop",
 		"block_height",
 		"transaction_hash",
 		"sender",
@@ -43,6 +44,7 @@ func (tokenTransfersView *TokenTransfers) Insert(
 	).Values(
 		tokenTransferRow.DenomId,
 		tokenTransferRow.TokenId,
+		tokenTransferRow.Drop,
 		tokenTransferRow.BlockHeight,
 		tokenTransferRow.TransactionHash,
 		tokenTransferRow.Sender,
@@ -72,6 +74,7 @@ func (tokenTransfersView *TokenTransfers) List(
 	stmtBuilder := tokenTransfersView.rdb.StmtBuilder.Select(
 		"denom_id",
 		"token_id",
+		"drop",
 		"block_height",
 		"transaction_hash",
 		"sender",
