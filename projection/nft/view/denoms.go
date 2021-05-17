@@ -198,8 +198,8 @@ type DenomListOrder struct {
 
 type DenomRow struct {
 	DenomId   string          `json:"denomId"`
-	Name      string          `json:"name"`
-	Schema    string          `json:"schema"`
-	Creator   string          `json:"creator"`
-	CreatedAt utctime.UTCTime `json:"createdAt"`
+	Name      string          `json:"denomName"`
+	Schema    string          `json:"denomSchema"`
+	Creator   string          `json:"denomCreator"`
+	CreatedAt utctime.UTCTime `json:"denomCreatedAt"`
 }

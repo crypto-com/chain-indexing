@@ -70,23 +70,36 @@ func (tokensView *Tokens) Insert(tokenRow *TokenRow) error {
 	return nil
 }
 
-func (tokensView *Tokens) FindById(denomId string, tokenId string) (*TokenRow, error) {
+func (tokensView *Tokens) FindById(
+	denomId string, tokenId string,
+) (*TokenRowWithDenomname, error) {
 	selectStmtBuilder := tokensView.rdb.StmtBuilder.Select(
-		"denom_id",
-		"token_id",
-		"drop",
-		"burned",
-		"name",
-		"uri",
-		"data",
-		"minter",
-		"owner",
-		"minted_at",
-		"last_edited_at",
+		fmt.Sprintf("%s.denom_id", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.name AS denom_name", DENOMS_TABLE_NAME),
+		fmt.Sprintf("%s.schema AS denom_schema", DENOMS_TABLE_NAME),
+		fmt.Sprintf("%s.token_id", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.drop", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.burned", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.name", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.uri", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.data", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.minter", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.owner", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.minted_at", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.last_edited_at", TOKENS_TABLE_NAME),
 	).From(
 		TOKENS_TABLE_NAME,
+	).LeftJoin(
+		fmt.Sprintf(
+			"%s ON %s.denom_id = %s.denom_id",
+			DENOMS_TABLE_NAME, DENOMS_TABLE_NAME, TOKENS_TABLE_NAME,
+		),
 	).Where(
-		"denom_id = ? AND token_id = ?", denomId, tokenId,
+		fmt.Sprintf(
+			"%s.denom_id = ? AND %s.token_id = ?",
+			TOKENS_TABLE_NAME, TOKENS_TABLE_NAME,
+		),
+		denomId, tokenId,
 	)
 
 	sql, sqlArgs, err := selectStmtBuilder.ToSql()
@@ -94,12 +107,14 @@ func (tokensView *Tokens) FindById(denomId string, tokenId string) (*TokenRow, e
 		return nil, fmt.Errorf("error building NFT token selection sql: %v: %w", err, rdb.ErrPrepare)
 	}
 
-	var row TokenRow
+	var row TokenRowWithDenomname
 	mintedAtTimeReader := tokensView.rdb.NtotReader()
 	lastEditedAtTimeReader := tokensView.rdb.NtotReader()
 
 	if err = tokensView.rdb.QueryRow(sql, sqlArgs...).Scan(
 		&row.DenomId,
+		&row.DenomName,
+		&row.DenomSchema,
 		&row.TokenId,
 		&row.Drop,
 		&row.Burned,
@@ -165,21 +180,28 @@ func (tokensView *Tokens) List(
 	filter TokenListFilter,
 	order TokenListOrder,
 	pagination *pagination_interface.Pagination,
-) ([]TokenRow, *pagination_interface.PaginationResult, error) {
+) ([]TokenRowWithDenomname, *pagination_interface.PaginationResult, error) {
 	stmtBuilder := tokensView.rdb.StmtBuilder.Select(
-		"denom_id",
-		"token_id",
-		"drop",
-		"burned",
-		"name",
-		"uri",
-		"data",
-		"minter",
-		"owner",
-		"minted_at",
-		"last_edited_at",
+		fmt.Sprintf("%s.denom_id", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.name AS denom_name", DENOMS_TABLE_NAME),
+		fmt.Sprintf("%s.schema AS denom_schema", DENOMS_TABLE_NAME),
+		fmt.Sprintf("%s.token_id", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.drop", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.burned", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.name", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.uri", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.data", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.minter", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.owner", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.minted_at", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.last_edited_at", TOKENS_TABLE_NAME),
 	).From(
 		TOKENS_TABLE_NAME,
+	).LeftJoin(
+		fmt.Sprintf(
+			"%s ON %s.denom_id = %s.denom_id",
+			DENOMS_TABLE_NAME, DENOMS_TABLE_NAME, TOKENS_TABLE_NAME,
+		),
 	)
 
 	if filter.MaybeDenomId != nil {
@@ -247,14 +269,16 @@ func (tokensView *Tokens) List(
 	}
 	defer rowsResult.Close()
 
-	rows := make([]TokenRow, 0)
+	rows := make([]TokenRowWithDenomname, 0)
 	for rowsResult.Next() {
-		var row TokenRow
+		var row TokenRowWithDenomname
 		mintedAtTimeReader := tokensView.rdb.NtotReader()
 		lastEditedAtTimeReader := tokensView.rdb.NtotReader()
 
 		if scanErr := rowsResult.Scan(
 			&row.DenomId,
+			&row.DenomName,
+			&row.DenomSchema,
 			&row.TokenId,
 			&row.Drop,
 			&row.Burned,
@@ -355,16 +379,23 @@ type TokenListOrder struct {
 	MintedAt view.ORDER
 }
 
+type TokenRowWithDenomname struct {
+	TokenRow
+
+	DenomName   string `json:"denomName"`
+	DenomSchema string `json:"denomSchema"`
+}
+
 type TokenRow struct {
 	DenomId      string          `json:"denomId"`
 	TokenId      string          `json:"tokenId"`
 	Drop         string          `json:"drop"`
-	Burned       bool            `json:"burned"`
-	Name         string          `json:"name"`
-	URI          string          `json:"uri"`
-	Data         string          `json:"data"`
-	Minter       string          `json:"minter"`
-	Owner        string          `json:"owner"`
-	MintedAt     utctime.UTCTime `json:"mintedAt"`
-	LastEditedAt utctime.UTCTime `json:"lastEditedAt"`
+	Burned       bool            `json:"tokenBurned"`
+	Name         string          `json:"tokenName"`
+	URI          string          `json:"tokenURI"`
+	Data         string          `json:"tokenData"`
+	Minter       string          `json:"tokenMinter"`
+	Owner        string          `json:"tokenOwner"`
+	MintedAt     utctime.UTCTime `json:"tokenMintedAt"`
+	LastEditedAt utctime.UTCTime `json:"tokenLastEditedAt"`
 }

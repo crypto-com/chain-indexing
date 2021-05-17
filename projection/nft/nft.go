@@ -136,7 +136,6 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 			tokenTransferRow := view.TokenTransferRow{
 				DenomId:         msgMintNFT.DenomId,
 				TokenId:         msgMintNFT.TokenId,
-				Drop:            drop,
 				BlockHeight:     height,
 				TransactionHash: msgMintNFT.TxHash(),
 				Sender:          msgMintNFT.Sender,
@@ -226,15 +225,9 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 			}
 
 		} else if msgTransferNFT, ok := event.(*event_usecase.MsgNFTTransferNFT); ok {
-			prevTokenRow, queryPrevTokenRow := tokensView.FindById(msgTransferNFT.DenomId, msgTransferNFT.TokenId)
-			if queryPrevTokenRow != nil {
-				return fmt.Errorf("error querying NFT token being edited: %v", queryPrevTokenRow)
-			}
-
 			transferRow := view.TokenTransferRow{
 				DenomId:         msgTransferNFT.DenomId,
 				TokenId:         msgTransferNFT.TokenId,
-				Drop:            prevTokenRow.Drop,
 				BlockHeight:     height,
 				TransactionHash: msgTransferNFT.TxHash(),
 				Sender:          msgTransferNFT.Sender,

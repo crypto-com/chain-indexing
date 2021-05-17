@@ -35,7 +35,6 @@ func (tokenTransfersView *TokenTransfers) Insert(
 	).Columns(
 		"denom_id",
 		"token_id",
-		"drop",
 		"block_height",
 		"transaction_hash",
 		"sender",
@@ -44,7 +43,6 @@ func (tokenTransfersView *TokenTransfers) Insert(
 	).Values(
 		tokenTransferRow.DenomId,
 		tokenTransferRow.TokenId,
-		tokenTransferRow.Drop,
 		tokenTransferRow.BlockHeight,
 		tokenTransferRow.TransactionHash,
 		tokenTransferRow.Sender,
@@ -70,37 +68,71 @@ func (tokenTransfersView *TokenTransfers) List(
 	filter TokenTransferListFilter,
 	order TokenTransferListOrder,
 	pagination *pagination_interface.Pagination,
-) ([]TokenTransferRow, *pagination_interface.PaginationResult, error) {
+) ([]TokenTransferRowWithDenomAndTokenDetails, *pagination_interface.PaginationResult, error) {
 	stmtBuilder := tokenTransfersView.rdb.StmtBuilder.Select(
-		"denom_id",
-		"token_id",
-		"drop",
-		"block_height",
-		"transaction_hash",
-		"sender",
-		"recipient",
-		"transferred_at",
+		fmt.Sprintf("%s.denom_id", TOKEN_TRANSFERS_TABLE_NAME),
+		fmt.Sprintf("%s.name AS denom_name", DENOMS_TABLE_NAME),
+		fmt.Sprintf("%s.schema AS denom_schema", DENOMS_TABLE_NAME),
+		fmt.Sprintf("%s.token_id", TOKEN_TRANSFERS_TABLE_NAME),
+		fmt.Sprintf("%s.drop AS token_drop", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.name AS token_name", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.uri AS token_uri", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.data AS token_data", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.minter AS token_minter", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.block_height", TOKEN_TRANSFERS_TABLE_NAME),
+		fmt.Sprintf("%s.transaction_hash", TOKEN_TRANSFERS_TABLE_NAME),
+		fmt.Sprintf("%s.sender", TOKEN_TRANSFERS_TABLE_NAME),
+		fmt.Sprintf("%s.recipient", TOKEN_TRANSFERS_TABLE_NAME),
+		fmt.Sprintf("%s.transferred_at", TOKEN_TRANSFERS_TABLE_NAME),
 	).From(
 		TOKEN_TRANSFERS_TABLE_NAME,
+	).LeftJoin(
+		fmt.Sprintf(
+			"%s ON %s.denom_id = %s.denom_id",
+			DENOMS_TABLE_NAME, DENOMS_TABLE_NAME, TOKEN_TRANSFERS_TABLE_NAME,
+		),
+	).LeftJoin(
+		fmt.Sprintf(
+			"%s ON %s.token_id = %s.token_id",
+			TOKENS_TABLE_NAME, TOKENS_TABLE_NAME, TOKEN_TRANSFERS_TABLE_NAME,
+		),
 	)
 
 	if filter.MaybeDenomId != nil {
-		stmtBuilder = stmtBuilder.Where("denom_id = ?", *filter.MaybeDenomId)
+		stmtBuilder = stmtBuilder.Where(
+			fmt.Sprintf("%s.denom_id = ?", TOKEN_TRANSFERS_TABLE_NAME),
+			*filter.MaybeDenomId,
+		)
 	}
 	if filter.MaybeTokenId != nil {
-		stmtBuilder = stmtBuilder.Where("token_id = ?", *filter.MaybeTokenId)
+		stmtBuilder = stmtBuilder.Where(
+			fmt.Sprintf("%s.token_id = ?", TOKEN_TRANSFERS_TABLE_NAME),
+			*filter.MaybeTokenId,
+		)
 	}
 	if filter.MaybeDrop != nil {
-		stmtBuilder = stmtBuilder.Where("drop = ?", *filter.MaybeDrop)
+		stmtBuilder = stmtBuilder.Where(
+			fmt.Sprintf("%s.drop = ?", TOKENS_TABLE_NAME),
+			*filter.MaybeDrop,
+		)
 	}
 	if filter.MaybeBlockHeight != nil {
-		stmtBuilder = stmtBuilder.Where("block_height = ?", *filter.MaybeBlockHeight)
+		stmtBuilder = stmtBuilder.Where(
+			fmt.Sprintf("%s.block_height = ?", TOKEN_TRANSFERS_TABLE_NAME),
+			*filter.MaybeBlockHeight,
+		)
 	}
 	if filter.MaybeSender != nil {
-		stmtBuilder = stmtBuilder.Where("sender = ?", *filter.MaybeSender)
+		stmtBuilder = stmtBuilder.Where(
+			fmt.Sprintf("%s.sender = ?", TOKEN_TRANSFERS_TABLE_NAME),
+			*filter.MaybeSender,
+		)
 	}
 	if filter.MaybeRecipient != nil {
-		stmtBuilder = stmtBuilder.Where("recipient = ?", *filter.MaybeRecipient)
+		stmtBuilder = stmtBuilder.Where(
+			fmt.Sprintf("%s.recipient = ?", TOKEN_TRANSFERS_TABLE_NAME),
+			*filter.MaybeRecipient,
+		)
 	}
 	if filter.MaybeAccount != nil {
 		stmtBuilder = stmtBuilder.Where(
@@ -116,9 +148,13 @@ func (tokenTransfersView *TokenTransfers) List(
 	}
 
 	if order.Id == view.ORDER_DESC {
-		stmtBuilder = stmtBuilder.OrderBy("id DESC")
+		stmtBuilder = stmtBuilder.OrderBy(
+			fmt.Sprintf("%s.id DESC", TOKEN_TRANSFERS_TABLE_NAME),
+		)
 	} else {
-		stmtBuilder = stmtBuilder.OrderBy("id")
+		stmtBuilder = stmtBuilder.OrderBy(
+			fmt.Sprintf("%s.id", TOKEN_TRANSFERS_TABLE_NAME),
+		)
 	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
@@ -136,15 +172,21 @@ func (tokenTransfersView *TokenTransfers) List(
 	}
 	defer rowsResult.Close()
 
-	rows := make([]TokenTransferRow, 0)
+	rows := make([]TokenTransferRowWithDenomAndTokenDetails, 0)
 	for rowsResult.Next() {
-		var row TokenTransferRow
+		var row TokenTransferRowWithDenomAndTokenDetails
 		transferredAtTimeReader := tokenTransfersView.rdb.NtotReader()
 
 		if scanErr := rowsResult.Scan(
 			&row.DenomId,
+			&row.DenomName,
+			&row.DenomSchema,
 			&row.TokenId,
 			&row.Drop,
+			&row.TokenName,
+			&row.TokenURI,
+			&row.TokenData,
+			&row.TokenMinter,
 			&row.BlockHeight,
 			&row.TransactionHash,
 			&row.Sender,
@@ -188,10 +230,21 @@ type TokenTransferListOrder struct {
 	Id view.ORDER
 }
 
+type TokenTransferRowWithDenomAndTokenDetails struct {
+	TokenTransferRow
+
+	DenomName   string `json:"denomName"`
+	DenomSchema string `json:"denomSchema"`
+	TokenName   string `json:"tokenName"`
+	Drop        string `json:"drop"`
+	TokenURI    string `json:"tokenURI"`
+	TokenData   string `json:"tokenData"`
+	TokenMinter string `json:"tokenMinter"`
+}
+
 type TokenTransferRow struct {
 	DenomId         string          `json:"denomId"`
 	TokenId         string          `json:"tokenId"`
-	Drop            string          `json:"drop"`
 	BlockHeight     int64           `json:"blockHeight"`
 	TransactionHash string          `json:"transactionHash"`
 	Sender          string          `json:"sender"`
