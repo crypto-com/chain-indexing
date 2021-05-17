@@ -292,7 +292,7 @@ func (nft *NFT) updateToken(
 		fmt.Sprintf("-:%s:%s:%s", tokenRow.Drop, tokenRow.Minter, tokenRow.Owner),
 		fmt.Sprintf("%s:%s:%s:%s", tokenRow.DenomId, tokenRow.Drop, tokenRow.Minter, tokenRow.Owner),
 	}, 1); incrementErr != nil {
-		return fmt.Errorf("error decrementing NFT token total: %v", incrementErr)
+		return fmt.Errorf("error incrementing NFT token total: %v", incrementErr)
 	}
 	return nil
 }
