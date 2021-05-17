@@ -1,11 +1,11 @@
 [blockchain]
-bonding_denom = "basecro"
-account_address_prefix = "cro"
-account_pubkey_prefix = "cro"
-validator_address_prefix = "crocncl"
-validator_pubkey_prefix = "crocncl"
-connode_address_prefix = "crocnclcons"
-connode_pubkey_prefix = "crocnclconspub"
+bonding_denom = "basetcro"
+account_address_prefix = "tcro"
+account_pubkey_prefix = "tcro"
+validator_address_prefix = "tcrocncl"
+validator_pubkey_prefix = "tcrocncl"
+connode_address_prefix = "tcrocnclcons"
+connode_pubkey_prefix = "tcrocnclconspub"
 
 [system]
 # mode of the system, possible values: EVENT_STORE,TENDERMINT_DIRECT
@@ -75,4 +75,6 @@ enables = [
     "Transaction",
     "Validator",
     "ValidatorStats",
+    "NFT",
+#    "CryptoComNFT",
 ]

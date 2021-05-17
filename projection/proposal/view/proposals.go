@@ -167,7 +167,6 @@ func (proposalView *Proposals) Update(row *ProposalRow) error {
 	if err != nil {
 		return fmt.Errorf("error building proposal update sql: %v: %w", err, rdb.ErrPrepare)
 	}
-	fmt.Println(sql, sqlArgs)
 	result, err := proposalView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
 		return fmt.Errorf("error updating proposal: %v: %w", err, rdb.ErrWrite)
@@ -180,7 +179,6 @@ func (proposalView *Proposals) Update(row *ProposalRow) error {
 }
 
 func (proposalView *Proposals) FindById(proposalId string) (*ProposalWithMonikerRow, error) {
-	fmt.Println(proposalId)
 	selectStmtBuilder := proposalView.rdb.StmtBuilder.Select(
 		fmt.Sprintf("%s.proposal_id", PROPOSALS_TABLE_NAME),
 		fmt.Sprintf("%s.title", PROPOSALS_TABLE_NAME),
