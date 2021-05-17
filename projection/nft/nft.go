@@ -183,7 +183,12 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				LastEditedAt: blockTime,
 			}
 
-			if updateTokenErr := nft.updateToken(tokensView, tokenRow, tokensTotalView); updateTokenErr != nil {
+			if updateTokenErr := nft.updateToken(
+				tokensView,
+				prevTokenRow.TokenRow,
+				tokenRow,
+				tokensTotalView,
+			); updateTokenErr != nil {
 				return updateTokenErr
 			}
 
@@ -252,23 +257,31 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 	return nil
 }
 
-func (nft *NFT) updateToken(tokensView *view.Tokens, tokenRow view.TokenRow, tokensTotalView *view.TokensTotal) error {
+func (nft *NFT) updateToken(
+	tokensView *view.Tokens,
+	prevTokenRow view.TokenRow,
+	tokenRow view.TokenRow,
+	tokensTotalView *view.TokensTotal,
+) error {
 	if updateTokenErr := tokensView.Update(tokenRow); updateTokenErr != nil {
 		return fmt.Errorf("error updating NFT token row: %v", updateTokenErr)
 	}
 
+	// Decrement all total entries with previous owner
 	if decrementErr := tokensTotalView.DecrementAll([]string{
-		fmt.Sprintf("-:-:-:%s", tokenRow.Owner),
-		fmt.Sprintf("%s:-:-:%s", tokenRow.DenomId, tokenRow.Owner),
-		fmt.Sprintf("-:%s:-:%s", tokenRow.Drop, tokenRow.Owner),
-		fmt.Sprintf("-:-:%s:%s", tokenRow.Minter, tokenRow.Owner),
-		fmt.Sprintf("%s:%s:-:%s", tokenRow.DenomId, tokenRow.Drop, tokenRow.Owner),
-		fmt.Sprintf("%s:-:%s:%s", tokenRow.DenomId, tokenRow.Minter, tokenRow.Owner),
-		fmt.Sprintf("-:%s:%s:%s", tokenRow.Drop, tokenRow.Minter, tokenRow.Owner),
-		fmt.Sprintf("%s:%s:%s:%s", tokenRow.DenomId, tokenRow.Drop, tokenRow.Minter, tokenRow.Owner),
+		fmt.Sprintf("-:-:-:%s", prevTokenRow.Owner),
+		fmt.Sprintf("%s:-:-:%s", prevTokenRow.DenomId, prevTokenRow.Owner),
+		fmt.Sprintf("-:%s:-:%s", prevTokenRow.Drop, prevTokenRow.Owner),
+		fmt.Sprintf("-:-:%s:%s", prevTokenRow.Minter, prevTokenRow.Owner),
+		fmt.Sprintf("%s:%s:-:%s", prevTokenRow.DenomId, prevTokenRow.Drop, prevTokenRow.Owner),
+		fmt.Sprintf("%s:-:%s:%s", prevTokenRow.DenomId, prevTokenRow.Minter, prevTokenRow.Owner),
+		fmt.Sprintf("-:%s:%s:%s", prevTokenRow.Drop, prevTokenRow.Minter, prevTokenRow.Owner),
+		fmt.Sprintf("%s:%s:%s:%s", prevTokenRow.DenomId, prevTokenRow.Drop, prevTokenRow.Minter, prevTokenRow.Owner),
 	}, 1); decrementErr != nil {
 		return fmt.Errorf("error decrementing NFT token total: %v", decrementErr)
 	}
+
+	// Increment all total entries with new owner
 	if incrementErr := tokensTotalView.IncrementAll([]string{
 		fmt.Sprintf("-:-:-:%s", tokenRow.Owner),
 		fmt.Sprintf("%s:-:-:%s", tokenRow.DenomId, tokenRow.Owner),
