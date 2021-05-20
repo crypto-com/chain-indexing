@@ -28,7 +28,7 @@ func InitProjection(name string, params InitParams) projection_entity.Projection
 	case "AccountTransaction":
 		return account_transaction.NewAccountTransaction(params.Logger, params.RdbConn, params.AccountAddressPrefix)
 	case "AccountMessage":
-		return account_message.NewAccountMessage(params.Logger, params.RdbConn)
+		return account_message.NewAccountMessage(params.Logger, params.RdbConn, params.AccountAddressPrefix)
 	case "Block":
 		return block.NewBlock(params.Logger, params.RdbConn)
 	case "BlockEvent":
