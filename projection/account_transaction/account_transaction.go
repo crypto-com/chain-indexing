@@ -205,6 +205,7 @@ func (projection *AccountTransaction) HandleEvents(height int64, events []event_
 	// Handle transaction messages
 	for _, event := range events {
 		if typedEvent, ok := event.(*event_usecase.MsgSend); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.FromAddress)
 			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.ToAddress)
 
 		} else if typedEvent, ok := event.(*event_usecase.MsgMultiSend); ok {
@@ -255,7 +256,12 @@ func (projection *AccountTransaction) HandleEvents(height int64, events []event_
 		} else if typedEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
 			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.DelegatorAddress)
 
-			//} else if _, ok := event.(*event_usecase.MsgEditValidator); ok {
+		} else if typedEvent, ok := event.(*event_usecase.MsgEditValidator); ok {
+			accountAddress := tmcosmosutils.MustAccountAddressFromValidatorAddress(
+				projection.accountAddressPrefix,
+				typedEvent.ValidatorAddress,
+			)
+			transactionInfos[typedEvent.TxHash()].AddAccount(accountAddress)
 
 		} else if typedEvent, ok := event.(*event_usecase.MsgDelegate); ok {
 			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.DelegatorAddress)
@@ -266,7 +272,29 @@ func (projection *AccountTransaction) HandleEvents(height int64, events []event_
 		} else if typedEvent, ok := event.(*event_usecase.MsgBeginRedelegate); ok {
 			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.DelegatorAddress)
 
-			//} else if _, ok := event.(*event_usecase.MsgUnjail); ok {
+		} else if typedEvent, ok := event.(*event_usecase.MsgUnjail); ok {
+			accountAddress := tmcosmosutils.MustAccountAddressFromValidatorAddress(
+				projection.accountAddressPrefix,
+				typedEvent.ValidatorAddr,
+			)
+			transactionInfos[typedEvent.TxHash()].AddAccount(accountAddress)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgNFTIssueDenom); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Sender)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgNFTMintNFT); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Sender)
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Recipient)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgNFTTransferNFT); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Sender)
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Recipient)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgNFTEditNFT); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Sender)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgNFTBurnNFT); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Sender)
 		}
 	}
 

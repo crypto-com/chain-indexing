@@ -3,6 +3,8 @@ package account_message
 import (
 	"fmt"
 
+	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
+
 	"github.com/crypto-com/chain-indexing/projection/account_message/view"
 
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
@@ -22,14 +24,22 @@ type AccountMessage struct {
 
 	rdbConn rdb.Conn
 	logger  applogger.Logger
+
+	accountAddressPrefix string
 }
 
-func NewAccountMessage(logger applogger.Logger, rdbConn rdb.Conn) *AccountMessage {
+func NewAccountMessage(
+	logger applogger.Logger,
+	rdbConn rdb.Conn,
+	accountAddressPrefix string,
+) *AccountMessage {
 	return &AccountMessage{
 		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "AccountMessage"),
 
 		rdbConn,
 		logger,
+
+		accountAddressPrefix,
 	}
 }
 
@@ -312,8 +322,27 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 					typedEvent.DelegatorAddress,
 				},
 			})
-			//} else if _, ok := event.(*event_usecase.MsgEditValidator); ok {
-			// TODO: Sender
+		} else if typedEvent, ok := event.(*event_usecase.MsgEditValidator); ok {
+			accountAddress := tmcosmosutils.MustAccountAddressFromValidatorAddress(
+				projection.accountAddressPrefix,
+				typedEvent.ValidatorAddress,
+			)
+
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					accountAddress,
+				},
+			})
 		} else if typedEvent, ok := event.(*event_usecase.MsgDelegate); ok {
 			accountMessages = append(accountMessages, view.AccountMessageRecord{
 				Row: view.AccountMessageRow{
@@ -362,8 +391,109 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 					typedEvent.DelegatorAddress,
 				},
 			})
-			//} else if _, ok := event.(*event_usecase.MsgUnjail); ok {
-			// TODO: Sender
+		} else if typedEvent, ok := event.(*event_usecase.MsgUnjail); ok {
+			accountAddress := tmcosmosutils.MustAccountAddressFromValidatorAddress(
+				projection.accountAddressPrefix,
+				typedEvent.ValidatorAddr,
+			)
+
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					accountAddress,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgNFTIssueDenom); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Sender,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgNFTMintNFT); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Sender,
+					typedEvent.Recipient,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgNFTTransferNFT); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Sender,
+					typedEvent.Recipient,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgNFTEditNFT); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Sender,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgNFTBurnNFT); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Sender,
+				},
+			})
 		}
 	}
 
