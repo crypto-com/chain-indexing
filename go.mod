@@ -20,8 +20,7 @@ require (
 	github.com/lab259/cors v0.2.0
 	github.com/luci/go-render v0.0.0-20160219211803-9a04cc21af0f
 	github.com/nbutton23/zxcvbn-go v0.0.0-20201221231540-e56b841a3c88
-	github.com/nxadm/tail v1.4.5 // indirect
-	github.com/onsi/ginkgo v1.14.2
+	github.com/onsi/ginkgo v1.16.2
 	github.com/onsi/gomega v1.10.2
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.20.0
@@ -29,7 +28,8 @@ require (
 	github.com/tendermint/tendermint v0.34.10
 	github.com/urfave/cli/v2 v2.2.0
 	github.com/valyala/fasthttp v1.17.0
-	golang.org/x/sys v0.0.0-20201214210602-f9fddec55a1e // indirect
+	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4 // indirect
+	golang.org/x/sys v0.0.0-20210514084401-e8d321eab015 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 )
 
