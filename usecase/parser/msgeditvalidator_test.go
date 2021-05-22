@@ -25,11 +25,15 @@ var _ = Describe("ParseMsgCommands", func() {
 			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_BLOCK_RESULTS_RESP))
+			accountAddressPrefix := "tcro"
+			bondingDenom := "basetcro"
 
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
+				accountAddressPrefix,
+				bondingDenom,
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(4))
@@ -46,7 +50,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					},
 
 					model.MsgEditValidatorParams{
-						Description: model.MsgValidatorDescription{
+						Description: model.ValidatorDescription{
 							Moniker:         "Edited Calvin Test Node",
 							Identity:        "[do-not-modify]",
 							Website:         "[do-not-modify]",

@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"fmt"
+
 	"github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
@@ -8,7 +10,11 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
-func ParseBeginBlockEventsCommands(blockHeight int64, beginBlockEvents []model.BlockResultsEvent) ([]command.Command, error) {
+func ParseBeginBlockEventsCommands(
+	blockHeight int64,
+	beginBlockEvents []model.BlockResultsEvent,
+	bondingDenom string,
+) ([]command.Command, error) {
 	commands := make([]command.Command, 0)
 
 	var proposerReward struct {
@@ -39,13 +45,18 @@ func ParseBeginBlockEventsCommands(blockHeight int64, beginBlockEvents []model.B
 				}))
 		} else if event.Type == "mint" {
 			mintEvent := utils.NewParsedTxsResultLogEvent(&beginBlockEvents[i])
+
+			amount := mintEvent.MustGetAttributeByKey("amount")
+			if amount == "" {
+				continue
+			}
 			commands = append(commands, command_usecase.NewCreateMint(
 				blockHeight,
 				model.MintParams{
 					BondedRatio:      mintEvent.MustGetAttributeByKey("bonded_ratio"),
 					Inflation:        mintEvent.MustGetAttributeByKey("inflation"),
 					AnnualProvisions: mintEvent.MustGetAttributeByKey("annual_provisions"),
-					Amount:           mintEvent.MustGetAttributeByKey("amount"),
+					Amount:           coin.MustParseCoinsNormalized(fmt.Sprintf("%s%s", amount, bondingDenom)),
 				},
 			))
 		} else if event.Type == "proposer_reward" {

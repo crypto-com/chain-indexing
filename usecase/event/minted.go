@@ -3,12 +3,12 @@ package event
 import (
 	"bytes"
 
-	"github.com/crypto-com/chain-indexing/usecase/model"
-
 	jsoniter "github.com/json-iterator/go"
+	"github.com/luci/go-render/render"
 
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
-	"github.com/luci/go-render/render"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 const MINTED = "Minted"
@@ -16,10 +16,10 @@ const MINTED = "Minted"
 type Minted struct {
 	event_entity.Base
 
-	BondedRatio      string `json:"bondedRatio"`
-	Inflation        string `json:"inflation"`
-	AnnualProvisions string `json:"annualProvisions"`
-	Amount           string `json:"amount"`
+	BondedRatio      string     `json:"bondedRatio"`
+	Inflation        string     `json:"inflation"`
+	AnnualProvisions string     `json:"annualProvisions"`
+	Amount           coin.Coins `json:"amount"`
 }
 
 func NewMinted(blockHeight int64, params model.MintParams) *Minted {

@@ -3,6 +3,10 @@ package parser
 import (
 	"fmt"
 	"strconv"
+	"time"
+
+	"github.com/crypto-com/chain-indexing/projection/validator/constants"
+	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
@@ -27,6 +31,8 @@ func ParseBlockResultsTxsMsgToCommands(
 	txDecoder *utils.TxDecoder,
 	block *model.Block,
 	blockResults *model.BlockResults,
+	accountAddressPrefix string,
+	stakingDenom string,
 ) ([]command.Command, error) {
 	commands := make([]command.Command, 0)
 
@@ -75,21 +81,37 @@ func ParseBlockResultsTxsMsgToCommands(
 			case "/cosmos.staking.v1beta1.MsgDelegate":
 				msgCommands = parseMsgDelegate(msgCommonParams, msg)
 			case "/cosmos.staking.v1beta1.MsgUndelegate":
-				msgCommands = parseMsgUndelegate(txSuccess, txsResult, msgIndex, msgCommonParams, msg)
+				msgCommands = parseMsgUndelegate(
+					accountAddressPrefix,
+					stakingDenom,
+					txSuccess, txsResult, msgIndex, msgCommonParams, msg,
+				)
 			case "/cosmos.staking.v1beta1.MsgBeginRedelegate":
-				msgCommands = parseMsgBeginRedelegate(msgCommonParams, msg)
+				msgCommands = parseMsgBeginRedelegate(
+					accountAddressPrefix,
+					stakingDenom,
+					txSuccess, txsResult, msgIndex, msgCommonParams, msg,
+				)
 			case "/cosmos.slashing.v1beta1.MsgUnjail":
 				msgCommands = parseMsgUnjail(msgCommonParams, msg)
 			case "/cosmos.staking.v1beta1.MsgCreateValidator":
 				msgCommands = parseMsgCreateValidator(msgCommonParams, msg)
 			case "/cosmos.staking.v1beta1.MsgEditValidator":
 				msgCommands = parseMsgEditValidator(msgCommonParams, msg)
-
+			case "/chainmain.nft.v1.MsgIssueDenom":
+				msgCommands = parseMsgNFTIssueDenom(msgCommonParams, msg)
+			case "/chainmain.nft.v1.MsgMintNFT":
+				msgCommands = parseMsgNFTMintNFT(msgCommonParams, msg)
+			case "/chainmain.nft.v1.MsgTransferNFT":
+				msgCommands = parseMsgNFTTransferNFT(msgCommonParams, msg)
+			case "/chainmain.nft.v1.MsgEditNFT":
+				msgCommands = parseMsgNFTEditNFT(msgCommonParams, msg)
+			case "/chainmain.nft.v1.MsgBurnNFT":
+				msgCommands = parseMsgNFTBurnNFT(msgCommonParams, msg)
 			case "/ibc.core.client.v1.MsgCreateClient":
 				msgCommands = ibcmsg.ParseMsgCreateClient(msgCommonParams, txsResult, msgIndex, msg)
 			case "/ibc.core.connection.v1.MsgConnectionOpenInit":
 				msgCommands = ibcmsg.ParseMsgConnectionOpenInit(msgCommonParams, txsResult, msgIndex, msg)
-				// TODO: IBC commands
 			}
 
 			commands = append(commands, msgCommands...)
@@ -663,6 +685,8 @@ func parseMsgDelegate(
 }
 
 func parseMsgUndelegate(
+	addressPrefix string,
+	stakingDenom string,
 	txSuccess bool,
 	txsResult model.BlockResultsTxsResult,
 	msgIndex int,
@@ -681,18 +705,38 @@ func parseMsgUndelegate(
 				ValidatorAddress:      msg["validator_address"].(string),
 				MaybeUnbondCompleteAt: nil,
 				Amount:                amount,
+				AutoClaimedRewards:    coin.Coin{},
 			},
 		)}
 	}
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
-	event := log.GetEventByType("unbond")
-	if event == nil {
+	unbondEvent := log.GetEventByType("unbond")
+	if unbondEvent == nil {
 		panic("missing `unbond` event in TxsResult log")
 	}
-	unbondCompletionTime, err := utctime.Parse("2006-01-02T15:04:05Z", event.MustGetAttributeByKey("completion_time"))
-	if err != nil {
-		panic(fmt.Sprintf("error parsing unbond completion time: %v", err))
+	unbondCompletionTime, unbondCompletionTimeErr := utctime.Parse(
+		time.RFC3339, unbondEvent.MustGetAttributeByKey("completion_time"),
+	)
+	if unbondCompletionTimeErr != nil {
+		panic(fmt.Sprintf("error parsing unbond completion time: %v", unbondCompletionTimeErr))
+	}
+
+	moduleAccounts := tmcosmosutils.NewModuleAccounts(addressPrefix)
+	transferEvents := log.GetEventsByType("transfer")
+	autoClaimedRewards := coin.NewZeroCoin(stakingDenom)
+	for _, transferEvent := range transferEvents {
+		sender := transferEvent.MustGetAttributeByKey("sender")
+		if sender != moduleAccounts.Distribution {
+			continue
+		}
+
+		amount := transferEvent.MustGetAttributeByKey("amount")
+		coin, coinErr := coin.ParseCoinNormalized(amount)
+		if coinErr != nil {
+			panic(fmt.Errorf("error parsing auto claimed rewards amount: %v", coinErr))
+		}
+		autoClaimedRewards = autoClaimedRewards.Add(coin)
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgUndelegate(
@@ -703,16 +747,54 @@ func parseMsgUndelegate(
 			ValidatorAddress:      msg["validator_address"].(string),
 			MaybeUnbondCompleteAt: &unbondCompletionTime,
 			Amount:                amount,
+			AutoClaimedRewards:    autoClaimedRewards,
 		},
 	)}
 }
 
 func parseMsgBeginRedelegate(
+	addressPrefix string,
+	stakingDenom string,
+	txSuccess bool,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 ) []command.Command {
 	amountValue, _ := msg["amount"].(map[string]interface{})
 	amount := tmcosmosutils.MustNewCoinFromAmountInterface(amountValue)
+
+	if !txSuccess {
+		return []command.Command{command_usecase.NewCreateMsgBeginRedelegate(
+			msgCommonParams,
+
+			model.MsgBeginRedelegateParams{
+				DelegatorAddress:    msg["delegator_address"].(string),
+				ValidatorSrcAddress: msg["validator_src_address"].(string),
+				ValidatorDstAddress: msg["validator_dst_address"].(string),
+				Amount:              amount,
+				AutoClaimedRewards:  coin.Coin{},
+			},
+		)}
+	}
+
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	moduleAccounts := tmcosmosutils.NewModuleAccounts(addressPrefix)
+	transferEvents := log.GetEventsByType("transfer")
+	autoClaimedRewards := coin.NewZeroCoin(stakingDenom)
+	for _, transferEvent := range transferEvents {
+		sender := transferEvent.MustGetAttributeByKey("sender")
+		if sender != moduleAccounts.Distribution {
+			continue
+		}
+
+		amount := transferEvent.MustGetAttributeByKey("amount")
+		coin, coinErr := coin.ParseCoinNormalized(amount)
+		if coinErr != nil {
+			panic(fmt.Errorf("error parsing auto claimed rewards amount: %v", coinErr))
+		}
+		autoClaimedRewards = autoClaimedRewards.Add(coin)
+	}
 
 	return []command.Command{command_usecase.NewCreateMsgBeginRedelegate(
 		msgCommonParams,
@@ -722,6 +804,7 @@ func parseMsgBeginRedelegate(
 			ValidatorSrcAddress: msg["validator_src_address"].(string),
 			ValidatorDstAddress: msg["validator_dst_address"].(string),
 			Amount:              amount,
+			AutoClaimedRewards:  autoClaimedRewards,
 		},
 	)}
 }
@@ -739,14 +822,13 @@ func parseMsgUnjail(
 	)}
 }
 
-func parseMsgCreateValidator(
-	msgCommonParams event.MsgCommonParams,
+func parseGenesisGenTxsMsgCreateValidator(
 	msg map[string]interface{},
 ) []command.Command {
 	amountValue, _ := msg["value"].(map[string]interface{})
 	amount := tmcosmosutils.MustNewCoinFromAmountInterface(amountValue)
 	tendermintPubkey, _ := msg["pubkey"].(map[string]interface{})
-	description := model.MsgValidatorDescription{
+	description := model.ValidatorDescription{
 		Moniker:         "",
 		Identity:        "",
 		Website:         "",
@@ -755,7 +837,7 @@ func parseMsgCreateValidator(
 	}
 
 	if descriptionJSON, ok := msg["description"].(map[string]interface{}); ok {
-		description = model.MsgValidatorDescription{
+		description = model.ValidatorDescription{
 			Moniker:         descriptionJSON["moniker"].(string),
 			Identity:        descriptionJSON["identity"].(string),
 			Website:         descriptionJSON["website"].(string),
@@ -764,13 +846,68 @@ func parseMsgCreateValidator(
 		}
 	}
 
-	commission := model.MsgValidatorCommission{
+	commission := model.ValidatorCommission{
 		Rate:          "",
 		MaxRate:       "",
 		MaxChangeRate: "",
 	}
 	if commissionJSON, ok := msg["commission"].(map[string]interface{}); ok {
-		commission = model.MsgValidatorCommission{
+		commission = model.ValidatorCommission{
+			Rate:          commissionJSON["rate"].(string),
+			MaxRate:       commissionJSON["max_rate"].(string),
+			MaxChangeRate: commissionJSON["max_change_rate"].(string),
+		}
+	}
+
+	return []command.Command{command_usecase.NewCreateGenesisValidator(
+		genesis.CreateGenesisValidatorParams{
+			// Genesis validator are always bonded
+			// TODO: What if gen_txs contains more validators than maximum validators
+			Status:            constants.BONDED,
+			Description:       description,
+			Commission:        commission,
+			MinSelfDelegation: msg["min_self_delegation"].(string),
+			DelegatorAddress:  msg["delegator_address"].(string),
+			ValidatorAddress:  msg["validator_address"].(string),
+			TendermintPubkey:  tendermintPubkey["key"].(string),
+			Amount:            amount,
+			Jailed:            false,
+		},
+	)}
+}
+
+func parseMsgCreateValidator(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	amountValue, _ := msg["value"].(map[string]interface{})
+	amount := tmcosmosutils.MustNewCoinFromAmountInterface(amountValue)
+	tendermintPubkey, _ := msg["pubkey"].(map[string]interface{})
+	description := model.ValidatorDescription{
+		Moniker:         "",
+		Identity:        "",
+		Website:         "",
+		SecurityContact: "",
+		Details:         "",
+	}
+
+	if descriptionJSON, ok := msg["description"].(map[string]interface{}); ok {
+		description = model.ValidatorDescription{
+			Moniker:         descriptionJSON["moniker"].(string),
+			Identity:        descriptionJSON["identity"].(string),
+			Website:         descriptionJSON["website"].(string),
+			SecurityContact: descriptionJSON["security_contact"].(string),
+			Details:         descriptionJSON["details"].(string),
+		}
+	}
+
+	commission := model.ValidatorCommission{
+		Rate:          "",
+		MaxRate:       "",
+		MaxChangeRate: "",
+	}
+	if commissionJSON, ok := msg["commission"].(map[string]interface{}); ok {
+		commission = model.ValidatorCommission{
 			Rate:          commissionJSON["rate"].(string),
 			MaxRate:       commissionJSON["max_rate"].(string),
 			MaxChangeRate: commissionJSON["max_change_rate"].(string),
@@ -796,9 +933,9 @@ func parseMsgEditValidator(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 ) []command.Command {
-	var description model.MsgValidatorDescription
+	var description model.ValidatorDescription
 	if descriptionJSON, ok := msg["description"].(map[string]interface{}); ok {
-		description = model.MsgValidatorDescription{
+		description = model.ValidatorDescription{
 			Moniker:         descriptionJSON["moniker"].(string),
 			Identity:        descriptionJSON["identity"].(string),
 			Website:         descriptionJSON["website"].(string),
@@ -825,6 +962,90 @@ func parseMsgEditValidator(
 			ValidatorAddress:       msg["validator_address"].(string),
 			MaybeCommissionRate:    maybeCommissionRate,
 			MaybeMinSelfDelegation: maybeMinSelfDelegation,
+		},
+	)}
+}
+
+func parseMsgNFTIssueDenom(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	return []command.Command{command_usecase.NewCreateMsgNFTIssueDenom(
+		msgCommonParams,
+
+		model.MsgNFTIssueDenomParams{
+			DenomId:   msg["id"].(string),
+			DenomName: msg["name"].(string),
+			Schema:    msg["schema"].(string),
+			Sender:    msg["sender"].(string),
+		},
+	)}
+}
+
+func parseMsgNFTMintNFT(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	return []command.Command{command_usecase.NewCreateMsgNFTMintNFT(
+		msgCommonParams,
+
+		model.MsgNFTMintNFTParams{
+			DenomId:   msg["denom_id"].(string),
+			TokenId:   msg["id"].(string),
+			TokenName: msg["name"].(string),
+			URI:       msg["uri"].(string),
+			Data:      msg["data"].(string),
+			Sender:    msg["sender"].(string),
+			Recipient: msg["recipient"].(string),
+		},
+	)}
+}
+
+func parseMsgNFTTransferNFT(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	return []command.Command{command_usecase.NewCreateMsgNFTTransferNFT(
+		msgCommonParams,
+
+		model.MsgNFTTransferNFTParams{
+			TokenId:   msg["id"].(string),
+			DenomId:   msg["denom_id"].(string),
+			Sender:    msg["sender"].(string),
+			Recipient: msg["recipient"].(string),
+		},
+	)}
+}
+
+func parseMsgNFTEditNFT(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	return []command.Command{command_usecase.NewCreateMsgNFTEditNFT(
+		msgCommonParams,
+
+		model.MsgNFTEditNFTParams{
+			DenomId:   msg["denom_id"].(string),
+			TokenId:   msg["id"].(string),
+			TokenName: msg["name"].(string),
+			URI:       msg["uri"].(string),
+			Data:      msg["data"].(string),
+			Sender:    msg["sender"].(string),
+		},
+	)}
+}
+
+func parseMsgNFTBurnNFT(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	return []command.Command{command_usecase.NewCreateMsgNFTBurnNFT(
+		msgCommonParams,
+
+		model.MsgNFTBurnNFTParams{
+			DenomId: msg["denom_id"].(string),
+			TokenId: msg["id"].(string),
+			Sender:  msg["sender"].(string),
 		},
 	)}
 }

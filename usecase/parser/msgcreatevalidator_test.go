@@ -24,25 +24,29 @@ var _ = Describe("ParseMsgCommands", func() {
 			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_MSG_CREATE_VALIDATOR_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_MSG_CREATE_VALIDATOR_BLOCK_RESULTS_RESP))
+			accountAddressPrefix := "tcro"
+			bondingDenom := "basetcro"
 
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
+				accountAddressPrefix,
+				bondingDenom,
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			thiscmd := cmds[0]
 			Expect(thiscmd.Name()).To(Equal("CreateMsgCreateValidator"))
 
-			description := model.MsgValidatorDescription{
+			description := model.ValidatorDescription{
 				Moniker:         "leo-node",
 				Identity:        "",
 				Website:         "",
 				SecurityContact: "",
 				Details:         "",
 			}
-			commissionRates := model.MsgValidatorCommission{
+			commissionRates := model.ValidatorCommission{
 				Rate:          "0.100000000000000000",
 				MaxRate:       "0.200000000000000000",
 				MaxChangeRate: "0.010000000000000000",

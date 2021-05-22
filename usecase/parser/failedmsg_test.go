@@ -19,11 +19,15 @@ var _ = Describe("ParseMsgCommands", func() {
 			txDecoder := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESULTS_RESP)
+			accountAddressPrefix := "tcro"
+			bondingDenom := "basetcro"
 
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
+				accountAddressPrefix,
+				bondingDenom,
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))

@@ -18,6 +18,8 @@ var (
 	BIGINT_INT10 = big.NewInt(10)
 )
 
+var _ rdb.TypeConv = &PgxTypeConv{}
+
 type PgxTypeConv struct{}
 
 func (conv *PgxTypeConv) Bton(b *big.Int) interface{} {
@@ -30,7 +32,23 @@ func (conv *PgxTypeConv) Bton(b *big.Int) interface{} {
 	}
 
 	var num pgtype.Numeric
-	if err = num.Set(b.String()); err != nil {
+	if err = num.Set(b.Text(10)); err != nil {
+		panic(fmt.Sprintf("cannot convert %v to numeric: %v", b, err))
+	}
+
+	return num
+}
+func (conv *PgxTypeConv) BFton(b *big.Float) interface{} {
+	var err error
+
+	var nilValue pgtype.Numeric
+	_ = nilValue.Set(nil)
+	if b == nil {
+		return nilValue
+	}
+
+	var num pgtype.Numeric
+	if err = num.Set(b.Text('f', 10)); err != nil {
 		panic(fmt.Sprintf("cannot convert %v to numeric: %v", b, err))
 	}
 
@@ -115,6 +133,39 @@ func sciToBigIntPtr(sci string) (*big.Int, error) {
 		return nil, fmt.Errorf("cannot convert %v to bigInt", sci)
 	}
 	return num, nil
+}
+
+func (conv *PgxTypeConv) NtobfReader() rdb.NtobfReader {
+	return new(PgxNtobfReader)
+}
+
+type PgxNtobfReader struct {
+	num pgtype.Numeric
+}
+
+func (reader *PgxNtobfReader) ScannableArg() interface{} {
+	return &reader.num
+}
+func (reader *PgxNtobfReader) Parse() (*big.Float, error) {
+	var err error
+
+	value, err := reader.num.Value()
+	if err != nil {
+		return nil, err
+	}
+	switch str := value.(type) {
+	case string:
+		// pgtype.Numeric.Amount() returns scientific notation e.g. "1000e0".
+		result, _, parseErr := new(big.Float).Parse(str, 10)
+		if parseErr != nil {
+			return nil, parseErr
+		}
+		return result, nil
+	case nil:
+		return nil, nil
+	default:
+		return nil, errors.New("unknown pgtype value")
+	}
 }
 
 func (conv *PgxTypeConv) Tton(t *utctime.UTCTime) interface{} {

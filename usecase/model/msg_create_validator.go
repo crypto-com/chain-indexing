@@ -5,11 +5,11 @@ import (
 )
 
 type MsgCreateValidatorParams struct {
-	Description       MsgValidatorDescription `json:"description"`
-	Commission        MsgValidatorCommission  `json:"commission"`
-	MinSelfDelegation string                  `json:"minSelfDelegation"`
-	DelegatorAddress  string                  `json:"delegatorAddress"`
-	ValidatorAddress  string                  `json:"validatorAddress"`
-	TendermintPubkey  string                  `json:"tendermintPubkey"`
-	Amount            coin.Coin               `json:"amount"`
+	Description       ValidatorDescription `json:"description"`
+	Commission        ValidatorCommission  `json:"commission"`
+	MinSelfDelegation string               `json:"minSelfDelegation"`
+	DelegatorAddress  string               `json:"delegatorAddress"`
+	ValidatorAddress  string               `json:"validatorAddress"`
+	TendermintPubkey  string               `json:"tendermintPubkey"`
+	Amount            coin.Coin            `json:"amount"`
 }

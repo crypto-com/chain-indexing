@@ -20,10 +20,14 @@ import (
 const DEFAULT_POLLING_INTERVAL = 5 * time.Second
 
 type SyncManager struct {
-	rdbConn         rdb.Conn
-	client          *tendermint.HTTPClient
-	logger          applogger.Logger
-	pollingInterval time.Duration
+	rdbConn              rdb.Conn
+	client               *tendermint.HTTPClient
+	logger               applogger.Logger
+	pollingInterval      time.Duration
+	strictGenesisParsing bool
+
+	accountAddressPrefix string
+	stakingDenom         string
 
 	txDecoder          *utils.TxDecoder
 	windowSyncStrategy *syncstrategy.Window
@@ -44,8 +48,13 @@ type SyncManagerParams struct {
 }
 
 type SyncManagerConfig struct {
-	WindowSize       int
-	TendermintRPCUrl string
+	WindowSize               int
+	TendermintRPCUrl         string
+	InsecureTendermintClient bool
+	StrictGenesisParsing     bool
+
+	AccountAddressPrefix string
+	StakingDenom         string
 }
 
 // NewSyncManager creates a new feed with polling for latest block starts at a specific height
@@ -53,7 +62,18 @@ func NewSyncManager(
 	params SyncManagerParams,
 	eventHandler eventhandler_interface.Handler,
 ) *SyncManager {
-	tendermintClient := tendermint.NewHTTPClient(params.Config.TendermintRPCUrl)
+	var tendermintClient *tendermint.HTTPClient
+	if params.Config.InsecureTendermintClient {
+		tendermintClient = tendermint.NewInsecureHTTPClient(
+			params.Config.TendermintRPCUrl,
+			params.Config.StrictGenesisParsing,
+		)
+	} else {
+		tendermintClient = tendermint.NewHTTPClient(
+			params.Config.TendermintRPCUrl,
+			params.Config.StrictGenesisParsing,
+		)
+	}
 
 	return &SyncManager{
 		rdbConn: params.RDbConn,
@@ -61,7 +81,11 @@ func NewSyncManager(
 		logger: params.Logger.WithFields(applogger.LogFields{
 			"module": "SyncManager",
 		}),
-		pollingInterval: DEFAULT_POLLING_INTERVAL,
+		pollingInterval:      DEFAULT_POLLING_INTERVAL,
+		strictGenesisParsing: params.Config.StrictGenesisParsing,
+
+		accountAddressPrefix: params.Config.AccountAddressPrefix,
+		stakingDenom:         params.Config.StakingDenom,
 
 		shouldSyncCh: make(chan bool, 1),
 
@@ -137,7 +161,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 			return nil, fmt.Errorf("error requesting chain genesis: %v", err)
 		}
 
-		return parser.ParseGenesisCommands(genesis)
+		return parser.ParseGenesisCommands(genesis, manager.accountAddressPrefix)
 	}
 
 	// Request tendermint RPC
@@ -156,6 +180,8 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		block,
 		rawBlock,
 		blockResults,
+		manager.accountAddressPrefix,
+		manager.stakingDenom,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing block data to commands %v", err)

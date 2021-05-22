@@ -29,8 +29,8 @@ func mustParseBlockResultsResp(rawResp string) *model.BlockResults {
 	return blockResults
 }
 
-func mustParseGenesisResp(rawResp string) *genesis.Genesis {
-	genesis, err := tendermint.ParseGenesisResp(strings.NewReader(rawResp))
+func mustParseGenesisResp(rawResp string, strictParsing bool) *genesis.Genesis {
+	genesis, err := tendermint.ParseGenesisResp(strings.NewReader(rawResp), strictParsing)
 
 	if err != nil {
 		panic(fmt.Sprintf("error parsing block genesis response: %v", err))

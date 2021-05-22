@@ -1,11 +1,11 @@
 [blockchain]
-bonding_denom = "basecro"
-account_address_prefix = "cro"
-account_pubkey_prefix = "cro"
-validator_address_prefix = "crocncl"
-validator_pubkey_prefix = "crocncl"
-connode_address_prefix = "crocnclcons"
-connode_pubkey_prefix = "crocnclconspub"
+bonding_denom = "basetcro"
+account_address_prefix = "tcro"
+account_pubkey_prefix = "tcro"
+validator_address_prefix = "tcrocncl"
+validator_pubkey_prefix = "tcrocncl"
+connode_address_prefix = "tcrocnclcons"
+connode_pubkey_prefix = "tcrocnclconspub"
 
 [system]
 # mode of the system, possible values: EVENT_STORE,TENDERMINT_DIRECT
@@ -20,9 +20,14 @@ window_size = 50
 
 [tendermint]
 http_rpc_url = "http://127.0.0.1:26657"
+insecure = false
+# When enabled, genssi parsing will reject any non-Cosmos SDK built-in module
+# inside genesis file.
+strict_genesis_parsing = false
 
 [cosmosapp]
 http_rpc_url = "http://127.0.0.1:1317"
+insecure = false
 
 [http]
 listening_address = "0.0.0.0:8080"
@@ -70,4 +75,6 @@ enables = [
     "Transaction",
     "Validator",
     "ValidatorStats",
+    "NFT",
+#    "CryptoComNFT",
 ]

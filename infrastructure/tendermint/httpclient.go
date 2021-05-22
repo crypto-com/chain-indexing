@@ -2,6 +2,7 @@ package tendermint
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,18 +12,23 @@ import (
 	"strings"
 	"time"
 
+	"github.com/crypto-com/chain-indexing/appinterface/tendermint"
+
 	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 )
 
+var _ tendermint.Client = &HTTPClient{}
+
 type HTTPClient struct {
-	httpClient       *http.Client
-	tendermintRPCUrl string
+	httpClient           *http.Client
+	tendermintRPCUrl     string
+	strictGenesisParsing bool
 }
 
 // NewHTTPClient returns a new HTTPClient for tendermint request
-func NewHTTPClient(tendermintRPCUrl string) *HTTPClient {
+func NewHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool) *HTTPClient {
 	httpClient := &http.Client{
 		Timeout: 30 * time.Second,
 	}
@@ -30,6 +36,25 @@ func NewHTTPClient(tendermintRPCUrl string) *HTTPClient {
 	return &HTTPClient{
 		httpClient,
 		strings.TrimSuffix(tendermintRPCUrl, "/"),
+		strictGenesisParsing,
+	}
+}
+
+// NewHTTPClient returns a new HTTPClient for tendermint request
+func NewInsecureHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool) *HTTPClient {
+	// nolint:gosec
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	httpClient := &http.Client{
+		Timeout:   30 * time.Second,
+		Transport: transport,
+	}
+
+	return &HTTPClient{
+		httpClient,
+		strings.TrimSuffix(tendermintRPCUrl, "/"),
+		strictGenesisParsing,
 	}
 }
 
@@ -42,7 +67,7 @@ func (client *HTTPClient) Genesis() (*genesis.Genesis, error) {
 	}
 	defer rawRespBody.Close()
 
-	genesis, err := ParseGenesisResp(rawRespBody)
+	genesis, err := ParseGenesisResp(rawRespBody, client.strictGenesisParsing)
 	if err != nil {
 		return nil, err
 	}
@@ -138,9 +163,9 @@ func (client *HTTPClient) Status() (*map[string]interface{}, error) {
 
 	body, _ := ioutil.ReadAll(rawRespBody)
 	jsonMap := make(map[string]interface{})
-	errread := json.Unmarshal([]byte(body), &jsonMap)
-	if errread != nil {
-		return nil, fmt.Errorf("error requesting Status : %v", errread)
+	errRead := json.Unmarshal([]byte(body), &jsonMap)
+	if errRead != nil {
+		return nil, fmt.Errorf("error requesting Status : %v", errRead)
 	}
 
 	return &jsonMap, nil

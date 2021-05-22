@@ -28,11 +28,15 @@ var _ = Describe("ParseMsgCommands", func() {
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSGS_WITHDRAW_DELEGATOR_REWARD_WITHDRAW_VALIDATOR_COMMISSION_BLOCK_RESULTS_RESP,
 			)
+			accountAddressPrefix := "tcro"
+			bondingDenom := "basetcro"
 
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
+				accountAddressPrefix,
+				bondingDenom,
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))
@@ -75,11 +79,15 @@ var _ = Describe("ParseMsgCommands", func() {
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_FAILED_MSG_WITHDRAW_VALIDATOR_COMMISSION_BLOCK_RESULTS_RESP,
 			)
+			accountAddressPrefix := "tcro"
+			bondingDenom := "basetcro"
 
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
+				accountAddressPrefix,
+				bondingDenom,
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))
@@ -121,11 +129,15 @@ var _ = Describe("ParseMsgCommands", func() {
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_WITHDRAW_DELEGATOR_REWARD_NO_REWARD_BLOCK_RESULTS_RESP,
 			))
+			accountAddressPrefix := "tcro"
+			bondingDenom := "basetcro"
 
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
+				accountAddressPrefix,
+				bondingDenom,
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))

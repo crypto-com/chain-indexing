@@ -19,6 +19,7 @@ type RouteRegistry struct {
 	accountMessagesHandler     *handlers.AccountMessages
 	accountsHandler            *handlers.Accounts
 	proposalsHandler           *handlers.Proposals
+	nftsHandler                *handlers.NFTs
 }
 
 func NewRoutesRegistry(
@@ -32,6 +33,7 @@ func NewRoutesRegistry(
 	accountMessagesHandler *handlers.AccountMessages,
 	accountsHandler *handlers.Accounts,
 	proposalsHandler *handlers.Proposals,
+	nftsHandler *handlers.NFTs,
 ) *RouteRegistry {
 	return &RouteRegistry{
 		searchHandler,
@@ -44,6 +46,7 @@ func NewRoutesRegistry(
 		accountMessagesHandler,
 		accountsHandler,
 		proposalsHandler,
+		nftsHandler,
 	}
 }
 
@@ -79,5 +82,15 @@ func (registry *RouteRegistry) Register(server *httpapi.Server, routePrefix stri
 	server.GET(fmt.Sprintf("%s/api/v1/validators/active", routePrefix), registry.validatorsHandler.ListActive)
 	server.GET(fmt.Sprintf("%s/api/v1/validators/{address}", routePrefix), registry.validatorsHandler.FindBy)
 	server.GET(fmt.Sprintf("%s/api/v1/validators/{address}/activities", routePrefix), registry.validatorsHandler.ListActivities)
+	server.GET(fmt.Sprintf("%s/api/v1/nfts/transfers", routePrefix), registry.nftsHandler.ListTransfers)
+	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms", routePrefix), registry.nftsHandler.ListDenoms)
+	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms/{denomId}", routePrefix), registry.nftsHandler.FindDenomById)
+	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms/{denomId}/tokens", routePrefix), registry.nftsHandler.ListTokensByDenomId)
+	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms/{denomId}/tokens/{tokenId}", routePrefix), registry.nftsHandler.FindTokenById)
+	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms/{denomId}/tokens/{tokenId}/transfers", routePrefix), registry.nftsHandler.ListTransfersByToken)
+	server.GET(fmt.Sprintf("%s/api/v1/nfts/drops", routePrefix), registry.nftsHandler.ListDrops)
+	server.GET(fmt.Sprintf("%s/api/v1/nfts/drops/{drop}/tokens", routePrefix), registry.nftsHandler.ListTokensByDrop)
+	server.GET(fmt.Sprintf("%s/api/v1/nfts/accounts/{account}/tokens", routePrefix), registry.nftsHandler.ListTokensByAccount)
+	server.GET(fmt.Sprintf("%s/api/v1/nfts/accounts/{account}/tokens/transfers", routePrefix), registry.nftsHandler.ListTransfersByAccount)
 
 }

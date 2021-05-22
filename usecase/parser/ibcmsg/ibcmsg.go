@@ -200,17 +200,17 @@ func ParseMsgConnectionOpenInit(
 	)}
 }
 
-func ParseMsgUpdateClient(
-	msgCommonParams event.MsgCommonParams,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msg map[string]interface{},
-) []command.Command {
-	header := msg["header"].(map[string]interface{})
-	if headerx["@type"]
-    params := ibc_model.MsgUpdateClientParams{
-		MaybeTendermintLightClientUpdate: nil,
-		ClientID:                         "",
-		Signer:                           "",
-	}
-}
+//func ParseMsgUpdateClient(
+//	msgCommonParams event.MsgCommonParams,
+//	txsResult model.BlockResultsTxsResult,
+//	msgIndex int,
+//	msg map[string]interface{},
+//) []command.Command {
+//	header := msg["header"].(map[string]interface{})
+//	if headerx["@type"]
+//    params := ibc_model.MsgUpdateClientParams{
+//		MaybeTendermintLightClientUpdate: nil,
+//		ClientID:                         "",
+//		Signer:                           "",
+//	}
+//}

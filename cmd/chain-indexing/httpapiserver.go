@@ -34,13 +34,22 @@ type HTTPAPIServer struct {
 
 // NewIndexService creates a new server instance for polling and indexing
 func NewHTTPAPIServer(logger applogger.Logger, rdbConn rdb.Conn, config *Config) *HTTPAPIServer {
-	return &HTTPAPIServer{
-		logger:  logger,
-		rdbConn: rdbConn,
-		cosmosAppClient: cosmosapp_infrastructure.NewHTTPClient(
-			config.CosmosApp.HTTPRPCUL,
+	var cosmosClient cosmosapp.Client
+	if config.CosmosApp.Insecure {
+		cosmosClient = cosmosapp_infrastructure.NewInsecureHTTPClient(
+			config.CosmosApp.HTTPRPCUrl,
 			config.Blockchain.BondingDenom,
-		),
+		)
+	} else {
+		cosmosClient = cosmosapp_infrastructure.NewHTTPClient(
+			config.CosmosApp.HTTPRPCUrl,
+			config.Blockchain.BondingDenom,
+		)
+	}
+	return &HTTPAPIServer{
+		logger:          logger,
+		rdbConn:         rdbConn,
+		cosmosAppClient: cosmosClient,
 
 		validatorAddressPrefix: config.Blockchain.ValidatorAddressPrefix,
 		conNodeAddressPrefix:   config.Blockchain.ConNodeAddressPrefix,
@@ -113,6 +122,10 @@ func (server *HTTPAPIServer) Run() error {
 		server.rdbConn.ToHandle(),
 		server.cosmosAppClient,
 	)
+	nftsHandler := handlers.NewNFTs(
+		server.logger,
+		server.rdbConn.ToHandle(),
+	)
 
 	routeRegistry := routes.NewRoutesRegistry(
 		searchHandler,
@@ -125,6 +138,7 @@ func (server *HTTPAPIServer) Run() error {
 		accountMessagesHandler,
 		accountsHandler,
 		proposalsHandler,
+		nftsHandler,
 	)
 	routeRegistry.Register(httpServer, server.routePrefix)
 

@@ -51,10 +51,14 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_CONNECTION_OPEN_INIT_BLOCK_RESULTS_RESP,
 			))
 
+			accountAddressPrefix := "cro"
+			stakingDenom := "basecro"
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
+				accountAddressPrefix,
+				stakingDenom,
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))

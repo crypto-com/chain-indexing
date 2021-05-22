@@ -22,10 +22,12 @@ var _ = Describe("Event", func() {
 			anyDelegatorAddress := "tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3"
 			anyValidatorAddress := "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3"
 			anyAmount := coin.MustNewCoinFromString("basetcro", "123456")
+			anyAutoClaimedRewards := coin.MustNewCoinFromString("basetcro", "789")
 			anyParams := model.MsgUndelegateParams{
-				DelegatorAddress: anyDelegatorAddress,
-				ValidatorAddress: anyValidatorAddress,
-				Amount:           anyAmount,
+				DelegatorAddress:   anyDelegatorAddress,
+				ValidatorAddress:   anyValidatorAddress,
+				Amount:             anyAmount,
+				AutoClaimedRewards: anyAutoClaimedRewards,
 			}
 			event := event_usecase.NewMsgUndelegate(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
@@ -51,6 +53,7 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.DelegatorAddress).To(Equal(anyDelegatorAddress))
 			Expect(typedEvent.ValidatorAddress).To(Equal(anyValidatorAddress))
 			Expect(typedEvent.Amount).To(Equal(anyAmount))
+			Expect(typedEvent.AutoClaimedRewards).To(Equal(anyAutoClaimedRewards))
 		})
 
 		It("should able to encode and decode to failed event", func() {
@@ -60,10 +63,12 @@ var _ = Describe("Event", func() {
 			anyDelegatorAddress := "tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3"
 			anyValidatorAddress := "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3"
 			anyAmount := coin.MustNewCoinFromString("basetcro", "123456")
+			anyAutoClaimedRewards := coin.MustNewCoinFromString("basetcro", "789")
 			anyParams := model.MsgUndelegateParams{
-				DelegatorAddress: anyDelegatorAddress,
-				ValidatorAddress: anyValidatorAddress,
-				Amount:           anyAmount,
+				DelegatorAddress:   anyDelegatorAddress,
+				ValidatorAddress:   anyValidatorAddress,
+				Amount:             anyAmount,
+				AutoClaimedRewards: anyAutoClaimedRewards,
 			}
 			event := event_usecase.NewMsgUndelegate(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,

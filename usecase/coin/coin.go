@@ -57,6 +57,21 @@ func NewInt64Coin(denom string, amount int64) Coin {
 	return NewCoin(denom, NewInt(amount))
 }
 
+// NewZeroCoin returns a new coin with zero unit of denomination. It will panic
+// if the denomination is invalid.
+func NewZeroCoin(denom string) Coin {
+	coin := Coin{
+		Denom:  denom,
+		Amount: NewInt(0),
+	}
+
+	if err := coin.Validate(); err != nil {
+		panic(err)
+	}
+
+	return coin
+}
+
 // String provides a human-readable representation of a coin
 func (coin Coin) String() string {
 	return fmt.Sprintf("%v%v", coin.Amount, coin.Denom)

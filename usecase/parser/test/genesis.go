@@ -8955,6 +8955,17 @@ const GENESIS_RESP = `{
               ]
             }
           ],
+          "subscription": {
+            "params": {
+              "failure_tolerance": 3,
+              "gas_per_collection": 31288,
+              "subscription_enabled": true
+            },
+            "plans": [],
+            "starting_plan_id": "1",
+            "starting_subscription_id": "1",
+            "subscriptions": []
+          },
           "supply": [],
           "denom_metadata": [
             {

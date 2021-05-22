@@ -2,6 +2,7 @@ package event_test
 
 import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -19,7 +20,7 @@ var _ = Describe("Event", func() {
 			anyBondedRatio := "0.000004999957742178"
 			anyInflation := "0.013000953646781450"
 			anyAnnualProvisions := "104008508208850609.312053700576913050"
-			anyAmount := "16479153707"
+			anyAmount := coin.MustParseCoinsNormalized("16479153707basetcro")
 
 			anyParams := model.MintParams{
 				BondedRatio:      anyBondedRatio,

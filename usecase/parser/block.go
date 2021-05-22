@@ -16,6 +16,8 @@ func ParseBlockToCommands(
 	block *usecase_model.Block,
 	rawBlock *usecase_model.RawBlock,
 	blockResults *usecase_model.BlockResults,
+	accountAddressPrefix string,
+	bondingDenom string,
 ) ([]entity_command.Command, error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -39,7 +41,13 @@ func ParseBlockToCommands(
 		}
 		commands = append(commands, transactionCommands...)
 
-		msgCommands, parseErr := ParseBlockResultsTxsMsgToCommands(txDecoder, block, blockResults)
+		msgCommands, parseErr := ParseBlockResultsTxsMsgToCommands(
+			txDecoder,
+			block,
+			blockResults,
+			accountAddressPrefix,
+			bondingDenom,
+		)
 		if parseErr != nil {
 			return nil, fmt.Errorf("error parsing message commands: %v", parseErr)
 		}
@@ -55,7 +63,11 @@ func ParseBlockToCommands(
 		commands = append(commands, txsAccountTransferCommands...)
 	}
 
-	beginBlockEventsCommands, parseErr := ParseBeginBlockEventsCommands(block.Height, blockResults.BeginBlockEvents)
+	beginBlockEventsCommands, parseErr := ParseBeginBlockEventsCommands(
+		block.Height,
+		blockResults.BeginBlockEvents,
+		bondingDenom,
+	)
 	if parseErr != nil {
 		return nil, fmt.Errorf("error parsing begin_block_events commands: %v", parseErr)
 	}

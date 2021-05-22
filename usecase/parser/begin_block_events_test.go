@@ -17,9 +17,11 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 		It("should return commands corresponding to events in begin_block_events", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.BEGIN_BLOCK_COMMON_EVENTS_BLOCK_RESULTS_RESP)
 
+			bondingDenom := "basetcro"
 			cmds, err := parser.ParseBeginBlockEventsCommands(
 				blockResults.Height,
 				blockResults.BeginBlockEvents,
+				bondingDenom,
 			)
 			Expect(err).To(BeNil())
 			expectedBlockHeight := int64(377673)
@@ -38,7 +40,7 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 						BondedRatio:      "0.000821761419299675",
 						Inflation:        "0.013777334128586270",
 						AnnualProvisions: "110307793770097823.255979052891494880",
-						Amount:           "17477215277",
+						Amount:           coin.MustParseCoinsNormalized("17477215277basetcro"),
 					},
 				),
 				command_usecase.NewCreateAccountTransfer(
@@ -86,9 +88,11 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 
 		It("should return ValidatorSlashed and ValidatorJailed command base on missing signature events", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.BEGIN_BLOCK_SLASH_MISSING_SIGNATURES_EVENT_BLOCK_RESULTS_RESP)
+			bondingDenom := "basetcro"
 			cmds, err := parser.ParseBeginBlockEventsCommands(
 				blockResults.Height,
 				blockResults.BeginBlockEvents,
+				bondingDenom,
 			)
 			Expect(err).To(BeNil())
 			expectedBlockHeight := int64(168481)
@@ -124,9 +128,11 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 
 		It("should return ValidatorSlashed and ValidatorJailed command base on double sign events", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.BEGIN_BLOCK_SLASH_DOUBLE_SIGN_EVENT_BLOCK_RESULTS_RESP)
+			bondingDenom := "basetcro"
 			cmds, err := parser.ParseBeginBlockEventsCommands(
 				blockResults.Height,
 				blockResults.BeginBlockEvents,
+				bondingDenom,
 			)
 			Expect(err).To(BeNil())
 			expectedBlockHeight := int64(165487)

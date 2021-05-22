@@ -20,11 +20,15 @@ var _ = Describe("ParseMsgCommands", func() {
 			txDecoder := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_SEND_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MSG_SEND_BLOCK_RESULTS_RESP)
+			accountAddressPrefix := "tcro"
+			bondingDenom := "basetcro"
 
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
+				accountAddressPrefix,
+				bondingDenom,
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
@@ -47,11 +51,15 @@ var _ = Describe("ParseMsgCommands", func() {
 			txDecoder := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.ONE_TX_TWO_MSG_SEND_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.ONE_TX_TWO_MSG_SEND_BLOCK_RESULTS_RESP)
+			accountAddressPrefix := "tcro"
+			bondingDenom := "basetcro"
 
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
+				accountAddressPrefix,
+				bondingDenom,
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))

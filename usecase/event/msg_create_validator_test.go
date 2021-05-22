@@ -15,14 +15,14 @@ var _ = Describe("Event", func() {
 	registry := event_entity.NewRegistry()
 	event_usecase.RegisterEvents(registry)
 
-	description := model.MsgValidatorDescription{
+	description := model.ValidatorDescription{
 		Moniker:         "mymonicker",
 		Identity:        "myidentity",
 		Website:         "mywebsite",
 		SecurityContact: "mysecuritycontact",
 		Details:         "mydetails",
 	}
-	commission := model.MsgValidatorCommission{
+	commission := model.ValidatorCommission{
 		Rate:          "0.100000000000000000",
 		MaxRate:       "0.200000000000000000",
 		MaxChangeRate: "0.010000000000000000",
