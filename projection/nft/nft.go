@@ -193,9 +193,9 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 			}
 
 		} else if msgBurnNFT, ok := event.(*event_usecase.MsgNFTBurnNFT); ok {
-			prevTokenRow, queryPrevTokenRow := tokensView.FindById(msgEditNFT.DenomId, msgEditNFT.TokenId)
-			if queryPrevTokenRow != nil {
-				return fmt.Errorf("error querying NFT token being edited: %v", queryPrevTokenRow)
+			prevTokenRow, queryPrevTokenRowErr := tokensView.FindById(msgBurnNFT.DenomId, msgBurnNFT.TokenId)
+			if queryPrevTokenRowErr != nil {
+				return fmt.Errorf("error querying NFT token being edited: %v", queryPrevTokenRowErr)
 			}
 
 			tokenRow := view.TokenRow{

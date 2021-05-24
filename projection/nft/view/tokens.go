@@ -205,22 +205,22 @@ func (tokensView *Tokens) List(
 	)
 
 	if filter.MaybeDenomId != nil {
-		stmtBuilder = stmtBuilder.Where("denom_id = ?", *filter.MaybeDenomId)
+		stmtBuilder = stmtBuilder.Where(fmt.Sprintf("%s.denom_id = ?", DENOMS_TABLE_NAME), *filter.MaybeDenomId)
 	}
 	if filter.MaybeDrop != nil {
-		stmtBuilder = stmtBuilder.Where("drop = ?", *filter.MaybeDrop)
+		stmtBuilder = stmtBuilder.Where(fmt.Sprintf("%s.drop = ?", TOKENS_TABLE_NAME), *filter.MaybeDrop)
 	}
 	if filter.MaybeMinter != nil {
-		stmtBuilder = stmtBuilder.Where("minter = ?", *filter.MaybeMinter)
+		stmtBuilder = stmtBuilder.Where(fmt.Sprintf("%s.minter = ?", TOKENS_TABLE_NAME), *filter.MaybeMinter)
 	}
 	if filter.MaybeOwner != nil {
-		stmtBuilder = stmtBuilder.Where("owner = ?", *filter.MaybeOwner)
+		stmtBuilder = stmtBuilder.Where(fmt.Sprintf("%s.owner = ?", TOKENS_TABLE_NAME), *filter.MaybeOwner)
 	}
 
 	if order.MintedAt == view.ORDER_DESC {
-		stmtBuilder = stmtBuilder.OrderBy("minted_at DESC")
+		stmtBuilder = stmtBuilder.OrderBy(fmt.Sprintf("%s.minted_at DESC", TOKENS_TABLE_NAME))
 	} else {
-		stmtBuilder = stmtBuilder.OrderBy("minted_at")
+		stmtBuilder = stmtBuilder.OrderBy(fmt.Sprintf("%s.minted_at", TOKENS_TABLE_NAME))
 	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
