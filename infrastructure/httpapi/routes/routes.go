@@ -84,6 +84,7 @@ func (registry *RouteRegistry) Register(server *httpapi.Server, routePrefix stri
 	server.GET(fmt.Sprintf("%s/api/v1/validators/{address}/activities", routePrefix), registry.validatorsHandler.ListActivities)
 	server.GET(fmt.Sprintf("%s/api/v1/nfts/transfers", routePrefix), registry.nftsHandler.ListTransfers)
 	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms", routePrefix), registry.nftsHandler.ListDenoms)
+	server.GET(fmt.Sprintf("%s/api/v1/nfts/tokens", routePrefix), registry.nftsHandler.ListTokens)
 	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms/{denomId}", routePrefix), registry.nftsHandler.FindDenomById)
 	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms/{denomId}/tokens", routePrefix), registry.nftsHandler.ListTokensByDenomId)
 	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms/{denomId}/tokens/{tokenId}", routePrefix), registry.nftsHandler.FindTokenById)

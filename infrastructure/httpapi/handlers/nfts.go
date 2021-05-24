@@ -82,7 +82,7 @@ func (handler *NFTs) FindDenomById(ctx *fasthttp.RequestCtx) {
 	httpapi.Success(ctx, denom)
 }
 
-func (handler *NFTs) ListTokensByDenomId(ctx *fasthttp.RequestCtx) {
+func (handler *NFTs) ListTokens(ctx *fasthttp.RequestCtx) {
 	pagination, paginationErr := httpapi.ParsePagination(ctx)
 	if paginationErr != nil {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
@@ -118,6 +118,42 @@ func (handler *NFTs) ListTokensByDenomId(ctx *fasthttp.RequestCtx) {
 	if queryArgs.Has("filter.owner") {
 		owner := string(queryArgs.Peek("filter.owner"))
 		filter.MaybeOwner = &owner
+	}
+
+	denoms, paginationResult, err := handler.tokensView.List(filter, nft_view.TokenListOrder{
+		MintedAt: mintedAtOrder,
+	}, pagination)
+	if err != nil {
+		handler.logger.Errorf("error listing NFT tokens: %v", err)
+		httpapi.InternalServerError(ctx)
+		return
+	}
+
+	httpapi.SuccessWithPagination(ctx, denoms, paginationResult)
+}
+
+func (handler *NFTs) ListTokensByDenomId(ctx *fasthttp.RequestCtx) {
+	denomId, _ := ctx.UserValue("denomId").(string)
+
+	pagination, paginationErr := httpapi.ParsePagination(ctx)
+	if paginationErr != nil {
+		ctx.SetStatusCode(fasthttp.StatusBadRequest)
+		return
+	}
+
+	mintedAtOrder := view.ORDER_ASC
+	queryArgs := ctx.QueryArgs()
+	if queryArgs.Has("order") {
+		if string(queryArgs.Peek("order")) == "mintedAt.desc" {
+			mintedAtOrder = view.ORDER_DESC
+		}
+	}
+
+	filter := nft_view.TokenListFilter{
+		MaybeDenomId: &denomId,
+		MaybeDrop:    nil,
+		MaybeMinter:  nil,
+		MaybeOwner:   nil,
 	}
 
 	denoms, paginationResult, err := handler.tokensView.List(filter, nft_view.TokenListOrder{
