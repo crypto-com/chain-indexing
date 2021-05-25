@@ -230,6 +230,32 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 			}
 
 		} else if msgTransferNFT, ok := event.(*event_usecase.MsgNFTTransferNFT); ok {
+			prevTokenRow, queryPrevTokenRowErr := tokensView.FindById(msgTransferNFT.DenomId, msgTransferNFT.TokenId)
+			if queryPrevTokenRowErr != nil {
+				return fmt.Errorf("error querying NFT token being edited: %v", queryPrevTokenRowErr)
+			}
+			tokenRow := view.TokenRow{
+				DenomId:      msgTransferNFT.DenomId,
+				TokenId:      msgTransferNFT.TokenId,
+				Drop:         prevTokenRow.Drop,
+				Burned:       prevTokenRow.Burned,
+				Name:         prevTokenRow.Name,
+				URI:          prevTokenRow.URI,
+				Data:         prevTokenRow.Data,
+				Minter:       prevTokenRow.Minter,
+				Owner:        msgTransferNFT.Recipient,
+				MintedAt:     prevTokenRow.MintedAt,
+				LastEditedAt: blockTime,
+			}
+			if updateTokenErr := nft.updateToken(
+				tokensView,
+				prevTokenRow.TokenRow,
+				tokenRow,
+				tokensTotalView,
+			); updateTokenErr != nil {
+				return updateTokenErr
+			}
+
 			transferRow := view.TokenTransferRow{
 				DenomId:         msgTransferNFT.DenomId,
 				TokenId:         msgTransferNFT.TokenId,
