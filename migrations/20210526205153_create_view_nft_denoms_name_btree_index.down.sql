@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS view_nft_denoms_name_btree_index;

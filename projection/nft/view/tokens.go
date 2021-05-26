@@ -45,7 +45,7 @@ func (tokensView *Tokens) Insert(tokenRow *TokenRow) error {
 	).Values(
 		tokenRow.DenomId,
 		tokenRow.TokenId,
-		tokenRow.Drop,
+		tokenRow.MaybeDrop,
 		tokenRow.Burned,
 		tokenRow.Name,
 		tokenRow.URI,
@@ -116,7 +116,7 @@ func (tokensView *Tokens) FindById(
 		&row.DenomName,
 		&row.DenomSchema,
 		&row.TokenId,
-		&row.Drop,
+		&row.MaybeDrop,
 		&row.Burned,
 		&row.Name,
 		&row.URI,
@@ -151,7 +151,7 @@ func (tokensView *Tokens) Update(tokenRow TokenRow) error {
 	sql, sqlArgs, err := tokensView.rdb.StmtBuilder.Update(
 		TOKENS_TABLE_NAME,
 	).SetMap(map[string]interface{}{
-		"drop":           tokenRow.Drop,
+		"drop":           tokenRow.MaybeDrop,
 		"burned":         tokenRow.Burned,
 		"name":           tokenRow.Name,
 		"uri":            tokenRow.URI,
@@ -280,7 +280,7 @@ func (tokensView *Tokens) List(
 			&row.DenomName,
 			&row.DenomSchema,
 			&row.TokenId,
-			&row.Drop,
+			&row.MaybeDrop,
 			&row.Burned,
 			&row.Name,
 			&row.URI,
@@ -389,7 +389,7 @@ type TokenRowWithDenomname struct {
 type TokenRow struct {
 	DenomId      string          `json:"denomId"`
 	TokenId      string          `json:"tokenId"`
-	Drop         string          `json:"drop"`
+	MaybeDrop    *string         `json:"drop"`
 	Burned       bool            `json:"tokenBurned"`
 	Name         string          `json:"tokenName"`
 	URI          string          `json:"tokenURI"`

@@ -2,6 +2,9 @@ package handlers
 
 import (
 	"errors"
+	"strings"
+
+	"github.com/crypto-com/chain-indexing/internal/primptr"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -14,9 +17,9 @@ import (
 type NFTs struct {
 	logger applogger.Logger
 
-	denomsView         *nft_view.Denoms
-	tokensView         *nft_view.Tokens
-	tokenTransfersView *nft_view.TokenTransfers
+	denomsView   *nft_view.Denoms
+	tokensView   *nft_view.Tokens
+	messagesView *nft_view.Messages
 }
 
 func NewNFTs(
@@ -27,7 +30,7 @@ func NewNFTs(
 
 		nft_view.NewDenoms(rdbHandle),
 		nft_view.NewTokens(rdbHandle),
-		nft_view.NewTokenTransfers(rdbHandle),
+		nft_view.NewMessages(rdbHandle),
 	}
 }
 
@@ -75,6 +78,22 @@ func (handler *NFTs) FindDenomById(ctx *fasthttp.RequestCtx) {
 			return
 		}
 		handler.logger.Errorf("error finding denom by id: %v", err)
+		httpapi.InternalServerError(ctx)
+		return
+	}
+
+	httpapi.Success(ctx, denom)
+}
+
+func (handler *NFTs) FindDenomByName(ctx *fasthttp.RequestCtx) {
+	nameParam, _ := ctx.UserValue("denomName").(string)
+	denom, err := handler.denomsView.FindByName(nameParam)
+	if err != nil {
+		if errors.Is(err, rdb.ErrNoRows) {
+			httpapi.NotFound(ctx)
+			return
+		}
+		handler.logger.Errorf("error finding denom by name: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
 	}
@@ -292,17 +311,14 @@ func (handler *NFTs) ListTransfersByToken(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
-	filter := nft_view.TokenTransferListFilter{
-		MaybeDenomId:     &denomIdParam,
-		MaybeTokenId:     &tokenIdParam,
-		MaybeDrop:        nil,
-		MaybeBlockHeight: nil,
-		MaybeSender:      nil,
-		MaybeRecipient:   nil,
-		MaybeAccount:     nil,
+	filter := nft_view.MessagesListFilter{
+		MaybeDenomId:  &denomIdParam,
+		MaybeTokenId:  &tokenIdParam,
+		MaybeDrop:     nil,
+		MaybeMsgTypes: []string{"MsgNFTTransferNFT"},
 	}
 
-	transfers, paginationResult, err := handler.tokenTransfersView.List(filter, nft_view.TokenTransferListOrder{
+	transfers, paginationResult, err := handler.messagesView.List(filter, nft_view.MessagesListOrder{
 		Id: idOrder,
 	}, pagination)
 	if err != nil {
@@ -314,106 +330,131 @@ func (handler *NFTs) ListTransfersByToken(ctx *fasthttp.RequestCtx) {
 	httpapi.SuccessWithPagination(ctx, transfers, paginationResult)
 }
 
-func (handler *NFTs) ListTransfersByAccount(ctx *fasthttp.RequestCtx) {
-	accountParam, _ := ctx.UserValue("account").(string)
+func (handler *NFTs) ListMessagesByDenom(ctx *fasthttp.RequestCtx) {
+	var err error
 
-	pagination, paginationErr := httpapi.ParsePagination(ctx)
-	if paginationErr != nil {
+	pagination, err := httpapi.ParsePagination(ctx)
+	if err != nil {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
 		return
 	}
 
-	idOrder := view.ORDER_ASC
+	denomId := ctx.UserValue("denomId").(string)
+	filter := nft_view.MessagesListFilter{
+		MaybeDenomId:  &denomId,
+		MaybeTokenId:  nil,
+		MaybeDrop:     nil,
+		MaybeMsgTypes: nil,
+	}
 	queryArgs := ctx.QueryArgs()
+	if queryArgs.Has("filter.msgType") {
+		filter.MaybeMsgTypes = strings.Split(string(queryArgs.Peek("filter.msgType")), ",")
+	}
+
+	idOrder := view.ORDER_ASC
 	if queryArgs.Has("order") {
-		if string(queryArgs.Peek("order")) == "transferredAt.desc" {
+		if string(queryArgs.Peek("order")) == "height.desc" {
 			idOrder = view.ORDER_DESC
 		}
 	}
 
-	filter := nft_view.TokenTransferListFilter{
-		MaybeDenomId:     nil,
-		MaybeTokenId:     nil,
-		MaybeDrop:        nil,
-		MaybeBlockHeight: nil,
-		MaybeSender:      nil,
-		MaybeRecipient:   nil,
-		MaybeAccount:     &accountParam,
-	}
-
-	transfers, paginationResult, err := handler.tokenTransfersView.List(filter, nft_view.TokenTransferListOrder{
-		Id: idOrder,
-	}, pagination)
+	blocks, paginationResult, err := handler.messagesView.List(
+		filter, nft_view.MessagesListOrder{Id: idOrder}, pagination,
+	)
 	if err != nil {
-		handler.logger.Errorf("error listing NFT token transfers by account: %v", err)
+		handler.logger.Errorf("error listing NFT messages: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
 	}
 
-	httpapi.SuccessWithPagination(ctx, transfers, paginationResult)
+	httpapi.SuccessWithPagination(ctx, blocks, paginationResult)
 }
 
-func (handler *NFTs) ListTransfers(ctx *fasthttp.RequestCtx) {
-	pagination, paginationErr := httpapi.ParsePagination(ctx)
-	if paginationErr != nil {
+func (handler *NFTs) ListMessagesByToken(ctx *fasthttp.RequestCtx) {
+	var err error
+
+	pagination, err := httpapi.ParsePagination(ctx)
+	if err != nil {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
 		return
 	}
 
-	idOrder := view.ORDER_ASC
+	denomId := ctx.UserValue("denomId").(string)
+	tokenId := ctx.UserValue("tokenId").(string)
+	filter := nft_view.MessagesListFilter{
+		MaybeDenomId:  &denomId,
+		MaybeTokenId:  &tokenId,
+		MaybeDrop:     nil,
+		MaybeMsgTypes: nil,
+	}
 	queryArgs := ctx.QueryArgs()
+	if queryArgs.Has("filter.msgType") {
+		filter.MaybeMsgTypes = strings.Split(string(queryArgs.Peek("filter.msgType")), ",")
+	}
+
+	idOrder := view.ORDER_ASC
 	if queryArgs.Has("order") {
-		if string(queryArgs.Peek("order")) == "transferredAt.desc" {
+		if string(queryArgs.Peek("order")) == "height.desc" {
 			idOrder = view.ORDER_DESC
 		}
 	}
 
-	filter := nft_view.TokenTransferListFilter{
-		MaybeDenomId:     nil,
-		MaybeTokenId:     nil,
-		MaybeDrop:        nil,
-		MaybeBlockHeight: nil,
-		MaybeSender:      nil,
-		MaybeRecipient:   nil,
-		MaybeAccount:     nil,
-	}
-	if queryArgs.Has("filter.denomId") {
-		denomId := string(queryArgs.Peek("filter.denomId"))
-		filter.MaybeDenomId = &denomId
-	}
-	if queryArgs.Has("filter.tokenId") {
-		tokenId := string(queryArgs.Peek("filter.tokenId"))
-		filter.MaybeTokenId = &tokenId
-	}
-	if queryArgs.Has("filter.drop") {
-		drop := string(queryArgs.Peek("filter.drop"))
-		filter.MaybeDrop = &drop
-	}
-	if queryArgs.Has("filter.blockHeight") {
-		blockHeight := string(queryArgs.Peek("filter.blockHeight"))
-		filter.MaybeBlockHeight = &blockHeight
-	}
-	if queryArgs.Has("filter.sender") {
-		sender := string(queryArgs.Peek("filter.sender"))
-		filter.MaybeSender = &sender
-	}
-	if queryArgs.Has("filter.recipient") {
-		recipient := string(queryArgs.Peek("filter.recipient"))
-		filter.MaybeRecipient = &recipient
-	}
-	if queryArgs.Has("filter.account") {
-		account := string(queryArgs.Peek("filter.account"))
-		filter.MaybeAccount = &account
-	}
-
-	transfers, paginationResult, err := handler.tokenTransfersView.List(filter, nft_view.TokenTransferListOrder{
-		Id: idOrder,
-	}, pagination)
+	blocks, paginationResult, err := handler.messagesView.List(
+		filter, nft_view.MessagesListOrder{Id: idOrder}, pagination,
+	)
 	if err != nil {
-		handler.logger.Errorf("error listing NFT token transfers by account: %v", err)
+		handler.logger.Errorf("error listing NFT messages: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
 	}
 
-	httpapi.SuccessWithPagination(ctx, transfers, paginationResult)
+	httpapi.SuccessWithPagination(ctx, blocks, paginationResult)
+}
+
+func (handler *NFTs) ListMessages(ctx *fasthttp.RequestCtx) {
+	var err error
+
+	pagination, err := httpapi.ParsePagination(ctx)
+	if err != nil {
+		ctx.SetStatusCode(fasthttp.StatusBadRequest)
+		return
+	}
+
+	filter := nft_view.MessagesListFilter{
+		MaybeDenomId:  nil,
+		MaybeTokenId:  nil,
+		MaybeDrop:     nil,
+		MaybeMsgTypes: nil,
+	}
+	queryArgs := ctx.QueryArgs()
+	if queryArgs.Has("filter.denomId") {
+		filter.MaybeDenomId = primptr.String(string(queryArgs.Peek("filter.denomId")))
+	}
+	if queryArgs.Has("filter.tokenId") {
+		filter.MaybeTokenId = primptr.String(string(queryArgs.Peek("filter.tokenId")))
+	}
+	if queryArgs.Has("filter.drop") {
+		filter.MaybeDrop = primptr.String(string(queryArgs.Peek("filter.drop")))
+	}
+	if queryArgs.Has("filter.msgType") {
+		filter.MaybeMsgTypes = strings.Split(string(queryArgs.Peek("filter.msgType")), ",")
+	}
+
+	idOrder := view.ORDER_ASC
+	if queryArgs.Has("order") {
+		if string(queryArgs.Peek("order")) == "height.desc" {
+			idOrder = view.ORDER_DESC
+		}
+	}
+
+	blocks, paginationResult, err := handler.messagesView.List(
+		filter, nft_view.MessagesListOrder{Id: idOrder}, pagination,
+	)
+	if err != nil {
+		handler.logger.Errorf("error listing NFT messages: %v", err)
+		httpapi.InternalServerError(ctx)
+		return
+	}
+
+	httpapi.SuccessWithPagination(ctx, blocks, paginationResult)
 }
