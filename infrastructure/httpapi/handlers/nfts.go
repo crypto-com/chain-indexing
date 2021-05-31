@@ -315,7 +315,7 @@ func (handler *NFTs) ListTransfersByToken(ctx *fasthttp.RequestCtx) {
 		MaybeDenomId:  &denomIdParam,
 		MaybeTokenId:  &tokenIdParam,
 		MaybeDrop:     nil,
-		MaybeMsgTypes: []string{"MsgNFTTransferNFT"},
+		MaybeMsgTypes: []string{"MsgTransferNFT"},
 	}
 
 	transfers, paginationResult, err := handler.messagesView.List(filter, nft_view.MessagesListOrder{
