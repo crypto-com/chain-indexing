@@ -17,6 +17,8 @@ import (
 
 var _ projection_entity.Projection = &NFT{}
 
+const DO_NOT_MODIFY = "[do-not-modify]"
+
 type NFT struct {
 	*rdbprojectionbase.Base
 
@@ -173,12 +175,12 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 			})
 
 		} else if msgEditNFT, ok := event.(*event_usecase.MsgNFTEditNFT); ok {
-			prevTokenRow, queryPrevTokenRow := tokensView.FindById(msgEditNFT.DenomId, msgEditNFT.TokenId)
+			mutPrevTokenRow, queryPrevTokenRow := tokensView.FindById(msgEditNFT.DenomId, msgEditNFT.TokenId)
 			if queryPrevTokenRow != nil {
 				return fmt.Errorf("error querying NFT token being edited: %v", queryPrevTokenRow)
 			}
 
-			drop := prevTokenRow.MaybeDrop
+			drop := mutPrevTokenRow.MaybeDrop
 			if nft.config.EnableDrop {
 				rawDrop, getDropErr := utils.GetValueFromJSONData(
 					[]byte(msgEditNFT.Data), nft.config.DropDataAccessor,
@@ -190,23 +192,34 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 					}
 				}
 			}
+
+			if msgEditNFT.TokenName != DO_NOT_MODIFY {
+				mutPrevTokenRow.Name = msgEditNFT.TokenName
+			}
+			if msgEditNFT.URI != DO_NOT_MODIFY {
+				mutPrevTokenRow.URI = msgEditNFT.URI
+			}
+			if msgEditNFT.Data != DO_NOT_MODIFY {
+				mutPrevTokenRow.Data = msgEditNFT.Data
+			}
+
 			tokenRow := view.TokenRow{
 				DenomId:      msgEditNFT.DenomId,
 				TokenId:      msgEditNFT.TokenId,
 				MaybeDrop:    drop,
-				Burned:       prevTokenRow.Burned,
-				Name:         msgEditNFT.TokenName,
-				URI:          msgEditNFT.URI,
-				Data:         msgEditNFT.Data,
-				Minter:       prevTokenRow.Minter,
-				Owner:        prevTokenRow.Owner,
-				MintedAt:     prevTokenRow.MintedAt,
+				Burned:       mutPrevTokenRow.Burned,
+				Name:         mutPrevTokenRow.Name,
+				URI:          mutPrevTokenRow.URI,
+				Data:         mutPrevTokenRow.Data,
+				Minter:       mutPrevTokenRow.Minter,
+				Owner:        mutPrevTokenRow.Owner,
+				MintedAt:     mutPrevTokenRow.MintedAt,
 				LastEditedAt: blockTime,
 			}
 
 			if updateTokenErr := nft.updateToken(
 				tokensView,
-				prevTokenRow.TokenRow,
+				mutPrevTokenRow.TokenRow,
 				tokenRow,
 				tokensTotalView,
 			); updateTokenErr != nil {
