@@ -100,6 +100,49 @@ func (denomsView *Denoms) FindById(denomId string) (*DenomRow, error) {
 	return &row, nil
 }
 
+func (denomsView *Denoms) FindByName(denomName string) (*DenomRow, error) {
+	selectStmtBuilder := denomsView.rdb.StmtBuilder.Select(
+		"denom_id",
+		"name",
+		"schema",
+		"creator",
+		"created_at",
+	).From(
+		DENOMS_TABLE_NAME,
+	).Where(
+		"name = ?", denomName,
+	)
+
+	sql, sqlArgs, err := selectStmtBuilder.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("error building NFT denom selection sql: %v: %w", err, rdb.ErrPrepare)
+	}
+
+	var row DenomRow
+	createdAtTimeReader := denomsView.rdb.NtotReader()
+
+	if err = denomsView.rdb.QueryRow(sql, sqlArgs...).Scan(
+		&row.DenomId,
+		&row.Name,
+		&row.Schema,
+		&row.Creator,
+		createdAtTimeReader.ScannableArg(),
+	); err != nil {
+		if errors.Is(err, rdb.ErrNoRows) {
+			return nil, rdb.ErrNoRows
+		}
+		return nil, fmt.Errorf("error scanning NFT denom row: %v: %w", err, rdb.ErrQuery)
+	}
+
+	createdAt, parseCreatedAtErr := createdAtTimeReader.Parse()
+	if parseCreatedAtErr != nil {
+		return nil, fmt.Errorf("error parsing NFT denom creation time: %v: %w", parseCreatedAtErr, rdb.ErrQuery)
+	}
+	row.CreatedAt = *createdAt
+
+	return &row, nil
+}
+
 func (denomsView *Denoms) List(
 	filter DenomListFilter,
 	order DenomListOrder,

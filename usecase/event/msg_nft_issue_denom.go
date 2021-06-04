@@ -10,9 +10,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_NFT_ISSUE_DENOM = "MsgNFTIssueDenom"
-const MSG_NFT_ISSUE_DENOM_CREATED = "MsgNFTIssueDenomCreated"
-const MSG_NFT_ISSUE_DENOM_FAILED = "MsgNFTIssueDenomFailed"
+const MSG_NFT_ISSUE_DENOM = "MsgIssueDenom"
+const MSG_NFT_ISSUE_DENOM_CREATED = "MsgIssueDenomCreated"
+const MSG_NFT_ISSUE_DENOM_FAILED = "MsgIssueDenomFailed"
 
 type MsgNFTIssueDenom struct {
 	MsgBase
