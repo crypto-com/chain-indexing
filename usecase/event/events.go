@@ -89,10 +89,10 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(MSG_NFT_BURN_NFT_FAILED, 1, DecodeMsgNFTBurnNFT)
 
 	// IBC
-	registry.Register(MSG_CREATE_CLIENT_CREATED, 1, DecodeMsgCreateClient)
-	registry.Register(MSG_CREATE_CLIENT_FAILED, 1, DecodeMsgCreateClient)
-	registry.Register(MSG_UPDATE_CLIENT_CREATED, 1, DecodeMsgUpdateClient)
-	registry.Register(MSG_UPDATE_CLIENT_FAILED, 1, DecodeMsgUpdateClient)
-	registry.Register(MSG_CONNECTION_OPEN_INIT_CREATED, 1, DecodeMsgConnectionOpenInit)
-	registry.Register(MSG_CONNECTION_OPEN_INIT_FAILED, 1, DecodeMsgConnectionOpenInit)
+	registry.Register(MSG_IBC_CREATE_CLIENT_CREATED, 1, DecodeMsgIBCCreateClient)
+	registry.Register(MSG_IBC_CREATE_CLIENT_FAILED, 1, DecodeMsgIBCCreateClient)
+	registry.Register(MSG_IBC_UPDATE_CLIENT_CREATED, 1, DecodeMsgIBCUpdateClient)
+	registry.Register(MSG_IBC_UPDATE_CLIENT_FAILED, 1, DecodeMsgIBCUpdateClient)
+	registry.Register(MSG_IBC_CONNECTION_OPEN_INIT_CREATED, 1, DecodeMsgIBCConnectionOpenInit)
+	registry.Register(MSG_IBC_CONNECTION_OPEN_INIT_FAILED, 1, DecodeMsgIBCConnectionOpenInit)
 }

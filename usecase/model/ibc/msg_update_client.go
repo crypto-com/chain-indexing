@@ -13,10 +13,10 @@ type TendermintLightClientUpdate struct {
 
 type TendermintLightClientUpdateHeader struct {
 	Type              string                                       `json:"@type"`
-	SignedHeader      TendermintLightClientUpdateSignedHeader      `json:"signedHeader"`
-	ValidatorSet      TendermintLightClientUpdateTrustedValidators `json:"validatorSet"`
-	TrustedHeight     TendermintLightClientUpdateTrustedHeight     `json:"trustedHeight"`
-	TrustedValidators TendermintLightClientUpdateTrustedValidators `json:"trustedValidators"`
+	SignedHeader      TendermintLightClientUpdateSignedHeader      `json:"signed_header"`
+	ValidatorSet      TendermintLightClientUpdateTrustedValidators `json:"validator_set"`
+	TrustedHeight     TendermintLightClientUpdateTrustedHeight     `json:"trusted_height"`
+	TrustedValidators TendermintLightClientUpdateTrustedValidators `json:"trusted_validators"`
 }
 
 type TendermintLightClientUpdateSignedHeader struct {
@@ -27,13 +27,13 @@ type TendermintLightClientUpdateSignedHeader struct {
 type TendermintLightClientUpdateCommit struct {
 	Height     string                                 `json:"height"`
 	Round      int64                                  `json:"round"`
-	BlockID    TendermintLightClientUpdateBlockID     `json:"blockId"`
+	BlockID    TendermintLightClientUpdateBlockID     `json:"block_id"`
 	Signatures []TendermintLightClientUpdateSignature `json:"signatures"`
 }
 
 type TendermintLightClientUpdateBlockID struct {
 	Hash          string                                   `json:"hash"`
-	PartSetHeader TendermintLightClientUpdatePartSetHeader `json:"partSetHeader"`
+	PartSetHeader TendermintLightClientUpdatePartSetHeader `json:"part_set_header"`
 }
 
 type TendermintLightClientUpdatePartSetHeader struct {
@@ -42,27 +42,27 @@ type TendermintLightClientUpdatePartSetHeader struct {
 }
 
 type TendermintLightClientUpdateSignature struct {
-	BlockIDFlag      string `json:"blockIdFlag"`
-	ValidatorAddress string `json:"validatorAddress"`
+	BlockIDFlag      string `json:"block_id_flag"`
+	ValidatorAddress string `json:"validator_address"`
 	Timestamp        string `json:"timestamp"`
 	Signature        string `json:"signature"`
 }
 
 type TendermintLightClientUpdateSignedHeaderHeader struct {
 	Version            TendermintLightClientUpdateVersion `json:"version"`
-	ChainID            string                             `json:"chainId"`
+	ChainID            string                             `json:"chain_id"`
 	Height             string                             `json:"height"`
 	Time               string                             `json:"time"`
-	LastBlockID        TendermintLightClientUpdateBlockID `json:"lastBlockId"`
-	LastCommitHash     string                             `json:"lastCommitHash"`
+	LastBlockID        TendermintLightClientUpdateBlockID `json:"last_block_id"`
+	LastCommitHash     string                             `json:"last_commit_hash"`
 	DataHash           string                             `json:"dataHash"`
-	ValidatorsHash     string                             `json:"validatorsHash"`
-	NextValidatorsHash string                             `json:"nextValidatorsHash"`
-	ConsensusHash      string                             `json:"consensusHash"`
+	ValidatorsHash     string                             `json:"validators_hash"`
+	NextValidatorsHash string                             `json:"next_validators_hash"`
+	ConsensusHash      string                             `json:"consensus_hash"`
 	AppHash            string                             `json:"appHash"`
-	LastResultsHash    string                             `json:"lastResultsHash"`
-	EvidenceHash       string                             `json:"evidenceHash"`
-	ProposerAddress    string                             `json:"proposerAddress"`
+	LastResultsHash    string                             `json:"last_results_hash"`
+	EvidenceHash       string                             `json:"evidence_hash"`
+	ProposerAddress    string                             `json:"proposer_address"`
 }
 
 type TendermintLightClientUpdateVersion struct {
@@ -71,21 +71,21 @@ type TendermintLightClientUpdateVersion struct {
 }
 
 type TendermintLightClientUpdateTrustedHeight struct {
-	RevisionNumber string `json:"revisionNumber"`
-	RevisionHeight string `json:"revisionHeight"`
+	RevisionNumber string `json:"revision_number"`
+	RevisionHeight string `json:"revision_height"`
 }
 
 type TendermintLightClientUpdateTrustedValidators struct {
 	Validators       []TendermintLightClientUpdateProposer `json:"validators"`
 	Proposer         TendermintLightClientUpdateProposer   `json:"proposer"`
-	TotalVotingPower string                                `json:"totalVotingPower"`
+	TotalVotingPower string                                `json:"total_voting_power"`
 }
 
 type TendermintLightClientUpdateProposer struct {
 	Address          string                            `json:"address"`
 	PubKey           TendermintLightClientUpdatePubKey `json:"pubKey"`
-	VotingPower      string                            `json:"votingPower"`
-	ProposerPriority string                            `json:"proposerPriority"`
+	VotingPower      string                            `json:"voting_power"`
+	ProposerPriority string                            `json:"proposer_priority"`
 }
 
 type TendermintLightClientUpdatePubKey struct {

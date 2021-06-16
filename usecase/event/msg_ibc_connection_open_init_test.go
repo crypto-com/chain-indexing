@@ -13,7 +13,7 @@ var _ = Describe("Event", func() {
 	registry := event_entity.NewRegistry()
 	event_usecase.RegisterEvents(registry)
 
-	Describe("En/DecodeMsgConnectionOpenInit", func() {
+	Describe("En/DecodeMsgIBCConnectionOpenInit", func() {
 		It("should able to encode and decode to the same event", func() {
 			anyHeight := int64(1000)
 			anyTxHash := "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416"
@@ -39,7 +39,7 @@ var _ = Describe("Event", func() {
 				Signer:      "cro1gdswrmwtzgv3kvf28lvtt7qv7q7myzmn466r3f",
 			}
 
-			event := event_usecase.NewMsgConnectionOpenInit(event_usecase.MsgCommonParams{
+			event := event_usecase.NewMsgIBCConnectionOpenInit(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
 				TxHash:      anyTxHash,
 				TxSuccess:   true,
@@ -50,12 +50,12 @@ var _ = Describe("Event", func() {
 			Expect(err).To(BeNil())
 
 			decodedEvent, err := registry.DecodeByType(
-				event_usecase.MSG_CONNECTION_OPEN_INIT_CREATED, 1, []byte(encoded),
+				event_usecase.MSG_IBC_CONNECTION_OPEN_INIT_CREATED, 1, []byte(encoded),
 			)
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))
-			typedEvent, _ := decodedEvent.(*event_usecase.MsgConnectionOpenInit)
-			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_CONNECTION_OPEN_INIT_CREATED))
+			typedEvent, _ := decodedEvent.(*event_usecase.MsgIBCConnectionOpenInit)
+			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_IBC_CONNECTION_OPEN_INIT_CREATED))
 			Expect(typedEvent.Version()).To(Equal(1))
 			Expect(typedEvent.TxSuccess()).To(BeTrue())
 			Expect(typedEvent.TxHash()).To(Equal(anyTxHash))
@@ -94,7 +94,7 @@ var _ = Describe("Event", func() {
 				Signer:      "cro1gdswrmwtzgv3kvf28lvtt7qv7q7myzmn466r3f",
 			}
 
-			event := event_usecase.NewMsgConnectionOpenInit(event_usecase.MsgCommonParams{
+			event := event_usecase.NewMsgIBCConnectionOpenInit(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
 				TxHash:      anyTxHash,
 				TxSuccess:   false,
@@ -105,12 +105,12 @@ var _ = Describe("Event", func() {
 			Expect(err).To(BeNil())
 
 			decodedEvent, err := registry.DecodeByType(
-				event_usecase.MSG_CONNECTION_OPEN_INIT_FAILED, 1, []byte(encoded),
+				event_usecase.MSG_IBC_CONNECTION_OPEN_INIT_FAILED, 1, []byte(encoded),
 			)
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))
-			typedEvent, _ := decodedEvent.(*event_usecase.MsgConnectionOpenInit)
-			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_CONNECTION_OPEN_INIT_FAILED))
+			typedEvent, _ := decodedEvent.(*event_usecase.MsgIBCConnectionOpenInit)
+			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_IBC_CONNECTION_OPEN_INIT_FAILED))
 			Expect(typedEvent.Version()).To(Equal(1))
 			Expect(typedEvent.TxSuccess()).To(BeFalse())
 			Expect(typedEvent.TxHash()).To(Equal(anyTxHash))

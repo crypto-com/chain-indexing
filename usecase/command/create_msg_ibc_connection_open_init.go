@@ -6,30 +6,30 @@ import (
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
 )
 
-type CreateMsgConnectionOpenInit struct {
+type CreateMsgIBCConnectionOpenInit struct {
 	msgCommonParams event.MsgCommonParams
 	params          ibc_model.MsgConnectionOpenInitParams
 }
 
-func NewCreateMsgConnectionOpenInit(
+func NewCreateMsgIBCConnectionOpenInit(
 	msgCommonParams event.MsgCommonParams,
 	params ibc_model.MsgConnectionOpenInitParams,
-) *CreateMsgConnectionOpenInit {
-	return &CreateMsgConnectionOpenInit{
+) *CreateMsgIBCConnectionOpenInit {
+	return &CreateMsgIBCConnectionOpenInit{
 		msgCommonParams,
 		params,
 	}
 }
 
-func (*CreateMsgConnectionOpenInit) Name() string {
-	return "CreateMsgConnectionOpenInit"
+func (*CreateMsgIBCConnectionOpenInit) Name() string {
+	return "CreateMsgIBCConnectionOpenInit"
 }
 
-func (*CreateMsgConnectionOpenInit) Version() int {
+func (*CreateMsgIBCConnectionOpenInit) Version() int {
 	return 1
 }
 
-func (cmd *CreateMsgConnectionOpenInit) Exec() (entity_event.Event, error) {
-	event := event.NewMsgConnectionOpenInit(cmd.msgCommonParams, cmd.params)
+func (cmd *CreateMsgIBCConnectionOpenInit) Exec() (entity_event.Event, error) {
+	event := event.NewMsgIBCConnectionOpenInit(cmd.msgCommonParams, cmd.params)
 	return event, nil
 }

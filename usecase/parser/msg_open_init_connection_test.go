@@ -18,14 +18,14 @@ import (
 )
 
 var _ = Describe("ParseMsgCommands", func() {
-	Describe("MsgConnectionOpenInit", func() {
-		It("should parse Msg commands when there is MsgConnectionOpenInit in the transaction", func() {
+	Describe("MsgIBCConnectionOpenInit", func() {
+		It("should parse Msg commands when there is MsgIBCConnectionOpenInit in the transaction", func() {
 			expected := `{
   "name": "MsgConnectionOpenInitCreated",
   "version": 1,
   "height": 6,
   "uuid": "{UUID}",
-  "msgName": "MsgConnectionOpenInit",
+  "msgName": "MsgIBCConnectionOpenInit",
   "txHash": "F2B7D61BA783E6CDD9FE5825EBF7770688F6F45C482CB78ACB51E84B06FC643E",
   "msgIndex": 0,
   "clientId": "07-tendermint-0",
@@ -66,7 +66,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(cmd.Name()).To(Equal("CreateMsgConnectionOpenInit"))
 
 			untypedEvent, _ := cmd.Exec()
-			createMsgCreateClientEvent := untypedEvent.(*event.MsgConnectionOpenInit)
+			createMsgCreateClientEvent := untypedEvent.(*event.MsgIBCConnectionOpenInit)
 
 			regex, _ := regexp.Compile("\n?\r?\\s?")
 			Expect(json.MustMarshalToString(createMsgCreateClientEvent)).To(Equal(

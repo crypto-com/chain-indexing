@@ -9,21 +9,24 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_UPDATE_CLIENT = "MsgUpdateClient"
-const MSG_UPDATE_CLIENT_CREATED = "MsgUpdateClientCreated"
-const MSG_UPDATE_CLIENT_FAILED = "MsgUpdateClientFailed"
+const MSG_IBC_CONNECTION_OPEN_INIT = "MsgConnectionOpenInit"
+const MSG_IBC_CONNECTION_OPEN_INIT_CREATED = "MsgConnectionOpenInitCreated"
+const MSG_IBC_CONNECTION_OPEN_INIT_FAILED = "MsgConnectionOpenInitFailed"
 
-type MsgUpdateClient struct {
+type MsgIBCConnectionOpenInit struct {
 	MsgBase
 
-	ibc_model.MsgUpdateClientParams
+	ibc_model.MsgConnectionOpenInitParams
 }
 
 // NewMsgDelegate creates a new instance of MsgDelegate
-func NewMsgUpdateClient(msgCommonParams MsgCommonParams, params ibc_model.MsgUpdateClientParams) *MsgUpdateClient {
-	return &MsgUpdateClient{
+func NewMsgIBCConnectionOpenInit(
+	msgCommonParams MsgCommonParams,
+	params ibc_model.MsgConnectionOpenInitParams,
+) *MsgIBCConnectionOpenInit {
+	return &MsgIBCConnectionOpenInit{
 		NewMsgBase(MsgBaseParams{
-			MsgName:         MSG_UPDATE_CLIENT,
+			MsgName:         MSG_IBC_CONNECTION_OPEN_INIT,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
@@ -33,7 +36,7 @@ func NewMsgUpdateClient(msgCommonParams MsgCommonParams, params ibc_model.MsgUpd
 }
 
 // ToJSON encodes the event into JSON string payload
-func (event *MsgUpdateClient) ToJSON() (string, error) {
+func (event *MsgIBCConnectionOpenInit) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
 		return "", err
@@ -42,16 +45,16 @@ func (event *MsgUpdateClient) ToJSON() (string, error) {
 	return string(encoded), nil
 }
 
-func (event *MsgUpdateClient) String() string {
+func (event *MsgIBCConnectionOpenInit) String() string {
 	return render.Render(event)
 }
 
 // DecodeMsgDelegate decodes the event from encoded bytes
-func DecodeMsgUpdateClient(encoded []byte) (entity_event.Event, error) {
+func DecodeMsgIBCConnectionOpenInit(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *MsgUpdateClient
+	var event *MsgIBCConnectionOpenInit
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}

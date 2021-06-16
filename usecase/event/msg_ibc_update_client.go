@@ -9,24 +9,24 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_CONNECTION_OPEN_INIT = "MsgConnectionOpenInit"
-const MSG_CONNECTION_OPEN_INIT_CREATED = "MsgConnectionOpenInitCreated"
-const MSG_CONNECTION_OPEN_INIT_FAILED = "MsgConnectionOpenInitFailed"
+const MSG_IBC_UPDATE_CLIENT = "MsgUpdateClientInit"
+const MSG_IBC_UPDATE_CLIENT_CREATED = "MsgUpdateClientInitCreated"
+const MSG_IBC_UPDATE_CLIENT_FAILED = "MsgUpdateClientInitFailed"
 
-type MsgConnectionOpenInit struct {
+type MsgIBCUpdateClient struct {
 	MsgBase
 
-	ibc_model.MsgConnectionOpenInitParams
+	ibc_model.MsgUpdateClientParams
 }
 
 // NewMsgDelegate creates a new instance of MsgDelegate
-func NewMsgConnectionOpenInit(
+func NewMsgIBCUpdateClient(
 	msgCommonParams MsgCommonParams,
-	params ibc_model.MsgConnectionOpenInitParams,
-) *MsgConnectionOpenInit {
-	return &MsgConnectionOpenInit{
+	params ibc_model.MsgUpdateClientParams,
+) *MsgIBCUpdateClient {
+	return &MsgIBCUpdateClient{
 		NewMsgBase(MsgBaseParams{
-			MsgName:         MSG_CONNECTION_OPEN_INIT,
+			MsgName:         MSG_IBC_UPDATE_CLIENT,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
@@ -36,7 +36,7 @@ func NewMsgConnectionOpenInit(
 }
 
 // ToJSON encodes the event into JSON string payload
-func (event *MsgConnectionOpenInit) ToJSON() (string, error) {
+func (event *MsgIBCUpdateClient) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
 		return "", err
@@ -45,16 +45,15 @@ func (event *MsgConnectionOpenInit) ToJSON() (string, error) {
 	return string(encoded), nil
 }
 
-func (event *MsgConnectionOpenInit) String() string {
+func (event *MsgIBCUpdateClient) String() string {
 	return render.Render(event)
 }
 
-// DecodeMsgDelegate decodes the event from encoded bytes
-func DecodeMsgConnectionOpenInit(encoded []byte) (entity_event.Event, error) {
+func DecodeMsgIBCUpdateClient(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *MsgConnectionOpenInit
+	var event *MsgIBCUpdateClient
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}

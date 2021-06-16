@@ -108,9 +108,9 @@ func ParseBlockResultsTxsMsgToCommands(
 				msgCommands = parseMsgNFTEditNFT(msgCommonParams, msg)
 			case "/chainmain.nft.v1.MsgBurnNFT":
 				msgCommands = parseMsgNFTBurnNFT(msgCommonParams, msg)
-			case "/ibc.core.client.v1.MsgCreateClient":
+			case "/ibc.core.client.v1.MsgIBCCreateClient":
 				msgCommands = ibcmsg.ParseMsgCreateClient(msgCommonParams, txsResult, msgIndex, msg)
-			case "/ibc.core.connection.v1.MsgConnectionOpenInit":
+			case "/ibc.core.connection.v1.MsgIBCConnectionOpenInit":
 				msgCommands = ibcmsg.ParseMsgConnectionOpenInit(msgCommonParams, txsResult, msgIndex, msg)
 			}
 

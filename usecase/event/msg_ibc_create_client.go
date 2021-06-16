@@ -9,21 +9,21 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_CREATE_CLIENT = "MsgCreateClient"
-const MSG_CREATE_CLIENT_CREATED = "MsgCreateClientCreated"
-const MSG_CREATE_CLIENT_FAILED = "MsgCreateClientFailed"
+const MSG_IBC_CREATE_CLIENT = "MsgCreateClient"
+const MSG_IBC_CREATE_CLIENT_CREATED = "MsgCreateClientCreated"
+const MSG_IBC_CREATE_CLIENT_FAILED = "MsgCreateClientFailed"
 
-type MsgCreateClient struct {
+type MsgIBCCreateClient struct {
 	MsgBase
 
 	ibc_model.MsgCreateClientParams
 }
 
 // NewMsgDelegate creates a new instance of MsgDelegate
-func NewMsgCreateClient(msgCommonParams MsgCommonParams, params ibc_model.MsgCreateClientParams) *MsgCreateClient {
-	return &MsgCreateClient{
+func NewMsgIBCCreateClient(msgCommonParams MsgCommonParams, params ibc_model.MsgCreateClientParams) *MsgIBCCreateClient {
+	return &MsgIBCCreateClient{
 		NewMsgBase(MsgBaseParams{
-			MsgName:         MSG_CREATE_CLIENT,
+			MsgName:         MSG_IBC_CREATE_CLIENT,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
@@ -33,7 +33,7 @@ func NewMsgCreateClient(msgCommonParams MsgCommonParams, params ibc_model.MsgCre
 }
 
 // ToJSON encodes the event into JSON string payload
-func (event *MsgCreateClient) ToJSON() (string, error) {
+func (event *MsgIBCCreateClient) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
 		return "", err
@@ -42,16 +42,16 @@ func (event *MsgCreateClient) ToJSON() (string, error) {
 	return string(encoded), nil
 }
 
-func (event *MsgCreateClient) String() string {
+func (event *MsgIBCCreateClient) String() string {
 	return render.Render(event)
 }
 
 // DecodeMsgDelegate decodes the event from encoded bytes
-func DecodeMsgCreateClient(encoded []byte) (entity_event.Event, error) {
+func DecodeMsgIBCCreateClient(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *MsgCreateClient
+	var event *MsgIBCCreateClient
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}

@@ -146,7 +146,7 @@ func ParseMsgCreateClient(
 		ClientType: event.MustGetAttributeByKey("client_type"),
 	}
 
-	return []command.Command{command_usecase.NewCreateMsgCreateClient(
+	return []command.Command{command_usecase.NewCreateMsgIBCCreateClient(
 		msgCommonParams,
 
 		params,
@@ -193,7 +193,7 @@ func ParseMsgConnectionOpenInit(
 		ConnectionID: event.MustGetAttributeByKey("connection_id"),
 	}
 
-	return []command.Command{command_usecase.NewCreateMsgConnectionOpenInit(
+	return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenInit(
 		msgCommonParams,
 
 		params,
