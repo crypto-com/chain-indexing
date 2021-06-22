@@ -35,12 +35,14 @@ func (denomsView *Denoms) Insert(denomRow *DenomRow) error {
 		"schema",
 		"creator",
 		"created_at",
+		"created_at_block_height",
 	).Values(
 		denomRow.DenomId,
 		denomRow.Name,
 		denomRow.Schema,
 		denomRow.Creator,
 		denomsView.rdb.Tton(&denomRow.CreatedAt),
+		denomRow.CreatedAtBlockHeight,
 	).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building NFT denom insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -64,6 +66,7 @@ func (denomsView *Denoms) FindById(denomId string) (*DenomRow, error) {
 		"schema",
 		"creator",
 		"created_at",
+		"created_at_block_height",
 	).From(
 		DENOMS_TABLE_NAME,
 	).Where(
@@ -84,6 +87,7 @@ func (denomsView *Denoms) FindById(denomId string) (*DenomRow, error) {
 		&row.Schema,
 		&row.Creator,
 		createdAtTimeReader.ScannableArg(),
+		&row.CreatedAtBlockHeight,
 	); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
@@ -107,6 +111,7 @@ func (denomsView *Denoms) FindByName(denomName string) (*DenomRow, error) {
 		"schema",
 		"creator",
 		"created_at",
+		"created_at_block_height",
 	).From(
 		DENOMS_TABLE_NAME,
 	).Where(
@@ -127,6 +132,7 @@ func (denomsView *Denoms) FindByName(denomName string) (*DenomRow, error) {
 		&row.Schema,
 		&row.Creator,
 		createdAtTimeReader.ScannableArg(),
+		&row.CreatedAtBlockHeight,
 	); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
@@ -154,6 +160,7 @@ func (denomsView *Denoms) List(
 		"schema",
 		"creator",
 		"created_at",
+		"created_at_block_height",
 	).From(
 		DENOMS_TABLE_NAME,
 	)
@@ -207,6 +214,7 @@ func (denomsView *Denoms) List(
 			&row.Schema,
 			&row.Creator,
 			createdAtTimeReader.ScannableArg(),
+			&row.CreatedAtBlockHeight,
 		); scanErr != nil {
 			if errors.Is(scanErr, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
@@ -240,9 +248,10 @@ type DenomListOrder struct {
 }
 
 type DenomRow struct {
-	DenomId   string          `json:"denomId"`
-	Name      string          `json:"denomName"`
-	Schema    string          `json:"denomSchema"`
-	Creator   string          `json:"denomCreator"`
-	CreatedAt utctime.UTCTime `json:"denomCreatedAt"`
+	DenomId              string          `json:"denomId"`
+	Name                 string          `json:"denomName"`
+	Schema               string          `json:"denomSchema"`
+	Creator              string          `json:"denomCreator"`
+	CreatedAt            utctime.UTCTime `json:"denomCreatedAt"`
+	CreatedAtBlockHeight int64           `json:"denomCreatedAtBlockHeight"`
 }

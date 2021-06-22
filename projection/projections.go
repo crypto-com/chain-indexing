@@ -53,7 +53,7 @@ func InitProjection(name string, params InitParams) projection_entity.Projection
 	case "CryptoComNFT":
 		return nft.NewNFT(params.Logger, params.RdbConn, nft.Config{
 			EnableDrop:       true,
-			DropDataAccessor: "drop",
+			DropDataAccessor: "dropId",
 		})
 	// register more projections here
 	default:

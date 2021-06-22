@@ -220,6 +220,22 @@ func (nftMessagesView *Messages) List(
 	return nftMessages, paginationResult, nil
 }
 
+func (nftMessagesView *Messages) DeleteAllByDenomTokenIds(denomId string, tokenId string) (int64, error) {
+	sql, sqlArgs, err := nftMessagesView.rdb.StmtBuilder.Delete(
+		MESSAGES_TABLE_NAME,
+	).Where("denom_id = ? AND maybe_token_id = ?", denomId, tokenId).ToSql()
+	if err != nil {
+		return 0, fmt.Errorf("error building NFT messages deletion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	result, err := nftMessagesView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return 0, fmt.Errorf("error deleteing NFT messages from the table: %v: %w", err, rdb.ErrWrite)
+	}
+
+	return result.RowsAffected(), nil
+}
+
 type MessageRow struct {
 	DenomId         string          `json:"denomId"`
 	MaybeTokenId    *string         `json:"tokenId"`
