@@ -1,0 +1,2 @@
+ALTER TABLE view_nft_tokens
+    ADD burned BOOL NOT NULL DEFAULT FALSE;
