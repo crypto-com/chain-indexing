@@ -63,9 +63,9 @@ func (nft *NFT) OnInit() error {
 }
 
 func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
-	rdbTx, insertMessageErr := nft.rdbConn.Begin()
-	if insertMessageErr != nil {
-		return fmt.Errorf("error beginning transaction: %v", insertMessageErr)
+	rdbTx, rdbTxErr := nft.rdbConn.Begin()
+	if rdbTxErr != nil {
+		return fmt.Errorf("error beginning transaction: %v", rdbTxErr)
 	}
 
 	committed := false
@@ -117,7 +117,7 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				return fmt.Errorf("error incrementing NFT denom to view: %v", incrementDenomTotalErr)
 			}
 
-			if insertMessageErr = nft.insertMessage(nftMessagesView, nftMessagesTotalView, view.MessageRow{
+			if rdbTxErr = nft.insertMessage(nftMessagesView, nftMessagesTotalView, view.MessageRow{
 				BlockHeight:     height,
 				BlockHash:       blockHash,
 				BlockTime:       blockTime,
@@ -129,8 +129,8 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				MessageIndex:    msgIssueDenom.MsgIndex,
 				MessageType:     msgIssueDenom.MsgType(),
 				Data:            msgIssueDenom,
-			}); insertMessageErr != nil {
-				return insertMessageErr
+			}); rdbTxErr != nil {
+				return rdbTxErr
 			}
 
 		} else if msgMintNFT, ok := event.(*event_usecase.MsgNFTMintNFT); ok {
@@ -164,7 +164,7 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				return insertTokenErr
 			}
 
-			if insertMessageErr = nft.insertMessage(nftMessagesView, nftMessagesTotalView, view.MessageRow{
+			if rdbTxErr = nft.insertMessage(nftMessagesView, nftMessagesTotalView, view.MessageRow{
 				BlockHeight:     height,
 				BlockHash:       blockHash,
 				BlockTime:       blockTime,
@@ -176,8 +176,8 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				MessageIndex:    msgMintNFT.MsgIndex,
 				MessageType:     msgMintNFT.MsgType(),
 				Data:            msgMintNFT,
-			}); insertMessageErr != nil {
-				return insertMessageErr
+			}); rdbTxErr != nil {
+				return rdbTxErr
 			}
 
 		} else if msgEditNFT, ok := event.(*event_usecase.MsgNFTEditNFT); ok {
@@ -233,7 +233,7 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				return updateTokenErr
 			}
 
-			if insertMessageErr = nft.insertMessage(nftMessagesView, nftMessagesTotalView, view.MessageRow{
+			if rdbTxErr = nft.insertMessage(nftMessagesView, nftMessagesTotalView, view.MessageRow{
 				BlockHeight:     height,
 				BlockHash:       blockHash,
 				BlockTime:       blockTime,
@@ -245,8 +245,8 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				MessageIndex:    msgEditNFT.MsgIndex,
 				MessageType:     msgEditNFT.MsgType(),
 				Data:            msgEditNFT,
-			}); insertMessageErr != nil {
-				return insertMessageErr
+			}); rdbTxErr != nil {
+				return rdbTxErr
 			})
 
 		} else if msgBurnNFT, ok := event.(*event_usecase.MsgNFTBurnNFT); ok {
@@ -292,7 +292,7 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				return updateTokenErr
 			}
 
-			if insertMessageErr = nft.insertMessage(nftMessagesView, nftMessagesTotalView, view.MessageRow{
+			if rdbTxErr = nft.insertMessage(nftMessagesView, nftMessagesTotalView, view.MessageRow{
 				BlockHeight:     height,
 				BlockHash:       blockHash,
 				BlockTime:       blockTime,
@@ -304,8 +304,8 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				MessageIndex:    msgTransferNFT.MsgIndex,
 				MessageType:     msgTransferNFT.MsgType(),
 				Data:            msgTransferNFT,
-			}); insertMessageErr != nil {
-				return insertMessageErr
+			}); rdbTxErr != nil {
+				return rdbTxErr
 			}
 		}
 	}
