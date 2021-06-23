@@ -425,14 +425,11 @@ func (nft *NFT) deleteToken(
 		return fmt.Errorf("error deleting NFT token from view: %d rows deleted", deletedRowCount)
 	}
 
-	deleteMessagesCount, deleteMessagesErr := nftMessagesView.DeleteAllByDenomTokenIds(
+	_, deleteMessagesErr := nftMessagesView.DeleteAllByDenomTokenIds(
 		tokenRow.DenomId, tokenRow.TokenId,
 	)
 	if deleteMessagesErr != nil {
 		return fmt.Errorf("error deleting NFT messages from view: %v", deleteMessagesErr)
-	}
-	if deleteMessagesCount == 0 {
-		return fmt.Errorf("error deleting NFT messages from view: no rows deleted")
 	}
 
 	if decrementErr := tokensTotalView.DecrementAll([]string{
