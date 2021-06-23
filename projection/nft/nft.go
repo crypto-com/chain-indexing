@@ -93,7 +93,6 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 		}
 	}
 
-	nftMessages := make([]view.MessageRow, 0)
 	for _, event := range events {
 		if msgIssueDenom, ok := event.(*event_usecase.MsgNFTIssueDenom); ok {
 			row := view.DenomRow{
@@ -247,7 +246,7 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				Data:            msgEditNFT,
 			}); rdbTxErr != nil {
 				return rdbTxErr
-			})
+			}
 
 		} else if msgBurnNFT, ok := event.(*event_usecase.MsgNFTBurnNFT); ok {
 			prevTokenRow, queryPrevTokenRowErr := tokensView.FindById(msgBurnNFT.DenomId, msgBurnNFT.TokenId)
@@ -351,6 +350,8 @@ func (nft *NFT) insertMessage(
 	if err := messagesView.Insert(&message); err != nil {
 		return fmt.Errorf("error inserting NFT message: %w", err)
 	}
+
+	return nil
 }
 
 func (nft *NFT) updateToken(
