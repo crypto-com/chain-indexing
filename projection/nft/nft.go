@@ -300,34 +300,34 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				Data:            msgTransferNFT,
 			})
 		}
-	}
 
-	for i, nftMessage := range nftMessages {
-		totalIdentities := []string{
-			"-:-:-:-",
-			fmt.Sprintf("%s:-:-:-", nilIdentifier(nftMessage.MaybeDrop)),
-			fmt.Sprintf("-:%s:-:-", nftMessage.DenomId),
-			fmt.Sprintf("-:-:%s:-", nilIdentifier(nftMessage.MaybeTokenId)),
-			fmt.Sprintf("-:-:-:%s", nftMessage.MessageType),
-			fmt.Sprintf("%s:%s:-:-", nilIdentifier(nftMessage.MaybeDrop), nftMessage.DenomId),
-			fmt.Sprintf("%s:-:%s:-", nilIdentifier(nftMessage.MaybeDrop), nilIdentifier(nftMessage.MaybeTokenId)),
-			fmt.Sprintf("%s:-:-:%s", nilIdentifier(nftMessage.MaybeDrop), nftMessage.MessageType),
-			fmt.Sprintf("-:%s:%s:-", nftMessage.DenomId, nilIdentifier(nftMessage.MaybeTokenId)),
-			fmt.Sprintf("-:%s:-:%s", nftMessage.DenomId, nftMessage.MessageType),
-			fmt.Sprintf("-:-:%s:%s", nilIdentifier(nftMessage.MaybeTokenId), nftMessage.MessageType),
-			fmt.Sprintf("%s:%s:%s:-", nilIdentifier(nftMessage.MaybeDrop), nftMessage.DenomId, nilIdentifier(nftMessage.MaybeTokenId)),
-			fmt.Sprintf("%s:%s:-:%s", nilIdentifier(nftMessage.MaybeDrop), nftMessage.DenomId, nftMessage.MessageType),
-			fmt.Sprintf("%s:-:%s:%s", nilIdentifier(nftMessage.MaybeDrop), nilIdentifier(nftMessage.MaybeTokenId), nftMessage.MessageType),
-			fmt.Sprintf("-:%s:%s:%s", nftMessage.DenomId, nilIdentifier(nftMessage.MaybeTokenId), nftMessage.MessageType),
-			fmt.Sprintf("%s:%s:%s:%s", nilIdentifier(nftMessage.MaybeDrop), nftMessage.DenomId, nilIdentifier(nftMessage.MaybeTokenId), nftMessage.MessageType),
-		}
-		if err := nftMessagesTotalView.IncrementAll(totalIdentities, 1); err != nil {
-			return fmt.Errorf("error incremnting NFT message total: %w", err)
-		}
+		for i, nftMessage := range nftMessages {
+			totalIdentities := []string{
+				"-:-:-:-",
+				fmt.Sprintf("%s:-:-:-", nilIdentifier(nftMessage.MaybeDrop)),
+				fmt.Sprintf("-:%s:-:-", nftMessage.DenomId),
+				fmt.Sprintf("-:-:%s:-", nilIdentifier(nftMessage.MaybeTokenId)),
+				fmt.Sprintf("-:-:-:%s", nftMessage.MessageType),
+				fmt.Sprintf("%s:%s:-:-", nilIdentifier(nftMessage.MaybeDrop), nftMessage.DenomId),
+				fmt.Sprintf("%s:-:%s:-", nilIdentifier(nftMessage.MaybeDrop), nilIdentifier(nftMessage.MaybeTokenId)),
+				fmt.Sprintf("%s:-:-:%s", nilIdentifier(nftMessage.MaybeDrop), nftMessage.MessageType),
+				fmt.Sprintf("-:%s:%s:-", nftMessage.DenomId, nilIdentifier(nftMessage.MaybeTokenId)),
+				fmt.Sprintf("-:%s:-:%s", nftMessage.DenomId, nftMessage.MessageType),
+				fmt.Sprintf("-:-:%s:%s", nilIdentifier(nftMessage.MaybeTokenId), nftMessage.MessageType),
+				fmt.Sprintf("%s:%s:%s:-", nilIdentifier(nftMessage.MaybeDrop), nftMessage.DenomId, nilIdentifier(nftMessage.MaybeTokenId)),
+				fmt.Sprintf("%s:%s:-:%s", nilIdentifier(nftMessage.MaybeDrop), nftMessage.DenomId, nftMessage.MessageType),
+				fmt.Sprintf("%s:-:%s:%s", nilIdentifier(nftMessage.MaybeDrop), nilIdentifier(nftMessage.MaybeTokenId), nftMessage.MessageType),
+				fmt.Sprintf("-:%s:%s:%s", nftMessage.DenomId, nilIdentifier(nftMessage.MaybeTokenId), nftMessage.MessageType),
+				fmt.Sprintf("%s:%s:%s:%s", nilIdentifier(nftMessage.MaybeDrop), nftMessage.DenomId, nilIdentifier(nftMessage.MaybeTokenId), nftMessage.MessageType),
+			}
+			if err := nftMessagesTotalView.IncrementAll(totalIdentities, 1); err != nil {
+				return fmt.Errorf("error incremnting NFT message total: %w", err)
+			}
 
-		// TODO: Change to use InsertAll
-		if err := nftMessagesView.Insert(&nftMessages[i]); err != nil {
-			return fmt.Errorf("error inserting NFT message: %w", err)
+			// TODO: Change to use InsertAll
+			if err := nftMessagesView.Insert(&nftMessages[i]); err != nil {
+				return fmt.Errorf("error inserting NFT message: %w", err)
+			}
 		}
 	}
 
@@ -425,11 +425,14 @@ func (nft *NFT) deleteToken(
 		return fmt.Errorf("error deleting NFT token from view: %d rows deleted", deletedRowCount)
 	}
 
-	_, deleteMessagesErr := nftMessagesView.DeleteAllByDenomTokenIds(
+	deleteMessagesCount, deleteMessagesErr := nftMessagesView.DeleteAllByDenomTokenIds(
 		tokenRow.DenomId, tokenRow.TokenId,
 	)
 	if deleteMessagesErr != nil {
 		return fmt.Errorf("error deleting NFT messages from view: %v", deleteMessagesErr)
+	}
+	if deleteMessagesCount == 0 {
+		return fmt.Errorf("error deleting NFT messages from view: no rows deleted")
 	}
 
 	if decrementErr := tokensTotalView.DecrementAll([]string{
