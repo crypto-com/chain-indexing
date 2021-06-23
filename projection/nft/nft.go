@@ -63,9 +63,9 @@ func (nft *NFT) OnInit() error {
 }
 
 func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
-	rdbTx, err := nft.rdbConn.Begin()
-	if err != nil {
-		return fmt.Errorf("error beginning transaction: %v", err)
+	rdbTx, insertMessageErr := nft.rdbConn.Begin()
+	if insertMessageErr != nil {
+		return fmt.Errorf("error beginning transaction: %v", insertMessageErr)
 	}
 
 	committed := false
@@ -117,7 +117,7 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				return fmt.Errorf("error incrementing NFT denom to view: %v", incrementDenomTotalErr)
 			}
 
-			nftMessages = append(nftMessages, view.MessageRow{
+			if insertMessageErr = nft.insertMessage(nftMessagesView, nftMessagesTotalView, view.MessageRow{
 				BlockHeight:     height,
 				BlockHash:       blockHash,
 				BlockTime:       blockTime,
@@ -129,7 +129,9 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				MessageIndex:    msgIssueDenom.MsgIndex,
 				MessageType:     msgIssueDenom.MsgType(),
 				Data:            msgIssueDenom,
-			})
+			}); insertMessageErr != nil {
+				return insertMessageErr
+			}
 
 		} else if msgMintNFT, ok := event.(*event_usecase.MsgNFTMintNFT); ok {
 			var maybeDrop *string
@@ -162,7 +164,7 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				return insertTokenErr
 			}
 
-			nftMessages = append(nftMessages, view.MessageRow{
+			if insertMessageErr = nft.insertMessage(nftMessagesView, nftMessagesTotalView, view.MessageRow{
 				BlockHeight:     height,
 				BlockHash:       blockHash,
 				BlockTime:       blockTime,
@@ -174,7 +176,9 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				MessageIndex:    msgMintNFT.MsgIndex,
 				MessageType:     msgMintNFT.MsgType(),
 				Data:            msgMintNFT,
-			})
+			}); insertMessageErr != nil {
+				return insertMessageErr
+			}
 
 		} else if msgEditNFT, ok := event.(*event_usecase.MsgNFTEditNFT); ok {
 			mutPrevTokenRow, queryPrevTokenRow := tokensView.FindById(msgEditNFT.DenomId, msgEditNFT.TokenId)
@@ -229,7 +233,7 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				return updateTokenErr
 			}
 
-			nftMessages = append(nftMessages, view.MessageRow{
+			if insertMessageErr = nft.insertMessage(nftMessagesView, nftMessagesTotalView, view.MessageRow{
 				BlockHeight:     height,
 				BlockHash:       blockHash,
 				BlockTime:       blockTime,
@@ -241,6 +245,8 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				MessageIndex:    msgEditNFT.MsgIndex,
 				MessageType:     msgEditNFT.MsgType(),
 				Data:            msgEditNFT,
+			}); insertMessageErr != nil {
+				return insertMessageErr
 			})
 
 		} else if msgBurnNFT, ok := event.(*event_usecase.MsgNFTBurnNFT); ok {
@@ -286,7 +292,7 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				return updateTokenErr
 			}
 
-			nftMessages = append(nftMessages, view.MessageRow{
+			if insertMessageErr = nft.insertMessage(nftMessagesView, nftMessagesTotalView, view.MessageRow{
 				BlockHeight:     height,
 				BlockHash:       blockHash,
 				BlockTime:       blockTime,
@@ -298,35 +304,8 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				MessageIndex:    msgTransferNFT.MsgIndex,
 				MessageType:     msgTransferNFT.MsgType(),
 				Data:            msgTransferNFT,
-			})
-		}
-
-		for i, nftMessage := range nftMessages {
-			totalIdentities := []string{
-				"-:-:-:-",
-				fmt.Sprintf("%s:-:-:-", nilIdentifier(nftMessage.MaybeDrop)),
-				fmt.Sprintf("-:%s:-:-", nftMessage.DenomId),
-				fmt.Sprintf("-:-:%s:-", nilIdentifier(nftMessage.MaybeTokenId)),
-				fmt.Sprintf("-:-:-:%s", nftMessage.MessageType),
-				fmt.Sprintf("%s:%s:-:-", nilIdentifier(nftMessage.MaybeDrop), nftMessage.DenomId),
-				fmt.Sprintf("%s:-:%s:-", nilIdentifier(nftMessage.MaybeDrop), nilIdentifier(nftMessage.MaybeTokenId)),
-				fmt.Sprintf("%s:-:-:%s", nilIdentifier(nftMessage.MaybeDrop), nftMessage.MessageType),
-				fmt.Sprintf("-:%s:%s:-", nftMessage.DenomId, nilIdentifier(nftMessage.MaybeTokenId)),
-				fmt.Sprintf("-:%s:-:%s", nftMessage.DenomId, nftMessage.MessageType),
-				fmt.Sprintf("-:-:%s:%s", nilIdentifier(nftMessage.MaybeTokenId), nftMessage.MessageType),
-				fmt.Sprintf("%s:%s:%s:-", nilIdentifier(nftMessage.MaybeDrop), nftMessage.DenomId, nilIdentifier(nftMessage.MaybeTokenId)),
-				fmt.Sprintf("%s:%s:-:%s", nilIdentifier(nftMessage.MaybeDrop), nftMessage.DenomId, nftMessage.MessageType),
-				fmt.Sprintf("%s:-:%s:%s", nilIdentifier(nftMessage.MaybeDrop), nilIdentifier(nftMessage.MaybeTokenId), nftMessage.MessageType),
-				fmt.Sprintf("-:%s:%s:%s", nftMessage.DenomId, nilIdentifier(nftMessage.MaybeTokenId), nftMessage.MessageType),
-				fmt.Sprintf("%s:%s:%s:%s", nilIdentifier(nftMessage.MaybeDrop), nftMessage.DenomId, nilIdentifier(nftMessage.MaybeTokenId), nftMessage.MessageType),
-			}
-			if err := nftMessagesTotalView.IncrementAll(totalIdentities, 1); err != nil {
-				return fmt.Errorf("error incremnting NFT message total: %w", err)
-			}
-
-			// TODO: Change to use InsertAll
-			if err := nftMessagesView.Insert(&nftMessages[i]); err != nil {
-				return fmt.Errorf("error inserting NFT message: %w", err)
+			}); insertMessageErr != nil {
+				return insertMessageErr
 			}
 		}
 	}
@@ -340,6 +319,38 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 	}
 	committed = true
 	return nil
+}
+
+func (nft *NFT) insertMessage(
+	messagesView *view.Messages,
+	messagesTotalView *view.MessagesTotal,
+	message view.MessageRow,
+) error {
+	totalIdentities := []string{
+		"-:-:-:-",
+		fmt.Sprintf("%s:-:-:-", nilIdentifier(message.MaybeDrop)),
+		fmt.Sprintf("-:%s:-:-", message.DenomId),
+		fmt.Sprintf("-:-:%s:-", nilIdentifier(message.MaybeTokenId)),
+		fmt.Sprintf("-:-:-:%s", message.MessageType),
+		fmt.Sprintf("%s:%s:-:-", nilIdentifier(message.MaybeDrop), message.DenomId),
+		fmt.Sprintf("%s:-:%s:-", nilIdentifier(message.MaybeDrop), nilIdentifier(message.MaybeTokenId)),
+		fmt.Sprintf("%s:-:-:%s", nilIdentifier(message.MaybeDrop), message.MessageType),
+		fmt.Sprintf("-:%s:%s:-", message.DenomId, nilIdentifier(message.MaybeTokenId)),
+		fmt.Sprintf("-:%s:-:%s", message.DenomId, message.MessageType),
+		fmt.Sprintf("-:-:%s:%s", nilIdentifier(message.MaybeTokenId), message.MessageType),
+		fmt.Sprintf("%s:%s:%s:-", nilIdentifier(message.MaybeDrop), message.DenomId, nilIdentifier(message.MaybeTokenId)),
+		fmt.Sprintf("%s:%s:-:%s", nilIdentifier(message.MaybeDrop), message.DenomId, message.MessageType),
+		fmt.Sprintf("%s:-:%s:%s", nilIdentifier(message.MaybeDrop), nilIdentifier(message.MaybeTokenId), message.MessageType),
+		fmt.Sprintf("-:%s:%s:%s", message.DenomId, nilIdentifier(message.MaybeTokenId), message.MessageType),
+		fmt.Sprintf("%s:%s:%s:%s", nilIdentifier(message.MaybeDrop), message.DenomId, nilIdentifier(message.MaybeTokenId), message.MessageType),
+	}
+	if err := messagesTotalView.IncrementAll(totalIdentities, 1); err != nil {
+		return fmt.Errorf("error incremnting NFT message total: %w", err)
+	}
+
+	if err := messagesView.Insert(&message); err != nil {
+		return fmt.Errorf("error inserting NFT message: %w", err)
+	}
 }
 
 func (nft *NFT) updateToken(
