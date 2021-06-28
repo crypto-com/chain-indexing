@@ -1,23 +1,27 @@
 package ibc
 
 type MsgConnectionOpenInitParams struct {
-	ClientID          string                            `json:"clientId"`
-	Counterparty      MsgConnectionOpenInitCounterparty `json:"counterparty"`
-	ConnectionVersion MsgConnectionOpenInitVersion      `json:"connectionVersion"`
-	DelayPeriod       string                            `json:"delayPeriod"`
-	Signer            string                            `json:"signer"`
+	RawMsgConnectionOpenInit
 
 	ConnectionID string `json:"connectionId"`
 }
 
+type RawMsgConnectionOpenInit struct {
+	ClientID     string                            `mapstructure:"client_id" json:"clientId"`
+	Counterparty MsgConnectionOpenInitCounterparty `mapstructure:"counterparty" json:"counterparty"`
+	Version      MsgConnectionOpenInitVersion      `mapstructure:"version" json:"version"`
+	DelayPeriod  uint64                            `mapstructure:"delay_period" json:"delayPeriod,string"`
+	Signer       string                            `mapstructure:"signer" json:"signer"`
+}
+
 type MsgConnectionOpenInitCounterparty struct {
-	ClientID     string                      `json:"clientId"`
-	ConnectionID string                      `json:"connectionId"`
-	Prefix       MsgConnectionOpenInitPrefix `json:"prefix"`
+	ClientID     string                      `mapstructure:"client_id" json:"clientId"`
+	ConnectionID string                      `mapstructure:"connection_id" json:"connectionId"`
+	Prefix       MsgConnectionOpenInitPrefix `mapstructure:"prefix" json:"prefix"`
 }
 
 type MsgConnectionOpenInitPrefix struct {
-	KeyPrefix []byte `json:"keyPrefix"`
+	KeyPrefix []byte `mapstructure:"key_prefix" json:"keyPrefix"`
 }
 
 type MsgConnectionOpenInitVersion struct {

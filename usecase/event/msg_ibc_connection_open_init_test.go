@@ -20,23 +20,27 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 
 			anyParams := ibc_model.MsgConnectionOpenInitParams{
-				ClientID: "07-tendermint-0",
-				Counterparty: ibc_model.MsgConnectionOpenInitCounterparty{
-					ClientID:     "07-tendermint-0",
-					ConnectionID: "",
-					Prefix: ibc_model.MsgConnectionOpenInitPrefix{
-						KeyPrefix: []byte("aWJj"),
+				RawMsgConnectionOpenInit: ibc_model.RawMsgConnectionOpenInit{
+					ClientID: "07-tendermint-0",
+					Counterparty: ibc_model.MsgConnectionOpenInitCounterparty{
+						ClientID:     "07-tendermint-0",
+						ConnectionID: "",
+						Prefix: ibc_model.MsgConnectionOpenInitPrefix{
+							KeyPrefix: []byte("aWJj"),
+						},
 					},
-				},
-				ConnectionVersion: ibc_model.MsgConnectionOpenInitVersion{
-					Identifier: "1",
-					Features: []string{
-						"ORDER_ORDERED",
-						"ORDER_UNORDERED",
+					Version: ibc_model.MsgConnectionOpenInitVersion{
+						Identifier: "1",
+						Features: []string{
+							"ORDER_ORDERED",
+							"ORDER_UNORDERED",
+						},
 					},
+					DelayPeriod: 0,
+					Signer:      "cro1gdswrmwtzgv3kvf28lvtt7qv7q7myzmn466r3f",
 				},
-				DelayPeriod: "0",
-				Signer:      "cro1gdswrmwtzgv3kvf28lvtt7qv7q7myzmn466r3f",
+
+				ConnectionID: "connection-0",
 			}
 
 			event := event_usecase.NewMsgIBCConnectionOpenInit(event_usecase.MsgCommonParams{
@@ -62,11 +66,12 @@ var _ = Describe("Event", func() {
 
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
-			Expect(typedEvent.ClientID).To(Equal(anyParams.ClientID))
-			Expect(typedEvent.Counterparty).To(Equal(anyParams.Counterparty))
-			Expect(typedEvent.ConnectionVersion).To(Equal(anyParams.ConnectionVersion))
-			Expect(typedEvent.DelayPeriod).To(Equal(anyParams.DelayPeriod))
-			Expect(typedEvent.Signer).To(Equal(anyParams.Signer))
+			Expect(typedEvent.Params.ClientID).To(Equal(anyParams.ClientID))
+			Expect(typedEvent.Params.Counterparty).To(Equal(anyParams.Counterparty))
+			Expect(typedEvent.Params.Version).To(Equal(anyParams.Version))
+			Expect(typedEvent.Params.DelayPeriod).To(Equal(anyParams.DelayPeriod))
+			Expect(typedEvent.Params.Signer).To(Equal(anyParams.Signer))
+			Expect(typedEvent.Params.ConnectionID).To(Equal(anyParams.ConnectionID))
 		})
 
 		It("should able to encode and decode failed event", func() {
@@ -75,23 +80,27 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 
 			anyParams := ibc_model.MsgConnectionOpenInitParams{
-				ClientID: "07-tendermint-0",
-				Counterparty: ibc_model.MsgConnectionOpenInitCounterparty{
-					ClientID:     "07-tendermint-0",
-					ConnectionID: "",
-					Prefix: ibc_model.MsgConnectionOpenInitPrefix{
-						KeyPrefix: []byte("aWJj"),
+				RawMsgConnectionOpenInit: ibc_model.RawMsgConnectionOpenInit{
+					ClientID: "07-tendermint-0",
+					Counterparty: ibc_model.MsgConnectionOpenInitCounterparty{
+						ClientID:     "07-tendermint-0",
+						ConnectionID: "",
+						Prefix: ibc_model.MsgConnectionOpenInitPrefix{
+							KeyPrefix: []byte("aWJj"),
+						},
 					},
-				},
-				ConnectionVersion: ibc_model.MsgConnectionOpenInitVersion{
-					Identifier: "1",
-					Features: []string{
-						"ORDER_ORDERED",
-						"ORDER_UNORDERED",
+					Version: ibc_model.MsgConnectionOpenInitVersion{
+						Identifier: "1",
+						Features: []string{
+							"ORDER_ORDERED",
+							"ORDER_UNORDERED",
+						},
 					},
+					DelayPeriod: 0,
+					Signer:      "cro1gdswrmwtzgv3kvf28lvtt7qv7q7myzmn466r3f",
 				},
-				DelayPeriod: "0",
-				Signer:      "cro1gdswrmwtzgv3kvf28lvtt7qv7q7myzmn466r3f",
+
+				ConnectionID: "connection-0",
 			}
 
 			event := event_usecase.NewMsgIBCConnectionOpenInit(event_usecase.MsgCommonParams{
@@ -117,11 +126,12 @@ var _ = Describe("Event", func() {
 
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
-			Expect(typedEvent.ClientID).To(Equal(anyParams.ClientID))
-			Expect(typedEvent.Counterparty).To(Equal(anyParams.Counterparty))
-			Expect(typedEvent.ConnectionVersion).To(Equal(anyParams.ConnectionVersion))
-			Expect(typedEvent.DelayPeriod).To(Equal(anyParams.DelayPeriod))
-			Expect(typedEvent.Signer).To(Equal(anyParams.Signer))
+			Expect(typedEvent.Params.ClientID).To(Equal(anyParams.ClientID))
+			Expect(typedEvent.Params.Counterparty).To(Equal(anyParams.Counterparty))
+			Expect(typedEvent.Params.Version).To(Equal(anyParams.Version))
+			Expect(typedEvent.Params.DelayPeriod).To(Equal(anyParams.DelayPeriod))
+			Expect(typedEvent.Params.Signer).To(Equal(anyParams.Signer))
+			Expect(typedEvent.Params.ConnectionID).To(Equal(anyParams.ConnectionID))
 		})
 	})
 })

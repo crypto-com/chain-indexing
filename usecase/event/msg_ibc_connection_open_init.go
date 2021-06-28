@@ -16,7 +16,7 @@ const MSG_IBC_CONNECTION_OPEN_INIT_FAILED = "MsgConnectionOpenInitFailed"
 type MsgIBCConnectionOpenInit struct {
 	MsgBase
 
-	ibc_model.MsgConnectionOpenInitParams
+	Params ibc_model.MsgConnectionOpenInitParams `json:"params"`
 }
 
 // NewMsgDelegate creates a new instance of MsgDelegate

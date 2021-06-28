@@ -159,37 +159,26 @@ func ParseMsgConnectionOpenInit(
 	msgIndex int,
 	msg map[string]interface{},
 ) []command.Command {
-	var counterParty MsgConnectionOpenInitCounterparty
-	if err := mapstructure.Decode(msg["counterparty"], &counterParty); err != nil {
-		panic(fmt.Errorf("error decoding counterparty: %v", err))
+	var rawMessage ibc_model.RawMsgConnectionOpenInit
+	decoder, decoderErr := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		Result:           &rawMessage,
+	})
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating mapstructure decoder: %v", decoderErr))
 	}
-
-	var version MsgConnectionOpenInitVersion
-	if err := mapstructure.Decode(msg["version"], &version); err != nil {
-		panic(fmt.Errorf("error decoding version: %v", err))
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding message: %v", err))
 	}
 
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
-	// When there is no reward withdrew, `transfer` event would not exist
 	event := log.GetEventByType("connection_open_init")
 	if event == nil {
 		panic("missing `connection_open_init` event in TxsResult log")
 	}
 	params := ibc_model.MsgConnectionOpenInitParams{
-		ClientID: msg["client_id"].(string),
-		Counterparty: ibc_model.MsgConnectionOpenInitCounterparty{
-			ClientID:     counterParty.ClientID,
-			ConnectionID: counterParty.ConnectionID,
-			Prefix: ibc_model.MsgConnectionOpenInitPrefix{
-				KeyPrefix: []byte(counterParty.Prefix.KeyPrefix),
-			},
-		},
-		ConnectionVersion: ibc_model.MsgConnectionOpenInitVersion{
-			Identifier: version.Identifier,
-			Features:   version.Features,
-		},
-		DelayPeriod:  msg["delay_period"].(string),
-		Signer:       msg["signer"].(string),
+		RawMsgConnectionOpenInit: rawMessage,
+
 		ConnectionID: event.MustGetAttributeByKey("connection_id"),
 	}
 

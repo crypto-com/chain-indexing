@@ -25,7 +25,7 @@ var _ = Describe("ParseMsgCommands", func() {
   "version": 1,
   "height": 5,
   "uuid": "{UUID}",
-  "msgName": "MsgIBCCreateClient",
+  "msgName": "MsgCreateClient",
   "txHash": "7E34A75D8063BADF7B93538C23C88DEEF1FF14E7BE7F13AD6AD34E228C64538D",
   "msgIndex": 0,
   "maybeTendermintLightClient": {
@@ -114,7 +114,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("CreateMsgCreateClient"))
+			Expect(cmd.Name()).To(Equal("CreateMsgIBCCreateClient"))
 
 			untypedEvent, _ := cmd.Exec()
 			createMsgCreateClientEvent := untypedEvent.(*event.MsgIBCCreateClient)

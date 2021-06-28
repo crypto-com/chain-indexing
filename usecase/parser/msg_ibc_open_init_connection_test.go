@@ -25,22 +25,24 @@ var _ = Describe("ParseMsgCommands", func() {
   "version": 1,
   "height": 6,
   "uuid": "{UUID}",
-  "msgName": "MsgIBCConnectionOpenInit",
+  "msgName": "MsgConnectionOpenInit",
   "txHash": "F2B7D61BA783E6CDD9FE5825EBF7770688F6F45C482CB78ACB51E84B06FC643E",
   "msgIndex": 0,
-  "clientId": "07-tendermint-0",
-  "counterparty": {
+  "params": {
     "clientId": "07-tendermint-0",
-    "connectionId": "",
-    "prefix": { "keyPrefix": "YVdKag==" }
-  },
-  "connectionVersion": {
-    "identifier": "1",
-    "features": ["ORDER_ORDERED", "ORDER_UNORDERED"]
-  },
-  "delayPeriod": "0",
-  "signer": "cro1gdswrmwtzgv3kvf28lvtt7qv7q7myzmn466r3f",
-  "connectionId": "connection-0"
+    "counterparty": {
+  	  "clientId": "07-tendermint-0",
+  	  "connectionId": "",
+  	  "prefix": { "keyPrefix": "YVdKag==" }
+    },
+    "version": {
+  	  "identifier": "1",
+  	  "features": ["ORDER_ORDERED", "ORDER_UNORDERED"]
+    },
+    "delayPeriod": "0",
+    "signer": "cro1gdswrmwtzgv3kvf28lvtt7qv7q7myzmn466r3f",
+    "connectionId": "connection-0"
+  }
 }`
 
 			txDecoder := utils.NewTxDecoder()
@@ -63,12 +65,13 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("CreateMsgConnectionOpenInit"))
+			Expect(cmd.Name()).To(Equal("CreateMsgIBCConnectionOpenInit"))
 
 			untypedEvent, _ := cmd.Exec()
 			createMsgCreateClientEvent := untypedEvent.(*event.MsgIBCConnectionOpenInit)
 
 			regex, _ := regexp.Compile("\n?\r?\\s?")
+
 			Expect(json.MustMarshalToString(createMsgCreateClientEvent)).To(Equal(
 				strings.Replace(
 					regex.ReplaceAllString(expected, ""),
