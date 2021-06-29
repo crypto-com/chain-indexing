@@ -33,7 +33,7 @@ var _ = Describe("ParseMsgCommands", func() {
     "counterparty": {
   	  "clientId": "07-tendermint-0",
   	  "connectionId": "",
-  	  "prefix": { "keyPrefix": "YVdKag==" }
+  	  "prefix": { "keyPrefix": "aWJj" }
     },
     "version": {
   	  "identifier": "1",

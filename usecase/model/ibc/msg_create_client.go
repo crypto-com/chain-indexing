@@ -1,9 +1,7 @@
 package ibc
 
 import (
-	"time"
-
-	"github.com/crypto-com/chain-indexing/internal/utctime"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 type MsgCreateClientParams struct {
@@ -20,62 +18,73 @@ type TendermintLightClient struct {
 	TendermintLightClientConsensusState TendermintLightClientConsensusState `json:"consensusState"`
 }
 
+type RawMsgCreateTendermintLightClient struct {
+	Type           string                              `mapstructure:"@type" json:"@type"`
+	ClientState    TendermintLightClientState          `mapstructure:"client_state" json:"clientState"`
+	ConsensusState TendermintLightClientConsensusState `mapstructure:"consensus_state" json:"consensusState"`
+	Signer         string                              `mapstructure:"signer" json:"signer"`
+}
+
 type TendermintLightClientState struct {
-	Type                         string                           `json:"@type"`
-	ChainID                      string                           `json:"chainId"`
-	TrustLevel                   TendermintLightClientTrustLevel  `json:"trustLevel"`
-	TrustingPeriod               time.Duration                    `json:"trustingPeriod"`
-	UnbondingPeriod              time.Duration                    `json:"unbondingPeriod"`
-	MaxClockDrift                time.Duration                    `json:"maxClockDrift"`
-	FrozenHeight                 TendermintLightClientHeight      `json:"frozenHeight"`
-	LatestHeight                 TendermintLightClientHeight      `json:"latestHeight"`
-	ProofSpecs                   []TendermintLightClientProofSpec `json:"proofSpecs"`
-	UpgradePath                  []string                         `json:"upgradePath"`
-	AllowUpdateAfterExpiry       bool                             `json:"allowUpdateAfterExpiry"`
-	AllowUpdateAfterMisbehaviour bool                             `json:"allowUpdateAfterMisbehaviour"`
+	Type                         string                           `mapstructure:"@type" json:"@type"`
+	ChainID                      string                           `mapstructure:"chain_id" json:"chainId"`
+	TrustLevel                   TendermintLightClientTrustLevel  `mapstructure:"trust_level" json:"trustLevel"`
+	TrustingPeriod               model.Duration                   `mapstructure:"trusting_period" json:"trustingPeriod"`
+	UnbondingPeriod              model.Duration                   `mapstructure:"unbonding_period" json:"unbondingPeriod"`
+	MaxClockDrift                model.Duration                   `mapstructure:"max_clock_drift" json:"maxClockDrift"`
+	FrozenHeight                 TendermintLightClientHeight      `mapstructure:"frozen_height" json:"frozenHeight"`
+	LatestHeight                 TendermintLightClientHeight      `mapstructure:"latest_height" json:"latestHeight"`
+	ProofSpecs                   []TendermintLightClientProofSpec `mapstructure:"proof_specs" json:"proofSpecs"`
+	UpgradePath                  []string                         `mapstructure:"upgrade_path" json:"upgradePath"`
+	AllowUpdateAfterExpiry       bool                             `mapstructure:"allow_update_after_expiry" json:"allowUpdateAfterExpiry"`
+	AllowUpdateAfterMisbehaviour bool                             `mapstructure:"allow_update_after_misbehaviour" json:"allowUpdateAfterMisbehaviour"`
 }
 
 type TendermintLightClientHeight struct {
-	RevisionNumber string `json:"revisionNumber"`
-	RevisionHeight string `json:"revisionHeight"`
+	RevisionNumber uint64 `mapstructure:"revision_number" json:"revisionNumber,string"`
+	RevisionHeight uint64 `mapstructure:"revision_height" json:"revisionHeight,string"`
 }
 
 type TendermintLightClientProofSpec struct {
-	MaybeLeafSpec  *TendermintLightClientLeafSpec  `json:"leafSpec"`
-	MaybeInnerSpec *TendermintLightClientInnerSpec `json:"innerSpec"`
-	MaxDepth       int64                           `json:"maxDepth"`
-	MinDepth       int64                           `json:"minDepth"`
+	LeafSpec  TendermintLightClientLeafSpec  `mapstructure:"leaf_spec" json:"leafSpec"`
+	InnerSpec TendermintLightClientInnerSpec `mapstructure:"inner_spec" json:"innerSpec"`
+	MaxDepth  int32                          `mapstructure:"max_depth" json:"maxDepth"`
+	MinDepth  int32                          `mapstructure:"min_depth" json:"minDepth"`
 }
 
 type TendermintLightClientInnerSpec struct {
-	ChildOrder      []int64 `json:"childOrder"`
-	ChildSize       int64   `json:"childSize"`
-	MinPrefixLength int64   `json:"minPrefixLength"`
-	MaxPrefixLength int64   `json:"maxPrefixLength"`
-	EmptyChild      []byte  `json:"emptyChild"`
-	Hash            string  `json:"hash"`
+	ChildOrder      []int32                     `mapstructure:"child_order" json:"childOrder"`
+	ChildSize       int32                       `mapstructure:"child_size" json:"childSize"`
+	MinPrefixLength int32                       `mapstructure:"min_prefix_length" json:"minPrefixLength"`
+	MaxPrefixLength int32                       `mapstructure:"max_prefix_length" json:"maxPrefixLength"`
+	EmptyChild      []byte                      `mapstructure:"empty_child" json:"emptyChild"`
+	Hash            TendermintLightClientHashOp `mapstructure:"hash" json:"hash"`
 }
 
 type TendermintLightClientLeafSpec struct {
-	Hash         string `json:"hash"`
-	PrehashKey   string `json:"prehashKey"`
-	PrehashValue string `json:"prehashValue"`
-	Length       string `json:"length"`
-	Prefix       string `json:"prefix"`
+	Hash         TendermintLightClientHashOp   `mapstructure:"hash" json:"hash"`
+	PrehashKey   TendermintLightClientHashOp   `mapstructure:"prehash_key" json:"prehashKey"`
+	PrehashValue TendermintLightClientHashOp   `mapstructure:"prehash_value" json:"prehashValue"`
+	Length       TendermintLightClientLengthOp `mapstructure:"length" json:"length"`
+	Prefix       []byte                        `mapstructure:"prefix" json:"prefix"`
 }
 
+type TendermintLightClientHashOp string
+
+type TendermintLightClientLengthOp string
+
 type TendermintLightClientTrustLevel struct {
-	Numerator   string `json:"numerator"`
-	Denominator string `json:"denominator"`
+	Numerator   uint64 `mapstructure:"numerator" json:"numerator,string"`
+	Denominator uint64 `mapstructure:"denominator" json:"denominator,string"`
 }
 
 type TendermintLightClientConsensusState struct {
-	Type               string                    `json:"@type"`
-	Timestamp          utctime.UTCTime           `json:"timestamp"`
-	Root               TendermintLightClientRoot `json:"root"`
-	NextValidatorsHash string                    `json:"nextValidatorsHash"`
+	Type               string                    `mapstructure:"@type" json:"@type"`
+	Timestamp          string                    `mapstructure:"timestamp" json:"timestamp"`
+	Root               TendermintLightClientRoot `mapstructure:"root" json:"root"`
+	NextValidatorsHash string                    `mapstructure:"next_validators_hash" json:"nextValidatorsHash"`
 }
 
 type TendermintLightClientRoot struct {
-	Hash string `json:"hash"`
+	Hash string `mapstructure:"hash" json:"hash"`
 }

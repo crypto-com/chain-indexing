@@ -33,9 +33,9 @@ var _ = Describe("ParseMsgCommands", func() {
       "@type": "/ibc.lightclients.tendermint.v1.ClientState",
       "chainId": "devnet-2",
       "trustLevel": { "numerator": "1", "denominator": "3" },
-      "trustingPeriod": 1209600000000000,
-      "unbondingPeriod": 1814400000000000,
-      "maxClockDrift": 5000000000,
+      "trustingPeriod": "336h0m0s",
+      "unbondingPeriod": "504h0m0s",
+	  "maxClockDrift": "5s",
       "frozenHeight": { "revisionNumber": "0", "revisionHeight": "0" },
       "latestHeight": { "revisionNumber": "2", "revisionHeight": "2" },
       "proofSpecs": [
@@ -120,6 +120,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			createMsgCreateClientEvent := untypedEvent.(*event.MsgIBCCreateClient)
 
 			regex, _ := regexp.Compile("\n?\r?\\s?")
+
 			Expect(json.MustMarshalToString(createMsgCreateClientEvent)).To(Equal(
 				strings.Replace(
 					regex.ReplaceAllString(expected, ""),
