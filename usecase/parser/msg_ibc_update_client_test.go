@@ -149,7 +149,7 @@ var _ = Describe("ParseMsgCommands", func() {
 				stakingDenom,
 			)
 			Expect(err).To(BeNil())
-			Expect(cmds).To(HaveLen(1))
+			Expect(cmds).To(HaveLen(2))
 			cmd := cmds[0]
 			Expect(cmd.Name()).To(Equal("CreateMsgIBCUpdateClient"))
 

@@ -19,7 +19,6 @@ type MsgIBCConnectionOpenInit struct {
 	Params ibc_model.MsgConnectionOpenInitParams `json:"params"`
 }
 
-// NewMsgDelegate creates a new instance of MsgDelegate
 func NewMsgIBCConnectionOpenInit(
 	msgCommonParams MsgCommonParams,
 	params ibc_model.MsgConnectionOpenInitParams,
@@ -49,7 +48,6 @@ func (event *MsgIBCConnectionOpenInit) String() string {
 	return render.Render(event)
 }
 
-// DecodeMsgDelegate decodes the event from encoded bytes
 func DecodeMsgIBCConnectionOpenInit(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()

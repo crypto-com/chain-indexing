@@ -95,4 +95,6 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(MSG_IBC_UPDATE_CLIENT_FAILED, 1, DecodeMsgIBCUpdateClient)
 	registry.Register(MSG_IBC_CONNECTION_OPEN_INIT_CREATED, 1, DecodeMsgIBCConnectionOpenInit)
 	registry.Register(MSG_IBC_CONNECTION_OPEN_INIT_FAILED, 1, DecodeMsgIBCConnectionOpenInit)
+	registry.Register(MSG_IBC_CONNECTION_OPEN_TRY_CREATED, 1, DecodeMsgIBCConnectionOpenTry)
+	registry.Register(MSG_IBC_CONNECTION_OPEN_TRY_FAILED, 1, DecodeMsgIBCConnectionOpenTry)
 }

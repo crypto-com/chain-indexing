@@ -22,14 +22,14 @@ var _ = Describe("Event", func() {
 			anyParams := ibc_model.MsgConnectionOpenInitParams{
 				RawMsgConnectionOpenInit: ibc_model.RawMsgConnectionOpenInit{
 					ClientID: "07-tendermint-0",
-					Counterparty: ibc_model.MsgConnectionOpenInitCounterparty{
+					Counterparty: ibc_model.Counterparty{
 						ClientID:     "07-tendermint-0",
 						ConnectionID: "",
-						Prefix: ibc_model.MsgConnectionOpenInitPrefix{
+						Prefix: ibc_model.CounterpartyPrefix{
 							KeyPrefix: []byte("aWJj"),
 						},
 					},
-					Version: ibc_model.MsgConnectionOpenInitVersion{
+					Version: ibc_model.CounterpartyVersion{
 						Identifier: "1",
 						Features: []string{
 							"ORDER_ORDERED",
@@ -82,14 +82,14 @@ var _ = Describe("Event", func() {
 			anyParams := ibc_model.MsgConnectionOpenInitParams{
 				RawMsgConnectionOpenInit: ibc_model.RawMsgConnectionOpenInit{
 					ClientID: "07-tendermint-0",
-					Counterparty: ibc_model.MsgConnectionOpenInitCounterparty{
+					Counterparty: ibc_model.Counterparty{
 						ClientID:     "07-tendermint-0",
 						ConnectionID: "",
-						Prefix: ibc_model.MsgConnectionOpenInitPrefix{
+						Prefix: ibc_model.CounterpartyPrefix{
 							KeyPrefix: []byte("aWJj"),
 						},
 					},
-					Version: ibc_model.MsgConnectionOpenInitVersion{
+					Version: ibc_model.CounterpartyVersion{
 						Identifier: "1",
 						Features: []string{
 							"ORDER_ORDERED",

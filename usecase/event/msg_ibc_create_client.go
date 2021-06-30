@@ -19,7 +19,6 @@ type MsgIBCCreateClient struct {
 	ibc_model.MsgCreateClientParams
 }
 
-// NewMsgDelegate creates a new instance of MsgDelegate
 func NewMsgIBCCreateClient(msgCommonParams MsgCommonParams, params ibc_model.MsgCreateClientParams) *MsgIBCCreateClient {
 	return &MsgIBCCreateClient{
 		NewMsgBase(MsgBaseParams{
@@ -46,7 +45,6 @@ func (event *MsgIBCCreateClient) String() string {
 	return render.Render(event)
 }
 
-// DecodeMsgDelegate decodes the event from encoded bytes
 func DecodeMsgIBCCreateClient(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
