@@ -19,7 +19,7 @@ import (
 
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgIBCCreateClient", func() {
-		It("should parse Msg commands when there is MsgIBCCreateClient in the transaction", func() {
+		It("should parse Msg commands when there is MsgCreateClient in the transaction", func() {
 			expected := `{
   "name": "MsgCreateClientCreated",
   "version": 1,

@@ -1,5 +1,7 @@
 package ibc
 
+import "time"
+
 type MsgUpdateClientParams struct {
 	MaybeTendermintLightClientUpdate *TendermintLightClientUpdate `json:"maybeTendermintLightClientUpdate"`
 	// TODO: SoloMachine and Localhost LightClient
@@ -8,86 +10,94 @@ type MsgUpdateClientParams struct {
 }
 
 type TendermintLightClientUpdate struct {
-	Header TendermintLightClientUpdateHeader `json:"header"`
+	Header TendermintLightClientHeader `json:"header"`
 }
 
-type TendermintLightClientUpdateHeader struct {
-	Type              string                                       `json:"@type"`
-	SignedHeader      TendermintLightClientUpdateSignedHeader      `json:"signed_header"`
-	ValidatorSet      TendermintLightClientUpdateTrustedValidators `json:"validator_set"`
-	TrustedHeight     TendermintLightClientUpdateTrustedHeight     `json:"trusted_height"`
-	TrustedValidators TendermintLightClientUpdateTrustedValidators `json:"trusted_validators"`
+type RawMsgUpdateTendermintLightClient struct {
+	Type     string                      `mapstructure:"@type" json:"@type"`
+	ClientID string                      `mapstructure:"client_id" json:"clientId"`
+	Header   TendermintLightClientHeader `mapstructure:"header" json:"header"`
+	Signer   string                      `mapstructure:"signer" json:"signer"`
 }
 
-type TendermintLightClientUpdateSignedHeader struct {
-	Header TendermintLightClientUpdateSignedHeaderHeader `json:"header"`
-	Commit TendermintLightClientUpdateCommit             `json:"commit"`
+type TendermintLightClientHeader struct {
+	Type              string                                 `mapstructure:"@type" json:"@type"`
+	SignedHeader      TendermintLightClientSignedHeader      `mapstructure:"signed_header" json:"signedHeader"`
+	ValidatorSet      TendermintLightClientTrustedValidators `mapstructure:"validator_set" json:"validatorSet"`
+	TrustedHeight     TendermintLightClientTrustedHeight     `mapstructure:"trusted_height" json:"trustedHeight"`
+	TrustedValidators TendermintLightClientTrustedValidators `mapstructure:"trusted_validators" json:"trustedValidators"`
 }
 
-type TendermintLightClientUpdateCommit struct {
-	Height     string                                 `json:"height"`
-	Round      int64                                  `json:"round"`
-	BlockID    TendermintLightClientUpdateBlockID     `json:"block_id"`
-	Signatures []TendermintLightClientUpdateSignature `json:"signatures"`
+type TendermintLightClientSignedHeader struct {
+	Header TendermintLightClientSignedHeaderHeader `mapstructure:"header" json:"header"`
+	Commit TendermintLightClientCommit             `mapstructure:"commit" json:"commit"`
 }
 
-type TendermintLightClientUpdateBlockID struct {
-	Hash          string                                   `json:"hash"`
-	PartSetHeader TendermintLightClientUpdatePartSetHeader `json:"part_set_header"`
+type TendermintLightClientCommit struct {
+	Height     int64                            `mapstructure:"height" json:"height,string"`
+	Round      int32                            `mapstructure:"round" json:"round"`
+	BlockID    TendermintLightClientBlockID     `mapstructure:"block_id" json:"blockId"`
+	Signatures []TendermintLightClientSignature `mapstructure:"signatures" json:"signatures"`
 }
 
-type TendermintLightClientUpdatePartSetHeader struct {
-	Total int64  `json:"total"`
-	Hash  string `json:"hash"`
+type TendermintLightClientBlockID struct {
+	Hash          []byte                             `mapstructure:"hash" json:"hash"`
+	PartSetHeader TendermintLightClientPartSetHeader `mapstructure:"part_set_header" json:"partSetHeader"`
 }
 
-type TendermintLightClientUpdateSignature struct {
-	BlockIDFlag      string `json:"block_id_flag"`
-	ValidatorAddress string `json:"validator_address"`
-	Timestamp        string `json:"timestamp"`
-	Signature        string `json:"signature"`
+type TendermintLightClientPartSetHeader struct {
+	Total uint32 `mapstructure:"total" json:"total"`
+	Hash  []byte `mapstructure:"hash" json:"hash"`
 }
 
-type TendermintLightClientUpdateSignedHeaderHeader struct {
-	Version            TendermintLightClientUpdateVersion `json:"version"`
-	ChainID            string                             `json:"chain_id"`
-	Height             string                             `json:"height"`
-	Time               string                             `json:"time"`
-	LastBlockID        TendermintLightClientUpdateBlockID `json:"last_block_id"`
-	LastCommitHash     string                             `json:"last_commit_hash"`
-	DataHash           string                             `json:"dataHash"`
-	ValidatorsHash     string                             `json:"validators_hash"`
-	NextValidatorsHash string                             `json:"next_validators_hash"`
-	ConsensusHash      string                             `json:"consensus_hash"`
-	AppHash            string                             `json:"appHash"`
-	LastResultsHash    string                             `json:"last_results_hash"`
-	EvidenceHash       string                             `json:"evidence_hash"`
-	ProposerAddress    string                             `json:"proposer_address"`
+type TendermintLightClientSignature struct {
+	BlockIDFlag      string    `mapstructure:"block_id_flag" json:"blockIdFlag"`
+	ValidatorAddress []byte    `mapstructure:"validator_address" json:"validatorAddress"`
+	Timestamp        time.Time `mapstructure:"timestamp" json:"timestamp"`
+	Signature        []byte    `mapstructure:"signature" json:"signature"`
 }
 
-type TendermintLightClientUpdateVersion struct {
-	Block string `json:"block"`
-	App   string `json:"app"`
+type TendermintLightClientSignedHeaderHeader struct {
+	Version            TendermintLightClientVersion `mapstructure:"version" json:"version"`
+	ChainID            string                       `mapstructure:"chain_id" json:"chainId"`
+	Height             int64                        `mapstructure:"height" json:"height,string"`
+	Time               time.Time                    `mapstructure:"time" json:"time"`
+	LastBlockID        TendermintLightClientBlockID `mapstructure:"last_block_id" json:"lastBlockId"`
+	LastCommitHash     []byte                       `mapstructure:"last_commit_hash" json:"lastCommitHash"`
+	DataHash           []byte                       `mapstructure:"data_hash" json:"dataHash"`
+	ValidatorsHash     []byte                       `mapstructure:"validators_hash" json:"validatorsHash"`
+	NextValidatorsHash []byte                       `mapstructure:"next_validators_hash" json:"nextValidatorsHash"`
+	ConsensusHash      []byte                       `mapstructure:"consensus_hash" json:"consensusHash"`
+	AppHash            []byte                       `mapstructure:"app_hash" json:"appHash"`
+	LastResultsHash    []byte                       `mapstructure:"last_results_hash" json:"lastResultsHash"`
+	EvidenceHash       []byte                       `mapstructure:"evidence_hash" json:"evidenceHash"`
+	ProposerAddress    []byte                       `mapstructure:"proposer_address" json:"proposerAddress"`
 }
 
-type TendermintLightClientUpdateTrustedHeight struct {
-	RevisionNumber string `json:"revision_number"`
-	RevisionHeight string `json:"revision_height"`
+type TendermintLightClientVersion struct {
+	Block uint64 `mapstructure:"block" json:"block,string"`
+	App   string `mapstructure:"app" json:"app"`
 }
 
-type TendermintLightClientUpdateTrustedValidators struct {
-	Validators       []TendermintLightClientUpdateProposer `json:"validators"`
-	Proposer         TendermintLightClientUpdateProposer   `json:"proposer"`
-	TotalVotingPower string                                `json:"total_voting_power"`
+type TendermintLightClientTrustedHeight struct {
+	RevisionNumber uint64 `mapstructure:"revision_number" json:"revisionNumber,string"`
+	RevisionHeight uint64 `mapstructure:"revision_height" json:"revisionHeight,string"`
 }
 
-type TendermintLightClientUpdateProposer struct {
-	Address          string                            `json:"address"`
-	PubKey           TendermintLightClientUpdatePubKey `json:"pubKey"`
-	VotingPower      string                            `json:"voting_power"`
-	ProposerPriority string                            `json:"proposer_priority"`
+type TendermintLightClientTrustedValidators struct {
+	Validators       []TendermintLightClientProposer `mapstructure:"validators" json:"validators"`
+	Proposer         TendermintLightClientProposer   `mapstructure:"proposer" json:"proposer"`
+	TotalVotingPower string                          `mapstructure:"total_voting_power" json:"totalVotingPower"`
 }
 
-type TendermintLightClientUpdatePubKey struct {
-	Ed25519 string `json:"ed25519"`
+type TendermintLightClientProposer struct {
+	Address          []byte                      `mapstructure:"address" json:"address"`
+	PubKey           TendermintLightClientPubKey `mapstructure:"pub_key" json:"pubKey"`
+	VotingPower      int64                       `mapstructure:"voting_power" json:"votingPower,string"`
+	ProposerPriority int64                       `mapstructure:"proposer_priority" json:"proposerPriority,string"`
+}
+
+type TendermintLightClientPubKey struct {
+	MaybeEd25519   []byte `mapstructure:"ed25519" json:"ed25519,omitempty"`
+	MaybeSecp256K1 []byte `mapstructure:"secp256k1" json:"secp256k1,omitempty"`
 }

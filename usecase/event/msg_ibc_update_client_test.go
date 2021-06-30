@@ -24,101 +24,101 @@ var _ = Describe("Event", func() {
 			anyRawHeader := `
 {
   "@type": "/ibc.lightclients.tendermint.v1.Header",
-  "signed_header": {
+  "signedHeader": {
 	"header": {
 	  "version": {
 		"block": "11",
 		"app": "0"
 	  },
-	  "chain_id": "devnet-2",
+	  "chainId": "devnet-2",
 	  "height": "10",
 	  "time": "2021-06-04T06:32:50.317992Z",
-	  "last_block_id": {
+	  "lastBlockId": {
 		"hash": "fjTfL3Lh/TBPfCgn+3hmM1xatobldIl4VIM4Rc6rFQM=",
-		"part_set_header": {
+		"partSetHeader": {
 		  "total": 1,
 		  "hash": "tRlaaIW4NRm5o/HoovFoiGIvBnhBYYbmymXBanGzAd0="
 		}
 	  },
-	  "last_commit_hash": "jZvjjDeaAPNDQyUiYxqgr2Lg1PD+7it5SdYryI8GvLc=",
-	  "data_hash": "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
-	  "validators_hash": "JfgGoWDACxlYhafc1+k9EfoyeVKb5OKuPCClHSCPAEY=",
-	  "next_validators_hash": "JfgGoWDACxlYhafc1+k9EfoyeVKb5OKuPCClHSCPAEY=",
-	  "consensus_hash": "BICRvH3cKD93v7+R1zxE2ljD34qcvIZ0Bdi389qtoi8=",
-	  "app_hash": "bJyiARV5/N+cnPPqdpdwInBfmm5BGBdjdC/yiChKoVo=",
-	  "last_results_hash": "qY+I1bPrhzX4RpXbyx8pROu/2QKykkA6Aova8FBVDcw=",
-	  "evidence_hash": "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
-	  "proposer_address": "b7Nb1HguYo+UMD7sUjToLIEEcKw="
+	  "lastCommitHash": "jZvjjDeaAPNDQyUiYxqgr2Lg1PD+7it5SdYryI8GvLc=",
+	  "dataHash": "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+	  "validatorsHash": "JfgGoWDACxlYhafc1+k9EfoyeVKb5OKuPCClHSCPAEY=",
+	  "nextValidatorsHash": "JfgGoWDACxlYhafc1+k9EfoyeVKb5OKuPCClHSCPAEY=",
+	  "consensusHash": "BICRvH3cKD93v7+R1zxE2ljD34qcvIZ0Bdi389qtoi8=",
+	  "appHash": "bJyiARV5/N+cnPPqdpdwInBfmm5BGBdjdC/yiChKoVo=",
+	  "lastResultsHash": "qY+I1bPrhzX4RpXbyx8pROu/2QKykkA6Aova8FBVDcw=",
+	  "evidenceHash": "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+	  "proposerAddress": "b7Nb1HguYo+UMD7sUjToLIEEcKw="
 	},
 	"commit": {
 	  "height": "10",
 	  "round": 0,
-	  "block_id": {
+	  "blockId": {
 		"hash": "uZSTJ9c1V0rm3ivA2PSQYPvIIzzwzRvnUSYElD1q86c=",
-		"part_set_header": {
+		"partSetHeader": {
 		  "total": 1,
 		  "hash": "9hgeGjUmYkYySwDxWMPb1kCheR4s68p6kvPo/5Zm6DM="
 		}
 	  },
 	  "signatures": [
 		{
-		  "block_id_flag": "BLOCK_ID_FLAG_COMMIT",
-		  "validator_address": "b7Nb1HguYo+UMD7sUjToLIEEcKw=",
+		  "blockIdFlag": "BLOCK_ID_FLAG_COMMIT",
+		  "validatorAddress": "b7Nb1HguYo+UMD7sUjToLIEEcKw=",
 		  "timestamp": "2021-06-04T06:32:55.678031Z",
 		  "signature": "vHyTqPllhI/7Ta1SRvMi4iVDRbJMISzSZQbyY7naO29duhUyeNSF/kOsBYven5f/1r3Z/PJlD6DERH1iPKDeCw=="
 		}
 	  ]
 	}
   },
-  "validator_set": {
+  "validatorSet": {
 	"validators": [
 	  {
 		"address": "b7Nb1HguYo+UMD7sUjToLIEEcKw=",
-		"pub_key": {
+		"pubKey": {
 		  "ed25519": "awslKyoIYmj2+4JGukqr32eCqj9JMtuSI8xBY102brY="
 		},
-		"voting_power": "10000000000",
-		"proposer_priority": "0"
+		"votingPower": "10000000000",
+		"proposerPriority": "0"
 	  }
 	],
 	"proposer": {
 	  "address": "b7Nb1HguYo+UMD7sUjToLIEEcKw=",
-	  "pub_key": {
+	  "pubKey": {
 		"ed25519": "awslKyoIYmj2+4JGukqr32eCqj9JMtuSI8xBY102brY="
 	  },
-	  "voting_power": "10000000000",
-	  "proposer_priority": "0"
+	  "votingPower": "10000000000",
+	  "proposerPriority": "0"
 	},
-	"total_voting_power": "10000000000"
+	"totalVotingPower": "10000000000"
   },
-  "trusted_height": {
-	"revision_number": "2",
-	"revision_height": "5"
+  "trustedHeight": {
+	"revisionNumber": "2",
+	"revisionHeight": "5"
   },
-  "trusted_validators": {
+  "trustedValidators": {
 	"validators": [
 	  {
 		"address": "b7Nb1HguYo+UMD7sUjToLIEEcKw=",
-		"pub_key": {
+		"pubKey": {
 		  "ed25519": "awslKyoIYmj2+4JGukqr32eCqj9JMtuSI8xBY102brY="
 		},
-		"voting_power": "10000000000",
-		"proposer_priority": "0"
+		"votingPower": "10000000000",
+		"proposerPriority": "0"
 	  }
 	],
 	"proposer": {
 	  "address": "b7Nb1HguYo+UMD7sUjToLIEEcKw=",
-	  "pub_key": {
+	  "pubKey": {
 		"ed25519": "awslKyoIYmj2+4JGukqr32eCqj9JMtuSI8xBY102brY="
 	  },
-	  "voting_power": "10000000000",
-	  "proposer_priority": "0"
+	  "votingPower": "10000000000",
+	  "proposerPriority": "0"
 	},
-	"total_voting_power": "10000000000"
+	"totalVotingPower": "10000000000"
   }
 }
 `
-			var anyHeader ibc_model.TendermintLightClientUpdateHeader
+			var anyHeader ibc_model.TendermintLightClientHeader
 			json.MustUnmarshalFromString(anyRawHeader, &anyHeader)
 
 			anyParams := ibc_model.MsgUpdateClientParams{
@@ -155,7 +155,7 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.MaybeTendermintLightClientUpdate.Header.Type).To(Equal(
 				"/ibc.lightclients.tendermint.v1.Header",
 			))
-			Expect(typedEvent.MaybeTendermintLightClientUpdate.Header.TrustedHeight.RevisionHeight).To(Equal("5"))
+			Expect(typedEvent.MaybeTendermintLightClientUpdate.Header.TrustedHeight.RevisionHeight).To(Equal(uint64(5)))
 			Expect(typedEvent.Signer).To(Equal(anyParams.Signer))
 		})
 
@@ -168,101 +168,101 @@ var _ = Describe("Event", func() {
 			anyRawHeader := `
 {
   "@type": "/ibc.lightclients.tendermint.v1.Header",
-  "signed_header": {
+  "signedHeader": {
 	"header": {
 	  "version": {
 		"block": "11",
 		"app": "0"
 	  },
-	  "chain_id": "devnet-2",
+	  "chainId": "devnet-2",
 	  "height": "10",
 	  "time": "2021-06-04T06:32:50.317992Z",
-	  "last_block_id": {
+	  "lastBlockId": {
 		"hash": "fjTfL3Lh/TBPfCgn+3hmM1xatobldIl4VIM4Rc6rFQM=",
-		"part_set_header": {
+		"partSetHeader": {
 		  "total": 1,
 		  "hash": "tRlaaIW4NRm5o/HoovFoiGIvBnhBYYbmymXBanGzAd0="
 		}
 	  },
-	  "last_commit_hash": "jZvjjDeaAPNDQyUiYxqgr2Lg1PD+7it5SdYryI8GvLc=",
-	  "data_hash": "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
-	  "validators_hash": "JfgGoWDACxlYhafc1+k9EfoyeVKb5OKuPCClHSCPAEY=",
-	  "next_validators_hash": "JfgGoWDACxlYhafc1+k9EfoyeVKb5OKuPCClHSCPAEY=",
-	  "consensus_hash": "BICRvH3cKD93v7+R1zxE2ljD34qcvIZ0Bdi389qtoi8=",
-	  "app_hash": "bJyiARV5/N+cnPPqdpdwInBfmm5BGBdjdC/yiChKoVo=",
-	  "last_results_hash": "qY+I1bPrhzX4RpXbyx8pROu/2QKykkA6Aova8FBVDcw=",
-	  "evidence_hash": "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
-	  "proposer_address": "b7Nb1HguYo+UMD7sUjToLIEEcKw="
+	  "lastCommitHash": "jZvjjDeaAPNDQyUiYxqgr2Lg1PD+7it5SdYryI8GvLc=",
+	  "dataHash": "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+	  "validatorsHash": "JfgGoWDACxlYhafc1+k9EfoyeVKb5OKuPCClHSCPAEY=",
+	  "nextValidatorsHash": "JfgGoWDACxlYhafc1+k9EfoyeVKb5OKuPCClHSCPAEY=",
+	  "consensusHash": "BICRvH3cKD93v7+R1zxE2ljD34qcvIZ0Bdi389qtoi8=",
+	  "appHash": "bJyiARV5/N+cnPPqdpdwInBfmm5BGBdjdC/yiChKoVo=",
+	  "lastResultsHash": "qY+I1bPrhzX4RpXbyx8pROu/2QKykkA6Aova8FBVDcw=",
+	  "evidenceHash": "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+	  "proposerAddress": "b7Nb1HguYo+UMD7sUjToLIEEcKw="
 	},
 	"commit": {
 	  "height": "10",
 	  "round": 0,
-	  "block_id": {
+	  "blockId": {
 		"hash": "uZSTJ9c1V0rm3ivA2PSQYPvIIzzwzRvnUSYElD1q86c=",
-		"part_set_header": {
+		"partSetHeader": {
 		  "total": 1,
 		  "hash": "9hgeGjUmYkYySwDxWMPb1kCheR4s68p6kvPo/5Zm6DM="
 		}
 	  },
 	  "signatures": [
 		{
-		  "block_id_flag": "BLOCK_ID_FLAG_COMMIT",
-		  "validator_address": "b7Nb1HguYo+UMD7sUjToLIEEcKw=",
+		  "blockIdFlag": "BLOCK_ID_FLAG_COMMIT",
+		  "validatorAddress": "b7Nb1HguYo+UMD7sUjToLIEEcKw=",
 		  "timestamp": "2021-06-04T06:32:55.678031Z",
 		  "signature": "vHyTqPllhI/7Ta1SRvMi4iVDRbJMISzSZQbyY7naO29duhUyeNSF/kOsBYven5f/1r3Z/PJlD6DERH1iPKDeCw=="
 		}
 	  ]
 	}
   },
-  "validator_set": {
+  "validatorSet": {
 	"validators": [
 	  {
 		"address": "b7Nb1HguYo+UMD7sUjToLIEEcKw=",
-		"pub_key": {
+		"pubKey": {
 		  "ed25519": "awslKyoIYmj2+4JGukqr32eCqj9JMtuSI8xBY102brY="
 		},
-		"voting_power": "10000000000",
-		"proposer_priority": "0"
+		"votingPower": "10000000000",
+		"proposerPriority": "0"
 	  }
 	],
 	"proposer": {
 	  "address": "b7Nb1HguYo+UMD7sUjToLIEEcKw=",
-	  "pub_key": {
+	  "pubKey": {
 		"ed25519": "awslKyoIYmj2+4JGukqr32eCqj9JMtuSI8xBY102brY="
 	  },
-	  "voting_power": "10000000000",
-	  "proposer_priority": "0"
+	  "votingPower": "10000000000",
+	  "proposerPriority": "0"
 	},
-	"total_voting_power": "10000000000"
+	"totalVotingPower": "10000000000"
   },
-  "trusted_height": {
-	"revision_number": "2",
-	"revision_height": "5"
+  "trustedHeight": {
+	"revisionNumber": "2",
+	"revisionHeight": "5"
   },
-  "trusted_validators": {
+  "trustedValidators": {
 	"validators": [
 	  {
 		"address": "b7Nb1HguYo+UMD7sUjToLIEEcKw=",
-		"pub_key": {
+		"pubKey": {
 		  "ed25519": "awslKyoIYmj2+4JGukqr32eCqj9JMtuSI8xBY102brY="
 		},
-		"voting_power": "10000000000",
-		"proposer_priority": "0"
+		"votingPower": "10000000000",
+		"proposerPriority": "0"
 	  }
 	],
 	"proposer": {
 	  "address": "b7Nb1HguYo+UMD7sUjToLIEEcKw=",
-	  "pub_key": {
+	  "pubKey": {
 		"ed25519": "awslKyoIYmj2+4JGukqr32eCqj9JMtuSI8xBY102brY="
 	  },
-	  "voting_power": "10000000000",
-	  "proposer_priority": "0"
+	  "votingPower": "10000000000",
+	  "proposerPriority": "0"
 	},
-	"total_voting_power": "10000000000"
+	"totalVotingPower": "10000000000"
   }
 }
 `
-			var anyHeader ibc_model.TendermintLightClientUpdateHeader
+			var anyHeader ibc_model.TendermintLightClientHeader
 			json.MustUnmarshalFromString(anyRawHeader, &anyHeader)
 
 			anyParams := ibc_model.MsgUpdateClientParams{
@@ -299,7 +299,7 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.MaybeTendermintLightClientUpdate.Header.Type).To(Equal(
 				"/ibc.lightclients.tendermint.v1.Header",
 			))
-			Expect(typedEvent.MaybeTendermintLightClientUpdate.Header.TrustedHeight.RevisionHeight).To(Equal("5"))
+			Expect(typedEvent.MaybeTendermintLightClientUpdate.Header.TrustedHeight.RevisionHeight).To(Equal(uint64(5)))
 			Expect(typedEvent.Signer).To(Equal(anyParams.Signer))
 		})
 	})

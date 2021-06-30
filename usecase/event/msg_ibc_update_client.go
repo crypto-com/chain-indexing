@@ -9,14 +9,14 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_UPDATE_CLIENT = "MsgUpdateClientInit"
-const MSG_IBC_UPDATE_CLIENT_CREATED = "MsgUpdateClientInitCreated"
-const MSG_IBC_UPDATE_CLIENT_FAILED = "MsgUpdateClientInitFailed"
+const MSG_IBC_UPDATE_CLIENT = "MsgUpdateClient"
+const MSG_IBC_UPDATE_CLIENT_CREATED = "MsgUpdateClientCreated"
+const MSG_IBC_UPDATE_CLIENT_FAILED = "MsgUpdateClientFailed"
 
 type MsgIBCUpdateClient struct {
 	MsgBase
 
-	ibc_model.MsgUpdateClientParams
+	ibc_model.MsgUpdateClientParams `json:"params"`
 }
 
 // NewMsgDelegate creates a new instance of MsgDelegate

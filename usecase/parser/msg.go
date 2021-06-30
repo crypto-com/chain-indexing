@@ -110,6 +110,8 @@ func ParseBlockResultsTxsMsgToCommands(
 				msgCommands = parseMsgNFTBurnNFT(msgCommonParams, msg)
 			case "/ibc.core.client.v1.MsgCreateClient":
 				msgCommands = ibcmsg.ParseMsgCreateClient(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.core.client.v1.MsgUpdateClient":
+				msgCommands = ibcmsg.ParseMsgUpdateClient(msgCommonParams, msg)
 			case "/ibc.core.connection.v1.MsgConnectionOpenInit":
 				msgCommands = ibcmsg.ParseMsgConnectionOpenInit(msgCommonParams, txsResult, msgIndex, msg)
 			}

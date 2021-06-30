@@ -2,6 +2,7 @@ package ibcmsg
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
@@ -24,11 +25,11 @@ func ParseMsgCreateClient(
 	clientStateType := msg["client_state"].(map[string]interface{})["@type"]
 	if clientStateType != "/ibc.lightclients.tendermint.v1.ClientState" {
 		// TODO: SoloMachine and Localhost LightClient
-		panic(fmt.Sprintf("Unsupported Light Client Type: %s", clientStateType))
+		return []command.Command{}
 	}
 
 	var rawMsg ibc_model.RawMsgCreateTendermintLightClient
-	clientStateDecoderConfig := &mapstructure.DecoderConfig{
+	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
@@ -37,12 +38,12 @@ func ParseMsgCreateClient(
 		),
 		Result: &rawMsg,
 	}
-	decoder, decodeErr := mapstructure.NewDecoder(clientStateDecoderConfig)
-	if decodeErr != nil {
-		panic(fmt.Errorf("error creating client state decoder: %v", decodeErr))
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating MsgCreateClient decoder: %v", decoderErr))
 	}
 	if err := decoder.Decode(msg); err != nil {
-		panic(fmt.Errorf("error decoding message: %v", err))
+		panic(fmt.Errorf("error decoding MsgCreateClient: %v", err))
 	}
 
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
@@ -107,17 +108,42 @@ func ParseMsgConnectionOpenInit(
 	)}
 }
 
-//func ParseMsgUpdateClient(
-//	msgCommonParams event.MsgCommonParams,
-//	txsResult model.BlockResultsTxsResult,
-//	msgIndex int,
-//	msg map[string]interface{},
-//) []command.Command {
-//	header := msg["header"].(map[string]interface{})
-//	if headerx["@type"]
-//    params := ibc_model.MsgUpdateClientParams{
-//		MaybeTendermintLightClientUpdate: nil,
-//		ClientID:                         "",
-//		Signer:                           "",
-//	}
-//}
+func ParseMsgUpdateClient(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	headerType := msg["header"].(map[string]interface{})["@type"]
+	if headerType != "/ibc.lightclients.tendermint.v1.Header" {
+		// TODO: SoloMachine and Localhost LightClient
+		return []command.Command{}
+	}
+
+	var rawMsg ibc_model.RawMsgUpdateTendermintLightClient
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating MsgUpdateClient decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding MsgUpdateClient: %v", err))
+	}
+
+	params := ibc_model.MsgUpdateClientParams{
+		MaybeTendermintLightClientUpdate: &ibc_model.TendermintLightClientUpdate{Header: rawMsg.Header},
+		ClientID:                         rawMsg.ClientID,
+		Signer:                           rawMsg.Signer,
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgIBCUpdateClient(
+		msgCommonParams,
+
+		params,
+	)}
+}
