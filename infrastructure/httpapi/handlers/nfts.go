@@ -161,10 +161,16 @@ func (handler *NFTs) ListTokensByDenomId(ctx *fasthttp.RequestCtx) {
 	}
 
 	mintedAtOrder := view.ORDER_ASC
+	var lastEditedAtOrder view.ORDER
 	queryArgs := ctx.QueryArgs()
 	if queryArgs.Has("order") {
-		if string(queryArgs.Peek("order")) == "mintedAt.desc" {
+		orderArg := string(queryArgs.Peek("order"))
+		if orderArg == "mintedAt.desc" {
 			mintedAtOrder = view.ORDER_DESC
+		} else if orderArg == "lastEditedAt" {
+			lastEditedAtOrder = view.ORDER_ASC
+		} else if orderArg == "lastEditedAt.desc" {
+			lastEditedAtOrder = view.ORDER_DESC
 		}
 	}
 
@@ -174,10 +180,12 @@ func (handler *NFTs) ListTokensByDenomId(ctx *fasthttp.RequestCtx) {
 		MaybeMinter:  nil,
 		MaybeOwner:   nil,
 	}
+	order := nft_view.TokenListOrder{
+		MintedAt:     mintedAtOrder,
+		LastEditedAt: lastEditedAtOrder,
+	}
 
-	denoms, paginationResult, err := handler.tokensView.List(filter, nft_view.TokenListOrder{
-		MintedAt: mintedAtOrder,
-	}, pagination)
+	denoms, paginationResult, err := handler.tokensView.List(filter, order, pagination)
 	if err != nil {
 		handler.logger.Errorf("error listing NFT tokens: %v", err)
 		httpapi.InternalServerError(ctx)
@@ -231,10 +239,16 @@ func (handler *NFTs) ListTokensByDrop(ctx *fasthttp.RequestCtx) {
 	}
 
 	mintedAtOrder := view.ORDER_ASC
+	var lastEditedAtOrder view.ORDER
 	queryArgs := ctx.QueryArgs()
 	if queryArgs.Has("order") {
-		if string(queryArgs.Peek("order")) == "mintedAt.desc" {
+		orderArg := string(queryArgs.Peek("order"))
+		if orderArg == "mintedAt.desc" {
 			mintedAtOrder = view.ORDER_DESC
+		} else if orderArg == "lastEditedAt" {
+			lastEditedAtOrder = view.ORDER_ASC
+		} else if orderArg == "lastEditedAt.desc" {
+			lastEditedAtOrder = view.ORDER_DESC
 		}
 	}
 
@@ -244,10 +258,12 @@ func (handler *NFTs) ListTokensByDrop(ctx *fasthttp.RequestCtx) {
 		MaybeMinter:  nil,
 		MaybeOwner:   nil,
 	}
+	order := nft_view.TokenListOrder{
+		MintedAt:     mintedAtOrder,
+		LastEditedAt: lastEditedAtOrder,
+	}
 
-	denoms, paginationResult, err := handler.tokensView.List(filter, nft_view.TokenListOrder{
-		MintedAt: mintedAtOrder,
-	}, pagination)
+	denoms, paginationResult, err := handler.tokensView.List(filter, order, pagination)
 	if err != nil {
 		handler.logger.Errorf("error listing NFT tokens by drop: %v", err)
 		httpapi.InternalServerError(ctx)
@@ -267,10 +283,16 @@ func (handler *NFTs) ListTokensByAccount(ctx *fasthttp.RequestCtx) {
 	}
 
 	mintedAtOrder := view.ORDER_ASC
+	var lastEditedAtOrder view.ORDER
 	queryArgs := ctx.QueryArgs()
 	if queryArgs.Has("order") {
-		if string(queryArgs.Peek("order")) == "mintedAt.desc" {
+		orderArg := string(queryArgs.Peek("order"))
+		if orderArg == "mintedAt.desc" {
 			mintedAtOrder = view.ORDER_DESC
+		} else if orderArg == "lastEditedAt" {
+			lastEditedAtOrder = view.ORDER_ASC
+		} else if orderArg == "lastEditedAt.desc" {
+			lastEditedAtOrder = view.ORDER_DESC
 		}
 	}
 
@@ -280,10 +302,12 @@ func (handler *NFTs) ListTokensByAccount(ctx *fasthttp.RequestCtx) {
 		MaybeMinter:  nil,
 		MaybeOwner:   &accountParam,
 	}
+	order := nft_view.TokenListOrder{
+		MintedAt:     mintedAtOrder,
+		LastEditedAt: lastEditedAtOrder,
+	}
 
-	denoms, paginationResult, err := handler.tokensView.List(filter, nft_view.TokenListOrder{
-		MintedAt: mintedAtOrder,
-	}, pagination)
+	denoms, paginationResult, err := handler.tokensView.List(filter, order, pagination)
 	if err != nil {
 		handler.logger.Errorf("error listing NFT tokens by account: %v", err)
 		httpapi.InternalServerError(ctx)

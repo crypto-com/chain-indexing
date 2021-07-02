@@ -244,6 +244,10 @@ func (tokensView *Tokens) List(
 
 	if order.MintedAt == view.ORDER_DESC {
 		stmtBuilder = stmtBuilder.OrderBy(fmt.Sprintf("%s.minted_at DESC", TOKENS_TABLE_NAME))
+	} else if order.LastEditedAt == view.ORDER_ASC {
+		stmtBuilder = stmtBuilder.OrderBy(fmt.Sprintf("%s.last_edited_at", TOKENS_TABLE_NAME))
+	} else if order.LastEditedAt == view.ORDER_DESC {
+		stmtBuilder = stmtBuilder.OrderBy(fmt.Sprintf("%s.last_edited_at DESC", TOKENS_TABLE_NAME))
 	} else {
 		stmtBuilder = stmtBuilder.OrderBy(fmt.Sprintf("%s.minted_at", TOKENS_TABLE_NAME))
 	}
@@ -402,7 +406,8 @@ type TokenListFilter struct {
 }
 
 type TokenListOrder struct {
-	MintedAt view.ORDER
+	MintedAt     view.ORDER
+	LastEditedAt view.ORDER
 }
 
 type TokenRowWithDenomname struct {
