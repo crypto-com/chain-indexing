@@ -345,6 +345,51 @@ func ParseMsgChannelOpenTry(
 	)}
 }
 
+func ParseMsgChannelOpenAck(
+	msgCommonParams event.MsgCommonParams,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgChannelOpenAck
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			StringToDurationHookFunc(),
+			StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgChannelOpenAck decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgChannelOpenAck: %v", err))
+	}
+
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	event := log.GetEventByType("channel_open_ack")
+	if event == nil {
+		panic("missing `channel_open_ack` event in TxsResult log")
+	}
+
+	params := ibc_model.MsgChannelOpenAckParams{
+		RawMsgChannelOpenAck: rawMsg,
+
+		CounterpartyPortID: event.MustGetAttributeByKey("counterparty_port_id"),
+		ConnectionID:       event.MustGetAttributeByKey("connection_id"),
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenAck(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
 func ParseMsgUpdateClient(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},

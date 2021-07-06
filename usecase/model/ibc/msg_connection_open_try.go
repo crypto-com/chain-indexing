@@ -19,7 +19,7 @@ type MsgConnectionOpenTryBaseParams struct {
 	ClientID             string                          `mapstructure:"client_id" json:"clientId"`
 	PreviousConnectionID string                          `mapstructure:"previous_connection_id" json:"previousConnectionId"`
 	Counterparty         ConnectionCounterparty          `mapstructure:"counterparty" json:"counterparty"`
-	DelayPeriod          string                          `mapstructure:"delay_period" json:"delayPeriod"`
+	DelayPeriod          uint64                          `mapstructure:"delay_period" json:"delayPeriod,string"`
 	CounterpartyVersions []ConnectionCounterpartyVersion `mapstructure:"counterparty_versions" json:"counterpartyVersions"`
 	ProofHeight          Height                          `mapstructure:"proof_height" json:"proofHeight"`
 	ProofInit            string                          `mapstructure:"proof_init" json:"proofInit"`
