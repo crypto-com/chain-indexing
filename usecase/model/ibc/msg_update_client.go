@@ -5,8 +5,11 @@ import "time"
 type MsgUpdateClientParams struct {
 	MaybeTendermintLightClientUpdate *TendermintLightClientUpdate `json:"maybeTendermintLightClientUpdate"`
 	// TODO: SoloMachine and Localhost LightClient
-	ClientID string `json:"clientId"`
-	Signer   string `json:"signer"`
+
+	ClientID        string `json:"clientId"`
+	ClientType      string `json:"clientType"`
+	ConsensusHeight string `json:"consensusHeight"`
+	Signer          string `json:"signer"`
 }
 
 type TendermintLightClientUpdate struct {

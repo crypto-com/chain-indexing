@@ -20,6 +20,8 @@ var _ = Describe("Event", func() {
 			anyTxHash := "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416"
 			anyMsgIndex := 2
 			anyClientId := "07-tendermint-0"
+			anyClientType := "07-tendermint"
+			anyConsensusHeight := "2-17"
 			anySigner := "cro1kkxdtp7yjtprvf2memjy8lmh4spfevea9yjxgn"
 			anyRawHeader := `
 {
@@ -124,6 +126,8 @@ var _ = Describe("Event", func() {
 			anyParams := ibc_model.MsgUpdateClientParams{
 				MaybeTendermintLightClientUpdate: &ibc_model.TendermintLightClientUpdate{Header: anyHeader},
 				ClientID:                         anyClientId,
+				ClientType:                       anyClientType,
+				ConsensusHeight:                  anyConsensusHeight,
 				Signer:                           anySigner,
 			}
 
@@ -151,6 +155,8 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 			Expect(typedEvent.ClientID).To(Equal(anyParams.ClientID))
+			Expect(typedEvent.ClientType).To(Equal(anyParams.ClientType))
+			Expect(typedEvent.ConsensusHeight).To(Equal(anyParams.ConsensusHeight))
 			Expect(typedEvent.MaybeTendermintLightClientUpdate).NotTo(BeNil())
 			Expect(typedEvent.MaybeTendermintLightClientUpdate.Header.Type).To(Equal(
 				"/ibc.lightclients.tendermint.v1.Header",
@@ -164,6 +170,8 @@ var _ = Describe("Event", func() {
 			anyTxHash := "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416"
 			anyMsgIndex := 2
 			anyClientId := "07-tendermint-0"
+			anyClientType := "07-tendermint"
+			anyConsensusHeight := "2-17"
 			anySigner := "cro1kkxdtp7yjtprvf2memjy8lmh4spfevea9yjxgn"
 			anyRawHeader := `
 {
@@ -268,6 +276,8 @@ var _ = Describe("Event", func() {
 			anyParams := ibc_model.MsgUpdateClientParams{
 				MaybeTendermintLightClientUpdate: &ibc_model.TendermintLightClientUpdate{Header: anyHeader},
 				ClientID:                         anyClientId,
+				ClientType:                       anyClientType,
+				ConsensusHeight:                  anyConsensusHeight,
 				Signer:                           anySigner,
 			}
 
@@ -295,6 +305,8 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 			Expect(typedEvent.ClientID).To(Equal(anyParams.ClientID))
+			Expect(typedEvent.ClientType).To(Equal(anyParams.ClientType))
+			Expect(typedEvent.ConsensusHeight).To(Equal(anyParams.ConsensusHeight))
 			Expect(typedEvent.MaybeTendermintLightClientUpdate).NotTo(BeNil())
 			Expect(typedEvent.MaybeTendermintLightClientUpdate.Header.Type).To(Equal(
 				"/ibc.lightclients.tendermint.v1.Header",

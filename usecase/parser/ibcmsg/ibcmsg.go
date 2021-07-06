@@ -392,6 +392,8 @@ func ParseMsgChannelOpenAck(
 
 func ParseMsgUpdateClient(
 	msgCommonParams event.MsgCommonParams,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
 	msg map[string]interface{},
 ) []command.Command {
 	headerType := msg["header"].(map[string]interface{})["@type"]
@@ -417,10 +419,19 @@ func ParseMsgUpdateClient(
 		panic(fmt.Errorf("error decoding MsgUpdateClient: %v", err))
 	}
 
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	event := log.GetEventByType("update_client")
+	if event == nil {
+		panic("missing `update_client` event in TxsResult log")
+	}
+
 	params := ibc_model.MsgUpdateClientParams{
 		MaybeTendermintLightClientUpdate: &ibc_model.TendermintLightClientUpdate{Header: rawMsg.Header},
-		ClientID:                         rawMsg.ClientID,
-		Signer:                           rawMsg.Signer,
+
+		ClientID:        rawMsg.ClientID,
+		ClientType:      event.MustGetAttributeByKey("client_type"),
+		ConsensusHeight: event.MustGetAttributeByKey("consensus_height"),
+		Signer:          rawMsg.Signer,
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCUpdateClient(
