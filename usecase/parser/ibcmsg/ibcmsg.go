@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/crypto-com/chain-indexing/internal/typeconv"
+
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -481,6 +483,54 @@ func ParseMsgUpdateClient(
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCUpdateClient(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
+func ParseMsgTransfer(
+	msgCommonParams event.MsgCommonParams,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgTransfer
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			StringToDurationHookFunc(),
+			StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgTransfer decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgTransfer: %v", err))
+	}
+
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	event := log.GetEventByType("send_packet")
+	if event == nil {
+		panic("missing `send_packet` event in TxsResult log")
+	}
+
+	params := ibc_model.MsgTransferParams{
+		RawMsgTransfer: rawMsg,
+
+		PacketSequence:     typeconv.MustAtou64(event.MustGetAttributeByKey("packet_sequence")),
+		DestinationPort:    event.MustGetAttributeByKey("packet_dst_port"),
+		DestinationChannel: event.MustGetAttributeByKey("packet_dst_channel"),
+		ChannelOrdering:    event.MustGetAttributeByKey("packet_channel_ordering"),
+		ConnectionID:       event.MustGetAttributeByKey("packet_connection"),
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgIBCTransferTransfer(
 		msgCommonParams,
 
 		params,

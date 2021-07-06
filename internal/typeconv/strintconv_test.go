@@ -38,13 +38,37 @@ var _ = Describe("MustAtou32", func() {
 		}).To(Panic())
 	})
 
-	It("should panic when the intever value is negative", func() {
+	It("should panic when the integer value is negative", func() {
 		Expect(func() {
 			typeconv.MustAtou32("-1001")
 		}).To(Panic())
 	})
 
-	It("should return uint32 representation of the intever value", func() {
+	It("should return uint32 representation of the integer value", func() {
 		Expect(typeconv.MustAtou32("1001")).To(Equal(uint32(1001)))
+	})
+})
+
+var _ = Describe("MustAtou64", func() {
+	It("should panic when the string is not an integer value", func() {
+		Expect(func() {
+			typeconv.MustAtou64("invalid")
+		}).To(Panic())
+	})
+
+	It("should panic when the integer value exceed uint64", func() {
+		Expect(func() {
+			typeconv.MustAtou64("18446744073709551616")
+		}).To(Panic())
+	})
+
+	It("should panic when the integer value is negative", func() {
+		Expect(func() {
+			typeconv.MustAtou64("-1001")
+		}).To(Panic())
+	})
+
+	It("should return uint64 representation of the integer value", func() {
+		Expect(typeconv.MustAtou64("1001")).To(Equal(uint64(1001)))
 	})
 })
