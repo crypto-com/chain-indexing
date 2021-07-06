@@ -390,6 +390,52 @@ func ParseMsgChannelOpenAck(
 	)}
 }
 
+func ParseMsgChannelOpenConfirm(
+	msgCommonParams event.MsgCommonParams,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgChannelOpenConfirm
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			StringToDurationHookFunc(),
+			StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgChannelOpenConfirm decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgChannelOpenConfirm: %v", err))
+	}
+
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	event := log.GetEventByType("channel_open_confirm")
+	if event == nil {
+		panic("missing `channel_open_confirm` event in TxsResult log")
+	}
+
+	params := ibc_model.MsgChannelOpenConfirmParams{
+		RawMsgChannelOpenConfirm: rawMsg,
+
+		CounterpartyChannelID: event.MustGetAttributeByKey("counterparty_channel_id"),
+		CounterpartyPortID:    event.MustGetAttributeByKey("counterparty_port_id"),
+		ConnectionID:          event.MustGetAttributeByKey("connection_id"),
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenConfirm(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
 func ParseMsgUpdateClient(
 	msgCommonParams event.MsgCommonParams,
 	txsResult model.BlockResultsTxsResult,
