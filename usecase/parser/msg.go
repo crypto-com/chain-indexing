@@ -118,6 +118,12 @@ func ParseBlockResultsTxsMsgToCommands(
 				msgCommands = ibcmsg.ParseMsgConnectionOpenTry(msgCommonParams, txsResult, msgIndex, msg)
 			case "/ibc.core.connection.v1.MsgConnectionOpenAck":
 				msgCommands = ibcmsg.ParseMsgConnectionOpenAck(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.core.connection.v1.MsgConnectionOpenConfirm":
+				msgCommands = ibcmsg.ParseMsgConnectionOpenConfirm(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.core.channel.v1.MsgChannelOpenInit":
+				msgCommands = ibcmsg.ParseMsgChannelOpenInit(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.core.channel.v1.MsgChannelOpenTry":
+				msgCommands = ibcmsg.ParseMsgChannelOpenTry(msgCommonParams, txsResult, msgIndex, msg)
 			}
 
 			commands = append(commands, msgCommands...)

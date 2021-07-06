@@ -48,7 +48,7 @@ func (event *MsgIBCConnectionOpenAck) String() string {
 	return render.Render(event)
 }
 
-// DecodeMsgIBCConnectionOpenTry decodes the event from encoded bytes
+// DecodeMsgIBCConnectionOpenAck decodes the event from encoded bytes
 func DecodeMsgIBCConnectionOpenAck(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()

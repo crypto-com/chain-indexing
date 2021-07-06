@@ -210,6 +210,141 @@ func ParseMsgConnectionOpenAck(
 	)}
 }
 
+func ParseMsgConnectionOpenConfirm(
+	msgCommonParams event.MsgCommonParams,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgConnectionOpenConfirm
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			StringToDurationHookFunc(),
+			StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating MsgConnectionOpenConfirm decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding MsgConnectionOpenConfirm: %v", err))
+	}
+
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	event := log.GetEventByType("connection_open_confirm")
+	if event == nil {
+		panic("missing `connection_open_confirm` event in TxsResult log")
+	}
+
+	params := ibc_model.MsgConnectionOpenConfirmParams{
+		RawMsgConnectionOpenConfirm: rawMsg,
+
+		ClientID:                 event.MustGetAttributeByKey("client_id"),
+		CounterpartyClientID:     event.MustGetAttributeByKey("counterparty_client_id"),
+		CounterpartyConnectionID: event.MustGetAttributeByKey("counterparty_connection_id"),
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenConfirm(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
+func ParseMsgChannelOpenInit(
+	msgCommonParams event.MsgCommonParams,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgChannelOpenInit
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			StringToDurationHookFunc(),
+			StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgChannelOpenInit decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgChannelOpenInit: %v", err))
+	}
+
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	event := log.GetEventByType("channel_open_init")
+	if event == nil {
+		panic("missing `channel_open_init` event in TxsResult log")
+	}
+
+	params := ibc_model.MsgChannelOpenInitParams{
+		RawMsgChannelOpenInit: rawMsg,
+
+		ChannelID: event.MustGetAttributeByKey("channel_id"),
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenInit(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
+func ParseMsgChannelOpenTry(
+	msgCommonParams event.MsgCommonParams,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgChannelOpenTry
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			StringToDurationHookFunc(),
+			StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgChannelOpenTry decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgChannelOpenTry: %v", err))
+	}
+
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	event := log.GetEventByType("channel_open_try")
+	if event == nil {
+		panic("missing `channel_open_try` event in TxsResult log")
+	}
+
+	params := ibc_model.MsgChannelOpenTryParams{
+		RawMsgChannelOpenTry: rawMsg,
+
+		ChannelID:    event.MustGetAttributeByKey("channel_id"),
+		ConnectionID: event.MustGetAttributeByKey("connection_id"),
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenTry(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
 func ParseMsgUpdateClient(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
