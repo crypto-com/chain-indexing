@@ -56,7 +56,7 @@ var _ = Describe("Event", func() {
   "signer": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"
 }
 `, &anyRawValue)
-			decoder.Decode(anyRawValue)
+			must.Do(decoder.Decode(anyRawValue))
 
 			anyParams := ibc_model.MsgChannelOpenAckParams{
 				RawMsgChannelOpenAck: anyRawMsgChannelOpenAck,
