@@ -130,6 +130,8 @@ func ParseBlockResultsTxsMsgToCommands(
 				msgCommands = ibcmsg.ParseMsgChannelOpenConfirm(msgCommonParams, txsResult, msgIndex, msg)
 			case "/ibc.applications.transfer.v1.MsgTransfer":
 				msgCommands = ibcmsg.ParseMsgTransfer(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.core.channel.v1.MsgRecvPacket":
+				msgCommands = ibcmsg.ParseMsgRecvPacket(msgCommonParams, txsResult, msgIndex, msg)
 			}
 
 			commands = append(commands, msgCommands...)
