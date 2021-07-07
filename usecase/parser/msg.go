@@ -132,6 +132,8 @@ func ParseBlockResultsTxsMsgToCommands(
 				msgCommands = ibcmsg.ParseMsgTransfer(msgCommonParams, txsResult, msgIndex, msg)
 			case "/ibc.core.channel.v1.MsgRecvPacket":
 				msgCommands = ibcmsg.ParseMsgRecvPacket(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.core.channel.v1.MsgAcknowledgement":
+				msgCommands = ibcmsg.ParseMsgAcknowledgement(msgCommonParams, txsResult, msgIndex, msg)
 			case "/ibc.core.channel.v1.MsgTimeout":
 				msgCommands = ibcmsg.ParseMsgTimeout(msgCommonParams, txsResult, msgIndex, msg)
 			case "/ibc.core.channel.v1.MsgTimeoutOnClose":

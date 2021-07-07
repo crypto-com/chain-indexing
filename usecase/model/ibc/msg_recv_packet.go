@@ -21,18 +21,11 @@ type RawMsgRecvPacket struct {
 }
 
 type MsgRecvPacketFungibleTokenPacketData struct {
-	RawMsgRecvPacketFungibleTokenPacketData
+	FungibleTokenPacketData
 
 	Success                bool   `json:"success"`
 	DenominationTraceHash  string `json:"denominationTraceHash"`
 	DenominationTraceDenom string `json:"denominationTraceDenom"`
-}
-
-type RawMsgRecvPacketFungibleTokenPacketData struct {
-	Sender   string `mapstructure:"sender" json:"sender"`
-	Receiver string `mapstructure:"receiver" json:"receiver"`
-	Denom    string `mapstructure:"denom" json:"denom"`
-	Amount   uint64 `mapstructure:"amount" json:"amount,string"`
 }
 
 type MsgRecvPacketPacketAck struct {

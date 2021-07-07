@@ -1,6 +1,7 @@
 package ibcmsg
 
 import (
+	"bytes"
 	"encoding/base64"
 	"fmt"
 	"strings"
@@ -580,13 +581,13 @@ func ParseMsgRecvPacket(
 		panic(fmt.Errorf("error decoding RawMsgRecvPacket: %v", err))
 	}
 
-	if !isPacketMsgTransfer(log, rawMsg) {
+	if !isPacketMsgTransfer(log, rawMsg.Packet) {
 		// unsupported application
 		return []command.Command{}
 	}
 
 	// Transfer application, MsgTransfer
-	var rawFungibleTokenPacketData ibc_model.RawMsgRecvPacketFungibleTokenPacketData
+	var rawFungibleTokenPacketData ibc_model.FungibleTokenPacketData
 	rawPacketData := base64_internal.MustDecodeString(rawMsg.Packet.Data)
 	json.MustUnmarshal(rawPacketData, &rawFungibleTokenPacketData)
 
@@ -618,7 +619,7 @@ func ParseMsgRecvPacket(
 		Application: "transfer",
 		MessageType: "MsgTransfer",
 		MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
-			RawMsgRecvPacketFungibleTokenPacketData: rawFungibleTokenPacketData,
+			FungibleTokenPacketData: rawFungibleTokenPacketData,
 			// success value inverted bug: https://github.com/cosmos/cosmos-sdk/pull/9640
 			Success:                fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "false",
 			DenominationTraceHash:  denominationTraceEvent.MustGetAttributeByKey("trace_hash"),
@@ -638,20 +639,94 @@ func ParseMsgRecvPacket(
 	)}
 }
 
+func ParseMsgAcknowledgement(
+	msgCommonParams event.MsgCommonParams,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msg map[string]interface{},
+) []command.Command {
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+
+	var rawMsg ibc_model.RawMsgAcknowledgement
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			StringToDurationHookFunc(),
+			StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgAcknowledgement decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgAcknowledgement: %v", err))
+	}
+
+	if !isPacketMsgTransfer(log, rawMsg.Packet) {
+		// unsupported application
+		return []command.Command{}
+	}
+
+	// Transfer application, MsgTransfer
+	var rawFungibleTokenPacketData ibc_model.FungibleTokenPacketData
+	rawPacketData := base64_internal.MustDecodeString(rawMsg.Packet.Data)
+	json.MustUnmarshal(rawPacketData, &rawFungibleTokenPacketData)
+
+	fungibleTokenPacketEvent := log.GetEventByType("fungible_token_packet")
+	if fungibleTokenPacketEvent == nil {
+		panic("missing `fungible_token_packet` event in TxsResult log")
+	}
+
+	acknowledgePacketEvent := log.GetEventByType("acknowledge_packet")
+	if acknowledgePacketEvent == nil {
+		panic("missing `acknowledge_packet` event in TxsResult log")
+	}
+
+	params := ibc_model.MsgAcknowledgementParams{
+		RawMsgAcknowledgement: rawMsg,
+
+		Application: "transfer",
+		MessageType: "MsgTransfer",
+		MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
+			FungibleTokenPacketData: rawFungibleTokenPacketData,
+			// https://github.com/cosmos/ibc-go/blob/e98838612a4fa5d240e392aad3409db5ec428f50/modules/apps/transfer/module.go#L327
+			Success: bytes.Compare(
+				[]byte(fungibleTokenPacketEvent.MustGetAttributeByKey("success")),
+				[]byte{byte(1)},
+			) == 0,
+			Acknowledgement: fungibleTokenPacketEvent.MustGetAttributeByKey("acknowledgement"),
+		},
+
+		PacketSequence:  typeconv.MustAtou64(acknowledgePacketEvent.MustGetAttributeByKey("packet_sequence")),
+		ChannelOrdering: acknowledgePacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
+		ConnectionID:    acknowledgePacketEvent.MustGetAttributeByKey("packet_connection"),
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgIBCAcknowledgement(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
 func isPacketMsgTransfer(
 	log *utils.ParsedTxsResultLog,
-	rawMsgRecvPacket ibc_model.RawMsgRecvPacket,
+	packet ibc_model.Packet,
 ) bool {
 	if !log.HasEvent("fungible_token_packet") {
 		return false
 	}
 
-	if rawMsgRecvPacket.Packet.DestinationPort != "transfer" {
+	if packet.DestinationPort != "transfer" {
 		return false
 	}
 
-	var fungiblePacketData ibc_model.RawMsgRecvPacketFungibleTokenPacketData
-	rawPacketData, decodeDataErr := base64.StdEncoding.DecodeString(rawMsgRecvPacket.Packet.Data)
+	var fungiblePacketData ibc_model.FungibleTokenPacketData
+	rawPacketData, decodeDataErr := base64.StdEncoding.DecodeString(packet.Data)
 	if decodeDataErr != nil {
 		return false
 	}

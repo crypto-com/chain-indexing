@@ -43,3 +43,10 @@ type Packet struct {
 	TimeoutHeight      Height `mapstructure:"timeout_height" json:"timeoutHeight"`
 	TimeoutTimestamp   string `mapstructure:"timeout_timestamp" json:"timeoutTimestamp"`
 }
+
+type FungibleTokenPacketData struct {
+	Sender   string `mapstructure:"sender" json:"sender"`
+	Receiver string `mapstructure:"receiver" json:"receiver"`
+	Denom    string `mapstructure:"denom" json:"denom"`
+	Amount   uint64 `mapstructure:"amount" json:"amount,string"`
+}
