@@ -8,7 +8,6 @@ type MsgChannelOpenTryParams struct {
 }
 
 type RawMsgChannelOpenTry struct {
-	Type                string  `mapstructure:"@type" json:"-"`
 	PortID              string  `mapstructure:"port_id" json:"portId"`
 	PreviousChannelID   string  `mapstructure:"previous_channel_id" json:"previousChannelId"`
 	Channel             Channel `mapstructure:"channel" json:"channel"`

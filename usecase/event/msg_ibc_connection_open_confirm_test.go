@@ -1,9 +1,14 @@
 package event_test
 
 import (
+	"time"
+
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/internal/json"
+	"github.com/crypto-com/chain-indexing/internal/must"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
+	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
+	"github.com/mitchellh/mapstructure"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -22,7 +27,19 @@ var _ = Describe("Event", func() {
 			anyClientId := "tendermint-0"
 			anyCounterpartyClientId := "tendermint-1"
 			anyCounterpartyCconnectionId := "connection-0"
+
+			var anyRawValue map[string]interface{}
 			var anyRawMsgConnectionOpenConfirm ibc_model.RawMsgConnectionOpenConfirm
+			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+				WeaklyTypedInput: true,
+				DecodeHook: mapstructure.ComposeDecodeHookFunc(
+					mapstructure.StringToTimeDurationHookFunc(),
+					mapstructure.StringToTimeHookFunc(time.RFC3339),
+					ibcmsg.StringToDurationHookFunc(),
+					ibcmsg.StringToByteSliceHookFunc(),
+				),
+				Result: &anyRawMsgConnectionOpenConfirm,
+			})
 			json.MustUnmarshalFromString(`
 {
   "@type": "/ibc.core.connection.v1.MsgConnectionOpenConfirm",
@@ -34,7 +51,8 @@ var _ = Describe("Event", func() {
   },
   "signer": "cro1dulwqgcdpemn8c34sjd92fxepz5p0sqpeevw7f"
 }
-`, &anyRawMsgConnectionOpenConfirm)
+`, &anyRawValue)
+			must.Do(decoder.Decode(anyRawValue))
 
 			anyParams := ibc_model.MsgConnectionOpenConfirmParams{
 				RawMsgConnectionOpenConfirm: anyRawMsgConnectionOpenConfirm,
@@ -85,7 +103,19 @@ var _ = Describe("Event", func() {
 			anyClientId := "tendermint-0"
 			anyCounterpartyClientId := "tendermint-1"
 			anyCounterpartyCconnectionId := "connection-0"
+
+			var anyRawValue map[string]interface{}
 			var anyRawMsgConnectionOpenConfirm ibc_model.RawMsgConnectionOpenConfirm
+			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+				WeaklyTypedInput: true,
+				DecodeHook: mapstructure.ComposeDecodeHookFunc(
+					mapstructure.StringToTimeDurationHookFunc(),
+					mapstructure.StringToTimeHookFunc(time.RFC3339),
+					ibcmsg.StringToDurationHookFunc(),
+					ibcmsg.StringToByteSliceHookFunc(),
+				),
+				Result: &anyRawMsgConnectionOpenConfirm,
+			})
 			json.MustUnmarshalFromString(`
 {
   "@type": "/ibc.core.connection.v1.MsgConnectionOpenConfirm",
@@ -97,7 +127,8 @@ var _ = Describe("Event", func() {
   },
   "signer": "cro1dulwqgcdpemn8c34sjd92fxepz5p0sqpeevw7f"
 }
-`, &anyRawMsgConnectionOpenConfirm)
+`, &anyRawValue)
+			must.Do(decoder.Decode(anyRawValue))
 
 			anyParams := ibc_model.MsgConnectionOpenConfirmParams{
 				RawMsgConnectionOpenConfirm: anyRawMsgConnectionOpenConfirm,

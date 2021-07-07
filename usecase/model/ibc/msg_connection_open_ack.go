@@ -16,7 +16,6 @@ type RawMsgConnectionOpenAckTendermintClient struct {
 }
 
 type MsgConnectionOpenAckBaseParams struct {
-	Type                     string                        `mapstructure:"@type" json:"-"`
 	ConnectionID             string                        `mapstructure:"connection_id" json:"connectionId"`
 	CounterpartyConnectionID string                        `mapstructure:"counterparty_connection_id" json:"counterpartyConnectionId"`
 	Version                  ConnectionCounterpartyVersion `mapstructure:"version" json:"version"`

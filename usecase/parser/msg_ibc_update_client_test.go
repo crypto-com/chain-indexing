@@ -128,7 +128,10 @@ var _ = Describe("ParseMsgCommands", func() {
     },
     "clientId": "07-tendermint-0",
     "clientType": "07-tendermint",
-    "consensusHeight": "1-8",
+    "consensusHeight": {
+      "revisionNumber": "1",
+      "revisionHeight": "8"
+    },
     "signer": "cro1rhuxl5q4flq48fjxp0lhklhjmh5gjrpjvjqwss"
   }
 }`

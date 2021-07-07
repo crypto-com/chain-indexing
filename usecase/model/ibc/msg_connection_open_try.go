@@ -15,7 +15,6 @@ type RawMsgConnectionOpenTryTendermintClient struct {
 }
 
 type MsgConnectionOpenTryBaseParams struct {
-	Type                 string                          `mapstructure:"@type" json:"-"`
 	ClientID             string                          `mapstructure:"client_id" json:"clientId"`
 	PreviousConnectionID string                          `mapstructure:"previous_connection_id" json:"previousConnectionId"`
 	Counterparty         ConnectionCounterparty          `mapstructure:"counterparty" json:"counterparty"`

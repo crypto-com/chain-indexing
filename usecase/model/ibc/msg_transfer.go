@@ -11,7 +11,6 @@ type MsgTransferParams struct {
 }
 
 type RawMsgTransfer struct {
-	Type             string           `mapstructure:"@type" json:"-"`
 	SourcePort       string           `mapstructure:"source_port" json:"sourcePort"`
 	SourceChannel    string           `mapstructure:"source_channel" json:"sourceChannel"`
 	Token            MsgTransferToken `mapstructure:"token" json:"token"`

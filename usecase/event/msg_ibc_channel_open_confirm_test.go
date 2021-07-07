@@ -3,6 +3,9 @@ package event_test
 import (
 	"time"
 
+	"github.com/crypto-com/chain-indexing/internal/json"
+	"github.com/crypto-com/chain-indexing/internal/must"
+
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
 	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
@@ -25,6 +28,8 @@ var _ = Describe("Event", func() {
 			anyCounterpartyChannelId := "channel-0"
 			anyCounterpartyPortId := "transfer"
 			anyConnectionId := "connection-0"
+
+			var anyRawValue map[string]interface{}
 			var anyRawMsgChannelOpenConfirm ibc_model.RawMsgChannelOpenConfirm
 			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 				WeaklyTypedInput: true,
@@ -36,7 +41,7 @@ var _ = Describe("Event", func() {
 				),
 				Result: &anyRawMsgChannelOpenConfirm,
 			})
-			decoder.Decode(`
+			json.MustUnmarshalFromString(`
 {
   "@type": "/ibc.applications.transfer.v1.MsgTransfer",
   "source_port": "transfer",
@@ -53,7 +58,8 @@ var _ = Describe("Event", func() {
   },
   "timeout_timestamp": "0"
 }
-`)
+`, &anyRawValue)
+			must.Do(decoder.Decode(anyRawValue))
 
 			anyParams := ibc_model.MsgChannelOpenConfirmParams{
 				RawMsgChannelOpenConfirm: anyRawMsgChannelOpenConfirm,
@@ -87,7 +93,6 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 
-			Expect(typedEvent.Params.Type).To(Equal(anyParams.Type))
 			Expect(typedEvent.Params.PortID).To(Equal(anyParams.PortID))
 			Expect(typedEvent.Params.ChannelID).To(Equal(anyParams.ChannelID))
 			Expect(typedEvent.Params.CounterpartyChannelID).To(Equal(anyParams.CounterpartyChannelID))
@@ -105,6 +110,8 @@ var _ = Describe("Event", func() {
 			anyCounterpartyChannelId := "channel-0"
 			anyCounterpartyPortId := "transfer"
 			anyConnectionId := "connection-0"
+
+			var anyRawValue map[string]interface{}
 			var anyRawMsgChannelOpenConfirm ibc_model.RawMsgChannelOpenConfirm
 			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 				WeaklyTypedInput: true,
@@ -116,7 +123,7 @@ var _ = Describe("Event", func() {
 				),
 				Result: &anyRawMsgChannelOpenConfirm,
 			})
-			decoder.Decode(`
+			json.MustUnmarshalFromString(`
 {
   "@type": "/ibc.applications.transfer.v1.MsgTransfer",
   "source_port": "transfer",
@@ -133,7 +140,8 @@ var _ = Describe("Event", func() {
   },
   "timeout_timestamp": "0"
 }
-`)
+`, &anyRawValue)
+			must.Do(decoder.Decode(anyRawValue))
 
 			anyParams := ibc_model.MsgChannelOpenConfirmParams{
 				RawMsgChannelOpenConfirm: anyRawMsgChannelOpenConfirm,
@@ -167,7 +175,6 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 
-			Expect(typedEvent.Params.Type).To(Equal(anyParams.Type))
 			Expect(typedEvent.Params.PortID).To(Equal(anyParams.PortID))
 			Expect(typedEvent.Params.ChannelID).To(Equal(anyParams.ChannelID))
 			Expect(typedEvent.Params.CounterpartyChannelID).To(Equal(anyParams.CounterpartyChannelID))

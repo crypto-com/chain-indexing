@@ -1,9 +1,14 @@
 package event_test
 
 import (
+	"time"
+
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/internal/json"
+	"github.com/crypto-com/chain-indexing/internal/must"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
+	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
+	"github.com/mitchellh/mapstructure"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -21,7 +26,19 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 			anyClientId := "tendermint-0"
 			anyCounterpartyClientId := "tendermint-1"
+
+			var anyRawValue map[string]interface{}
 			var anyRawMsgConnectionOpenAck ibc_model.RawMsgConnectionOpenAckTendermintClient
+			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+				WeaklyTypedInput: true,
+				DecodeHook: mapstructure.ComposeDecodeHookFunc(
+					mapstructure.StringToTimeDurationHookFunc(),
+					mapstructure.StringToTimeHookFunc(time.RFC3339),
+					ibcmsg.StringToDurationHookFunc(),
+					ibcmsg.StringToByteSliceHookFunc(),
+				),
+				Result: &anyRawMsgConnectionOpenAck,
+			})
 			json.MustUnmarshalFromString(`
 {
   "@type": "/ibc.core.connection.v1.MsgConnectionOpenAck",
@@ -118,7 +135,9 @@ var _ = Describe("Event", func() {
 	},
 	"signer": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"
 }
-`, &anyRawMsgConnectionOpenAck)
+
+`, &anyRawValue)
+			must.Do(decoder.Decode(anyRawValue))
 
 			anyParams := ibc_model.MsgConnectionOpenAckParams{
 				MsgConnectionOpenAckBaseParams: anyRawMsgConnectionOpenAck.MsgConnectionOpenAckBaseParams,
@@ -174,7 +193,19 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 			anyClientId := "tendermint-0"
 			anyCounterpartyClientId := "tendermint-1"
+
+			var anyRawValue map[string]interface{}
 			var anyRawMsgConnectionOpenAck ibc_model.RawMsgConnectionOpenAckTendermintClient
+			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+				WeaklyTypedInput: true,
+				DecodeHook: mapstructure.ComposeDecodeHookFunc(
+					mapstructure.StringToTimeDurationHookFunc(),
+					mapstructure.StringToTimeHookFunc(time.RFC3339),
+					ibcmsg.StringToDurationHookFunc(),
+					ibcmsg.StringToByteSliceHookFunc(),
+				),
+				Result: &anyRawMsgConnectionOpenAck,
+			})
 			json.MustUnmarshalFromString(`
 {
   "@type": "/ibc.core.connection.v1.MsgConnectionOpenAck",
@@ -271,7 +302,9 @@ var _ = Describe("Event", func() {
 	},
 	"signer": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"
 }
-`, &anyRawMsgConnectionOpenAck)
+
+`, &anyRawValue)
+			must.Do(decoder.Decode(anyRawValue))
 
 			anyParams := ibc_model.MsgConnectionOpenAckParams{
 				MsgConnectionOpenAckBaseParams: anyRawMsgConnectionOpenAck.MsgConnectionOpenAckBaseParams,

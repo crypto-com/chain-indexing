@@ -47,5 +47,5 @@ type RawMsgRecvPacketFungibleTokenPacketData struct {
 }
 
 type MsgRecvPacketPacketAck struct {
-	Result []byte `mspstructure:"result" json:"json"`
+	Result []byte `mspstructure:"result" json:"result"`
 }

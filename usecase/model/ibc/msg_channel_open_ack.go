@@ -8,7 +8,6 @@ type MsgChannelOpenAckParams struct {
 }
 
 type RawMsgChannelOpenAck struct {
-	Type                  string `mapstructure:"@type" json:"-"`
 	PortID                string `mapstructure:"port_id" json:"portId"`
 	ChannelID             string `mapstructure:"channel_id" json:"channelId"`
 	CounterpartyChannelID string `mapstructure:"counterparty_channel_id" json:"counterpartyChannelId"`

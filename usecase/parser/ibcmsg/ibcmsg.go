@@ -3,6 +3,7 @@ package ibcmsg
 import (
 	"encoding/base64"
 	"fmt"
+	"strings"
 	"time"
 
 	base64_internal "github.com/crypto-com/chain-indexing/internal/base64"
@@ -479,7 +480,7 @@ func ParseMsgUpdateClient(
 
 		ClientID:        rawMsg.ClientID,
 		ClientType:      event.MustGetAttributeByKey("client_type"),
-		ConsensusHeight: event.MustGetAttributeByKey("consensus_height"),
+		ConsensusHeight: mustParseHeight(event.MustGetAttributeByKey("consensus_height")),
 		Signer:          rawMsg.Signer,
 	}
 
@@ -488,6 +489,20 @@ func ParseMsgUpdateClient(
 
 		params,
 	)}
+}
+
+func mustParseHeight(height string) ibc_model.Height {
+	heightTokens := strings.Split(height, "-")
+	if len(heightTokens) != 2 {
+		panic("invalid height")
+	}
+
+	revisionNumber := typeconv.MustAtou64(heightTokens[0])
+	revisionHeight := typeconv.MustAtou64(heightTokens[1])
+	return ibc_model.Height{
+		RevisionNumber: revisionNumber,
+		RevisionHeight: revisionHeight,
+	}
 }
 
 func ParseMsgTransfer(

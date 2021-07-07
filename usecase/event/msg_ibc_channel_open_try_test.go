@@ -3,6 +3,9 @@ package event_test
 import (
 	"time"
 
+	"github.com/crypto-com/chain-indexing/internal/json"
+	"github.com/crypto-com/chain-indexing/internal/must"
+
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
 	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
@@ -24,6 +27,8 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 			anyChannelId := "channel-0"
 			anyConnectionId := "connection-0"
+
+			var anyRawValue map[string]interface{}
 			var anyRawMsgChannelOpenTry ibc_model.RawMsgChannelOpenTry
 			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 				WeaklyTypedInput: true,
@@ -35,7 +40,7 @@ var _ = Describe("Event", func() {
 				),
 				Result: &anyRawMsgChannelOpenTry,
 			})
-			decoder.Decode(`
+			json.MustUnmarshalFromString(`
 {
   "@type": "/ibc.core.channel.v1.MsgChannelOpenTry",
   "port_id": "transfer",
@@ -60,7 +65,8 @@ var _ = Describe("Event", func() {
   },
   "signer": "cro1dulwqgcdpemn8c34sjd92fxepz5p0sqpeevw7f"
 }
-`)
+`, &anyRawValue)
+			must.Do(decoder.Decode(anyRawValue))
 
 			anyParams := ibc_model.MsgChannelOpenTryParams{
 				RawMsgChannelOpenTry: anyRawMsgChannelOpenTry,
@@ -93,7 +99,6 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 
-			Expect(typedEvent.Params.Type).To(Equal(anyParams.Type))
 			Expect(typedEvent.Params.PortID).To(Equal(anyParams.PortID))
 			Expect(typedEvent.Params.PreviousChannelID).To(Equal(anyParams.PreviousChannelID))
 			Expect(typedEvent.Params.Channel).To(Equal(anyParams.Channel))
@@ -111,6 +116,8 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 			anyChannelId := "channel-0"
 			anyConnectionId := "connection-0"
+
+			var anyRawValue map[string]interface{}
 			var anyRawMsgChannelOpenTry ibc_model.RawMsgChannelOpenTry
 			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 				WeaklyTypedInput: true,
@@ -122,7 +129,7 @@ var _ = Describe("Event", func() {
 				),
 				Result: &anyRawMsgChannelOpenTry,
 			})
-			decoder.Decode(`
+			json.MustUnmarshalFromString(`
 {
   "@type": "/ibc.core.channel.v1.MsgChannelOpenTry",
   "port_id": "transfer",
@@ -147,7 +154,8 @@ var _ = Describe("Event", func() {
   },
   "signer": "cro1dulwqgcdpemn8c34sjd92fxepz5p0sqpeevw7f"
 }
-`)
+`, &anyRawValue)
+			must.Do(decoder.Decode(anyRawValue))
 
 			anyParams := ibc_model.MsgChannelOpenTryParams{
 				RawMsgChannelOpenTry: anyRawMsgChannelOpenTry,
@@ -180,7 +188,6 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 
-			Expect(typedEvent.Params.Type).To(Equal(anyParams.Type))
 			Expect(typedEvent.Params.PortID).To(Equal(anyParams.PortID))
 			Expect(typedEvent.Params.PreviousChannelID).To(Equal(anyParams.PreviousChannelID))
 			Expect(typedEvent.Params.Channel).To(Equal(anyParams.Channel))

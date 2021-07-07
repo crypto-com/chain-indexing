@@ -52,13 +52,13 @@ var _ = Describe("ParseMsgCommands", func() {
     "application": "transfer",
     "messageType": "MsgTransfer",
     "maybeMsgTransfer": {
-      "sender": "cro1yl6hdjhmkf37639730gffanpzndzdpmhky7stj",
+      "sender": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv",
       "receiver": "cro1dulwqgcdpemn8c34sjd92fxepz5p0sqpeevw7f",
       "denom": "basecro",
       "amount": "1234",
       "success": true,
       "denominationTraceHash": "6411AE2ADA1E73DB59DB151A8988F9B7D5E7E233D8414DB6817F8F1A01611F86",
-      "denominationTraceDenom": "ibc/6411AE2ADA1E73DB59DB151A8988F9B7D5E7E233D8414DB6817F8F1A01611F86",
+      "denominationTraceDenom": "ibc/6411AE2ADA1E73DB59DB151A8988F9B7D5E7E233D8414DB6817F8F1A01611F86"
     },
 
     "packetSequence": "1",

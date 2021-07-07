@@ -3,6 +3,10 @@ package event_test
 import (
 	"time"
 
+	"github.com/crypto-com/chain-indexing/internal/must"
+
+	"github.com/crypto-com/chain-indexing/internal/json"
+
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
 	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
@@ -24,6 +28,8 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 			anyCounterpartyPortId := "transfer"
 			anyConnectionId := "connection-0"
+
+			var anyRawValue map[string]interface{}
 			var anyRawMsgChannelOpenAck ibc_model.RawMsgChannelOpenAck
 			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 				WeaklyTypedInput: true,
@@ -35,7 +41,7 @@ var _ = Describe("Event", func() {
 				),
 				Result: &anyRawMsgChannelOpenAck,
 			})
-			decoder.Decode(`
+			json.MustUnmarshalFromString(`
 {
   "@type": "/ibc.core.channel.v1.MsgChannelOpenAck",
   "port_id": "transfer",
@@ -49,7 +55,8 @@ var _ = Describe("Event", func() {
   },
   "signer": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"
 }
-`)
+`, &anyRawValue)
+			decoder.Decode(anyRawValue)
 
 			anyParams := ibc_model.MsgChannelOpenAckParams{
 				RawMsgChannelOpenAck: anyRawMsgChannelOpenAck,
@@ -82,7 +89,6 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 
-			Expect(typedEvent.Params.Type).To(Equal(anyParams.Type))
 			Expect(typedEvent.Params.PortID).To(Equal(anyParams.PortID))
 			Expect(typedEvent.Params.ChannelID).To(Equal(anyParams.ChannelID))
 			Expect(typedEvent.Params.CounterpartyChannelID).To(Equal(anyParams.CounterpartyChannelID))
@@ -100,6 +106,8 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 			anyCounterpartyPortId := "transfer"
 			anyConnectionId := "connection-0"
+
+			var anyRawValue map[string]interface{}
 			var anyRawMsgChannelOpenAck ibc_model.RawMsgChannelOpenAck
 			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 				WeaklyTypedInput: true,
@@ -111,7 +119,7 @@ var _ = Describe("Event", func() {
 				),
 				Result: &anyRawMsgChannelOpenAck,
 			})
-			decoder.Decode(`
+			json.MustUnmarshalFromString(`
 {
   "@type": "/ibc.core.channel.v1.MsgChannelOpenAck",
   "port_id": "transfer",
@@ -125,7 +133,8 @@ var _ = Describe("Event", func() {
   },
   "signer": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"
 }
-`)
+`, &anyRawValue)
+			must.Do(decoder.Decode(anyRawValue))
 
 			anyParams := ibc_model.MsgChannelOpenAckParams{
 				RawMsgChannelOpenAck: anyRawMsgChannelOpenAck,
@@ -158,7 +167,6 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 
-			Expect(typedEvent.Params.Type).To(Equal(anyParams.Type))
 			Expect(typedEvent.Params.PortID).To(Equal(anyParams.PortID))
 			Expect(typedEvent.Params.ChannelID).To(Equal(anyParams.ChannelID))
 			Expect(typedEvent.Params.CounterpartyChannelID).To(Equal(anyParams.CounterpartyChannelID))

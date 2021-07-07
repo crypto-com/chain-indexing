@@ -21,7 +21,10 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 			anyClientId := "07-tendermint-0"
 			anyClientType := "07-tendermint"
-			anyConsensusHeight := "2-17"
+			anyConsensusHeight := ibc_model.Height{
+				RevisionNumber: 2,
+				RevisionHeight: 17,
+			}
 			anySigner := "cro1kkxdtp7yjtprvf2memjy8lmh4spfevea9yjxgn"
 			anyRawHeader := `
 {
@@ -171,7 +174,10 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 			anyClientId := "07-tendermint-0"
 			anyClientType := "07-tendermint"
-			anyConsensusHeight := "2-17"
+			anyConsensusHeight := ibc_model.Height{
+				RevisionNumber: 2,
+				RevisionHeight: 17,
+			}
 			anySigner := "cro1kkxdtp7yjtprvf2memjy8lmh4spfevea9yjxgn"
 			anyRawHeader := `
 {

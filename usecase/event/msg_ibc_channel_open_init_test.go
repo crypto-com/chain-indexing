@@ -1,9 +1,14 @@
 package event_test
 
 import (
+	"time"
+
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/internal/json"
+	"github.com/crypto-com/chain-indexing/internal/must"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
+	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
+	"github.com/mitchellh/mapstructure"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -20,7 +25,19 @@ var _ = Describe("Event", func() {
 			anyTxHash := "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416"
 			anyMsgIndex := 2
 			anyChannelId := "channel-0"
+
+			var anyRawValue map[string]interface{}
 			var anyRawMsgChannelOpenInit ibc_model.RawMsgChannelOpenInit
+			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+				WeaklyTypedInput: true,
+				DecodeHook: mapstructure.ComposeDecodeHookFunc(
+					mapstructure.StringToTimeDurationHookFunc(),
+					mapstructure.StringToTimeHookFunc(time.RFC3339),
+					ibcmsg.StringToDurationHookFunc(),
+					ibcmsg.StringToByteSliceHookFunc(),
+				),
+				Result: &anyRawMsgChannelOpenInit,
+			})
 			json.MustUnmarshalFromString(`
 {
   "@type": "/ibc.core.channel.v1.MsgChannelOpenInit",
@@ -39,7 +56,8 @@ var _ = Describe("Event", func() {
   },
   "signer": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"
 }
-`, &anyRawMsgChannelOpenInit)
+`, &anyRawValue)
+			must.Do(decoder.Decode(anyRawValue))
 
 			anyParams := ibc_model.MsgChannelOpenInitParams{
 				RawMsgChannelOpenInit: anyRawMsgChannelOpenInit,
@@ -71,7 +89,6 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 
-			Expect(typedEvent.Params.Type).To(Equal(anyParams.Type))
 			Expect(typedEvent.Params.PortID).To(Equal(anyParams.PortID))
 			Expect(typedEvent.Params.Channel).To(Equal(anyParams.Channel))
 			Expect(typedEvent.Params.Signer).To(Equal(anyParams.Signer))
@@ -84,7 +101,19 @@ var _ = Describe("Event", func() {
 			anyTxHash := "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416"
 			anyMsgIndex := 2
 			anyChannelId := "channel-0"
+
+			var anyRawValue map[string]interface{}
 			var anyRawMsgChannelOpenInit ibc_model.RawMsgChannelOpenInit
+			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+				WeaklyTypedInput: true,
+				DecodeHook: mapstructure.ComposeDecodeHookFunc(
+					mapstructure.StringToTimeDurationHookFunc(),
+					mapstructure.StringToTimeHookFunc(time.RFC3339),
+					ibcmsg.StringToDurationHookFunc(),
+					ibcmsg.StringToByteSliceHookFunc(),
+				),
+				Result: &anyRawMsgChannelOpenInit,
+			})
 			json.MustUnmarshalFromString(`
 {
   "@type": "/ibc.core.channel.v1.MsgChannelOpenInit",
@@ -103,7 +132,8 @@ var _ = Describe("Event", func() {
   },
   "signer": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"
 }
-`, &anyRawMsgChannelOpenInit)
+`, &anyRawValue)
+			must.Do(decoder.Decode(anyRawValue))
 
 			anyParams := ibc_model.MsgChannelOpenInitParams{
 				RawMsgChannelOpenInit: anyRawMsgChannelOpenInit,
@@ -135,7 +165,6 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 
-			Expect(typedEvent.Params.Type).To(Equal(anyParams.Type))
 			Expect(typedEvent.Params.PortID).To(Equal(anyParams.PortID))
 			Expect(typedEvent.Params.Channel).To(Equal(anyParams.Channel))
 			Expect(typedEvent.Params.Signer).To(Equal(anyParams.Signer))

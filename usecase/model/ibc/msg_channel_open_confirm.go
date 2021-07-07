@@ -9,7 +9,6 @@ type MsgChannelOpenConfirmParams struct {
 }
 
 type RawMsgChannelOpenConfirm struct {
-	Type        string `mapstructure:"@type" json:"-"`
 	PortID      string `mapstructure:"port_id" json:"portId"`
 	ChannelID   string `mapstructure:"channel_id" json:"channelId"`
 	ProofACK    []byte `mapstructure:"proof_ack" json:"proofAck"`

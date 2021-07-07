@@ -8,7 +8,7 @@ type MsgUpdateClientParams struct {
 
 	ClientID        string `json:"clientId"`
 	ClientType      string `json:"clientType"`
-	ConsensusHeight string `json:"consensusHeight"`
+	ConsensusHeight Height `json:"consensusHeight"`
 	Signer          string `json:"signer"`
 }
 
