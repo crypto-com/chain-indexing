@@ -43,6 +43,8 @@ func (tokensView *Tokens) Insert(tokenRow *TokenRow) error {
 		"minted_at_block_height",
 		"last_edited_at",
 		"last_edited_at_block_height",
+		"last_transferred_at",
+		"last_transferred_at_block_height",
 	).Values(
 		tokenRow.DenomId,
 		tokenRow.TokenId,
@@ -56,6 +58,8 @@ func (tokensView *Tokens) Insert(tokenRow *TokenRow) error {
 		tokenRow.MintedAtBlockHeight,
 		tokensView.rdb.Tton(&tokenRow.LastEditedAt),
 		tokenRow.LastEditedAtBlockHeight,
+		tokensView.rdb.Tton(&tokenRow.LastTransferredAt),
+		tokenRow.LastTransferredAtBlockHeight,
 	).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building NFT token insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -110,6 +114,8 @@ func (tokensView *Tokens) FindById(
 		fmt.Sprintf("%s.minted_at_block_height", TOKENS_TABLE_NAME),
 		fmt.Sprintf("%s.last_edited_at", TOKENS_TABLE_NAME),
 		fmt.Sprintf("%s.last_edited_at_block_height", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.last_transferred_at", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.last_transferred_at_block_height", TOKENS_TABLE_NAME),
 	).From(
 		TOKENS_TABLE_NAME,
 	).LeftJoin(
@@ -133,6 +139,7 @@ func (tokensView *Tokens) FindById(
 	var row TokenRowWithDenomname
 	mintedAtTimeReader := tokensView.rdb.NtotReader()
 	lastEditedAtTimeReader := tokensView.rdb.NtotReader()
+	lastTransferredAtTimeReader := tokensView.rdb.NtotReader()
 
 	if err = tokensView.rdb.QueryRow(sql, sqlArgs...).Scan(
 		&row.DenomId,
@@ -149,6 +156,8 @@ func (tokensView *Tokens) FindById(
 		&row.MintedAtBlockHeight,
 		lastEditedAtTimeReader.ScannableArg(),
 		&row.LastEditedAtBlockHeight,
+		lastTransferredAtTimeReader.ScannableArg(),
+		&row.LastTransferredAtBlockHeight,
 	); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
@@ -175,13 +184,15 @@ func (tokensView *Tokens) Update(tokenRow TokenRow) error {
 	sql, sqlArgs, err := tokensView.rdb.StmtBuilder.Update(
 		TOKENS_TABLE_NAME,
 	).SetMap(map[string]interface{}{
-		"drop":                        tokenRow.MaybeDrop,
-		"name":                        tokenRow.Name,
-		"uri":                         tokenRow.URI,
-		"data":                        tokenRow.Data,
-		"owner":                       tokenRow.Owner,
-		"last_edited_at":              tokensView.rdb.TypeConv.Tton(&tokenRow.LastEditedAt),
-		"last_edited_at_block_height": tokenRow.LastEditedAtBlockHeight,
+		"drop":                             tokenRow.MaybeDrop,
+		"name":                             tokenRow.Name,
+		"uri":                              tokenRow.URI,
+		"data":                             tokenRow.Data,
+		"owner":                            tokenRow.Owner,
+		"last_edited_at":                   tokensView.rdb.TypeConv.Tton(&tokenRow.LastEditedAt),
+		"last_edited_at_block_height":      tokenRow.LastEditedAtBlockHeight,
+		"last_transferred_at":              tokensView.rdb.TypeConv.Tton(&tokenRow.LastTransferredAt),
+		"last_transferred_at_block_height": tokenRow.LastTransferredAtBlockHeight,
 	}).Where(
 		"denom_id = ? AND token_id = ?", tokenRow.DenomId, tokenRow.TokenId,
 	).ToSql()
@@ -220,6 +231,8 @@ func (tokensView *Tokens) List(
 		fmt.Sprintf("%s.minted_at_block_height", TOKENS_TABLE_NAME),
 		fmt.Sprintf("%s.last_edited_at", TOKENS_TABLE_NAME),
 		fmt.Sprintf("%s.last_edited_at_block_height", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.last_transferred_at", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.last_transferred_at_block_height", TOKENS_TABLE_NAME),
 	).From(
 		TOKENS_TABLE_NAME,
 	).LeftJoin(
@@ -248,6 +261,10 @@ func (tokensView *Tokens) List(
 		stmtBuilder = stmtBuilder.OrderBy(fmt.Sprintf("%s.last_edited_at", TOKENS_TABLE_NAME))
 	} else if order.LastEditedAt == view.ORDER_DESC {
 		stmtBuilder = stmtBuilder.OrderBy(fmt.Sprintf("%s.last_edited_at DESC", TOKENS_TABLE_NAME))
+	} else if order.LastTransferredAt == view.ORDER_ASC {
+		stmtBuilder = stmtBuilder.OrderBy(fmt.Sprintf("%s.last_transferred_at", TOKENS_TABLE_NAME))
+	} else if order.LastTransferredAt == view.ORDER_DESC {
+		stmtBuilder = stmtBuilder.OrderBy(fmt.Sprintf("%s.last_transferred_at DESC", TOKENS_TABLE_NAME))
 	} else {
 		stmtBuilder = stmtBuilder.OrderBy(fmt.Sprintf("%s.minted_at", TOKENS_TABLE_NAME))
 	}
@@ -303,6 +320,7 @@ func (tokensView *Tokens) List(
 		var row TokenRowWithDenomname
 		mintedAtTimeReader := tokensView.rdb.NtotReader()
 		lastEditedAtTimeReader := tokensView.rdb.NtotReader()
+		lastTransferredAtTimeReader := tokensView.rdb.NtotReader()
 
 		if scanErr := rowsResult.Scan(
 			&row.DenomId,
@@ -319,6 +337,8 @@ func (tokensView *Tokens) List(
 			&row.MintedAtBlockHeight,
 			lastEditedAtTimeReader.ScannableArg(),
 			&row.LastEditedAtBlockHeight,
+			lastTransferredAtTimeReader.ScannableArg(),
+			&row.LastTransferredAtBlockHeight,
 		); scanErr != nil {
 			if errors.Is(scanErr, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
@@ -406,8 +426,9 @@ type TokenListFilter struct {
 }
 
 type TokenListOrder struct {
-	MintedAt     view.ORDER
-	LastEditedAt view.ORDER
+	MintedAt          view.ORDER
+	LastEditedAt      view.ORDER
+	LastTransferredAt view.ORDER
 }
 
 type TokenRowWithDenomname struct {
@@ -418,16 +439,18 @@ type TokenRowWithDenomname struct {
 }
 
 type TokenRow struct {
-	DenomId                 string          `json:"denomId"`
-	TokenId                 string          `json:"tokenId"`
-	MaybeDrop               *string         `json:"drop"`
-	Name                    string          `json:"tokenName"`
-	URI                     string          `json:"tokenURI"`
-	Data                    string          `json:"tokenData"`
-	Minter                  string          `json:"tokenMinter"`
-	Owner                   string          `json:"tokenOwner"`
-	MintedAt                utctime.UTCTime `json:"tokenMintedAt"`
-	MintedAtBlockHeight     int64           `json:"tokenMintedAtBlockHeight"`
-	LastEditedAt            utctime.UTCTime `json:"tokenLastEditedAt"`
-	LastEditedAtBlockHeight int64           `json:"tokenLastEditedAtBlockHeight"`
+	DenomId                      string          `json:"denomId"`
+	TokenId                      string          `json:"tokenId"`
+	MaybeDrop                    *string         `json:"drop"`
+	Name                         string          `json:"tokenName"`
+	URI                          string          `json:"tokenURI"`
+	Data                         string          `json:"tokenData"`
+	Minter                       string          `json:"tokenMinter"`
+	Owner                        string          `json:"tokenOwner"`
+	MintedAt                     utctime.UTCTime `json:"tokenMintedAt"`
+	MintedAtBlockHeight          int64           `json:"tokenMintedAtBlockHeight"`
+	LastEditedAt                 utctime.UTCTime `json:"tokenLastEditedAt"`
+	LastEditedAtBlockHeight      int64           `json:"tokenLastEditedAtBlockHeight"`
+	LastTransferredAt            utctime.UTCTime `json:"tokenLastTransferredAt"`
+	LastTransferredAtBlockHeight int64           `json:"tokenLastTransferredAtBlockHeight"`
 }
