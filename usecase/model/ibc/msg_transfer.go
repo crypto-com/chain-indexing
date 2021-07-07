@@ -22,5 +22,5 @@ type RawMsgTransfer struct {
 
 type MsgTransferToken struct {
 	Denom  string `mapstructure:"denom" json:"denom"`
-	Amount string `mapstructure:"amount" json:"amount"`
+	Amount uint64 `mapstructure:"amount" json:"amount,string"`
 }

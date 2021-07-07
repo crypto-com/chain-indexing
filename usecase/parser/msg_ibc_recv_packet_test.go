@@ -18,8 +18,8 @@ import (
 )
 
 var _ = Describe("ParseMsgCommands", func() {
-	Describe("MsgIBCCoreRecvPacket", func() {
-		It("should parse Msg commands when there is MsgIBCCoreRecvPacket in the transaction", func() {
+	Describe("MsgIBCRecvPacket", func() {
+		It("should parse Msg commands when there is MsgIBCRecvPacket in the transaction", func() {
 			expected := `{
   "name": "MsgRecvPacketCreated",
   "version": 1,
@@ -65,7 +65,7 @@ var _ = Describe("ParseMsgCommands", func() {
     "channelOrdering": "ORDER_UNORDERED",
     "connectionId": "connection-0",
     "packetAck": {
-      "result": "AQ==",
+      "result": "AQ=="
     }
   }
 }
@@ -91,10 +91,10 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))
 			cmd := cmds[1]
-			Expect(cmd.Name()).To(Equal("CreateMsgIBCCoreRecvPacket"))
+			Expect(cmd.Name()).To(Equal("CreateMsgIBCRecvPacket"))
 
 			untypedEvent, _ := cmd.Exec()
-			typedEvent := untypedEvent.(*event.MsgIBCCoreRecvPacket)
+			typedEvent := untypedEvent.(*event.MsgIBCRecvPacket)
 
 			regex, _ := regexp.Compile("\n?\r?\\s?")
 

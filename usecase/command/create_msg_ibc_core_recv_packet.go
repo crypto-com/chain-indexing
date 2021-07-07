@@ -6,30 +6,30 @@ import (
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
 )
 
-type CreateMsgIBCCoreRecvPacket struct {
+type CreateMsgIBCRecvPacket struct {
 	msgCommonParams event.MsgCommonParams
 	params          ibc_model.MsgRecvPacketParams
 }
 
-func NewCreateMsgIBCCoreRecvPacket(
+func NewCreateMsgIBCRecvPacket(
 	msgCommonParams event.MsgCommonParams,
 	params ibc_model.MsgRecvPacketParams,
-) *CreateMsgIBCCoreRecvPacket {
-	return &CreateMsgIBCCoreRecvPacket{
+) *CreateMsgIBCRecvPacket {
+	return &CreateMsgIBCRecvPacket{
 		msgCommonParams,
 		params,
 	}
 }
 
-func (*CreateMsgIBCCoreRecvPacket) Name() string {
-	return "CreateMsgIBCCoreRecvPacket"
+func (*CreateMsgIBCRecvPacket) Name() string {
+	return "CreateMsgIBCRecvPacket"
 }
 
-func (*CreateMsgIBCCoreRecvPacket) Version() int {
+func (*CreateMsgIBCRecvPacket) Version() int {
 	return 1
 }
 
-func (cmd *CreateMsgIBCCoreRecvPacket) Exec() (entity_event.Event, error) {
-	event := event.NewMsgIBCCoreRecvPacket(cmd.msgCommonParams, cmd.params)
+func (cmd *CreateMsgIBCRecvPacket) Exec() (entity_event.Event, error) {
+	event := event.NewMsgIBCRecvPacket(cmd.msgCommonParams, cmd.params)
 	return event, nil
 }

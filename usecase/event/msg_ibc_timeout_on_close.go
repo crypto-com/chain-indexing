@@ -9,23 +9,23 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_CORE_RECV_PACKET = "MsgRecvPacket"
-const MSG_IBC_CORE_RECV_PACKET_CREATED = "MsgRecvPacketCreated"
-const MSG_IBC_CORE_RECV_PACKET_FAILED = "MsgRecvPacketFailed"
+const MSG_IBC_TIMEOUT_ON_CLOSE = "MsgTimeoutOnClose"
+const MSG_IBC_TIMEOUT_ON_CLOSE_CREATED = "MsgTimeoutOnCloseCreated"
+const MSG_IBC_TIMEOUT_ON_CLOSE_FAILED = "MsgTimeoutOnCloseFailed"
 
-type MsgIBCCoreRecvPacket struct {
+type MsgIBCTimeoutOnClose struct {
 	MsgBase
 
-	Params ibc_model.MsgRecvPacketParams `json:"params"`
+	Params ibc_model.MsgTimeoutOnCloseParams `json:"params"`
 }
 
-func NewMsgIBCCoreRecvPacket(
+func NewMsgIBCTimeoutOnClose(
 	msgCommonParams MsgCommonParams,
-	params ibc_model.MsgRecvPacketParams,
-) *MsgIBCCoreRecvPacket {
-	return &MsgIBCCoreRecvPacket{
+	params ibc_model.MsgTimeoutOnCloseParams,
+) *MsgIBCTimeoutOnClose {
+	return &MsgIBCTimeoutOnClose{
 		NewMsgBase(MsgBaseParams{
-			MsgName:         MSG_IBC_CORE_RECV_PACKET,
+			MsgName:         MSG_IBC_TIMEOUT_ON_CLOSE,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
@@ -35,7 +35,7 @@ func NewMsgIBCCoreRecvPacket(
 }
 
 // ToJSON encodes the event into JSON string payload
-func (event *MsgIBCCoreRecvPacket) ToJSON() (string, error) {
+func (event *MsgIBCTimeoutOnClose) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
 		return "", err
@@ -44,15 +44,15 @@ func (event *MsgIBCCoreRecvPacket) ToJSON() (string, error) {
 	return string(encoded), nil
 }
 
-func (event *MsgIBCCoreRecvPacket) String() string {
+func (event *MsgIBCTimeoutOnClose) String() string {
 	return render.Render(event)
 }
 
-func DecodeMsgIBCCoreRecvPacket(encoded []byte) (entity_event.Event, error) {
+func DecodeMsgIBCTimeoutOnClose(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *MsgIBCCoreRecvPacket
+	var event *MsgIBCTimeoutOnClose
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}

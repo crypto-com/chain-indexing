@@ -32,3 +32,14 @@ type Channel struct {
 	ConnectionHops []string            `mapstructure:"connection_hops" json:"connectionHops"`
 	Version        string              `mapstructure:"version" json:"version"`
 }
+
+type Packet struct {
+	Sequence           string `mapstructure:"sequence" json:"sequence"`
+	SourcePort         string `mapstructure:"source_port" json:"sourcePort"`
+	SourceChannel      string `mapstructure:"source_channel" json:"sourceChannel"`
+	DestinationPort    string `mapstructure:"destination_port" json:"destinationPort"`
+	DestinationChannel string `mapstructure:"destination_channel" json:"destinationChannel"`
+	Data               string `mapstructure:"data" json:"data"`
+	TimeoutHeight      Height `mapstructure:"timeout_height" json:"timeoutHeight"`
+	TimeoutTimestamp   string `mapstructure:"timeout_timestamp" json:"timeoutTimestamp"`
+}
