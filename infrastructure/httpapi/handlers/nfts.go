@@ -162,6 +162,7 @@ func (handler *NFTs) ListTokensByDenomId(ctx *fasthttp.RequestCtx) {
 
 	mintedAtOrder := view.ORDER_ASC
 	var lastEditedAtOrder view.ORDER
+	var lastTransferredAtOrder view.ORDER
 	queryArgs := ctx.QueryArgs()
 	if queryArgs.Has("order") {
 		orderArg := string(queryArgs.Peek("order"))
@@ -171,6 +172,10 @@ func (handler *NFTs) ListTokensByDenomId(ctx *fasthttp.RequestCtx) {
 			lastEditedAtOrder = view.ORDER_ASC
 		} else if orderArg == "lastEditedAt.desc" {
 			lastEditedAtOrder = view.ORDER_DESC
+		} else if orderArg == "lastTransferredAt" {
+			lastTransferredAtOrder = view.ORDER_ASC
+		} else if orderArg == "lastTransferredAt.desc" {
+			lastTransferredAtOrder = view.ORDER_DESC
 		}
 	}
 
@@ -181,8 +186,9 @@ func (handler *NFTs) ListTokensByDenomId(ctx *fasthttp.RequestCtx) {
 		MaybeOwner:   nil,
 	}
 	order := nft_view.TokenListOrder{
-		MintedAt:     mintedAtOrder,
-		LastEditedAt: lastEditedAtOrder,
+		MintedAt:          mintedAtOrder,
+		LastEditedAt:      lastEditedAtOrder,
+		LastTransferredAt: lastTransferredAtOrder,
 	}
 
 	denoms, paginationResult, err := handler.tokensView.List(filter, order, pagination)
@@ -240,6 +246,7 @@ func (handler *NFTs) ListTokensByDrop(ctx *fasthttp.RequestCtx) {
 
 	mintedAtOrder := view.ORDER_ASC
 	var lastEditedAtOrder view.ORDER
+	var lastTransferredAtOrder view.ORDER
 	queryArgs := ctx.QueryArgs()
 	if queryArgs.Has("order") {
 		orderArg := string(queryArgs.Peek("order"))
@@ -249,6 +256,10 @@ func (handler *NFTs) ListTokensByDrop(ctx *fasthttp.RequestCtx) {
 			lastEditedAtOrder = view.ORDER_ASC
 		} else if orderArg == "lastEditedAt.desc" {
 			lastEditedAtOrder = view.ORDER_DESC
+		} else if orderArg == "lastTransferredAt" {
+			lastTransferredAtOrder = view.ORDER_ASC
+		} else if orderArg == "lastTransferredAt.desc" {
+			lastTransferredAtOrder = view.ORDER_DESC
 		}
 	}
 
@@ -259,8 +270,9 @@ func (handler *NFTs) ListTokensByDrop(ctx *fasthttp.RequestCtx) {
 		MaybeOwner:   nil,
 	}
 	order := nft_view.TokenListOrder{
-		MintedAt:     mintedAtOrder,
-		LastEditedAt: lastEditedAtOrder,
+		MintedAt:          mintedAtOrder,
+		LastEditedAt:      lastEditedAtOrder,
+		LastTransferredAt: lastTransferredAtOrder,
 	}
 
 	denoms, paginationResult, err := handler.tokensView.List(filter, order, pagination)
@@ -284,6 +296,7 @@ func (handler *NFTs) ListTokensByAccount(ctx *fasthttp.RequestCtx) {
 
 	mintedAtOrder := view.ORDER_ASC
 	var lastEditedAtOrder view.ORDER
+	var lastTransferredAtOrder view.ORDER
 	queryArgs := ctx.QueryArgs()
 	if queryArgs.Has("order") {
 		orderArg := string(queryArgs.Peek("order"))
@@ -293,6 +306,10 @@ func (handler *NFTs) ListTokensByAccount(ctx *fasthttp.RequestCtx) {
 			lastEditedAtOrder = view.ORDER_ASC
 		} else if orderArg == "lastEditedAt.desc" {
 			lastEditedAtOrder = view.ORDER_DESC
+		} else if orderArg == "lastTransferredAt" {
+			lastTransferredAtOrder = view.ORDER_ASC
+		} else if orderArg == "lastTransferredAt.desc" {
+			lastTransferredAtOrder = view.ORDER_DESC
 		}
 	}
 
@@ -303,8 +320,9 @@ func (handler *NFTs) ListTokensByAccount(ctx *fasthttp.RequestCtx) {
 		MaybeOwner:   &accountParam,
 	}
 	order := nft_view.TokenListOrder{
-		MintedAt:     mintedAtOrder,
-		LastEditedAt: lastEditedAtOrder,
+		MintedAt:          mintedAtOrder,
+		LastEditedAt:      lastEditedAtOrder,
+		LastTransferredAt: lastTransferredAtOrder,
 	}
 
 	denoms, paginationResult, err := handler.tokensView.List(filter, order, pagination)

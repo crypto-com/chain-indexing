@@ -146,18 +146,20 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				}
 			}
 			tokenRow := view.TokenRow{
-				TokenId:                 msgMintNFT.TokenId,
-				DenomId:                 msgMintNFT.DenomId,
-				MaybeDrop:               maybeDrop,
-				Name:                    msgMintNFT.TokenName,
-				URI:                     msgMintNFT.URI,
-				Data:                    msgMintNFT.Data,
-				Minter:                  msgMintNFT.Sender,
-				Owner:                   msgMintNFT.Recipient,
-				MintedAt:                blockTime,
-				MintedAtBlockHeight:     height,
-				LastEditedAt:            blockTime,
-				LastEditedAtBlockHeight: height,
+				TokenId:                      msgMintNFT.TokenId,
+				DenomId:                      msgMintNFT.DenomId,
+				MaybeDrop:                    maybeDrop,
+				Name:                         msgMintNFT.TokenName,
+				URI:                          msgMintNFT.URI,
+				Data:                         msgMintNFT.Data,
+				Minter:                       msgMintNFT.Sender,
+				Owner:                        msgMintNFT.Recipient,
+				MintedAt:                     blockTime,
+				MintedAtBlockHeight:          height,
+				LastEditedAt:                 blockTime,
+				LastEditedAtBlockHeight:      height,
+				LastTransferredAt:            blockTime,
+				LastTransferredAtBlockHeight: height,
 			}
 			if insertTokenErr := nft.insertToken(tokensView, tokenRow, tokensTotalView); insertTokenErr != nil {
 				return insertTokenErr
@@ -209,18 +211,20 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 			}
 
 			tokenRow := view.TokenRow{
-				DenomId:                 msgEditNFT.DenomId,
-				TokenId:                 msgEditNFT.TokenId,
-				MaybeDrop:               drop,
-				Name:                    mutPrevTokenRow.Name,
-				URI:                     mutPrevTokenRow.URI,
-				Data:                    mutPrevTokenRow.Data,
-				Minter:                  mutPrevTokenRow.Minter,
-				Owner:                   mutPrevTokenRow.Owner,
-				MintedAt:                mutPrevTokenRow.MintedAt,
-				MintedAtBlockHeight:     mutPrevTokenRow.MintedAtBlockHeight,
-				LastEditedAt:            blockTime,
-				LastEditedAtBlockHeight: height,
+				DenomId:                      msgEditNFT.DenomId,
+				TokenId:                      msgEditNFT.TokenId,
+				MaybeDrop:                    drop,
+				Name:                         mutPrevTokenRow.Name,
+				URI:                          mutPrevTokenRow.URI,
+				Data:                         mutPrevTokenRow.Data,
+				Minter:                       mutPrevTokenRow.Minter,
+				Owner:                        mutPrevTokenRow.Owner,
+				MintedAt:                     mutPrevTokenRow.MintedAt,
+				MintedAtBlockHeight:          mutPrevTokenRow.MintedAtBlockHeight,
+				LastEditedAt:                 blockTime,
+				LastEditedAtBlockHeight:      height,
+				LastTransferredAt:            mutPrevTokenRow.LastTransferredAt,
+				LastTransferredAtBlockHeight: mutPrevTokenRow.LastTransferredAtBlockHeight,
 			}
 
 			if updateTokenErr := nft.updateToken(
@@ -269,18 +273,20 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				return fmt.Errorf("error querying NFT token being edited: %v", queryPrevTokenRowErr)
 			}
 			tokenRow := view.TokenRow{
-				DenomId:                 msgTransferNFT.DenomId,
-				TokenId:                 msgTransferNFT.TokenId,
-				MaybeDrop:               prevTokenRow.MaybeDrop,
-				Name:                    prevTokenRow.Name,
-				URI:                     prevTokenRow.URI,
-				Data:                    prevTokenRow.Data,
-				Minter:                  prevTokenRow.Minter,
-				Owner:                   msgTransferNFT.Recipient,
-				MintedAt:                prevTokenRow.MintedAt,
-				MintedAtBlockHeight:     prevTokenRow.MintedAtBlockHeight,
-				LastEditedAt:            blockTime,
-				LastEditedAtBlockHeight: height,
+				DenomId:                      msgTransferNFT.DenomId,
+				TokenId:                      msgTransferNFT.TokenId,
+				MaybeDrop:                    prevTokenRow.MaybeDrop,
+				Name:                         prevTokenRow.Name,
+				URI:                          prevTokenRow.URI,
+				Data:                         prevTokenRow.Data,
+				Minter:                       prevTokenRow.Minter,
+				Owner:                        msgTransferNFT.Recipient,
+				MintedAt:                     prevTokenRow.MintedAt,
+				MintedAtBlockHeight:          prevTokenRow.MintedAtBlockHeight,
+				LastEditedAt:                 prevTokenRow.LastEditedAt,
+				LastEditedAtBlockHeight:      prevTokenRow.LastEditedAtBlockHeight,
+				LastTransferredAt:            blockTime,
+				LastTransferredAtBlockHeight: height,
 			}
 			if updateTokenErr := nft.updateToken(
 				tokensView,
