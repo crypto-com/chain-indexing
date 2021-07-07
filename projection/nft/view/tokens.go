@@ -177,6 +177,12 @@ func (tokensView *Tokens) FindById(
 	}
 	row.LastEditedAt = *lastEditedAt
 
+	lastTransferredAt, parseLastTransferredAtErr := lastTransferredAtTimeReader.Parse()
+	if parseLastEditedAtErr != nil {
+		return nil, fmt.Errorf("error parsing NFT token last transferred time: %v: %w", parseLastTransferredAtErr, rdb.ErrQuery)
+	}
+	row.LastTransferredAt = *lastTransferredAt
+
 	return &row, nil
 }
 
@@ -357,6 +363,12 @@ func (tokensView *Tokens) List(
 			return nil, nil, fmt.Errorf("error parsing NFT token last edited time: %v: %w", parseLastEditedAtErr, rdb.ErrQuery)
 		}
 		row.LastEditedAt = *lastEditedAt
+
+		lastTransferredAt, parseLastTransferredAtErr := lastTransferredAtTimeReader.Parse()
+		if parseLastEditedAtErr != nil {
+			return nil, nil, fmt.Errorf("error parsing NFT token last transferred time: %v: %w", parseLastTransferredAtErr, rdb.ErrQuery)
+		}
+		row.LastTransferredAt = *lastTransferredAt
 
 		rows = append(rows, row)
 	}
