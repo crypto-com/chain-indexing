@@ -5,6 +5,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/model"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
 func ParseEndBlockEventsCommands(blockHeight int64, endBlockEvents []model.BlockResultsEvent) ([]command.Command, error) {
@@ -12,7 +13,7 @@ func ParseEndBlockEventsCommands(blockHeight int64, endBlockEvents []model.Block
 
 	for i, event := range endBlockEvents {
 		if event.Type == "transfer" {
-			transferEvent := NewParsedTxsResultLogEvent(&endBlockEvents[i])
+			transferEvent := utils.NewParsedTxsResultLogEvent(&endBlockEvents[i])
 
 			amount := transferEvent.MustGetAttributeByKey("amount")
 			if amount == "" {
@@ -25,7 +26,7 @@ func ParseEndBlockEventsCommands(blockHeight int64, endBlockEvents []model.Block
 					Amount:    coin.MustParseCoinsNormalized(amount),
 				}))
 		} else if event.Type == "complete_unbonding" {
-			completeBondingEvent := NewParsedTxsResultLogEvent(&endBlockEvents[i])
+			completeBondingEvent := utils.NewParsedTxsResultLogEvent(&endBlockEvents[i])
 			amountValue := completeBondingEvent.MustGetAttributeByKey("amount")
 
 			commands = append(commands, command_usecase.NewCreateCompleteBonding(
@@ -37,7 +38,7 @@ func ParseEndBlockEventsCommands(blockHeight int64, endBlockEvents []model.Block
 				},
 			))
 		} else if event.Type == "active_proposal" {
-			activeProposalEvent := NewParsedTxsResultLogEvent(&endBlockEvents[i])
+			activeProposalEvent := utils.NewParsedTxsResultLogEvent(&endBlockEvents[i])
 
 			commands = append(commands, command_usecase.NewEndProposal(
 				blockHeight,
@@ -45,7 +46,7 @@ func ParseEndBlockEventsCommands(blockHeight int64, endBlockEvents []model.Block
 				activeProposalEvent.MustGetAttributeByKey("proposal_result"),
 			))
 		} else if event.Type == "inactive_proposal" {
-			activeProposalEvent := NewParsedTxsResultLogEvent(&endBlockEvents[i])
+			activeProposalEvent := utils.NewParsedTxsResultLogEvent(&endBlockEvents[i])
 
 			commands = append(commands, command_usecase.NewInactiveProposal(
 				blockHeight,

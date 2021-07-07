@@ -3,6 +3,8 @@ package parser
 import (
 	"fmt"
 
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+
 	"github.com/crypto-com/chain-indexing/usecase/command"
 
 	entity_command "github.com/crypto-com/chain-indexing/entity/command"
@@ -10,7 +12,7 @@ import (
 )
 
 func ParseBlockToCommands(
-	txDecoder *TxDecoder,
+	txDecoder *utils.TxDecoder,
 	block *usecase_model.Block,
 	rawBlock *usecase_model.RawBlock,
 	blockResults *usecase_model.BlockResults,

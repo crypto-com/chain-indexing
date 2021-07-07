@@ -7,6 +7,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/model"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
 func ParseBeginBlockEventsCommands(
@@ -22,7 +23,7 @@ func ParseBeginBlockEventsCommands(
 	}
 	for i, event := range beginBlockEvents {
 		if event.Type == "proposer_reward" {
-			proposerRewardEvent := NewParsedTxsResultLogEvent(&beginBlockEvents[i])
+			proposerRewardEvent := utils.NewParsedTxsResultLogEvent(&beginBlockEvents[i])
 			proposerReward.address = proposerRewardEvent.MustGetAttributeByKey("validator")
 			proposerReward.amount = proposerRewardEvent.MustGetAttributeByKey("amount")
 			break
@@ -30,7 +31,7 @@ func ParseBeginBlockEventsCommands(
 	}
 	for i, event := range beginBlockEvents {
 		if event.Type == "transfer" {
-			transferEvent := NewParsedTxsResultLogEvent(&beginBlockEvents[i])
+			transferEvent := utils.NewParsedTxsResultLogEvent(&beginBlockEvents[i])
 
 			amount := transferEvent.MustGetAttributeByKey("amount")
 			if amount == "" {
@@ -43,7 +44,7 @@ func ParseBeginBlockEventsCommands(
 					Amount:    coin.MustParseCoinsNormalized(amount),
 				}))
 		} else if event.Type == "mint" {
-			mintEvent := NewParsedTxsResultLogEvent(&beginBlockEvents[i])
+			mintEvent := utils.NewParsedTxsResultLogEvent(&beginBlockEvents[i])
 
 			amount := mintEvent.MustGetAttributeByKey("amount")
 			if amount == "" {
@@ -59,7 +60,7 @@ func ParseBeginBlockEventsCommands(
 				},
 			))
 		} else if event.Type == "proposer_reward" {
-			proposerRewardEvent := NewParsedTxsResultLogEvent(&beginBlockEvents[i])
+			proposerRewardEvent := utils.NewParsedTxsResultLogEvent(&beginBlockEvents[i])
 			amount := proposerRewardEvent.MustGetAttributeByKey("amount")
 			if amount == "" {
 				continue
@@ -70,7 +71,7 @@ func ParseBeginBlockEventsCommands(
 				blockHeight, validator, coin.MustParseDecCoins(amount),
 			))
 		} else if event.Type == "rewards" {
-			proposerRewardEvent := NewParsedTxsResultLogEvent(&beginBlockEvents[i])
+			proposerRewardEvent := utils.NewParsedTxsResultLogEvent(&beginBlockEvents[i])
 
 			amount := proposerRewardEvent.MustGetAttributeByKey("amount")
 			if amount == "" {
@@ -87,7 +88,7 @@ func ParseBeginBlockEventsCommands(
 				blockHeight, validator, coin.MustParseDecCoins(amount),
 			))
 		} else if event.Type == "commission" {
-			proposerRewardEvent := NewParsedTxsResultLogEvent(&beginBlockEvents[i])
+			proposerRewardEvent := utils.NewParsedTxsResultLogEvent(&beginBlockEvents[i])
 			amount := proposerRewardEvent.MustGetAttributeByKey("amount")
 			if amount == "" {
 				continue
@@ -98,7 +99,7 @@ func ParseBeginBlockEventsCommands(
 				blockHeight, validator, coin.MustParseDecCoins(amount),
 			))
 		} else if event.Type == "slash" {
-			slashEvent := NewParsedTxsResultLogEvent(&beginBlockEvents[i])
+			slashEvent := utils.NewParsedTxsResultLogEvent(&beginBlockEvents[i])
 
 			if slashEvent.HasAttribute("address") {
 				commands = append(commands, command_usecase.NewSlashValidator(

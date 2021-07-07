@@ -3,6 +3,8 @@ package parser_test
 import (
 	"strings"
 
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -28,7 +30,7 @@ var _ = Describe("TransactionParser", func() {
 
 	Describe("ParseTransactionCommands", func() {
 		It("should parse Transaction commands when there is two Msg in one transaction", func() {
-			txFeeParser := parser.NewTxDecoder()
+			txFeeParser := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.ONE_TX_TWO_MSG_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.ONE_TX_TWO_MSG_BLOCK_RESULTS_RESP)
 
@@ -79,7 +81,7 @@ var _ = Describe("TransactionParser", func() {
 		})
 
 		It("should parse Transaction commands when there is transaction fee", func() {
-			txFeeParser := parser.NewTxDecoder()
+			txFeeParser := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_WITH_FEE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_WITH_FEE_BLOCK_RESULTS_RESP)
 
@@ -122,7 +124,7 @@ var _ = Describe("TransactionParser", func() {
 		})
 
 		It("should parse Transaction commands when transaction failed with fee", func() {
-			txFeeParser := parser.NewTxDecoder()
+			txFeeParser := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESULTS_RESP)
 
@@ -164,7 +166,7 @@ var _ = Describe("TransactionParser", func() {
 		})
 
 		It("should parse Transaction commands when transaction failed without fee", func() {
-			txFeeParser := parser.NewTxDecoder()
+			txFeeParser := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_FAILED_WITHOUT_FEE_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_FAILED_WITHOUT_FEE_BLOCK_RESULTS_RESP))
 
@@ -206,7 +208,7 @@ var _ = Describe("TransactionParser", func() {
 		})
 
 		It("should parse Transaction commands when there is transaction memo and timeout_height", func() {
-			txFeeParser := parser.NewTxDecoder()
+			txFeeParser := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESULTS_RESP)
 
@@ -248,7 +250,7 @@ var _ = Describe("TransactionParser", func() {
 		})
 
 		It("should parse failed Transaction commands when there is transaction memo and timeout_height", func() {
-			txFeeParser := parser.NewTxDecoder()
+			txFeeParser := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESULTS_RESP)
 
@@ -290,7 +292,7 @@ var _ = Describe("TransactionParser", func() {
 		})
 
 		It("should parse Transaction commands when the signer is multisig address", func() {
-			txFeeParser := parser.NewTxDecoder()
+			txFeeParser := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MULTISIG_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MULTISIG_BLOCK_RESULTS_RESP)
 

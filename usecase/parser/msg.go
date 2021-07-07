@@ -8,6 +8,10 @@ import (
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+
+	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
+
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 
 	"github.com/crypto-com/chain-indexing/internal/primptr"
@@ -24,7 +28,7 @@ import (
 )
 
 func ParseBlockResultsTxsMsgToCommands(
-	txDecoder *TxDecoder,
+	txDecoder *utils.TxDecoder,
 	block *model.Block,
 	blockResults *model.BlockResults,
 	accountAddressPrefix string,
@@ -104,7 +108,36 @@ func ParseBlockResultsTxsMsgToCommands(
 				msgCommands = parseMsgNFTEditNFT(msgCommonParams, msg)
 			case "/chainmain.nft.v1.MsgBurnNFT":
 				msgCommands = parseMsgNFTBurnNFT(msgCommonParams, msg)
-				// TODO: IBC commands
+			case "/ibc.core.client.v1.MsgCreateClient":
+				msgCommands = ibcmsg.ParseMsgCreateClient(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.core.client.v1.MsgUpdateClient":
+				msgCommands = ibcmsg.ParseMsgUpdateClient(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.core.connection.v1.MsgConnectionOpenInit":
+				msgCommands = ibcmsg.ParseMsgConnectionOpenInit(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.core.connection.v1.MsgConnectionOpenTry":
+				msgCommands = ibcmsg.ParseMsgConnectionOpenTry(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.core.connection.v1.MsgConnectionOpenAck":
+				msgCommands = ibcmsg.ParseMsgConnectionOpenAck(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.core.connection.v1.MsgConnectionOpenConfirm":
+				msgCommands = ibcmsg.ParseMsgConnectionOpenConfirm(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.core.channel.v1.MsgChannelOpenInit":
+				msgCommands = ibcmsg.ParseMsgChannelOpenInit(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.core.channel.v1.MsgChannelOpenTry":
+				msgCommands = ibcmsg.ParseMsgChannelOpenTry(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.core.channel.v1.MsgChannelOpenAck":
+				msgCommands = ibcmsg.ParseMsgChannelOpenAck(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.core.channel.v1.MsgChannelOpenConfirm":
+				msgCommands = ibcmsg.ParseMsgChannelOpenConfirm(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.applications.transfer.v1.MsgTransfer":
+				msgCommands = ibcmsg.ParseMsgTransfer(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.core.channel.v1.MsgRecvPacket":
+				msgCommands = ibcmsg.ParseMsgRecvPacket(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.core.channel.v1.MsgAcknowledgement":
+				msgCommands = ibcmsg.ParseMsgAcknowledgement(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.core.channel.v1.MsgTimeout":
+				msgCommands = ibcmsg.ParseMsgTimeout(msgCommonParams, txsResult, msgIndex, msg)
+			case "/ibc.core.channel.v1.MsgTimeoutOnClose":
+				msgCommands = ibcmsg.ParseMsgTimeoutOnClose(msgCommonParams, txsResult, msgIndex, msg)
 			}
 
 			commands = append(commands, msgCommands...)
@@ -197,7 +230,7 @@ func parseMsgWithdrawDelegatorReward(
 			},
 		)}
 	}
-	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	var recipient string
 	var amount coin.Coins
 	// When there is no reward withdrew, `transfer` event would not exist
@@ -240,7 +273,7 @@ func parseMsgWithdrawValidatorCommission(
 			},
 		)}
 	}
-	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	var recipient string
 	var amount coin.Coins
 	// When there is no reward withdrew, `transfer` event would not exist
@@ -310,7 +343,7 @@ func parseMsgSubmitProposal(
 	}
 
 	if msgCommonParams.TxSuccess {
-		log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+		log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 		logEvent := log.GetEventByType("submit_proposal")
 		if logEvent == nil {
 			panic("missing `submit_proposal` event in TxsResult log")
@@ -353,7 +386,7 @@ func parseMsgSubmitParamChangeProposal(
 			},
 		)}
 	}
-	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	event := log.GetEventByType("submit_proposal")
 	if event == nil {
 		panic("missing `submit_proposal` event in TxsResult log")
@@ -411,7 +444,7 @@ func parseMsgSubmitCommunityFundSpendProposal(
 			},
 		)}
 	}
-	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
 	event := log.GetEventByType("submit_proposal")
 	if event == nil {
@@ -479,7 +512,7 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 			},
 		)}
 	}
-	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
 	event := log.GetEventByType("submit_proposal")
 	if event == nil {
@@ -531,7 +564,7 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 			},
 		)}
 	}
-	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
 	event := log.GetEventByType("submit_proposal")
 	if event == nil {
@@ -583,7 +616,7 @@ func parseMsgSubmitTextProposal(
 			},
 		)}
 	}
-	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
 	event := log.GetEventByType("submit_proposal")
 	if event == nil {
@@ -640,7 +673,7 @@ func parseMsgDeposit(
 	)}
 
 	if msgCommonParams.TxSuccess {
-		log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+		log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 		logEvents := log.GetEventsByType("proposal_deposit")
 		if logEvents == nil {
 			panic("missing `proposal_deposit` event in TxsResult log")
@@ -702,8 +735,7 @@ func parseMsgUndelegate(
 			},
 		)}
 	}
-
-	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
 	unbondEvent := log.GetEventByType("unbond")
 	if unbondEvent == nil {
@@ -772,7 +804,7 @@ func parseMsgBeginRedelegate(
 		)}
 	}
 
-	log := NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	moduleAccounts := tmcosmosutils.NewModuleAccounts(addressPrefix)
 	transferEvents := log.GetEventsByType("transfer")
 	autoClaimedRewards := coin.NewZeroCoin(stakingDenom)

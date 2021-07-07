@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	command_entity "github.com/crypto-com/chain-indexing/entity/command"
@@ -27,7 +29,7 @@ type SyncManager struct {
 	accountAddressPrefix string
 	stakingDenom         string
 
-	txDecoder          *parser.TxDecoder
+	txDecoder          *utils.TxDecoder
 	windowSyncStrategy *syncstrategy.Window
 
 	eventHandler eventhandler_interface.Handler
@@ -40,7 +42,7 @@ type SyncManager struct {
 type SyncManagerParams struct {
 	Logger    applogger.Logger
 	RDbConn   rdb.Conn
-	TxDecoder *parser.TxDecoder
+	TxDecoder *utils.TxDecoder
 
 	Config SyncManagerConfig
 }

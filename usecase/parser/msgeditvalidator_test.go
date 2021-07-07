@@ -3,6 +3,8 @@ package parser_test
 import (
 	"strings"
 
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+
 	"github.com/crypto-com/chain-indexing/internal/primptr"
 
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
@@ -20,7 +22,7 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgEditValidator", func() {
 
 		It("should parse Msg commands when there is staking.MsgEditValidator in the transaction", func() {
-			txDecoder := parser.NewTxDecoder()
+			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_BLOCK_RESULTS_RESP))
 			accountAddressPrefix := "tcro"
