@@ -51,6 +51,22 @@ func ParseMsgCreateClient(
 		panic(fmt.Errorf("error decoding MsgCreateClient: %v", err))
 	}
 
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgCreateClientParams{
+			MaybeTendermintLightClient: &ibc_model.TendermintLightClient{
+				TendermintClientState:               rawMsg.ClientState,
+				TendermintLightClientConsensusState: rawMsg.ConsensusState,
+			},
+			Signer: rawMsg.Signer,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgIBCCreateClient(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
 	event := log.GetEventByType("create_client")
@@ -93,6 +109,16 @@ func ParseMsgConnectionOpenInit(
 	}
 	if err := decoder.Decode(msg); err != nil {
 		panic(fmt.Errorf("error decoding message: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenInit(
+			msgCommonParams,
+
+			ibc_model.MsgConnectionOpenInitParams{
+				RawMsgConnectionOpenInit: rawMessage,
+			},
+		)}
 	}
 
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
@@ -142,6 +168,19 @@ func ParseMsgConnectionOpenTry(
 	}
 	if err := decoder.Decode(msg); err != nil {
 		panic(fmt.Errorf("error decoding MsgConnectionOpenTry: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgConnectionOpenTryParams{
+			MsgConnectionOpenTryBaseParams: rawMsg.MsgConnectionOpenTryBaseParams,
+			MaybeTendermintClientState:     &rawMsg.TendermintClientState,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenTry(
+			msgCommonParams,
+
+			params,
+		)}
 	}
 
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
@@ -194,6 +233,19 @@ func ParseMsgConnectionOpenAck(
 		panic(fmt.Errorf("error decoding MsgConnectionOpenAck: %v", err))
 	}
 
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgConnectionOpenAckParams{
+			MsgConnectionOpenAckBaseParams: rawMsg.MsgConnectionOpenAckBaseParams,
+			MaybeTendermintClientState:     &rawMsg.TendermintClientState,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenAck(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	event := log.GetEventByType("connection_open_ack")
 	if event == nil {
@@ -238,6 +290,16 @@ func ParseMsgConnectionOpenConfirm(
 	}
 	if err := decoder.Decode(msg); err != nil {
 		panic(fmt.Errorf("error decoding MsgConnectionOpenConfirm: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenConfirm(
+			msgCommonParams,
+
+			ibc_model.MsgConnectionOpenConfirmParams{
+				RawMsgConnectionOpenConfirm: rawMsg,
+			},
+		)}
 	}
 
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
@@ -286,6 +348,16 @@ func ParseMsgChannelOpenInit(
 		panic(fmt.Errorf("error decoding RawMsgChannelOpenInit: %v", err))
 	}
 
+	if !msgCommonParams.TxSuccess {
+		return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenInit(
+			msgCommonParams,
+
+			ibc_model.MsgChannelOpenInitParams{
+				RawMsgChannelOpenInit: rawMsg,
+			},
+		)}
+	}
+
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	event := log.GetEventByType("channel_open_init")
 	if event == nil {
@@ -328,6 +400,16 @@ func ParseMsgChannelOpenTry(
 	}
 	if err := decoder.Decode(msg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgChannelOpenTry: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenTry(
+			msgCommonParams,
+
+			ibc_model.MsgChannelOpenTryParams{
+				RawMsgChannelOpenTry: rawMsg,
+			},
+		)}
 	}
 
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
@@ -375,6 +457,16 @@ func ParseMsgChannelOpenAck(
 		panic(fmt.Errorf("error decoding RawMsgChannelOpenAck: %v", err))
 	}
 
+	if !msgCommonParams.TxSuccess {
+		return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenAck(
+			msgCommonParams,
+
+			ibc_model.MsgChannelOpenAckParams{
+				RawMsgChannelOpenAck: rawMsg,
+			},
+		)}
+	}
+
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	event := log.GetEventByType("channel_open_ack")
 	if event == nil {
@@ -418,6 +510,16 @@ func ParseMsgChannelOpenConfirm(
 	}
 	if err := decoder.Decode(msg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgChannelOpenConfirm: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenConfirm(
+			msgCommonParams,
+
+			ibc_model.MsgChannelOpenConfirmParams{
+				RawMsgChannelOpenConfirm: rawMsg,
+			},
+		)}
 	}
 
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
@@ -468,6 +570,23 @@ func ParseMsgUpdateClient(
 	}
 	if err := decoder.Decode(msg); err != nil {
 		panic(fmt.Errorf("error decoding MsgUpdateClient: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgUpdateClientParams{
+			MaybeTendermintLightClientUpdate: &ibc_model.TendermintLightClientUpdate{Header: rawMsg.Header},
+
+			ClientID:        rawMsg.ClientID,
+			ClientType:      "",
+			ConsensusHeight: ibc_model.Height{},
+			Signer:          rawMsg.Signer,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgIBCUpdateClient(
+			msgCommonParams,
+
+			params,
+		)}
 	}
 
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
@@ -531,6 +650,15 @@ func ParseMsgTransfer(
 		panic(fmt.Errorf("error decoding RawMsgTransfer: %v", err))
 	}
 
+	if !msgCommonParams.TxSuccess {
+		return []command.Command{command_usecase.NewCreateMsgIBCTransferTransfer(
+			msgCommonParams,
+			ibc_model.MsgTransferParams{
+				RawMsgTransfer: rawMsg,
+			},
+		)}
+	}
+
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	event := log.GetEventByType("send_packet")
 	if event == nil {
@@ -560,8 +688,6 @@ func ParseMsgRecvPacket(
 	msgIndex int,
 	msg map[string]interface{},
 ) []command.Command {
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
-
 	var rawMsg ibc_model.RawMsgRecvPacket
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -581,7 +707,7 @@ func ParseMsgRecvPacket(
 		panic(fmt.Errorf("error decoding RawMsgRecvPacket: %v", err))
 	}
 
-	if !isPacketMsgTransfer(log, rawMsg.Packet) {
+	if !isPacketMsgTransfer(rawMsg.Packet) {
 		// unsupported application
 		return []command.Command{}
 	}
@@ -591,14 +717,38 @@ func ParseMsgRecvPacket(
 	rawPacketData := base64_internal.MustDecodeString(rawMsg.Packet.Data)
 	json.MustUnmarshal(rawPacketData, &rawFungibleTokenPacketData)
 
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgRecvPacketParams{
+			RawMsgRecvPacket: rawMsg,
+
+			Application: "transfer",
+			MessageType: "MsgTransfer",
+			MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
+				FungibleTokenPacketData: rawFungibleTokenPacketData,
+			},
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+
 	fungibleTokenPacketEvent := log.GetEventByType("fungible_token_packet")
 	if fungibleTokenPacketEvent == nil {
 		panic("missing `fungible_token_packet` event in TxsResult log")
 	}
 
+	var maybeDenominationTrace *ibc_model.MsgRecvPacketFungibleTokenDenominationTrace
 	denominationTraceEvent := log.GetEventByType("denomination_trace")
-	if denominationTraceEvent == nil {
-		panic("missing `denomination_trace` event in TxsResult log")
+	if denominationTraceEvent != nil {
+		maybeDenominationTrace = &ibc_model.MsgRecvPacketFungibleTokenDenominationTrace{
+			Hash:  denominationTraceEvent.MustGetAttributeByKey("trace_hash"),
+			Denom: denominationTraceEvent.MustGetAttributeByKey("denom"),
+		}
 	}
 
 	recvPacketEvent := log.GetEventByType("recv_packet")
@@ -622,8 +772,7 @@ func ParseMsgRecvPacket(
 			FungibleTokenPacketData: rawFungibleTokenPacketData,
 			// success value inverted bug: https://github.com/cosmos/cosmos-sdk/pull/9640
 			Success:                fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "false",
-			DenominationTraceHash:  denominationTraceEvent.MustGetAttributeByKey("trace_hash"),
-			DenominationTraceDenom: denominationTraceEvent.MustGetAttributeByKey("denom"),
+			MaybeDenominationTrace: maybeDenominationTrace,
 		},
 
 		PacketSequence:  typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
@@ -645,8 +794,6 @@ func ParseMsgAcknowledgement(
 	msgIndex int,
 	msg map[string]interface{},
 ) []command.Command {
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
-
 	var rawMsg ibc_model.RawMsgAcknowledgement
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -666,7 +813,7 @@ func ParseMsgAcknowledgement(
 		panic(fmt.Errorf("error decoding RawMsgAcknowledgement: %v", err))
 	}
 
-	if !isPacketMsgTransfer(log, rawMsg.Packet) {
+	if !isPacketMsgTransfer(rawMsg.Packet) {
 		// unsupported application
 		return []command.Command{}
 	}
@@ -675,6 +822,26 @@ func ParseMsgAcknowledgement(
 	var rawFungibleTokenPacketData ibc_model.FungibleTokenPacketData
 	rawPacketData := base64_internal.MustDecodeString(rawMsg.Packet.Data)
 	json.MustUnmarshal(rawPacketData, &rawFungibleTokenPacketData)
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgAcknowledgementParams{
+			RawMsgAcknowledgement: rawMsg,
+
+			Application: "transfer",
+			MessageType: "MsgTransfer",
+			MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
+				FungibleTokenPacketData: rawFungibleTokenPacketData,
+			},
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgIBCAcknowledgement(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 
 	fungibleTokenPacketEvent := log.GetEventByType("fungible_token_packet")
 	if fungibleTokenPacketEvent == nil {
@@ -714,13 +881,8 @@ func ParseMsgAcknowledgement(
 }
 
 func isPacketMsgTransfer(
-	log *utils.ParsedTxsResultLog,
 	packet ibc_model.Packet,
 ) bool {
-	if !log.HasEvent("fungible_token_packet") {
-		return false
-	}
-
 	if packet.DestinationPort != "transfer" {
 		return false
 	}
@@ -743,8 +905,6 @@ func ParseMsgTimeout(
 	msgIndex int,
 	msg map[string]interface{},
 ) []command.Command {
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
-
 	var rawMsg ibc_model.RawMsgTimeout
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -764,12 +924,13 @@ func ParseMsgTimeout(
 		panic(fmt.Errorf("error decoding RawMsgTimeout: %v", err))
 	}
 
-	if !isTimeoutMsgTransfer(log, rawMsg.Packet) {
+	if !isPacketMsgTransfer(rawMsg.Packet) {
 		// unsupported application
 		return []command.Command{}
 	}
 
 	// Transfer application, MsgTransfer
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 
 	timeoutEvent := log.GetEventByType("timeout")
 	if timeoutEvent == nil {
@@ -818,8 +979,6 @@ func ParseMsgTimeoutOnClose(
 	msgIndex int,
 	msg map[string]interface{},
 ) []command.Command {
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
-
 	var rawMsg ibc_model.RawMsgTimeoutOnClose
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -839,10 +998,27 @@ func ParseMsgTimeoutOnClose(
 		panic(fmt.Errorf("error decoding RawMsgTimeoutOnClose: %v", err))
 	}
 
-	if !isTimeoutMsgTransfer(log, rawMsg.Packet) {
+	if !isPacketMsgTransfer(rawMsg.Packet) {
 		// unsupported application
 		return []command.Command{}
 	}
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgTimeoutOnCloseParams{
+			RawMsgTimeoutOnClose: rawMsg,
+
+			Application: "transfer",
+			MessageType: "MsgTransfer",
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgIBCTimeoutOnClose(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 
 	// Transfer application, MsgTransfer
 	timeoutEvent := log.GetEventByType("timeout")
@@ -884,23 +1060,4 @@ func ParseMsgTimeoutOnClose(
 
 		params,
 	)}
-}
-
-func isTimeoutMsgTransfer(
-	log *utils.ParsedTxsResultLog,
-	timeoutPacket ibc_model.Packet,
-) bool {
-	if !log.HasEvent("timeout") {
-		return false
-	}
-
-	if log.GetEventByType("timeout").MustGetAttributeByKey("module") != "transfer" {
-		return false
-	}
-
-	if timeoutPacket.DestinationPort != "transfer" {
-		return false
-	}
-
-	return true
 }
