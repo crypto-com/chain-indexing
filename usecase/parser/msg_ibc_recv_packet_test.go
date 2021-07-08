@@ -57,8 +57,10 @@ var _ = Describe("ParseMsgCommands", func() {
       "denom": "basecro",
       "amount": "1234",
       "success": true,
-      "denominationTraceHash": "6411AE2ADA1E73DB59DB151A8988F9B7D5E7E233D8414DB6817F8F1A01611F86",
-      "denominationTraceDenom": "ibc/6411AE2ADA1E73DB59DB151A8988F9B7D5E7E233D8414DB6817F8F1A01611F86"
+      "maybeDenominationTrace": {
+        "hash": "6411AE2ADA1E73DB59DB151A8988F9B7D5E7E233D8414DB6817F8F1A01611F86",
+        "denom": "ibc/6411AE2ADA1E73DB59DB151A8988F9B7D5E7E233D8414DB6817F8F1A01611F86"
+	  }
     },
 
     "packetSequence": "1",

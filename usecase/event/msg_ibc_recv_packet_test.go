@@ -103,8 +103,10 @@ var _ = Describe("Event", func() {
 				MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 					FungibleTokenPacketData: anyRawMsgRecvPacketFungibleTokenPacketData,
 					Success:                 true,
-					DenominationTraceHash:   "6411AE2ADA1E73DB59DB151A8988F9B7D5E7E233D8414DB6817F8F1A01611F86",
-					DenominationTraceDenom:  "ibc/6411AE2ADA1E73DB59DB151A8988F9B7D5E7E233D8414DB6817F8F1A01611F86",
+					MaybeDenominationTrace: &ibc_model.MsgRecvPacketFungibleTokenDenominationTrace{
+						Hash:  "6411AE2ADA1E73DB59DB151A8988F9B7D5E7E233D8414DB6817F8F1A01611F86",
+						Denom: "ibc/6411AE2ADA1E73DB59DB151A8988F9B7D5E7E233D8414DB6817F8F1A01611F86",
+					},
 				},
 
 				PacketSequence:  anyPacketSequence,
@@ -227,8 +229,10 @@ var _ = Describe("Event", func() {
 				MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 					FungibleTokenPacketData: anyRawMsgRecvPacketFungibleTokenPacketData,
 					Success:                 true,
-					DenominationTraceHash:   "6411AE2ADA1E73DB59DB151A8988F9B7D5E7E233D8414DB6817F8F1A01611F86",
-					DenominationTraceDenom:  "ibc/6411AE2ADA1E73DB59DB151A8988F9B7D5E7E233D8414DB6817F8F1A01611F86",
+					MaybeDenominationTrace: &ibc_model.MsgRecvPacketFungibleTokenDenominationTrace{
+						Hash:  "6411AE2ADA1E73DB59DB151A8988F9B7D5E7E233D8414DB6817F8F1A01611F86",
+						Denom: "ibc/6411AE2ADA1E73DB59DB151A8988F9B7D5E7E233D8414DB6817F8F1A01611F86",
+					},
 				},
 
 				PacketSequence:  anyPacketSequence,

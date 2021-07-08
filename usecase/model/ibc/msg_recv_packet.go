@@ -23,9 +23,13 @@ type RawMsgRecvPacket struct {
 type MsgRecvPacketFungibleTokenPacketData struct {
 	FungibleTokenPacketData
 
-	Success                bool   `json:"success"`
-	DenominationTraceHash  string `json:"denominationTraceHash"`
-	DenominationTraceDenom string `json:"denominationTraceDenom"`
+	Success                bool                                         `json:"success"`
+	MaybeDenominationTrace *MsgRecvPacketFungibleTokenDenominationTrace `json:"maybeDenominationTrace"`
+}
+
+type MsgRecvPacketFungibleTokenDenominationTrace struct {
+	Hash  string `json:"hash"`
+	Denom string `json:"denom"`
 }
 
 type MsgRecvPacketPacketAck struct {
