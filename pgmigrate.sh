@@ -65,7 +65,7 @@ if [[ "${RET_VALUE}" != 0 ]]; then
         exit 1
     fi
     
-    go get -tags 'postgres' -u github.com/golang-migrate/migrate/cmd/migrate
+    go get -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate
     check_migrate
     if [[ "${RET_VALUE}" != 0 ]]; then
         echoerr "Failed to install migrate. Please install it manually."

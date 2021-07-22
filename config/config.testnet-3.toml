@@ -47,7 +47,7 @@ pprof_listening_address = "0.0.0.0:3000"
 host = "localhost"
 port = 5432
 username = "postgres"
-# password can only be provided through CLI or Environment variable `DB_PASS`
+# password can only be provided through CLI or Environment variable `DB_PASSWORD`
 name = "postgres"
 schema = "public"
 ssl = true
