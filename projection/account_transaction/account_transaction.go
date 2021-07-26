@@ -3,17 +3,17 @@ package account_transaction
 import (
 	"fmt"
 
-	"github.com/crypto-com/chain-indexing/internal/base64"
-
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
+	"github.com/crypto-com/chain-indexing/internal/base64"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	"github.com/crypto-com/chain-indexing/projection/account_transaction/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 var _ projection_entity.Projection = &AccountTransaction{}
@@ -295,6 +295,52 @@ func (projection *AccountTransaction) HandleEvents(height int64, events []event_
 
 		} else if typedEvent, ok := event.(*event_usecase.MsgNFTBurnNFT); ok {
 			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Sender)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCCreateClient); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCUpdateClient); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCConnectionOpenInit); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCConnectionOpenAck); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCConnectionOpenTry); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCConnectionOpenConfirm); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCChannelOpenInit); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCChannelOpenAck); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCChannelOpenTry); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCChannelOpenConfirm); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCAcknowledgement); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCRecvPacket); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.MaybeFungibleTokenPacketData.Receiver)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCTransferTransfer); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Sender)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCTimeout); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCTimeoutOnClose); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
+
 		}
 	}
 
@@ -331,7 +377,7 @@ func (projection *AccountTransaction) HandleEvents(height int64, events []event_
 	return nil
 }
 
-func (projection *AccountTransaction) ParseSenderAddresses(senders []event_usecase.TransactionSigner) []string {
+func (projection *AccountTransaction) ParseSenderAddresses(senders []model.TransactionSigner) []string {
 	addresses := make([]string, 0, len(senders))
 	for _, sender := range senders {
 		var address string

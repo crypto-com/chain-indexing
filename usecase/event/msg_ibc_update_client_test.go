@@ -157,15 +157,15 @@ var _ = Describe("Event", func() {
 
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
-			Expect(typedEvent.ClientID).To(Equal(anyParams.ClientID))
-			Expect(typedEvent.ClientType).To(Equal(anyParams.ClientType))
-			Expect(typedEvent.ConsensusHeight).To(Equal(anyParams.ConsensusHeight))
-			Expect(typedEvent.MaybeTendermintLightClientUpdate).NotTo(BeNil())
-			Expect(typedEvent.MaybeTendermintLightClientUpdate.Header.Type).To(Equal(
+			Expect(typedEvent.Params.ClientID).To(Equal(anyParams.ClientID))
+			Expect(typedEvent.Params.ClientType).To(Equal(anyParams.ClientType))
+			Expect(typedEvent.Params.ConsensusHeight).To(Equal(anyParams.ConsensusHeight))
+			Expect(typedEvent.Params.MaybeTendermintLightClientUpdate).NotTo(BeNil())
+			Expect(typedEvent.Params.MaybeTendermintLightClientUpdate.Header.Type).To(Equal(
 				"/ibc.lightclients.tendermint.v1.Header",
 			))
-			Expect(typedEvent.MaybeTendermintLightClientUpdate.Header.TrustedHeight.RevisionHeight).To(Equal(uint64(5)))
-			Expect(typedEvent.Signer).To(Equal(anyParams.Signer))
+			Expect(typedEvent.Params.MaybeTendermintLightClientUpdate.Header.TrustedHeight.RevisionHeight).To(Equal(uint64(5)))
+			Expect(typedEvent.Params.Signer).To(Equal(anyParams.Signer))
 		})
 
 		It("should able to encode and decode failed event", func() {
@@ -310,15 +310,15 @@ var _ = Describe("Event", func() {
 
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
-			Expect(typedEvent.ClientID).To(Equal(anyParams.ClientID))
-			Expect(typedEvent.ClientType).To(Equal(anyParams.ClientType))
-			Expect(typedEvent.ConsensusHeight).To(Equal(anyParams.ConsensusHeight))
-			Expect(typedEvent.MaybeTendermintLightClientUpdate).NotTo(BeNil())
-			Expect(typedEvent.MaybeTendermintLightClientUpdate.Header.Type).To(Equal(
+			Expect(typedEvent.Params.ClientID).To(Equal(anyParams.ClientID))
+			Expect(typedEvent.Params.ClientType).To(Equal(anyParams.ClientType))
+			Expect(typedEvent.Params.ConsensusHeight).To(Equal(anyParams.ConsensusHeight))
+			Expect(typedEvent.Params.MaybeTendermintLightClientUpdate).NotTo(BeNil())
+			Expect(typedEvent.Params.MaybeTendermintLightClientUpdate.Header.Type).To(Equal(
 				"/ibc.lightclients.tendermint.v1.Header",
 			))
-			Expect(typedEvent.MaybeTendermintLightClientUpdate.Header.TrustedHeight.RevisionHeight).To(Equal(uint64(5)))
-			Expect(typedEvent.Signer).To(Equal(anyParams.Signer))
+			Expect(typedEvent.Params.MaybeTendermintLightClientUpdate.Header.TrustedHeight.RevisionHeight).To(Equal(uint64(5)))
+			Expect(typedEvent.Params.Signer).To(Equal(anyParams.Signer))
 		})
 	})
 })

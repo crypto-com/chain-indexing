@@ -16,31 +16,25 @@ const TRANSACTION_CREATED = "TransactionCreated"
 type TransactionCreated struct {
 	entity_event.Base
 
-	TxHash        string              `json:"txHash"`
-	Index         int                 `json:"index"`
-	Code          int                 `json:"code"`
-	Log           string              `json:"log"`
-	MsgCount      int                 `json:"msgCount"`
-	Senders       []TransactionSigner `json:"senders"`
-	Fee           coin.Coins          `json:"fee"`
-	FeePayer      string              `json:"feePayer"`
-	FeeGranter    string              `json:"feeGranter"`
-	GasWanted     int                 `json:"gasWanted"`
-	GasUsed       int                 `json:"gasUsed"`
-	Memo          string              `json:"memo"`
-	TimeoutHeight int64               `json:"timeoutHeight"`
+	TxHash   string                    `json:"txHash"`
+	Index    int                       `json:"index"`
+	Code     int                       `json:"code"`
+	Log      string                    `json:"log"`
+	MsgCount int                       `json:"msgCount"`
+	Signers  []model.TransactionSigner `json:"signers"`
+	// Deprecated
+	Senders       []model.TransactionSigner `json:"senders"`
+	Fee           coin.Coins                `json:"fee"`
+	FeePayer      string                    `json:"feePayer"`
+	FeeGranter    string                    `json:"feeGranter"`
+	GasWanted     int                       `json:"gasWanted"`
+	GasUsed       int                       `json:"gasUsed"`
+	Memo          string                    `json:"memo"`
+	TimeoutHeight int64                     `json:"timeoutHeight"`
 }
 
 const TRANSACTION_SIGNER_SECP256K1 = "/cosmos.crypto.secp256k1.PubKey"
 const TRANSACTION_SIGNER_MULTISIG_LEGACY_AMINO = "/cosmos.crypto.multisig.LegacyAminoPubKey"
-
-type TransactionSigner struct {
-	Type            string   `json:"type"`
-	IsMultiSig      bool     `json:"isMultiSig"`
-	Pubkeys         []string `json:"pubkeys"`
-	MaybeThreshold  *int     `json:"threshold,omitempty"`
-	AccountSequence uint64   `json:"accountSequence"`
-}
 
 func NewTransactionCreated(blockHeight int64, params model.CreateTransactionParams) *TransactionCreated {
 	return &TransactionCreated{
@@ -55,7 +49,8 @@ func NewTransactionCreated(blockHeight int64, params model.CreateTransactionPara
 		Code:          params.Code,
 		Log:           params.Log,
 		MsgCount:      params.MsgCount,
-		Senders:       parseSenders(params.Signers),
+		Signers:       params.Signers,
+		Senders:       params.Signers,
 		Fee:           params.Fee,
 		FeePayer:      params.FeePayer,
 		FeeGranter:    params.FeeGranter,

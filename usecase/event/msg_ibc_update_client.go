@@ -16,7 +16,7 @@ const MSG_IBC_UPDATE_CLIENT_FAILED = "MsgUpdateClientFailed"
 type MsgIBCUpdateClient struct {
 	MsgBase
 
-	ibc_model.MsgUpdateClientParams `json:"params"`
+	Params ibc_model.MsgUpdateClientParams `json:"params"`
 }
 
 // NewMsgDelegate creates a new instance of MsgDelegate

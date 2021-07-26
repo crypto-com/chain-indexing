@@ -20,6 +20,7 @@ func ParseTransactionCommands(
 	txDecoder *utils.TxDecoder,
 	block *model.Block,
 	blockResults *model.BlockResults,
+	accountAddressPrefix string,
 ) ([]command.Command, error) {
 	blockHeight := blockResults.Height
 	cmds := make([]command.Command, 0, len(blockResults.TxsResults))
@@ -59,32 +60,11 @@ func ParseTransactionCommands(
 			return nil, fmt.Errorf("error parsing timeout height: %v", err)
 		}
 
-		signers := make([]model.TransactionSigner, 0)
-		for _, signer := range tx.AuthInfo.SignerInfos {
-			sequence, parseErr := strconv.ParseUint(signer.Sequence, 10, 64)
-			if parseErr != nil {
-				return nil, fmt.Errorf("error parsing account sequence: %v", parseErr)
-			}
-			if signer.ModeInfo.MaybeSingle != nil {
-				signers = append(signers, model.TransactionSigner{
-					Type:            signer.PublicKey.Type,
-					IsMultiSig:      false,
-					Pubkeys:         []string{*signer.PublicKey.MaybeKey},
-					AccountSequence: sequence,
-				})
-			} else {
-				pubkeys := make([]string, 0, len(signer.PublicKey.MaybePublicKeys))
-				for _, pubkey := range signer.PublicKey.MaybePublicKeys {
-					pubkeys = append(pubkeys, pubkey.Key)
-				}
-				signers = append(signers, model.TransactionSigner{
-					Type:            signer.PublicKey.Type,
-					IsMultiSig:      true,
-					Pubkeys:         pubkeys,
-					MaybeThreshold:  signer.PublicKey.MaybeThreshold,
-					AccountSequence: sequence,
-				})
-			}
+		signers, parseSignerInfosErr := ParseSignerInfosToTransactionSigners(
+			tx.AuthInfo.SignerInfos, accountAddressPrefix,
+		)
+		if parseSignerInfosErr != nil {
+			return nil, fmt.Errorf("error parsing SignerInfos: %v", parseSignerInfosErr)
 		}
 
 		cmds = append(cmds, command_usecase.NewCreateTransaction(blockHeight, model.CreateTransactionParams{

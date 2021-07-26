@@ -91,7 +91,11 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
 			blockTime = blockCreatedEvent.Block.Time
 			blockHash = blockCreatedEvent.Block.Hash
-		} else if typedEvent, ok := event.(*event_usecase.MsgSend); ok {
+		}
+	}
+
+	for _, event := range events {
+		if typedEvent, ok := event.(*event_usecase.MsgSend); ok {
 			accountMessages = append(accountMessages, view.AccountMessageRecord{
 				Row: view.AccountMessageRow{
 					BlockHeight:     height,
@@ -492,6 +496,248 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 				},
 				Accounts: []string{
 					typedEvent.Sender,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCCreateClient); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Signer,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCUpdateClient); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Signer,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCConnectionOpenInit); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Signer,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCConnectionOpenAck); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Signer,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCConnectionOpenTry); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Signer,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCConnectionOpenConfirm); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Signer,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCChannelOpenInit); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Signer,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCChannelOpenAck); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Signer,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCChannelOpenTry); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Signer,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCChannelOpenConfirm); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Signer,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCAcknowledgement); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Signer,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCRecvPacket); ok {
+			if typedEvent.Params.MaybeFungibleTokenPacketData != nil {
+				accountMessages = append(accountMessages, view.AccountMessageRecord{
+					Row: view.AccountMessageRow{
+						BlockHeight:     height,
+						BlockHash:       "",
+						BlockTime:       utctime.UTCTime{},
+						TransactionHash: typedEvent.TxHash(),
+						Success:         typedEvent.TxSuccess(),
+						MessageIndex:    typedEvent.MsgIndex,
+						MessageType:     typedEvent.MsgType(),
+						Data:            typedEvent,
+					},
+					Accounts: []string{
+						typedEvent.Params.MaybeFungibleTokenPacketData.Receiver,
+					},
+				})
+			}
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCTransferTransfer); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Sender,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCTimeout); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Signer,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCTimeoutOnClose); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Signer,
 				},
 			})
 		}
