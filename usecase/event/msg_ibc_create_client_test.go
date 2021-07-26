@@ -49,7 +49,7 @@ var _ = Describe("Event", func() {
 
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
-			Expect(typedEvent.Signer).To(Equal(anySigner))
+			Expect(typedEvent.Params.Signer).To(Equal(anySigner))
 		})
 
 		It("should able to encode and decode failed event", func() {
@@ -87,7 +87,7 @@ var _ = Describe("Event", func() {
 
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
-			Expect(typedEvent.Signer).To(Equal(anySigner))
+			Expect(typedEvent.Params.Signer).To(Equal(anySigner))
 		})
 	})
 })
