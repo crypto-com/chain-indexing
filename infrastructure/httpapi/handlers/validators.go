@@ -252,8 +252,8 @@ func (handler *Validators) getGlobalAPY() (*big.Float, error) {
 	estimatedAPY := new(big.Float).Mul(
 		expectedAPY,
 		new(big.Float).Quo(
-			blockPerYearParam,
 			estimatedBlockPerYear,
+			blockPerYearParam,
 		),
 	)
 
