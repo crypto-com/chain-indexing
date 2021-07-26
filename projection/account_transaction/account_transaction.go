@@ -3,19 +3,17 @@ package account_transaction
 import (
 	"fmt"
 
-	"github.com/crypto-com/chain-indexing/usecase/model"
-
-	"github.com/crypto-com/chain-indexing/internal/base64"
-
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
+	"github.com/crypto-com/chain-indexing/internal/base64"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	"github.com/crypto-com/chain-indexing/projection/account_transaction/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 var _ projection_entity.Projection = &AccountTransaction{}

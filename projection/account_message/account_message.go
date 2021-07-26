@@ -46,8 +46,6 @@ func NewAccountMessage(
 func (_ *AccountMessage) GetEventsToListen() []string {
 	return append([]string{
 		event_usecase.BLOCK_CREATED,
-		event_usecase.TRANSACTION_CREATED,
-		event_usecase.TRANSACTION_FAILED,
 	}, event_usecase.MSG_EVENTS...)
 }
 
