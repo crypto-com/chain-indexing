@@ -7,20 +7,19 @@ import (
 	"strings"
 	"time"
 
-	chainstats_view "github.com/crypto-com/chain-indexing/projection/chainstats/view"
-
-	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
-
-	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
-
-	"github.com/crypto-com/chain-indexing/projection/validator/constants"
+	"github.com/crypto-com/chain-indexing/projection/chainstats"
 
 	"github.com/valyala/fasthttp"
 
+	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/appinterface/tendermint"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
+	chainstats_view "github.com/crypto-com/chain-indexing/projection/chainstats/view"
+	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 	validator_view "github.com/crypto-com/chain-indexing/projection/validator/view"
 )
 
@@ -31,6 +30,7 @@ type Validators struct {
 	consNodeAddressPrefix  string
 
 	cosmosAppClient         cosmosapp.Client
+	tendermintClient        tendermint.Client
 	validatorsView          *validator_view.Validators
 	validatorActivitiesView *validator_view.ValidatorActivities
 	chainStatsView          *chainstats_view.ChainStats
@@ -44,6 +44,7 @@ func NewValidators(
 	validatorAddressPrefix string,
 	consNodeAddressPrefix string,
 	cosmosAppClient cosmosapp.Client,
+	tendermintClient tendermint.Client,
 	rdbHandle *rdb.Handle,
 ) *Validators {
 	return &Validators{
@@ -55,6 +56,7 @@ func NewValidators(
 		consNodeAddressPrefix,
 
 		cosmosAppClient,
+		tendermintClient,
 		validator_view.NewValidators(rdbHandle),
 		validator_view.NewValidatorActivities(rdbHandle),
 		chainstats_view.NewChainStats(rdbHandle),
@@ -217,16 +219,86 @@ func (handler *Validators) getGlobalAPY() (*big.Float, error) {
 		return nil, fmt.Errorf("error fetching total bonded: %v", err)
 	}
 
-	// TODO: calculate actual APY = expected APY * estimated block count / actual block count
+	// actual APY = expected APY * estimated block count / actual block count
+	genesis, err := handler.tendermintClient.Genesis()
+	if err != nil {
+		return nil, fmt.Errorf("error fetching genesis: %v", err)
+	}
+	blockPerYearParam, blockPerYearParamOk := new(big.Float).SetString(genesis.AppState.Mint.Params.BlocksPerYear)
+	if !blockPerYearParamOk {
+		return nil, fmt.Errorf("error parsing block per year param: %s", genesis.AppState.Mint.Params.BlocksPerYear)
+	}
+
+	averageBlockTime, err := handler.getAverageBlockTime()
+	if err != nil {
+		return nil, fmt.Errorf("error fetching average block time: %v", err)
+	}
+
+	totalSecondsPerYear := big.NewFloat(31556952)
+	estimatedBlockPerYear := new(big.Float).Quo(
+		totalSecondsPerYear,
+		averageBlockTime,
+	)
+
 	annualProvisionsBigFloat, annualProvisionsOk := new(big.Float).SetString(annualProvisions.Amount.String())
 	if !annualProvisionsOk {
 		return nil, fmt.Errorf("error parsing annual provisions: %s", annualProvisions.Amount.String())
 	}
-	estimatedAPY := new(big.Float).Quo(
+	expectedAPY := new(big.Float).Quo(
 		annualProvisionsBigFloat,
 		new(big.Float).SetInt(totalBonded.Amount.BigInt()),
 	)
+
+	estimatedAPY := new(big.Float).Mul(
+		expectedAPY,
+		new(big.Float).Quo(
+			blockPerYearParam,
+			estimatedBlockPerYear,
+		),
+	)
+
 	return estimatedAPY, nil
+}
+
+func (handler *Validators) getAverageBlockTime() (*big.Float, error) {
+	var totalBlockTime = big.NewInt(0)
+	var totalBlockCount = big.NewInt(1)
+	if rawTotalBlockTime, err := handler.chainStatsView.FindBy(chainstats.TOTAL_BLOCK_TIME); err != nil {
+		return nil, fmt.Errorf("error fetching total block time: %v", err)
+	} else {
+		if rawTotalBlockTime != "" {
+			var ok bool
+			if totalBlockTime, ok = new(big.Int).SetString(rawTotalBlockTime, 10); !ok {
+				return nil, errors.New("error converting total block time from string to big.Int")
+			}
+		}
+
+		if rawTotalBlockCount, err := handler.chainStatsView.FindBy(chainstats.TOTAL_BLOCK_COUNT); err != nil {
+			return nil, fmt.Errorf("error fetching total block time: %v", err)
+		} else {
+			if rawTotalBlockCount != "" {
+				var ok bool
+				if totalBlockCount, ok = new(big.Int).SetString(rawTotalBlockCount, 10); !ok {
+					return nil, fmt.Errorf("error converting total block count from string to big.Int")
+				}
+			}
+		}
+	}
+
+	totalBlockTimeMilliSecond := new(big.Float).Quo(
+		new(big.Float).SetInt(totalBlockTime),
+		new(big.Float).SetInt64(int64(1000000)),
+	)
+	averageBlockTimeMilliSecond := new(big.Float).Quo(
+		totalBlockTimeMilliSecond,
+		new(big.Float).SetInt(totalBlockCount),
+	)
+	averageBlockTime := new(big.Float).Quo(
+		averageBlockTimeMilliSecond,
+		big.NewFloat(1000),
+	)
+
+	return averageBlockTime, nil
 }
 
 func (handler *Validators) ListActive(ctx *fasthttp.RequestCtx) {
