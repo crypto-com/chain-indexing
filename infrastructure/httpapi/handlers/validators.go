@@ -219,7 +219,7 @@ func (handler *Validators) getGlobalAPY() (*big.Float, error) {
 		return nil, fmt.Errorf("error fetching total bonded: %v", err)
 	}
 
-	// actual APY = expected APY * estimated block count / actual block count
+	// estimated APY = expected APY * estimated block count / actual block count
 	genesis, err := handler.tendermintClient.Genesis()
 	if err != nil {
 		return nil, fmt.Errorf("error fetching genesis: %v", err)
