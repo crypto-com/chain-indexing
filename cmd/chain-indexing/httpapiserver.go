@@ -7,17 +7,20 @@ import (
 
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/appinterface/tendermint"
 	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi/handlers"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi/routes"
+	tendermint_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 
 type HTTPAPIServer struct {
-	logger          applogger.Logger
-	rdbConn         rdb.Conn
-	cosmosAppClient cosmosapp.Client
+	logger           applogger.Logger
+	rdbConn          rdb.Conn
+	cosmosAppClient  cosmosapp.Client
+	tendermintClient tendermint.Client
 
 	validatorAddressPrefix string
 	conNodeAddressPrefix   string
@@ -46,10 +49,24 @@ func NewHTTPAPIServer(logger applogger.Logger, rdbConn rdb.Conn, config *Config)
 			config.Blockchain.BondingDenom,
 		)
 	}
+
+	var tendermintClient tendermint.Client
+	if config.Tendermint.Insecure {
+		tendermintClient = tendermint_infrastructure.NewInsecureHTTPClient(
+			config.Tendermint.HTTPRPCUrl,
+			config.Tendermint.StrictGenesisParsing,
+		)
+	} else {
+		tendermintClient = tendermint_infrastructure.NewHTTPClient(
+			config.Tendermint.HTTPRPCUrl,
+			config.Tendermint.StrictGenesisParsing,
+		)
+	}
 	return &HTTPAPIServer{
-		logger:          logger,
-		rdbConn:         rdbConn,
-		cosmosAppClient: cosmosClient,
+		logger:           logger,
+		rdbConn:          rdbConn,
+		cosmosAppClient:  cosmosClient,
+		tendermintClient: tendermintClient,
 
 		validatorAddressPrefix: config.Blockchain.ValidatorAddressPrefix,
 		conNodeAddressPrefix:   config.Blockchain.ConNodeAddressPrefix,
@@ -107,6 +124,7 @@ func (server *HTTPAPIServer) Run() error {
 		server.validatorAddressPrefix,
 		server.conNodeAddressPrefix,
 		server.cosmosAppClient,
+		server.tendermintClient,
 		server.rdbConn.ToHandle(),
 	)
 	accountTransactionsHandler := handlers.NewAccountTransactions(server.logger, server.rdbConn.ToHandle())
