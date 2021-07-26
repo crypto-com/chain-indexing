@@ -27,19 +27,27 @@ var _ = Describe("Event", func() {
 				MsgCount: 1,
 				Signers: []model.TransactionSigner{
 					{
-						Type:            "/cosmos.crypto.secp256k1.PubKey",
-						Pubkeys:         []string{"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"},
-						AccountSequence: uint64(1),
+						TransactionSignerInfo: model.TransactionSignerInfo{
+							Type:            "/cosmos.crypto.secp256k1.PubKey",
+							IsMultiSig:      false,
+							Pubkeys:         []string{"pubkey"},
+							AccountSequence: uint64(1),
+						},
+						Address: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 					},
 					{
-						Type: "/cosmos.crypto.multisig.LegacyAminoPubKey",
-						Pubkeys: []string{
-							"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-							"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-							"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+						TransactionSignerInfo: model.TransactionSignerInfo{
+							Type:       "/cosmos.crypto.multisig.LegacyAminoPubKey",
+							IsMultiSig: true,
+							Pubkeys: []string{
+								"pubkey1",
+								"pubkey2",
+								"pubkey3",
+							},
+							MaybeThreshold:  primptr.Int(2),
+							AccountSequence: uint64(1),
 						},
-						MaybeThreshold:  primptr.Int(2),
-						AccountSequence: uint64(1),
+						Address: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 					},
 				},
 				Fee:           coin.MustParseCoinsNormalized("1000basetcro,2000tcro"),

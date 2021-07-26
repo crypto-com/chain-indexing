@@ -16,7 +16,7 @@ const MSG_IBC_CREATE_CLIENT_FAILED = "MsgCreateClientFailed"
 type MsgIBCCreateClient struct {
 	MsgBase
 
-	ibc_model.MsgCreateClientParams
+	Params ibc_model.MsgCreateClientParams `json:"params"`
 }
 
 func NewMsgIBCCreateClient(msgCommonParams MsgCommonParams, params ibc_model.MsgCreateClientParams) *MsgIBCCreateClient {

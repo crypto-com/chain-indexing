@@ -23,7 +23,7 @@ func NewCreateAccountTransfer(
 
 // Name returns name of command
 func (*CreateAccountTransfer) Name() string {
-	return "CreateMsgVote"
+	return "CreateAccountTransfer"
 }
 
 // Version returns version of command

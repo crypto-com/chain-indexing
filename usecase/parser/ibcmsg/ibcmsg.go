@@ -929,6 +929,21 @@ func ParseMsgTimeout(
 		return []command.Command{}
 	}
 
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgTimeoutParams{
+			RawMsgTimeout: rawMsg,
+
+			Application: "transfer",
+			MessageType: "MsgTransfer",
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgIBCTimeout(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
 	// Transfer application, MsgTransfer
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 

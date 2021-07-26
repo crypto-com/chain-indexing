@@ -28,70 +28,72 @@ var _ = Describe("ParseMsgCommands", func() {
   "msgName": "MsgCreateClient",
   "txHash": "7E34A75D8063BADF7B93538C23C88DEEF1FF14E7BE7F13AD6AD34E228C64538D",
   "msgIndex": 0,
-  "maybeTendermintLightClient": {
-    "clientState": {
-      "@type": "/ibc.lightclients.tendermint.v1.ClientState",
-      "chainId": "devnet-2",
-      "trustLevel": { "numerator": "1", "denominator": "3" },
-      "trustingPeriod": "336h0m0s",
-      "unbondingPeriod": "504h0m0s",
-	  "maxClockDrift": "5s",
-      "frozenHeight": { "revisionNumber": "0", "revisionHeight": "0" },
-      "latestHeight": { "revisionNumber": "2", "revisionHeight": "2" },
-      "proofSpecs": [
-        {
-          "leafSpec": {
-            "hash": "SHA256",
-            "prehashKey": "NO_HASH",
-            "prehashValue": "SHA256",
-            "length": "VAR_PROTO",
-            "prefix": "AA=="
-          },
-          "innerSpec": {
-            "childOrder": [0, 1],
-            "childSize": 33,
-            "minPrefixLength": 4,
-            "maxPrefixLength": 12,
-            "emptyChild": null,
-            "hash": "SHA256"
-          },
-          "maxDepth": 0,
-          "minDepth": 0
-        },
-        {
-          "leafSpec": {
-            "hash": "SHA256",
-            "prehashKey": "NO_HASH",
-            "prehashValue": "SHA256",
-            "length": "VAR_PROTO",
-            "prefix": "AA=="
-          },
-          "innerSpec": {
-            "childOrder": [0, 1],
-            "childSize": 32,
-            "minPrefixLength": 1,
-            "maxPrefixLength": 1,
-            "emptyChild": null,
-            "hash": "SHA256"
-          },
-          "maxDepth": 0,
-          "minDepth": 0
-        }
-      ],
-      "upgradePath": ["upgrade", "upgradedIBCState"],
-      "allowUpdateAfterExpiry": false,
-      "allowUpdateAfterMisbehaviour": false
-    },
-    "consensusState": {
-      "@type": "/ibc.lightclients.tendermint.v1.ConsensusState",
-      "timestamp": "2021-05-04T18:02:36.089446Z",
-      "root": { "hash": "bVjiQ29+V522NVFdx1BiVJnIBJV8Y1pYe9psvxZFAWg=" },
-      "nextValidatorsHash": "E3DE0D2B3237A02E9C20C34F9EE04F69F5861FBC2E2722A011CA9037FC67A7EC"
-    }
-  },
-  "signer": "cro1gdswrmwtzgv3kvf28lvtt7qv7q7myzmn466r3f",
-  "clientId": "07-tendermint-0",
-  "clientType": "07-tendermint"
+  "params": {
+	  "maybeTendermintLightClient": {
+		"clientState": {
+		  "@type": "/ibc.lightclients.tendermint.v1.ClientState",
+		  "chainId": "devnet-2",
+		  "trustLevel": { "numerator": "1", "denominator": "3" },
+		  "trustingPeriod": "336h0m0s",
+		  "unbondingPeriod": "504h0m0s",
+		  "maxClockDrift": "5s",
+		  "frozenHeight": { "revisionNumber": "0", "revisionHeight": "0" },
+		  "latestHeight": { "revisionNumber": "2", "revisionHeight": "2" },
+		  "proofSpecs": [
+			{
+			  "leafSpec": {
+				"hash": "SHA256",
+				"prehashKey": "NO_HASH",
+				"prehashValue": "SHA256",
+				"length": "VAR_PROTO",
+				"prefix": "AA=="
+			  },
+			  "innerSpec": {
+				"childOrder": [0, 1],
+				"childSize": 33,
+				"minPrefixLength": 4,
+				"maxPrefixLength": 12,
+				"emptyChild": null,
+				"hash": "SHA256"
+			  },
+			  "maxDepth": 0,
+			  "minDepth": 0
+			},
+			{
+			  "leafSpec": {
+				"hash": "SHA256",
+				"prehashKey": "NO_HASH",
+				"prehashValue": "SHA256",
+				"length": "VAR_PROTO",
+				"prefix": "AA=="
+			  },
+			  "innerSpec": {
+				"childOrder": [0, 1],
+				"childSize": 32,
+				"minPrefixLength": 1,
+				"maxPrefixLength": 1,
+				"emptyChild": null,
+				"hash": "SHA256"
+			  },
+			  "maxDepth": 0,
+			  "minDepth": 0
+			}
+		  ],
+		  "upgradePath": ["upgrade", "upgradedIBCState"],
+		  "allowUpdateAfterExpiry": false,
+		  "allowUpdateAfterMisbehaviour": false
+		},
+		"consensusState": {
+		  "@type": "/ibc.lightclients.tendermint.v1.ConsensusState",
+		  "timestamp": "2021-05-04T18:02:36.089446Z",
+		  "root": { "hash": "bVjiQ29+V522NVFdx1BiVJnIBJV8Y1pYe9psvxZFAWg=" },
+		  "nextValidatorsHash": "E3DE0D2B3237A02E9C20C34F9EE04F69F5861FBC2E2722A011CA9037FC67A7EC"
+		}
+	  },
+	  "signer": "cro1gdswrmwtzgv3kvf28lvtt7qv7q7myzmn466r3f",
+	  "clientId": "07-tendermint-0",
+	  "clientType": "07-tendermint"
+  }
 }`
 
 			txDecoder := utils.NewTxDecoder()
