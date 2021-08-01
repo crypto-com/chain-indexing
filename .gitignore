@@ -25,6 +25,8 @@
 
 # Rust build
 target/
+# Go build
+bin/
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out

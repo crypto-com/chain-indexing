@@ -13,7 +13,7 @@ Using Docker is the easiest way to build chain-indexing. The Docker image contai
 `/app/migrate` Program to perform migration
 
 ```bash
-docker build -o chain-indexing .
+make docker
 ```
 
 ### 1.2 Build manually
