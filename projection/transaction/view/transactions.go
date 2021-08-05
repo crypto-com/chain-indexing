@@ -55,6 +55,7 @@ func (transactionsView *BlockTransactions) InsertAll(transactions []TransactionR
 				"memo",
 				"timeout_height",
 				"messages",
+				"signers",
 			)
 		}
 		var transactionMessagesJSON string
@@ -67,6 +68,13 @@ func (transactionsView *BlockTransactions) InsertAll(transactions []TransactionR
 
 		var feeJSON string
 		if feeJSON, marshalErr = jsoniter.MarshalToString(transaction.Fee); marshalErr != nil {
+			return fmt.Errorf(
+				"error JSON marshalling block transation fee for insertion: %v: %w", marshalErr, rdb.ErrBuildSQLStmt,
+			)
+		}
+
+		var signersJSON string
+		if signersJSON, marshalErr = jsoniter.MarshalToString(transaction.Signers); marshalErr != nil {
 			return fmt.Errorf(
 				"error JSON marshalling block transation fee for insertion: %v: %w", marshalErr, rdb.ErrBuildSQLStmt,
 			)
@@ -89,6 +97,7 @@ func (transactionsView *BlockTransactions) InsertAll(transactions []TransactionR
 			transaction.Memo,
 			transaction.TimeoutHeight,
 			transactionMessagesJSON,
+			signersJSON,
 		)
 		pendingRowCount += 1
 
@@ -136,7 +145,8 @@ func (transactionsView *BlockTransactions) Insert(transaction *TransactionRow) e
 		"memo",
 		"timeout_height",
 		"messages",
-	).Values("?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?").ToSql()
+		"signers",
+	).Values("?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?").ToSql()
 	if err != nil {
 		return fmt.Errorf("error building block transactions insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
@@ -148,6 +158,11 @@ func (transactionsView *BlockTransactions) Insert(transaction *TransactionRow) e
 
 	var feeJSON string
 	if feeJSON, err = jsoniter.MarshalToString(transaction.Fee); err != nil {
+		return fmt.Errorf("error JSON marshalling block transation fee for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	var signersJSON string
+	if signersJSON, err = jsoniter.MarshalToString(transaction.Signers); err != nil {
 		return fmt.Errorf("error JSON marshalling block transation fee for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
@@ -168,6 +183,7 @@ func (transactionsView *BlockTransactions) Insert(transaction *TransactionRow) e
 		transaction.Memo,
 		transaction.TimeoutHeight,
 		transactionMessagesJSON,
+		signersJSON,
 	)
 	if err != nil {
 		return fmt.Errorf("error inserting block transaction into the table: %v: %w", err, rdb.ErrWrite)
@@ -198,6 +214,7 @@ func (transactionsView *BlockTransactions) FindByHash(txHash string) (*Transacti
 		"memo",
 		"timeout_height",
 		"messages",
+		"signers",
 	).From(
 		"view_transactions",
 	).Where(
@@ -212,6 +229,7 @@ func (transactionsView *BlockTransactions) FindByHash(txHash string) (*Transacti
 	var transaction TransactionRow
 	var feeJSON *string
 	var messagesJSON *string
+	var signersJSON *string
 	blockTimeReader := transactionsView.rdb.NtotReader()
 
 	if err = transactionsView.rdb.QueryRow(sql, sqlArgs...).Scan(
@@ -230,6 +248,7 @@ func (transactionsView *BlockTransactions) FindByHash(txHash string) (*Transacti
 		&transaction.Memo,
 		&transaction.TimeoutHeight,
 		&messagesJSON,
+		&signersJSON,
 	); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
@@ -253,6 +272,12 @@ func (transactionsView *BlockTransactions) FindByHash(txHash string) (*Transacti
 		return nil, fmt.Errorf("error unmarshalling transaction messages JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 	}
 	transaction.Messages = messages
+
+	var signers []TransactionRowSigner
+	if unmarshalErr := jsoniter.UnmarshalFromString(*signersJSON, &signers); unmarshalErr != nil {
+		return nil, fmt.Errorf("error unmarshalling transaction messages JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
+	}
+	transaction.Signers = signers
 
 	return &transaction, nil
 }
@@ -278,6 +303,7 @@ func (transactionsView *BlockTransactions) List(
 		"memo",
 		"timeout_height",
 		"messages",
+		"signers",
 	).From(
 		"view_transactions",
 	)
@@ -325,6 +351,7 @@ func (transactionsView *BlockTransactions) List(
 		var transaction TransactionRow
 		var feeJSON *string
 		var messagesJSON *string
+		var signersJSON *string
 		blockTimeReader := transactionsView.rdb.NtotReader()
 
 		if err = rowsResult.Scan(
@@ -343,6 +370,7 @@ func (transactionsView *BlockTransactions) List(
 			&transaction.Memo,
 			&transaction.TimeoutHeight,
 			&messagesJSON,
+			&signersJSON,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
@@ -366,6 +394,12 @@ func (transactionsView *BlockTransactions) List(
 			return nil, nil, fmt.Errorf("error unmarshalling transaction messages JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 		}
 		transaction.Messages = messages
+
+		var signers []TransactionRowSigner
+		if unmarshalErr := jsoniter.UnmarshalFromString(*signersJSON, &signers); unmarshalErr != nil {
+			return nil, nil, fmt.Errorf("error unmarshalling transaction messages JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
+		}
+		transaction.Signers = signers
 
 		transactions = append(transactions, transaction)
 	}
@@ -396,6 +430,7 @@ func (transactionsView *BlockTransactions) Search(keyword string) ([]Transaction
 		"memo",
 		"timeout_height",
 		"messages",
+		"signers",
 	).From(
 		"view_transactions",
 	).Where(
@@ -418,6 +453,7 @@ func (transactionsView *BlockTransactions) Search(keyword string) ([]Transaction
 		var transaction TransactionRow
 		var feeJSON *string
 		var messagesJSON *string
+		var signersJSON *string
 		blockTimeReader := transactionsView.rdb.NtotReader()
 
 		if err = rowsResult.Scan(
@@ -436,6 +472,7 @@ func (transactionsView *BlockTransactions) Search(keyword string) ([]Transaction
 			&transaction.Memo,
 			&transaction.TimeoutHeight,
 			&messagesJSON,
+			&signersJSON,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, rdb.ErrNoRows
@@ -459,6 +496,12 @@ func (transactionsView *BlockTransactions) Search(keyword string) ([]Transaction
 			return nil, fmt.Errorf("error unmarshalling transaction messages JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 		}
 		transaction.Messages = messages
+
+		var signers []TransactionRowSigner
+		if unmarshalErr := jsoniter.UnmarshalFromString(*signersJSON, &signers); unmarshalErr != nil {
+			return nil, fmt.Errorf("error unmarshalling transaction messages JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
+		}
+		transaction.Signers = signers
 
 		transactions = append(transactions, transaction)
 	}
@@ -500,6 +543,7 @@ type TransactionRow struct {
 	Memo          string                  `json:"memo"`
 	TimeoutHeight int64                   `json:"timeoutHeight"`
 	Messages      []TransactionRowMessage `json:"messages"`
+	Signers       []TransactionRowSigner     `json:"signers"`
 }
 
 type TransactionRowMessage struct {
@@ -513,4 +557,14 @@ type TransactionsListFilter struct {
 
 type TransactionsListOrder struct {
 	Height view.ORDER
+}
+
+type TransactionRowSigner struct {
+	Type            string   `json:"type"`
+	IsMultiSig      bool     `json:"isMultiSig"`
+	Pubkeys         []string `json:"pubkeys"`
+	MaybeThreshold  *int     `json:"threshold,omitempty"`
+	AccountSequence uint64   `json:"accountSequence"`
+
+	Address string `json:"address"`
 }
