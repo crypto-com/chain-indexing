@@ -140,12 +140,20 @@ Providing `--install-dependency` will attempt to install test runner [Ginkgo](ht
 
 ## 4. Lint
 
+### With Local Installed golangci-lint
+
 #### Prerequisite
 
 - [golangci-lint](https://github.com/golangci/golangci-lint)
 
 ```bash
 ./lint.sh
+```
+
+### With Docker
+
+```bash
+docker run --rm -v $(pwd):/app -w /app golangci/golangci-lint:v1.33 golangci-lint run -v
 ```
 
 ## 5. Contributing
