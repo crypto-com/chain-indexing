@@ -64,7 +64,7 @@ We have two options at the moment:
 
 You can have your Postgres setup locally or remotely.
 
-**REMINDER** I would suggest using our `docker-compose` script to start the DB instance. If you install through `homebrew`, its default setting will need to be adjusted in order to match your indexing server's configuration. 
+**REMINDER**: I would suggest using our `docker-compose` script to start the DB instance. If you install through `homebrew`, its default setting will need to be adjusted in order to match the indexing server's configuration. 
 
 #### Run Postgres with Docker
 
