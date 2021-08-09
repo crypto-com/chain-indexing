@@ -54,12 +54,6 @@ Note: Postgres database password is not available in `config.toml` nor command o
 #### Reminder On Connecting Mainnet
 
 There is a rate limiter on our public nodes. If you hit the rate limit, you may want to run your own nodes.
-
-We have two options at the moment:
-
-- `cdc.gpcloudservice.com`, then choose `gateway` as `HK Office VPN`
-- `vpn.mcointernal.com`
-
 ### 2.3 Postgres Database
 
 You can have your Postgres setup locally or remotely.
