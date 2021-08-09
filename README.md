@@ -26,6 +26,16 @@ docker build -o chain-indexing .
 make all
 ```
 
+Please make sure `$GOPATH` is set and `$GOPATH/bin` includes in `$PATH`. You could include the following code into your `zsh` or `bash` file (`.zshrc` or `.bash_profile`).
+
+```bash
+# Add $GOPATH/bin to $PATH
+export GOPATH=$HOME/go
+export PATH=$GOPATH/bin:$PATH
+```
+
+Then `source` the file or open a new terminal session.
+
 ## 2. How to Run
 
 ### 2.1 Prerequisite
@@ -41,9 +51,14 @@ Copy it, update configuration based on your setup and rename it as `config/confi
 
 Note: Postgres database password is not available in `config.toml` nor command option. You must provide it as environment variable `DB_PASSWORD` on start.
 
+#### Reminder On Connecting Mainnet
+
+There is a rate limiter on our public nodes. If you hit the rate limit, you may want to run your own nodes.
 ### 2.3 Postgres Database
 
 You can have your Postgres setup locally or remotely.
+
+**REMINDER**: I would suggest using our `docker-compose` script to start the DB instance. If you install through `homebrew`, its default setting will need to be adjusted in order to match the indexing server's configuration. 
 
 #### Run Postgres with Docker
 
@@ -82,6 +97,12 @@ docker run -it \
 #### Manual Build
 
 ```bash
+# In your first run, you need to install the dependency `migrate`
+./pgmigrate.sh --install-dependency
+# Then you should have `migrate` under your `$PATH`
+which migrate
+
+# Run the below command to start the migrate
 ./pgmigrate.sh -- -verbose up
 ```
 
@@ -113,12 +134,20 @@ Providing `--install-dependency` will attempt to install test runner [Ginkgo](ht
 
 ## 4. Lint
 
+### With Local Installed golangci-lint
+
 #### Prerequisite
 
 - [golangci-lint](https://github.com/golangci/golangci-lint)
 
 ```bash
 ./lint.sh
+```
+
+### With Docker
+
+```bash
+docker run --rm -v $(pwd):/app -w /app golangci/golangci-lint:v1.33 golangci-lint run -v
 ```
 
 ## 5. Contributing
