@@ -31,13 +31,16 @@ bin/
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
+# docker copy
+.dockerignore
+
 log/
 *.log
 
 config/config.toml
 chain-indexing
-!chain-indexing/
+!*/chain-indexing/
 check-password-strength
-!check-password-strength/
+!*/check-password-strength/
 
 pgdata*

@@ -11,6 +11,5 @@ migrate:
 
 .PHONY: docker
 docker:
-	GOOS=linux GOARCH=amd64 go build -o bin/chain-indexing.linux ./cmd/chain-indexing/
-	GOOS=linux GOARCH=amd64 go build -o bin/migrate.linux -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate
+	cp .gitignore .dockerignore && echo "**/.git" >> .dockerignore
 	docker build -t chain-indexing -f Dockerfile .
