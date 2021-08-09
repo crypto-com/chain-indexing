@@ -35,10 +35,6 @@ func (handler *AccountTransactions) ListByAccount(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	account := ctx.UserValue("account").(string)
-	filter := account_transaction_view.AccountTransactionsListFilter{
-		Account: account,
-	}
 	queryArgs := ctx.QueryArgs()
 
 	idOrder := view.ORDER_ASC
@@ -46,6 +42,16 @@ func (handler *AccountTransactions) ListByAccount(ctx *fasthttp.RequestCtx) {
 		if string(queryArgs.Peek("order")) == "height.desc" {
 			idOrder = view.ORDER_DESC
 		}
+	}
+	memo := ""
+	if queryArgs.Has("memo") {
+		memo = string(queryArgs.Peek("memo"))
+	}
+
+	account := ctx.UserValue("account").(string)
+	filter := account_transaction_view.AccountTransactionsListFilter{
+		Account: account,
+		Memo:    memo,
 	}
 
 	blocks, paginationResult, err := handler.accountTransactionsView.List(
