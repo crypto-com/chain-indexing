@@ -53,7 +53,7 @@ Note: Postgres database password is not available in `config.toml` nor command o
 
 #### Reminder On Connecting Mainnet
 
-There is a rate limiter on our `mainnet` node. You need to run your indexing server under VPN to pull blocks from `mainnet`.
+There is a rate limiter on our public nodes. If you hit the rate limit, you may want to run your own nodes.
 
 We have two options at the moment:
 
