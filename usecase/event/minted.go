@@ -18,7 +18,7 @@ type Minted struct {
 
 	BondedRatio      string     `json:"bondedRatio"`
 	Inflation        string     `json:"inflation"`
-	AnnualProvisions string     `json:"annualProvisions"`
+	AnnualProvisions coin.Coins `json:"annualProvisions"`
 	Amount           coin.Coins `json:"amount"`
 }
 

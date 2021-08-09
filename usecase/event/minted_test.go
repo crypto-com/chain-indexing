@@ -19,7 +19,7 @@ var _ = Describe("Event", func() {
 			anyHeight := int64(1000)
 			anyBondedRatio := "0.000004999957742178"
 			anyInflation := "0.013000953646781450"
-			anyAnnualProvisions := "104008508208850609.312053700576913050"
+			anyAnnualProvisions := coin.MustParseCoinsNormalized("104008508208850609.312053700576913050basetcro")
 			anyAmount := coin.MustParseCoinsNormalized("16479153707basetcro")
 
 			anyParams := model.MintParams{
