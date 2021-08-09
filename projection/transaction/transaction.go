@@ -72,26 +72,26 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 			blockTime = blockCreatedEvent.Block.Time
 			blockHash = blockCreatedEvent.Block.Hash
 		} else if transactionCreatedEvent, ok := event.(*event_usecase.TransactionCreated); ok {
-			tx := transaction_view.TransactionRow{
-				BlockHeight:   height,
-				BlockTime:     utctime.UTCTime{}, // placeholder
-				Hash:          transactionCreatedEvent.TxHash,
-				Index:         transactionCreatedEvent.Index,
-				Success:       true,
-				Code:          transactionCreatedEvent.Code,
-				Log:           transactionCreatedEvent.Log,
-				Fee:           transactionCreatedEvent.Fee,
-				FeePayer:      transactionCreatedEvent.FeePayer,
-				FeeGranter:    transactionCreatedEvent.FeeGranter,
-				GasWanted:     transactionCreatedEvent.GasWanted,
-				GasUsed:       transactionCreatedEvent.GasUsed,
-				Memo:          transactionCreatedEvent.Memo,
-				TimeoutHeight: transactionCreatedEvent.TimeoutHeight,
-				Messages:      make([]transaction_view.TransactionRowMessage, 0),
-			}
+			if transactionCreatedEvent != nil {
+				tx := transaction_view.TransactionRow{
+					BlockHeight:   height,
+					BlockTime:     utctime.UTCTime{}, // placeholder
+					Hash:          transactionCreatedEvent.TxHash,
+					Index:         transactionCreatedEvent.Index,
+					Success:       true,
+					Code:          transactionCreatedEvent.Code,
+					Log:           transactionCreatedEvent.Log,
+					Fee:           transactionCreatedEvent.Fee,
+					FeePayer:      transactionCreatedEvent.FeePayer,
+					FeeGranter:    transactionCreatedEvent.FeeGranter,
+					GasWanted:     transactionCreatedEvent.GasWanted,
+					GasUsed:       transactionCreatedEvent.GasUsed,
+					Memo:          transactionCreatedEvent.Memo,
+					TimeoutHeight: transactionCreatedEvent.TimeoutHeight,
+					Messages:      make([]transaction_view.TransactionRowMessage, 0),
+				}
 
-			signers := make([]transaction_view.TransactionRowSigner, 0)
-			if transactionCreatedEvent != nil && transactionCreatedEvent.Signers != nil {
+				signers := make([]transaction_view.TransactionRowSigner, 0)
 				for _, transactionCreatedEventSigner := range transactionCreatedEvent.Signers {
 					signers = append(signers, transaction_view.TransactionRowSigner{
 						Type:            transactionCreatedEventSigner.Type,
@@ -102,9 +102,9 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 						Address:         transactionCreatedEventSigner.Address,
 					})
 				}
+				tx.Signers = signers
+				txs = append(txs, tx)
 			}
-			tx.Signers = signers
-			txs = append(txs, tx)
 		} else if transactionFailedEvent, ok := event.(*event_usecase.TransactionFailed); ok {
 			tx := transaction_view.TransactionRow{
 				BlockHeight:   height,
@@ -125,17 +125,15 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 			}
 
 			signers := make([]transaction_view.TransactionRowSigner, 0)
-			if transactionCreatedEvent != nil && transactionCreatedEvent.Signers != nil {
-				for _, transactionCreatedEventSigner := range transactionCreatedEvent.Signers {
-					signers = append(signers, transaction_view.TransactionRowSigner{
-						Type:            transactionCreatedEventSigner.Type,
-						IsMultiSig:      transactionCreatedEventSigner.IsMultiSig,
-						Pubkeys:         transactionCreatedEventSigner.Pubkeys,
-						MaybeThreshold:  transactionCreatedEventSigner.MaybeThreshold,
-						AccountSequence: transactionCreatedEventSigner.AccountSequence,
-						Address:         transactionCreatedEventSigner.Address,
-					})
-				}
+			for _, transactionFailedEventSigner := range transactionFailedEvent.Signers {
+				signers = append(signers, transaction_view.TransactionRowSigner{
+					Type:            transactionFailedEventSigner.Type,
+					IsMultiSig:      transactionFailedEventSigner.IsMultiSig,
+					Pubkeys:         transactionFailedEventSigner.Pubkeys,
+					MaybeThreshold:  transactionFailedEventSigner.MaybeThreshold,
+					AccountSequence: transactionFailedEventSigner.AccountSequence,
+					Address:         transactionFailedEventSigner.Address,
+				})
 			}
 
 			tx.Signers = signers
