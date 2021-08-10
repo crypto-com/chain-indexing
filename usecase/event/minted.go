@@ -16,10 +16,10 @@ const MINTED = "Minted"
 type Minted struct {
 	event_entity.Base
 
-	BondedRatio      string     `json:"bondedRatio"`
-	Inflation        string     `json:"inflation"`
-	AnnualProvisions coin.Coins `json:"annualProvisions"`
-	Amount           coin.Coins `json:"amount"`
+	BondedRatio      string       `json:"bondedRatio"`
+	Inflation        string       `json:"inflation"`
+	AnnualProvisions coin.DecCoin `json:"annualProvisions"`
+	Amount           coin.Coins   `json:"amount"`
 }
 
 func NewMinted(blockHeight int64, params model.MintParams) *Minted {

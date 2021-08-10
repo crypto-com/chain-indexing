@@ -39,7 +39,7 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 					model.MintParams{
 						BondedRatio:      "0.000821761419299675",
 						Inflation:        "0.013777334128586270",
-						AnnualProvisions: coin.MustParseCoinsNormalized("110307793770097823.255979052891494880basetcro"),
+						AnnualProvisions: coin.MustParseDecCoin("110307793770097823.255979052891494880basetcro"),
 						Amount:           coin.MustParseCoinsNormalized("17477215277basetcro"),
 					},
 				),

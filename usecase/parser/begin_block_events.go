@@ -59,7 +59,7 @@ func ParseBeginBlockEventsCommands(
 				model.MintParams{
 					BondedRatio:      mintEvent.MustGetAttributeByKey("bonded_ratio"),
 					Inflation:        mintEvent.MustGetAttributeByKey("inflation"),
-					AnnualProvisions: coin.MustParseCoinsNormalized(fmt.Sprintf("%s%s", annualProvisions, bondingDenom)),
+					AnnualProvisions: coin.MustParseDecCoin(fmt.Sprintf("%s%s", annualProvisions, bondingDenom)),
 					Amount:           coin.MustParseCoinsNormalized(fmt.Sprintf("%s%s", amount, bondingDenom)),
 				},
 			))
