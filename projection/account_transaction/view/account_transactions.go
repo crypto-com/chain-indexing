@@ -114,9 +114,17 @@ func (accountMessagesView *AccountTransactions) List(
 		"view_account_transactions",
 	).InnerJoin(
 		"view_account_transaction_data ON view_account_transactions.block_height = view_account_transaction_data.block_height AND view_account_transactions.transaction_hash = view_account_transaction_data.hash",
-	).Where(
-		"view_account_transactions.account = ? AND view_account_transaction_data.memo = ?", filter.Account, filter.Memo,
 	)
+
+	if filter.Memo != "" {
+		stmtBuilder = stmtBuilder.Where(
+			"view_account_transactions.account = ? AND view_account_transaction_data.memo = ?", filter.Account, filter.Memo,
+		)
+	} else {
+		stmtBuilder = stmtBuilder.Where(
+			"view_account_transactions.account = ?", filter.Account,
+		)
+	}
 
 	if order.Id == view.ORDER_DESC {
 		stmtBuilder = stmtBuilder.OrderBy("view_account_transactions.id DESC")
