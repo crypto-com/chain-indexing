@@ -72,7 +72,7 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 			blockTime = blockCreatedEvent.Block.Time
 			blockHash = blockCreatedEvent.Block.Hash
 		} else if transactionCreatedEvent, ok := event.(*event_usecase.TransactionCreated); ok {
-			txs = append(txs, transaction_view.TransactionRow{
+			tx := transaction_view.TransactionRow{
 				BlockHeight:   height,
 				BlockTime:     utctime.UTCTime{}, // placeholder
 				Hash:          transactionCreatedEvent.TxHash,
@@ -88,9 +88,23 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 				Memo:          transactionCreatedEvent.Memo,
 				TimeoutHeight: transactionCreatedEvent.TimeoutHeight,
 				Messages:      make([]transaction_view.TransactionRowMessage, 0),
-			})
+			}
+
+			signers := make([]transaction_view.TransactionRowSigner, 0)
+			for _, transactionCreatedEventSigner := range transactionCreatedEvent.Signers {
+				signers = append(signers, transaction_view.TransactionRowSigner{
+					Type:            transactionCreatedEventSigner.Type,
+					IsMultiSig:      transactionCreatedEventSigner.IsMultiSig,
+					Pubkeys:         transactionCreatedEventSigner.Pubkeys,
+					MaybeThreshold:  transactionCreatedEventSigner.MaybeThreshold,
+					AccountSequence: transactionCreatedEventSigner.AccountSequence,
+					Address:         transactionCreatedEventSigner.Address,
+				})
+			}
+			tx.Signers = signers
+			txs = append(txs, tx)
 		} else if transactionFailedEvent, ok := event.(*event_usecase.TransactionFailed); ok {
-			txs = append(txs, transaction_view.TransactionRow{
+			tx := transaction_view.TransactionRow{
 				BlockHeight:   height,
 				BlockTime:     utctime.UTCTime{}, // placeholder
 				Hash:          transactionFailedEvent.TxHash,
@@ -106,7 +120,22 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 				Memo:          transactionFailedEvent.Memo,
 				TimeoutHeight: transactionFailedEvent.TimeoutHeight,
 				Messages:      make([]transaction_view.TransactionRowMessage, 0),
-			})
+			}
+
+			signers := make([]transaction_view.TransactionRowSigner, 0)
+			for _, transactionFailedEventSigner := range transactionFailedEvent.Signers {
+				signers = append(signers, transaction_view.TransactionRowSigner{
+					Type:            transactionFailedEventSigner.Type,
+					IsMultiSig:      transactionFailedEventSigner.IsMultiSig,
+					Pubkeys:         transactionFailedEventSigner.Pubkeys,
+					MaybeThreshold:  transactionFailedEventSigner.MaybeThreshold,
+					AccountSequence: transactionFailedEventSigner.AccountSequence,
+					Address:         transactionFailedEventSigner.Address,
+				})
+			}
+
+			tx.Signers = signers
+			txs = append(txs, tx)
 		} else if msgEvent, ok := event.(event_usecase.MsgEvent); ok {
 			if _, exist := txMsgs[msgEvent.TxHash()]; !exist {
 				txMsgs[msgEvent.TxHash()] = make([]event_usecase.MsgEvent, 0)
