@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"sort"
-	"strconv"
-	"strings"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/multisig"
 
@@ -239,27 +237,4 @@ func IsValidCosmosAddress(address string) bool {
 
 	_, err = bech32.ConvertBits(conv, 5, 8, false)
 	return err == nil
-}
-
-// IsValidCosmosAddressWithMemo will check if the input is combined with a CosmosAddress and a Memo
-// Expected input: {CosmosAddress}/{Memo}
-func IsValidCosmosAddressWithMemo(addressWithMemo string) bool {
-	strs := strings.Split(addressWithMemo, "/")
-	if len(strs) != 2 {
-		return false
-	}
-
-	// Check memo format, it should be a 9 digits or 10 digits int.
-	// memo range: [10^8, 10^10 - 1]
-	memoStr := strs[1]
-	memo, err := strconv.Atoi(memoStr)
-	if err != nil {
-		return false
-	}
-	if memo < 100000000 || memo > 9999999999 {
-		return false
-	}
-
-	address := strs[0]
-	return IsValidCosmosAddress(address)
 }

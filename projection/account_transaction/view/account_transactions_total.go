@@ -18,8 +18,11 @@ func NewAccountTransactionsTotal(rdbHandle *rdb.Handle) *AccountTransactionsTota
 }
 
 func (total *AccountTransactionsTotal) Search(address string) (bool, error) {
-	_, err := total.FindBy(fmt.Sprintf("%s:-", address))
+	numberOfRowsFound, err := total.FindBy(fmt.Sprintf("%s:-", address))
 	if err != nil {
+		return false, err
+	}
+	if numberOfRowsFound == 0 {
 		return false, err
 	}
 	return true, nil

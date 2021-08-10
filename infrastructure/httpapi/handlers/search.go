@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 
@@ -17,6 +18,8 @@ import (
 	block_view "github.com/crypto-com/chain-indexing/projection/block/view"
 	transaction_view "github.com/crypto-com/chain-indexing/projection/transaction/view"
 )
+
+const maxMemoLength = 256
 
 type Search struct {
 	logger applogger.Logger
@@ -90,15 +93,23 @@ func (search *Search) Search(ctx *fasthttp.RequestCtx) {
 			results.Accounts = []string{keyword}
 		}
 	}
-	if tmcosmosutils.IsValidCosmosAddressWithMemo(keyword) {
-		isAccountExist, err := search.accountTransactionsTotalView.Search(keyword)
-		if err != nil {
-			search.logger.Errorf("error searching account: %v", err)
-			httpapi.InternalServerError(ctx)
-			return
-		}
-		if isAccountExist {
-			results.Accounts = []string{keyword}
+
+	// If keyword contains a "/", then it is a {account}/{memo} combination
+	strs := strings.SplitN(keyword, "/", 2)
+	if len(strs) == 2 {
+		address := strs[0]
+		memo := strs[1]
+
+		if len(memo) <= maxMemoLength && tmcosmosutils.IsValidCosmosAddress(address) {
+			isAccountExist, err := search.accountTransactionsTotalView.Search(keyword)
+			if err != nil {
+				search.logger.Errorf("error searching account: %v", err)
+				httpapi.InternalServerError(ctx)
+				return
+			}
+			if isAccountExist {
+				results.Accounts = []string{keyword}
+			}
 		}
 	}
 
