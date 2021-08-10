@@ -90,6 +90,17 @@ func (search *Search) Search(ctx *fasthttp.RequestCtx) {
 			results.Accounts = []string{keyword}
 		}
 	}
+	if tmcosmosutils.IsValidCosmosAddressWithMemo(keyword) {
+		isAccountExist, err := search.accountTransactionsTotalView.Search(keyword)
+		if err != nil {
+			search.logger.Errorf("error searching account: %v", err)
+			httpapi.InternalServerError(ctx)
+			return
+		}
+		if isAccountExist {
+			results.Accounts = []string{keyword}
+		}
+	}
 
 	results.Blocks = blocks
 	results.Transactions = transactions

@@ -133,7 +133,7 @@ func (accountMessagesView *AccountTransactions) List(
 
 			identity := fmt.Sprintf("%s:-", filter.Account)
 			if filter.Memo != "" {
-				identity = fmt.Sprintf("%s:%s", filter.Account, filter.Memo)
+				identity = fmt.Sprintf("%s/%s:-", filter.Account, filter.Memo)
 			}
 
 			total, err := totalView.FindBy(identity)
