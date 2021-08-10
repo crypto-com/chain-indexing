@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/multisig"
@@ -248,7 +249,16 @@ func IsValidCosmosAddressWithMemo(addressWithMemo string) bool {
 		return false
 	}
 
-	// TODO: Memo format checking?
+	// Check memo format, it should be a 9 digits or 10 digits int.
+	// memo range: [10^8, 10^10 - 1]
+	memoStr := strs[1]
+	memo, err := strconv.Atoi(memoStr)
+	if err != nil {
+		return false
+	}
+	if memo < 100000000 || memo > 9999999999 {
+		return false
+	}
 
 	address := strs[0]
 	return IsValidCosmosAddress(address)

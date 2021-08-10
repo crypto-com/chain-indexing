@@ -129,4 +129,41 @@ var _ = Describe("tmcosmosutils", func() {
 			)).To(Equal("tcro1se7jsq9ax3qqm3uyc0aullneu25fxm56u8ryqw"))
 		})
 	})
+
+	Describe("IsValidCosmosAddressWithMemo", func() {
+		It("should return true when memo is in correct format", func() {
+			result := tmcosmosutils.IsValidCosmosAddressWithMemo(
+				"cro1w2kvwrzp23aq54n3amwav4yy4a9ahq2kz2wtmj/3910079064",
+			)
+			Expect(result).To(BeTrue())
+			result = tmcosmosutils.IsValidCosmosAddressWithMemo(
+				"cro1w2kvwrzp23aq54n3amwav4yy4a9ahq2kz2wtmj/100000000",
+			)
+			Expect(result).To(BeTrue())
+			result = tmcosmosutils.IsValidCosmosAddressWithMemo(
+				"cro1w2kvwrzp23aq54n3amwav4yy4a9ahq2kz2wtmj/9999999999",
+			)
+			Expect(result).To(BeTrue())
+		})
+		It("should return false when memo is less than 10^8", func() {
+			result := tmcosmosutils.IsValidCosmosAddressWithMemo(
+				"cro1w2kvwrzp23aq54n3amwav4yy4a9ahq2kz2wtmj/12345678",
+			)
+			Expect(result).To(BeFalse())
+			result = tmcosmosutils.IsValidCosmosAddressWithMemo(
+				"cro1w2kvwrzp23aq54n3amwav4yy4a9ahq2kz2wtmj/99999999",
+			)
+			Expect(result).To(BeFalse())
+		})
+		It("should return false when memo is more than or equal to 10^10", func() {
+			result := tmcosmosutils.IsValidCosmosAddressWithMemo(
+				"cro1w2kvwrzp23aq54n3amwav4yy4a9ahq2kz2wtmj/12345678901",
+			)
+			Expect(result).To(BeFalse())
+			result = tmcosmosutils.IsValidCosmosAddressWithMemo(
+				"cro1w2kvwrzp23aq54n3amwav4yy4a9ahq2kz2wtmj/10000000000",
+			)
+			Expect(result).To(BeFalse())
+		})
+	})
 })
