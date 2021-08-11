@@ -50,12 +50,16 @@ func ParseBeginBlockEventsCommands(
 			if amount == "" {
 				continue
 			}
+			annualProvisions := mintEvent.MustGetAttributeByKey("annual_provisions")
+			if annualProvisions == "" {
+				continue
+			}
 			commands = append(commands, command_usecase.NewCreateMint(
 				blockHeight,
 				model.MintParams{
 					BondedRatio:      mintEvent.MustGetAttributeByKey("bonded_ratio"),
 					Inflation:        mintEvent.MustGetAttributeByKey("inflation"),
-					AnnualProvisions: mintEvent.MustGetAttributeByKey("annual_provisions"),
+					AnnualProvisions: coin.MustParseDecCoin(fmt.Sprintf("%s%s", annualProvisions, bondingDenom)),
 					Amount:           coin.MustParseCoinsNormalized(fmt.Sprintf("%s%s", amount, bondingDenom)),
 				},
 			))
