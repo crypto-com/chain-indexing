@@ -19,8 +19,6 @@ import (
 	transaction_view "github.com/crypto-com/chain-indexing/projection/transaction/view"
 )
 
-const maxMemoLength = 256
-
 type Search struct {
 	logger applogger.Logger
 
@@ -98,9 +96,8 @@ func (search *Search) Search(ctx *fasthttp.RequestCtx) {
 	strs := strings.SplitN(keyword, "/", 2)
 	if len(strs) == 2 {
 		address := strs[0]
-		memo := strs[1]
 
-		if len(memo) <= maxMemoLength && tmcosmosutils.IsValidCosmosAddress(address) {
+		if tmcosmosutils.IsValidCosmosAddress(address) {
 			isAccountExist, err := search.accountTransactionsTotalView.Search(keyword)
 			if err != nil {
 				search.logger.Errorf("error searching account: %v", err)
