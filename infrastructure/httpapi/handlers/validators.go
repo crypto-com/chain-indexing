@@ -24,7 +24,15 @@ import (
 	validator_view "github.com/crypto-com/chain-indexing/projection/validator/view"
 )
 
-const mRecentDays int64 = 7
+// When we have a large number of blocks, we would like only take the recent N most blocks (blocks in 7 recent days),
+// in order to calculate the averageBlockTime.
+//
+// Assume average block generation time is 6 seconds per block.
+// Then in recent 7 days, number of estimated generated block will be:
+//
+// nRecentBlocks: n (block) = 7(day) * 24(hour/day) * 3600(sec/hour) / 6(sec/block)
+//
+const nRecentBlocksInInt = 100800
 
 type Validators struct {
 	logger applogger.Logger
@@ -303,17 +311,9 @@ func (handler *Validators) getAverageBlockTime() (*big.Float, error) {
 		big.NewFloat(1000),
 	)
 
-	// In ideal case, we calculate the average block time with recent N most blocks (blocks in M recent days).
-	// N = M * 24 * 3600 / averageBlockTime
-
-	nRecentBlocksInFloat := new(big.Float).Quo(
-		new(big.Float).SetInt64(mRecentDays*24*3600),
-		averageBlockTime,
-	)
-	nRecentBlocks, _ := nRecentBlocksInFloat.Int(nil)
-
 	// totalBlockCount > nRecentBlocks: then re-calculate averageBlockTime
 	// totalBlockCount <= nRecentBlocks: use the above calculated averageBlockTime
+	nRecentBlocks := big.NewInt(nRecentBlocksInInt)
 	if totalBlockCount.Cmp(nRecentBlocks) == 1 {
 
 		latestBlockHeight, err := handler.blockView.Count()
