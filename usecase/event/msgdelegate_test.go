@@ -63,10 +63,12 @@ var _ = Describe("Event", func() {
 			anyDelegatorAddress := "tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3"
 			anyValidatorAddress := "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3"
 			anyAmount := coin.MustNewCoinFromString("basetcro", "123456")
+			anyAutoClaimedRewards := coin.MustNewCoinFromString("basetcro", "789")
 			anyParams := model.MsgDelegateParams{
-				DelegatorAddress: anyDelegatorAddress,
-				ValidatorAddress: anyValidatorAddress,
-				Amount:           anyAmount,
+				DelegatorAddress:   anyDelegatorAddress,
+				ValidatorAddress:   anyValidatorAddress,
+				Amount:             anyAmount,
+				AutoClaimedRewards: anyAutoClaimedRewards,
 			}
 			event := event_usecase.NewMsgDelegate(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
