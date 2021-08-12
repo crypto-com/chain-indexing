@@ -18,5 +18,3 @@ WORKDIR /app
 RUN cp "${GOPATH}/src/github.com/crypto-com/chain-indexing/chain-indexing" .
 COPY ./migrations ./migrations
 COPY ./pgmigrate.sh ./migrate
-
-EXPOSE 8080

@@ -11,5 +11,4 @@ migrate:
 
 .PHONY: docker
 docker:
-	cp .gitignore .dockerignore && echo "**/.git" >> .dockerignore
 	docker build -t chain-indexing -f Dockerfile .
