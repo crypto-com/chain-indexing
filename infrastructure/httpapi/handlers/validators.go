@@ -18,10 +18,13 @@ import (
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/crypto-com/chain-indexing/internal/primptr"
+	block_view "github.com/crypto-com/chain-indexing/projection/block/view"
 	chainstats_view "github.com/crypto-com/chain-indexing/projection/chainstats/view"
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 	validator_view "github.com/crypto-com/chain-indexing/projection/validator/view"
 )
+
+const mRecentDays int64 = 7
 
 type Validators struct {
 	logger applogger.Logger
@@ -34,6 +37,7 @@ type Validators struct {
 	validatorsView          *validator_view.Validators
 	validatorActivitiesView *validator_view.ValidatorActivities
 	chainStatsView          *chainstats_view.ChainStats
+	blockView               *block_view.Blocks
 
 	globalAPY              *big.Float
 	globalAPYLastUpdatedAt time.Time
@@ -60,6 +64,7 @@ func NewValidators(
 		validator_view.NewValidators(rdbHandle),
 		validator_view.NewValidatorActivities(rdbHandle),
 		chainstats_view.NewChainStats(rdbHandle),
+		block_view.NewBlocks(rdbHandle),
 
 		nil,
 		time.Unix(int64(0), int64(0)),
@@ -297,6 +302,55 @@ func (handler *Validators) getAverageBlockTime() (*big.Float, error) {
 		averageBlockTimeMilliSecond,
 		big.NewFloat(1000),
 	)
+
+	// In ideal case, we calculate the average block time with recent N most blocks (blocks in M recent days).
+	// N = M * 24 * 3600 / averageBlockTime
+
+	nRecentBlocksInFloat := new(big.Float).Quo(
+		new(big.Float).SetInt64(mRecentDays*24*3600),
+		averageBlockTime,
+	)
+	nRecentBlocks, _ := nRecentBlocksInFloat.Int(nil)
+
+	// totalBlockCount > nRecentBlocks: then re-calculate averageBlockTime
+	// totalBlockCount <= nRecentBlocks: use the above calculated averageBlockTime
+	if totalBlockCount.Cmp(nRecentBlocks) == 1 {
+
+		latestBlockHeight, err := handler.blockView.Count()
+		if err != nil {
+			return nil, fmt.Errorf("error fetching latest block height: %v", err)
+		}
+		latestBlockIdentity := block_view.BlockIdentity{MaybeHeight: &latestBlockHeight}
+		latestBlock, err := handler.blockView.FindBy(&latestBlockIdentity)
+		if err != nil {
+			return nil, fmt.Errorf("error fetching latest block: %v", err)
+		}
+
+		// Find the nth block before latest block
+		startBlockHeight := latestBlockHeight - nRecentBlocks.Int64()
+		startBlockIdentity := block_view.BlockIdentity{MaybeHeight: &startBlockHeight}
+		startBlock, err := handler.blockView.FindBy(&startBlockIdentity)
+		if err != nil {
+			return nil, fmt.Errorf("error fetching the start block: %v", err)
+		}
+
+		// Calculate total time in generating n recent blocks
+		nRecentBlocksTotalTime := latestBlock.Time.UnixNano() - startBlock.Time.UnixNano()
+
+		nRecentBlocksTotalTimeMilliSecond := new(big.Float).Quo(
+			new(big.Float).SetInt64(nRecentBlocksTotalTime),
+			new(big.Float).SetInt64(int64(1000000)),
+		)
+		averageBlockTimeMilliSecond = new(big.Float).Quo(
+			nRecentBlocksTotalTimeMilliSecond,
+			new(big.Float).SetInt(nRecentBlocks),
+		)
+		averageBlockTime = new(big.Float).Quo(
+			averageBlockTimeMilliSecond,
+			big.NewFloat(1000),
+		)
+
+	}
 
 	return averageBlockTime, nil
 }
