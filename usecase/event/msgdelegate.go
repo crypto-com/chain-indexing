@@ -20,9 +20,10 @@ const MSG_DELEGATE_FAILED = "MsgDelegateFailed"
 type MsgDelegate struct {
 	MsgBase
 
-	DelegatorAddress string    `json:"delegatorAddress"`
-	ValidatorAddress string    `json:"validatorAddress"`
-	Amount           coin.Coin `json:"amount"`
+	DelegatorAddress   string    `json:"delegatorAddress"`
+	ValidatorAddress   string    `json:"validatorAddress"`
+	Amount             coin.Coin `json:"amount"`
+	AutoClaimedRewards coin.Coin `json:"autoClaimedRewards"`
 }
 
 // NewMsgDelegate creates a new instance of MsgDelegate
@@ -37,6 +38,7 @@ func NewMsgDelegate(msgCommonParams MsgCommonParams, params model.MsgDelegatePar
 		params.DelegatorAddress,
 		params.ValidatorAddress,
 		params.Amount,
+		params.AutoClaimedRewards,
 	}
 }
 
