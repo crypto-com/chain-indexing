@@ -139,9 +139,11 @@ func (accountMessagesView *AccountTransactions) List(
 		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
 			totalView := NewAccountTransactionsTotal(rdbHandle)
 
-			identity := fmt.Sprintf("%s:-", filter.Account)
+			identity := ""
 			if filter.Memo != "" {
 				identity = fmt.Sprintf("%s/%s:-", filter.Account, filter.Memo)
+			} else {
+				identity = fmt.Sprintf("%s:-", filter.Account)
 			}
 
 			total, err := totalView.FindBy(identity)
