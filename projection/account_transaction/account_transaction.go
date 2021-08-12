@@ -349,19 +349,43 @@ func (projection *AccountTransaction) HandleEvents(height int64, events []event_
 		accountTransactionRows = append(accountTransactionRows, info.ToRows()...)
 	}
 
-	for _, row := range accountTransactionRows {
-		if err := accountTransactionsTotalView.Increment(fmt.Sprintf("%s:-", row.Account), 1); err != nil {
-			return fmt.Errorf("error incremnting total account transaction of account: %w", err)
-		}
-		for _, messageType := range row.MessageTypes {
-			if err := accountTransactionsTotalView.Increment(
-				fmt.Sprintf("%s:%s", row.Account, messageType), 1,
-			); err != nil {
-				return fmt.Errorf("error incremnting total account transaction message type of account: %w", err)
-			}
-		}
+	for _, tx := range txs {
+		txInfo := transactionInfos[tx.Hash]
+		rows := txInfo.ToRows()
 
+		for _, row := range rows {
+
+			// Calculate account transaction total
+			if err := accountTransactionsTotalView.Increment(fmt.Sprintf("%s:-", row.Account), 1); err != nil {
+				return fmt.Errorf("error incrementing total account transaction of account: %w", err)
+			}
+			for _, messageType := range row.MessageTypes {
+				if err := accountTransactionsTotalView.Increment(
+					fmt.Sprintf("%s:%s", row.Account, messageType), 1,
+				); err != nil {
+					return fmt.Errorf("error incrementing total account transaction message type of account: %w", err)
+				}
+			}
+
+			// Calulate account/memo transaction total
+			if tx.Memo != "" {
+				accountWithMemo := row.Account + "/" + tx.Memo
+
+				if err := accountTransactionsTotalView.Increment(fmt.Sprintf("%s:-", accountWithMemo), 1); err != nil {
+					return fmt.Errorf("error incrementing total account transaction of account: %w", err)
+				}
+				for _, messageType := range row.MessageTypes {
+					if err := accountTransactionsTotalView.Increment(
+						fmt.Sprintf("%s:%s", accountWithMemo, messageType), 1,
+					); err != nil {
+						return fmt.Errorf("error incrementing total account transaction message type of account: %w", err)
+					}
+				}
+			}
+
+		}
 	}
+
 	if err := accountTransactionsView.InsertAll(accountTransactionRows); err != nil {
 		return fmt.Errorf("error inserting account message: %w", err)
 	}

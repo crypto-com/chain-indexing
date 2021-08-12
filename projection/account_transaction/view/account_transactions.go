@@ -114,9 +114,17 @@ func (accountMessagesView *AccountTransactions) List(
 		"view_account_transactions",
 	).InnerJoin(
 		"view_account_transaction_data ON view_account_transactions.block_height = view_account_transaction_data.block_height AND view_account_transactions.transaction_hash = view_account_transaction_data.hash",
-	).Where(
-		"view_account_transactions.account = ?", filter.Account,
 	)
+
+	if filter.Memo != "" {
+		stmtBuilder = stmtBuilder.Where(
+			"view_account_transactions.account = ? AND view_account_transaction_data.memo = ?", filter.Account, filter.Memo,
+		)
+	} else {
+		stmtBuilder = stmtBuilder.Where(
+			"view_account_transactions.account = ?", filter.Account,
+		)
+	}
 
 	if order.Id == view.ORDER_DESC {
 		stmtBuilder = stmtBuilder.OrderBy("view_account_transactions.id DESC")
@@ -130,7 +138,14 @@ func (accountMessagesView *AccountTransactions) List(
 	).WithCustomTotalQueryFn(
 		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
 			totalView := NewAccountTransactionsTotal(rdbHandle)
-			identity := fmt.Sprintf("%s:-", filter.Account)
+
+			identity := ""
+			if filter.Memo != "" {
+				identity = fmt.Sprintf("%s/%s:-", filter.Account, filter.Memo)
+			} else {
+				identity = fmt.Sprintf("%s:-", filter.Account)
+			}
+
 			total, err := totalView.FindBy(identity)
 			if err != nil {
 				return int64(0), err
@@ -255,6 +270,8 @@ type AccountTransactionReadRow struct {
 type AccountTransactionsListFilter struct {
 	// Required account filter
 	Account string
+	// Optional memo filter
+	Memo string
 }
 
 type AccountTransactionsListOrder struct {

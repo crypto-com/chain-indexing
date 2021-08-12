@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 
@@ -88,6 +89,24 @@ func (search *Search) Search(ctx *fasthttp.RequestCtx) {
 		}
 		if isAccountExist {
 			results.Accounts = []string{keyword}
+		}
+	}
+
+	// If keyword contains a "/", then it is a {account}/{memo} combination
+	strs := strings.SplitN(keyword, "/", 2)
+	if len(strs) == 2 {
+		address := strs[0]
+
+		if tmcosmosutils.IsValidCosmosAddress(address) {
+			isAccountExist, err := search.accountTransactionsTotalView.Search(keyword)
+			if err != nil {
+				search.logger.Errorf("error searching account: %v", err)
+				httpapi.InternalServerError(ctx)
+				return
+			}
+			if isAccountExist {
+				results.Accounts = []string{keyword}
+			}
 		}
 	}
 
