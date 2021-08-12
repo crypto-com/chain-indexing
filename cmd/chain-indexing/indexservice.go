@@ -61,13 +61,17 @@ func (service *IndexService) Run() error {
 		service.insecureTendermintClient,
 		service.strictGenesisParsing,
 	)
-	infoManager.Run()
 
 	switch service.systemMode {
 	case SYSTEM_MODE_EVENT_STORE:
+		infoManager.Run()
 		return service.RunEventStoreMode()
 	case SYSTEM_MODE_TENDERMINT_DIRECT:
+		infoManager.Run()
 		return service.RunTendermintDirectMode()
+	case SYSTEM_MODE_API_ONLY:
+		// No index process to be run on API ONLY mode
+		return nil
 	default:
 		return fmt.Errorf("unsupported system mode: %s", service.systemMode)
 	}
