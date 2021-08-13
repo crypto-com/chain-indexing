@@ -281,7 +281,6 @@ func (handler *Validators) getAverageBlockTime() (*big.Float, error) {
 	var totalBlockTime = big.NewInt(0)
 	var totalBlockCount = big.NewInt(1)
 
-	// Case A: totalBlockCount <= nRecentBlocks, calculate with blocks from Genesis block to Latest block
 	if rawTotalBlockTime, err := handler.chainStatsView.FindBy(chainstats.TOTAL_BLOCK_TIME); err != nil {
 		return nil, fmt.Errorf("error fetching total block time: %v", err)
 	} else {
@@ -308,8 +307,8 @@ func (handler *Validators) getAverageBlockTime() (*big.Float, error) {
 
 	isTotalBlockCountExcess := (totalBlockCount.Cmp(nRecentBlocks) == 1)
 
-	// Case B: totalBlockCount > nRecentBlocks, calculate with n recent blocks
 	var averageBlockTimeMilliSecond *big.Float
+	// Determine case A or case B
 	if isTotalBlockCountExcess {
 		latestBlockHeight, err := handler.blockView.Count()
 		if err != nil {
