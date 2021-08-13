@@ -274,8 +274,14 @@ func (handler *Validators) getGlobalAPY() (*big.Float, error) {
 }
 
 func (handler *Validators) getAverageBlockTime() (*big.Float, error) {
+	// Average block time calculattion
+	//
+	// Case A: totalBlockCount <= nRecentBlocks, calculate with blocks from Genesis block to Latest block
+	// Case B: totalBlockCount > nRecentBlocks, calculate with n recent blocks
 	var totalBlockTime = big.NewInt(0)
 	var totalBlockCount = big.NewInt(1)
+
+	// Case A: totalBlockCount <= nRecentBlocks, calculate with blocks from Genesis block to Latest block
 	if rawTotalBlockTime, err := handler.chainStatsView.FindBy(chainstats.TOTAL_BLOCK_TIME); err != nil {
 		return nil, fmt.Errorf("error fetching total block time: %v", err)
 	} else {
@@ -298,24 +304,12 @@ func (handler *Validators) getAverageBlockTime() (*big.Float, error) {
 		}
 	}
 
-	totalBlockTimeMilliSecond := new(big.Float).Quo(
-		new(big.Float).SetInt(totalBlockTime),
-		new(big.Float).SetInt64(int64(1000000)),
-	)
-	averageBlockTimeMilliSecond := new(big.Float).Quo(
-		totalBlockTimeMilliSecond,
-		new(big.Float).SetInt(totalBlockCount),
-	)
-	averageBlockTime := new(big.Float).Quo(
-		averageBlockTimeMilliSecond,
-		big.NewFloat(1000),
-	)
-
-	// totalBlockCount > nRecentBlocks: then re-calculate averageBlockTime
-	// totalBlockCount <= nRecentBlocks: use the above calculated averageBlockTime
 	nRecentBlocks := big.NewInt(nRecentBlocksInInt)
-	if totalBlockCount.Cmp(nRecentBlocks) == 1 {
 
+	isTotalBlockCountExcess := (totalBlockCount.Cmp(nRecentBlocks) == 1)
+
+	// Case B: totalBlockCount > nRecentBlocks, calculate with n recent blocks
+	if isTotalBlockCountExcess {
 		latestBlockHeight, err := handler.blockView.Count()
 		if err != nil {
 			return nil, fmt.Errorf("error fetching latest block height: %v", err)
@@ -337,20 +331,22 @@ func (handler *Validators) getAverageBlockTime() (*big.Float, error) {
 		// Calculate total time in generating n recent blocks
 		nRecentBlocksTotalTime := latestBlock.Time.UnixNano() - startBlock.Time.UnixNano()
 
-		nRecentBlocksTotalTimeMilliSecond := new(big.Float).Quo(
-			new(big.Float).SetInt64(nRecentBlocksTotalTime),
-			new(big.Float).SetInt64(int64(1000000)),
-		)
-		averageBlockTimeMilliSecond = new(big.Float).Quo(
-			nRecentBlocksTotalTimeMilliSecond,
-			new(big.Float).SetInt(nRecentBlocks),
-		)
-		averageBlockTime = new(big.Float).Quo(
-			averageBlockTimeMilliSecond,
-			big.NewFloat(1000),
-		)
-
+		totalBlockTime = new(big.Int).SetInt64(nRecentBlocksTotalTime)
+		totalBlockCount = nRecentBlocks
 	}
+
+	totalBlockTimeMilliSecond := new(big.Float).Quo(
+		new(big.Float).SetInt(totalBlockTime),
+		new(big.Float).SetInt64(int64(1000000)),
+	)
+	averageBlockTimeMilliSecond := new(big.Float).Quo(
+		totalBlockTimeMilliSecond,
+		new(big.Float).SetInt(totalBlockCount),
+	)
+	averageBlockTime := new(big.Float).Quo(
+		averageBlockTimeMilliSecond,
+		big.NewFloat(1000),
+	)
 
 	return averageBlockTime, nil
 }
