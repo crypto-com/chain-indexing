@@ -45,9 +45,9 @@ func (window *Window) Sync(
 	})
 	logger.Debug("spawning goroutines for sync block workers")
 
-	wg := sync.WaitGroup{}
-	wg.Add(int(endHeight - beginHeight + 1))
-	mtx := sync.Mutex{}
+	workersWaitGroup := sync.WaitGroup{}
+	workersWaitGroup.Add(int(endHeight - beginHeight + 1))
+	commandWindowMutex := sync.Mutex{}
 
 	commandWindow := newUnsafeCommandWindow(beginHeight, endHeight)
 
@@ -61,15 +61,15 @@ func (window *Window) Sync(
 				result = workResult{height, nil, err}
 			}
 
-			mtx.Lock()
+			commandWindowMutex.Lock()
 			commandWindow.Put(result.height, result.commands)
-			mtx.Unlock()
+			commandWindowMutex.Unlock()
 
-			wg.Done()
+			workersWaitGroup.Done()
 		}(height)
 	}
 
-	wg.Wait()
+	workersWaitGroup.Wait()
 
 	return commandWindow.Export(), endHeight, nil
 }

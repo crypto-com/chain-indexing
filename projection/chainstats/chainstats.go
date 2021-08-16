@@ -100,10 +100,6 @@ func (projection *ChainStats) HandleEvents(height int64, events []event_entity.E
 	rdbTxHandle := rdbTx.ToHandle()
 	chainStatsView := view.NewChainStats(rdbTxHandle)
 
-	if len(events) <= 0 {
-		return nil
-	}
-
 	event := events[0]
 	var maybeGenesisBlockTime *int64
 	if genesisCreatedEvent, ok := event.(*event_usecase.GenesisCreated); ok {
