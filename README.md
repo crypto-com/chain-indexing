@@ -13,7 +13,7 @@ Using Docker is the easiest way to build chain-indexing. The Docker image contai
 `/app/migrate` Program to perform migration
 
 ```bash
-docker build -o chain-indexing .
+make docker
 ```
 
 ### 1.2 Build manually
@@ -81,7 +81,7 @@ This will start the following docker instances on your local network when you us
 for DB_PASSWORD, never use common word such as "postgres" , "admin", "password", choose at least 16 characters including number, special character, capital letters even in testing environment.
 if you don't use strong password, pgmigrate will stop further processing
 
-#### Docker (Not working yet)
+#### Docker
 
 ```bash
 docker run -it \
@@ -108,7 +108,7 @@ which migrate
 
 ### 2.5 Run the Service
 
-#### Docker (Not working yet)
+#### Docker
 
 ```bash
 docker run \

@@ -3,10 +3,6 @@
 
 # IDE
 .vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
 *.code-workspace
 .idea/*
 
@@ -34,10 +30,12 @@ bin/
 log/
 *.log
 
-config/config.toml
+config/*.toml
 chain-indexing
 !*/chain-indexing/
 check-password-strength
 !*/check-password-strength/
 
 pgdata*
+**/.git
+.github
