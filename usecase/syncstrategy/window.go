@@ -1,7 +1,6 @@
 package syncstrategy
 
 import (
-	"context"
 	"github.com/crypto-com/chain-indexing/entity/command"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"golang.org/x/sync/errgroup"
@@ -47,8 +46,7 @@ func (window *Window) Sync(
 	})
 	logger.Debug("spawning goroutines for sync block workers")
 
-	ctx := context.Background()
-	workersErrGroup, _ := errgroup.WithContext(ctx)
+	workersErrGroup := errgroup.Group{}
 	commandWindowMutex := sync.Mutex{}
 
 	commandWindow := newUnsafeCommandWindow(beginHeight, endHeight)
