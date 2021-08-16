@@ -17,6 +17,7 @@ import (
 
 const SYSTEM_MODE_EVENT_STORE = "EVENT_STORE"
 const SYSTEM_MODE_TENDERMINT_DIRECT = "TENDERMINT_DIRECT"
+const SYSTEM_MODE_API_ONLY = "API_ONLY"
 
 func CliApp(args []string) error {
 	cliApp := &cli.App{
@@ -139,7 +140,9 @@ func CliApp(args []string) error {
 			logger.SetLogLevel(logLevel)
 
 			// Setup system
-			if config.System.Mode != SYSTEM_MODE_EVENT_STORE && config.System.Mode != SYSTEM_MODE_TENDERMINT_DIRECT {
+			switch config.System.Mode {
+			case SYSTEM_MODE_EVENT_STORE, SYSTEM_MODE_TENDERMINT_DIRECT, SYSTEM_MODE_API_ONLY:
+			default:
 				logger.Panicf("unrecognized system mode: %s", config.System.Mode)
 			}
 
