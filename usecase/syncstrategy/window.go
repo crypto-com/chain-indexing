@@ -1,8 +1,10 @@
 package syncstrategy
 
 import (
+	"context"
 	"github.com/crypto-com/chain-indexing/entity/command"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	"golang.org/x/sync/errgroup"
 	"sync"
 )
 
@@ -45,31 +47,34 @@ func (window *Window) Sync(
 	})
 	logger.Debug("spawning goroutines for sync block workers")
 
-	workersWaitGroup := sync.WaitGroup{}
-	workersWaitGroup.Add(int(endHeight - beginHeight + 1))
+	ctx := context.Background()
+	workersErrGroup, _ := errgroup.WithContext(ctx)
 	commandWindowMutex := sync.Mutex{}
 
 	commandWindow := newUnsafeCommandWindow(beginHeight, endHeight)
 
 	for height := beginHeight; height <= endHeight; height += 1 {
-		go func(height int64) {
+		height := height
+		workersErrGroup.Go(func() error {
 			commands, err := worker(height)
-			result := workResult{height, commands, nil}
-
 			if err != nil {
 				logger.Errorf("received error from sync block worker #%d: %v", height, err)
-				result = workResult{height, nil, err}
+				return err
 			}
+
+			result := workResult{height, commands, nil}
 
 			commandWindowMutex.Lock()
 			commandWindow.Put(result.height, result.commands)
 			commandWindowMutex.Unlock()
 
-			workersWaitGroup.Done()
-		}(height)
+			return nil
+		})
 	}
 
-	workersWaitGroup.Wait()
+	if err := workersErrGroup.Wait(); err != nil {
+		return nil, beginHeight - 1, err
+	}
 
 	return commandWindow.Export(), endHeight, nil
 }
