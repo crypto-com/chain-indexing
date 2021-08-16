@@ -65,8 +65,8 @@ func (window *Window) Sync(
 			result := workResult{height, commands, nil}
 
 			commandWindowMutex.Lock()
+			defer commandWindowMutex.Unlock()
 			commandWindow.Put(result.height, result.commands)
-			commandWindowMutex.Unlock()
 
 			return nil
 		})
