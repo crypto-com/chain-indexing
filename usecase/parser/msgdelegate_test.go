@@ -41,9 +41,10 @@ var _ = Describe("ParseMsgCommands", func() {
 					MsgIndex:    0,
 				},
 				model.MsgDelegateParams{
-					DelegatorAddress: "tcro1fs8r6zxmr5nc86j8cpcmjmccf8s2cafxh5hy8r",
-					ValidatorAddress: "tcrocncl1fs8r6zxmr5nc86j8cpcmjmccf8s2cafxzt5alq",
-					Amount:           coin.MustParseCoinNormalized("27464382775basetcro"),
+					DelegatorAddress:   "tcro1fs8r6zxmr5nc86j8cpcmjmccf8s2cafxh5hy8r",
+					ValidatorAddress:   "tcrocncl1fs8r6zxmr5nc86j8cpcmjmccf8s2cafxzt5alq",
+					Amount:             coin.MustParseCoinNormalized("27464382775basetcro"),
+					AutoClaimedRewards: coin.MustParseCoinNormalized("4082858866basetcro"),
 				},
 			)}))
 		})

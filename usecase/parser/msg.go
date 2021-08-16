@@ -79,7 +79,11 @@ func ParseBlockResultsTxsMsgToCommands(
 			case "/cosmos.gov.v1beta1.MsgDeposit":
 				msgCommands = parseMsgDeposit(msgCommonParams, txsResult, msgIndex, msg)
 			case "/cosmos.staking.v1beta1.MsgDelegate":
-				msgCommands = parseMsgDelegate(msgCommonParams, msg)
+				msgCommands = parseMsgDelegate(
+					accountAddressPrefix,
+					stakingDenom,
+					txSuccess, txsResult, msgIndex, msgCommonParams, msg,
+				)
 			case "/cosmos.staking.v1beta1.MsgUndelegate":
 				msgCommands = parseMsgUndelegate(
 					accountAddressPrefix,
@@ -693,19 +697,56 @@ func parseMsgDeposit(
 }
 
 func parseMsgDelegate(
+	addressPrefix string,
+	stakingDenom string,
+	txSuccess bool,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 ) []command.Command {
 	amountValue, _ := msg["amount"].(map[string]interface{})
 	amount := tmcosmosutils.MustNewCoinFromAmountInterface(amountValue)
 
+	if !txSuccess {
+		return []command.Command{command_usecase.NewCreateMsgDelegate(
+			msgCommonParams,
+
+			model.MsgDelegateParams{
+				DelegatorAddress:   msg["delegator_address"].(string),
+				ValidatorAddress:   msg["validator_address"].(string),
+				Amount:             amount,
+				AutoClaimedRewards: coin.Coin{},
+			},
+		)}
+	}
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+
+	moduleAccounts := tmcosmosutils.NewModuleAccounts(addressPrefix)
+	transferEvents := log.GetEventsByType("transfer")
+	autoClaimedRewards := coin.NewZeroCoin(stakingDenom)
+	for _, transferEvent := range transferEvents {
+		sender := transferEvent.MustGetAttributeByKey("sender")
+		if sender != moduleAccounts.Distribution {
+			continue
+		}
+
+		amount := transferEvent.MustGetAttributeByKey("amount")
+		coin, coinErr := coin.ParseCoinNormalized(amount)
+		if coinErr != nil {
+			panic(fmt.Errorf("error parsing auto claimed rewards amount: %v", coinErr))
+		}
+		autoClaimedRewards = autoClaimedRewards.Add(coin)
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgDelegate(
 		msgCommonParams,
 
 		model.MsgDelegateParams{
-			DelegatorAddress: msg["delegator_address"].(string),
-			ValidatorAddress: msg["validator_address"].(string),
-			Amount:           amount,
+			DelegatorAddress:   msg["delegator_address"].(string),
+			ValidatorAddress:   msg["validator_address"].(string),
+			Amount:             amount,
+			AutoClaimedRewards: autoClaimedRewards,
 		},
 	)}
 }
