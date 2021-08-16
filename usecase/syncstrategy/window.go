@@ -46,14 +46,13 @@ func (window *Window) Sync(
 	logger.Debug("spawning goroutines for sync block workers")
 
 	wg := sync.WaitGroup{}
+	wg.Add(int(endHeight - beginHeight + 1))
 	mtx := sync.Mutex{}
 
 	commandWindow := newUnsafeCommandWindow(beginHeight, endHeight)
 
 	for height := beginHeight; height <= endHeight; height += 1 {
 		go func(height int64) {
-			wg.Add(1)
-
 			commands, err := worker(height)
 			result := workResult{height, commands, nil}
 
