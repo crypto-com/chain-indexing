@@ -4,7 +4,6 @@ import (
 	"github.com/crypto-com/chain-indexing/entity/command"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"golang.org/x/sync/errgroup"
-	"sync"
 )
 
 var _ Strategy = &Window{}
@@ -47,7 +46,6 @@ func (window *Window) Sync(
 	logger.Debug("spawning goroutines for sync block workers")
 
 	workersErrGroup := errgroup.Group{}
-	commandWindowMutex := sync.Mutex{}
 
 	commandWindow := newUnsafeCommandWindow(beginHeight, endHeight)
 
@@ -71,12 +69,6 @@ func (window *Window) Sync(
 	}
 
 	return commandWindow.Export(), endHeight, nil
-}
-
-type workResult struct {
-	height   int64
-	commands []command.Command
-	err      error
 }
 
 // An concurrency-unsafe command window. Never use it in multiple goroutines.
