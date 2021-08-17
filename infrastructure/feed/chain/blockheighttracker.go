@@ -1,8 +1,11 @@
 package chain
 
 import (
+	"fmt"
 	"sync"
 	"time"
+
+	"github.com/cenkalti/backoff/v4"
 
 	"github.com/crypto-com/chain-indexing/internal/primptr"
 
@@ -45,27 +48,32 @@ func NewBlockHeightTracker(logger applogger.Logger, client tendermint.Client) *B
 
 func (tracker *BlockHeightTracker) Run() {
 	for {
-		height, err := tracker.client.LatestBlockHeight()
-		if err != nil {
-			tracker.logger.Errorf("error getting chain latest block height: %v", err)
-			<-time.After(1 * time.Second)
-			continue
-		}
-
-		for _, subscription := range tracker.subscriptions {
-			select {
-			case subscription <- height:
-			default:
-				tracker.logger.Info("block subscription channel is blocked, maybe busy?")
+		operation := func() error {
+			height, err := tracker.client.LatestBlockHeight()
+			if err != nil {
+				return fmt.Errorf("error getting chain latest block height: %v", err)
 			}
+
+			for _, subscription := range tracker.subscriptions {
+				select {
+				case subscription <- height:
+				default:
+					tracker.logger.Info("block subscription channel is blocked, maybe busy?")
+				}
+			}
+
+			tracker.rwMutex.Lock()
+			tracker.latestBlockHeight = &height
+			tracker.rwMutex.Unlock()
+
+			tracker.logger.Infof("updated chain latest block height: %d", height)
+			<-time.After(tracker.pollingInterval)
+			return nil
 		}
-
-		tracker.rwMutex.Lock()
-		tracker.latestBlockHeight = &height
-		tracker.rwMutex.Unlock()
-
-		tracker.logger.Infof("updated chain latest block height: %d", height)
-		<-time.After(tracker.pollingInterval)
+		notifyFn := func(opErr error, backoffDuration time.Duration) {
+			tracker.logger.Errorf("retrying in %s: %v", backoffDuration.String(), opErr)
+		}
+		_ = backoff.RetryNotify(operation, backoff.NewExponentialBackOff(), notifyFn)
 	}
 }
 

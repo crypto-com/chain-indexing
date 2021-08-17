@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+	"github.com/cenkalti/backoff/v4"
 
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -14,6 +14,7 @@ import (
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	"github.com/crypto-com/chain-indexing/usecase/syncstrategy"
 )
 
@@ -97,7 +98,7 @@ func NewSyncManager(
 }
 
 // SyncBlocks makes request to tendermint, create and dispatch notifications
-func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
+func (manager *SyncManager) SyncBlocks(latestHeight int64, isRetry bool) error {
 	maybeLastIndexedHeight, err := manager.eventHandler.GetLastHandledEventHeight()
 	if err != nil {
 		return fmt.Errorf("error running GetLastIndexedBlockHeight %v", err)
@@ -109,10 +110,17 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
 		currentIndexingHeight = *maybeLastIndexedHeight + 1
 	}
 
-	manager.logger.Infof("going to synchronized blocks from %d to %d", currentIndexingHeight, latestHeight)
-	for currentIndexingHeight <= latestHeight {
+	targetHeight := latestHeight
+	if isRetry {
+		// Reduce the block size to be synced when retrying to avoid spamming and wasting resource
+		if latestHeight > currentIndexingHeight {
+			targetHeight = currentIndexingHeight + 1
+		}
+	}
+	manager.logger.Infof("going to synchronized blocks from %d to %d", currentIndexingHeight, targetHeight)
+	for currentIndexingHeight <= targetHeight {
 		blocksCommands, syncedHeight, err := manager.windowSyncStrategy.Sync(
-			currentIndexingHeight, latestHeight, manager.syncBlockWorker,
+			currentIndexingHeight, targetHeight, manager.syncBlockWorker,
 		)
 		if err != nil {
 			return fmt.Errorf("error when synchronizing block with window strategy: %v", err)
@@ -206,18 +214,36 @@ func (manager *SyncManager) Run() error {
 	tracker.Subscribe(blockHeightCh)
 
 	for {
-		if manager.latestBlockHeight == nil {
-			manager.logger.Info("the chain has no block yet")
-		} else {
-			if err := manager.SyncBlocks(*manager.latestBlockHeight); err != nil {
-				manager.logger.Errorf("error synchronizing blocks to latest height %d: %v", *manager.latestBlockHeight, err)
-				<-time.After(5 * time.Second)
+		isRetry := false
+		operation := func() error {
+			if manager.latestBlockHeight == nil {
+				manager.logger.Info("the chain has no block yet")
+			} else {
+				if syncErr := manager.SyncBlocks(*manager.latestBlockHeight, isRetry); syncErr != nil {
+					return fmt.Errorf(
+						"error synchronizing blocks to latest height %d: %v", *manager.latestBlockHeight, syncErr,
+					)
+				}
 			}
-		}
 
-		select {
-		case <-manager.shouldSyncCh:
-		case <-time.After(manager.pollingInterval):
+			select {
+			case <-manager.shouldSyncCh:
+			case <-time.After(manager.pollingInterval):
+			}
+			return nil
+		}
+		notifyFn := func(opErr error, backoffDuration time.Duration) {
+			isRetry = true
+			manager.logger.Errorf(
+				"retrying in %s: %v", backoffDuration.String(), opErr,
+			)
+		}
+		if err := backoff.RetryNotify(
+			operation,
+			backoff.NewExponentialBackOff(),
+			notifyFn,
+		); err != nil {
+			manager.logger.Errorf("exiting after permanent error: %v", err)
 		}
 	}
 }
