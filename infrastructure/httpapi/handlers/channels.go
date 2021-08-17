@@ -26,10 +26,6 @@ func NewChannels(logger applogger.Logger, rdbHandle *rdb.Handle) *Channels {
 	}
 }
 
-func (handler *Channels) FindByHash(ctx *fasthttp.RequestCtx) {
-	httpapi.Success(ctx, nil)
-}
-
 func (handler *Channels) List(ctx *fasthttp.RequestCtx) {
 	var err error
 
