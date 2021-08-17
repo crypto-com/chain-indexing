@@ -129,13 +129,7 @@ if [[ "${RET_VALUE}" != "OK" ]]; then
             exit 1
         fi
     else
-        is_golang_1_16_and_above
-        if [[ "${RET_VALUE}" == 1 ]]; then
-#            install_golang_migrate_golang_1_16_and_above
-            install_golang_migrate_universal
-        else
-            install_golang_migrate_golang_1_15_and_below
-        fi
+        install_golang_migrate_universal
 
         check_migrate
         if [[ "${RET_VALUE}" == "NOT_FOUND" ]]; then
