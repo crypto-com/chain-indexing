@@ -1,8 +1,10 @@
 package syncstrategy
 
 import (
+	"context"
 	"github.com/crypto-com/chain-indexing/entity/command"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	"golang.org/x/sync/errgroup"
 )
 
 var _ Strategy = &Window{}
@@ -30,8 +32,6 @@ func (window *Window) Sync(
 	latestHeight int64,
 	worker SyncBlockWorker,
 ) ([][]command.Command, SyncedHeight, error) {
-	workResultCh := make(chan workResult)
-
 	beginHeight := currentHeight
 	var endHeight int64
 	if latestHeight-currentHeight+1 < int64(window.size) {
@@ -46,48 +46,30 @@ func (window *Window) Sync(
 	})
 	logger.Debug("spawning goroutines for sync block workers")
 
-	for height := beginHeight; height <= endHeight; height += 1 {
-		go func(height int64) {
-			commands, err := worker(height)
-			if err != nil {
-				workResultCh <- workResult{height, nil, err}
-			}
-
-			workResultCh <- workResult{height, commands, nil}
-		}(height)
-	}
+	workersErrGroup, _ := errgroup.WithContext(context.Background())
 
 	commandWindow := newUnsafeCommandWindow(beginHeight, endHeight)
-	remainingWork := endHeight - beginHeight + 1
-	var workerErr error
 
-	logger.Debug("listening for sync block workers")
-	for {
-		result := <-workResultCh
-		remainingWork -= 1
-		if result.err != nil {
-			workerErr = result.err
-			logger.Errorf("received error from sync block worker #%d: %v", result.height, result.err)
-		} else {
-			if workerErr == nil {
-				commandWindow.Put(result.height, result.commands)
+	for height := beginHeight; height <= endHeight; height += 1 {
+		height := height
+		workersErrGroup.Go(func() error {
+			commands, err := worker(height)
+			if err != nil {
+				logger.Errorf("received error from sync block worker #%d: %v", height, err)
+				return err
 			}
-		}
 
-		if remainingWork == 0 {
-			logger.Info("all sync block workers completed")
-			if workerErr != nil {
-				return nil, beginHeight - 1, workerErr
-			}
-			return commandWindow.Export(), endHeight, nil
-		}
+			commandWindow.Put(height, commands)
+
+			return nil
+		})
 	}
-}
 
-type workResult struct {
-	height   int64
-	commands []command.Command
-	err      error
+	if err := workersErrGroup.Wait(); err != nil {
+		return nil, beginHeight - 1, err
+	}
+
+	return commandWindow.Export(), endHeight, nil
 }
 
 // An concurrency-unsafe command window. Never use it in multiple goroutines.
