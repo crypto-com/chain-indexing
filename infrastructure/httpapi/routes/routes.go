@@ -20,6 +20,7 @@ type RouteRegistry struct {
 	accountsHandler            *handlers.Accounts
 	proposalsHandler           *handlers.Proposals
 	nftsHandler                *handlers.NFTs
+	channelsHandler            *handlers.Channels
 }
 
 func NewRoutesRegistry(
@@ -34,6 +35,7 @@ func NewRoutesRegistry(
 	accountsHandler *handlers.Accounts,
 	proposalsHandler *handlers.Proposals,
 	nftsHandler *handlers.NFTs,
+	channelsHandler *handlers.Channels,
 ) *RouteRegistry {
 	return &RouteRegistry{
 		searchHandler,
@@ -47,6 +49,7 @@ func NewRoutesRegistry(
 		accountsHandler,
 		proposalsHandler,
 		nftsHandler,
+		channelsHandler,
 	}
 }
 
@@ -59,29 +62,38 @@ func (registry *RouteRegistry) Register(server *httpapi.Server, routePrefix stri
 		ctx.SetStatusCode(fasthttp.StatusOK)
 		ctx.SetBody([]byte("Ok"))
 	})
+
 	server.GET(fmt.Sprintf("%s/api/v1/search", routePrefix), registry.searchHandler.Search)
+
 	server.GET(fmt.Sprintf("%s/api/v1/accounts", routePrefix), registry.accountsHandler.List)
 	server.GET(fmt.Sprintf("%s/api/v1/accounts/{account}", routePrefix), registry.accountsHandler.FindBy)
 	server.GET(fmt.Sprintf("%s/api/v1/accounts/{account}/transactions", routePrefix), registry.accountTransactionsHandler.ListByAccount)
 	server.GET(fmt.Sprintf("%s/api/v1/accounts/{account}/messages", routePrefix), registry.accountMessagesHandler.ListByAccount)
+
 	server.GET(fmt.Sprintf("%s/api/v1/blocks", routePrefix), registry.blocksHandler.List)
 	server.GET(fmt.Sprintf("%s/api/v1/blocks/{height-or-hash}", routePrefix), registry.blocksHandler.FindBy)
 	server.GET(fmt.Sprintf("%s/api/v1/blocks/{height}/transactions", routePrefix), registry.blocksHandler.ListTransactionsByHeight)
 	server.GET(fmt.Sprintf("%s/api/v1/blocks/{height}/events", routePrefix), registry.blocksHandler.ListEventsByHeight)
 	server.GET(fmt.Sprintf("%s/api/v1/blocks/{height}/commitments", routePrefix), registry.blocksHandler.ListCommitmentsByHeight)
+
 	server.GET(fmt.Sprintf("%s/api/v1/events", routePrefix), registry.blockEventHandler.List)
 	server.GET(fmt.Sprintf("%s/api/v1/events/{id}", routePrefix), registry.blockEventHandler.FindById)
+
 	server.GET(fmt.Sprintf("%s/api/v1/proposals", routePrefix), registry.proposalsHandler.List)
 	server.GET(fmt.Sprintf("%s/api/v1/proposals/{id}", routePrefix), registry.proposalsHandler.FindById)
 	server.GET(fmt.Sprintf("%s/api/v1/proposals/{id}/votes", routePrefix), registry.proposalsHandler.ListVotesById)
 	server.GET(fmt.Sprintf("%s/api/v1/proposals/{id}/depositors", routePrefix), registry.proposalsHandler.ListDepositorsById)
+
 	server.GET(fmt.Sprintf("%s/api/v1/status", routePrefix), registry.statusHandler.GetStatus)
+
 	server.GET(fmt.Sprintf("%s/api/v1/transactions", routePrefix), registry.transactionHandler.List)
 	server.GET(fmt.Sprintf("%s/api/v1/transactions/{hash}", routePrefix), registry.transactionHandler.FindByHash)
+
 	server.GET(fmt.Sprintf("%s/api/v1/validators", routePrefix), registry.validatorsHandler.List)
 	server.GET(fmt.Sprintf("%s/api/v1/validators/active", routePrefix), registry.validatorsHandler.ListActive)
 	server.GET(fmt.Sprintf("%s/api/v1/validators/{address}", routePrefix), registry.validatorsHandler.FindBy)
 	server.GET(fmt.Sprintf("%s/api/v1/validators/{address}/activities", routePrefix), registry.validatorsHandler.ListActivities)
+
 	server.GET(fmt.Sprintf("%s/api/v1/nfts/messages", routePrefix), registry.nftsHandler.ListMessages)
 	server.GET(fmt.Sprintf("%s/api/v1/nfts/denom/name/{denomName}", routePrefix), registry.nftsHandler.FindDenomByName)
 	server.GET(fmt.Sprintf("%s/api/v1/nfts/denom/id/{denomId}", routePrefix), registry.nftsHandler.FindDenomById)
@@ -96,4 +108,6 @@ func (registry *RouteRegistry) Register(server *httpapi.Server, routePrefix stri
 	server.GET(fmt.Sprintf("%s/api/v1/nfts/drops", routePrefix), registry.nftsHandler.ListDrops)
 	server.GET(fmt.Sprintf("%s/api/v1/nfts/drops/{drop}/tokens", routePrefix), registry.nftsHandler.ListTokensByDrop)
 	server.GET(fmt.Sprintf("%s/api/v1/nfts/accounts/{account}/tokens", routePrefix), registry.nftsHandler.ListTokensByAccount)
+
+	server.GET(fmt.Sprintf("%s/api/v1/channels", routePrefix), registry.channelsHandler.List)
 }
