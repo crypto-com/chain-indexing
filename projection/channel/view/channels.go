@@ -45,12 +45,12 @@ func (channelsView *Channels) Upsert(channel *ChannelRow) error {
 			channel.SuccessPacketCount,
 			channel.FailurePacketCount,
 		).
-		Suffix(`ON CONFLICT(channel_id, port_id) DO UPDATE SET
+		Suffix(`ON CONFLICT (channel_id, port_id) DO UPDATE SET
 			connection_id = EXCLUDED.connection_id,
 			counterparty_channel_id = EXCLUDED.counterparty_channel_id,
 			counterparty_port_id = EXCLUDED.counterparty_port_id,
 			success_packet_count = EXCLUDED.success_packet_count,
-			failure_packet_count = EXCLUDED.failure_packet_count,
+			failure_packet_count = EXCLUDED.failure_packet_count
 		`).
 		ToSql()
 
@@ -136,10 +136,10 @@ func (channelsView *Channels) List(order ChannelsListOrder, pagination *paginati
 
 func (channelsView *Channels) SuccessPacketCountIncrement(channelId string, portId string) error {
 	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
-		Insert("view_channels").
-		Columns("channel_id", "port_id", "success_packet_count").
-		Values(channelId, portId, 1).
-		Suffix("ON CONFLICT (channel_id, port_id) DO UPDATE SET success_packet_count = success_packet_count + EXCLUDED.success_packet_count").
+		Insert("view_channels AS ORIGINAL").
+		Columns("channel_id", "port_id", "success_packet_count", "failure_packet_count").
+		Values(channelId, portId, 1, 0).
+		Suffix("ON CONFLICT (channel_id, port_id) DO UPDATE SET success_packet_count = ORIGINAL.success_packet_count + EXCLUDED.success_packet_count").
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("error building channel insert sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -158,10 +158,10 @@ func (channelsView *Channels) SuccessPacketCountIncrement(channelId string, port
 
 func (channelsView *Channels) FailurePacketCountIncrement(channelId string, portId string) error {
 	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
-		Insert("view_channels").
-		Columns("channel_id", "port_id", "failure_packet_count").
-		Values(channelId, portId, 1).
-		Suffix("ON CONFLICT (channel_id, port_id) DO UPDATE SET failure_packet_count = failure_packet_count + EXCLUDED.failure_packet_count").
+		Insert("view_channels AS ORIGINAL").
+		Columns("channel_id", "port_id", "success_packet_count", "failure_packet_count").
+		Values(channelId, portId, 0, 1).
+		Suffix("ON CONFLICT (channel_id, port_id) DO UPDATE SET failure_packet_count = ORIGINAL.failure_packet_count + EXCLUDED.failure_packet_count").
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("error building channel insert sql: %v: %w", err, rdb.ErrBuildSQLStmt)
