@@ -41,11 +41,11 @@ func (_ *Channel) GetEventsToListen() []string {
 	// reference: https://hermes.informal.systems/commands/relaying/packets.html#packet-streaming
 	//
 	return []string{
-		event_usecase.MSG_IBC_CHANNEL_OPEN_ACK,
-		event_usecase.MSG_IBC_CHANNEL_OPEN_CONFIRM,
-		event_usecase.MSG_IBC_ACKNOWLEDGEMENT,
-		event_usecase.MSG_IBC_TIMEOUT,
-		event_usecase.MSG_IBC_TIMEOUT_ON_CLOSE,
+		event_usecase.MSG_IBC_CHANNEL_OPEN_ACK_CREATED,
+		event_usecase.MSG_IBC_CHANNEL_OPEN_CONFIRM_CREATED,
+		event_usecase.MSG_IBC_ACKNOWLEDGEMENT_CREATED,
+		event_usecase.MSG_IBC_TIMEOUT_CREATED,
+		event_usecase.MSG_IBC_TIMEOUT_ON_CLOSE_CREATED,
 	}
 }
 
@@ -131,7 +131,6 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 			}
 
 		}
-
 	}
 
 	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
