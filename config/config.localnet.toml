@@ -77,5 +77,6 @@ enables = [
     "Validator",
     "ValidatorStats",
     "NFT",
+    "Channel",
 #    "CryptoComNFT",
 ]
