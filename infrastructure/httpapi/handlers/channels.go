@@ -19,7 +19,7 @@ type Channels struct {
 func NewChannels(logger applogger.Logger, rdbHandle *rdb.Handle) *Channels {
 	return &Channels{
 		logger.WithFields(applogger.LogFields{
-			"module": "ChannelssHandler",
+			"module": "ChannelsHandler",
 		}),
 
 		channel_view.NewChannels(rdbHandle),
