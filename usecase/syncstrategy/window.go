@@ -60,11 +60,7 @@ func (window *Window) Sync(
 				return err
 			}
 
-			result := workResult{height, commands, nil}
-
-			commandWindowMutex.Lock()
-			defer commandWindowMutex.Unlock()
-			commandWindow.Put(result.height, result.commands)
+			commandWindow.Put(height, commands)
 
 			return nil
 		})
