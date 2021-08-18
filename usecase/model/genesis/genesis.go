@@ -1,5 +1,7 @@
 package genesis
 
+import "github.com/crypto-com/chain-indexing/usecase/coin"
+
 type Genesis struct {
 	GenesisTime     string          `json:"genesis_time"`
 	ChainID         string          `json:"chain_id"`
@@ -83,8 +85,8 @@ type Bank struct {
 }
 
 type Balance struct {
-	Address string       `json:"address"`
-	Coins   []MinDeposit `json:"coins"`
+	Address string     `json:"address"`
+	Coins   coin.Coins `json:"coins"`
 }
 
 type DenomMetadatum struct {

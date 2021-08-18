@@ -41,6 +41,7 @@ func NewAccount(
 func (_ *Account) GetEventsToListen() []string {
 	return []string{
 		// TODO: Genesis account
+		event_usecase.GENESIS_CREATED,
 		event_usecase.ACCOUNT_TRANSFERRED,
 	}
 }
@@ -69,6 +70,10 @@ func (projection *Account) HandleEvents(height int64, events []event_entity.Even
 	for _, event := range events {
 		if accountCreatedEvent, ok := event.(*event_usecase.AccountTransferred); ok {
 			if handleErr := projection.handleAccountCreatedEvent(accountsView, accountCreatedEvent); handleErr != nil {
+				return fmt.Errorf("error handling AccountCreatedEvent: %v", handleErr)
+			}
+		} else if genesisCreatedEvent, ok := event.(*event_usecase.GenesisCreated); ok {
+			if handleErr := projection.handleGenesisCreatedEvent(accountsView, genesisCreatedEvent); handleErr != nil {
 				return fmt.Errorf("error handling AccountCreatedEvent: %v", handleErr)
 			}
 		}
@@ -101,6 +106,18 @@ func (projection *Account) handleAccountCreatedEvent(accountsView *account_view.
 	return nil
 }
 
+func (projection *Account) handleGenesisCreatedEvent(accountsView *account_view.Accounts, event *event_usecase.GenesisCreated) error {
+
+	for _, account := range event.Genesis.AppState.Bank.Balances {
+		err := projection.writeAccountInfo(accountsView, account.Address)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (projection *Account) getAccountInfo(address string) (*cosmosapp_interface.Account, error) {
 	var accountInfo, accountInfoError = projection.cosmosClient.Account(address)
 	if accountInfoError != nil {
@@ -120,6 +137,8 @@ func (projection *Account) getAccountBalances(targetAddress string) (coin.Coins,
 }
 
 func (projection *Account) writeAccountInfo(accountsView *account_view.Accounts, address string) error {
+	// TODO: use self-calculation to update account balance rather than call cosmos sdk everytime
+
 	accountInfo, err := projection.getAccountInfo(address)
 	if err != nil {
 		return err
