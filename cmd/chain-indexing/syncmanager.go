@@ -19,12 +19,16 @@ import (
 )
 
 const DEFAULT_POLLING_INTERVAL = 5 * time.Second
+const DEFAULT_MAX_RETRY_INTERVAL = 15 * time.Minute
+const DEFAULT_MAX_RETRY_TIME = 0 // 0 means always retry
 
 type SyncManager struct {
 	rdbConn              rdb.Conn
 	client               *tendermint.HTTPClient
 	logger               applogger.Logger
 	pollingInterval      time.Duration
+	maxRetryInterval     time.Duration
+	maxRetryTime         time.Duration
 	strictGenesisParsing bool
 
 	accountAddressPrefix string
@@ -83,6 +87,8 @@ func NewSyncManager(
 			"module": "SyncManager",
 		}),
 		pollingInterval:      DEFAULT_POLLING_INTERVAL,
+		maxRetryInterval:     DEFAULT_MAX_RETRY_INTERVAL,
+		maxRetryTime:         DEFAULT_MAX_RETRY_TIME,
 		strictGenesisParsing: params.Config.StrictGenesisParsing,
 
 		accountAddressPrefix: params.Config.AccountAddressPrefix,
@@ -240,8 +246,8 @@ func (manager *SyncManager) Run() error {
 		}
 
 		neverStopExponentialBackoff := backoff.NewExponentialBackOff()
-		neverStopExponentialBackoff.MaxElapsedTime = 0
-		neverStopExponentialBackoff.MaxInterval = 15 * time.Minute
+		neverStopExponentialBackoff.MaxElapsedTime = manager.maxRetryTime
+		neverStopExponentialBackoff.MaxInterval = manager.maxRetryInterval
 		if err := backoff.RetryNotify(
 			operation,
 			backoff.NewExponentialBackOff(),

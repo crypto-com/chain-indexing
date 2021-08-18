@@ -14,12 +14,16 @@ import (
 )
 
 const DEFAULT_POLLING_INTERVAL = 5 * time.Second
+const DEFAULT_MAX_RETRY_INTERVAL = 15 * time.Minute
+const DEFAULT_MAX_RETRY_TIME = 0 // 0 means always retry
 
 type BlockHeightTracker struct {
 	logger applogger.Logger
 	client tendermint.Client
 
-	pollingInterval time.Duration
+	pollingInterval  time.Duration
+	maxRetryInterval time.Duration
+	maxRetryTime     time.Duration
 
 	subscriptions []chan<- int64
 
@@ -34,7 +38,9 @@ func NewBlockHeightTracker(logger applogger.Logger, client tendermint.Client) *B
 		}),
 		client: client,
 
-		pollingInterval: DEFAULT_POLLING_INTERVAL,
+		pollingInterval:  DEFAULT_POLLING_INTERVAL,
+		maxRetryInterval: DEFAULT_MAX_RETRY_INTERVAL,
+		maxRetryTime:     DEFAULT_MAX_RETRY_TIME,
 
 		subscriptions: make([]chan<- int64, 0),
 
@@ -74,8 +80,8 @@ func (tracker *BlockHeightTracker) Run() {
 			tracker.logger.Errorf("retrying in %s: %v", backoffDuration.String(), opErr)
 		}
 		neverStopExponentialBackoff := backoff.NewExponentialBackOff()
-		neverStopExponentialBackoff.MaxElapsedTime = 0
-		neverStopExponentialBackoff.MaxInterval = 15 * time.Minute
+		neverStopExponentialBackoff.MaxElapsedTime = tracker.maxRetryTime
+		neverStopExponentialBackoff.MaxInterval = tracker.maxRetryInterval
 		if err := backoff.RetryNotify(operation, neverStopExponentialBackoff, notifyFn); err != nil {
 			tracker.logger.Errorf("stopping retry after too many errors: %s: %v", err)
 		}
