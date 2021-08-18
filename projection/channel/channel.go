@@ -126,7 +126,7 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 				CounterpartyChannelID: msgIBCChannelOpenAck.Params.CounterpartyChannelID,
 				CounterpartyPortID:    msgIBCChannelOpenAck.Params.CounterpartyPortID,
 			}
-			if err := channelsView.Update(channel); err != nil {
+			if err := channelsView.UpdateFactualColumns(channel); err != nil {
 				return fmt.Errorf("error updating channel: %w", err)
 			}
 
@@ -139,7 +139,7 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 				CounterpartyChannelID: msgIBCChannelOpenConfirm.Params.CounterpartyChannelID,
 				CounterpartyPortID:    msgIBCChannelOpenConfirm.Params.CounterpartyPortID,
 			}
-			if err := channelsView.Update(channel); err != nil {
+			if err := channelsView.UpdateFactualColumns(channel); err != nil {
 				return fmt.Errorf("error updating channel: %w", err)
 			}
 
