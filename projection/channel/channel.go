@@ -162,7 +162,6 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 				return fmt.Errorf("error updating last_out_packet_sequence: %w", err)
 			}
 
-			height := msgIBCTransferTransfer.BlockHeight
 			if err := projection.updateLastActivityTime(blocksView, channelsView, channelID, portID, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
@@ -182,7 +181,6 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 				return fmt.Errorf("error updating last_in_packet_sequence: %w", err)
 			}
 
-			height := msgIBCRecvPacket.BlockHeight
 			if err := projection.updateLastActivityTime(blocksView, channelsView, channelID, portID, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
@@ -206,7 +204,6 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 				return fmt.Errorf("error updating last_out_packet_sequence: %w", err)
 			}
 
-			height := msgIBCAcknowledgement.BlockHeight
 			if err := projection.updateLastActivityTime(blocksView, channelsView, channelID, portID, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
