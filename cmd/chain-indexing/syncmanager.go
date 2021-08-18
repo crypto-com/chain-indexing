@@ -18,9 +18,10 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/syncstrategy"
 )
 
+const MAX_RETRY_TIME_ALWAYS_RETRY = 0
 const DEFAULT_POLLING_INTERVAL = 5 * time.Second
 const DEFAULT_MAX_RETRY_INTERVAL = 15 * time.Minute
-const DEFAULT_MAX_RETRY_TIME = 0 // 0 means always retry
+const DEFAULT_MAX_RETRY_TIME = MAX_RETRY_TIME_ALWAYS_RETRY
 
 type SyncManager struct {
 	rdbConn              rdb.Conn
