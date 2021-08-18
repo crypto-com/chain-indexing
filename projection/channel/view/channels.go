@@ -7,6 +7,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	_ "github.com/crypto-com/chain-indexing/test/factory"
 )
@@ -22,7 +23,7 @@ func NewChannels(handle *rdb.Handle) *Channels {
 	}
 }
 
-func (channelsView *Channels) Upsert(channel *ChannelRow) error {
+func (channelsView *Channels) Insert(channel *ChannelRow) error {
 	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
 		Insert(
 			"view_channels",
@@ -33,8 +34,13 @@ func (channelsView *Channels) Upsert(channel *ChannelRow) error {
 			"connection_id",
 			"counterparty_channel_id",
 			"counterparty_port_id",
-			"success_packet_count",
-			"failure_packet_count",
+			"packet_ordering",
+			"last_in_packet_sequence",
+			"last_out_packet_sequence",
+			"total_transfer_in_count",
+			"total_transfer_out_count",
+			"total_transfer_out_success_count",
+			"total_transfer_out_success_rate",
 		).
 		Values(
 			channel.ChannelID,
@@ -42,16 +48,14 @@ func (channelsView *Channels) Upsert(channel *ChannelRow) error {
 			channel.ConnectionID,
 			channel.CounterpartyChannelID,
 			channel.CounterpartyPortID,
-			channel.SuccessPacketCount,
-			channel.FailurePacketCount,
+			channel.PacketOrdering,
+			channel.LastInPacketSequence,
+			channel.LastOutPacketSequence,
+			channel.TotalTransferInCount,
+			channel.TotalTransferOutCount,
+			channel.TotalTransferOutSuccessCount,
+			channel.TotalTransferOutSuccessRate,
 		).
-		Suffix(`ON CONFLICT (channel_id, port_id) DO UPDATE SET
-			connection_id = EXCLUDED.connection_id,
-			counterparty_channel_id = EXCLUDED.counterparty_channel_id,
-			counterparty_port_id = EXCLUDED.counterparty_port_id,
-			success_packet_count = EXCLUDED.success_packet_count,
-			failure_packet_count = EXCLUDED.failure_packet_count
-		`).
 		ToSql()
 
 	if err != nil {
@@ -63,11 +67,159 @@ func (channelsView *Channels) Upsert(channel *ChannelRow) error {
 		return fmt.Errorf("error inserting channel into the table: %v: %w", err, rdb.ErrWrite)
 	}
 	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error inserting channel into the table: no rows inserted: %w", rdb.ErrWrite)
+		return fmt.Errorf("error inserting channel into the table: no row inserted: %w", rdb.ErrWrite)
 	}
 
 	return nil
+}
 
+func (channelsView *Channels) Update(channel *ChannelRow) error {
+	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
+		Update(
+			"view_channels",
+		).
+		SetMap(map[string]interface{}{
+			"connection_id":                    channel.ConnectionID,
+			"counterparty_channel_id":          channel.CounterpartyChannelID,
+			"counterparty_port_id":             channel.CounterpartyPortID,
+			"last_in_packet_sequence":          channel.LastInPacketSequence,
+			"last_out_packet_sequence":         channel.LastOutPacketSequence,
+			"total_transfer_in_count":          channel.TotalTransferInCount,
+			"total_transfer_out_count":         channel.TotalTransferOutCount,
+			"total_transfer_out_success_count": channel.TotalTransferOutSuccessCount,
+			"total_transfer_out_success_rate":  channel.TotalTransferOutSuccessRate,
+		}).
+		Where(
+			"channel_id = ? AND port_id = ?", channel.ChannelID, channel.PortID,
+		).
+		ToSql()
+
+	if err != nil {
+		return fmt.Errorf("error building channel update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	result, err := channelsView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error updating channel into the table: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() != 1 {
+		return fmt.Errorf("error updating channel into the table: no row updated: %w", rdb.ErrWrite)
+	}
+
+	return nil
+}
+
+func (channelsView *Channels) Increment(channelID string, portID string, column string, increaseNumber int64) error {
+	if column != "total_transfer_in_count" &&
+		column != "total_transfer_out_count" &&
+		column != "total_transfer_out_success_count" {
+		return fmt.Errorf("error unsupported column in Increment(): %v", column)
+	}
+
+	newValue := fmt.Sprintf("%s+%v", column, increaseNumber)
+
+	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
+		Update("view_channels").
+		Set(column, sq.Expr(newValue)). // e.g. Set("columnA", sq.Expr("columnA+1"))
+		Where(
+			"channel_id = ? AND port_id = ?", channelID, portID,
+		).
+		ToSql()
+	if err != nil {
+		return fmt.Errorf("error building channel increment sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	result, err := channelsView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error incresing column: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() != 1 {
+		return fmt.Errorf("error incresing column: no row updated: %w", rdb.ErrWrite)
+	}
+
+	return nil
+}
+
+func (channelsView *Channels) UpdateSequence(channelID string, portID string, column string, sequence uint64) error {
+	if column != "last_in_packet_sequence" && column != "last_out_packet_sequence" {
+		return fmt.Errorf("error unsupported column in UpdateSequence(): %v", column)
+	}
+
+	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
+		Update("view_channels").
+		SetMap(map[string]interface{}{
+			column: sequence,
+		}).
+		Where(
+			"channel_id = ? AND port_id = ?", channelID, portID,
+		).
+		ToSql()
+	if err != nil {
+		return fmt.Errorf("error building channel increment sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	result, err := channelsView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error incresing column: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() != 1 {
+		return fmt.Errorf("error incresing column: no row updated: %w", rdb.ErrWrite)
+	}
+
+	return nil
+}
+
+func (channelsView *Channels) UpdateTotalTransferOutSuccessRate(channelID string, portID string) error {
+	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
+		Select(
+			"total_transfer_out_count",
+			"total_transfer_out_success_count",
+		).
+		From("view_channels").
+		Where("channel_id = ? AND port_id = ?", channelID, portID).
+		ToSql()
+	if err != nil {
+		return fmt.Errorf("error building selection sql: %v: %w", err, rdb.ErrPrepare)
+	}
+
+	var channel ChannelRow
+	if err = channelsView.rdb.QueryRow(sql, sqlArgs...).Scan(
+		&channel.TotalTransferOutCount,
+		&channel.TotalTransferOutSuccessCount,
+	); err != nil {
+		if errors.Is(err, rdb.ErrNoRows) {
+			return rdb.ErrNoRows
+		}
+		return fmt.Errorf("error scanning channel row: %v: %w", err, rdb.ErrQuery)
+	}
+
+	totalTransferOutSuccessRatio := 0.0
+	if channel.TotalTransferOutCount > 0 {
+		totalTransferOutSuccessRatio = float64(channel.TotalTransferOutSuccessCount) / float64(channel.TotalTransferOutCount)
+	}
+
+	sql, sqlArgs, err = channelsView.rdb.StmtBuilder.
+		Update("view_channels").
+		SetMap(map[string]interface{}{
+			"total_transfer_out_success_rate": totalTransferOutSuccessRatio,
+		}).
+		Where(
+			"channel_id = ? AND port_id = ?", channelID, portID,
+		).
+		ToSql()
+	if err != nil {
+		return fmt.Errorf("error building channel update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	result, err := channelsView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error updating total_transfer_out_success_rate: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() != 1 {
+		return fmt.Errorf("error updating total_transfer_out_success_rate: no row updated: %w", rdb.ErrWrite)
+	}
+
+	return nil
 }
 
 func (channelsView *Channels) List(order ChannelsListOrder, pagination *pagination.Pagination) ([]ChannelRow, *pagination.PaginationResult, error) {
@@ -77,8 +229,13 @@ func (channelsView *Channels) List(order ChannelsListOrder, pagination *paginati
 		"connection_id",
 		"counterparty_channel_id",
 		"counterparty_port_id",
-		"success_packet_count",
-		"failure_packet_count",
+		"packet_ordering",
+		"last_in_packet_sequence",
+		"last_out_packet_sequence",
+		"total_transfer_in_count",
+		"total_transfer_out_count",
+		"total_transfer_out_success_count",
+		"total_transfer_out_success_rate",
 	).From(
 		"view_channels",
 	)
@@ -113,8 +270,13 @@ func (channelsView *Channels) List(order ChannelsListOrder, pagination *paginati
 			&channel.ConnectionID,
 			&channel.CounterpartyChannelID,
 			&channel.CounterpartyPortID,
-			&channel.SuccessPacketCount,
-			&channel.FailurePacketCount,
+			&channel.PacketOrdering,
+			&channel.LastInPacketSequence,
+			&channel.LastOutPacketSequence,
+			&channel.TotalTransferInCount,
+			&channel.TotalTransferOutCount,
+			&channel.TotalTransferOutSuccessCount,
+			&channel.TotalTransferOutSuccessRate,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
@@ -131,51 +293,6 @@ func (channelsView *Channels) List(order ChannelsListOrder, pagination *paginati
 	}
 
 	return channels, paginationResult, nil
-
-}
-
-func (channelsView *Channels) SuccessPacketCountIncrement(channelId string, portId string) error {
-	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
-		Insert("view_channels AS ORIGINAL").
-		Columns("channel_id", "port_id", "success_packet_count", "failure_packet_count").
-		Values(channelId, portId, 1, 0).
-		Suffix("ON CONFLICT (channel_id, port_id) DO UPDATE SET success_packet_count = ORIGINAL.success_packet_count + EXCLUDED.success_packet_count").
-		ToSql()
-	if err != nil {
-		return fmt.Errorf("error building channel insert sql: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
-
-	result, err := channelsView.rdb.Exec(sql, sqlArgs...)
-	if err != nil {
-		return fmt.Errorf("error inserting success_packet_count: %v: %w", err, rdb.ErrWrite)
-	}
-	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error inserting success_packet_count: no row inserted: %w", rdb.ErrWrite)
-	}
-
-	return nil
-}
-
-func (channelsView *Channels) FailurePacketCountIncrement(channelId string, portId string) error {
-	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
-		Insert("view_channels AS ORIGINAL").
-		Columns("channel_id", "port_id", "success_packet_count", "failure_packet_count").
-		Values(channelId, portId, 0, 1).
-		Suffix("ON CONFLICT (channel_id, port_id) DO UPDATE SET failure_packet_count = ORIGINAL.failure_packet_count + EXCLUDED.failure_packet_count").
-		ToSql()
-	if err != nil {
-		return fmt.Errorf("error building channel insert sql: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
-
-	result, err := channelsView.rdb.Exec(sql, sqlArgs...)
-	if err != nil {
-		return fmt.Errorf("error inserting failure_packet_count: %v: %w", err, rdb.ErrWrite)
-	}
-	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error inserting failure_packet_count: no row inserted: %w", rdb.ErrWrite)
-	}
-
-	return nil
 }
 
 type ChannelsListOrder struct {
@@ -183,11 +300,16 @@ type ChannelsListOrder struct {
 }
 
 type ChannelRow struct {
-	ChannelID             string `json:"channelId"`
-	PortID                string `json:"portId"`
-	ConnectionID          string `json:"connectionId"`
-	CounterpartyChannelID string `json:"counterpartyChannelId"`
-	CounterpartyPortID    string `json:"counterpartyPortId"`
-	SuccessPacketCount    int    `json:"successPacketCount"`
-	FailurePacketCount    int    `json:"failurePacketCount"`
+	ChannelID                    string  `json:"channelId"`
+	PortID                       string  `json:"portId"`
+	ConnectionID                 string  `json:"connectionId"`
+	CounterpartyChannelID        string  `json:"counterpartyChannelId"`
+	CounterpartyPortID           string  `json:"counterpartyPortId"`
+	PacketOrdering               string  `json:"packetOrdering"`
+	LastInPacketSequence         int64   `json:"lastInPacketSequence"`
+	LastOutPacketSequence        int64   `json:"lastOutPacketSequence"`
+	TotalTransferInCount         int64   `json:"totalTransferInCount"`
+	TotalTransferOutCount        int64   `json:"totalTransferOutCount"`
+	TotalTransferOutSuccessCount int64   `json:"totalTransferOutSuccessCount"`
+	TotalTransferOutSuccessRate  float64 `json:"totalTransferOutSuccessRate"`
 }

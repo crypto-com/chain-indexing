@@ -31,21 +31,14 @@ func NewChannel(logger applogger.Logger, rdbConn rdb.Conn) *Channel {
 }
 
 func (_ *Channel) GetEventsToListen() []string {
-	// The indexing server is polling from source chain
-	//
-	// When the source chain init a transfer,
-	// - on success, the source chain will generate MSG_IBC_ACKNOWLEDGEMENT event
-	//							 the destination chain will generate MSG_IBC_RECV_PACKET event
-	// - on failure, the source chain will generate MSG_IBC_TIMEOUT or MSG_IBC_TIMEOUT_ON_CLOSE
-	//
-	// reference: https://hermes.informal.systems/commands/relaying/packets.html#packet-streaming
-	//
 	return []string{
+		event_usecase.MSG_IBC_CHANNEL_OPEN_INIT_CREATED,
+		event_usecase.MSG_IBC_CHANNEL_OPEN_TRY_CREATED,
 		event_usecase.MSG_IBC_CHANNEL_OPEN_ACK_CREATED,
 		event_usecase.MSG_IBC_CHANNEL_OPEN_CONFIRM_CREATED,
+		event_usecase.MSG_IBC_TRANSFER_TRANSFER_CREATED,
+		event_usecase.MSG_IBC_RECV_PACKET_CREATED,
 		event_usecase.MSG_IBC_ACKNOWLEDGEMENT_CREATED,
-		event_usecase.MSG_IBC_TIMEOUT_CREATED,
-		event_usecase.MSG_IBC_TIMEOUT_ON_CLOSE_CREATED,
 	}
 }
 
@@ -70,64 +63,143 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 
 	channelsView := channel_view.NewChannels(rdbTxHandle)
 
-	for _, event := range events {
-		if msgIBCChannelOpenAck, ok := event.(*event_usecase.MsgIBCChannelOpenAck); ok {
+	// NOTES: Why four channel open events are all needed?
+	//
+	// PacketOrdering info can only be found in MsgIBCChannelOpenInit and MsgIBCChannelOpenTry.
+	//
+	// Full information of ConnectionID, CounterpartyChannelID, and CounterpartyPortID
+	// can only be found in MsgIBCChannelOpenAck and MsgIBCChannelOpenConfirm.
 
-			// Channel just created, packet count should be 0
+	for _, event := range events {
+		if msgIBCChannelOpenInit, ok := event.(*event_usecase.MsgIBCChannelOpenInit); ok {
+
 			channel := &channel_view.ChannelRow{
-				ChannelID:             msgIBCChannelOpenAck.Params.ChannelID,
-				PortID:                msgIBCChannelOpenAck.Params.PortID,
-				ConnectionID:          msgIBCChannelOpenAck.Params.ConnectionID,
-				CounterpartyChannelID: msgIBCChannelOpenAck.Params.CounterpartyChannelID,
-				CounterpartyPortID:    msgIBCChannelOpenAck.Params.CounterpartyPortID,
-				SuccessPacketCount:    0,
-				FailurePacketCount:    0,
+				ChannelID:                    msgIBCChannelOpenInit.Params.ChannelID,
+				PortID:                       msgIBCChannelOpenInit.Params.PortID,
+				ConnectionID:                 "",
+				CounterpartyChannelID:        msgIBCChannelOpenInit.Params.Channel.Counterparty.ChannelID,
+				CounterpartyPortID:           msgIBCChannelOpenInit.Params.Channel.Counterparty.PortID,
+				PacketOrdering:               msgIBCChannelOpenInit.Params.Channel.Ordering,
+				LastInPacketSequence:         0,
+				LastOutPacketSequence:        0,
+				TotalTransferInCount:         0,
+				TotalTransferOutCount:        0,
+				TotalTransferOutSuccessCount: 0,
+				TotalTransferOutSuccessRate:  0,
 			}
-			if err := channelsView.Upsert(channel); err != nil {
-				return fmt.Errorf("error upserting channel: %w", err)
+			if err := channelsView.Insert(channel); err != nil {
+				return fmt.Errorf("error inserting channel: %w", err)
+			}
+
+		} else if msgIBCChannelOpenTry, ok := event.(*event_usecase.MsgIBCChannelOpenTry); ok {
+
+			channel := &channel_view.ChannelRow{
+				ChannelID:                    msgIBCChannelOpenTry.Params.ChannelID,
+				PortID:                       msgIBCChannelOpenTry.Params.PortID,
+				ConnectionID:                 msgIBCChannelOpenTry.Params.ConnectionID,
+				CounterpartyChannelID:        msgIBCChannelOpenTry.Params.Channel.Counterparty.ChannelID,
+				CounterpartyPortID:           msgIBCChannelOpenTry.Params.Channel.Counterparty.PortID,
+				PacketOrdering:               msgIBCChannelOpenTry.Params.Channel.Ordering,
+				LastInPacketSequence:         0,
+				LastOutPacketSequence:        0,
+				TotalTransferInCount:         0,
+				TotalTransferOutCount:        0,
+				TotalTransferOutSuccessCount: 0,
+				TotalTransferOutSuccessRate:  0,
+			}
+			if err := channelsView.Insert(channel); err != nil {
+				return fmt.Errorf("error inserting channel: %w", err)
+			}
+
+		} else if msgIBCChannelOpenAck, ok := event.(*event_usecase.MsgIBCChannelOpenAck); ok {
+
+			channel := &channel_view.ChannelRow{
+				ChannelID:                    msgIBCChannelOpenAck.Params.ChannelID,
+				PortID:                       msgIBCChannelOpenAck.Params.PortID,
+				ConnectionID:                 msgIBCChannelOpenAck.Params.ConnectionID,
+				CounterpartyChannelID:        msgIBCChannelOpenAck.Params.CounterpartyChannelID,
+				CounterpartyPortID:           msgIBCChannelOpenAck.Params.CounterpartyPortID,
+				LastInPacketSequence:         0,
+				LastOutPacketSequence:        0,
+				TotalTransferInCount:         0,
+				TotalTransferOutCount:        0,
+				TotalTransferOutSuccessCount: 0,
+				TotalTransferOutSuccessRate:  0,
+			}
+			if err := channelsView.Update(channel); err != nil {
+				return fmt.Errorf("error updating channel: %w", err)
 			}
 
 		} else if msgIBCChannelOpenConfirm, ok := event.(*event_usecase.MsgIBCChannelOpenConfirm); ok {
 
-			// Channel just created, packet count should be 0
 			channel := &channel_view.ChannelRow{
-				ChannelID:             msgIBCChannelOpenConfirm.Params.ChannelID,
-				PortID:                msgIBCChannelOpenConfirm.Params.PortID,
-				ConnectionID:          msgIBCChannelOpenConfirm.Params.ConnectionID,
-				CounterpartyChannelID: msgIBCChannelOpenConfirm.Params.CounterpartyChannelID,
-				CounterpartyPortID:    msgIBCChannelOpenConfirm.Params.CounterpartyPortID,
-				SuccessPacketCount:    0,
-				FailurePacketCount:    0,
+				ChannelID:                    msgIBCChannelOpenConfirm.Params.ChannelID,
+				PortID:                       msgIBCChannelOpenConfirm.Params.PortID,
+				ConnectionID:                 msgIBCChannelOpenConfirm.Params.ConnectionID,
+				CounterpartyChannelID:        msgIBCChannelOpenConfirm.Params.CounterpartyChannelID,
+				CounterpartyPortID:           msgIBCChannelOpenConfirm.Params.CounterpartyPortID,
+				LastInPacketSequence:         0,
+				LastOutPacketSequence:        0,
+				TotalTransferInCount:         0,
+				TotalTransferOutCount:        0,
+				TotalTransferOutSuccessCount: 0,
+				TotalTransferOutSuccessRate:  0,
 			}
-			if err := channelsView.Upsert(channel); err != nil {
-				return fmt.Errorf("error upserting channel: %w", err)
+			if err := channelsView.Update(channel); err != nil {
+				return fmt.Errorf("error updating channel: %w", err)
+			}
+
+		} else if msgIBCTransferTransfer, ok := event.(*event_usecase.MsgIBCTransferTransfer); ok {
+
+			// Transfer started by source chain
+			channelId := msgIBCTransferTransfer.Params.SourceChannel
+			portId := msgIBCTransferTransfer.Params.SourcePort
+
+			// TotalTransferOutSuccessRate
+			if err := channelsView.Increment(channelId, portId, "total_transfer_out_count", 1); err != nil {
+				return fmt.Errorf("error increasing total_transfer_out_count: %w", err)
+			}
+			if err := channelsView.UpdateTotalTransferOutSuccessRate(channelId, portId); err != nil {
+				return fmt.Errorf("error updating total_transfer_out_success_rate: %w", err)
+			}
+
+			lastOutPacketSequence := msgIBCTransferTransfer.Params.PacketSequence
+			if err := channelsView.UpdateSequence(channelId, portId, "last_out_packet_sequence", lastOutPacketSequence); err != nil {
+				return fmt.Errorf("error updating last_out_packet_sequence: %w", err)
+			}
+
+		} else if msgIBCRecvPacket, ok := event.(*event_usecase.MsgIBCRecvPacket); ok {
+
+			// Transfer started by destination chain
+			channelId := msgIBCRecvPacket.Params.Packet.DestinationChannel
+			portId := msgIBCRecvPacket.Params.Packet.DestinationPort
+
+			if err := channelsView.Increment(channelId, portId, "total_transfer_in_count", 1); err != nil {
+				return fmt.Errorf("error increasing total_transfer_in_count: %w", err)
+			}
+
+			lastInPacketSequence := msgIBCRecvPacket.Params.PacketSequence
+			if err := channelsView.UpdateSequence(channelId, portId, "last_in_packet_sequence", lastInPacketSequence); err != nil {
+				return fmt.Errorf("error updating last_in_packet_sequence: %w", err)
 			}
 
 		} else if msgIBCAcknowledgement, ok := event.(*event_usecase.MsgIBCAcknowledgement); ok {
 
+			// Transfer started by source chain
 			channelId := msgIBCAcknowledgement.Params.Packet.SourceChannel
 			portId := msgIBCAcknowledgement.Params.Packet.SourcePort
 
-			if err := channelsView.SuccessPacketCountIncrement(channelId, portId); err != nil {
-				return fmt.Errorf("error increasing channel.SuccessPacketCount: %w", err)
+			// TotalTransferOutSuccessRate
+			if err := channelsView.Increment(channelId, portId, "total_transfer_out_success_count", 1); err != nil {
+				return fmt.Errorf("error increasing total_transfer_out_success_count: %w", err)
+			}
+			if err := channelsView.UpdateTotalTransferOutSuccessRate(channelId, portId); err != nil {
+				return fmt.Errorf("error updating total_transfer_out_success_rate: %w", err)
 			}
 
-		} else if msgIBCTimeout, ok := event.(*event_usecase.MsgIBCTimeout); ok {
-
-			channelId := msgIBCTimeout.Params.Packet.SourceChannel
-			portId := msgIBCTimeout.Params.Packet.SourcePort
-
-			if err := channelsView.FailurePacketCountIncrement(channelId, portId); err != nil {
-				return fmt.Errorf("error increasing channel.FailurePacketCount: %w", err)
-			}
-
-		} else if msgIBCTimeoutOnClose, ok := event.(*event_usecase.MsgIBCTimeoutOnClose); ok {
-
-			channelId := msgIBCTimeoutOnClose.Params.Packet.SourceChannel
-			portId := msgIBCTimeoutOnClose.Params.Packet.SourcePort
-
-			if err := channelsView.FailurePacketCountIncrement(channelId, portId); err != nil {
-				return fmt.Errorf("error increasing channel.FailurePacketCount: %w", err)
+			lastOutPacketSequence := msgIBCAcknowledgement.Params.PacketSequence
+			if err := channelsView.UpdateSequence(channelId, portId, "last_out_packet_sequence", lastOutPacketSequence); err != nil {
+				return fmt.Errorf("error updating last_out_packet_sequence: %w", err)
 			}
 
 		}
