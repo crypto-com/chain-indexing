@@ -8,6 +8,7 @@ import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	block_view "github.com/crypto-com/chain-indexing/projection/block/view"
 	channel_view "github.com/crypto-com/chain-indexing/projection/channel/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
@@ -62,6 +63,7 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 	rdbTxHandle := rdbTx.ToHandle()
 
 	channelsView := channel_view.NewChannels(rdbTxHandle)
+	blocksView := block_view.NewBlocks(rdbTxHandle)
 
 	// NOTES: Why four channel open events are all needed?
 	//
@@ -86,6 +88,8 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 				TotalTransferOutCount:        0,
 				TotalTransferOutSuccessCount: 0,
 				TotalTransferOutSuccessRate:  0,
+				LastActivityTime:             0,
+				BondedTokens:                 []map[string]interface{}{},
 			}
 			if err := channelsView.Insert(channel); err != nil {
 				return fmt.Errorf("error inserting channel: %w", err)
@@ -106,6 +110,8 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 				TotalTransferOutCount:        0,
 				TotalTransferOutSuccessCount: 0,
 				TotalTransferOutSuccessRate:  0,
+				LastActivityTime:             0,
+				BondedTokens:                 []map[string]interface{}{},
 			}
 			if err := channelsView.Insert(channel); err != nil {
 				return fmt.Errorf("error inserting channel: %w", err)
@@ -114,17 +120,11 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 		} else if msgIBCChannelOpenAck, ok := event.(*event_usecase.MsgIBCChannelOpenAck); ok {
 
 			channel := &channel_view.ChannelRow{
-				ChannelID:                    msgIBCChannelOpenAck.Params.ChannelID,
-				PortID:                       msgIBCChannelOpenAck.Params.PortID,
-				ConnectionID:                 msgIBCChannelOpenAck.Params.ConnectionID,
-				CounterpartyChannelID:        msgIBCChannelOpenAck.Params.CounterpartyChannelID,
-				CounterpartyPortID:           msgIBCChannelOpenAck.Params.CounterpartyPortID,
-				LastInPacketSequence:         0,
-				LastOutPacketSequence:        0,
-				TotalTransferInCount:         0,
-				TotalTransferOutCount:        0,
-				TotalTransferOutSuccessCount: 0,
-				TotalTransferOutSuccessRate:  0,
+				ChannelID:             msgIBCChannelOpenAck.Params.ChannelID,
+				PortID:                msgIBCChannelOpenAck.Params.PortID,
+				ConnectionID:          msgIBCChannelOpenAck.Params.ConnectionID,
+				CounterpartyChannelID: msgIBCChannelOpenAck.Params.CounterpartyChannelID,
+				CounterpartyPortID:    msgIBCChannelOpenAck.Params.CounterpartyPortID,
 			}
 			if err := channelsView.Update(channel); err != nil {
 				return fmt.Errorf("error updating channel: %w", err)
@@ -133,17 +133,11 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 		} else if msgIBCChannelOpenConfirm, ok := event.(*event_usecase.MsgIBCChannelOpenConfirm); ok {
 
 			channel := &channel_view.ChannelRow{
-				ChannelID:                    msgIBCChannelOpenConfirm.Params.ChannelID,
-				PortID:                       msgIBCChannelOpenConfirm.Params.PortID,
-				ConnectionID:                 msgIBCChannelOpenConfirm.Params.ConnectionID,
-				CounterpartyChannelID:        msgIBCChannelOpenConfirm.Params.CounterpartyChannelID,
-				CounterpartyPortID:           msgIBCChannelOpenConfirm.Params.CounterpartyPortID,
-				LastInPacketSequence:         0,
-				LastOutPacketSequence:        0,
-				TotalTransferInCount:         0,
-				TotalTransferOutCount:        0,
-				TotalTransferOutSuccessCount: 0,
-				TotalTransferOutSuccessRate:  0,
+				ChannelID:             msgIBCChannelOpenConfirm.Params.ChannelID,
+				PortID:                msgIBCChannelOpenConfirm.Params.PortID,
+				ConnectionID:          msgIBCChannelOpenConfirm.Params.ConnectionID,
+				CounterpartyChannelID: msgIBCChannelOpenConfirm.Params.CounterpartyChannelID,
+				CounterpartyPortID:    msgIBCChannelOpenConfirm.Params.CounterpartyPortID,
 			}
 			if err := channelsView.Update(channel); err != nil {
 				return fmt.Errorf("error updating channel: %w", err)
@@ -152,54 +146,69 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 		} else if msgIBCTransferTransfer, ok := event.(*event_usecase.MsgIBCTransferTransfer); ok {
 
 			// Transfer started by source chain
-			channelId := msgIBCTransferTransfer.Params.SourceChannel
-			portId := msgIBCTransferTransfer.Params.SourcePort
+			channelID := msgIBCTransferTransfer.Params.SourceChannel
+			portID := msgIBCTransferTransfer.Params.SourcePort
 
 			// TotalTransferOutSuccessRate
-			if err := channelsView.Increment(channelId, portId, "total_transfer_out_count", 1); err != nil {
+			if err := channelsView.Increment(channelID, portID, "total_transfer_out_count", 1); err != nil {
 				return fmt.Errorf("error increasing total_transfer_out_count: %w", err)
 			}
-			if err := channelsView.UpdateTotalTransferOutSuccessRate(channelId, portId); err != nil {
+			if err := channelsView.UpdateTotalTransferOutSuccessRate(channelID, portID); err != nil {
 				return fmt.Errorf("error updating total_transfer_out_success_rate: %w", err)
 			}
 
 			lastOutPacketSequence := msgIBCTransferTransfer.Params.PacketSequence
-			if err := channelsView.UpdateSequence(channelId, portId, "last_out_packet_sequence", lastOutPacketSequence); err != nil {
+			if err := channelsView.UpdateSequence(channelID, portID, "last_out_packet_sequence", lastOutPacketSequence); err != nil {
 				return fmt.Errorf("error updating last_out_packet_sequence: %w", err)
+			}
+
+			height := msgIBCTransferTransfer.BlockHeight
+			if err := projection.updateLastActivityTime(blocksView, channelsView, channelID, portID, height); err != nil {
+				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
 		} else if msgIBCRecvPacket, ok := event.(*event_usecase.MsgIBCRecvPacket); ok {
 
 			// Transfer started by destination chain
-			channelId := msgIBCRecvPacket.Params.Packet.DestinationChannel
-			portId := msgIBCRecvPacket.Params.Packet.DestinationPort
+			channelID := msgIBCRecvPacket.Params.Packet.DestinationChannel
+			portID := msgIBCRecvPacket.Params.Packet.DestinationPort
 
-			if err := channelsView.Increment(channelId, portId, "total_transfer_in_count", 1); err != nil {
+			if err := channelsView.Increment(channelID, portID, "total_transfer_in_count", 1); err != nil {
 				return fmt.Errorf("error increasing total_transfer_in_count: %w", err)
 			}
 
 			lastInPacketSequence := msgIBCRecvPacket.Params.PacketSequence
-			if err := channelsView.UpdateSequence(channelId, portId, "last_in_packet_sequence", lastInPacketSequence); err != nil {
+			if err := channelsView.UpdateSequence(channelID, portID, "last_in_packet_sequence", lastInPacketSequence); err != nil {
 				return fmt.Errorf("error updating last_in_packet_sequence: %w", err)
+			}
+
+			height := msgIBCRecvPacket.BlockHeight
+			if err := projection.updateLastActivityTime(blocksView, channelsView, channelID, portID, height); err != nil {
+				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
 		} else if msgIBCAcknowledgement, ok := event.(*event_usecase.MsgIBCAcknowledgement); ok {
 
 			// Transfer started by source chain
-			channelId := msgIBCAcknowledgement.Params.Packet.SourceChannel
-			portId := msgIBCAcknowledgement.Params.Packet.SourcePort
+			channelID := msgIBCAcknowledgement.Params.Packet.SourceChannel
+			portID := msgIBCAcknowledgement.Params.Packet.SourcePort
 
 			// TotalTransferOutSuccessRate
-			if err := channelsView.Increment(channelId, portId, "total_transfer_out_success_count", 1); err != nil {
+			if err := channelsView.Increment(channelID, portID, "total_transfer_out_success_count", 1); err != nil {
 				return fmt.Errorf("error increasing total_transfer_out_success_count: %w", err)
 			}
-			if err := channelsView.UpdateTotalTransferOutSuccessRate(channelId, portId); err != nil {
+			if err := channelsView.UpdateTotalTransferOutSuccessRate(channelID, portID); err != nil {
 				return fmt.Errorf("error updating total_transfer_out_success_rate: %w", err)
 			}
 
 			lastOutPacketSequence := msgIBCAcknowledgement.Params.PacketSequence
-			if err := channelsView.UpdateSequence(channelId, portId, "last_out_packet_sequence", lastOutPacketSequence); err != nil {
+			if err := channelsView.UpdateSequence(channelID, portID, "last_out_packet_sequence", lastOutPacketSequence); err != nil {
 				return fmt.Errorf("error updating last_out_packet_sequence: %w", err)
+			}
+
+			height := msgIBCAcknowledgement.BlockHeight
+			if err := projection.updateLastActivityTime(blocksView, channelsView, channelID, portID, height); err != nil {
+				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
 		}
@@ -213,6 +222,27 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 		return fmt.Errorf("error committing changes: %v", err)
 	}
 	committed = true
+
+	return nil
+}
+
+func (projection *Channel) updateLastActivityTime(
+	blocksView *block_view.Blocks,
+	channelsView *channel_view.Channels,
+	channelID string,
+	portID string,
+	height int64,
+) error {
+
+	identity := block_view.BlockIdentity{MaybeHeight: &height}
+	var block *block_view.Block
+	var err error
+	if block, err = blocksView.FindBy(&identity); err != nil {
+		return fmt.Errorf("error find the block: %w", err)
+	}
+	if err := channelsView.UpdateLastActivityTime(channelID, portID, block.Time); err != nil {
+		return fmt.Errorf("error updating channel last_activity_time: %w", err)
+	}
 
 	return nil
 }
