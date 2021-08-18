@@ -6,6 +6,7 @@ import (
 
 	"github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -41,6 +42,8 @@ func (channelsView *Channels) Insert(channel *ChannelRow) error {
 			"total_transfer_out_count",
 			"total_transfer_out_success_count",
 			"total_transfer_out_success_rate",
+			"last_activity_time",
+			"bonded_tokens",
 		).
 		Values(
 			channel.ChannelID,
@@ -55,6 +58,8 @@ func (channelsView *Channels) Insert(channel *ChannelRow) error {
 			channel.TotalTransferOutCount,
 			channel.TotalTransferOutSuccessCount,
 			channel.TotalTransferOutSuccessRate,
+			channel.LastActivityTime,
+			channel.BondedTokens,
 		).
 		ToSql()
 
@@ -79,15 +84,9 @@ func (channelsView *Channels) Update(channel *ChannelRow) error {
 			"view_channels",
 		).
 		SetMap(map[string]interface{}{
-			"connection_id":                    channel.ConnectionID,
-			"counterparty_channel_id":          channel.CounterpartyChannelID,
-			"counterparty_port_id":             channel.CounterpartyPortID,
-			"last_in_packet_sequence":          channel.LastInPacketSequence,
-			"last_out_packet_sequence":         channel.LastOutPacketSequence,
-			"total_transfer_in_count":          channel.TotalTransferInCount,
-			"total_transfer_out_count":         channel.TotalTransferOutCount,
-			"total_transfer_out_success_count": channel.TotalTransferOutSuccessCount,
-			"total_transfer_out_success_rate":  channel.TotalTransferOutSuccessRate,
+			"connection_id":           channel.ConnectionID,
+			"counterparty_channel_id": channel.CounterpartyChannelID,
+			"counterparty_port_id":    channel.CounterpartyPortID,
 		}).
 		Where(
 			"channel_id = ? AND port_id = ?", channel.ChannelID, channel.PortID,
@@ -193,19 +192,18 @@ func (channelsView *Channels) UpdateTotalTransferOutSuccessRate(channelID string
 		return fmt.Errorf("error scanning channel row: %v: %w", err, rdb.ErrQuery)
 	}
 
-	totalTransferOutSuccessRatio := 0.0
+	// Rate = totalSuccessCount / totalCount
+	totalTransferOutSuccessRate := 0.0
 	if channel.TotalTransferOutCount > 0 {
-		totalTransferOutSuccessRatio = float64(channel.TotalTransferOutSuccessCount) / float64(channel.TotalTransferOutCount)
+		totalTransferOutSuccessRate = float64(channel.TotalTransferOutSuccessCount) / float64(channel.TotalTransferOutCount)
 	}
 
 	sql, sqlArgs, err = channelsView.rdb.StmtBuilder.
 		Update("view_channels").
 		SetMap(map[string]interface{}{
-			"total_transfer_out_success_rate": totalTransferOutSuccessRatio,
+			"total_transfer_out_success_rate": totalTransferOutSuccessRate,
 		}).
-		Where(
-			"channel_id = ? AND port_id = ?", channelID, portID,
-		).
+		Where("channel_id = ? AND port_id = ?", channelID, portID).
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("error building channel update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -217,6 +215,29 @@ func (channelsView *Channels) UpdateTotalTransferOutSuccessRate(channelID string
 	}
 	if result.RowsAffected() != 1 {
 		return fmt.Errorf("error updating total_transfer_out_success_rate: no row updated: %w", rdb.ErrWrite)
+	}
+
+	return nil
+}
+
+func (channelsView *Channels) UpdateLastActivityTime(channelID string, portID string, time utctime.UTCTime) error {
+	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
+		Update("view_channels").
+		SetMap(map[string]interface{}{
+			"last_activity_time": channelsView.rdb.Tton(&time),
+		}).
+		Where("channel_id = ? AND port_id = ?", channelID, portID).
+		ToSql()
+	if err != nil {
+		return fmt.Errorf("error building channel update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	result, err := channelsView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error updating last_activity_time: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() != 1 {
+		return fmt.Errorf("error updating last_activity_time: no row updated: %w", rdb.ErrWrite)
 	}
 
 	return nil
@@ -300,16 +321,18 @@ type ChannelsListOrder struct {
 }
 
 type ChannelRow struct {
-	ChannelID                    string  `json:"channelId"`
-	PortID                       string  `json:"portId"`
-	ConnectionID                 string  `json:"connectionId"`
-	CounterpartyChannelID        string  `json:"counterpartyChannelId"`
-	CounterpartyPortID           string  `json:"counterpartyPortId"`
-	PacketOrdering               string  `json:"packetOrdering"`
-	LastInPacketSequence         int64   `json:"lastInPacketSequence"`
-	LastOutPacketSequence        int64   `json:"lastOutPacketSequence"`
-	TotalTransferInCount         int64   `json:"totalTransferInCount"`
-	TotalTransferOutCount        int64   `json:"totalTransferOutCount"`
-	TotalTransferOutSuccessCount int64   `json:"totalTransferOutSuccessCount"`
-	TotalTransferOutSuccessRate  float64 `json:"totalTransferOutSuccessRate"`
+	ChannelID                    string                   `json:"channelId"`
+	PortID                       string                   `json:"portId"`
+	ConnectionID                 string                   `json:"connectionId"`
+	CounterpartyChannelID        string                   `json:"counterpartyChannelId"`
+	CounterpartyPortID           string                   `json:"counterpartyPortId"`
+	PacketOrdering               string                   `json:"packetOrdering"`
+	LastInPacketSequence         int64                    `json:"lastInPacketSequence"`
+	LastOutPacketSequence        int64                    `json:"lastOutPacketSequence"`
+	TotalTransferInCount         int64                    `json:"totalTransferInCount"`
+	TotalTransferOutCount        int64                    `json:"totalTransferOutCount"`
+	TotalTransferOutSuccessCount int64                    `json:"totalTransferOutSuccessCount"`
+	TotalTransferOutSuccessRate  float64                  `json:"totalTransferOutSuccessRate"`
+	BondedTokens                 []map[string]interface{} `json:"bondedTokens"`
+	LastActivityTime             int64                    `json:"lastActivityTime"`
 }
