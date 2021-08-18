@@ -274,7 +274,7 @@ func (handler *Validators) getGlobalAPY() (*big.Float, error) {
 }
 
 func (handler *Validators) getAverageBlockTime() (*big.Float, error) {
-	// Average block time calculattion
+	// Average block time calculation
 	//
 	// Case A: totalBlockCount <= nRecentBlocks, calculate with blocks from Genesis block to Latest block
 	// Case B: totalBlockCount > nRecentBlocks, calculate with n recent blocks
@@ -305,11 +305,12 @@ func (handler *Validators) getAverageBlockTime() (*big.Float, error) {
 
 	nRecentBlocks := big.NewInt(nRecentBlocksInInt)
 
-	isTotalBlockCountExcess := (totalBlockCount.Cmp(nRecentBlocks) == 1)
+	hasNBlocksSinceGenesis := (totalBlockCount.Cmp(nRecentBlocks) == 1)
 
 	var averageBlockTimeMilliSecond *big.Float
 	// Determine case A or case B
-	if isTotalBlockCountExcess {
+	if hasNBlocksSinceGenesis {
+		// Case B
 		latestBlockHeight, err := handler.blockView.Count()
 		if err != nil {
 			return nil, fmt.Errorf("error fetching latest block height: %v", err)
@@ -331,7 +332,6 @@ func (handler *Validators) getAverageBlockTime() (*big.Float, error) {
 		// Calculate total time in generating n recent blocks
 		nRecentBlocksTotalTime := latestBlock.Time.UnixNano() - startBlock.Time.UnixNano()
 
-		// Case B
 		nRecentBlocksTotalTimeMilliSecond := new(big.Float).Quo(
 			new(big.Float).SetInt64(nRecentBlocksTotalTime),
 			new(big.Float).SetInt64(int64(1000000)),
