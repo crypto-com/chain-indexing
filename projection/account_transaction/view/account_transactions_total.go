@@ -23,7 +23,7 @@ func (total *AccountTransactionsTotal) Search(address string) (bool, error) {
 		return false, err
 	}
 	if numberOfRowsFound == 0 {
-		return false, err
+		return false, nil
 	}
 	return true, nil
 }
