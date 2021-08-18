@@ -78,7 +78,7 @@ func (channelsView *Channels) Insert(channel *ChannelRow) error {
 	return nil
 }
 
-func (channelsView *Channels) Update(channel *ChannelRow) error {
+func (channelsView *Channels) UpdateFactualColumns(channel *ChannelRow) error {
 	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
 		Update(
 			"view_channels",
