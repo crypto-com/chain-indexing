@@ -238,12 +238,16 @@ func (manager *SyncManager) Run() error {
 				"retrying in %s: %v", backoffDuration.String(), opErr,
 			)
 		}
+
+		neverStopExponentialBackoff := backoff.NewExponentialBackOff()
+		neverStopExponentialBackoff.MaxElapsedTime = 0
+		neverStopExponentialBackoff.MaxInterval = 15 * time.Minute
 		if err := backoff.RetryNotify(
 			operation,
 			backoff.NewExponentialBackOff(),
 			notifyFn,
 		); err != nil {
-			manager.logger.Errorf("exiting after permanent error: %v", err)
+			manager.logger.Errorf("stopping retry after too many errors: %s: %v", err)
 		}
 	}
 }

@@ -73,7 +73,12 @@ func (tracker *BlockHeightTracker) Run() {
 		notifyFn := func(opErr error, backoffDuration time.Duration) {
 			tracker.logger.Errorf("retrying in %s: %v", backoffDuration.String(), opErr)
 		}
-		_ = backoff.RetryNotify(operation, backoff.NewExponentialBackOff(), notifyFn)
+		neverStopExponentialBackoff := backoff.NewExponentialBackOff()
+		neverStopExponentialBackoff.MaxElapsedTime = 0
+		neverStopExponentialBackoff.MaxInterval = 15 * time.Minute
+		if err := backoff.RetryNotify(operation, neverStopExponentialBackoff, notifyFn); err != nil {
+			tracker.logger.Errorf("stopping retry after too many errors: %s: %v", err)
+		}
 	}
 }
 
