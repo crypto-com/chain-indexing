@@ -317,7 +317,7 @@ func (channelsView *Channels) List(order ChannelsListOrder, pagination *paginati
 			return nil, nil, fmt.Errorf("error scanning channel row: %v: %w", err, rdb.ErrQuery)
 		}
 
-		if err := jsoniter.UnmarshalFromString(bondedTokensJSON, &channel.BondedTokens); err != nil {
+		if err = jsoniter.UnmarshalFromString(bondedTokensJSON, &channel.BondedTokens); err != nil {
 			return nil, nil, fmt.Errorf("error unmarshalling channel bonded_tokens JSON: %v: %w", err, rdb.ErrQuery)
 		}
 
