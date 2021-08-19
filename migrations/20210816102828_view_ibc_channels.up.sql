@@ -1,4 +1,4 @@
-CREATE TABLE view_channels (
+CREATE TABLE view_ibc_channels (
     id BIGSERIAL,
     channel_id VARCHAR NOT NULL,
     port_id VARCHAR NOT NULL,

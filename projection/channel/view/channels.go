@@ -27,7 +27,7 @@ func NewChannels(handle *rdb.Handle) *Channels {
 func (channelsView *Channels) Insert(channel *ChannelRow) error {
 	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
 		Insert(
-			"view_channels",
+			"view_ibc_channels",
 		).
 		Columns(
 			"channel_id",
@@ -81,7 +81,7 @@ func (channelsView *Channels) Insert(channel *ChannelRow) error {
 func (channelsView *Channels) UpdateFactualColumns(channel *ChannelRow) error {
 	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
 		Update(
-			"view_channels",
+			"view_ibc_channels",
 		).
 		SetMap(map[string]interface{}{
 			"connection_id":           channel.ConnectionID,
@@ -118,7 +118,7 @@ func (channelsView *Channels) Increment(channelID string, portID string, column 
 	newValue := fmt.Sprintf("%s+%v", column, increaseNumber)
 
 	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
-		Update("view_channels").
+		Update("view_ibc_channels").
 		Set(column, sq.Expr(newValue)). // e.g. Set("columnA", sq.Expr("columnA+1"))
 		Where(
 			"channel_id = ? AND port_id = ?", channelID, portID,
@@ -145,7 +145,7 @@ func (channelsView *Channels) UpdateSequence(channelID string, portID string, co
 	}
 
 	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
-		Update("view_channels").
+		Update("view_ibc_channels").
 		SetMap(map[string]interface{}{
 			column: sequence,
 		}).
@@ -174,7 +174,7 @@ func (channelsView *Channels) UpdateTotalTransferOutSuccessRate(channelID string
 			"total_transfer_out_count",
 			"total_transfer_out_success_count",
 		).
-		From("view_channels").
+		From("view_ibc_channels").
 		Where("channel_id = ? AND port_id = ?", channelID, portID).
 		ToSql()
 	if err != nil {
@@ -199,7 +199,7 @@ func (channelsView *Channels) UpdateTotalTransferOutSuccessRate(channelID string
 	}
 
 	sql, sqlArgs, err = channelsView.rdb.StmtBuilder.
-		Update("view_channels").
+		Update("view_ibc_channels").
 		SetMap(map[string]interface{}{
 			"total_transfer_out_success_rate": totalTransferOutSuccessRate,
 		}).
@@ -222,7 +222,7 @@ func (channelsView *Channels) UpdateTotalTransferOutSuccessRate(channelID string
 
 func (channelsView *Channels) UpdateLastActivityTime(channelID string, portID string, time utctime.UTCTime) error {
 	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
-		Update("view_channels").
+		Update("view_ibc_channels").
 		SetMap(map[string]interface{}{
 			"last_activity_time": channelsView.rdb.Tton(&time),
 		}).
@@ -258,7 +258,7 @@ func (channelsView *Channels) List(order ChannelsListOrder, pagination *paginati
 		"total_transfer_out_success_count",
 		"total_transfer_out_success_rate",
 	).From(
-		"view_channels",
+		"view_ibc_channels",
 	)
 
 	if order.ChannelId == view.ORDER_DESC {
