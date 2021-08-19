@@ -7,6 +7,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
+	jsoniter "github.com/json-iterator/go"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -25,6 +26,12 @@ func NewChannels(handle *rdb.Handle) *Channels {
 }
 
 func (channelsView *Channels) Insert(channel *ChannelRow) error {
+	var bondedTokensJSON string
+	var err error
+	if bondedTokensJSON, err = jsoniter.MarshalToString(channel.BondedTokens); err != nil {
+		return fmt.Errorf("error JSON marshalling channel bonded_tokens for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
 	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
 		Insert(
 			"view_ibc_channels",
@@ -59,7 +66,7 @@ func (channelsView *Channels) Insert(channel *ChannelRow) error {
 			channel.TotalTransferOutSuccessCount,
 			channel.TotalTransferOutSuccessRate,
 			channel.LastActivityTime,
-			channel.BondedTokens,
+			bondedTokensJSON,
 		).
 		ToSql()
 
@@ -257,6 +264,8 @@ func (channelsView *Channels) List(order ChannelsListOrder, pagination *paginati
 		"total_transfer_out_count",
 		"total_transfer_out_success_count",
 		"total_transfer_out_success_rate",
+		"last_activity_time",
+		"bonded_tokens",
 	).From(
 		"view_ibc_channels",
 	)
@@ -285,6 +294,7 @@ func (channelsView *Channels) List(order ChannelsListOrder, pagination *paginati
 	channels := make([]ChannelRow, 0)
 	for rowsResult.Next() {
 		var channel ChannelRow
+		var bondedTokensJSON string
 		if err = rowsResult.Scan(
 			&channel.ChannelID,
 			&channel.PortID,
@@ -298,11 +308,17 @@ func (channelsView *Channels) List(order ChannelsListOrder, pagination *paginati
 			&channel.TotalTransferOutCount,
 			&channel.TotalTransferOutSuccessCount,
 			&channel.TotalTransferOutSuccessRate,
+			&channel.LastActivityTime,
+			&bondedTokensJSON,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
 			}
 			return nil, nil, fmt.Errorf("error scanning channel row: %v: %w", err, rdb.ErrQuery)
+		}
+
+		if err := jsoniter.UnmarshalFromString(bondedTokensJSON, &channel.BondedTokens); err != nil {
+			return nil, nil, fmt.Errorf("error unmarshalling channel bonded_tokens JSON: %v: %w", err, rdb.ErrQuery)
 		}
 
 		channels = append(channels, channel)
