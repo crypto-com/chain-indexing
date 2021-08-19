@@ -8,6 +8,7 @@ require (
 	github.com/brianvoe/gofakeit/v5 v5.10.1
 	github.com/btcsuite/btcutil v1.0.2
 	github.com/calvinlauyh/cosmosutils v0.0.7
+	github.com/cenkalti/backoff/v4 v4.0.2
 	github.com/cosmos/cosmos-sdk v0.42.4
 	github.com/fasthttp/router v1.3.3
 	github.com/golang-migrate/migrate/v4 v4.14.1
