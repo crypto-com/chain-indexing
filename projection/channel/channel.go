@@ -8,6 +8,7 @@ import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
 	block_view "github.com/crypto-com/chain-indexing/projection/block/view"
 	channel_view "github.com/crypto-com/chain-indexing/projection/channel/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
@@ -88,7 +89,8 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 				TotalTransferOutCount:        0,
 				TotalTransferOutSuccessCount: 0,
 				TotalTransferOutSuccessRate:  0,
-				LastActivityTime:             0,
+				LastActivityBlockTime:        utctime.FromUnixNano(0),
+				LastActivityBlockHeight:      0,
 				BondedTokens:                 []map[string]interface{}{},
 			}
 			if err := channelsView.Insert(channel); err != nil {
@@ -110,7 +112,8 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 				TotalTransferOutCount:        0,
 				TotalTransferOutSuccessCount: 0,
 				TotalTransferOutSuccessRate:  0,
-				LastActivityTime:             0,
+				LastActivityBlockTime:        utctime.FromUnixNano(0),
+				LastActivityBlockHeight:      0,
 				BondedTokens:                 []map[string]interface{}{},
 			}
 			if err := channelsView.Insert(channel); err != nil {
@@ -162,7 +165,7 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 				return fmt.Errorf("error updating last_out_packet_sequence: %w", err)
 			}
 
-			if err := projection.updateLastActivityTime(blocksView, channelsView, channelID, portID, height); err != nil {
+			if err := projection.updateLastActivityTimeAndHeight(blocksView, channelsView, channelID, portID, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
@@ -181,7 +184,7 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 				return fmt.Errorf("error updating last_in_packet_sequence: %w", err)
 			}
 
-			if err := projection.updateLastActivityTime(blocksView, channelsView, channelID, portID, height); err != nil {
+			if err := projection.updateLastActivityTimeAndHeight(blocksView, channelsView, channelID, portID, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
@@ -204,7 +207,7 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 				return fmt.Errorf("error updating last_out_packet_sequence: %w", err)
 			}
 
-			if err := projection.updateLastActivityTime(blocksView, channelsView, channelID, portID, height); err != nil {
+			if err := projection.updateLastActivityTimeAndHeight(blocksView, channelsView, channelID, portID, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
@@ -223,7 +226,7 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 	return nil
 }
 
-func (projection *Channel) updateLastActivityTime(
+func (projection *Channel) updateLastActivityTimeAndHeight(
 	blocksView *block_view.Blocks,
 	channelsView *channel_view.Channels,
 	channelID string,
@@ -237,7 +240,7 @@ func (projection *Channel) updateLastActivityTime(
 	if block, err = blocksView.FindBy(&identity); err != nil {
 		return fmt.Errorf("error find the block: %w", err)
 	}
-	if err := channelsView.UpdateLastActivityTime(channelID, portID, block.Time); err != nil {
+	if err := channelsView.UpdateLastActivityTimeAndHeight(channelID, portID, block.Time, height); err != nil {
 		return fmt.Errorf("error updating channel last_activity_time: %w", err)
 	}
 

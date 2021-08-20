@@ -43,8 +43,8 @@ func (handler *Channels) List(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
-	blocks, paginationResult, err := handler.channelView.List(channel_view.ChannelsListOrder{
-		ChannelId: channelIdOrder,
+	channels, paginationResult, err := handler.channelView.List(channel_view.ChannelsListOrder{
+		ChannelID: channelIdOrder,
 	}, pagination)
 	if err != nil {
 		handler.logger.Errorf("error listing channels: %v", err)
@@ -52,5 +52,5 @@ func (handler *Channels) List(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	httpapi.SuccessWithPagination(ctx, blocks, paginationResult)
+	httpapi.SuccessWithPagination(ctx, channels, paginationResult)
 }
