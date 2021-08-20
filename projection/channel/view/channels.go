@@ -11,7 +11,6 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
-	_ "github.com/crypto-com/chain-indexing/test/factory"
 )
 
 // Channels projection view implemented by relational database
@@ -49,7 +48,8 @@ func (channelsView *Channels) Insert(channel *ChannelRow) error {
 			"total_transfer_out_count",
 			"total_transfer_out_success_count",
 			"total_transfer_out_success_rate",
-			"last_activity_time",
+			"last_activity_block_time",
+			"last_activity_block_height",
 			"bonded_tokens",
 		).
 		Values(
@@ -65,7 +65,8 @@ func (channelsView *Channels) Insert(channel *ChannelRow) error {
 			channel.TotalTransferOutCount,
 			channel.TotalTransferOutSuccessCount,
 			channel.TotalTransferOutSuccessRate,
-			channel.LastActivityTime,
+			channelsView.rdb.Tton(&channel.LastActivityBlockTime),
+			channel.LastActivityBlockHeight,
 			bondedTokensJSON,
 		).
 		ToSql()
@@ -227,11 +228,12 @@ func (channelsView *Channels) UpdateTotalTransferOutSuccessRate(channelID string
 	return nil
 }
 
-func (channelsView *Channels) UpdateLastActivityTime(channelID string, portID string, time utctime.UTCTime) error {
+func (channelsView *Channels) UpdateLastActivityTimeAndHeight(channelID string, portID string, time utctime.UTCTime, height int64) error {
 	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
 		Update("view_ibc_channels").
 		SetMap(map[string]interface{}{
-			"last_activity_time": channelsView.rdb.Tton(&time),
+			"last_activity_block_time":   channelsView.rdb.Tton(&time),
+			"last_activity_block_height": height,
 		}).
 		Where("channel_id = ? AND port_id = ?", channelID, portID).
 		ToSql()
@@ -241,10 +243,10 @@ func (channelsView *Channels) UpdateLastActivityTime(channelID string, portID st
 
 	result, err := channelsView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
-		return fmt.Errorf("error updating last_activity_time: %v: %w", err, rdb.ErrWrite)
+		return fmt.Errorf("error updating last_activity time and height: %v: %w", err, rdb.ErrWrite)
 	}
 	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error updating last_activity_time: no row updated: %w", rdb.ErrWrite)
+		return fmt.Errorf("error updating last_activity time and height: no row updated: %w", rdb.ErrWrite)
 	}
 
 	return nil
@@ -264,13 +266,14 @@ func (channelsView *Channels) List(order ChannelsListOrder, pagination *paginati
 		"total_transfer_out_count",
 		"total_transfer_out_success_count",
 		"total_transfer_out_success_rate",
-		"last_activity_time",
+		"last_activity_block_time",
+		"last_activity_block_height",
 		"bonded_tokens",
 	).From(
 		"view_ibc_channels",
 	)
 
-	if order.ChannelId == view.ORDER_DESC {
+	if order.ChannelID == view.ORDER_DESC {
 		stmtBuilder = stmtBuilder.OrderBy("channel_id DESC")
 	} else {
 		stmtBuilder = stmtBuilder.OrderBy("channel_id")
@@ -295,6 +298,7 @@ func (channelsView *Channels) List(order ChannelsListOrder, pagination *paginati
 	for rowsResult.Next() {
 		var channel ChannelRow
 		var bondedTokensJSON string
+		timeReader := channelsView.rdb.NtotReader()
 		if err = rowsResult.Scan(
 			&channel.ChannelID,
 			&channel.PortID,
@@ -308,7 +312,8 @@ func (channelsView *Channels) List(order ChannelsListOrder, pagination *paginati
 			&channel.TotalTransferOutCount,
 			&channel.TotalTransferOutSuccessCount,
 			&channel.TotalTransferOutSuccessRate,
-			&channel.LastActivityTime,
+			timeReader.ScannableArg(),
+			&channel.LastActivityBlockHeight,
 			&bondedTokensJSON,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
@@ -316,6 +321,12 @@ func (channelsView *Channels) List(order ChannelsListOrder, pagination *paginati
 			}
 			return nil, nil, fmt.Errorf("error scanning channel row: %v: %w", err, rdb.ErrQuery)
 		}
+
+		lastActivityBlockTime, parseErr := timeReader.Parse()
+		if parseErr != nil {
+			return nil, nil, fmt.Errorf("error parsing block time: %v: %w", parseErr, rdb.ErrQuery)
+		}
+		channel.LastActivityBlockTime = *lastActivityBlockTime
 
 		if err = jsoniter.UnmarshalFromString(bondedTokensJSON, &channel.BondedTokens); err != nil {
 			return nil, nil, fmt.Errorf("error unmarshalling channel bonded_tokens JSON: %v: %w", err, rdb.ErrQuery)
@@ -333,7 +344,7 @@ func (channelsView *Channels) List(order ChannelsListOrder, pagination *paginati
 }
 
 type ChannelsListOrder struct {
-	ChannelId view.ORDER
+	ChannelID view.ORDER
 }
 
 type ChannelRow struct {
@@ -349,6 +360,7 @@ type ChannelRow struct {
 	TotalTransferOutCount        int64                    `json:"totalTransferOutCount"`
 	TotalTransferOutSuccessCount int64                    `json:"totalTransferOutSuccessCount"`
 	TotalTransferOutSuccessRate  float64                  `json:"totalTransferOutSuccessRate"`
+	LastActivityBlockTime        utctime.UTCTime          `json:"lastActivityBlockTime"`
+	LastActivityBlockHeight      int64                    `json:"lastActivityBlockHeight"`
 	BondedTokens                 []map[string]interface{} `json:"bondedTokens"`
-	LastActivityTime             int64                    `json:"lastActivityTime"`
 }
