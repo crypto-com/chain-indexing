@@ -60,7 +60,7 @@ func MustConsensusNodePubKeyFromTmPubKey(bech32Prefix string, pubKey []byte) str
 func ConsensusNodePubKeyFromTmPubKey(bech32Prefix string, pubKey []byte) (string, error) {
 	pkToMarshal := ed25519.PubKey{Key: pubKey}
 
-	conv, err := bech32.ConvertBits(legacy.Cdc.MustMarshalBinaryBare(pkToMarshal), 8, 5, true)
+	conv, err := bech32.ConvertBits(legacy.Cdc.MustMarshal(pkToMarshal), 8, 5, true)
 	if err != nil {
 		return "", fmt.Errorf("error converting tendermint public key to bech32 bits: %v", err)
 	}
@@ -113,7 +113,7 @@ func ConsensusNodeAddressFromConsensusNodePubKey(bech32Prefix string, consensusN
 		return "", fmt.Errorf("error converting bech32 bits to tendermint public key: %v", err)
 	}
 	var pubKey cryptotypes.PubKey
-	legacy.Cdc.MustUnmarshalBinaryBare(pkToUnmarshal, &pubKey)
+	legacy.Cdc.MustUnmarshal(pkToUnmarshal, &pubKey)
 
 	conv, err = bech32.ConvertBits(pubKey.Address().Bytes(), 8, 5, true)
 	if err != nil {
@@ -185,7 +185,7 @@ func PubKeyFromCosmosPubKey(accountPubKey string) ([]byte, error) {
 	}
 
 	var pubKey cryptotypes.PubKey
-	legacy.Cdc.MustUnmarshalBinaryBare(pkToUnmarshal, &pubKey)
+	legacy.Cdc.MustUnmarshal(pkToUnmarshal, &pubKey)
 
 	return pubKey.Bytes(), nil
 }

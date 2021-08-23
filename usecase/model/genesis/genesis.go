@@ -1,5 +1,7 @@
 package genesis
 
+import "encoding/json"
+
 type Genesis struct {
 	GenesisTime     string          `json:"genesis_time"`
 	ChainID         string          `json:"chain_id"`
@@ -360,9 +362,9 @@ type Vesting struct {
 
 type StakingParams struct {
 	BondDenom         string `json:"bond_denom"`
-	HistoricalEntries int64  `json:"historical_entries"`
-	MaxEntries        int64  `json:"max_entries"`
-	MaxValidators     int64  `json:"max_validators"`
+	HistoricalEntries json.Number  `json:"historical_entries"`
+	MaxEntries        json.Number  `json:"max_entries"`
+	MaxValidators     json.Number  `json:"max_validators"`
 	UnbondingTime     string `json:"unbonding_time"`
 }
 
