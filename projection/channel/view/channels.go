@@ -107,7 +107,7 @@ func (channelsView *Channels) UpdateFactualColumns(channel *ChannelRow) error {
 			"created_at_block_height": channel.CreatedAtBlockHeight,
 		}).
 		Where(
-			"channel_id = ? AND port_id = ?", channel.ChannelID, channel.PortID,
+			"channel_id = ?", channel.ChannelID,
 		).
 		ToSql()
 
@@ -126,7 +126,7 @@ func (channelsView *Channels) UpdateFactualColumns(channel *ChannelRow) error {
 	return nil
 }
 
-func (channelsView *Channels) Increment(channelID string, portID string, column string, increaseNumber int64) error {
+func (channelsView *Channels) Increment(channelID string, column string, increaseNumber int64) error {
 	if column != "total_transfer_in_count" &&
 		column != "total_transfer_out_count" &&
 		column != "total_transfer_out_success_count" {
@@ -138,9 +138,7 @@ func (channelsView *Channels) Increment(channelID string, portID string, column 
 	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
 		Update("view_ibc_channels").
 		Set(column, sq.Expr(newValue)). // e.g. Set("columnA", sq.Expr("columnA+1"))
-		Where(
-			"channel_id = ? AND port_id = ?", channelID, portID,
-		).
+		Where("channel_id = ?", channelID).
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("error building channel increment sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -157,7 +155,7 @@ func (channelsView *Channels) Increment(channelID string, portID string, column 
 	return nil
 }
 
-func (channelsView *Channels) UpdateSequence(channelID string, portID string, column string, sequence uint64) error {
+func (channelsView *Channels) UpdateSequence(channelID string, column string, sequence uint64) error {
 	if column != "last_in_packet_sequence" && column != "last_out_packet_sequence" {
 		return fmt.Errorf("error unsupported column in UpdateSequence(): %v", column)
 	}
@@ -167,9 +165,7 @@ func (channelsView *Channels) UpdateSequence(channelID string, portID string, co
 		SetMap(map[string]interface{}{
 			column: sequence,
 		}).
-		Where(
-			"channel_id = ? AND port_id = ?", channelID, portID,
-		).
+		Where("channel_id = ?", channelID).
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("error building channel increment sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -186,14 +182,14 @@ func (channelsView *Channels) UpdateSequence(channelID string, portID string, co
 	return nil
 }
 
-func (channelsView *Channels) UpdateTotalTransferOutSuccessRate(channelID string, portID string) error {
+func (channelsView *Channels) UpdateTotalTransferOutSuccessRate(channelID string) error {
 	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
 		Select(
 			"total_transfer_out_count",
 			"total_transfer_out_success_count",
 		).
 		From("view_ibc_channels").
-		Where("channel_id = ? AND port_id = ?", channelID, portID).
+		Where("channel_id = ?", channelID).
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("error building selection sql: %v: %w", err, rdb.ErrPrepare)
@@ -221,7 +217,7 @@ func (channelsView *Channels) UpdateTotalTransferOutSuccessRate(channelID string
 		SetMap(map[string]interface{}{
 			"total_transfer_out_success_rate": totalTransferOutSuccessRate,
 		}).
-		Where("channel_id = ? AND port_id = ?", channelID, portID).
+		Where("channel_id = ?", channelID).
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("error building channel update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -238,14 +234,14 @@ func (channelsView *Channels) UpdateTotalTransferOutSuccessRate(channelID string
 	return nil
 }
 
-func (channelsView *Channels) UpdateLastActivityTimeAndHeight(channelID string, portID string, time utctime.UTCTime, height int64) error {
+func (channelsView *Channels) UpdateLastActivityTimeAndHeight(channelID string, time utctime.UTCTime, height int64) error {
 	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
 		Update("view_ibc_channels").
 		SetMap(map[string]interface{}{
 			"last_activity_block_time":   channelsView.rdb.Tton(&time),
 			"last_activity_block_height": height,
 		}).
-		Where("channel_id = ? AND port_id = ?", channelID, portID).
+		Where("channel_id = ?", channelID).
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("error building channel update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -262,13 +258,13 @@ func (channelsView *Channels) UpdateLastActivityTimeAndHeight(channelID string, 
 	return nil
 }
 
-func (channelsView *Channels) UpdateStatus(channelID string, portID string, open bool) error {
+func (channelsView *Channels) UpdateStatus(channelID string, open bool) error {
 	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
 		Update("view_ibc_channels").
 		SetMap(map[string]interface{}{
 			"status": open,
 		}).
-		Where("channel_id = ? AND port_id = ?", channelID, portID).
+		Where("channel_id = ?", channelID).
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("error building channel.status update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -285,7 +281,7 @@ func (channelsView *Channels) UpdateStatus(channelID string, portID string, open
 	return nil
 }
 
-func (channelsView *Channels) UpdateBondedTokens(channelID string, portID string, bondedTokens *BondedTokens) error {
+func (channelsView *Channels) UpdateBondedTokens(channelID string, bondedTokens *BondedTokens) error {
 	bondedTokensJSON, err := jsoniter.MarshalToString(*bondedTokens)
 	if err != nil {
 		return fmt.Errorf("error JSON marshalling channel bonded_tokens for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -296,7 +292,7 @@ func (channelsView *Channels) UpdateBondedTokens(channelID string, portID string
 		SetMap(map[string]interface{}{
 			"bonded_tokens": bondedTokensJSON,
 		}).
-		Where("channel_id = ? AND port_id = ?", channelID, portID).
+		Where("channel_id = ?", channelID).
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("error building channel.bonded_tokens update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -313,13 +309,11 @@ func (channelsView *Channels) UpdateBondedTokens(channelID string, portID string
 	return nil
 }
 
-func (channelsView *Channels) FindBondedTokensBy(channelID string, portID string) (*BondedTokens, error) {
+func (channelsView *Channels) FindBondedTokensBy(channelID string) (*BondedTokens, error) {
 	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
-		Select(
-			"bonded_tokens",
-		).
+		Select("bonded_tokens").
 		From("view_ibc_channels").
-		Where("channel_id = ? AND port_id = ?", channelID, portID).
+		Where("channel_id = ?", channelID).
 		ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("error building select bonded_tokens sql: %v: %w", err, rdb.ErrPrepare)
