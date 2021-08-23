@@ -11,6 +11,7 @@ import (
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	block_view "github.com/crypto-com/chain-indexing/projection/block/view"
 	channel_view "github.com/crypto-com/chain-indexing/projection/channel/view"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
@@ -34,6 +35,9 @@ func NewChannel(logger applogger.Logger, rdbConn rdb.Conn) *Channel {
 
 func (_ *Channel) GetEventsToListen() []string {
 	return []string{
+		event_usecase.MSG_IBC_CREATE_CLIENT_CREATED,
+		event_usecase.MSG_IBC_CONNECTION_OPEN_ACK_CREATED,
+		event_usecase.MSG_IBC_CONNECTION_OPEN_CONFIRM_CREATED,
 		event_usecase.MSG_IBC_CHANNEL_OPEN_INIT_CREATED,
 		event_usecase.MSG_IBC_CHANNEL_OPEN_TRY_CREATED,
 		event_usecase.MSG_IBC_CHANNEL_OPEN_ACK_CREATED,
@@ -64,6 +68,8 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 	rdbTxHandle := rdbTx.ToHandle()
 
 	channelsView := channel_view.NewChannels(rdbTxHandle)
+	ibcClientsView := channel_view.NewIBCClients(rdbTxHandle)
+	ibcConnectionsView := channel_view.NewIBCConnections(rdbTxHandle)
 	blocksView := block_view.NewBlocks(rdbTxHandle)
 
 	// NOTES: Why four channel open events are all needed?
@@ -74,7 +80,55 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 	// can only be found in MsgIBCChannelOpenAck and MsgIBCChannelOpenConfirm.
 
 	for _, event := range events {
-		if msgIBCChannelOpenInit, ok := event.(*event_usecase.MsgIBCChannelOpenInit); ok {
+		if msgIBCCreateClient, ok := event.(*event_usecase.MsgIBCCreateClient); ok {
+
+			client := &channel_view.IBCClientRow{
+				ClientID:            msgIBCCreateClient.Params.ClientID,
+				CounterpartyChainID: msgIBCCreateClient.Params.MaybeTendermintLightClient.TendermintClientState.ChainID,
+			}
+			if err := ibcClientsView.Insert(client); err != nil {
+				return fmt.Errorf("error inserting client: %w", err)
+			}
+
+		} else if msgIBCConnectionOpenConfirm, ok := event.(*event_usecase.MsgIBCConnectionOpenConfirm); ok {
+
+			clientID := msgIBCConnectionOpenConfirm.Params.ClientID
+			counterpartyChainID, err := ibcClientsView.FindCounterpartyChainIDBy(clientID)
+			if err != nil {
+				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
+			}
+
+			connection := &channel_view.IBCConnectionRow{
+				ConnectionID:             msgIBCConnectionOpenConfirm.Params.ConnectionID,
+				ClientID:                 msgIBCConnectionOpenConfirm.Params.ClientID,
+				CounterpartyConnectionID: msgIBCConnectionOpenConfirm.Params.CounterpartyConnectionID,
+				CounterpartyClientID:     msgIBCConnectionOpenConfirm.Params.CounterpartyClientID,
+				CounterpartyChainID:      counterpartyChainID,
+			}
+			if err := ibcConnectionsView.Insert(connection); err != nil {
+				return fmt.Errorf("error inserting connection: %w", err)
+			}
+
+		} else if msgIBCConnectionOpenAck, ok := event.(*event_usecase.MsgIBCConnectionOpenAck); ok {
+
+			clientID := msgIBCConnectionOpenAck.Params.ClientID
+			counterpartyChainID, err := ibcClientsView.FindCounterpartyChainIDBy(clientID)
+			if err != nil {
+				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
+			}
+
+			connection := &channel_view.IBCConnectionRow{
+				ConnectionID:             msgIBCConnectionOpenAck.Params.ConnectionID,
+				ClientID:                 msgIBCConnectionOpenAck.Params.ClientID,
+				CounterpartyConnectionID: msgIBCConnectionOpenAck.Params.CounterpartyConnectionID,
+				CounterpartyClientID:     msgIBCConnectionOpenAck.Params.CounterpartyClientID,
+				CounterpartyChainID:      counterpartyChainID,
+			}
+			if err := ibcConnectionsView.Insert(connection); err != nil {
+				return fmt.Errorf("error inserting connection: %w", err)
+			}
+
+		} else if msgIBCChannelOpenInit, ok := event.(*event_usecase.MsgIBCChannelOpenInit); ok {
 
 			channel := &channel_view.ChannelRow{
 				ChannelID:                    msgIBCChannelOpenInit.Params.ChannelID,
@@ -82,6 +136,8 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 				ConnectionID:                 "",
 				CounterpartyChannelID:        msgIBCChannelOpenInit.Params.Channel.Counterparty.ChannelID,
 				CounterpartyPortID:           msgIBCChannelOpenInit.Params.Channel.Counterparty.PortID,
+				CounterpartyChainID:          "",
+				Status:                       false,
 				PacketOrdering:               msgIBCChannelOpenInit.Params.Channel.Ordering,
 				LastInPacketSequence:         0,
 				LastOutPacketSequence:        0,
@@ -89,9 +145,11 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 				TotalTransferOutCount:        0,
 				TotalTransferOutSuccessCount: 0,
 				TotalTransferOutSuccessRate:  0,
+				CreatedAtBlockTime:           utctime.FromUnixNano(0),
+				CreatedAtBlockHeight:         0,
 				LastActivityBlockTime:        utctime.FromUnixNano(0),
 				LastActivityBlockHeight:      0,
-				BondedTokens:                 []map[string]interface{}{},
+				BondedTokens:                 *channel_view.NewEmptyBondedTokens(),
 			}
 			if err := channelsView.Insert(channel); err != nil {
 				return fmt.Errorf("error inserting channel: %w", err)
@@ -105,6 +163,8 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 				ConnectionID:                 msgIBCChannelOpenTry.Params.ConnectionID,
 				CounterpartyChannelID:        msgIBCChannelOpenTry.Params.Channel.Counterparty.ChannelID,
 				CounterpartyPortID:           msgIBCChannelOpenTry.Params.Channel.Counterparty.PortID,
+				CounterpartyChainID:          "",
+				Status:                       false,
 				PacketOrdering:               msgIBCChannelOpenTry.Params.Channel.Ordering,
 				LastInPacketSequence:         0,
 				LastOutPacketSequence:        0,
@@ -112,9 +172,11 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 				TotalTransferOutCount:        0,
 				TotalTransferOutSuccessCount: 0,
 				TotalTransferOutSuccessRate:  0,
+				CreatedAtBlockTime:           utctime.FromUnixNano(0),
+				CreatedAtBlockHeight:         0,
 				LastActivityBlockTime:        utctime.FromUnixNano(0),
 				LastActivityBlockHeight:      0,
-				BondedTokens:                 []map[string]interface{}{},
+				BondedTokens:                 *channel_view.NewEmptyBondedTokens(),
 			}
 			if err := channelsView.Insert(channel); err != nil {
 				return fmt.Errorf("error inserting channel: %w", err)
@@ -122,18 +184,49 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 
 		} else if msgIBCChannelOpenAck, ok := event.(*event_usecase.MsgIBCChannelOpenAck); ok {
 
+			connectionID := msgIBCChannelOpenAck.Params.ConnectionID
+			counterpartyChainID, err := ibcConnectionsView.FindCounterpartyChainIDBy(connectionID)
+			if err != nil {
+				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
+			}
+
+			identity := block_view.BlockIdentity{MaybeHeight: &height}
+			block, err := blocksView.FindBy(&identity)
+			if err != nil {
+				return fmt.Errorf("error finding the block: %w", err)
+			}
+
 			channel := &channel_view.ChannelRow{
 				ChannelID:             msgIBCChannelOpenAck.Params.ChannelID,
 				PortID:                msgIBCChannelOpenAck.Params.PortID,
 				ConnectionID:          msgIBCChannelOpenAck.Params.ConnectionID,
 				CounterpartyChannelID: msgIBCChannelOpenAck.Params.CounterpartyChannelID,
 				CounterpartyPortID:    msgIBCChannelOpenAck.Params.CounterpartyPortID,
+				CounterpartyChainID:   counterpartyChainID,
+				CreatedAtBlockTime:    block.Time,
+				CreatedAtBlockHeight:  height,
 			}
 			if err := channelsView.UpdateFactualColumns(channel); err != nil {
 				return fmt.Errorf("error updating channel: %w", err)
 			}
 
+			if err := channelsView.UpdateStatus(channel.ChannelID, channel.PortID, true); err != nil {
+				return fmt.Errorf("error updating channel status: %w", err)
+			}
+
 		} else if msgIBCChannelOpenConfirm, ok := event.(*event_usecase.MsgIBCChannelOpenConfirm); ok {
+
+			connectionID := msgIBCChannelOpenConfirm.Params.ConnectionID
+			counterpartyChainID, err := ibcConnectionsView.FindCounterpartyChainIDBy(connectionID)
+			if err != nil {
+				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
+			}
+
+			identity := block_view.BlockIdentity{MaybeHeight: &height}
+			block, err := blocksView.FindBy(&identity)
+			if err != nil {
+				return fmt.Errorf("error finding the block: %w", err)
+			}
 
 			channel := &channel_view.ChannelRow{
 				ChannelID:             msgIBCChannelOpenConfirm.Params.ChannelID,
@@ -141,9 +234,16 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 				ConnectionID:          msgIBCChannelOpenConfirm.Params.ConnectionID,
 				CounterpartyChannelID: msgIBCChannelOpenConfirm.Params.CounterpartyChannelID,
 				CounterpartyPortID:    msgIBCChannelOpenConfirm.Params.CounterpartyPortID,
+				CounterpartyChainID:   counterpartyChainID,
+				CreatedAtBlockTime:    block.Time,
+				CreatedAtBlockHeight:  height,
 			}
 			if err := channelsView.UpdateFactualColumns(channel); err != nil {
 				return fmt.Errorf("error updating channel: %w", err)
+			}
+
+			if err := channelsView.UpdateStatus(channel.ChannelID, channel.PortID, true); err != nil {
+				return fmt.Errorf("error updating channel status: %w", err)
 			}
 
 		} else if msgIBCTransferTransfer, ok := event.(*event_usecase.MsgIBCTransferTransfer); ok {
@@ -188,6 +288,23 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
+			amount := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount
+			denom := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Denom
+			destinationChannelID := msgIBCRecvPacket.Params.Packet.DestinationChannel
+			destinationPortID := msgIBCRecvPacket.Params.Packet.DestinationPort
+
+			if err := projection.updateBondedTokensWhenMsgIBCRecvPacket(
+				channelsView,
+				channelID,
+				portID,
+				amount,
+				denom,
+				destinationChannelID,
+				destinationPortID,
+			); err != nil {
+				return fmt.Errorf("error updateBondedTokensWhenMsgIBCRecvPacket: %w", err)
+			}
+
 		} else if msgIBCAcknowledgement, ok := event.(*event_usecase.MsgIBCAcknowledgement); ok {
 
 			// Transfer started by source chain
@@ -209,6 +326,23 @@ func (projection *Channel) HandleEvents(height int64, events []event_entity.Even
 
 			if err := projection.updateLastActivityTimeAndHeight(blocksView, channelsView, channelID, portID, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
+			}
+
+			amount := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount
+			denom := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Denom
+			destinationChannelID := msgIBCAcknowledgement.Params.Packet.DestinationChannel
+			destinationPortID := msgIBCAcknowledgement.Params.Packet.DestinationPort
+
+			if err := projection.updateBondedTokensWhenMsgIBCAcknowledgement(
+				channelsView,
+				channelID,
+				portID,
+				amount,
+				denom,
+				destinationChannelID,
+				destinationPortID,
+			); err != nil {
+				return fmt.Errorf("error updateBondedTokensWhenMsgIBCAcknowledgement: %w", err)
 			}
 
 		}
@@ -235,13 +369,104 @@ func (projection *Channel) updateLastActivityTimeAndHeight(
 ) error {
 
 	identity := block_view.BlockIdentity{MaybeHeight: &height}
-	var block *block_view.Block
-	var err error
-	if block, err = blocksView.FindBy(&identity); err != nil {
-		return fmt.Errorf("error find the block: %w", err)
+	block, err := blocksView.FindBy(&identity)
+	if err != nil {
+		return fmt.Errorf("error finding the block: %w", err)
 	}
 	if err := channelsView.UpdateLastActivityTimeAndHeight(channelID, portID, block.Time, height); err != nil {
 		return fmt.Errorf("error updating channel last_activity_time: %w", err)
+	}
+
+	return nil
+}
+
+func (projection *Channel) updateBondedTokensWhenMsgIBCRecvPacket(
+	channelsView *channel_view.Channels,
+	channelID string,
+	portID string,
+	amount uint64,
+	denom string,
+	destinationChannelID string,
+	destinationPortID string,
+) error {
+
+	bondedTokens, err := channelsView.FindBondedTokensBy(channelID, portID)
+	if err != nil {
+		return fmt.Errorf("error finding channel bonded_tokens: %w", err)
+	}
+
+	// Check if the token is originally from this chain
+	tokenOriginallyFromThisChain := false
+	tokenIndex := -1
+	for i, token := range bondedTokens.OnCounterpartyChain {
+		if token.Denom == denom {
+			tokenOriginallyFromThisChain = true
+			tokenIndex = i
+			break
+		}
+	}
+	if tokenOriginallyFromThisChain {
+		// This token is originally from this chain, now it is sent back from counterparty chain.
+		// Subtract it from the bondedTokens.OnCouterpartyChain[i]
+		amountInCoinInt := coin.NewIntFromUint64(amount)
+		bondedTokens.OnCounterpartyChain[tokenIndex].Amount = bondedTokens.OnCounterpartyChain[tokenIndex].Amount.Sub(amountInCoinInt)
+	} else {
+		// This token is new to this chain.
+		// Append it to bondedTokens.OnThisChain
+		newDenom := fmt.Sprintf("%s/%s/%s", destinationPortID, destinationChannelID, denom)
+		amountInCoinInt := coin.NewIntFromUint64(amount)
+		newToken := channel_view.NewBondedToken(newDenom, amountInCoinInt)
+		bondedTokens.OnThisChain = append(bondedTokens.OnThisChain, *newToken)
+	}
+
+	if err := channelsView.UpdateBondedTokens(channelID, portID, bondedTokens); err != nil {
+		return fmt.Errorf("error channelsView.UpdateBondedTokens: %w", err)
+	}
+
+	return nil
+}
+
+func (projection *Channel) updateBondedTokensWhenMsgIBCAcknowledgement(
+	channelsView *channel_view.Channels,
+	channelID string,
+	portID string,
+	amount uint64,
+	denom string,
+	destinationChannelID string,
+	destinationPortID string,
+) error {
+
+	bondedTokens, err := channelsView.FindBondedTokensBy(channelID, portID)
+	if err != nil {
+		return fmt.Errorf("error channelsView.FindBondedTokensBy: %w", err)
+	}
+
+	// Check if the token is originally from counterparty chain
+	tokenOriginallyFromCounterpartyChain := false
+	tokenIndex := -1
+	for i, token := range bondedTokens.OnThisChain {
+		if token.Denom == denom {
+			tokenOriginallyFromCounterpartyChain = true
+			tokenIndex = i
+			break
+		}
+	}
+	if tokenOriginallyFromCounterpartyChain {
+		// This token is from counterparty chain, now it is sent back to counterparty chain.
+		// Subtract it from the bondedTokens.OnThisChain[i]
+		amountInCoinInt := coin.NewIntFromUint64(amount)
+		bondedTokens.OnThisChain[tokenIndex].Amount = bondedTokens.OnThisChain[tokenIndex].Amount.Sub(amountInCoinInt)
+	} else {
+		// This token is new to the counterparty chain.
+		// Append it to bondedTokens.OnCounterpartyChain
+		newDenom := fmt.Sprintf("%s/%s/%s", destinationPortID, destinationChannelID, denom)
+		amountInCoinInt := coin.NewIntFromUint64(amount)
+		newToken := channel_view.NewBondedToken(newDenom, amountInCoinInt)
+		bondedTokens.OnCounterpartyChain = append(bondedTokens.OnCounterpartyChain, *newToken)
+	}
+
+	if err := channelsView.UpdateBondedTokens(channelID, portID, bondedTokens); err != nil {
+		return fmt.Errorf("error channelsView.UpdateBondedTokens: %w", err)
 	}
 
 	return nil
