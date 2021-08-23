@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+	"github.com/cenkalti/backoff/v4"
 
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -14,16 +14,22 @@ import (
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	"github.com/crypto-com/chain-indexing/usecase/syncstrategy"
 )
 
+const MAX_RETRY_TIME_ALWAYS_RETRY = 0
 const DEFAULT_POLLING_INTERVAL = 5 * time.Second
+const DEFAULT_MAX_RETRY_INTERVAL = 15 * time.Minute
+const DEFAULT_MAX_RETRY_TIME = MAX_RETRY_TIME_ALWAYS_RETRY
 
 type SyncManager struct {
 	rdbConn              rdb.Conn
 	client               *tendermint.HTTPClient
 	logger               applogger.Logger
 	pollingInterval      time.Duration
+	maxRetryInterval     time.Duration
+	maxRetryTime         time.Duration
 	strictGenesisParsing bool
 
 	accountAddressPrefix string
@@ -82,6 +88,8 @@ func NewSyncManager(
 			"module": "SyncManager",
 		}),
 		pollingInterval:      DEFAULT_POLLING_INTERVAL,
+		maxRetryInterval:     DEFAULT_MAX_RETRY_INTERVAL,
+		maxRetryTime:         DEFAULT_MAX_RETRY_TIME,
 		strictGenesisParsing: params.Config.StrictGenesisParsing,
 
 		accountAddressPrefix: params.Config.AccountAddressPrefix,
@@ -97,7 +105,7 @@ func NewSyncManager(
 }
 
 // SyncBlocks makes request to tendermint, create and dispatch notifications
-func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
+func (manager *SyncManager) SyncBlocks(latestHeight int64, isRetry bool) error {
 	maybeLastIndexedHeight, err := manager.eventHandler.GetLastHandledEventHeight()
 	if err != nil {
 		return fmt.Errorf("error running GetLastIndexedBlockHeight %v", err)
@@ -109,10 +117,17 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64) error {
 		currentIndexingHeight = *maybeLastIndexedHeight + 1
 	}
 
-	manager.logger.Infof("going to synchronized blocks from %d to %d", currentIndexingHeight, latestHeight)
-	for currentIndexingHeight <= latestHeight {
+	targetHeight := latestHeight
+	if isRetry {
+		// Reduce the block size to be synced when retrying to avoid spamming and wasting resource
+		if latestHeight > currentIndexingHeight {
+			targetHeight = currentIndexingHeight + 1
+		}
+	}
+	manager.logger.Infof("going to synchronized blocks from %d to %d", currentIndexingHeight, targetHeight)
+	for currentIndexingHeight <= targetHeight {
 		blocksCommands, syncedHeight, err := manager.windowSyncStrategy.Sync(
-			currentIndexingHeight, latestHeight, manager.syncBlockWorker,
+			currentIndexingHeight, targetHeight, manager.syncBlockWorker,
 		)
 		if err != nil {
 			return fmt.Errorf("error when synchronizing block with window strategy: %v", err)
@@ -206,18 +221,40 @@ func (manager *SyncManager) Run() error {
 	tracker.Subscribe(blockHeightCh)
 
 	for {
-		if manager.latestBlockHeight == nil {
-			manager.logger.Info("the chain has no block yet")
-		} else {
-			if err := manager.SyncBlocks(*manager.latestBlockHeight); err != nil {
-				manager.logger.Errorf("error synchronizing blocks to latest height %d: %v", *manager.latestBlockHeight, err)
-				<-time.After(5 * time.Second)
+		isRetry := false
+		operation := func() error {
+			if manager.latestBlockHeight == nil {
+				manager.logger.Info("the chain has no block yet")
+			} else {
+				if syncErr := manager.SyncBlocks(*manager.latestBlockHeight, isRetry); syncErr != nil {
+					return fmt.Errorf(
+						"error synchronizing blocks to latest height %d: %v", *manager.latestBlockHeight, syncErr,
+					)
+				}
 			}
+
+			select {
+			case <-manager.shouldSyncCh:
+			case <-time.After(manager.pollingInterval):
+			}
+			return nil
+		}
+		notifyFn := func(opErr error, backoffDuration time.Duration) {
+			isRetry = true
+			manager.logger.Errorf(
+				"retrying in %s: %v", backoffDuration.String(), opErr,
+			)
 		}
 
-		select {
-		case <-manager.shouldSyncCh:
-		case <-time.After(manager.pollingInterval):
+		neverStopExponentialBackoff := backoff.NewExponentialBackOff()
+		neverStopExponentialBackoff.MaxElapsedTime = manager.maxRetryTime
+		neverStopExponentialBackoff.MaxInterval = manager.maxRetryInterval
+		if err := backoff.RetryNotify(
+			operation,
+			backoff.NewExponentialBackOff(),
+			notifyFn,
+		); err != nil {
+			manager.logger.Errorf("stopping retry after too many errors: %s: %v", err)
 		}
 	}
 }

@@ -74,10 +74,12 @@ install_golang_migrate_golang_1_15_and_below() {
     set -x
     # https://github.com/golang-migrate/migrate/pull/257#issuecomment-705249902
     GO111MODULE=off go get -tags 'postgres' -u -d github.com/golang-migrate/migrate/cmd/migrate/
+    pushd .
     cd "${GOPATH}/src/github.com/golang-migrate/migrate/cmd/migrate"
     git checkout ${GOLANG_MIGRATE_VERSION}
     go build -tags 'postgres' -ldflags="-X main.Version=$(git describe --tags)" -o "${GOPATH}/bin/migrate" "${GOPATH}/src/github.com/golang-migrate/migrate/cmd/migrate"
     set +x
+    popd
 }
 
 install_golang_migrate_universal() {

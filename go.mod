@@ -7,6 +7,7 @@ require (
 	github.com/Masterminds/squirrel v1.5.0
 	github.com/brianvoe/gofakeit/v5 v5.10.1
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
+	github.com/cenkalti/backoff/v4 v4.0.2
 	github.com/calvinlauyh/cosmosutils v0.0.8
 	github.com/cosmos/cosmos-sdk v0.43.0
 	github.com/fasthttp/router v1.3.3
