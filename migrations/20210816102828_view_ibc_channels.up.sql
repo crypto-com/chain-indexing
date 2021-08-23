@@ -1,6 +1,6 @@
 CREATE TABLE view_ibc_channels (
     id BIGSERIAL,
-    channel_id VARCHAR NOT NULL,
+    channel_id VARCHAR NOT NULL UNIQUE,
     port_id VARCHAR NOT NULL,
     connection_id VARCHAR NOT NULL,
     counterparty_channel_id VARCHAR NOT NULL,
@@ -19,6 +19,5 @@ CREATE TABLE view_ibc_channels (
     last_activity_block_time BIGINT NOT NULL,
     last_activity_block_height BIGINT NOT NULL,
     bonded_tokens JSONB NOT NULL,
-    PRIMARY KEY(id),
-    UNIQUE (channel_id, port_id)
+    PRIMARY KEY(id)
 );
