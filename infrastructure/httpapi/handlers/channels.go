@@ -13,7 +13,7 @@ import (
 type Channels struct {
 	logger applogger.Logger
 
-	channelView *channel_view.Channels
+	channelView *channel_view.IBCChannels
 }
 
 func NewChannels(logger applogger.Logger, rdbHandle *rdb.Handle) *Channels {
@@ -22,7 +22,7 @@ func NewChannels(logger applogger.Logger, rdbHandle *rdb.Handle) *Channels {
 			"module": "ChannelsHandler",
 		}),
 
-		channel_view.NewChannels(rdbHandle),
+		channel_view.NewIBCChannels(rdbHandle),
 	}
 }
 
