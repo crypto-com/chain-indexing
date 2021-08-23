@@ -14,23 +14,23 @@ import (
 )
 
 // Channels projection view implemented by relational database
-type Channels struct {
+type IBCChannels struct {
 	rdb *rdb.Handle
 }
 
-func NewChannels(handle *rdb.Handle) *Channels {
-	return &Channels{
+func NewIBCChannels(handle *rdb.Handle) *IBCChannels {
+	return &IBCChannels{
 		handle,
 	}
 }
 
-func (channelsView *Channels) Insert(channel *ChannelRow) error {
+func (ibcChannelsView *IBCChannels) Insert(channel *ChannelRow) error {
 	bondedTokensJSON, err := jsoniter.MarshalToString(channel.BondedTokens)
 	if err != nil {
 		return fmt.Errorf("error JSON marshalling channel bonded_tokens for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
+	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
 		Insert(
 			"view_ibc_channels",
 		).
@@ -70,9 +70,9 @@ func (channelsView *Channels) Insert(channel *ChannelRow) error {
 			channel.TotalTransferOutCount,
 			channel.TotalTransferOutSuccessCount,
 			channel.TotalTransferOutSuccessRate,
-			channelsView.rdb.Tton(&channel.CreatedAtBlockTime),
+			ibcChannelsView.rdb.Tton(&channel.CreatedAtBlockTime),
 			channel.CreatedAtBlockHeight,
-			channelsView.rdb.Tton(&channel.LastActivityBlockTime),
+			ibcChannelsView.rdb.Tton(&channel.LastActivityBlockTime),
 			channel.LastActivityBlockHeight,
 			bondedTokensJSON,
 		).
@@ -82,7 +82,7 @@ func (channelsView *Channels) Insert(channel *ChannelRow) error {
 		return fmt.Errorf("error building channel insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := channelsView.rdb.Exec(sql, sqlArgs...)
+	result, err := ibcChannelsView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
 		return fmt.Errorf("error inserting channel into the table: %v: %w", err, rdb.ErrWrite)
 	}
@@ -93,8 +93,8 @@ func (channelsView *Channels) Insert(channel *ChannelRow) error {
 	return nil
 }
 
-func (channelsView *Channels) UpdateFactualColumns(channel *ChannelRow) error {
-	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
+func (ibcChannelsView *IBCChannels) UpdateFactualColumns(channel *ChannelRow) error {
+	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
 		Update(
 			"view_ibc_channels",
 		).
@@ -103,7 +103,7 @@ func (channelsView *Channels) UpdateFactualColumns(channel *ChannelRow) error {
 			"counterparty_channel_id": channel.CounterpartyChannelID,
 			"counterparty_port_id":    channel.CounterpartyPortID,
 			"counterparty_chain_id":   channel.CounterpartyChainID,
-			"created_at_block_time":   channelsView.rdb.Tton(&channel.CreatedAtBlockTime),
+			"created_at_block_time":   ibcChannelsView.rdb.Tton(&channel.CreatedAtBlockTime),
 			"created_at_block_height": channel.CreatedAtBlockHeight,
 		}).
 		Where(
@@ -115,7 +115,7 @@ func (channelsView *Channels) UpdateFactualColumns(channel *ChannelRow) error {
 		return fmt.Errorf("error building channel update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := channelsView.rdb.Exec(sql, sqlArgs...)
+	result, err := ibcChannelsView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
 		return fmt.Errorf("error updating channel into the table: %v: %w", err, rdb.ErrWrite)
 	}
@@ -126,7 +126,7 @@ func (channelsView *Channels) UpdateFactualColumns(channel *ChannelRow) error {
 	return nil
 }
 
-func (channelsView *Channels) Increment(channelID string, column string, increaseNumber int64) error {
+func (ibcChannelsView *IBCChannels) Increment(channelID string, column string, increaseNumber int64) error {
 	if column != "total_transfer_in_count" &&
 		column != "total_transfer_out_count" &&
 		column != "total_transfer_out_success_count" {
@@ -135,7 +135,7 @@ func (channelsView *Channels) Increment(channelID string, column string, increas
 
 	newValue := fmt.Sprintf("%s+%v", column, increaseNumber)
 
-	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
+	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
 		Update("view_ibc_channels").
 		Set(column, sq.Expr(newValue)). // e.g. Set("columnA", sq.Expr("columnA+1"))
 		Where("channel_id = ?", channelID).
@@ -144,7 +144,7 @@ func (channelsView *Channels) Increment(channelID string, column string, increas
 		return fmt.Errorf("error building channel increment sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := channelsView.rdb.Exec(sql, sqlArgs...)
+	result, err := ibcChannelsView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
 		return fmt.Errorf("error incresing column: %v: %w", err, rdb.ErrWrite)
 	}
@@ -155,12 +155,12 @@ func (channelsView *Channels) Increment(channelID string, column string, increas
 	return nil
 }
 
-func (channelsView *Channels) UpdateSequence(channelID string, column string, sequence uint64) error {
+func (ibcChannelsView *IBCChannels) UpdateSequence(channelID string, column string, sequence uint64) error {
 	if column != "last_in_packet_sequence" && column != "last_out_packet_sequence" {
 		return fmt.Errorf("error unsupported column in UpdateSequence(): %v", column)
 	}
 
-	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
+	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
 		Update("view_ibc_channels").
 		SetMap(map[string]interface{}{
 			column: sequence,
@@ -171,7 +171,7 @@ func (channelsView *Channels) UpdateSequence(channelID string, column string, se
 		return fmt.Errorf("error building channel increment sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := channelsView.rdb.Exec(sql, sqlArgs...)
+	result, err := ibcChannelsView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
 		return fmt.Errorf("error incresing column: %v: %w", err, rdb.ErrWrite)
 	}
@@ -182,8 +182,8 @@ func (channelsView *Channels) UpdateSequence(channelID string, column string, se
 	return nil
 }
 
-func (channelsView *Channels) UpdateTotalTransferOutSuccessRate(channelID string) error {
-	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
+func (ibcChannelsView *IBCChannels) UpdateTotalTransferOutSuccessRate(channelID string) error {
+	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
 		Select(
 			"total_transfer_out_count",
 			"total_transfer_out_success_count",
@@ -196,7 +196,7 @@ func (channelsView *Channels) UpdateTotalTransferOutSuccessRate(channelID string
 	}
 
 	var channel ChannelRow
-	if err = channelsView.rdb.QueryRow(sql, sqlArgs...).Scan(
+	if err = ibcChannelsView.rdb.QueryRow(sql, sqlArgs...).Scan(
 		&channel.TotalTransferOutCount,
 		&channel.TotalTransferOutSuccessCount,
 	); err != nil {
@@ -212,7 +212,7 @@ func (channelsView *Channels) UpdateTotalTransferOutSuccessRate(channelID string
 		totalTransferOutSuccessRate = float64(channel.TotalTransferOutSuccessCount) / float64(channel.TotalTransferOutCount)
 	}
 
-	sql, sqlArgs, err = channelsView.rdb.StmtBuilder.
+	sql, sqlArgs, err = ibcChannelsView.rdb.StmtBuilder.
 		Update("view_ibc_channels").
 		SetMap(map[string]interface{}{
 			"total_transfer_out_success_rate": totalTransferOutSuccessRate,
@@ -223,7 +223,7 @@ func (channelsView *Channels) UpdateTotalTransferOutSuccessRate(channelID string
 		return fmt.Errorf("error building channel update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := channelsView.rdb.Exec(sql, sqlArgs...)
+	result, err := ibcChannelsView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
 		return fmt.Errorf("error updating total_transfer_out_success_rate: %v: %w", err, rdb.ErrWrite)
 	}
@@ -234,11 +234,11 @@ func (channelsView *Channels) UpdateTotalTransferOutSuccessRate(channelID string
 	return nil
 }
 
-func (channelsView *Channels) UpdateLastActivityTimeAndHeight(channelID string, time utctime.UTCTime, height int64) error {
-	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
+func (ibcChannelsView *IBCChannels) UpdateLastActivityTimeAndHeight(channelID string, time utctime.UTCTime, height int64) error {
+	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
 		Update("view_ibc_channels").
 		SetMap(map[string]interface{}{
-			"last_activity_block_time":   channelsView.rdb.Tton(&time),
+			"last_activity_block_time":   ibcChannelsView.rdb.Tton(&time),
 			"last_activity_block_height": height,
 		}).
 		Where("channel_id = ?", channelID).
@@ -247,7 +247,7 @@ func (channelsView *Channels) UpdateLastActivityTimeAndHeight(channelID string, 
 		return fmt.Errorf("error building channel update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := channelsView.rdb.Exec(sql, sqlArgs...)
+	result, err := ibcChannelsView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
 		return fmt.Errorf("error updating last_activity time and height: %v: %w", err, rdb.ErrWrite)
 	}
@@ -258,8 +258,8 @@ func (channelsView *Channels) UpdateLastActivityTimeAndHeight(channelID string, 
 	return nil
 }
 
-func (channelsView *Channels) UpdateStatus(channelID string, open bool) error {
-	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
+func (ibcChannelsView *IBCChannels) UpdateStatus(channelID string, open bool) error {
+	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
 		Update("view_ibc_channels").
 		SetMap(map[string]interface{}{
 			"status": open,
@@ -270,7 +270,7 @@ func (channelsView *Channels) UpdateStatus(channelID string, open bool) error {
 		return fmt.Errorf("error building channel.status update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := channelsView.rdb.Exec(sql, sqlArgs...)
+	result, err := ibcChannelsView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
 		return fmt.Errorf("error updating channel.status: %v: %w", err, rdb.ErrWrite)
 	}
@@ -281,13 +281,13 @@ func (channelsView *Channels) UpdateStatus(channelID string, open bool) error {
 	return nil
 }
 
-func (channelsView *Channels) UpdateBondedTokens(channelID string, bondedTokens *BondedTokens) error {
+func (ibcChannelsView *IBCChannels) UpdateBondedTokens(channelID string, bondedTokens *BondedTokens) error {
 	bondedTokensJSON, err := jsoniter.MarshalToString(*bondedTokens)
 	if err != nil {
 		return fmt.Errorf("error JSON marshalling channel bonded_tokens for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
+	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
 		Update("view_ibc_channels").
 		SetMap(map[string]interface{}{
 			"bonded_tokens": bondedTokensJSON,
@@ -298,7 +298,7 @@ func (channelsView *Channels) UpdateBondedTokens(channelID string, bondedTokens 
 		return fmt.Errorf("error building channel.bonded_tokens update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := channelsView.rdb.Exec(sql, sqlArgs...)
+	result, err := ibcChannelsView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
 		return fmt.Errorf("error updating channel.bonded_tokens: %v: %w", err, rdb.ErrWrite)
 	}
@@ -309,8 +309,8 @@ func (channelsView *Channels) UpdateBondedTokens(channelID string, bondedTokens 
 	return nil
 }
 
-func (channelsView *Channels) FindBondedTokensBy(channelID string) (*BondedTokens, error) {
-	sql, sqlArgs, err := channelsView.rdb.StmtBuilder.
+func (ibcChannelsView *IBCChannels) FindBondedTokensBy(channelID string) (*BondedTokens, error) {
+	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
 		Select("bonded_tokens").
 		From("view_ibc_channels").
 		Where("channel_id = ?", channelID).
@@ -320,7 +320,7 @@ func (channelsView *Channels) FindBondedTokensBy(channelID string) (*BondedToken
 	}
 
 	var bondedTokensJSON string
-	if err = channelsView.rdb.QueryRow(sql, sqlArgs...).Scan(
+	if err = ibcChannelsView.rdb.QueryRow(sql, sqlArgs...).Scan(
 		&bondedTokensJSON,
 	); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
@@ -337,8 +337,8 @@ func (channelsView *Channels) FindBondedTokensBy(channelID string) (*BondedToken
 	return &bondedTokens, nil
 }
 
-func (channelsView *Channels) List(order ChannelsListOrder, pagination *pagination.Pagination) ([]ChannelRow, *pagination.PaginationResult, error) {
-	stmtBuilder := channelsView.rdb.StmtBuilder.Select(
+func (ibcChannelsView *IBCChannels) List(order ChannelsListOrder, pagination *pagination.Pagination) ([]ChannelRow, *pagination.PaginationResult, error) {
+	stmtBuilder := ibcChannelsView.rdb.StmtBuilder.Select(
 		"channel_id",
 		"port_id",
 		"connection_id",
@@ -370,14 +370,14 @@ func (channelsView *Channels) List(order ChannelsListOrder, pagination *paginati
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
-		channelsView.rdb,
+		ibcChannelsView.rdb,
 	).BuildStmt(stmtBuilder)
 	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
 	if err != nil {
 		return nil, nil, fmt.Errorf("error building channels select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	rowsResult, err := channelsView.rdb.Query(sql, sqlArgs...)
+	rowsResult, err := ibcChannelsView.rdb.Query(sql, sqlArgs...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error executing channels select SQL: %v: %w", err, rdb.ErrQuery)
 	}
@@ -387,8 +387,8 @@ func (channelsView *Channels) List(order ChannelsListOrder, pagination *paginati
 	for rowsResult.Next() {
 		var channel ChannelRow
 		var bondedTokensJSON string
-		lastActivityTimeReader := channelsView.rdb.NtotReader()
-		createdAtTimeReader := channelsView.rdb.NtotReader()
+		lastActivityTimeReader := ibcChannelsView.rdb.NtotReader()
+		createdAtTimeReader := ibcChannelsView.rdb.NtotReader()
 		if err = rowsResult.Scan(
 			&channel.ChannelID,
 			&channel.PortID,
