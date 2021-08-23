@@ -128,11 +128,11 @@ func (projection *Base) persistGenesisParam(
 	case "staking.bond_denom":
 		value = genesis.AppState.Staking.Params.BondDenom
 	case "staking.historical_entries":
-		value = strconv.FormatInt(genesis.AppState.Staking.Params.HistoricalEntries, 10)
+		value = genesis.AppState.Staking.Params.HistoricalEntries.String()
 	case "staking.max_entries":
-		value = strconv.FormatInt(genesis.AppState.Staking.Params.MaxEntries, 10)
+		value = genesis.AppState.Staking.Params.MaxEntries.String()
 	case "staking.max_validators":
-		value = strconv.FormatInt(genesis.AppState.Staking.Params.MaxValidators, 10)
+		value = genesis.AppState.Staking.Params.MaxValidators.String()
 	case "staking.unbonding_time":
 		value = genesis.AppState.Staking.Params.UnbondingTime
 
