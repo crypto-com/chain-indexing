@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"errors"
+
 	"github.com/valyala/fasthttp"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
@@ -13,7 +15,7 @@ import (
 type Channels struct {
 	logger applogger.Logger
 
-	channelView *channel_view.IBCChannels
+	ibcChannelView *channel_view.IBCChannels
 }
 
 func NewChannels(logger applogger.Logger, rdbHandle *rdb.Handle) *Channels {
@@ -27,8 +29,6 @@ func NewChannels(logger applogger.Logger, rdbHandle *rdb.Handle) *Channels {
 }
 
 func (handler *Channels) List(ctx *fasthttp.RequestCtx) {
-	var err error
-
 	pagination, err := httpapi.ParsePagination(ctx)
 	if err != nil {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
@@ -43,7 +43,7 @@ func (handler *Channels) List(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
-	channels, paginationResult, err := handler.channelView.List(channel_view.ChannelsListOrder{
+	channels, paginationResult, err := handler.ibcChannelView.List(channel_view.ChannelsListOrder{
 		ChannelID: channelIdOrder,
 	}, pagination)
 	if err != nil {
@@ -53,4 +53,21 @@ func (handler *Channels) List(ctx *fasthttp.RequestCtx) {
 	}
 
 	httpapi.SuccessWithPagination(ctx, channels, paginationResult)
+}
+
+func (handler *Channels) FindById(ctx *fasthttp.RequestCtx) {
+	channel, err := handler.ibcChannelView.FindBy(
+		ctx.UserValue("channelId").(string),
+	)
+	if err != nil {
+		if errors.Is(err, rdb.ErrNoRows) {
+			httpapi.NotFound(ctx)
+			return
+		}
+		handler.logger.Errorf("error finding channel by id: %v", err)
+		httpapi.InternalServerError(ctx)
+		return
+	}
+
+	httpapi.Success(ctx, channel)
 }
