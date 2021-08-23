@@ -110,4 +110,5 @@ func (registry *RouteRegistry) Register(server *httpapi.Server, routePrefix stri
 	server.GET(fmt.Sprintf("%s/api/v1/nfts/accounts/{account}/tokens", routePrefix), registry.nftsHandler.ListTokensByAccount)
 
 	server.GET(fmt.Sprintf("%s/api/v1/channels", routePrefix), registry.channelsHandler.List)
+	server.GET(fmt.Sprintf("%s/api/v1/channels/{channelId}", routePrefix), registry.channelsHandler.FindById)
 }

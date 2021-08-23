@@ -337,6 +337,86 @@ func (ibcChannelsView *IBCChannels) FindBondedTokensBy(channelID string) (*Bonde
 	return &bondedTokens, nil
 }
 
+func (ibcChannelsView *IBCChannels) FindBy(channelID string) (*ChannelRow, error) {
+	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
+		Select(
+			"channel_id",
+			"port_id",
+			"connection_id",
+			"counterparty_channel_id",
+			"counterparty_port_id",
+			"counterparty_chain_id",
+			"status",
+			"packet_ordering",
+			"last_in_packet_sequence",
+			"last_out_packet_sequence",
+			"total_transfer_in_count",
+			"total_transfer_out_count",
+			"total_transfer_out_success_count",
+			"total_transfer_out_success_rate",
+			"created_at_block_time",
+			"created_at_block_height",
+			"last_activity_block_time",
+			"last_activity_block_height",
+			"bonded_tokens",
+		).
+		From("view_ibc_channels").
+		Where("channel_id = ?", channelID).
+		ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("error building select channel sql: %v: %w", err, rdb.ErrPrepare)
+	}
+
+	var channel ChannelRow
+	var bondedTokensJSON string
+	lastActivityTimeReader := ibcChannelsView.rdb.NtotReader()
+	createdAtTimeReader := ibcChannelsView.rdb.NtotReader()
+	if err = ibcChannelsView.rdb.QueryRow(sql, sqlArgs...).Scan(
+		&channel.ChannelID,
+		&channel.PortID,
+		&channel.ConnectionID,
+		&channel.CounterpartyChannelID,
+		&channel.CounterpartyPortID,
+		&channel.CounterpartyChainID,
+		&channel.Status,
+		&channel.PacketOrdering,
+		&channel.LastInPacketSequence,
+		&channel.LastOutPacketSequence,
+		&channel.TotalTransferInCount,
+		&channel.TotalTransferOutCount,
+		&channel.TotalTransferOutSuccessCount,
+		&channel.TotalTransferOutSuccessRate,
+		createdAtTimeReader.ScannableArg(),
+		&channel.CreatedAtBlockHeight,
+		lastActivityTimeReader.ScannableArg(),
+		&channel.LastActivityBlockHeight,
+		&bondedTokensJSON,
+	); err != nil {
+		if errors.Is(err, rdb.ErrNoRows) {
+			return nil, rdb.ErrNoRows
+		}
+		return nil, fmt.Errorf("error scanning channel: %v: %w", err, rdb.ErrQuery)
+	}
+
+	createdAtBlockTime, parseErr := createdAtTimeReader.Parse()
+	if parseErr != nil {
+		return nil, fmt.Errorf("error parsing createdAtBlockTime: %v: %w", parseErr, rdb.ErrQuery)
+	}
+	channel.CreatedAtBlockTime = *createdAtBlockTime
+
+	lastActivityBlockTime, parseErr := lastActivityTimeReader.Parse()
+	if parseErr != nil {
+		return nil, fmt.Errorf("error parsing lastActivityBlockTime: %v: %w", parseErr, rdb.ErrQuery)
+	}
+	channel.LastActivityBlockTime = *lastActivityBlockTime
+
+	if err = jsoniter.UnmarshalFromString(bondedTokensJSON, &channel.BondedTokens); err != nil {
+		return nil, fmt.Errorf("error unmarshalling channel bonded_tokens JSON: %v: %w", err, rdb.ErrQuery)
+	}
+
+	return &channel, nil
+}
+
 func (ibcChannelsView *IBCChannels) List(order ChannelsListOrder, pagination *pagination.Pagination) ([]ChannelRow, *pagination.PaginationResult, error) {
 	stmtBuilder := ibcChannelsView.rdb.StmtBuilder.Select(
 		"channel_id",
