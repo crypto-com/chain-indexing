@@ -4,6 +4,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/go-version"
+
 	"github.com/crypto-com/chain-indexing/internal/json"
 
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
@@ -78,12 +80,14 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
+			anyVersion := version.Must(version.NewVersion("v0.43"))
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
 				accountAddressPrefix,
 				stakingDenom,
+				anyVersion,
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))

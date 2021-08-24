@@ -3,8 +3,7 @@ package parser_test
 import (
 	"strings"
 
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-
+	"github.com/hashicorp/go-version"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -15,6 +14,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
 	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
 var _ = Describe("ParseMsgCommands", func() {
@@ -22,10 +22,12 @@ var _ = Describe("ParseMsgCommands", func() {
 
 		It("should parse Msg commands when there is staking.MsgCreateValidator in the transaction", func() {
 			txDecoder := utils.NewTxDecoder()
-			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_MSG_CREATE_VALIDATOR_BLOCK_RESP))
-			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_MSG_CREATE_VALIDATOR_BLOCK_RESULTS_RESP))
+			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_MSG_CREATE_VALIDATOR_V0_43_BLOCK_RESP))
+			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_MSG_CREATE_VALIDATOR_V0_43_BLOCK_RESULTS_RESP))
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"
+
+			anyVersion := version.Must(version.NewVersion("v0.43"))
 
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
@@ -33,6 +35,7 @@ var _ = Describe("ParseMsgCommands", func() {
 				blockResults,
 				accountAddressPrefix,
 				bondingDenom,
+				anyVersion,
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
@@ -40,7 +43,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(thiscmd.Name()).To(Equal("CreateMsgCreateValidator"))
 
 			description := model.ValidatorDescription{
-				Moniker:         "leo-node",
+				Moniker:         "c4_node_testing",
 				Identity:        "",
 				Website:         "",
 				SecurityContact: "",
@@ -54,8 +57,8 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			Expect(thiscmd).To(Equal(command_usecase.NewCreateMsgCreateValidator(
 				event.MsgCommonParams{
-					BlockHeight: int64(76550),
-					TxHash:      "1FE830F23A3C542547700AAB3D0E5106A0131B393260910F63EE3B5542E281EF",
+					BlockHeight: int64(3106),
+					TxHash:      "2F5390FB7F7570D463993A2A97CABCBC764286FA2CE052721D8771AA8B8D3853",
 					TxSuccess:   true,
 					MsgIndex:    0,
 				},
@@ -63,10 +66,10 @@ var _ = Describe("ParseMsgCommands", func() {
 					Description:       description,
 					Commission:        commissionRates,
 					MinSelfDelegation: "1",
-					DelegatorAddress:  "tcro109ww3ss92v4vsaq470vvgw528mtqp98mq0vvp9",
-					ValidatorAddress:  "tcrocncl109ww3ss92v4vsaq470vvgw528mtqp98m4s04ex",
-					TendermintPubkey:  "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
-					Amount:            coin.MustParseCoinNormalized("10000000000000basetcro"),
+					DelegatorAddress:  "tcro1k4nz2yalsuzuzxexcxuughp33cfqls7e6utarx",
+					ValidatorAddress:  "tcrocncl1k4nz2yalsuzuzxexcxuughp33cfqls7e0rgym9",
+					TendermintPubkey:  "hTpJIeVSSo1PNU87B8y1vMvpyv3ShMmu2I0vYON1w2o=",
+					Amount:            coin.MustParseCoinNormalized("100000000000basetcro"),
 				},
 			)))
 		})

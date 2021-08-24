@@ -129,8 +129,9 @@ func CliApp(args []string) error {
 				cliConfig.DatabasePort = primptr.Int32(int32(ctx.Int("dbPort")))
 			}
 
-			config := Config{
-				fileConfig,
+			config := NewConfigFromFileConfig(fileConfig)
+			if parseConfigErr := config.Parse(); parseConfigErr != nil {
+				panic(fmt.Errorf("invalid config: %v", parseConfigErr))
 			}
 			config.OverrideByCLIConfig(&cliConfig)
 
@@ -146,21 +147,21 @@ func CliApp(args []string) error {
 				logger.Panicf("unrecognized system mode: %s", config.System.Mode)
 			}
 
-			rdbConn, err := SetupRDbConn(&config, logger)
+			rdbConn, err := SetupRDbConn(config, logger)
 			if err != nil {
 				logger.Panicf("error setting up RDb connection: %v", err)
 			}
 
-			httpAPIServer := NewHTTPAPIServer(logger, rdbConn, &config)
+			httpAPIServer := NewHTTPAPIServer(logger, rdbConn, config)
 			go func() {
 				if runErr := httpAPIServer.Run(); runErr != nil {
 					logger.Panicf("%v", runErr)
 				}
 			}()
 
-			projections := initProjections(logger, rdbConn, &config)
+			projections := initProjections(logger, rdbConn, config)
 
-			indexService := NewIndexService(logger, rdbConn, &config, projections)
+			indexService := NewIndexService(logger, rdbConn, config, projections)
 			go func() {
 				if runErr := indexService.Run(); runErr != nil {
 					logger.Panicf("%v", runErr)

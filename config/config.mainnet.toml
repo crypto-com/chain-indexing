@@ -1,4 +1,5 @@
 [blockchain]
+cosmos_sdk_version = "v0.42.7"
 bonding_denom = "basecro"
 account_address_prefix = "cro"
 account_pubkey_prefix = "cro"
@@ -12,6 +13,7 @@ connode_pubkey_prefix = "crocnclconspub"
 # EVENT_STORE mode: synced blocks are parsed to events and persist to event store. Projections will replay events from
 # event store.
 # TENDERMINT_DIRECT mode: synced blocks are parsed to events and are replayed directly by projections.
+# API_ONLY mode: indexing is disabled and provide API service only
 mode = "TENDERMINT_DIRECT"
 
 [sync]

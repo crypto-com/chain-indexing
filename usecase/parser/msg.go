@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/hashicorp/go-version"
+
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 
@@ -33,6 +35,7 @@ func ParseBlockResultsTxsMsgToCommands(
 	blockResults *model.BlockResults,
 	accountAddressPrefix string,
 	stakingDenom string,
+	cosmosSDKVersion *version.Version,
 ) ([]command.Command, error) {
 	commands := make([]command.Command, 0)
 
@@ -135,7 +138,7 @@ func ParseBlockResultsTxsMsgToCommands(
 			case "/ibc.applications.transfer.v1.MsgTransfer":
 				msgCommands = ibcmsg.ParseMsgTransfer(msgCommonParams, txsResult, msgIndex, msg)
 			case "/ibc.core.channel.v1.MsgRecvPacket":
-				msgCommands = ibcmsg.ParseMsgRecvPacket(msgCommonParams, txsResult, msgIndex, msg)
+				msgCommands = ibcmsg.ParseMsgRecvPacket(msgCommonParams, txsResult, msgIndex, msg, cosmosSDKVersion)
 			case "/ibc.core.channel.v1.MsgAcknowledgement":
 				msgCommands = ibcmsg.ParseMsgAcknowledgement(msgCommonParams, txsResult, msgIndex, msg)
 			case "/ibc.core.channel.v1.MsgTimeout":

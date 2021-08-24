@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+	"github.com/hashicorp/go-version"
 
 	"github.com/crypto-com/chain-indexing/usecase/command"
 
@@ -18,6 +19,7 @@ func ParseBlockToCommands(
 	blockResults *usecase_model.BlockResults,
 	accountAddressPrefix string,
 	bondingDenom string,
+	cosmosSDKVersion *version.Version,
 ) ([]entity_command.Command, error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -47,6 +49,7 @@ func ParseBlockToCommands(
 			blockResults,
 			accountAddressPrefix,
 			bondingDenom,
+			cosmosSDKVersion,
 		)
 		if parseErr != nil {
 			return nil, fmt.Errorf("error parsing message commands: %v", parseErr)

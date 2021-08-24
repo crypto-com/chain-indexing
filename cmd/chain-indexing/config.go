@@ -1,7 +1,21 @@
 package main
 
+import (
+	"fmt"
+
+	"github.com/hashicorp/go-version"
+)
+
 type Config struct {
-	FileConfig
+	ParsedConfig
+}
+
+func NewConfigFromFileConfig(fileConfig FileConfig) *Config {
+	return &Config{
+		ParsedConfig{
+			FileConfig: fileConfig,
+		},
+	}
 }
 
 func (config *Config) OverrideByCLIConfig(cliConfig *CLIConfig) {
@@ -71,6 +85,7 @@ type FileConfig struct {
 }
 
 type BlockchainConfig struct {
+	CosmosSDKVersionText   string `toml:"cosmos_sdk_version"`
 	BondingDenom           string `toml:"bonding_denom"`
 	AccountAddressPrefix   string `toml:"account_address_prefix"`
 	AccountPubKeyPrefix    string `toml:"account_pubkey_prefix"`
@@ -137,4 +152,27 @@ type LoggerConfig struct {
 
 type ProjectionConfig struct {
 	Enables []string `toml:"enables"`
+}
+
+type ParsedConfig struct {
+	FileConfig
+	Blockchain ParsedBlockchainConfig
+}
+
+func (config *Config) Parse() error {
+	config.ParsedConfig.Blockchain.BlockchainConfig = config.FileConfig.Blockchain
+
+	if config.FileConfig.Blockchain.CosmosSDKVersionText != "" {
+		if version, parseErr := version.NewVersion(config.FileConfig.Blockchain.CosmosSDKVersionText); parseErr != nil {
+			return fmt.Errorf("error parsing Cosmos SDK version from file config: %v", parseErr)
+		} else {
+			config.ParsedConfig.Blockchain.CosmosSDKVersion = version
+		}
+	}
+	return nil
+}
+
+type ParsedBlockchainConfig struct {
+	BlockchainConfig
+	CosmosSDKVersion *version.Version
 }

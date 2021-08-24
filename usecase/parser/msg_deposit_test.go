@@ -3,6 +3,7 @@ package parser_test
 import (
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+	"github.com/hashicorp/go-version"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -25,12 +26,15 @@ var _ = Describe("ParseMsgCommands", func() {
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"
 
+			anyVersion := version.Must(version.NewVersion("v0.43"))
+
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
 				accountAddressPrefix,
 				bondingDenom,
+				anyVersion,
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))

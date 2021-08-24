@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+	"github.com/hashicorp/go-version"
 
 	event_interface "github.com/crypto-com/chain-indexing/appinterface/event"
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
@@ -20,6 +21,7 @@ type IndexService struct {
 	projections []projection_entity.Projection
 
 	systemMode               string
+	cosmosSDKVersion         *version.Version
 	accountAddressPrefix     string
 	consNodeAddressPrefix    string
 	bondingDenom             string
@@ -42,6 +44,7 @@ func NewIndexService(
 		projections: projections,
 
 		systemMode:               config.System.Mode,
+		cosmosSDKVersion:         config.Blockchain.CosmosSDKVersion,
 		consNodeAddressPrefix:    config.Blockchain.ConNodeAddressPrefix,
 		accountAddressPrefix:     config.Blockchain.AccountAddressPrefix,
 		bondingDenom:             config.Blockchain.BondingDenom,
@@ -107,6 +110,7 @@ func (service *IndexService) RunEventStoreMode() error {
 				TendermintRPCUrl:         service.tendermintHTTPRPCURL,
 				InsecureTendermintClient: service.insecureTendermintClient,
 				StrictGenesisParsing:     service.strictGenesisParsing,
+				CosmosSDKVersion:         service.cosmosSDKVersion,
 				AccountAddressPrefix:     service.accountAddressPrefix,
 				StakingDenom:             service.bondingDenom,
 			},

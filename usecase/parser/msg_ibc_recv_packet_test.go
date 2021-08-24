@@ -4,23 +4,21 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/crypto-com/chain-indexing/internal/json"
-
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-
+	"github.com/hashicorp/go-version"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
+	"github.com/crypto-com/chain-indexing/internal/json"
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
 	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgIBCRecvPacket", func() {
-		It("should parse Msg commands when there is MsgIBCRecvPacket in the transaction", func() {
-			expected := `{
+		expected := `{
   "name": "MsgRecvPacketCreated",
   "version": 1,
   "height": 26,
@@ -56,7 +54,7 @@ var _ = Describe("ParseMsgCommands", func() {
       "receiver": "cro1dulwqgcdpemn8c34sjd92fxepz5p0sqpeevw7f",
       "denom": "basecro",
       "amount": "1234",
-      "success": true,
+      "success": {SUCCESS},
       "maybeDenominationTrace": {
         "hash": "6411AE2ADA1E73DB59DB151A8988F9B7D5E7E233D8414DB6817F8F1A01611F86",
         "denom": "ibc/6411AE2ADA1E73DB59DB151A8988F9B7D5E7E233D8414DB6817F8F1A01611F86"
@@ -72,7 +70,7 @@ var _ = Describe("ParseMsgCommands", func() {
   }
 }
 `
-
+		It("should parse Msg commands when there is MsgIBCRecvPacket in the transaction", func() {
 			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_RECV_PACKET_BLOCK_RESP,
@@ -83,12 +81,14 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
+			v0_42_7 := version.Must(version.NewVersion("v0.42.7"))
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
 				accountAddressPrefix,
 				stakingDenom,
+				v0_42_7,
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))
@@ -101,11 +101,143 @@ var _ = Describe("ParseMsgCommands", func() {
 			regex, _ := regexp.Compile("\n?\r?\\s?")
 
 			Expect(json.MustMarshalToString(typedEvent)).To(Equal(
-				strings.Replace(
-					regex.ReplaceAllString(expected, ""),
-					"{UUID}",
-					typedEvent.UUID(),
-					-1,
+				strings.ReplaceAll(
+					strings.ReplaceAll(
+						regex.ReplaceAllString(expected, ""),
+						"{UUID}",
+						typedEvent.UUID(),
+					),
+					"{SUCCESS}",
+					"false",
+				),
+			))
+		})
+
+		It("should reverse success value when Cosmos SDK version is before v0.42.7", func() {
+			txDecoder := utils.NewTxDecoder()
+			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
+				usecase_parser_test.TX_MSG_RECV_PACKET_BLOCK_RESP,
+			))
+			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
+				usecase_parser_test.TX_MSG_RECV_PACKET_BLOCK_RESULTS_RESP,
+			))
+
+			accountAddressPrefix := "cro"
+			stakingDenom := "basecro"
+			v0_42 := version.Must(version.NewVersion("v0.42"))
+			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
+				txDecoder,
+				block,
+				blockResults,
+				accountAddressPrefix,
+				stakingDenom,
+				v0_42,
+			)
+			Expect(err).To(BeNil())
+			Expect(cmds).To(HaveLen(2))
+			cmd := cmds[1]
+			Expect(cmd.Name()).To(Equal("CreateMsgIBCRecvPacket"))
+
+			untypedEvent, _ := cmd.Exec()
+			typedEvent := untypedEvent.(*event.MsgIBCRecvPacket)
+
+			regex, _ := regexp.Compile("\n?\r?\\s?")
+
+			Expect(json.MustMarshalToString(typedEvent)).To(Equal(
+				strings.ReplaceAll(
+					strings.ReplaceAll(
+						regex.ReplaceAllString(expected, ""),
+						"{UUID}",
+						typedEvent.UUID(),
+					),
+					"{SUCCESS}",
+					"true",
+				),
+			))
+		})
+
+		It("should parse success value using the on-chain value when Cosmos SDK version is v0.42.7", func() {
+			txDecoder := utils.NewTxDecoder()
+			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
+				usecase_parser_test.TX_MSG_RECV_PACKET_BLOCK_RESP,
+			))
+			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
+				usecase_parser_test.TX_MSG_RECV_PACKET_BLOCK_RESULTS_RESP,
+			))
+
+			accountAddressPrefix := "cro"
+			stakingDenom := "basecro"
+			v0_42_7 := version.Must(version.NewVersion("v0.42.7"))
+			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
+				txDecoder,
+				block,
+				blockResults,
+				accountAddressPrefix,
+				stakingDenom,
+				v0_42_7,
+			)
+			Expect(err).To(BeNil())
+			Expect(cmds).To(HaveLen(2))
+			cmd := cmds[1]
+			Expect(cmd.Name()).To(Equal("CreateMsgIBCRecvPacket"))
+
+			untypedEvent, _ := cmd.Exec()
+			typedEvent := untypedEvent.(*event.MsgIBCRecvPacket)
+
+			regex, _ := regexp.Compile("\n?\r?\\s?")
+
+			Expect(json.MustMarshalToString(typedEvent)).To(Equal(
+				strings.ReplaceAll(
+					strings.ReplaceAll(
+						regex.ReplaceAllString(expected, ""),
+						"{UUID}",
+						typedEvent.UUID(),
+					),
+					"{SUCCESS}",
+					"false",
+				),
+			))
+		})
+
+		It("should parse success value using the on-chain value when Cosmos SDK version is v0.43", func() {
+			txDecoder := utils.NewTxDecoder()
+			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
+				usecase_parser_test.TX_MSG_RECV_PACKET_BLOCK_RESP,
+			))
+			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
+				usecase_parser_test.TX_MSG_RECV_PACKET_BLOCK_RESULTS_RESP,
+			))
+
+			accountAddressPrefix := "cro"
+			stakingDenom := "basecro"
+			v0_42_7 := version.Must(version.NewVersion("v0.42.7"))
+			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
+				txDecoder,
+				block,
+				blockResults,
+				accountAddressPrefix,
+				stakingDenom,
+				v0_42_7,
+			)
+			Expect(err).To(BeNil())
+			Expect(cmds).To(HaveLen(2))
+			cmd := cmds[1]
+			Expect(cmd.Name()).To(Equal("CreateMsgIBCRecvPacket"))
+
+			untypedEvent, _ := cmd.Exec()
+			typedEvent := untypedEvent.(*event.MsgIBCRecvPacket)
+
+			regex, _ := regexp.Compile("\n?\r?\\s?")
+
+			Expect(json.MustMarshalToString(typedEvent)).To(Equal(
+				strings.ReplaceAll(
+					strings.ReplaceAll(
+						regex.ReplaceAllString(expected, ""),
+						"{UUID}",
+						typedEvent.UUID(),
+					),
+					"{SUCCESS}",
+					"false",
 				),
 			))
 		})

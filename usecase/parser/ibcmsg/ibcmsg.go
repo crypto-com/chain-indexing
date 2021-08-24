@@ -7,12 +7,13 @@ import (
 	"strings"
 	"time"
 
-	base64_internal "github.com/crypto-com/chain-indexing/internal/base64"
-	"github.com/crypto-com/chain-indexing/internal/json"
+	version "github.com/hashicorp/go-version"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/mitchellh/mapstructure"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
+	base64_internal "github.com/crypto-com/chain-indexing/internal/base64"
+	"github.com/crypto-com/chain-indexing/internal/json"
 	"github.com/crypto-com/chain-indexing/internal/typeconv"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/event"
@@ -687,6 +688,7 @@ func ParseMsgRecvPacket(
 	txsResult model.BlockResultsTxsResult,
 	msgIndex int,
 	msg map[string]interface{},
+	cosmosSDKVersion *version.Version,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgRecvPacket
 	decoderConfig := &mapstructure.DecoderConfig{
@@ -763,6 +765,15 @@ func ParseMsgRecvPacket(
 	var packetAck ibc_model.MsgRecvPacketPacketAck
 	json.MustUnmarshalFromString(writeAckEvent.MustGetAttributeByKey("packet_ack"), &packetAck)
 
+	v0_42_7 := version.Must(version.NewVersion("v0.42.7"))
+	var transferSuccess bool
+	if cosmosSDKVersion.LessThan(v0_42_7) {
+		// success value inverted bug: https://github.com/cosmos/cosmos-sdk/pull/9640
+		transferSuccess = fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "false"
+	} else {
+		transferSuccess = fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "true"
+	}
+
 	params := ibc_model.MsgRecvPacketParams{
 		RawMsgRecvPacket: rawMsg,
 
@@ -770,9 +781,8 @@ func ParseMsgRecvPacket(
 		MessageType: "MsgTransfer",
 		MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 			FungibleTokenPacketData: rawFungibleTokenPacketData,
-			// success value inverted bug: https://github.com/cosmos/cosmos-sdk/pull/9640
-			Success:                fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "false",
-			MaybeDenominationTrace: maybeDenominationTrace,
+			Success:                 transferSuccess,
+			MaybeDenominationTrace:  maybeDenominationTrace,
 		},
 
 		PacketSequence:  typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),

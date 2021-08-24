@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/go-version"
+
 	"github.com/cenkalti/backoff/v4"
 
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
@@ -32,6 +34,7 @@ type SyncManager struct {
 	maxRetryTime         time.Duration
 	strictGenesisParsing bool
 
+	cosmosSDKVersion     *version.Version
 	accountAddressPrefix string
 	stakingDenom         string
 
@@ -59,6 +62,7 @@ type SyncManagerConfig struct {
 	InsecureTendermintClient bool
 	StrictGenesisParsing     bool
 
+	CosmosSDKVersion     *version.Version
 	AccountAddressPrefix string
 	StakingDenom         string
 }
@@ -92,6 +96,7 @@ func NewSyncManager(
 		maxRetryTime:         DEFAULT_MAX_RETRY_TIME,
 		strictGenesisParsing: params.Config.StrictGenesisParsing,
 
+		cosmosSDKVersion:     params.Config.CosmosSDKVersion,
 		accountAddressPrefix: params.Config.AccountAddressPrefix,
 		stakingDenom:         params.Config.StakingDenom,
 
@@ -197,6 +202,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		blockResults,
 		manager.accountAddressPrefix,
 		manager.stakingDenom,
+		manager.cosmosSDKVersion,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing block data to commands %v", err)
