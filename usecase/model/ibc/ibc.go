@@ -1,5 +1,7 @@
 package ibc
 
+import "github.com/crypto-com/chain-indexing/internal/json"
+
 type Height struct {
 	RevisionNumber uint64 `mapstructure:"revision_number" json:"revisionNumber,string"`
 	RevisionHeight uint64 `mapstructure:"revision_height" json:"revisionHeight,string"`
@@ -45,8 +47,8 @@ type Packet struct {
 }
 
 type FungibleTokenPacketData struct {
-	Sender   string `mapstructure:"sender" json:"sender"`
-	Receiver string `mapstructure:"receiver" json:"receiver"`
-	Denom    string `mapstructure:"denom" json:"denom"`
-	Amount   uint64 `mapstructure:"amount" json:"amount,string"`
+	Sender   string      `mapstructure:"sender" json:"sender"`
+	Receiver string      `mapstructure:"receiver" json:"receiver"`
+	Denom    string      `mapstructure:"denom" json:"denom"`
+	Amount   json.Uint64 `mapstructure:"amount" json:"amount"`
 }

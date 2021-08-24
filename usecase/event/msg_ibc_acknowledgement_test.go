@@ -77,6 +77,7 @@ var _ = Describe("Event", func() {
 				DecodeHook: mapstructure.ComposeDecodeHookFunc(
 					mapstructure.StringToTimeDurationHookFunc(),
 					mapstructure.StringToTimeHookFunc(time.RFC3339),
+					ibcmsg.StringToJsonUint64HookFunc(),
 					ibcmsg.StringToDurationHookFunc(),
 					ibcmsg.StringToByteSliceHookFunc(),
 				),
@@ -198,6 +199,7 @@ var _ = Describe("Event", func() {
 				DecodeHook: mapstructure.ComposeDecodeHookFunc(
 					mapstructure.StringToTimeDurationHookFunc(),
 					mapstructure.StringToTimeHookFunc(time.RFC3339),
+					ibcmsg.StringToJsonUint64HookFunc(),
 					ibcmsg.StringToDurationHookFunc(),
 					ibcmsg.StringToByteSliceHookFunc(),
 				),
