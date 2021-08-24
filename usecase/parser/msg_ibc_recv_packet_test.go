@@ -244,7 +244,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			})
 		})
 
-		FIt("should parse Msg commands when there is SoloMachine MsgIBCRecvPacket in the transaction", func() {
+		It("should parse Msg commands when there is SoloMachine MsgIBCRecvPacket in the transaction", func() {
 			expected := `{
   "name": "MsgRecvPacketCreated",
   "version": 1,
