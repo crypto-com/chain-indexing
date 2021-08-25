@@ -362,9 +362,9 @@ type Vesting struct {
 
 type StakingParams struct {
 	BondDenom         string      `json:"bond_denom"`
-	HistoricalEntries json.Uint16 `json:"historical_entries"`
-	MaxEntries        json.Uint16 `json:"max_entries"`
-	MaxValidators     json.Uint16 `json:"max_validators"`
+	HistoricalEntries json.Uint32 `json:"historical_entries"`
+	MaxEntries        json.Uint32 `json:"max_entries"`
+	MaxValidators     json.Uint32 `json:"max_validators"`
 	UnbondingTime     string      `json:"unbonding_time"`
 }
 
