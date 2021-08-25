@@ -51,6 +51,8 @@ func (ibcChannelsView *IBCChannels) Insert(channel *ChannelRow) error {
 			"total_transfer_out_success_rate",
 			"created_at_block_time",
 			"created_at_block_height",
+			"verified",
+			"description",
 			"last_activity_block_time",
 			"last_activity_block_height",
 			"bonded_tokens",
@@ -72,6 +74,8 @@ func (ibcChannelsView *IBCChannels) Insert(channel *ChannelRow) error {
 			channel.TotalTransferOutSuccessRate,
 			ibcChannelsView.rdb.Tton(&channel.CreatedAtBlockTime),
 			channel.CreatedAtBlockHeight,
+			channel.Verified,
+			channel.Description,
 			ibcChannelsView.rdb.Tton(&channel.LastActivityBlockTime),
 			channel.LastActivityBlockHeight,
 			bondedTokensJSON,
@@ -356,6 +360,8 @@ func (ibcChannelsView *IBCChannels) FindBy(channelID string) (*ChannelRow, error
 			"total_transfer_out_success_rate",
 			"created_at_block_time",
 			"created_at_block_height",
+			"verified",
+			"description",
 			"last_activity_block_time",
 			"last_activity_block_height",
 			"bonded_tokens",
@@ -388,6 +394,8 @@ func (ibcChannelsView *IBCChannels) FindBy(channelID string) (*ChannelRow, error
 		&channel.TotalTransferOutSuccessRate,
 		createdAtTimeReader.ScannableArg(),
 		&channel.CreatedAtBlockHeight,
+		&channel.Verified,
+		&channel.Description,
 		lastActivityTimeReader.ScannableArg(),
 		&channel.LastActivityBlockHeight,
 		&bondedTokensJSON,
@@ -435,6 +443,8 @@ func (ibcChannelsView *IBCChannels) List(order ChannelsListOrder, pagination *pa
 		"total_transfer_out_success_rate",
 		"created_at_block_time",
 		"created_at_block_height",
+		"verified",
+		"description",
 		"last_activity_block_time",
 		"last_activity_block_height",
 		"bonded_tokens",
@@ -486,6 +496,8 @@ func (ibcChannelsView *IBCChannels) List(order ChannelsListOrder, pagination *pa
 			&channel.TotalTransferOutSuccessRate,
 			createdAtTimeReader.ScannableArg(),
 			&channel.CreatedAtBlockHeight,
+			&channel.Verified,
+			&channel.Description,
 			lastActivityTimeReader.ScannableArg(),
 			&channel.LastActivityBlockHeight,
 			&bondedTokensJSON,
@@ -544,6 +556,8 @@ type ChannelRow struct {
 	TotalTransferOutSuccessRate  float64         `json:"totalTransferOutSuccessRate"`
 	CreatedAtBlockTime           utctime.UTCTime `json:"createdAtBlockTime"`
 	CreatedAtBlockHeight         int64           `json:"createdAtBlockHeight"`
+	Verified                     bool            `json:"verified"`
+	Description                  string          `json:"description"`
 	LastActivityBlockTime        utctime.UTCTime `json:"lastActivityBlockTime"`
 	LastActivityBlockHeight      int64           `json:"lastActivityBlockHeight"`
 	BondedTokens                 BondedTokens    `json:"bondedTokens"`
