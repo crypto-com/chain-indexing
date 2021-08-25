@@ -14,7 +14,7 @@ import (
 	"github.com/crypto-com/chain-indexing/projection/account_transaction"
 	"github.com/crypto-com/chain-indexing/projection/block"
 	"github.com/crypto-com/chain-indexing/projection/blockevent"
-	"github.com/crypto-com/chain-indexing/projection/ibc"
+	"github.com/crypto-com/chain-indexing/projection/ibc_channel"
 	"github.com/crypto-com/chain-indexing/projection/nft"
 	"github.com/crypto-com/chain-indexing/projection/proposal"
 	"github.com/crypto-com/chain-indexing/projection/transaction"
@@ -56,8 +56,8 @@ func InitProjection(name string, params InitParams) projection_entity.Projection
 			EnableDrop:       true,
 			DropDataAccessor: "dropId",
 		})
-	case "IBC":
-		return ibc.NewIBC(params.Logger, params.RdbConn)
+	case "IBCChannel":
+		return ibc_channel.NewIBCChannel(params.Logger, params.RdbConn)
 	// register more projections here
 	default:
 		panic(fmt.Sprintf("Unrecognized projection: %s", name))

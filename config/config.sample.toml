@@ -76,6 +76,6 @@ enables = [
     "Validator",
     "ValidatorStats",
     "NFT",
-    "IBC",
+    "IBCChannel",
 #    "CryptoComNFT",
 ]
