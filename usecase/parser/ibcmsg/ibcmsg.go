@@ -770,9 +770,8 @@ func ParseMsgRecvPacket(
 		MessageType: "MsgTransfer",
 		MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 			FungibleTokenPacketData: rawFungibleTokenPacketData,
-			// success value inverted bug: https://github.com/cosmos/cosmos-sdk/pull/9640
-			Success:                fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "false",
-			MaybeDenominationTrace: maybeDenominationTrace,
+			Success:                 fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "true",
+			MaybeDenominationTrace:  maybeDenominationTrace,
 		},
 
 		PacketSequence:  typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
