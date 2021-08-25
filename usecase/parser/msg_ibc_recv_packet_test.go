@@ -56,7 +56,7 @@ var _ = Describe("ParseMsgCommands", func() {
       "receiver": "cro1dulwqgcdpemn8c34sjd92fxepz5p0sqpeevw7f",
       "denom": "basecro",
       "amount": "1234",
-      "success": true,
+      "success": false,
       "maybeDenominationTrace": {
         "hash": "6411AE2ADA1E73DB59DB151A8988F9B7D5E7E233D8414DB6817F8F1A01611F86",
         "denom": "ibc/6411AE2ADA1E73DB59DB151A8988F9B7D5E7E233D8414DB6817F8F1A01611F86"
