@@ -9,26 +9,26 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
-	ibc_view "github.com/crypto-com/chain-indexing/projection/ibc/view"
+	ibc_channel_view "github.com/crypto-com/chain-indexing/projection/ibc_channel/view"
 )
 
-type IBC struct {
+type IBCChannel struct {
 	logger applogger.Logger
 
-	ibcChannelsView *ibc_view.IBCChannels
+	ibcChannelsView *ibc_channel_view.IBCChannels
 }
 
-func NewIBC(logger applogger.Logger, rdbHandle *rdb.Handle) *IBC {
-	return &IBC{
+func NewIBCChannel(logger applogger.Logger, rdbHandle *rdb.Handle) *IBCChannel {
+	return &IBCChannel{
 		logger.WithFields(applogger.LogFields{
-			"module": "IBCHandler",
+			"module": "IBCChannelHandler",
 		}),
 
-		ibc_view.NewIBCChannels(rdbHandle),
+		ibc_channel_view.NewIBCChannels(rdbHandle),
 	}
 }
 
-func (handler *IBC) ListChannels(ctx *fasthttp.RequestCtx) {
+func (handler *IBCChannel) ListChannels(ctx *fasthttp.RequestCtx) {
 	pagination, err := httpapi.ParsePagination(ctx)
 	if err != nil {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
@@ -43,11 +43,11 @@ func (handler *IBC) ListChannels(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
-	ibcChannels, paginationResult, err := handler.ibcChannelsView.List(ibc_view.IBCChannelsListOrder{
+	ibcChannels, paginationResult, err := handler.ibcChannelsView.List(ibc_channel_view.IBCChannelsListOrder{
 		ChannelID: channelIdOrder,
 	}, pagination)
 	if err != nil {
-		handler.logger.Errorf("error listing IBC channels: %v", err)
+		handler.logger.Errorf("error listing IBCChannel channels: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
 	}
@@ -55,7 +55,7 @@ func (handler *IBC) ListChannels(ctx *fasthttp.RequestCtx) {
 	httpapi.SuccessWithPagination(ctx, ibcChannels, paginationResult)
 }
 
-func (handler *IBC) FindChannelById(ctx *fasthttp.RequestCtx) {
+func (handler *IBCChannel) FindChannelById(ctx *fasthttp.RequestCtx) {
 	ibcChannel, err := handler.ibcChannelsView.FindBy(
 		ctx.UserValue("channelId").(string),
 	)
@@ -64,7 +64,7 @@ func (handler *IBC) FindChannelById(ctx *fasthttp.RequestCtx) {
 			httpapi.NotFound(ctx)
 			return
 		}
-		handler.logger.Errorf("error finding IBC channel by id: %v", err)
+		handler.logger.Errorf("error finding IBCChannel channel by id: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
 	}

@@ -144,7 +144,7 @@ func (server *HTTPAPIServer) Run() error {
 		server.logger,
 		server.rdbConn.ToHandle(),
 	)
-	ibcHandler := handlers.NewIBC(
+	ibcChannelHandler := handlers.NewIBCChannel(
 		server.logger,
 		server.rdbConn.ToHandle(),
 	)
@@ -161,7 +161,7 @@ func (server *HTTPAPIServer) Run() error {
 		accountsHandler,
 		proposalsHandler,
 		nftsHandler,
-		ibcHandler,
+		ibcChannelHandler,
 	)
 	routeRegistry.Register(httpServer, server.routePrefix)
 
