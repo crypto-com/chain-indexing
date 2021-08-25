@@ -1,6 +1,6 @@
 package genesis
 
-import "encoding/json"
+import "github.com/crypto-com/chain-indexing/internal/json"
 
 type Genesis struct {
 	GenesisTime     string          `json:"genesis_time"`
@@ -361,11 +361,11 @@ type Vesting struct {
 }
 
 type StakingParams struct {
-	BondDenom         string `json:"bond_denom"`
-	HistoricalEntries json.Number  `json:"historical_entries"`
-	MaxEntries        json.Number  `json:"max_entries"`
-	MaxValidators     json.Number  `json:"max_validators"`
-	UnbondingTime     string `json:"unbonding_time"`
+	BondDenom         string      `json:"bond_denom"`
+	HistoricalEntries json.Uint16 `json:"historical_entries"`
+	MaxEntries        json.Uint16 `json:"max_entries"`
+	MaxValidators     json.Uint16 `json:"max_validators"`
+	UnbondingTime     string      `json:"unbonding_time"`
 }
 
 type ConsensusParams struct {

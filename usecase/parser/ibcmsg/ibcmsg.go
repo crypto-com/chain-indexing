@@ -892,7 +892,7 @@ func isPacketMsgTransfer(
 	if decodeDataErr != nil {
 		return false
 	}
-	if err := jsoniter.Unmarshal(rawPacketData, &fungiblePacketData); err != nil {
+	if unmarshalErr := jsoniter.Unmarshal(rawPacketData, &fungiblePacketData); unmarshalErr != nil {
 		return false
 	}
 

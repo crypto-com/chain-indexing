@@ -18,7 +18,7 @@ func NewCreateGenesis(genesis genesis.Genesis) *CreateGenesis {
 
 // Name returns name of command
 func (*CreateGenesis) Name() string {
-	return "CreateMint"
+	return "CreateGenesis"
 }
 
 // Version returns version of command
