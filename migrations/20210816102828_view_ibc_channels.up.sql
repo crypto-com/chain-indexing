@@ -16,6 +16,8 @@ CREATE TABLE view_ibc_channels (
     total_transfer_out_success_rate NUMERIC NOT NULL,
     created_at_block_time BIGINT NOT NULL,
     created_at_block_height BIGINT NOT NULL,
+    verified BOOLEAN NOT NULL,
+    description VARCHAR NOT NULL,
     last_activity_block_time BIGINT NOT NULL,
     last_activity_block_height BIGINT NOT NULL,
     bonded_tokens JSONB NOT NULL,
