@@ -24,7 +24,7 @@ func NewIBCChannels(handle *rdb.Handle) *IBCChannels {
 	}
 }
 
-func (ibcChannelsView *IBCChannels) Insert(channel *ChannelRow) error {
+func (ibcChannelsView *IBCChannels) Insert(channel *IBCChannelRow) error {
 	bondedTokensJSON, err := jsoniter.MarshalToString(channel.BondedTokens)
 	if err != nil {
 		return fmt.Errorf("error JSON marshalling channel bonded_tokens for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -97,7 +97,7 @@ func (ibcChannelsView *IBCChannels) Insert(channel *ChannelRow) error {
 	return nil
 }
 
-func (ibcChannelsView *IBCChannels) UpdateFactualColumns(channel *ChannelRow) error {
+func (ibcChannelsView *IBCChannels) UpdateFactualColumns(channel *IBCChannelRow) error {
 	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
 		Update(
 			"view_ibc_channels",
@@ -199,7 +199,7 @@ func (ibcChannelsView *IBCChannels) UpdateTotalTransferOutSuccessRate(channelID 
 		return fmt.Errorf("error building selection sql: %v: %w", err, rdb.ErrPrepare)
 	}
 
-	var channel ChannelRow
+	var channel IBCChannelRow
 	if err = ibcChannelsView.rdb.QueryRow(sql, sqlArgs...).Scan(
 		&channel.TotalTransferOutCount,
 		&channel.TotalTransferOutSuccessCount,
@@ -341,7 +341,7 @@ func (ibcChannelsView *IBCChannels) FindBondedTokensBy(channelID string) (*Bonde
 	return &bondedTokens, nil
 }
 
-func (ibcChannelsView *IBCChannels) FindBy(channelID string) (*ChannelRow, error) {
+func (ibcChannelsView *IBCChannels) FindBy(channelID string) (*IBCChannelRow, error) {
 	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
 		Select(
 			"channel_id",
@@ -373,7 +373,7 @@ func (ibcChannelsView *IBCChannels) FindBy(channelID string) (*ChannelRow, error
 		return nil, fmt.Errorf("error building select channel sql: %v: %w", err, rdb.ErrPrepare)
 	}
 
-	var channel ChannelRow
+	var channel IBCChannelRow
 	var bondedTokensJSON string
 	lastActivityTimeReader := ibcChannelsView.rdb.NtotReader()
 	createdAtTimeReader := ibcChannelsView.rdb.NtotReader()
@@ -425,7 +425,7 @@ func (ibcChannelsView *IBCChannels) FindBy(channelID string) (*ChannelRow, error
 	return &channel, nil
 }
 
-func (ibcChannelsView *IBCChannels) List(order ChannelsListOrder, pagination *pagination.Pagination) ([]ChannelRow, *pagination.PaginationResult, error) {
+func (ibcChannelsView *IBCChannels) List(order IBCChannelsListOrder, pagination *pagination.Pagination) ([]IBCChannelRow, *pagination.PaginationResult, error) {
 	stmtBuilder := ibcChannelsView.rdb.StmtBuilder.Select(
 		"channel_id",
 		"port_id",
@@ -473,9 +473,9 @@ func (ibcChannelsView *IBCChannels) List(order ChannelsListOrder, pagination *pa
 	}
 	defer rowsResult.Close()
 
-	channels := make([]ChannelRow, 0)
+	channels := make([]IBCChannelRow, 0)
 	for rowsResult.Next() {
-		var channel ChannelRow
+		var channel IBCChannelRow
 		var bondedTokensJSON string
 		lastActivityTimeReader := ibcChannelsView.rdb.NtotReader()
 		createdAtTimeReader := ibcChannelsView.rdb.NtotReader()
@@ -535,11 +535,11 @@ func (ibcChannelsView *IBCChannels) List(order ChannelsListOrder, pagination *pa
 	return channels, paginationResult, nil
 }
 
-type ChannelsListOrder struct {
+type IBCChannelsListOrder struct {
 	ChannelID view.ORDER
 }
 
-type ChannelRow struct {
+type IBCChannelRow struct {
 	ChannelID                    string          `json:"channelId"`
 	PortID                       string          `json:"portId"`
 	ConnectionID                 string          `json:"connectionId"`
