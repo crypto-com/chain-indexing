@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/crypto-com/chain-indexing/internal/json"
 	"github.com/crypto-com/chain-indexing/usecase/model"
-
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -52,5 +52,27 @@ func StringToDurationHookFunc() mapstructure.DecodeHookFunc {
 			return nil, parseErr
 		}
 		return model.Duration{Duration: d}, nil
+	}
+}
+
+// String to wrapped json.Uint64
+func StringToJsonUint64HookFunc() mapstructure.DecodeHookFunc {
+	return func(
+		f reflect.Type,
+		t reflect.Type,
+		data interface{}) (interface{}, error) {
+		if f.Kind() != reflect.String {
+			return data, nil
+		}
+		if t != reflect.TypeOf(json.Uint64{}) {
+			return data, nil
+		}
+
+		// Convert it by parsing
+		u, parseErr := json.NewUint64FromString(data.(string))
+		if parseErr != nil {
+			return nil, parseErr
+		}
+		return u, nil
 	}
 }
