@@ -951,9 +951,9 @@ func ParseMsgTimeout(
 		)}
 	}
 
-	// Transfer application, MsgTransfer
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 
+	// Transfer application, MsgTransfer
 	var rawFungibleTokenPacketData ibc_model.FungibleTokenPacketData
 	rawPacketData := base64_internal.MustDecodeString(rawMsg.Packet.Data)
 	json.MustUnmarshal(rawPacketData, &rawFungibleTokenPacketData)
@@ -1040,10 +1040,9 @@ func ParseMsgTimeoutOnClose(
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 
 	// Transfer application, MsgTransfer
-	timeoutEvent := log.GetEventByType("timeout")
-	if timeoutEvent == nil {
-		panic("missing `timeout` event in TxsResult log")
-	}
+	var rawFungibleTokenPacketData ibc_model.FungibleTokenPacketData
+	rawPacketData := base64_internal.MustDecodeString(rawMsg.Packet.Data)
+	json.MustUnmarshal(rawPacketData, &rawFungibleTokenPacketData)
 
 	timeoutPacketEvent := log.GetEventByType("timeout_packet")
 	if timeoutPacketEvent == nil {
@@ -1056,11 +1055,9 @@ func ParseMsgTimeoutOnClose(
 		Application: "transfer",
 		MessageType: "MsgTransfer",
 		MaybeMsgTransfer: &ibc_model.MsgTimeoutMsgTransfer{
-			RefundReceiver: timeoutEvent.MustGetAttributeByKey("refund_receiver"),
-			RefundDenom:    timeoutEvent.MustGetAttributeByKey("refund_denom"),
-			RefundAmount: typeconv.MustAtou64(
-				timeoutEvent.MustGetAttributeByKey("refund_amount"),
-			),
+			RefundReceiver: rawFungibleTokenPacketData.Sender,
+			RefundDenom:    rawFungibleTokenPacketData.Denom,
+			RefundAmount:   rawFungibleTokenPacketData.Amount.Uint64(),
 		},
 
 		PacketTimeoutHeight: mustParseHeight(
