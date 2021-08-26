@@ -7,14 +7,13 @@ require (
 	github.com/Masterminds/squirrel v1.5.0
 	github.com/brianvoe/gofakeit/v5 v5.10.1
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
-	github.com/calvinlauyh/cosmosutils v0.0.8
+	github.com/calvinlauyh/cosmosutils v0.1.0
 	github.com/cenkalti/backoff/v4 v4.0.2
 	github.com/cosmos/cosmos-sdk v0.43.0
 	github.com/fasthttp/router v1.3.3
 	github.com/golang-migrate/migrate/v4 v4.14.1
 	github.com/google/go-querystring v1.0.0
 	github.com/google/uuid v1.1.2
-	github.com/hashicorp/go-version v1.2.0 // indirect
 	github.com/jackc/pgconn v1.6.4
 	github.com/jackc/pgtype v1.4.2
 	github.com/jackc/pgx/v4 v4.8.1
