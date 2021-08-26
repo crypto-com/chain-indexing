@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	"github.com/crypto-com/chain-indexing/internal/slice"
 	"strings"
 	"time"
+
+	"github.com/crypto-com/chain-indexing/internal/slice"
 
 	base64_internal "github.com/crypto-com/chain-indexing/internal/base64"
 	"github.com/crypto-com/chain-indexing/internal/json"
@@ -953,10 +954,9 @@ func ParseMsgTimeout(
 	// Transfer application, MsgTransfer
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 
-	timeoutEvent := log.GetEventByType("timeout")
-	if timeoutEvent == nil {
-		panic("missing `timeout` event in TxsResult log")
-	}
+	var rawFungibleTokenPacketData ibc_model.FungibleTokenPacketData
+	rawPacketData := base64_internal.MustDecodeString(rawMsg.Packet.Data)
+	json.MustUnmarshal(rawPacketData, &rawFungibleTokenPacketData)
 
 	timeoutPacketEvent := log.GetEventByType("timeout_packet")
 	if timeoutPacketEvent == nil {
@@ -969,11 +969,9 @@ func ParseMsgTimeout(
 		Application: "transfer",
 		MessageType: "MsgTransfer",
 		MaybeMsgTransfer: &ibc_model.MsgTimeoutMsgTransfer{
-			RefundReceiver: timeoutEvent.MustGetAttributeByKey("refund_receiver"),
-			RefundDenom:    timeoutEvent.MustGetAttributeByKey("refund_denom"),
-			RefundAmount: typeconv.MustAtou64(
-				timeoutEvent.MustGetAttributeByKey("refund_amount"),
-			),
+			RefundReceiver: rawFungibleTokenPacketData.Sender,
+			RefundDenom:    rawFungibleTokenPacketData.Denom,
+			RefundAmount:   rawFungibleTokenPacketData.Amount.Uint64(),
 		},
 
 		PacketTimeoutHeight: mustParseHeight(

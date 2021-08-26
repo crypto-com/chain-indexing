@@ -106,4 +106,91 @@ var _ = Describe("ParseMsgCommands", func() {
 			))
 		})
 	})
+
+	It("should parse MsgIBCTimeout commands from IBC module v1.0", func() {
+		expected := `{
+  "name": "MsgTimeoutCreated",
+  "version": 1,
+  "height": 116603,
+  "uuid": "{UUID}",
+  "msgName": "MsgTimeout",
+  "txHash": "6E92746D301DDEABDE609C0C179F8590B19ACB116B84C34C3322DE1DD86E6F88",
+  "msgIndex": 1,
+  "params": {
+	"packet": {
+  	"sequence": "6",
+  	"sourcePort": "transfer",
+  	"sourceChannel": "channel-3",
+  	"destinationPort": "transfer",
+  	"destinationChannel": "channel-0",
+  	"data": "eyJhbW91bnQiOiIxMjAwMDAwMDAwIiwiZGVub20iOiJiYXNldGNybyIsInJlY2VpdmVyIjoiMHg3NkNCMUU3RjQ0MjVjMDRjMjg4MTYwNDMxQzE1RTcwOTBFNjk4ODA3Iiwic2VuZGVyIjoidGNybzFwZG4ybnNuOXdlc3o2cHgzbGNqc2dtcDhwZWZlZG56cDNnbXAzcSJ9",
+  	"timeoutHeight": {
+  	  "revisionNumber": "1",
+  	  "revisionHeight": "9625"
+  	},
+  	"timeoutTimestamp": "1629970506606047053"
+    },
+    "proofUnreceived": "CpcDEpQDCjZyZWNlaXB0cy9wb3J0cy90cmFuc2Zlci9jaGFubmVscy9jaGFubmVsLTAvc2VxdWVuY2VzLzYS2QIKNnJlY2VpcHRzL3BvcnRzL3RyYW5zZmVyL2NoYW5uZWxzL2NoYW5uZWwtMC9zZXF1ZW5jZXMvNRIBARoNCAEYASABKgUAAuCGASIrCAESJwIE4IYBIEJhlOHMiF7wvYkma0mL9ZaBKSBvpMSlS5pc3wxSIlauICIrCAESJwQG4IYBIBBG7wE6JJkv1qXkudC7PUKjxhyQVd1WoCBulw9kgbZDICIrCAESJwYK4IYBIEHRIctJW3/u39dYp93G9VYi1vH+OqgbUQTlpH6zuvTeICIrCAESJwgS4IYBIKlOcbIpUtIjsvKY4sX4smAswbtqAcTJIwALg6vo4WjtICIrCAESJwou4IYBIKnOxf5TdIEKNKoyLa+v3wi6GZV8R6/EWkKksV+F2bJJICIsCAESKA6IAeCGASAcF85jgj8rJqE5KuT6Pn6M3vniI8pj8r+nZh1DjddkaCAK/gEK+wEKA2liYxIg9ZHNOHkkM1QqTK5REOJCUDdE6YQhJY4NCw2/XabKWkQaCQgBGAEgASoBACInCAESAQEaIPlW3n8EGa9BCcwZdOHxNyMKvSuMufUnd17syhqIFw8iIiUIARIhAR4QzCLrac9Tf3agA+wisTfC3vPscPdlz4bffhZFnCCYIicIARIBARog60VlV7C7caF2dBzNb7WiYKfjWnk25bvzhBwlwCTFfy4iJQgBEiEBFKZnubPo/t62bUnE99vhYIzX1vIQSNcqT1uhLgCzt54iJwgBEgEBGiB1YHAKnzeCrqnmPaSu8SX/AEUowTzbWNmXgrbUAhCTjg==",
+    "proofHeight": {
+      "revisionNumber": "1",
+      "revisionHeight": "8736"
+    },
+    "nextSequenceRecv": "6",
+    "signer": "tcro18mcwp6vtlvpgxy62eledk3chhjguw636x8n7h6",
+
+    "application": "transfer",
+    "messageType": "MsgTransfer",
+    "maybeMsgTransfer": {
+      "refundReceiver": "tcro1pdn2nsn9wesz6px3lcjsgmp8pefednzp3gmp3q",
+      "refundDenom": "basetcro",
+      "refundAmount": "1200000000"
+    },
+
+    "packetTimeoutHeight": {
+      "revisionNumber": "1",
+      "revisionHeight": "9625"
+    },
+    "packetTimeoutTimestamp": "1629970506606047053",
+    "packetSequence": "6",
+    "channelOrdering": "ORDER_UNORDERED"
+  }
+}
+`
+
+		txDecoder := utils.NewTxDecoder()
+		block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
+			usecase_parser_test.TX_MSG_TIMEOUT_V1_0_BLOCK_RESP,
+		))
+		blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
+			usecase_parser_test.TX_MSG_TIMEOUT_V1_0_BLOCK_RESULTS_RESP,
+		))
+
+		accountAddressPrefix := "cro"
+		stakingDenom := "basecro"
+		cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
+			txDecoder,
+			block,
+			blockResults,
+			accountAddressPrefix,
+			stakingDenom,
+		)
+		Expect(err).To(BeNil())
+		Expect(cmds).To(HaveLen(2))
+		cmd := cmds[1]
+		Expect(cmd.Name()).To(Equal("CreateMsgIBCTimeout"))
+
+		untypedEvent, _ := cmd.Exec()
+		typedEvent := untypedEvent.(*event.MsgIBCTimeout)
+
+		regex, _ := regexp.Compile("\n?\r?\\s?")
+
+		Expect(json.MustMarshalToString(typedEvent)).To(Equal(
+			strings.Replace(
+				regex.ReplaceAllString(expected, ""),
+				"{UUID}",
+				typedEvent.UUID(),
+				-1,
+			),
+		))
+	})
 })
