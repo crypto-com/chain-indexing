@@ -35,7 +35,7 @@ func ParseMsgCreateClient(
 ) []command.Command {
 	clientStateType := msg["client_state"].(map[string]interface{})["@type"]
 
-	if c, ok := clientStateType.(string); ok && !slice.ContainString(allowedClientStateTypes, c) {
+	if !slice.ContainString(allowedClientStateTypes, clientStateType.(string)) {
 		return []command.Command{}
 	}
 
