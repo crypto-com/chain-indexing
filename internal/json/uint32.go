@@ -23,7 +23,6 @@ func (u Uint32) String() string {
 }
 
 func (u Uint32) MarshalJSON() ([]byte, error) {
-	// uint32 number can be handled by all languages as number
 	return []byte(u.String()), nil
 }
 
