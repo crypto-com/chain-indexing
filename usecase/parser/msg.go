@@ -142,6 +142,16 @@ func ParseBlockResultsTxsMsgToCommands(
 				msgCommands = ibcmsg.ParseMsgTimeout(msgCommonParams, txsResult, msgIndex, msg)
 			case "/ibc.core.channel.v1.MsgTimeoutOnClose":
 				msgCommands = ibcmsg.ParseMsgTimeoutOnClose(msgCommonParams, txsResult, msgIndex, msg)
+			case "/cosmos.authz.v1beta1.MsgGrant":
+				// TODO: implement MsgGrant parser
+			case "/cosmos.authz.v1beta1.MsgRevoke":
+				// TODO: implement MsgRevoke parser
+			case "/cosmos.authz.v1beta1.MsgExec":
+				// TODO: implement MsgExec parser
+			case "/cosmos.feegrant.v1beta1.MsgGrantAllowance":
+				// TODO: implement MsgGrantAllowance parser
+			case "/cosmos.feegrant.v1beta1.MsgRevokeAllowance":
+				// TODO: implement MsgRevokeAllowance parser
 			}
 
 			commands = append(commands, msgCommands...)
