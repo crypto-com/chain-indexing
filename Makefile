@@ -10,6 +10,8 @@ install-migrate:
 	./pgmigrate.sh --install-dependency -- version
 migrate:
 	./pgmigrate.sh -- -verbose up
+clean:
+	rm chain-indexing check-password-strength		
 
 .PHONY: docker
 docker:

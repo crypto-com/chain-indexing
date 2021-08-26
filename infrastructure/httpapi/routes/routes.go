@@ -20,7 +20,7 @@ type RouteRegistry struct {
 	accountsHandler            *handlers.Accounts
 	proposalsHandler           *handlers.Proposals
 	nftsHandler                *handlers.NFTs
-	channelsHandler            *handlers.Channels
+	ibcChannelHandler          *handlers.IBCChannel
 }
 
 func NewRoutesRegistry(
@@ -35,7 +35,7 @@ func NewRoutesRegistry(
 	accountsHandler *handlers.Accounts,
 	proposalsHandler *handlers.Proposals,
 	nftsHandler *handlers.NFTs,
-	channelsHandler *handlers.Channels,
+	ibcChannelHandler *handlers.IBCChannel,
 ) *RouteRegistry {
 	return &RouteRegistry{
 		searchHandler,
@@ -49,7 +49,7 @@ func NewRoutesRegistry(
 		accountsHandler,
 		proposalsHandler,
 		nftsHandler,
-		channelsHandler,
+		ibcChannelHandler,
 	}
 }
 
@@ -109,5 +109,6 @@ func (registry *RouteRegistry) Register(server *httpapi.Server, routePrefix stri
 	server.GET(fmt.Sprintf("%s/api/v1/nfts/drops/{drop}/tokens", routePrefix), registry.nftsHandler.ListTokensByDrop)
 	server.GET(fmt.Sprintf("%s/api/v1/nfts/accounts/{account}/tokens", routePrefix), registry.nftsHandler.ListTokensByAccount)
 
-	server.GET(fmt.Sprintf("%s/api/v1/channels", routePrefix), registry.channelsHandler.List)
+	server.GET(fmt.Sprintf("%s/api/v1/ibc/channels", routePrefix), registry.ibcChannelHandler.ListChannels)
+	server.GET(fmt.Sprintf("%s/api/v1/ibc/channels/{channelId}", routePrefix), registry.ibcChannelHandler.FindChannelById)
 }
