@@ -53,19 +53,19 @@ is_golang_1_16_and_above() {
     MINOR="$(echo ${GOVERSION} | cut -d. -f2)"
     REVISION="$(echo ${GOVERSION} | cut -d. -f3)"
     if [[ "${MAJOR}" == "" ]]; then
-      echoerr "Golang version not found. Make sure it is installed."
-      exit 1
+        echoerr "Golang version not found. Make sure it is installed."
+        exit 1
     fi
 
     if [[ $MAJOR != 1 ]]; then
-      echoerr "Only Golang v1 is supported. Found v${GOVERSION}"
-      exit 1
+        echoerr "Only Golang v1 is supported. Found v${GOVERSION}"
+        exit 1
     fi
 
     if [[ $MINOR -ge 16 ]]; then
-      RET_VALUE=1
+        RET_VALUE=1
     else
-      RET_VALUE=0
+        RET_VALUE=0
     fi
 }
 
