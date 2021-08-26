@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"github.com/crypto-com/chain-indexing/internal/slice"
 	"strings"
 	"time"
 
@@ -21,6 +22,11 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
+var allowedClientStateTypes = []string{
+	"/ibc.lightclients.tendermint.v1.ClientState",
+	"/ibc.lightclients.solomachine.v2.ClientState",
+}
+
 func ParseMsgCreateClient(
 	msgCommonParams event.MsgCommonParams,
 	txsResult model.BlockResultsTxsResult,
@@ -28,8 +34,8 @@ func ParseMsgCreateClient(
 	msg map[string]interface{},
 ) []command.Command {
 	clientStateType := msg["client_state"].(map[string]interface{})["@type"]
-	if clientStateType != "/ibc.lightclients.tendermint.v1.ClientState" {
-		// TODO: SoloMachine and Localhost LightClient
+
+	if !slice.ContainString(allowedClientStateTypes, clientStateType.(string)) {
 		return []command.Command{}
 	}
 
