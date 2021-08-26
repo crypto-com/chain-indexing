@@ -286,7 +286,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
-			amount := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount
+			amount := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount.Uint64()
 			denom := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Denom
 			destinationChannelID := msgIBCRecvPacket.Params.Packet.DestinationChannel
 			destinationPortID := msgIBCRecvPacket.Params.Packet.DestinationPort
@@ -324,7 +324,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
-			amount := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount
+			amount := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount.Uint64()
 			denom := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Denom
 			destinationChannelID := msgIBCAcknowledgement.Params.Packet.DestinationChannel
 			destinationPortID := msgIBCAcknowledgement.Params.Packet.DestinationPort
