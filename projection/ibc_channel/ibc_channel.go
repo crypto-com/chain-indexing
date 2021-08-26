@@ -9,7 +9,6 @@ import (
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
-	block_view "github.com/crypto-com/chain-indexing/projection/block/view"
 	ibc_channel_view "github.com/crypto-com/chain-indexing/projection/ibc_channel/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
@@ -35,6 +34,8 @@ func NewIBCChannel(logger applogger.Logger, rdbConn rdb.Conn) *IBCChannel {
 
 func (_ *IBCChannel) GetEventsToListen() []string {
 	return []string{
+		event_usecase.BLOCK_CREATED,
+
 		event_usecase.MSG_IBC_CREATE_CLIENT_CREATED,
 		event_usecase.MSG_IBC_CONNECTION_OPEN_ACK_CREATED,
 		event_usecase.MSG_IBC_CONNECTION_OPEN_CONFIRM_CREATED,
@@ -70,7 +71,14 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 	ibcChannelsView := ibc_channel_view.NewIBCChannels(rdbTxHandle)
 	ibcClientsView := ibc_channel_view.NewIBCClients(rdbTxHandle)
 	ibcConnectionsView := ibc_channel_view.NewIBCConnections(rdbTxHandle)
-	blocksView := block_view.NewBlocks(rdbTxHandle)
+
+	// Get the block time of current height
+	var blockTime utctime.UTCTime
+	for _, event := range events {
+		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
+			blockTime = blockCreatedEvent.Block.Time
+		}
+	}
 
 	// NOTES: Why four channel open events are all needed?
 	//
@@ -194,12 +202,6 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
 			}
 
-			identity := block_view.BlockIdentity{MaybeHeight: &height}
-			block, err := blocksView.FindBy(&identity)
-			if err != nil {
-				return fmt.Errorf("error finding the block: %w", err)
-			}
-
 			channel := &ibc_channel_view.IBCChannelRow{
 				ChannelID:             msgIBCChannelOpenAck.Params.ChannelID,
 				PortID:                msgIBCChannelOpenAck.Params.PortID,
@@ -207,7 +209,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				CounterpartyChannelID: msgIBCChannelOpenAck.Params.CounterpartyChannelID,
 				CounterpartyPortID:    msgIBCChannelOpenAck.Params.CounterpartyPortID,
 				CounterpartyChainID:   counterpartyChainID,
-				CreatedAtBlockTime:    block.Time,
+				CreatedAtBlockTime:    blockTime,
 				CreatedAtBlockHeight:  height,
 			}
 			if err := ibcChannelsView.UpdateFactualColumns(channel); err != nil {
@@ -226,12 +228,6 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
 			}
 
-			identity := block_view.BlockIdentity{MaybeHeight: &height}
-			block, err := blocksView.FindBy(&identity)
-			if err != nil {
-				return fmt.Errorf("error finding the block: %w", err)
-			}
-
 			channel := &ibc_channel_view.IBCChannelRow{
 				ChannelID:             msgIBCChannelOpenConfirm.Params.ChannelID,
 				PortID:                msgIBCChannelOpenConfirm.Params.PortID,
@@ -239,7 +235,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				CounterpartyChannelID: msgIBCChannelOpenConfirm.Params.CounterpartyChannelID,
 				CounterpartyPortID:    msgIBCChannelOpenConfirm.Params.CounterpartyPortID,
 				CounterpartyChainID:   counterpartyChainID,
-				CreatedAtBlockTime:    block.Time,
+				CreatedAtBlockTime:    blockTime,
 				CreatedAtBlockHeight:  height,
 			}
 			if err := ibcChannelsView.UpdateFactualColumns(channel); err != nil {
@@ -268,7 +264,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating last_out_packet_sequence: %w", err)
 			}
 
-			if err := projection.updateLastActivityTimeAndHeight(blocksView, ibcChannelsView, channelID, height); err != nil {
+			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
@@ -286,7 +282,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating last_in_packet_sequence: %w", err)
 			}
 
-			if err := projection.updateLastActivityTimeAndHeight(blocksView, ibcChannelsView, channelID, height); err != nil {
+			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
@@ -324,7 +320,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating last_out_packet_sequence: %w", err)
 			}
 
-			if err := projection.updateLastActivityTimeAndHeight(blocksView, ibcChannelsView, channelID, height); err != nil {
+			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
@@ -355,25 +351,6 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 		return fmt.Errorf("error committing changes: %v", err)
 	}
 	committed = true
-
-	return nil
-}
-
-func (projection *IBCChannel) updateLastActivityTimeAndHeight(
-	blocksView *block_view.Blocks,
-	ibcChannelsView *ibc_channel_view.IBCChannels,
-	channelID string,
-	height int64,
-) error {
-
-	identity := block_view.BlockIdentity{MaybeHeight: &height}
-	block, err := blocksView.FindBy(&identity)
-	if err != nil {
-		return fmt.Errorf("error finding the block: %w", err)
-	}
-	if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, block.Time, height); err != nil {
-		return fmt.Errorf("error updating channel last_activity_time: %w", err)
-	}
 
 	return nil
 }
