@@ -868,11 +868,11 @@ func ParseMsgAcknowledgement(
 		MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
 			FungibleTokenPacketData: rawFungibleTokenPacketData,
 			// https://github.com/cosmos/ibc-go/blob/e98838612a4fa5d240e392aad3409db5ec428f50/modules/apps/transfer/module.go#L327
-			Success: fungibleTokenPacketEvent.HasAttribute("success")
-			&& bytes.Equal(
-				[]byte(fungibleTokenPacketEvent.MustGetAttributeByKey("success")),
-				[]byte{byte(1)},
-			),
+			Success: fungibleTokenPacketEvent.HasAttribute("success") &&
+				bytes.Equal(
+					[]byte(fungibleTokenPacketEvent.MustGetAttributeByKey("success")),
+					[]byte{byte(1)},
+				),
 			Acknowledgement: fungibleTokenPacketEvent.MustGetAttributeByKey("acknowledgement"),
 		},
 
