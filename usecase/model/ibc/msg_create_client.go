@@ -3,7 +3,8 @@ package ibc
 type MsgCreateClientParams struct {
 	MaybeTendermintLightClient  *TendermintLightClient  `json:"maybeTendermintLightClient"`
 	MaybeSoloMachineLightClient *SoloMachineLightClient `json:"maybeSoloMachineLightClient"`
-	// TODO: Localhost LightClient
+	MaybeLocalhostLightClient   *LocalhostLightClient   `json:"maybeLocalhostLightClient"`
+	// TODO: Test localhost LightClient
 	Signer string `json:"signer"`
 
 	ClientID   string `json:"clientId"`
@@ -20,6 +21,10 @@ type SoloMachineLightClient struct {
 	SoloMachineLightClientConsensusState SoloMachineLightClientConsensusState `json:"consensusState"`
 }
 
+type LocalhostLightClient struct {
+	LocalhostClientState LocalhostLightClientState `json:"clientState"`
+}
+
 type RawMsgCreateTendermintLightClient struct {
 	Type           string                              `mapstructure:"@type" json:"@type"`
 	ClientState    TendermintLightClientState          `mapstructure:"client_state" json:"clientState"`
@@ -32,4 +37,10 @@ type RawMsgCreateSoloMachineLightClient struct {
 	ClientState    SoloMachineLightClientState          `mapstructure:"client_state" json:"clientState"`
 	ConsensusState SoloMachineLightClientConsensusState `mapstructure:"consensus_state" json:"consensusState"`
 	Signer         string                               `mapstructure:"signer" json:"signer"`
+}
+
+type RawMsgCreateLocalhostLightClient struct {
+	Type        string                    `mapstructure:"@type" json:"@type"`
+	ClientState LocalhostLightClientState `mapstructure:"client_state" json:"clientState"`
+	Signer      string                    `mapstructure:"signer" json:"signer"`
 }
