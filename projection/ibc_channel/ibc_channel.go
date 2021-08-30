@@ -369,28 +369,19 @@ func (projection *IBCChannel) updateBondedTokensWhenMsgIBCRecvPacket(
 		return fmt.Errorf("error finding channel bonded_tokens: %w", err)
 	}
 
-	// Check if the token is originally from this chain
-	tokenOriginallyFromThisChain := false
-	tokenIndex := -1
-	for i, token := range bondedTokens.OnCounterpartyChain {
-		if token.Denom == denom {
-			tokenOriginallyFromThisChain = true
-			tokenIndex = i
-			break
-		}
-	}
-	if tokenOriginallyFromThisChain {
-		// This token is originally from this chain, now it is sent back from counterparty chain.
-		// Subtract it from the bondedTokens.OnCouterpartyChain[i]
-		amountInCoinInt := coin.NewIntFromUint64(amount)
-		bondedTokens.OnCounterpartyChain[tokenIndex].Amount = bondedTokens.OnCounterpartyChain[tokenIndex].Amount.Sub(amountInCoinInt)
+	amountInCoinInt := coin.NewIntFromUint64(amount)
+
+	if projection.tokenOriginFromThisChain(bondedTokens, denom) {
+		// This token is from this chain, now it is sent back.
+		// Subtract it from the bondedTokens.OnCouterpartyChain
+		token := ibc_channel_view.NewBondedToken(denom, amountInCoinInt)
+		projection.subtractTokenOnCounterpartyChain(bondedTokens, token)
 	} else {
-		// This token is new to this chain.
-		// Append it to bondedTokens.OnThisChain
+		// This token is NOT from this chain.
+		// Add it to bondedTokens.OnThisChain
 		newDenom := fmt.Sprintf("%s/%s/%s", destinationPortID, destinationChannelID, denom)
-		amountInCoinInt := coin.NewIntFromUint64(amount)
-		newToken := ibc_channel_view.NewBondedToken(newDenom, amountInCoinInt)
-		bondedTokens.OnThisChain = append(bondedTokens.OnThisChain, *newToken)
+		token := ibc_channel_view.NewBondedToken(newDenom, amountInCoinInt)
+		projection.addTokenOnThisChain(bondedTokens, token)
 	}
 
 	if err := ibcChannelsView.UpdateBondedTokens(channelID, bondedTokens); err != nil {
@@ -414,28 +405,19 @@ func (projection *IBCChannel) updateBondedTokensWhenMsgIBCAcknowledgement(
 		return fmt.Errorf("error ibcChannelsView.FindBondedTokensBy: %w", err)
 	}
 
-	// Check if the token is originally from counterparty chain
-	tokenOriginallyFromCounterpartyChain := false
-	tokenIndex := -1
-	for i, token := range bondedTokens.OnThisChain {
-		if token.Denom == denom {
-			tokenOriginallyFromCounterpartyChain = true
-			tokenIndex = i
-			break
-		}
-	}
-	if tokenOriginallyFromCounterpartyChain {
-		// This token is from counterparty chain, now it is sent back to counterparty chain.
-		// Subtract it from the bondedTokens.OnThisChain[i]
-		amountInCoinInt := coin.NewIntFromUint64(amount)
-		bondedTokens.OnThisChain[tokenIndex].Amount = bondedTokens.OnThisChain[tokenIndex].Amount.Sub(amountInCoinInt)
+	amountInCoinInt := coin.NewIntFromUint64(amount)
+
+	if projection.tokenOriginFromCounterpartyChain(bondedTokens, denom) {
+		// This token is from the counterparty chain, now it is sent back to counterparty chain.
+		// Subtract it from the bondedTokens.OnThisChain
+		token := ibc_channel_view.NewBondedToken(denom, amountInCoinInt)
+		projection.subtractTokenOnThisChain(bondedTokens, token)
 	} else {
-		// This token is new to the counterparty chain.
-		// Append it to bondedTokens.OnCounterpartyChain
+		// This token is NOT from the counterparty chain.
+		// Add it to bondedTokens.OnCounterpartyChain
 		newDenom := fmt.Sprintf("%s/%s/%s", destinationPortID, destinationChannelID, denom)
-		amountInCoinInt := coin.NewIntFromUint64(amount)
-		newToken := ibc_channel_view.NewBondedToken(newDenom, amountInCoinInt)
-		bondedTokens.OnCounterpartyChain = append(bondedTokens.OnCounterpartyChain, *newToken)
+		token := ibc_channel_view.NewBondedToken(newDenom, amountInCoinInt)
+		projection.addOnCounterpartyChain(bondedTokens, token)
 	}
 
 	if err := ibcChannelsView.UpdateBondedTokens(channelID, bondedTokens); err != nil {
@@ -443,4 +425,80 @@ func (projection *IBCChannel) updateBondedTokensWhenMsgIBCAcknowledgement(
 	}
 
 	return nil
+}
+
+func (projection *IBCChannel) tokenOriginFromCounterpartyChain(bondedTokens *ibc_channel_view.BondedTokens, denom string) bool {
+	for _, token := range bondedTokens.OnThisChain {
+		if token.Denom == denom {
+			return true
+		}
+	}
+	return false
+}
+
+func (projection *IBCChannel) tokenOriginFromThisChain(bondedTokens *ibc_channel_view.BondedTokens, denom string) bool {
+	for _, token := range bondedTokens.OnCounterpartyChain {
+		if token.Denom == denom {
+			return true
+		}
+	}
+	return false
+}
+
+func (projection *IBCChannel) subtractTokenOnThisChain(
+	bondedTokens *ibc_channel_view.BondedTokens,
+	newToken *ibc_channel_view.BondedToken,
+) error {
+	for i, token := range bondedTokens.OnThisChain {
+		if token.Denom == newToken.Denom {
+			bondedTokens.OnThisChain[i].Amount = bondedTokens.OnThisChain[i].Amount.Sub(newToken.Amount)
+			return nil
+		}
+	}
+	return fmt.Errorf("error Token not found on BondedTokens.OnThisChain: newToken %v", newToken.Denom)
+}
+
+func (projection *IBCChannel) subtractTokenOnCounterpartyChain(
+	bondedTokens *ibc_channel_view.BondedTokens,
+	newToken *ibc_channel_view.BondedToken,
+) error {
+	for i, token := range bondedTokens.OnCounterpartyChain {
+		if token.Denom == newToken.Denom {
+			bondedTokens.OnCounterpartyChain[i].Amount = bondedTokens.OnCounterpartyChain[i].Amount.Sub(newToken.Amount)
+			return nil
+		}
+	}
+	return fmt.Errorf("error Token not found on BondedTokens.OnCounterpartyChain: newToken %v", newToken.Denom)
+}
+
+func (projection *IBCChannel) addOnCounterpartyChain(
+	bondedTokens *ibc_channel_view.BondedTokens,
+	newToken *ibc_channel_view.BondedToken,
+) {
+	for i, token := range bondedTokens.OnCounterpartyChain {
+		if token.Denom == newToken.Denom {
+			// This token already has a record on bondedTokens.OnCounterpartyChain
+			bondedTokens.OnCounterpartyChain[i].Amount = bondedTokens.OnCounterpartyChain[i].Amount.Add(newToken.Amount)
+			return
+		}
+	}
+	// This token has NO record on bondedTokens.OnCounterpartyChain yet
+	bondedTokens.OnCounterpartyChain = append(bondedTokens.OnCounterpartyChain, *newToken)
+	return
+}
+
+func (projection *IBCChannel) addTokenOnThisChain(
+	bondedTokens *ibc_channel_view.BondedTokens,
+	newToken *ibc_channel_view.BondedToken,
+) {
+	for i, token := range bondedTokens.OnThisChain {
+		if token.Denom == newToken.Denom {
+			// This token already has a record on bondedTokens.OnThisChain
+			bondedTokens.OnThisChain[i].Amount = bondedTokens.OnThisChain[i].Amount.Add(newToken.Amount)
+			return
+		}
+	}
+	// This token has NO record on bondedTokens.OnThisChain yet
+	bondedTokens.OnThisChain = append(bondedTokens.OnThisChain, *newToken)
+	return
 }
