@@ -23,6 +23,8 @@ import (
 
 const tendermintClientStateTypeV1 = "/ibc.lightclients.tendermint.v1.ClientState"
 const soloMachineClientStateTypeV2 = "/ibc.lightclients.solomachine.v2.ClientState"
+const tendermintHeaderTypeV1 = "/ibc.lightclients.tendermint.v1.Header"
+const soloMachineHeaderTypeV2 = "/ibc.lightclients.solomachine.v2.Header"
 
 func ParseMsgCreateClient(
 	msgCommonParams event.MsgCommonParams,
@@ -641,14 +643,14 @@ func ParseMsgUpdateClient(
 	headerType := msg["header"].(map[string]interface{})["@type"]
 
 	switch headerType {
-	case "/ibc.lightclients.tendermint.v1.Header":
+	case tendermintHeaderTypeV1:
 		return parseMsgUpdateTendermintLightClient(
 			msgCommonParams,
 			txsResult,
 			msgIndex,
 			msg,
 		)
-	case "/ibc.lightclients.solomachine.v2.Header":
+	case soloMachineHeaderTypeV2:
 		return parseMsgUpdateSolomachineLightClient(
 			msgCommonParams,
 			txsResult,
