@@ -639,11 +639,34 @@ func ParseMsgUpdateClient(
 	msg map[string]interface{},
 ) []command.Command {
 	headerType := msg["header"].(map[string]interface{})["@type"]
-	if headerType != "/ibc.lightclients.tendermint.v1.Header" {
-		// TODO: SoloMachine and Localhost LightClient
-		return []command.Command{}
-	}
 
+	switch headerType {
+	case "/ibc.lightclients.tendermint.v1.Header":
+		return parseMsgUpdateTendermintLightClient(
+			msgCommonParams,
+			txsResult,
+			msgIndex,
+			msg,
+		)
+	case "/ibc.lightclients.solomachine.v2.Header":
+		return parseMsgUpdateSolomachineLightClient(
+			msgCommonParams,
+			txsResult,
+			msgIndex,
+			msg,
+		)
+	default:
+		return []command.Command{}
+
+	}
+}
+
+func parseMsgUpdateTendermintLightClient(
+	msgCommonParams event.MsgCommonParams,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msg map[string]interface{},
+) []command.Command {
 	var rawMsg ibc_model.RawMsgUpdateTendermintLightClient
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -686,6 +709,68 @@ func ParseMsgUpdateClient(
 
 	params := ibc_model.MsgUpdateClientParams{
 		MaybeTendermintLightClientUpdate: &ibc_model.TendermintLightClientUpdate{Header: rawMsg.Header},
+
+		ClientID:        rawMsg.ClientID,
+		ClientType:      event.MustGetAttributeByKey("client_type"),
+		ConsensusHeight: mustParseHeight(event.MustGetAttributeByKey("consensus_height")),
+		Signer:          rawMsg.Signer,
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgIBCUpdateClient(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
+func parseMsgUpdateSolomachineLightClient(
+	msgCommonParams event.MsgCommonParams,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgUpdateSoloMachineLightClient
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating MsgUpdateClient decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding MsgUpdateClient: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgUpdateClientParams{
+			MaybeSoloMachineLightClientUpdate: &ibc_model.SoloMachineLightClientUpdate{Header: rawMsg.Header},
+
+			ClientID:        rawMsg.ClientID,
+			ClientType:      "",
+			ConsensusHeight: ibc_model.Height{},
+			Signer:          rawMsg.Signer,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgIBCUpdateClient(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	event := log.GetEventByType("update_client")
+	if event == nil {
+		panic("missing `update_client` event in TxsResult log")
+	}
+
+	params := ibc_model.MsgUpdateClientParams{
+		MaybeSoloMachineLightClientUpdate: &ibc_model.SoloMachineLightClientUpdate{Header: rawMsg.Header},
 
 		ClientID:        rawMsg.ClientID,
 		ClientType:      event.MustGetAttributeByKey("client_type"),

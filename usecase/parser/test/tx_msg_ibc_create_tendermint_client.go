@@ -1,6 +1,6 @@
 package usecase_parser_test
 
-const TX_MSG_CREATE_CLIENT_BLOCK_RESP = `{
+const TX_MSG_CREATE_TENDERMINT_CLIENT_BLOCK_RESP = `{
     "jsonrpc": "2.0",
     "id": -1,
     "result": {
@@ -67,7 +67,7 @@ const TX_MSG_CREATE_CLIENT_BLOCK_RESP = `{
     }
 }`
 
-const TX_MSG_CREATE_CLIENT_BLOCK_RESULTS_RESP = `
+const TX_MSG_CREATE_TENDERMINT_CLIENT_BLOCK_RESULTS_RESP = `
 {
     "jsonrpc": "2.0",
     "id": -1,

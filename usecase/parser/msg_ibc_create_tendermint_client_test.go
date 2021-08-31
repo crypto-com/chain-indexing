@@ -18,7 +18,7 @@ import (
 )
 
 var _ = Describe("ParseMsgCommands", func() {
-	Describe("MsgIBCCreateClient", func() {
+	Describe("MsgIBCCreateTendermintClient", func() {
 		It("should parse Msg commands when there is MsgCreateClient in the transaction", func() {
 			expected := `{
   "name": "MsgCreateClientCreated",
@@ -90,6 +90,8 @@ var _ = Describe("ParseMsgCommands", func() {
 		  "nextValidatorsHash": "E3DE0D2B3237A02E9C20C34F9EE04F69F5861FBC2E2722A011CA9037FC67A7EC"
 		}
 	  },
+      "maybeSoloMachineLightClient": null,
+      "maybeLocalhostLightClient": null,
 	  "signer": "cro1gdswrmwtzgv3kvf28lvtt7qv7q7myzmn466r3f",
 	  "clientId": "07-tendermint-0",
 	  "clientType": "07-tendermint"
@@ -98,10 +100,10 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
-				usecase_parser_test.TX_MSG_CREATE_CLIENT_BLOCK_RESP,
+				usecase_parser_test.TX_MSG_CREATE_TENDERMINT_CLIENT_BLOCK_RESP,
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
-				usecase_parser_test.TX_MSG_CREATE_CLIENT_BLOCK_RESULTS_RESP,
+				usecase_parser_test.TX_MSG_CREATE_TENDERMINT_CLIENT_BLOCK_RESULTS_RESP,
 			))
 
 			accountAddressPrefix := "cro"

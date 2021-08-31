@@ -152,6 +152,8 @@ func ParseBlockResultsTxsMsgToCommands(
 				// TODO: implement MsgGrantAllowance parser
 			case "/cosmos.feegrant.v1beta1.MsgRevokeAllowance":
 				// TODO: implement MsgRevokeAllowance parser
+			case "/cosmos.vesting.v1beta1.MsgCreateVestingAccount":
+				// TODO: implement MsgCreateVestingAccount parser
 			}
 
 			commands = append(commands, msgCommands...)
