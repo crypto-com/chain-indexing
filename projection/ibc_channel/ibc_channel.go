@@ -286,34 +286,30 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
-			amount := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount.Uint64()
-			denom := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Denom
-			destinationChannelID := msgIBCRecvPacket.Params.Packet.DestinationChannel
-			destinationPortID := msgIBCRecvPacket.Params.Packet.DestinationPort
+			if msgIBCRecvPacket.Params.PacketAck.MaybeError == "" {
 
-			if err := projection.updateBondedTokensWhenMsgIBCRecvPacket(
-				ibcChannelsView,
-				channelID,
-				amount,
-				denom,
-				destinationChannelID,
-				destinationPortID,
-			); err != nil {
-				return fmt.Errorf("error updateChannelBondedTokensWhenMsgIBCRecvPacket: %w", err)
+				amount := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount.Uint64()
+				denom := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Denom
+				destinationChannelID := msgIBCRecvPacket.Params.Packet.DestinationChannel
+				destinationPortID := msgIBCRecvPacket.Params.Packet.DestinationPort
+
+				if err := projection.updateBondedTokensWhenMsgIBCRecvPacket(
+					ibcChannelsView,
+					channelID,
+					amount,
+					denom,
+					destinationChannelID,
+					destinationPortID,
+				); err != nil {
+					return fmt.Errorf("error updateChannelBondedTokensWhenMsgIBCRecvPacket: %w", err)
+				}
+
 			}
 
 		} else if msgIBCAcknowledgement, ok := event.(*event_usecase.MsgIBCAcknowledgement); ok {
 
 			// Transfer started by source chain
 			channelID := msgIBCAcknowledgement.Params.Packet.SourceChannel
-
-			// TotalTransferOutSuccessRate
-			if err := ibcChannelsView.Increment(channelID, "total_transfer_out_success_count", 1); err != nil {
-				return fmt.Errorf("error increasing total_transfer_out_success_count: %w", err)
-			}
-			if err := ibcChannelsView.UpdateTotalTransferOutSuccessRate(channelID); err != nil {
-				return fmt.Errorf("error updating total_transfer_out_success_rate: %w", err)
-			}
 
 			lastOutPacketSequence := msgIBCAcknowledgement.Params.PacketSequence
 			if err := ibcChannelsView.UpdateSequence(channelID, "last_out_packet_sequence", lastOutPacketSequence); err != nil {
@@ -324,20 +320,32 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
-			amount := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount.Uint64()
-			denom := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Denom
-			destinationChannelID := msgIBCAcknowledgement.Params.Packet.DestinationChannel
-			destinationPortID := msgIBCAcknowledgement.Params.Packet.DestinationPort
+			if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Error == "" {
 
-			if err := projection.updateBondedTokensWhenMsgIBCAcknowledgement(
-				ibcChannelsView,
-				channelID,
-				amount,
-				denom,
-				destinationChannelID,
-				destinationPortID,
-			); err != nil {
-				return fmt.Errorf("error updateChannelBondedTokensWhenMsgIBCAcknowledgement: %w", err)
+				// TotalTransferOutSuccessRate
+				if err := ibcChannelsView.Increment(channelID, "total_transfer_out_success_count", 1); err != nil {
+					return fmt.Errorf("error increasing total_transfer_out_success_count: %w", err)
+				}
+				if err := ibcChannelsView.UpdateTotalTransferOutSuccessRate(channelID); err != nil {
+					return fmt.Errorf("error updating total_transfer_out_success_rate: %w", err)
+				}
+
+				amount := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount.Uint64()
+				denom := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Denom
+				destinationChannelID := msgIBCAcknowledgement.Params.Packet.DestinationChannel
+				destinationPortID := msgIBCAcknowledgement.Params.Packet.DestinationPort
+
+				if err := projection.updateBondedTokensWhenMsgIBCAcknowledgement(
+					ibcChannelsView,
+					channelID,
+					amount,
+					denom,
+					destinationChannelID,
+					destinationPortID,
+				); err != nil {
+					return fmt.Errorf("error updateChannelBondedTokensWhenMsgIBCAcknowledgement: %w", err)
+				}
+
 			}
 
 		}
@@ -448,27 +456,25 @@ func (projection *IBCChannel) tokenOriginFromThisChain(bondedTokens *ibc_channel
 func (projection *IBCChannel) subtractTokenOnThisChain(
 	bondedTokens *ibc_channel_view.BondedTokens,
 	newToken *ibc_channel_view.BondedToken,
-) error {
+) {
 	for i, token := range bondedTokens.OnThisChain {
 		if token.Denom == newToken.Denom {
 			bondedTokens.OnThisChain[i].Amount = bondedTokens.OnThisChain[i].Amount.Sub(newToken.Amount)
-			return nil
+			return
 		}
 	}
-	return fmt.Errorf("error Token not found on BondedTokens.OnThisChain: newToken %v", newToken.Denom)
 }
 
 func (projection *IBCChannel) subtractTokenOnCounterpartyChain(
 	bondedTokens *ibc_channel_view.BondedTokens,
 	newToken *ibc_channel_view.BondedToken,
-) error {
+) {
 	for i, token := range bondedTokens.OnCounterpartyChain {
 		if token.Denom == newToken.Denom {
 			bondedTokens.OnCounterpartyChain[i].Amount = bondedTokens.OnCounterpartyChain[i].Amount.Sub(newToken.Amount)
-			return nil
+			return
 		}
 	}
-	return fmt.Errorf("error Token not found on BondedTokens.OnCounterpartyChain: newToken %v", newToken.Denom)
 }
 
 func (projection *IBCChannel) addOnCounterpartyChain(
@@ -484,7 +490,6 @@ func (projection *IBCChannel) addOnCounterpartyChain(
 	}
 	// This token has NO record on bondedTokens.OnCounterpartyChain yet
 	bondedTokens.OnCounterpartyChain = append(bondedTokens.OnCounterpartyChain, *newToken)
-	return
 }
 
 func (projection *IBCChannel) addTokenOnThisChain(
@@ -500,5 +505,4 @@ func (projection *IBCChannel) addTokenOnThisChain(
 	}
 	// This token has NO record on bondedTokens.OnThisChain yet
 	bondedTokens.OnThisChain = append(bondedTokens.OnThisChain, *newToken)
-	return
 }
