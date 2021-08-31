@@ -883,7 +883,7 @@ func ParseMsgAcknowledgement(
 
 	// https://github.com/cosmos/ibc-go/blob/e98838612a4fa5d240e392aad3409db5ec428f50/modules/apps/transfer/module.go#L364
 	if fungibleTokenPacketEvent.GetAttributeByKey("error") != nil {
-		params.MaybeFungibleTokenPacketData.Error = fungibleTokenPacketEvent.MustGetAttributeByKey("error")
+		params.MaybeFungibleTokenPacketData.MaybeError = fungibleTokenPacketEvent.MustGetAttributeByKey("error")
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCAcknowledgement(

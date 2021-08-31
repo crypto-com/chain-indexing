@@ -25,5 +25,5 @@ type MsgAcknowledgementFungibleTokenPacketData struct {
 
 	Success         bool   `json:"success"`
 	Acknowledgement string `json:"acknowledgement"`
-	Error           string `json:"error"`
+	MaybeError      string `json:"error"`
 }

@@ -320,7 +320,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
-			if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Error == "" {
+			if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.MaybeError == "" {
 
 				// TotalTransferOutSuccessRate
 				if err := ibcChannelsView.Increment(channelID, "total_transfer_out_success_count", 1); err != nil {
