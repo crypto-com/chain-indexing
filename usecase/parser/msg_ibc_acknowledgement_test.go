@@ -58,7 +58,8 @@ var _ = Describe("ParseMsgCommands", func() {
       "denom": "basecro",
       "amount": "1234",
       "success": true,
-      "acknowledgement": "{0xc0038ae7a0}"
+      "acknowledgement": "{0xc0038ae7a0}",
+			"error": ""
     },
 
     "packetSequence": "1",

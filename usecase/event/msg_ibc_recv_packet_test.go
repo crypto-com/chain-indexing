@@ -31,7 +31,7 @@ var _ = Describe("Event", func() {
 			anyPacketSequence := uint64(1)
 			anyChannelOrdering := "ORDER_UNORDERED"
 			anyConnectionId := "connection-0"
-			anyPacketAck := ibc_model.MsgRecvPacketPacketAck{Result: base64.MustDecodeString("AQ==")}
+			anyPacketAck := ibc_model.MsgRecvPacketPacketAck{MaybeResult: base64.MustDecodeString("AQ==")}
 			anyApplication := "transfer"
 			anyMessageType := "MsgTransfer"
 
@@ -158,7 +158,7 @@ var _ = Describe("Event", func() {
 			anyPacketSequence := uint64(1)
 			anyChannelOrdering := "ORDER_UNORDERED"
 			anyConnectionId := "connection-0"
-			anyPacketAck := ibc_model.MsgRecvPacketPacketAck{Result: base64.MustDecodeString("AQ==")}
+			anyPacketAck := ibc_model.MsgRecvPacketPacketAck{MaybeResult: base64.MustDecodeString("AQ==")}
 			anyApplication := "transfer"
 			anyMessageType := "MsgTransfer"
 
