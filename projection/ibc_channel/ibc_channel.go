@@ -89,10 +89,22 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 	for _, event := range events {
 		if msgIBCCreateClient, ok := event.(*event_usecase.MsgIBCCreateClient); ok {
-
-			client := &ibc_channel_view.IBCClientRow{
-				ClientID:            msgIBCCreateClient.Params.ClientID,
-				CounterpartyChainID: msgIBCCreateClient.Params.MaybeTendermintLightClient.TendermintClientState.ChainID,
+			var client *ibc_channel_view.IBCClientRow
+			if msgIBCCreateClient.Params.MaybeTendermintLightClient != nil {
+				client = &ibc_channel_view.IBCClientRow{
+					ClientID:            msgIBCCreateClient.Params.ClientID,
+					CounterpartyChainID: msgIBCCreateClient.Params.MaybeTendermintLightClient.TendermintClientState.ChainID,
+				}
+			} else if msgIBCCreateClient.Params.MaybeSoloMachineLightClient != nil {
+				client = &ibc_channel_view.IBCClientRow{
+					ClientID:            msgIBCCreateClient.Params.ClientID,
+					CounterpartyChainID: msgIBCCreateClient.Params.MaybeSoloMachineLightClient.SoloMachineLightClientConsensusState.Diversifier,
+				}
+			} else if msgIBCCreateClient.Params.MaybeLocalhostLightClient != nil {
+				client = &ibc_channel_view.IBCClientRow{
+					ClientID:            msgIBCCreateClient.Params.ClientID,
+					CounterpartyChainID: msgIBCCreateClient.Params.MaybeLocalhostLightClient.LocalhostClientState.ChainID,
+				}
 			}
 			if err := ibcClientsView.Insert(client); err != nil {
 				return fmt.Errorf("error inserting client: %w", err)
