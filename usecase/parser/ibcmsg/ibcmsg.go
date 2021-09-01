@@ -1251,3 +1251,187 @@ func ParseMsgTimeoutOnClose(
 		params,
 	)}
 }
+
+func ParseMsgGrant(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgGrant
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			StringToDurationHookFunc(),
+			StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgGrant decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgGrant: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgGrantParams{
+			RawMsgGrant: rawMsg,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgGrant(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
+	params := ibc_model.MsgGrantParams{
+		RawMsgGrant: rawMsg,
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgGrant(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
+func ParseMsgRevoke(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgRevoke
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			StringToDurationHookFunc(),
+			StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgRevoke decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgRevoke: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgRevokeParams{
+			RawMsgRevoke: rawMsg,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgRevoke(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
+	params := ibc_model.MsgRevokeParams{
+		RawMsgRevoke: rawMsg,
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgRevoke(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
+func ParseMsgExec(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgExec
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			StringToDurationHookFunc(),
+			StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating ParseMsgExec decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding ParseMsgExec: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgExecParams{
+			RawMsgExec: rawMsg,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgExec(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
+	params := ibc_model.MsgExecParams{
+		RawMsgExec: rawMsg,
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgExec(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
+func ParseMsgRevokeAllowance(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgRevokeAllowance
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			StringToDurationHookFunc(),
+			StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgRevokeAllowance decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgRevokeAllowance: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgRevokeAllowanceParams{
+			RawMsgRevokeAllowance: rawMsg,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgRevokeAllowance(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
+	params := ibc_model.MsgRevokeAllowanceParams{
+		RawMsgRevokeAllowance: rawMsg,
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgRevokeAllowance(
+		msgCommonParams,
+
+		params,
+	)}
+}

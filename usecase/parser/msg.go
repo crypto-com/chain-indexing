@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -143,15 +144,19 @@ func ParseBlockResultsTxsMsgToCommands(
 			case "/ibc.core.channel.v1.MsgTimeoutOnClose":
 				msgCommands = ibcmsg.ParseMsgTimeoutOnClose(msgCommonParams, txsResult, msgIndex, msg)
 			case "/cosmos.authz.v1beta1.MsgGrant":
-				// TODO: implement MsgGrant parser
+				msgCommands = ibcmsg.ParseMsgGrant(msgCommonParams, msg)
+				log.Println("MsgGrant height:", blockHeight)
 			case "/cosmos.authz.v1beta1.MsgRevoke":
-				// TODO: implement MsgRevoke parser
+				msgCommands = ibcmsg.ParseMsgRevoke(msgCommonParams, msg)
+				log.Println("MsgRevoke height:", blockHeight)
 			case "/cosmos.authz.v1beta1.MsgExec":
-				// TODO: implement MsgExec parser
+				msgCommands = ibcmsg.ParseMsgExec(msgCommonParams, msg)
+				log.Println("MsgExec height:", blockHeight)
 			case "/cosmos.feegrant.v1beta1.MsgGrantAllowance":
 				// TODO: implement MsgGrantAllowance parser
 			case "/cosmos.feegrant.v1beta1.MsgRevokeAllowance":
-				// TODO: implement MsgRevokeAllowance parser
+				msgCommands = ibcmsg.ParseMsgRevokeAllowance(msgCommonParams, msg)
+				log.Println("MsgRevokeAllowance height:", blockHeight)
 			case "/cosmos.vesting.v1beta1.MsgCreateVestingAccount":
 				// TODO: implement MsgCreateVestingAccount parser
 			}
