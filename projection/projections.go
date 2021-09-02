@@ -57,7 +57,13 @@ func InitProjection(name string, params InitParams) projection_entity.Projection
 			DropDataAccessor: "dropId",
 		})
 	case "IBCChannel":
-		return ibc_channel.NewIBCChannel(params.Logger, params.RdbConn)
+		return ibc_channel.NewIBCChannel(params.Logger, params.RdbConn, ibc_channel.Config{
+			EnableTxMsgTrace: false,
+		})
+	case "IBCChannelTxMsgTrace":
+		return ibc_channel.NewIBCChannel(params.Logger, params.RdbConn, ibc_channel.Config{
+			EnableTxMsgTrace: true,
+		})
 	// register more projections here
 	default:
 		panic(fmt.Sprintf("Unrecognized projection: %s", name))
