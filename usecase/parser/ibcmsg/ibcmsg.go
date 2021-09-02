@@ -778,6 +778,8 @@ func ParseMsgRecvPacket(
 		MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 			FungibleTokenPacketData: rawFungibleTokenPacketData,
 			// success value inverted bug: https://github.com/cosmos/cosmos-sdk/pull/9640
+			// TODO: after fixing this, please also update `projection/ibc_channel/ibc_channel.go -> HandleEvents()`
+			//			 when event type is `MsgIBCRecvPacket`.
 			Success:                fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "false",
 			MaybeDenominationTrace: maybeDenominationTrace,
 		},
@@ -874,6 +876,8 @@ func ParseMsgAcknowledgement(
 					[]byte{byte(1)},
 				),
 			Acknowledgement: fungibleTokenPacketEvent.MustGetAttributeByKey("acknowledgement"),
+			// https://github.com/cosmos/ibc-go/blob/e98838612a4fa5d240e392aad3409db5ec428f50/modules/apps/transfer/module.go#L364
+			MaybeError: fungibleTokenPacketEvent.GetAttributeByKey("error"),
 		},
 
 		PacketSequence:  typeconv.MustAtou64(acknowledgePacketEvent.MustGetAttributeByKey("packet_sequence")),

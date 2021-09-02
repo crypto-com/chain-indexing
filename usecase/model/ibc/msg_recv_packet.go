@@ -33,5 +33,6 @@ type MsgRecvPacketFungibleTokenDenominationTrace struct {
 }
 
 type MsgRecvPacketPacketAck struct {
-	Result []byte `mspstructure:"result" json:"result"`
+	MaybeResult []byte  `mapstructure:"result" json:"result"`
+	MaybeError  *string `mapstructure:"error" json:"error"`
 }
