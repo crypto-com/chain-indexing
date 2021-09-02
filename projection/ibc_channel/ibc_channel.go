@@ -562,7 +562,7 @@ func (projection *IBCChannel) updateBondedTokensWhenMsgIBCAcknowledgement(
 		// Add it to bondedTokens.OnCounterpartyChain
 		newDenom := fmt.Sprintf("%s/%s/%s", destinationPortID, destinationChannelID, denom)
 		token := ibc_channel_view.NewBondedToken(newDenom, amountInCoinInt)
-		projection.addOnCounterpartyChain(bondedTokens, token)
+		projection.addTokenOnCounterpartyChain(bondedTokens, token)
 	}
 
 	if err := ibcChannelsView.UpdateBondedTokens(channelID, bondedTokens); err != nil {
@@ -614,7 +614,7 @@ func (projection *IBCChannel) subtractTokenOnCounterpartyChain(
 	}
 }
 
-func (projection *IBCChannel) addOnCounterpartyChain(
+func (projection *IBCChannel) addTokenOnCounterpartyChain(
 	bondedTokens *ibc_channel_view.BondedTokens,
 	newToken *ibc_channel_view.BondedToken,
 ) {
