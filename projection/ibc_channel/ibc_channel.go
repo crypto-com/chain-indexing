@@ -32,8 +32,12 @@ type Config struct {
 }
 
 func NewIBCChannel(logger applogger.Logger, rdbConn rdb.Conn, config Config) *IBCChannel {
+	projectionID := "IBCChannel"
+	if config.EnableTxMsgTrace {
+		projectionID = "IBCChannelTxMsgTrace"
+	}
 	return &IBCChannel{
-		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "IBCChannel"),
+		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), projectionID),
 
 		rdbConn,
 		logger,
