@@ -9,9 +9,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_CREATE_VESTING_ACCOUNT = "MshCreateVestingAccount"
-const MSG_IBC_CREATE_VESTING_ACCOUNT_CREATED = "MshCreateVestingAccountCreated"
-const MSG_IBC_CREATE_VESTING_ACCOUNT_FAILED = "MshCreateVestingAccountFailed"
+const MSG_IBC_CREATE_VESTING_ACCOUNT = "MsgCreateVestingAccount"
+const MSG_IBC_CREATE_VESTING_ACCOUNT_CREATED = "MsgCreateVestingAccountCreated"
+const MSG_IBC_CREATE_VESTING_ACCOUNT_FAILED = "MsgCreateVestingAccountFailed"
 
 type MsgIBCCreateVestingAccount struct {
 	MsgBase
