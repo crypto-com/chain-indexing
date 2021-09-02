@@ -23,7 +23,7 @@ type RawMsgAcknowledgement struct {
 type MsgAcknowledgementFungibleTokenPacketData struct {
 	FungibleTokenPacketData
 
-	Success         bool   `json:"success"`
-	Acknowledgement string `json:"acknowledgement"`
-	MaybeError      string `json:"error"`
+	Success         bool    `json:"success"`
+	Acknowledgement string  `json:"acknowledgement"`
+	MaybeError      *string `json:"error"`
 }

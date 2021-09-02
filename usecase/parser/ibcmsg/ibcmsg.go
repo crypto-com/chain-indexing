@@ -876,16 +876,13 @@ func ParseMsgAcknowledgement(
 					[]byte{byte(1)},
 				),
 			Acknowledgement: fungibleTokenPacketEvent.MustGetAttributeByKey("acknowledgement"),
+			// https://github.com/cosmos/ibc-go/blob/e98838612a4fa5d240e392aad3409db5ec428f50/modules/apps/transfer/module.go#L364
+			MaybeError: fungibleTokenPacketEvent.GetAttributeByKey("error"),
 		},
 
 		PacketSequence:  typeconv.MustAtou64(acknowledgePacketEvent.MustGetAttributeByKey("packet_sequence")),
 		ChannelOrdering: acknowledgePacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
 		ConnectionID:    acknowledgePacketEvent.MustGetAttributeByKey("packet_connection"),
-	}
-
-	// https://github.com/cosmos/ibc-go/blob/e98838612a4fa5d240e392aad3409db5ec428f50/modules/apps/transfer/module.go#L364
-	if fungibleTokenPacketEvent.GetAttributeByKey("error") != nil {
-		params.MaybeFungibleTokenPacketData.MaybeError = fungibleTokenPacketEvent.MustGetAttributeByKey("error")
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCAcknowledgement(

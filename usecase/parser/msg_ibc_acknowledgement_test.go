@@ -59,7 +59,7 @@ var _ = Describe("ParseMsgCommands", func() {
       "amount": "1234",
       "success": true,
       "acknowledgement": "{0xc0038ae7a0}",
-			"error": ""
+			"error": null
     },
 
     "packetSequence": "1",
