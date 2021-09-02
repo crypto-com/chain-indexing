@@ -354,6 +354,11 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				}
 				success := strconv.FormatBool(msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Success)
 
+				maybeError := ""
+				if msgIBCRecvPacket.Params.PacketAck.MaybeError != nil {
+					maybeError = *msgIBCRecvPacket.Params.PacketAck.MaybeError
+				}
+
 				// Here the bonded_tokens has already been updated by the above updateBondedTokensWhenXXXX()
 				updatedBondedTokens, err := ibcChannelsView.FindBondedTokensBy(channelID)
 				if err != nil {
@@ -372,7 +377,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 					Denom:               msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Denom,
 					Amount:              msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount.String(),
 					Success:             success,
-					Error:               msgIBCRecvPacket.Params.PacketAck.MaybeError,
+					Error:               maybeError,
 					MessageType:         msgIBCRecvPacket.MsgName,
 					Message:             msg,
 					UpdatedBondedTokens: updatedBondedTokensJSON,
@@ -432,6 +437,11 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				}
 				success := strconv.FormatBool(msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Success)
 
+				maybeError := ""
+				if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.MaybeError != nil {
+					maybeError = *msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.MaybeError
+				}
+
 				// Here the bonded_tokens has already been updated by the above updateBondedTokensWhenXXXX()
 				updatedBondedTokens, err := ibcChannelsView.FindBondedTokensBy(channelID)
 				if err != nil {
@@ -450,7 +460,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 					Denom:               msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Denom,
 					Amount:              msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount.String(),
 					Success:             success,
-					Error:               msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.MaybeError,
+					Error:               maybeError,
 					MessageType:         msgIBCAcknowledgement.MsgName,
 					Message:             msg,
 					UpdatedBondedTokens: updatedBondedTokensJSON,
