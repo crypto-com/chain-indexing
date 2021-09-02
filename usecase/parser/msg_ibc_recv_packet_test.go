@@ -68,7 +68,7 @@ var _ = Describe("ParseMsgCommands", func() {
     "connectionId": "connection-0",
     "packetAck": {
       "result": "AQ==",
-			"error": ""
+      "error": ""
     }
   }
 }
