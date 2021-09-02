@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
@@ -145,20 +144,16 @@ func ParseBlockResultsTxsMsgToCommands(
 				msgCommands = ibcmsg.ParseMsgTimeoutOnClose(msgCommonParams, txsResult, msgIndex, msg)
 			case "/cosmos.authz.v1beta1.MsgGrant":
 				msgCommands = ibcmsg.ParseMsgGrant(msgCommonParams, msg)
-				log.Println("MsgGrant height:", blockHeight)
 			case "/cosmos.authz.v1beta1.MsgRevoke":
 				msgCommands = ibcmsg.ParseMsgRevoke(msgCommonParams, msg)
-				log.Println("MsgRevoke height:", blockHeight)
 			case "/cosmos.authz.v1beta1.MsgExec":
 				msgCommands = ibcmsg.ParseMsgExec(msgCommonParams, msg)
-				log.Println("MsgExec height:", blockHeight)
 			case "/cosmos.feegrant.v1beta1.MsgGrantAllowance":
-				// TODO: implement MsgGrantAllowance parser
+				msgCommands = ibcmsg.ParseMsgGrantAllowance(msgCommonParams, msg)
 			case "/cosmos.feegrant.v1beta1.MsgRevokeAllowance":
 				msgCommands = ibcmsg.ParseMsgRevokeAllowance(msgCommonParams, msg)
-				log.Println("MsgRevokeAllowance height:", blockHeight)
 			case "/cosmos.vesting.v1beta1.MsgCreateVestingAccount":
-				// TODO: implement MsgCreateVestingAccount parser
+				msgCommands = ibcmsg.ParseMsgCreateVestingAccount(msgCommonParams, msg)
 			}
 
 			commands = append(commands, msgCommands...)
