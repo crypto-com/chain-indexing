@@ -16,8 +16,8 @@ func NewIBCChannelMessages(handle *rdb.Handle) *IBCChannelMessages {
 	}
 }
 
-func (ibcClientsView *IBCChannelMessages) Insert(ibcChannelMessage *IBCChannelMessageRow) error {
-	sql, sqlArgs, err := ibcClientsView.rdb.StmtBuilder.
+func (ibcChannelMessagesView *IBCChannelMessages) Insert(ibcChannelMessage *IBCChannelMessageRow) error {
+	sql, sqlArgs, err := ibcChannelMessagesView.rdb.StmtBuilder.
 		Insert("view_ibc_channel_messages").
 		Columns(
 			"channel_id",
@@ -51,7 +51,7 @@ func (ibcClientsView *IBCChannelMessages) Insert(ibcChannelMessage *IBCChannelMe
 		return fmt.Errorf("error building view_ibc_channel_messages insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := ibcClientsView.rdb.Exec(sql, sqlArgs...)
+	result, err := ibcChannelMessagesView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
 		return fmt.Errorf("error inserting view_ibc_channel_messages into the table: %v: %w", err, rdb.ErrWrite)
 	}
