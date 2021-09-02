@@ -15,7 +15,8 @@ import (
 type IBCChannel struct {
 	logger applogger.Logger
 
-	ibcChannelsView *ibc_channel_view.IBCChannels
+	ibcChannelsView         *ibc_channel_view.IBCChannels
+	ibcDenomHashMappingView *ibc_channel_view.IBCDenomHashMapping
 }
 
 func NewIBCChannel(logger applogger.Logger, rdbHandle *rdb.Handle) *IBCChannel {
@@ -25,6 +26,7 @@ func NewIBCChannel(logger applogger.Logger, rdbHandle *rdb.Handle) *IBCChannel {
 		}),
 
 		ibc_channel_view.NewIBCChannels(rdbHandle),
+		ibc_channel_view.NewIBCDenomHashMapping(rdbHandle),
 	}
 }
 
@@ -70,4 +72,15 @@ func (handler *IBCChannel) FindChannelById(ctx *fasthttp.RequestCtx) {
 	}
 
 	httpapi.Success(ctx, ibcChannel)
+}
+
+func (handler *IBCChannel) ListAllDenomHashMapping(ctx *fasthttp.RequestCtx) {
+	ibcDenomHashMappings, err := handler.ibcDenomHashMappingView.ListAll()
+	if err != nil {
+		handler.logger.Errorf("error listing IBCDenomHashMppings: %v", err)
+		httpapi.InternalServerError(ctx)
+		return
+	}
+
+	httpapi.Success(ctx, ibcDenomHashMappings)
 }

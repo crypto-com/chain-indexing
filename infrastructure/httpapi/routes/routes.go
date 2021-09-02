@@ -111,4 +111,5 @@ func (registry *RouteRegistry) Register(server *httpapi.Server, routePrefix stri
 
 	server.GET(fmt.Sprintf("%s/api/v1/ibc/channels", routePrefix), registry.ibcChannelHandler.ListChannels)
 	server.GET(fmt.Sprintf("%s/api/v1/ibc/channels/{channelId}", routePrefix), registry.ibcChannelHandler.FindChannelById)
+	server.GET(fmt.Sprintf("%s/api/v1/ibc/denom-hash-mappings", routePrefix), registry.ibcChannelHandler.ListAllDenomHashMapping)
 }
