@@ -18,21 +18,26 @@ func NewIBCDenomHashMapping(handle *rdb.Handle) *IBCDenomHashMapping {
 }
 
 func (ibcDenomHashMappingView *IBCDenomHashMapping) IfDenomExist(denom string) (bool, error) {
+	//	SELECT EXISTS (
+	//		SELECT * FROM some_table where some_field = $1
+	//	)
 	sql, sqlArgs, err := ibcDenomHashMappingView.rdb.StmtBuilder.
-		Select("COUNT(*)").
+		Select("*").
+		Prefix("SELECT EXISTS (").
 		From("view_ibc_denom_hash_mapping").
 		Where("denom = ?", denom).
+		Suffix(")").
 		ToSql()
 	if err != nil {
-		return false, fmt.Errorf("error building count select view_ibc_denom_hash_mapping sql: %v: %w", err, rdb.ErrPrepare)
+		return false, fmt.Errorf("error building SELECT EXISTS view_ibc_denom_hash_mapping sql: %v: %w", err, rdb.ErrPrepare)
 	}
 
-	var count int64
-	if err = ibcDenomHashMappingView.rdb.QueryRow(sql, sqlArgs...).Scan(&count); err != nil {
-		return false, fmt.Errorf("error executing count select on view_ibc_denom_hash_mapping: %v: %w", err, rdb.ErrQuery)
+	var exist bool
+	if err = ibcDenomHashMappingView.rdb.QueryRow(sql, sqlArgs...).Scan(&exist); err != nil {
+		return false, fmt.Errorf("error executing SELECT EXISTS on view_ibc_denom_hash_mapping: %v: %w", err, rdb.ErrQuery)
 	}
 
-	return count > 0, nil
+	return exist, nil
 }
 
 func (ibcDenomHashMappingView *IBCDenomHashMapping) Insert(ibcDenomHash *IBCDenomHashMappingRow) error {
