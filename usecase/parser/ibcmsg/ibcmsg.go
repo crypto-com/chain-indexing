@@ -1295,12 +1295,7 @@ func parseRawMsgSendGrant(
 
 	if !msgCommonParams.TxSuccess {
 		params := ibc_model.MsgGrantParams{
-			MaybeSendGrant: &ibc_model.RawMsgSendGrant{
-				Type:    rawMsg.Type,
-				Granter: rawMsg.Granter,
-				Grantee: rawMsg.Grantee,
-				Grant:   rawMsg.Grant,
-			},
+			MaybeSendGrant: &rawMsg,
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgGrant(
@@ -1311,12 +1306,7 @@ func parseRawMsgSendGrant(
 	}
 
 	params := ibc_model.MsgGrantParams{
-		MaybeSendGrant: &ibc_model.RawMsgSendGrant{
-			Type:    rawMsg.Type,
-			Granter: rawMsg.Granter,
-			Grantee: rawMsg.Grantee,
-			Grant:   rawMsg.Grant,
-		},
+		MaybeSendGrant: &rawMsg,
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgGrant(
@@ -1351,12 +1341,7 @@ func parseRawMsgStackGrant(
 
 	if !msgCommonParams.TxSuccess {
 		params := ibc_model.MsgGrantParams{
-			MaybeStakeGrant: &ibc_model.RawMsgStakeGrant{
-				Type:    rawMsg.Type,
-				Granter: rawMsg.Granter,
-				Grantee: rawMsg.Grantee,
-				Grant:   rawMsg.Grant,
-			},
+			MaybeStakeGrant: &rawMsg,
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgGrant(
@@ -1367,12 +1352,7 @@ func parseRawMsgStackGrant(
 	}
 
 	params := ibc_model.MsgGrantParams{
-		MaybeStakeGrant: &ibc_model.RawMsgStakeGrant{
-			Type:    rawMsg.Type,
-			Granter: rawMsg.Granter,
-			Grantee: rawMsg.Grantee,
-			Grant:   rawMsg.Grant,
-		},
+		MaybeStakeGrant: &rawMsg,
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgGrant(
@@ -1407,12 +1387,7 @@ func parseRawMsgGenericGrant(
 
 	if !msgCommonParams.TxSuccess {
 		params := ibc_model.MsgGrantParams{
-			MaybeGenericGrant: &ibc_model.RawMsgGenericGrant{
-				Type:    rawMsg.Type,
-				Granter: rawMsg.Granter,
-				Grantee: rawMsg.Grantee,
-				Grant:   rawMsg.Grant,
-			},
+			MaybeGenericGrant: &rawMsg,
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgGrant(
@@ -1423,12 +1398,7 @@ func parseRawMsgGenericGrant(
 	}
 
 	params := ibc_model.MsgGrantParams{
-		MaybeGenericGrant: &ibc_model.RawMsgGenericGrant{
-			Type:    rawMsg.Type,
-			Granter: rawMsg.Granter,
-			Grantee: rawMsg.Grantee,
-			Grant:   rawMsg.Grant,
-		},
+		MaybeGenericGrant: &rawMsg,
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgGrant(
@@ -1573,12 +1543,7 @@ func parseRawMsgGrantBasicAllowance(
 
 	if !msgCommonParams.TxSuccess {
 		params := ibc_model.MsgGrantAllowanceParams{
-			MaybeBasicAllowance: &ibc_model.RawMsgGrantBasicAllowance{
-				Type:      rawMsg.Type,
-				Granter:   rawMsg.Granter,
-				Grantee:   rawMsg.Grantee,
-				Allowance: rawMsg.Allowance,
-			},
+			MaybeBasicAllowance: &rawMsg,
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
@@ -1589,12 +1554,7 @@ func parseRawMsgGrantBasicAllowance(
 	}
 
 	params := ibc_model.MsgGrantAllowanceParams{
-		MaybeBasicAllowance: &ibc_model.RawMsgGrantBasicAllowance{
-			Type:      rawMsg.Type,
-			Granter:   rawMsg.Granter,
-			Grantee:   rawMsg.Grantee,
-			Allowance: rawMsg.Allowance,
-		},
+		MaybeBasicAllowance: &rawMsg,
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
@@ -1629,12 +1589,7 @@ func parseRawMsgGrantPeriodicAllowance(
 
 	if !msgCommonParams.TxSuccess {
 		params := ibc_model.MsgGrantAllowanceParams{
-			MaybePeriodicAllowance: &ibc_model.RawMsgGrantPeriodicAllowance{
-				Type:      rawMsg.Type,
-				Granter:   rawMsg.Granter,
-				Grantee:   rawMsg.Grantee,
-				Allowance: rawMsg.Allowance,
-			},
+			MaybePeriodicAllowance: &rawMsg,
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
@@ -1645,12 +1600,7 @@ func parseRawMsgGrantPeriodicAllowance(
 	}
 
 	params := ibc_model.MsgGrantAllowanceParams{
-		MaybePeriodicAllowance: &ibc_model.RawMsgGrantPeriodicAllowance{
-			Type:      rawMsg.Type,
-			Granter:   rawMsg.Granter,
-			Grantee:   rawMsg.Grantee,
-			Allowance: rawMsg.Allowance,
-		},
+		MaybePeriodicAllowance: &rawMsg,
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
@@ -1685,12 +1635,7 @@ func parseRawMsgGrantAllowedMsgAllowance(
 
 	if !msgCommonParams.TxSuccess {
 		params := ibc_model.MsgGrantAllowanceParams{
-			MaybeAllowedMsgAllowance: &ibc_model.RawMsgGrantAllowedMsgAllowance{
-				Type:      rawMsg.Type,
-				Granter:   rawMsg.Granter,
-				Grantee:   rawMsg.Grantee,
-				Allowance: rawMsg.Allowance,
-			},
+			MaybeAllowedMsgAllowance: &rawMsg,
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
@@ -1701,12 +1646,7 @@ func parseRawMsgGrantAllowedMsgAllowance(
 	}
 
 	params := ibc_model.MsgGrantAllowanceParams{
-		MaybeAllowedMsgAllowance: &ibc_model.RawMsgGrantAllowedMsgAllowance{
-			Type:      rawMsg.Type,
-			Granter:   rawMsg.Granter,
-			Grantee:   rawMsg.Grantee,
-			Allowance: rawMsg.Allowance,
-		},
+		MaybeAllowedMsgAllowance: &rawMsg,
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgGrantAllowance(

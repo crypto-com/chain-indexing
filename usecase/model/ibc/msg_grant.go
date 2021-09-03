@@ -28,28 +28,21 @@ type RawMsgGenericGrant struct {
 }
 
 type SendGrant struct {
-	Authorization MaybeSendAuthorization `mapstructure:"authorization" json:"authorization"`
-	Expiration    string                 `mapstructure:"expiration" json:"expiration"`
+	Authorization SendAuthorization `mapstructure:"authorization" json:"authorization"`
+	Expiration    string            `mapstructure:"expiration" json:"expiration"`
 }
 
 type StakeGrant struct {
-	Authorization MaybeStakeAuthorization `mapstructure:"authorization" json:"authorization"`
-	Expiration    string                  `mapstructure:"expiration" json:"expiration"`
+	Authorization StakeAuthorization `mapstructure:"authorization" json:"authorization"`
+	Expiration    string             `mapstructure:"expiration" json:"expiration"`
 }
 
 type GenericGrant struct {
-	Authorization MaybeGenericAuthorization `mapstructure:"authorization" json:"authorization"`
-	Expiration    string                    `mapstructure:"expiration" json:"expiration"`
+	Authorization GenericAuthorization `mapstructure:"authorization" json:"authorization"`
+	Expiration    string               `mapstructure:"expiration" json:"expiration"`
 }
 
-type MsgGrantAuthorization struct {
-	Type                      string                     `mapstructure:"@type" json:"@type"`
-	MaybeSendAuthorization    *MaybeSendAuthorization    `json:"maybeSendAuthorization"`
-	MaybeStakeAuthorization   *MaybeStakeAuthorization   `json:"maybeStakeAuthorization"`
-	MaybeGenericAuthorization *MaybeGenericAuthorization `json:"maybeGenericAuthorization"`
-}
-
-type MaybeSendAuthorization struct {
+type SendAuthorization struct {
 	SpendLimit []MsgGrantSpendLimit `mapstructure:"spend_limit" json:"spendLimit"`
 }
 
@@ -58,7 +51,7 @@ type MsgGrantSpendLimit struct {
 	Amount string `mapstructure:"amount" json:"amount"`
 }
 
-type MaybeStakeAuthorization struct {
+type StakeAuthorization struct {
 	MaxTokens         MsgGrantMaxTokens `mapstructure:"max_tokens" json:"maxTokens,omitempty"`
 	AllowList         Validators        `mapstructure:"allow_list" json:"allowList,omitempty"`
 	DenyList          Validators        `mapstructure:"deny_list" json:"denyList,omitempty"`
@@ -74,6 +67,6 @@ type Validators struct {
 	Address []string `mapstructure:"address" json:"address,omitempty"`
 }
 
-type MaybeGenericAuthorization struct {
+type GenericAuthorization struct {
 	Msg string `mapstructure:"msg" json:"msg,omitempty"`
 }
