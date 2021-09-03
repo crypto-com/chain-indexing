@@ -2,6 +2,7 @@ package ibc_channel
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -12,6 +13,7 @@ import (
 	ibc_channel_view "github.com/crypto-com/chain-indexing/projection/ibc_channel/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	jsoniter "github.com/json-iterator/go"
 )
 
 var _ entity_projection.Projection = &IBCChannel{}
@@ -21,14 +23,26 @@ type IBCChannel struct {
 
 	rdbConn rdb.Conn
 	logger  applogger.Logger
+
+	config Config
 }
 
-func NewIBCChannel(logger applogger.Logger, rdbConn rdb.Conn) *IBCChannel {
+type Config struct {
+	EnableTxMsgTrace bool
+}
+
+func NewIBCChannel(logger applogger.Logger, rdbConn rdb.Conn, config Config) *IBCChannel {
+	projectionID := "IBCChannel"
+	if config.EnableTxMsgTrace {
+		projectionID = "IBCChannelTxMsgTrace"
+	}
 	return &IBCChannel{
-		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "IBCChannel"),
+		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), projectionID),
 
 		rdbConn,
 		logger,
+
+		config,
 	}
 }
 
@@ -71,6 +85,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 	ibcChannelsView := ibc_channel_view.NewIBCChannels(rdbTxHandle)
 	ibcClientsView := ibc_channel_view.NewIBCClients(rdbTxHandle)
 	ibcConnectionsView := ibc_channel_view.NewIBCConnections(rdbTxHandle)
+	ibcChannelMessagesView := ibc_channel_view.NewIBCChannelMessages(rdbTxHandle)
 
 	// Get the block time of current height
 	var blockTime utctime.UTCTime
@@ -268,6 +283,32 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
+			if projection.config.EnableTxMsgTrace {
+
+				amount := msgIBCTransferTransfer.Params.Token.Amount
+				msg, err := msgIBCTransferTransfer.ToJSON()
+				if err != nil {
+					return fmt.Errorf("error msgIBCTransferTransfer.ToJSON(): %w", err)
+				}
+
+				if err := ibcChannelMessagesView.Insert(&ibc_channel_view.IBCChannelMessageRow{
+					ChannelID:           channelID,
+					BlockHeight:         height,
+					SourceChannel:       msgIBCTransferTransfer.Params.SourceChannel,
+					DestinationChannel:  msgIBCTransferTransfer.Params.DestinationChannel,
+					Denom:               msgIBCTransferTransfer.Params.Token.Denom,
+					Amount:              strconv.FormatUint(amount, 10),
+					Success:             "",
+					Error:               "",
+					MessageType:         msgIBCTransferTransfer.MsgName,
+					Message:             msg,
+					UpdatedBondedTokens: "{}",
+				}); err != nil {
+					return fmt.Errorf("error adding tx trace when MsgIBCTransferTransfer: %w", err)
+				}
+
+			}
+
 		} else if msgIBCRecvPacket, ok := event.(*event_usecase.MsgIBCRecvPacket); ok {
 
 			// Transfer started by destination chain
@@ -305,6 +346,47 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 					destinationPortID,
 				); err != nil {
 					return fmt.Errorf("error updateChannelBondedTokensWhenMsgIBCRecvPacket: %w", err)
+				}
+
+			}
+
+			if projection.config.EnableTxMsgTrace {
+
+				msg, err := msgIBCRecvPacket.ToJSON()
+				if err != nil {
+					return fmt.Errorf("error msgIBCRecvPacket.ToJSON(): %w", err)
+				}
+				success := strconv.FormatBool(msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Success)
+
+				maybeError := ""
+				if msgIBCRecvPacket.Params.PacketAck.MaybeError != nil {
+					maybeError = *msgIBCRecvPacket.Params.PacketAck.MaybeError
+				}
+
+				// Here the bonded_tokens has already been updated by the above updateBondedTokensWhenXXXX()
+				updatedBondedTokens, err := ibcChannelsView.FindBondedTokensBy(channelID)
+				if err != nil {
+					return fmt.Errorf("error finding channel updated bonded_tokens: %w", err)
+				}
+				updatedBondedTokensJSON, err := jsoniter.MarshalToString(updatedBondedTokens)
+				if err != nil {
+					return fmt.Errorf("error marshal updatedBondedTokens to string: %w", err)
+				}
+
+				if err := ibcChannelMessagesView.Insert(&ibc_channel_view.IBCChannelMessageRow{
+					ChannelID:           channelID,
+					BlockHeight:         height,
+					SourceChannel:       msgIBCRecvPacket.Params.Packet.SourceChannel,
+					DestinationChannel:  msgIBCRecvPacket.Params.Packet.DestinationChannel,
+					Denom:               msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Denom,
+					Amount:              msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount.String(),
+					Success:             success,
+					Error:               maybeError,
+					MessageType:         msgIBCRecvPacket.MsgName,
+					Message:             msg,
+					UpdatedBondedTokens: updatedBondedTokensJSON,
+				}); err != nil {
+					return fmt.Errorf("error adding tx trace when MsgIBCRecvPacket: %w", err)
 				}
 
 			}
@@ -347,6 +429,47 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 					destinationPortID,
 				); err != nil {
 					return fmt.Errorf("error updateChannelBondedTokensWhenMsgIBCAcknowledgement: %w", err)
+				}
+
+			}
+
+			if projection.config.EnableTxMsgTrace {
+
+				msg, err := msgIBCAcknowledgement.ToJSON()
+				if err != nil {
+					return fmt.Errorf("error msgIBCAcknowledgement.ToJSON(): %w", err)
+				}
+				success := strconv.FormatBool(msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Success)
+
+				maybeError := ""
+				if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.MaybeError != nil {
+					maybeError = *msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.MaybeError
+				}
+
+				// Here the bonded_tokens has already been updated by the above updateBondedTokensWhenXXXX()
+				updatedBondedTokens, err := ibcChannelsView.FindBondedTokensBy(channelID)
+				if err != nil {
+					return fmt.Errorf("error finding channel updated bonded_tokens: %w", err)
+				}
+				updatedBondedTokensJSON, err := jsoniter.MarshalToString(updatedBondedTokens)
+				if err != nil {
+					return fmt.Errorf("error marshal updatedBondedTokens to string: %w", err)
+				}
+
+				if err := ibcChannelMessagesView.Insert(&ibc_channel_view.IBCChannelMessageRow{
+					ChannelID:           channelID,
+					BlockHeight:         height,
+					SourceChannel:       msgIBCAcknowledgement.Params.Packet.SourceChannel,
+					DestinationChannel:  msgIBCAcknowledgement.Params.Packet.DestinationChannel,
+					Denom:               msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Denom,
+					Amount:              msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount.String(),
+					Success:             success,
+					Error:               maybeError,
+					MessageType:         msgIBCAcknowledgement.MsgName,
+					Message:             msg,
+					UpdatedBondedTokens: updatedBondedTokensJSON,
+				}); err != nil {
+					return fmt.Errorf("error adding tx trace when MsgIBCAcknowledgement: %w", err)
 				}
 
 			}
