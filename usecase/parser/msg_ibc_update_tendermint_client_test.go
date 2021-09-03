@@ -126,6 +126,7 @@ var _ = Describe("ParseMsgCommands", func() {
         }
       }
     },
+    "maybeSoloMachineLightClientUpdate":null,
     "clientId": "07-tendermint-0",
     "clientType": "07-tendermint",
     "consensusHeight": {
@@ -138,10 +139,10 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
-				usecase_parser_test.TX_MSG_UPDATE_CLIENT_BLOCK_RESP,
+				usecase_parser_test.TX_MSG_UPDATE_TENDERMINT_CLIENT_BLOCK_RESP,
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
-				usecase_parser_test.TX_MSG_UPDATE_CLIENT_BLOCK_RESULTS_RESP,
+				usecase_parser_test.TX_MSG_UPDATE_TENDERMINT_CLIENT_BLOCK_RESULTS_RESP,
 			))
 
 			accountAddressPrefix := "cro"

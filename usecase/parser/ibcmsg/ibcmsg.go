@@ -7,8 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/crypto-com/chain-indexing/internal/slice"
-
 	base64_internal "github.com/crypto-com/chain-indexing/internal/base64"
 	"github.com/crypto-com/chain-indexing/internal/json"
 	jsoniter "github.com/json-iterator/go"
@@ -23,10 +21,10 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
-var allowedClientStateTypes = []string{
-	"/ibc.lightclients.tendermint.v1.ClientState",
-	"/ibc.lightclients.solomachine.v2.ClientState",
-}
+const tendermintClientStateTypeV1 = "/ibc.lightclients.tendermint.v1.ClientState"
+const soloMachineClientStateTypeV2 = "/ibc.lightclients.solomachine.v2.ClientState"
+const tendermintHeaderTypeV1 = "/ibc.lightclients.tendermint.v1.Header"
+const soloMachineHeaderTypeV2 = "/ibc.lightclients.solomachine.v2.Header"
 
 func ParseMsgCreateClient(
 	msgCommonParams event.MsgCommonParams,
@@ -36,10 +34,33 @@ func ParseMsgCreateClient(
 ) []command.Command {
 	clientStateType := msg["client_state"].(map[string]interface{})["@type"]
 
-	if !slice.ContainString(allowedClientStateTypes, clientStateType.(string)) {
+	switch clientStateType {
+	case tendermintClientStateTypeV1:
+		return parseRawMsgCreateTendermintLightClient(
+			msgCommonParams,
+			txsResult,
+			msgIndex,
+			msg,
+		)
+	case soloMachineClientStateTypeV2:
+		return parseRawMsgCreateSoloMachineLightClient(
+			msgCommonParams,
+			txsResult,
+			msgIndex,
+			msg,
+		)
+	default:
 		return []command.Command{}
-	}
 
+	}
+}
+
+func parseRawMsgCreateTendermintLightClient(
+	msgCommonParams event.MsgCommonParams,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msg map[string]interface{},
+) []command.Command {
 	var rawMsg ibc_model.RawMsgCreateTendermintLightClient
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -84,6 +105,69 @@ func ParseMsgCreateClient(
 		MaybeTendermintLightClient: &ibc_model.TendermintLightClient{
 			TendermintClientState:               rawMsg.ClientState,
 			TendermintLightClientConsensusState: rawMsg.ConsensusState,
+		},
+		Signer:     rawMsg.Signer,
+		ClientID:   event.MustGetAttributeByKey("client_id"),
+		ClientType: event.MustGetAttributeByKey("client_type"),
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgIBCCreateClient(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
+func parseRawMsgCreateSoloMachineLightClient(
+	msgCommonParams event.MsgCommonParams,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgCreateSoloMachineLightClient
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			StringToDurationHookFunc(),
+			StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating MsgCreateClient decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding MsgCreateClient: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgCreateClientParams{
+			MaybeSoloMachineLightClient: &ibc_model.SoloMachineLightClient{
+				SoloMachineClientState:               rawMsg.ClientState,
+				SoloMachineLightClientConsensusState: rawMsg.ConsensusState,
+			},
+			Signer: rawMsg.Signer,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgIBCCreateClient(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	// When there is no reward withdrew, `transfer` event would not exist
+	event := log.GetEventByType("create_client")
+	if event == nil {
+		panic("missing `create_client` event in TxsResult log")
+	}
+	params := ibc_model.MsgCreateClientParams{
+		MaybeSoloMachineLightClient: &ibc_model.SoloMachineLightClient{
+			SoloMachineClientState:               rawMsg.ClientState,
+			SoloMachineLightClientConsensusState: rawMsg.ConsensusState,
 		},
 		Signer:     rawMsg.Signer,
 		ClientID:   event.MustGetAttributeByKey("client_id"),
@@ -557,11 +641,34 @@ func ParseMsgUpdateClient(
 	msg map[string]interface{},
 ) []command.Command {
 	headerType := msg["header"].(map[string]interface{})["@type"]
-	if headerType != "/ibc.lightclients.tendermint.v1.Header" {
-		// TODO: SoloMachine and Localhost LightClient
-		return []command.Command{}
-	}
 
+	switch headerType {
+	case tendermintHeaderTypeV1:
+		return parseMsgUpdateTendermintLightClient(
+			msgCommonParams,
+			txsResult,
+			msgIndex,
+			msg,
+		)
+	case soloMachineHeaderTypeV2:
+		return parseMsgUpdateSolomachineLightClient(
+			msgCommonParams,
+			txsResult,
+			msgIndex,
+			msg,
+		)
+	default:
+		return []command.Command{}
+
+	}
+}
+
+func parseMsgUpdateTendermintLightClient(
+	msgCommonParams event.MsgCommonParams,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msg map[string]interface{},
+) []command.Command {
 	var rawMsg ibc_model.RawMsgUpdateTendermintLightClient
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -604,6 +711,68 @@ func ParseMsgUpdateClient(
 
 	params := ibc_model.MsgUpdateClientParams{
 		MaybeTendermintLightClientUpdate: &ibc_model.TendermintLightClientUpdate{Header: rawMsg.Header},
+
+		ClientID:        rawMsg.ClientID,
+		ClientType:      event.MustGetAttributeByKey("client_type"),
+		ConsensusHeight: mustParseHeight(event.MustGetAttributeByKey("consensus_height")),
+		Signer:          rawMsg.Signer,
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgIBCUpdateClient(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
+func parseMsgUpdateSolomachineLightClient(
+	msgCommonParams event.MsgCommonParams,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgUpdateSoloMachineLightClient
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating MsgUpdateClient decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding MsgUpdateClient: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgUpdateClientParams{
+			MaybeSoloMachineLightClientUpdate: &ibc_model.SoloMachineLightClientUpdate{Header: rawMsg.Header},
+
+			ClientID:        rawMsg.ClientID,
+			ClientType:      "",
+			ConsensusHeight: ibc_model.Height{},
+			Signer:          rawMsg.Signer,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgIBCUpdateClient(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	event := log.GetEventByType("update_client")
+	if event == nil {
+		panic("missing `update_client` event in TxsResult log")
+	}
+
+	params := ibc_model.MsgUpdateClientParams{
+		MaybeSoloMachineLightClientUpdate: &ibc_model.SoloMachineLightClientUpdate{Header: rawMsg.Header},
 
 		ClientID:        rawMsg.ClientID,
 		ClientType:      event.MustGetAttributeByKey("client_type"),

@@ -3,8 +3,9 @@ package ibc
 import "time"
 
 type MsgUpdateClientParams struct {
-	MaybeTendermintLightClientUpdate *TendermintLightClientUpdate `json:"maybeTendermintLightClientUpdate"`
-	// TODO: SoloMachine and Localhost LightClient
+	MaybeTendermintLightClientUpdate  *TendermintLightClientUpdate  `json:"maybeTendermintLightClientUpdate"`
+	MaybeSoloMachineLightClientUpdate *SoloMachineLightClientUpdate `json:"maybeSoloMachineLightClientUpdate"`
+	// TODO: Localhost LightClient
 
 	ClientID        string `json:"clientId"`
 	ClientType      string `json:"clientType"`
@@ -16,11 +17,22 @@ type TendermintLightClientUpdate struct {
 	Header TendermintLightClientHeader `json:"header"`
 }
 
+type SoloMachineLightClientUpdate struct {
+	Header SoloMachineLightClientHeader `json:"header"`
+}
+
 type RawMsgUpdateTendermintLightClient struct {
 	Type     string                      `mapstructure:"@type" json:"@type"`
 	ClientID string                      `mapstructure:"client_id" json:"clientId"`
 	Header   TendermintLightClientHeader `mapstructure:"header" json:"header"`
 	Signer   string                      `mapstructure:"signer" json:"signer"`
+}
+
+type RawMsgUpdateSoloMachineLightClient struct {
+	Type     string                       `mapstructure:"@type" json:"@type"`
+	ClientID string                       `mapstructure:"client_id" json:"clientId"`
+	Header   SoloMachineLightClientHeader `mapstructure:"header" json:"header"`
+	Signer   string                       `mapstructure:"signer" json:"signer"`
 }
 
 type TendermintLightClientHeader struct {
@@ -103,4 +115,18 @@ type TendermintLightClientProposer struct {
 type TendermintLightClientPubKey struct {
 	MaybeEd25519   []byte `mapstructure:"ed25519" json:"ed25519,omitempty"`
 	MaybeSecp256K1 []byte `mapstructure:"secp256k1" json:"secp256k1,omitempty"`
+}
+
+type SoloMachineLightClientHeader struct {
+	Type           string                       `mapstructure:"@type" json:"@type"`
+	Sequence       uint64                       `mapstructure:"sequence" json:"sequence"`
+	Timestamp      uint64                       `mapstructure:"timestamp" json:"timestamp"`
+	Signature      []byte                       `mapstructure:"signature" json:"signature"`
+	NewPublicKey   SoloMachineLightClientPubKey `mapstructure:"new_public_key" json:"newPublicKey"`
+	NewDiversifier string                       `mapstructure:"new_diversifier" json:"NewDiversifier"`
+}
+
+type SoloMachineLightClientPubKey struct {
+	Type string `mapstructure:"@type" json:"@type"`
+	Key  string `mapstructure:"key" json:"key"`
 }
