@@ -1,8 +1,11 @@
 package ibc_channel
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -86,6 +89,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 	ibcClientsView := ibc_channel_view.NewIBCClients(rdbTxHandle)
 	ibcConnectionsView := ibc_channel_view.NewIBCConnections(rdbTxHandle)
 	ibcChannelMessagesView := ibc_channel_view.NewIBCChannelMessages(rdbTxHandle)
+	ibcDenomHashMappingView := ibc_channel_view.NewIBCDenomHashMapping(rdbTxHandle)
 
 	// Get the block time of current height
 	var blockTime utctime.UTCTime
@@ -351,6 +355,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 				if err := projection.updateBondedTokensWhenMsgIBCRecvPacket(
 					ibcChannelsView,
+					ibcDenomHashMappingView,
 					channelID,
 					amount,
 					denom,
@@ -503,6 +508,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 func (projection *IBCChannel) updateBondedTokensWhenMsgIBCRecvPacket(
 	ibcChannelsView *ibc_channel_view.IBCChannels,
+	ibcDenomHashMappingView *ibc_channel_view.IBCDenomHashMapping,
 	channelID string,
 	amount uint64,
 	denom string,
@@ -528,6 +534,11 @@ func (projection *IBCChannel) updateBondedTokensWhenMsgIBCRecvPacket(
 		newDenom := fmt.Sprintf("%s/%s/%s", destinationPortID, destinationChannelID, denom)
 		token := ibc_channel_view.NewBondedToken(newDenom, amountInCoinInt)
 		projection.addTokenOnThisChain(bondedTokens, token)
+
+		// For keeping record of denom-hash, we only interested in tokens sending to our chain
+		if err = projection.insertDenomHashMappingIfNotExist(ibcDenomHashMappingView, newDenom); err != nil {
+			return fmt.Errorf("error insertDenomHashMappingIfNotExist: %w", err)
+		}
 	}
 
 	if err := ibcChannelsView.UpdateBondedTokens(channelID, bondedTokens); err != nil {
@@ -563,7 +574,7 @@ func (projection *IBCChannel) updateBondedTokensWhenMsgIBCAcknowledgement(
 		// Add it to bondedTokens.OnCounterpartyChain
 		newDenom := fmt.Sprintf("%s/%s/%s", destinationPortID, destinationChannelID, denom)
 		token := ibc_channel_view.NewBondedToken(newDenom, amountInCoinInt)
-		projection.addOnCounterpartyChain(bondedTokens, token)
+		projection.addTokenOnCounterpartyChain(bondedTokens, token)
 	}
 
 	if err := ibcChannelsView.UpdateBondedTokens(channelID, bondedTokens); err != nil {
@@ -615,7 +626,7 @@ func (projection *IBCChannel) subtractTokenOnCounterpartyChain(
 	}
 }
 
-func (projection *IBCChannel) addOnCounterpartyChain(
+func (projection *IBCChannel) addTokenOnCounterpartyChain(
 	bondedTokens *ibc_channel_view.BondedTokens,
 	newToken *ibc_channel_view.BondedToken,
 ) {
@@ -643,4 +654,29 @@ func (projection *IBCChannel) addTokenOnThisChain(
 	}
 	// This token has NO record on bondedTokens.OnThisChain yet
 	bondedTokens.OnThisChain = append(bondedTokens.OnThisChain, *newToken)
+}
+
+func (projection *IBCChannel) insertDenomHashMappingIfNotExist(
+	ibcDenomHashMappingView *ibc_channel_view.IBCDenomHashMapping,
+	denom string,
+) error {
+
+	exist, err := ibcDenomHashMappingView.IfDenomExist(denom)
+	if err != nil {
+		return fmt.Errorf("error invoking IfDenomExist(): %v", err)
+	}
+
+	// The record does not exist, insert one
+	if !exist {
+		sum := sha256.Sum256([]byte(denom))
+		hashBase64 := hex.EncodeToString((sum[:]))
+
+		return ibcDenomHashMappingView.Insert(&ibc_channel_view.IBCDenomHashMappingRow{
+			Denom: denom,
+			Hash:  strings.ToUpper(hashBase64),
+		})
+	}
+
+	// The record exists, do nothing
+	return nil
 }
