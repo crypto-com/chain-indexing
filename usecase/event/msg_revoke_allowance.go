@@ -9,23 +9,23 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_GRANT_ALLOWANCE = "MsgGrantAllowance"
-const MSG_IBC_GRANT_ALLOWANCE_CREATED = "MsgGrantAllowanceCreated"
-const MSG_IBC_GRANT_ALLOWANCE_FAILED = "MsgGrantAllowanceFailed"
+const MSG_REVOKE_ALLOWANCE = "MsgRevokeAllowance"
+const MSG_REVOKE_ALLOWANCE_CREATED = "MsgRevokeAllowanceCreated"
+const MSG_REVOKE_ALLOWANCE_FAILED = "MsgRevokeAllowanceFailed"
 
-type MsgIBCGrantAllowance struct {
+type MsgRevokeAllowance struct {
 	MsgBase
 
-	Params ibc_model.MsgGrantAllowanceParams `json:"params"`
+	Params ibc_model.MsgRevokeAllowanceParams `json:"params"`
 }
 
-func NewMsgIBCGrantAllowance(
+func NewMsgRevokeAllowance(
 	msgCommonParams MsgCommonParams,
-	params ibc_model.MsgGrantAllowanceParams,
-) *MsgIBCGrantAllowance {
-	return &MsgIBCGrantAllowance{
+	params ibc_model.MsgRevokeAllowanceParams,
+) *MsgRevokeAllowance {
+	return &MsgRevokeAllowance{
 		NewMsgBase(MsgBaseParams{
-			MsgName:         MSG_IBC_GRANT_ALLOWANCE,
+			MsgName:         MSG_REVOKE_ALLOWANCE,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
@@ -35,7 +35,7 @@ func NewMsgIBCGrantAllowance(
 }
 
 // ToJSON encodes the event into JSON string payload
-func (event *MsgIBCGrantAllowance) ToJSON() (string, error) {
+func (event *MsgRevokeAllowance) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
 		return "", err
@@ -44,15 +44,15 @@ func (event *MsgIBCGrantAllowance) ToJSON() (string, error) {
 	return string(encoded), nil
 }
 
-func (event *MsgIBCGrantAllowance) String() string {
+func (event *MsgRevokeAllowance) String() string {
 	return render.Render(event)
 }
 
-func DecodeMsgIBCGrantAllowance(encoded []byte) (entity_event.Event, error) {
+func DecodeMsgRevokeAllowance(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *MsgIBCGrantAllowance
+	var event *MsgRevokeAllowance
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}

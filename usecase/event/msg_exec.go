@@ -9,23 +9,23 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_REVOKE_ALLOWANCE = "MsgRevokeAllowance"
-const MSG_IBC_REVOKE_ALLOWANCE_CREATED = "MsgRevokeAllowanceCreated"
-const MSG_IBC_REVOKE_ALLOWANCE_FAILED = "MsgRevokeAllowanceFailed"
+const MSG_EXEC = "MsgExec"
+const MSG_EXEC_CREATED = "MsgExecCreated"
+const MSG_EXEC_FAILED = "MsgExecFailed"
 
-type MsgIBCRevokeAllowance struct {
+type MsgExec struct {
 	MsgBase
 
-	Params ibc_model.MsgRevokeAllowanceParams `json:"params"`
+	Params ibc_model.MsgExecParams `json:"params"`
 }
 
-func NewMsgIBCRevokeAllowance(
+func NewMsgExec(
 	msgCommonParams MsgCommonParams,
-	params ibc_model.MsgRevokeAllowanceParams,
-) *MsgIBCRevokeAllowance {
-	return &MsgIBCRevokeAllowance{
+	params ibc_model.MsgExecParams,
+) *MsgExec {
+	return &MsgExec{
 		NewMsgBase(MsgBaseParams{
-			MsgName:         MSG_IBC_REVOKE_ALLOWANCE,
+			MsgName:         MSG_EXEC,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
@@ -35,7 +35,7 @@ func NewMsgIBCRevokeAllowance(
 }
 
 // ToJSON encodes the event into JSON string payload
-func (event *MsgIBCRevokeAllowance) ToJSON() (string, error) {
+func (event *MsgExec) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
 		return "", err
@@ -44,15 +44,15 @@ func (event *MsgIBCRevokeAllowance) ToJSON() (string, error) {
 	return string(encoded), nil
 }
 
-func (event *MsgIBCRevokeAllowance) String() string {
+func (event *MsgExec) String() string {
 	return render.Render(event)
 }
 
-func DecodeMsgIBCRevokeAllowance(encoded []byte) (entity_event.Event, error) {
+func DecodeMsgExec(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *MsgIBCRevokeAllowance
+	var event *MsgExec
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}

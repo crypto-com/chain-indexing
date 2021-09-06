@@ -30,6 +30,6 @@ func (*CreateMsgExec) Version() int {
 }
 
 func (cmd *CreateMsgExec) Exec() (entity_event.Event, error) {
-	event := event.NewMsgIBCExec(cmd.msgCommonParams, cmd.params)
+	event := event.NewMsgExec(cmd.msgCommonParams, cmd.params)
 	return event, nil
 }

@@ -2,6 +2,8 @@ package parser
 
 import (
 	"fmt"
+	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
+	"github.com/mitchellh/mapstructure"
 	"strconv"
 	"time"
 
@@ -143,17 +145,17 @@ func ParseBlockResultsTxsMsgToCommands(
 			case "/ibc.core.channel.v1.MsgTimeoutOnClose":
 				msgCommands = ibcmsg.ParseMsgTimeoutOnClose(msgCommonParams, txsResult, msgIndex, msg)
 			case "/cosmos.authz.v1beta1.MsgGrant":
-				msgCommands = ibcmsg.ParseMsgGrant(msgCommonParams, msg)
+				msgCommands = parseMsgGrant(msgCommonParams, msg)
 			case "/cosmos.authz.v1beta1.MsgRevoke":
-				msgCommands = ibcmsg.ParseMsgRevoke(msgCommonParams, msg)
+				msgCommands = parseMsgRevoke(msgCommonParams, msg)
 			case "/cosmos.authz.v1beta1.MsgExec":
-				msgCommands = ibcmsg.ParseMsgExec(msgCommonParams, msg)
+				msgCommands = parseMsgExec(msgCommonParams, msg)
 			case "/cosmos.feegrant.v1beta1.MsgGrantAllowance":
-				msgCommands = ibcmsg.ParseMsgGrantAllowance(msgCommonParams, msg)
+				msgCommands = parseMsgGrantAllowance(msgCommonParams, msg)
 			case "/cosmos.feegrant.v1beta1.MsgRevokeAllowance":
-				msgCommands = ibcmsg.ParseMsgRevokeAllowance(msgCommonParams, msg)
+				msgCommands = parseMsgRevokeAllowance(msgCommonParams, msg)
 			case "/cosmos.vesting.v1beta1.MsgCreateVestingAccount":
-				msgCommands = ibcmsg.ParseMsgCreateVestingAccount(msgCommonParams, msg)
+				msgCommands = parseMsgCreateVestingAccount(msgCommonParams, msg)
 			}
 
 			commands = append(commands, msgCommands...)
@@ -1126,5 +1128,503 @@ func parseMsgNFTBurnNFT(
 			TokenId: msg["id"].(string),
 			Sender:  msg["sender"].(string),
 		},
+	)}
+}
+
+
+
+func parseMsgGrant(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	authType := msg["grant"].(map[string]interface{})["authorization"].(map[string]interface{})["@type"]
+
+	switch authType {
+	case "/cosmos.bank.v1beta1.SendAuthorization":
+		return parseRawMsgSendGrant(msgCommonParams, msg)
+	case "/cosmos.bank.v1beta1.StakeAuthorization":
+		return parseRawMsgStackGrant(msgCommonParams, msg)
+	case "/cosmos.bank.v1beta1.GenericAuthorization":
+		return parseRawMsgGenericGrant(msgCommonParams, msg)
+	default:
+		return []command.Command{}
+	}
+}
+
+func parseRawMsgSendGrant(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgSendGrant
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			utils.StringToDurationHookFunc(),
+			utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgSendGrant decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgSendGrant: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgGrantParams{
+			MaybeSendGrant: &rawMsg,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgGrant(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
+	params := ibc_model.MsgGrantParams{
+		MaybeSendGrant: &rawMsg,
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgGrant(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
+func parseRawMsgStackGrant(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgStakeGrant
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			utils.StringToDurationHookFunc(),
+			utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgStakeGrant decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgStakeGrant: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgGrantParams{
+			MaybeStakeGrant: &rawMsg,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgGrant(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
+	params := ibc_model.MsgGrantParams{
+		MaybeStakeGrant: &rawMsg,
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgGrant(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
+func parseRawMsgGenericGrant(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgGenericGrant
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			utils.StringToDurationHookFunc(),
+			utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgGenericGrant decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgGenericGrant: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgGrantParams{
+			MaybeGenericGrant: &rawMsg,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgGrant(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
+	params := ibc_model.MsgGrantParams{
+		MaybeGenericGrant: &rawMsg,
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgGrant(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
+func parseMsgRevoke(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgRevoke
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			utils.StringToDurationHookFunc(),
+			utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgRevoke decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgRevoke: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgRevokeParams{
+			RawMsgRevoke: rawMsg,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgRevoke(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
+	params := ibc_model.MsgRevokeParams{
+		RawMsgRevoke: rawMsg,
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgRevoke(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
+func parseMsgExec(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgExec
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			utils.StringToDurationHookFunc(),
+			utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating ParseMsgExec decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding ParseMsgExec: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgExecParams{
+			RawMsgExec: rawMsg,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgExec(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
+	params := ibc_model.MsgExecParams{
+		RawMsgExec: rawMsg,
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgExec(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
+func parseMsgGrantAllowance(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	allowanceType := msg["allowance"].(map[string]interface{})["@type"]
+
+	switch allowanceType {
+	case "/cosmos.feegrant.v1beta1.BasicAllowance":
+		return parseRawMsgGrantBasicAllowance(msgCommonParams, msg)
+	case "/cosmos.feegrant.v1beta1.PeriodicAllowance":
+		return parseRawMsgGrantPeriodicAllowance(msgCommonParams, msg)
+	case "/cosmos.feegrant.v1beta1.AllowedMsgAllowance":
+		return parseRawMsgGrantAllowedMsgAllowance(msgCommonParams, msg)
+	default:
+		return []command.Command{}
+	}
+}
+
+func parseRawMsgGrantBasicAllowance(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgGrantBasicAllowance
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			utils.StringToDurationHookFunc(),
+			utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgGrantBasicAllowance decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgGrantBasicAllowance: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgGrantAllowanceParams{
+			MaybeBasicAllowance: &rawMsg,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
+	params := ibc_model.MsgGrantAllowanceParams{
+		MaybeBasicAllowance: &rawMsg,
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
+func parseRawMsgGrantPeriodicAllowance(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgGrantPeriodicAllowance
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			utils.StringToDurationHookFunc(),
+			utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgGrantPeriodicAllowance decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgGrantPeriodicAllowance: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgGrantAllowanceParams{
+			MaybePeriodicAllowance: &rawMsg,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
+	params := ibc_model.MsgGrantAllowanceParams{
+		MaybePeriodicAllowance: &rawMsg,
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
+func parseRawMsgGrantAllowedMsgAllowance(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgGrantAllowedMsgAllowance
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			utils.StringToDurationHookFunc(),
+			utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgGrantAllowedMsgAllowance decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgGrantAllowedMsgAllowance: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgGrantAllowanceParams{
+			MaybeAllowedMsgAllowance: &rawMsg,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
+	params := ibc_model.MsgGrantAllowanceParams{
+		MaybeAllowedMsgAllowance: &rawMsg,
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
+func parseMsgRevokeAllowance(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgRevokeAllowance
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			utils.StringToDurationHookFunc(),
+			utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgRevokeAllowance decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgRevokeAllowance: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgRevokeAllowanceParams{
+			RawMsgRevokeAllowance: rawMsg,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgRevokeAllowance(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
+	params := ibc_model.MsgRevokeAllowanceParams{
+		RawMsgRevokeAllowance: rawMsg,
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgRevokeAllowance(
+		msgCommonParams,
+
+		params,
+	)}
+}
+
+func parseMsgCreateVestingAccount(
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) []command.Command {
+	var rawMsg ibc_model.RawMsgCreateVestingAccount
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			utils.StringToDurationHookFunc(),
+			utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgCreateVestingAccount decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgCreateVestingAccount: %v", err))
+	}
+
+	if !msgCommonParams.TxSuccess {
+		params := ibc_model.MsgCreateVestingAccountParams{
+			RawMsgCreateVestingAccount: rawMsg,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgCreateVestingAccount(
+			msgCommonParams,
+
+			params,
+		)}
+	}
+
+	params := ibc_model.MsgCreateVestingAccountParams{
+		RawMsgCreateVestingAccount: rawMsg,
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgCreateVestingAccount(
+		msgCommonParams,
+
+		params,
 	)}
 }

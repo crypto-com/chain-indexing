@@ -30,6 +30,6 @@ func (*CreateMsgGrantAllowance) Version() int {
 }
 
 func (cmd *CreateMsgGrantAllowance) Exec() (entity_event.Event, error) {
-	event := event.NewMsgIBCGrantAllowance(cmd.msgCommonParams, cmd.params)
+	event := event.NewMsgGrantAllowance(cmd.msgCommonParams, cmd.params)
 	return event, nil
 }

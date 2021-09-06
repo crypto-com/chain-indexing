@@ -9,23 +9,23 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_CREATE_VESTING_ACCOUNT = "MsgCreateVestingAccount"
-const MSG_IBC_CREATE_VESTING_ACCOUNT_CREATED = "MsgCreateVestingAccountCreated"
-const MSG_IBC_CREATE_VESTING_ACCOUNT_FAILED = "MsgCreateVestingAccountFailed"
+const MSG_REVOKE = "MsgRevoke"
+const MSG_REVOKE_CREATED = "MsgRevokeCreated"
+const MSG_REVOKE_FAILED = "MsgRevokeFailed"
 
-type MsgIBCCreateVestingAccount struct {
+type MsgRevoke struct {
 	MsgBase
 
-	Params ibc_model.MsgCreateVestingAccountParams `json:"params"`
+	Params ibc_model.MsgRevokeParams `json:"params"`
 }
 
-func NewMsgIBCCreateVestingAccount(
+func NewMsgRevoke(
 	msgCommonParams MsgCommonParams,
-	params ibc_model.MsgCreateVestingAccountParams,
-) *MsgIBCCreateVestingAccount {
-	return &MsgIBCCreateVestingAccount{
+	params ibc_model.MsgRevokeParams,
+) *MsgRevoke {
+	return &MsgRevoke{
 		NewMsgBase(MsgBaseParams{
-			MsgName:         MSG_IBC_CREATE_VESTING_ACCOUNT,
+			MsgName:         MSG_REVOKE,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
@@ -35,7 +35,7 @@ func NewMsgIBCCreateVestingAccount(
 }
 
 // ToJSON encodes the event into JSON string payload
-func (event *MsgIBCCreateVestingAccount) ToJSON() (string, error) {
+func (event *MsgRevoke) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
 		return "", err
@@ -44,15 +44,15 @@ func (event *MsgIBCCreateVestingAccount) ToJSON() (string, error) {
 	return string(encoded), nil
 }
 
-func (event *MsgIBCCreateVestingAccount) String() string {
+func (event *MsgRevoke) String() string {
 	return render.Render(event)
 }
 
-func DecodeMsgIBCCreateVestingAccount(encoded []byte) (entity_event.Event, error) {
+func DecodeMsgRevoke(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *MsgIBCCreateVestingAccount
+	var event *MsgRevoke
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}

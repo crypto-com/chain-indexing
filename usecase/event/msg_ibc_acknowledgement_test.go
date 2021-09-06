@@ -1,6 +1,7 @@
 package event_test
 
 import (
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	"time"
 
 	"github.com/crypto-com/chain-indexing/internal/json"
@@ -9,7 +10,6 @@ import (
 
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
-	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
 	"github.com/mitchellh/mapstructure"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -39,8 +39,8 @@ var _ = Describe("Event", func() {
 				DecodeHook: mapstructure.ComposeDecodeHookFunc(
 					mapstructure.StringToTimeDurationHookFunc(),
 					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					ibcmsg.StringToDurationHookFunc(),
-					ibcmsg.StringToByteSliceHookFunc(),
+					utils.StringToDurationHookFunc(),
+					utils.StringToByteSliceHookFunc(),
 				),
 				Result: &anyRawMsg,
 			})
@@ -77,9 +77,9 @@ var _ = Describe("Event", func() {
 				DecodeHook: mapstructure.ComposeDecodeHookFunc(
 					mapstructure.StringToTimeDurationHookFunc(),
 					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					ibcmsg.StringToJsonUint64HookFunc(),
-					ibcmsg.StringToDurationHookFunc(),
-					ibcmsg.StringToByteSliceHookFunc(),
+					utils.StringToJsonUint64HookFunc(),
+					utils.StringToDurationHookFunc(),
+					utils.StringToByteSliceHookFunc(),
 				),
 				Result: &anyFungibleTokenPacketData,
 			})
@@ -161,8 +161,8 @@ var _ = Describe("Event", func() {
 				DecodeHook: mapstructure.ComposeDecodeHookFunc(
 					mapstructure.StringToTimeDurationHookFunc(),
 					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					ibcmsg.StringToDurationHookFunc(),
-					ibcmsg.StringToByteSliceHookFunc(),
+					utils.StringToDurationHookFunc(),
+					utils.StringToByteSliceHookFunc(),
 				),
 				Result: &anyRawMsg,
 			})
@@ -199,9 +199,9 @@ var _ = Describe("Event", func() {
 				DecodeHook: mapstructure.ComposeDecodeHookFunc(
 					mapstructure.StringToTimeDurationHookFunc(),
 					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					ibcmsg.StringToJsonUint64HookFunc(),
-					ibcmsg.StringToDurationHookFunc(),
-					ibcmsg.StringToByteSliceHookFunc(),
+					utils.StringToJsonUint64HookFunc(),
+					utils.StringToDurationHookFunc(),
+					utils.StringToByteSliceHookFunc(),
 				),
 				Result: &anyFungibleTokenPacketData,
 			})

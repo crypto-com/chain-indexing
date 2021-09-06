@@ -18,7 +18,7 @@ import (
 )
 
 var _ = Describe("ParseMsgCommands", func() {
-	Describe("MsgIBCRevoke", func() {
+	Describe("MsgRevoke", func() {
 		It("should parse Msg commands when there is MsgRevoke in the transaction", func() {
 			expected := `{
             "name": "MsgRevokeCreated",
@@ -59,7 +59,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(cmd.Name()).To(Equal("CreateMsgRevoke"))
 
 			untypedEvent, _ := cmd.Exec()
-			createMsgRevokeEvent := untypedEvent.(*event.MsgIBCRevoke)
+			createMsgRevokeEvent := untypedEvent.(*event.MsgRevoke)
 
 			regex, _ := regexp.Compile("\n?\r?\\s?")
 

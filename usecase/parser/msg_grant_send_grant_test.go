@@ -18,38 +18,44 @@ import (
 )
 
 var _ = Describe("ParseMsgCommands", func() {
-	Describe("MsgIBCGrantBasicAllowance", func() {
-		It("should parse Msg commands when there is MsgGrantAllowance in the transaction", func() {
+	Describe("MsgIBCGrantSendGrant", func() {
+		It("should parse Msg commands when there is MsgGrant in the transaction", func() {
 			expected := `{
-            "name": "MsgGrantAllowanceCreated",
+            "name": "MsgGrantCreated",
             "version": 1,
-            "height": 124056,
+            "height": 128465,
             "uuid": "{UUID}",
-            "msgName": "MsgGrantAllowance",
-            "txHash": "1798B9B2694B891BF275DC79DF0C79FDF426D41BA498685C82A284A88207E36C",
+            "msgName": "MsgGrant",
+            "txHash": "928E45A1D77FD01EA4EA8A3A20A19D0A69F5AA5A259D8AB5D956FF0BF6811034",
             "msgIndex": 0,
             "params": {
-                "maybeBasicAllowance": {
-                    "@type": "/cosmos.feegrant.v1beta1.MsgGrantAllowance",
-                    "granter": "tcro16u0wuyhc73tdw0m7qt3cmfeg68ug8g4hc4verc",
+                "maybeSendGrant": {
+                    "@type": "/cosmos.authz.v1beta1.MsgGrant",
+                    "granter": "tcro1vurfhqf0j2jgfpjahlja6g6uq2ts2r60swm2d9",
                     "grantee": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2",
-                    "allowance": {
-                        "@type": "/cosmos.feegrant.v1beta1.BasicAllowance",
-                        "spendLimit": [],
-                        "expiration": ""
+                    "grant": {
+                        "authorization": {
+                            "spendLimit": [
+                                {
+                                    "denom": "basetcro",
+                                    "amount": "400000000"
+                                }
+                            ]
+                        },
+                        "expiration": "2022-08-27T03:14:35Z"
                     }
                 },
-                "maybePeriodicAllowance": null,
-                "maybeAllowedMsgAllowance": null
+                "maybeStakeGrant": null,
+                "maybeGenericGrant": null
             }
         }`
 
 			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
-				usecase_parser_test.TX_MSG_GRANT_BASIC_ALLOWANCE_BLOCK_RESP,
+				usecase_parser_test.TX_MSG_GRANT_SEND_GRANT_BLOCK_RESP,
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
-				usecase_parser_test.TX_MSG_GRANT_BASIC_ALLOWANCE_BLOCK_RESULTS_RESP,
+				usecase_parser_test.TX_MSG_GRANT_SEND_GRANT_BLOCK_RESULTS_RESP,
 			))
 
 			accountAddressPrefix := "cro"
@@ -64,18 +70,18 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("CreateMsgGrantAllowance"))
+			Expect(cmd.Name()).To(Equal("CreateMsgGrant"))
 
 			untypedEvent, _ := cmd.Exec()
-			createMsgGrantAllowanceEvent := untypedEvent.(*event.MsgIBCGrantAllowance)
+			createMsgGrantEvent := untypedEvent.(*event.MsgGrant)
 
 			regex, _ := regexp.Compile("\n?\r?\\s?")
 
-			Expect(json.MustMarshalToString(createMsgGrantAllowanceEvent)).To(Equal(
+			Expect(json.MustMarshalToString(createMsgGrantEvent)).To(Equal(
 				strings.Replace(
 					regex.ReplaceAllString(expected, ""),
 					"{UUID}",
-					createMsgGrantAllowanceEvent.UUID(),
+					createMsgGrantEvent.UUID(),
 					-1,
 				),
 			))

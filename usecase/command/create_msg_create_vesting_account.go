@@ -30,6 +30,6 @@ func (*CreateMsgCreateVestingAccount) Version() int {
 }
 
 func (cmd *CreateMsgCreateVestingAccount) Exec() (entity_event.Event, error) {
-	event := event.NewMsgIBCCreateVestingAccount(cmd.msgCommonParams, cmd.params)
+	event := event.NewMsgCreateVestingAccount(cmd.msgCommonParams, cmd.params)
 	return event, nil
 }

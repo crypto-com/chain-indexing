@@ -121,4 +121,22 @@ func RegisterEvents(registry *event.Registry) {
 
 	registry.Register(MSG_IBC_TRANSFER_TRANSFER_CREATED, 1, DecodeMsgIBCTransferTransfer)
 	registry.Register(MSG_IBC_TRANSFER_TRANSFER_FAILED, 1, DecodeMsgIBCTransferTransfer)
+
+	// Authz
+	registry.Register(MSG_GRANT_CREATED, 1, DecodeMsgGrant)
+	registry.Register(MSG_GRANT_FAILED, 1, DecodeMsgGrant)
+	registry.Register(MSG_REVOKE_CREATED, 1, DecodeMsgRevoke)
+	registry.Register(MSG_REVOKE_FAILED, 1, DecodeMsgRevoke)
+	registry.Register(MSG_EXEC_CREATED, 1, DecodeMsgExec)
+	registry.Register(MSG_EXEC_FAILED, 1, DecodeMsgExec)
+
+	// Feegrant
+	registry.Register(MSG_GRANT_ALLOWANCE_CREATED, 1, DecodeMsgGrantAllowance)
+	registry.Register(MSG_GRANT_ALLOWANCE_FAILED, 1, DecodeMsgGrantAllowance)
+	registry.Register(MSG_REVOKE_ALLOWANCE_CREATED, 1, DecodeMsgRevokeAllowance)
+	registry.Register(MSG_REVOKE_ALLOWANCE_FAILED, 1, DecodeMsgRevokeAllowance)
+
+	// vesting
+	registry.Register(MSG_CREATE_VESTING_ACCOUNT_CREATED, 1, DecodeMsgCreateVestingAccount)
+	registry.Register(MSG_CREATE_VESTING_ACCOUNT_FAILED, 1, DecodeMsgCreateVestingAccount)
 }

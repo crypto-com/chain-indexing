@@ -30,6 +30,6 @@ func (*CreateMsgRevokeAllowance) Version() int {
 }
 
 func (cmd *CreateMsgRevokeAllowance) Exec() (entity_event.Event, error) {
-	event := event.NewMsgIBCRevokeAllowance(cmd.msgCommonParams, cmd.params)
+	event := event.NewMsgRevokeAllowance(cmd.msgCommonParams, cmd.params)
 	return event, nil
 }

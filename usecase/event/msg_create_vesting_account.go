@@ -9,23 +9,23 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_REVOKE = "MsgRevoke"
-const MSG_IBC_REVOKE_CREATED = "MsgRevokeCreated"
-const MSG_IBC_REVOKE_FAILED = "MsgRevokeFailed"
+const MSG_CREATE_VESTING_ACCOUNT = "MsgCreateVestingAccount"
+const MSG_CREATE_VESTING_ACCOUNT_CREATED = "MsgCreateVestingAccountCreated"
+const MSG_CREATE_VESTING_ACCOUNT_FAILED = "MsgCreateVestingAccountFailed"
 
-type MsgIBCRevoke struct {
+type MsgCreateVestingAccount struct {
 	MsgBase
 
-	Params ibc_model.MsgRevokeParams `json:"params"`
+	Params ibc_model.MsgCreateVestingAccountParams `json:"params"`
 }
 
-func NewMsgIBCRevoke(
+func NewMsgCreateVestingAccount(
 	msgCommonParams MsgCommonParams,
-	params ibc_model.MsgRevokeParams,
-) *MsgIBCRevoke {
-	return &MsgIBCRevoke{
+	params ibc_model.MsgCreateVestingAccountParams,
+) *MsgCreateVestingAccount {
+	return &MsgCreateVestingAccount{
 		NewMsgBase(MsgBaseParams{
-			MsgName:         MSG_IBC_REVOKE,
+			MsgName:         MSG_CREATE_VESTING_ACCOUNT,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
@@ -35,7 +35,7 @@ func NewMsgIBCRevoke(
 }
 
 // ToJSON encodes the event into JSON string payload
-func (event *MsgIBCRevoke) ToJSON() (string, error) {
+func (event *MsgCreateVestingAccount) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
 		return "", err
@@ -44,15 +44,15 @@ func (event *MsgIBCRevoke) ToJSON() (string, error) {
 	return string(encoded), nil
 }
 
-func (event *MsgIBCRevoke) String() string {
+func (event *MsgCreateVestingAccount) String() string {
 	return render.Render(event)
 }
 
-func DecodeMsgIBCRevoke(encoded []byte) (entity_event.Event, error) {
+func DecodeMsgCreateVestingAccount(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *MsgIBCRevoke
+	var event *MsgCreateVestingAccount
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}

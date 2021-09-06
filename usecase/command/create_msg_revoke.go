@@ -30,6 +30,6 @@ func (*CreateMsgRevoke) Version() int {
 }
 
 func (cmd *CreateMsgRevoke) Exec() (entity_event.Event, error) {
-	event := event.NewMsgIBCRevoke(cmd.msgCommonParams, cmd.params)
+	event := event.NewMsgRevoke(cmd.msgCommonParams, cmd.params)
 	return event, nil
 }
