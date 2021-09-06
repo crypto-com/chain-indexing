@@ -37,17 +37,24 @@ func (handler *IBCChannel) ListChannels(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	channelIdOrder := view.ORDER_ASC
+	var listOrder ibc_channel_view.IBCChannelsListOrder
+	view_order_desc := view.ORDER_DESC
+	view_order_asc := view.ORDER_ASC
+
 	queryArgs := ctx.QueryArgs()
 	if queryArgs.Has("order") {
-		if string(queryArgs.Peek("order")) == "channel_id.desc" {
-			channelIdOrder = view.ORDER_DESC
+		if string(queryArgs.Peek("order")) == "created_at_block_time.desc" {
+			listOrder.MaybeCreatedAtBlockTime = &view_order_desc
+		} else if string(queryArgs.Peek("order")) == "created_at_block_time.asc" {
+			listOrder.MaybeCreatedAtBlockTime = &view_order_asc
+		} else if string(queryArgs.Peek("order")) == "last_activity_block_time.desc" {
+			listOrder.MaybeLastActivityBlockTime = &view_order_desc
+		} else if string(queryArgs.Peek("order")) == "last_activity_block_time.asc" {
+			listOrder.MaybeLastActivityBlockTime = &view_order_asc
 		}
 	}
 
-	ibcChannels, paginationResult, err := handler.ibcChannelsView.List(ibc_channel_view.IBCChannelsListOrder{
-		ChannelID: channelIdOrder,
-	}, pagination)
+	ibcChannels, paginationResult, err := handler.ibcChannelsView.List(listOrder, pagination)
 	if err != nil {
 		handler.logger.Errorf("error listing IBCChannel channels: %v", err)
 		httpapi.InternalServerError(ctx)

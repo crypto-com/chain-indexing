@@ -425,6 +425,7 @@ func (ibcChannelsView *IBCChannels) FindBy(channelID string) (*IBCChannelRow, er
 	return &channel, nil
 }
 
+// List only return `opened` IBC channel
 func (ibcChannelsView *IBCChannels) List(order IBCChannelsListOrder, pagination *pagination.Pagination) ([]IBCChannelRow, *pagination.PaginationResult, error) {
 	stmtBuilder := ibcChannelsView.rdb.StmtBuilder.Select(
 		"channel_id",
@@ -450,12 +451,26 @@ func (ibcChannelsView *IBCChannels) List(order IBCChannelsListOrder, pagination 
 		"bonded_tokens",
 	).From(
 		"view_ibc_channels",
+	).Where(
+		"status = ?", "true", // Only if status is true, the channel is in `opened` status
 	)
 
-	if order.ChannelID == view.ORDER_DESC {
-		stmtBuilder = stmtBuilder.OrderBy("channel_id DESC")
+	// MaybeLastActivityBlockTime has a higher priority than MaybeCreatedAtBlockTime
+	if order.MaybeLastActivityBlockTime != nil {
+		if *order.MaybeLastActivityBlockTime == view.ORDER_DESC {
+			stmtBuilder = stmtBuilder.OrderBy("last_activity_block_time DESC")
+		} else {
+			stmtBuilder = stmtBuilder.OrderBy("last_activity_block_time")
+		}
+	} else if order.MaybeCreatedAtBlockTime != nil {
+		if *order.MaybeCreatedAtBlockTime == view.ORDER_DESC {
+			stmtBuilder = stmtBuilder.OrderBy("created_at_block_time DESC")
+		} else {
+			stmtBuilder = stmtBuilder.OrderBy("created_at_block_time")
+		}
 	} else {
-		stmtBuilder = stmtBuilder.OrderBy("channel_id")
+		// By default, sort by last_activity_block_time in descending order
+		stmtBuilder = stmtBuilder.OrderBy("last_activity_block_time DESC")
 	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
@@ -536,7 +551,8 @@ func (ibcChannelsView *IBCChannels) List(order IBCChannelsListOrder, pagination 
 }
 
 type IBCChannelsListOrder struct {
-	ChannelID view.ORDER
+	MaybeCreatedAtBlockTime    *view.ORDER
+	MaybeLastActivityBlockTime *view.ORDER
 }
 
 type IBCChannelRow struct {
