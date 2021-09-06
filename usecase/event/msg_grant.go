@@ -2,9 +2,9 @@ package event
 
 import (
 	"bytes"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
-	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/luci/go-render/render"
 )
@@ -16,12 +16,12 @@ const MSG_GRANT_FAILED = "MsgGrantFailed"
 type MsgGrant struct {
 	MsgBase
 
-	Params ibc_model.MsgGrantParams `json:"params"`
+	Params model.MsgGrantParams `json:"params"`
 }
 
 func NewMsgGrant(
 	msgCommonParams MsgCommonParams,
-	params ibc_model.MsgGrantParams,
+	params model.MsgGrantParams,
 ) *MsgGrant {
 	return &MsgGrant{
 		NewMsgBase(MsgBaseParams{

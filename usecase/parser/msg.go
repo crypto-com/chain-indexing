@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
 	"github.com/mitchellh/mapstructure"
 	"strconv"
 	"time"
@@ -1155,7 +1154,7 @@ func parseRawMsgSendGrant(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 ) []command.Command {
-	var rawMsg ibc_model.RawMsgSendGrant
+	var rawMsg model.RawMsgSendGrant
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -1175,7 +1174,7 @@ func parseRawMsgSendGrant(
 	}
 
 	if !msgCommonParams.TxSuccess {
-		params := ibc_model.MsgGrantParams{
+		params := model.MsgGrantParams{
 			MaybeSendGrant: &rawMsg,
 		}
 
@@ -1186,7 +1185,7 @@ func parseRawMsgSendGrant(
 		)}
 	}
 
-	params := ibc_model.MsgGrantParams{
+	params := model.MsgGrantParams{
 		MaybeSendGrant: &rawMsg,
 	}
 
@@ -1201,7 +1200,7 @@ func parseRawMsgStackGrant(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 ) []command.Command {
-	var rawMsg ibc_model.RawMsgStakeGrant
+	var rawMsg model.RawMsgStakeGrant
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -1221,7 +1220,7 @@ func parseRawMsgStackGrant(
 	}
 
 	if !msgCommonParams.TxSuccess {
-		params := ibc_model.MsgGrantParams{
+		params := model.MsgGrantParams{
 			MaybeStakeGrant: &rawMsg,
 		}
 
@@ -1232,7 +1231,7 @@ func parseRawMsgStackGrant(
 		)}
 	}
 
-	params := ibc_model.MsgGrantParams{
+	params := model.MsgGrantParams{
 		MaybeStakeGrant: &rawMsg,
 	}
 
@@ -1247,7 +1246,7 @@ func parseRawMsgGenericGrant(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 ) []command.Command {
-	var rawMsg ibc_model.RawMsgGenericGrant
+	var rawMsg model.RawMsgGenericGrant
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -1267,7 +1266,7 @@ func parseRawMsgGenericGrant(
 	}
 
 	if !msgCommonParams.TxSuccess {
-		params := ibc_model.MsgGrantParams{
+		params := model.MsgGrantParams{
 			MaybeGenericGrant: &rawMsg,
 		}
 
@@ -1278,7 +1277,7 @@ func parseRawMsgGenericGrant(
 		)}
 	}
 
-	params := ibc_model.MsgGrantParams{
+	params := model.MsgGrantParams{
 		MaybeGenericGrant: &rawMsg,
 	}
 
@@ -1293,7 +1292,7 @@ func parseMsgRevoke(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 ) []command.Command {
-	var rawMsg ibc_model.RawMsgRevoke
+	var rawMsg model.RawMsgRevoke
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -1313,7 +1312,7 @@ func parseMsgRevoke(
 	}
 
 	if !msgCommonParams.TxSuccess {
-		params := ibc_model.MsgRevokeParams{
+		params := model.MsgRevokeParams{
 			RawMsgRevoke: rawMsg,
 		}
 
@@ -1324,7 +1323,7 @@ func parseMsgRevoke(
 		)}
 	}
 
-	params := ibc_model.MsgRevokeParams{
+	params := model.MsgRevokeParams{
 		RawMsgRevoke: rawMsg,
 	}
 
@@ -1339,7 +1338,7 @@ func parseMsgExec(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 ) []command.Command {
-	var rawMsg ibc_model.RawMsgExec
+	var rawMsg model.RawMsgExec
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -1359,7 +1358,7 @@ func parseMsgExec(
 	}
 
 	if !msgCommonParams.TxSuccess {
-		params := ibc_model.MsgExecParams{
+		params := model.MsgExecParams{
 			RawMsgExec: rawMsg,
 		}
 
@@ -1370,7 +1369,7 @@ func parseMsgExec(
 		)}
 	}
 
-	params := ibc_model.MsgExecParams{
+	params := model.MsgExecParams{
 		RawMsgExec: rawMsg,
 	}
 
@@ -1403,7 +1402,7 @@ func parseRawMsgGrantBasicAllowance(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 ) []command.Command {
-	var rawMsg ibc_model.RawMsgGrantBasicAllowance
+	var rawMsg model.RawMsgGrantBasicAllowance
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -1423,7 +1422,7 @@ func parseRawMsgGrantBasicAllowance(
 	}
 
 	if !msgCommonParams.TxSuccess {
-		params := ibc_model.MsgGrantAllowanceParams{
+		params := model.MsgGrantAllowanceParams{
 			MaybeBasicAllowance: &rawMsg,
 		}
 
@@ -1434,7 +1433,7 @@ func parseRawMsgGrantBasicAllowance(
 		)}
 	}
 
-	params := ibc_model.MsgGrantAllowanceParams{
+	params := model.MsgGrantAllowanceParams{
 		MaybeBasicAllowance: &rawMsg,
 	}
 
@@ -1449,7 +1448,7 @@ func parseRawMsgGrantPeriodicAllowance(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 ) []command.Command {
-	var rawMsg ibc_model.RawMsgGrantPeriodicAllowance
+	var rawMsg model.RawMsgGrantPeriodicAllowance
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -1469,7 +1468,7 @@ func parseRawMsgGrantPeriodicAllowance(
 	}
 
 	if !msgCommonParams.TxSuccess {
-		params := ibc_model.MsgGrantAllowanceParams{
+		params := model.MsgGrantAllowanceParams{
 			MaybePeriodicAllowance: &rawMsg,
 		}
 
@@ -1480,7 +1479,7 @@ func parseRawMsgGrantPeriodicAllowance(
 		)}
 	}
 
-	params := ibc_model.MsgGrantAllowanceParams{
+	params := model.MsgGrantAllowanceParams{
 		MaybePeriodicAllowance: &rawMsg,
 	}
 
@@ -1495,7 +1494,7 @@ func parseRawMsgGrantAllowedMsgAllowance(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 ) []command.Command {
-	var rawMsg ibc_model.RawMsgGrantAllowedMsgAllowance
+	var rawMsg model.RawMsgGrantAllowedMsgAllowance
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -1515,7 +1514,7 @@ func parseRawMsgGrantAllowedMsgAllowance(
 	}
 
 	if !msgCommonParams.TxSuccess {
-		params := ibc_model.MsgGrantAllowanceParams{
+		params := model.MsgGrantAllowanceParams{
 			MaybeAllowedMsgAllowance: &rawMsg,
 		}
 
@@ -1526,7 +1525,7 @@ func parseRawMsgGrantAllowedMsgAllowance(
 		)}
 	}
 
-	params := ibc_model.MsgGrantAllowanceParams{
+	params := model.MsgGrantAllowanceParams{
 		MaybeAllowedMsgAllowance: &rawMsg,
 	}
 
@@ -1541,7 +1540,7 @@ func parseMsgRevokeAllowance(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 ) []command.Command {
-	var rawMsg ibc_model.RawMsgRevokeAllowance
+	var rawMsg model.RawMsgRevokeAllowance
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -1561,7 +1560,7 @@ func parseMsgRevokeAllowance(
 	}
 
 	if !msgCommonParams.TxSuccess {
-		params := ibc_model.MsgRevokeAllowanceParams{
+		params := model.MsgRevokeAllowanceParams{
 			RawMsgRevokeAllowance: rawMsg,
 		}
 
@@ -1572,7 +1571,7 @@ func parseMsgRevokeAllowance(
 		)}
 	}
 
-	params := ibc_model.MsgRevokeAllowanceParams{
+	params := model.MsgRevokeAllowanceParams{
 		RawMsgRevokeAllowance: rawMsg,
 	}
 
@@ -1587,7 +1586,7 @@ func parseMsgCreateVestingAccount(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 ) []command.Command {
-	var rawMsg ibc_model.RawMsgCreateVestingAccount
+	var rawMsg model.RawMsgCreateVestingAccount
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -1607,7 +1606,7 @@ func parseMsgCreateVestingAccount(
 	}
 
 	if !msgCommonParams.TxSuccess {
-		params := ibc_model.MsgCreateVestingAccountParams{
+		params := model.MsgCreateVestingAccountParams{
 			RawMsgCreateVestingAccount: rawMsg,
 		}
 
@@ -1618,7 +1617,7 @@ func parseMsgCreateVestingAccount(
 		)}
 	}
 
-	params := ibc_model.MsgCreateVestingAccountParams{
+	params := model.MsgCreateVestingAccountParams{
 		RawMsgCreateVestingAccount: rawMsg,
 	}
 

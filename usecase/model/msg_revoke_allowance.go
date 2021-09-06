@@ -1,4 +1,4 @@
-package ibc
+package model
 
 type MsgRevokeAllowanceParams struct {
 	RawMsgRevokeAllowance

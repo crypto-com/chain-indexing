@@ -1,8 +1,4 @@
-package ibc
-
-import (
-	"github.com/crypto-com/chain-indexing/usecase/model"
-)
+package model
 
 type MsgGrantAllowanceParams struct {
 	MaybeBasicAllowance      *RawMsgGrantBasicAllowance      `json:"maybeBasicAllowance"`
@@ -49,7 +45,7 @@ type MsgGrantAllowanceSpendLimit struct {
 type PeriodicAllowance struct {
 	Type             string                              `mapstructure:"@type" json:"@type"`
 	Basic            BasicAllowance                      `mapstructure:"basic" json:"basic"`
-	Period           model.Duration                      `mapstructure:"period" json:"period"`
+	Period           Duration                            `mapstructure:"period" json:"period"`
 	PeriodSpendLimit []MsgGrantAllowancePeriodSpendLimit `mapstructure:"period_spend_limit" json:"periodSpendLimit"`
 	PeriodCanSpend   []MsgGrantAllowancePeriodCanSpend   `mapstructure:"period_can_spend" json:"periodCanSpend"`
 	PeriodReset      string                              `mapstructure:"period_reset" json:"periodReset"`

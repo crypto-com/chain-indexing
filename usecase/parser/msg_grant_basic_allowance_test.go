@@ -18,7 +18,7 @@ import (
 )
 
 var _ = Describe("ParseMsgCommands", func() {
-	Describe("MsgIBCGrantBasicAllowance", func() {
+	Describe("MsgGrantBasicAllowance", func() {
 		It("should parse Msg commands when there is MsgGrantAllowance in the transaction", func() {
 			expected := `{
             "name": "MsgGrantAllowanceCreated",

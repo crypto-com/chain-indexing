@@ -2,9 +2,9 @@ package event
 
 import (
 	"bytes"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
-	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/luci/go-render/render"
 )
@@ -16,12 +16,12 @@ const MSG_CREATE_VESTING_ACCOUNT_FAILED = "MsgCreateVestingAccountFailed"
 type MsgCreateVestingAccount struct {
 	MsgBase
 
-	Params ibc_model.MsgCreateVestingAccountParams `json:"params"`
+	Params model.MsgCreateVestingAccountParams `json:"params"`
 }
 
 func NewMsgCreateVestingAccount(
 	msgCommonParams MsgCommonParams,
-	params ibc_model.MsgCreateVestingAccountParams,
+	params model.MsgCreateVestingAccountParams,
 ) *MsgCreateVestingAccount {
 	return &MsgCreateVestingAccount{
 		NewMsgBase(MsgBaseParams{

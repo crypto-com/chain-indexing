@@ -3,17 +3,17 @@ package command
 import (
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/usecase/event"
-	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 type CreateMsgRevoke struct {
 	msgCommonParams event.MsgCommonParams
-	params          ibc_model.MsgRevokeParams
+	params          model.MsgRevokeParams
 }
 
 func NewCreateMsgRevoke(
 	msgCommonParams event.MsgCommonParams,
-	params ibc_model.MsgRevokeParams,
+	params model.MsgRevokeParams,
 ) *CreateMsgRevoke {
 	return &CreateMsgRevoke{
 		msgCommonParams,

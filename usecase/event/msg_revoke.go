@@ -2,9 +2,9 @@ package event
 
 import (
 	"bytes"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
-	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/luci/go-render/render"
 )
@@ -16,12 +16,12 @@ const MSG_REVOKE_FAILED = "MsgRevokeFailed"
 type MsgRevoke struct {
 	MsgBase
 
-	Params ibc_model.MsgRevokeParams `json:"params"`
+	Params model.MsgRevokeParams `json:"params"`
 }
 
 func NewMsgRevoke(
 	msgCommonParams MsgCommonParams,
-	params ibc_model.MsgRevokeParams,
+	params model.MsgRevokeParams,
 ) *MsgRevoke {
 	return &MsgRevoke{
 		NewMsgBase(MsgBaseParams{

@@ -2,7 +2,7 @@ package event_test
 
 import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
-	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -19,7 +19,7 @@ var _ = Describe("Event", func() {
 			anyTxHash := "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416"
 			anyMsgIndex := 2
 
-			anyParams := ibc_model.MsgRevokeParams{}
+			anyParams := model.MsgRevokeParams{}
 
 			event := event_usecase.NewMsgRevoke(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
@@ -51,7 +51,7 @@ var _ = Describe("Event", func() {
 			anyTxHash := "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416"
 			anyMsgIndex := 2
 
-			anyParams := ibc_model.MsgRevokeParams{}
+			anyParams := model.MsgRevokeParams{}
 
 			event := event_usecase.NewMsgRevoke(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,

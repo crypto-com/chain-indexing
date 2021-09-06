@@ -3,17 +3,17 @@ package command
 import (
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/usecase/event"
-	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 type CreateMsgExec struct {
 	msgCommonParams event.MsgCommonParams
-	params          ibc_model.MsgExecParams
+	params          model.MsgExecParams
 }
 
 func NewCreateMsgExec(
 	msgCommonParams event.MsgCommonParams,
-	params ibc_model.MsgExecParams,
+	params model.MsgExecParams,
 ) *CreateMsgExec {
 	return &CreateMsgExec{
 		msgCommonParams,

@@ -1,4 +1,4 @@
-package ibc
+package model
 
 type MsgGrantParams struct {
 	MaybeSendGrant    *RawMsgSendGrant    `json:"maybeSendGrant"`
