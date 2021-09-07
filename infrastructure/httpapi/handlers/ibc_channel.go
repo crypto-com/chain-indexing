@@ -43,13 +43,13 @@ func (handler *IBCChannel) ListChannels(ctx *fasthttp.RequestCtx) {
 
 	queryArgs := ctx.QueryArgs()
 	if queryArgs.Has("order") {
-		if string(queryArgs.Peek("order")) == "created_at_block_time.desc" {
+		if string(queryArgs.Peek("order")) == "createdAtBlockTime.desc" {
 			listOrder.MaybeCreatedAtBlockTime = &view_order_desc
-		} else if string(queryArgs.Peek("order")) == "created_at_block_time.asc" {
+		} else if string(queryArgs.Peek("order")) == "createdAtBlockTime.asc" {
 			listOrder.MaybeCreatedAtBlockTime = &view_order_asc
-		} else if string(queryArgs.Peek("order")) == "last_activity_block_time.desc" {
+		} else if string(queryArgs.Peek("order")) == "lastActivityBlockTime.desc" {
 			listOrder.MaybeLastActivityBlockTime = &view_order_desc
-		} else if string(queryArgs.Peek("order")) == "last_activity_block_time.asc" {
+		} else if string(queryArgs.Peek("order")) == "lastActivityBlockTime.asc" {
 			listOrder.MaybeLastActivityBlockTime = &view_order_asc
 		}
 	}
