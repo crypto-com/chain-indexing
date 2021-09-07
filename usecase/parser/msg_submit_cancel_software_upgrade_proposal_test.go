@@ -3,7 +3,6 @@ package parser_test
 import (
 	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
-	"github.com/crypto-com/chain-indexing/usecase/parser"
 	"github.com/crypto-com/chain-indexing/usecase/parser/test"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	. "github.com/onsi/ginkgo"
@@ -26,7 +25,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"
 
-			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
+			cmds, err := ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,

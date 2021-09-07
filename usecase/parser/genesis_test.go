@@ -1,7 +1,6 @@
 package parser_test
 
 import (
-	"github.com/crypto-com/chain-indexing/usecase/parser"
 	"strings"
 
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
@@ -40,7 +39,7 @@ var _ = Describe("Parse Genesis", func() {
 		rawGenesis := mustParseGenesisResp(usecase_parser_test.GENESIS_EXPORTED_RESP, strict)
 
 		accountAddressPrefix := "tcro"
-		cmds, err := parser.ParseGenesisCommands(rawGenesis, accountAddressPrefix)
+		cmds, err := ParseGenesisCommands(rawGenesis, accountAddressPrefix)
 		Expect(err).To(BeNil())
 		Expect(cmds).To(HaveLen(4))
 		Expect(cmds[0]).To(Equal(command_usecase.NewCreateGenesis(*rawGenesis)))
@@ -126,7 +125,7 @@ var _ = Describe("Parse Genesis", func() {
 		rawGenesis := mustParseGenesisResp(usecase_parser_test.GENESIS_RESP, strict)
 
 		accountAddressPrefix := "tcro"
-		cmds, err := parser.ParseGenesisCommands(rawGenesis, accountAddressPrefix)
+		cmds, err := ParseGenesisCommands(rawGenesis, accountAddressPrefix)
 		Expect(err).To(BeNil())
 		Expect(cmds).To(HaveLen(4))
 		Expect(cmds[0]).To(Equal(command_usecase.NewCreateGenesis(*rawGenesis)))

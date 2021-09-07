@@ -1,7 +1,6 @@
 package parser_test
 
 import (
-	"github.com/crypto-com/chain-indexing/usecase/parser"
 	"github.com/crypto-com/chain-indexing/usecase/parser/test"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	"strings"
@@ -27,7 +26,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"
 
-			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
+			cmds, err := ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,

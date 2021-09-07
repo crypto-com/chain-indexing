@@ -2,7 +2,6 @@ package parser_test
 
 import (
 	"github.com/crypto-com/chain-indexing/usecase/model"
-	"github.com/crypto-com/chain-indexing/usecase/parser"
 	"github.com/crypto-com/chain-indexing/usecase/parser/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -18,7 +17,7 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.BEGIN_BLOCK_COMMON_EVENTS_BLOCK_RESULTS_RESP)
 
 			bondingDenom := "basetcro"
-			cmds, err := parser.ParseBeginBlockEventsCommands(
+			cmds, err := ParseBeginBlockEventsCommands(
 				blockResults.Height,
 				blockResults.BeginBlockEvents,
 				bondingDenom,
@@ -89,7 +88,7 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 		It("should return ValidatorSlashed and ValidatorJailed command base on missing signature events", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.BEGIN_BLOCK_SLASH_MISSING_SIGNATURES_EVENT_BLOCK_RESULTS_RESP)
 			bondingDenom := "basetcro"
-			cmds, err := parser.ParseBeginBlockEventsCommands(
+			cmds, err := ParseBeginBlockEventsCommands(
 				blockResults.Height,
 				blockResults.BeginBlockEvents,
 				bondingDenom,
@@ -129,7 +128,7 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 		It("should return ValidatorSlashed and ValidatorJailed command base on double sign events", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.BEGIN_BLOCK_SLASH_DOUBLE_SIGN_EVENT_BLOCK_RESULTS_RESP)
 			bondingDenom := "basetcro"
-			cmds, err := parser.ParseBeginBlockEventsCommands(
+			cmds, err := ParseBeginBlockEventsCommands(
 				blockResults.Height,
 				blockResults.BeginBlockEvents,
 				bondingDenom,
