@@ -9,6 +9,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
 	ibc_channel_view "github.com/crypto-com/chain-indexing/projection/ibc_channel/view"
 )
 
@@ -37,32 +38,27 @@ func (handler *IBCChannel) ListChannels(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	var listOrder ibc_channel_view.IBCChannelsListOrder
-	view_order_desc := view.ORDER_DESC
-	view_order_asc := view.ORDER_ASC
-
 	queryArgs := ctx.QueryArgs()
+
+	var listOrder ibc_channel_view.IBCChannelsListOrder
 	if queryArgs.Has("order") {
 		if string(queryArgs.Peek("order")) == "createdAtBlockTime.desc" {
-			listOrder.MaybeCreatedAtBlockTime = &view_order_desc
+			listOrder.MaybeCreatedAtBlockTime = primptr.String(view.ORDER_DESC)
 		} else if string(queryArgs.Peek("order")) == "createdAtBlockTime.asc" {
-			listOrder.MaybeCreatedAtBlockTime = &view_order_asc
+			listOrder.MaybeCreatedAtBlockTime = primptr.String(view.ORDER_ASC)
 		} else if string(queryArgs.Peek("order")) == "lastActivityBlockTime.desc" {
-			listOrder.MaybeLastActivityBlockTime = &view_order_desc
+			listOrder.MaybeLastActivityBlockTime = primptr.String(view.ORDER_DESC)
 		} else if string(queryArgs.Peek("order")) == "lastActivityBlockTime.asc" {
-			listOrder.MaybeLastActivityBlockTime = &view_order_asc
+			listOrder.MaybeLastActivityBlockTime = primptr.String(view.ORDER_ASC)
 		}
 	}
 
 	var listFilter ibc_channel_view.IBCChannelsListFilter
-	view_filter_status_true := true
-	view_filter_status_false := false
-
 	if queryArgs.Has("status") {
 		if string(queryArgs.Peek("status")) == "true" {
-			listFilter.MaybeStatus = &view_filter_status_true
+			listFilter.MaybeStatus = primptr.Bool(true)
 		} else if string(queryArgs.Peek("status")) == "false" {
-			listFilter.MaybeStatus = &view_filter_status_false
+			listFilter.MaybeStatus = primptr.Bool(false)
 		}
 	}
 
