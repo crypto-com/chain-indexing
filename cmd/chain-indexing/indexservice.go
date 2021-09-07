@@ -114,7 +114,7 @@ func (service *IndexService) RunEventStoreMode() error {
 				StakingDenom:             service.bondingDenom,
 			},
 		},
-		utils.NewParserManager(
+		utils.NewCosmosParserManager(
 			utils.CosmosParserManagerParams{
 				Logger: service.logger,
 				Config: utils.CosmosParserManagerConfig{
@@ -151,7 +151,7 @@ func (service *IndexService) RunTendermintDirectMode() error {
 						StakingDenom:             service.bondingDenom,
 					},
 				},
-				utils.NewParserManager(
+				utils.NewCosmosParserManager(
 					utils.CosmosParserManagerParams{
 						Logger: service.logger,
 						Config: utils.CosmosParserManagerConfig{

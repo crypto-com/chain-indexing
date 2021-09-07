@@ -39,7 +39,7 @@ type CosmosParserParams struct {
 	Msg             map[string]interface{}
 }
 
-func NewParserManager(params CosmosParserManagerParams) *CosmosParserManager {
+func NewCosmosParserManager(params CosmosParserManagerParams) *CosmosParserManager {
 	cpm := &CosmosParserManager{
 		store:  make(map[string]CosmosParserBlockHeight),
 		logger: params.Logger,
