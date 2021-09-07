@@ -425,7 +425,6 @@ func (ibcChannelsView *IBCChannels) FindBy(channelID string) (*IBCChannelRow, er
 	return &channel, nil
 }
 
-// List only return `opened` IBC channel
 func (ibcChannelsView *IBCChannels) List(
 	order IBCChannelsListOrder,
 	filter IBCChannelsListFilter,
