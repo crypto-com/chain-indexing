@@ -462,7 +462,7 @@ func (ibcChannelsView *IBCChannels) List(
 	)
 
 	if filter.MaybeStatus != nil {
-		if *filter.MaybeStatus == true {
+		if *filter.MaybeStatus {
 			// Filtered channels in `opened` status
 			stmtBuilder = stmtBuilder.Where("status = ?", "true")
 		} else {
