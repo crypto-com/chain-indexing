@@ -425,7 +425,15 @@ func (ibcChannelsView *IBCChannels) FindBy(channelID string) (*IBCChannelRow, er
 	return &channel, nil
 }
 
-func (ibcChannelsView *IBCChannels) List(order IBCChannelsListOrder, pagination *pagination.Pagination) ([]IBCChannelRow, *pagination.PaginationResult, error) {
+func (ibcChannelsView *IBCChannels) List(
+	order IBCChannelsListOrder,
+	filter IBCChannelsListFilter,
+	pagination *pagination.Pagination,
+) (
+	[]IBCChannelRow,
+	*pagination.PaginationResult,
+	error,
+) {
 	stmtBuilder := ibcChannelsView.rdb.StmtBuilder.Select(
 		"channel_id",
 		"port_id",
@@ -452,10 +460,31 @@ func (ibcChannelsView *IBCChannels) List(order IBCChannelsListOrder, pagination 
 		"view_ibc_channels",
 	)
 
-	if order.ChannelID == view.ORDER_DESC {
-		stmtBuilder = stmtBuilder.OrderBy("channel_id DESC")
+	if filter.MaybeStatus != nil {
+		if *filter.MaybeStatus {
+			// Filtered channels in `opened` status
+			stmtBuilder = stmtBuilder.Where("status = ?", "true")
+		} else {
+			stmtBuilder = stmtBuilder.Where("status = ?", "false")
+		}
+	}
+
+	// MaybeLastActivityBlockTime has a higher priority than MaybeCreatedAtBlockTime
+	if order.MaybeLastActivityBlockTime != nil {
+		if *order.MaybeLastActivityBlockTime == view.ORDER_DESC {
+			stmtBuilder = stmtBuilder.OrderBy("last_activity_block_time DESC")
+		} else {
+			stmtBuilder = stmtBuilder.OrderBy("last_activity_block_time")
+		}
+	} else if order.MaybeCreatedAtBlockTime != nil {
+		if *order.MaybeCreatedAtBlockTime == view.ORDER_DESC {
+			stmtBuilder = stmtBuilder.OrderBy("created_at_block_time DESC")
+		} else {
+			stmtBuilder = stmtBuilder.OrderBy("created_at_block_time")
+		}
 	} else {
-		stmtBuilder = stmtBuilder.OrderBy("channel_id")
+		// By default, sort by last_activity_block_time in descending order
+		stmtBuilder = stmtBuilder.OrderBy("last_activity_block_time DESC")
 	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
@@ -535,8 +564,13 @@ func (ibcChannelsView *IBCChannels) List(order IBCChannelsListOrder, pagination 
 	return channels, paginationResult, nil
 }
 
+type IBCChannelsListFilter struct {
+	MaybeStatus *bool
+}
+
 type IBCChannelsListOrder struct {
-	ChannelID view.ORDER
+	MaybeCreatedAtBlockTime    *view.ORDER
+	MaybeLastActivityBlockTime *view.ORDER
 }
 
 type IBCChannelRow struct {
