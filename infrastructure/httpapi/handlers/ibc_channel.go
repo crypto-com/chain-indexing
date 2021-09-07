@@ -54,7 +54,19 @@ func (handler *IBCChannel) ListChannels(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
-	ibcChannels, paginationResult, err := handler.ibcChannelsView.List(listOrder, pagination)
+	var listFilter ibc_channel_view.IBCChannelsListFilter
+	view_filter_status_true := true
+	view_filter_status_false := false
+
+	if queryArgs.Has("status") {
+		if string(queryArgs.Peek("status")) == "true" {
+			listFilter.MaybeStatus = &view_filter_status_true
+		} else if string(queryArgs.Peek("status")) == "false" {
+			listFilter.MaybeStatus = &view_filter_status_false
+		}
+	}
+
+	ibcChannels, paginationResult, err := handler.ibcChannelsView.List(listOrder, listFilter, pagination)
 	if err != nil {
 		handler.logger.Errorf("error listing IBCChannel channels: %v", err)
 		httpapi.InternalServerError(ctx)

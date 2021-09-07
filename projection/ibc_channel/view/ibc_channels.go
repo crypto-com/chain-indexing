@@ -426,7 +426,15 @@ func (ibcChannelsView *IBCChannels) FindBy(channelID string) (*IBCChannelRow, er
 }
 
 // List only return `opened` IBC channel
-func (ibcChannelsView *IBCChannels) List(order IBCChannelsListOrder, pagination *pagination.Pagination) ([]IBCChannelRow, *pagination.PaginationResult, error) {
+func (ibcChannelsView *IBCChannels) List(
+	order IBCChannelsListOrder,
+	filter IBCChannelsListFilter,
+	pagination *pagination.Pagination,
+) (
+	[]IBCChannelRow,
+	*pagination.PaginationResult,
+	error,
+) {
 	stmtBuilder := ibcChannelsView.rdb.StmtBuilder.Select(
 		"channel_id",
 		"port_id",
@@ -451,9 +459,16 @@ func (ibcChannelsView *IBCChannels) List(order IBCChannelsListOrder, pagination 
 		"bonded_tokens",
 	).From(
 		"view_ibc_channels",
-	).Where(
-		"status = ?", "true", // Only if status is true, the channel is in `opened` status
 	)
+
+	if filter.MaybeStatus != nil {
+		if *filter.MaybeStatus == true {
+			// Filtered channels in `opened` status
+			stmtBuilder = stmtBuilder.Where("status = ?", "true")
+		} else {
+			stmtBuilder = stmtBuilder.Where("status = ?", "false")
+		}
+	}
 
 	// MaybeLastActivityBlockTime has a higher priority than MaybeCreatedAtBlockTime
 	if order.MaybeLastActivityBlockTime != nil {
@@ -548,6 +563,10 @@ func (ibcChannelsView *IBCChannels) List(order IBCChannelsListOrder, pagination 
 	}
 
 	return channels, paginationResult, nil
+}
+
+type IBCChannelsListFilter struct {
+	MaybeStatus *bool
 }
 
 type IBCChannelsListOrder struct {
