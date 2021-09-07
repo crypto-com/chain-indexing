@@ -2,16 +2,15 @@ package parser
 
 import (
 	"fmt"
-
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-
 	"github.com/crypto-com/chain-indexing/usecase/command"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
 	entity_command "github.com/crypto-com/chain-indexing/entity/command"
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 func ParseBlockToCommands(
+	parserManager *utils.CosmosParserManager,
 	txDecoder *utils.TxDecoder,
 	block *usecase_model.Block,
 	rawBlock *usecase_model.RawBlock,
@@ -42,6 +41,7 @@ func ParseBlockToCommands(
 		commands = append(commands, transactionCommands...)
 
 		msgCommands, parseErr := ParseBlockResultsTxsMsgToCommands(
+			parserManager,
 			txDecoder,
 			block,
 			blockResults,

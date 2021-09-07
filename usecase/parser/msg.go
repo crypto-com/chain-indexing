@@ -2,16 +2,14 @@ package parser
 
 import (
 	"fmt"
+	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	"github.com/mitchellh/mapstructure"
 	"strconv"
 	"time"
 
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
-
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-
-	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
 
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 
@@ -29,6 +27,7 @@ import (
 )
 
 func ParseBlockResultsTxsMsgToCommands(
+	parserManager *utils.CosmosParserManager,
 	txDecoder *utils.TxDecoder,
 	block *model.Block,
 	blockResults *model.BlockResults,
@@ -136,7 +135,13 @@ func ParseBlockResultsTxsMsgToCommands(
 			case "/ibc.applications.transfer.v1.MsgTransfer":
 				msgCommands = ibcmsg.ParseMsgTransfer(msgCommonParams, txsResult, msgIndex, msg)
 			case "/ibc.core.channel.v1.MsgRecvPacket":
-				msgCommands = ibcmsg.ParseMsgRecvPacket(msgCommonParams, txsResult, msgIndex, msg)
+				parser := parserManager.GetParser(event.MSG_IBC_RECV_PACKET, uint64(blockHeight))
+				msgCommands = parser(utils.CosmosParserParams{
+					MsgCommonParams: msgCommonParams,
+					Msg: msg,
+					MsgIndex: msgIndex,
+					TxsResult: txsResult,
+				})
 			case "/ibc.core.channel.v1.MsgAcknowledgement":
 				msgCommands = ibcmsg.ParseMsgAcknowledgement(msgCommonParams, txsResult, msgIndex, msg)
 			case "/ibc.core.channel.v1.MsgTimeout":
@@ -144,7 +149,13 @@ func ParseBlockResultsTxsMsgToCommands(
 			case "/ibc.core.channel.v1.MsgTimeoutOnClose":
 				msgCommands = ibcmsg.ParseMsgTimeoutOnClose(msgCommonParams, txsResult, msgIndex, msg)
 			case "/cosmos.authz.v1beta1.MsgGrant":
-				msgCommands = parseMsgGrant(msgCommonParams, msg)
+				parser := parserManager.GetParser(event.MSG_GRANT, uint64(blockHeight))
+				msgCommands = parser(utils.CosmosParserParams{
+					MsgCommonParams: msgCommonParams,
+					Msg: msg,
+					MsgIndex: msgIndex,
+					TxsResult: txsResult,
+				})
 			case "/cosmos.authz.v1beta1.MsgRevoke":
 				msgCommands = parseMsgRevoke(msgCommonParams, msg)
 			case "/cosmos.authz.v1beta1.MsgExec":
@@ -1132,19 +1143,18 @@ func parseMsgNFTBurnNFT(
 
 
 
-func parseMsgGrant(
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgGrant(
+	cosmosParserParams utils.CosmosParserParams,
 ) []command.Command {
-	authType := msg["grant"].(map[string]interface{})["authorization"].(map[string]interface{})["@type"]
+	authType := cosmosParserParams.Msg["grant"].(map[string]interface{})["authorization"].(map[string]interface{})["@type"]
 
 	switch authType {
 	case "/cosmos.bank.v1beta1.SendAuthorization":
-		return parseRawMsgSendGrant(msgCommonParams, msg)
+		return parseRawMsgSendGrant(cosmosParserParams.MsgCommonParams, cosmosParserParams.Msg)
 	case "/cosmos.bank.v1beta1.StakeAuthorization":
-		return parseRawMsgStackGrant(msgCommonParams, msg)
+		return parseRawMsgStackGrant(cosmosParserParams.MsgCommonParams, cosmosParserParams.Msg)
 	case "/cosmos.bank.v1beta1.GenericAuthorization":
-		return parseRawMsgGenericGrant(msgCommonParams, msg)
+		return parseRawMsgGenericGrant(cosmosParserParams.MsgCommonParams, cosmosParserParams.Msg)
 	default:
 		return []command.Command{}
 	}

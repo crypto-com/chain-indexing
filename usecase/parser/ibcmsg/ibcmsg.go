@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+	log2 "log"
 	"strings"
 	"time"
 
@@ -19,7 +21,6 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
 const tendermintClientStateTypeV1 = "/ibc.lightclients.tendermint.v1.ClientState"
@@ -860,11 +861,9 @@ func ParseMsgTransfer(
 }
 
 func ParseMsgRecvPacket(
-	msgCommonParams event.MsgCommonParams,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msg map[string]interface{},
+	cosmosParserParams utils.CosmosParserParams,
 ) []command.Command {
+	log2.Println("v0 ParseMsgRecvPacket with block height:", cosmosParserParams.MsgCommonParams.BlockHeight)
 	var rawMsg ibc_model.RawMsgRecvPacket
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -880,11 +879,11 @@ func ParseMsgRecvPacket(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating RawMsgRecvPacket decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := decoder.Decode(cosmosParserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgRecvPacket: %v", err))
 	}
 
-	if !isPacketMsgTransfer(rawMsg.Packet) {
+	if !IsPacketMsgTransfer(rawMsg.Packet) {
 		// unsupported application
 		return []command.Command{}
 	}
@@ -894,7 +893,7 @@ func ParseMsgRecvPacket(
 	rawPacketData := base64_internal.MustDecodeString(rawMsg.Packet.Data)
 	json.MustUnmarshal(rawPacketData, &rawFungibleTokenPacketData)
 
-	if !msgCommonParams.TxSuccess {
+	if !cosmosParserParams.MsgCommonParams.TxSuccess {
 		params := ibc_model.MsgRecvPacketParams{
 			RawMsgRecvPacket: rawMsg,
 
@@ -906,13 +905,13 @@ func ParseMsgRecvPacket(
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
-			msgCommonParams,
+			cosmosParserParams.MsgCommonParams,
 
 			params,
 		)}
 	}
 
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&cosmosParserParams.TxsResult.Log[cosmosParserParams.MsgIndex])
 
 	recvPacketEvent := log.GetEventByType("recv_packet")
 	if recvPacketEvent == nil {
@@ -988,7 +987,7 @@ func ParseMsgRecvPacket(
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
-		msgCommonParams,
+		cosmosParserParams.MsgCommonParams,
 
 		params,
 	)}
@@ -1019,7 +1018,7 @@ func ParseMsgAcknowledgement(
 		panic(fmt.Errorf("error decoding RawMsgAcknowledgement: %v", err))
 	}
 
-	if !isPacketMsgTransfer(rawMsg.Packet) {
+	if !IsPacketMsgTransfer(rawMsg.Packet) {
 		// unsupported application
 		return []command.Command{}
 	}
@@ -1089,7 +1088,7 @@ func ParseMsgAcknowledgement(
 	)}
 }
 
-func isPacketMsgTransfer(
+func IsPacketMsgTransfer(
 	packet ibc_model.Packet,
 ) bool {
 	if packet.DestinationPort != "transfer" {
@@ -1133,7 +1132,7 @@ func ParseMsgTimeout(
 		panic(fmt.Errorf("error decoding RawMsgTimeout: %v", err))
 	}
 
-	if !isPacketMsgTransfer(rawMsg.Packet) {
+	if !IsPacketMsgTransfer(rawMsg.Packet) {
 		// unsupported application
 		return []command.Command{}
 	}
@@ -1219,7 +1218,7 @@ func ParseMsgTimeoutOnClose(
 		panic(fmt.Errorf("error decoding RawMsgTimeoutOnClose: %v", err))
 	}
 
-	if !isPacketMsgTransfer(rawMsg.Packet) {
+	if !IsPacketMsgTransfer(rawMsg.Packet) {
 		// unsupported application
 		return []command.Command{}
 	}

@@ -108,8 +108,9 @@ type TendermintConfig struct {
 }
 
 type CosmosAppConfig struct {
-	HTTPRPCUrl string `toml:"http_rpc_url"`
-	Insecure   bool   `toml:"insecure"`
+	HTTPRPCUrl          string `toml:"http_rpc_url"`
+	Insecure            bool   `toml:"insecure"`
+	BlockHeigth_V0_43_0 uint64 `toml:"v0_43_0"`
 }
 
 type DatabaseConfig struct {

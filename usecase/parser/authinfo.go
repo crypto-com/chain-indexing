@@ -2,12 +2,12 @@ package parser
 
 import (
 	"fmt"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	"strconv"
 
 	"github.com/crypto-com/chain-indexing/internal/base64"
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/usecase/model"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
 func ParseSignerInfosToTransactionSigners(

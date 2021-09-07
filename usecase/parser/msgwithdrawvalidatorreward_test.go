@@ -1,9 +1,10 @@
 package parser_test
 
 import (
-	"strings"
-
+	"github.com/crypto-com/chain-indexing/usecase/parser"
+	"github.com/crypto-com/chain-indexing/usecase/parser/test"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+	"strings"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -14,8 +15,6 @@ import (
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
-	"github.com/crypto-com/chain-indexing/usecase/parser"
-	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
 )
 
 var _ = Describe("ParseMsgCommands", func() {

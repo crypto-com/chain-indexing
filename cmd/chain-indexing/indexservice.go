@@ -2,9 +2,6 @@ package main
 
 import (
 	"fmt"
-
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-
 	event_interface "github.com/crypto-com/chain-indexing/appinterface/event"
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -12,6 +9,7 @@ import (
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
 type IndexService struct {
@@ -27,6 +25,8 @@ type IndexService struct {
 	tendermintHTTPRPCURL     string
 	insecureTendermintClient bool
 	strictGenesisParsing     bool
+
+	cosmosVersionBlockHeight utils.CosmosVersionBLockHeight
 }
 
 // NewIndexService creates a new server instance for polling and indexing
@@ -49,6 +49,9 @@ func NewIndexService(
 		tendermintHTTPRPCURL:     config.Tendermint.HTTPRPCUrl,
 		insecureTendermintClient: config.Tendermint.Insecure,
 		strictGenesisParsing:     config.Tendermint.StrictGenesisParsing,
+		cosmosVersionBlockHeight: utils.CosmosVersionBLockHeight{
+			V0_43_0: config.CosmosApp.BlockHeigth_V0_43_0,
+		},
 	}
 }
 
@@ -111,6 +114,14 @@ func (service *IndexService) RunEventStoreMode() error {
 				StakingDenom:             service.bondingDenom,
 			},
 		},
+		utils.NewParserManager(
+			utils.CosmosParserManagerParams{
+				Logger: service.logger,
+				Config: utils.CosmosParserManagerConfig{
+					CosmosVersionBLockHeight: service.cosmosVersionBlockHeight,
+				},
+			},
+		),
 		eventStoreHandler,
 	)
 	if err := syncManager.Run(); err != nil {
@@ -125,20 +136,31 @@ func (service *IndexService) RunTendermintDirectMode() error {
 
 	for i := range service.projections {
 		go func(projection projection_entity.Projection) {
-			syncManager := NewSyncManager(SyncManagerParams{
-				Logger: service.logger.WithFields(applogger.LogFields{
-					"projection": projection.Id(),
-				}),
-				RDbConn:   service.rdbConn,
-				TxDecoder: txDecoder,
-				Config: SyncManagerConfig{
-					WindowSize:               service.windowSize,
-					TendermintRPCUrl:         service.tendermintHTTPRPCURL,
-					InsecureTendermintClient: service.insecureTendermintClient,
-					AccountAddressPrefix:     service.accountAddressPrefix,
-					StakingDenom:             service.bondingDenom,
+			syncManager := NewSyncManager(
+				SyncManagerParams{
+					Logger: service.logger.WithFields(applogger.LogFields{
+						"projection": projection.Id(),
+					}),
+					RDbConn:   service.rdbConn,
+					TxDecoder: txDecoder,
+					Config: SyncManagerConfig{
+						WindowSize:               service.windowSize,
+						TendermintRPCUrl:         service.tendermintHTTPRPCURL,
+						InsecureTendermintClient: service.insecureTendermintClient,
+						AccountAddressPrefix:     service.accountAddressPrefix,
+						StakingDenom:             service.bondingDenom,
+					},
 				},
-			}, eventhandler_interface.NewProjectionHandler(service.logger, projection))
+				utils.NewParserManager(
+					utils.CosmosParserManagerParams{
+						Logger: service.logger,
+						Config: utils.CosmosParserManagerConfig{
+							service.cosmosVersionBlockHeight,
+						},
+					},
+				),
+				eventhandler_interface.NewProjectionHandler(service.logger, projection),
+			)
 			if err := syncManager.Run(); err != nil {
 				panic(fmt.Sprintf("error running sync manager %v", err))
 			}

@@ -1,6 +1,7 @@
 package parser_test
 
 import (
+	"github.com/crypto-com/chain-indexing/usecase/parser"
 	"strings"
 
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
@@ -14,7 +15,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
-	"github.com/crypto-com/chain-indexing/usecase/parser"
 	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
 )
 
