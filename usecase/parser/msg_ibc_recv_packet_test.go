@@ -198,5 +198,94 @@ var _ = Describe("ParseMsgCommands", func() {
 				),
 			))
 		})
+
+		It("should parse Msg commands when there is MsgIBCRecvPacket in the transaction and missing fungible_token_packet event in TxsResult log", func() {
+			expected := `{
+	"name": "MsgRecvPacketCreated",
+	"version": 1,
+	"height": 317994,
+	"uuid": "{UUID}",
+	"msgName": "MsgRecvPacket",
+	"txHash": "D4BBE348AB746FCED63D2028D8886B9091312336142AC040C1C2841E7BF78C9C",
+	"msgIndex": 1,
+	"params": {
+		"packet": {
+			"sequence": "45",
+			"sourcePort": "transfer",
+			"sourceChannel": "channel-0",
+			"destinationPort": "transfer",
+			"destinationChannel": "channel-3",
+			"data": "eyJhbW91bnQiOiIxMDAwMDAwMDAwMDAwIiwiZGVub20iOiJ0cmFuc2Zlci9jaGFubmVsLTAvYmFzZXRjcm8iLCJyZWNlaXZlciI6InRjcm8xZjZxY3ZwMzNkYzc5eHpwdXdsbDdtbG41bG5lcHVxdjhkN2xlZDkiLCJzZW5kZXIiOiJldGgxbXRjbjI1MDVrMzdtbHp0eXdmOGVnOHNwdjBrcG5zcWFtMnpzMDIifQ==",
+			"timeoutHeight": { "revisionNumber": "4", "revisionHeight": "318973" },
+			"timeoutTimestamp": "1631044281305171742"
+		},
+		"proofCommitment": "Ct4DCtsDCjpjb21taXRtZW50cy9wb3J0cy90cmFuc2Zlci9jaGFubmVscy9jaGFubmVsLTAvc2VxdWVuY2VzLzQ1EiAwXmZ+E3z/y5/o578BC3kosoTiz+6+AojpYblmSh5W8xoNCAEYASABKgUAAr7ZECItCAESBgIEvtkQIBohIPbTrk6EJ8X5DxhymRoZgwtWIdCWUEDvERLzfc0ZAqsGIisIARInBAi+2RAgWaR5S/iXR6U3mJrwh2+coIl4NuGr7NmYE6Q9BaRg5OUgIisIARInBg6+2RAggfivNe1TRsR5vKy2Q/8+PFs+4aH1/SXUSQrz8S5OQzogIisIARInCBq+2RAgxdZ4NqbPmgBmrQjrBjseWC4e8qfIh9HB2p3l5PFGuKogIisIARInCji+2RAgSbJl1ZFAyv2EfWKcK7c0EX9BYSWC8Qqe15sVwfznQKggIisIARInDHK+2RAgNP1NCTsx4mWJXKq6JA28CLfe7AKb+NlRzt1Iz8ap7E0gIi4IARIHDp4BvtkQIBohIDevlIZff9mKJUxPfds1+iJkBdYITPcR4K2lLtT9rtM2IiwIARIoEo4EvtkQIC1OxSRQNX8wkn4yu5jUjYisJqp/Octv4mrIo7cZ65riIAr+AQr7AQoDaWJjEiB81eIohS3kImn0slDchX3TsOpmg1KtoBJjeoS0XamZ3xoJCAEYASABKgEAIicIARIBARog+VbefwQZr0EJzBl04fE3Iwq9K4y59Sd3XuzKGogXDyIiJQgBEiEBHhDMIutpz1N/dqAD7CKxN8Le8+xw92XPht9+FkWcIJgiJwgBEgEBGiD/qVFKOoGhKJbUxy/btGutELgMJU2cxTOhZsIRJkfjNiIlCAESIQHmnMo6MTcTPxTquoyKFdT4/zdYaQSWXpWpi+bivu8T3SInCAESAQEaIHVgcAqfN4KuqeY9pK7xJf8ARSjBPNtY2ZeCttQCEJOO",
+		"proofHeight": { "revisionNumber": "1", "revisionHeight": "136800" },
+		"signer": "tcro18mcwp6vtlvpgxy62eledk3chhjguw636x8n7h6",
+		"application": "transfer",
+		"messageType": "MsgTransfer",
+		"maybeMsgTransfer": {
+			"sender": "eth1mtcn2505k37mlztywf8eg8spv0kpnsqam2zs02",
+			"receiver": "tcro1f6qcvp33dc79xzpuwll7mln5lnepuqv8d7led9",
+			"denom": "transfer/channel-0/basetcro",
+			"amount": "1000000000000",
+			"success": false,
+			"maybeDenominationTrace": null
+		},
+		"packetSequence": "45",
+		"channelOrdering": "",
+		"connectionId": "",
+		"packetAck": {
+			"result": null,
+			"error": "{PACKET_ACK_ERROR}"
+		}
+	}
+}
+`
+
+			txDecoder := utils.NewTxDecoder()
+			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
+				usecase_parser_test.TX_MSG_RECV_PACKET_MISSING_FUNGIBLE_TOKEN_PACKET_BLOCK_RESP,
+			))
+			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
+				usecase_parser_test.TX_MSG_RECV_PACKET_MISSING_FUNGIBLE_TOKEN_PACKET_BLOCK_RESULTS_RESP,
+			))
+
+			accountAddressPrefix := "cro"
+			stakingDenom := "basecro"
+			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
+				txDecoder,
+				block,
+				blockResults,
+				accountAddressPrefix,
+				stakingDenom,
+			)
+			Expect(err).To(BeNil())
+			Expect(cmds).To(HaveLen(2))
+			cmd := cmds[1]
+			Expect(cmd.Name()).To(Equal("CreateMsgIBCRecvPacket"))
+
+			untypedEvent, _ := cmd.Exec()
+			typedEvent := untypedEvent.(*event.MsgIBCRecvPacket)
+
+			regex, _ := regexp.Compile("\n?\r?\\s?")
+
+			expectedWithUUID := strings.Replace(
+				regex.ReplaceAllString(expected, ""),
+				"{UUID}",
+				typedEvent.UUID(),
+				-1,
+			)
+
+			Expect(json.MustMarshalToString(typedEvent)).To(Equal(
+				strings.Replace(
+					expectedWithUUID,
+					"{PACKET_ACK_ERROR}",
+					"missing `fungible_token_packet` event in TxsResult log, this could happen when the packet is already relayed",
+					-1,
+				),
+			))
+		})
+
 	})
 })
