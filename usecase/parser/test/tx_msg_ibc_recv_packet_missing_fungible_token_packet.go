@@ -1,5 +1,6 @@
 package usecase_parser_test
 
+/* #nosec G101 */
 const TX_MSG_RECV_PACKET_MISSING_FUNGIBLE_TOKEN_PACKET_BLOCK_RESP = `
 {
   "jsonrpc": "2.0",
@@ -117,6 +118,7 @@ const TX_MSG_RECV_PACKET_MISSING_FUNGIBLE_TOKEN_PACKET_BLOCK_RESP = `
 }  
 `
 
+/* #nosec G101 */
 const TX_MSG_RECV_PACKET_MISSING_FUNGIBLE_TOKEN_PACKET_BLOCK_RESULTS_RESP = `
 {
   "jsonrpc": "2.0",
