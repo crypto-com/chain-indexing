@@ -62,6 +62,20 @@ func (handler *IBCChannel) ListChannels(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
+	if queryArgs.Has("groupBy") {
+		if string(queryArgs.Peek("groupBy")) == "chainId" {
+			ibcChannelsGroupByChainId, paginationResult, err := handler.ibcChannelsView.ListChannelsGroupByChainId(listOrder, listFilter, pagination)
+			if err != nil {
+				handler.logger.Errorf("error listing IBCChannel group by chain id: %v", err)
+				httpapi.InternalServerError(ctx)
+				return
+			}
+
+			httpapi.SuccessWithPagination(ctx, ibcChannelsGroupByChainId, paginationResult)
+			return
+		}
+	}
+
 	ibcChannels, paginationResult, err := handler.ibcChannelsView.List(listOrder, listFilter, pagination)
 	if err != nil {
 		handler.logger.Errorf("error listing IBCChannel channels: %v", err)
@@ -71,7 +85,6 @@ func (handler *IBCChannel) ListChannels(ctx *fasthttp.RequestCtx) {
 
 	httpapi.SuccessWithPagination(ctx, ibcChannels, paginationResult)
 }
-
 func (handler *IBCChannel) FindChannelById(ctx *fasthttp.RequestCtx) {
 	ibcChannel, err := handler.ibcChannelsView.FindBy(
 		ctx.UserValue("channelId").(string),
