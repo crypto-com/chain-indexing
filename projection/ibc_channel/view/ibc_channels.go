@@ -430,10 +430,94 @@ func (ibcChannelsView *IBCChannels) List(
 	filter IBCChannelsListFilter,
 	pagination *pagination.Pagination,
 ) (
-	[]IBCChannelRow,
+	*[]IBCChannelRow,
 	*pagination.PaginationResult,
 	error,
 ) {
+	return ibcChannelsView.commonListIBCChannels(order, filter, pagination, nil)
+}
+
+func (ibcChannelsView *IBCChannels) ListChannelsGroupByChainId(
+	order IBCChannelsListOrder,
+	filter IBCChannelsListFilter,
+	pagination *pagination.Pagination,
+) (
+	*[]ChainChannels,
+	*pagination.PaginationResult,
+	error,
+) {
+	// First to get all chainId
+	stmtBuilder := ibcChannelsView.rdb.StmtBuilder.Select(
+		"counterparty_chain_id",
+	).From(
+		"view_ibc_channels",
+	).Distinct()
+
+	rDbPagination := rdb.NewRDbPaginationBuilder(
+		pagination,
+		ibcChannelsView.rdb,
+	).BuildStmt(stmtBuilder)
+	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
+	if err != nil {
+		return nil, nil, fmt.Errorf("error building select distinct counterparty_chain_id SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	rowsResult, err := ibcChannelsView.rdb.Query(sql, sqlArgs...)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error executing select distinct counterparty_chain_id SQL: %v: %w", err, rdb.ErrQuery)
+	}
+	defer rowsResult.Close()
+
+	chainIDs := make([]string, 0)
+	for rowsResult.Next() {
+		var chainID string
+		if err = rowsResult.Scan(
+			&chainID,
+		); err != nil {
+			if errors.Is(err, rdb.ErrNoRows) {
+				return nil, nil, rdb.ErrNoRows
+			}
+			return nil, nil, fmt.Errorf("error scanning channel row counterparty_chain_id: %v: %w", err, rdb.ErrQuery)
+		}
+
+		chainIDs = append(chainIDs, chainID)
+	}
+
+	// Then, loop through chainId, get each chain's channel list
+	chainChannelsList := make([]ChainChannels, 0)
+	for _, chainID := range chainIDs {
+
+		var chainChannels ChainChannels
+
+		chainChannels.ChainID = chainID
+		channels, _, err := ibcChannelsView.commonListIBCChannels(order, filter, pagination, &chainID)
+		if err != nil {
+			return nil, nil, fmt.Errorf("error listing channel of a specific chain: %v", err)
+		}
+		chainChannels.Channels = *channels
+
+		chainChannelsList = append(chainChannelsList, chainChannels)
+	}
+
+	paginationResult, err := rDbPagination.Result()
+	if err != nil {
+		return nil, nil, fmt.Errorf("error preparing pagination result: %v", err)
+	}
+
+	return &chainChannelsList, paginationResult, nil
+}
+
+func (ibcChannelsView *IBCChannels) commonListIBCChannels(
+	order IBCChannelsListOrder,
+	filter IBCChannelsListFilter,
+	pagination *pagination.Pagination,
+	chainID *string,
+) (
+	*[]IBCChannelRow,
+	*pagination.PaginationResult,
+	error,
+) {
+
 	stmtBuilder := ibcChannelsView.rdb.StmtBuilder.Select(
 		"channel_id",
 		"port_id",
@@ -459,6 +543,10 @@ func (ibcChannelsView *IBCChannels) List(
 	).From(
 		"view_ibc_channels",
 	)
+
+	if chainID != nil {
+		stmtBuilder = stmtBuilder.Where("counterparty_chain_id = ?", *chainID)
+	}
 
 	if filter.MaybeStatus != nil {
 		if *filter.MaybeStatus {
@@ -561,7 +649,7 @@ func (ibcChannelsView *IBCChannels) List(
 		return nil, nil, fmt.Errorf("error preparing pagination result: %v", err)
 	}
 
-	return channels, paginationResult, nil
+	return &channels, paginationResult, nil
 }
 
 type IBCChannelsListFilter struct {
@@ -571,6 +659,11 @@ type IBCChannelsListFilter struct {
 type IBCChannelsListOrder struct {
 	MaybeCreatedAtBlockTime    *view.ORDER
 	MaybeLastActivityBlockTime *view.ORDER
+}
+
+type ChainChannels struct {
+	ChainID  string          `json:"chainId"`
+	Channels []IBCChannelRow `json:"channels"`
 }
 
 type IBCChannelRow struct {
