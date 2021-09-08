@@ -343,8 +343,9 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
-			// TODO:	should use the below checking when we fix the `success value inverted bug`
-			//				in `ibcmsg.go -> ParseMsgRecvPacket()`
+			// TODO:	1. Should use the below checking when we fix the `success value inverted bug`
+			//				in `ibcmsg.go -> ParseMsgRecvPacket()`.
+			//				2. After changing the below logic, need to update `ibcmsg.go -> ParseMsgRecvPacket()` handle `fungible_token_packet` related logic.
 			// if msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Success {
 			if msgIBCRecvPacket.Params.PacketAck.MaybeError == nil {
 
