@@ -485,13 +485,13 @@ func (ibcChannelsView *IBCChannels) ListChannelsGroupByChainId(
 
 	// Then, loop through chainId, get each chain's channel list
 	chainChannelsList := make([]ChainChannels, 0)
-	for _, chainID := range chainIDs {
+	for i, chainID := range chainIDs {
 
 		var chainChannels ChainChannels
 
 		chainChannels.ChainID = chainID
-		channels, _, err := ibcChannelsView.commonListIBCChannels(order, filter, pagination, &chainID)
-		if err != nil {
+		channels, _, listChannelsErr := ibcChannelsView.commonListIBCChannels(order, filter, pagination, &chainIDs[i])
+		if listChannelsErr != nil {
 			return nil, nil, fmt.Errorf("error listing channel of a specific chain: %v", err)
 		}
 		chainChannels.Channels = *channels
