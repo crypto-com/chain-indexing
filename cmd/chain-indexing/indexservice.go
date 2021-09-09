@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	event_interface "github.com/crypto-com/chain-indexing/appinterface/event"
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -50,7 +51,7 @@ func NewIndexService(
 		insecureTendermintClient: config.Tendermint.Insecure,
 		strictGenesisParsing:     config.Tendermint.StrictGenesisParsing,
 		cosmosVersionBlockHeight: utils.CosmosVersionBlockHeight{
-			V0_43_0: config.CosmosApp.BlockHeigth_V0_43_0,
+			V0_43_0: config.CosmosVersionEnabledHeight.BlockHeight_V0_43_0,
 		},
 	}
 }

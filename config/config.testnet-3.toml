@@ -29,7 +29,6 @@ strict_genesis_parsing = false
 [cosmosapp]
 http_rpc_url = "https://testnet-croeseid-3.crypto.org:1317"
 insecure = false
-v0_43_0 = 0
 
 [http]
 listening_address = "0.0.0.0:8080"
@@ -82,3 +81,6 @@ enables = [
     "IBCChannel",
 #    "IBCChannelTxMsgTrace",
 ]
+
+[cosmos_version_enabled_height]
+v0_43_0 = 0
