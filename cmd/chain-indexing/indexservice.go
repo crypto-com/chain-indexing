@@ -26,7 +26,7 @@ type IndexService struct {
 	insecureTendermintClient bool
 	strictGenesisParsing     bool
 
-	cosmosVersionBlockHeight utils.CosmosVersionBLockHeight
+	cosmosVersionBlockHeight utils.CosmosVersionBlockHeight
 }
 
 // NewIndexService creates a new server instance for polling and indexing
@@ -49,7 +49,7 @@ func NewIndexService(
 		tendermintHTTPRPCURL:     config.Tendermint.HTTPRPCUrl,
 		insecureTendermintClient: config.Tendermint.Insecure,
 		strictGenesisParsing:     config.Tendermint.StrictGenesisParsing,
-		cosmosVersionBlockHeight: utils.CosmosVersionBLockHeight{
+		cosmosVersionBlockHeight: utils.CosmosVersionBlockHeight{
 			V0_43_0: config.CosmosApp.BlockHeigth_V0_43_0,
 		},
 	}
@@ -118,7 +118,7 @@ func (service *IndexService) RunEventStoreMode() error {
 			utils.CosmosParserManagerParams{
 				Logger: service.logger,
 				Config: utils.CosmosParserManagerConfig{
-					CosmosVersionBLockHeight: service.cosmosVersionBlockHeight,
+					CosmosVersionBlockHeight: service.cosmosVersionBlockHeight,
 				},
 			},
 		),

@@ -16,5 +16,5 @@ func InitParsers(manager *utils.CosmosParserManager) {
 
 func RegisterBreakingVersionParsers(manager *utils.CosmosParserManager) {
 	//v0.43.0
-	manager.RegisterParser(event.MSG_IBC_RECV_PACKET, manager.GetConfig().CosmosVersionBLockHeight.V0_43_0, V0_43_0_ibcmsg.ParseMsgRecvPacket)
+	manager.RegisterParser(event.MSG_IBC_RECV_PACKET, manager.GetCosmosV0_43_0BlockHeight(), V0_43_0_ibcmsg.ParseMsgRecvPacket)
 }

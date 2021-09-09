@@ -18,10 +18,10 @@ type CosmosParserManager struct {
 type CosmosParserBlockHeight map[uint64]CosmosParser
 
 type CosmosParserManagerConfig struct {
-	CosmosVersionBLockHeight
+	CosmosVersionBlockHeight
 }
 
-type CosmosVersionBLockHeight struct {
+type CosmosVersionBlockHeight struct {
 	V0_43_0 uint64
 }
 
@@ -51,8 +51,8 @@ func NewCosmosParserManager(params CosmosParserManagerParams) *CosmosParserManag
 	return cpm
 }
 
-func (cpm *CosmosParserManager) GetConfig() CosmosParserManagerConfig {
-	return cpm.config
+func (cpm *CosmosParserManager) GetCosmosV0_43_0BlockHeight() uint64 {
+	return cpm.config.CosmosVersionBlockHeight.V0_43_0
 }
 
 func (cpm *CosmosParserManager) RegisterParser(name string, fromHeight uint64, parser CosmosParser) {
