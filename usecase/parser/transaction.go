@@ -5,9 +5,10 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	"strconv"
 	"strings"
+
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
@@ -67,17 +68,17 @@ func ParseTransactionCommands(
 		}
 
 		cmds = append(cmds, command_usecase.NewCreateTransaction(blockHeight, model.CreateTransactionParams{
-			TxHash:     TxHash(txHex),
-			Index:      i,
-			Code:       txsResult.Code,
-			Log:        log,
-			MsgCount:   len(tx.Body.Messages),
-			Signers:    signers,
-			Fee:        fee,
-			FeePayer:   tx.AuthInfo.Fee.Payer,
-			FeeGranter: tx.AuthInfo.Fee.Granter,
-			GasWanted:  gasWanted,
-			GasUsed:    gasUsed,
+			TxHash:        TxHash(txHex),
+			Index:         i,
+			Code:          txsResult.Code,
+			Log:           log,
+			MsgCount:      len(tx.Body.Messages),
+			Signers:       signers,
+			Fee:           fee,
+			FeePayer:      tx.AuthInfo.Fee.Payer,
+			FeeGranter:    tx.AuthInfo.Fee.Granter,
+			GasWanted:     gasWanted,
+			GasUsed:       gasUsed,
 			Memo:          tx.Body.Memo,
 			TimeoutHeight: timeoutHeight,
 		}))

@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-
 	base64_internal "github.com/crypto-com/chain-indexing/internal/base64"
 	"github.com/crypto-com/chain-indexing/internal/json"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
+	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
 	"github.com/mitchellh/mapstructure"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/internal/typeconv"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
-	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
 func ParseMsgRecvPacket(
@@ -69,9 +69,41 @@ func ParseMsgRecvPacket(
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 
+	recvPacketEvent := log.GetEventByType("recv_packet")
+	if recvPacketEvent == nil {
+		panic("missing `recv_packet` event in TxsResult log")
+	}
+
 	fungibleTokenPacketEvent := log.GetEventByType("fungible_token_packet")
 	if fungibleTokenPacketEvent == nil {
-		panic("missing `fungible_token_packet` event in TxsResult log")
+		// Note: this could happen when the packet is already relayed.
+		// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/04-channel/keeper/packet.go#L239
+		// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/keeper/msg_server.go#L508
+
+		packetAck := ibc_model.MsgRecvPacketPacketAck{
+			MaybeError: primptr.String("missing `fungible_token_packet` event in TxsResult log, this could happen when the packet is already relayed"),
+		}
+
+		msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
+			RawMsgRecvPacket: rawMsg,
+
+			Application: "transfer",
+			MessageType: "MsgTransfer",
+			MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
+				FungibleTokenPacketData: rawFungibleTokenPacketData,
+				Success:                 false,
+			},
+
+			PacketSequence: typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
+			// TODO: Remove this when IBCChannel projection no longer relies on packetAck.MaybeError to check if MsgRecvPacket is success or not
+			PacketAck: packetAck,
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
+			parserParams.MsgCommonParams,
+
+			msgRecvPacketParams,
+		)}
 	}
 
 	var maybeDenominationTrace *ibc_model.MsgRecvPacketFungibleTokenDenominationTrace
@@ -81,11 +113,6 @@ func ParseMsgRecvPacket(
 			Hash:  denominationTraceEvent.MustGetAttributeByKey("trace_hash"),
 			Denom: denominationTraceEvent.MustGetAttributeByKey("denom"),
 		}
-	}
-
-	recvPacketEvent := log.GetEventByType("recv_packet")
-	if recvPacketEvent == nil {
-		panic("missing `recv_packet` event in TxsResult log")
 	}
 
 	writeAckEvent := log.GetEventByType("write_acknowledgement")
@@ -102,8 +129,11 @@ func ParseMsgRecvPacket(
 		MessageType: "MsgTransfer",
 		MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 			FungibleTokenPacketData: rawFungibleTokenPacketData,
-			Success:                 fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "true",
-			MaybeDenominationTrace:  maybeDenominationTrace,
+			// success value inverted bug: https://github.com/cosmos/cosmos-sdk/pull/9640
+			// TODO: after fixing this, please also update `projection/ibc_channel/ibc_channel.go -> HandleEvents()`
+			//			 when event type is `MsgIBCRecvPacket`.
+			Success:                fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "true",
+			MaybeDenominationTrace: maybeDenominationTrace,
 		},
 
 		PacketSequence:  typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),

@@ -62,32 +62,50 @@ func ParseBlockResultsTxsMsgToCommands(
 
 			msgType := msg["@type"]
 			switch msgType {
-			case "/cosmos.bank.v1beta1.MsgSend",
+			case
+				// cosmos bank
+				"/cosmos.bank.v1beta1.MsgSend",
 				"/cosmos.bank.v1beta1.MsgMultiSend",
+
+				// cosmos distribution
 				"/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
 				"/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
 				"/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission",
 				"/cosmos.distribution.v1beta1.MsgFundCommunityPool",
+
+				// cosmos gov
 				"/cosmos.gov.v1beta1.MsgSubmitProposal",
 				"/cosmos.gov.v1beta1.MsgVote",
 				"/cosmos.gov.v1beta1.MsgDeposit",
+
+				// cosmos staking
 				"/cosmos.staking.v1beta1.MsgDelegate",
 				"/cosmos.staking.v1beta1.MsgUndelegate",
 				"/cosmos.staking.v1beta1.MsgBeginRedelegate",
 				"/cosmos.staking.v1beta1.MsgCreateValidator",
 				"/cosmos.staking.v1beta1.MsgEditValidator",
+
+				// cosmos slashing
 				"/cosmos.slashing.v1beta1.MsgUnjail",
+
+				// chainmain nft
 				"/chainmain.nft.v1.MsgIssueDenom",
 				"/chainmain.nft.v1.MsgMintNFT",
 				"/chainmain.nft.v1.MsgTransferNFT",
 				"/chainmain.nft.v1.MsgEditNFT",
 				"/chainmain.nft.v1.MsgBurnNFT",
+
+				// ibc core client
 				"/ibc.core.client.v1.MsgCreateClient",
 				"/ibc.core.client.v1.MsgUpdateClient",
+
+				// ibc core connection
 				"/ibc.core.connection.v1.MsgConnectionOpenInit",
 				"/ibc.core.connection.v1.MsgConnectionOpenTry",
 				"/ibc.core.connection.v1.MsgConnectionOpenAck",
 				"/ibc.core.connection.v1.MsgConnectionOpenConfirm",
+
+				// ibc core channel
 				"/ibc.core.channel.v1.MsgChannelOpenInit",
 				"/ibc.core.channel.v1.MsgChannelOpenTry",
 				"/ibc.core.channel.v1.MsgChannelOpenAck",
@@ -96,14 +114,22 @@ func ParseBlockResultsTxsMsgToCommands(
 				"/ibc.core.channel.v1.MsgAcknowledgement",
 				"/ibc.core.channel.v1.MsgTimeout",
 				"/ibc.core.channel.v1.MsgTimeoutOnClose",
+
+				// ibc applications transfer
 				"/ibc.applications.transfer.v1.MsgTransfer",
+
+				// cosmos authz
 				"/cosmos.authz.v1beta1.MsgGrant",
 				"/cosmos.authz.v1beta1.MsgRevoke",
 				"/cosmos.authz.v1beta1.MsgExec",
+
+				// cosmos feegrant
 				"/cosmos.feegrant.v1beta1.MsgGrantAllowance",
 				"/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
+
+				// cosmos vesting
 				"/cosmos.vesting.v1beta1.MsgCreateVestingAccount":
-				parser := parserManager.GetParser(GetParserKeyFromMsgType(msgType.(string)), utils.ParserBlockHeight(blockHeight))
+				parser := parserManager.GetParser(utils.CosmosParserKey(msgType.(string)), utils.ParserBlockHeight(blockHeight))
 				msgCommands = parser(utils.CosmosParserParams{
 					AddressPrefix:   accountAddressPrefix,
 					StakingDenom:    stakingDenom,

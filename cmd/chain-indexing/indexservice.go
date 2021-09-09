@@ -154,9 +154,11 @@ func (service *IndexService) RunTendermintDirectMode() error {
 				},
 				utils.NewCosmosParserManager(
 					utils.CosmosParserManagerParams{
-						Logger: service.logger,
+						Logger: service.logger.WithFields(applogger.LogFields{
+							"projection": projection.Id(),
+						}),
 						Config: utils.CosmosParserManagerConfig{
-							service.cosmosVersionBlockHeight,
+							CosmosVersionBlockHeight: service.cosmosVersionBlockHeight,
 						},
 					},
 				),
