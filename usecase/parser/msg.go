@@ -2,11 +2,12 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	"github.com/mitchellh/mapstructure"
-	"strconv"
-	"time"
 
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
@@ -135,7 +136,7 @@ func ParseBlockResultsTxsMsgToCommands(
 			case "/ibc.applications.transfer.v1.MsgTransfer":
 				msgCommands = ibcmsg.ParseMsgTransfer(msgCommonParams, txsResult, msgIndex, msg)
 			case "/ibc.core.channel.v1.MsgRecvPacket":
-				parser := parserManager.GetParser(event.MSG_IBC_RECV_PACKET, uint64(blockHeight))
+				parser := parserManager.GetParser(event.MSG_IBC_RECV_PACKET, utils.ParserBlockHeight(blockHeight))
 				msgCommands = parser(utils.CosmosParserParams{
 					MsgCommonParams: msgCommonParams,
 					Msg: msg,
@@ -149,7 +150,7 @@ func ParseBlockResultsTxsMsgToCommands(
 			case "/ibc.core.channel.v1.MsgTimeoutOnClose":
 				msgCommands = ibcmsg.ParseMsgTimeoutOnClose(msgCommonParams, txsResult, msgIndex, msg)
 			case "/cosmos.authz.v1beta1.MsgGrant":
-				parser := parserManager.GetParser(event.MSG_GRANT, uint64(blockHeight))
+				parser := parserManager.GetParser(event.MSG_GRANT, utils.ParserBlockHeight(blockHeight))
 				msgCommands = parser(utils.CosmosParserParams{
 					MsgCommonParams: msgCommonParams,
 					Msg: msg,

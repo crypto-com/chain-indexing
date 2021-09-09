@@ -51,7 +51,7 @@ func NewIndexService(
 		insecureTendermintClient: config.Tendermint.Insecure,
 		strictGenesisParsing:     config.Tendermint.StrictGenesisParsing,
 		cosmosVersionBlockHeight: utils.CosmosVersionBlockHeight{
-			V0_43_0: config.CosmosVersionEnabledHeight.BlockHeight_V0_43_0,
+			V0_43_0: utils.ParserBlockHeight(config.CosmosVersionEnabledHeight.BlockHeight_V0_43_0),
 		},
 	}
 }

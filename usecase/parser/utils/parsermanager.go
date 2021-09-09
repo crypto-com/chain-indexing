@@ -10,19 +10,23 @@ import (
 )
 
 type CosmosParserManager struct {
-	store  map[string]CosmosParserBlockHeight
+	store  map[CosmosParserKey]BlockHeightToCosmosParserMap
 	logger applogger.Logger
 	config CosmosParserManagerConfig
 }
 
-type CosmosParserBlockHeight map[uint64]CosmosParser
+type CosmosParserKey string
+
+type ParserBlockHeight uint64
+
+type BlockHeightToCosmosParserMap map[ParserBlockHeight]CosmosParser
 
 type CosmosParserManagerConfig struct {
 	CosmosVersionBlockHeight
 }
 
 type CosmosVersionBlockHeight struct {
-	V0_43_0 uint64
+	V0_43_0 ParserBlockHeight
 }
 
 type CosmosParserManagerParams struct {
@@ -43,7 +47,7 @@ type CosmosParserParams struct {
 
 func NewCosmosParserManager(params CosmosParserManagerParams) *CosmosParserManager {
 	cpm := &CosmosParserManager{
-		store:  make(map[string]CosmosParserBlockHeight),
+		store:  make(map[CosmosParserKey]BlockHeightToCosmosParserMap),
 		logger: params.Logger,
 		config: params.Config,
 	}
@@ -51,23 +55,23 @@ func NewCosmosParserManager(params CosmosParserManagerParams) *CosmosParserManag
 	return cpm
 }
 
-func (cpm *CosmosParserManager) GetCosmosV0_43_0BlockHeight() uint64 {
+func (cpm *CosmosParserManager) GetCosmosV0_43_0BlockHeight() ParserBlockHeight {
 	return cpm.config.CosmosVersionBlockHeight.V0_43_0
 }
 
-func (cpm *CosmosParserManager) RegisterParser(name string, fromHeight uint64, parser CosmosParser) {
+func (cpm *CosmosParserManager) RegisterParser(name CosmosParserKey, fromHeight ParserBlockHeight, parser CosmosParser) {
 	if cpm.store[name] == nil {
-		cpm.store[name] = make(map[uint64]CosmosParser)
+		cpm.store[name] = make(map[ParserBlockHeight]CosmosParser)
 	}
 	cpm.store[name][fromHeight] = parser
 }
 
-func (cpm *CosmosParserManager) GetParser(name string, blockHeight uint64) CosmosParser {
+func (cpm *CosmosParserManager) GetParser(name CosmosParserKey, blockHeight ParserBlockHeight) CosmosParser {
 	parserVersions, ok := cpm.store[name]
 	if !ok {
 		panic(fmt.Sprintf("Requesting invalid parser :%s", name))
 	}
-	resultBlockHeight := uint64(0)
+	resultBlockHeight := ParserBlockHeight(0)
 	resultParser := parserVersions[resultBlockHeight]
 	for fromBlockHeight, parser := range parserVersions {
 		if fromBlockHeight <= blockHeight && fromBlockHeight > resultBlockHeight {
