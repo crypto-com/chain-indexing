@@ -1,4 +1,4 @@
-package ibcmsg
+package utils
 
 import (
 	"encoding/base64"
