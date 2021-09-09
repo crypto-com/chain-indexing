@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"fmt"
+
 	"github.com/crypto-com/chain-indexing/entity/command"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/crypto-com/chain-indexing/usecase/event"
@@ -63,12 +65,13 @@ func (cpm *CosmosParserManager) RegisterParser(name string, fromHeight uint64, p
 func (cpm *CosmosParserManager) GetParser(name string, blockHeight uint64) CosmosParser {
 	parserVersions, ok := cpm.store[name]
 	if !ok {
-		cpm.logger.Errorf("Requesting invalid parser :%s", name)
+		panic(fmt.Sprintf("Requesting invalid parser :%s", name))
 	}
 	resultBlockHeight := uint64(0)
 	resultParser := parserVersions[resultBlockHeight]
 	for fromBlockHeight, parser := range parserVersions {
 		if fromBlockHeight <= blockHeight && fromBlockHeight > resultBlockHeight {
+			resultBlockHeight = fromBlockHeight
 			resultParser = parser
 		}
 	}
