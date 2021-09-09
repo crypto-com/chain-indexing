@@ -24,7 +24,10 @@ var _ = Describe("ParseMsgCommands", func() {
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"
 
+			pm := usecase_parser_test.InitParserManager()
+
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
+				pm,
 				txDecoder,
 				block,
 				blockResults,

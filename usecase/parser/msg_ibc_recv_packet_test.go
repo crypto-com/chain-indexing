@@ -84,7 +84,11 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
+
+			pm := usecase_parser_test.InitParserManager()
+
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
+				pm,
 				txDecoder,
 				block,
 				blockResults,
@@ -165,7 +169,11 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
+
+			pm := usecase_parser_test.InitParserManager()
+
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
+				pm,
 				txDecoder,
 				block,
 				blockResults,
@@ -253,7 +261,11 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
+
+			pm := usecase_parser_test.InitParserManager()
+
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
+				pm,
 				txDecoder,
 				block,
 				blockResults,

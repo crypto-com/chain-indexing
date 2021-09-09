@@ -18,7 +18,7 @@ import (
 )
 
 func ParseMsgRecvPacket(
-	cosmosParserParams utils.CosmosParserParams,
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgRecvPacket
 	decoderConfig := &mapstructure.DecoderConfig{
@@ -35,7 +35,7 @@ func ParseMsgRecvPacket(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating RawMsgRecvPacket decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(cosmosParserParams.Msg); err != nil {
+	if err := decoder.Decode(parserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgRecvPacket: %v", err))
 	}
 
@@ -49,8 +49,8 @@ func ParseMsgRecvPacket(
 	rawPacketData := base64_internal.MustDecodeString(rawMsg.Packet.Data)
 	json.MustUnmarshal(rawPacketData, &rawFungibleTokenPacketData)
 
-	if !cosmosParserParams.MsgCommonParams.TxSuccess {
-		params := ibc_model.MsgRecvPacketParams{
+	if !parserParams.MsgCommonParams.TxSuccess {
+		msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
 			RawMsgRecvPacket: rawMsg,
 
 			Application: "transfer",
@@ -61,13 +61,13 @@ func ParseMsgRecvPacket(
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
-			cosmosParserParams.MsgCommonParams,
+			parserParams.MsgCommonParams,
 
-			params,
+			msgRecvPacketParams,
 		)}
 	}
 
-	log := utils.NewParsedTxsResultLog(&cosmosParserParams.TxsResult.Log[cosmosParserParams.MsgIndex])
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 
 	fungibleTokenPacketEvent := log.GetEventByType("fungible_token_packet")
 	if fungibleTokenPacketEvent == nil {
@@ -95,7 +95,7 @@ func ParseMsgRecvPacket(
 	var packetAck ibc_model.MsgRecvPacketPacketAck
 	json.MustUnmarshalFromString(writeAckEvent.MustGetAttributeByKey("packet_ack"), &packetAck)
 
-	params := ibc_model.MsgRecvPacketParams{
+	msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
 		RawMsgRecvPacket: rawMsg,
 
 		Application: "transfer",
@@ -113,8 +113,8 @@ func ParseMsgRecvPacket(
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
-		cosmosParserParams.MsgCommonParams,
+		parserParams.MsgCommonParams,
 
-		params,
+		msgRecvPacketParams,
 	)}
 }
