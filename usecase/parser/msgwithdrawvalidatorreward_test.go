@@ -1,9 +1,9 @@
 package parser_test
 
 import (
-	"github.com/crypto-com/chain-indexing/usecase/parser/test"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	"strings"
+
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -14,6 +14,8 @@ import (
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
+	"github.com/crypto-com/chain-indexing/usecase/parser"
+	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
 )
 
 var _ = Describe("ParseMsgCommands", func() {
@@ -29,7 +31,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"
 
-			cmds, err := ParseBlockResultsTxsMsgToCommands(
+			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
@@ -80,7 +82,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"
 
-			cmds, err := ParseBlockResultsTxsMsgToCommands(
+			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,
@@ -130,7 +132,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"
 
-			cmds, err := ParseBlockResultsTxsMsgToCommands(
+			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,

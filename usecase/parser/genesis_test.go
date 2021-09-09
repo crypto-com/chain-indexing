@@ -14,6 +14,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
+	"github.com/crypto-com/chain-indexing/usecase/parser"
 	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
 )
 
@@ -39,7 +40,7 @@ var _ = Describe("Parse Genesis", func() {
 		rawGenesis := mustParseGenesisResp(usecase_parser_test.GENESIS_EXPORTED_RESP, strict)
 
 		accountAddressPrefix := "tcro"
-		cmds, err := ParseGenesisCommands(rawGenesis, accountAddressPrefix)
+		cmds, err := parser.ParseGenesisCommands(rawGenesis, accountAddressPrefix)
 		Expect(err).To(BeNil())
 		Expect(cmds).To(HaveLen(4))
 		Expect(cmds[0]).To(Equal(command_usecase.NewCreateGenesis(*rawGenesis)))
@@ -125,7 +126,7 @@ var _ = Describe("Parse Genesis", func() {
 		rawGenesis := mustParseGenesisResp(usecase_parser_test.GENESIS_RESP, strict)
 
 		accountAddressPrefix := "tcro"
-		cmds, err := ParseGenesisCommands(rawGenesis, accountAddressPrefix)
+		cmds, err := parser.ParseGenesisCommands(rawGenesis, accountAddressPrefix)
 		Expect(err).To(BeNil())
 		Expect(cmds).To(HaveLen(4))
 		Expect(cmds[0]).To(Equal(command_usecase.NewCreateGenesis(*rawGenesis)))

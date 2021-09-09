@@ -2,9 +2,9 @@ package ibcmsg
 
 import (
 	"fmt"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-	log2 "log"
 	"time"
+
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
 	base64_internal "github.com/crypto-com/chain-indexing/internal/base64"
 	"github.com/crypto-com/chain-indexing/internal/json"
@@ -20,7 +20,6 @@ import (
 func ParseMsgRecvPacket(
 	cosmosParserParams utils.CosmosParserParams,
 ) []command.Command {
-	log2.Println("v0.43.0 ParseMsgRecvPacket with block height:", cosmosParserParams.MsgCommonParams.BlockHeight)
 	var rawMsg ibc_model.RawMsgRecvPacket
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,

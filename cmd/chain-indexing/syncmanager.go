@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
@@ -15,6 +14,7 @@ import (
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	"github.com/crypto-com/chain-indexing/usecase/syncstrategy"
 )
 

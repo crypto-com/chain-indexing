@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-	log2 "log"
 	"strings"
 	"time"
 
@@ -21,6 +19,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
 const tendermintClientStateTypeV1 = "/ibc.lightclients.tendermint.v1.ClientState"
@@ -863,7 +862,6 @@ func ParseMsgTransfer(
 func ParseMsgRecvPacket(
 	cosmosParserParams utils.CosmosParserParams,
 ) []command.Command {
-	log2.Println("v0 ParseMsgRecvPacket with block height:", cosmosParserParams.MsgCommonParams.BlockHeight)
 	var rawMsg ibc_model.RawMsgRecvPacket
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -944,7 +942,7 @@ func ParseMsgRecvPacket(
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
-			msgCommonParams,
+			cosmosParserParams.MsgCommonParams,
 
 			params,
 		)}

@@ -1,9 +1,9 @@
 package parser_test
 
 import (
-	"github.com/crypto-com/chain-indexing/usecase/parser/test"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	"strings"
+
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -14,13 +14,15 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/model"
+	"github.com/crypto-com/chain-indexing/usecase/parser"
+	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
 )
 
 var _ = Describe("TransactionParser", func() {
 	Describe("TxHash", func() {
 		It("should return transaction hash from hex encouded tx data", func() {
 			txHex := "Cp4CCowBChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEmwKK3Rjcm8xNjV0emNyaDJ5bDgzZzhxZXF4dWVnMmc1Z3pndTU3eTNmZTNrYzMSK3Rjcm8xODRsdGEybHN5dTQ3dnd5cDJlOHptdGNhM2s1eXE4NXA2YzR2cDMaEAoIYmFzZXRjcm8SBDEwMDAKjAEKHC9jb3Ntb3MuYmFuay52MWJldGExLk1zZ1NlbmQSbAordGNybzE4NGx0YTJsc3l1NDd2d3lwMmU4em10Y2EzazV5cTg1cDZjNHZwMxIrdGNybzE2NXR6Y3JoMnlsODNnOHFlcXh1ZWcyZzVnemd1NTd5M2ZlM2tjMxoQCghiYXNldGNybxIEMjAwMBKsAQpRCkYKHy9jb3Ntb3MuY3J5cHRvLnNlY3AyNTZrMS5QdWJLZXkSIwohAgiLen9uwpvsreYibwgnQtzupil7kyNJl4oTG3Wl6oIEEgQKAggBGLdPClEKRgofL2Nvc21vcy5jcnlwdG8uc2VjcDI1NmsxLlB1YktleRIjCiEDw9KBooWSrc6BvuMJTwDq4mkyy8aC+6I5uQ9H2sn+cDYSBAoCCAEYyk8SBBDAmgwaQMtPcJacL5aryCBZz7bL4vKrOLFi07rejX0nMvBRA7BSd09ywefL+VMSkC/UwqhHC28pRTHhEDiNApbxrIYBVvIaQE0+gltCOfawUGDJU9nXJJkFLPmjMKJMYvt3UtTMjPR2bws7l78EzaUfrjtbmrkIokoxAW8GBgTuhEkC2Frr6Q0="
-			Expect(TxHash(txHex)).To(Equal(
+			Expect(parser.TxHash(txHex)).To(Equal(
 				"4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416",
 			))
 		})
@@ -33,7 +35,7 @@ var _ = Describe("TransactionParser", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.ONE_TX_TWO_MSG_BLOCK_RESULTS_RESP)
 			anyAccountAddressPrefix := "tcro"
 
-			cmds, err := ParseTransactionCommands(
+			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
 				block,
 				blockResults,
@@ -92,7 +94,7 @@ var _ = Describe("TransactionParser", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_WITH_FEE_BLOCK_RESULTS_RESP)
 			anyAccountAddressPrefix := "tcro"
 
-			cmds, err := ParseTransactionCommands(
+			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
 				block,
 				blockResults,
@@ -140,7 +142,7 @@ var _ = Describe("TransactionParser", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESULTS_RESP)
 			anyAccountAddressPrefix := "tcro"
 
-			cmds, err := ParseTransactionCommands(
+			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
 				block,
 				blockResults,
@@ -187,7 +189,7 @@ var _ = Describe("TransactionParser", func() {
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_FAILED_WITHOUT_FEE_BLOCK_RESULTS_RESP))
 			anyAccountAddressPrefix := "tcro"
 
-			cmds, err := ParseTransactionCommands(
+			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
 				block,
 				blockResults,
@@ -234,7 +236,7 @@ var _ = Describe("TransactionParser", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESULTS_RESP)
 			anyAccountAddressPrefix := "tcro"
 
-			cmds, err := ParseTransactionCommands(
+			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
 				block,
 				blockResults,
@@ -281,7 +283,7 @@ var _ = Describe("TransactionParser", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESULTS_RESP)
 			anyAccountAddressPrefix := "tcro"
 
-			cmds, err := ParseTransactionCommands(
+			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
 				block,
 				blockResults,
@@ -328,7 +330,7 @@ var _ = Describe("TransactionParser", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MULTISIG_BLOCK_RESULTS_RESP)
 			anyAccountAddressPrefix := "tcro"
 
-			cmds, err := ParseTransactionCommands(
+			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
 				block,
 				blockResults,

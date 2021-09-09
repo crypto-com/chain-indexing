@@ -1,18 +1,20 @@
 package parser_test
 
 import (
-	"github.com/crypto-com/chain-indexing/usecase/parser/test"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	"regexp"
 	"strings"
 
 	"github.com/crypto-com/chain-indexing/internal/json"
+
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	"github.com/crypto-com/chain-indexing/usecase/event"
+	"github.com/crypto-com/chain-indexing/usecase/parser"
+	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
 )
 
 var _ = Describe("ParseMsgCommands", func() {
@@ -127,7 +129,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
-				usecase_parser_test.usecase_parser_test.TX_MSG_CONNECTION_OPEN_ACK_BLOCK_RESP,
+				usecase_parser_test.TX_MSG_CONNECTION_OPEN_ACK_BLOCK_RESP,
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_CONNECTION_OPEN_ACK_BLOCK_RESULTS_RESP,
@@ -135,7 +137,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
-			cmds, err := ParseBlockResultsTxsMsgToCommands(
+			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				txDecoder,
 				block,
 				blockResults,

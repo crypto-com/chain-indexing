@@ -2,13 +2,14 @@ package parser_test
 
 import (
 	"github.com/crypto-com/chain-indexing/usecase/model"
-	"github.com/crypto-com/chain-indexing/usecase/parser/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
+	"github.com/crypto-com/chain-indexing/usecase/parser"
+	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
 )
 
 var _ = Describe("ParseTxAccountTransferCommands", func() {
@@ -17,7 +18,7 @@ var _ = Describe("ParseTxAccountTransferCommands", func() {
 		It("should return CreateAccountTransfer command when there is transfer event in transaction", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MSG_SEND_BLOCK_RESULTS_RESP)
 
-			cmds, err := ParseTxAccountTransferCommands(
+			cmds, err := parser.ParseTxAccountTransferCommands(
 				blockResults.Height,
 				blockResults.TxsResults,
 			)
@@ -49,7 +50,7 @@ var _ = Describe("ParseTxAccountTransferCommands", func() {
 		It("should return multiple CreateAccountTransfer commands when there are multiple bank.MsgSend in one transaction", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.ONE_TX_TWO_MSG_SEND_BLOCK_RESULTS_RESP)
 
-			cmds, err := ParseTxAccountTransferCommands(
+			cmds, err := parser.ParseTxAccountTransferCommands(
 				blockResults.Height,
 				blockResults.TxsResults,
 			)
@@ -81,7 +82,7 @@ var _ = Describe("ParseTxAccountTransferCommands", func() {
 		It("should retur no command when there are transfer event with no amount", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_WITH_EMPTY_TRANSFER_AMOUNT_BLOCK_RESULTS_RESP)
 
-			cmds, err := ParseTxAccountTransferCommands(
+			cmds, err := parser.ParseTxAccountTransferCommands(
 				blockResults.Height,
 				blockResults.TxsResults,
 			)

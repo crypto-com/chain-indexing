@@ -2,12 +2,13 @@ package parser_test
 
 import (
 	"github.com/crypto-com/chain-indexing/usecase/model"
-	"github.com/crypto-com/chain-indexing/usecase/parser/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
+	"github.com/crypto-com/chain-indexing/usecase/parser"
+	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
 )
 
 var _ = Describe("ParseValidatorUpdatesCommands", func() {
@@ -16,7 +17,7 @@ var _ = Describe("ParseValidatorUpdatesCommands", func() {
 		It("should return commands corresponding to events in validator_updates", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.VALIDATOR_UPDATES_CREATE_VALIDATOR_BLOCK_RESULTS_RESP)
 
-			cmds, err := ParseValidatorUpdatesCommands(
+			cmds, err := parser.ParseValidatorUpdatesCommands(
 				blockResults.Height,
 				blockResults.ValidatorUpdates,
 			)
@@ -44,7 +45,7 @@ var _ = Describe("ParseValidatorUpdatesCommands", func() {
 		It("should return 0 power commands when poser is not defined", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.VALIDATOR_UPDATES_VALIDATOR_SLASHED_BLOCK_RESULTS_RESP)
 
-			cmds, err := ParseValidatorUpdatesCommands(
+			cmds, err := parser.ParseValidatorUpdatesCommands(
 				blockResults.Height,
 				blockResults.ValidatorUpdates,
 			)
