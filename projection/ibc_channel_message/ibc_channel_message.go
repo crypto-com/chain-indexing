@@ -36,7 +36,7 @@ func NewIBCChannelMessage(
 }
 
 func (_ *IBCChannelMessage) GetEventsToListen() []string {
-	return append([]string{
+	return []string{
 		event_usecase.BLOCK_CREATED,
 
 		event_usecase.MSG_IBC_CHANNEL_OPEN_INIT_CREATED,
@@ -48,7 +48,7 @@ func (_ *IBCChannelMessage) GetEventsToListen() []string {
 		event_usecase.MSG_IBC_ACKNOWLEDGEMENT_CREATED,
 		event_usecase.MSG_IBC_TIMEOUT_CREATED,
 		event_usecase.MSG_IBC_TIMEOUT_ON_CLOSE_CREATED,
-	})
+	}
 }
 
 func (projection *IBCChannelMessage) OnInit() error {
@@ -271,8 +271,8 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 		}
 	}
 
-	for _, message := range messages {
-		if err := ibcChannelMessagesView.Insert(&message); err != nil {
+	for i, message := range messages {
+		if err := ibcChannelMessagesView.Insert(&messages[i]); err != nil {
 			return fmt.Errorf("error inserting IBCChannelMessage: %v", err)
 		}
 

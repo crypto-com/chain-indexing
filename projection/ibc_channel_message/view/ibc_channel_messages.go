@@ -134,6 +134,10 @@ func (ibcChannelMessagesView *IBCChannelMessages) ListByChannelID(
 	).BuildStmt(stmtBuilder)
 
 	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
+	if err != nil {
+		return nil, nil, fmt.Errorf("error building IBCChannelMessage select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
+	}
+
 	rowsResult, err := ibcChannelMessagesView.rdb.Query(sql, sqlArgs...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error executing IBCChannelMessage select SQL: %v: %w", err, rdb.ErrQuery)
