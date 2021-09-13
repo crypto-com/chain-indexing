@@ -6,19 +6,19 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 )
 
-type IBCChannelMessages struct {
+type IBCChannelTraces struct {
 	rdb *rdb.Handle
 }
 
-func NewIBCChannelMessages(handle *rdb.Handle) *IBCChannelMessages {
-	return &IBCChannelMessages{
+func NewIBCChannelTraces(handle *rdb.Handle) *IBCChannelTraces {
+	return &IBCChannelTraces{
 		handle,
 	}
 }
 
-func (ibcChannelMessagesView *IBCChannelMessages) Insert(ibcChannelMessage *IBCChannelMessageRow) error {
-	sql, sqlArgs, err := ibcChannelMessagesView.rdb.StmtBuilder.
-		Insert("view_ibc_channel_messages").
+func (ibcChannelTracesView *IBCChannelTraces) Insert(ibcChannelMessage *IBCChannelTraceRow) error {
+	sql, sqlArgs, err := ibcChannelTracesView.rdb.StmtBuilder.
+		Insert("view_ibc_channel_traces").
 		Columns(
 			"channel_id",
 			"block_height",
@@ -48,21 +48,21 @@ func (ibcChannelMessagesView *IBCChannelMessages) Insert(ibcChannelMessage *IBCC
 		ToSql()
 
 	if err != nil {
-		return fmt.Errorf("error building view_ibc_channel_messages insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		return fmt.Errorf("error building view_ibc_channel_traces insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := ibcChannelMessagesView.rdb.Exec(sql, sqlArgs...)
+	result, err := ibcChannelTracesView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
-		return fmt.Errorf("error inserting view_ibc_channel_messages into the table: %v: %w", err, rdb.ErrWrite)
+		return fmt.Errorf("error inserting view_ibc_channel_traces into the table: %v: %w", err, rdb.ErrWrite)
 	}
 	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error inserting view_ibc_channel_messages into the table: no row inserted: %w", rdb.ErrWrite)
+		return fmt.Errorf("error inserting view_ibc_channel_traces into the table: no row inserted: %w", rdb.ErrWrite)
 	}
 
 	return nil
 }
 
-type IBCChannelMessageRow struct {
+type IBCChannelTraceRow struct {
 	ChannelID           string `json:"channelId"`
 	BlockHeight         int64  `json:"blockHeight"`
 	SourceChannel       string `json:"sourceChannel"`
