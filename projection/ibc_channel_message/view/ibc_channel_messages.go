@@ -1,0 +1,195 @@
+package view
+
+import (
+	"errors"
+	"fmt"
+
+	sq "github.com/Masterminds/squirrel"
+	"github.com/crypto-com/chain-indexing/appinterface/pagination"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
+	jsoniter "github.com/json-iterator/go"
+)
+
+type IBCChannelMessages struct {
+	rdb *rdb.Handle
+}
+
+func NewIBCChannelMessages(handle *rdb.Handle) *IBCChannelMessages {
+	return &IBCChannelMessages{
+		handle,
+	}
+}
+
+func (ibcChannelMessagesView *IBCChannelMessages) Insert(ibcChannelMessage *IBCChannelMessageRow) error {
+	messageJSON, err := jsoniter.MarshalToString(ibcChannelMessage.Message)
+	if err != nil {
+		return fmt.Errorf("error JSON marshalling ibcChannelMessage.Message for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	sql, sqlArgs, err := ibcChannelMessagesView.rdb.StmtBuilder.
+		Insert("view_ibc_channel_messages").
+		Columns(
+			"channel_id",
+			"block_height",
+			"block_time",
+			"transaction_hash",
+			"success",
+			"error",
+			"denom",
+			"amount",
+			"message_type",
+			"message",
+		).
+		Values(
+			ibcChannelMessage.ChannelID,
+			ibcChannelMessage.BlockHeight,
+			ibcChannelMessagesView.rdb.Tton(&ibcChannelMessage.BlockTime),
+			ibcChannelMessage.TransactionHash,
+			ibcChannelMessage.Success,
+			ibcChannelMessage.Error,
+			ibcChannelMessage.Denom,
+			ibcChannelMessage.Amount,
+			ibcChannelMessage.MessageType,
+			messageJSON,
+		).
+		ToSql()
+
+	if err != nil {
+		return fmt.Errorf("error building view_ibc_channel_messages insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	result, err := ibcChannelMessagesView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error inserting view_ibc_channel_messages into the table: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() != 1 {
+		return fmt.Errorf("error inserting view_ibc_channel_messages into the table: no row inserted: %w", rdb.ErrWrite)
+	}
+
+	return nil
+}
+
+func (ibcChannelMessagesView *IBCChannelMessages) ListByChannelID(
+	channelID string,
+	order IBCChannelMessagesListOrder,
+	filter IBCChannelMessagesListFilter,
+	pagination *pagination.Pagination,
+) (
+	[]IBCChannelMessageRow,
+	*pagination.PaginationResult,
+	error,
+) {
+	stmtBuilder := ibcChannelMessagesView.rdb.StmtBuilder.Select(
+		"block_height",
+		"block_time",
+		"transaction_hash",
+		"success",
+		"error",
+		"denom",
+		"amount",
+		"message_type",
+		"message",
+	).From(
+		"view_ibc_channel_messages",
+	).Where(
+		"channel_id = ?", channelID,
+	)
+
+	if order.BlockTime == view.ORDER_DESC {
+		stmtBuilder = stmtBuilder.OrderBy("block_time DESC")
+	} else {
+		stmtBuilder = stmtBuilder.OrderBy("block_time")
+	}
+
+	totalIdentities := []string{fmt.Sprintf("%s:-", channelID)}
+	for _, msgType := range filter.MsgTypes {
+		totalIdentities = append(totalIdentities, fmt.Sprintf("%s:%s", channelID, msgType))
+	}
+
+	rDbPagination := rdb.NewRDbPaginationBuilder(
+		pagination,
+		ibcChannelMessagesView.rdb,
+	).WithCustomTotalQueryFn(
+		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
+			totalView := NewIBCChannelMessagesTotal(rdbHandle)
+			total, err := totalView.SumBy(totalIdentities)
+			if err != nil {
+				return int64(0), err
+			}
+			return total, nil
+		},
+	).BuildStmt(stmtBuilder)
+
+	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
+	rowsResult, err := ibcChannelMessagesView.rdb.Query(sql, sqlArgs...)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error executing IBCChannelMessage select SQL: %v: %w", err, rdb.ErrQuery)
+	}
+	defer rowsResult.Close()
+
+	messages := make([]IBCChannelMessageRow, 0)
+	for rowsResult.Next() {
+		var message IBCChannelMessageRow
+		var messageJSON string
+		BlockTimeReader := ibcChannelMessagesView.rdb.NtotReader()
+		if err = rowsResult.Scan(
+			&message.ChannelID,
+			&message.BlockHeight,
+			BlockTimeReader.ScannableArg(),
+			&message.TransactionHash,
+			&message.Success,
+			&message.Error,
+			&message.Denom,
+			&message.Amount,
+			&message.MessageType,
+			&message,
+		); err != nil {
+			if errors.Is(err, rdb.ErrNoRows) {
+				return nil, nil, rdb.ErrNoRows
+			}
+			return nil, nil, fmt.Errorf("error scanning IBCChannelMessage row: %v: %w", err, rdb.ErrQuery)
+		}
+
+		blockTime, parseErr := BlockTimeReader.Parse()
+		if parseErr != nil {
+			return nil, nil, fmt.Errorf("error parsing IBCChannelMessage BlockTime: %v: %w", parseErr, rdb.ErrQuery)
+		}
+		message.BlockTime = *blockTime
+
+		if err = jsoniter.UnmarshalFromString(messageJSON, &message.Message); err != nil {
+			return nil, nil, fmt.Errorf("error unmarshalling IBCChannelMessage message JSON: %v: %w", err, rdb.ErrQuery)
+		}
+
+		messages = append(messages, message)
+	}
+
+	paginationResult, err := rDbPagination.Result()
+	if err != nil {
+		return nil, nil, fmt.Errorf("error preparing pagination result: %v", err)
+	}
+
+	return messages, paginationResult, nil
+}
+
+type IBCChannelMessagesListOrder struct {
+	BlockTime view.ORDER
+}
+
+type IBCChannelMessagesListFilter struct {
+	MsgTypes []string
+}
+
+type IBCChannelMessageRow struct {
+	ChannelID       string          `json:"channelId"`
+	BlockHeight     int64           `json:"blockHeight"`
+	BlockTime       utctime.UTCTime `json:"blockTime"`
+	TransactionHash string          `json:"transactionHash"`
+	Success         string          `json:"success"`
+	Error           string          `json:"error"`
+	Denom           string          `json:"denom"`
+	Amount          string          `json:"amount"`
+	MessageType     string          `json:"messageType"`
+	Message         string          `json:"message"`
+}
