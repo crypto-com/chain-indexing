@@ -37,6 +37,8 @@ func (ibcChannelMessagesView *IBCChannelMessages) Insert(ibcChannelMessage *IBCC
 			"transaction_hash",
 			"success",
 			"error",
+			"sender",
+			"receiver",
 			"denom",
 			"amount",
 			"message_type",
@@ -49,6 +51,8 @@ func (ibcChannelMessagesView *IBCChannelMessages) Insert(ibcChannelMessage *IBCC
 			ibcChannelMessage.TransactionHash,
 			ibcChannelMessage.Success,
 			ibcChannelMessage.Error,
+			ibcChannelMessage.Sender,
+			ibcChannelMessage.Receiver,
 			ibcChannelMessage.Denom,
 			ibcChannelMessage.Amount,
 			ibcChannelMessage.MessageType,
@@ -82,11 +86,14 @@ func (ibcChannelMessagesView *IBCChannelMessages) ListByChannelID(
 	error,
 ) {
 	stmtBuilder := ibcChannelMessagesView.rdb.StmtBuilder.Select(
+		"channel_id",
 		"block_height",
 		"block_time",
 		"transaction_hash",
 		"success",
 		"error",
+		"sender",
+		"receiver",
 		"denom",
 		"amount",
 		"message_type",
@@ -103,9 +110,13 @@ func (ibcChannelMessagesView *IBCChannelMessages) ListByChannelID(
 		stmtBuilder = stmtBuilder.OrderBy("block_time")
 	}
 
-	totalIdentities := []string{fmt.Sprintf("%s:-", channelID)}
-	for _, msgType := range filter.MsgTypes {
-		totalIdentities = append(totalIdentities, fmt.Sprintf("%s:%s", channelID, msgType))
+	totalIdentities := make([]string, 0)
+	if filter.MaybeMsgTypes == nil {
+		totalIdentities = []string{fmt.Sprintf("%s:-", channelID)}
+	} else {
+		for _, msgType := range filter.MaybeMsgTypes {
+			totalIdentities = append(totalIdentities, fmt.Sprintf("%s:%s", channelID, msgType))
+		}
 	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
@@ -141,10 +152,12 @@ func (ibcChannelMessagesView *IBCChannelMessages) ListByChannelID(
 			&message.TransactionHash,
 			&message.Success,
 			&message.Error,
+			&message.Sender,
+			&message.Receiver,
 			&message.Denom,
 			&message.Amount,
 			&message.MessageType,
-			&message,
+			&messageJSON,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
@@ -178,7 +191,7 @@ type IBCChannelMessagesListOrder struct {
 }
 
 type IBCChannelMessagesListFilter struct {
-	MsgTypes []string
+	MaybeMsgTypes []string
 }
 
 type IBCChannelMessageRow struct {
@@ -186,10 +199,12 @@ type IBCChannelMessageRow struct {
 	BlockHeight     int64           `json:"blockHeight"`
 	BlockTime       utctime.UTCTime `json:"blockTime"`
 	TransactionHash string          `json:"transactionHash"`
-	Success         string          `json:"success"`
+	Success         bool            `json:"success"`
 	Error           string          `json:"error"`
+	Sender          string          `json:"sender"`
+	Receiver        string          `json:"receiver"`
 	Denom           string          `json:"denom"`
 	Amount          string          `json:"amount"`
 	MessageType     string          `json:"messageType"`
-	Message         string          `json:"message"`
+	Message         interface{}     `json:"message"`
 }
