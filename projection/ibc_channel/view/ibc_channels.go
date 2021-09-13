@@ -430,7 +430,7 @@ func (ibcChannelsView *IBCChannels) List(
 	filter IBCChannelsListFilter,
 	pagination *pagination.Pagination,
 ) (
-	*[]IBCChannelRow,
+	[]IBCChannelRow,
 	*pagination.PaginationResult,
 	error,
 ) {
@@ -562,7 +562,7 @@ func (ibcChannelsView *IBCChannels) List(
 		return nil, nil, fmt.Errorf("error preparing pagination result: %v", err)
 	}
 
-	return &channels, paginationResult, nil
+	return channels, paginationResult, nil
 }
 
 func (ibcChannelsView *IBCChannels) ListChannelsGroupByChainId(
@@ -570,16 +570,63 @@ func (ibcChannelsView *IBCChannels) ListChannelsGroupByChainId(
 	filter IBCChannelsListFilter,
 	pagination *pagination.Pagination,
 ) (
-	*[]ChainChannels,
+	[]ChainChannels,
 	*pagination.PaginationResult,
 	error,
 ) {
-	// First to get all chainId
+
 	stmtBuilder := ibcChannelsView.rdb.StmtBuilder.Select(
+		"channel_id",
+		"port_id",
+		"connection_id",
+		"counterparty_channel_id",
+		"counterparty_port_id",
 		"counterparty_chain_id",
+		"status",
+		"packet_ordering",
+		"last_in_packet_sequence",
+		"last_out_packet_sequence",
+		"total_transfer_in_count",
+		"total_transfer_out_count",
+		"total_transfer_out_success_count",
+		"total_transfer_out_success_rate",
+		"created_at_block_time",
+		"created_at_block_height",
+		"verified",
+		"description",
+		"last_activity_block_time",
+		"last_activity_block_height",
+		"bonded_tokens",
 	).From(
 		"view_ibc_channels",
-	).Distinct()
+	)
+
+	if filter.MaybeStatus != nil {
+		if *filter.MaybeStatus {
+			// Filtered channels in `opened` status
+			stmtBuilder = stmtBuilder.Where("status = ?", "true")
+		} else {
+			stmtBuilder = stmtBuilder.Where("status = ?", "false")
+		}
+	}
+
+	// MaybeLastActivityBlockTime has a higher priority than MaybeCreatedAtBlockTime
+	if order.MaybeLastActivityBlockTime != nil {
+		if *order.MaybeLastActivityBlockTime == view.ORDER_DESC {
+			stmtBuilder = stmtBuilder.OrderBy("last_activity_block_time DESC")
+		} else {
+			stmtBuilder = stmtBuilder.OrderBy("last_activity_block_time")
+		}
+	} else if order.MaybeCreatedAtBlockTime != nil {
+		if *order.MaybeCreatedAtBlockTime == view.ORDER_DESC {
+			stmtBuilder = stmtBuilder.OrderBy("created_at_block_time DESC")
+		} else {
+			stmtBuilder = stmtBuilder.OrderBy("created_at_block_time")
+		}
+	} else {
+		// By default, sort by last_activity_block_time in descending order
+		stmtBuilder = stmtBuilder.OrderBy("last_activity_block_time DESC")
+	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
@@ -587,43 +634,87 @@ func (ibcChannelsView *IBCChannels) ListChannelsGroupByChainId(
 	).BuildStmt(stmtBuilder)
 	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
 	if err != nil {
-		return nil, nil, fmt.Errorf("error building select distinct counterparty_chain_id SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
+		return nil, nil, fmt.Errorf("error building channels select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
 	}
 
 	rowsResult, err := ibcChannelsView.rdb.Query(sql, sqlArgs...)
 	if err != nil {
-		return nil, nil, fmt.Errorf("error executing select distinct counterparty_chain_id SQL: %v: %w", err, rdb.ErrQuery)
+		return nil, nil, fmt.Errorf("error executing channels select SQL: %v: %w", err, rdb.ErrQuery)
 	}
 	defer rowsResult.Close()
 
-	chainIDs := make([]string, 0)
+	// key: chainID
+	// value: []IBCChannelRow
+	chainChannelsMap := make(map[string][]IBCChannelRow)
+
 	for rowsResult.Next() {
-		var chainID string
+		var channel IBCChannelRow
+		var bondedTokensJSON string
+		lastActivityTimeReader := ibcChannelsView.rdb.NtotReader()
+		createdAtTimeReader := ibcChannelsView.rdb.NtotReader()
 		if err = rowsResult.Scan(
-			&chainID,
+			&channel.ChannelID,
+			&channel.PortID,
+			&channel.ConnectionID,
+			&channel.CounterpartyChannelID,
+			&channel.CounterpartyPortID,
+			&channel.CounterpartyChainID,
+			&channel.Status,
+			&channel.PacketOrdering,
+			&channel.LastInPacketSequence,
+			&channel.LastOutPacketSequence,
+			&channel.TotalTransferInCount,
+			&channel.TotalTransferOutCount,
+			&channel.TotalTransferOutSuccessCount,
+			&channel.TotalTransferOutSuccessRate,
+			createdAtTimeReader.ScannableArg(),
+			&channel.CreatedAtBlockHeight,
+			&channel.Verified,
+			&channel.Description,
+			lastActivityTimeReader.ScannableArg(),
+			&channel.LastActivityBlockHeight,
+			&bondedTokensJSON,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
 			}
-			return nil, nil, fmt.Errorf("error scanning channel row counterparty_chain_id: %v: %w", err, rdb.ErrQuery)
+			return nil, nil, fmt.Errorf("error scanning channel row: %v: %w", err, rdb.ErrQuery)
 		}
 
-		chainIDs = append(chainIDs, chainID)
+		createdAtBlockTime, parseErr := createdAtTimeReader.Parse()
+		if parseErr != nil {
+			return nil, nil, fmt.Errorf("error parsing createdAtBlockTime: %v: %w", parseErr, rdb.ErrQuery)
+		}
+		channel.CreatedAtBlockTime = *createdAtBlockTime
+
+		lastActivityBlockTime, parseErr := lastActivityTimeReader.Parse()
+		if parseErr != nil {
+			return nil, nil, fmt.Errorf("error parsing lastActivityBlockTime: %v: %w", parseErr, rdb.ErrQuery)
+		}
+		channel.LastActivityBlockTime = *lastActivityBlockTime
+
+		if err = jsoniter.UnmarshalFromString(bondedTokensJSON, &channel.BondedTokens); err != nil {
+			return nil, nil, fmt.Errorf("error unmarshalling channel bonded_tokens JSON: %v: %w", err, rdb.ErrQuery)
+		}
+
+		// Append channel to chainChannelsMap[chainID]
+		if channels, ok := chainChannelsMap[channel.CounterpartyChainID]; ok {
+			channels = append(channels, channel)
+			chainChannelsMap[channel.CounterpartyChainID] = channels
+		} else {
+			newChannels := make([]IBCChannelRow, 0)
+			newChannels = append(newChannels, channel)
+			chainChannelsMap[channel.CounterpartyChainID] = newChannels
+		}
 	}
 
-	// Then, loop through chainId, get each chain's channel list
-	chainChannelsList := make([]ChainChannels, 0)
-	for _, chainID := range chainIDs {
-
-		var chainChannels ChainChannels
-
-		chainChannels.ChainID = chainID
-		channels, _, listChannelsErr := ibcChannelsView.listIBCChannelsByChainID(order, filter, pagination, chainID)
-		if listChannelsErr != nil {
-			return nil, nil, fmt.Errorf("error listing channel of a specific chain: %v", err)
+	// Convert map[string][]IBCChannelRow to []ChainChannels
+	var chainChannelsList []ChainChannels
+	for chainID, channels := range chainChannelsMap {
+		chainChannels := ChainChannels{
+			ChainID:  chainID,
+			Channels: channels,
 		}
-		chainChannels.Channels = *channels
-
 		chainChannelsList = append(chainChannelsList, chainChannels)
 	}
 
@@ -632,150 +723,7 @@ func (ibcChannelsView *IBCChannels) ListChannelsGroupByChainId(
 		return nil, nil, fmt.Errorf("error preparing pagination result: %v", err)
 	}
 
-	return &chainChannelsList, paginationResult, nil
-}
-
-func (ibcChannelsView *IBCChannels) listIBCChannelsByChainID(
-	order IBCChannelsListOrder,
-	filter IBCChannelsListFilter,
-	pagination *pagination.Pagination,
-	chainID string,
-) (
-	*[]IBCChannelRow,
-	*pagination.PaginationResult,
-	error,
-) {
-
-	stmtBuilder := ibcChannelsView.rdb.StmtBuilder.Select(
-		"channel_id",
-		"port_id",
-		"connection_id",
-		"counterparty_channel_id",
-		"counterparty_port_id",
-		"counterparty_chain_id",
-		"status",
-		"packet_ordering",
-		"last_in_packet_sequence",
-		"last_out_packet_sequence",
-		"total_transfer_in_count",
-		"total_transfer_out_count",
-		"total_transfer_out_success_count",
-		"total_transfer_out_success_rate",
-		"created_at_block_time",
-		"created_at_block_height",
-		"verified",
-		"description",
-		"last_activity_block_time",
-		"last_activity_block_height",
-		"bonded_tokens",
-	).From(
-		"view_ibc_channels",
-	).Where(
-		"counterparty_chain_id = ?", chainID,
-	)
-
-	if filter.MaybeStatus != nil {
-		if *filter.MaybeStatus {
-			// Filtered channels in `opened` status
-			stmtBuilder = stmtBuilder.Where("status = ?", "true")
-		} else {
-			stmtBuilder = stmtBuilder.Where("status = ?", "false")
-		}
-	}
-
-	// MaybeLastActivityBlockTime has a higher priority than MaybeCreatedAtBlockTime
-	if order.MaybeLastActivityBlockTime != nil {
-		if *order.MaybeLastActivityBlockTime == view.ORDER_DESC {
-			stmtBuilder = stmtBuilder.OrderBy("last_activity_block_time DESC")
-		} else {
-			stmtBuilder = stmtBuilder.OrderBy("last_activity_block_time")
-		}
-	} else if order.MaybeCreatedAtBlockTime != nil {
-		if *order.MaybeCreatedAtBlockTime == view.ORDER_DESC {
-			stmtBuilder = stmtBuilder.OrderBy("created_at_block_time DESC")
-		} else {
-			stmtBuilder = stmtBuilder.OrderBy("created_at_block_time")
-		}
-	} else {
-		// By default, sort by last_activity_block_time in descending order
-		stmtBuilder = stmtBuilder.OrderBy("last_activity_block_time DESC")
-	}
-
-	rDbPagination := rdb.NewRDbPaginationBuilder(
-		pagination,
-		ibcChannelsView.rdb,
-	).BuildStmt(stmtBuilder)
-	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
-	if err != nil {
-		return nil, nil, fmt.Errorf("error building channels select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
-	}
-
-	rowsResult, err := ibcChannelsView.rdb.Query(sql, sqlArgs...)
-	if err != nil {
-		return nil, nil, fmt.Errorf("error executing channels select SQL: %v: %w", err, rdb.ErrQuery)
-	}
-	defer rowsResult.Close()
-
-	channels := make([]IBCChannelRow, 0)
-	for rowsResult.Next() {
-		var channel IBCChannelRow
-		var bondedTokensJSON string
-		lastActivityTimeReader := ibcChannelsView.rdb.NtotReader()
-		createdAtTimeReader := ibcChannelsView.rdb.NtotReader()
-		if err = rowsResult.Scan(
-			&channel.ChannelID,
-			&channel.PortID,
-			&channel.ConnectionID,
-			&channel.CounterpartyChannelID,
-			&channel.CounterpartyPortID,
-			&channel.CounterpartyChainID,
-			&channel.Status,
-			&channel.PacketOrdering,
-			&channel.LastInPacketSequence,
-			&channel.LastOutPacketSequence,
-			&channel.TotalTransferInCount,
-			&channel.TotalTransferOutCount,
-			&channel.TotalTransferOutSuccessCount,
-			&channel.TotalTransferOutSuccessRate,
-			createdAtTimeReader.ScannableArg(),
-			&channel.CreatedAtBlockHeight,
-			&channel.Verified,
-			&channel.Description,
-			lastActivityTimeReader.ScannableArg(),
-			&channel.LastActivityBlockHeight,
-			&bondedTokensJSON,
-		); err != nil {
-			if errors.Is(err, rdb.ErrNoRows) {
-				return nil, nil, rdb.ErrNoRows
-			}
-			return nil, nil, fmt.Errorf("error scanning channel row: %v: %w", err, rdb.ErrQuery)
-		}
-
-		createdAtBlockTime, parseErr := createdAtTimeReader.Parse()
-		if parseErr != nil {
-			return nil, nil, fmt.Errorf("error parsing createdAtBlockTime: %v: %w", parseErr, rdb.ErrQuery)
-		}
-		channel.CreatedAtBlockTime = *createdAtBlockTime
-
-		lastActivityBlockTime, parseErr := lastActivityTimeReader.Parse()
-		if parseErr != nil {
-			return nil, nil, fmt.Errorf("error parsing lastActivityBlockTime: %v: %w", parseErr, rdb.ErrQuery)
-		}
-		channel.LastActivityBlockTime = *lastActivityBlockTime
-
-		if err = jsoniter.UnmarshalFromString(bondedTokensJSON, &channel.BondedTokens); err != nil {
-			return nil, nil, fmt.Errorf("error unmarshalling channel bonded_tokens JSON: %v: %w", err, rdb.ErrQuery)
-		}
-
-		channels = append(channels, channel)
-	}
-
-	paginationResult, err := rDbPagination.Result()
-	if err != nil {
-		return nil, nil, fmt.Errorf("error preparing pagination result: %v", err)
-	}
-
-	return &channels, paginationResult, nil
+	return chainChannelsList, paginationResult, nil
 }
 
 type IBCChannelsListFilter struct {
