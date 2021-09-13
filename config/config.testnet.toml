@@ -80,4 +80,5 @@ enables = [
 #    "CryptoComNFT",
     "IBCChannel",
 #    "IBCChannelTxMsgTrace",
+    "IBCChannelMessage",
 ]

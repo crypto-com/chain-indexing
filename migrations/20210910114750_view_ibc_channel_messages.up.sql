@@ -6,6 +6,8 @@ CREATE TABLE view_ibc_channel_messages (
     transaction_hash VARCHAR NOT NULL,
     success BOOLEAN NOT NULL,
     error VARCHAR NOT NULL,
+    sender VARCHAR NOT NULL,
+    receiver VARCHAR NOT NULL,
     denom VARCHAR NOT NULL,
     amount VARCHAR NOT NULL,
     message_type VARCHAR NOT NULL,
