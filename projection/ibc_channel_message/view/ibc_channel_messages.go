@@ -114,6 +114,7 @@ func (ibcChannelMessagesView *IBCChannelMessages) ListByChannelID(
 	if filter.MaybeMsgTypes == nil {
 		totalIdentities = []string{fmt.Sprintf("%s:-", channelID)}
 	} else {
+		stmtBuilder = stmtBuilder.Where(sq.Eq{"message_type": filter.MaybeMsgTypes})
 		for _, msgType := range filter.MaybeMsgTypes {
 			totalIdentities = append(totalIdentities, fmt.Sprintf("%s:%s", channelID, msgType))
 		}
