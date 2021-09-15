@@ -463,10 +463,9 @@ func (ibcChannelsView *IBCChannels) List(
 
 	if filter.MaybeStatus != nil {
 		if *filter.MaybeStatus {
-			// Filtered channels in `opened` status
-			stmtBuilder = stmtBuilder.Where("status = ?", "true")
+			stmtBuilder = addOpenedStatusFilterConditionTo(stmtBuilder)
 		} else {
-			stmtBuilder = stmtBuilder.Where("status = ?", "false")
+			stmtBuilder = addClosedStatusFilterConditionTo(stmtBuilder)
 		}
 	}
 
@@ -603,10 +602,9 @@ func (ibcChannelsView *IBCChannels) ListChannelsGroupByChainId(
 
 	if filter.MaybeStatus != nil {
 		if *filter.MaybeStatus {
-			// Filtered channels in `opened` status
-			stmtBuilder = stmtBuilder.Where("status = ?", "true")
+			stmtBuilder = addOpenedStatusFilterConditionTo(stmtBuilder)
 		} else {
-			stmtBuilder = stmtBuilder.Where("status = ?", "false")
+			stmtBuilder = addClosedStatusFilterConditionTo(stmtBuilder)
 		}
 	}
 
@@ -643,9 +641,7 @@ func (ibcChannelsView *IBCChannels) ListChannelsGroupByChainId(
 	}
 	defer rowsResult.Close()
 
-	// key: chainID
-	// value: []IBCChannelRow
-	chainChannelsMap := make(map[string][]IBCChannelRow)
+	chainChannelsMap := make(map[IBCChainID][]IBCChannelRow)
 
 	for rowsResult.Next() {
 		var channel IBCChannelRow
@@ -698,25 +694,18 @@ func (ibcChannelsView *IBCChannels) ListChannelsGroupByChainId(
 		}
 
 		// Append channel to chainChannelsMap[chainID]
-		if channels, ok := chainChannelsMap[channel.CounterpartyChainID]; ok {
+		chainID := IBCChainID(channel.CounterpartyChainID)
+		if channels, ok := chainChannelsMap[chainID]; ok {
 			channels = append(channels, channel)
-			chainChannelsMap[channel.CounterpartyChainID] = channels
+			chainChannelsMap[chainID] = channels
 		} else {
 			newChannels := make([]IBCChannelRow, 0)
 			newChannels = append(newChannels, channel)
-			chainChannelsMap[channel.CounterpartyChainID] = newChannels
+			chainChannelsMap[chainID] = newChannels
 		}
 	}
 
-	// Convert map[string][]IBCChannelRow to []ChainChannels
-	var chainChannelsList []ChainChannels
-	for chainID, channels := range chainChannelsMap {
-		chainChannels := ChainChannels{
-			ChainID:  chainID,
-			Channels: channels,
-		}
-		chainChannelsList = append(chainChannelsList, chainChannels)
-	}
+	chainChannelsList := convertChainChannelsMapToList(chainChannelsMap)
 
 	paginationResult, err := rDbPagination.Result()
 	if err != nil {
@@ -725,6 +714,28 @@ func (ibcChannelsView *IBCChannels) ListChannelsGroupByChainId(
 
 	return chainChannelsList, paginationResult, nil
 }
+
+func convertChainChannelsMapToList(chainChannelsMap map[IBCChainID][]IBCChannelRow) []ChainChannels {
+	var chainChannelsList []ChainChannels
+	for chainID, channels := range chainChannelsMap {
+		chainChannels := ChainChannels{
+			ChainID:  string(chainID),
+			Channels: channels,
+		}
+		chainChannelsList = append(chainChannelsList, chainChannels)
+	}
+	return chainChannelsList
+}
+
+func addOpenedStatusFilterConditionTo(stmtBuilder sq.SelectBuilder) sq.SelectBuilder {
+	return stmtBuilder.Where("status = ?", "true")
+}
+
+func addClosedStatusFilterConditionTo(stmtBuilder sq.SelectBuilder) sq.SelectBuilder {
+	return stmtBuilder.Where("status = ?", "false")
+}
+
+type IBCChainID string
 
 type IBCChannelsListFilter struct {
 	MaybeStatus *bool
