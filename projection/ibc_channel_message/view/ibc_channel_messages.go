@@ -35,7 +35,7 @@ func (ibcChannelMessagesView *IBCChannelMessages) Insert(ibcChannelMessage *IBCC
 			"block_height",
 			"block_time",
 			"transaction_hash",
-			"signer",
+			"relayer",
 			"success",
 			"error",
 			"sender",
@@ -50,7 +50,7 @@ func (ibcChannelMessagesView *IBCChannelMessages) Insert(ibcChannelMessage *IBCC
 			ibcChannelMessage.BlockHeight,
 			ibcChannelMessagesView.rdb.Tton(&ibcChannelMessage.BlockTime),
 			ibcChannelMessage.TransactionHash,
-			ibcChannelMessage.Signer,
+			ibcChannelMessage.Relayer,
 			ibcChannelMessage.Success,
 			ibcChannelMessage.Error,
 			ibcChannelMessage.Sender,
@@ -92,7 +92,7 @@ func (ibcChannelMessagesView *IBCChannelMessages) ListByChannelID(
 		"block_height",
 		"block_time",
 		"transaction_hash",
-		"signer",
+		"relayer",
 		"success",
 		"error",
 		"sender",
@@ -158,7 +158,7 @@ func (ibcChannelMessagesView *IBCChannelMessages) ListByChannelID(
 			&message.BlockHeight,
 			BlockTimeReader.ScannableArg(),
 			&message.TransactionHash,
-			&message.Signer,
+			&message.Relayer,
 			&message.Success,
 			&message.Error,
 			&message.Sender,
@@ -208,7 +208,7 @@ type IBCChannelMessageRow struct {
 	BlockHeight     int64           `json:"blockHeight"`
 	BlockTime       utctime.UTCTime `json:"blockTime"`
 	TransactionHash string          `json:"transactionHash"`
-	Signer          string          `json:"signer"`
+	Relayer         string          `json:"relayer"`
 	Success         bool            `json:"success"`
 	Error           string          `json:"error"`
 	Sender          string          `json:"sender"`
