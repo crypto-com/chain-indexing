@@ -77,22 +77,22 @@ func (cpm *CosmosParserManager) GetParser(name CosmosParserKey, blockHeight Pars
 	if !ok {
 		panic(fmt.Sprintf("Requesting invalid parser :%s", name))
 	}
-	currentEnableBlockHeight := ParserBlockHeight(0)
-	resultParser := parserVersions[currentEnableBlockHeight]
-	for enabledBlockHeight, parser := range parserVersions {
-		if isEnabledBlock(enabledBlockHeight, blockHeight) && isLaterVersion(enabledBlockHeight, currentEnableBlockHeight) {
-			currentEnableBlockHeight = enabledBlockHeight
-			resultParser = parser
+	enabledBlockHeight := ParserBlockHeight(0)
+	parser := parserVersions[enabledBlockHeight]
+	for curEnabledBlockHeight, curParser := range parserVersions {
+		if isEnabledBlock(curEnabledBlockHeight, blockHeight) && isLaterVersion(curEnabledBlockHeight, enabledBlockHeight) {
+			enabledBlockHeight = curEnabledBlockHeight
+			parser = curParser
 		}
 	}
 
-	return resultParser
+	return parser
 }
 
-func isEnabledBlock(enabledBlockHeight ParserBlockHeight, currentBlockHeight ParserBlockHeight) bool {
-	return enabledBlockHeight <= currentBlockHeight
+func isEnabledBlock(enabledBlockHeight ParserBlockHeight, blockHeight ParserBlockHeight) bool {
+	return enabledBlockHeight <= blockHeight
 }
 
-func isLaterVersion(enabledBlockHeight ParserBlockHeight, currentEnableBlockHeight ParserBlockHeight) bool {
-	return enabledBlockHeight > currentEnableBlockHeight
+func isLaterVersion(enabledBlockHeight ParserBlockHeight, existingEnableBlockHeight ParserBlockHeight) bool {
+	return enabledBlockHeight > existingEnableBlockHeight
 }
