@@ -2,16 +2,14 @@ package parser
 
 import (
 	"fmt"
-	"github.com/mitchellh/mapstructure"
 	"strconv"
 	"time"
 
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+	"github.com/mitchellh/mapstructure"
+
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
-
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-
-	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
 
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 
@@ -29,6 +27,7 @@ import (
 )
 
 func ParseBlockResultsTxsMsgToCommands(
+	parserManager *utils.CosmosParserManager,
 	txDecoder *utils.TxDecoder,
 	block *model.Block,
 	blockResults *model.BlockResults,
@@ -60,101 +59,85 @@ func ParseBlockResultsTxsMsgToCommands(
 			}
 
 			var msgCommands []command.Command
-			switch msg["@type"] {
-			case "/cosmos.bank.v1beta1.MsgSend":
-				msgCommands = parseMsgSend(msgCommonParams, msg)
-			case "/cosmos.bank.v1beta1.MsgMultiSend":
-				msgCommands = parseMsgMultiSend(msgCommonParams, msg)
-			case "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress":
-				msgCommands = parseMsgSetWithdrawAddress(msgCommonParams, msg)
-			case "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward":
-				msgCommands = parseMsgWithdrawDelegatorReward(txSuccess, txsResult, msgIndex, msgCommonParams, msg)
-			case "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission":
-				msgCommands = parseMsgWithdrawValidatorCommission(txSuccess, txsResult, msgIndex, msgCommonParams, msg)
-			case "/cosmos.distribution.v1beta1.MsgFundCommunityPool":
-				msgCommands = parseMsgFundCommunityPool(msgCommonParams, msg)
-			case "/cosmos.gov.v1beta1.MsgSubmitProposal":
-				msgCommands = parseMsgSubmitProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg)
-			case "/cosmos.gov.v1beta1.MsgVote":
-				msgCommands = parseMsgVote(msgCommonParams, msg)
-			case "/cosmos.gov.v1beta1.MsgDeposit":
-				msgCommands = parseMsgDeposit(msgCommonParams, txsResult, msgIndex, msg)
-			case "/cosmos.staking.v1beta1.MsgDelegate":
-				msgCommands = parseMsgDelegate(
-					accountAddressPrefix,
-					stakingDenom,
-					txSuccess, txsResult, msgIndex, msgCommonParams, msg,
-				)
-			case "/cosmos.staking.v1beta1.MsgUndelegate":
-				msgCommands = parseMsgUndelegate(
-					accountAddressPrefix,
-					stakingDenom,
-					txSuccess, txsResult, msgIndex, msgCommonParams, msg,
-				)
-			case "/cosmos.staking.v1beta1.MsgBeginRedelegate":
-				msgCommands = parseMsgBeginRedelegate(
-					accountAddressPrefix,
-					stakingDenom,
-					txSuccess, txsResult, msgIndex, msgCommonParams, msg,
-				)
-			case "/cosmos.slashing.v1beta1.MsgUnjail":
-				msgCommands = parseMsgUnjail(msgCommonParams, msg)
-			case "/cosmos.staking.v1beta1.MsgCreateValidator":
-				msgCommands = parseMsgCreateValidator(msgCommonParams, msg)
-			case "/cosmos.staking.v1beta1.MsgEditValidator":
-				msgCommands = parseMsgEditValidator(msgCommonParams, msg)
-			case "/chainmain.nft.v1.MsgIssueDenom":
-				msgCommands = parseMsgNFTIssueDenom(msgCommonParams, msg)
-			case "/chainmain.nft.v1.MsgMintNFT":
-				msgCommands = parseMsgNFTMintNFT(msgCommonParams, msg)
-			case "/chainmain.nft.v1.MsgTransferNFT":
-				msgCommands = parseMsgNFTTransferNFT(msgCommonParams, msg)
-			case "/chainmain.nft.v1.MsgEditNFT":
-				msgCommands = parseMsgNFTEditNFT(msgCommonParams, msg)
-			case "/chainmain.nft.v1.MsgBurnNFT":
-				msgCommands = parseMsgNFTBurnNFT(msgCommonParams, msg)
-			case "/ibc.core.client.v1.MsgCreateClient":
-				msgCommands = ibcmsg.ParseMsgCreateClient(msgCommonParams, txsResult, msgIndex, msg)
-			case "/ibc.core.client.v1.MsgUpdateClient":
-				msgCommands = ibcmsg.ParseMsgUpdateClient(msgCommonParams, txsResult, msgIndex, msg)
-			case "/ibc.core.connection.v1.MsgConnectionOpenInit":
-				msgCommands = ibcmsg.ParseMsgConnectionOpenInit(msgCommonParams, txsResult, msgIndex, msg)
-			case "/ibc.core.connection.v1.MsgConnectionOpenTry":
-				msgCommands = ibcmsg.ParseMsgConnectionOpenTry(msgCommonParams, txsResult, msgIndex, msg)
-			case "/ibc.core.connection.v1.MsgConnectionOpenAck":
-				msgCommands = ibcmsg.ParseMsgConnectionOpenAck(msgCommonParams, txsResult, msgIndex, msg)
-			case "/ibc.core.connection.v1.MsgConnectionOpenConfirm":
-				msgCommands = ibcmsg.ParseMsgConnectionOpenConfirm(msgCommonParams, txsResult, msgIndex, msg)
-			case "/ibc.core.channel.v1.MsgChannelOpenInit":
-				msgCommands = ibcmsg.ParseMsgChannelOpenInit(msgCommonParams, txsResult, msgIndex, msg)
-			case "/ibc.core.channel.v1.MsgChannelOpenTry":
-				msgCommands = ibcmsg.ParseMsgChannelOpenTry(msgCommonParams, txsResult, msgIndex, msg)
-			case "/ibc.core.channel.v1.MsgChannelOpenAck":
-				msgCommands = ibcmsg.ParseMsgChannelOpenAck(msgCommonParams, txsResult, msgIndex, msg)
-			case "/ibc.core.channel.v1.MsgChannelOpenConfirm":
-				msgCommands = ibcmsg.ParseMsgChannelOpenConfirm(msgCommonParams, txsResult, msgIndex, msg)
-			case "/ibc.applications.transfer.v1.MsgTransfer":
-				msgCommands = ibcmsg.ParseMsgTransfer(msgCommonParams, txsResult, msgIndex, msg)
-			case "/ibc.core.channel.v1.MsgRecvPacket":
-				msgCommands = ibcmsg.ParseMsgRecvPacket(msgCommonParams, txsResult, msgIndex, msg)
-			case "/ibc.core.channel.v1.MsgAcknowledgement":
-				msgCommands = ibcmsg.ParseMsgAcknowledgement(msgCommonParams, txsResult, msgIndex, msg)
-			case "/ibc.core.channel.v1.MsgTimeout":
-				msgCommands = ibcmsg.ParseMsgTimeout(msgCommonParams, txsResult, msgIndex, msg)
-			case "/ibc.core.channel.v1.MsgTimeoutOnClose":
-				msgCommands = ibcmsg.ParseMsgTimeoutOnClose(msgCommonParams, txsResult, msgIndex, msg)
-			case "/cosmos.authz.v1beta1.MsgGrant":
-				msgCommands = parseMsgGrant(msgCommonParams, msg)
-			case "/cosmos.authz.v1beta1.MsgRevoke":
-				msgCommands = parseMsgRevoke(msgCommonParams, msg)
-			case "/cosmos.authz.v1beta1.MsgExec":
-				msgCommands = parseMsgExec(msgCommonParams, msg)
-			case "/cosmos.feegrant.v1beta1.MsgGrantAllowance":
-				msgCommands = parseMsgGrantAllowance(msgCommonParams, msg)
-			case "/cosmos.feegrant.v1beta1.MsgRevokeAllowance":
-				msgCommands = parseMsgRevokeAllowance(msgCommonParams, msg)
-			case "/cosmos.vesting.v1beta1.MsgCreateVestingAccount":
-				msgCommands = parseMsgCreateVestingAccount(msgCommonParams, msg)
+
+			msgType := msg["@type"]
+			switch msgType {
+			case
+				// cosmos bank
+				"/cosmos.bank.v1beta1.MsgSend",
+				"/cosmos.bank.v1beta1.MsgMultiSend",
+
+				// cosmos distribution
+				"/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
+				"/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+				"/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission",
+				"/cosmos.distribution.v1beta1.MsgFundCommunityPool",
+
+				// cosmos gov
+				"/cosmos.gov.v1beta1.MsgSubmitProposal",
+				"/cosmos.gov.v1beta1.MsgVote",
+				"/cosmos.gov.v1beta1.MsgDeposit",
+
+				// cosmos staking
+				"/cosmos.staking.v1beta1.MsgDelegate",
+				"/cosmos.staking.v1beta1.MsgUndelegate",
+				"/cosmos.staking.v1beta1.MsgBeginRedelegate",
+				"/cosmos.staking.v1beta1.MsgCreateValidator",
+				"/cosmos.staking.v1beta1.MsgEditValidator",
+
+				// cosmos slashing
+				"/cosmos.slashing.v1beta1.MsgUnjail",
+
+				// chainmain nft
+				"/chainmain.nft.v1.MsgIssueDenom",
+				"/chainmain.nft.v1.MsgMintNFT",
+				"/chainmain.nft.v1.MsgTransferNFT",
+				"/chainmain.nft.v1.MsgEditNFT",
+				"/chainmain.nft.v1.MsgBurnNFT",
+
+				// ibc core client
+				"/ibc.core.client.v1.MsgCreateClient",
+				"/ibc.core.client.v1.MsgUpdateClient",
+
+				// ibc core connection
+				"/ibc.core.connection.v1.MsgConnectionOpenInit",
+				"/ibc.core.connection.v1.MsgConnectionOpenTry",
+				"/ibc.core.connection.v1.MsgConnectionOpenAck",
+				"/ibc.core.connection.v1.MsgConnectionOpenConfirm",
+
+				// ibc core channel
+				"/ibc.core.channel.v1.MsgChannelOpenInit",
+				"/ibc.core.channel.v1.MsgChannelOpenTry",
+				"/ibc.core.channel.v1.MsgChannelOpenAck",
+				"/ibc.core.channel.v1.MsgChannelOpenConfirm",
+				"/ibc.core.channel.v1.MsgRecvPacket",
+				"/ibc.core.channel.v1.MsgAcknowledgement",
+				"/ibc.core.channel.v1.MsgTimeout",
+				"/ibc.core.channel.v1.MsgTimeoutOnClose",
+
+				// ibc applications transfer
+				"/ibc.applications.transfer.v1.MsgTransfer",
+
+				// cosmos authz
+				"/cosmos.authz.v1beta1.MsgGrant",
+				"/cosmos.authz.v1beta1.MsgRevoke",
+				"/cosmos.authz.v1beta1.MsgExec",
+
+				// cosmos feegrant
+				"/cosmos.feegrant.v1beta1.MsgGrantAllowance",
+				"/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
+
+				// cosmos vesting
+				"/cosmos.vesting.v1beta1.MsgCreateVestingAccount":
+				parser := parserManager.GetParser(utils.CosmosParserKey(msgType.(string)), utils.ParserBlockHeight(blockHeight))
+				msgCommands = parser(utils.CosmosParserParams{
+					AddressPrefix:   accountAddressPrefix,
+					StakingDenom:    stakingDenom,
+					TxsResult:       txsResult,
+					MsgCommonParams: msgCommonParams,
+					Msg:             msg,
+					MsgIndex:        msgIndex,
+				})
 			}
 
 			commands = append(commands, msgCommands...)
@@ -164,26 +147,24 @@ func ParseBlockResultsTxsMsgToCommands(
 	return commands, nil
 }
 
-func parseMsgSend(
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgSend(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	return []command.Command{command_usecase.NewCreateMsgSend(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
 		event.MsgSendCreatedParams{
-			FromAddress: msg["from_address"].(string),
-			ToAddress:   msg["to_address"].(string),
-			Amount:      tmcosmosutils.MustNewCoinsFromAmountInterface(msg["amount"].([]interface{})),
+			FromAddress: parserParams.Msg["from_address"].(string),
+			ToAddress:   parserParams.Msg["to_address"].(string),
+			Amount:      tmcosmosutils.MustNewCoinsFromAmountInterface(parserParams.Msg["amount"].([]interface{})),
 		},
 	)}
 }
 
-func parseMsgMultiSend(
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgMultiSend(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
-	rawInputs, _ := msg["inputs"].([]interface{})
+	rawInputs, _ := parserParams.Msg["inputs"].([]interface{})
 	inputs := make([]model.MsgMultiSendInput, 0, len(rawInputs))
 	for _, rawInput := range rawInputs {
 		input, _ := rawInput.(map[string]interface{})
@@ -193,7 +174,7 @@ func parseMsgMultiSend(
 		})
 	}
 
-	rawOutputs, _ := msg["outputs"].([]interface{})
+	rawOutputs, _ := parserParams.Msg["outputs"].([]interface{})
 	outputs := make([]model.MsgMultiSendOutput, 0, len(rawOutputs))
 	for _, rawOutput := range rawOutputs {
 		output, _ := rawOutput.(map[string]interface{})
@@ -204,7 +185,7 @@ func parseMsgMultiSend(
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgMultiSend(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
 		model.MsgMultiSendParams{
 			Inputs:  inputs,
@@ -213,46 +194,41 @@ func parseMsgMultiSend(
 	)}
 }
 
-func parseMsgSetWithdrawAddress(
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgSetWithdrawAddress(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	return []command.Command{command_usecase.NewCreateMsgSetWithdrawAddress(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
 		model.MsgSetWithdrawAddressParams{
-			DelegatorAddress: msg["delegator_address"].(string),
-			WithdrawAddress:  msg["withdraw_address"].(string),
+			DelegatorAddress: parserParams.Msg["delegator_address"].(string),
+			WithdrawAddress:  parserParams.Msg["withdraw_address"].(string),
 		},
 	)}
 }
 
-func parseMsgWithdrawDelegatorReward(
-	txSuccess bool,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgWithdrawDelegatorReward(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
-	if !txSuccess {
-		delegatorAddress, _ := msg["delegator_address"].(string)
+	if !parserParams.MsgCommonParams.TxSuccess {
+		delegatorAddress, _ := parserParams.Msg["delegator_address"].(string)
 		return []command.Command{command_usecase.NewCreateMsgWithdrawDelegatorReward(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
 			model.MsgWithdrawDelegatorRewardParams{
 				DelegatorAddress: delegatorAddress,
-				ValidatorAddress: msg["validator_address"].(string),
+				ValidatorAddress: parserParams.Msg["validator_address"].(string),
 				RecipientAddress: delegatorAddress,
 				Amount:           coin.NewEmptyCoins(),
 			},
 		)}
 	}
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	var recipient string
 	var amount coin.Coins
 	// When there is no reward withdrew, `transfer` event would not exist
 	if event := log.GetEventByType("transfer"); event == nil {
-		recipient, _ = msg["delegator_address"].(string)
+		recipient, _ = parserParams.Msg["delegator_address"].(string)
 		amount = coin.NewEmptyCoins()
 	} else {
 		recipient = event.MustGetAttributeByKey("recipient")
@@ -261,41 +237,37 @@ func parseMsgWithdrawDelegatorReward(
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgWithdrawDelegatorReward(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
 		model.MsgWithdrawDelegatorRewardParams{
-			DelegatorAddress: msg["delegator_address"].(string),
-			ValidatorAddress: msg["validator_address"].(string),
+			DelegatorAddress: parserParams.Msg["delegator_address"].(string),
+			ValidatorAddress: parserParams.Msg["validator_address"].(string),
 			RecipientAddress: recipient,
 			Amount:           amount,
 		},
 	)}
 }
 
-func parseMsgWithdrawValidatorCommission(
-	txSuccess bool,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgWithdrawValidatorCommission(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
-	if !txSuccess {
+	if !parserParams.MsgCommonParams.TxSuccess {
 		return []command.Command{command_usecase.NewCreateMsgWithdrawValidatorCommission(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
 			model.MsgWithdrawValidatorCommissionParams{
-				ValidatorAddress: msg["validator_address"].(string),
+				ValidatorAddress: parserParams.Msg["validator_address"].(string),
 				RecipientAddress: "",
 				Amount:           coin.NewEmptyCoins(),
 			},
 		)}
 	}
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	var recipient string
 	var amount coin.Coins
 	// When there is no reward withdrew, `transfer` event would not exist
 	if event := log.GetEventByType("transfer"); event == nil {
-		recipient, _ = msg["delegator_address"].(string)
+		recipient, _ = parserParams.Msg["delegator_address"].(string)
 		amount = coin.NewEmptyCoins()
 	} else {
 		recipient = event.MustGetAttributeByKey("recipient")
@@ -304,38 +276,33 @@ func parseMsgWithdrawValidatorCommission(
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgWithdrawValidatorCommission(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
 		model.MsgWithdrawValidatorCommissionParams{
-			ValidatorAddress: msg["validator_address"].(string),
+			ValidatorAddress: parserParams.Msg["validator_address"].(string),
 			RecipientAddress: recipient,
 			Amount:           amount,
 		},
 	)}
 }
 
-func parseMsgFundCommunityPool(
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgFundCommunityPool(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	return []command.Command{command_usecase.NewCreateMsgFundCommunityPool(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
 		model.MsgFundCommunityPoolParams{
-			Depositor: msg["depositor"].(string),
-			Amount:    tmcosmosutils.MustNewCoinsFromAmountInterface(msg["amount"].([]interface{})),
+			Depositor: parserParams.Msg["depositor"].(string),
+			Amount:    tmcosmosutils.MustNewCoinsFromAmountInterface(parserParams.Msg["amount"].([]interface{})),
 		},
 	)}
 }
 
-func parseMsgSubmitProposal(
-	txSuccess bool,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgSubmitProposal(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
-	rawContent, err := jsoniter.Marshal(msg["content"])
+	rawContent, err := jsoniter.Marshal(parserParams.Msg["content"])
 	if err != nil {
 		panic(fmt.Sprintf("error encoding proposal content: %v", err))
 	}
@@ -346,21 +313,21 @@ func parseMsgSubmitProposal(
 
 	var cmds []command.Command
 	if proposalContent.Type == "/cosmos.params.v1beta1.ParameterChangeProposal" {
-		cmds = parseMsgSubmitParamChangeProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
+		cmds = parseMsgSubmitParamChangeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal" {
-		cmds = parseMsgSubmitCommunityFundSpendProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
+		cmds = parseMsgSubmitCommunityFundSpendProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal" {
-		cmds = parseMsgSubmitSoftwareUpgradeProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
+		cmds = parseMsgSubmitSoftwareUpgradeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal" {
-		cmds = parseMsgSubmitCancelSoftwareUpgradeProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
+		cmds = parseMsgSubmitCancelSoftwareUpgradeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.gov.v1beta1.TextProposal" {
-		cmds = parseMsgSubmitTextProposal(txSuccess, txsResult, msgIndex, msgCommonParams, msg, rawContent)
+		cmds = parseMsgSubmitTextProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else {
 		panic(fmt.Sprintf("unrecognzied govenance proposal type `%s`", proposalContent.Type))
 	}
 
-	if msgCommonParams.TxSuccess {
-		log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	if parserParams.MsgCommonParams.TxSuccess {
+		log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 		logEvent := log.GetEventByType("submit_proposal")
 		if logEvent == nil {
 			panic("missing `submit_proposal` event in TxsResult log")
@@ -368,7 +335,7 @@ func parseMsgSubmitProposal(
 
 		if logEvent.HasAttribute("voting_period_start") {
 			cmds = append(cmds, command_usecase.NewStartProposalVotingPeriod(
-				msgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"),
+				parserParams.MsgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"),
 			))
 		}
 	}
@@ -658,39 +625,35 @@ func parseMsgSubmitTextProposal(
 	)}
 }
 
-func parseMsgVote(
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgVote(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	return []command.Command{command_usecase.NewCreateMsgVote(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
 		model.MsgVoteParams{
-			ProposalId: msg["proposal_id"].(string),
-			Voter:      msg["voter"].(string),
-			Option:     msg["option"].(string),
+			ProposalId: parserParams.Msg["proposal_id"].(string),
+			Voter:      parserParams.Msg["voter"].(string),
+			Option:     parserParams.Msg["option"].(string),
 		},
 	)}
 }
 
-func parseMsgDeposit(
-	msgCommonParams event.MsgCommonParams,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msg map[string]interface{},
+func ParseMsgDeposit(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	cmds := []command.Command{command_usecase.NewCreateMsgDeposit(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
 		model.MsgDepositParams{
-			ProposalId: msg["proposal_id"].(string),
-			Depositor:  msg["depositor"].(string),
-			Amount:     tmcosmosutils.MustNewCoinsFromAmountInterface(msg["amount"].([]interface{})),
+			ProposalId: parserParams.Msg["proposal_id"].(string),
+			Depositor:  parserParams.Msg["depositor"].(string),
+			Amount:     tmcosmosutils.MustNewCoinsFromAmountInterface(parserParams.Msg["amount"].([]interface{})),
 		},
 	)}
 
-	if msgCommonParams.TxSuccess {
-		log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	if parserParams.MsgCommonParams.TxSuccess {
+		log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 		logEvents := log.GetEventsByType("proposal_deposit")
 		if logEvents == nil {
 			panic("missing `proposal_deposit` event in TxsResult log")
@@ -699,7 +662,7 @@ func parseMsgDeposit(
 		for _, logEvent := range logEvents {
 			if logEvent.HasAttribute("voting_period_start") {
 				cmds = append(cmds, command_usecase.NewStartProposalVotingPeriod(
-					msgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"),
+					parserParams.MsgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"),
 				))
 				break
 			}
@@ -709,35 +672,29 @@ func parseMsgDeposit(
 	return cmds
 }
 
-func parseMsgDelegate(
-	addressPrefix string,
-	stakingDenom string,
-	txSuccess bool,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgDelegate(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
-	amountValue, _ := msg["amount"].(map[string]interface{})
+	amountValue, _ := parserParams.Msg["amount"].(map[string]interface{})
 	amount := tmcosmosutils.MustNewCoinFromAmountInterface(amountValue)
 
-	if !txSuccess {
+	if !parserParams.MsgCommonParams.TxSuccess {
 		return []command.Command{command_usecase.NewCreateMsgDelegate(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
 			model.MsgDelegateParams{
-				DelegatorAddress:   msg["delegator_address"].(string),
-				ValidatorAddress:   msg["validator_address"].(string),
+				DelegatorAddress:   parserParams.Msg["delegator_address"].(string),
+				ValidatorAddress:   parserParams.Msg["validator_address"].(string),
 				Amount:             amount,
 				AutoClaimedRewards: coin.Coin{},
 			},
 		)}
 	}
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 
-	moduleAccounts := tmcosmosutils.NewModuleAccounts(addressPrefix)
+	moduleAccounts := tmcosmosutils.NewModuleAccounts(parserParams.AddressPrefix)
 	transferEvents := log.GetEventsByType("transfer")
-	autoClaimedRewards := coin.NewZeroCoin(stakingDenom)
+	autoClaimedRewards := coin.NewZeroCoin(parserParams.StakingDenom)
 	for _, transferEvent := range transferEvents {
 		sender := transferEvent.MustGetAttributeByKey("sender")
 		if sender != moduleAccounts.Distribution {
@@ -753,43 +710,37 @@ func parseMsgDelegate(
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgDelegate(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
 		model.MsgDelegateParams{
-			DelegatorAddress:   msg["delegator_address"].(string),
-			ValidatorAddress:   msg["validator_address"].(string),
+			DelegatorAddress:   parserParams.Msg["delegator_address"].(string),
+			ValidatorAddress:   parserParams.Msg["validator_address"].(string),
 			Amount:             amount,
 			AutoClaimedRewards: autoClaimedRewards,
 		},
 	)}
 }
 
-func parseMsgUndelegate(
-	addressPrefix string,
-	stakingDenom string,
-	txSuccess bool,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgUndelegate(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
-	amountValue, _ := msg["amount"].(map[string]interface{})
+	amountValue, _ := parserParams.Msg["amount"].(map[string]interface{})
 	amount := tmcosmosutils.MustNewCoinFromAmountInterface(amountValue)
 
-	if !txSuccess {
+	if !parserParams.MsgCommonParams.TxSuccess {
 		return []command.Command{command_usecase.NewCreateMsgUndelegate(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
 			model.MsgUndelegateParams{
-				DelegatorAddress:      msg["delegator_address"].(string),
-				ValidatorAddress:      msg["validator_address"].(string),
+				DelegatorAddress:      parserParams.Msg["delegator_address"].(string),
+				ValidatorAddress:      parserParams.Msg["validator_address"].(string),
 				MaybeUnbondCompleteAt: nil,
 				Amount:                amount,
 				AutoClaimedRewards:    coin.Coin{},
 			},
 		)}
 	}
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
 	unbondEvent := log.GetEventByType("unbond")
 	if unbondEvent == nil {
@@ -802,9 +753,9 @@ func parseMsgUndelegate(
 		panic(fmt.Sprintf("error parsing unbond completion time: %v", unbondCompletionTimeErr))
 	}
 
-	moduleAccounts := tmcosmosutils.NewModuleAccounts(addressPrefix)
+	moduleAccounts := tmcosmosutils.NewModuleAccounts(parserParams.AddressPrefix)
 	transferEvents := log.GetEventsByType("transfer")
-	autoClaimedRewards := coin.NewZeroCoin(stakingDenom)
+	autoClaimedRewards := coin.NewZeroCoin(parserParams.StakingDenom)
 	for _, transferEvent := range transferEvents {
 		sender := transferEvent.MustGetAttributeByKey("sender")
 		if sender != moduleAccounts.Distribution {
@@ -820,11 +771,11 @@ func parseMsgUndelegate(
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgUndelegate(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
 		model.MsgUndelegateParams{
-			DelegatorAddress:      msg["delegator_address"].(string),
-			ValidatorAddress:      msg["validator_address"].(string),
+			DelegatorAddress:      parserParams.Msg["delegator_address"].(string),
+			ValidatorAddress:      parserParams.Msg["validator_address"].(string),
 			MaybeUnbondCompleteAt: &unbondCompletionTime,
 			Amount:                amount,
 			AutoClaimedRewards:    autoClaimedRewards,
@@ -832,36 +783,30 @@ func parseMsgUndelegate(
 	)}
 }
 
-func parseMsgBeginRedelegate(
-	addressPrefix string,
-	stakingDenom string,
-	txSuccess bool,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgBeginRedelegate(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
-	amountValue, _ := msg["amount"].(map[string]interface{})
+	amountValue, _ := parserParams.Msg["amount"].(map[string]interface{})
 	amount := tmcosmosutils.MustNewCoinFromAmountInterface(amountValue)
 
-	if !txSuccess {
+	if !parserParams.MsgCommonParams.TxSuccess {
 		return []command.Command{command_usecase.NewCreateMsgBeginRedelegate(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
 			model.MsgBeginRedelegateParams{
-				DelegatorAddress:    msg["delegator_address"].(string),
-				ValidatorSrcAddress: msg["validator_src_address"].(string),
-				ValidatorDstAddress: msg["validator_dst_address"].(string),
+				DelegatorAddress:    parserParams.Msg["delegator_address"].(string),
+				ValidatorSrcAddress: parserParams.Msg["validator_src_address"].(string),
+				ValidatorDstAddress: parserParams.Msg["validator_dst_address"].(string),
 				Amount:              amount,
 				AutoClaimedRewards:  coin.Coin{},
 			},
 		)}
 	}
 
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
-	moduleAccounts := tmcosmosutils.NewModuleAccounts(addressPrefix)
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
+	moduleAccounts := tmcosmosutils.NewModuleAccounts(parserParams.AddressPrefix)
 	transferEvents := log.GetEventsByType("transfer")
-	autoClaimedRewards := coin.NewZeroCoin(stakingDenom)
+	autoClaimedRewards := coin.NewZeroCoin(parserParams.StakingDenom)
 	for _, transferEvent := range transferEvents {
 		sender := transferEvent.MustGetAttributeByKey("sender")
 		if sender != moduleAccounts.Distribution {
@@ -877,27 +822,26 @@ func parseMsgBeginRedelegate(
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgBeginRedelegate(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
 		model.MsgBeginRedelegateParams{
-			DelegatorAddress:    msg["delegator_address"].(string),
-			ValidatorSrcAddress: msg["validator_src_address"].(string),
-			ValidatorDstAddress: msg["validator_dst_address"].(string),
+			DelegatorAddress:    parserParams.Msg["delegator_address"].(string),
+			ValidatorSrcAddress: parserParams.Msg["validator_src_address"].(string),
+			ValidatorDstAddress: parserParams.Msg["validator_dst_address"].(string),
 			Amount:              amount,
 			AutoClaimedRewards:  autoClaimedRewards,
 		},
 	)}
 }
 
-func parseMsgUnjail(
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgUnjail(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	return []command.Command{command_usecase.NewCreateMsgUnjail(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
 		model.MsgUnjailParams{
-			ValidatorAddr: msg["validator_addr"].(string),
+			ValidatorAddr: parserParams.Msg["validator_addr"].(string),
 		},
 	)}
 }
@@ -956,13 +900,12 @@ func parseGenesisGenTxsMsgCreateValidator(
 	)}
 }
 
-func parseMsgCreateValidator(
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgCreateValidator(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
-	amountValue, _ := msg["value"].(map[string]interface{})
+	amountValue, _ := parserParams.Msg["value"].(map[string]interface{})
 	amount := tmcosmosutils.MustNewCoinFromAmountInterface(amountValue)
-	tendermintPubkey, _ := msg["pubkey"].(map[string]interface{})
+	tendermintPubkey, _ := parserParams.Msg["pubkey"].(map[string]interface{})
 	description := model.ValidatorDescription{
 		Moniker:         "",
 		Identity:        "",
@@ -971,7 +914,7 @@ func parseMsgCreateValidator(
 		Details:         "",
 	}
 
-	if descriptionJSON, ok := msg["description"].(map[string]interface{}); ok {
+	if descriptionJSON, ok := parserParams.Msg["description"].(map[string]interface{}); ok {
 		description = model.ValidatorDescription{
 			Moniker:         descriptionJSON["moniker"].(string),
 			Identity:        descriptionJSON["identity"].(string),
@@ -986,7 +929,7 @@ func parseMsgCreateValidator(
 		MaxRate:       "",
 		MaxChangeRate: "",
 	}
-	if commissionJSON, ok := msg["commission"].(map[string]interface{}); ok {
+	if commissionJSON, ok := parserParams.Msg["commission"].(map[string]interface{}); ok {
 		commission = model.ValidatorCommission{
 			Rate:          commissionJSON["rate"].(string),
 			MaxRate:       commissionJSON["max_rate"].(string),
@@ -995,26 +938,25 @@ func parseMsgCreateValidator(
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgCreateValidator(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
 		model.MsgCreateValidatorParams{
 			Description:       description,
 			Commission:        commission,
-			MinSelfDelegation: msg["min_self_delegation"].(string),
-			DelegatorAddress:  msg["delegator_address"].(string),
-			ValidatorAddress:  msg["validator_address"].(string),
+			MinSelfDelegation: parserParams.Msg["min_self_delegation"].(string),
+			DelegatorAddress:  parserParams.Msg["delegator_address"].(string),
+			ValidatorAddress:  parserParams.Msg["validator_address"].(string),
 			TendermintPubkey:  tendermintPubkey["key"].(string),
 			Amount:            amount,
 		},
 	)}
 }
 
-func parseMsgEditValidator(
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgEditValidator(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var description model.ValidatorDescription
-	if descriptionJSON, ok := msg["description"].(map[string]interface{}); ok {
+	if descriptionJSON, ok := parserParams.Msg["description"].(map[string]interface{}); ok {
 		description = model.ValidatorDescription{
 			Moniker:         descriptionJSON["moniker"].(string),
 			Identity:        descriptionJSON["identity"].(string),
@@ -1025,126 +967,118 @@ func parseMsgEditValidator(
 	}
 
 	var maybeCommissionRate *string
-	if msg["commission_rate"] != nil {
-		maybeCommissionRate = primptr.String(msg["commission_rate"].(string))
+	if parserParams.Msg["commission_rate"] != nil {
+		maybeCommissionRate = primptr.String(parserParams.Msg["commission_rate"].(string))
 	}
 
 	var maybeMinSelfDelegation *string
-	if msg["min_self_delegation"] != nil {
-		maybeMinSelfDelegation = primptr.String(msg["min_self_delegation"].(string))
+	if parserParams.Msg["min_self_delegation"] != nil {
+		maybeMinSelfDelegation = primptr.String(parserParams.Msg["min_self_delegation"].(string))
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgEditValidator(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
 		model.MsgEditValidatorParams{
 			Description:            description,
-			ValidatorAddress:       msg["validator_address"].(string),
+			ValidatorAddress:       parserParams.Msg["validator_address"].(string),
 			MaybeCommissionRate:    maybeCommissionRate,
 			MaybeMinSelfDelegation: maybeMinSelfDelegation,
 		},
 	)}
 }
 
-func parseMsgNFTIssueDenom(
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgNFTIssueDenom(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	return []command.Command{command_usecase.NewCreateMsgNFTIssueDenom(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
 		model.MsgNFTIssueDenomParams{
-			DenomId:   msg["id"].(string),
-			DenomName: msg["name"].(string),
-			Schema:    msg["schema"].(string),
-			Sender:    msg["sender"].(string),
+			DenomId:   parserParams.Msg["id"].(string),
+			DenomName: parserParams.Msg["name"].(string),
+			Schema:    parserParams.Msg["schema"].(string),
+			Sender:    parserParams.Msg["sender"].(string),
 		},
 	)}
 }
 
-func parseMsgNFTMintNFT(
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgNFTMintNFT(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	return []command.Command{command_usecase.NewCreateMsgNFTMintNFT(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
 		model.MsgNFTMintNFTParams{
-			DenomId:   msg["denom_id"].(string),
-			TokenId:   msg["id"].(string),
-			TokenName: msg["name"].(string),
-			URI:       msg["uri"].(string),
-			Data:      msg["data"].(string),
-			Sender:    msg["sender"].(string),
-			Recipient: msg["recipient"].(string),
+			DenomId:   parserParams.Msg["denom_id"].(string),
+			TokenId:   parserParams.Msg["id"].(string),
+			TokenName: parserParams.Msg["name"].(string),
+			URI:       parserParams.Msg["uri"].(string),
+			Data:      parserParams.Msg["data"].(string),
+			Sender:    parserParams.Msg["sender"].(string),
+			Recipient: parserParams.Msg["recipient"].(string),
 		},
 	)}
 }
 
-func parseMsgNFTTransferNFT(
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgNFTTransferNFT(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	return []command.Command{command_usecase.NewCreateMsgNFTTransferNFT(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
 		model.MsgNFTTransferNFTParams{
-			TokenId:   msg["id"].(string),
-			DenomId:   msg["denom_id"].(string),
-			Sender:    msg["sender"].(string),
-			Recipient: msg["recipient"].(string),
+			TokenId:   parserParams.Msg["id"].(string),
+			DenomId:   parserParams.Msg["denom_id"].(string),
+			Sender:    parserParams.Msg["sender"].(string),
+			Recipient: parserParams.Msg["recipient"].(string),
 		},
 	)}
 }
 
-func parseMsgNFTEditNFT(
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgNFTEditNFT(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	return []command.Command{command_usecase.NewCreateMsgNFTEditNFT(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
 		model.MsgNFTEditNFTParams{
-			DenomId:   msg["denom_id"].(string),
-			TokenId:   msg["id"].(string),
-			TokenName: msg["name"].(string),
-			URI:       msg["uri"].(string),
-			Data:      msg["data"].(string),
-			Sender:    msg["sender"].(string),
+			DenomId:   parserParams.Msg["denom_id"].(string),
+			TokenId:   parserParams.Msg["id"].(string),
+			TokenName: parserParams.Msg["name"].(string),
+			URI:       parserParams.Msg["uri"].(string),
+			Data:      parserParams.Msg["data"].(string),
+			Sender:    parserParams.Msg["sender"].(string),
 		},
 	)}
 }
 
-func parseMsgNFTBurnNFT(
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgNFTBurnNFT(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	return []command.Command{command_usecase.NewCreateMsgNFTBurnNFT(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
 		model.MsgNFTBurnNFTParams{
-			DenomId: msg["denom_id"].(string),
-			TokenId: msg["id"].(string),
-			Sender:  msg["sender"].(string),
+			DenomId: parserParams.Msg["denom_id"].(string),
+			TokenId: parserParams.Msg["id"].(string),
+			Sender:  parserParams.Msg["sender"].(string),
 		},
 	)}
 }
 
-
-
-func parseMsgGrant(
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgGrant(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
-	authType := msg["grant"].(map[string]interface{})["authorization"].(map[string]interface{})["@type"]
+	authType := parserParams.Msg["grant"].(map[string]interface{})["authorization"].(map[string]interface{})["@type"]
 
 	switch authType {
 	case "/cosmos.bank.v1beta1.SendAuthorization":
-		return parseRawMsgSendGrant(msgCommonParams, msg)
+		return parseRawMsgSendGrant(parserParams.MsgCommonParams, parserParams.Msg)
 	case "/cosmos.bank.v1beta1.StakeAuthorization":
-		return parseRawMsgStackGrant(msgCommonParams, msg)
+		return parseRawMsgStackGrant(parserParams.MsgCommonParams, parserParams.Msg)
 	case "/cosmos.bank.v1beta1.GenericAuthorization":
-		return parseRawMsgGenericGrant(msgCommonParams, msg)
+		return parseRawMsgGenericGrant(parserParams.MsgCommonParams, parserParams.Msg)
 	default:
 		return []command.Command{}
 	}
@@ -1288,9 +1222,8 @@ func parseRawMsgGenericGrant(
 	)}
 }
 
-func parseMsgRevoke(
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgRevoke(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg model.RawMsgRevoke
 	decoderConfig := &mapstructure.DecoderConfig{
@@ -1307,36 +1240,35 @@ func parseMsgRevoke(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating RawMsgRevoke decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := decoder.Decode(parserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgRevoke: %v", err))
 	}
 
-	if !msgCommonParams.TxSuccess {
-		params := model.MsgRevokeParams{
+	if !parserParams.MsgCommonParams.TxSuccess {
+		revokeParams := model.MsgRevokeParams{
 			RawMsgRevoke: rawMsg,
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgRevoke(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
-			params,
+			revokeParams,
 		)}
 	}
 
-	params := model.MsgRevokeParams{
+	revokeParams := model.MsgRevokeParams{
 		RawMsgRevoke: rawMsg,
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgRevoke(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
-		params,
+		revokeParams,
 	)}
 }
 
-func parseMsgExec(
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgExec(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg model.RawMsgExec
 	decoderConfig := &mapstructure.DecoderConfig{
@@ -1353,46 +1285,45 @@ func parseMsgExec(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating ParseMsgExec decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := decoder.Decode(parserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding ParseMsgExec: %v", err))
 	}
 
-	if !msgCommonParams.TxSuccess {
-		params := model.MsgExecParams{
+	if !parserParams.MsgCommonParams.TxSuccess {
+		execParams := model.MsgExecParams{
 			RawMsgExec: rawMsg,
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgExec(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
-			params,
+			execParams,
 		)}
 	}
 
-	params := model.MsgExecParams{
+	execParams := model.MsgExecParams{
 		RawMsgExec: rawMsg,
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgExec(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
-		params,
+		execParams,
 	)}
 }
 
-func parseMsgGrantAllowance(
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgGrantAllowance(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
-	allowanceType := msg["allowance"].(map[string]interface{})["@type"]
+	allowanceType := parserParams.Msg["allowance"].(map[string]interface{})["@type"]
 
 	switch allowanceType {
 	case "/cosmos.feegrant.v1beta1.BasicAllowance":
-		return parseRawMsgGrantBasicAllowance(msgCommonParams, msg)
+		return parseRawMsgGrantBasicAllowance(parserParams.MsgCommonParams, parserParams.Msg)
 	case "/cosmos.feegrant.v1beta1.PeriodicAllowance":
-		return parseRawMsgGrantPeriodicAllowance(msgCommonParams, msg)
+		return parseRawMsgGrantPeriodicAllowance(parserParams.MsgCommonParams, parserParams.Msg)
 	case "/cosmos.feegrant.v1beta1.AllowedMsgAllowance":
-		return parseRawMsgGrantAllowedMsgAllowance(msgCommonParams, msg)
+		return parseRawMsgGrantAllowedMsgAllowance(parserParams.MsgCommonParams, parserParams.Msg)
 	default:
 		return []command.Command{}
 	}
@@ -1536,9 +1467,8 @@ func parseRawMsgGrantAllowedMsgAllowance(
 	)}
 }
 
-func parseMsgRevokeAllowance(
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgRevokeAllowance(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg model.RawMsgRevokeAllowance
 	decoderConfig := &mapstructure.DecoderConfig{
@@ -1555,36 +1485,35 @@ func parseMsgRevokeAllowance(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating RawMsgRevokeAllowance decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := decoder.Decode(parserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgRevokeAllowance: %v", err))
 	}
 
-	if !msgCommonParams.TxSuccess {
-		params := model.MsgRevokeAllowanceParams{
+	if !parserParams.MsgCommonParams.TxSuccess {
+		revokeAllowanceParams := model.MsgRevokeAllowanceParams{
 			RawMsgRevokeAllowance: rawMsg,
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgRevokeAllowance(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
-			params,
+			revokeAllowanceParams,
 		)}
 	}
 
-	params := model.MsgRevokeAllowanceParams{
+	revokeAllowanceParams := model.MsgRevokeAllowanceParams{
 		RawMsgRevokeAllowance: rawMsg,
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgRevokeAllowance(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
-		params,
+		revokeAllowanceParams,
 	)}
 }
 
-func parseMsgCreateVestingAccount(
-	msgCommonParams event.MsgCommonParams,
-	msg map[string]interface{},
+func ParseMsgCreateVestingAccount(
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg model.RawMsgCreateVestingAccount
 	decoderConfig := &mapstructure.DecoderConfig{
@@ -1601,29 +1530,29 @@ func parseMsgCreateVestingAccount(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating RawMsgCreateVestingAccount decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := decoder.Decode(parserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgCreateVestingAccount: %v", err))
 	}
 
-	if !msgCommonParams.TxSuccess {
-		params := model.MsgCreateVestingAccountParams{
+	if !parserParams.MsgCommonParams.TxSuccess {
+		msgCreateVestingAccountParams := model.MsgCreateVestingAccountParams{
 			RawMsgCreateVestingAccount: rawMsg,
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgCreateVestingAccount(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
-			params,
+			msgCreateVestingAccountParams,
 		)}
 	}
 
-	params := model.MsgCreateVestingAccountParams{
+	msgCreateVestingAccountParams := model.MsgCreateVestingAccountParams{
 		RawMsgCreateVestingAccount: rawMsg,
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgCreateVestingAccount(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
-		params,
+		msgCreateVestingAccountParams,
 	)}
 }

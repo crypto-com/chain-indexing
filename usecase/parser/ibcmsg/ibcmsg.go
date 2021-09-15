@@ -28,27 +28,24 @@ const tendermintHeaderTypeV1 = "/ibc.lightclients.tendermint.v1.Header"
 const soloMachineHeaderTypeV2 = "/ibc.lightclients.solomachine.v2.Header"
 
 func ParseMsgCreateClient(
-	msgCommonParams event.MsgCommonParams,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msg map[string]interface{},
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
-	clientStateType := msg["client_state"].(map[string]interface{})["@type"]
+	clientStateType := parserParams.Msg["client_state"].(map[string]interface{})["@type"]
 
 	switch clientStateType {
 	case tendermintClientStateTypeV1:
 		return parseRawMsgCreateTendermintLightClient(
-			msgCommonParams,
-			txsResult,
-			msgIndex,
-			msg,
+			parserParams.MsgCommonParams,
+			parserParams.TxsResult,
+			parserParams.MsgIndex,
+			parserParams.Msg,
 		)
 	case soloMachineClientStateTypeV2:
 		return parseRawMsgCreateSoloMachineLightClient(
-			msgCommonParams,
-			txsResult,
-			msgIndex,
-			msg,
+			parserParams.MsgCommonParams,
+			parserParams.TxsResult,
+			parserParams.MsgIndex,
+			parserParams.Msg,
 		)
 	default:
 		return []command.Command{}
@@ -183,10 +180,7 @@ func parseRawMsgCreateSoloMachineLightClient(
 }
 
 func ParseMsgConnectionOpenInit(
-	msgCommonParams event.MsgCommonParams,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msg map[string]interface{},
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMessage ibc_model.RawMsgConnectionOpenInit
 	decoder, decoderErr := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
@@ -199,13 +193,13 @@ func ParseMsgConnectionOpenInit(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating mapstructure decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := decoder.Decode(parserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding message: %v", err))
 	}
 
-	if !msgCommonParams.TxSuccess {
+	if !parserParams.MsgCommonParams.TxSuccess {
 		return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenInit(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
 			ibc_model.MsgConnectionOpenInitParams{
 				RawMsgConnectionOpenInit: rawMessage,
@@ -213,31 +207,28 @@ func ParseMsgConnectionOpenInit(
 		)}
 	}
 
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	event := log.GetEventByType("connection_open_init")
 	if event == nil {
 		panic("missing `connection_open_init` event in TxsResult log")
 	}
-	params := ibc_model.MsgConnectionOpenInitParams{
+	msgConnectionOpenInitParams := ibc_model.MsgConnectionOpenInitParams{
 		RawMsgConnectionOpenInit: rawMessage,
 
 		ConnectionID: event.MustGetAttributeByKey("connection_id"),
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenInit(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
-		params,
+		msgConnectionOpenInitParams,
 	)}
 }
 
 func ParseMsgConnectionOpenTry(
-	msgCommonParams event.MsgCommonParams,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msg map[string]interface{},
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
-	clientStateType := msg["client_state"].(map[string]interface{})["@type"]
+	clientStateType := parserParams.Msg["client_state"].(map[string]interface{})["@type"]
 	if clientStateType != "/ibc.lightclients.tendermint.v1.ClientState" {
 		// TODO: SoloMachine and Localhost LightClient
 		return []command.Command{}
@@ -258,49 +249,46 @@ func ParseMsgConnectionOpenTry(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating MsgConnectionOpenTry decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := decoder.Decode(parserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding MsgConnectionOpenTry: %v", err))
 	}
 
-	if !msgCommonParams.TxSuccess {
-		params := ibc_model.MsgConnectionOpenTryParams{
+	if !parserParams.MsgCommonParams.TxSuccess {
+		msgConnectionOpenTryParams := ibc_model.MsgConnectionOpenTryParams{
 			MsgConnectionOpenTryBaseParams: rawMsg.MsgConnectionOpenTryBaseParams,
 			MaybeTendermintClientState:     &rawMsg.TendermintClientState,
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenTry(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
-			params,
+			msgConnectionOpenTryParams,
 		)}
 	}
 
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	event := log.GetEventByType("connection_open_try")
 	if event == nil {
 		panic("missing `connection_open_try` event in TxsResult log")
 	}
 
-	params := ibc_model.MsgConnectionOpenTryParams{
+	msgConnectionOpenTryParams := ibc_model.MsgConnectionOpenTryParams{
 		MsgConnectionOpenTryBaseParams: rawMsg.MsgConnectionOpenTryBaseParams,
 		MaybeTendermintClientState:     &rawMsg.TendermintClientState,
 		ConnectionID:                   event.MustGetAttributeByKey("connection_id"),
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenTry(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
-		params,
+		msgConnectionOpenTryParams,
 	)}
 }
 
 func ParseMsgConnectionOpenAck(
-	msgCommonParams event.MsgCommonParams,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msg map[string]interface{},
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
-	clientStateType := msg["client_state"].(map[string]interface{})["@type"]
+	clientStateType := parserParams.Msg["client_state"].(map[string]interface{})["@type"]
 	if clientStateType != "/ibc.lightclients.tendermint.v1.ClientState" {
 		// TODO: SoloMachine and Localhost LightClient
 		return []command.Command{}
@@ -321,30 +309,30 @@ func ParseMsgConnectionOpenAck(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating MsgConnectionOpenAck decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := decoder.Decode(parserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding MsgConnectionOpenAck: %v", err))
 	}
 
-	if !msgCommonParams.TxSuccess {
-		params := ibc_model.MsgConnectionOpenAckParams{
+	if !parserParams.MsgCommonParams.TxSuccess {
+		msgConnectionOpenAckParams := ibc_model.MsgConnectionOpenAckParams{
 			MsgConnectionOpenAckBaseParams: rawMsg.MsgConnectionOpenAckBaseParams,
 			MaybeTendermintClientState:     &rawMsg.TendermintClientState,
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenAck(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
-			params,
+			msgConnectionOpenAckParams,
 		)}
 	}
 
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	event := log.GetEventByType("connection_open_ack")
 	if event == nil {
 		panic("missing `connection_open_ack` event in TxsResult log")
 	}
 
-	params := ibc_model.MsgConnectionOpenAckParams{
+	msgConnectionOpenAckParams := ibc_model.MsgConnectionOpenAckParams{
 		MsgConnectionOpenAckBaseParams: rawMsg.MsgConnectionOpenAckBaseParams,
 		MaybeTendermintClientState:     &rawMsg.TendermintClientState,
 
@@ -353,17 +341,14 @@ func ParseMsgConnectionOpenAck(
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenAck(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
-		params,
+		msgConnectionOpenAckParams,
 	)}
 }
 
 func ParseMsgConnectionOpenConfirm(
-	msgCommonParams event.MsgCommonParams,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msg map[string]interface{},
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgConnectionOpenConfirm
 	decoderConfig := &mapstructure.DecoderConfig{
@@ -380,13 +365,13 @@ func ParseMsgConnectionOpenConfirm(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating MsgConnectionOpenConfirm decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := decoder.Decode(parserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding MsgConnectionOpenConfirm: %v", err))
 	}
 
-	if !msgCommonParams.TxSuccess {
+	if !parserParams.MsgCommonParams.TxSuccess {
 		return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenConfirm(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
 			ibc_model.MsgConnectionOpenConfirmParams{
 				RawMsgConnectionOpenConfirm: rawMsg,
@@ -394,13 +379,13 @@ func ParseMsgConnectionOpenConfirm(
 		)}
 	}
 
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	event := log.GetEventByType("connection_open_confirm")
 	if event == nil {
 		panic("missing `connection_open_confirm` event in TxsResult log")
 	}
 
-	params := ibc_model.MsgConnectionOpenConfirmParams{
+	msgConnectionOpenConfirmParams := ibc_model.MsgConnectionOpenConfirmParams{
 		RawMsgConnectionOpenConfirm: rawMsg,
 
 		ClientID:                 event.MustGetAttributeByKey("client_id"),
@@ -409,17 +394,14 @@ func ParseMsgConnectionOpenConfirm(
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenConfirm(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
-		params,
+		msgConnectionOpenConfirmParams,
 	)}
 }
 
 func ParseMsgChannelOpenInit(
-	msgCommonParams event.MsgCommonParams,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msg map[string]interface{},
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgChannelOpenInit
 	decoderConfig := &mapstructure.DecoderConfig{
@@ -436,13 +418,13 @@ func ParseMsgChannelOpenInit(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating RawMsgChannelOpenInit decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := decoder.Decode(parserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgChannelOpenInit: %v", err))
 	}
 
-	if !msgCommonParams.TxSuccess {
+	if !parserParams.MsgCommonParams.TxSuccess {
 		return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenInit(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
 			ibc_model.MsgChannelOpenInitParams{
 				RawMsgChannelOpenInit: rawMsg,
@@ -450,30 +432,27 @@ func ParseMsgChannelOpenInit(
 		)}
 	}
 
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	event := log.GetEventByType("channel_open_init")
 	if event == nil {
 		panic("missing `channel_open_init` event in TxsResult log")
 	}
 
-	params := ibc_model.MsgChannelOpenInitParams{
+	msgChannelOpenInitParams := ibc_model.MsgChannelOpenInitParams{
 		RawMsgChannelOpenInit: rawMsg,
 
 		ChannelID: event.MustGetAttributeByKey("channel_id"),
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenInit(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
-		params,
+		msgChannelOpenInitParams,
 	)}
 }
 
 func ParseMsgChannelOpenTry(
-	msgCommonParams event.MsgCommonParams,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msg map[string]interface{},
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgChannelOpenTry
 	decoderConfig := &mapstructure.DecoderConfig{
@@ -490,13 +469,13 @@ func ParseMsgChannelOpenTry(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating RawMsgChannelOpenTry decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := decoder.Decode(parserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgChannelOpenTry: %v", err))
 	}
 
-	if !msgCommonParams.TxSuccess {
+	if !parserParams.MsgCommonParams.TxSuccess {
 		return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenTry(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
 			ibc_model.MsgChannelOpenTryParams{
 				RawMsgChannelOpenTry: rawMsg,
@@ -504,13 +483,13 @@ func ParseMsgChannelOpenTry(
 		)}
 	}
 
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	event := log.GetEventByType("channel_open_try")
 	if event == nil {
 		panic("missing `channel_open_try` event in TxsResult log")
 	}
 
-	params := ibc_model.MsgChannelOpenTryParams{
+	msgChannelOpenTryParams := ibc_model.MsgChannelOpenTryParams{
 		RawMsgChannelOpenTry: rawMsg,
 
 		ChannelID:    event.MustGetAttributeByKey("channel_id"),
@@ -518,17 +497,14 @@ func ParseMsgChannelOpenTry(
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenTry(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
-		params,
+		msgChannelOpenTryParams,
 	)}
 }
 
 func ParseMsgChannelOpenAck(
-	msgCommonParams event.MsgCommonParams,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msg map[string]interface{},
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgChannelOpenAck
 	decoderConfig := &mapstructure.DecoderConfig{
@@ -545,13 +521,13 @@ func ParseMsgChannelOpenAck(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating RawMsgChannelOpenAck decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := decoder.Decode(parserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgChannelOpenAck: %v", err))
 	}
 
-	if !msgCommonParams.TxSuccess {
+	if !parserParams.MsgCommonParams.TxSuccess {
 		return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenAck(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
 			ibc_model.MsgChannelOpenAckParams{
 				RawMsgChannelOpenAck: rawMsg,
@@ -559,13 +535,13 @@ func ParseMsgChannelOpenAck(
 		)}
 	}
 
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	event := log.GetEventByType("channel_open_ack")
 	if event == nil {
 		panic("missing `channel_open_ack` event in TxsResult log")
 	}
 
-	params := ibc_model.MsgChannelOpenAckParams{
+	msgChannelOpenAckParams := ibc_model.MsgChannelOpenAckParams{
 		RawMsgChannelOpenAck: rawMsg,
 
 		CounterpartyPortID: event.MustGetAttributeByKey("counterparty_port_id"),
@@ -573,17 +549,14 @@ func ParseMsgChannelOpenAck(
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenAck(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
-		params,
+		msgChannelOpenAckParams,
 	)}
 }
 
 func ParseMsgChannelOpenConfirm(
-	msgCommonParams event.MsgCommonParams,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msg map[string]interface{},
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgChannelOpenConfirm
 	decoderConfig := &mapstructure.DecoderConfig{
@@ -600,13 +573,13 @@ func ParseMsgChannelOpenConfirm(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating RawMsgChannelOpenConfirm decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := decoder.Decode(parserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgChannelOpenConfirm: %v", err))
 	}
 
-	if !msgCommonParams.TxSuccess {
+	if !parserParams.MsgCommonParams.TxSuccess {
 		return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenConfirm(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
 			ibc_model.MsgChannelOpenConfirmParams{
 				RawMsgChannelOpenConfirm: rawMsg,
@@ -614,13 +587,13 @@ func ParseMsgChannelOpenConfirm(
 		)}
 	}
 
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	event := log.GetEventByType("channel_open_confirm")
 	if event == nil {
 		panic("missing `channel_open_confirm` event in TxsResult log")
 	}
 
-	params := ibc_model.MsgChannelOpenConfirmParams{
+	msgChannelOpenConfirmParams := ibc_model.MsgChannelOpenConfirmParams{
 		RawMsgChannelOpenConfirm: rawMsg,
 
 		CounterpartyChannelID: event.MustGetAttributeByKey("counterparty_channel_id"),
@@ -629,34 +602,31 @@ func ParseMsgChannelOpenConfirm(
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenConfirm(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
-		params,
+		msgChannelOpenConfirmParams,
 	)}
 }
 
 func ParseMsgUpdateClient(
-	msgCommonParams event.MsgCommonParams,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msg map[string]interface{},
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
-	headerType := msg["header"].(map[string]interface{})["@type"]
+	headerType := parserParams.Msg["header"].(map[string]interface{})["@type"]
 
 	switch headerType {
 	case tendermintHeaderTypeV1:
 		return parseMsgUpdateTendermintLightClient(
-			msgCommonParams,
-			txsResult,
-			msgIndex,
-			msg,
+			parserParams.MsgCommonParams,
+			parserParams.TxsResult,
+			parserParams.MsgIndex,
+			parserParams.Msg,
 		)
 	case soloMachineHeaderTypeV2:
 		return parseMsgUpdateSolomachineLightClient(
-			msgCommonParams,
-			txsResult,
-			msgIndex,
-			msg,
+			parserParams.MsgCommonParams,
+			parserParams.TxsResult,
+			parserParams.MsgIndex,
+			parserParams.Msg,
 		)
 	default:
 		return []command.Command{}
@@ -803,10 +773,7 @@ func mustParseHeight(height string) ibc_model.Height {
 }
 
 func ParseMsgTransfer(
-	msgCommonParams event.MsgCommonParams,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msg map[string]interface{},
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgTransfer
 	decoderConfig := &mapstructure.DecoderConfig{
@@ -823,26 +790,26 @@ func ParseMsgTransfer(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating RawMsgTransfer decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := decoder.Decode(parserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgTransfer: %v", err))
 	}
 
-	if !msgCommonParams.TxSuccess {
+	if !parserParams.MsgCommonParams.TxSuccess {
 		return []command.Command{command_usecase.NewCreateMsgIBCTransferTransfer(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 			ibc_model.MsgTransferParams{
 				RawMsgTransfer: rawMsg,
 			},
 		)}
 	}
 
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	event := log.GetEventByType("send_packet")
 	if event == nil {
 		panic("missing `send_packet` event in TxsResult log")
 	}
 
-	params := ibc_model.MsgTransferParams{
+	msgTransferParams := ibc_model.MsgTransferParams{
 		RawMsgTransfer: rawMsg,
 
 		PacketSequence:     typeconv.MustAtou64(event.MustGetAttributeByKey("packet_sequence")),
@@ -853,17 +820,14 @@ func ParseMsgTransfer(
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCTransferTransfer(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
-		params,
+		msgTransferParams,
 	)}
 }
 
 func ParseMsgRecvPacket(
-	msgCommonParams event.MsgCommonParams,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msg map[string]interface{},
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgRecvPacket
 	decoderConfig := &mapstructure.DecoderConfig{
@@ -880,11 +844,11 @@ func ParseMsgRecvPacket(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating RawMsgRecvPacket decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := decoder.Decode(parserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgRecvPacket: %v", err))
 	}
 
-	if !isPacketMsgTransfer(rawMsg.Packet) {
+	if !IsPacketMsgTransfer(rawMsg.Packet) {
 		// unsupported application
 		return []command.Command{}
 	}
@@ -894,8 +858,8 @@ func ParseMsgRecvPacket(
 	rawPacketData := base64_internal.MustDecodeString(rawMsg.Packet.Data)
 	json.MustUnmarshal(rawPacketData, &rawFungibleTokenPacketData)
 
-	if !msgCommonParams.TxSuccess {
-		params := ibc_model.MsgRecvPacketParams{
+	if !parserParams.MsgCommonParams.TxSuccess {
+		msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
 			RawMsgRecvPacket: rawMsg,
 
 			Application: "transfer",
@@ -906,13 +870,13 @@ func ParseMsgRecvPacket(
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
-			params,
+			msgRecvPacketParams,
 		)}
 	}
 
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 
 	recvPacketEvent := log.GetEventByType("recv_packet")
 	if recvPacketEvent == nil {
@@ -929,7 +893,7 @@ func ParseMsgRecvPacket(
 			MaybeError: primptr.String("missing `fungible_token_packet` event in TxsResult log, this could happen when the packet is already relayed"),
 		}
 
-		params := ibc_model.MsgRecvPacketParams{
+		msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
 			RawMsgRecvPacket: rawMsg,
 
 			Application: "transfer",
@@ -945,9 +909,9 @@ func ParseMsgRecvPacket(
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
-			params,
+			msgRecvPacketParams,
 		)}
 	}
 
@@ -967,16 +931,13 @@ func ParseMsgRecvPacket(
 	var packetAck ibc_model.MsgRecvPacketPacketAck
 	json.MustUnmarshalFromString(writeAckEvent.MustGetAttributeByKey("packet_ack"), &packetAck)
 
-	params := ibc_model.MsgRecvPacketParams{
+	msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
 		RawMsgRecvPacket: rawMsg,
 
 		Application: "transfer",
 		MessageType: "MsgTransfer",
 		MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 			FungibleTokenPacketData: rawFungibleTokenPacketData,
-			// success value inverted bug: https://github.com/cosmos/cosmos-sdk/pull/9640
-			// TODO: after fixing this, please also update `projection/ibc_channel/ibc_channel.go -> HandleEvents()`
-			//			 when event type is `MsgIBCRecvPacket`.
 			Success:                fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "false",
 			MaybeDenominationTrace: maybeDenominationTrace,
 		},
@@ -988,17 +949,14 @@ func ParseMsgRecvPacket(
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
-		params,
+		msgRecvPacketParams,
 	)}
 }
 
 func ParseMsgAcknowledgement(
-	msgCommonParams event.MsgCommonParams,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msg map[string]interface{},
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgAcknowledgement
 	decoderConfig := &mapstructure.DecoderConfig{
@@ -1015,11 +973,11 @@ func ParseMsgAcknowledgement(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating RawMsgAcknowledgement decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := decoder.Decode(parserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgAcknowledgement: %v", err))
 	}
 
-	if !isPacketMsgTransfer(rawMsg.Packet) {
+	if !IsPacketMsgTransfer(rawMsg.Packet) {
 		// unsupported application
 		return []command.Command{}
 	}
@@ -1029,8 +987,8 @@ func ParseMsgAcknowledgement(
 	rawPacketData := base64_internal.MustDecodeString(rawMsg.Packet.Data)
 	json.MustUnmarshal(rawPacketData, &rawFungibleTokenPacketData)
 
-	if !msgCommonParams.TxSuccess {
-		params := ibc_model.MsgAcknowledgementParams{
+	if !parserParams.MsgCommonParams.TxSuccess {
+		msgAcknowledgementParams := ibc_model.MsgAcknowledgementParams{
 			RawMsgAcknowledgement: rawMsg,
 
 			Application: "transfer",
@@ -1041,13 +999,13 @@ func ParseMsgAcknowledgement(
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgIBCAcknowledgement(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
-			params,
+			msgAcknowledgementParams,
 		)}
 	}
 
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 
 	fungibleTokenPacketEvent := log.GetEventByType("fungible_token_packet")
 	if fungibleTokenPacketEvent == nil {
@@ -1059,7 +1017,7 @@ func ParseMsgAcknowledgement(
 		panic("missing `acknowledge_packet` event in TxsResult log")
 	}
 
-	params := ibc_model.MsgAcknowledgementParams{
+	msgAcknowledgementParams := ibc_model.MsgAcknowledgementParams{
 		RawMsgAcknowledgement: rawMsg,
 
 		Application: "transfer",
@@ -1083,13 +1041,13 @@ func ParseMsgAcknowledgement(
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCAcknowledgement(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
-		params,
+		msgAcknowledgementParams,
 	)}
 }
 
-func isPacketMsgTransfer(
+func IsPacketMsgTransfer(
 	packet ibc_model.Packet,
 ) bool {
 	if packet.DestinationPort != "transfer" {
@@ -1109,10 +1067,7 @@ func isPacketMsgTransfer(
 }
 
 func ParseMsgTimeout(
-	msgCommonParams event.MsgCommonParams,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msg map[string]interface{},
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgTimeout
 	decoderConfig := &mapstructure.DecoderConfig{
@@ -1129,17 +1084,17 @@ func ParseMsgTimeout(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating RawMsgTimeout decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := decoder.Decode(parserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgTimeout: %v", err))
 	}
 
-	if !isPacketMsgTransfer(rawMsg.Packet) {
+	if !IsPacketMsgTransfer(rawMsg.Packet) {
 		// unsupported application
 		return []command.Command{}
 	}
 
-	if !msgCommonParams.TxSuccess {
-		params := ibc_model.MsgTimeoutParams{
+	if !parserParams.MsgCommonParams.TxSuccess {
+		msgTimeoutParams := ibc_model.MsgTimeoutParams{
 			RawMsgTimeout: rawMsg,
 
 			Application: "transfer",
@@ -1147,13 +1102,13 @@ func ParseMsgTimeout(
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgIBCTimeout(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
-			params,
+			msgTimeoutParams,
 		)}
 	}
 
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 
 	// Transfer application, MsgTransfer
 	var rawFungibleTokenPacketData ibc_model.FungibleTokenPacketData
@@ -1165,7 +1120,7 @@ func ParseMsgTimeout(
 		panic("missing `timeout_packet` event in TxsResult log")
 	}
 
-	params := ibc_model.MsgTimeoutParams{
+	msgTimeoutParams := ibc_model.MsgTimeoutParams{
 		RawMsgTimeout: rawMsg,
 
 		Application: "transfer",
@@ -1188,17 +1143,14 @@ func ParseMsgTimeout(
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCTimeout(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
-		params,
+		msgTimeoutParams,
 	)}
 }
 
 func ParseMsgTimeoutOnClose(
-	msgCommonParams event.MsgCommonParams,
-	txsResult model.BlockResultsTxsResult,
-	msgIndex int,
-	msg map[string]interface{},
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgTimeoutOnClose
 	decoderConfig := &mapstructure.DecoderConfig{
@@ -1215,17 +1167,17 @@ func ParseMsgTimeoutOnClose(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating RawMsgTimeoutOnClose decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := decoder.Decode(parserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgTimeoutOnClose: %v", err))
 	}
 
-	if !isPacketMsgTransfer(rawMsg.Packet) {
+	if !IsPacketMsgTransfer(rawMsg.Packet) {
 		// unsupported application
 		return []command.Command{}
 	}
 
-	if !msgCommonParams.TxSuccess {
-		params := ibc_model.MsgTimeoutOnCloseParams{
+	if !parserParams.MsgCommonParams.TxSuccess {
+		msgTimeoutOnCloseParams := ibc_model.MsgTimeoutOnCloseParams{
 			RawMsgTimeoutOnClose: rawMsg,
 
 			Application: "transfer",
@@ -1233,13 +1185,13 @@ func ParseMsgTimeoutOnClose(
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgIBCTimeoutOnClose(
-			msgCommonParams,
+			parserParams.MsgCommonParams,
 
-			params,
+			msgTimeoutOnCloseParams,
 		)}
 	}
 
-	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 
 	// Transfer application, MsgTransfer
 	var rawFungibleTokenPacketData ibc_model.FungibleTokenPacketData
@@ -1251,7 +1203,7 @@ func ParseMsgTimeoutOnClose(
 		panic("missing `timeout_packet` event in TxsResult log")
 	}
 
-	params := ibc_model.MsgTimeoutOnCloseParams{
+	msgTimeoutOnCloseParams := ibc_model.MsgTimeoutOnCloseParams{
 		RawMsgTimeoutOnClose: rawMsg,
 
 		Application: "transfer",
@@ -1274,8 +1226,8 @@ func ParseMsgTimeoutOnClose(
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCTimeoutOnClose(
-		msgCommonParams,
+		parserParams.MsgCommonParams,
 
-		params,
+		msgTimeoutOnCloseParams,
 	)}
 }

@@ -57,17 +57,18 @@ type CLIConfig struct {
 
 // FileConfig is the struct matches config.toml
 type FileConfig struct {
-	Blockchain BlockchainConfig
-	System     SystemConfig
-	Sync       SyncConfig
-	Tendermint TendermintConfig
-	CosmosApp  CosmosAppConfig `toml:"cosmosapp"`
-	HTTP       HTTPConfig
-	Debug      DebugConfig
-	Database   DatabaseConfig
-	Postgres   PostgresConfig
-	Logger     LoggerConfig
-	Projection ProjectionConfig
+	Blockchain                 BlockchainConfig
+	System                     SystemConfig
+	Sync                       SyncConfig
+	Tendermint                 TendermintConfig
+	CosmosApp                  CosmosAppConfig `toml:"cosmosapp"`
+	HTTP                       HTTPConfig
+	Debug                      DebugConfig
+	Database                   DatabaseConfig
+	Postgres                   PostgresConfig
+	Logger                     LoggerConfig
+	Projection                 ProjectionConfig
+	CosmosVersionEnabledHeight CosmosVersionEnabledHeightConfig `toml:"cosmos_version_enabled_height"`
 }
 
 type BlockchainConfig struct {
@@ -137,4 +138,8 @@ type LoggerConfig struct {
 
 type ProjectionConfig struct {
 	Enables []string `toml:"enables"`
+}
+
+type CosmosVersionEnabledHeightConfig struct {
+	V0_42_7 uint64 `toml:"v0_42_7"`
 }

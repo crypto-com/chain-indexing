@@ -43,6 +43,8 @@ type SyncManager struct {
 	// SyncManager state
 	latestBlockHeight *int64
 	shouldSyncCh      chan bool
+
+	parserManager *utils.CosmosParserManager
 }
 
 type SyncManagerParams struct {
@@ -66,6 +68,7 @@ type SyncManagerConfig struct {
 // NewSyncManager creates a new feed with polling for latest block starts at a specific height
 func NewSyncManager(
 	params SyncManagerParams,
+	pm *utils.CosmosParserManager,
 	eventHandler eventhandler_interface.Handler,
 ) *SyncManager {
 	var tendermintClient *tendermint.HTTPClient
@@ -101,6 +104,8 @@ func NewSyncManager(
 		windowSyncStrategy: syncstrategy.NewWindow(params.Logger, params.Config.WindowSize),
 
 		eventHandler: eventHandler,
+
+		parserManager: pm,
 	}
 }
 
@@ -191,6 +196,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 	}
 
 	commands, err := parser.ParseBlockToCommands(
+		manager.parserManager,
 		manager.txDecoder,
 		block,
 		rawBlock,
@@ -219,6 +225,9 @@ func (manager *SyncManager) Run() error {
 		}
 	}()
 	tracker.Subscribe(blockHeightCh)
+
+	parser.InitParsers(manager.parserManager)
+	parser.RegisterBreakingVersionParsers(manager.parserManager)
 
 	for {
 		isRetry := false

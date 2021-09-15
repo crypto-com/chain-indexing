@@ -81,3 +81,6 @@ enables = [
     "IBCChannel",
 #    "IBCChannelTxMsgTrace",
 ]
+
+[cosmos_version_enabled_height]
+v0_42_7 = 0
