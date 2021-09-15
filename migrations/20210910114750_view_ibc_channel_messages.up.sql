@@ -4,7 +4,7 @@ CREATE TABLE view_ibc_channel_messages (
     block_height BIGINT NOT NULL,
     block_time BIGINT NOT NULL,
     transaction_hash VARCHAR NOT NULL,
-    signer VARCHAR NOT NULL,
+    relayer VARCHAR NOT NULL,
     success BOOLEAN NOT NULL,
     error VARCHAR NOT NULL,
     sender VARCHAR NOT NULL,
