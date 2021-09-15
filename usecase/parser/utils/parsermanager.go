@@ -57,7 +57,7 @@ func NewCosmosParserManager(params CosmosParserManagerParams) *CosmosParserManag
 	return cpm
 }
 
-// GetCosmosV0_42_7BlockHeight return height of the first block with cosmos sdk v0.43.0
+// GetCosmosV0_42_7BlockHeight return height of the first block with cosmos sdk v0.42.7
 func (cpm *CosmosParserManager) GetCosmosV0_42_7BlockHeight() ParserBlockHeight {
 	return cpm.config.CosmosVersionBlockHeight.V0_42_7
 }

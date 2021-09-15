@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/crypto-com/chain-indexing/internal/json"
-	V0_43_0_ibcmsg "github.com/crypto-com/chain-indexing/usecase/parser/v0_42_7/ibcmsg"
+	V0_42_7_ibcmsg "github.com/crypto-com/chain-indexing/usecase/parser/v0_42_7/ibcmsg"
 
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
@@ -16,7 +16,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
 	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
-	usecase_parser_v0_43_0_test "github.com/crypto-com/chain-indexing/usecase/parser/v0_42_7/test"
+	usecase_parser_V0_42_7_test "github.com/crypto-com/chain-indexing/usecase/parser/v0_42_7/test"
 )
 
 var _ = Describe("ParseMsgCommands", func() {
@@ -75,17 +75,17 @@ var _ = Describe("ParseMsgCommands", func() {
 `
 			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
-				usecase_parser_v0_43_0_test.TX_MSG_RECV_PACKET_BLOCK_RESP,
+				usecase_parser_V0_42_7_test.TX_MSG_RECV_PACKET_BLOCK_RESP,
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
-				usecase_parser_v0_43_0_test.TX_MSG_RECV_PACKET_BLOCK_RESULTS_RESP,
+				usecase_parser_V0_42_7_test.TX_MSG_RECV_PACKET_BLOCK_RESULTS_RESP,
 			))
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
 
 			pm := usecase_parser_test.InitParserManager()
-			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_43_0_ibcmsg.ParseMsgRecvPacket)
+			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_42_7_ibcmsg.ParseMsgRecvPacket)
 
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				pm,
@@ -161,17 +161,17 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
-				usecase_parser_v0_43_0_test.TX_MSG_RECV_PACKET_PACKET_ACK_ERROR_BLOCK_RESP,
+				usecase_parser_V0_42_7_test.TX_MSG_RECV_PACKET_PACKET_ACK_ERROR_BLOCK_RESP,
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
-				usecase_parser_v0_43_0_test.TX_MSG_RECV_PACKET_PACKET_ACK_ERROR_BLOCK_RESULTS_RESP,
+				usecase_parser_V0_42_7_test.TX_MSG_RECV_PACKET_PACKET_ACK_ERROR_BLOCK_RESULTS_RESP,
 			))
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
 
 			pm := usecase_parser_test.InitParserManager()
-			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_43_0_ibcmsg.ParseMsgRecvPacket)
+			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_42_7_ibcmsg.ParseMsgRecvPacket)
 
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				pm,
@@ -254,17 +254,17 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
-				usecase_parser_v0_43_0_test.TX_MSG_RECV_PACKET_MISSING_FUNGIBLE_TOKEN_PACKET_BLOCK_RESP,
+				usecase_parser_V0_42_7_test.TX_MSG_RECV_PACKET_MISSING_FUNGIBLE_TOKEN_PACKET_BLOCK_RESP,
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
-				usecase_parser_v0_43_0_test.TX_MSG_RECV_PACKET_MISSING_FUNGIBLE_TOKEN_PACKET_BLOCK_RESULTS_RESP,
+				usecase_parser_V0_42_7_test.TX_MSG_RECV_PACKET_MISSING_FUNGIBLE_TOKEN_PACKET_BLOCK_RESULTS_RESP,
 			))
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
 
 			pm := usecase_parser_test.InitParserManager()
-			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_43_0_ibcmsg.ParseMsgRecvPacket)
+			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_42_7_ibcmsg.ParseMsgRecvPacket)
 
 			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
 				pm,
