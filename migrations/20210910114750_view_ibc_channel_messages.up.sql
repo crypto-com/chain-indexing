@@ -1,9 +1,10 @@
 CREATE TABLE view_ibc_channel_messages (
     id BIGSERIAL,
     channel_id VARCHAR NOT NULL,
-    block_height BIGINT,
+    block_height BIGINT NOT NULL,
     block_time BIGINT NOT NULL,
     transaction_hash VARCHAR NOT NULL,
+    signer VARCHAR NOT NULL,
     success BOOLEAN NOT NULL,
     error VARCHAR NOT NULL,
     sender VARCHAR NOT NULL,

@@ -91,6 +91,7 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 				BlockHeight:     height,
 				BlockTime:       blockTime,
 				TransactionHash: typedEvent.TxHash(),
+				Signer:          typedEvent.Params.Signer,
 				Success:         true,
 				Error:           "",
 				Sender:          "",
@@ -111,6 +112,7 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 				BlockHeight:     height,
 				BlockTime:       blockTime,
 				TransactionHash: typedEvent.TxHash(),
+				Signer:          typedEvent.Params.Signer,
 				Success:         true,
 				Error:           "",
 				Sender:          "",
@@ -131,6 +133,7 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 				BlockHeight:     height,
 				BlockTime:       blockTime,
 				TransactionHash: typedEvent.TxHash(),
+				Signer:          typedEvent.Params.Signer,
 				Success:         true,
 				Error:           "",
 				Sender:          "",
@@ -151,6 +154,7 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 				BlockHeight:     height,
 				BlockTime:       blockTime,
 				TransactionHash: typedEvent.TxHash(),
+				Signer:          typedEvent.Params.Signer,
 				Success:         true,
 				Error:           "",
 				Sender:          "",
@@ -171,6 +175,7 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 				BlockHeight:     height,
 				BlockTime:       blockTime,
 				TransactionHash: typedEvent.TxHash(),
+				Signer:          "",
 				Success:         true,
 				Error:           "",
 				Sender:          typedEvent.Params.Sender,
@@ -191,16 +196,19 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 				BlockHeight:     height,
 				BlockTime:       blockTime,
 				TransactionHash: typedEvent.TxHash(),
-				Success:         typedEvent.Params.MaybeFungibleTokenPacketData.Success,
-				Sender:          typedEvent.Params.MaybeFungibleTokenPacketData.Sender,
-				Receiver:        typedEvent.Params.MaybeFungibleTokenPacketData.Receiver,
-				Denom:           typedEvent.Params.MaybeFungibleTokenPacketData.Denom,
-				Amount:          typedEvent.Params.MaybeFungibleTokenPacketData.Amount.String(),
+				Signer:          typedEvent.Params.Signer,
 				MessageType:     typedEvent.MsgName,
 				Message:         typedEvent,
 			}
 			if typedEvent.Params.PacketAck.MaybeError != nil {
 				message.Error = *typedEvent.Params.PacketAck.MaybeError
+			}
+			if typedEvent.Params.MaybeFungibleTokenPacketData != nil {
+				message.Success = typedEvent.Params.MaybeFungibleTokenPacketData.Success
+				message.Sender = typedEvent.Params.MaybeFungibleTokenPacketData.Sender
+				message.Receiver = typedEvent.Params.MaybeFungibleTokenPacketData.Receiver
+				message.Denom = typedEvent.Params.MaybeFungibleTokenPacketData.Denom
+				message.Amount = typedEvent.Params.MaybeFungibleTokenPacketData.Amount.String()
 			}
 
 			messages = append(messages, message)
@@ -214,16 +222,19 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 				BlockHeight:     height,
 				BlockTime:       blockTime,
 				TransactionHash: typedEvent.TxHash(),
-				Success:         typedEvent.Params.MaybeFungibleTokenPacketData.Success,
-				Sender:          typedEvent.Params.MaybeFungibleTokenPacketData.Sender,
-				Receiver:        typedEvent.Params.MaybeFungibleTokenPacketData.Receiver,
-				Denom:           typedEvent.Params.MaybeFungibleTokenPacketData.Denom,
-				Amount:          typedEvent.Params.MaybeFungibleTokenPacketData.Amount.String(),
+				Signer:          typedEvent.Params.Signer,
 				MessageType:     typedEvent.MsgName,
 				Message:         typedEvent,
 			}
-			if typedEvent.Params.MaybeFungibleTokenPacketData.MaybeError != nil {
-				message.Error = *typedEvent.Params.MaybeFungibleTokenPacketData.MaybeError
+			if typedEvent.Params.MaybeFungibleTokenPacketData != nil {
+				message.Success = typedEvent.Params.MaybeFungibleTokenPacketData.Success
+				message.Sender = typedEvent.Params.MaybeFungibleTokenPacketData.Sender
+				message.Receiver = typedEvent.Params.MaybeFungibleTokenPacketData.Receiver
+				message.Denom = typedEvent.Params.MaybeFungibleTokenPacketData.Denom
+				message.Amount = typedEvent.Params.MaybeFungibleTokenPacketData.Amount.String()
+				if typedEvent.Params.MaybeFungibleTokenPacketData.MaybeError != nil {
+					message.Error = *typedEvent.Params.MaybeFungibleTokenPacketData.MaybeError
+				}
 			}
 
 			messages = append(messages, message)
@@ -237,14 +248,17 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 				BlockHeight:     height,
 				BlockTime:       blockTime,
 				TransactionHash: typedEvent.TxHash(),
+				Signer:          typedEvent.Params.Signer,
 				Success:         true,
 				Error:           "",
 				Sender:          "",
-				Receiver:        typedEvent.Params.MaybeMsgTransfer.RefundReceiver,
-				Denom:           typedEvent.Params.MaybeMsgTransfer.RefundDenom,
-				Amount:          strconv.FormatUint(typedEvent.Params.MaybeMsgTransfer.RefundAmount, 10),
 				MessageType:     typedEvent.MsgName,
 				Message:         typedEvent,
+			}
+			if typedEvent.Params.MaybeMsgTransfer != nil {
+				message.Receiver = typedEvent.Params.MaybeMsgTransfer.RefundReceiver
+				message.Denom = typedEvent.Params.MaybeMsgTransfer.RefundDenom
+				message.Amount = strconv.FormatUint(typedEvent.Params.MaybeMsgTransfer.RefundAmount, 10)
 			}
 			messages = append(messages, message)
 
@@ -257,14 +271,17 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 				BlockHeight:     height,
 				BlockTime:       blockTime,
 				TransactionHash: typedEvent.TxHash(),
+				Signer:          typedEvent.Params.Signer,
 				Success:         true,
 				Error:           "",
 				Sender:          "",
-				Receiver:        typedEvent.Params.MaybeMsgTransfer.RefundReceiver,
-				Denom:           typedEvent.Params.MaybeMsgTransfer.RefundDenom,
-				Amount:          strconv.FormatUint(typedEvent.Params.MaybeMsgTransfer.RefundAmount, 10),
 				MessageType:     typedEvent.MsgName,
 				Message:         typedEvent,
+			}
+			if typedEvent.Params.MaybeMsgTransfer != nil {
+				message.Receiver = typedEvent.Params.MaybeMsgTransfer.RefundReceiver
+				message.Denom = typedEvent.Params.MaybeMsgTransfer.RefundDenom
+				message.Amount = strconv.FormatUint(typedEvent.Params.MaybeMsgTransfer.RefundAmount, 10)
 			}
 			messages = append(messages, message)
 
