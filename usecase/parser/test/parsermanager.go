@@ -11,7 +11,7 @@ func InitParserManager() *utils.CosmosParserManager {
 			Logger: nil,
 			Config: utils.CosmosParserManagerConfig{
 				CosmosVersionBlockHeight: utils.CosmosVersionBlockHeight{
-					V0_43_0: 0,
+					V0_42_7: 0,
 				},
 			},
 		})

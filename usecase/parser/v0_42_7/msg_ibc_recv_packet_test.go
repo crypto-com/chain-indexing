@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/crypto-com/chain-indexing/internal/json"
-	V0_43_0_ibcmsg "github.com/crypto-com/chain-indexing/usecase/parser/v0_43_0/ibcmsg"
+	V0_43_0_ibcmsg "github.com/crypto-com/chain-indexing/usecase/parser/v0_42_7/ibcmsg"
 
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
@@ -16,7 +16,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
 	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
-	usecase_parser_v0_43_0_test "github.com/crypto-com/chain-indexing/usecase/parser/v0_43_0/test"
+	usecase_parser_v0_43_0_test "github.com/crypto-com/chain-indexing/usecase/parser/v0_42_7/test"
 )
 
 var _ = Describe("ParseMsgCommands", func() {

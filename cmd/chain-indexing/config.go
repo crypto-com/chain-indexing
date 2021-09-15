@@ -141,5 +141,5 @@ type ProjectionConfig struct {
 }
 
 type CosmosVersionEnabledHeightConfig struct {
-	V0_43_0 uint64 `toml:"v0_43_0"`
+	V0_42_7 uint64 `toml:"v0_42_7"`
 }

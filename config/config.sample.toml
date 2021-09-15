@@ -83,4 +83,4 @@ enables = [
 ]
 
 [cosmos_version_enabled_height]
-v0_43_0 = 0
+v0_42_7 = 0

@@ -3,7 +3,7 @@ package parser
 import (
 	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-	V0_43_0_ibcmsg "github.com/crypto-com/chain-indexing/usecase/parser/v0_43_0/ibcmsg"
+	V0_43_0_ibcmsg "github.com/crypto-com/chain-indexing/usecase/parser/v0_42_7/ibcmsg"
 )
 
 const BEGIN_BLOCK_HEIGHT = 0
@@ -79,5 +79,5 @@ func InitParsers(manager *utils.CosmosParserManager) {
 
 func RegisterBreakingVersionParsers(manager *utils.CosmosParserManager) {
 	//v0.43.0
-	manager.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", manager.GetCosmosV0_43_0BlockHeight(), V0_43_0_ibcmsg.ParseMsgRecvPacket)
+	manager.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", manager.GetCosmosV0_42_7BlockHeight(), V0_43_0_ibcmsg.ParseMsgRecvPacket)
 }

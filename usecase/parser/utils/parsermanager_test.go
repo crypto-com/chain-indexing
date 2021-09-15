@@ -15,13 +15,13 @@ var _ = Describe("ParseManager", func() {
 				Logger: nil,
 				Config: utils.CosmosParserManagerConfig{
 					CosmosVersionBlockHeight: utils.CosmosVersionBlockHeight{
-						V0_43_0: 123,
+						V0_42_7: 123,
 					},
 				},
 			},
 		)
 
-		Expect(pm.GetCosmosV0_43_0BlockHeight()).To(Equal(utils.ParserBlockHeight(123)))
+		Expect(pm.GetCosmosV0_42_7BlockHeight()).To(Equal(utils.ParserBlockHeight(123)))
 	})
 
 	It("should get parser A", func() {
@@ -31,7 +31,7 @@ var _ = Describe("ParseManager", func() {
 				Logger: nil,
 				Config: utils.CosmosParserManagerConfig{
 					CosmosVersionBlockHeight: utils.CosmosVersionBlockHeight{
-						V0_43_0: 0,
+						V0_42_7: 0,
 					},
 				},
 			},
@@ -59,7 +59,7 @@ var _ = Describe("ParseManager", func() {
 				Logger: nil,
 				Config: utils.CosmosParserManagerConfig{
 					CosmosVersionBlockHeight: utils.CosmosVersionBlockHeight{
-						V0_43_0: 0,
+						V0_42_7: 0,
 					},
 				},
 			},
@@ -89,7 +89,7 @@ var _ = Describe("ParseManager", func() {
 				Logger: nil,
 				Config: utils.CosmosParserManagerConfig{
 					CosmosVersionBlockHeight: utils.CosmosVersionBlockHeight{
-						V0_43_0: 0,
+						V0_42_7: 0,
 					},
 				},
 			},
