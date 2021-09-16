@@ -14,4 +14,6 @@ CREATE TABLE view_ibc_channel_messages (
     message_type VARCHAR NOT NULL,
     message JSONB NOT NULL,
     PRIMARY KEY (id)
-)
+);
+
+CREATE INDEX view_ibc_channel_messages_channel_id_btree_index ON view_ibc_channel_messages USING btree (channel_id);
