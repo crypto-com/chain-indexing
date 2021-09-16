@@ -343,11 +343,8 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
-			// TODO:	1. Should use the below checking when we fix the `success value inverted bug`
-			//				in `ibcmsg.go -> ParseMsgRecvPacket()`.
-			//				2. After changing the below logic, need to update `ibcmsg.go -> ParseMsgRecvPacket()` handle `fungible_token_packet` related logic.
-			// if msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Success {
-			if msgIBCRecvPacket.Params.PacketAck.MaybeError == nil {
+			if msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData != nil &&
+				msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Success {
 
 				amount := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount.Uint64()
 				denom := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Denom
@@ -374,7 +371,10 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				if err != nil {
 					return fmt.Errorf("error msgIBCRecvPacket.ToJSON(): %w", err)
 				}
-				success := strconv.FormatBool(msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Success)
+				success := "false"
+				if msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData != nil {
+					success = strconv.FormatBool(msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Success)
+				}
 
 				maybeError := ""
 				if msgIBCRecvPacket.Params.PacketAck.MaybeError != nil {
@@ -391,19 +391,22 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 					return fmt.Errorf("error marshal updatedBondedTokens to string: %w", err)
 				}
 
-				if err := ibcChannelMessagesView.Insert(&ibc_channel_view.IBCChannelMessageRow{
+				trace := &ibc_channel_view.IBCChannelMessageRow{
 					ChannelID:           channelID,
 					BlockHeight:         height,
 					SourceChannel:       msgIBCRecvPacket.Params.Packet.SourceChannel,
 					DestinationChannel:  msgIBCRecvPacket.Params.Packet.DestinationChannel,
-					Denom:               msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Denom,
-					Amount:              msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount.String(),
 					Success:             success,
 					Error:               maybeError,
 					MessageType:         msgIBCRecvPacket.MsgName,
 					Message:             msg,
 					UpdatedBondedTokens: updatedBondedTokensJSON,
-				}); err != nil {
+				}
+				if msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData != nil {
+					trace.Denom = msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Denom
+					trace.Amount = msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount.String()
+				}
+				if err := ibcChannelMessagesView.Insert(trace); err != nil {
 					return fmt.Errorf("error adding tx trace when MsgIBCRecvPacket: %w", err)
 				}
 
@@ -423,7 +426,8 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
-			if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Success {
+			if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData != nil &&
+				msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Success {
 
 				// TotalTransferOutSuccessRate
 				if err := ibcChannelsView.Increment(channelID, "total_transfer_out_success_count", 1); err != nil {
@@ -457,7 +461,10 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				if err != nil {
 					return fmt.Errorf("error msgIBCAcknowledgement.ToJSON(): %w", err)
 				}
-				success := strconv.FormatBool(msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Success)
+				success := ""
+				if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData != nil {
+					success = strconv.FormatBool(msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Success)
+				}
 
 				maybeError := ""
 				if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.MaybeError != nil {
@@ -474,19 +481,22 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 					return fmt.Errorf("error marshal updatedBondedTokens to string: %w", err)
 				}
 
-				if err := ibcChannelMessagesView.Insert(&ibc_channel_view.IBCChannelMessageRow{
+				trace := &ibc_channel_view.IBCChannelMessageRow{
 					ChannelID:           channelID,
 					BlockHeight:         height,
 					SourceChannel:       msgIBCAcknowledgement.Params.Packet.SourceChannel,
 					DestinationChannel:  msgIBCAcknowledgement.Params.Packet.DestinationChannel,
-					Denom:               msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Denom,
-					Amount:              msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount.String(),
 					Success:             success,
 					Error:               maybeError,
 					MessageType:         msgIBCAcknowledgement.MsgName,
 					Message:             msg,
 					UpdatedBondedTokens: updatedBondedTokensJSON,
-				}); err != nil {
+				}
+				if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData != nil {
+					trace.Denom = msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Denom
+					trace.Amount = msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount.String()
+				}
+				if err := ibcChannelMessagesView.Insert(trace); err != nil {
 					return fmt.Errorf("error adding tx trace when MsgIBCAcknowledgement: %w", err)
 				}
 

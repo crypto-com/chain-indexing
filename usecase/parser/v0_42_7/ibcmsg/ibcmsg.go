@@ -6,7 +6,6 @@ import (
 
 	base64_internal "github.com/crypto-com/chain-indexing/internal/base64"
 	"github.com/crypto-com/chain-indexing/internal/json"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
 	"github.com/mitchellh/mapstructure"
 
@@ -80,10 +79,6 @@ func ParseMsgRecvPacket(
 		// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/04-channel/keeper/packet.go#L239
 		// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/keeper/msg_server.go#L508
 
-		packetAck := ibc_model.MsgRecvPacketPacketAck{
-			MaybeError: primptr.String("missing `fungible_token_packet` event in TxsResult log, this could happen when the packet is already relayed"),
-		}
-
 		msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
 			RawMsgRecvPacket: rawMsg,
 
@@ -95,8 +90,6 @@ func ParseMsgRecvPacket(
 			},
 
 			PacketSequence: typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
-			// TODO: Remove this when IBCChannel projection no longer relies on packetAck.MaybeError to check if MsgRecvPacket is success or not
-			PacketAck: packetAck,
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
@@ -129,8 +122,8 @@ func ParseMsgRecvPacket(
 		MessageType: "MsgTransfer",
 		MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 			FungibleTokenPacketData: rawFungibleTokenPacketData,
-			Success:                fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "true",
-			MaybeDenominationTrace: maybeDenominationTrace,
+			Success:                 fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "true",
+			MaybeDenominationTrace:  maybeDenominationTrace,
 		},
 
 		PacketSequence:  typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
