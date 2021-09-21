@@ -50,13 +50,13 @@ func (ibcChannelMessagesView *IBCChannelMessages) Insert(ibcChannelMessage *IBCC
 			ibcChannelMessage.BlockHeight,
 			ibcChannelMessagesView.rdb.Tton(&ibcChannelMessage.BlockTime),
 			ibcChannelMessage.TransactionHash,
-			ibcChannelMessage.Relayer,
-			ibcChannelMessage.Success,
-			ibcChannelMessage.Error,
-			ibcChannelMessage.Sender,
-			ibcChannelMessage.Receiver,
-			ibcChannelMessage.Denom,
-			ibcChannelMessage.Amount,
+			ibcChannelMessage.MaybeRelayer,
+			ibcChannelMessage.MaybeSuccess,
+			ibcChannelMessage.MaybeError,
+			ibcChannelMessage.MaybeSender,
+			ibcChannelMessage.MaybeReceiver,
+			ibcChannelMessage.MaybeDenom,
+			ibcChannelMessage.MaybeAmount,
 			ibcChannelMessage.MessageType,
 			messageJSON,
 		).
@@ -158,13 +158,13 @@ func (ibcChannelMessagesView *IBCChannelMessages) ListByChannelID(
 			&message.BlockHeight,
 			BlockTimeReader.ScannableArg(),
 			&message.TransactionHash,
-			&message.Relayer,
-			&message.Success,
-			&message.Error,
-			&message.Sender,
-			&message.Receiver,
-			&message.Denom,
-			&message.Amount,
+			&message.MaybeRelayer,
+			&message.MaybeSuccess,
+			&message.MaybeError,
+			&message.MaybeSender,
+			&message.MaybeReceiver,
+			&message.MaybeDenom,
+			&message.MaybeAmount,
 			&message.MessageType,
 			&messageJSON,
 		); err != nil {
@@ -208,13 +208,13 @@ type IBCChannelMessageRow struct {
 	BlockHeight     int64           `json:"blockHeight"`
 	BlockTime       utctime.UTCTime `json:"blockTime"`
 	TransactionHash string          `json:"transactionHash"`
-	Relayer         string          `json:"relayer"`
-	Success         bool            `json:"success"`
-	Error           string          `json:"error"`
-	Sender          string          `json:"sender"`
-	Receiver        string          `json:"receiver"`
-	Denom           string          `json:"denom"`
-	Amount          string          `json:"amount"`
+	MaybeRelayer    *string         `json:"relayer"`
+	MaybeSuccess    *bool           `json:"success"`
+	MaybeError      *string         `json:"error"`
+	MaybeSender     *string         `json:"sender"`
+	MaybeReceiver   *string         `json:"receiver"`
+	MaybeDenom      *string         `json:"denom"`
+	MaybeAmount     *string         `json:"amount"`
 	MessageType     string          `json:"messageType"`
 	Message         interface{}     `json:"message"`
 }
