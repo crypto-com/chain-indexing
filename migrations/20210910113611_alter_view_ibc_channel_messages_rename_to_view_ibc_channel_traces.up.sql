@@ -1,0 +1,1 @@
+ALTER TABLE view_ibc_channel_messages RENAME TO view_ibc_channel_traces;

@@ -80,6 +80,7 @@ enables = [
 #    "CryptoComNFT",
     "IBCChannel",
 #    "IBCChannelTxMsgTrace",
+    "IBCChannelMessage",
 ]
 
 [cosmos_version_enabled_height]

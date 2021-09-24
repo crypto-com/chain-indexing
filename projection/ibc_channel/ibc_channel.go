@@ -88,7 +88,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 	ibcChannelsView := ibc_channel_view.NewIBCChannels(rdbTxHandle)
 	ibcClientsView := ibc_channel_view.NewIBCClients(rdbTxHandle)
 	ibcConnectionsView := ibc_channel_view.NewIBCConnections(rdbTxHandle)
-	ibcChannelMessagesView := ibc_channel_view.NewIBCChannelMessages(rdbTxHandle)
+	ibcChannelTracesView := ibc_channel_view.NewIBCChannelTraces(rdbTxHandle)
 	ibcDenomHashMappingView := ibc_channel_view.NewIBCDenomHashMapping(rdbTxHandle)
 
 	// Get the block time of current height
@@ -307,7 +307,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 					return fmt.Errorf("error msgIBCTransferTransfer.ToJSON(): %w", err)
 				}
 
-				if err := ibcChannelMessagesView.Insert(&ibc_channel_view.IBCChannelMessageRow{
+				if err := ibcChannelTracesView.Insert(&ibc_channel_view.IBCChannelTraceRow{
 					ChannelID:           channelID,
 					BlockHeight:         height,
 					SourceChannel:       msgIBCTransferTransfer.Params.SourceChannel,
@@ -391,7 +391,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 					return fmt.Errorf("error marshal updatedBondedTokens to string: %w", err)
 				}
 
-				if err := ibcChannelMessagesView.Insert(&ibc_channel_view.IBCChannelMessageRow{
+				if err := ibcChannelTracesView.Insert(&ibc_channel_view.IBCChannelTraceRow{
 					ChannelID:           channelID,
 					BlockHeight:         height,
 					SourceChannel:       msgIBCRecvPacket.Params.Packet.SourceChannel,
@@ -474,7 +474,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 					return fmt.Errorf("error marshal updatedBondedTokens to string: %w", err)
 				}
 
-				if err := ibcChannelMessagesView.Insert(&ibc_channel_view.IBCChannelMessageRow{
+				if err := ibcChannelTracesView.Insert(&ibc_channel_view.IBCChannelTraceRow{
 					ChannelID:           channelID,
 					BlockHeight:         height,
 					SourceChannel:       msgIBCAcknowledgement.Params.Packet.SourceChannel,

@@ -78,8 +78,9 @@ enables = [
     "ValidatorStats",
     "NFT",
 #    "CryptoComNFT",
-    "IBCChannel",
-#    "IBCChannelTxMsgTrace",
+#    "IBCChannel",
+    "IBCChannelTxMsgTrace",
+    "IBCChannelMessage",
 ]
 
 [cosmos_version_enabled_height]
