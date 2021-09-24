@@ -39,6 +39,24 @@ var _ = Describe("ParseMsgCommands", func() {
             }
         }`
 
+			expectedInnerMsg := `{
+				"name": "MsgSendCreated",
+				"version": 1,
+				"height": 113382,
+				"uuid": "{UUID}",
+				"msgName": "MsgSend",
+				"txHash": "0CE949FAB0CB8EFB6E80F8ED785A6313FE7C094C336D4A7E8630E7D81AECD946",
+				"msgIndex": 0,
+				"fromAddress": "tcro1vurfhqf0j2jgfpjahlja6g6uq2ts2r60swm2d9",
+				"toAddress": "tcro1a93yfnsc3x7m0m445cjsvee2n7qz9c0purlzwq",
+				"amount": [
+					{
+						"denom": "basetcro",
+						"amount": "100000000"
+					}
+				]
+			}`
+
 			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_EXEC_BLOCK_RESP,
@@ -61,7 +79,8 @@ var _ = Describe("ParseMsgCommands", func() {
 				stakingDenom,
 			)
 			Expect(err).To(BeNil())
-			Expect(cmds).To(HaveLen(1))
+			Expect(cmds).To(HaveLen(2))
+
 			cmd := cmds[0]
 			Expect(cmd.Name()).To(Equal("CreateMsgExec"))
 
@@ -78,6 +97,22 @@ var _ = Describe("ParseMsgCommands", func() {
 					-1,
 				),
 			))
+
+			innerCmd := cmds[1]
+			Expect(innerCmd.Name()).To(Equal("CreateMsgSend"))
+
+			untypedInnerEvent, _ := innerCmd.Exec()
+			createMsgSendEvent := untypedInnerEvent.(*event.MsgSend)
+
+			Expect(json.MustMarshalToString(createMsgSendEvent)).To(Equal(
+				strings.Replace(
+					regex.ReplaceAllString(expectedInnerMsg, ""),
+					"{UUID}",
+					createMsgSendEvent.UUID(),
+					-1,
+				),
+			))
+
 		})
 	})
 })
