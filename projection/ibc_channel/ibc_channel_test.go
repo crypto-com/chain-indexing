@@ -755,14 +755,14 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		fmt.Println("Running", tc.Name)
-
 		mockRDbConn := NewMockRDbConn()
 		tc.MockFunc(mockRDbConn)
 
 		projection := NewIBCChannelProjection(mockRDbConn)
 		err := projection.HandleEvents(1, tc.Events)
 		assert.NoError(t, err)
+
+		fmt.Println(tc.Name, "Passed")
 	}
 }
 
