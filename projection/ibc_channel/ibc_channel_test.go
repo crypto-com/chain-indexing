@@ -156,7 +156,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 			Events: []entity_event.Event{
 				&event_usecase.MsgIBCConnectionOpenAck{
 					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
-						MsgName: event_usecase.MSG_IBC_CONNECTION_OPEN_CONFIRM,
+						MsgName: event_usecase.MSG_IBC_CONNECTION_OPEN_ACK,
 						Version: 1,
 						MsgCommonParams: event_usecase.MsgCommonParams{
 							BlockHeight: 1,
@@ -208,7 +208,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 			Events: []entity_event.Event{
 				&event_usecase.MsgIBCChannelOpenInit{
 					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
-						MsgName: event_usecase.MSG_IBC_CONNECTION_OPEN_CONFIRM,
+						MsgName: event_usecase.MSG_IBC_CHANNEL_OPEN_INIT,
 						Version: 1,
 						MsgCommonParams: event_usecase.MsgCommonParams{
 							BlockHeight: 1,
@@ -281,7 +281,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 			Events: []entity_event.Event{
 				&event_usecase.MsgIBCChannelOpenTry{
 					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
-						MsgName: event_usecase.MSG_IBC_CONNECTION_OPEN_CONFIRM,
+						MsgName: event_usecase.MSG_IBC_CHANNEL_OPEN_TRY,
 						Version: 1,
 						MsgCommonParams: event_usecase.MsgCommonParams{
 							BlockHeight: 1,
@@ -354,7 +354,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 			Events: []entity_event.Event{
 				&event_usecase.MsgIBCChannelOpenAck{
 					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
-						MsgName: event_usecase.MSG_IBC_CONNECTION_OPEN_CONFIRM,
+						MsgName: event_usecase.MSG_IBC_CHANNEL_OPEN_ACK,
 						Version: 1,
 						MsgCommonParams: event_usecase.MsgCommonParams{
 							BlockHeight: 1,
@@ -417,7 +417,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 			Events: []entity_event.Event{
 				&event_usecase.MsgIBCChannelOpenConfirm{
 					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
-						MsgName: event_usecase.MSG_IBC_CONNECTION_OPEN_CONFIRM,
+						MsgName: event_usecase.MSG_IBC_CHANNEL_OPEN_CONFIRM,
 						Version: 1,
 						MsgCommonParams: event_usecase.MsgCommonParams{
 							BlockHeight: 1,
@@ -479,7 +479,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 			Events: []entity_event.Event{
 				&event_usecase.MsgIBCTransferTransfer{
 					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
-						MsgName: event_usecase.MSG_IBC_CONNECTION_OPEN_CONFIRM,
+						MsgName: event_usecase.MSG_IBC_TRANSFER_TRANSFER,
 						Version: 1,
 						MsgCommonParams: event_usecase.MsgCommonParams{
 							BlockHeight: 1,
@@ -553,7 +553,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 			Events: []entity_event.Event{
 				&event_usecase.MsgIBCRecvPacket{
 					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
-						MsgName: event_usecase.MSG_IBC_CONNECTION_OPEN_CONFIRM,
+						MsgName: event_usecase.MSG_IBC_RECV_PACKET,
 						Version: 1,
 						MsgCommonParams: event_usecase.MsgCommonParams{
 							BlockHeight: 1,
@@ -657,7 +657,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 			Events: []entity_event.Event{
 				&event_usecase.MsgIBCAcknowledgement{
 					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
-						MsgName: event_usecase.MSG_IBC_CONNECTION_OPEN_CONFIRM,
+						MsgName: event_usecase.MSG_IBC_ACKNOWLEDGEMENT,
 						Version: 1,
 						MsgCommonParams: event_usecase.MsgCommonParams{
 							BlockHeight: 1,
