@@ -75,11 +75,11 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					Params: ibc_model.MsgCreateClientParams{
 						MaybeTendermintLightClient: &ibc_model.TendermintLightClient{
 							TendermintClientState: ibc_model.TendermintLightClientState{
-								ChainID: "2",
+								ChainID: "ChainID",
 							},
 							TendermintLightClientConsensusState: ibc_model.TendermintLightClientConsensusState{},
 						},
-						ClientID: "1",
+						ClientID: "ClientID",
 					},
 				},
 			},
@@ -92,8 +92,8 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				mockTx.On(
 					"Exec",
 					"INSERT INTO view_ibc_clients (client_id,counterparty_chain_id) VALUES ($1,$2)",
-					"1",
-					"2",
+					"ClientID",
+					"ChainID",
 				).Return(mockExecResult, nil)
 
 				mockUpdateLastHandledEventHeight(mockTx)
