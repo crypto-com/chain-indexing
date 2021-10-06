@@ -10,6 +10,8 @@ import (
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/crypto-com/chain-indexing/internal/json"
+
+	//"github.com/crypto-com/chain-indexing/internal/json"
 	"github.com/crypto-com/chain-indexing/projection/ibc_channel"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
@@ -45,9 +47,9 @@ func NewMockRDbTx() *test.MockRDbTx {
 		Runner:      mockTx,
 		TypeConv:    &pg.PgxTypeConv{},
 		StmtBuilder: pg.PostgresStmtBuilder,
-	})
-	mockTx.On("Rollback").Return(nil)
-	mockTx.On("Commit").Return(nil)
+	}).Maybe()
+	mockTx.On("Rollback").Return(nil).Maybe()
+	mockTx.On("Commit").Return(nil).Maybe()
 
 	return mockTx
 }
@@ -56,7 +58,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 	testCases := []struct {
 		Name     string
 		Events   []entity_event.Event
-		MockFunc func(mock *test.MockRDbConn)
+		MockFunc func(mock *test.MockRDbConn) []*testify_mock.Mock
 	}{
 		{
 			Name: "HandleMsgIBCCreateClient",
@@ -83,11 +85,13 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mock *test.MockRDbConn) {
+			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
-				mock.On("Begin").Return(mockTx, nil)
+				mocks = append(mocks, &mockTx.Mock)
+				mockCoon.On("Begin").Return(mockTx, nil)
 
 				mockExecResult := &test.MockRDbExecResult{}
+				mocks = append(mocks, &mockExecResult.Mock)
 				mockExecResult.On("RowsAffected").Return(int64(1))
 				mockTx.On(
 					"Exec",
@@ -97,6 +101,8 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				).Return(mockExecResult, nil)
 
 				mockUpdateLastHandledEventHeight(mockTx)
+
+				return mocks
 			},
 		},
 		{
@@ -123,11 +129,13 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mock *test.MockRDbConn) {
+			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
-				mock.On("Begin").Return(mockTx, nil)
+				mocks = append(mocks, &mockTx.Mock)
+				mockCoon.On("Begin").Return(mockTx, nil)
 
 				mockRowResult := &test.MockRDbRowResult{}
+				mocks = append(mocks, &mockRowResult.Mock)
 				var chainID string
 				mockRowResult.On("Scan", &chainID).Return(nil)
 				mockTx.On(
@@ -137,6 +145,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				).Return(mockRowResult, nil)
 
 				mockExecResult := &test.MockRDbExecResult{}
+				mocks = append(mocks, &mockExecResult.Mock)
 				mockExecResult.On("RowsAffected").Return(int64(1))
 				mockTx.On(
 					"Exec",
@@ -149,6 +158,8 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				).Return(mockExecResult, nil)
 
 				mockUpdateLastHandledEventHeight(mockTx)
+
+				return mocks
 			},
 		},
 		{
@@ -175,11 +186,13 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mock *test.MockRDbConn) {
+			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
-				mock.On("Begin").Return(mockTx, nil)
+				mocks = append(mocks, &mockTx.Mock)
+				mockCoon.On("Begin").Return(mockTx, nil)
 
 				mockRowResult := &test.MockRDbRowResult{}
+				mocks = append(mocks, &mockRowResult.Mock)
 				var chainID string
 				mockRowResult.On("Scan", &chainID).Return(nil)
 				mockTx.On(
@@ -189,6 +202,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				).Return(mockRowResult, nil)
 
 				mockExecResult := &test.MockRDbExecResult{}
+				mocks = append(mocks, &mockExecResult.Mock)
 				mockExecResult.On("RowsAffected").Return(int64(1))
 				mockTx.On(
 					"Exec",
@@ -201,6 +215,8 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				).Return(mockExecResult, nil)
 
 				mockUpdateLastHandledEventHeight(mockTx)
+
+				return mocks
 			},
 		},
 		{
@@ -232,20 +248,13 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mock *test.MockRDbConn) {
+			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
-				mock.On("Begin").Return(mockTx, nil)
-
-				mockRowResult := &test.MockRDbRowResult{}
-				var chainID string
-				mockRowResult.On("Scan", &chainID).Return(nil)
-				mockTx.On(
-					"QueryRow",
-					"SELECT counterparty_chain_id FROM view_ibc_clients WHERE client_id = $1",
-					"ClientID",
-				).Return(mockRowResult, nil)
+				mocks = append(mocks, &mockTx.Mock)
+				mockCoon.On("Begin").Return(mockTx, nil)
 
 				mockExecResult := &test.MockRDbExecResult{}
+				mocks = append(mocks, &mockExecResult.Mock)
 				mockExecResult.On("RowsAffected").Return(int64(1))
 				mockTx.On(
 					"Exec",
@@ -274,6 +283,8 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				).Return(mockExecResult, nil)
 
 				mockUpdateLastHandledEventHeight(mockTx)
+
+				return mocks
 			},
 		},
 		{
@@ -305,20 +316,13 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mock *test.MockRDbConn) {
+			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
-				mock.On("Begin").Return(mockTx, nil)
-
-				mockRowResult := &test.MockRDbRowResult{}
-				var chainID string
-				mockRowResult.On("Scan", &chainID).Return(nil)
-				mockTx.On(
-					"QueryRow",
-					"SELECT counterparty_chain_id FROM view_ibc_clients WHERE client_id = $1",
-					"ClientID",
-				).Return(mockRowResult, nil)
+				mocks = append(mocks, &mockTx.Mock)
+				mockCoon.On("Begin").Return(mockTx, nil)
 
 				mockExecResult := &test.MockRDbExecResult{}
+				mocks = append(mocks, &mockExecResult.Mock)
 				mockExecResult.On("RowsAffected").Return(int64(1))
 				mockTx.On(
 					"Exec",
@@ -347,6 +351,8 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				).Return(mockExecResult, nil)
 
 				mockUpdateLastHandledEventHeight(mockTx)
+
+				return mocks
 			},
 		},
 		{
@@ -375,11 +381,13 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mock *test.MockRDbConn) {
+			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
-				mock.On("Begin").Return(mockTx, nil)
+				mocks = append(mocks, &mockTx.Mock)
+				mockCoon.On("Begin").Return(mockTx, nil)
 
 				mockRowResult := &test.MockRDbRowResult{}
+				mocks = append(mocks, &mockRowResult.Mock)
 				var chainID string
 				mockRowResult.On("Scan", &chainID).Return(nil)
 				mockTx.On(
@@ -389,6 +397,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				).Return(mockRowResult, nil)
 
 				mockExecResult := &test.MockRDbExecResult{}
+				mocks = append(mocks, &mockExecResult.Mock)
 				mockExecResult.On("RowsAffected").Return(int64(1))
 				mockTx.On(
 					"Exec",
@@ -410,6 +419,8 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				).Return(mockExecResult, nil)
 
 				mockUpdateLastHandledEventHeight(mockTx)
+
+				return mocks
 			},
 		},
 		{
@@ -437,11 +448,13 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mock *test.MockRDbConn) {
+			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
-				mock.On("Begin").Return(mockTx, nil)
+				mocks = append(mocks, &mockTx.Mock)
+				mockCoon.On("Begin").Return(mockTx, nil)
 
 				mockRowResult := &test.MockRDbRowResult{}
+				mocks = append(mocks, &mockRowResult.Mock)
 				var chainID string
 				mockRowResult.On("Scan", &chainID).Return(nil)
 				mockTx.On(
@@ -451,6 +464,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				).Return(mockRowResult, nil)
 
 				mockExecResult := &test.MockRDbExecResult{}
+				mocks = append(mocks, &mockExecResult.Mock)
 				mockExecResult.On("RowsAffected").Return(int64(1))
 				mockTx.On(
 					"Exec",
@@ -472,6 +486,8 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				).Return(mockExecResult, nil)
 
 				mockUpdateLastHandledEventHeight(mockTx)
+
+				return mocks
 			},
 		},
 		{
@@ -496,11 +512,13 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mock *test.MockRDbConn) {
+			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
-				mock.On("Begin").Return(mockTx, nil)
+				mocks = append(mocks, &mockTx.Mock)
+				mockCoon.On("Begin").Return(mockTx, nil)
 
 				mockExecResult := &test.MockRDbExecResult{}
+				mocks = append(mocks, &mockExecResult.Mock)
 				mockExecResult.On("RowsAffected").Return(int64(1))
 				mockTx.On(
 					"Exec",
@@ -509,6 +527,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				).Return(mockExecResult, nil)
 
 				mockRowResult := &test.MockRDbRowResult{}
+				mocks = append(mocks, &mockRowResult.Mock)
 				var totalTransferOutCount int64
 				var totalTransferOutSuccessCount int64
 				mockRowResult.On("Scan", &totalTransferOutCount, &totalTransferOutSuccessCount).Return(nil).Run(func(args testify_mock.Arguments) {
@@ -546,6 +565,8 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				).Return(mockExecResult, nil)
 
 				mockUpdateLastHandledEventHeight(mockTx)
+
+				return mocks
 			},
 		},
 		{
@@ -585,11 +606,13 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mock *test.MockRDbConn) {
+			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
-				mock.On("Begin").Return(mockTx, nil)
+				mocks = append(mocks, &mockTx.Mock)
+				mockCoon.On("Begin").Return(mockTx, nil)
 
 				mockExecResult := &test.MockRDbExecResult{}
+				mocks = append(mocks, &mockExecResult.Mock)
 				mockExecResult.On("RowsAffected").Return(int64(1))
 				mockTx.On(
 					"Exec",
@@ -613,6 +636,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				).Return(mockExecResult, nil)
 
 				mockRowResult := &test.MockRDbRowResult{}
+				mocks = append(mocks, &mockRowResult.Mock)
 				var bondedTokensJSON string
 				mockRowResult.On("Scan", &bondedTokensJSON).Return(nil).Run(func(args testify_mock.Arguments) {
 					bondedTokensJSON := args.Get(0).(*string)
@@ -650,6 +674,8 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				).Return(mockExecResult, nil)
 
 				mockUpdateLastHandledEventHeight(mockTx)
+
+				return mocks
 			},
 		},
 		{
@@ -678,22 +704,24 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 								Denom:  "DENOM",
 								Amount: json.NewUint64(100),
 							},
-							Success:    false,
+							Success:    true,
 							MaybeError: nil,
 						},
 						PacketSequence: 1,
 					},
 				},
 			},
-			MockFunc: func(mock *test.MockRDbConn) {
+			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
-				mock.On("Begin").Return(mockTx, nil)
+				mocks = append(mocks, &mockTx.Mock)
+				mockCoon.On("Begin").Return(mockTx, nil)
 
 				mockExecResult := &test.MockRDbExecResult{}
+				mocks = append(mocks, &mockExecResult.Mock)
 				mockExecResult.On("RowsAffected").Return(int64(1))
 				mockTx.On(
 					"Exec",
-					"UPDATE view_ibc_channels SET total_transfer_in_count = total_transfer_in_count+1 WHERE channel_id = $1",
+					"UPDATE view_ibc_channels SET total_transfer_out_success_count = total_transfer_out_success_count+1 WHERE channel_id = $1",
 					"SourceChannel",
 				).Return(mockExecResult, nil)
 
@@ -713,6 +741,21 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				).Return(mockExecResult, nil)
 
 				mockRowResult := &test.MockRDbRowResult{}
+				mocks = append(mocks, &mockRowResult.Mock)
+				var totalTransferOutCount int64
+				var totalTransferOutSuccessCount int64
+				mockRowResult.On("Scan", &totalTransferOutCount, &totalTransferOutSuccessCount).Return(nil).Run(func(args testify_mock.Arguments) {
+					totalTransferOutCount := args.Get(0).(*int64)
+					totalTransferOutSuccessCount := args.Get(1).(*int64)
+					*totalTransferOutCount = 1
+					*totalTransferOutSuccessCount = 1
+				})
+				mockTx.On(
+					"QueryRow",
+					"SELECT total_transfer_out_count, total_transfer_out_success_count FROM view_ibc_channels WHERE channel_id = $1",
+					"SourceChannel",
+				).Return(mockRowResult, nil)
+
 				var bondedTokensJSON string
 				mockRowResult.On("Scan", &bondedTokensJSON).Return(nil).Run(func(args testify_mock.Arguments) {
 					bondedTokensJSON := args.Get(0).(*string)
@@ -721,46 +764,42 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				mockTx.On(
 					"QueryRow",
 					"SELECT bonded_tokens FROM view_ibc_channels WHERE channel_id = $1",
-					"DestinationChannel",
-				).Return(mockRowResult, nil)
-
-				var existed bool
-				mockRowResult.On("Scan", &existed).Return(nil).Run(func(args testify_mock.Arguments) {
-					existed := args.Get(0).(*bool)
-					*existed = false
-				})
-				mockTx.On(
-					"QueryRow",
-					"SELECT EXISTS ( SELECT * FROM view_ibc_denom_hash_mapping WHERE denom = $1 )",
-					"DestinationPort/DestinationChannel/DENOM",
+					"SourceChannel",
 				).Return(mockRowResult, nil)
 
 				mockTx.On(
 					"Exec",
-					"INSERT INTO view_ibc_denom_hash_mapping (denom,hash) VALUES ($1,$2)",
-					"DestinationPort/DestinationChannel/DENOM",
-					"293BDA936C232AE821E94F4CA8B95D60C09D13D2D84B0C027B2C250158A95381",
+					"UPDATE view_ibc_channels SET total_transfer_out_success_rate = $1 WHERE channel_id = $2",
+					float64(1),
+					"SourceChannel",
 				).Return(mockExecResult, nil)
 
 				mockTx.On(
 					"Exec",
 					"UPDATE view_ibc_channels SET bonded_tokens = $1 WHERE channel_id = $2",
-					"{\"onThisChain\":[{\"denom\":\"DestinationPort/DestinationChannel/DENOM\",\"amount\":\"100\"}],\"onCounterpartyChain\":null}",
-					"DestinationChannel",
+					"{\"onThisChain\":null,\"onCounterpartyChain\":[{\"denom\":\"//DENOM\",\"amount\":\"100\"}]}",
+					"SourceChannel",
 				).Return(mockExecResult, nil)
 
 				mockUpdateLastHandledEventHeight(mockTx)
+
+				return mocks
 			},
 		},
 	}
 
 	for _, tc := range testCases {
 		mockRDbConn := NewMockRDbConn()
-		tc.MockFunc(mockRDbConn)
+		mocks := tc.MockFunc(mockRDbConn)
+		mocks = append(mocks, &mockRDbConn.Mock)
 
 		projection := NewIBCChannelProjection(mockRDbConn)
 		err := projection.HandleEvents(1, tc.Events)
 		assert.NoError(t, err)
+
+		for _, m := range mocks {
+			m.AssertExpectations(t)
+		}
 
 		fmt.Println(tc.Name, "Passed")
 	}
