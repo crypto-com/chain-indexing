@@ -3,6 +3,8 @@ package projection
 import (
 	"fmt"
 
+	"github.com/crypto-com/chain-indexing/projection/bridge_pending_activity"
+
 	"github.com/crypto-com/chain-indexing/projection/chainstats"
 
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
@@ -67,6 +69,8 @@ func InitProjection(name string, params InitParams) projection_entity.Projection
 		})
 	case "IBCChannelMessage":
 		return ibc_channel_message.NewIBCChannelMessage(params.Logger, params.RdbConn)
+	case "BridgePendingActivity":
+		return bridge_pending_activity.NewBridgePendingActivity(params.Logger, params.RdbConn)
 	// register more projections here
 	default:
 		panic(fmt.Sprintf("Unrecognized projection: %s", name))

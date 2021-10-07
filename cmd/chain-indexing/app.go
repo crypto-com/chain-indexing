@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
+
 	"github.com/crypto-com/chain-indexing/internal/primptr"
 
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
@@ -133,6 +135,8 @@ func CliApp(args []string) error {
 				fileConfig,
 			}
 			config.OverrideByCLIConfig(&cliConfig)
+
+			rdbprojectionbase.SetGlobalConfigPath(configPath)
 
 			// Create logger
 			logLevel := parseLogLevel(config.Logger.Level)
