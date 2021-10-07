@@ -809,6 +809,12 @@ func ParseMsgTransfer(
 		panic("missing `send_packet` event in TxsResult log")
 	}
 
+	packetData := event.MustGetAttributeByKey("packet_data")
+	var fungiblePacketData ibc_model.FungibleTokenPacketData
+	if unmarshalErr := jsoniter.Unmarshal([]byte(packetData), &fungiblePacketData); unmarshalErr != nil {
+		panic("unable to parse `send_packet` event, key `packet_data`")
+	}
+
 	msgTransferParams := ibc_model.MsgTransferParams{
 		RawMsgTransfer: rawMsg,
 
@@ -817,6 +823,7 @@ func ParseMsgTransfer(
 		DestinationChannel: event.MustGetAttributeByKey("packet_dst_channel"),
 		ChannelOrdering:    event.MustGetAttributeByKey("packet_channel_ordering"),
 		ConnectionID:       event.MustGetAttributeByKey("packet_connection"),
+		PacketData:         fungiblePacketData,
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCTransferTransfer(
