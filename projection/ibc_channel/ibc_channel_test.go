@@ -84,7 +84,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
+			MockFunc: func(mockConn *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
 				mocks = append(mocks, &mockTx.Mock)
 				mockConn.On("Begin").Return(mockTx, nil)
@@ -128,10 +128,10 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
+			MockFunc: func(mockConn *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
 				mocks = append(mocks, &mockTx.Mock)
-				mockCoon.On("Begin").Return(mockTx, nil)
+				mockConn.On("Begin").Return(mockTx, nil)
 
 				mockRowResult := &test.MockRDbRowResult{}
 				mocks = append(mocks, &mockRowResult.Mock)
@@ -185,10 +185,10 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
+			MockFunc: func(mockConn *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
 				mocks = append(mocks, &mockTx.Mock)
-				mockCoon.On("Begin").Return(mockTx, nil)
+				mockConn.On("Begin").Return(mockTx, nil)
 
 				mockRowResult := &test.MockRDbRowResult{}
 				mocks = append(mocks, &mockRowResult.Mock)
@@ -247,10 +247,10 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
+			MockFunc: func(mockConn *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
 				mocks = append(mocks, &mockTx.Mock)
-				mockCoon.On("Begin").Return(mockTx, nil)
+				mockConn.On("Begin").Return(mockTx, nil)
 
 				mockExecResult := &test.MockRDbExecResult{}
 				mocks = append(mocks, &mockExecResult.Mock)
@@ -315,10 +315,10 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
+			MockFunc: func(mockConn *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
 				mocks = append(mocks, &mockTx.Mock)
-				mockCoon.On("Begin").Return(mockTx, nil)
+				mockConn.On("Begin").Return(mockTx, nil)
 
 				mockExecResult := &test.MockRDbExecResult{}
 				mocks = append(mocks, &mockExecResult.Mock)
@@ -380,10 +380,10 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
+			MockFunc: func(mockConn *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
 				mocks = append(mocks, &mockTx.Mock)
-				mockCoon.On("Begin").Return(mockTx, nil)
+				mockConn.On("Begin").Return(mockTx, nil)
 
 				mockRowResult := &test.MockRDbRowResult{}
 				mocks = append(mocks, &mockRowResult.Mock)
@@ -447,10 +447,10 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
+			MockFunc: func(mockConn *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
 				mocks = append(mocks, &mockTx.Mock)
-				mockCoon.On("Begin").Return(mockTx, nil)
+				mockConn.On("Begin").Return(mockTx, nil)
 
 				mockRowResult := &test.MockRDbRowResult{}
 				mocks = append(mocks, &mockRowResult.Mock)
@@ -511,10 +511,10 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
+			MockFunc: func(mockConn *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
 				mocks = append(mocks, &mockTx.Mock)
-				mockCoon.On("Begin").Return(mockTx, nil)
+				mockConn.On("Begin").Return(mockTx, nil)
 
 				mockExecResult := &test.MockRDbExecResult{}
 				mocks = append(mocks, &mockExecResult.Mock)
@@ -605,10 +605,10 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
+			MockFunc: func(mockConn *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
 				mocks = append(mocks, &mockTx.Mock)
-				mockCoon.On("Begin").Return(mockTx, nil)
+				mockConn.On("Begin").Return(mockTx, nil)
 
 				mockExecResult := &test.MockRDbExecResult{}
 				mocks = append(mocks, &mockExecResult.Mock)
@@ -710,10 +710,10 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
+			MockFunc: func(mockConn *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
 				mocks = append(mocks, &mockTx.Mock)
-				mockCoon.On("Begin").Return(mockTx, nil)
+				mockConn.On("Begin").Return(mockTx, nil)
 
 				mockExecResult := &test.MockRDbExecResult{}
 				mocks = append(mocks, &mockExecResult.Mock)
