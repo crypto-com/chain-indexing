@@ -88,7 +88,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 			MockFunc: func(mockCoon *test.MockRDbConn) (mocks []*testify_mock.Mock) {
 				mockTx := NewMockRDbTx()
 				mocks = append(mocks, &mockTx.Mock)
-				mockCoon.On("Begin").Return(mockTx, nil)
+				mockConn.On("Begin").Return(mockTx, nil)
 
 				mockExecResult := &test.MockRDbExecResult{}
 				mocks = append(mocks, &mockExecResult.Mock)
