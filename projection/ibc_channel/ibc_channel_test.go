@@ -5,18 +5,17 @@ import (
 	"testing"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/stretchr/testify/assert"
+	testify_mock "github.com/stretchr/testify/mock"
+
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/crypto-com/chain-indexing/internal/json"
-
-	//"github.com/crypto-com/chain-indexing/internal/json"
 	"github.com/crypto-com/chain-indexing/projection/ibc_channel"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
-	"github.com/stretchr/testify/assert"
-	testify_mock "github.com/stretchr/testify/mock"
 )
 
 func NewIBCChannelProjection(rdbConn rdb.Conn) *ibc_channel.IBCChannel {
