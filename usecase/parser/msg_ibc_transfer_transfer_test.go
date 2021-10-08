@@ -48,7 +48,7 @@ var _ = Describe("ParseMsgCommands", func() {
     "destinationChannel": "channel-0",
     "channelOrdering": "ORDER_UNORDERED",
     "connectionId": "connection-0",
-		"packetData": {
+    "packetData": {
       "sender": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv",
       "receiver": "cro1dulwqgcdpemn8c34sjd92fxepz5p0sqpeevw7f",
       "denom": "basecro",
