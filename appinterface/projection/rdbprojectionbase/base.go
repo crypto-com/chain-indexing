@@ -2,19 +2,17 @@ package rdbprojectionbase
 
 import (
 	"fmt"
+	"time"
 
+	"github.com/iancoleman/strcase"
+	"github.com/mitchellh/mapstructure"
+
+	"github.com/crypto-com/chain-indexing/appinterface/projection"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
-	"github.com/crypto-com/chain-indexing/internal/filereader/toml"
 	"github.com/crypto-com/chain-indexing/internal/primptr"
 )
 
 const DEFAULT_TABLE = "projections"
-
-var GlobalConfigPath string
-
-func SetGlobalConfigPath(configPath string) {
-	GlobalConfigPath = configPath
-}
 
 // Table should have the following schema
 // | Field                     | Data Type | Constraint  |
@@ -53,11 +51,29 @@ func NewRDbBaseWithOptions(rdbHandle *rdb.Handle, projectionId string, options O
 		projectionId: projectionId,
 	}
 	if options.MaybeConfigPtr != nil {
-		configReader := toml.MustFromFile(GlobalConfigPath)
-		config := TomlConfig{Projection: options.MaybeConfigPtr}
-		configReader.MustRead(&config)
-		base.config = config.Projection
-		fmt.Println(config)
+		decoderConfig := &mapstructure.DecoderConfig{
+			WeaklyTypedInput: true,
+			DecodeHook: mapstructure.ComposeDecodeHookFunc(
+				mapstructure.StringToTimeDurationHookFunc(),
+				mapstructure.StringToTimeHookFunc(time.RFC3339),
+			),
+			Result: options.MaybeConfigPtr,
+		}
+		decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+		if decoderErr != nil {
+			panic(fmt.Errorf("error creating projection config decoder: %v", decoderErr))
+		}
+
+		projectionConfigId := strcase.ToSnake(projectionId)
+		projectionConfig, projectionConfigFound := projection.GlobalConfig.Projection[projectionConfigId]
+		if !projectionConfigFound {
+			panic(fmt.Sprintf("no projection config found for projection id: %s", projectionConfigId))
+		}
+		if err := decoder.Decode(projectionConfig); err != nil {
+			panic(fmt.Errorf("error decoding projection %s config: %v", projectionId, err))
+		}
+
+		base.config = options.MaybeConfigPtr
 	}
 
 	return base
@@ -72,7 +88,7 @@ type Options struct {
 }
 
 type TomlConfig struct {
-	Projection interface{}
+	Projection map[string]interface{}
 }
 
 // Implements projection.Id()

@@ -1,4 +1,4 @@
-package view
+package types
 
 type Status string
 

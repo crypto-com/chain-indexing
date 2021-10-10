@@ -3,10 +3,6 @@ package projection
 import (
 	"fmt"
 
-	"github.com/crypto-com/chain-indexing/projection/bridge_pending_activity"
-
-	"github.com/crypto-com/chain-indexing/projection/chainstats"
-
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
@@ -16,6 +12,8 @@ import (
 	"github.com/crypto-com/chain-indexing/projection/account_transaction"
 	"github.com/crypto-com/chain-indexing/projection/block"
 	"github.com/crypto-com/chain-indexing/projection/blockevent"
+	"github.com/crypto-com/chain-indexing/projection/bridge_pending_activity"
+	"github.com/crypto-com/chain-indexing/projection/chainstats"
 	"github.com/crypto-com/chain-indexing/projection/ibc_channel"
 	"github.com/crypto-com/chain-indexing/projection/ibc_channel_message"
 	"github.com/crypto-com/chain-indexing/projection/nft"

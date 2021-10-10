@@ -5,16 +5,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
-
-	"github.com/crypto-com/chain-indexing/internal/primptr"
-
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
-
-	"github.com/crypto-com/chain-indexing/infrastructure"
-
-	"github.com/crypto-com/chain-indexing/internal/filereader/toml"
 	"github.com/urfave/cli/v2"
+
+	"github.com/crypto-com/chain-indexing/appinterface/projection"
+	"github.com/crypto-com/chain-indexing/infrastructure"
+	"github.com/crypto-com/chain-indexing/internal/filereader/toml"
+	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
 )
 
 const SYSTEM_MODE_EVENT_STORE = "EVENT_STORE"
@@ -101,12 +98,19 @@ func CliApp(args []string) error {
 			configPath := ctx.String("config")
 			configReader, configFileErr := toml.FromFile(configPath)
 			if configFileErr != nil {
-				return configFileErr
+				return fmt.Errorf("error creating Toml config reader: %v", configFileErr)
 			}
 			var fileConfig FileConfig
-			readConfigErr := configReader.Read(&fileConfig)
-			if readConfigErr != nil {
-				return readConfigErr
+			if readConfigErr := configReader.Read(&fileConfig); readConfigErr != nil {
+				return fmt.Errorf("error reading Toml config: %v", readConfigErr)
+			}
+
+			projectionConfigReader, projectionConfigFileErr := toml.FromFile(configPath)
+			if projectionConfigFileErr != nil {
+				return fmt.Errorf("error creating projection Toml config reader: %v", configFileErr)
+			}
+			if readProjectionConfigErr := projectionConfigReader.Read(&projection.GlobalConfig); readProjectionConfigErr != nil {
+				return fmt.Errorf("error reading global projection Toml config: %v", readProjectionConfigErr)
 			}
 
 			cliConfig := CLIConfig{
@@ -135,8 +139,6 @@ func CliApp(args []string) error {
 				fileConfig,
 			}
 			config.OverrideByCLIConfig(&cliConfig)
-
-			rdbprojectionbase.SetGlobalConfigPath(configPath)
 
 			// Create logger
 			logLevel := parseLogLevel(config.Logger.Level)
