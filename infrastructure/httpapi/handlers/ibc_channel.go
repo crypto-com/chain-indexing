@@ -16,7 +16,7 @@ import (
 type IBCChannel struct {
 	logger applogger.Logger
 
-	ibcChannelsView         *ibc_channel_view.IBCChannels
+	ibcChannelsView         ibc_channel_view.IBCChannels
 	ibcDenomHashMappingView *ibc_channel_view.IBCDenomHashMapping
 }
 
@@ -26,7 +26,7 @@ func NewIBCChannel(logger applogger.Logger, rdbHandle *rdb.Handle) *IBCChannel {
 			"module": "IBCChannelHandler",
 		}),
 
-		ibc_channel_view.NewIBCChannels(rdbHandle),
+		ibc_channel_view.NewIBCChannelsView(rdbHandle),
 		ibc_channel_view.NewIBCDenomHashMapping(rdbHandle),
 	}
 }

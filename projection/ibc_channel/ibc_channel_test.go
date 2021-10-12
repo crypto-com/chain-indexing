@@ -5,6 +5,10 @@ import (
 	"testing"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/crypto-com/chain-indexing/internal/json"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
+	ibc_channel_view "github.com/crypto-com/chain-indexing/projection/ibc_channel/view"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/stretchr/testify/assert"
 	testify_mock "github.com/stretchr/testify/mock"
 
@@ -12,7 +16,6 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	"github.com/crypto-com/chain-indexing/internal/json"
 	"github.com/crypto-com/chain-indexing/projection/ibc_channel"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
@@ -42,11 +45,7 @@ func NewMockRDbConn() *test.MockRDbConn {
 
 func NewMockRDbTx() *test.MockRDbTx {
 	mockTx := &test.MockRDbTx{}
-	mockTx.On("ToHandle").Return(&rdb.Handle{
-		Runner:      mockTx,
-		TypeConv:    &pg.PgxTypeConv{},
-		StmtBuilder: pg.PostgresStmtBuilder,
-	}).Maybe()
+	mockTx.On("ToHandle").Return(nil).Maybe()
 	mockTx.On("Rollback").Return(nil).Maybe()
 	mockTx.On("Commit").Return(nil).Maybe()
 
@@ -57,7 +56,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 	testCases := []struct {
 		Name     string
 		Events   []entity_event.Event
-		MockFunc func(mock *test.MockRDbConn) []*testify_mock.Mock
+		MockFunc func() []*testify_mock.Mock
 	}{
 		{
 			Name: "HandleMsgIBCCreateClient",
@@ -84,22 +83,24 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mockConn *test.MockRDbConn) (mocks []*testify_mock.Mock) {
-				mockTx := NewMockRDbTx()
-				mocks = append(mocks, &mockTx.Mock)
-				mockConn.On("Begin").Return(mockTx, nil)
+			MockFunc: func() (mocks []*testify_mock.Mock) {
+				mockIbcClientsView := ibc_channel_view.NewMockIBCClientsView(nil).(*ibc_channel_view.MockIBCClientsView)
+				mocks = append(mocks, &mockIbcClientsView.Mock)
 
-				mockExecResult := &test.MockRDbExecResult{}
-				mocks = append(mocks, &mockExecResult.Mock)
-				mockExecResult.On("RowsAffected").Return(int64(1))
-				mockTx.On(
-					"Exec",
-					"INSERT INTO view_ibc_clients (client_id,counterparty_chain_id) VALUES ($1,$2)",
-					"ClientID",
-					"ChainID",
-				).Return(mockExecResult, nil)
+				ibc_channel.NewIBCClients = func(_ *rdb.Handle) ibc_channel_view.IBCClients {
+					return mockIbcClientsView
+				}
+				mockIbcClientsView.On(
+					"Insert",
+					&ibc_channel_view.IBCClientRow{
+						ClientID:            "ClientID",
+						CounterpartyChainID: "ChainID",
+					},
+				).Return(nil)
 
-				mockUpdateLastHandledEventHeight(mockTx)
+				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
 
 				return mocks
 			},
@@ -128,35 +129,40 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mockConn *test.MockRDbConn) (mocks []*testify_mock.Mock) {
-				mockTx := NewMockRDbTx()
-				mocks = append(mocks, &mockTx.Mock)
-				mockConn.On("Begin").Return(mockTx, nil)
+			MockFunc: func() (mocks []*testify_mock.Mock) {
+				mockIbcClientsView := ibc_channel_view.NewMockIBCClientsView(nil).(*ibc_channel_view.MockIBCClientsView)
+				mocks = append(mocks, &mockIbcClientsView.Mock)
 
-				mockRowResult := &test.MockRDbRowResult{}
-				mocks = append(mocks, &mockRowResult.Mock)
-				var chainID string
-				mockRowResult.On("Scan", &chainID).Return(nil)
-				mockTx.On(
-					"QueryRow",
-					"SELECT counterparty_chain_id FROM view_ibc_clients WHERE client_id = $1",
+				ibc_channel.NewIBCClients = func(_ *rdb.Handle) ibc_channel_view.IBCClients {
+					return mockIbcClientsView
+				}
+
+				mockIbcClientsView.On(
+					"FindCounterpartyChainIDBy",
 					"ClientID",
-				).Return(mockRowResult, nil)
+				).Return("CounterpartyChainID", nil)
 
-				mockExecResult := &test.MockRDbExecResult{}
-				mocks = append(mocks, &mockExecResult.Mock)
-				mockExecResult.On("RowsAffected").Return(int64(1))
-				mockTx.On(
-					"Exec",
-					"INSERT INTO view_ibc_connections (connection_id,client_id,counterparty_connection_id,counterparty_client_id,counterparty_chain_id) VALUES ($1,$2,$3,$4,$5)",
-					"ConnectionID",
-					"ClientID",
-					"CounterpartyConnectionID",
-					"CounterpartyClientID",
-					"",
-				).Return(mockExecResult, nil)
+				mockIbcConnectionsView := ibc_channel_view.NewMockIBCConnectionsView(nil).(*ibc_channel_view.MockIBCConnectionsView)
+				mocks = append(mocks, &mockIbcConnectionsView.Mock)
 
-				mockUpdateLastHandledEventHeight(mockTx)
+				ibc_channel.NewIBCConnections = func(_ *rdb.Handle) ibc_channel_view.IBCConnections {
+					return mockIbcConnectionsView
+				}
+
+				mockIbcConnectionsView.On(
+					"Insert",
+					&ibc_channel_view.IBCConnectionRow{
+						ConnectionID:             "ConnectionID",
+						ClientID:                 "ClientID",
+						CounterpartyConnectionID: "CounterpartyConnectionID",
+						CounterpartyClientID:     "CounterpartyClientID",
+						CounterpartyChainID:      "CounterpartyChainID",
+					},
+				).Return(nil)
+
+				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
 
 				return mocks
 			},
@@ -185,35 +191,40 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mockConn *test.MockRDbConn) (mocks []*testify_mock.Mock) {
-				mockTx := NewMockRDbTx()
-				mocks = append(mocks, &mockTx.Mock)
-				mockConn.On("Begin").Return(mockTx, nil)
+			MockFunc: func() (mocks []*testify_mock.Mock) {
+				mockIbcClientsView := ibc_channel_view.NewMockIBCClientsView(nil).(*ibc_channel_view.MockIBCClientsView)
+				mocks = append(mocks, &mockIbcClientsView.Mock)
 
-				mockRowResult := &test.MockRDbRowResult{}
-				mocks = append(mocks, &mockRowResult.Mock)
-				var chainID string
-				mockRowResult.On("Scan", &chainID).Return(nil)
-				mockTx.On(
-					"QueryRow",
-					"SELECT counterparty_chain_id FROM view_ibc_clients WHERE client_id = $1",
+				ibc_channel.NewIBCClients = func(_ *rdb.Handle) ibc_channel_view.IBCClients {
+					return mockIbcClientsView
+				}
+
+				mockIbcClientsView.On(
+					"FindCounterpartyChainIDBy",
 					"ClientID",
-				).Return(mockRowResult, nil)
+				).Return("CounterpartyChainID", nil)
 
-				mockExecResult := &test.MockRDbExecResult{}
-				mocks = append(mocks, &mockExecResult.Mock)
-				mockExecResult.On("RowsAffected").Return(int64(1))
-				mockTx.On(
-					"Exec",
-					"INSERT INTO view_ibc_connections (connection_id,client_id,counterparty_connection_id,counterparty_client_id,counterparty_chain_id) VALUES ($1,$2,$3,$4,$5)",
-					"ConnectionID",
-					"ClientID",
-					"CounterpartyConnectionID",
-					"CounterpartyClientID",
-					"",
-				).Return(mockExecResult, nil)
+				mockIbcConnectionsView := ibc_channel_view.NewMockIBCConnectionsView(nil).(*ibc_channel_view.MockIBCConnectionsView)
+				mocks = append(mocks, &mockIbcConnectionsView.Mock)
 
-				mockUpdateLastHandledEventHeight(mockTx)
+				ibc_channel.NewIBCConnections = func(_ *rdb.Handle) ibc_channel_view.IBCConnections {
+					return mockIbcConnectionsView
+				}
+
+				mockIbcConnectionsView.On(
+					"Insert",
+					&ibc_channel_view.IBCConnectionRow{
+						ConnectionID:             "ConnectionID",
+						ClientID:                 "ClientID",
+						CounterpartyConnectionID: "CounterpartyConnectionID",
+						CounterpartyClientID:     "CounterpartyClientID",
+						CounterpartyChainID:      "CounterpartyChainID",
+					},
+				).Return(nil)
+
+				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
 
 				return mocks
 			},
@@ -247,41 +258,47 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mockConn *test.MockRDbConn) (mocks []*testify_mock.Mock) {
-				mockTx := NewMockRDbTx()
-				mocks = append(mocks, &mockTx.Mock)
-				mockConn.On("Begin").Return(mockTx, nil)
+			MockFunc: func() (mocks []*testify_mock.Mock) {
+				mockIbcChannelsView := ibc_channel_view.NewMockIBCChannelsView(nil).(*ibc_channel_view.MockIBCChannelsView)
+				mocks = append(mocks, &mockIbcChannelsView.Mock)
 
-				mockExecResult := &test.MockRDbExecResult{}
-				mocks = append(mocks, &mockExecResult.Mock)
-				mockExecResult.On("RowsAffected").Return(int64(1))
-				mockTx.On(
-					"Exec",
-					"INSERT INTO view_ibc_channels (channel_id,port_id,connection_id,counterparty_channel_id,counterparty_port_id,counterparty_chain_id,status,packet_ordering,last_in_packet_sequence,last_out_packet_sequence,total_transfer_in_count,total_transfer_out_count,total_transfer_out_success_count,total_transfer_out_success_rate,created_at_block_time,created_at_block_height,verified,description,last_activity_block_time,last_activity_block_height,bonded_tokens) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)",
-					"ChannelID",
-					"PortID",
-					"",
-					"CounterpartyChannelID",
-					"CounterpartyPortID",
-					"",
-					false,
-					"Ordering",
-					int64(0),
-					int64(0),
-					int64(0),
-					int64(0),
-					int64(0),
-					float64(0),
-					int64(0),
-					int64(0),
-					false,
-					"",
-					int64(0),
-					int64(0),
-					"{\"onThisChain\":[],\"onCounterpartyChain\":[]}",
-				).Return(mockExecResult, nil)
+				ibc_channel.NewIBCChannels = func(_ *rdb.Handle) ibc_channel_view.IBCChannels {
+					return mockIbcChannelsView
+				}
 
-				mockUpdateLastHandledEventHeight(mockTx)
+				mockIbcChannelsView.On(
+					"Insert",
+					&ibc_channel_view.IBCChannelRow{
+						ChannelID:                    "ChannelID",
+						PortID:                       "PortID",
+						ConnectionID:                 "",
+						CounterpartyChannelID:        "CounterpartyChannelID",
+						CounterpartyPortID:           "CounterpartyPortID",
+						CounterpartyChainID:          "",
+						Status:                       false,
+						PacketOrdering:               "Ordering",
+						LastInPacketSequence:         0,
+						LastOutPacketSequence:        0,
+						TotalTransferInCount:         0,
+						TotalTransferOutCount:        0,
+						TotalTransferOutSuccessCount: 0,
+						TotalTransferOutSuccessRate:  0,
+						CreatedAtBlockTime:           utctime.UTCTime{},
+						CreatedAtBlockHeight:         0,
+						Verified:                     false,
+						Description:                  "",
+						LastActivityBlockTime:        utctime.UTCTime{},
+						LastActivityBlockHeight:      0,
+						BondedTokens: ibc_channel_view.BondedTokens{
+							OnThisChain:         []ibc_channel_view.BondedToken{},
+							OnCounterpartyChain: []ibc_channel_view.BondedToken{},
+						},
+					},
+				).Return(nil)
+
+				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
 
 				return mocks
 			},
@@ -315,41 +332,47 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mockConn *test.MockRDbConn) (mocks []*testify_mock.Mock) {
-				mockTx := NewMockRDbTx()
-				mocks = append(mocks, &mockTx.Mock)
-				mockConn.On("Begin").Return(mockTx, nil)
+			MockFunc: func() (mocks []*testify_mock.Mock) {
+				mockIbcChannelsView := ibc_channel_view.NewMockIBCChannelsView(nil).(*ibc_channel_view.MockIBCChannelsView)
+				mocks = append(mocks, &mockIbcChannelsView.Mock)
 
-				mockExecResult := &test.MockRDbExecResult{}
-				mocks = append(mocks, &mockExecResult.Mock)
-				mockExecResult.On("RowsAffected").Return(int64(1))
-				mockTx.On(
-					"Exec",
-					"INSERT INTO view_ibc_channels (channel_id,port_id,connection_id,counterparty_channel_id,counterparty_port_id,counterparty_chain_id,status,packet_ordering,last_in_packet_sequence,last_out_packet_sequence,total_transfer_in_count,total_transfer_out_count,total_transfer_out_success_count,total_transfer_out_success_rate,created_at_block_time,created_at_block_height,verified,description,last_activity_block_time,last_activity_block_height,bonded_tokens) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)",
-					"ChannelID",
-					"PortID",
-					"",
-					"CounterpartyChannelID",
-					"CounterpartyPortID",
-					"",
-					false,
-					"Ordering",
-					int64(0),
-					int64(0),
-					int64(0),
-					int64(0),
-					int64(0),
-					float64(0),
-					int64(0),
-					int64(0),
-					false,
-					"",
-					int64(0),
-					int64(0),
-					"{\"onThisChain\":[],\"onCounterpartyChain\":[]}",
-				).Return(mockExecResult, nil)
+				ibc_channel.NewIBCChannels = func(_ *rdb.Handle) ibc_channel_view.IBCChannels {
+					return mockIbcChannelsView
+				}
 
-				mockUpdateLastHandledEventHeight(mockTx)
+				mockIbcChannelsView.On(
+					"Insert",
+					&ibc_channel_view.IBCChannelRow{
+						ChannelID:                    "ChannelID",
+						PortID:                       "PortID",
+						ConnectionID:                 "",
+						CounterpartyChannelID:        "CounterpartyChannelID",
+						CounterpartyPortID:           "CounterpartyPortID",
+						CounterpartyChainID:          "",
+						Status:                       false,
+						PacketOrdering:               "Ordering",
+						LastInPacketSequence:         0,
+						LastOutPacketSequence:        0,
+						TotalTransferInCount:         0,
+						TotalTransferOutCount:        0,
+						TotalTransferOutSuccessCount: 0,
+						TotalTransferOutSuccessRate:  0,
+						CreatedAtBlockTime:           utctime.UTCTime{},
+						CreatedAtBlockHeight:         0,
+						Verified:                     false,
+						Description:                  "",
+						LastActivityBlockTime:        utctime.UTCTime{},
+						LastActivityBlockHeight:      0,
+						BondedTokens: ibc_channel_view.BondedTokens{
+							OnThisChain:         []ibc_channel_view.BondedToken{},
+							OnCounterpartyChain: []ibc_channel_view.BondedToken{},
+						},
+					},
+				).Return(nil)
+
+				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
 
 				return mocks
 			},
@@ -380,44 +403,62 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mockConn *test.MockRDbConn) (mocks []*testify_mock.Mock) {
-				mockTx := NewMockRDbTx()
-				mocks = append(mocks, &mockTx.Mock)
-				mockConn.On("Begin").Return(mockTx, nil)
+			MockFunc: func() (mocks []*testify_mock.Mock) {
+				mockIbcConnectionsView := ibc_channel_view.NewMockIBCConnectionsView(nil).(*ibc_channel_view.MockIBCConnectionsView)
+				mocks = append(mocks, &mockIbcConnectionsView.Mock)
 
-				mockRowResult := &test.MockRDbRowResult{}
-				mocks = append(mocks, &mockRowResult.Mock)
-				var chainID string
-				mockRowResult.On("Scan", &chainID).Return(nil)
-				mockTx.On(
-					"QueryRow",
-					"SELECT counterparty_chain_id FROM view_ibc_connections WHERE connection_id = $1",
-					"ConnectionID",
-				).Return(mockRowResult, nil)
+				ibc_channel.NewIBCConnections = func(_ *rdb.Handle) ibc_channel_view.IBCConnections {
+					return mockIbcConnectionsView
+				}
 
-				mockExecResult := &test.MockRDbExecResult{}
-				mocks = append(mocks, &mockExecResult.Mock)
-				mockExecResult.On("RowsAffected").Return(int64(1))
-				mockTx.On(
-					"Exec",
-					"UPDATE view_ibc_channels SET connection_id = $1, counterparty_chain_id = $2, counterparty_channel_id = $3, counterparty_port_id = $4, created_at_block_height = $5, created_at_block_time = $6 WHERE channel_id = $7",
-					"ConnectionID",
-					"",
-					"CounterpartyChannelID",
-					"CounterpartyPortID",
-					int64(1),
-					int64(0),
+				mockIbcConnectionsView.On("FindCounterpartyChainIDBy", "ConnectionID").Return("CounterpartyChainID", nil)
+
+				mockIbcChannelsView := ibc_channel_view.NewMockIBCChannelsView(nil).(*ibc_channel_view.MockIBCChannelsView)
+				mocks = append(mocks, &mockIbcChannelsView.Mock)
+
+				ibc_channel.NewIBCChannels = func(_ *rdb.Handle) ibc_channel_view.IBCChannels {
+					return mockIbcChannelsView
+				}
+
+				mockIbcChannelsView.On(
+					"UpdateFactualColumns",
+					&ibc_channel_view.IBCChannelRow{
+						ChannelID:                    "ChannelID",
+						PortID:                       "PortID",
+						ConnectionID:                 "ConnectionID",
+						CounterpartyChannelID:        "CounterpartyChannelID",
+						CounterpartyPortID:           "CounterpartyPortID",
+						CounterpartyChainID:          "CounterpartyChainID",
+						Status:                       false,
+						PacketOrdering:               "",
+						LastInPacketSequence:         0,
+						LastOutPacketSequence:        0,
+						TotalTransferInCount:         0,
+						TotalTransferOutCount:        0,
+						TotalTransferOutSuccessCount: 0,
+						TotalTransferOutSuccessRate:  0,
+						CreatedAtBlockTime:           utctime.UTCTime{},
+						CreatedAtBlockHeight:         1,
+						Verified:                     false,
+						Description:                  "",
+						LastActivityBlockTime:        utctime.UTCTime{},
+						LastActivityBlockHeight:      0,
+						BondedTokens: ibc_channel_view.BondedTokens{
+							OnThisChain:         []ibc_channel_view.BondedToken(nil),
+							OnCounterpartyChain: []ibc_channel_view.BondedToken(nil),
+						},
+					},
+				).Return(nil)
+
+				mockIbcChannelsView.On(
+					"UpdateStatus",
 					"ChannelID",
-				).Return(mockExecResult, nil)
-
-				mockTx.On(
-					"Exec",
-					"UPDATE view_ibc_channels SET status = $1 WHERE channel_id = $2",
 					true,
-					"ChannelID",
-				).Return(mockExecResult, nil)
+				).Return(nil)
 
-				mockUpdateLastHandledEventHeight(mockTx)
+				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
 
 				return mocks
 			},
@@ -447,44 +488,62 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mockConn *test.MockRDbConn) (mocks []*testify_mock.Mock) {
-				mockTx := NewMockRDbTx()
-				mocks = append(mocks, &mockTx.Mock)
-				mockConn.On("Begin").Return(mockTx, nil)
+			MockFunc: func() (mocks []*testify_mock.Mock) {
+				mockIbcConnectionsView := ibc_channel_view.NewMockIBCConnectionsView(nil).(*ibc_channel_view.MockIBCConnectionsView)
+				mocks = append(mocks, &mockIbcConnectionsView.Mock)
 
-				mockRowResult := &test.MockRDbRowResult{}
-				mocks = append(mocks, &mockRowResult.Mock)
-				var chainID string
-				mockRowResult.On("Scan", &chainID).Return(nil)
-				mockTx.On(
-					"QueryRow",
-					"SELECT counterparty_chain_id FROM view_ibc_connections WHERE connection_id = $1",
-					"ConnectionID",
-				).Return(mockRowResult, nil)
+				ibc_channel.NewIBCConnections = func(_ *rdb.Handle) ibc_channel_view.IBCConnections {
+					return mockIbcConnectionsView
+				}
 
-				mockExecResult := &test.MockRDbExecResult{}
-				mocks = append(mocks, &mockExecResult.Mock)
-				mockExecResult.On("RowsAffected").Return(int64(1))
-				mockTx.On(
-					"Exec",
-					"UPDATE view_ibc_channels SET connection_id = $1, counterparty_chain_id = $2, counterparty_channel_id = $3, counterparty_port_id = $4, created_at_block_height = $5, created_at_block_time = $6 WHERE channel_id = $7",
-					"ConnectionID",
-					"",
-					"CounterpartyChannelID",
-					"CounterpartyPortID",
-					int64(1),
-					int64(0),
+				mockIbcConnectionsView.On("FindCounterpartyChainIDBy", "ConnectionID").Return("CounterpartyChainID", nil)
+
+				mockIbcChannelsView := ibc_channel_view.NewMockIBCChannelsView(nil).(*ibc_channel_view.MockIBCChannelsView)
+				mocks = append(mocks, &mockIbcChannelsView.Mock)
+
+				ibc_channel.NewIBCChannels = func(_ *rdb.Handle) ibc_channel_view.IBCChannels {
+					return mockIbcChannelsView
+				}
+
+				mockIbcChannelsView.On(
+					"UpdateFactualColumns",
+					&ibc_channel_view.IBCChannelRow{
+						ChannelID:                    "ChannelID",
+						PortID:                       "PortID",
+						ConnectionID:                 "ConnectionID",
+						CounterpartyChannelID:        "CounterpartyChannelID",
+						CounterpartyPortID:           "CounterpartyPortID",
+						CounterpartyChainID:          "CounterpartyChainID",
+						Status:                       false,
+						PacketOrdering:               "",
+						LastInPacketSequence:         0,
+						LastOutPacketSequence:        0,
+						TotalTransferInCount:         0,
+						TotalTransferOutCount:        0,
+						TotalTransferOutSuccessCount: 0,
+						TotalTransferOutSuccessRate:  0,
+						CreatedAtBlockTime:           utctime.UTCTime{},
+						CreatedAtBlockHeight:         1,
+						Verified:                     false,
+						Description:                  "",
+						LastActivityBlockTime:        utctime.UTCTime{},
+						LastActivityBlockHeight:      0,
+						BondedTokens: ibc_channel_view.BondedTokens{
+							OnThisChain:         []ibc_channel_view.BondedToken(nil),
+							OnCounterpartyChain: []ibc_channel_view.BondedToken(nil),
+						},
+					},
+				).Return(nil)
+
+				mockIbcChannelsView.On(
+					"UpdateStatus",
 					"ChannelID",
-				).Return(mockExecResult, nil)
-
-				mockTx.On(
-					"Exec",
-					"UPDATE view_ibc_channels SET status = $1 WHERE channel_id = $2",
 					true,
-					"ChannelID",
-				).Return(mockExecResult, nil)
+				).Return(nil)
 
-				mockUpdateLastHandledEventHeight(mockTx)
+				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
 
 				return mocks
 			},
@@ -511,59 +570,43 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mockConn *test.MockRDbConn) (mocks []*testify_mock.Mock) {
-				mockTx := NewMockRDbTx()
-				mocks = append(mocks, &mockTx.Mock)
-				mockConn.On("Begin").Return(mockTx, nil)
+			MockFunc: func() (mocks []*testify_mock.Mock) {
+				mockIbcChannelsView := ibc_channel_view.NewMockIBCChannelsView(nil).(*ibc_channel_view.MockIBCChannelsView)
+				mocks = append(mocks, &mockIbcChannelsView.Mock)
 
-				mockExecResult := &test.MockRDbExecResult{}
-				mocks = append(mocks, &mockExecResult.Mock)
-				mockExecResult.On("RowsAffected").Return(int64(1))
-				mockTx.On(
-					"Exec",
-					"UPDATE view_ibc_channels SET total_transfer_out_count = total_transfer_out_count+1 WHERE channel_id = $1",
+				ibc_channel.NewIBCChannels = func(_ *rdb.Handle) ibc_channel_view.IBCChannels {
+					return mockIbcChannelsView
+				}
+
+				mockIbcChannelsView.On(
+					"Increment",
 					"SourceChannel",
-				).Return(mockExecResult, nil)
-
-				mockRowResult := &test.MockRDbRowResult{}
-				mocks = append(mocks, &mockRowResult.Mock)
-				var totalTransferOutCount int64
-				var totalTransferOutSuccessCount int64
-				mockRowResult.On("Scan", &totalTransferOutCount, &totalTransferOutSuccessCount).Return(nil).Run(func(args testify_mock.Arguments) {
-					totalTransferOutCount := args.Get(0).(*int64)
-					totalTransferOutSuccessCount := args.Get(1).(*int64)
-					*totalTransferOutCount = 1
-					*totalTransferOutSuccessCount = 1
-				})
-				mockTx.On(
-					"QueryRow",
-					"SELECT total_transfer_out_count, total_transfer_out_success_count FROM view_ibc_channels WHERE channel_id = $1",
-					"SourceChannel",
-				).Return(mockRowResult, nil)
-
-				mockTx.On(
-					"Exec",
-					"UPDATE view_ibc_channels SET total_transfer_out_success_rate = $1 WHERE channel_id = $2",
-					float64(1),
-					"SourceChannel",
-				).Return(mockExecResult, nil)
-
-				mockTx.On(
-					"Exec",
-					"UPDATE view_ibc_channels SET last_out_packet_sequence = $1 WHERE channel_id = $2",
-					uint64(1),
-					"SourceChannel",
-				).Return(mockExecResult, nil)
-
-				mockTx.On(
-					"Exec",
-					"UPDATE view_ibc_channels SET last_activity_block_height = $1, last_activity_block_time = $2 WHERE channel_id = $3",
+					"total_transfer_out_count",
 					int64(1),
-					int64(0),
-					"SourceChannel",
-				).Return(mockExecResult, nil)
+				).Return(nil)
 
-				mockUpdateLastHandledEventHeight(mockTx)
+				mockIbcChannelsView.On(
+					"UpdateTotalTransferOutSuccessRate",
+					"SourceChannel",
+				).Return(nil)
+
+				mockIbcChannelsView.On(
+					"UpdateSequence",
+					"SourceChannel",
+					"last_out_packet_sequence",
+					uint64(1),
+				).Return(nil)
+
+				mockIbcChannelsView.On(
+					"UpdateLastActivityTimeAndHeight",
+					"SourceChannel",
+					utctime.UTCTime{},
+					int64(1),
+				).Return(nil)
+
+				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
 
 				return mocks
 			},
@@ -605,74 +648,99 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mockConn *test.MockRDbConn) (mocks []*testify_mock.Mock) {
-				mockTx := NewMockRDbTx()
-				mocks = append(mocks, &mockTx.Mock)
-				mockConn.On("Begin").Return(mockTx, nil)
+			MockFunc: func() (mocks []*testify_mock.Mock) {
+				mockIbcChannelsView := ibc_channel_view.NewMockIBCChannelsView(nil).(*ibc_channel_view.MockIBCChannelsView)
+				mocks = append(mocks, &mockIbcChannelsView.Mock)
 
-				mockExecResult := &test.MockRDbExecResult{}
-				mocks = append(mocks, &mockExecResult.Mock)
-				mockExecResult.On("RowsAffected").Return(int64(1))
-				mockTx.On(
-					"Exec",
-					"UPDATE view_ibc_channels SET total_transfer_in_count = total_transfer_in_count+1 WHERE channel_id = $1",
+				ibc_channel.NewIBCChannels = func(_ *rdb.Handle) ibc_channel_view.IBCChannels {
+					return mockIbcChannelsView
+				}
+
+				mockIbcChannelsView.On(
+					"Increment",
 					"DestinationChannel",
-				).Return(mockExecResult, nil)
-
-				mockTx.On(
-					"Exec",
-					"UPDATE view_ibc_channels SET last_in_packet_sequence = $1 WHERE channel_id = $2",
-					uint64(1),
-					"DestinationChannel",
-				).Return(mockExecResult, nil)
-
-				mockTx.On(
-					"Exec",
-					"UPDATE view_ibc_channels SET last_activity_block_height = $1, last_activity_block_time = $2 WHERE channel_id = $3",
+					"total_transfer_in_count",
 					int64(1),
-					int64(0),
+				).Return(nil)
+
+				mockIbcChannelsView.On(
+					"UpdateSequence",
 					"DestinationChannel",
-				).Return(mockExecResult, nil)
+					"last_in_packet_sequence",
+					uint64(1),
+				).Return(nil)
 
-				mockRowResult := &test.MockRDbRowResult{}
-				mocks = append(mocks, &mockRowResult.Mock)
-				var bondedTokensJSON string
-				mockRowResult.On("Scan", &bondedTokensJSON).Return(nil).Run(func(args testify_mock.Arguments) {
-					bondedTokensJSON := args.Get(0).(*string)
-					*bondedTokensJSON = "{\"test\":\"\"}"
-				})
-				mockTx.On(
-					"QueryRow",
-					"SELECT bonded_tokens FROM view_ibc_channels WHERE channel_id = $1",
+				mockIbcChannelsView.On(
+					"UpdateLastActivityTimeAndHeight",
 					"DestinationChannel",
-				).Return(mockRowResult, nil)
+					utctime.UTCTime{},
+					int64(1),
+				).Return(nil)
 
-				var existed bool
-				mockRowResult.On("Scan", &existed).Return(nil).Run(func(args testify_mock.Arguments) {
-					existed := args.Get(0).(*bool)
-					*existed = false
-				})
-				mockTx.On(
-					"QueryRow",
-					"SELECT EXISTS ( SELECT * FROM view_ibc_denom_hash_mapping WHERE denom = $1 )",
-					"DestinationPort/DestinationChannel/DENOM",
-				).Return(mockRowResult, nil)
-
-				mockTx.On(
-					"Exec",
-					"INSERT INTO view_ibc_denom_hash_mapping (denom,hash) VALUES ($1,$2)",
-					"DestinationPort/DestinationChannel/DENOM",
-					"293BDA936C232AE821E94F4CA8B95D60C09D13D2D84B0C027B2C250158A95381",
-				).Return(mockExecResult, nil)
-
-				mockTx.On(
-					"Exec",
-					"UPDATE view_ibc_channels SET bonded_tokens = $1 WHERE channel_id = $2",
-					"{\"onThisChain\":[{\"denom\":\"DestinationPort/DestinationChannel/DENOM\",\"amount\":\"100\"}],\"onCounterpartyChain\":null}",
+				mockIbcChannelsView.On(
+					"FindBondedTokensBy",
 					"DestinationChannel",
-				).Return(mockExecResult, nil)
+				).Return(
+					&ibc_channel_view.BondedTokens{
+						OnThisChain: []ibc_channel_view.BondedToken{
+							{
+								Denom:  "OnThisChainDenom",
+								Amount: coin.NewInt(100),
+							},
+						},
+						OnCounterpartyChain: []ibc_channel_view.BondedToken{
+							{
+								Denom:  "OnCounterpartyChainDenom",
+								Amount: coin.NewInt(1000),
+							},
+						},
+					},
+					nil,
+				)
 
-				mockUpdateLastHandledEventHeight(mockTx)
+				mockIbcDenomHashMappingView := ibc_channel_view.NewMockIBCDenomHashMapping(nil).(*ibc_channel_view.MockIBCDenomHashMappingView)
+				mocks = append(mocks, &mockIbcDenomHashMappingView.Mock)
+
+				ibc_channel.NewIBCDenomHashMapping = func(_ *rdb.Handle) ibc_channel_view.IBCDenomHashMapping {
+					return mockIbcDenomHashMappingView
+				}
+
+				mockIbcDenomHashMappingView.On("IfDenomExist", "DestinationPort/DestinationChannel/DENOM").Return(false, nil)
+
+				mockIbcDenomHashMappingView.On(
+					"Insert",
+					&ibc_channel_view.IBCDenomHashMappingRow{
+						Denom: "DestinationPort/DestinationChannel/DENOM",
+						Hash:  "293BDA936C232AE821E94F4CA8B95D60C09D13D2D84B0C027B2C250158A95381",
+					},
+				).Return(nil)
+
+				mockIbcChannelsView.On(
+					"UpdateBondedTokens",
+					"DestinationChannel",
+					&ibc_channel_view.BondedTokens{
+						OnThisChain:[]ibc_channel_view.BondedToken{
+							{
+								Denom:"OnThisChainDenom",
+								Amount:coin.NewInt(100),
+							},
+							{
+								Denom:"DestinationPort/DestinationChannel/DENOM",
+								Amount:coin.NewInt(100),
+							},
+						},
+						OnCounterpartyChain:[]ibc_channel_view.BondedToken{
+							{
+								Denom:"OnCounterpartyChainDenom",
+								Amount:coin.NewInt(1000),
+							},
+						},
+					},
+				).Return(nil)
+
+				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
 
 				return mocks
 			},
@@ -710,77 +778,87 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(mockConn *test.MockRDbConn) (mocks []*testify_mock.Mock) {
-				mockTx := NewMockRDbTx()
-				mocks = append(mocks, &mockTx.Mock)
-				mockConn.On("Begin").Return(mockTx, nil)
+			MockFunc: func() (mocks []*testify_mock.Mock) {
+				mockIbcChannelsView := ibc_channel_view.NewMockIBCChannelsView(nil).(*ibc_channel_view.MockIBCChannelsView)
+				mocks = append(mocks, &mockIbcChannelsView.Mock)
 
-				mockExecResult := &test.MockRDbExecResult{}
-				mocks = append(mocks, &mockExecResult.Mock)
-				mockExecResult.On("RowsAffected").Return(int64(1))
-				mockTx.On(
-					"Exec",
-					"UPDATE view_ibc_channels SET total_transfer_out_success_count = total_transfer_out_success_count+1 WHERE channel_id = $1",
+				ibc_channel.NewIBCChannels = func(_ *rdb.Handle) ibc_channel_view.IBCChannels {
+					return mockIbcChannelsView
+				}
+
+				mockIbcChannelsView.On(
+					"UpdateSequence",
 					"SourceChannel",
-				).Return(mockExecResult, nil)
-
-				mockTx.On(
-					"Exec",
-					"UPDATE view_ibc_channels SET last_out_packet_sequence = $1 WHERE channel_id = $2",
+					"last_out_packet_sequence",
 					uint64(1),
-					"SourceChannel",
-				).Return(mockExecResult, nil)
+				).Return(nil)
 
-				mockTx.On(
-					"Exec",
-					"UPDATE view_ibc_channels SET last_activity_block_height = $1, last_activity_block_time = $2 WHERE channel_id = $3",
+				mockIbcChannelsView.On(
+					"UpdateLastActivityTimeAndHeight",
+					"SourceChannel",
+					utctime.UTCTime{},
 					int64(1),
-					int64(0),
-					"SourceChannel",
-				).Return(mockExecResult, nil)
+				).Return(nil)
 
-				mockRowResult := &test.MockRDbRowResult{}
-				mocks = append(mocks, &mockRowResult.Mock)
-				var totalTransferOutCount int64
-				var totalTransferOutSuccessCount int64
-				mockRowResult.On("Scan", &totalTransferOutCount, &totalTransferOutSuccessCount).Return(nil).Run(func(args testify_mock.Arguments) {
-					totalTransferOutCount := args.Get(0).(*int64)
-					totalTransferOutSuccessCount := args.Get(1).(*int64)
-					*totalTransferOutCount = 1
-					*totalTransferOutSuccessCount = 1
-				})
-				mockTx.On(
-					"QueryRow",
-					"SELECT total_transfer_out_count, total_transfer_out_success_count FROM view_ibc_channels WHERE channel_id = $1",
+				mockIbcChannelsView.On(
+					"Increment",
 					"SourceChannel",
-				).Return(mockRowResult, nil)
+					"total_transfer_out_success_count",
+					int64(1),
+				).Return(nil)
 
-				var bondedTokensJSON string
-				mockRowResult.On("Scan", &bondedTokensJSON).Return(nil).Run(func(args testify_mock.Arguments) {
-					bondedTokensJSON := args.Get(0).(*string)
-					*bondedTokensJSON = "{\"test\":\"\"}"
-				})
-				mockTx.On(
-					"QueryRow",
-					"SELECT bonded_tokens FROM view_ibc_channels WHERE channel_id = $1",
+				mockIbcChannelsView.On(
+					"UpdateTotalTransferOutSuccessRate",
 					"SourceChannel",
-				).Return(mockRowResult, nil)
+				).Return(nil)
 
-				mockTx.On(
-					"Exec",
-					"UPDATE view_ibc_channels SET total_transfer_out_success_rate = $1 WHERE channel_id = $2",
-					float64(1),
+				mockIbcChannelsView.On(
+					"FindBondedTokensBy",
 					"SourceChannel",
-				).Return(mockExecResult, nil)
+				).Return(
+					&ibc_channel_view.BondedTokens{
+						OnThisChain: []ibc_channel_view.BondedToken{
+							{
+								Denom:  "OnThisChainDenom",
+								Amount: coin.NewInt(100),
+							},
+						},
+						OnCounterpartyChain: []ibc_channel_view.BondedToken{
+							{
+								Denom:  "OnCounterpartyChainDenom",
+								Amount: coin.NewInt(1000),
+							},
+						},
+					},
+					nil,
+				)
 
-				mockTx.On(
-					"Exec",
-					"UPDATE view_ibc_channels SET bonded_tokens = $1 WHERE channel_id = $2",
-					"{\"onThisChain\":null,\"onCounterpartyChain\":[{\"denom\":\"//DENOM\",\"amount\":\"100\"}]}",
+				mockIbcChannelsView.On(
+					"UpdateBondedTokens",
 					"SourceChannel",
-				).Return(mockExecResult, nil)
+					&ibc_channel_view.BondedTokens{
+						OnThisChain:[]ibc_channel_view.BondedToken{
+							{
+								Denom:"OnThisChainDenom",
+								Amount:coin.NewInt(100),
+							},
+						},
+						OnCounterpartyChain:[]ibc_channel_view.BondedToken{
+							{
+								Denom:"OnCounterpartyChainDenom",
+								Amount:coin.NewInt(1000),
+							},
+							{
+								Denom:"//DENOM",
+								Amount:coin.NewInt(100),
+							},
+						},
+					},
+				).Return(nil)
 
-				mockUpdateLastHandledEventHeight(mockTx)
+				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
 
 				return mocks
 			},
@@ -789,8 +867,9 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 
 	for _, tc := range testCases {
 		mockRDbConn := NewMockRDbConn()
-		mocks := tc.MockFunc(mockRDbConn)
-		mocks = append(mocks, &mockRDbConn.Mock)
+		mockTx := NewMockRDbTx()
+		mockRDbConn.On("Begin").Return(mockTx, nil)
+		mocks := tc.MockFunc()
 
 		projection := NewIBCChannelProjection(mockRDbConn)
 		err := projection.HandleEvents(1, tc.Events)

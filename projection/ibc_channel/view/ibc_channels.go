@@ -13,18 +13,33 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 )
 
+type IBCChannels interface {
+	Insert(*IBCChannelRow) error
+	UpdateFactualColumns(*IBCChannelRow) error
+	Increment(string, string, int64) error
+	UpdateSequence(string, string, uint64) error
+	UpdateTotalTransferOutSuccessRate(string) error
+	UpdateLastActivityTimeAndHeight(string, utctime.UTCTime, int64) error
+	UpdateStatus(string, bool) error
+	UpdateBondedTokens(string, *BondedTokens) error
+	FindBondedTokensBy(string) (*BondedTokens, error)
+	FindBy(string) (*IBCChannelRow, error)
+	List(IBCChannelsListOrder, IBCChannelsListFilter, *pagination.Pagination) ([]IBCChannelRow, *pagination.PaginationResult, error)
+	ListChannelsGroupByChainId(IBCChannelsListOrder, IBCChannelsListFilter, *pagination.Pagination) ([]ChainChannels, *pagination.PaginationResult, error)
+}
+
 // Channels projection view implemented by relational database
-type IBCChannels struct {
+type IBCChannelsView struct {
 	rdb *rdb.Handle
 }
 
-func NewIBCChannels(handle *rdb.Handle) *IBCChannels {
-	return &IBCChannels{
+func NewIBCChannelsView(handle *rdb.Handle) IBCChannels {
+	return &IBCChannelsView{
 		handle,
 	}
 }
 
-func (ibcChannelsView *IBCChannels) Insert(channel *IBCChannelRow) error {
+func (ibcChannelsView *IBCChannelsView) Insert(channel *IBCChannelRow) error {
 	bondedTokensJSON, err := jsoniter.MarshalToString(channel.BondedTokens)
 	if err != nil {
 		return fmt.Errorf("error JSON marshalling channel bonded_tokens for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -97,7 +112,7 @@ func (ibcChannelsView *IBCChannels) Insert(channel *IBCChannelRow) error {
 	return nil
 }
 
-func (ibcChannelsView *IBCChannels) UpdateFactualColumns(channel *IBCChannelRow) error {
+func (ibcChannelsView *IBCChannelsView) UpdateFactualColumns(channel *IBCChannelRow) error {
 	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
 		Update(
 			"view_ibc_channels",
@@ -130,7 +145,7 @@ func (ibcChannelsView *IBCChannels) UpdateFactualColumns(channel *IBCChannelRow)
 	return nil
 }
 
-func (ibcChannelsView *IBCChannels) Increment(channelID string, column string, increaseNumber int64) error {
+func (ibcChannelsView *IBCChannelsView) Increment(channelID string, column string, increaseNumber int64) error {
 	if column != "total_transfer_in_count" &&
 		column != "total_transfer_out_count" &&
 		column != "total_transfer_out_success_count" {
@@ -159,7 +174,7 @@ func (ibcChannelsView *IBCChannels) Increment(channelID string, column string, i
 	return nil
 }
 
-func (ibcChannelsView *IBCChannels) UpdateSequence(channelID string, column string, sequence uint64) error {
+func (ibcChannelsView *IBCChannelsView) UpdateSequence(channelID string, column string, sequence uint64) error {
 	if column != "last_in_packet_sequence" && column != "last_out_packet_sequence" {
 		return fmt.Errorf("error unsupported column in UpdateSequence(): %v", column)
 	}
@@ -186,7 +201,7 @@ func (ibcChannelsView *IBCChannels) UpdateSequence(channelID string, column stri
 	return nil
 }
 
-func (ibcChannelsView *IBCChannels) UpdateTotalTransferOutSuccessRate(channelID string) error {
+func (ibcChannelsView *IBCChannelsView) UpdateTotalTransferOutSuccessRate(channelID string) error {
 	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
 		Select(
 			"total_transfer_out_count",
@@ -238,7 +253,7 @@ func (ibcChannelsView *IBCChannels) UpdateTotalTransferOutSuccessRate(channelID 
 	return nil
 }
 
-func (ibcChannelsView *IBCChannels) UpdateLastActivityTimeAndHeight(channelID string, time utctime.UTCTime, height int64) error {
+func (ibcChannelsView *IBCChannelsView) UpdateLastActivityTimeAndHeight(channelID string, time utctime.UTCTime, height int64) error {
 	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
 		Update("view_ibc_channels").
 		SetMap(map[string]interface{}{
@@ -262,7 +277,7 @@ func (ibcChannelsView *IBCChannels) UpdateLastActivityTimeAndHeight(channelID st
 	return nil
 }
 
-func (ibcChannelsView *IBCChannels) UpdateStatus(channelID string, open bool) error {
+func (ibcChannelsView *IBCChannelsView) UpdateStatus(channelID string, open bool) error {
 	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
 		Update("view_ibc_channels").
 		SetMap(map[string]interface{}{
@@ -285,7 +300,7 @@ func (ibcChannelsView *IBCChannels) UpdateStatus(channelID string, open bool) er
 	return nil
 }
 
-func (ibcChannelsView *IBCChannels) UpdateBondedTokens(channelID string, bondedTokens *BondedTokens) error {
+func (ibcChannelsView *IBCChannelsView) UpdateBondedTokens(channelID string, bondedTokens *BondedTokens) error {
 	bondedTokensJSON, err := jsoniter.MarshalToString(*bondedTokens)
 	if err != nil {
 		return fmt.Errorf("error JSON marshalling channel bonded_tokens for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -313,7 +328,7 @@ func (ibcChannelsView *IBCChannels) UpdateBondedTokens(channelID string, bondedT
 	return nil
 }
 
-func (ibcChannelsView *IBCChannels) FindBondedTokensBy(channelID string) (*BondedTokens, error) {
+func (ibcChannelsView *IBCChannelsView) FindBondedTokensBy(channelID string) (*BondedTokens, error) {
 	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
 		Select("bonded_tokens").
 		From("view_ibc_channels").
@@ -341,7 +356,7 @@ func (ibcChannelsView *IBCChannels) FindBondedTokensBy(channelID string) (*Bonde
 	return &bondedTokens, nil
 }
 
-func (ibcChannelsView *IBCChannels) FindBy(channelID string) (*IBCChannelRow, error) {
+func (ibcChannelsView *IBCChannelsView) FindBy(channelID string) (*IBCChannelRow, error) {
 	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
 		Select(
 			"channel_id",
@@ -425,7 +440,7 @@ func (ibcChannelsView *IBCChannels) FindBy(channelID string) (*IBCChannelRow, er
 	return &channel, nil
 }
 
-func (ibcChannelsView *IBCChannels) List(
+func (ibcChannelsView *IBCChannelsView) List(
 	order IBCChannelsListOrder,
 	filter IBCChannelsListFilter,
 	pagination *pagination.Pagination,
@@ -564,7 +579,7 @@ func (ibcChannelsView *IBCChannels) List(
 	return channels, paginationResult, nil
 }
 
-func (ibcChannelsView *IBCChannels) ListChannelsGroupByChainId(
+func (ibcChannelsView *IBCChannelsView) ListChannelsGroupByChainId(
 	order IBCChannelsListOrder,
 	filter IBCChannelsListFilter,
 	pagination *pagination.Pagination,
