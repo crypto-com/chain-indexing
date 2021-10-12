@@ -42,11 +42,7 @@ func NewMockRDbConn() *test.MockRDbConn {
 
 func NewMockRDbTx() *test.MockRDbTx {
 	mockTx := &test.MockRDbTx{}
-	mockTx.On("ToHandle").Return(&rdb.Handle{
-		Runner:      mockTx,
-		TypeConv:    &pg.PgxTypeConv{},
-		StmtBuilder: pg.PostgresStmtBuilder,
-	}).Maybe()
+	mockTx.On("ToHandle").Return(nil).Maybe()
 	mockTx.On("Rollback").Return(nil).Maybe()
 	mockTx.On("Commit").Return(nil).Maybe()
 
@@ -115,6 +111,10 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					return mockIBCChannelMessageTotalView
 				}
 
+				ibc_channel_message.UpdateLastHandledEventHeight = func(_ *ibc_channel_message.IBCChannelMessage, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
 				return mocks
 			},
 		},
@@ -172,6 +172,10 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 
 				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
 					return mockIBCChannelMessageTotalView
+				}
+
+				ibc_channel_message.UpdateLastHandledEventHeight = func(_ *ibc_channel_message.IBCChannelMessage, _ *rdb.Handle, _ int64) error {
+					return nil
 				}
 
 				return mocks
@@ -233,6 +237,10 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					return mockIBCChannelMessageTotalView
 				}
 
+				ibc_channel_message.UpdateLastHandledEventHeight = func(_ *ibc_channel_message.IBCChannelMessage, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
 				return mocks
 			},
 		},
@@ -290,6 +298,10 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 
 				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
 					return mockIBCChannelMessageTotalView
+				}
+
+				ibc_channel_message.UpdateLastHandledEventHeight = func(_ *ibc_channel_message.IBCChannelMessage, _ *rdb.Handle, _ int64) error {
+					return nil
 				}
 
 				return mocks
@@ -357,6 +369,10 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 
 				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
 					return mockIBCChannelMessageTotalView
+				}
+
+				ibc_channel_message.UpdateLastHandledEventHeight = func(_ *ibc_channel_message.IBCChannelMessage, _ *rdb.Handle, _ int64) error {
+					return nil
 				}
 
 				return mocks
@@ -440,6 +456,10 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					return mockIBCChannelMessageTotalView
 				}
 
+				ibc_channel_message.UpdateLastHandledEventHeight = func(_ *ibc_channel_message.IBCChannelMessage, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
 				return mocks
 			},
 		},
@@ -521,6 +541,10 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					return mockIBCChannelMessageTotalView
 				}
 
+				ibc_channel_message.UpdateLastHandledEventHeight = func(_ *ibc_channel_message.IBCChannelMessage, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
 				return mocks
 			},
 		},
@@ -597,6 +621,10 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 
 				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
 					return mockIBCChannelMessageTotalView
+				}
+
+				ibc_channel_message.UpdateLastHandledEventHeight = func(_ *ibc_channel_message.IBCChannelMessage, _ *rdb.Handle, _ int64) error {
+					return nil
 				}
 
 				return mocks
@@ -677,6 +705,10 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					return mockIBCChannelMessageTotalView
 				}
 
+				ibc_channel_message.UpdateLastHandledEventHeight = func(_ *ibc_channel_message.IBCChannelMessage, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
 				return mocks
 			},
 		},
@@ -745,6 +777,10 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 
 				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
 					return mockIBCChannelMessageTotalView
+				}
+
+				ibc_channel_message.UpdateLastHandledEventHeight = func(_ *ibc_channel_message.IBCChannelMessage, _ *rdb.Handle, _ int64) error {
+					return nil
 				}
 
 				return mocks
@@ -817,6 +853,10 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					return mockIBCChannelMessageTotalView
 				}
 
+				ibc_channel_message.UpdateLastHandledEventHeight = func(_ *ibc_channel_message.IBCChannelMessage, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
 				return mocks
 			},
 		},
@@ -831,14 +871,9 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 		mocks = append(mocks, &mockRDbConn.Mock)
 		mocks = append(mocks, &mockTx.Mock)
 
-		updateHeightCalled, actualInputHeight := fakeUpdateProjectionLastHandledEventHeight()
-
 		projection := NewIBCChannelMessageProjection(mockRDbConn)
 		err := projection.HandleEvents(1, tc.Events)
 		assert.NoError(t, err)
-
-		assert.True(t, *updateHeightCalled)
-		assert.EqualValues(t, int64(1), *actualInputHeight)
 
 		for _, m := range mocks {
 			m.AssertExpectations(t)
@@ -846,15 +881,4 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 
 		fmt.Println(tc.Name, "Passed")
 	}
-}
-
-func fakeUpdateProjectionLastHandledEventHeight() (*bool, *int64) {
-	var called bool
-	var inputHeight int64
-	ibc_channel_message.UpdateLastHandledEventHeight = func(_ *ibc_channel_message.IBCChannelMessage, rdbHandle *rdb.Handle, height int64) error {
-		called = true
-		inputHeight = height
-		return nil
-	}
-	return &called, &inputHeight
 }

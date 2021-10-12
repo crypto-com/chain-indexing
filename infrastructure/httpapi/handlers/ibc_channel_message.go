@@ -24,7 +24,7 @@ func NewIBCChannelMessage(logger applogger.Logger, rdbHandle *rdb.Handle) *IBCCh
 			"module": "IBCChannelMessageHandler",
 		}),
 
-		ibc_channel_message_view.NewIBCChannelMessages(rdbHandle),
+		ibc_channel_message_view.NewIBCChannelMessagesView(rdbHandle),
 	}
 }
 
