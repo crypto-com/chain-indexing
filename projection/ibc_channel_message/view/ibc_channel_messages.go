@@ -16,7 +16,21 @@ type IBCChannelMessages struct {
 	rdb *rdb.Handle
 }
 
-func NewIBCChannelMessages(handle *rdb.Handle) *IBCChannelMessages {
+type IBCChannelMessagesI interface {
+	Insert(*IBCChannelMessageRow) error
+	ListByChannelID(
+		channelID string,
+		order IBCChannelMessagesListOrder,
+		filter IBCChannelMessagesListFilter,
+		pagination *pagination.Pagination,
+	) (
+		[]IBCChannelMessageRow,
+		*pagination.PaginationResult,
+		error,
+	)
+}
+
+func NewIBCChannelMessages(handle *rdb.Handle) IBCChannelMessagesI {
 	return &IBCChannelMessages{
 		handle,
 	}
