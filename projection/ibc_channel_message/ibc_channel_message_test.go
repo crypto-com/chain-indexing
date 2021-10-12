@@ -8,11 +8,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	testify_mock "github.com/stretchr/testify/mock"
 
-	pagination2 "github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	"github.com/crypto-com/chain-indexing/internal/json"
 	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	"github.com/crypto-com/chain-indexing/projection/ibc_channel_message"
@@ -53,51 +53,11 @@ func NewMockRDbTx() *test.MockRDbTx {
 	return mockTx
 }
 
-type MockIBCChannelMessageView struct {
-	testify_mock.Mock
-}
-
-func (ibcChannelMessagesView *MockIBCChannelMessageView) Insert(ibcChannelMessage *view.IBCChannelMessageRow) error {
-	mockArgs := ibcChannelMessagesView.Called(ibcChannelMessage)
-	return mockArgs.Error(0)
-}
-
-func (ibcChannelMessagesView *MockIBCChannelMessageView) ListByChannelID(
-	channelID string,
-	order view.IBCChannelMessagesListOrder,
-	filter view.IBCChannelMessagesListFilter,
-	pagination *pagination2.Pagination,
-) (
-	[]view.IBCChannelMessageRow,
-	*pagination2.PaginationResult,
-	error,
-) {
-	mockArgs := ibcChannelMessagesView.Called(channelID, order, filter, pagination)
-	messages, _ := mockArgs.Get(0).([]view.IBCChannelMessageRow)
-	paginationResult, _ := mockArgs.Get(1).(*pagination2.PaginationResult)
-	return messages, paginationResult, mockArgs.Error(3)
-}
-
-type MockIBCChannelMessageTotalView struct {
-	testify_mock.Mock
-}
-
-func (totalView *MockIBCChannelMessageTotalView) Increment(identity string, total int64) error {
-	mockArgs := totalView.Called(identity, total)
-	return mockArgs.Error(0)
-}
-
-func (totalView *MockIBCChannelMessageTotalView) SumBy(identities []string) (int64, error) {
-	mockArgs := totalView.Called(identities)
-	total, _ := mockArgs.Get(0).(int64)
-	return total, mockArgs.Error(1)
-}
-
 func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 	testCases := []struct {
 		Name     string
 		Events   []entity_event.Event
-		MockFunc func(mock *test.MockRDbConn, events []entity_event.Event) []*testify_mock.Mock
+		MockFunc func(events []entity_event.Event) []*testify_mock.Mock
 	}{
 		{
 			Name: "HandleMsgIBCChannelOpenInit",
@@ -116,54 +76,744 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					Params: ibc_model.MsgChannelOpenInitParams{
 						ChannelID: "ChannelID",
 						RawMsgChannelOpenInit: ibc_model.RawMsgChannelOpenInit{
-							PortID: "PortID",
-							Channel: ibc_model.Channel{
-								Ordering: "Ordering",
-								Counterparty: ibc_model.ChannelCounterparty{
-									PortID:    "CounterpartyPortID",
-									ChannelID: "CounterpartyChannelID",
-								},
-							},
 							Signer: "Signer",
 						},
 					},
 				},
 			},
-			MockFunc: func(mockCoon *test.MockRDbConn, events []entity_event.Event) (mocks []*testify_mock.Mock) {
-				mockTx := NewMockRDbTx()
-				mocks = append(mocks, &mockTx.Mock)
-				mockCoon.On("Begin").Return(mockTx, nil)
-
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				typedEvent := events[0].(*usecase_event.MsgIBCChannelOpenInit)
 
-				mockIBCChannelMessageView := &MockIBCChannelMessageView{}
+				mockIBCChannelMessageView := &view.MockIBCChannelMessageView{}
 				mocks = append(mocks, &mockIBCChannelMessageView.Mock)
 				mockIBCChannelMessageView.
 					On("Insert", &view.IBCChannelMessageRow{
 						ChannelID:       "ChannelID",
 						BlockHeight:     int64(1),
 						BlockTime:       utctime.UTCTime{},
-						TransactionHash: typedEvent.TxHash(),
-						MaybeRelayer:    primptr.String(typedEvent.Params.Signer),
-						MessageType:     typedEvent.MsgName,
+						TransactionHash: "TxHash",
+						MaybeRelayer:    primptr.String("Signer"),
+						MessageType:     usecase_event.MSG_IBC_CHANNEL_OPEN_INIT,
 						Message:         typedEvent,
 					}).
 					Return(nil)
 
-				ibc_channel_message.NewIBCChannelMessagesView = func(handle *rdb.Handle) view.IBCChannelMessagesI {
+				ibc_channel_message.NewIBCChannelMessages = func(handle *rdb.Handle) view.IBCChannelMessages {
 					return mockIBCChannelMessageView
 				}
 
-				mockIBCChannelMessageTotalView := &MockIBCChannelMessageTotalView{}
+				mockIBCChannelMessageTotalView := &view.MockIBCChannelMessageTotalView{}
 				mocks = append(mocks, &mockIBCChannelMessageTotalView.Mock)
 				mockIBCChannelMessageTotalView.
 					On("Increment", fmt.Sprintf("%s:-", "ChannelID"), int64(1)).
 					Return(nil)
 				mockIBCChannelMessageTotalView.
-					On("Increment", fmt.Sprintf("%s:%s", "ChannelID", typedEvent.MsgName), int64(1)).
+					On("Increment", fmt.Sprintf("%s:%s", "ChannelID", usecase_event.MSG_IBC_CHANNEL_OPEN_INIT), int64(1)).
 					Return(nil)
 
-				ibc_channel_message.NewIBCChannelMessagesTotalView = func(handle *rdb.Handle) view.IBCChannelMessagesTotalI {
+				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
+					return mockIBCChannelMessageTotalView
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgIBCChannelOpenTry",
+			Events: []entity_event.Event{
+				&usecase_event.MsgIBCChannelOpenTry{
+					MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
+						MsgName: usecase_event.MSG_IBC_CHANNEL_OPEN_TRY,
+						Version: 1,
+						MsgCommonParams: usecase_event.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgChannelOpenTryParams{
+						ChannelID: "ChannelID",
+						RawMsgChannelOpenTry: ibc_model.RawMsgChannelOpenTry{
+							Signer: "Signer",
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[0].(*usecase_event.MsgIBCChannelOpenTry)
+
+				mockIBCChannelMessageView := &view.MockIBCChannelMessageView{}
+				mocks = append(mocks, &mockIBCChannelMessageView.Mock)
+				mockIBCChannelMessageView.
+					On("Insert", &view.IBCChannelMessageRow{
+						ChannelID:       "ChannelID",
+						BlockHeight:     int64(1),
+						BlockTime:       utctime.UTCTime{},
+						TransactionHash: "TxHash",
+						MaybeRelayer:    primptr.String("Signer"),
+						MessageType:     usecase_event.MSG_IBC_CHANNEL_OPEN_TRY,
+						Message:         typedEvent,
+					}).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessages = func(handle *rdb.Handle) view.IBCChannelMessages {
+					return mockIBCChannelMessageView
+				}
+
+				mockIBCChannelMessageTotalView := &view.MockIBCChannelMessageTotalView{}
+				mocks = append(mocks, &mockIBCChannelMessageTotalView.Mock)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:-", "ChannelID"), int64(1)).
+					Return(nil)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:%s", "ChannelID", usecase_event.MSG_IBC_CHANNEL_OPEN_TRY), int64(1)).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
+					return mockIBCChannelMessageTotalView
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgIBCChannelOpenAck",
+			Events: []entity_event.Event{
+				&usecase_event.MsgIBCChannelOpenAck{
+					MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
+						MsgName: usecase_event.MSG_IBC_CHANNEL_OPEN_ACK,
+						Version: 1,
+						MsgCommonParams: usecase_event.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgChannelOpenAckParams{
+						RawMsgChannelOpenAck: ibc_model.RawMsgChannelOpenAck{
+							ChannelID: "ChannelID",
+							Signer:    "Signer",
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[0].(*usecase_event.MsgIBCChannelOpenAck)
+
+				mockIBCChannelMessageView := &view.MockIBCChannelMessageView{}
+				mocks = append(mocks, &mockIBCChannelMessageView.Mock)
+				mockIBCChannelMessageView.
+					On("Insert", &view.IBCChannelMessageRow{
+						ChannelID:       "ChannelID",
+						BlockHeight:     int64(1),
+						BlockTime:       utctime.UTCTime{},
+						TransactionHash: "TxHash",
+						MaybeRelayer:    primptr.String("Signer"),
+						MessageType:     usecase_event.MSG_IBC_CHANNEL_OPEN_ACK,
+						Message:         typedEvent,
+					}).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessages = func(handle *rdb.Handle) view.IBCChannelMessages {
+					return mockIBCChannelMessageView
+				}
+
+				mockIBCChannelMessageTotalView := &view.MockIBCChannelMessageTotalView{}
+				mocks = append(mocks, &mockIBCChannelMessageTotalView.Mock)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:-", "ChannelID"), int64(1)).
+					Return(nil)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:%s", "ChannelID", usecase_event.MSG_IBC_CHANNEL_OPEN_ACK), int64(1)).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
+					return mockIBCChannelMessageTotalView
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgIBCChannelOpenConfirm",
+			Events: []entity_event.Event{
+				&usecase_event.MsgIBCChannelOpenConfirm{
+					MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
+						MsgName: usecase_event.MSG_IBC_CHANNEL_OPEN_CONFIRM,
+						Version: 1,
+						MsgCommonParams: usecase_event.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgChannelOpenConfirmParams{
+						RawMsgChannelOpenConfirm: ibc_model.RawMsgChannelOpenConfirm{
+							ChannelID: "ChannelID",
+							Signer:    "Signer",
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[0].(*usecase_event.MsgIBCChannelOpenConfirm)
+
+				mockIBCChannelMessageView := &view.MockIBCChannelMessageView{}
+				mocks = append(mocks, &mockIBCChannelMessageView.Mock)
+				mockIBCChannelMessageView.
+					On("Insert", &view.IBCChannelMessageRow{
+						ChannelID:       "ChannelID",
+						BlockHeight:     int64(1),
+						BlockTime:       utctime.UTCTime{},
+						TransactionHash: "TxHash",
+						MaybeRelayer:    primptr.String("Signer"),
+						MessageType:     usecase_event.MSG_IBC_CHANNEL_OPEN_CONFIRM,
+						Message:         typedEvent,
+					}).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessages = func(handle *rdb.Handle) view.IBCChannelMessages {
+					return mockIBCChannelMessageView
+				}
+
+				mockIBCChannelMessageTotalView := &view.MockIBCChannelMessageTotalView{}
+				mocks = append(mocks, &mockIBCChannelMessageTotalView.Mock)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:-", "ChannelID"), int64(1)).
+					Return(nil)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:%s", "ChannelID", usecase_event.MSG_IBC_CHANNEL_OPEN_CONFIRM), int64(1)).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
+					return mockIBCChannelMessageTotalView
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgIBCTransfer",
+			Events: []entity_event.Event{
+				&usecase_event.MsgIBCTransferTransfer{
+					MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
+						MsgName: usecase_event.MSG_IBC_TRANSFER_TRANSFER,
+						Version: 1,
+						MsgCommonParams: usecase_event.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgTransferParams{
+						RawMsgTransfer: ibc_model.RawMsgTransfer{
+							SourceChannel: "SourceChannel",
+							Sender:        "Sender",
+							Receiver:      "Receiver",
+							Token: ibc_model.MsgTransferToken{
+								Denom:  "Denom",
+								Amount: uint64(1000),
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[0].(*usecase_event.MsgIBCTransferTransfer)
+
+				mockIBCChannelMessageView := &view.MockIBCChannelMessageView{}
+				mocks = append(mocks, &mockIBCChannelMessageView.Mock)
+				mockIBCChannelMessageView.
+					On("Insert", &view.IBCChannelMessageRow{
+						ChannelID:       "SourceChannel",
+						BlockHeight:     int64(1),
+						BlockTime:       utctime.UTCTime{},
+						TransactionHash: "TxHash",
+						MaybeSender:     primptr.String("Sender"),
+						MaybeReceiver:   primptr.String("Receiver"),
+						MaybeDenom:      primptr.String("Denom"),
+						MaybeAmount:     primptr.String("1000"),
+						MessageType:     usecase_event.MSG_IBC_TRANSFER_TRANSFER,
+						Message:         typedEvent,
+					}).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessages = func(handle *rdb.Handle) view.IBCChannelMessages {
+					return mockIBCChannelMessageView
+				}
+
+				mockIBCChannelMessageTotalView := &view.MockIBCChannelMessageTotalView{}
+				mocks = append(mocks, &mockIBCChannelMessageTotalView.Mock)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:-", "SourceChannel"), int64(1)).
+					Return(nil)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:%s", "SourceChannel", usecase_event.MSG_IBC_TRANSFER_TRANSFER), int64(1)).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
+					return mockIBCChannelMessageTotalView
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgIBCRecvPacket WITHOUT error",
+			Events: []entity_event.Event{
+				&usecase_event.MsgIBCRecvPacket{
+					MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
+						MsgName: usecase_event.MSG_IBC_RECV_PACKET,
+						Version: 1,
+						MsgCommonParams: usecase_event.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgRecvPacketParams{
+						RawMsgRecvPacket: ibc_model.RawMsgRecvPacket{
+							Signer: "Signer",
+							Packet: ibc_model.Packet{
+								SourceChannel:      "SourceChannel",
+								DestinationChannel: "DestinationChannel",
+							},
+						},
+						MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
+							Success: true,
+							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
+								Sender:   "Sender",
+								Receiver: "Receiver",
+								Denom:    "Denom",
+								Amount:   json.NewUint64(1000),
+							},
+						},
+						PacketAck: ibc_model.MsgRecvPacketPacketAck{
+							MaybeResult: []byte("MaybeResult"),
+							MaybeError:  nil,
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[0].(*usecase_event.MsgIBCRecvPacket)
+
+				mockIBCChannelMessageView := &view.MockIBCChannelMessageView{}
+				mocks = append(mocks, &mockIBCChannelMessageView.Mock)
+				mockIBCChannelMessageView.
+					On("Insert", &view.IBCChannelMessageRow{
+						ChannelID:       "DestinationChannel",
+						BlockHeight:     int64(1),
+						BlockTime:       utctime.UTCTime{},
+						TransactionHash: "TxHash",
+						MaybeRelayer:    primptr.String("Signer"),
+						MaybeError:      nil,
+						MaybeSuccess:    primptr.Bool(true),
+						MaybeSender:     primptr.String("Sender"),
+						MaybeReceiver:   primptr.String("Receiver"),
+						MaybeDenom:      primptr.String("Denom"),
+						MaybeAmount:     primptr.String("1000"),
+						MessageType:     usecase_event.MSG_IBC_RECV_PACKET,
+						Message:         typedEvent,
+					}).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessages = func(handle *rdb.Handle) view.IBCChannelMessages {
+					return mockIBCChannelMessageView
+				}
+
+				mockIBCChannelMessageTotalView := &view.MockIBCChannelMessageTotalView{}
+				mocks = append(mocks, &mockIBCChannelMessageTotalView.Mock)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:-", "DestinationChannel"), int64(1)).
+					Return(nil)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:%s", "DestinationChannel", usecase_event.MSG_IBC_RECV_PACKET), int64(1)).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
+					return mockIBCChannelMessageTotalView
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgIBCRecvPacket WITH error",
+			Events: []entity_event.Event{
+				&usecase_event.MsgIBCRecvPacket{
+					MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
+						MsgName: usecase_event.MSG_IBC_RECV_PACKET,
+						Version: 1,
+						MsgCommonParams: usecase_event.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgRecvPacketParams{
+						RawMsgRecvPacket: ibc_model.RawMsgRecvPacket{
+							Signer: "Signer",
+							Packet: ibc_model.Packet{
+								SourceChannel:      "SourceChannel",
+								DestinationChannel: "DestinationChannel",
+							},
+						},
+						MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
+							Success: false,
+							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
+								Sender:   "Sender",
+								Receiver: "Receiver",
+								Denom:    "Denom",
+								Amount:   json.NewUint64(1000),
+							},
+						},
+						PacketAck: ibc_model.MsgRecvPacketPacketAck{
+							MaybeResult: nil,
+							MaybeError:  primptr.String("MaybeError"),
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[0].(*usecase_event.MsgIBCRecvPacket)
+
+				mockIBCChannelMessageView := &view.MockIBCChannelMessageView{}
+				mocks = append(mocks, &mockIBCChannelMessageView.Mock)
+				mockIBCChannelMessageView.
+					On("Insert", &view.IBCChannelMessageRow{
+						ChannelID:       "DestinationChannel",
+						BlockHeight:     int64(1),
+						BlockTime:       utctime.UTCTime{},
+						TransactionHash: "TxHash",
+						MaybeRelayer:    primptr.String("Signer"),
+						MaybeError:      primptr.String("MaybeError"),
+						MaybeSuccess:    primptr.Bool(false),
+						MaybeSender:     primptr.String("Sender"),
+						MaybeReceiver:   primptr.String("Receiver"),
+						MaybeDenom:      primptr.String("Denom"),
+						MaybeAmount:     primptr.String("1000"),
+						MessageType:     usecase_event.MSG_IBC_RECV_PACKET,
+						Message:         typedEvent,
+					}).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessages = func(handle *rdb.Handle) view.IBCChannelMessages {
+					return mockIBCChannelMessageView
+				}
+
+				mockIBCChannelMessageTotalView := &view.MockIBCChannelMessageTotalView{}
+				mocks = append(mocks, &mockIBCChannelMessageTotalView.Mock)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:-", "DestinationChannel"), int64(1)).
+					Return(nil)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:%s", "DestinationChannel", usecase_event.MSG_IBC_RECV_PACKET), int64(1)).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
+					return mockIBCChannelMessageTotalView
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgIBCAcknowledgement WITHOUT error",
+			Events: []entity_event.Event{
+				&usecase_event.MsgIBCAcknowledgement{
+					MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
+						MsgName: usecase_event.MSG_IBC_ACKNOWLEDGEMENT,
+						Version: 1,
+						MsgCommonParams: usecase_event.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgAcknowledgementParams{
+						RawMsgAcknowledgement: ibc_model.RawMsgAcknowledgement{
+							Signer: "Signer",
+							Packet: ibc_model.Packet{
+								SourceChannel:      "SourceChannel",
+								DestinationChannel: "DestinationChannel",
+							},
+						},
+						MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
+							Success: true,
+							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
+								Sender:   "Sender",
+								Receiver: "Receiver",
+								Denom:    "Denom",
+								Amount:   json.NewUint64(1000),
+							},
+							MaybeError: nil,
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[0].(*usecase_event.MsgIBCAcknowledgement)
+
+				mockIBCChannelMessageView := &view.MockIBCChannelMessageView{}
+				mocks = append(mocks, &mockIBCChannelMessageView.Mock)
+				mockIBCChannelMessageView.
+					On("Insert", &view.IBCChannelMessageRow{
+						ChannelID:       "SourceChannel",
+						BlockHeight:     int64(1),
+						BlockTime:       utctime.UTCTime{},
+						TransactionHash: "TxHash",
+						MaybeRelayer:    primptr.String("Signer"),
+						MaybeError:      nil,
+						MaybeSuccess:    primptr.Bool(true),
+						MaybeSender:     primptr.String("Sender"),
+						MaybeReceiver:   primptr.String("Receiver"),
+						MaybeDenom:      primptr.String("Denom"),
+						MaybeAmount:     primptr.String("1000"),
+						MessageType:     usecase_event.MSG_IBC_ACKNOWLEDGEMENT,
+						Message:         typedEvent,
+					}).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessages = func(handle *rdb.Handle) view.IBCChannelMessages {
+					return mockIBCChannelMessageView
+				}
+
+				mockIBCChannelMessageTotalView := &view.MockIBCChannelMessageTotalView{}
+				mocks = append(mocks, &mockIBCChannelMessageTotalView.Mock)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:-", "SourceChannel"), int64(1)).
+					Return(nil)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:%s", "SourceChannel", usecase_event.MSG_IBC_ACKNOWLEDGEMENT), int64(1)).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
+					return mockIBCChannelMessageTotalView
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgIBCAcknowledgement WITH error",
+			Events: []entity_event.Event{
+				&usecase_event.MsgIBCAcknowledgement{
+					MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
+						MsgName: usecase_event.MSG_IBC_ACKNOWLEDGEMENT,
+						Version: 1,
+						MsgCommonParams: usecase_event.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgAcknowledgementParams{
+						RawMsgAcknowledgement: ibc_model.RawMsgAcknowledgement{
+							Signer: "Signer",
+							Packet: ibc_model.Packet{
+								SourceChannel:      "SourceChannel",
+								DestinationChannel: "DestinationChannel",
+							},
+						},
+						MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
+							Success: false,
+							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
+								Sender:   "Sender",
+								Receiver: "Receiver",
+								Denom:    "Denom",
+								Amount:   json.NewUint64(1000),
+							},
+							MaybeError: primptr.String("MaybeError"),
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[0].(*usecase_event.MsgIBCAcknowledgement)
+
+				mockIBCChannelMessageView := &view.MockIBCChannelMessageView{}
+				mocks = append(mocks, &mockIBCChannelMessageView.Mock)
+				mockIBCChannelMessageView.
+					On("Insert", &view.IBCChannelMessageRow{
+						ChannelID:       "SourceChannel",
+						BlockHeight:     int64(1),
+						BlockTime:       utctime.UTCTime{},
+						TransactionHash: "TxHash",
+						MaybeRelayer:    primptr.String("Signer"),
+						MaybeError:      primptr.String("MaybeError"),
+						MaybeSuccess:    primptr.Bool(false),
+						MaybeSender:     primptr.String("Sender"),
+						MaybeReceiver:   primptr.String("Receiver"),
+						MaybeDenom:      primptr.String("Denom"),
+						MaybeAmount:     primptr.String("1000"),
+						MessageType:     usecase_event.MSG_IBC_ACKNOWLEDGEMENT,
+						Message:         typedEvent,
+					}).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessages = func(handle *rdb.Handle) view.IBCChannelMessages {
+					return mockIBCChannelMessageView
+				}
+
+				mockIBCChannelMessageTotalView := &view.MockIBCChannelMessageTotalView{}
+				mocks = append(mocks, &mockIBCChannelMessageTotalView.Mock)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:-", "SourceChannel"), int64(1)).
+					Return(nil)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:%s", "SourceChannel", usecase_event.MSG_IBC_ACKNOWLEDGEMENT), int64(1)).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
+					return mockIBCChannelMessageTotalView
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgIBCTimeout",
+			Events: []entity_event.Event{
+				&usecase_event.MsgIBCTimeout{
+					MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
+						MsgName: usecase_event.MSG_IBC_TIMEOUT,
+						Version: 1,
+						MsgCommonParams: usecase_event.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgTimeoutParams{
+						RawMsgTimeout: ibc_model.RawMsgTimeout{
+							Signer: "Signer",
+							Packet: ibc_model.Packet{
+								SourceChannel:      "SourceChannel",
+								DestinationChannel: "DestinationChannel",
+							},
+						},
+						MaybeMsgTransfer: &ibc_model.MsgTimeoutMsgTransfer{
+							RefundReceiver: "RefundReceiver",
+							RefundDenom:    "RefundDenom",
+							RefundAmount:   1000,
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[0].(*usecase_event.MsgIBCTimeout)
+
+				mockIBCChannelMessageView := &view.MockIBCChannelMessageView{}
+				mocks = append(mocks, &mockIBCChannelMessageView.Mock)
+				mockIBCChannelMessageView.
+					On("Insert", &view.IBCChannelMessageRow{
+						ChannelID:       "SourceChannel",
+						BlockHeight:     int64(1),
+						BlockTime:       utctime.UTCTime{},
+						TransactionHash: "TxHash",
+						MaybeRelayer:    primptr.String("Signer"),
+						MaybeReceiver:   primptr.String("RefundReceiver"),
+						MaybeDenom:      primptr.String("RefundDenom"),
+						MaybeAmount:     primptr.String("1000"),
+						MessageType:     usecase_event.MSG_IBC_TIMEOUT,
+						Message:         typedEvent,
+					}).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessages = func(handle *rdb.Handle) view.IBCChannelMessages {
+					return mockIBCChannelMessageView
+				}
+
+				mockIBCChannelMessageTotalView := &view.MockIBCChannelMessageTotalView{}
+				mocks = append(mocks, &mockIBCChannelMessageTotalView.Mock)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:-", "SourceChannel"), int64(1)).
+					Return(nil)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:%s", "SourceChannel", usecase_event.MSG_IBC_TIMEOUT), int64(1)).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
+					return mockIBCChannelMessageTotalView
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgIBCTimeoutOnClose",
+			Events: []entity_event.Event{
+				&usecase_event.MsgIBCTimeoutOnClose{
+					MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
+						MsgName: usecase_event.MSG_IBC_TIMEOUT_ON_CLOSE,
+						Version: 1,
+						MsgCommonParams: usecase_event.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgTimeoutOnCloseParams{
+						RawMsgTimeoutOnClose: ibc_model.RawMsgTimeoutOnClose{
+							Signer: "Signer",
+							Packet: ibc_model.Packet{
+								SourceChannel:      "SourceChannel",
+								DestinationChannel: "DestinationChannel",
+							},
+						},
+						MaybeMsgTransfer: &ibc_model.MsgTimeoutMsgTransfer{
+							RefundReceiver: "RefundReceiver",
+							RefundDenom:    "RefundDenom",
+							RefundAmount:   1000,
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[0].(*usecase_event.MsgIBCTimeoutOnClose)
+
+				mockIBCChannelMessageView := &view.MockIBCChannelMessageView{}
+				mocks = append(mocks, &mockIBCChannelMessageView.Mock)
+				mockIBCChannelMessageView.
+					On("Insert", &view.IBCChannelMessageRow{
+						ChannelID:       "SourceChannel",
+						BlockHeight:     int64(1),
+						BlockTime:       utctime.UTCTime{},
+						TransactionHash: "TxHash",
+						MaybeRelayer:    primptr.String("Signer"),
+						MaybeReceiver:   primptr.String("RefundReceiver"),
+						MaybeDenom:      primptr.String("RefundDenom"),
+						MaybeAmount:     primptr.String("1000"),
+						MessageType:     usecase_event.MSG_IBC_TIMEOUT_ON_CLOSE,
+						Message:         typedEvent,
+					}).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessages = func(handle *rdb.Handle) view.IBCChannelMessages {
+					return mockIBCChannelMessageView
+				}
+
+				mockIBCChannelMessageTotalView := &view.MockIBCChannelMessageTotalView{}
+				mocks = append(mocks, &mockIBCChannelMessageTotalView.Mock)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:-", "SourceChannel"), int64(1)).
+					Return(nil)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:%s", "SourceChannel", usecase_event.MSG_IBC_TIMEOUT_ON_CLOSE), int64(1)).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
 					return mockIBCChannelMessageTotalView
 				}
 
@@ -174,8 +824,12 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 
 	for _, tc := range testCases {
 		mockRDbConn := NewMockRDbConn()
-		mocks := tc.MockFunc(mockRDbConn, tc.Events)
+		mockTx := NewMockRDbTx()
+		mockRDbConn.On("Begin").Return(mockTx, nil)
+
+		mocks := tc.MockFunc(tc.Events)
 		mocks = append(mocks, &mockRDbConn.Mock)
+		mocks = append(mocks, &mockTx.Mock)
 
 		updateHeightCalled, actualInputHeight := fakeUpdateProjectionLastHandledEventHeight()
 
@@ -197,7 +851,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 func fakeUpdateProjectionLastHandledEventHeight() (*bool, *int64) {
 	var called bool
 	var inputHeight int64
-	ibc_channel_message.UpdateProjectionLastHandledEventHeight = func(_ *ibc_channel_message.IBCChannelMessage, rdbHandle *rdb.Handle, height int64) error {
+	ibc_channel_message.UpdateLastHandledEventHeight = func(_ *ibc_channel_message.IBCChannelMessage, rdbHandle *rdb.Handle, height int64) error {
 		called = true
 		inputHeight = height
 		return nil

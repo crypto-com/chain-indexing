@@ -5,17 +5,17 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 )
 
-type IBCChannelMessagesTotal struct {
-	*view.Total
-}
-
-type IBCChannelMessagesTotalI interface {
+type IBCChannelMessagesTotal interface {
 	Increment(identity string, total int64) error
 	SumBy(identities []string) (int64, error)
 }
 
-func NewIBCChannelMessagesTotal(rdbHandle *rdb.Handle) IBCChannelMessagesTotalI {
-	return &IBCChannelMessagesTotal{
+type IBCChannelMessagesTotalView struct {
+	*view.Total
+}
+
+func NewIBCChannelMessagesTotalView(rdbHandle *rdb.Handle) IBCChannelMessagesTotal {
+	return &IBCChannelMessagesTotalView{
 		view.NewTotal(rdbHandle, "view_ibc_channel_messages_total"),
 	}
 }

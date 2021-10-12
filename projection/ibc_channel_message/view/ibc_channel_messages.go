@@ -12,11 +12,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-type IBCChannelMessages struct {
-	rdb *rdb.Handle
-}
-
-type IBCChannelMessagesI interface {
+type IBCChannelMessages interface {
 	Insert(*IBCChannelMessageRow) error
 	ListByChannelID(
 		channelID string,
@@ -30,13 +26,17 @@ type IBCChannelMessagesI interface {
 	)
 }
 
-func NewIBCChannelMessages(handle *rdb.Handle) IBCChannelMessagesI {
-	return &IBCChannelMessages{
+type IBCChannelMessagesView struct {
+	rdb *rdb.Handle
+}
+
+func NewIBCChannelMessagesView(handle *rdb.Handle) IBCChannelMessages {
+	return &IBCChannelMessagesView{
 		handle,
 	}
 }
 
-func (ibcChannelMessagesView *IBCChannelMessages) Insert(ibcChannelMessage *IBCChannelMessageRow) error {
+func (ibcChannelMessagesView *IBCChannelMessagesView) Insert(ibcChannelMessage *IBCChannelMessageRow) error {
 	messageJSON, err := jsoniter.MarshalToString(ibcChannelMessage.Message)
 	if err != nil {
 		return fmt.Errorf("error JSON marshalling ibcChannelMessage.Message for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -91,7 +91,7 @@ func (ibcChannelMessagesView *IBCChannelMessages) Insert(ibcChannelMessage *IBCC
 	return nil
 }
 
-func (ibcChannelMessagesView *IBCChannelMessages) ListByChannelID(
+func (ibcChannelMessagesView *IBCChannelMessagesView) ListByChannelID(
 	channelID string,
 	order IBCChannelMessagesListOrder,
 	filter IBCChannelMessagesListFilter,
@@ -142,7 +142,7 @@ func (ibcChannelMessagesView *IBCChannelMessages) ListByChannelID(
 		ibcChannelMessagesView.rdb,
 	).WithCustomTotalQueryFn(
 		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
-			totalView := NewIBCChannelMessagesTotal(rdbHandle)
+			totalView := NewIBCChannelMessagesTotalView(rdbHandle)
 			total, err := totalView.SumBy(totalIdentities)
 			if err != nil {
 				return int64(0), err
