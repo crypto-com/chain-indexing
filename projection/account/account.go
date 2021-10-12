@@ -38,6 +38,11 @@ func NewAccount(
 	}
 }
 
+var (
+	NewAccountsView              = account_view.NewAccountsView
+	UpdateLastHandledEventHeight = (*Account).UpdateLastHandledEventHeight
+)
+
 func (_ *Account) GetEventsToListen() []string {
 	return []string{
 		// TODO: Genesis account
@@ -64,7 +69,7 @@ func (projection *Account) HandleEvents(height int64, events []event_entity.Even
 
 	rdbTxHandle := rdbTx.ToHandle()
 
-	accountsView := account_view.NewAccounts(rdbTxHandle)
+	accountsView := NewAccountsView(rdbTxHandle)
 
 	for _, event := range events {
 		if accountCreatedEvent, ok := event.(*event_usecase.AccountTransferred); ok {
@@ -74,7 +79,7 @@ func (projection *Account) HandleEvents(height int64, events []event_entity.Even
 		}
 	}
 
-	if err = projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
+	if err = UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
 		return fmt.Errorf("error updating last handled event height: %v", err)
 	}
 
@@ -86,7 +91,7 @@ func (projection *Account) HandleEvents(height int64, events []event_entity.Even
 	return nil
 }
 
-func (projection *Account) handleAccountCreatedEvent(accountsView *account_view.Accounts, event *event_usecase.AccountTransferred) error {
+func (projection *Account) handleAccountCreatedEvent(accountsView account_view.Accounts, event *event_usecase.AccountTransferred) error {
 
 	recipienterr := projection.writeAccountInfo(accountsView, event.Recipient)
 	if recipienterr != nil {
@@ -119,7 +124,7 @@ func (projection *Account) getAccountBalances(targetAddress string) (coin.Coins,
 	return balanceInfo, nil
 }
 
-func (projection *Account) writeAccountInfo(accountsView *account_view.Accounts, address string) error {
+func (projection *Account) writeAccountInfo(accountsView account_view.Accounts, address string) error {
 	accountInfo, err := projection.getAccountInfo(address)
 	if err != nil {
 		return err

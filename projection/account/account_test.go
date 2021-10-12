@@ -11,6 +11,7 @@ import (
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/crypto-com/chain-indexing/projection/account"
+	account_view "github.com/crypto-com/chain-indexing/projection/account/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/stretchr/testify/assert"
@@ -53,7 +54,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 	testCases := []struct {
 		Name     string
 		Events   []entity_event.Event
-		MockFunc func(mockConn *test.MockRDbConn, mockClient *cosmosapp.MockClient) []*testify_mock.Mock
+		MockFunc func(mockClient *cosmosapp.MockClient) []*testify_mock.Mock
 	}{
 		{
 			Name: "HandleAccountTransferred",
@@ -69,11 +70,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					Amount:    coin.Coins{},
 				},
 			},
-			MockFunc: func(mockCoon *test.MockRDbConn, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
-				mockTx := NewMockRDbTx()
-				mocks = append(mocks, &mockTx.Mock)
-				mockCoon.On("Begin").Return(mockTx, nil)
-
+			MockFunc: func(mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 				mockClient.On("Account", "Recipient").Return(
 					&cosmosapp.Account{
 						Type:    "AccountType",
@@ -123,20 +120,31 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					nil,
 				)
 
-				mockExecResult := &test.MockRDbExecResult{}
-				mocks = append(mocks, &mockExecResult.Mock)
-				mockExecResult.On("RowsAffected").Return(int64(1))
-				mockTx.On(
-					"Exec",
-					"INSERT INTO view_accounts (address,account_type,name,pubkey,account_number,sequence_number,balance) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT(address) DO UPDATE SET balance = EXCLUDED.balance",
-					"Recipient",
-					"AccountType",
-					(*string)(nil),
-					testify_mock.Anything,
-					"",
-					"",
-					"[{\"denom\":\"Denom\",\"amount\":\"100\"}]",
-				).Return(mockExecResult, nil)
+				mockAccountsView := account_view.NewMockAccountsView(nil).(*account_view.MockAccountsView)
+				mocks = append(mocks, &mockAccountsView.Mock)
+
+				account.NewAccountsView = func(_ *rdb.Handle) account_view.Accounts {
+					return mockAccountsView
+				}
+
+				pubkey := "Key"
+
+				mockAccountsView.On(
+					"Upsert",
+					&account_view.AccountRow{
+						Address:       "Recipient",
+						Type:          "AccountType",
+						MaybeName:     (*string)(nil),
+						MaybePubkey:   &pubkey,
+						AccountNumber: "", SequenceNumber: "",
+						Balance: coin.Coins{
+							{
+								Denom:  "Denom",
+								Amount: coin.NewInt(100),
+							},
+						},
+					},
+				).Return(nil)
 
 				mockClient.On("Account", "Sender").Return(
 					&cosmosapp.Account{
@@ -144,7 +152,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						Address: "Sender",
 						MaybePubkey: &cosmosapp.PubKey{
 							Type: "PubKeyType",
-							Key:  "Key",
+							Key:  pubkey,
 						},
 						AccountNumber: "",
 						Sequence:      "",
@@ -187,19 +195,26 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					nil,
 				)
 
-				mockTx.On(
-					"Exec",
-					"INSERT INTO view_accounts (address,account_type,name,pubkey,account_number,sequence_number,balance) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT(address) DO UPDATE SET balance = EXCLUDED.balance",
-					"Sender",
-					"AccountType",
-					(*string)(nil),
-					testify_mock.Anything,
-					"",
-					"",
-					"[{\"denom\":\"Denom\",\"amount\":\"1000\"}]",
-				).Return(mockExecResult, nil)
+				mockAccountsView.On(
+					"Upsert",
+					&account_view.AccountRow{
+						Address:       "Sender",
+						Type:          "AccountType",
+						MaybeName:     (*string)(nil),
+						MaybePubkey:   &pubkey,
+						AccountNumber: "", SequenceNumber: "",
+						Balance: coin.Coins{
+							{
+								Denom:  "Denom",
+								Amount: coin.NewInt(1000),
+							},
+						},
+					},
+				).Return(nil)
 
-				mockUpdateLastHandledEventHeight(mockTx)
+				account.UpdateLastHandledEventHeight = func(_ *account.Account, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
 
 				return mocks
 			},
@@ -208,9 +223,11 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 
 	for _, tc := range testCases {
 		mockRDbConn := NewMockRDbConn()
+		mockTx := NewMockRDbTx()
+		mockRDbConn.On("Begin").Return(mockTx, nil)
 		mockClient := &cosmosapp.MockClient{}
-		mocks := tc.MockFunc(mockRDbConn, mockClient)
-		mocks = append(mocks, &mockRDbConn.Mock, &mockClient.Mock)
+		mocks := tc.MockFunc(mockClient)
+		mocks = append(mocks, &mockClient.Mock)
 
 		projection := NewAccountProjection(mockRDbConn, mockClient)
 		err := projection.HandleEvents(1, tc.Events)
