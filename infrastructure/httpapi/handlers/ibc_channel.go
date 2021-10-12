@@ -27,7 +27,7 @@ func NewIBCChannel(logger applogger.Logger, rdbHandle *rdb.Handle) *IBCChannel {
 		}),
 
 		ibc_channel_view.NewIBCChannelsView(rdbHandle),
-		ibc_channel_view.NewIBCDenomHashMapping(rdbHandle),
+		ibc_channel_view.NewIBCDenomHashMappingView(rdbHandle),
 	}
 }
 

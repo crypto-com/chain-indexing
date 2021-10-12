@@ -25,8 +25,8 @@ var (
 	NewIBCChannels = ibc_channel_view.NewIBCChannelsView
 	NewIBCClients = ibc_channel_view.NewIBCClientsView
 	NewIBCConnections = ibc_channel_view.NewIBCConnectionsView
+	NewIBCDenomHashMapping = ibc_channel_view.NewIBCDenomHashMappingView
 	NewIBCChannelTraces = ibc_channel_view.NewIBCChannelTraces
-	NewIBCDenomHashMapping = ibc_channel_view.NewIBCDenomHashMapping
 	UpdateLastHandledEventHeight = (*IBCChannel).UpdateLastHandledEventHeight
 )
 

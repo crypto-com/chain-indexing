@@ -17,7 +17,7 @@ type IBCDenomHashMappingView struct {
 	rdb *rdb.Handle
 }
 
-func NewIBCDenomHashMapping(handle *rdb.Handle) IBCDenomHashMapping {
+func NewIBCDenomHashMappingView(handle *rdb.Handle) IBCDenomHashMapping {
 	return &IBCDenomHashMappingView{
 		handle,
 	}
