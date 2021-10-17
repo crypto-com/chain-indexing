@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
@@ -40,7 +41,7 @@ func ParseBlockToCommands(
 		}
 		commands = append(commands, transactionCommands...)
 
-		msgCommands, parseErr := ParseBlockResultsTxsMsgToCommands(
+		msgCommands, parseErr := ParseBlockTxsMsgToCommands(
 			parserManager,
 			txDecoder,
 			block,
@@ -61,6 +62,12 @@ func ParseBlockToCommands(
 			return nil, fmt.Errorf("error parsing block_results account transfer commands: %v", parseErr)
 		}
 		commands = append(commands, txsAccountTransferCommands...)
+
+		txsResultsCommand, parseTxsResultCommandErr := ParseBlockResultsTxsResults(block, blockResults)
+		if parseTxsResultCommandErr != nil {
+			return nil, fmt.Errorf("error parsing block_results txs_results commands: %v", parseErr)
+		}
+		commands = append(commands, txsResultsCommand...)
 	}
 
 	beginBlockEventsCommands, parseErr := ParseBeginBlockEventsCommands(

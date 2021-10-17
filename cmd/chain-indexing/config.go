@@ -68,6 +68,7 @@ type FileConfig struct {
 	Postgres                   PostgresConfig
 	Logger                     LoggerConfig
 	Projection                 ProjectionConfig
+	CronJob                    CronJobConfig                    `toml:"cronjob"`
 	CosmosVersionEnabledHeight CosmosVersionEnabledHeightConfig `toml:"cosmos_version_enabled_height"`
 }
 
@@ -137,6 +138,10 @@ type LoggerConfig struct {
 }
 
 type ProjectionConfig struct {
+	Enables []string `toml:"enables"`
+}
+
+type CronJobConfig struct {
 	Enables []string `toml:"enables"`
 }
 

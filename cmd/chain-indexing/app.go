@@ -7,11 +7,11 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/crypto-com/chain-indexing/appinterface/projection"
 	"github.com/crypto-com/chain-indexing/infrastructure"
 	"github.com/crypto-com/chain-indexing/internal/filereader/toml"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/crypto-com/chain-indexing/internal/primptr"
+	projection_usecase "github.com/crypto-com/chain-indexing/usecase/projection"
 )
 
 const SYSTEM_MODE_EVENT_STORE = "EVENT_STORE"
@@ -109,7 +109,7 @@ func CliApp(args []string) error {
 			if projectionConfigFileErr != nil {
 				return fmt.Errorf("error creating projection Toml config reader: %v", configFileErr)
 			}
-			if readProjectionConfigErr := projectionConfigReader.Read(&projection.GlobalConfig); readProjectionConfigErr != nil {
+			if readProjectionConfigErr := projectionConfigReader.Read(&projection_usecase.GlobalConfig); readProjectionConfigErr != nil {
 				return fmt.Errorf("error reading global projection Toml config: %v", readProjectionConfigErr)
 			}
 
@@ -166,7 +166,9 @@ func CliApp(args []string) error {
 
 			projections := initProjections(logger, rdbConn, &config)
 
-			indexService := NewIndexService(logger, rdbConn, &config, projections)
+			cronJobs := initCronJobs(logger, rdbConn, &config)
+
+			indexService := NewIndexService(logger, rdbConn, &config, projections, cronJobs)
 			go func() {
 				if runErr := indexService.Run(); runErr != nil {
 					logger.Panicf("%v", runErr)

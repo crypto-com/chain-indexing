@@ -18,11 +18,13 @@ CREATE TABLE view_bridge_pending_activities(
     maybe_bridge_fee_amount VARCHAR NULL,
     maybe_bridge_fee_denom VARCHAR NULL,
     status VARCHAR NOT NULL,
-    is_processed BOOL NOT NULL
+    is_processed BOOL NOT NULL,
+    created_at BIGINT NOT NULL,
+    updated_at BIGINT NOT NULL
 );
 
 CREATE INDEX view_bridge_pending_activities_link_id_btree_index
-    ON view_bridge_pending_activities USING btree (link_id);
+    ON view_bridge_pending_activities USING btree (link_id, is_processed);
 
 CREATE INDEX view_bridge_pending_activities_is_processed_btree_index
-    ON view_bridge_pending_activities USING btree (is_processed);
+    ON view_bridge_pending_activities USING btree (direction, is_processed);

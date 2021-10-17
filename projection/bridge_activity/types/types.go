@@ -1,10 +1,18 @@
 package types
 
-type Status string
+type Chain = string
 
-type BridgeType string
+type Status = string
 
-type Direction string
+type BridgeType = string
+
+type Direction = string
+
+const (
+	CHAIN_CRYPTO_ORG_CHAIN Chain = "Crypto.org-Chain"
+	CHAIN_CRONOS           Chain = "Cronos"
+	CHAIN_ETHEREUM         Chain = "Ethereum"
+)
 
 const (
 	STATUS_PENDING                Status = "Pending"
@@ -22,4 +30,5 @@ const (
 const (
 	DIRECTION_OUTGOING Direction = "Outgoing"
 	DIRECTION_INCOMING Direction = "Incoming"
+	DIRECTION_RESPONSE Direction = "Response"
 )
