@@ -3,6 +3,7 @@ package tmcosmosutils
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"sort"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/multisig"
@@ -90,6 +91,7 @@ func MustValidatorAddressFromAccountAddress(bech32Prefix string, srcAddress stri
 }
 
 func ValidatorAddressFromAccountAddress(bech32Prefix string, srcAddress string) (string, error) {
+	log.Println(srcAddress)
 	_, conv, err := bech32.Decode(srcAddress)
 	if err != nil {
 		return "", fmt.Errorf("error Decoding provided address: %v", err)

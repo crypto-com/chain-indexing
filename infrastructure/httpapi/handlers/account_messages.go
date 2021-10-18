@@ -24,7 +24,7 @@ func NewAccountMessages(logger applogger.Logger, rdbHandle *rdb.Handle) *Account
 			"module": "AccountMessagesHandler",
 		}),
 
-		account_message_view.NewAccountMessages(rdbHandle),
+		account_message_view.NewAccountMessagesView(rdbHandle),
 	}
 }
 
