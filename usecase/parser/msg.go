@@ -26,7 +26,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
-func ParseBlockResultsTxsMsgToCommands(
+func ParseBlockTxsMsgToCommands(
 	parserManager *utils.CosmosParserManager,
 	txDecoder *utils.TxDecoder,
 	block *model.Block,

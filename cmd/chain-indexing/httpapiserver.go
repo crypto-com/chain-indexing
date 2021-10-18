@@ -22,6 +22,7 @@ type HTTPAPIServer struct {
 	cosmosAppClient  cosmosapp.Client
 	tendermintClient tendermint.Client
 
+	accountAddressPrefix   string
 	validatorAddressPrefix string
 	conNodeAddressPrefix   string
 
@@ -68,6 +69,7 @@ func NewHTTPAPIServer(logger applogger.Logger, rdbConn rdb.Conn, config *Config)
 		cosmosAppClient:  cosmosClient,
 		tendermintClient: tendermintClient,
 
+		accountAddressPrefix:   config.Blockchain.AccountAddressPrefix,
 		validatorAddressPrefix: config.Blockchain.ValidatorAddressPrefix,
 		conNodeAddressPrefix:   config.Blockchain.ConNodeAddressPrefix,
 		listeningAddress:       config.HTTP.ListeningAddress,
@@ -152,6 +154,11 @@ func (server *HTTPAPIServer) Run() error {
 		server.logger,
 		server.rdbConn.ToHandle(),
 	)
+	bridgesHandler := handlers.NewBridges(
+		server.logger,
+		server.rdbConn.ToHandle(),
+		server.accountAddressPrefix,
+	)
 
 	routeRegistry := routes.NewRoutesRegistry(
 		searchHandler,
@@ -167,6 +174,7 @@ func (server *HTTPAPIServer) Run() error {
 		nftsHandler,
 		ibcChannelHandler,
 		ibcChannelMessageHandler,
+		bridgesHandler,
 	)
 	routeRegistry.Register(httpServer, server.routePrefix)
 

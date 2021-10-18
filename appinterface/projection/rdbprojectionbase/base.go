@@ -2,6 +2,8 @@ package rdbprojectionbase
 
 import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
+	projection_usecase "github.com/crypto-com/chain-indexing/usecase/projection"
 )
 
 const DEFAULT_TABLE = "projections"
@@ -15,39 +17,49 @@ const DEFAULT_TABLE = "projections"
 // Base is a bas for projection which keeps track of last handled event height using relational
 // database. It implements Id() and GetLastHandledEventHeight() of projection interface.
 type Base struct {
+	projection_usecase.Base
+
 	rdbHandle *rdb.Handle
 	store     *Store
-
-	projectionId string
 }
 
 // Create a new Base using table name in the RDb to keep the projection handling records
 func NewRDbBase(rdbHandle *rdb.Handle, projectionId string) *Base {
-	return &Base{
-		rdbHandle: rdbHandle,
-		store:     NewStore(DEFAULT_TABLE),
+	return NewRDbBaseWithOptions(rdbHandle, projectionId, Options{
+		MaybeConfigPtr: nil,
 
-		projectionId: projectionId,
-	}
+		MaybeTable: primptr.String(DEFAULT_TABLE),
+	})
 }
 
-// Create a new Base with customize table name in the RDb to keep the projection handling records
-func NewRDbBaseWithTable(rdbHandle *rdb.Handle, projectionId string, table string) *Base {
-	return &Base{
+func NewRDbBaseWithOptions(rdbHandle *rdb.Handle, projectionId string, options Options) *Base {
+	table := DEFAULT_TABLE
+	if options.MaybeTable != nil {
+		table = *options.MaybeTable
+	}
+
+	base := &Base{
+		Base: projection_usecase.NewBaseWithOptions(projectionId, projection_usecase.Options{
+			MaybeConfigPtr: options.MaybeConfigPtr,
+		}),
+
 		rdbHandle: rdbHandle,
 		store:     NewStore(table),
-
-		projectionId: projectionId,
 	}
+
+	return base
 }
 
-// Implements projection.Id()
-func (base *Base) Id() string {
-	return base.projectionId
+type Options struct {
+	// Pointer to the configuration
+	MaybeConfigPtr interface{}
+
+	// Customize table name in the RDb too keep the projection handling records
+	MaybeTable *string
 }
 
 func (base *Base) UpdateLastHandledEventHeight(rdbHandle *rdb.Handle, height int64) error {
-	if err := base.store.UpdateLastHandledEventHeight(rdbHandle, base.projectionId, height); err != nil {
+	if err := base.store.UpdateLastHandledEventHeight(rdbHandle, base.Id(), height); err != nil {
 		return err
 	}
 	return nil
@@ -55,5 +67,5 @@ func (base *Base) UpdateLastHandledEventHeight(rdbHandle *rdb.Handle, height int
 
 // Implements projection.GetLastHandledEventHeight()
 func (base *Base) GetLastHandledEventHeight() (*int64, error) {
-	return base.store.GetLastHandledEventHeight(base.rdbHandle, base.projectionId)
+	return base.store.GetLastHandledEventHeight(base.rdbHandle, base.Id())
 }

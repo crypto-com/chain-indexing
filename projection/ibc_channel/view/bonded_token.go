@@ -2,8 +2,8 @@ package view
 
 import "github.com/crypto-com/chain-indexing/usecase/coin"
 
-// OnThisChain: 				keep track of tokens from counterparty chain transfering to this chain
-// OnCounterpartyChain: keep track of tokens from this chain transering to counterparty chain
+// OnThisChain:         keep track of tokens from counterparty chain transferring to this chain
+// OnCounterpartyChain: keep track of tokens from this chain transferring to counterparty chain
 type BondedTokens struct {
 	OnThisChain         []BondedToken `json:"onThisChain"`
 	OnCounterpartyChain []BondedToken `json:"onCounterpartyChain"`

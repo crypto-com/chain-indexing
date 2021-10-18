@@ -9,6 +9,7 @@ import (
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 
+// TODO: Move InfoManager to CronJob
 const INFO_DEFAULT_POLLING_INTERVAL = 5 * time.Second
 
 type InfoManager struct {

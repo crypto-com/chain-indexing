@@ -22,6 +22,7 @@ type RouteRegistry struct {
 	nftsHandler                *handlers.NFTs
 	ibcChannelHandler          *handlers.IBCChannel
 	ibcChannelMessageHandler   *handlers.IBCChannelMessage
+	bridgesHandler             *handlers.Bridges
 }
 
 func NewRoutesRegistry(
@@ -38,6 +39,7 @@ func NewRoutesRegistry(
 	nftsHandler *handlers.NFTs,
 	ibcChannelHandler *handlers.IBCChannel,
 	ibcChannelMessageHandler *handlers.IBCChannelMessage,
+	bridgesHandler *handlers.Bridges,
 ) *RouteRegistry {
 	return &RouteRegistry{
 		searchHandler,
@@ -53,6 +55,7 @@ func NewRoutesRegistry(
 		nftsHandler,
 		ibcChannelHandler,
 		ibcChannelMessageHandler,
+		bridgesHandler,
 	}
 }
 
@@ -116,4 +119,9 @@ func (registry *RouteRegistry) Register(server *httpapi.Server, routePrefix stri
 	server.GET(fmt.Sprintf("%s/api/v1/ibc/channels/{channelId}", routePrefix), registry.ibcChannelHandler.FindChannelById)
 	server.GET(fmt.Sprintf("%s/api/v1/ibc/channels/{channelId}/messages", routePrefix), registry.ibcChannelMessageHandler.ListByChannelID)
 	server.GET(fmt.Sprintf("%s/api/v1/ibc/denom-hash-mappings", routePrefix), registry.ibcChannelHandler.ListAllDenomHashMapping)
+
+	server.GET(fmt.Sprintf("%s/api/v1/bridges/txs/{hash}", routePrefix), registry.bridgesHandler.FindByTransactionHash)
+	server.GET(fmt.Sprintf("%s/api/v1/bridges/activities", routePrefix), registry.bridgesHandler.ListActivities)
+	server.GET(fmt.Sprintf("%s/api/v1/bridges/{network}/account/{account}/activities", routePrefix), registry.bridgesHandler.ListActivitiesByNetwork)
+
 }

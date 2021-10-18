@@ -21,6 +21,15 @@ import (
 
 var _ entity_projection.Projection = &IBCChannel{}
 
+var (
+	NewIBCChannels = ibc_channel_view.NewIBCChannelsView
+	NewIBCClients = ibc_channel_view.NewIBCClientsView
+	NewIBCConnections = ibc_channel_view.NewIBCConnectionsView
+	NewIBCDenomHashMapping = ibc_channel_view.NewIBCDenomHashMappingView
+	NewIBCChannelTraces = ibc_channel_view.NewIBCChannelTraces
+	UpdateLastHandledEventHeight = (*IBCChannel).UpdateLastHandledEventHeight
+)
+
 type IBCChannel struct {
 	*rdbprojectionbase.Base
 
@@ -85,11 +94,11 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 	rdbTxHandle := rdbTx.ToHandle()
 
-	ibcChannelsView := ibc_channel_view.NewIBCChannels(rdbTxHandle)
-	ibcClientsView := ibc_channel_view.NewIBCClients(rdbTxHandle)
-	ibcConnectionsView := ibc_channel_view.NewIBCConnections(rdbTxHandle)
-	ibcChannelTracesView := ibc_channel_view.NewIBCChannelTraces(rdbTxHandle)
-	ibcDenomHashMappingView := ibc_channel_view.NewIBCDenomHashMapping(rdbTxHandle)
+	ibcChannelsView := NewIBCChannels(rdbTxHandle)
+	ibcClientsView := NewIBCClients(rdbTxHandle)
+	ibcConnectionsView := NewIBCConnections(rdbTxHandle)
+	ibcChannelTracesView := NewIBCChannelTraces(rdbTxHandle)
+	ibcDenomHashMappingView := NewIBCDenomHashMapping(rdbTxHandle)
 
 	// Get the block time of current height
 	var blockTime utctime.UTCTime
@@ -495,7 +504,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 		}
 	}
 
-	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
+	if err := UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
 		return fmt.Errorf("error updating last handled event height: %v", err)
 	}
 
@@ -508,8 +517,8 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 }
 
 func (projection *IBCChannel) updateBondedTokensWhenMsgIBCRecvPacket(
-	ibcChannelsView *ibc_channel_view.IBCChannels,
-	ibcDenomHashMappingView *ibc_channel_view.IBCDenomHashMapping,
+	ibcChannelsView ibc_channel_view.IBCChannels,
+	ibcDenomHashMappingView ibc_channel_view.IBCDenomHashMapping,
 	channelID string,
 	amount uint64,
 	denom string,
@@ -550,7 +559,7 @@ func (projection *IBCChannel) updateBondedTokensWhenMsgIBCRecvPacket(
 }
 
 func (projection *IBCChannel) updateBondedTokensWhenMsgIBCAcknowledgement(
-	ibcChannelsView *ibc_channel_view.IBCChannels,
+	ibcChannelsView ibc_channel_view.IBCChannels,
 	channelID string,
 	amount uint64,
 	denom string,
@@ -658,7 +667,7 @@ func (projection *IBCChannel) addTokenOnThisChain(
 }
 
 func (projection *IBCChannel) insertDenomHashMappingIfNotExist(
-	ibcDenomHashMappingView *ibc_channel_view.IBCDenomHashMapping,
+	ibcDenomHashMappingView ibc_channel_view.IBCDenomHashMapping,
 	denom string,
 ) error {
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	event_interface "github.com/crypto-com/chain-indexing/appinterface/event"
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
@@ -17,6 +18,7 @@ type IndexService struct {
 	logger      applogger.Logger
 	rdbConn     rdb.Conn
 	projections []projection_entity.Projection
+	cronJobs    []projection_entity.CronJob
 
 	systemMode               string
 	accountAddressPrefix     string
@@ -36,11 +38,13 @@ func NewIndexService(
 	rdbConn rdb.Conn,
 	config *Config,
 	projections []projection_entity.Projection,
+	cronJobs []projection_entity.CronJob,
 ) *IndexService {
 	return &IndexService{
 		logger:      logger,
 		rdbConn:     rdbConn,
 		projections: projections,
+		cronJobs:    cronJobs,
 
 		systemMode:               config.System.Mode,
 		consNodeAddressPrefix:    config.Blockchain.ConNodeAddressPrefix,
@@ -69,15 +73,35 @@ func (service *IndexService) Run() error {
 	switch service.systemMode {
 	case SYSTEM_MODE_EVENT_STORE:
 		infoManager.Run()
+		service.runCronJobs()
 		return service.RunEventStoreMode()
 	case SYSTEM_MODE_TENDERMINT_DIRECT:
 		infoManager.Run()
+		service.runCronJobs()
 		return service.RunTendermintDirectMode()
 	case SYSTEM_MODE_API_ONLY:
 		// No index process to be run on API ONLY mode
 		return nil
 	default:
 		return fmt.Errorf("unsupported system mode: %s", service.systemMode)
+	}
+}
+
+func (service *IndexService) runCronJobs() {
+	for i := range service.cronJobs {
+		cronJobClosure := service.cronJobs[i]
+		go func() {
+			logger := service.logger.WithFields(applogger.LogFields{
+				"module": cronJobClosure.Id(),
+			})
+			for {
+				if cronJobErr := cronJobClosure.Exec(); cronJobErr != nil {
+					logger.Errorf("error executing cron job: %v", cronJobErr)
+				}
+				logger.Infof("successfully executed cron job, going to execute again in %s", cronJobClosure.Interval())
+				<-time.After(cronJobClosure.Interval())
+			}
+		}()
 	}
 }
 
