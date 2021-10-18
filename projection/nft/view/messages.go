@@ -17,17 +17,27 @@ import (
 
 const MESSAGES_TABLE_NAME = "view_nft_messages"
 
-type Messages struct {
+type Messages interface {
+	Insert(messageRow *MessageRow) error
+	List(
+		filter MessagesListFilter,
+		order MessagesListOrder,
+		pagination *pagination_interface.Pagination,
+	) ([]MessageRow, *pagination_interface.PaginationResult, error)
+	DeleteAllByDenomTokenIds(denomId string, tokenId string) (int64, error)
+}
+
+type MessagesView struct {
 	rdb *rdb.Handle
 }
 
-func NewMessages(handle *rdb.Handle) *Messages {
-	return &Messages{
+func NewMessagesView(handle *rdb.Handle) Messages {
+	return &MessagesView{
 		handle,
 	}
 }
 
-func (nftMessagesView *Messages) Insert(messageRow *MessageRow) error {
+func (nftMessagesView *MessagesView) Insert(messageRow *MessageRow) error {
 	nftMessageDataJSON, err := jsoniter.MarshalToString(messageRow.Data)
 	if err != nil {
 		return fmt.Errorf("error JSON marshalling NFT message for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -80,7 +90,7 @@ func (nftMessagesView *Messages) Insert(messageRow *MessageRow) error {
 	return nil
 }
 
-func (nftMessagesView *Messages) List(
+func (nftMessagesView *MessagesView) List(
 	filter MessagesListFilter,
 	order MessagesListOrder,
 	pagination *pagination_interface.Pagination,
@@ -148,7 +158,7 @@ func (nftMessagesView *Messages) List(
 				}
 			}
 
-			totalView := NewMessagesTotal(rdbHandle)
+			totalView := NewMessagesTotalView(rdbHandle)
 			total, err := totalView.SumBy(totalIdentities)
 			if err != nil {
 				return int64(0), err
@@ -220,7 +230,7 @@ func (nftMessagesView *Messages) List(
 	return nftMessages, paginationResult, nil
 }
 
-func (nftMessagesView *Messages) DeleteAllByDenomTokenIds(denomId string, tokenId string) (int64, error) {
+func (nftMessagesView *MessagesView) DeleteAllByDenomTokenIds(denomId string, tokenId string) (int64, error) {
 	sql, sqlArgs, err := nftMessagesView.rdb.StmtBuilder.Delete(
 		MESSAGES_TABLE_NAME,
 	).Where("denom_id = ? AND maybe_token_id = ?", denomId, tokenId).ToSql()
