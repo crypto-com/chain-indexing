@@ -68,25 +68,25 @@ color = false
 
 [projection]
 enables = [
-#    "AccountMemoSnapshot(client:chain-desktop-app)",
-#    "AccountMessage",
-#    "AccountStakingSnapshot",
-#    "AccountTransaction",
-#    "Block",
-#    "BlockEvent",
-#    "ChainStats",
-#    "Proposal",
-#    "Transaction",
-#    "Validator",
-#    "ValidatorStats",
-#    "NFT",
-#    "CryptoComNFT",
-#    "BridgePendingActivity"
+    "AccountMessage",
+    "AccountTransaction",
+    "Block",
+    "BlockEvent",
+    "ChainStats",
+    "Proposal",
+    "Transaction",
+    "Validator",
+    "ValidatorStats",
+    "NFT",
+    #    "CryptoComNFT",
+    "IBCChannel",
+    #    "IBCChannelTxMsgTrace",
+    "IBCChannelMessage"
 ]
 
 [cronjob]
 enables = [
-#    "BridgeActivityMatcher"
+    "BridgeActivityMatcher"
 ]
 
 [projection.bridge_pending_activity]
