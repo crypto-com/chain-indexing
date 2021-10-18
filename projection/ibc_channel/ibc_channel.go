@@ -327,7 +327,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				sourceChannelID,
 				sourcePortID,
 			); err != nil {
-				return fmt.Errorf("error updateChannelBondedTokensWhenMsgIBCTransfer: %v", err)
+				return fmt.Errorf("error updateBondedTokensWhenMsgIBCTransfer: %v", err)
 			}
 
 			if projection.config.EnableTxMsgTrace {
@@ -674,7 +674,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 	return nil
 }
 
-func (projection *IBCChannel) updateBondedTokensWhenMsgIBCRecvPacket(
+func updateBondedTokensWhenMsgIBCRecvPacket(
 	ibcChannelsView ibc_channel_view.IBCChannels,
 	ibcDenomHashMappingView ibc_channel_view.IBCDenomHashMapping,
 	channelID string,
@@ -720,7 +720,7 @@ func (projection *IBCChannel) updateBondedTokensWhenMsgIBCRecvPacket(
 	return nil
 }
 
-func (projection *IBCChannel) updateBondedTokensWhenMsgIBCAcknowledgement(
+func updateBondedTokensWhenMsgIBCTransfer(
 	ibcChannelsView ibc_channel_view.IBCChannels,
 	channelID string,
 	amount uint64,
@@ -761,7 +761,7 @@ func (projection *IBCChannel) updateBondedTokensWhenMsgIBCAcknowledgement(
 }
 
 func revertUpdateBondedTokensWhenMsgIBCTransfer(
-	ibcChannelsView *ibc_channel_view.IBCChannels,
+	ibcChannelsView ibc_channel_view.IBCChannels,
 	channelID string,
 	amount uint64,
 	denom string,
@@ -809,6 +809,9 @@ func subtractTokenOnThisChain(
 	for i, token := range bondedTokens.OnThisChain {
 		if token.Denom == newToken.Denom {
 			bondedTokens.OnThisChain[i].Amount = bondedTokens.OnThisChain[i].Amount.Sub(newToken.Amount)
+			if bondedTokens.OnThisChain[i].Amount.IsZero() {
+				bondedTokens.OnThisChain = append(bondedTokens.OnThisChain[:i], bondedTokens.OnThisChain[i+1:]...)
+			}
 			return nil
 		}
 	}
@@ -822,9 +825,13 @@ func subtractTokenOnCounterpartyChain(
 	for i, token := range bondedTokens.OnCounterpartyChain {
 		if token.Denom == newToken.Denom {
 			bondedTokens.OnCounterpartyChain[i].Amount = bondedTokens.OnCounterpartyChain[i].Amount.Sub(newToken.Amount)
+			if bondedTokens.OnCounterpartyChain[i].Amount.IsZero() {
+				bondedTokens.OnCounterpartyChain = append(bondedTokens.OnCounterpartyChain[:i], bondedTokens.OnCounterpartyChain[i+1:]...)
+			}
 			return nil
 		}
 	}
+
 	return fmt.Errorf("denom %s is not found on bondedTokens.OnCounterpartyChain", newToken.Denom)
 }
 
@@ -858,7 +865,7 @@ func addTokenOnThisChain(
 	bondedTokens.OnThisChain = append(bondedTokens.OnThisChain, *newToken)
 }
 
-func (projection *IBCChannel) insertDenomHashMappingIfNotExist(
+func insertDenomHashMappingIfNotExist(
 	ibcDenomHashMappingView ibc_channel_view.IBCDenomHashMapping,
 	denom string,
 ) error {
@@ -884,7 +891,7 @@ func (projection *IBCChannel) insertDenomHashMappingIfNotExist(
 }
 
 func getBondedTokensInJSON(
-	ibcChannelsView *ibc_channel_view.IBCChannels,
+	ibcChannelsView ibc_channel_view.IBCChannels,
 	channelID string,
 ) (string, error) {
 
