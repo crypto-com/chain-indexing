@@ -139,4 +139,10 @@ func RegisterEvents(registry *event.Registry) {
 	// vesting
 	registry.Register(MSG_CREATE_VESTING_ACCOUNT_CREATED, 1, DecodeMsgCreateVestingAccount)
 	registry.Register(MSG_CREATE_VESTING_ACCOUNT_FAILED, 1, DecodeMsgCreateVestingAccount)
+
+	// Gravity
+	registry.Register(GRAVITY_ETHEREUM_SEND_TO_COSMOS_HANDLED, 1, DecodeGravityEthereumSendToCosmosHandled)
+
+	// Cronos
+	registry.Register(CRONOS_SEND_TO_IBC_CREATED, 1, DecodeCronosSendToIBCCreated)
 }

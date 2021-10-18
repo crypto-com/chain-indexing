@@ -17,7 +17,7 @@ func GetValueFromJSONData(rawJSON []byte, accessor string) (interface{}, error) 
 		var keyExist bool
 		if index == lastIndex {
 			var result interface{}
-			result, keyExist = data[accessor].(interface{})
+			result, keyExist = data[accessor]
 			if !keyExist {
 				return nil, nil
 			}

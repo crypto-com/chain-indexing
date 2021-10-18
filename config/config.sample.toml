@@ -83,5 +83,32 @@ enables = [
     "IBCChannelMessage",
 ]
 
+[cronjob]
+enables = [
+    "BridgeActivityMatcher"
+]
+
+[projection.bridge_pending_activity]
+this_chain_id = "cronostestnet_338-3"
+this_chain_name = "Cronos"
+counterparty_chain_name = "Crypto.org-Chain"
+channel_id = "channel-0"
+starting_height = 0
+
+[projection.bridge_activity_matcher]
+interval = "1m"
+
+[projection.bridge_activity_matcher.crypto_org_chain_database]
+host = "localhost"
+port = 5432
+username = "postgres"
+# password can be provided in toml file or Environment variable
+# `PROJECTION_BRIDGE_ACTIVITY_MATCHER_CRYPTO_ORG_CHAIN_DB_PASSWORD`. We recommend to use Envionrment variable in
+# production
+#password = "postgres"
+name = "indexing"
+schema = "public"
+ssl = true
+
 [cosmos_version_enabled_height]
 v0_42_7 = 0
