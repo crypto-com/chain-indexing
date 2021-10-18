@@ -81,7 +81,18 @@ enables = [
     "IBCChannel",
 #    "IBCChannelTxMsgTrace",
     "IBCChannelMessage",
+    "BridgePendingActivity"
 ]
+
+[conrjob]
+enables = []
+
+[projection.bridge_pending_activity]
+this_chain_id = "testnet-croeseid-4"
+this_chain_name = "Crypto.org-Chain"
+counterparty_chain_name = "Cronos"
+channel_id = "channel-131"
+starting_height = 899374
 
 [cosmos_version_enabled_height]
 v0_42_7 = 0
