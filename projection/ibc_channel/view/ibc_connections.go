@@ -7,17 +7,22 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 )
 
-type IBCConnections struct {
+type IBCConnections interface {
+	Insert(*IBCConnectionRow) error
+	FindCounterpartyChainIDBy(string) (string, error)
+}
+
+type IBCConnectionsView struct {
 	rdb *rdb.Handle
 }
 
-func NewIBCConnections(handle *rdb.Handle) *IBCConnections {
-	return &IBCConnections{
+func NewIBCConnectionsView(handle *rdb.Handle) IBCConnections {
+	return &IBCConnectionsView{
 		handle,
 	}
 }
 
-func (ibcConnectionsView *IBCConnections) Insert(ibcConnection *IBCConnectionRow) error {
+func (ibcConnectionsView *IBCConnectionsView) Insert(ibcConnection *IBCConnectionRow) error {
 	sql, sqlArgs, err := ibcConnectionsView.rdb.StmtBuilder.
 		Insert("view_ibc_connections").
 		Columns(
@@ -51,7 +56,7 @@ func (ibcConnectionsView *IBCConnections) Insert(ibcConnection *IBCConnectionRow
 	return nil
 }
 
-func (ibcConnectionsView *IBCConnections) FindCounterpartyChainIDBy(connectionID string) (string, error) {
+func (ibcConnectionsView *IBCConnectionsView) FindCounterpartyChainIDBy(connectionID string) (string, error) {
 	sql, sqlArgs, err := ibcConnectionsView.rdb.StmtBuilder.
 		Select("counterparty_chain_id").
 		From("view_ibc_connections").
