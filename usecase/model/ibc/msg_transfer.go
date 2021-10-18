@@ -8,6 +8,9 @@ type MsgTransferParams struct {
 	DestinationChannel string `json:"destinationChannel"`
 	ChannelOrdering    string `json:"channelOrdering"`
 	ConnectionID       string `json:"connectionId"`
+	// `PacketData.Denom` is always in the format of <port>/<channel>/<basedenom> or <basedenom>
+	// While `RawMsgTransfer.Token.Denom` is possible in the format of ibc/sha256(xxx)
+	PacketData FungibleTokenPacketData `json:"packetData"`
 }
 
 type RawMsgTransfer struct {

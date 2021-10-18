@@ -22,11 +22,11 @@ import (
 var _ entity_projection.Projection = &IBCChannel{}
 
 var (
-	NewIBCChannels = ibc_channel_view.NewIBCChannelsView
-	NewIBCClients = ibc_channel_view.NewIBCClientsView
-	NewIBCConnections = ibc_channel_view.NewIBCConnectionsView
-	NewIBCDenomHashMapping = ibc_channel_view.NewIBCDenomHashMappingView
-	NewIBCChannelTraces = ibc_channel_view.NewIBCChannelTraces
+	NewIBCChannels               = ibc_channel_view.NewIBCChannelsView
+	NewIBCClients                = ibc_channel_view.NewIBCClientsView
+	NewIBCConnections            = ibc_channel_view.NewIBCConnectionsView
+	NewIBCDenomHashMapping       = ibc_channel_view.NewIBCDenomHashMappingView
+	NewIBCChannelTraces          = ibc_channel_view.NewIBCChannelTraces
 	UpdateLastHandledEventHeight = (*IBCChannel).UpdateLastHandledEventHeight
 )
 
@@ -72,6 +72,8 @@ func (_ *IBCChannel) GetEventsToListen() []string {
 		event_usecase.MSG_IBC_TRANSFER_TRANSFER_CREATED,
 		event_usecase.MSG_IBC_RECV_PACKET_CREATED,
 		event_usecase.MSG_IBC_ACKNOWLEDGEMENT_CREATED,
+		event_usecase.MSG_IBC_TIMEOUT_CREATED,
+		event_usecase.MSG_IBC_TIMEOUT_ON_CLOSE_CREATED,
 	}
 }
 
@@ -308,12 +310,37 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
+			amount := msgIBCTransferTransfer.Params.PacketData.Amount.Uint64()
+			denom := msgIBCTransferTransfer.Params.PacketData.Denom
+			destinationChannelID := msgIBCTransferTransfer.Params.DestinationChannel
+			destinationPortID := msgIBCTransferTransfer.Params.DestinationPort
+			sourceChannelID := msgIBCTransferTransfer.Params.SourceChannel
+			sourcePortID := msgIBCTransferTransfer.Params.SourcePort
+
+			if err := updateBondedTokensWhenMsgIBCTransfer(
+				ibcChannelsView,
+				channelID,
+				amount,
+				denom,
+				destinationChannelID,
+				destinationPortID,
+				sourceChannelID,
+				sourcePortID,
+			); err != nil {
+				return fmt.Errorf("error updateBondedTokensWhenMsgIBCTransfer: %v", err)
+			}
+
 			if projection.config.EnableTxMsgTrace {
 
-				amount := msgIBCTransferTransfer.Params.Token.Amount
 				msg, err := msgIBCTransferTransfer.ToJSON()
 				if err != nil {
 					return fmt.Errorf("error msgIBCTransferTransfer.ToJSON(): %w", err)
+				}
+
+				// Here the bonded_tokens has already been updated by the above updateBondedTokensWhenXXXX()
+				updatedBondedTokensJSON, err := getBondedTokensInJSON(ibcChannelsView, channelID)
+				if err != nil {
+					return fmt.Errorf("error getBondedTokensInJSON: %v", err)
 				}
 
 				if err := ibcChannelTracesView.Insert(&ibc_channel_view.IBCChannelTraceRow{
@@ -321,13 +348,13 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 					BlockHeight:         height,
 					SourceChannel:       msgIBCTransferTransfer.Params.SourceChannel,
 					DestinationChannel:  msgIBCTransferTransfer.Params.DestinationChannel,
-					Denom:               msgIBCTransferTransfer.Params.Token.Denom,
-					Amount:              strconv.FormatUint(amount, 10),
+					Denom:               msgIBCTransferTransfer.Params.PacketData.Denom,
+					Amount:              msgIBCTransferTransfer.Params.PacketData.Amount.String(),
 					Success:             "",
 					Error:               "",
 					MessageType:         msgIBCTransferTransfer.MsgName,
 					Message:             msg,
-					UpdatedBondedTokens: "{}",
+					UpdatedBondedTokens: updatedBondedTokensJSON,
 				}); err != nil {
 					return fmt.Errorf("error adding tx trace when MsgIBCTransferTransfer: %w", err)
 				}
@@ -362,8 +389,10 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				denom := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Denom
 				destinationChannelID := msgIBCRecvPacket.Params.Packet.DestinationChannel
 				destinationPortID := msgIBCRecvPacket.Params.Packet.DestinationPort
+				sourceChannelID := msgIBCRecvPacket.Params.Packet.SourceChannel
+				sourcePortID := msgIBCRecvPacket.Params.Packet.SourcePort
 
-				if err := projection.updateBondedTokensWhenMsgIBCRecvPacket(
+				if err := updateBondedTokensWhenMsgIBCRecvPacket(
 					ibcChannelsView,
 					ibcDenomHashMappingView,
 					channelID,
@@ -371,13 +400,15 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 					denom,
 					destinationChannelID,
 					destinationPortID,
+					sourceChannelID,
+					sourcePortID,
 				); err != nil {
 					return fmt.Errorf("error updateChannelBondedTokensWhenMsgIBCRecvPacket: %w", err)
 				}
 
 			}
 
-			if projection.config.EnableTxMsgTrace {
+			if projection.config.EnableTxMsgTrace && msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData != nil {
 
 				msg, err := msgIBCRecvPacket.ToJSON()
 				if err != nil {
@@ -391,13 +422,9 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				}
 
 				// Here the bonded_tokens has already been updated by the above updateBondedTokensWhenXXXX()
-				updatedBondedTokens, err := ibcChannelsView.FindBondedTokensBy(channelID)
+				updatedBondedTokensJSON, err := getBondedTokensInJSON(ibcChannelsView, channelID)
 				if err != nil {
-					return fmt.Errorf("error finding channel updated bonded_tokens: %w", err)
-				}
-				updatedBondedTokensJSON, err := jsoniter.MarshalToString(updatedBondedTokens)
-				if err != nil {
-					return fmt.Errorf("error marshal updatedBondedTokens to string: %w", err)
+					return fmt.Errorf("error getBondedTokensInJSON: %v", err)
 				}
 
 				if err := ibcChannelTracesView.Insert(&ibc_channel_view.IBCChannelTraceRow{
@@ -423,44 +450,49 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 			// Transfer started by source chain
 			channelID := msgIBCAcknowledgement.Params.Packet.SourceChannel
 
-			lastOutPacketSequence := msgIBCAcknowledgement.Params.PacketSequence
-			if err := ibcChannelsView.UpdateSequence(channelID, "last_out_packet_sequence", lastOutPacketSequence); err != nil {
-				return fmt.Errorf("error updating last_out_packet_sequence: %w", err)
-			}
-
 			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
-			if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Success {
+			if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData != nil {
 
-				// TotalTransferOutSuccessRate
-				if err := ibcChannelsView.Increment(channelID, "total_transfer_out_success_count", 1); err != nil {
-					return fmt.Errorf("error increasing total_transfer_out_success_count: %w", err)
-				}
-				if err := ibcChannelsView.UpdateTotalTransferOutSuccessRate(channelID); err != nil {
-					return fmt.Errorf("error updating total_transfer_out_success_rate: %w", err)
-				}
+				if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Success {
 
-				amount := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount.Uint64()
-				denom := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Denom
-				destinationChannelID := msgIBCAcknowledgement.Params.Packet.DestinationChannel
-				destinationPortID := msgIBCAcknowledgement.Params.Packet.DestinationPort
+					// TotalTransferOutSuccessRate
+					if err := ibcChannelsView.Increment(channelID, "total_transfer_out_success_count", 1); err != nil {
+						return fmt.Errorf("error increasing total_transfer_out_success_count: %w", err)
+					}
+					if err := ibcChannelsView.UpdateTotalTransferOutSuccessRate(channelID); err != nil {
+						return fmt.Errorf("error updating total_transfer_out_success_rate: %w", err)
+					}
 
-				if err := projection.updateBondedTokensWhenMsgIBCAcknowledgement(
-					ibcChannelsView,
-					channelID,
-					amount,
-					denom,
-					destinationChannelID,
-					destinationPortID,
-				); err != nil {
-					return fmt.Errorf("error updateChannelBondedTokensWhenMsgIBCAcknowledgement: %w", err)
+				} else {
+
+					amount := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount.Uint64()
+					denom := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Denom
+					destinationChannelID := msgIBCAcknowledgement.Params.Packet.DestinationChannel
+					destinationPortID := msgIBCAcknowledgement.Params.Packet.DestinationPort
+					sourceChannelID := msgIBCAcknowledgement.Params.Packet.SourceChannel
+					sourcePortID := msgIBCAcknowledgement.Params.Packet.SourcePort
+
+					if err := revertUpdateBondedTokensWhenMsgIBCTransfer(
+						ibcChannelsView,
+						channelID,
+						amount,
+						denom,
+						destinationChannelID,
+						destinationPortID,
+						sourceChannelID,
+						sourcePortID,
+					); err != nil {
+						return fmt.Errorf("error revertUpdateBondedTokensWhenMsgIBCTransfer: %v", err)
+					}
+
 				}
 
 			}
 
-			if projection.config.EnableTxMsgTrace {
+			if projection.config.EnableTxMsgTrace && msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData != nil {
 
 				msg, err := msgIBCAcknowledgement.ToJSON()
 				if err != nil {
@@ -474,13 +506,9 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				}
 
 				// Here the bonded_tokens has already been updated by the above updateBondedTokensWhenXXXX()
-				updatedBondedTokens, err := ibcChannelsView.FindBondedTokensBy(channelID)
+				updatedBondedTokensJSON, err := getBondedTokensInJSON(ibcChannelsView, channelID)
 				if err != nil {
-					return fmt.Errorf("error finding channel updated bonded_tokens: %w", err)
-				}
-				updatedBondedTokensJSON, err := jsoniter.MarshalToString(updatedBondedTokens)
-				if err != nil {
-					return fmt.Errorf("error marshal updatedBondedTokens to string: %w", err)
+					return fmt.Errorf("error getBondedTokensInJSON: %v", err)
 				}
 
 				if err := ibcChannelTracesView.Insert(&ibc_channel_view.IBCChannelTraceRow{
@@ -501,6 +529,136 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 			}
 
+		} else if msgIBCTimeout, ok := event.(*event_usecase.MsgIBCTimeout); ok {
+
+			// Transfer started by source chain
+			channelID := msgIBCTimeout.Params.Packet.SourceChannel
+
+			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
+				return fmt.Errorf("error updating channel last_activity_time: %w", err)
+			}
+
+			if msgIBCTimeout.Params.MaybeMsgTransfer != nil {
+
+				amount := msgIBCTimeout.Params.MaybeMsgTransfer.RefundAmount
+				denom := msgIBCTimeout.Params.MaybeMsgTransfer.RefundDenom
+				destinationChannelID := msgIBCTimeout.Params.Packet.DestinationChannel
+				destinationPortID := msgIBCTimeout.Params.Packet.DestinationPort
+				sourceChannelID := msgIBCTimeout.Params.Packet.SourceChannel
+				sourcePortID := msgIBCTimeout.Params.Packet.SourcePort
+
+				if err := revertUpdateBondedTokensWhenMsgIBCTransfer(
+					ibcChannelsView,
+					channelID,
+					amount,
+					denom,
+					destinationChannelID,
+					destinationPortID,
+					sourceChannelID,
+					sourcePortID,
+				); err != nil {
+					return fmt.Errorf("error revertUpdateBondedTokensWhenMsgIBCTransfer: %v", err)
+				}
+
+			}
+
+			if projection.config.EnableTxMsgTrace && msgIBCTimeout.Params.MaybeMsgTransfer != nil {
+
+				amount := msgIBCTimeout.Params.MaybeMsgTransfer.RefundAmount
+				msg, err := msgIBCTimeout.ToJSON()
+				if err != nil {
+					return fmt.Errorf("error msgIBCTimeout.ToJSON(): %w", err)
+				}
+
+				// Here the bonded_tokens has already been updated by the above updateBondedTokensWhenXXXX()
+				updatedBondedTokensJSON, err := getBondedTokensInJSON(ibcChannelsView, channelID)
+				if err != nil {
+					return fmt.Errorf("error getBondedTokensInJSON: %v", err)
+				}
+
+				if err := ibcChannelTracesView.Insert(&ibc_channel_view.IBCChannelTraceRow{
+					ChannelID:           channelID,
+					BlockHeight:         height,
+					SourceChannel:       msgIBCTimeout.Params.Packet.SourceChannel,
+					DestinationChannel:  msgIBCTimeout.Params.Packet.DestinationChannel,
+					Denom:               msgIBCTimeout.Params.MaybeMsgTransfer.RefundDenom,
+					Amount:              strconv.FormatUint(amount, 10),
+					Success:             "",
+					Error:               "",
+					MessageType:         msgIBCTimeout.MsgName,
+					Message:             msg,
+					UpdatedBondedTokens: updatedBondedTokensJSON,
+				}); err != nil {
+					return fmt.Errorf("error adding tx trace when MsgIBCTimeout: %w", err)
+				}
+
+			}
+
+		} else if msgIBCTimeoutOnClose, ok := event.(*event_usecase.MsgIBCTimeoutOnClose); ok {
+
+			// Transfer started by source chain
+			channelID := msgIBCTimeoutOnClose.Params.Packet.SourceChannel
+
+			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
+				return fmt.Errorf("error updating channel last_activity_time: %w", err)
+			}
+
+			if msgIBCTimeoutOnClose.Params.MaybeMsgTransfer != nil {
+
+				amount := msgIBCTimeoutOnClose.Params.MaybeMsgTransfer.RefundAmount
+				denom := msgIBCTimeoutOnClose.Params.MaybeMsgTransfer.RefundDenom
+				destinationChannelID := msgIBCTimeoutOnClose.Params.Packet.DestinationChannel
+				destinationPortID := msgIBCTimeoutOnClose.Params.Packet.DestinationPort
+				sourceChannelID := msgIBCTimeoutOnClose.Params.Packet.SourceChannel
+				sourcePortID := msgIBCTimeoutOnClose.Params.Packet.SourcePort
+
+				if err := revertUpdateBondedTokensWhenMsgIBCTransfer(
+					ibcChannelsView,
+					channelID,
+					amount,
+					denom,
+					destinationChannelID,
+					destinationPortID,
+					sourceChannelID,
+					sourcePortID,
+				); err != nil {
+					return fmt.Errorf("error revertUpdateBondedTokensWhenMsgIBCTransfer: %v", err)
+				}
+
+			}
+
+			if projection.config.EnableTxMsgTrace && msgIBCTimeoutOnClose.Params.MaybeMsgTransfer != nil {
+
+				amount := msgIBCTimeoutOnClose.Params.MaybeMsgTransfer.RefundAmount
+				msg, err := msgIBCTimeoutOnClose.ToJSON()
+				if err != nil {
+					return fmt.Errorf("error msgIBCTimeoutOnClose.ToJSON(): %w", err)
+				}
+
+				// Here the bonded_tokens has already been updated by the above updateBondedTokensWhenXXXX()
+				updatedBondedTokensJSON, err := getBondedTokensInJSON(ibcChannelsView, channelID)
+				if err != nil {
+					return fmt.Errorf("error getBondedTokensInJSON: %v", err)
+				}
+
+				if err := ibcChannelTracesView.Insert(&ibc_channel_view.IBCChannelTraceRow{
+					ChannelID:           channelID,
+					BlockHeight:         height,
+					SourceChannel:       msgIBCTimeoutOnClose.Params.Packet.SourceChannel,
+					DestinationChannel:  msgIBCTimeoutOnClose.Params.Packet.DestinationChannel,
+					Denom:               msgIBCTimeoutOnClose.Params.MaybeMsgTransfer.RefundDenom,
+					Amount:              strconv.FormatUint(amount, 10),
+					Success:             "",
+					Error:               "",
+					MessageType:         msgIBCTimeoutOnClose.MsgName,
+					Message:             msg,
+					UpdatedBondedTokens: updatedBondedTokensJSON,
+				}); err != nil {
+					return fmt.Errorf("error adding tx trace when MsgIBCTimeoutOnClose: %w", err)
+				}
+
+			}
+
 		}
 	}
 
@@ -516,7 +674,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 	return nil
 }
 
-func (projection *IBCChannel) updateBondedTokensWhenMsgIBCRecvPacket(
+func updateBondedTokensWhenMsgIBCRecvPacket(
 	ibcChannelsView ibc_channel_view.IBCChannels,
 	ibcDenomHashMappingView ibc_channel_view.IBCDenomHashMapping,
 	channelID string,
@@ -524,119 +682,160 @@ func (projection *IBCChannel) updateBondedTokensWhenMsgIBCRecvPacket(
 	denom string,
 	destinationChannelID string,
 	destinationPortID string,
+	sourceChannelID string,
+	sourcePortID string,
 ) error {
 
 	bondedTokens, err := ibcChannelsView.FindBondedTokensBy(channelID)
 	if err != nil {
-		return fmt.Errorf("error finding channel bonded_tokens: %w", err)
+		return fmt.Errorf("error finding channel bonded_tokens: %v", err)
 	}
 
 	amountInCoinInt := coin.NewIntFromUint64(amount)
 
-	if projection.tokenOriginFromThisChain(bondedTokens, denom) {
-		// This token is from this chain, now it is sent back.
+	if receiverChainIsTokenSource(denom, sourceChannelID, sourcePortID) {
+		// This chain is token source, it is unbonded now.
 		// Subtract it from the bondedTokens.OnCouterpartyChain
 		token := ibc_channel_view.NewBondedToken(denom, amountInCoinInt)
-		projection.subtractTokenOnCounterpartyChain(bondedTokens, token)
+		if subtractErr := subtractTokenOnCounterpartyChain(bondedTokens, token); subtractErr != nil {
+			return fmt.Errorf("error subtractTokenOnCounterpartyChain: %v", subtractErr)
+		}
 	} else {
-		// This token is NOT from this chain.
+		// Counterparty chain is token source, it is bonded to this chain now.
 		// Add it to bondedTokens.OnThisChain
 		newDenom := fmt.Sprintf("%s/%s/%s", destinationPortID, destinationChannelID, denom)
 		token := ibc_channel_view.NewBondedToken(newDenom, amountInCoinInt)
-		projection.addTokenOnThisChain(bondedTokens, token)
+		addTokenOnThisChain(bondedTokens, token)
 
 		// For keeping record of denom-hash, we only interested in tokens sending to our chain
-		if err = projection.insertDenomHashMappingIfNotExist(ibcDenomHashMappingView, newDenom); err != nil {
-			return fmt.Errorf("error insertDenomHashMappingIfNotExist: %w", err)
+		if insertErr := insertDenomHashMappingIfNotExist(ibcDenomHashMappingView, newDenom); insertErr != nil {
+			return fmt.Errorf("error insertDenomHashMappingIfNotExist: %v", insertErr)
 		}
 	}
 
 	if err := ibcChannelsView.UpdateBondedTokens(channelID, bondedTokens); err != nil {
-		return fmt.Errorf("error ibcChannelsView.UpdateBondedTokens: %w", err)
+		return fmt.Errorf("error ibcChannelsView.UpdateBondedTokens: %v", err)
 	}
 
 	return nil
 }
 
-func (projection *IBCChannel) updateBondedTokensWhenMsgIBCAcknowledgement(
+func updateBondedTokensWhenMsgIBCTransfer(
 	ibcChannelsView ibc_channel_view.IBCChannels,
 	channelID string,
 	amount uint64,
 	denom string,
 	destinationChannelID string,
 	destinationPortID string,
+	sourceChannelID string,
+	sourcePortID string,
 ) error {
 
 	bondedTokens, err := ibcChannelsView.FindBondedTokensBy(channelID)
 	if err != nil {
-		return fmt.Errorf("error ibcChannelsView.FindBondedTokensBy: %w", err)
+		return fmt.Errorf("error ibcChannelsView.FindBondedTokensBy: %v", err)
 	}
 
 	amountInCoinInt := coin.NewIntFromUint64(amount)
 
-	if projection.tokenOriginFromCounterpartyChain(bondedTokens, denom) {
-		// This token is from the counterparty chain, now it is sent back to counterparty chain.
+	if receiverChainIsTokenSource(denom, sourceChannelID, sourcePortID) {
+		// Counterparty chain is token source, it is unbonded now.
 		// Subtract it from the bondedTokens.OnThisChain
 		token := ibc_channel_view.NewBondedToken(denom, amountInCoinInt)
-		projection.subtractTokenOnThisChain(bondedTokens, token)
+		if subtractErr := subtractTokenOnThisChain(bondedTokens, token); subtractErr != nil {
+			return fmt.Errorf("error subtractTokenOnThisChain: %v", subtractErr)
+		}
 	} else {
-		// This token is NOT from the counterparty chain.
+		// This chain is token source, it is bonded to counterparty chain now.
 		// Add it to bondedTokens.OnCounterpartyChain
 		newDenom := fmt.Sprintf("%s/%s/%s", destinationPortID, destinationChannelID, denom)
 		token := ibc_channel_view.NewBondedToken(newDenom, amountInCoinInt)
-		projection.addTokenOnCounterpartyChain(bondedTokens, token)
+		addTokenOnCounterpartyChain(bondedTokens, token)
 	}
 
 	if err := ibcChannelsView.UpdateBondedTokens(channelID, bondedTokens); err != nil {
-		return fmt.Errorf("error ibcChannelsView.UpdateBondedTokens: %w", err)
+		return fmt.Errorf("error ibcChannelsView.UpdateBondedTokens: %v", err)
 	}
 
 	return nil
 }
 
-func (projection *IBCChannel) tokenOriginFromCounterpartyChain(bondedTokens *ibc_channel_view.BondedTokens, denom string) bool {
-	for _, token := range bondedTokens.OnThisChain {
-		if token.Denom == denom {
-			return true
+func revertUpdateBondedTokensWhenMsgIBCTransfer(
+	ibcChannelsView ibc_channel_view.IBCChannels,
+	channelID string,
+	amount uint64,
+	denom string,
+	destinationChannelID string,
+	destinationPortID string,
+	sourceChannelID string,
+	sourcePortID string,
+) error {
+
+	bondedTokens, err := ibcChannelsView.FindBondedTokensBy(channelID)
+	if err != nil {
+		return fmt.Errorf("error ibcChannelsView.FindBondedTokensBy: %v", err)
+	}
+
+	amountInCoinInt := coin.NewIntFromUint64(amount)
+
+	// Revert the operation in updateBondedTokensWhenMsgIBCTransfer()
+	if receiverChainIsTokenSource(denom, sourceChannelID, sourcePortID) {
+		token := ibc_channel_view.NewBondedToken(denom, amountInCoinInt)
+		addTokenOnThisChain(bondedTokens, token)
+	} else {
+		newDenom := fmt.Sprintf("%s/%s/%s", destinationPortID, destinationChannelID, denom)
+		token := ibc_channel_view.NewBondedToken(newDenom, amountInCoinInt)
+		if subtractErr := subtractTokenOnCounterpartyChain(bondedTokens, token); subtractErr != nil {
+			return fmt.Errorf("error subtractTokenOnCounterpartyChain: %v", subtractErr)
 		}
 	}
-	return false
-}
 
-func (projection *IBCChannel) tokenOriginFromThisChain(bondedTokens *ibc_channel_view.BondedTokens, denom string) bool {
-	for _, token := range bondedTokens.OnCounterpartyChain {
-		if token.Denom == denom {
-			return true
-		}
+	if err := ibcChannelsView.UpdateBondedTokens(channelID, bondedTokens); err != nil {
+		return fmt.Errorf("error ibcChannelsView.UpdateBondedTokens: %v", err)
 	}
-	return false
+
+	return nil
 }
 
-func (projection *IBCChannel) subtractTokenOnThisChain(
+func receiverChainIsTokenSource(denom, packetSourceChannelID, packetSourcePortID string) bool {
+	denomPrefix := fmt.Sprintf("%s/%s", packetSourcePortID, packetSourceChannelID)
+	return strings.HasPrefix(denom, denomPrefix)
+}
+
+func subtractTokenOnThisChain(
 	bondedTokens *ibc_channel_view.BondedTokens,
 	newToken *ibc_channel_view.BondedToken,
-) {
+) error {
 	for i, token := range bondedTokens.OnThisChain {
 		if token.Denom == newToken.Denom {
 			bondedTokens.OnThisChain[i].Amount = bondedTokens.OnThisChain[i].Amount.Sub(newToken.Amount)
-			return
+			if bondedTokens.OnThisChain[i].Amount.IsZero() {
+				bondedTokens.OnThisChain = append(bondedTokens.OnThisChain[:i], bondedTokens.OnThisChain[i+1:]...)
+			}
+			return nil
 		}
 	}
+	return fmt.Errorf("denom %s is not found on bondedTokens.OnThisChain", newToken.Denom)
 }
 
-func (projection *IBCChannel) subtractTokenOnCounterpartyChain(
+func subtractTokenOnCounterpartyChain(
 	bondedTokens *ibc_channel_view.BondedTokens,
 	newToken *ibc_channel_view.BondedToken,
-) {
+) error {
 	for i, token := range bondedTokens.OnCounterpartyChain {
 		if token.Denom == newToken.Denom {
 			bondedTokens.OnCounterpartyChain[i].Amount = bondedTokens.OnCounterpartyChain[i].Amount.Sub(newToken.Amount)
-			return
+			if bondedTokens.OnCounterpartyChain[i].Amount.IsZero() {
+				bondedTokens.OnCounterpartyChain = append(bondedTokens.OnCounterpartyChain[:i], bondedTokens.OnCounterpartyChain[i+1:]...)
+			}
+			return nil
 		}
 	}
+
+	return fmt.Errorf("denom %s is not found on bondedTokens.OnCounterpartyChain", newToken.Denom)
 }
 
-func (projection *IBCChannel) addTokenOnCounterpartyChain(
+func addTokenOnCounterpartyChain(
 	bondedTokens *ibc_channel_view.BondedTokens,
 	newToken *ibc_channel_view.BondedToken,
 ) {
@@ -651,7 +850,7 @@ func (projection *IBCChannel) addTokenOnCounterpartyChain(
 	bondedTokens.OnCounterpartyChain = append(bondedTokens.OnCounterpartyChain, *newToken)
 }
 
-func (projection *IBCChannel) addTokenOnThisChain(
+func addTokenOnThisChain(
 	bondedTokens *ibc_channel_view.BondedTokens,
 	newToken *ibc_channel_view.BondedToken,
 ) {
@@ -666,7 +865,7 @@ func (projection *IBCChannel) addTokenOnThisChain(
 	bondedTokens.OnThisChain = append(bondedTokens.OnThisChain, *newToken)
 }
 
-func (projection *IBCChannel) insertDenomHashMappingIfNotExist(
+func insertDenomHashMappingIfNotExist(
 	ibcDenomHashMappingView ibc_channel_view.IBCDenomHashMapping,
 	denom string,
 ) error {
@@ -689,4 +888,17 @@ func (projection *IBCChannel) insertDenomHashMappingIfNotExist(
 
 	// The record exists, do nothing
 	return nil
+}
+
+func getBondedTokensInJSON(
+	ibcChannelsView ibc_channel_view.IBCChannels,
+	channelID string,
+) (string, error) {
+
+	updatedBondedTokens, err := ibcChannelsView.FindBondedTokensBy(channelID)
+	if err != nil {
+		return "", fmt.Errorf("error finding channel bonded_tokens: %w", err)
+	}
+	return jsoniter.MarshalToString(updatedBondedTokens)
+
 }
