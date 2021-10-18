@@ -4262,25 +4262,3 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 		fmt.Println(tc.Name, "Passed")
 	}
 }
-
-func mockUpdateLastHandledEventHeight(mockTx *test.MockRDbTx) {
-	mockRowResult := &test.MockRDbRowResult{}
-
-	var lastHandledEventHeight int64
-	mockRowResult.On("Scan", &lastHandledEventHeight).Return(nil)
-	mockTx.On(
-		"QueryRow",
-		"SELECT last_handled_event_height FROM projections WHERE id = $1",
-		"AccountMessage",
-	).Return(mockRowResult, nil)
-
-	mockExecResult := &test.MockRDbExecResult{}
-	mockExecResult.On("RowsAffected").Return(int64(1))
-	mockTx.On(
-		"Exec",
-		"UPDATE projections SET id = $1, last_handled_event_height = $2 WHERE id = $3",
-		"AccountMessage",
-		int64(1),
-		"AccountMessage",
-	).Return(mockExecResult, nil)
-}

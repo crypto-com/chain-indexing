@@ -15,7 +15,7 @@ import (
 type AccountMessages struct {
 	logger applogger.Logger
 
-	accountMessagesView *account_message_view.AccountMessages
+	accountMessagesView account_message_view.AccountMessages
 }
 
 func NewAccountMessages(logger applogger.Logger, rdbHandle *rdb.Handle) *AccountMessages {
