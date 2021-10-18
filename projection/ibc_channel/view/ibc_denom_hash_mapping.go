@@ -7,17 +7,23 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 )
 
-type IBCDenomHashMapping struct {
+type IBCDenomHashMapping interface {
+	IfDenomExist(string) (bool, error)
+	Insert(*IBCDenomHashMappingRow) error
+	ListAll() (*[]IBCDenomHashMappingRow, error)
+}
+
+type IBCDenomHashMappingView struct {
 	rdb *rdb.Handle
 }
 
-func NewIBCDenomHashMapping(handle *rdb.Handle) *IBCDenomHashMapping {
-	return &IBCDenomHashMapping{
+func NewIBCDenomHashMappingView(handle *rdb.Handle) IBCDenomHashMapping {
+	return &IBCDenomHashMappingView{
 		handle,
 	}
 }
 
-func (ibcDenomHashMappingView *IBCDenomHashMapping) IfDenomExist(denom string) (bool, error) {
+func (ibcDenomHashMappingView *IBCDenomHashMappingView) IfDenomExist(denom string) (bool, error) {
 	//	SELECT EXISTS (
 	//		SELECT * FROM some_table where some_field = $1
 	//	)
@@ -40,7 +46,7 @@ func (ibcDenomHashMappingView *IBCDenomHashMapping) IfDenomExist(denom string) (
 	return exist, nil
 }
 
-func (ibcDenomHashMappingView *IBCDenomHashMapping) Insert(ibcDenomHash *IBCDenomHashMappingRow) error {
+func (ibcDenomHashMappingView *IBCDenomHashMappingView) Insert(ibcDenomHash *IBCDenomHashMappingRow) error {
 	sql, sqlArgs, err := ibcDenomHashMappingView.rdb.StmtBuilder.
 		Insert("view_ibc_denom_hash_mapping").
 		Columns(
@@ -68,7 +74,7 @@ func (ibcDenomHashMappingView *IBCDenomHashMapping) Insert(ibcDenomHash *IBCDeno
 	return nil
 }
 
-func (ibcDenomHashMappingView *IBCDenomHashMapping) ListAll() (*[]IBCDenomHashMappingRow, error) {
+func (ibcDenomHashMappingView *IBCDenomHashMappingView) ListAll() (*[]IBCDenomHashMappingRow, error) {
 	sql, sqlArgs, err := ibcDenomHashMappingView.rdb.StmtBuilder.Select(
 		"denom",
 		"hash",

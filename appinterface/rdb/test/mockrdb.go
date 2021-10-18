@@ -12,7 +12,7 @@ type MockRDbConn struct {
 	mock.Mock
 }
 
-func NewMockRDBbConn() *MockRDbConn {
+func NewMockRDbConn() *MockRDbConn {
 	return &MockRDbConn{}
 }
 
