@@ -88,17 +88,18 @@ func (service *IndexService) Run() error {
 }
 
 func (service *IndexService) runCronJobs() {
-	for _, cronJob := range service.cronJobs {
+	for i := range service.cronJobs {
+		cronJobClosure := service.cronJobs[i]
 		go func() {
 			logger := service.logger.WithFields(applogger.LogFields{
-				"module": cronJob.Id(),
+				"module": cronJobClosure.Id(),
 			})
 			for {
-				if cronJobErr := cronJob.Exec(); cronJobErr != nil {
+				if cronJobErr := cronJobClosure.Exec(); cronJobErr != nil {
 					logger.Errorf("error executing cron job: %v", cronJobErr)
 				}
-				logger.Infof("successfully executed cron job, going to execute again in %s", cronJob.Interval())
-				<-time.After(cronJob.Interval())
+				logger.Infof("successfully executed cron job, going to execute again in %s", cronJobClosure.Interval())
+				<-time.After(cronJobClosure.Interval())
 			}
 		}()
 	}

@@ -30,7 +30,6 @@ func initCronJobs(
 				"error initializing cron job %s: %v",
 				cronJob.Id(), onInitErr,
 			))
-			continue
 		}
 		cronJobs = append(cronJobs, cronJob)
 	}

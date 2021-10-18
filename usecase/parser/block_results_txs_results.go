@@ -18,14 +18,11 @@ func ParseBlockResultsTxsResults(
 ) ([]commandentity.Command, error) {
 	cmds := make([]commandentity.Command, 0)
 
-	for i, txResults := range blockResults.TxsResults {
+	for i := range blockResults.TxsResults {
 		txHex := block.Txs[i]
 
-		if parsedCmds, parseErr := parseCosmosSendToIBC(block.Height, txHex, &txResults); parseErr == nil {
-			cmds = append(cmds, parsedCmds...)
-		} else {
-			return nil, fmt.Errorf("error when parsing CosmosSendToIBC commands: %v", parseErr)
-		}
+		parsedCmds := parseCosmosSendToIBC(block.Height, txHex, &blockResults.TxsResults[i])
+		cmds = append(cmds, parsedCmds...)
 	}
 
 	return cmds, nil
@@ -35,25 +32,25 @@ func parseCosmosSendToIBC(
 	blockHeight int64,
 	txHex string,
 	txResults *model.BlockResultsTxsResult,
-) ([]commandentity.Command, error) {
+) []commandentity.Command {
 	isEthereumTx := false
 
 	var maybeIBCSendPacketEvent *utils.ParsedTxsResultLogEvent
-	for _, event := range txResults.Events {
+	for i, event := range txResults.Events {
 		if event.Type == "ethereum_tx" {
 			isEthereumTx = true
 			break
 		} else if event.Type == "send_packet" {
-			maybeIBCSendPacketEvent = utils.NewParsedTxsResultLogEvent(&event)
+			maybeIBCSendPacketEvent = utils.NewParsedTxsResultLogEvent(&txResults.Events[i])
 		}
 	}
 
 	if !isEthereumTx {
-		return nil, nil
+		return nil
 	}
 
 	if maybeIBCSendPacketEvent == nil {
-		return nil, nil
+		return nil
 	}
 
 	params := model.RawCosmosSendToIBCParams{
@@ -98,7 +95,7 @@ func parseCosmosSendToIBC(
 		ConnectionID:       params.PacketConnection,
 	})
 
-	return []commandentity.Command{cmd}, nil
+	return []commandentity.Command{cmd}
 }
 
 func mustParseCosmosSendToIBCTimeoutHeight(height string) model.CosmosSendToIBCHeight {

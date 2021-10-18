@@ -26,7 +26,7 @@ var _ = Describe("Event", func() {
 				BridgeChainId:             338,
 				EthereumTokenContract:     "0x564a1c3af089d02d0b6c311c650ea3768424cbfa",
 				Nonce:                     2,
-				EthereumEventVoteRecordId: "vote-record-id",
+				EthereumEventVoteRecordId: []byte("vote-record-id"),
 			}
 			event := event_usecase.NewGravityEthereumSendToCosmosHandled(anyHeight, anyParams)
 

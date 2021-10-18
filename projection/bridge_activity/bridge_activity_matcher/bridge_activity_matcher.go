@@ -1,6 +1,7 @@
 package bridge_activity_matcher
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -281,7 +282,7 @@ func (cronJob *BridgeActivityMatcher) HandleIncoming(
 
 		mutExistingActivity, existingActivityErr := bridgeActivities.FindByLinkId(row.LinkId)
 		if existingActivityErr != nil {
-			if existingActivityErr == rdb.ErrNoRows {
+			if errors.Is(existingActivityErr, rdb.ErrNoRows) {
 				logger.Infof(
 					"error querying existing activity by link id %s: not found, will try again later.",
 					row.LinkId,
