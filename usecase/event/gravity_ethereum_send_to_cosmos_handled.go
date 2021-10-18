@@ -48,7 +48,7 @@ func DecodeGravityEthereumSendToCosmosHandled(encoded []byte) (event_entity.Even
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *ValidatorJailed
+	var event *GravityEthereumSendToCosmosHandled
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}
