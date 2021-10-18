@@ -87,7 +87,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			pm := usecase_parser_test.InitParserManager()
 			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_42_7_ibcmsg.ParseMsgRecvPacket)
 
-			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
+			cmds, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -173,7 +173,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			pm := usecase_parser_test.InitParserManager()
 			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_42_7_ibcmsg.ParseMsgRecvPacket)
 
-			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
+			cmds, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -266,7 +266,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			pm := usecase_parser_test.InitParserManager()
 			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_42_7_ibcmsg.ParseMsgRecvPacket)
 
-			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
+			cmds, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,

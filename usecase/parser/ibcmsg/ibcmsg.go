@@ -938,14 +938,15 @@ func ParseMsgRecvPacket(
 		MessageType: "MsgTransfer",
 		MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 			FungibleTokenPacketData: rawFungibleTokenPacketData,
-			Success:                fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "false",
-			MaybeDenominationTrace: maybeDenominationTrace,
+			Success:                 fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "false",
+			MaybeDenominationTrace:  maybeDenominationTrace,
 		},
 
 		PacketSequence:  typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
 		ChannelOrdering: recvPacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
 		ConnectionID:    recvPacketEvent.MustGetAttributeByKey("packet_connection"),
-		PacketAck:       packetAck,
+		// TODO: Remove this when IBCChannel projection no longer relies on packetAck.MaybeError to check if MsgRecvPacket is success or not
+		PacketAck: packetAck,
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(

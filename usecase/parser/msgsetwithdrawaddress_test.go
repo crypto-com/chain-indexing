@@ -27,7 +27,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
+			cmds, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,

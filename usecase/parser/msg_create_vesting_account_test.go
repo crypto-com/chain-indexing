@@ -4,17 +4,15 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/crypto-com/chain-indexing/internal/json"
-
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
+	"github.com/crypto-com/chain-indexing/internal/json"
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
 	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
 var _ = Describe("ParseMsgCommands", func() {
@@ -56,7 +54,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
+			cmds, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,

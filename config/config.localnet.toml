@@ -78,7 +78,7 @@ enables = [
     "ValidatorStats",
     "NFT",
 #    "CryptoComNFT",
-#    "IBCChannel",
+#    "BridgePendingActivity",
     "IBCChannelTxMsgTrace",
     "IBCChannelMessage",
 ]
