@@ -30,7 +30,7 @@ func NewIBCChannelMessageProjection(rdbConn rdb.Conn) *ibc_channel_message.IBCCh
 }
 
 func NewMockRDbConn() *test.MockRDbConn {
-	mock := test.NewMockRDBbConn()
+	mock := test.NewMockRDbConn()
 	mock.On("ToHandle").Return(&rdb.Handle{
 		Runner:      mock,
 		TypeConv:    &pg.PgxTypeConv{},
