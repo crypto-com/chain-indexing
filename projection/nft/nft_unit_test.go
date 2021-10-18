@@ -31,7 +31,7 @@ func NewIBCChannelMessageProjection(rdbConn rdb.Conn) *nft.NFT {
 }
 
 func NewMockRDbConn() *test.MockRDbConn {
-	mock := test.NewMockRDBbConn()
+	mock := test.NewMockRDbConn()
 	mock.On("ToHandle").Return(&rdb.Handle{
 		Runner:      mock,
 		TypeConv:    &pg.PgxTypeConv{},
