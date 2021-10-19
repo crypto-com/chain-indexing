@@ -44,7 +44,8 @@ var _ = Describe("ParseMsgCommands", func() {
 	},
 	"signer": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv",
 
-    "channelId": "channel-0"
+    "channelId": "channel-0",
+    "connectionId": "connection-0"
   }
 }`
 
