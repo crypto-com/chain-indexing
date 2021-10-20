@@ -3,7 +3,6 @@ package tmcosmosutils
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"sort"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/multisig"
