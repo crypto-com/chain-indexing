@@ -22,7 +22,7 @@ import (
 type Accounts struct {
 	logger applogger.Logger
 
-	accountsView   *account_view.Accounts
+	accountsView   account_view.Accounts
 	validatorsView *validator_view.Validators
 	cosmosClient   cosmosapp.Client
 
@@ -40,7 +40,7 @@ func NewAccounts(
 			"module": "AccountsHandler",
 		}),
 
-		account_view.NewAccounts(rdbHandle),
+		account_view.NewAccountsView(rdbHandle),
 		validator_view.NewValidators(rdbHandle),
 		cosmosClient,
 

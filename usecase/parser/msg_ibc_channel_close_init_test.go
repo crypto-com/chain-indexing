@@ -18,43 +18,33 @@ import (
 )
 
 var _ = Describe("ParseMsgCommands", func() {
-	Describe("MsgIBCChannelOpenInit", func() {
-		It("should parse Msg commands when there is MsgChannelOpenInit in the transaction", func() {
-			expected := `{
-  "name": "MsgChannelOpenInitCreated",
-  "version": 1,
-  "height": 14,
-  "uuid": "{UUID}",
-  "msgName": "MsgChannelOpenInit",
-  "txHash": "310C7A5DE69CABB2175A2CBD417A2BFBA105C030941663F3F8809BBA2A6D810D",
-  "msgIndex": 0,
-  "params": {
-	"portId": "transfer",
-	"channel": {
-	  "state": "STATE_INIT",
-	  "ordering": "ORDER_UNORDERED",
-	  "counterparty": {
-		"portId": "transfer",
-		"channelId": ""
-	  },
-	  "connectionHops": [
-		"connection-0"
-	  ],
-	  "version": "ics20-1"
-	},
-	"signer": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv",
-
-    "channelId": "channel-0",
-    "connectionId": "connection-0"
-  }
-}`
+	Describe("MsgIBCChannelCloseInit", func() {
+		It("should parse Msg commands when there is MsgChannelCloseInit in the transaction", func() {
+			expected := `
+			{
+				"name": "MsgChannelCloseInitCreated",
+				"version": 1,
+				"height": 23,
+				"uuid": "{UUID}",
+				"msgName": "MsgChannelCloseInit",
+				"txHash": "3E491C5B2404FC3C3C15A59630729355ED398BFB617DA7D61C1B548E98955F8D",
+				"msgIndex": 0,
+				"params": {
+					"portId": "transfer",
+					"channelId": "channel-1",
+					"signer": "cro1t7yk3d4meeaqf5zfegv8p94wlfhpcnsftz55f7",
+					"counterpartyPortId": "transfer",
+					"counterpartyChannelId": "channel-0",
+					"connectionId": "connection-1"
+				}
+			}`
 
 			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
-				usecase_parser_test.TX_MSG_CHANNEL_OPEN_INIT_BLOCK_RESP,
+				usecase_parser_test.TX_MSG_CHANNEL_CLOSE_INIT_BLOCK_RESP,
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
-				usecase_parser_test.TX_MSG_CHANNEL_OPEN_INIT_BLOCK_RESULTS_RESP,
+				usecase_parser_test.TX_MSG_CHANNEL_CLOSE_INIT_BLOCK_RESULTS_RESP,
 			))
 
 			accountAddressPrefix := "cro"
@@ -73,10 +63,10 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("CreateMsgIBCChannelOpenInit"))
+			Expect(cmd.Name()).To(Equal("CreateMsgIBCChannelCloseInit"))
 
 			untypedEvent, _ := cmd.Exec()
-			typedEvent := untypedEvent.(*event.MsgIBCChannelOpenInit)
+			typedEvent := untypedEvent.(*event.MsgIBCChannelCloseInit)
 
 			regex, _ := regexp.Compile("\n?\r?\\s?")
 

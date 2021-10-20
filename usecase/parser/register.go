@@ -60,6 +60,8 @@ func InitParsers(manager *utils.CosmosParserManager) {
 	manager.RegisterParser("/ibc.core.channel.v1.MsgAcknowledgement", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgAcknowledgement)
 	manager.RegisterParser("/ibc.core.channel.v1.MsgTimeout", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgTimeout)
 	manager.RegisterParser("/ibc.core.channel.v1.MsgTimeoutOnClose", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgTimeoutOnClose)
+	manager.RegisterParser("/ibc.core.channel.v1.MsgChannelCloseInit", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgChannelCloseInit)
+	manager.RegisterParser("/ibc.core.channel.v1.MsgChannelCloseConfirm", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgChannelCloseConfirm)
 
 	// ibc applications transfer
 	manager.RegisterParser("/ibc.applications.transfer.v1.MsgTransfer", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgTransfer)
