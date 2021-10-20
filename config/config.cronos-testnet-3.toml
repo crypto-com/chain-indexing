@@ -7,6 +7,9 @@ validator_pubkey_prefix = "tcrccncl"
 connode_address_prefix = "tcrccnclcons"
 connode_pubkey_prefix = "tcrgo get github.com/ethereum/go-ethereum/common@v1.10.3ccnclconspub"
 
+[cosmos_version_enabled_height]
+v0_42_7 = 0
+
 [system]
 # mode of the system, possible values: EVENT_STORE,TENDERMINT_DIRECT,API_ONLY
 # EVENT_STORE mode: synced blocks are parsed to events and persist to event store. Projections will replay events from
@@ -81,7 +84,8 @@ enables = [
     #    "CryptoComNFT",
     "IBCChannel",
     #    "IBCChannelTxMsgTrace",
-    "IBCChannelMessage"
+    "IBCChannelMessage",
+    "BridgePendingActivity"
 ]
 
 [cronjob]
