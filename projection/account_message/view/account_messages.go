@@ -15,18 +15,23 @@ import (
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 )
 
+type AccountMessages interface {
+	Insert(*AccountMessageRow, []string) error
+	List(AccountMessagesListFilter, AccountMessagesListOrder, *pagination_interface.Pagination) ([]AccountMessageRow, *pagination_interface.PaginationResult, error)
+}
+
 // BlockTransactions projection view implemented by relational database
-type AccountMessages struct {
+type AccountMessagesView struct {
 	rdb *rdb.Handle
 }
 
-func NewAccountMessages(handle *rdb.Handle) *AccountMessages {
-	return &AccountMessages{
+func NewAccountMessagesView(handle *rdb.Handle) AccountMessages {
+	return &AccountMessagesView{
 		handle,
 	}
 }
 
-func (accountMessagesView *AccountMessages) Insert(messageRow *AccountMessageRow, accounts []string) error {
+func (accountMessagesView *AccountMessagesView) Insert(messageRow *AccountMessageRow, accounts []string) error {
 	accountMessageDataJSON, err := jsoniter.MarshalToString(messageRow.Data)
 	if err != nil {
 		return fmt.Errorf("error JSON marshalling account message for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -76,7 +81,7 @@ func (accountMessagesView *AccountMessages) Insert(messageRow *AccountMessageRow
 	return nil
 }
 
-func (accountMessagesView *AccountMessages) List(
+func (accountMessagesView *AccountMessagesView) List(
 	filter AccountMessagesListFilter,
 	order AccountMessagesListOrder,
 	pagination *pagination_interface.Pagination,
@@ -119,7 +124,7 @@ func (accountMessagesView *AccountMessages) List(
 		accountMessagesView.rdb,
 	).WithCustomTotalQueryFn(
 		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
-			totalView := NewAccountMessagesTotal(rdbHandle)
+			totalView := NewAccountMessagesTotalView(rdbHandle)
 			total, err := totalView.SumBy(totalIdentities)
 			if err != nil {
 				return int64(0), err
