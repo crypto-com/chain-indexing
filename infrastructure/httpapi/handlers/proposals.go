@@ -22,9 +22,9 @@ type Proposals struct {
 	logger applogger.Logger
 
 	cosmosClient       cosmosapp.Client
-	proposalsView      *proposal_view.Proposals
-	votesView          *proposal_view.Votes
-	depositorsView     *proposal_view.Depositors
+	proposalsView      proposal_view.Proposals
+	votesView          proposal_view.Votes
+	depositorsView     proposal_view.Depositors
 	proposalParamsView *param_view.Params
 
 	totalBonded              coin.Coin
@@ -36,9 +36,9 @@ func NewProposals(logger applogger.Logger, rdbHandle *rdb.Handle, cosmosClient c
 		logger,
 
 		cosmosClient,
-		proposal_view.NewProposals(rdbHandle),
-		proposal_view.NewVotes(rdbHandle),
-		proposal_view.NewDepositors(rdbHandle),
+		proposal_view.NewProposalsView(rdbHandle),
+		proposal_view.NewVotesView(rdbHandle),
+		proposal_view.NewDepositorsView(rdbHandle),
 		param_view.NewParams(rdbHandle, proposal_view.PARAMS_TABLE_NAME),
 
 		coin.Coin{},
