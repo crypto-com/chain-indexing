@@ -7,6 +7,9 @@ validator_pubkey_prefix = "crocncl"
 connode_address_prefix = "crocnclcons"
 connode_pubkey_prefix = "crocnclconspub"
 
+[cosmos_version_enabled_height]
+v0_42_7 = 0
+
 [system]
 # mode of the system, possible values: EVENT_STORE,TENDERMINT_DIRECT
 # EVENT_STORE mode: synced blocks are parsed to events and persist to event store. Projections will replay events from
@@ -81,6 +84,7 @@ enables = [
     "IBCChannel",
 #    "IBCChannelTxMsgTrace",
     "IBCChannelMessage",
+    "BridgePendingActivity"
 ]
 
 [cronjob]
@@ -109,6 +113,3 @@ username = "postgres"
 name = "indexing"
 schema = "public"
 ssl = true
-
-[cosmos_version_enabled_height]
-v0_42_7 = 0
