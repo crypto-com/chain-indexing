@@ -1,8 +1,9 @@
 package event_test
 
 import (
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	"time"
+
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/internal/json"
@@ -25,6 +26,7 @@ var _ = Describe("Event", func() {
 			anyTxHash := "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416"
 			anyMsgIndex := 2
 			anyChannelId := "channel-0"
+			anyConnectionId := "connection-0"
 
 			var anyRawValue map[string]interface{}
 			var anyRawMsgChannelOpenInit ibc_model.RawMsgChannelOpenInit
@@ -62,7 +64,8 @@ var _ = Describe("Event", func() {
 			anyParams := ibc_model.MsgChannelOpenInitParams{
 				RawMsgChannelOpenInit: anyRawMsgChannelOpenInit,
 
-				ChannelID: anyChannelId,
+				ChannelID:    anyChannelId,
+				ConnectionID: anyConnectionId,
 			}
 
 			event := event_usecase.NewMsgIBCChannelOpenInit(event_usecase.MsgCommonParams{
@@ -94,6 +97,7 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.Params.Signer).To(Equal(anyParams.Signer))
 
 			Expect(typedEvent.Params.ChannelID).To(Equal(anyParams.ChannelID))
+			Expect(typedEvent.Params.ConnectionID).To(Equal(anyParams.ConnectionID))
 		})
 
 		It("should able to encode and decode failed event", func() {
@@ -101,6 +105,7 @@ var _ = Describe("Event", func() {
 			anyTxHash := "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416"
 			anyMsgIndex := 2
 			anyChannelId := "channel-0"
+			anyConnectionId := "connection-0"
 
 			var anyRawValue map[string]interface{}
 			var anyRawMsgChannelOpenInit ibc_model.RawMsgChannelOpenInit
@@ -138,7 +143,8 @@ var _ = Describe("Event", func() {
 			anyParams := ibc_model.MsgChannelOpenInitParams{
 				RawMsgChannelOpenInit: anyRawMsgChannelOpenInit,
 
-				ChannelID: anyChannelId,
+				ChannelID:    anyChannelId,
+				ConnectionID: anyConnectionId,
 			}
 
 			event := event_usecase.NewMsgIBCChannelOpenInit(event_usecase.MsgCommonParams{
@@ -170,6 +176,7 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.Params.Signer).To(Equal(anyParams.Signer))
 
 			Expect(typedEvent.Params.ChannelID).To(Equal(anyParams.ChannelID))
+			Expect(typedEvent.Params.ConnectionID).To(Equal(anyParams.ConnectionID))
 		})
 	})
 })

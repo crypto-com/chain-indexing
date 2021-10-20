@@ -441,7 +441,8 @@ func ParseMsgChannelOpenInit(
 	msgChannelOpenInitParams := ibc_model.MsgChannelOpenInitParams{
 		RawMsgChannelOpenInit: rawMsg,
 
-		ChannelID: event.MustGetAttributeByKey("channel_id"),
+		ChannelID:    event.MustGetAttributeByKey("channel_id"),
+		ConnectionID: event.MustGetAttributeByKey("connection_id"),
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenInit(
