@@ -5,12 +5,17 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 )
 
-type MessagesTotal struct {
+type MessagesTotal interface {
+	IncrementAll(identities []string, total int64) error
+	SumBy(identities []string) (int64, error)
+}
+
+type MessagesTotalView struct {
 	*view.Total
 }
 
-func NewMessagesTotal(rdbHandle *rdb.Handle) *MessagesTotal {
-	return &MessagesTotal{
+func NewMessagesTotalView(rdbHandle *rdb.Handle) MessagesTotal {
+	return &MessagesTotalView{
 		view.NewTotal(rdbHandle, "view_nft_messages_total"),
 	}
 }
