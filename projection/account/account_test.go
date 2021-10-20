@@ -79,8 +79,8 @@ func TestAccount_HandleEvents(t *testing.T) {
 							Type: "PubKeyType",
 							Key:  "Key",
 						},
-						AccountNumber: "",
-						Sequence:      "",
+						AccountNumber: "AccountNumber",
+						Sequence:      "Sequence",
 						MaybeModuleAccount: &cosmosapp.ModuleAccount{
 							Name:        "",
 							Permissions: []string{},
@@ -132,11 +132,12 @@ func TestAccount_HandleEvents(t *testing.T) {
 				mockAccountsView.On(
 					"Upsert",
 					&account_view.AccountRow{
-						Address:       "Recipient",
-						Type:          "AccountType",
-						MaybeName:     (*string)(nil),
-						MaybePubkey:   &pubkey,
-						AccountNumber: "", SequenceNumber: "",
+						Address:        "Recipient",
+						Type:           "AccountType",
+						MaybeName:      (*string)(nil),
+						MaybePubkey:    &pubkey,
+						AccountNumber:  "AccountNumber",
+						SequenceNumber: "Sequence",
 						Balance: coin.Coins{
 							{
 								Denom:  "Denom",
@@ -154,8 +155,8 @@ func TestAccount_HandleEvents(t *testing.T) {
 							Type: "PubKeyType",
 							Key:  pubkey,
 						},
-						AccountNumber: "",
-						Sequence:      "",
+						AccountNumber: "AccountNumber",
+						Sequence:      "Sequence",
 						MaybeModuleAccount: &cosmosapp.ModuleAccount{
 							Name:        "",
 							Permissions: []string{},
@@ -198,11 +199,12 @@ func TestAccount_HandleEvents(t *testing.T) {
 				mockAccountsView.On(
 					"Upsert",
 					&account_view.AccountRow{
-						Address:       "Sender",
-						Type:          "AccountType",
-						MaybeName:     (*string)(nil),
-						MaybePubkey:   &pubkey,
-						AccountNumber: "", SequenceNumber: "",
+						Address:        "Sender",
+						Type:           "AccountType",
+						MaybeName:      (*string)(nil),
+						MaybePubkey:    &pubkey,
+						AccountNumber:  "AccountNumber",
+						SequenceNumber: "Sequence",
 						Balance: coin.Coins{
 							{
 								Denom:  "Denom",
