@@ -50,7 +50,7 @@ func NewMockRDbTx() *test.MockRDbTx {
 	return mockTx
 }
 
-func TestIBCChannel_HandleEvents(t *testing.T) {
+func TestAccount_HandleEvents(t *testing.T) {
 	testCases := []struct {
 		Name     string
 		Events   []entity_event.Event
