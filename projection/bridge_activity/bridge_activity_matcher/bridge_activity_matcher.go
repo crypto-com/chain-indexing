@@ -6,14 +6,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
-
-	"github.com/crypto-com/chain-indexing/internal/primptr"
-
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
+	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/view"
 	projection_usecase "github.com/crypto-com/chain-indexing/usecase/projection"
 )
@@ -177,6 +175,10 @@ func (cronJob *BridgeActivityMatcher) HandleOutgoing(
 	rows []view.BridgePendingActivityReadRow,
 	bridgePendingActivities *view.BridgePendingActivities,
 ) error {
+	if len(rows) == 0 {
+		return nil
+	}
+
 	var currentThisRDbTx rdb.Tx
 	var currentCommitted bool
 	defer func() {
@@ -242,6 +244,10 @@ func (cronJob *BridgeActivityMatcher) HandleIncoming(
 	rows []view.BridgePendingActivityReadRow,
 	bridgePendingActivities *view.BridgePendingActivities,
 ) error {
+	if len(rows) == 0 {
+		return nil
+	}
+
 	logger := cronJob.logger.WithFields(applogger.LogFields{
 		"source": bridgePendingActivities,
 	})

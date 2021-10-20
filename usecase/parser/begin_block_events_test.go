@@ -12,7 +12,7 @@ import (
 	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
 )
 
-var _ = Describe("ParseBeginBlockEventsCommands", func() {
+var _ = Describe("ParseBlockResultsTxsResults", func() {
 	Describe("MsgSend", func() {
 		It("should return commands corresponding to events in begin_block_events", func() {
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.BEGIN_BLOCK_COMMON_EVENTS_BLOCK_RESULTS_RESP)
