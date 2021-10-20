@@ -19,6 +19,16 @@ var _ projection_entity.Projection = &NFT{}
 
 const DO_NOT_MODIFY = "[do-not-modify]"
 
+var (
+	NewDenoms                    = view.NewDenomsView
+	NewDenomsTotal               = view.NewDenomsTotalView
+	NewTokens                    = view.NewTokensView
+	NewTokensTotal               = view.NewTokensTotalView
+	NewMessages                  = view.NewMessagesView
+	NewMessagesTotal             = view.NewMessagesTotalView
+	UpdateLastHandledEventHeight = (*NFT).UpdateLastHandledEventHeight
+)
+
 type NFT struct {
 	*rdbprojectionbase.Base
 
@@ -77,12 +87,12 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 
 	rdbTxHandle := rdbTx.ToHandle()
 
-	denomsView := view.NewDenoms(rdbTxHandle)
-	denomsTotalView := view.NewDenomsTotal(rdbTxHandle)
-	tokensView := view.NewTokens(rdbTxHandle)
-	tokensTotalView := view.NewTokensTotal(rdbTxHandle)
-	nftMessagesView := view.NewMessages(rdbTxHandle)
-	nftMessagesTotalView := view.NewMessagesTotal(rdbTxHandle)
+	denomsView := NewDenoms(rdbTxHandle)
+	denomsTotalView := NewDenomsTotal(rdbTxHandle)
+	tokensView := NewTokens(rdbTxHandle)
+	tokensTotalView := NewTokensTotal(rdbTxHandle)
+	nftMessagesView := NewMessages(rdbTxHandle)
+	nftMessagesTotalView := NewMessagesTotal(rdbTxHandle)
 
 	var blockTime utctime.UTCTime
 	var blockHash string
@@ -315,7 +325,7 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 		}
 	}
 
-	if err := nft.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
+	if err := UpdateLastHandledEventHeight(nft, rdbTxHandle, height); err != nil {
 		return fmt.Errorf("error updating last handled event height: %v", err)
 	}
 
@@ -327,8 +337,8 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 }
 
 func (nft *NFT) insertMessage(
-	messagesView *view.Messages,
-	messagesTotalView *view.MessagesTotal,
+	messagesView view.Messages,
+	messagesTotalView view.MessagesTotal,
 	message view.MessageRow,
 ) error {
 	totalIdentities := []string{
@@ -361,10 +371,10 @@ func (nft *NFT) insertMessage(
 }
 
 func (nft *NFT) updateToken(
-	tokensView *view.Tokens,
+	tokensView view.Tokens,
 	prevTokenRow view.TokenRow,
 	tokenRow view.TokenRow,
-	tokensTotalView *view.TokensTotal,
+	tokensTotalView view.TokensTotal,
 ) error {
 	if updateTokenErr := tokensView.Update(tokenRow); updateTokenErr != nil {
 		return fmt.Errorf("error updating NFT token row: %v", updateTokenErr)
@@ -401,7 +411,7 @@ func (nft *NFT) updateToken(
 }
 
 func (nft *NFT) insertToken(
-	tokensView *view.Tokens, tokenRow view.TokenRow, tokensTotalView *view.TokensTotal,
+	tokensView view.Tokens, tokenRow view.TokenRow, tokensTotalView view.TokensTotal,
 ) error {
 	if insertTokenErr := tokensView.Insert(&tokenRow); insertTokenErr != nil {
 		return fmt.Errorf("error inserting NFT token into view: %v", insertTokenErr)
@@ -430,9 +440,9 @@ func (nft *NFT) insertToken(
 }
 
 func (nft *NFT) deleteToken(
-	tokensView *view.Tokens,
-	tokensTotalView *view.TokensTotal,
-	nftMessagesView *view.Messages,
+	tokensView view.Tokens,
+	tokensTotalView view.TokensTotal,
+	nftMessagesView view.Messages,
 	tokenRow view.TokenRow,
 ) error {
 	deletedRowCount, deleteTokenErr := tokensView.Delete(tokenRow.DenomId, tokenRow.TokenId)

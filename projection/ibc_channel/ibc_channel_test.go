@@ -245,7 +245,8 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						},
 					}),
 					Params: ibc_model.MsgChannelOpenInitParams{
-						ChannelID: "ChannelID",
+						ChannelID:    "ChannelID",
+						ConnectionID: "ConnectionID",
 						RawMsgChannelOpenInit: ibc_model.RawMsgChannelOpenInit{
 							PortID: "PortID",
 							Channel: ibc_model.Channel{
@@ -260,6 +261,15 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				},
 			},
 			MockFunc: func() (mocks []*testify_mock.Mock) {
+				mockIbcConnectionsView := ibc_channel_view.NewMockIBCConnectionsView(nil).(*ibc_channel_view.MockIBCConnectionsView)
+				mocks = append(mocks, &mockIbcConnectionsView.Mock)
+
+				ibc_channel.NewIBCConnections = func(_ *rdb.Handle) ibc_channel_view.IBCConnections {
+					return mockIbcConnectionsView
+				}
+
+				mockIbcConnectionsView.On("FindCounterpartyChainIDBy", "ConnectionID").Return("CounterpartyChainID", nil)
+
 				mockIbcChannelsView := ibc_channel_view.NewMockIBCChannelsView(nil).(*ibc_channel_view.MockIBCChannelsView)
 				mocks = append(mocks, &mockIbcChannelsView.Mock)
 
@@ -272,10 +282,10 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					&ibc_channel_view.IBCChannelRow{
 						ChannelID:                    "ChannelID",
 						PortID:                       "PortID",
-						ConnectionID:                 "",
+						ConnectionID:                 "ConnectionID",
 						CounterpartyChannelID:        "CounterpartyChannelID",
 						CounterpartyPortID:           "CounterpartyPortID",
-						CounterpartyChainID:          "",
+						CounterpartyChainID:          "CounterpartyChainID",
 						Status:                       false,
 						PacketOrdering:               "Ordering",
 						LastInPacketSequence:         0,
@@ -319,7 +329,8 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						},
 					}),
 					Params: ibc_model.MsgChannelOpenTryParams{
-						ChannelID: "ChannelID",
+						ChannelID:    "ChannelID",
+						ConnectionID: "ConnectionID",
 						RawMsgChannelOpenTry: ibc_model.RawMsgChannelOpenTry{
 							PortID: "PortID",
 							Channel: ibc_model.Channel{
@@ -334,6 +345,15 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				},
 			},
 			MockFunc: func() (mocks []*testify_mock.Mock) {
+				mockIbcConnectionsView := ibc_channel_view.NewMockIBCConnectionsView(nil).(*ibc_channel_view.MockIBCConnectionsView)
+				mocks = append(mocks, &mockIbcConnectionsView.Mock)
+
+				ibc_channel.NewIBCConnections = func(_ *rdb.Handle) ibc_channel_view.IBCConnections {
+					return mockIbcConnectionsView
+				}
+
+				mockIbcConnectionsView.On("FindCounterpartyChainIDBy", "ConnectionID").Return("CounterpartyChainID", nil)
+
 				mockIbcChannelsView := ibc_channel_view.NewMockIBCChannelsView(nil).(*ibc_channel_view.MockIBCChannelsView)
 				mocks = append(mocks, &mockIbcChannelsView.Mock)
 
@@ -346,10 +366,10 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					&ibc_channel_view.IBCChannelRow{
 						ChannelID:                    "ChannelID",
 						PortID:                       "PortID",
-						ConnectionID:                 "",
+						ConnectionID:                 "ConnectionID",
 						CounterpartyChannelID:        "CounterpartyChannelID",
 						CounterpartyPortID:           "CounterpartyPortID",
-						CounterpartyChainID:          "",
+						CounterpartyChainID:          "CounterpartyChainID",
 						Status:                       false,
 						PacketOrdering:               "Ordering",
 						LastInPacketSequence:         0,

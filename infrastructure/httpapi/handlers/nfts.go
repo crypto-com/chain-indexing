@@ -17,9 +17,9 @@ import (
 type NFTs struct {
 	logger applogger.Logger
 
-	denomsView   *nft_view.Denoms
-	tokensView   *nft_view.Tokens
-	messagesView *nft_view.Messages
+	denomsView   nft_view.Denoms
+	tokensView   nft_view.Tokens
+	messagesView nft_view.Messages
 }
 
 func NewNFTs(
@@ -28,9 +28,9 @@ func NewNFTs(
 	return &NFTs{
 		logger,
 
-		nft_view.NewDenoms(rdbHandle),
-		nft_view.NewTokens(rdbHandle),
-		nft_view.NewMessages(rdbHandle),
+		nft_view.NewDenomsView(rdbHandle),
+		nft_view.NewTokensView(rdbHandle),
+		nft_view.NewMessagesView(rdbHandle),
 	}
 }
 
