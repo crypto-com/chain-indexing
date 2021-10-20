@@ -26,7 +26,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
-func ParseBlockResultsTxsMsgToCommands(
+func ParseBlockTxsMsgToCommands(
 	parserManager *utils.CosmosParserManager,
 	txDecoder *utils.TxDecoder,
 	block *model.Block,
@@ -114,6 +114,8 @@ func ParseBlockResultsTxsMsgToCommands(
 				"/ibc.core.channel.v1.MsgAcknowledgement",
 				"/ibc.core.channel.v1.MsgTimeout",
 				"/ibc.core.channel.v1.MsgTimeoutOnClose",
+				"/ibc.core.channel.v1.MsgChannelCloseInit",
+				"/ibc.core.channel.v1.MsgChannelCloseConfirm",
 
 				// ibc applications transfer
 				"/ibc.applications.transfer.v1.MsgTransfer",
@@ -137,6 +139,7 @@ func ParseBlockResultsTxsMsgToCommands(
 					MsgCommonParams: msgCommonParams,
 					Msg:             msg,
 					MsgIndex:        msgIndex,
+					ParserManager:   parserManager,
 				})
 			}
 
@@ -1294,22 +1297,67 @@ func ParseMsgExec(
 			RawMsgExec: rawMsg,
 		}
 
-		return []command.Command{command_usecase.NewCreateMsgExec(
+		innerCommands := parseMsgExecInnerMsgs(parserParams)
+
+		return append([]command.Command{command_usecase.NewCreateMsgExec(
 			parserParams.MsgCommonParams,
 
 			execParams,
-		)}
+		)}, innerCommands...)
 	}
 
 	execParams := model.MsgExecParams{
 		RawMsgExec: rawMsg,
 	}
 
-	return []command.Command{command_usecase.NewCreateMsgExec(
+	innerCommands := parseMsgExecInnerMsgs(parserParams)
+
+	return append([]command.Command{command_usecase.NewCreateMsgExec(
 		parserParams.MsgCommonParams,
 
 		execParams,
-	)}
+	)}, innerCommands...)
+}
+
+func parseMsgExecInnerMsgs(
+	parserParams utils.CosmosParserParams,
+) []command.Command {
+
+	var commands []command.Command
+	blockHeight := parserParams.MsgCommonParams.BlockHeight
+
+	msgs, ok := parserParams.Msg["msgs"].([]interface{})
+	if !ok {
+		panic(fmt.Errorf("error parsing MsgExec.msgs to []interface{}: %v", parserParams.Msg["msgs"]))
+	}
+
+	for innerMsgIndex, innerMsgInterface := range msgs {
+		innerMsg, ok := innerMsgInterface.(map[string]interface{})
+		if !ok {
+			panic(fmt.Errorf("error parsing MsgExec.msgs[%v] to map[string]interface{}: %v", innerMsgIndex, innerMsgInterface))
+		}
+
+		innerMsgType, ok := innerMsg["@type"].(string)
+		if !ok {
+			panic(fmt.Errorf("error missing '@type' in MsgExec.msgs[%v]: %v", innerMsgIndex, innerMsg))
+		}
+
+		parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(innerMsgType), utils.ParserBlockHeight(blockHeight))
+
+		msgCommands := parser(utils.CosmosParserParams{
+			AddressPrefix:   parserParams.AddressPrefix,
+			StakingDenom:    parserParams.StakingDenom,
+			TxsResult:       parserParams.TxsResult,
+			MsgCommonParams: parserParams.MsgCommonParams,
+			Msg:             innerMsg,
+			MsgIndex:        parserParams.MsgIndex,
+			ParserManager:   parserParams.ParserManager,
+		})
+
+		commands = append(commands, msgCommands...)
+	}
+
+	return commands
 }
 
 func ParseMsgGrantAllowance(

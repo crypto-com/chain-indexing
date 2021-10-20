@@ -3,7 +3,8 @@ package ibc
 type MsgChannelOpenInitParams struct {
 	RawMsgChannelOpenInit
 
-	ChannelID string `json:"channelId"`
+	ChannelID    string `json:"channelId"`
+	ConnectionID string `json:"connectionId"`
 }
 
 type RawMsgChannelOpenInit struct {

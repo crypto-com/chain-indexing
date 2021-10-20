@@ -341,6 +341,53 @@ func (projection *AccountTransaction) HandleEvents(height int64, events []event_
 		} else if typedEvent, ok := event.(*event_usecase.MsgIBCTimeoutOnClose); ok {
 			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
 
+		} else if typedEvent, ok := event.(*event_usecase.MsgGrant); ok {
+
+			if typedEvent.Params.MaybeSendGrant != nil {
+				transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.MaybeSendGrant.Granter)
+				transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.MaybeSendGrant.Grantee)
+
+			} else if typedEvent.Params.MaybeStakeGrant != nil {
+				transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.MaybeStakeGrant.Granter)
+				transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.MaybeStakeGrant.Grantee)
+
+			} else if typedEvent.Params.MaybeGenericGrant != nil {
+				transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.MaybeGenericGrant.Granter)
+				transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.MaybeGenericGrant.Grantee)
+
+			}
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgRevoke); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Granter)
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Grantee)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgExec); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Grantee)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgGrantAllowance); ok {
+
+			if typedEvent.Params.MaybeBasicAllowance != nil {
+				transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.MaybeBasicAllowance.Granter)
+				transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.MaybeBasicAllowance.Grantee)
+
+			} else if typedEvent.Params.MaybePeriodicAllowance != nil {
+				transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.MaybePeriodicAllowance.Granter)
+				transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.MaybePeriodicAllowance.Grantee)
+
+			} else if typedEvent.Params.MaybeAllowedMsgAllowance != nil {
+				transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.MaybeAllowedMsgAllowance.Granter)
+				transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.MaybeAllowedMsgAllowance.Grantee)
+
+			}
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgRevokeAllowance); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Granter)
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Grantee)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgCreateVestingAccount); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.FromAddress)
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.ToAddress)
+
 		}
 	}
 

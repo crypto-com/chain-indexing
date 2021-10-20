@@ -3,8 +3,6 @@ package projection
 import (
 	"fmt"
 
-	"github.com/crypto-com/chain-indexing/projection/chainstats"
-
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
@@ -14,6 +12,8 @@ import (
 	"github.com/crypto-com/chain-indexing/projection/account_transaction"
 	"github.com/crypto-com/chain-indexing/projection/block"
 	"github.com/crypto-com/chain-indexing/projection/blockevent"
+	"github.com/crypto-com/chain-indexing/projection/bridge_activity/bridge_pending_activity"
+	"github.com/crypto-com/chain-indexing/projection/chainstats"
 	"github.com/crypto-com/chain-indexing/projection/ibc_channel"
 	"github.com/crypto-com/chain-indexing/projection/ibc_channel_message"
 	"github.com/crypto-com/chain-indexing/projection/nft"
@@ -23,7 +23,7 @@ import (
 	"github.com/crypto-com/chain-indexing/projection/validatorstats"
 )
 
-func InitProjection(name string, params InitParams) projection_entity.Projection {
+func InitProjection(name string, params InitProjectionParams) projection_entity.Projection {
 	switch name {
 	case "Account":
 		return account.NewAccount(params.Logger, params.RdbConn, params.CosmosAppClient)
@@ -67,13 +67,15 @@ func InitProjection(name string, params InitParams) projection_entity.Projection
 		})
 	case "IBCChannelMessage":
 		return ibc_channel_message.NewIBCChannelMessage(params.Logger, params.RdbConn)
+	case "BridgePendingActivity":
+		return bridge_pending_activity.NewBridgePendingActivity(params.Logger, params.RdbConn)
 	// register more projections here
 	default:
 		panic(fmt.Sprintf("Unrecognized projection: %s", name))
 	}
 }
 
-type InitParams struct {
+type InitProjectionParams struct {
 	Logger  applogger.Logger
 	RdbConn rdb.Conn
 

@@ -148,7 +148,11 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64, isRetry bool) error {
 			for _, command := range commands {
 				event, err := command.Exec()
 				if err != nil {
-					return fmt.Errorf("error generating event: %v", err)
+
+					return fmt.Errorf(
+						"error executing command %sV%d to produce events: %v",
+						command.Name(), command.Version(), err,
+					)
 				}
 				events = append(events, event)
 			}

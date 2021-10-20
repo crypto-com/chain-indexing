@@ -29,7 +29,7 @@ func initProjections(
 	}
 
 	projections := make([]projection_entity.Projection, 0, len(config.Projection.Enables))
-	initParams := projection.InitParams{
+	initParams := projection.InitProjectionParams{
 		Logger:  logger,
 		RdbConn: rdbConn,
 

@@ -15,17 +15,32 @@ import (
 // nolint:gosec
 const TOKENS_TABLE_NAME = "view_nft_tokens"
 
-type Tokens struct {
+type Tokens interface {
+	Insert(tokenRow *TokenRow) error
+	Delete(denomId string, tokenId string) (int64, error)
+	FindById(denomId string, tokenId string) (*TokenRowWithDenomname, error)
+	Update(tokenRow TokenRow) error
+	List(
+		filter TokenListFilter,
+		order TokenListOrder,
+		pagination *pagination_interface.Pagination,
+	) ([]TokenRowWithDenomname, *pagination_interface.PaginationResult, error)
+	ListDrops(
+		pagination *pagination_interface.Pagination,
+	) ([]string, *pagination_interface.PaginationResult, error)
+}
+
+type TokensView struct {
 	rdb *rdb.Handle
 }
 
-func NewTokens(handle *rdb.Handle) *Tokens {
-	return &Tokens{
+func NewTokensView(handle *rdb.Handle) Tokens {
+	return &TokensView{
 		handle,
 	}
 }
 
-func (tokensView *Tokens) Insert(tokenRow *TokenRow) error {
+func (tokensView *TokensView) Insert(tokenRow *TokenRow) error {
 	var err error
 
 	sql, sqlArgs, err := tokensView.rdb.StmtBuilder.Insert(
@@ -76,7 +91,7 @@ func (tokensView *Tokens) Insert(tokenRow *TokenRow) error {
 	return nil
 }
 
-func (tokensView *Tokens) Delete(denomId string, tokenId string) (int64, error) {
+func (tokensView *TokensView) Delete(denomId string, tokenId string) (int64, error) {
 	var err error
 
 	sql, sqlArgs, err := tokensView.rdb.StmtBuilder.Delete(
@@ -96,7 +111,7 @@ func (tokensView *Tokens) Delete(denomId string, tokenId string) (int64, error) 
 	return result.RowsAffected(), nil
 }
 
-func (tokensView *Tokens) FindById(
+func (tokensView *TokensView) FindById(
 	denomId string, tokenId string,
 ) (*TokenRowWithDenomname, error) {
 	selectStmtBuilder := tokensView.rdb.StmtBuilder.Select(
@@ -186,7 +201,7 @@ func (tokensView *Tokens) FindById(
 	return &row, nil
 }
 
-func (tokensView *Tokens) Update(tokenRow TokenRow) error {
+func (tokensView *TokensView) Update(tokenRow TokenRow) error {
 	sql, sqlArgs, err := tokensView.rdb.StmtBuilder.Update(
 		TOKENS_TABLE_NAME,
 	).SetMap(map[string]interface{}{
@@ -217,7 +232,7 @@ func (tokensView *Tokens) Update(tokenRow TokenRow) error {
 	return nil
 }
 
-func (tokensView *Tokens) List(
+func (tokensView *TokensView) List(
 	filter TokenListFilter,
 	order TokenListOrder,
 	pagination *pagination_interface.Pagination,
@@ -280,7 +295,7 @@ func (tokensView *Tokens) List(
 		tokensView.rdb,
 	).WithCustomTotalQueryFn(
 		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
-			totalView := NewTokensTotal(rdbHandle)
+			totalView := NewTokensTotalView(rdbHandle)
 
 			denomIdIdentifier := "-"
 			dropIdentifier := "-"
@@ -381,7 +396,7 @@ func (tokensView *Tokens) List(
 	return rows, paginationResult, nil
 }
 
-func (tokensView *Tokens) ListDrops(
+func (tokensView *TokensView) ListDrops(
 	pagination *pagination_interface.Pagination,
 ) ([]string, *pagination_interface.PaginationResult, error) {
 	stmtBuilder := tokensView.rdb.StmtBuilder.Select(

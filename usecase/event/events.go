@@ -109,6 +109,10 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(MSG_IBC_CHANNEL_OPEN_ACK_FAILED, 1, DecodeMsgIBCChannelOpenAck)
 	registry.Register(MSG_IBC_CHANNEL_OPEN_CONFIRM_CREATED, 1, DecodeMsgIBCChannelOpenConfirm)
 	registry.Register(MSG_IBC_CHANNEL_OPEN_CONFIRM_FAILED, 1, DecodeMsgIBCChannelOpenConfirm)
+	registry.Register(MSG_IBC_CHANNEL_CLOSE_INIT_CREATED, 1, DecodeMsgIBCChannelCloseInit)
+	registry.Register(MSG_IBC_CHANNEL_CLOSE_INIT_FAILED, 1, DecodeMsgIBCChannelCloseInit)
+	registry.Register(MSG_IBC_CHANNEL_CLOSE_CONFIRM_CREATED, 1, DecodeMsgIBCChannelCloseConfirm)
+	registry.Register(MSG_IBC_CHANNEL_CLOSE_CONFIRM_FAILED, 1, DecodeMsgIBCChannelCloseConfirm)
 
 	registry.Register(MSG_IBC_RECV_PACKET_CREATED, 1, DecodeMsgIBCRecvPacket)
 	registry.Register(MSG_IBC_RECV_PACKET_FAILED, 1, DecodeMsgIBCRecvPacket)
@@ -139,4 +143,10 @@ func RegisterEvents(registry *event.Registry) {
 	// vesting
 	registry.Register(MSG_CREATE_VESTING_ACCOUNT_CREATED, 1, DecodeMsgCreateVestingAccount)
 	registry.Register(MSG_CREATE_VESTING_ACCOUNT_FAILED, 1, DecodeMsgCreateVestingAccount)
+
+	// Gravity
+	registry.Register(GRAVITY_ETHEREUM_SEND_TO_COSMOS_HANDLED, 1, DecodeGravityEthereumSendToCosmosHandled)
+
+	// Cronos
+	registry.Register(CRONOS_SEND_TO_IBC_CREATED, 1, DecodeCronosSendToIBCCreated)
 }

@@ -15,7 +15,7 @@ import (
 type IBCChannelMessage struct {
 	logger applogger.Logger
 
-	ibcChannelMessagesView *ibc_channel_message_view.IBCChannelMessages
+	ibcChannelMessagesView ibc_channel_message_view.IBCChannelMessages
 }
 
 func NewIBCChannelMessage(logger applogger.Logger, rdbHandle *rdb.Handle) *IBCChannelMessage {
@@ -24,7 +24,7 @@ func NewIBCChannelMessage(logger applogger.Logger, rdbHandle *rdb.Handle) *IBCCh
 			"module": "IBCChannelMessageHandler",
 		}),
 
-		ibc_channel_message_view.NewIBCChannelMessages(rdbHandle),
+		ibc_channel_message_view.NewIBCChannelMessagesView(rdbHandle),
 	}
 }
 

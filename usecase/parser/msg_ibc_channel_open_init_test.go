@@ -44,7 +44,8 @@ var _ = Describe("ParseMsgCommands", func() {
 	},
 	"signer": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv",
 
-    "channelId": "channel-0"
+    "channelId": "channel-0",
+    "connectionId": "connection-0"
   }
 }`
 
@@ -61,7 +62,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, err := parser.ParseBlockResultsTxsMsgToCommands(
+			cmds, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,

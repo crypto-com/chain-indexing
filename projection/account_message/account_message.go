@@ -730,6 +730,147 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 					typedEvent.Params.Signer,
 				},
 			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgGrant); ok {
+
+			var accounts []string
+
+			if typedEvent.Params.MaybeSendGrant != nil {
+				accounts = []string{
+					typedEvent.Params.MaybeSendGrant.Granter,
+					typedEvent.Params.MaybeSendGrant.Grantee,
+				}
+			} else if typedEvent.Params.MaybeStakeGrant != nil {
+				accounts = []string{
+					typedEvent.Params.MaybeStakeGrant.Granter,
+					typedEvent.Params.MaybeStakeGrant.Grantee,
+				}
+			} else if typedEvent.Params.MaybeGenericGrant != nil {
+				accounts = []string{
+					typedEvent.Params.MaybeGenericGrant.Granter,
+					typedEvent.Params.MaybeGenericGrant.Grantee,
+				}
+			}
+
+			accountMessage := view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: accounts,
+			}
+
+			accountMessages = append(accountMessages, accountMessage)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgRevoke); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Granter,
+					typedEvent.Params.Grantee,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgExec); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Grantee,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgGrantAllowance); ok {
+
+			var accounts []string
+
+			if typedEvent.Params.MaybeBasicAllowance != nil {
+				accounts = []string{
+					typedEvent.Params.MaybeBasicAllowance.Granter,
+					typedEvent.Params.MaybeBasicAllowance.Grantee,
+				}
+			} else if typedEvent.Params.MaybePeriodicAllowance != nil {
+				accounts = []string{
+					typedEvent.Params.MaybePeriodicAllowance.Granter,
+					typedEvent.Params.MaybePeriodicAllowance.Grantee,
+				}
+			} else if typedEvent.Params.MaybeAllowedMsgAllowance != nil {
+				accounts = []string{
+					typedEvent.Params.MaybeAllowedMsgAllowance.Granter,
+					typedEvent.Params.MaybeAllowedMsgAllowance.Grantee,
+				}
+			}
+
+			accountMessage := view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: accounts,
+			}
+
+			accountMessages = append(accountMessages, accountMessage)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgRevokeAllowance); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Granter,
+					typedEvent.Params.Grantee,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgCreateVestingAccount); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.FromAddress,
+					typedEvent.Params.ToAddress,
+				},
+			})
 		}
 	}
 
