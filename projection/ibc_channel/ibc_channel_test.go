@@ -6,6 +6,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/crypto-com/chain-indexing/internal/json"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	ibc_channel_view "github.com/crypto-com/chain-indexing/projection/ibc_channel/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
@@ -565,8 +566,15 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					Params: ibc_model.MsgTransferParams{
 						RawMsgTransfer: ibc_model.RawMsgTransfer{
 							SourceChannel: "SourceChannel",
+							SourcePort:    "SourcePort",
 						},
-						PacketSequence: 1,
+						PacketData: ibc_model.FungibleTokenPacketData{
+							Amount: json.NewUint64(100),
+							Denom:  "DENOM",
+						},
+						DestinationChannel: "DestinationChannel",
+						DestinationPort:    "DestinationPort",
+						PacketSequence:     1,
 					},
 				},
 			},
@@ -604,6 +612,50 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
+				mockIbcChannelsView.On(
+					"FindBondedTokensBy",
+					"SourceChannel",
+				).Return(
+					&ibc_channel_view.BondedTokens{
+						OnThisChain: []ibc_channel_view.BondedToken{
+							{
+								Denom:  "OnThisChainDenom",
+								Amount: coin.NewInt(100),
+							},
+						},
+						OnCounterpartyChain: []ibc_channel_view.BondedToken{
+							{
+								Denom:  "OnCounterpartyChainDenom",
+								Amount: coin.NewInt(1000),
+							},
+						},
+					},
+					nil,
+				)
+
+				mockIbcChannelsView.On(
+					"UpdateBondedTokens",
+					"SourceChannel",
+					&ibc_channel_view.BondedTokens{
+						OnThisChain: []ibc_channel_view.BondedToken{
+							{
+								Denom:  "OnThisChainDenom",
+								Amount: coin.NewInt(100),
+							},
+						},
+						OnCounterpartyChain: []ibc_channel_view.BondedToken{
+							{
+								Denom:  "OnCounterpartyChainDenom",
+								Amount: coin.NewInt(1000),
+							},
+							{
+								Denom:  "DestinationPort/DestinationChannel/DENOM",
+								Amount: coin.NewInt(100),
+							},
+						},
+					},
+				).Return(nil)
+
 				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
 					return nil
 				}
@@ -612,7 +664,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 			},
 		},
 		{
-			Name: "HandleMsgIBCRecvPacket",
+			Name: "HandleMsgIBCRecvPacket WITHOUT error",
 			Events: []entity_event.Event{
 				&event_usecase.MsgIBCRecvPacket{
 					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
@@ -719,20 +771,20 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					"UpdateBondedTokens",
 					"DestinationChannel",
 					&ibc_channel_view.BondedTokens{
-						OnThisChain:[]ibc_channel_view.BondedToken{
+						OnThisChain: []ibc_channel_view.BondedToken{
 							{
-								Denom:"OnThisChainDenom",
-								Amount:coin.NewInt(100),
+								Denom:  "OnThisChainDenom",
+								Amount: coin.NewInt(100),
 							},
 							{
-								Denom:"DestinationPort/DestinationChannel/DENOM",
-								Amount:coin.NewInt(100),
+								Denom:  "DestinationPort/DestinationChannel/DENOM",
+								Amount: coin.NewInt(100),
 							},
 						},
-						OnCounterpartyChain:[]ibc_channel_view.BondedToken{
+						OnCounterpartyChain: []ibc_channel_view.BondedToken{
 							{
-								Denom:"OnCounterpartyChainDenom",
-								Amount:coin.NewInt(1000),
+								Denom:  "OnCounterpartyChainDenom",
+								Amount: coin.NewInt(1000),
 							},
 						},
 					},
@@ -746,7 +798,80 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 			},
 		},
 		{
-			Name: "HandleMsgIBCAcknowledgement",
+			Name: "HandleMsgIBCRecvPacket WITH error",
+			Events: []entity_event.Event{
+				&event_usecase.MsgIBCRecvPacket{
+					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
+						MsgName: event_usecase.MSG_IBC_RECV_PACKET,
+						Version: 1,
+						MsgCommonParams: event_usecase.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgRecvPacketParams{
+						RawMsgRecvPacket: ibc_model.RawMsgRecvPacket{
+							Packet: ibc_model.Packet{
+								Sequence:           "PacketSequence",
+								DestinationPort:    "DestinationPort",
+								DestinationChannel: "DestinationChannel",
+							},
+						},
+						MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
+							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
+								Denom:  "DENOM",
+								Amount: json.NewUint64(100),
+							},
+							Success: true,
+						},
+						PacketSequence: 1,
+						PacketAck: ibc_model.MsgRecvPacketPacketAck{
+							MaybeResult: nil,
+							MaybeError:  primptr.String("MaybeError"),
+						},
+					},
+				},
+			},
+			MockFunc: func() (mocks []*testify_mock.Mock) {
+				mockIbcChannelsView := ibc_channel_view.NewMockIBCChannelsView(nil).(*ibc_channel_view.MockIBCChannelsView)
+				mocks = append(mocks, &mockIbcChannelsView.Mock)
+
+				ibc_channel.NewIBCChannels = func(_ *rdb.Handle) ibc_channel_view.IBCChannels {
+					return mockIbcChannelsView
+				}
+
+				mockIbcChannelsView.On(
+					"Increment",
+					"DestinationChannel",
+					"total_transfer_in_count",
+					int64(1),
+				).Return(nil)
+
+				mockIbcChannelsView.On(
+					"UpdateSequence",
+					"DestinationChannel",
+					"last_in_packet_sequence",
+					uint64(1),
+				).Return(nil)
+
+				mockIbcChannelsView.On(
+					"UpdateLastActivityTimeAndHeight",
+					"DestinationChannel",
+					utctime.UTCTime{},
+					int64(1),
+				).Return(nil)
+
+				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgIBCAcknowledgement WITHOUT error",
 			Events: []entity_event.Event{
 				&event_usecase.MsgIBCAcknowledgement{
 					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
@@ -787,13 +912,6 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				}
 
 				mockIbcChannelsView.On(
-					"UpdateSequence",
-					"SourceChannel",
-					"last_out_packet_sequence",
-					uint64(1),
-				).Return(nil)
-
-				mockIbcChannelsView.On(
 					"UpdateLastActivityTimeAndHeight",
 					"SourceChannel",
 					utctime.UTCTime{},
@@ -812,6 +930,63 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					"SourceChannel",
 				).Return(nil)
 
+				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgIBCAcknowledgement WITH error",
+			Events: []entity_event.Event{
+				&event_usecase.MsgIBCAcknowledgement{
+					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
+						MsgName: event_usecase.MSG_IBC_ACKNOWLEDGEMENT,
+						Version: 1,
+						MsgCommonParams: event_usecase.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgAcknowledgementParams{
+						RawMsgAcknowledgement: ibc_model.RawMsgAcknowledgement{
+							Packet: ibc_model.Packet{
+								Sequence:           "PacketSequence",
+								SourceChannel:      "SourceChannel",
+								DestinationPort:    "DestinationPort",
+								DestinationChannel: "DestinationChannel",
+							},
+						},
+						MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
+							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
+								Denom:  "DENOM",
+								Amount: json.NewUint64(100),
+							},
+							Success:    false,
+							MaybeError: primptr.String("MaybeError"),
+						},
+						PacketSequence: 1,
+					},
+				},
+			},
+			MockFunc: func() (mocks []*testify_mock.Mock) {
+				mockIbcChannelsView := ibc_channel_view.NewMockIBCChannelsView(nil).(*ibc_channel_view.MockIBCChannelsView)
+				mocks = append(mocks, &mockIbcChannelsView.Mock)
+
+				ibc_channel.NewIBCChannels = func(_ *rdb.Handle) ibc_channel_view.IBCChannels {
+					return mockIbcChannelsView
+				}
+
+				mockIbcChannelsView.On(
+					"UpdateLastActivityTimeAndHeight",
+					"SourceChannel",
+					utctime.UTCTime{},
+					int64(1),
+				).Return(nil)
+
 				mockIbcChannelsView.On(
 					"FindBondedTokensBy",
 					"SourceChannel",
@@ -828,6 +1003,10 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 								Denom:  "OnCounterpartyChainDenom",
 								Amount: coin.NewInt(1000),
 							},
+							{
+								Denom:  "DestinationPort/DestinationChannel/DENOM",
+								Amount: coin.NewInt(100),
+							},
 						},
 					},
 					nil,
@@ -837,20 +1016,210 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					"UpdateBondedTokens",
 					"SourceChannel",
 					&ibc_channel_view.BondedTokens{
-						OnThisChain:[]ibc_channel_view.BondedToken{
+						OnThisChain: []ibc_channel_view.BondedToken{
 							{
-								Denom:"OnThisChainDenom",
-								Amount:coin.NewInt(100),
+								Denom:  "OnThisChainDenom",
+								Amount: coin.NewInt(100),
 							},
 						},
-						OnCounterpartyChain:[]ibc_channel_view.BondedToken{
+						OnCounterpartyChain: []ibc_channel_view.BondedToken{
 							{
-								Denom:"OnCounterpartyChainDenom",
-								Amount:coin.NewInt(1000),
+								Denom:  "OnCounterpartyChainDenom",
+								Amount: coin.NewInt(1000),
+							},
+						},
+					},
+				).Return(nil)
+
+				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgTimeout",
+			Events: []entity_event.Event{
+				&event_usecase.MsgIBCTimeout{
+					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
+						MsgName: event_usecase.MSG_IBC_TIMEOUT,
+						Version: 1,
+						MsgCommonParams: event_usecase.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgTimeoutParams{
+						RawMsgTimeout: ibc_model.RawMsgTimeout{
+							Packet: ibc_model.Packet{
+								Sequence:           "PacketSequence",
+								SourceChannel:      "SourceChannel",
+								DestinationPort:    "DestinationPort",
+								DestinationChannel: "DestinationChannel",
+							},
+						},
+						MaybeMsgTransfer: &ibc_model.MsgTimeoutMsgTransfer{
+							RefundDenom:  "DENOM",
+							RefundAmount: 100,
+						},
+						PacketSequence: 1,
+					},
+				},
+			},
+			MockFunc: func() (mocks []*testify_mock.Mock) {
+				mockIbcChannelsView := ibc_channel_view.NewMockIBCChannelsView(nil).(*ibc_channel_view.MockIBCChannelsView)
+				mocks = append(mocks, &mockIbcChannelsView.Mock)
+
+				ibc_channel.NewIBCChannels = func(_ *rdb.Handle) ibc_channel_view.IBCChannels {
+					return mockIbcChannelsView
+				}
+
+				mockIbcChannelsView.On(
+					"UpdateLastActivityTimeAndHeight",
+					"SourceChannel",
+					utctime.UTCTime{},
+					int64(1),
+				).Return(nil)
+
+				mockIbcChannelsView.On(
+					"FindBondedTokensBy",
+					"SourceChannel",
+				).Return(
+					&ibc_channel_view.BondedTokens{
+						OnThisChain: []ibc_channel_view.BondedToken{
+							{
+								Denom:  "OnThisChainDenom",
+								Amount: coin.NewInt(100),
+							},
+						},
+						OnCounterpartyChain: []ibc_channel_view.BondedToken{
+							{
+								Denom:  "OnCounterpartyChainDenom",
+								Amount: coin.NewInt(1000),
 							},
 							{
-								Denom:"//DENOM",
-								Amount:coin.NewInt(100),
+								Denom:  "DestinationPort/DestinationChannel/DENOM",
+								Amount: coin.NewInt(100),
+							},
+						},
+					},
+					nil,
+				)
+
+				mockIbcChannelsView.On(
+					"UpdateBondedTokens",
+					"SourceChannel",
+					&ibc_channel_view.BondedTokens{
+						OnThisChain: []ibc_channel_view.BondedToken{
+							{
+								Denom:  "OnThisChainDenom",
+								Amount: coin.NewInt(100),
+							},
+						},
+						OnCounterpartyChain: []ibc_channel_view.BondedToken{
+							{
+								Denom:  "OnCounterpartyChainDenom",
+								Amount: coin.NewInt(1000),
+							},
+						},
+					},
+				).Return(nil)
+
+				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgTimeoutOnClose",
+			Events: []entity_event.Event{
+				&event_usecase.MsgIBCTimeoutOnClose{
+					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
+						MsgName: event_usecase.MSG_IBC_TIMEOUT,
+						Version: 1,
+						MsgCommonParams: event_usecase.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgTimeoutOnCloseParams{
+						RawMsgTimeoutOnClose: ibc_model.RawMsgTimeoutOnClose{
+							Packet: ibc_model.Packet{
+								Sequence:           "PacketSequence",
+								SourceChannel:      "SourceChannel",
+								DestinationPort:    "DestinationPort",
+								DestinationChannel: "DestinationChannel",
+							},
+						},
+						MaybeMsgTransfer: &ibc_model.MsgTimeoutMsgTransfer{
+							RefundDenom:  "DENOM",
+							RefundAmount: 100,
+						},
+						PacketSequence: 1,
+					},
+				},
+			},
+			MockFunc: func() (mocks []*testify_mock.Mock) {
+				mockIbcChannelsView := ibc_channel_view.NewMockIBCChannelsView(nil).(*ibc_channel_view.MockIBCChannelsView)
+				mocks = append(mocks, &mockIbcChannelsView.Mock)
+
+				ibc_channel.NewIBCChannels = func(_ *rdb.Handle) ibc_channel_view.IBCChannels {
+					return mockIbcChannelsView
+				}
+
+				mockIbcChannelsView.On(
+					"UpdateLastActivityTimeAndHeight",
+					"SourceChannel",
+					utctime.UTCTime{},
+					int64(1),
+				).Return(nil)
+
+				mockIbcChannelsView.On(
+					"FindBondedTokensBy",
+					"SourceChannel",
+				).Return(
+					&ibc_channel_view.BondedTokens{
+						OnThisChain: []ibc_channel_view.BondedToken{
+							{
+								Denom:  "OnThisChainDenom",
+								Amount: coin.NewInt(100),
+							},
+						},
+						OnCounterpartyChain: []ibc_channel_view.BondedToken{
+							{
+								Denom:  "OnCounterpartyChainDenom",
+								Amount: coin.NewInt(1000),
+							},
+							{
+								Denom:  "DestinationPort/DestinationChannel/DENOM",
+								Amount: coin.NewInt(100),
+							},
+						},
+					},
+					nil,
+				)
+
+				mockIbcChannelsView.On(
+					"UpdateBondedTokens",
+					"SourceChannel",
+					&ibc_channel_view.BondedTokens{
+						OnThisChain: []ibc_channel_view.BondedToken{
+							{
+								Denom:  "OnThisChainDenom",
+								Amount: coin.NewInt(100),
+							},
+						},
+						OnCounterpartyChain: []ibc_channel_view.BondedToken{
+							{
+								Denom:  "OnCounterpartyChainDenom",
+								Amount: coin.NewInt(1000),
 							},
 						},
 					},
