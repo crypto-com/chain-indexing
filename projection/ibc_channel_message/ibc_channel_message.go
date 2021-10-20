@@ -17,6 +17,12 @@ import (
 
 var _ projection_entity.Projection = &IBCChannelMessage{}
 
+var (
+	NewIBCChannelMessages        = view.NewIBCChannelMessagesView
+	NewIBCChannelMessagesTotal   = view.NewIBCChannelMessagesTotalView
+	UpdateLastHandledEventHeight = (*IBCChannelMessage).UpdateLastHandledEventHeight
+)
+
 type IBCChannelMessage struct {
 	*rdbprojectionbase.Base
 
@@ -71,8 +77,8 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 
 	rdbTxHandle := rdbTx.ToHandle()
 
-	ibcChannelMessagesView := view.NewIBCChannelMessages(rdbTxHandle)
-	ibcChannelMessagesTotalView := view.NewIBCChannelMessagesTotal(rdbTxHandle)
+	ibcChannelMessagesView := NewIBCChannelMessages(rdbTxHandle)
+	ibcChannelMessagesTotalView := NewIBCChannelMessagesTotal(rdbTxHandle)
 
 	// Get the block time of current height
 	var blockTime utctime.UTCTime
@@ -270,7 +276,7 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 		}
 	}
 
-	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
+	if err := UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
 		return fmt.Errorf("error updating last handled event height: %v", err)
 	}
 
@@ -283,7 +289,7 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 }
 
 func (projection *IBCChannelMessage) updateIBCChannelMessagesTotal(
-	totalView *view.IBCChannelMessagesTotal,
+	totalView view.IBCChannelMessagesTotal,
 	channelID string,
 	messageType string,
 ) error {
