@@ -19,7 +19,7 @@ import (
 	usecase_event "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
-func NewIBCChannelMessageProjection(rdbConn rdb.Conn) *nft.NFT {
+func NewNFTProjection(rdbConn rdb.Conn) *nft.NFT {
 
 	return nft.NewNFT(
 		nil,
@@ -50,7 +50,7 @@ func NewMockRDbTx() *test.MockRDbTx {
 	return mockTx
 }
 
-func TestIBCChannelMessage_HandleEvents(t *testing.T) {
+func TestNFT_HandleEvents(t *testing.T) {
 	testCases := []struct {
 		Name     string
 		Events   []entity_event.Event
@@ -735,7 +735,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 		mocks = append(mocks, &mockRDbConn.Mock)
 		mocks = append(mocks, &mockTx.Mock)
 
-		projection := NewIBCChannelMessageProjection(mockRDbConn)
+		projection := NewNFTProjection(mockRDbConn)
 		err := projection.HandleEvents(1, tc.Events)
 		assert.NoError(t, err)
 
