@@ -285,7 +285,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 			if err := view.Insert(&bridge_pending_activity_view.BridgePendingActivityInsertRow{
 				BlockHeight:                   height,
 				BlockTime:                     &blockTime,
-				MaybeTransactionId:            primptr.String(cronosSendToIBCCreatedEvent.Params.TxHash),
+				MaybeTransactionId:            primptr.String(cronosSendToIBCCreatedEvent.Params.EthereumTxHash),
 				BridgeType:                    types.BRIDGE_TYPE_IBC,
 				LinkId:                        ibcLinkId(projection.Config().ThisChainName, cronosSendToIBCCreatedEvent.Params.PacketSequence),
 				Direction:                     types.DIRECTION_OUTGOING,

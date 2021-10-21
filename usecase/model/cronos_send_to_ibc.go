@@ -2,7 +2,7 @@ package model
 
 import "github.com/crypto-com/chain-indexing/internal/json"
 
-type RawCosmosSendToIBCParams struct {
+type RawCronosSendToIBCParams struct {
 	PacketChannelOrdering  string
 	PacketConnection       string
 	PacketData             string
@@ -23,14 +23,15 @@ type FungibleTokenPacketData struct {
 	Amount   json.Uint64 `json:"amount"`
 }
 
-type CosmosSendToIBCParams struct {
+type CronosSendToIBCParams struct {
 	TxHash             string                `json:"txHash"`
+	EthereumTxHash     string                `json:"ethereumTxHash"`
 	SourcePort         string                `json:"sourcePort"`
 	SourceChannel      string                `json:"sourceChannel"`
-	Token              CosmosSendToIBCToken  `json:"token"`
+	Token              CronosSendToIBCToken  `json:"token"`
 	Sender             string                `json:"sender"`
 	Receiver           string                `json:"receiver"`
-	TimeoutHeight      CosmosSendToIBCHeight `json:"timeoutHeight"`
+	TimeoutHeight      CronosSendToIBCHeight `json:"timeoutHeight"`
 	TimeoutTimestamp   string                `json:"timeoutTimestamp"`
 	PacketDataHex      string                `json:"packetDataHex"`
 	PacketSequence     uint64                `json:"packetSequence,string"`
@@ -40,12 +41,12 @@ type CosmosSendToIBCParams struct {
 	ConnectionID       string                `json:"connectionId"`
 }
 
-type CosmosSendToIBCToken struct {
+type CronosSendToIBCToken struct {
 	Denom  string      `json:"denom"`
 	Amount json.Uint64 `json:"amount"`
 }
 
-type CosmosSendToIBCHeight struct {
+type CronosSendToIBCHeight struct {
 	RevisionNumber uint64 `json:"revisionNumber,string"`
 	RevisionHeight uint64 `json:"revisionHeight,string"`
 }

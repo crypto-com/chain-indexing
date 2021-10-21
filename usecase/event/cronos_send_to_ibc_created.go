@@ -17,12 +17,12 @@ const CRONOS_SEND_TO_IBC_CREATED = "CronosSendToIBCCreated"
 type CronosSendToIBCCreated struct {
 	event_entity.Base
 
-	Params model.CosmosSendToIBCParams `json:"params"`
+	Params model.CronosSendToIBCParams `json:"params"`
 }
 
 func NewCronosSendToIBCCreated(
 	blockHeight int64,
-	params model.CosmosSendToIBCParams,
+	params model.CronosSendToIBCParams,
 ) *CronosSendToIBCCreated {
 	return &CronosSendToIBCCreated{
 		event_entity.NewBase(event_entity.BaseParams{
