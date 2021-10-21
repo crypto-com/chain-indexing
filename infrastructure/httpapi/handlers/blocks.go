@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 
 	validator_view "github.com/crypto-com/chain-indexing/projection/validator/view"
-
 	"github.com/valyala/fasthttp"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
@@ -37,6 +37,14 @@ func NewBlocks(logger applogger.Logger, rdbHandle *rdb.Handle) *Blocks {
 		blockevent_view.NewBlockEvents(rdbHandle),
 		validator_view.NewValidatorBlockCommitments(rdbHandle),
 	}
+}
+
+func (handler *Blocks) Register(server *httpapi.Server, routePrefix string) {
+	server.GET(fmt.Sprintf("%s/api/v1/blocks", routePrefix), handler.List)
+	server.GET(fmt.Sprintf("%s/api/v1/blocks/{height-or-hash}", routePrefix), handler.FindBy)
+	server.GET(fmt.Sprintf("%s/api/v1/blocks/{height}/transactions", routePrefix), handler.ListTransactionsByHeight)
+	server.GET(fmt.Sprintf("%s/api/v1/blocks/{height}/events", routePrefix), handler.ListEventsByHeight)
+	server.GET(fmt.Sprintf("%s/api/v1/blocks/{height}/commitments", routePrefix), handler.ListCommitmentsByHeight)
 }
 
 func (handler *Blocks) FindBy(ctx *fasthttp.RequestCtx) {

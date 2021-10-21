@@ -3,13 +3,12 @@ package handlers
 import (
 	"strings"
 
-	"github.com/valyala/fasthttp"
-
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	account_message_view "github.com/crypto-com/chain-indexing/projection/account_message/view"
+	"github.com/valyala/fasthttp"
 )
 
 type AccountMessages struct {
@@ -26,6 +25,10 @@ func NewAccountMessages(logger applogger.Logger, rdbHandle *rdb.Handle) *Account
 
 		account_message_view.NewAccountMessages(rdbHandle),
 	}
+}
+
+func (handler *AccountMessages) Register(server *httpapi.Server, routePrefix string) {
+	server.GET("/ListByAccount", handler.ListByAccount)
 }
 
 func (handler *AccountMessages) ListByAccount(ctx *fasthttp.RequestCtx) {

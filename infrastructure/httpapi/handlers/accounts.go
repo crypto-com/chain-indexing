@@ -2,12 +2,12 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 	validator_view "github.com/crypto-com/chain-indexing/projection/validator/view"
-
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 
 	"github.com/valyala/fasthttp"
@@ -46,6 +46,11 @@ func NewAccounts(
 
 		validatorAddressPrefix,
 	}
+}
+
+func (handler *Accounts) Register(server *httpapi.Server, routePrefix string) {
+	server.GET(fmt.Sprintf("%s/api/v1/accounts", routePrefix), handler.List)
+	server.GET(fmt.Sprintf("%s/api/v1/accounts/{account}", routePrefix), handler.FindBy)
 }
 
 func (handler *Accounts) FindBy(ctx *fasthttp.RequestCtx) {
