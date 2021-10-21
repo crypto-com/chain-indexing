@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	if err := CliApp(os.Args); err != nil {
+	if err := run(os.Args); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

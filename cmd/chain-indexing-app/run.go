@@ -15,7 +15,7 @@ import (
 	projection_usecase "github.com/crypto-com/chain-indexing/usecase/projection"
 )
 
-func CliApp(args []string) error {
+func run(args []string) error {
 	cliApp := &cli.App{
 		Name:                 filepath.Base(args[0]),
 		Usage:                "Crypto.com Chain Indexing Service",
