@@ -142,11 +142,15 @@ func CliApp(args []string) error {
 			logger := infrastructure.NewZerologLogger(os.Stdout)
 			logger.SetLogLevel(logLevel)
 
-			app := NewApp(logger, &config)
+			app := bootstrap.NewApp(logger, &config)
 
 			app.Init()
-			app.InitIndexService()
-			app.InitHTTPAPIServer()
+
+			app.InitIndexService(
+				initProjections(logger, app.GetRDbConn(), &config),
+				initCronJobs(logger, app.GetRDbConn(), &config),
+			)
+			app.InitHTTPAPIServer(initHTTPAPIHanlders(logger, app.GetRDbConn(), &config))
 
 			app.Run()
 
