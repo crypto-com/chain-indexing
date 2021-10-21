@@ -25,23 +25,17 @@ type Handler interface {
 }
 
 func NewHTTPAPIServer(logger applogger.Logger, config *Config) *HTTPAPIServer {
-	server := &HTTPAPIServer{
-		logger: logger,
+	httpListeningAddress := config.HTTP.ListeningAddress
+	httpRoutePrefix := config.HTTP.RoutePrefix
 
-		listeningAddress: config.HTTP.ListeningAddress,
-		routePrefix:      config.HTTP.RoutePrefix,
-
-		pprof: config.Debug,
-	}
-
-	server.httpServer = httpapi.NewServer(
-		server.listeningAddress,
+	httpServer := httpapi.NewServer(
+		httpListeningAddress,
 	).WithLogger(
-		server.logger,
+		logger,
 	)
 
 	if len(config.HTTP.CorsAllowedOrigins) != 0 {
-		server.httpServer = server.httpServer.WithCors(cors.Options{
+		httpServer = httpServer.WithCors(cors.Options{
 			AllowedOrigins: config.HTTP.CorsAllowedOrigins,
 			AllowedMethods: config.HTTP.CorsAllowedMethods,
 			AllowedHeaders: config.HTTP.CorsAllowedHeaders,
@@ -49,12 +43,21 @@ func NewHTTPAPIServer(logger applogger.Logger, config *Config) *HTTPAPIServer {
 		})
 	}
 
-	server.httpServer.GET(fmt.Sprintf("%s/api/v1/health", server.routePrefix), func(ctx *fasthttp.RequestCtx) {
+	httpServer.GET(fmt.Sprintf("%s/api/v1/health", httpRoutePrefix), func(ctx *fasthttp.RequestCtx) {
 		ctx.SetStatusCode(fasthttp.StatusOK)
 		ctx.SetBody([]byte("Ok"))
 	})
 
-	return server
+	return &HTTPAPIServer{
+		logger: logger,
+
+		listeningAddress: httpListeningAddress,
+		routePrefix:      httpRoutePrefix,
+
+		pprof: config.Debug,
+
+		httpServer: httpServer,
+	}
 }
 
 func (server *HTTPAPIServer) RegisterHandlers(handlers []Handler) {

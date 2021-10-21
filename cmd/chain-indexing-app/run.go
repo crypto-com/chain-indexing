@@ -144,8 +144,6 @@ func run(args []string) error {
 
 			app := bootstrap.NewApp(logger, &config)
 
-			app.Init()
-
 			app.InitIndexService(
 				initProjections(logger, app.GetRDbConn(), &config),
 				initCronJobs(logger, app.GetRDbConn(), &config),

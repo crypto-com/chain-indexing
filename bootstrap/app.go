@@ -16,9 +16,15 @@ type app struct {
 }
 
 func NewApp(logger applogger.Logger, config *Config) *app {
+	rdbConn, err := SetupRDbConn(a.config, a.logger)
+	if err != nil {
+		logger.Panicf("error setting up RDb connection: %v", err)
+	}
+
 	return &app{
-		logger: logger,
-		config: config,
+		logger:  logger,
+		config:  config,
+		rdbConn: rdbConn,
 	}
 }
 
@@ -26,20 +32,12 @@ func (a *app) GetRDbConn() rdb.Conn {
 	return a.rdbConn
 }
 
-func (a *app) Init() {
-	rdbConn, err := SetupRDbConn(a.config, a.logger)
-	if err != nil {
-		a.logger.Panicf("error setting up RDb connection: %v", err)
-	}
-	a.rdbConn = rdbConn
-}
-
 func (a *app) InitHTTPAPIServer(handlers []Handler) {
 	a.httpAPIServer = NewHTTPAPIServer(a.logger, a.config)
 	a.httpAPIServer.RegisterHandlers(handlers)
 }
 
-func (a *app) InitIndexService(projections []projection_entity.Projection, cronJobs []projection_entity.CronJob,) {
+func (a *app) InitIndexService(projections []projection_entity.Projection, cronJobs []projection_entity.CronJob) {
 	a.indexService = NewIndexService(a.logger, a.rdbConn, a.config, projections, cronJobs)
 }
 
