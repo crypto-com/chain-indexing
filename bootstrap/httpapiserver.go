@@ -49,15 +49,15 @@ func NewHTTPAPIServer(logger applogger.Logger, config *Config) *HTTPAPIServer {
 		})
 	}
 
-	return server
-}
-
-func (server *HTTPAPIServer) RegisterHandlers(handlers []Handler) {
 	server.httpServer.GET(fmt.Sprintf("%s/api/v1/health", server.routePrefix), func(ctx *fasthttp.RequestCtx) {
 		ctx.SetStatusCode(fasthttp.StatusOK)
 		ctx.SetBody([]byte("Ok"))
 	})
 
+	return server
+}
+
+func (server *HTTPAPIServer) RegisterHandlers(handlers []Handler) {
 	for _, handler := range handlers {
 		handler.Register(server.httpServer, server.routePrefix)
 	}
