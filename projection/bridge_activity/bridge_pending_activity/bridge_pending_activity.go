@@ -58,7 +58,7 @@ func (_ *BridgePendingActivity) GetEventsToListen() []string {
 		event_usecase.MSG_IBC_TRANSFER_TRANSFER_FAILED,
 		event_usecase.MSG_IBC_RECV_PACKET_CREATED,
 		event_usecase.MSG_IBC_ACKNOWLEDGEMENT_CREATED,
-		event_usecase.MSG_IBC_TIMEOUT,
+		event_usecase.MSG_IBC_TIMEOUT_CREATED,
 
 		event_usecase.CRONOS_SEND_TO_IBC_CREATED,
 
