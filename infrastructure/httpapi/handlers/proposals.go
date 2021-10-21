@@ -25,7 +25,7 @@ type Proposals struct {
 	proposalsView      proposal_view.Proposals
 	votesView          proposal_view.Votes
 	depositorsView     proposal_view.Depositors
-	proposalParamsView *param_view.Params
+	proposalParamsView param_view.Params
 
 	totalBonded              coin.Coin
 	totalBondedLastUpdatedAt time.Time
@@ -39,7 +39,7 @@ func NewProposals(logger applogger.Logger, rdbHandle *rdb.Handle, cosmosClient c
 		proposal_view.NewProposalsView(rdbHandle),
 		proposal_view.NewVotesView(rdbHandle),
 		proposal_view.NewDepositorsView(rdbHandle),
-		param_view.NewParams(rdbHandle, proposal_view.PARAMS_TABLE_NAME),
+		param_view.NewParamsView(rdbHandle, proposal_view.PARAMS_TABLE_NAME),
 
 		coin.Coin{},
 		time.Unix(int64(0), int64(0)),

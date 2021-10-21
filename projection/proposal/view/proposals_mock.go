@@ -42,7 +42,7 @@ func (proposalsView *MockProposalsView) FindById(
 ) {
 	mockArgs := proposalsView.Called(proposalId)
 	result1, _ := mockArgs.Get(0).(*ProposalWithMonikerRow)
-	return result1, mockArgs.Error(3)
+	return result1, mockArgs.Error(1)
 }
 
 func (proposalsView *MockProposalsView) List(
@@ -57,5 +57,5 @@ func (proposalsView *MockProposalsView) List(
 	mockArgs := proposalsView.Called(filter, order, pagination)
 	result1, _ := mockArgs.Get(0).([]ProposalWithMonikerRow)
 	result2, _ := mockArgs.Get(1).(*pagination2.PaginationResult)
-	return result1, result2, mockArgs.Error(3)
+	return result1, result2, mockArgs.Error(2)
 }

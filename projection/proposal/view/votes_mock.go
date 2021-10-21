@@ -33,7 +33,7 @@ func (votesView *MockVotesView) FindByProposalIdVoter(
 ) {
 	mockArgs := votesView.Called(proposalId, voterAddress)
 	result1, _ := mockArgs.Get(0).(*VoteWithMonikerRow)
-	return result1, mockArgs.Error(3)
+	return result1, mockArgs.Error(1)
 }
 
 func (votesView *MockVotesView) ListByProposalId(
@@ -48,5 +48,5 @@ func (votesView *MockVotesView) ListByProposalId(
 	mockArgs := votesView.Called(proposalId, order, pagination)
 	result1, _ := mockArgs.Get(0).([]VoteWithMonikerRow)
 	result2, _ := mockArgs.Get(1).(*pagination2.PaginationResult)
-	return result1, result2, mockArgs.Error(3)
+	return result1, result2, mockArgs.Error(2)
 }

@@ -15,6 +15,10 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 )
 
+var (
+	NewParams = view.NewParamsView
+)
+
 // a generic Param projection. For table schema refer to view/params.go
 type Base struct {
 	tableName string
@@ -41,7 +45,7 @@ func (projection *Base) GetEventsToListen() []string {
 func (projection *Base) HandleEvents(conn *rdb.Handle, _ logger.Logger, events []event_entity.Event) error {
 	for _, event := range events {
 		if genesisCreatedEvent, ok := event.(*event_usecase.GenesisCreated); ok {
-			view := view.NewParams(conn, projection.tableName)
+			view := NewParams(conn, projection.tableName)
 			for _, param := range projection.paramList {
 				if err := projection.persistGenesisParam(view, &genesisCreatedEvent.Genesis, param); err != nil {
 					return err
@@ -54,12 +58,12 @@ func (projection *Base) HandleEvents(conn *rdb.Handle, _ logger.Logger, events [
 	return nil
 }
 
-func (projection *Base) GetView(conn *rdb.Handle) *view.Params {
-	return view.NewParams(conn, projection.tableName)
+func (projection *Base) GetView(conn *rdb.Handle) view.Params {
+	return NewParams(conn, projection.tableName)
 }
 
 func (projection *Base) persistGenesisParam(
-	view *view.Params, genesis *genesis.Genesis, param types.ParamAccessor,
+	view view.Params, genesis *genesis.Genesis, param types.ParamAccessor,
 ) error {
 	var value string
 	switch key := fmt.Sprintf("%s.%s", param.Module, param.Key); key {

@@ -31,5 +31,5 @@ func (depositorsView *MockDepositorsView) ListByProposalId(
 	mockArgs := depositorsView.Called(proposalId, order, pagination)
 	result1, _ := mockArgs.Get(0).([]DepositorWithMonikerRow)
 	result2, _ := mockArgs.Get(1).(*pagination2.PaginationResult)
-	return result1, result2, mockArgs.Error(3)
+	return result1, result2, mockArgs.Error(2)
 }
