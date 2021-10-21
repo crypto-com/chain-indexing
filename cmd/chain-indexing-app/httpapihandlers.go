@@ -9,7 +9,7 @@ import (
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 
-func initHTTPAPIHanlders(
+func initHTTPAPIHandlers(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	config *bootstrap.Config,

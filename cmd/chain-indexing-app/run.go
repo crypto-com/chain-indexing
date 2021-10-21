@@ -150,7 +150,7 @@ func run(args []string) error {
 				initProjections(logger, app.GetRDbConn(), &config),
 				initCronJobs(logger, app.GetRDbConn(), &config),
 			)
-			app.InitHTTPAPIServer(initHTTPAPIHanlders(logger, app.GetRDbConn(), &config))
+			app.InitHTTPAPIServer(initHTTPAPIHandlers(logger, app.GetRDbConn(), &config))
 
 			app.Run()
 
