@@ -133,7 +133,7 @@ func CliApp(args []string) error {
 			}
 
 			config := bootstrap.Config{
-				fileConfig,
+				FileConfig: fileConfig,
 			}
 			config.OverrideByCLIConfig(&cliConfig)
 
