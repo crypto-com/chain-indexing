@@ -16,7 +16,7 @@ type app struct {
 }
 
 func NewApp(logger applogger.Logger, config *Config) *app {
-	rdbConn, err := SetupRDbConn(a.config, a.logger)
+	rdbConn, err := SetupRDbConn(config, logger)
 	if err != nil {
 		logger.Panicf("error setting up RDb connection: %v", err)
 	}
