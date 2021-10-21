@@ -18,8 +18,6 @@ type app struct {
 	logger applogger.Logger
 	config *bootstrap.Config
 
-	projections   []projection_entity.Projection
-	cronJobs      []projection_entity.CronJob
 	rdbConn       rdb.Conn
 	httpAPIServer *bootstrap.HTTPAPIServer
 	indexService  *bootstrap.IndexService
