@@ -9,11 +9,11 @@ require (
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
 	github.com/calvinlauyh/cosmosutils v0.1.0
 	github.com/cenkalti/backoff/v4 v4.0.2
-	github.com/cosmos/cosmos-sdk v0.44.1
+	github.com/cosmos/cosmos-sdk v0.44.2
 	github.com/cosmos/ibc-go v1.2.1
 	github.com/crypto-org-chain/chain-main/v3 v3.0.0-croeseid
-	github.com/crypto-org-chain/cronos v0.5.5-testnet
-	github.com/ethereum/go-ethereum v1.10.3 // indirect
+	github.com/crypto-org-chain/cronos v0.6.0-testnet
+	github.com/ethereum/go-ethereum v1.10.3
 	github.com/ettle/strcase v0.1.1
 	github.com/fasthttp/router v1.3.3
 	github.com/golang-migrate/migrate/v4 v4.14.1
