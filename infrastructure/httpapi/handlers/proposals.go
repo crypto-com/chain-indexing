@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"math/big"
 	"time"
 
@@ -44,6 +45,13 @@ func NewProposals(logger applogger.Logger, rdbHandle *rdb.Handle, cosmosClient c
 		coin.Coin{},
 		time.Unix(int64(0), int64(0)),
 	}
+}
+
+func (handler *Proposals) Register(server *httpapi.Server, routePrefix string) {
+	server.GET(fmt.Sprintf("%s/api/v1/proposals", routePrefix), handler.List)
+	server.GET(fmt.Sprintf("%s/api/v1/proposals/{id}", routePrefix), handler.FindById)
+	server.GET(fmt.Sprintf("%s/api/v1/proposals/{id}/votes", routePrefix), handler.ListVotesById)
+	server.GET(fmt.Sprintf("%s/api/v1/proposals/{id}/depositors", routePrefix), handler.ListDepositorsById)
 }
 
 func (handler *Proposals) FindById(ctx *fasthttp.RequestCtx) {

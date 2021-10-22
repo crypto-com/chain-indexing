@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/valyala/fasthttp"
 
@@ -29,6 +30,12 @@ func NewIBCChannel(logger applogger.Logger, rdbHandle *rdb.Handle) *IBCChannel {
 		ibc_channel_view.NewIBCChannelsView(rdbHandle),
 		ibc_channel_view.NewIBCDenomHashMappingView(rdbHandle),
 	}
+}
+
+func (handler *IBCChannel) Register(server *httpapi.Server, routePrefix string) {
+	server.GET(fmt.Sprintf("%s/api/v1/ibc/channels", routePrefix), handler.ListChannels)
+	server.GET(fmt.Sprintf("%s/api/v1/ibc/channels/{channelId}", routePrefix), handler.FindChannelById)
+	server.GET(fmt.Sprintf("%s/api/v1/ibc/denom-hash-mappings", routePrefix), handler.ListAllDenomHashMapping)
 }
 
 func (handler *IBCChannel) ListChannels(ctx *fasthttp.RequestCtx) {

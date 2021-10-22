@@ -79,6 +79,13 @@ func NewValidators(
 	}
 }
 
+func (handler *Validators) Register(server *httpapi.Server, routePrefix string) {
+	server.GET(fmt.Sprintf("%s/api/v1/validators", routePrefix), handler.List)
+	server.GET(fmt.Sprintf("%s/api/v1/validators/active", routePrefix), handler.ListActive)
+	server.GET(fmt.Sprintf("%s/api/v1/validators/{address}", routePrefix), handler.FindBy)
+	server.GET(fmt.Sprintf("%s/api/v1/validators/{address}/activities", routePrefix), handler.ListActivities)
+}
+
 func (handler *Validators) FindBy(ctx *fasthttp.RequestCtx) {
 	addressParams, _ := ctx.UserValue("address").(string)
 	var identity validator_view.ValidatorIdentity

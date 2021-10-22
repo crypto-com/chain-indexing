@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"fmt"
+
 	"github.com/valyala/fasthttp"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
@@ -24,6 +26,10 @@ func NewAccountTransactions(logger applogger.Logger, rdbHandle *rdb.Handle) *Acc
 
 		account_transaction_view.NewAccountTransactions(rdbHandle),
 	}
+}
+
+func (handler *AccountTransactions) Register(server *httpapi.Server, routePrefix string) {
+	server.GET(fmt.Sprintf("%s/api/v1/accounts/{account}/transactions", routePrefix), handler.ListByAccount)
 }
 
 func (handler *AccountTransactions) ListByAccount(ctx *fasthttp.RequestCtx) {
