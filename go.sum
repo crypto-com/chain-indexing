@@ -294,6 +294,7 @@ github.com/cosmos/cosmos-sdk v0.43.0/go.mod h1:ctcrTEAhei9s8O3KSNvL0dxe+fVQGp07Q
 github.com/cosmos/cosmos-sdk v0.44.0/go.mod h1:orG0jzFJ2KsDfzLd/X0JSOMzF4Oxc/BQz2GkcYF4gRE=
 github.com/cosmos/cosmos-sdk v0.44.1 h1:UspmTMwKNGf6mH8k388v2T5csP9BYpPJkbQ/eG30PtM=
 github.com/cosmos/cosmos-sdk v0.44.1/go.mod h1:fwQJdw+aECatpTvQTo1tSfHEsxACdZYU80QCZUPnHr4=
+github.com/cosmos/cosmos-sdk v0.44.2/go.mod h1:fwQJdw+aECatpTvQTo1tSfHEsxACdZYU80QCZUPnHr4=
 github.com/cosmos/go-bip39 v0.0.0-20180819234021-555e2067c45d/go.mod h1:tSxLoYXyBmiFeKpvmq4dzayMdCjCnu8uqmCysIGBT2Y=
 github.com/cosmos/go-bip39 v1.0.0 h1:pcomnQdrdH22njcAatO0yWojsUnCO3y2tNoV1cb6hHY=
 github.com/cosmos/go-bip39 v1.0.0/go.mod h1:RNJv0H/pOIVgxw6KS7QeX2a0Uo0aKUlfhZ4xuwvCdJw=
@@ -323,6 +324,7 @@ github.com/crypto-org-chain/chain-main/v3 v3.0.0-croeseid h1:YAffq+tYiSqYXgIb11V
 github.com/crypto-org-chain/chain-main/v3 v3.0.0-croeseid/go.mod h1:92Z70bDbsScrWzIHB496p7nXKydtq5am9rqa0fCpbM8=
 github.com/crypto-org-chain/cronos v0.5.5-testnet h1:Oz29IDjsr5VFPzcy0w+OoIITe8ue4mPUFgZDwVDvrAE=
 github.com/crypto-org-chain/cronos v0.5.5-testnet/go.mod h1:Z2wDvtCEYEQPCu58bFSDGkELlLE81489Vt6GF0r/4N0=
+github.com/crypto-org-chain/cronos v0.6.0-testnet/go.mod h1:sszwHj4VpDiXKGvb1sZ5dYZnEPJHq0kPbJKtzDeL8tE=
 github.com/cyphar/filepath-securejoin v0.2.2/go.mod h1:FpkQEhXnPnOthhzymB7CGsFk2G9VLXONKD9G7QGMM+4=
 github.com/cznic/mathutil v0.0.0-20180504122225-ca4c9f2c1369/go.mod h1:e6NPNENfs9mPDVNRekM7lKScauxd5kXTr1Mfyig6TDM=
 github.com/daixiang0/gci v0.2.9/go.mod h1:+4dZ7TISfSmqfAGv59ePaHfNzgGtIkHAhhdKggP1JAc=
