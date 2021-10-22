@@ -6,32 +6,32 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
-type CreateCosmosSendToIBC struct {
+type CreateCronosSendToIBC struct {
 	blockHeight int64
-	params      model.CosmosSendToIBCParams
+	params      model.CronosSendToIBCParams
 }
 
-func NewCreateCosmosSendToIBC(
+func NewCreateCronosSendToIBC(
 	blockHeight int64,
-	params model.CosmosSendToIBCParams,
-) *CreateCosmosSendToIBC {
-	return &CreateCosmosSendToIBC{
+	params model.CronosSendToIBCParams,
+) *CreateCronosSendToIBC {
+	return &CreateCronosSendToIBC{
 		blockHeight,
 		params,
 	}
 }
 
 // Name returns name of command
-func (*CreateCosmosSendToIBC) Name() string {
-	return "CreateCosmosSendToIBC"
+func (*CreateCronosSendToIBC) Name() string {
+	return "CreateCronosSendToIBC"
 }
 
 // Version returns version of command
-func (*CreateCosmosSendToIBC) Version() int {
+func (*CreateCronosSendToIBC) Version() int {
 	return 1
 }
 
 // Exec process the command data and return the event accordingly
-func (cmd *CreateCosmosSendToIBC) Exec() (entity_event.Event, error) {
+func (cmd *CreateCronosSendToIBC) Exec() (entity_event.Event, error) {
 	return event.NewCronosSendToIBCCreated(cmd.blockHeight, cmd.params), nil
 }

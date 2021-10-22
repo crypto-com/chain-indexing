@@ -19,6 +19,12 @@ import (
 
 var _ projection_entity.Projection = &AccountMessage{}
 
+var (
+	NewAccountMessages = view.NewAccountMessagesView
+	NewAccountMessagesTotal = view.NewAccountMessagesTotalView
+	UpdateLastHandledEventHeight = (*AccountMessage).UpdateLastHandledEventHeight
+)
+
 type AccountMessage struct {
 	*rdbprojectionbase.Base
 
@@ -81,8 +87,8 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 		return nil
 	}
 
-	accountMessagesView := view.NewAccountMessages(rdbTxHandle)
-	accountMessagesTotalView := view.NewAccountMessagesTotal(rdbTxHandle)
+	accountMessagesView := NewAccountMessages(rdbTxHandle)
+	accountMessagesTotalView := NewAccountMessagesTotal(rdbTxHandle)
 
 	var blockTime utctime.UTCTime
 	var blockHash string
@@ -180,22 +186,6 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 				},
 				Accounts: []string{
 					typedEvent.RecipientAddress,
-				},
-			})
-		} else if typedEvent, ok := event.(*event_usecase.MsgFundCommunityPool); ok {
-			accountMessages = append(accountMessages, view.AccountMessageRecord{
-				Row: view.AccountMessageRow{
-					BlockHeight:     height,
-					BlockHash:       "",
-					BlockTime:       utctime.UTCTime{},
-					TransactionHash: typedEvent.TxHash(),
-					Success:         typedEvent.TxSuccess(),
-					MessageIndex:    typedEvent.MsgIndex,
-					MessageType:     typedEvent.MsgType(),
-					Data:            typedEvent,
-				},
-				Accounts: []string{
-					typedEvent.Depositor,
 				},
 			})
 		} else if typedEvent, ok := event.(*event_usecase.MsgFundCommunityPool); ok {
@@ -914,7 +904,7 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 		}
 	}
 
-	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
+	if err := UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
 		return fmt.Errorf("error updating last handled event height: %v", err)
 	}
 

@@ -7,6 +7,9 @@ validator_pubkey_prefix = "tcrocncl"
 connode_address_prefix = "tcrocnclcons"
 connode_pubkey_prefix = "tcrocnclconspub"
 
+[cosmos_version_enabled_height]
+v0_42_7 = 0
+
 [system]
 # mode of the system, possible values: EVENT_STORE,TENDERMINT_DIRECT
 # EVENT_STORE mode: synced blocks are parsed to events and persist to event store. Projections will replay events from
@@ -93,6 +96,3 @@ this_chain_name = "Crypto.org-Chain"
 counterparty_chain_name = "Cronos"
 channel_id = "channel-131"
 starting_height = 899374
-
-[cosmos_version_enabled_height]
-v0_42_7 = 0

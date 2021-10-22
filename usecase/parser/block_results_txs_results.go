@@ -21,24 +21,27 @@ func ParseBlockResultsTxsResults(
 	for i := range blockResults.TxsResults {
 		txHex := block.Txs[i]
 
-		parsedCmds := parseCosmosSendToIBC(block.Height, txHex, &blockResults.TxsResults[i])
+		parsedCmds := parseCronosSendToIBC(block.Height, txHex, &blockResults.TxsResults[i])
 		cmds = append(cmds, parsedCmds...)
 	}
 
 	return cmds, nil
 }
 
-func parseCosmosSendToIBC(
+func parseCronosSendToIBC(
 	blockHeight int64,
 	txHex string,
 	txResults *model.BlockResultsTxsResult,
 ) []commandentity.Command {
 	isEthereumTx := false
+	var ethereumTxHash string
 
 	var maybeIBCSendPacketEvent *utils.ParsedTxsResultLogEvent
 	for i, event := range txResults.Events {
 		if event.Type == "ethereum_tx" {
 			isEthereumTx = true
+			ethereumTxEvent := utils.NewParsedTxsResultLogEvent(&txResults.Events[i])
+			ethereumTxHash = ethereumTxEvent.MustGetAttributeByKey("ethereumTxHash")
 			break
 		} else if event.Type == "send_packet" {
 			maybeIBCSendPacketEvent = utils.NewParsedTxsResultLogEvent(&txResults.Events[i])
@@ -53,7 +56,7 @@ func parseCosmosSendToIBC(
 		return nil
 	}
 
-	params := model.RawCosmosSendToIBCParams{
+	params := model.RawCronosSendToIBCParams{
 		PacketChannelOrdering:  maybeIBCSendPacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
 		PacketConnection:       maybeIBCSendPacketEvent.MustGetAttributeByKey("packet_connection"),
 		PacketData:             maybeIBCSendPacketEvent.MustGetAttributeByKey("packet_data"),
@@ -72,17 +75,18 @@ func parseCosmosSendToIBC(
 
 	timeoutHeight := mustParseCosmosSendToIBCTimeoutHeight(params.PacketTimeoutHeight)
 
-	cmd := command.NewCreateCosmosSendToIBC(blockHeight, model.CosmosSendToIBCParams{
-		TxHash:        TxHash(txHex),
-		SourcePort:    params.PacketSrcPort,
-		SourceChannel: params.PacketSrcChannel,
-		Token: model.CosmosSendToIBCToken{
+	cmd := command.NewCreateCronosSendToIBC(blockHeight, model.CronosSendToIBCParams{
+		TxHash:         TxHash(txHex),
+		EthereumTxHash: ethereumTxHash,
+		SourcePort:     params.PacketSrcPort,
+		SourceChannel:  params.PacketSrcChannel,
+		Token: model.CronosSendToIBCToken{
 			Denom:  fungibleTokenPacketData.Denom,
 			Amount: fungibleTokenPacketData.Amount,
 		},
 		Sender:   fungibleTokenPacketData.Sender,
 		Receiver: fungibleTokenPacketData.Receiver,
-		TimeoutHeight: model.CosmosSendToIBCHeight{
+		TimeoutHeight: model.CronosSendToIBCHeight{
 			RevisionNumber: timeoutHeight.RevisionNumber,
 			RevisionHeight: timeoutHeight.RevisionHeight,
 		},
@@ -98,7 +102,7 @@ func parseCosmosSendToIBC(
 	return []commandentity.Command{cmd}
 }
 
-func mustParseCosmosSendToIBCTimeoutHeight(height string) model.CosmosSendToIBCHeight {
+func mustParseCosmosSendToIBCTimeoutHeight(height string) model.CronosSendToIBCHeight {
 	heightTokens := strings.Split(height, "-")
 	if len(heightTokens) != 2 {
 		panic(fmt.Errorf("invalid height: %s", height))
@@ -106,7 +110,7 @@ func mustParseCosmosSendToIBCTimeoutHeight(height string) model.CosmosSendToIBCH
 
 	revisionNumber := typeconv.MustAtou64(heightTokens[0])
 	revisionHeight := typeconv.MustAtou64(heightTokens[1])
-	return model.CosmosSendToIBCHeight{
+	return model.CronosSendToIBCHeight{
 		RevisionNumber: revisionNumber,
 		RevisionHeight: revisionHeight,
 	}

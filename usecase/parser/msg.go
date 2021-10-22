@@ -113,6 +113,8 @@ func ParseBlockTxsMsgToCommands(
 				"/ibc.core.channel.v1.MsgAcknowledgement",
 				"/ibc.core.channel.v1.MsgTimeout",
 				"/ibc.core.channel.v1.MsgTimeoutOnClose",
+				"/ibc.core.channel.v1.MsgChannelCloseInit",
+				"/ibc.core.channel.v1.MsgChannelCloseConfirm",
 
 				// ibc applications transfer
 				"/ibc.applications.transfer.v1.MsgTransfer",

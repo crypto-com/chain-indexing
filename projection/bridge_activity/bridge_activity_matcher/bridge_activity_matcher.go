@@ -6,13 +6,12 @@ import (
 	"os"
 	"time"
 
-	applogger "github.com/crypto-com/chain-indexing/external/logger"
-	"github.com/crypto-com/chain-indexing/external/primptr"
-	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
-
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/external/primptr"
+	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/view"
 	projection_usecase "github.com/crypto-com/chain-indexing/usecase/projection"
 )
@@ -176,63 +175,82 @@ func (cronJob *BridgeActivityMatcher) HandleOutgoing(
 	rows []view.BridgePendingActivityReadRow,
 	bridgePendingActivities *view.BridgePendingActivities,
 ) error {
-	var currentThisRDbTx rdb.Tx
-	var currentCommitted bool
+	if len(rows) == 0 {
+		return nil
+	}
+
+	for _, row := range rows {
+		if err := cronJob.handleOutgoingRow(row, bridgePendingActivities); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (cronJob *BridgeActivityMatcher) handleOutgoingRow(
+	row view.BridgePendingActivityReadRow,
+	bridgePendingActivities *view.BridgePendingActivities,
+) error {
+	logger := cronJob.logger.WithFields(applogger.LogFields{
+		"rowType": types.DIRECTION_OUTGOING,
+		"rowId":   row.Id,
+	})
+
+	logger.Info("going to handle outgoing row")
+
+	thisRDbTx, thisRDbConnBeginErr := cronJob.thisRDbConn.Begin()
+	if thisRDbConnBeginErr != nil {
+		return fmt.Errorf("error beginning transaction: %v", thisRDbConnBeginErr)
+	}
+
+	committed := false
 	defer func() {
-		if !currentCommitted && currentThisRDbTx != nil {
-			_ = currentThisRDbTx.Rollback()
+		if !committed {
+			_ = thisRDbTx.Rollback()
 		}
 	}()
-	for _, row := range rows {
-		var rdbConnBeginErr error
 
-		currentCommitted = false
-		currentThisRDbTx = nil
-		if currentThisRDbTx, rdbConnBeginErr = cronJob.thisRDbConn.Begin(); rdbConnBeginErr != nil {
-			return fmt.Errorf("error beginning transaction: %v", rdbConnBeginErr)
-		}
+	thisRDbTxHandle := thisRDbTx.ToHandle()
 
-		thisRDbTxHandle := currentThisRDbTx.ToHandle()
+	bridgeActivities := view.NewBridgeActivities(thisRDbTxHandle)
 
-		bridgeActivities := view.NewBridgeActivities(thisRDbTxHandle)
-
-		if insertErr := bridgeActivities.Insert(&view.BridgeActivityInsertRow{
-			BridgeType:                           row.BridgeType,
-			SourceBlockHeight:                    row.BlockHeight,
-			SourceBlockTime:                      row.BlockTime,
-			SourceTransactionId:                  *row.MaybeTransactionId,
-			SourceChain:                          row.FromChainId,
-			SourceAddress:                        *row.MaybeFromAddress,
-			MaybeSourceSmartContractAddress:      row.MaybeFromSmartContractAddress,
-			MaybeDestinationBlockHeight:          nil,
-			MaybeDestinationBlockTime:            nil,
-			MaybeDestinationTransactionId:        nil,
-			DestinationChain:                     row.ToChainId,
-			DestinationAddress:                   row.ToAddress,
-			MaybeDestinationSmartContractAddress: row.MaybeToSmartContractAddress,
-			MaybeChannelId:                       row.MaybeChannelId,
-			LinkId:                               row.LinkId,
-			Amount:                               row.Amount,
-			MaybeDenom:                           row.MaybeDenom,
-			MaybeBridgeFeeAmount:                 row.MaybeBridgeFeeAmount,
-			MaybeBridgeFeeDenom:                  row.MaybeBridgeFeeDenom,
-			Status:                               row.Status,
-		}); insertErr != nil {
-			return fmt.Errorf("error inserting outgoing activity into bridge activity table: %v", insertErr)
-		}
-
-		if updateToProcessedErr := bridgePendingActivities.UpdateToProcessed(row.Id); updateToProcessedErr != nil {
-			return fmt.Errorf(
-				"error updating pending activity row to processed into briding pending activity table: %v",
-				updateToProcessedErr,
-			)
-		}
-
-		if err := currentThisRDbTx.Commit(); err != nil {
-			return fmt.Errorf("error committing changes: %v", err)
-		}
-		currentCommitted = true
+	if insertErr := bridgeActivities.Insert(&view.BridgeActivityInsertRow{
+		BridgeType:                           row.BridgeType,
+		SourceBlockHeight:                    row.BlockHeight,
+		SourceBlockTime:                      row.BlockTime,
+		SourceTransactionId:                  *row.MaybeTransactionId,
+		SourceChain:                          row.FromChainId,
+		SourceAddress:                        *row.MaybeFromAddress,
+		MaybeSourceSmartContractAddress:      row.MaybeFromSmartContractAddress,
+		MaybeDestinationBlockHeight:          nil,
+		MaybeDestinationBlockTime:            nil,
+		MaybeDestinationTransactionId:        nil,
+		DestinationChain:                     row.ToChainId,
+		DestinationAddress:                   row.ToAddress,
+		MaybeDestinationSmartContractAddress: row.MaybeToSmartContractAddress,
+		MaybeChannelId:                       row.MaybeChannelId,
+		LinkId:                               row.LinkId,
+		Amount:                               row.Amount,
+		MaybeDenom:                           row.MaybeDenom,
+		MaybeBridgeFeeAmount:                 row.MaybeBridgeFeeAmount,
+		MaybeBridgeFeeDenom:                  row.MaybeBridgeFeeDenom,
+		Status:                               row.Status,
+	}); insertErr != nil {
+		return fmt.Errorf("error inserting outgoing activity into bridge activity table: %v", insertErr)
 	}
+
+	if updateToProcessedErr := bridgePendingActivities.UpdateToProcessed(row.Id); updateToProcessedErr != nil {
+		return fmt.Errorf(
+			"error updating pending activity row to processed into briding pending activity table: %v",
+			updateToProcessedErr,
+		)
+	}
+
+	if err := thisRDbTx.Commit(); err != nil {
+		return fmt.Errorf("error committing changes: %v", err)
+	}
+	committed = true
 
 	return nil
 }
@@ -241,89 +259,73 @@ func (cronJob *BridgeActivityMatcher) HandleIncoming(
 	rows []view.BridgePendingActivityReadRow,
 	bridgePendingActivities *view.BridgePendingActivities,
 ) error {
+	if len(rows) == 0 {
+		return nil
+	}
+
+	for _, row := range rows {
+		if err := cronJob.handleIncomingRow(row, bridgePendingActivities); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (cronJob *BridgeActivityMatcher) handleIncomingRow(
+	row view.BridgePendingActivityReadRow,
+	bridgePendingActivities *view.BridgePendingActivities,
+) error {
 	logger := cronJob.logger.WithFields(applogger.LogFields{
-		"source": bridgePendingActivities,
+		"rowType": types.DIRECTION_INCOMING,
+		"rowId":   row.Id,
 	})
 
-	var currentThisRDbTx rdb.Tx
-	var currentCommitted bool
+	logger.Info("going to handle incoming row")
+
+	thisRDbTx, thisRDbConnBeginErr := cronJob.thisRDbConn.Begin()
+	if thisRDbConnBeginErr != nil {
+		return fmt.Errorf("error beginning transaction: %v", thisRDbConnBeginErr)
+	}
+	committed := false
 	defer func() {
-		if !currentCommitted && currentThisRDbTx != nil {
-			_ = currentThisRDbTx.Rollback()
+		if !committed {
+			_ = thisRDbTx.Rollback()
 		}
 	}()
-	for _, row := range rows {
-		logger.WithFields(applogger.LogFields{
-			"rowId": row.Id,
-		})
-		logger.Info("going to handle incoming row")
 
-		var rdbConnBeginErr error
+	thisRDbTxHandle := thisRDbTx.ToHandle()
 
-		currentCommitted = false
-		currentThisRDbTx = nil
-		if currentThisRDbTx, rdbConnBeginErr = cronJob.thisRDbConn.Begin(); rdbConnBeginErr != nil {
-			return fmt.Errorf("error beginning transaction: %v", rdbConnBeginErr)
+	bridgeActivities := view.NewBridgeActivities(thisRDbTxHandle)
+
+	commit := func() error {
+		if err := thisRDbTx.Commit(); err != nil {
+			return fmt.Errorf("error committing changes: %v", err)
 		}
+		committed = true
 
-		thisRDbTxHandle := currentThisRDbTx.ToHandle()
+		return nil
+	}
 
-		bridgeActivities := view.NewBridgeActivities(thisRDbTxHandle)
-
-		commit := func() error {
-			if err := currentThisRDbTx.Commit(); err != nil {
-				return fmt.Errorf("error committing changes: %v", err)
-			}
-			currentCommitted = true
-
+	mutExistingActivity, existingActivityErr := bridgeActivities.FindByLinkId(row.LinkId)
+	if existingActivityErr != nil {
+		if errors.Is(existingActivityErr, rdb.ErrNoRows) {
+			logger.Infof(
+				"error querying existing activity by link id %s: not found, will try again later.",
+				row.LinkId,
+			)
 			return nil
 		}
+		return fmt.Errorf("error querying existing activity by link id %s: %v", row.LinkId, existingActivityErr)
+	}
 
-		mutExistingActivity, existingActivityErr := bridgeActivities.FindByLinkId(row.LinkId)
-		if existingActivityErr != nil {
-			if errors.Is(existingActivityErr, rdb.ErrNoRows) {
-				logger.Infof(
-					"error querying existing activity by link id %s: not found, will try again later.",
-					row.LinkId,
-				)
-				continue
-			}
-			return fmt.Errorf("error querying existing activity by link id %s: %v", row.LinkId, existingActivityErr)
-		}
+	isCounterpartyPendingIncomingActivity := row.Direction != types.DIRECTION_RESPONSE
+	isPendingActivityAResponse := !isCounterpartyPendingIncomingActivity
+	// Destination block time is only updated after processed a pending activity at counterparty
+	isActivityAlreadyProcessedByCounterparty := mutExistingActivity.MaybeDestinationBlockTime != nil
 
-		isCounterpartyPendingIncomingActivity := row.Direction != types.DIRECTION_RESPONSE
-		isPendingActivityAResponse := !isCounterpartyPendingIncomingActivity
-		// Destination block time is only updated after processed a pending activity at counterparty
-		isActivityAlreadyProcessedByCounterparty := mutExistingActivity.MaybeDestinationBlockTime != nil
-
-		if isActivityAlreadyProcessedByCounterparty && isPendingActivityAResponse {
-			logger.Info("row already processed with counterparty activity")
-			if updateToProcessedErr := bridgePendingActivities.UpdateToProcessed(row.Id); updateToProcessedErr != nil {
-				return fmt.Errorf(
-					"error updating pending activity row to processed into briding pending activity table: %v",
-					updateToProcessedErr,
-				)
-			}
-			if commitErr := commit(); commitErr != nil {
-				return commitErr
-			}
-
-			continue
-		}
-
-		if isCounterpartyPendingIncomingActivity {
-			mutExistingActivity.MaybeDestinationBlockTime = row.BlockTime
-			mutExistingActivity.MaybeDestinationBlockHeight = primptr.Int64(row.BlockHeight)
-			mutExistingActivity.MaybeDestinationTransactionId = row.MaybeTransactionId
-			mutExistingActivity.MaybeDestinationSmartContractAddress = row.MaybeToSmartContractAddress
-			mutExistingActivity.Status = row.Status
-		} else {
-			mutExistingActivity.Status = row.Status
-		}
-		if updateErr := bridgeActivities.Update(&mutExistingActivity); updateErr != nil {
-			return fmt.Errorf("error updating activity into bridge activity table: %v", updateErr)
-		}
-
+	if isActivityAlreadyProcessedByCounterparty && isPendingActivityAResponse {
+		logger.Info("row already processed with counterparty activity")
 		if updateToProcessedErr := bridgePendingActivities.UpdateToProcessed(row.Id); updateToProcessedErr != nil {
 			return fmt.Errorf(
 				"error updating pending activity row to processed into briding pending activity table: %v",
@@ -331,12 +333,34 @@ func (cronJob *BridgeActivityMatcher) HandleIncoming(
 			)
 		}
 
-		if commitErr := commit(); commitErr != nil {
-			return commitErr
-		}
-
-		logger.Info("successfully handled incoming row")
+		return nil
 	}
 
+	if isCounterpartyPendingIncomingActivity {
+		mutExistingActivity.MaybeDestinationBlockTime = row.BlockTime
+		mutExistingActivity.MaybeDestinationBlockHeight = primptr.Int64(row.BlockHeight)
+		mutExistingActivity.MaybeDestinationTransactionId = row.MaybeTransactionId
+		mutExistingActivity.MaybeDestinationSmartContractAddress = row.MaybeToSmartContractAddress
+		mutExistingActivity.Status = row.Status
+	} else {
+		mutExistingActivity.Status = row.Status
+	}
+	if updateErr := bridgeActivities.Update(&mutExistingActivity); updateErr != nil {
+		return fmt.Errorf("error updating activity into bridge activity table: %v", updateErr)
+	}
+
+	if updateToProcessedErr := bridgePendingActivities.UpdateToProcessed(row.Id); updateToProcessedErr != nil {
+		return fmt.Errorf(
+			"error updating pending activity row to processed into briding pending activity table: %v",
+			updateToProcessedErr,
+		)
+	}
+
+	if commitErr := commit(); commitErr != nil {
+		return commitErr
+	}
+	committed = true
+
+	logger.Info("successfully handled incoming row")
 	return nil
 }

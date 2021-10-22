@@ -15,7 +15,13 @@ import (
 	_ "github.com/crypto-com/chain-indexing/test/factory"
 )
 
-type Accounts struct {
+type Accounts interface {
+	Upsert(*AccountRow) error
+	FindBy(*AccountIdentity) (*AccountRow, error)
+	List(AccountsListOrder, *pagination.Pagination) ([]AccountRow, *pagination.PaginationResult, error)
+}
+
+type AccountsView struct {
 	rdb *rdb.Handle
 }
 
@@ -27,13 +33,13 @@ type AccountIdentity struct {
 	Address string
 }
 
-func NewAccounts(handle *rdb.Handle) *Accounts {
-	return &Accounts{
+func NewAccountsView(handle *rdb.Handle) Accounts {
+	return &AccountsView{
 		handle,
 	}
 }
 
-func (accountsView *Accounts) Upsert(account *AccountRow) error {
+func (accountsView *AccountsView) Upsert(account *AccountRow) error {
 	sql, sqlArgs, err := accountsView.rdb.StmtBuilder.
 		Insert(
 			"view_accounts",
@@ -74,7 +80,7 @@ func (accountsView *Accounts) Upsert(account *AccountRow) error {
 	return nil
 }
 
-func (accountsView *Accounts) FindBy(identity *AccountIdentity) (*AccountRow, error) {
+func (accountsView *AccountsView) FindBy(identity *AccountIdentity) (*AccountRow, error) {
 	var err error
 
 	selectStmtBuilder := accountsView.rdb.StmtBuilder.Select(
@@ -116,7 +122,7 @@ func (accountsView *Accounts) FindBy(identity *AccountIdentity) (*AccountRow, er
 	return &account, nil
 }
 
-func (accountsView *Accounts) List(
+func (accountsView *AccountsView) List(
 	order AccountsListOrder,
 	pagination *pagination.Pagination,
 ) ([]AccountRow, *pagination.PaginationResult, error) {

@@ -180,13 +180,19 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 		} else if msgIBCChannelOpenInit, ok := event.(*event_usecase.MsgIBCChannelOpenInit); ok {
 
+			connectionID := msgIBCChannelOpenInit.Params.ConnectionID
+			counterpartyChainID, err := ibcConnectionsView.FindCounterpartyChainIDBy(connectionID)
+			if err != nil {
+				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
+			}
+
 			channel := &ibc_channel_view.IBCChannelRow{
 				ChannelID:                    msgIBCChannelOpenInit.Params.ChannelID,
 				PortID:                       msgIBCChannelOpenInit.Params.PortID,
-				ConnectionID:                 "",
+				ConnectionID:                 msgIBCChannelOpenInit.Params.ConnectionID,
 				CounterpartyChannelID:        msgIBCChannelOpenInit.Params.Channel.Counterparty.ChannelID,
 				CounterpartyPortID:           msgIBCChannelOpenInit.Params.Channel.Counterparty.PortID,
-				CounterpartyChainID:          "",
+				CounterpartyChainID:          counterpartyChainID,
 				Status:                       false,
 				PacketOrdering:               msgIBCChannelOpenInit.Params.Channel.Ordering,
 				LastInPacketSequence:         0,
@@ -209,13 +215,19 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 		} else if msgIBCChannelOpenTry, ok := event.(*event_usecase.MsgIBCChannelOpenTry); ok {
 
+			connectionID := msgIBCChannelOpenTry.Params.ConnectionID
+			counterpartyChainID, err := ibcConnectionsView.FindCounterpartyChainIDBy(connectionID)
+			if err != nil {
+				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
+			}
+
 			channel := &ibc_channel_view.IBCChannelRow{
 				ChannelID:                    msgIBCChannelOpenTry.Params.ChannelID,
 				PortID:                       msgIBCChannelOpenTry.Params.PortID,
 				ConnectionID:                 msgIBCChannelOpenTry.Params.ConnectionID,
 				CounterpartyChannelID:        msgIBCChannelOpenTry.Params.Channel.Counterparty.ChannelID,
 				CounterpartyPortID:           msgIBCChannelOpenTry.Params.Channel.Counterparty.PortID,
-				CounterpartyChainID:          "",
+				CounterpartyChainID:          counterpartyChainID,
 				Status:                       false,
 				PacketOrdering:               msgIBCChannelOpenTry.Params.Channel.Ordering,
 				LastInPacketSequence:         0,

@@ -14,17 +14,28 @@ import (
 
 const DENOMS_TABLE_NAME = "view_nft_denoms"
 
-type Denoms struct {
+type Denoms interface {
+	Insert(denomRow *DenomRow) error
+	FindById(denomId string) (*DenomRow, error)
+	FindByName(denomName string) (*DenomRow, error)
+	List(
+		filter DenomListFilter,
+		order DenomListOrder,
+		pagination *pagination_interface.Pagination,
+	) ([]DenomRow, *pagination_interface.PaginationResult, error)
+}
+
+type DenomsView struct {
 	rdb *rdb.Handle
 }
 
-func NewDenoms(handle *rdb.Handle) *Denoms {
-	return &Denoms{
+func NewDenomsView(handle *rdb.Handle) Denoms {
+	return &DenomsView{
 		handle,
 	}
 }
 
-func (denomsView *Denoms) Insert(denomRow *DenomRow) error {
+func (denomsView *DenomsView) Insert(denomRow *DenomRow) error {
 	var err error
 
 	sql, sqlArgs, err := denomsView.rdb.StmtBuilder.Insert(
@@ -59,7 +70,7 @@ func (denomsView *Denoms) Insert(denomRow *DenomRow) error {
 	return nil
 }
 
-func (denomsView *Denoms) FindById(denomId string) (*DenomRow, error) {
+func (denomsView *DenomsView) FindById(denomId string) (*DenomRow, error) {
 	selectStmtBuilder := denomsView.rdb.StmtBuilder.Select(
 		"denom_id",
 		"name",
@@ -104,7 +115,7 @@ func (denomsView *Denoms) FindById(denomId string) (*DenomRow, error) {
 	return &row, nil
 }
 
-func (denomsView *Denoms) FindByName(denomName string) (*DenomRow, error) {
+func (denomsView *DenomsView) FindByName(denomName string) (*DenomRow, error) {
 	selectStmtBuilder := denomsView.rdb.StmtBuilder.Select(
 		"denom_id",
 		"name",
@@ -149,7 +160,7 @@ func (denomsView *Denoms) FindByName(denomName string) (*DenomRow, error) {
 	return &row, nil
 }
 
-func (denomsView *Denoms) List(
+func (denomsView *DenomsView) List(
 	filter DenomListFilter,
 	order DenomListOrder,
 	pagination *pagination_interface.Pagination,
@@ -180,7 +191,7 @@ func (denomsView *Denoms) List(
 		denomsView.rdb,
 	).WithCustomTotalQueryFn(
 		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
-			totalView := NewDenomsTotal(rdbHandle)
+			totalView := NewDenomsTotalView(rdbHandle)
 			identifier := "-"
 			if filter.MaybeCreator != nil {
 				identifier = *filter.MaybeCreator

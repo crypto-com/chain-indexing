@@ -441,7 +441,8 @@ func ParseMsgChannelOpenInit(
 	msgChannelOpenInitParams := ibc_model.MsgChannelOpenInitParams{
 		RawMsgChannelOpenInit: rawMsg,
 
-		ChannelID: event.MustGetAttributeByKey("channel_id"),
+		ChannelID:    event.MustGetAttributeByKey("channel_id"),
+		ConnectionID: event.MustGetAttributeByKey("connection_id"),
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenInit(
@@ -1237,5 +1238,111 @@ func ParseMsgTimeoutOnClose(
 		parserParams.MsgCommonParams,
 
 		msgTimeoutOnCloseParams,
+	)}
+}
+
+func ParseMsgChannelCloseInit(
+	parserParams utils.CosmosParserParams,
+) []command.Command {
+	var rawMsg ibc_model.RawMsgChannelCloseInit
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			utils.StringToDurationHookFunc(),
+			utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgChannelCloseInit decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(parserParams.Msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgChannelCloseInit: %v", err))
+	}
+
+	if !parserParams.MsgCommonParams.TxSuccess {
+		return []command.Command{command_usecase.NewCreateMsgIBCChannelCloseInit(
+			parserParams.MsgCommonParams,
+
+			ibc_model.MsgChannelCloseInitParams{
+				RawMsgChannelCloseInit: rawMsg,
+			},
+		)}
+	}
+
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
+	event := log.GetEventByType("channel_close_init")
+	if event == nil {
+		panic("missing `channel_close_init` event in TxsResult log")
+	}
+
+	msgChannelCloseInitParams := ibc_model.MsgChannelCloseInitParams{
+		RawMsgChannelCloseInit: rawMsg,
+
+		CounterpartyPortID:    event.MustGetAttributeByKey("counterparty_port_id"),
+		CounterpartyChannelID: event.MustGetAttributeByKey("counterparty_channel_id"),
+		ConnectionID:          event.MustGetAttributeByKey("connection_id"),
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgIBCChannelCloseInit(
+		parserParams.MsgCommonParams,
+
+		msgChannelCloseInitParams,
+	)}
+}
+
+func ParseMsgChannelCloseConfirm(
+	parserParams utils.CosmosParserParams,
+) []command.Command {
+	var rawMsg ibc_model.RawMsgChannelCloseConfirm
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			utils.StringToDurationHookFunc(),
+			utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgChannelCloseConfirm decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(parserParams.Msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgChannelCloseConfirm: %v", err))
+	}
+
+	if !parserParams.MsgCommonParams.TxSuccess {
+		return []command.Command{command_usecase.NewCreateMsgIBCChannelCloseConfirm(
+			parserParams.MsgCommonParams,
+
+			ibc_model.MsgChannelCloseConfirmParams{
+				RawMsgChannelCloseConfirm: rawMsg,
+			},
+		)}
+	}
+
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
+	event := log.GetEventByType("channel_close_confirm")
+	if event == nil {
+		panic("missing `channel_close_confirm` event in TxsResult log")
+	}
+
+	msgChannelCloseConfirmParams := ibc_model.MsgChannelCloseConfirmParams{
+		RawMsgChannelCloseConfirm: rawMsg,
+
+		CounterpartyPortID:    event.MustGetAttributeByKey("counterparty_port_id"),
+		CounterpartyChannelID: event.MustGetAttributeByKey("counterparty_channel_id"),
+		ConnectionID:          event.MustGetAttributeByKey("connection_id"),
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgIBCChannelCloseConfirm(
+		parserParams.MsgCommonParams,
+
+		msgChannelCloseConfirmParams,
 	)}
 }
