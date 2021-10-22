@@ -69,6 +69,8 @@ func (_ *IBCChannel) GetEventsToListen() []string {
 		event_usecase.MSG_IBC_CHANNEL_OPEN_TRY_CREATED,
 		event_usecase.MSG_IBC_CHANNEL_OPEN_ACK_CREATED,
 		event_usecase.MSG_IBC_CHANNEL_OPEN_CONFIRM_CREATED,
+		event_usecase.MSG_IBC_CHANNEL_CLOSE_INIT_CREATED,
+		event_usecase.MSG_IBC_CHANNEL_CLOSE_CONFIRM_CREATED,
 		event_usecase.MSG_IBC_TRANSFER_TRANSFER_CREATED,
 		event_usecase.MSG_IBC_RECV_PACKET_CREATED,
 		event_usecase.MSG_IBC_ACKNOWLEDGEMENT_CREATED,
@@ -193,7 +195,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				CounterpartyChannelID:        msgIBCChannelOpenInit.Params.Channel.Counterparty.ChannelID,
 				CounterpartyPortID:           msgIBCChannelOpenInit.Params.Channel.Counterparty.PortID,
 				CounterpartyChainID:          counterpartyChainID,
-				Status:                       false,
+				Established:                  false,
 				PacketOrdering:               msgIBCChannelOpenInit.Params.Channel.Ordering,
 				LastInPacketSequence:         0,
 				LastOutPacketSequence:        0,
@@ -228,7 +230,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				CounterpartyChannelID:        msgIBCChannelOpenTry.Params.Channel.Counterparty.ChannelID,
 				CounterpartyPortID:           msgIBCChannelOpenTry.Params.Channel.Counterparty.PortID,
 				CounterpartyChainID:          counterpartyChainID,
-				Status:                       false,
+				Established:                  false,
 				PacketOrdering:               msgIBCChannelOpenTry.Params.Channel.Ordering,
 				LastInPacketSequence:         0,
 				LastOutPacketSequence:        0,
@@ -270,8 +272,8 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating channel: %w", err)
 			}
 
-			if err := ibcChannelsView.UpdateStatus(channel.ChannelID, true); err != nil {
-				return fmt.Errorf("error updating channel status: %w", err)
+			if err := ibcChannelsView.UpdateEstablished(channel.ChannelID, true); err != nil {
+				return fmt.Errorf("error updating channel established: %w", err)
 			}
 
 		} else if msgIBCChannelOpenConfirm, ok := event.(*event_usecase.MsgIBCChannelOpenConfirm); ok {
@@ -296,8 +298,8 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating channel: %w", err)
 			}
 
-			if err := ibcChannelsView.UpdateStatus(channel.ChannelID, true); err != nil {
-				return fmt.Errorf("error updating channel status: %w", err)
+			if err := ibcChannelsView.UpdateEstablished(channel.ChannelID, true); err != nil {
+				return fmt.Errorf("error updating channel established: %w", err)
 			}
 
 		} else if msgIBCTransferTransfer, ok := event.(*event_usecase.MsgIBCTransferTransfer); ok {
@@ -669,6 +671,30 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 					return fmt.Errorf("error adding tx trace when MsgIBCTimeoutOnClose: %w", err)
 				}
 
+			}
+
+		} else if msgIBCChannelCloseInit, ok := event.(*event_usecase.MsgIBCChannelCloseInit); ok {
+
+			channelID := msgIBCChannelCloseInit.Params.ChannelID
+
+			if err := ibcChannelsView.UpdateClosed(channelID, true); err != nil {
+				return fmt.Errorf("error updating channel closed: %w", err)
+			}
+
+			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
+				return fmt.Errorf("error updating channel last_activity_time: %w", err)
+			}
+
+		} else if msgIBCChannelCloseConfirm, ok := event.(*event_usecase.MsgIBCChannelCloseConfirm); ok {
+
+			channelID := msgIBCChannelCloseConfirm.Params.ChannelID
+
+			if err := ibcChannelsView.UpdateClosed(channelID, true); err != nil {
+				return fmt.Errorf("error updating channel closed: %w", err)
+			}
+
+			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
+				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
 		}

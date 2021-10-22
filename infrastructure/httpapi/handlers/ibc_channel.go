@@ -54,11 +54,11 @@ func (handler *IBCChannel) ListChannels(ctx *fasthttp.RequestCtx) {
 	}
 
 	var listFilter ibc_channel_view.IBCChannelsListFilter
-	if queryArgs.Has("status") {
-		if string(queryArgs.Peek("status")) == "true" {
-			listFilter.MaybeStatus = primptr.Bool(true)
-		} else if string(queryArgs.Peek("status")) == "false" {
-			listFilter.MaybeStatus = primptr.Bool(false)
+	if queryArgs.Has("established") {
+		if string(queryArgs.Peek("established")) == "true" {
+			listFilter.MaybeEstablished = primptr.Bool(true)
+		} else if string(queryArgs.Peek("established")) == "false" {
+			listFilter.MaybeEstablished = primptr.Bool(false)
 		}
 	}
 

@@ -45,8 +45,13 @@ func (ibcChannelsView *MockIBCChannelsView) UpdateLastActivityTimeAndHeight(chan
 	return mockArgs.Error(0)
 }
 
-func (ibcChannelsView *MockIBCChannelsView) UpdateStatus(channelID string, open bool) error {
-	mockArgs := ibcChannelsView.Called(channelID, open)
+func (ibcChannelsView *MockIBCChannelsView) UpdateEstablished(channelID string, established bool) error {
+	mockArgs := ibcChannelsView.Called(channelID, established)
+	return mockArgs.Error(0)
+}
+
+func (ibcChannelsView *MockIBCChannelsView) UpdateClosed(channelID string, closed bool) error {
+	mockArgs := ibcChannelsView.Called(channelID, closed)
 	return mockArgs.Error(0)
 }
 
