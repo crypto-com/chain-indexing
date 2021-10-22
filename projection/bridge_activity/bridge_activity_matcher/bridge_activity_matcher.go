@@ -6,14 +6,13 @@ import (
 	"os"
 	"time"
 
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
-
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/view"
 	projection_usecase "github.com/crypto-com/chain-indexing/usecase/projection"
 )

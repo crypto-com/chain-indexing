@@ -3,7 +3,7 @@ package bootstrap
 import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 )
 
 type app struct {

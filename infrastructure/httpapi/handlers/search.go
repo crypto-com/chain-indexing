@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 
 	account_transaction_view "github.com/crypto-com/chain-indexing/projection/account_transaction/view"
@@ -15,7 +16,6 @@ import (
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	block_view "github.com/crypto-com/chain-indexing/projection/block/view"
 	transaction_view "github.com/crypto-com/chain-indexing/projection/transaction/view"
 )

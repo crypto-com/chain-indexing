@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"strconv"
 
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	bridge_pending_activity_view "github.com/crypto-com/chain-indexing/projection/bridge_activity/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"

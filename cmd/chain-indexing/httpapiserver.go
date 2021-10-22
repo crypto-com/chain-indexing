@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/lab259/cors"
 
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
@@ -13,12 +14,11 @@ import (
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi/handlers"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi/routes"
 	tendermint_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/tendermint"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 
 type HTTPAPIServer struct {
-	logger           applogger.Logger
-	rdbConn          rdb.Conn
+	logger  applogger.Logger
+	rdbConn rdb.Conn
 	cosmosAppClient  cosmosapp.Client
 	tendermintClient tendermint.Client
 

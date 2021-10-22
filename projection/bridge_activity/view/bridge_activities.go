@@ -5,12 +5,11 @@ import (
 	"fmt"
 
 	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 
 	"github.com/google/uuid"
-
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
 

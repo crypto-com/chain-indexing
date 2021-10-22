@@ -5,8 +5,8 @@ import (
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	account_message_view "github.com/crypto-com/chain-indexing/projection/account_message/view"
 	"github.com/valyala/fasthttp"
 )

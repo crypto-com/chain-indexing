@@ -1,6 +1,8 @@
 package validator_test
 
 import (
+	. "github.com/crypto-com/chain-indexing/external/logger/test"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -8,8 +10,6 @@ import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	. "github.com/crypto-com/chain-indexing/internal/logger/test"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	"github.com/crypto-com/chain-indexing/projection/validator"
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"

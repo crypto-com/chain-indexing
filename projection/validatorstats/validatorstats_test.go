@@ -1,6 +1,8 @@
 package validatorstats_test
 
 import (
+	. "github.com/crypto-com/chain-indexing/external/logger/test"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/projection/block"
 	viewBlock "github.com/crypto-com/chain-indexing/projection/block/view"
 	"github.com/crypto-com/chain-indexing/projection/validatorstats"
@@ -10,7 +12,6 @@ import (
 
 	. "github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	. "github.com/crypto-com/chain-indexing/entity/event/test"
-	. "github.com/crypto-com/chain-indexing/internal/logger/test"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	. "github.com/crypto-com/chain-indexing/test"
 	. "github.com/onsi/ginkgo"
@@ -20,7 +21,6 @@ import (
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
 
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 )

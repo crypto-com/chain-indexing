@@ -6,6 +6,7 @@ import (
 
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/bootstrap"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/projection/account"
 	"github.com/crypto-com/chain-indexing/projection/account_message"
 	"github.com/crypto-com/chain-indexing/projection/account_transaction"
@@ -24,7 +25,6 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 
 func initProjections(

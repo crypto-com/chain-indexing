@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 
 func SetupRDbConn(config *Config, logger applogger.Logger) (rdb.Conn, error) {

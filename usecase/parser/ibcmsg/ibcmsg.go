@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	base64_internal "github.com/crypto-com/chain-indexing/internal/base64"
 	"github.com/crypto-com/chain-indexing/internal/json"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/mitchellh/mapstructure"
 

@@ -5,12 +5,12 @@ import (
 	"os"
 	"path/filepath"
 
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/urfave/cli/v2"
 
 	"github.com/crypto-com/chain-indexing/infrastructure"
 	"github.com/crypto-com/chain-indexing/internal/filereader/toml"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 	projection_usecase "github.com/crypto-com/chain-indexing/usecase/projection"
 )
 

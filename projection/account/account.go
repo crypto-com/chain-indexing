@@ -3,6 +3,7 @@ package account
 import (
 	"fmt"
 
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
@@ -12,7 +13,6 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 

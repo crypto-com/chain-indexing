@@ -5,10 +5,10 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/appinterface/tendermint"
 	"github.com/crypto-com/chain-indexing/bootstrap"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	httpapi_handlers "github.com/crypto-com/chain-indexing/infrastructure/httpapi/handlers"
 	tendermint_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/tendermint"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 
 func initHTTPAPIHandlers(

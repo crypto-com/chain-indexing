@@ -5,9 +5,9 @@ import (
 	"path"
 	"runtime"
 
+	. "github.com/crypto-com/chain-indexing/external/logger/test"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	. "github.com/crypto-com/chain-indexing/internal/logger/test"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/internal/typeconv"
 )
 

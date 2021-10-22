@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 
 	"github.com/crypto-com/chain-indexing/projection/chainstats"
 
@@ -16,7 +17,6 @@ import (
 	status_polling "github.com/crypto-com/chain-indexing/appinterface/polling"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	block_view "github.com/crypto-com/chain-indexing/projection/block/view"
 	chainstats_view "github.com/crypto-com/chain-indexing/projection/chainstats/view"
 	transaction_view "github.com/crypto-com/chain-indexing/projection/transaction/view"

@@ -3,8 +3,8 @@ package bootstrap
 import (
 	"fmt"
 
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/lab259/cors"
 	"github.com/valyala/fasthttp"
 )

@@ -5,20 +5,19 @@ import (
 	"fmt"
 	"strings"
 
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/crypto-com/chain-indexing/internal/primptr"
-
 	"github.com/valyala/fasthttp"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	bridge_activitiy_view "github.com/crypto-com/chain-indexing/projection/bridge_activity/view"
 )
 

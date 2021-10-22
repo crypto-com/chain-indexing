@@ -1,11 +1,11 @@
 package pg_test
 
 import (
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	. "github.com/crypto-com/chain-indexing/infrastructure/pg"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 )
 
 var _ = Describe("ConnConfig", func() {

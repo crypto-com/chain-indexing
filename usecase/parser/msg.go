@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	"github.com/mitchellh/mapstructure"
 
@@ -12,8 +13,6 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
-
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 

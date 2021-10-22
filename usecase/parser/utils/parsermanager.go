@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 )
