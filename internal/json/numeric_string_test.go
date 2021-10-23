@@ -38,7 +38,7 @@ var _ = Describe("NumericString", func() {
 		})
 
 		It("should encode number which exceeds int64 to string", func() {
-			v := json.NewNumericString("9223372036854775807123456")
+			v, _ := json.NewNumericString("9223372036854775807123456")
 			actual, err := jsoniter.Marshal(v)
 
 			Expect(err).To(BeNil())
@@ -46,7 +46,7 @@ var _ = Describe("NumericString", func() {
 		})
 
 		It("should encode max uint64 to the string representation", func() {
-			v := json.NewNumericString(MAX_UINT64)
+			v, _ := json.NewNumericString(MAX_UINT64)
 			actual, err := jsoniter.Marshal(v)
 
 			Expect(err).To(BeNil())
@@ -54,7 +54,7 @@ var _ = Describe("NumericString", func() {
 		})
 
 		It("should encode max int64 to the string representation", func() {
-			v := json.NewNumericString(MAX_INT64)
+			v, _ := json.NewNumericString(MAX_INT64)
 			actual, err := jsoniter.Marshal(v)
 
 			Expect(err).To(BeNil())
@@ -62,7 +62,7 @@ var _ = Describe("NumericString", func() {
 		})
 
 		It("should encode max negative int64 to the string representation", func() {
-			v := json.NewNumericString(MAX_NEGATIVE_INT64)
+			v, _ := json.NewNumericString(MAX_NEGATIVE_INT64)
 			actual, err := jsoniter.Marshal(v)
 
 			Expect(err).To(BeNil())
@@ -126,7 +126,7 @@ var _ = Describe("NumericString", func() {
 		})
 
 		It("should be able to encode and decode to/from json", func() {
-			expected := json.NewNumericString("18446744073709551615")
+			expected, _ := json.NewNumericString("18446744073709551615")
 			encoded, _ := jsoniter.Marshal(expected)
 
 			var actual json.Uint64
