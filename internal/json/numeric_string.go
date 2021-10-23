@@ -14,8 +14,12 @@ type NumericString struct {
 	v string
 }
 
-func NewNumericString(v string) NumericString {
-	return NumericString{v: v}
+func NewNumericString(v string) (*NumericString, error) {
+	_, ok := new(big.Int).SetString(v, 10)
+	if !ok {
+		return nil, fmt.Errorf("invalid number")
+	}
+	return &NumericString{v: v}, nil
 }
 
 func NewNumericStringFromUint64(v uint64) (*NumericString, error) {
