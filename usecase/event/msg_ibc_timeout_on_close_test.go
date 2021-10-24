@@ -1,15 +1,11 @@
 package event_test
 
 import (
-	"time"
-
-	"github.com/mitchellh/mapstructure"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/internal/json"
-	"github.com/crypto-com/chain-indexing/internal/must"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
 	mapstructure_utils "github.com/crypto-com/chain-indexing/usecase/parser/utils/mapstructure"
@@ -30,7 +26,7 @@ var _ = Describe("Event", func() {
 			anyMessageType := "MsgTransfer"
 			anyRefundReceiver := "cro1s7cu28403gzdvy5tttyskm3zxjejxcv63espre"
 			anyRefundDenom := "basecro"
-			anyRefundAmount := uint64(1)
+			anyRefundAmount := json.NewNumericStringFromUint64(1)
 			anyPacketTimeoutHeight := ibc_model.Height{
 				RevisionNumber: 4,
 				RevisionHeight: 6182017,
@@ -39,16 +35,6 @@ var _ = Describe("Event", func() {
 
 			var anyRawValue map[string]interface{}
 			var anyRawMsg ibc_model.RawMsgTimeoutOnClose
-			msgRecvPacketDecoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-				WeaklyTypedInput: true,
-				DecodeHook: mapstructure.ComposeDecodeHookFunc(
-					mapstructure.StringToTimeDurationHookFunc(),
-					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					mapstructure_utils.StringToDurationHookFunc(),
-					mapstructure_utils.StringToByteSliceHookFunc(),
-				),
-				Result: &anyRawMsg,
-			})
 			json.MustUnmarshalFromString(`
 {
   "@type": "/ibc.core.channel.v1.MsgTimeout",
@@ -73,7 +59,7 @@ var _ = Describe("Event", func() {
   "next_sequence_recv": "5",
   "signer": "cro1q040rm026jmpfmxdsj6q9phm9tdceepnsau6me"
 }`, &anyRawValue)
-			must.Do(msgRecvPacketDecoder.Decode(anyRawValue))
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(anyRawValue, &anyRawMsg)
 
 			anyParams := ibc_model.MsgTimeoutOnCloseParams{
 				RawMsgTimeoutOnClose: anyRawMsg,
@@ -138,7 +124,7 @@ var _ = Describe("Event", func() {
 			anyMessageType := "MsgTransfer"
 			anyRefundReceiver := "cro1s7cu28403gzdvy5tttyskm3zxjejxcv63espre"
 			anyRefundDenom := "basecro"
-			anyRefundAmount := uint64(1)
+			anyRefundAmount := json.NewNumericStringFromUint64(1)
 			anyPacketTimeoutHeight := ibc_model.Height{
 				RevisionNumber: 4,
 				RevisionHeight: 6182017,
@@ -147,16 +133,6 @@ var _ = Describe("Event", func() {
 
 			var anyRawValue map[string]interface{}
 			var anyRawMsg ibc_model.RawMsgTimeoutOnClose
-			msgRecvPacketDecoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-				WeaklyTypedInput: true,
-				DecodeHook: mapstructure.ComposeDecodeHookFunc(
-					mapstructure.StringToTimeDurationHookFunc(),
-					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					mapstructure_utils.StringToDurationHookFunc(),
-					mapstructure_utils.StringToByteSliceHookFunc(),
-				),
-				Result: &anyRawMsg,
-			})
 			json.MustUnmarshalFromString(`
 {
   "@type": "/ibc.core.channel.v1.MsgTimeout",
@@ -181,7 +157,7 @@ var _ = Describe("Event", func() {
   "next_sequence_recv": "5",
   "signer": "cro1q040rm026jmpfmxdsj6q9phm9tdceepnsau6me"
 }`, &anyRawValue)
-			must.Do(msgRecvPacketDecoder.Decode(anyRawValue))
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(anyRawValue, &anyRawMsg)
 
 			anyParams := ibc_model.MsgTimeoutOnCloseParams{
 				RawMsgTimeoutOnClose: anyRawMsg,

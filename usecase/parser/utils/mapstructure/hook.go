@@ -39,7 +39,8 @@ func StringToDurationHookFunc() mapstructure.DecodeHookFunc {
 	return func(
 		f reflect.Type,
 		t reflect.Type,
-		data interface{}) (interface{}, error) {
+		data interface{},
+	) (interface{}, error) {
 		if f.Kind() != reflect.String {
 			return data, nil
 		}
@@ -47,7 +48,6 @@ func StringToDurationHookFunc() mapstructure.DecodeHookFunc {
 			return data, nil
 		}
 
-		// Convert it by parsing
 		d, parseErr := time.ParseDuration(data.(string))
 		if parseErr != nil {
 			return nil, parseErr
@@ -61,20 +61,31 @@ func StringToJsonUint64HookFunc() mapstructure.DecodeHookFunc {
 	return func(
 		f reflect.Type,
 		t reflect.Type,
-		data interface{}) (interface{}, error) {
+		data interface{},
+	) (interface{}, error) {
 		if f.Kind() != reflect.String {
 			return data, nil
 		}
-		if t != reflect.TypeOf(json.Uint64{}) {
-			return data, nil
+
+		if t != reflect.TypeOf(json.Uint64{}) && t != reflect.PtrTo(reflect.TypeOf(json.Uint64{})) {
 		}
 
-		// Convert it by parsing
-		u, parseErr := json.NewUint64FromString(data.(string))
-		if parseErr != nil {
-			return nil, parseErr
+		if t == reflect.TypeOf(json.Uint64{}) {
+			u, parseErr := json.NewUint64FromString(data.(string))
+			if parseErr != nil {
+				return nil, parseErr
+			}
+			return *u, nil
 		}
-		return u, nil
+		if t == reflect.PtrTo(reflect.TypeOf(json.Uint64{})) {
+			u, parseErr := json.NewUint64FromString(data.(string))
+			if parseErr != nil {
+				return nil, parseErr
+			}
+			return u, nil
+		}
+
+		return data, nil
 	}
 }
 
@@ -82,19 +93,28 @@ func StringToJsonNumericStringHookFunc() mapstructure.DecodeHookFunc {
 	return func(
 		f reflect.Type,
 		t reflect.Type,
-		data interface{}) (interface{}, error) {
+		data interface{},
+	) (interface{}, error) {
 		if f.Kind() != reflect.String {
 			return data, nil
 		}
-		if t != reflect.TypeOf(json.NumericString{}) {
-			return data, nil
+
+		if t == reflect.TypeOf(json.NumericString{}) {
+			u, parseErr := json.NewNumericString(data.(string))
+			if parseErr != nil {
+				return nil, parseErr
+			}
+			return *u, nil
 		}
 
-		// Convert it by parsing
-		u, parseErr := json.NewNumericString(data.(string))
-		if parseErr != nil {
-			return nil, parseErr
+		if t == reflect.PtrTo(reflect.TypeOf(json.NumericString{})) {
+			u, parseErr := json.NewNumericString(data.(string))
+			if parseErr != nil {
+				return nil, parseErr
+			}
+			return u, nil
 		}
-		return u, nil
+
+		return data, nil
 	}
 }

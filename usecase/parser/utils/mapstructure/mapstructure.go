@@ -38,16 +38,16 @@ func NewMapstructureDecoder(
 	}
 }
 
-func (generator *MapstructureDecoder) MustScan(
+func (generator *MapstructureDecoder) MustDecode(
 	input interface{},
 	resultPtr interface{},
 ) {
-	if err := generator.Scan(input, resultPtr); err != nil {
+	if err := generator.Decode(input, resultPtr); err != nil {
 		panic(err)
 	}
 }
 
-func (generator *MapstructureDecoder) Scan(
+func (generator *MapstructureDecoder) Decode(
 	input interface{},
 	resultPtr interface{},
 ) error {
