@@ -58,7 +58,7 @@ var _ = Describe("Event", func() {
   "signer": "cro1dulwqgcdpemn8c34sjd92fxepz5p0sqpeevw7f"
 }
 `, &anyRawValue)
-			mapstructure_utils.DefaultMapstructureDecoder.Decode(anyRawValue, &anyRawMsgRecvPacket)
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(anyRawValue, &anyRawMsgRecvPacket)
 
 			var anyRawMsgRecvPacketFungibleTokenPacketData ibc_model.FungibleTokenPacketData
 			json.MustUnmarshalFromString(`
@@ -187,7 +187,7 @@ var _ = Describe("Event", func() {
   "sender":"cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"
 }
 `, &anyRawValue)
-			mapstructure_utils.DefaultMapstructureDecoder.Decode(
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(
 				anyRawValue,
 				&anyRawMsgRecvPacketFungibleTokenPacketData,
 			)

@@ -618,7 +618,6 @@ func ParseMsgTransfer(
 	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgTransfer
-	fmt.Printf("%+v", parserParams.Msg)
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgTransfer: %v", err))
 	}

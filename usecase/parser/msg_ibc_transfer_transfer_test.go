@@ -97,41 +97,40 @@ var _ = Describe("ParseMsgCommands", func() {
 			))
 		})
 
-		// FIXME: Fix the parsing logic to pass this test case
-		XIt("should parse Msg commands when there is MsgTransfer with exceed uint64 amount in the transaction", func() {
+		It("should parse Msg commands when there is MsgTransfer with exceed uint64 amount in the transaction", func() {
 			expected := `{
-  "name": "MsgTransferCreated",
+  "name": "MsgTransferFailed",
   "version": 1,
-  "height": 24,
+  "height": 140108,
   "uuid": "{UUID}",
   "msgName": "MsgTransfer",
-  "txHash": "7A5D86E0B1A364106EE2F1B40431B15A8E1B6C4A2E09E831AB773A12F5F5A564",
+  "txHash": "D924F6E1A16ACDFFBF0B5BFDECC8E010E8F8D746B379FFC63D477C472B4128B7",
   "msgIndex": 0,
   "params": {
     "sourcePort": "transfer",
     "sourceChannel": "channel-0",
     "token": {
-      "denom": "basecro",
-	  "amount": "1234"
+      "denom": "basetcro",
+	  "amount": "28836836236828398900"
     },
-    "sender": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv",
-    "receiver": "cro1dulwqgcdpemn8c34sjd92fxepz5p0sqpeevw7f",
+    "sender": "tcrc1v76r7u4uyr3ewdks8cqmuw7ca4lejvc89pxhev",
+    "receiver": "tcro1558rfl8pnpk90rmryvy3ep03yslq4ar0lkvdnn",
     "timeoutHeight": {
-      "revisionNumber": "2",
-      "revisionHeight": "1023"
+      "revisionNumber": "4",
+      "revisionHeight": "1042864"
     },
-    "timeoutTimestamp": "0",
+    "timeoutTimestamp": "1634894674620940059",
 
-    "packetSequence": "1",
-    "destinationPort": "transfer",
-    "destinationChannel": "channel-0",
-    "channelOrdering": "ORDER_UNORDERED",
-    "connectionId": "connection-0",
+    "packetSequence": "0",
+    "destinationPort": "",
+    "destinationChannel": "",
+    "channelOrdering": "",
+    "connectionId": "",
     "packetData": {
-      "sender": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv",
-      "receiver": "cro1dulwqgcdpemn8c34sjd92fxepz5p0sqpeevw7f",
-      "denom": "basecro",
-      "amount": "1234"
+      "sender": "",
+      "receiver": "",
+      "denom": "",
+      "amount": null
     }
   }
 }

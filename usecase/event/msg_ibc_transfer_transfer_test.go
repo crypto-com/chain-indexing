@@ -46,7 +46,7 @@ var _ = Describe("Event", func() {
   "timeout_timestamp": "0"
 }
 `, &anyRawValue)
-			mapstructure_utils.DefaultMapstructureDecoder.Decode(anyRawValue, &anyRawMsgTransfer)
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(anyRawValue, &anyRawMsgTransfer)
 
 			anyParams := ibc_model.MsgTransferParams{
 				RawMsgTransfer: anyRawMsgTransfer,
