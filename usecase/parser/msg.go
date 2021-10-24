@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"time"
 
+	mapstructure2 "github.com/crypto-com/chain-indexing/usecase/parser/utils/mapstructure"
+
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	"github.com/mitchellh/mapstructure"
 
@@ -1097,8 +1099,8 @@ func parseRawMsgSendGrant(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure2.StringToDurationHookFunc(),
+			mapstructure2.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1143,8 +1145,8 @@ func parseRawMsgStackGrant(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure2.StringToDurationHookFunc(),
+			mapstructure2.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1189,8 +1191,8 @@ func parseRawMsgGenericGrant(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure2.StringToDurationHookFunc(),
+			mapstructure2.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1234,8 +1236,8 @@ func ParseMsgRevoke(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure2.StringToDurationHookFunc(),
+			mapstructure2.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1279,8 +1281,8 @@ func ParseMsgExec(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure2.StringToDurationHookFunc(),
+			mapstructure2.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1387,8 +1389,8 @@ func parseRawMsgGrantBasicAllowance(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure2.StringToDurationHookFunc(),
+			mapstructure2.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1433,8 +1435,8 @@ func parseRawMsgGrantPeriodicAllowance(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure2.StringToDurationHookFunc(),
+			mapstructure2.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1479,8 +1481,8 @@ func parseRawMsgGrantAllowedMsgAllowance(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure2.StringToDurationHookFunc(),
+			mapstructure2.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1524,8 +1526,8 @@ func ParseMsgRevokeAllowance(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure2.StringToDurationHookFunc(),
+			mapstructure2.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1569,8 +1571,8 @@ func ParseMsgCreateVestingAccount(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure2.StringToDurationHookFunc(),
+			mapstructure2.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}

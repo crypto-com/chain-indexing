@@ -3,7 +3,7 @@ package event_test
 import (
 	"time"
 
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+	mapstructure2 "github.com/crypto-com/chain-indexing/usecase/parser/utils/mapstructure"
 
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/internal/json"
@@ -35,8 +35,8 @@ var _ = Describe("Event", func() {
 				DecodeHook: mapstructure.ComposeDecodeHookFunc(
 					mapstructure.StringToTimeDurationHookFunc(),
 					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					utils.StringToDurationHookFunc(),
-					utils.StringToByteSliceHookFunc(),
+					mapstructure2.StringToDurationHookFunc(),
+					mapstructure2.StringToByteSliceHookFunc(),
 				),
 				Result: &anyRawMsgChannelOpenInit,
 			})
@@ -114,8 +114,8 @@ var _ = Describe("Event", func() {
 				DecodeHook: mapstructure.ComposeDecodeHookFunc(
 					mapstructure.StringToTimeDurationHookFunc(),
 					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					utils.StringToDurationHookFunc(),
-					utils.StringToByteSliceHookFunc(),
+					mapstructure2.StringToDurationHookFunc(),
+					mapstructure2.StringToByteSliceHookFunc(),
 				),
 				Result: &anyRawMsgChannelOpenInit,
 			})
