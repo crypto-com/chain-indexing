@@ -1,6 +1,7 @@
 package test
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"runtime"
@@ -12,6 +13,12 @@ import (
 )
 
 func WithTestPgConnConfig(body func(*pg.ConnConfig)) bool {
+	testDB := os.Getenv("TEST_DB")
+	if testDB == "" || testDB == "0" {
+		fmt.Println("Skipping DB testing")
+		return true
+	}
+
 	ssl := true
 	if os.Getenv("TEST_POSTGRES_SSL") == "0" {
 		ssl = false
@@ -31,6 +38,12 @@ func WithTestPgConnConfig(body func(*pg.ConnConfig)) bool {
 }
 
 func WithTestPgxConn(body func(*pg.PgxConn, *pg.Migrate)) bool {
+	testDB := os.Getenv("TEST_DB")
+	if testDB == "" || testDB == "0" {
+		fmt.Println("Skipping DB testing")
+		return true
+	}
+
 	ssl := true
 	if os.Getenv("TEST_POSTGRES_SSL") == "0" {
 		ssl = false
