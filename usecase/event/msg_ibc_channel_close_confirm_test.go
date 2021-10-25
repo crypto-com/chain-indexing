@@ -1,18 +1,14 @@
 package event_test
 
 import (
-	"time"
-
-	"github.com/mitchellh/mapstructure"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/internal/json"
-	"github.com/crypto-com/chain-indexing/internal/must"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+	mapstructure_utils "github.com/crypto-com/chain-indexing/usecase/parser/utils/mapstructure"
 )
 
 var _ = Describe("Event", func() {
@@ -30,16 +26,6 @@ var _ = Describe("Event", func() {
 
 			var anyRawValue map[string]interface{}
 			var anyRawMsgChannelCloseConfirm ibc_model.RawMsgChannelCloseConfirm
-			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-				WeaklyTypedInput: true,
-				DecodeHook: mapstructure.ComposeDecodeHookFunc(
-					mapstructure.StringToTimeDurationHookFunc(),
-					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					utils.StringToDurationHookFunc(),
-					utils.StringToByteSliceHookFunc(),
-				),
-				Result: &anyRawMsgChannelCloseConfirm,
-			})
 			json.MustUnmarshalFromString(`
       {
         "@type": "/ibc.core.channel.v1.MsgChannelCloseConfirm",
@@ -49,7 +35,10 @@ var _ = Describe("Event", func() {
         "proof_height": { "revision_number": "2", "revision_height": "24" },
         "signer": "cro12cgecr4kmyylql6kerfpn7ff42weur7glq4uj3"
       }`, &anyRawValue)
-			must.Do(decoder.Decode(anyRawValue))
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(
+				anyRawValue,
+				&anyRawMsgChannelCloseConfirm,
+			)
 
 			anyParams := ibc_model.MsgChannelCloseConfirmParams{
 				RawMsgChannelCloseConfirm: anyRawMsgChannelCloseConfirm,
@@ -104,16 +93,6 @@ var _ = Describe("Event", func() {
 
 			var anyRawValue map[string]interface{}
 			var anyRawMsgChannelCloseConfirm ibc_model.RawMsgChannelCloseConfirm
-			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-				WeaklyTypedInput: true,
-				DecodeHook: mapstructure.ComposeDecodeHookFunc(
-					mapstructure.StringToTimeDurationHookFunc(),
-					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					utils.StringToDurationHookFunc(),
-					utils.StringToByteSliceHookFunc(),
-				),
-				Result: &anyRawMsgChannelCloseConfirm,
-			})
 			json.MustUnmarshalFromString(`
 			{
         "@type": "/ibc.core.channel.v1.MsgChannelCloseConfirm",
@@ -123,7 +102,10 @@ var _ = Describe("Event", func() {
         "proof_height": { "revision_number": "2", "revision_height": "24" },
         "signer": "cro12cgecr4kmyylql6kerfpn7ff42weur7glq4uj3"
       }`, &anyRawValue)
-			must.Do(decoder.Decode(anyRawValue))
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(
+				anyRawValue,
+				&anyRawMsgChannelCloseConfirm,
+			)
 
 			anyParams := ibc_model.MsgChannelCloseConfirmParams{
 				RawMsgChannelCloseConfirm: anyRawMsgChannelCloseConfirm,

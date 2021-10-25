@@ -3,17 +3,16 @@ package event_test
 import (
 	"time"
 
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-
-	event_entity "github.com/crypto-com/chain-indexing/entity/event"
-	"github.com/crypto-com/chain-indexing/internal/json"
-	"github.com/crypto-com/chain-indexing/internal/must"
-	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
 	"github.com/mitchellh/mapstructure"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	event_entity "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/internal/json"
+	"github.com/crypto-com/chain-indexing/internal/must"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
+	mapstructure_utils "github.com/crypto-com/chain-indexing/usecase/parser/utils/mapstructure"
 )
 
 var _ = Describe("Event", func() {
@@ -35,8 +34,8 @@ var _ = Describe("Event", func() {
 				DecodeHook: mapstructure.ComposeDecodeHookFunc(
 					mapstructure.StringToTimeDurationHookFunc(),
 					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					utils.StringToDurationHookFunc(),
-					utils.StringToByteSliceHookFunc(),
+					mapstructure_utils.StringToDurationHookFunc(),
+					mapstructure_utils.StringToByteSliceHookFunc(),
 				),
 				Result: &anyRawMsgChannelOpenInit,
 			})
@@ -114,8 +113,8 @@ var _ = Describe("Event", func() {
 				DecodeHook: mapstructure.ComposeDecodeHookFunc(
 					mapstructure.StringToTimeDurationHookFunc(),
 					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					utils.StringToDurationHookFunc(),
-					utils.StringToByteSliceHookFunc(),
+					mapstructure_utils.StringToDurationHookFunc(),
+					mapstructure_utils.StringToByteSliceHookFunc(),
 				),
 				Result: &anyRawMsgChannelOpenInit,
 			})
