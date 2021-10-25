@@ -5,10 +5,8 @@ import (
 	"encoding/base64"
 	"fmt"
 	"strings"
-	"time"
 
 	jsoniter "github.com/json-iterator/go"
-	"github.com/mitchellh/mapstructure"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
 	base64_internal "github.com/crypto-com/chain-indexing/internal/base64"
@@ -61,20 +59,7 @@ func parseRawMsgCreateTendermintLightClient(
 	msg map[string]interface{},
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgCreateTendermintLightClient
-	decoderConfig := &mapstructure.DecoderConfig{
-		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			mapstructure.StringToTimeDurationHookFunc(),
-			mapstructure_utils.StringToDurationHookFunc(),
-			mapstructure_utils.StringToByteSliceHookFunc(),
-		),
-		Result: &rawMsg,
-	}
-	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
-	if decoderErr != nil {
-		panic(fmt.Errorf("error creating MsgCreateClient decoder: %v", decoderErr))
-	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding MsgCreateClient: %v", err))
 	}
 
@@ -124,20 +109,7 @@ func parseRawMsgCreateSoloMachineLightClient(
 	msg map[string]interface{},
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgCreateSoloMachineLightClient
-	decoderConfig := &mapstructure.DecoderConfig{
-		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			mapstructure.StringToTimeDurationHookFunc(),
-			mapstructure_utils.StringToDurationHookFunc(),
-			mapstructure_utils.StringToByteSliceHookFunc(),
-		),
-		Result: &rawMsg,
-	}
-	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
-	if decoderErr != nil {
-		panic(fmt.Errorf("error creating MsgCreateClient decoder: %v", decoderErr))
-	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding MsgCreateClient: %v", err))
 	}
 
@@ -184,17 +156,7 @@ func ParseMsgConnectionOpenInit(
 	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMessage ibc_model.RawMsgConnectionOpenInit
-	decoder, decoderErr := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			mapstructure_utils.StringToByteSliceHookFunc(),
-		),
-		Result: &rawMessage,
-	})
-	if decoderErr != nil {
-		panic(fmt.Errorf("error creating mapstructure decoder: %v", decoderErr))
-	}
-	if err := decoder.Decode(parserParams.Msg); err != nil {
+	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMessage); err != nil {
 		panic(fmt.Errorf("error decoding message: %v", err))
 	}
 
@@ -236,21 +198,7 @@ func ParseMsgConnectionOpenTry(
 	}
 
 	var rawMsg ibc_model.RawMsgConnectionOpenTryTendermintClient
-	decoderConfig := &mapstructure.DecoderConfig{
-		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			mapstructure.StringToTimeDurationHookFunc(),
-			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			mapstructure_utils.StringToDurationHookFunc(),
-			mapstructure_utils.StringToByteSliceHookFunc(),
-		),
-		Result: &rawMsg,
-	}
-	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
-	if decoderErr != nil {
-		panic(fmt.Errorf("error creating MsgConnectionOpenTry decoder: %v", decoderErr))
-	}
-	if err := decoder.Decode(parserParams.Msg); err != nil {
+	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding MsgConnectionOpenTry: %v", err))
 	}
 
@@ -296,21 +244,7 @@ func ParseMsgConnectionOpenAck(
 	}
 
 	var rawMsg ibc_model.RawMsgConnectionOpenAckTendermintClient
-	decoderConfig := &mapstructure.DecoderConfig{
-		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			mapstructure.StringToTimeDurationHookFunc(),
-			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			mapstructure_utils.StringToDurationHookFunc(),
-			mapstructure_utils.StringToByteSliceHookFunc(),
-		),
-		Result: &rawMsg,
-	}
-	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
-	if decoderErr != nil {
-		panic(fmt.Errorf("error creating MsgConnectionOpenAck decoder: %v", decoderErr))
-	}
-	if err := decoder.Decode(parserParams.Msg); err != nil {
+	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding MsgConnectionOpenAck: %v", err))
 	}
 
@@ -352,21 +286,7 @@ func ParseMsgConnectionOpenConfirm(
 	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgConnectionOpenConfirm
-	decoderConfig := &mapstructure.DecoderConfig{
-		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			mapstructure.StringToTimeDurationHookFunc(),
-			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			mapstructure_utils.StringToDurationHookFunc(),
-			mapstructure_utils.StringToByteSliceHookFunc(),
-		),
-		Result: &rawMsg,
-	}
-	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
-	if decoderErr != nil {
-		panic(fmt.Errorf("error creating MsgConnectionOpenConfirm decoder: %v", decoderErr))
-	}
-	if err := decoder.Decode(parserParams.Msg); err != nil {
+	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding MsgConnectionOpenConfirm: %v", err))
 	}
 
@@ -405,21 +325,7 @@ func ParseMsgChannelOpenInit(
 	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgChannelOpenInit
-	decoderConfig := &mapstructure.DecoderConfig{
-		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			mapstructure.StringToTimeDurationHookFunc(),
-			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			mapstructure_utils.StringToDurationHookFunc(),
-			mapstructure_utils.StringToByteSliceHookFunc(),
-		),
-		Result: &rawMsg,
-	}
-	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
-	if decoderErr != nil {
-		panic(fmt.Errorf("error creating RawMsgChannelOpenInit decoder: %v", decoderErr))
-	}
-	if err := decoder.Decode(parserParams.Msg); err != nil {
+	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgChannelOpenInit: %v", err))
 	}
 
@@ -457,21 +363,7 @@ func ParseMsgChannelOpenTry(
 	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgChannelOpenTry
-	decoderConfig := &mapstructure.DecoderConfig{
-		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			mapstructure.StringToTimeDurationHookFunc(),
-			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			mapstructure_utils.StringToDurationHookFunc(),
-			mapstructure_utils.StringToByteSliceHookFunc(),
-		),
-		Result: &rawMsg,
-	}
-	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
-	if decoderErr != nil {
-		panic(fmt.Errorf("error creating RawMsgChannelOpenTry decoder: %v", decoderErr))
-	}
-	if err := decoder.Decode(parserParams.Msg); err != nil {
+	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgChannelOpenTry: %v", err))
 	}
 
@@ -509,21 +401,7 @@ func ParseMsgChannelOpenAck(
 	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgChannelOpenAck
-	decoderConfig := &mapstructure.DecoderConfig{
-		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			mapstructure.StringToTimeDurationHookFunc(),
-			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			mapstructure_utils.StringToDurationHookFunc(),
-			mapstructure_utils.StringToByteSliceHookFunc(),
-		),
-		Result: &rawMsg,
-	}
-	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
-	if decoderErr != nil {
-		panic(fmt.Errorf("error creating RawMsgChannelOpenAck decoder: %v", decoderErr))
-	}
-	if err := decoder.Decode(parserParams.Msg); err != nil {
+	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgChannelOpenAck: %v", err))
 	}
 
@@ -561,21 +439,7 @@ func ParseMsgChannelOpenConfirm(
 	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgChannelOpenConfirm
-	decoderConfig := &mapstructure.DecoderConfig{
-		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			mapstructure.StringToTimeDurationHookFunc(),
-			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			mapstructure_utils.StringToDurationHookFunc(),
-			mapstructure_utils.StringToByteSliceHookFunc(),
-		),
-		Result: &rawMsg,
-	}
-	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
-	if decoderErr != nil {
-		panic(fmt.Errorf("error creating RawMsgChannelOpenConfirm decoder: %v", decoderErr))
-	}
-	if err := decoder.Decode(parserParams.Msg); err != nil {
+	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgChannelOpenConfirm: %v", err))
 	}
 
@@ -643,19 +507,7 @@ func parseMsgUpdateTendermintLightClient(
 	msg map[string]interface{},
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgUpdateTendermintLightClient
-	decoderConfig := &mapstructure.DecoderConfig{
-		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			mapstructure_utils.StringToByteSliceHookFunc(),
-		),
-		Result: &rawMsg,
-	}
-	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
-	if decoderErr != nil {
-		panic(fmt.Errorf("error creating MsgUpdateClient decoder: %v", decoderErr))
-	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding MsgUpdateClient: %v", err))
 	}
 
@@ -705,19 +557,7 @@ func parseMsgUpdateSolomachineLightClient(
 	msg map[string]interface{},
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgUpdateSoloMachineLightClient
-	decoderConfig := &mapstructure.DecoderConfig{
-		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			mapstructure_utils.StringToByteSliceHookFunc(),
-		),
-		Result: &rawMsg,
-	}
-	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
-	if decoderErr != nil {
-		panic(fmt.Errorf("error creating MsgUpdateClient decoder: %v", decoderErr))
-	}
-	if err := decoder.Decode(msg); err != nil {
+	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding MsgUpdateClient: %v", err))
 	}
 
@@ -778,21 +618,7 @@ func ParseMsgTransfer(
 	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgTransfer
-	decoderConfig := &mapstructure.DecoderConfig{
-		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			mapstructure.StringToTimeDurationHookFunc(),
-			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			mapstructure_utils.StringToDurationHookFunc(),
-			mapstructure_utils.StringToByteSliceHookFunc(),
-		),
-		Result: &rawMsg,
-	}
-	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
-	if decoderErr != nil {
-		panic(fmt.Errorf("error creating RawMsgTransfer decoder: %v", decoderErr))
-	}
-	if err := decoder.Decode(parserParams.Msg); err != nil {
+	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgTransfer: %v", err))
 	}
 
@@ -839,21 +665,7 @@ func ParseMsgRecvPacket(
 	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgRecvPacket
-	decoderConfig := &mapstructure.DecoderConfig{
-		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			mapstructure.StringToTimeDurationHookFunc(),
-			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			mapstructure_utils.StringToDurationHookFunc(),
-			mapstructure_utils.StringToByteSliceHookFunc(),
-		),
-		Result: &rawMsg,
-	}
-	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
-	if decoderErr != nil {
-		panic(fmt.Errorf("error creating RawMsgRecvPacket decoder: %v", decoderErr))
-	}
-	if err := decoder.Decode(parserParams.Msg); err != nil {
+	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgRecvPacket: %v", err))
 	}
 
@@ -969,21 +781,7 @@ func ParseMsgAcknowledgement(
 	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgAcknowledgement
-	decoderConfig := &mapstructure.DecoderConfig{
-		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			mapstructure.StringToTimeDurationHookFunc(),
-			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			mapstructure_utils.StringToDurationHookFunc(),
-			mapstructure_utils.StringToByteSliceHookFunc(),
-		),
-		Result: &rawMsg,
-	}
-	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
-	if decoderErr != nil {
-		panic(fmt.Errorf("error creating RawMsgAcknowledgement decoder: %v", decoderErr))
-	}
-	if err := decoder.Decode(parserParams.Msg); err != nil {
+	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgAcknowledgement: %v", err))
 	}
 
@@ -1080,21 +878,7 @@ func ParseMsgTimeout(
 	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgTimeout
-	decoderConfig := &mapstructure.DecoderConfig{
-		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			mapstructure.StringToTimeDurationHookFunc(),
-			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			mapstructure_utils.StringToDurationHookFunc(),
-			mapstructure_utils.StringToByteSliceHookFunc(),
-		),
-		Result: &rawMsg,
-	}
-	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
-	if decoderErr != nil {
-		panic(fmt.Errorf("error creating RawMsgTimeout decoder: %v", decoderErr))
-	}
-	if err := decoder.Decode(parserParams.Msg); err != nil {
+	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgTimeout: %v", err))
 	}
 
@@ -1138,7 +922,7 @@ func ParseMsgTimeout(
 		MaybeMsgTransfer: &ibc_model.MsgTimeoutMsgTransfer{
 			RefundReceiver: rawFungibleTokenPacketData.Sender,
 			RefundDenom:    rawFungibleTokenPacketData.Denom,
-			RefundAmount:   rawFungibleTokenPacketData.Amount.Uint64(),
+			RefundAmount:   rawFungibleTokenPacketData.Amount,
 		},
 
 		PacketTimeoutHeight: mustParseHeight(
@@ -1163,21 +947,7 @@ func ParseMsgTimeoutOnClose(
 	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgTimeoutOnClose
-	decoderConfig := &mapstructure.DecoderConfig{
-		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			mapstructure.StringToTimeDurationHookFunc(),
-			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			mapstructure_utils.StringToDurationHookFunc(),
-			mapstructure_utils.StringToByteSliceHookFunc(),
-		),
-		Result: &rawMsg,
-	}
-	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
-	if decoderErr != nil {
-		panic(fmt.Errorf("error creating RawMsgTimeoutOnClose decoder: %v", decoderErr))
-	}
-	if err := decoder.Decode(parserParams.Msg); err != nil {
+	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgTimeoutOnClose: %v", err))
 	}
 
@@ -1221,7 +991,7 @@ func ParseMsgTimeoutOnClose(
 		MaybeMsgTransfer: &ibc_model.MsgTimeoutMsgTransfer{
 			RefundReceiver: rawFungibleTokenPacketData.Sender,
 			RefundDenom:    rawFungibleTokenPacketData.Denom,
-			RefundAmount:   rawFungibleTokenPacketData.Amount.Uint64(),
+			RefundAmount:   rawFungibleTokenPacketData.Amount,
 		},
 
 		PacketTimeoutHeight: mustParseHeight(
@@ -1246,21 +1016,7 @@ func ParseMsgChannelCloseInit(
 	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgChannelCloseInit
-	decoderConfig := &mapstructure.DecoderConfig{
-		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			mapstructure.StringToTimeDurationHookFunc(),
-			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			mapstructure_utils.StringToDurationHookFunc(),
-			mapstructure_utils.StringToByteSliceHookFunc(),
-		),
-		Result: &rawMsg,
-	}
-	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
-	if decoderErr != nil {
-		panic(fmt.Errorf("error creating RawMsgChannelCloseInit decoder: %v", decoderErr))
-	}
-	if err := decoder.Decode(parserParams.Msg); err != nil {
+	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgChannelCloseInit: %v", err))
 	}
 
@@ -1299,21 +1055,7 @@ func ParseMsgChannelCloseConfirm(
 	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	var rawMsg ibc_model.RawMsgChannelCloseConfirm
-	decoderConfig := &mapstructure.DecoderConfig{
-		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			mapstructure.StringToTimeDurationHookFunc(),
-			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			mapstructure_utils.StringToDurationHookFunc(),
-			mapstructure_utils.StringToByteSliceHookFunc(),
-		),
-		Result: &rawMsg,
-	}
-	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
-	if decoderErr != nil {
-		panic(fmt.Errorf("error creating RawMsgChannelCloseConfirm decoder: %v", decoderErr))
-	}
-	if err := decoder.Decode(parserParams.Msg); err != nil {
+	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgChannelCloseConfirm: %v", err))
 	}
 

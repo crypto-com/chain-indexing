@@ -1,5 +1,7 @@
 package ibc
 
+import "github.com/crypto-com/chain-indexing/internal/json"
+
 type MsgTransferParams struct {
 	RawMsgTransfer
 
@@ -24,6 +26,6 @@ type RawMsgTransfer struct {
 }
 
 type MsgTransferToken struct {
-	Denom  string `mapstructure:"denom" json:"denom"`
-	Amount uint64 `mapstructure:"amount" json:"amount,string"`
+	Denom  string              `mapstructure:"denom" json:"denom"`
+	Amount *json.NumericString `mapstructure:"amount" json:"amount"`
 }

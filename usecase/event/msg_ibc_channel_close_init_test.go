@@ -33,7 +33,7 @@ var _ = Describe("Event", func() {
         "channel_id": "channel-1",
         "signer": "cro1t7yk3d4meeaqf5zfegv8p94wlfhpcnsftz55f7"
       }`, &anyRawValue)
-			mapstructure_utils.DefaultMapstructureDecoder.MustScan(
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(
 				anyRawValue,
 				&anyRawMsgChannelCloseInit,
 			)
@@ -96,7 +96,7 @@ var _ = Describe("Event", func() {
         "channel_id": "channel-1",
         "signer": "cro1t7yk3d4meeaqf5zfegv8p94wlfhpcnsftz55f7"
       }`, &anyRawValue)
-			mapstructure_utils.DefaultMapstructureDecoder.MustScan(
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(
 				anyRawValue,
 				&anyRawMsgChannelCloseInit,
 			)

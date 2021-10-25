@@ -35,7 +35,7 @@ var _ = Describe("Event", func() {
         "proof_height": { "revision_number": "2", "revision_height": "24" },
         "signer": "cro12cgecr4kmyylql6kerfpn7ff42weur7glq4uj3"
       }`, &anyRawValue)
-			mapstructure_utils.DefaultMapstructureDecoder.MustScan(
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(
 				anyRawValue,
 				&anyRawMsgChannelCloseConfirm,
 			)
@@ -102,7 +102,7 @@ var _ = Describe("Event", func() {
         "proof_height": { "revision_number": "2", "revision_height": "24" },
         "signer": "cro12cgecr4kmyylql6kerfpn7ff42weur7glq4uj3"
       }`, &anyRawValue)
-			mapstructure_utils.DefaultMapstructureDecoder.MustScan(
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(
 				anyRawValue,
 				&anyRawMsgChannelCloseConfirm,
 			)

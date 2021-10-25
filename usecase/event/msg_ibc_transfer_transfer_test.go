@@ -1,15 +1,11 @@
 package event_test
 
 import (
-	"time"
-
-	"github.com/mitchellh/mapstructure"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/internal/json"
-	"github.com/crypto-com/chain-indexing/internal/must"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
 	mapstructure_utils "github.com/crypto-com/chain-indexing/usecase/parser/utils/mapstructure"
@@ -32,16 +28,6 @@ var _ = Describe("Event", func() {
 
 			var anyRawValue map[string]interface{}
 			var anyRawMsgTransfer ibc_model.RawMsgTransfer
-			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-				WeaklyTypedInput: true,
-				DecodeHook: mapstructure.ComposeDecodeHookFunc(
-					mapstructure.StringToTimeDurationHookFunc(),
-					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					mapstructure_utils.StringToDurationHookFunc(),
-					mapstructure_utils.StringToByteSliceHookFunc(),
-				),
-				Result: &anyRawMsgTransfer,
-			})
 			json.MustUnmarshalFromString(`
 {
   "@type": "/ibc.applications.transfer.v1.MsgTransfer",
@@ -60,7 +46,7 @@ var _ = Describe("Event", func() {
   "timeout_timestamp": "0"
 }
 `, &anyRawValue)
-			must.Do(decoder.Decode(anyRawValue))
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(anyRawValue, &anyRawMsgTransfer)
 
 			anyParams := ibc_model.MsgTransferParams{
 				RawMsgTransfer: anyRawMsgTransfer,
@@ -123,16 +109,6 @@ var _ = Describe("Event", func() {
 
 			var anyRawValue map[string]interface{}
 			var anyRawMsgTransfer ibc_model.RawMsgTransfer
-			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-				WeaklyTypedInput: true,
-				DecodeHook: mapstructure.ComposeDecodeHookFunc(
-					mapstructure.StringToTimeDurationHookFunc(),
-					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					mapstructure_utils.StringToDurationHookFunc(),
-					mapstructure_utils.StringToByteSliceHookFunc(),
-				),
-				Result: &anyRawMsgTransfer,
-			})
 			json.MustUnmarshalFromString(`
 {
   "@type": "/ibc.applications.transfer.v1.MsgTransfer",
@@ -151,7 +127,7 @@ var _ = Describe("Event", func() {
   "timeout_timestamp": "0"
 }
 `, &anyRawValue)
-			must.Do(decoder.Decode(anyRawValue))
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(anyRawValue, &anyRawMsgTransfer)
 
 			anyParams := ibc_model.MsgTransferParams{
 				RawMsgTransfer: anyRawMsgTransfer,

@@ -22,8 +22,8 @@ func NewNumericString(v string) (*NumericString, error) {
 	return &NumericString{v: v}, nil
 }
 
-func NewNumericStringFromUint64(v uint64) (*NumericString, error) {
-	return &NumericString{v: strconv.FormatUint(v, 10)}, nil
+func NewNumericStringFromUint64(v uint64) *NumericString {
+	return &NumericString{v: strconv.FormatUint(v, 10)}
 }
 
 func (u NumericString) String() string {

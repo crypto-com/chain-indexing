@@ -47,8 +47,8 @@ type Packet struct {
 }
 
 type FungibleTokenPacketData struct {
-	Sender   string      `mapstructure:"sender" json:"sender"`
-	Receiver string      `mapstructure:"receiver" json:"receiver"`
-	Denom    string      `mapstructure:"denom" json:"denom"`
-	Amount   json.Uint64 `mapstructure:"amount" json:"amount"`
+	Sender   string              `mapstructure:"sender" json:"sender"`
+	Receiver string              `mapstructure:"receiver" json:"receiver"`
+	Denom    string              `mapstructure:"denom" json:"denom"`
+	Amount   *json.NumericString `mapstructure:"amount" json:"amount"`
 }

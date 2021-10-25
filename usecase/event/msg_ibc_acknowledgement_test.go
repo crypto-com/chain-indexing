@@ -54,7 +54,7 @@ var _ = Describe("Event", func() {
   "signer": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"
 }
 `, &anyRawValue)
-			mapstructure_utils.DefaultMapstructureDecoder.MustScan(anyRawValue, &anyRawMsg)
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(anyRawValue, &anyRawMsg)
 
 			var anyFungibleTokenPacketData ibc_model.FungibleTokenPacketData
 			json.MustUnmarshalFromString(`
@@ -65,7 +65,7 @@ var _ = Describe("Event", func() {
   "sender":"cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"
 }
 `, &anyRawValue)
-			mapstructure_utils.DefaultMapstructureDecoder.MustScan(anyRawValue, &anyRawMsg)
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(anyRawValue, &anyRawMsg)
 
 			anyParams := ibc_model.MsgAcknowledgementParams{
 				RawMsgAcknowledgement: anyRawMsg,
@@ -154,7 +154,7 @@ var _ = Describe("Event", func() {
   "signer": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"
 }
 `, &anyRawValue)
-			mapstructure_utils.DefaultMapstructureDecoder.MustScan(anyRawValue, &anyRawMsg)
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(anyRawValue, &anyRawMsg)
 
 			var anyFungibleTokenPacketData ibc_model.FungibleTokenPacketData
 			json.MustUnmarshalFromString(`
@@ -165,7 +165,7 @@ var _ = Describe("Event", func() {
   "sender":"cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"
 }
 `, &anyRawValue)
-			mapstructure_utils.DefaultMapstructureDecoder.MustScan(anyRawValue, &anyRawMsg)
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(anyRawValue, &anyRawMsg)
 
 			anyParams := ibc_model.MsgAcknowledgementParams{
 				RawMsgAcknowledgement: anyRawMsg,

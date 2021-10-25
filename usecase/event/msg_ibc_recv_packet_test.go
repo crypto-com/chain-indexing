@@ -34,16 +34,6 @@ var _ = Describe("Event", func() {
 
 			var anyRawValue map[string]interface{}
 			var anyRawMsgRecvPacket ibc_model.RawMsgRecvPacket
-			msgRecvPacketDecoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-				WeaklyTypedInput: true,
-				DecodeHook: mapstructure.ComposeDecodeHookFunc(
-					mapstructure.StringToTimeDurationHookFunc(),
-					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					mapstructure_utils.StringToDurationHookFunc(),
-					mapstructure_utils.StringToByteSliceHookFunc(),
-				),
-				Result: &anyRawMsgRecvPacket,
-			})
 			json.MustUnmarshalFromString(`
 {
   "@type": "/ibc.core.channel.v1.MsgRecvPacket",
@@ -68,21 +58,9 @@ var _ = Describe("Event", func() {
   "signer": "cro1dulwqgcdpemn8c34sjd92fxepz5p0sqpeevw7f"
 }
 `, &anyRawValue)
-			must.Do(msgRecvPacketDecoder.Decode(anyRawValue))
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(anyRawValue, &anyRawMsgRecvPacket)
 
 			var anyRawMsgRecvPacketFungibleTokenPacketData ibc_model.FungibleTokenPacketData
-			msgRecvPacketFungibleTokenPacketDataDecoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-				WeaklyTypedInput: true,
-				DecodeHook: mapstructure.ComposeDecodeHookFunc(
-					mapstructure.StringToTimeDurationHookFunc(),
-					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					mapstructure_utils.StringToJsonUint64HookFunc(),
-					mapstructure_utils.StringToDurationHookFunc(),
-					mapstructure_utils.StringToByteSliceHookFunc(),
-				),
-				Result: &anyRawMsgRecvPacketFungibleTokenPacketData,
-			})
-
 			json.MustUnmarshalFromString(`
 {
   "amount":"1234",
@@ -91,7 +69,10 @@ var _ = Describe("Event", func() {
   "sender":"cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"
 }
 `, &anyRawValue)
-			must.Do(msgRecvPacketFungibleTokenPacketDataDecoder.Decode(anyRawValue))
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(
+				anyRawValue,
+				&anyRawMsgRecvPacketFungibleTokenPacketData,
+			)
 
 			anyParams := ibc_model.MsgRecvPacketParams{
 				RawMsgRecvPacket: anyRawMsgRecvPacket,
@@ -198,18 +179,6 @@ var _ = Describe("Event", func() {
 			must.Do(msgRecvPacketDecoder.Decode(anyRawValue))
 
 			var anyRawMsgRecvPacketFungibleTokenPacketData ibc_model.FungibleTokenPacketData
-			msgRecvPacketFungibleTokenPacketDataDecoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-				WeaklyTypedInput: true,
-				DecodeHook: mapstructure.ComposeDecodeHookFunc(
-					mapstructure.StringToTimeDurationHookFunc(),
-					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					mapstructure_utils.StringToJsonUint64HookFunc(),
-					mapstructure_utils.StringToDurationHookFunc(),
-					mapstructure_utils.StringToByteSliceHookFunc(),
-				),
-				Result: &anyRawMsgRecvPacketFungibleTokenPacketData,
-			})
-
 			json.MustUnmarshalFromString(`
 {
   "amount":"1234",
@@ -218,7 +187,10 @@ var _ = Describe("Event", func() {
   "sender":"cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"
 }
 `, &anyRawValue)
-			must.Do(msgRecvPacketFungibleTokenPacketDataDecoder.Decode(anyRawValue))
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(
+				anyRawValue,
+				&anyRawMsgRecvPacketFungibleTokenPacketData,
+			)
 
 			anyParams := ibc_model.MsgRecvPacketParams{
 				RawMsgRecvPacket: anyRawMsgRecvPacket,
