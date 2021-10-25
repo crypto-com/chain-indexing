@@ -3736,6 +3736,15 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						},
 					}),
 					Params: ibc_model.MsgAcknowledgementParams{
+						MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
+							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
+								Sender:   "Sender",
+								Receiver: "Receiver",
+								Denom:    "Denom",
+								Amount:   json.NewNumericStringFromUint64(100),
+							},
+							Success: true,
+						},
 						RawMsgAcknowledgement: ibc_model.RawMsgAcknowledgement{
 							Signer: "Signer",
 						},
@@ -3759,6 +3768,18 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				mockAccountMessagesTotalView.On(
 					"Increment",
 					"Signer:MsgAcknowledgement",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Sender:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Sender:MsgAcknowledgement",
 					int64(1),
 				).Return(nil)
 
@@ -3793,13 +3814,22 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 								MsgIndex:  0,
 							},
 							Params: ibc_model.MsgAcknowledgementParams{
+								MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
+									FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
+										Sender:   "Sender",
+										Receiver: "Receiver",
+										Denom:    "Denom",
+										Amount:   json.NewNumericStringFromUint64(100),
+									},
+									Success: true,
+								},
 								RawMsgAcknowledgement: ibc_model.RawMsgAcknowledgement{
 									Signer: "Signer",
 								},
 							},
 						},
 					},
-					[]string{"Signer"},
+					[]string{"Signer", "Sender"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -3851,6 +3881,9 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							Success:                true,
 							MaybeDenominationTrace: nil,
 						},
+						RawMsgRecvPacket: ibc_model.RawMsgRecvPacket{
+							Signer: "Signer",
+						},
 					},
 				},
 			},
@@ -3861,6 +3894,18 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				account_message.NewAccountMessagesTotal = func(_ *rdb.Handle) account_message_view.AccountMessagesTotal {
 					return mockAccountMessagesTotalView
 				}
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Signer:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Signer:MsgRecvPacket",
+					int64(1),
+				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
@@ -3915,10 +3960,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 									Success:                true,
 									MaybeDenominationTrace: nil,
 								},
+								RawMsgRecvPacket: ibc_model.RawMsgRecvPacket{
+									Signer: "Signer",
+								},
 							},
 						},
 					},
-					[]string{"Receiver"},
+					[]string{"Signer", "Receiver"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
