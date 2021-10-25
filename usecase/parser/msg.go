@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/crypto-com/chain-indexing/entity/command"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/mitchellh/mapstructure"
 
