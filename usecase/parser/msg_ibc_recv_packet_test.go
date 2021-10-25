@@ -4,17 +4,15 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/crypto-com/chain-indexing/internal/json"
-
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
+	"github.com/crypto-com/chain-indexing/internal/json"
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
 	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
 var _ = Describe("ParseMsgCommands", func() {
@@ -297,6 +295,94 @@ var _ = Describe("ParseMsgCommands", func() {
 					-1,
 				),
 			))
+		})
+
+		It("should parse Msg commands when there is SoloMachine MsgIBCRecvPacket in the transaction", func() {
+			expected := `{
+	"name": "MsgRecvPacketCreated",
+	"version": 1,
+	"height": 14803,
+	"uuid": "{UUID}",
+	"msgName": "MsgRecvPacket",
+	"txHash": "0696B4561D093E0AF784D6CC5701C4FB0645E47BE425C47108737E23BB4FBDEA",
+	"msgIndex": 0,
+	"params": {
+		"packet": {
+			"sequence": "1",
+			"sourcePort": "transfer",
+			"sourceChannel": "channel-VSAv",
+			"destinationPort": "transfer",
+			"destinationChannel": "channel-0",
+			"data": "eyJkZW5vbSI6InNvbG90b2tlbiIsImFtb3VudCI6MjAsInNlbmRlciI6InRjcm8xNHdrdTRocjc0bTBtNHR2ZXhzNGY2anZ1eTZ2bnUyeDJkZzdoc3kiLCJyZWNlaXZlciI6InRjcm8xNHdrdTRocjc0bTBtNHR2ZXhzNGY2anZ1eTZ2bnUyeDJkZzdoc3kifQ==",
+			"timeoutHeight": { "revisionNumber": "4", "revisionHeight": "14812" },
+			"timeoutTimestamp": "0"
+		},
+		"proofCommitment": "CkQKQhJAqfGjUQ5IBMpw/u/sAm+xxKztwsL9zJHGs/GObfCQPyd2Yi489Y8BbB0I9nQiOXymYa5Tu/lTuo+tJMQSLzCr+BCqsPyIBg==",
+		"proofHeight": { "revisionNumber": "0", "revisionHeight": "5" },
+		"signer": "tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy",
+		"application": "transfer",
+		"messageType": "MsgTransfer",
+		"maybeMsgTransfer": {
+			"sender": "tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy",
+			"receiver": "tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy",
+			"denom": "solotoken",
+			"amount": "20",
+			"success": false,
+			"maybeDenominationTrace": {
+				"hash": "1A35E932DCE61466ED9F72D0B436628C388FB1BC60CB23A055039B7DE54883CC",
+				"denom": "ibc/1A35E932DCE61466ED9F72D0B436628C388FB1BC60CB23A055039B7DE54883CC"
+			}
+		},
+		"packetSequence": "1",
+		"channelOrdering": "ORDER_UNORDERED",
+		"connectionId": "connection-0",
+		"packetAck": {
+			"result": "AQ==",
+			"error": null
+		}
+	}
+}
+`
+
+			txDecoder := utils.NewTxDecoder()
+			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
+				usecase_parser_test.TX_MSG_RECV_PACKET_SOLO_MACHINE_BLOCK_RESP,
+			))
+			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
+				usecase_parser_test.TX_MSG_RECV_PACKET_SOLO_MACHINE_BLOCK_RESULTS_RESP,
+			))
+
+			accountAddressPrefix := "cro"
+			stakingDenom := "basecro"
+
+			pm := usecase_parser_test.InitParserManager()
+
+			cmds, err := parser.ParseBlockTxsMsgToCommands(
+				pm,
+				txDecoder,
+				block,
+				blockResults,
+				accountAddressPrefix,
+				stakingDenom,
+			)
+			Expect(err).To(BeNil())
+			Expect(cmds).To(HaveLen(1))
+			cmd := cmds[0]
+			Expect(cmd.Name()).To(Equal("CreateMsgIBCRecvPacket"))
+
+			untypedEvent, _ := cmd.Exec()
+			typedEvent := untypedEvent.(*event.MsgIBCRecvPacket)
+
+			regex, _ := regexp.Compile("\n?\r?\\s?")
+
+			expectedWithUUID := strings.Replace(
+				regex.ReplaceAllString(expected, ""),
+				"{UUID}",
+				typedEvent.UUID(),
+				-1,
+			)
+
+			Expect(json.MustMarshalToString(typedEvent)).To(Equal(expectedWithUUID))
 		})
 	})
 })

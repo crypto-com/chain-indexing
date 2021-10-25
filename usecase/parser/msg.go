@@ -5,24 +5,20 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/crypto-com/chain-indexing/external/primptr"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/mitchellh/mapstructure"
 
-	"github.com/crypto-com/chain-indexing/projection/validator/constants"
-	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
-
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
-
 	"github.com/crypto-com/chain-indexing/internal/utctime"
-
-	jsoniter "github.com/json-iterator/go"
-
-	"github.com/crypto-com/chain-indexing/entity/command"
+	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
+	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+	mapstructure_utils "github.com/crypto-com/chain-indexing/usecase/parser/utils/mapstructure"
 )
 
 func ParseBlockTxsMsgToCommands(
@@ -1096,8 +1092,8 @@ func parseRawMsgSendGrant(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1142,8 +1138,8 @@ func parseRawMsgStackGrant(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1188,8 +1184,8 @@ func parseRawMsgGenericGrant(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1233,8 +1229,8 @@ func ParseMsgRevoke(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1278,8 +1274,8 @@ func ParseMsgExec(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1386,8 +1382,8 @@ func parseRawMsgGrantBasicAllowance(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1432,8 +1428,8 @@ func parseRawMsgGrantPeriodicAllowance(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1478,8 +1474,8 @@ func parseRawMsgGrantAllowedMsgAllowance(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1523,8 +1519,8 @@ func ParseMsgRevokeAllowance(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1568,8 +1564,8 @@ func ParseMsgCreateVestingAccount(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}

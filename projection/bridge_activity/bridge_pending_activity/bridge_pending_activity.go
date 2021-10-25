@@ -122,6 +122,13 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 				continue
 			}
 			if msgIBCTransferTransfer.TxSuccess() {
+				tokenAmount, tokenAmountOk := coin.NewIntFromString(msgIBCTransferTransfer.Params.Token.Amount.String())
+				if !tokenAmountOk {
+					return fmt.Errorf(
+						"error creating coin from token amount: %s",
+						msgIBCTransferTransfer.Params.Token.Amount.String(),
+					)
+				}
 				if err := view.Insert(&bridge_pending_activity_view.BridgePendingActivityInsertRow{
 					BlockHeight:                   height,
 					BlockTime:                     &blockTime,
@@ -136,7 +143,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 					ToAddress:                     msgIBCTransferTransfer.Params.Receiver,
 					MaybeToSmartContractAddress:   nil,
 					MaybeChannelId:                primptr.String(msgIBCTransferTransfer.Params.SourceChannel),
-					Amount:                        coin.NewIntFromUint64(msgIBCTransferTransfer.Params.Token.Amount),
+					Amount:                        tokenAmount,
 					MaybeDenom:                    primptr.String(msgIBCTransferTransfer.Params.Token.Denom),
 					MaybeBridgeFeeAmount:          nil,
 					MaybeBridgeFeeDenom:           nil,
@@ -146,6 +153,13 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 					return fmt.Errorf("error inserting record when MsgIBCTransferTransfer: %w", err)
 				}
 			} else {
+				tokenAmount, tokenAmountOk := coin.NewIntFromString(msgIBCTransferTransfer.Params.Token.Amount.String())
+				if !tokenAmountOk {
+					return fmt.Errorf(
+						"error creating coing from token amount: %s",
+						msgIBCTransferTransfer.Params.Token.Amount.String(),
+					)
+				}
 				if err := view.Insert(&bridge_pending_activity_view.BridgePendingActivityInsertRow{
 					BlockHeight:        height,
 					BlockTime:          &blockTime,
@@ -163,7 +177,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 					ToAddress:                     msgIBCTransferTransfer.Params.Receiver,
 					MaybeToSmartContractAddress:   nil,
 					MaybeChannelId:                primptr.String(msgIBCTransferTransfer.Params.SourceChannel),
-					Amount:                        coin.NewIntFromUint64(msgIBCTransferTransfer.Params.Token.Amount),
+					Amount:                        tokenAmount,
 					MaybeDenom:                    primptr.String(msgIBCTransferTransfer.Params.Token.Denom),
 					MaybeBridgeFeeAmount:          nil,
 					MaybeBridgeFeeDenom:           nil,
@@ -186,6 +200,14 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 					status = types.STATUS_COUNTERPARTY_REJECTED
 				}
 
+				amount, amountOk := coin.NewIntFromString(msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount.String())
+				if !amountOk {
+					return fmt.Errorf(
+						"error creating coin from token amount: %s",
+						msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount.String(),
+					)
+				}
+
 				if err := view.Insert(&bridge_pending_activity_view.BridgePendingActivityInsertRow{
 					BlockHeight:                   height,
 					BlockTime:                     &blockTime,
@@ -200,7 +222,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 					ToAddress:                     msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Receiver,
 					MaybeToSmartContractAddress:   nil,
 					MaybeChannelId:                primptr.String(msgIBCRecvPacket.Params.Packet.DestinationChannel),
-					Amount:                        coin.NewIntFromUint64(msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount.Uint64()),
+					Amount:                        amount,
 					MaybeDenom:                    primptr.String(msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Denom),
 					MaybeBridgeFeeAmount:          nil,
 					MaybeBridgeFeeDenom:           nil,
@@ -223,6 +245,14 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 					status = types.STATUS_COUNTERPARTY_REJECTED
 				}
 
+				amount, amountOk := coin.NewIntFromString(msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount.String())
+				if !amountOk {
+					return fmt.Errorf(
+						"error creating coin from token amount: %s",
+						msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount.String(),
+					)
+				}
+
 				if err := view.Insert(&bridge_pending_activity_view.BridgePendingActivityInsertRow{
 					BlockHeight:                   height,
 					BlockTime:                     &blockTime,
@@ -237,7 +267,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 					ToAddress:                     msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Receiver,
 					MaybeToSmartContractAddress:   nil,
 					MaybeChannelId:                primptr.String(msgIBCAcknowledgement.Params.Packet.SourceChannel),
-					Amount:                        coin.NewIntFromUint64(msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount.Uint64()),
+					Amount:                        amount,
 					MaybeDenom:                    primptr.String(msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Denom),
 					MaybeBridgeFeeAmount:          nil,
 					MaybeBridgeFeeDenom:           nil,
@@ -252,6 +282,15 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 			if msgIBCTimeout.Params.Packet.SourceChannel != projection.Config().ChannelId {
 				continue
 			}
+
+			amount, amountOk := coin.NewIntFromString(msgIBCTimeout.Params.MaybeMsgTransfer.RefundAmount.String())
+			if !amountOk {
+				return fmt.Errorf(
+					"error creating coin from token amount: %s",
+					msgIBCTimeout.Params.MaybeMsgTransfer.RefundAmount.String(),
+				)
+			}
+
 			if msgIBCTimeout.Params.MaybeMsgTransfer != nil {
 				if err := view.Insert(&bridge_pending_activity_view.BridgePendingActivityInsertRow{
 					BlockHeight:                   height,
@@ -267,7 +306,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 					ToAddress:                     msgIBCTimeout.Params.MaybeMsgTransfer.RefundReceiver,
 					MaybeToSmartContractAddress:   nil,
 					MaybeChannelId:                primptr.String(msgIBCTimeout.Params.Packet.SourceChannel),
-					Amount:                        coin.NewIntFromUint64(msgIBCTimeout.Params.MaybeMsgTransfer.RefundAmount),
+					Amount:                        amount,
 					MaybeDenom:                    primptr.String(msgIBCTimeout.Params.MaybeMsgTransfer.RefundDenom),
 					MaybeBridgeFeeAmount:          nil,
 					MaybeBridgeFeeDenom:           nil,

@@ -328,7 +328,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 							Receiver:      "Receiver",
 							Token: ibc_model.MsgTransferToken{
 								Denom:  "Denom",
-								Amount: uint64(1000),
+								Amount: json.NewNumericStringFromUint64(1000),
 							},
 						},
 					},
@@ -406,7 +406,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 								Sender:   "Sender",
 								Receiver: "Receiver",
 								Denom:    "Denom",
-								Amount:   json.NewUint64(1000),
+								Amount:   json.NewNumericStringFromUint64(1000),
 							},
 						},
 						PacketAck: ibc_model.MsgRecvPacketPacketAck{
@@ -491,7 +491,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 								Sender:   "Sender",
 								Receiver: "Receiver",
 								Denom:    "Denom",
-								Amount:   json.NewUint64(1000),
+								Amount:   json.NewNumericStringFromUint64(1000),
 							},
 						},
 						PacketAck: ibc_model.MsgRecvPacketPacketAck{
@@ -576,7 +576,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 								Sender:   "Sender",
 								Receiver: "Receiver",
 								Denom:    "Denom",
-								Amount:   json.NewUint64(1000),
+								Amount:   json.NewNumericStringFromUint64(1000),
 							},
 							MaybeError: nil,
 						},
@@ -658,7 +658,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 								Sender:   "Sender",
 								Receiver: "Receiver",
 								Denom:    "Denom",
-								Amount:   json.NewUint64(1000),
+								Amount:   json.NewNumericStringFromUint64(1000),
 							},
 							MaybeError: primptr.String("MaybeError"),
 						},
@@ -737,7 +737,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 						MaybeMsgTransfer: &ibc_model.MsgTimeoutMsgTransfer{
 							RefundReceiver: "RefundReceiver",
 							RefundDenom:    "RefundDenom",
-							RefundAmount:   1000,
+							RefundAmount:   json.NewNumericStringFromUint64(1000),
 						},
 					},
 				},
@@ -811,7 +811,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 						MaybeMsgTransfer: &ibc_model.MsgTimeoutMsgTransfer{
 							RefundReceiver: "RefundReceiver",
 							RefundDenom:    "RefundDenom",
-							RefundAmount:   1000,
+							RefundAmount:   json.NewNumericStringFromUint64(1000),
 						},
 					},
 				},

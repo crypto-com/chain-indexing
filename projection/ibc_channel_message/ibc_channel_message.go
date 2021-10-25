@@ -2,7 +2,6 @@ package ibc_channel_message
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -161,7 +160,7 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 				MaybeSender:     primptr.String(typedEvent.Params.Sender),
 				MaybeReceiver:   primptr.String(typedEvent.Params.Receiver),
 				MaybeDenom:      primptr.String(typedEvent.Params.Token.Denom),
-				MaybeAmount:     primptr.String(strconv.FormatUint(typedEvent.Params.Token.Amount, 10)),
+				MaybeAmount:     primptr.String(typedEvent.Params.Token.Amount.String()),
 				MessageType:     typedEvent.MsgName,
 				Message:         typedEvent,
 			}
@@ -235,7 +234,7 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 			if typedEvent.Params.MaybeMsgTransfer != nil {
 				message.MaybeReceiver = primptr.String(typedEvent.Params.MaybeMsgTransfer.RefundReceiver)
 				message.MaybeDenom = primptr.String(typedEvent.Params.MaybeMsgTransfer.RefundDenom)
-				message.MaybeAmount = primptr.String(strconv.FormatUint(typedEvent.Params.MaybeMsgTransfer.RefundAmount, 10))
+				message.MaybeAmount = primptr.String(typedEvent.Params.MaybeMsgTransfer.RefundAmount.String())
 			}
 			messages = append(messages, message)
 
@@ -255,7 +254,7 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 			if typedEvent.Params.MaybeMsgTransfer != nil {
 				message.MaybeReceiver = primptr.String(typedEvent.Params.MaybeMsgTransfer.RefundReceiver)
 				message.MaybeDenom = primptr.String(typedEvent.Params.MaybeMsgTransfer.RefundDenom)
-				message.MaybeAmount = primptr.String(strconv.FormatUint(typedEvent.Params.MaybeMsgTransfer.RefundAmount, 10))
+				message.MaybeAmount = primptr.String(typedEvent.Params.MaybeMsgTransfer.RefundAmount.String())
 			}
 			messages = append(messages, message)
 
