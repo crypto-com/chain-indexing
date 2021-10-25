@@ -4,17 +4,18 @@ import (
 	"fmt"
 	"time"
 
-	base64_internal "github.com/crypto-com/chain-indexing/internal/base64"
-	"github.com/crypto-com/chain-indexing/internal/json"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
-	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
 	"github.com/mitchellh/mapstructure"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
+	base64_internal "github.com/crypto-com/chain-indexing/internal/base64"
+	"github.com/crypto-com/chain-indexing/internal/json"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/internal/typeconv"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
+	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+	mapstructure_utils "github.com/crypto-com/chain-indexing/usecase/parser/utils/mapstructure"
 )
 
 func ParseMsgRecvPacket(
@@ -26,8 +27,8 @@ func ParseMsgRecvPacket(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}

@@ -718,7 +718,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 							SourcePort:    "SourcePort",
 						},
 						PacketData: ibc_model.FungibleTokenPacketData{
-							Amount: json.NewUint64(100),
+							Amount: json.NewNumericStringFromUint64(100),
 							Denom:  "DENOM",
 						},
 						DestinationChannel: "DestinationChannel",
@@ -837,7 +837,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
 								Denom:  "DENOM",
-								Amount: json.NewUint64(100),
+								Amount: json.NewNumericStringFromUint64(100),
 							},
 							Success: false,
 						},
@@ -971,7 +971,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
 								Denom:  "DENOM",
-								Amount: json.NewUint64(100),
+								Amount: json.NewNumericStringFromUint64(100),
 							},
 							Success: true,
 						},
@@ -1043,7 +1043,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
 							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
 								Denom:  "DENOM",
-								Amount: json.NewUint64(100),
+								Amount: json.NewNumericStringFromUint64(100),
 							},
 							Success:    true,
 							MaybeError: nil,
@@ -1112,7 +1112,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
 							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
 								Denom:  "DENOM",
-								Amount: json.NewUint64(100),
+								Amount: json.NewNumericStringFromUint64(100),
 							},
 							Success:    false,
 							MaybeError: primptr.String("MaybeError"),
@@ -1212,7 +1212,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						},
 						MaybeMsgTransfer: &ibc_model.MsgTimeoutMsgTransfer{
 							RefundDenom:  "DENOM",
-							RefundAmount: 100,
+							RefundAmount: json.NewNumericStringFromUint64(100),
 						},
 						PacketSequence: 1,
 					},
@@ -1309,7 +1309,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						},
 						MaybeMsgTransfer: &ibc_model.MsgTimeoutMsgTransfer{
 							RefundDenom:  "DENOM",
-							RefundAmount: 100,
+							RefundAmount: json.NewNumericStringFromUint64(100),
 						},
 						PacketSequence: 1,
 					},

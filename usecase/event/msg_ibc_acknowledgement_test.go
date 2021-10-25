@@ -1,20 +1,14 @@
 package event_test
 
 import (
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-	"time"
-
-	"github.com/crypto-com/chain-indexing/internal/json"
-
-	"github.com/crypto-com/chain-indexing/internal/must"
-
-	event_entity "github.com/crypto-com/chain-indexing/entity/event"
-	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
-	"github.com/mitchellh/mapstructure"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	event_entity "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/internal/json"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
+	mapstructure_utils "github.com/crypto-com/chain-indexing/usecase/parser/utils/mapstructure"
 )
 
 var _ = Describe("Event", func() {
@@ -34,16 +28,7 @@ var _ = Describe("Event", func() {
 
 			var anyRawValue map[string]interface{}
 			var anyRawMsg ibc_model.RawMsgAcknowledgement
-			msgRecvPacketDecoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-				WeaklyTypedInput: true,
-				DecodeHook: mapstructure.ComposeDecodeHookFunc(
-					mapstructure.StringToTimeDurationHookFunc(),
-					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					utils.StringToDurationHookFunc(),
-					utils.StringToByteSliceHookFunc(),
-				),
-				Result: &anyRawMsg,
-			})
+
 			json.MustUnmarshalFromString(`
 {
   "@type": "/ibc.core.channel.v1.MsgAcknowledgement",
@@ -69,21 +54,9 @@ var _ = Describe("Event", func() {
   "signer": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"
 }
 `, &anyRawValue)
-			must.Do(msgRecvPacketDecoder.Decode(anyRawValue))
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(anyRawValue, &anyRawMsg)
 
 			var anyFungibleTokenPacketData ibc_model.FungibleTokenPacketData
-			fungibleTokenPacketDataDecoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-				WeaklyTypedInput: true,
-				DecodeHook: mapstructure.ComposeDecodeHookFunc(
-					mapstructure.StringToTimeDurationHookFunc(),
-					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					utils.StringToJsonUint64HookFunc(),
-					utils.StringToDurationHookFunc(),
-					utils.StringToByteSliceHookFunc(),
-				),
-				Result: &anyFungibleTokenPacketData,
-			})
-
 			json.MustUnmarshalFromString(`
 {
   "amount":"1234",
@@ -92,7 +65,7 @@ var _ = Describe("Event", func() {
   "sender":"cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"
 }
 `, &anyRawValue)
-			must.Do(fungibleTokenPacketDataDecoder.Decode(anyRawValue))
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(anyRawValue, &anyRawMsg)
 
 			anyParams := ibc_model.MsgAcknowledgementParams{
 				RawMsgAcknowledgement: anyRawMsg,
@@ -156,16 +129,6 @@ var _ = Describe("Event", func() {
 
 			var anyRawValue map[string]interface{}
 			var anyRawMsg ibc_model.RawMsgAcknowledgement
-			msgRecvPacketDecoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-				WeaklyTypedInput: true,
-				DecodeHook: mapstructure.ComposeDecodeHookFunc(
-					mapstructure.StringToTimeDurationHookFunc(),
-					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					utils.StringToDurationHookFunc(),
-					utils.StringToByteSliceHookFunc(),
-				),
-				Result: &anyRawMsg,
-			})
 			json.MustUnmarshalFromString(`
 {
   "@type": "/ibc.core.channel.v1.MsgAcknowledgement",
@@ -191,21 +154,9 @@ var _ = Describe("Event", func() {
   "signer": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"
 }
 `, &anyRawValue)
-			must.Do(msgRecvPacketDecoder.Decode(anyRawValue))
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(anyRawValue, &anyRawMsg)
 
 			var anyFungibleTokenPacketData ibc_model.FungibleTokenPacketData
-			fungibleTokenPacketDataDecoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-				WeaklyTypedInput: true,
-				DecodeHook: mapstructure.ComposeDecodeHookFunc(
-					mapstructure.StringToTimeDurationHookFunc(),
-					mapstructure.StringToTimeHookFunc(time.RFC3339),
-					utils.StringToJsonUint64HookFunc(),
-					utils.StringToDurationHookFunc(),
-					utils.StringToByteSliceHookFunc(),
-				),
-				Result: &anyFungibleTokenPacketData,
-			})
-
 			json.MustUnmarshalFromString(`
 {
   "amount":"1234",
@@ -214,7 +165,7 @@ var _ = Describe("Event", func() {
   "sender":"cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"
 }
 `, &anyRawValue)
-			must.Do(fungibleTokenPacketDataDecoder.Decode(anyRawValue))
+			mapstructure_utils.DefaultMapstructureDecoder.MustDecode(anyRawValue, &anyRawMsg)
 
 			anyParams := ibc_model.MsgAcknowledgementParams{
 				RawMsgAcknowledgement: anyRawMsg,

@@ -1,5 +1,7 @@
 package ibc
 
+import "github.com/crypto-com/chain-indexing/internal/json"
+
 type MsgTimeoutParams struct {
 	RawMsgTimeout
 
@@ -23,7 +25,7 @@ type RawMsgTimeout struct {
 }
 
 type MsgTimeoutMsgTransfer struct {
-	RefundReceiver string `json:"refundReceiver"`
-	RefundDenom    string `json:"refundDenom"`
-	RefundAmount   uint64 `json:"refundAmount,string"`
+	RefundReceiver string              `json:"refundReceiver"`
+	RefundDenom    string              `json:"refundDenom"`
+	RefundAmount   *json.NumericString `json:"refundAmount"`
 }

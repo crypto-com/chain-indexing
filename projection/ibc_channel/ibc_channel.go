@@ -367,7 +367,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
-			amount := msgIBCTransferTransfer.Params.PacketData.Amount.Uint64()
+			amount := msgIBCTransferTransfer.Params.PacketData.Amount.String()
 			denom := msgIBCTransferTransfer.Params.PacketData.Denom
 			destinationChannelID := msgIBCTransferTransfer.Params.DestinationChannel
 			destinationPortID := msgIBCTransferTransfer.Params.DestinationPort
@@ -442,7 +442,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 			// if msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Success {
 			if msgIBCRecvPacket.Params.PacketAck.MaybeError == nil {
 
-				amount := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount.Uint64()
+				amount := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount.String()
 				denom := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Denom
 				destinationChannelID := msgIBCRecvPacket.Params.Packet.DestinationChannel
 				destinationPortID := msgIBCRecvPacket.Params.Packet.DestinationPort
@@ -525,7 +525,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 				} else {
 
-					amount := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount.Uint64()
+					amount := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount.String()
 					denom := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Denom
 					destinationChannelID := msgIBCAcknowledgement.Params.Packet.DestinationChannel
 					destinationPortID := msgIBCAcknowledgement.Params.Packet.DestinationPort
@@ -597,7 +597,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 			if msgIBCTimeout.Params.MaybeMsgTransfer != nil {
 
-				amount := msgIBCTimeout.Params.MaybeMsgTransfer.RefundAmount
+				amount := msgIBCTimeout.Params.MaybeMsgTransfer.RefundAmount.String()
 				denom := msgIBCTimeout.Params.MaybeMsgTransfer.RefundDenom
 				destinationChannelID := msgIBCTimeout.Params.Packet.DestinationChannel
 				destinationPortID := msgIBCTimeout.Params.Packet.DestinationPort
@@ -621,7 +621,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 			if projection.config.EnableTxMsgTrace && msgIBCTimeout.Params.MaybeMsgTransfer != nil {
 
-				amount := msgIBCTimeout.Params.MaybeMsgTransfer.RefundAmount
+				amount := msgIBCTimeout.Params.MaybeMsgTransfer.RefundAmount.String()
 				msg, err := msgIBCTimeout.ToJSON()
 				if err != nil {
 					return fmt.Errorf("error msgIBCTimeout.ToJSON(): %w", err)
@@ -639,7 +639,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 					SourceChannel:       msgIBCTimeout.Params.Packet.SourceChannel,
 					DestinationChannel:  msgIBCTimeout.Params.Packet.DestinationChannel,
 					Denom:               msgIBCTimeout.Params.MaybeMsgTransfer.RefundDenom,
-					Amount:              strconv.FormatUint(amount, 10),
+					Amount:              amount,
 					Success:             "",
 					Error:               "",
 					MessageType:         msgIBCTimeout.MsgName,
@@ -672,7 +672,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				if err := revertUpdateBondedTokensWhenMsgIBCTransfer(
 					ibcChannelsView,
 					channelID,
-					amount,
+					amount.String(),
 					denom,
 					destinationChannelID,
 					destinationPortID,
@@ -686,7 +686,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 			if projection.config.EnableTxMsgTrace && msgIBCTimeoutOnClose.Params.MaybeMsgTransfer != nil {
 
-				amount := msgIBCTimeoutOnClose.Params.MaybeMsgTransfer.RefundAmount
+				amount := msgIBCTimeoutOnClose.Params.MaybeMsgTransfer.RefundAmount.String()
 				msg, err := msgIBCTimeoutOnClose.ToJSON()
 				if err != nil {
 					return fmt.Errorf("error msgIBCTimeoutOnClose.ToJSON(): %w", err)
@@ -704,7 +704,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 					SourceChannel:       msgIBCTimeoutOnClose.Params.Packet.SourceChannel,
 					DestinationChannel:  msgIBCTimeoutOnClose.Params.Packet.DestinationChannel,
 					Denom:               msgIBCTimeoutOnClose.Params.MaybeMsgTransfer.RefundDenom,
-					Amount:              strconv.FormatUint(amount, 10),
+					Amount:              amount,
 					Success:             "",
 					Error:               "",
 					MessageType:         msgIBCTimeoutOnClose.MsgName,
@@ -759,7 +759,7 @@ func updateBondedTokensWhenMsgIBCRecvPacket(
 	ibcChannelsView ibc_channel_view.IBCChannels,
 	ibcDenomHashMappingView ibc_channel_view.IBCDenomHashMapping,
 	channelID string,
-	amount uint64,
+	amount string,
 	denom string,
 	destinationChannelID string,
 	destinationPortID string,
@@ -772,11 +772,14 @@ func updateBondedTokensWhenMsgIBCRecvPacket(
 		return fmt.Errorf("error finding channel bonded_tokens: %v", err)
 	}
 
-	amountInCoinInt := coin.NewIntFromUint64(amount)
+	amountInCoinInt, amountInCoinIntOk := coin.NewIntFromString(amount)
+	if !amountInCoinIntOk {
+		return fmt.Errorf("error creating coin from string: %s", amount)
+	}
 
 	if receiverChainIsTokenSource(denom, sourceChannelID, sourcePortID) {
 		// This chain is token source, it is unbonded now.
-		// Subtract it from the bondedTokens.OnCouterpartyChain
+		// Subtract it from the bondedTokens.OnCounterpartyChain
 		token := ibc_channel_view.NewBondedToken(denom, amountInCoinInt)
 		if subtractErr := subtractTokenOnCounterpartyChain(bondedTokens, token); subtractErr != nil {
 			return fmt.Errorf("error subtractTokenOnCounterpartyChain: %v", subtractErr)
@@ -804,7 +807,7 @@ func updateBondedTokensWhenMsgIBCRecvPacket(
 func updateBondedTokensWhenMsgIBCTransfer(
 	ibcChannelsView ibc_channel_view.IBCChannels,
 	channelID string,
-	amount uint64,
+	amount string,
 	denom string,
 	destinationChannelID string,
 	destinationPortID string,
@@ -817,7 +820,10 @@ func updateBondedTokensWhenMsgIBCTransfer(
 		return fmt.Errorf("error ibcChannelsView.FindBondedTokensBy: %v", err)
 	}
 
-	amountInCoinInt := coin.NewIntFromUint64(amount)
+	amountInCoinInt, amountInCoinIntOk := coin.NewIntFromString(amount)
+	if !amountInCoinIntOk {
+		return fmt.Errorf("error creating coin from sting: %s", amount)
+	}
 
 	if receiverChainIsTokenSource(denom, sourceChannelID, sourcePortID) {
 		// Counterparty chain is token source, it is unbonded now.
@@ -844,7 +850,7 @@ func updateBondedTokensWhenMsgIBCTransfer(
 func revertUpdateBondedTokensWhenMsgIBCTransfer(
 	ibcChannelsView ibc_channel_view.IBCChannels,
 	channelID string,
-	amount uint64,
+	amount string,
 	denom string,
 	destinationChannelID string,
 	destinationPortID string,
@@ -857,7 +863,10 @@ func revertUpdateBondedTokensWhenMsgIBCTransfer(
 		return fmt.Errorf("error ibcChannelsView.FindBondedTokensBy: %v", err)
 	}
 
-	amountInCoinInt := coin.NewIntFromUint64(amount)
+	amountInCoinInt, amountInCoinIntOk := coin.NewIntFromString(amount)
+	if !amountInCoinIntOk {
+		return fmt.Errorf("error creating coin from amount: %s", amount)
+	}
 
 	// Revert the operation in updateBondedTokensWhenMsgIBCTransfer()
 	if receiverChainIsTokenSource(denom, sourceChannelID, sourcePortID) {
