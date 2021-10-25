@@ -61,6 +61,103 @@ func initHTTPAPIHandlers(
 }
 ```
 
+### Configuration
+```
+config := bootstrap.Config{
+	FileConfig: bootstrap.FileConfig{
+		Blockchain: bootstrap.BlockchainConfig{
+		    // Bonding denom of the blockchain
+			BondingDenom:           "",
+		    // Account address prefix of the blockchain
+			AccountAddressPrefix:   "",
+		    // Account public key prefix of the blockchain
+			AccountPubKeyPrefix:    "",
+		    // Validator address prefix of the blockchain
+			ValidatorAddressPrefix: "",
+		    // Validator public key prefix of the blockchain
+			ValidatorPubKeyPrefix:  "",
+		},
+		System: bootstrap.SystemConfig{
+		    // "EVENT_STORE", "TENDERMINT_DIRECT", "API_ONLY"
+			Mode: "",
+		},
+		Sync: bootstrap.SyncConfig{
+		    // Window size of Sunc process
+			WindowSize: 0,
+		},
+		Tendermint: bootstrap.TendermintConfig{
+		    // HTTP address of Tendermint client
+			HTTPRPCUrl:           "",
+		    // Connection type
+			Insecure:             false,
+			StrictGenesisParsing: false,
+		},
+		CosmosApp: bootstrap.CosmosAppConfig{
+		    // HTTP address of Cosmos app client
+			HTTPRPCUrl: "",
+		    // Connection type
+			Insecure:   false,
+		},
+		HTTP: bootstrap.HTTPConfig{
+		    // HTTP address to be listened
+			ListeningAddress:   "",
+		    // Prefix of all routes
+			RoutePrefix:        "",
+			// Allowed CORS for Origins
+			CorsAllowedOrigins: nil,
+			// Allowed CORS for Methods
+			CorsAllowedMethods: nil,
+			// Allowed CORS for Headers
+			CorsAllowedHeaders: nil,
+		},
+		Debug: bootstrap.DebugConfig{
+			// Enable pprof server
+			PprofEnable:           false,
+			// Pprof server address to be listened
+			PprofListeningAddress: "",
+		},
+		Database: bootstrap.DatabaseConfig{
+		    // Connection type
+			SSL:      false,
+		    // Database host
+			Host:     "",
+		    // Database port
+			Port:     0,
+		    // Database username
+			Username: "",
+		    // Database password
+			Password: "",
+		    // Database name
+			Name:     "",
+		    // Database schema name
+			Schema:   "",
+		},
+		Postgres: bootstrap.PostgresConfig{
+		    // Max connections of Database
+			MaxConns:            0,
+		    // Min connections of Database
+			MinConns:            0,
+		    // Max connections life time of Database
+			MaxConnLifeTime:     "",
+		    // Max connections idle time of Database
+			MaxConnIdleTime:     "",
+		    // Health check interval of Database
+			HealthCheckInterval: "",
+		},
+		Logger: bootstrap.LoggerConfig{
+		    // LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_ERROR, LOG_LEVEL_PANIC, LOG_DISABLED
+			Level: (logger.LogLevel),
+			// Enable colered logs
+			Color: false,
+		},
+	    CosmosVersionEnabledHeight: bootstrap.CosmosVersionEnabledHeightConfig{
+	            // BLock height from cosmos sdk version v0.42.7
+		        V0_42_7: 0,
+			},
+		},
+}
+```
+
 
 ## 2. Test
 
