@@ -4,13 +4,14 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/crypto-com/chain-indexing/appinterface/pagination"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
-	"github.com/crypto-com/chain-indexing/internal/utctime"
+	sq "github.com/Masterminds/squirrel"
 	jsoniter "github.com/json-iterator/go"
 
-	sq "github.com/Masterminds/squirrel"
+	"github.com/crypto-com/chain-indexing/appinterface/pagination"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
+	"github.com/crypto-com/chain-indexing/projection/ibc_channel/types"
 )
 
 type IBCChannels interface {
@@ -20,8 +21,7 @@ type IBCChannels interface {
 	UpdateSequence(string, string, uint64) error
 	UpdateTotalTransferOutSuccessRate(string) error
 	UpdateLastActivityTimeAndHeight(string, utctime.UTCTime, int64) error
-	UpdateEstablished(string, bool) error
-	UpdateClosed(string, bool) error
+	UpdateStatus(string, types.Status) error
 	UpdateBondedTokens(string, *BondedTokens) error
 	FindBondedTokensBy(string) (*BondedTokens, error)
 	FindBy(string) (*IBCChannelRow, error)
@@ -57,8 +57,7 @@ func (ibcChannelsView *IBCChannelsView) Insert(channel *IBCChannelRow) error {
 			"counterparty_channel_id",
 			"counterparty_port_id",
 			"counterparty_chain_id",
-			"established",
-			"closed",
+			"status",
 			"packet_ordering",
 			"last_in_packet_sequence",
 			"last_out_packet_sequence",
@@ -81,8 +80,7 @@ func (ibcChannelsView *IBCChannelsView) Insert(channel *IBCChannelRow) error {
 			channel.CounterpartyChannelID,
 			channel.CounterpartyPortID,
 			channel.CounterpartyChainID,
-			channel.Established,
-			channel.Closed,
+			channel.Status,
 			channel.PacketOrdering,
 			channel.LastInPacketSequence,
 			channel.LastOutPacketSequence,
@@ -280,47 +278,24 @@ func (ibcChannelsView *IBCChannelsView) UpdateLastActivityTimeAndHeight(channelI
 	return nil
 }
 
-func (ibcChannelsView *IBCChannelsView) UpdateEstablished(channelID string, established bool) error {
+func (ibcChannelsView *IBCChannelsView) UpdateStatus(channelID string, status types.Status) error {
 	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
 		Update("view_ibc_channels").
 		SetMap(map[string]interface{}{
-			"established": established,
+			"status": status,
 		}).
 		Where("channel_id = ?", channelID).
 		ToSql()
 	if err != nil {
-		return fmt.Errorf("error building channel.Established update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		return fmt.Errorf("error building channel.Status update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
 	result, err := ibcChannelsView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
-		return fmt.Errorf("error updating channel.Established: %v: %w", err, rdb.ErrWrite)
+		return fmt.Errorf("error updating channel.Status: %v: %w", err, rdb.ErrWrite)
 	}
 	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error updating channel.Established: no row updated: %w", rdb.ErrWrite)
-	}
-
-	return nil
-}
-
-func (ibcChannelsView *IBCChannelsView) UpdateClosed(channelID string, closed bool) error {
-	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
-		Update("view_ibc_channels").
-		SetMap(map[string]interface{}{
-			"closed": closed,
-		}).
-		Where("channel_id = ?", channelID).
-		ToSql()
-	if err != nil {
-		return fmt.Errorf("error building channel.Closed update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
-
-	result, err := ibcChannelsView.rdb.Exec(sql, sqlArgs...)
-	if err != nil {
-		return fmt.Errorf("error updating channel.Closed: %v: %w", err, rdb.ErrWrite)
-	}
-	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error updating channel.Closed: no row updated: %w", rdb.ErrWrite)
+		return fmt.Errorf("error updating channel.Status: no row updated: %w", rdb.ErrWrite)
 	}
 
 	return nil
@@ -391,8 +366,7 @@ func (ibcChannelsView *IBCChannelsView) FindBy(channelID string) (*IBCChannelRow
 			"counterparty_channel_id",
 			"counterparty_port_id",
 			"counterparty_chain_id",
-			"established",
-			"closed",
+			"status",
 			"packet_ordering",
 			"last_in_packet_sequence",
 			"last_out_packet_sequence",
@@ -426,8 +400,7 @@ func (ibcChannelsView *IBCChannelsView) FindBy(channelID string) (*IBCChannelRow
 		&channel.CounterpartyChannelID,
 		&channel.CounterpartyPortID,
 		&channel.CounterpartyChainID,
-		&channel.Established,
-		&channel.Closed,
+		&channel.Status,
 		&channel.PacketOrdering,
 		&channel.LastInPacketSequence,
 		&channel.LastOutPacketSequence,
@@ -485,8 +458,7 @@ func (ibcChannelsView *IBCChannelsView) List(
 		"counterparty_channel_id",
 		"counterparty_port_id",
 		"counterparty_chain_id",
-		"established",
-		"closed",
+		"status",
 		"packet_ordering",
 		"last_in_packet_sequence",
 		"last_out_packet_sequence",
@@ -505,12 +477,8 @@ func (ibcChannelsView *IBCChannelsView) List(
 		"view_ibc_channels",
 	)
 
-	if filter.MaybeEstablished != nil {
-		if *filter.MaybeEstablished {
-			stmtBuilder = addEstablishedFilterConditionTo(stmtBuilder)
-		} else {
-			stmtBuilder = addNotEstablishedFilterConditionTo(stmtBuilder)
-		}
+	if filter.MaybeStatus != nil {
+		stmtBuilder = stmtBuilder.Where("status = ?", *filter.MaybeStatus)
 	}
 
 	// MaybeLastActivityBlockTime has a higher priority than MaybeCreatedAtBlockTime
@@ -559,8 +527,7 @@ func (ibcChannelsView *IBCChannelsView) List(
 			&channel.CounterpartyChannelID,
 			&channel.CounterpartyPortID,
 			&channel.CounterpartyChainID,
-			&channel.Established,
-			&channel.Closed,
+			&channel.Status,
 			&channel.PacketOrdering,
 			&channel.LastInPacketSequence,
 			&channel.LastOutPacketSequence,
@@ -626,8 +593,7 @@ func (ibcChannelsView *IBCChannelsView) ListChannelsGroupByChainId(
 		"counterparty_channel_id",
 		"counterparty_port_id",
 		"counterparty_chain_id",
-		"established",
-		"closed",
+		"status",
 		"packet_ordering",
 		"last_in_packet_sequence",
 		"last_out_packet_sequence",
@@ -646,12 +612,8 @@ func (ibcChannelsView *IBCChannelsView) ListChannelsGroupByChainId(
 		"view_ibc_channels",
 	)
 
-	if filter.MaybeEstablished != nil {
-		if *filter.MaybeEstablished {
-			stmtBuilder = addEstablishedFilterConditionTo(stmtBuilder)
-		} else {
-			stmtBuilder = addNotEstablishedFilterConditionTo(stmtBuilder)
-		}
+	if filter.MaybeStatus != nil {
+		stmtBuilder = stmtBuilder.Where("status = ?", *filter.MaybeStatus)
 	}
 
 	// MaybeLastActivityBlockTime has a higher priority than MaybeCreatedAtBlockTime
@@ -701,8 +663,7 @@ func (ibcChannelsView *IBCChannelsView) ListChannelsGroupByChainId(
 			&channel.CounterpartyChannelID,
 			&channel.CounterpartyPortID,
 			&channel.CounterpartyChainID,
-			&channel.Established,
-			&channel.Closed,
+			&channel.Status,
 			&channel.PacketOrdering,
 			&channel.LastInPacketSequence,
 			&channel.LastOutPacketSequence,
@@ -774,18 +735,10 @@ func convertChainChannelsMapToList(chainChannelsMap map[IBCChainID][]IBCChannelR
 	return chainChannelsList
 }
 
-func addEstablishedFilterConditionTo(stmtBuilder sq.SelectBuilder) sq.SelectBuilder {
-	return stmtBuilder.Where("established = ?", "true")
-}
-
-func addNotEstablishedFilterConditionTo(stmtBuilder sq.SelectBuilder) sq.SelectBuilder {
-	return stmtBuilder.Where("established = ?", "false")
-}
-
 type IBCChainID string
 
 type IBCChannelsListFilter struct {
-	MaybeEstablished *bool
+	MaybeStatus *types.Status
 }
 
 type IBCChannelsListOrder struct {
@@ -805,8 +758,7 @@ type IBCChannelRow struct {
 	CounterpartyChannelID        string          `json:"counterpartyChannelId"`
 	CounterpartyPortID           string          `json:"counterpartyPortId"`
 	CounterpartyChainID          string          `json:"counterpartyChainId"`
-	Established                  bool            `json:"established"`
-	Closed                       bool            `json:"closed"`
+	Status                       string          `json:"status"`
 	PacketOrdering               string          `json:"packetOrdering"`
 	LastInPacketSequence         int64           `json:"lastInPacketSequence"`
 	LastOutPacketSequence        int64           `json:"lastOutPacketSequence"`

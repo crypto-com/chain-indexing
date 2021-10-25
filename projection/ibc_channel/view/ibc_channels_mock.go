@@ -4,6 +4,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
+	"github.com/crypto-com/chain-indexing/projection/ibc_channel/types"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -45,13 +46,8 @@ func (ibcChannelsView *MockIBCChannelsView) UpdateLastActivityTimeAndHeight(chan
 	return mockArgs.Error(0)
 }
 
-func (ibcChannelsView *MockIBCChannelsView) UpdateEstablished(channelID string, established bool) error {
-	mockArgs := ibcChannelsView.Called(channelID, established)
-	return mockArgs.Error(0)
-}
-
-func (ibcChannelsView *MockIBCChannelsView) UpdateClosed(channelID string, closed bool) error {
-	mockArgs := ibcChannelsView.Called(channelID, closed)
+func (ibcChannelsView *MockIBCChannelsView) UpdateStatus(channelID string, status types.Status) error {
+	mockArgs := ibcChannelsView.Called(channelID, status)
 	return mockArgs.Error(0)
 }
 

@@ -1,5 +1,10 @@
 ALTER TABLE view_ibc_channels
-RENAME COLUMN status TO established;
+ALTER COLUMN status TYPE VARCHAR;
 
-ALTER TABLE view_ibc_channels
-ADD COLUMN closed BOOLEAN NOT NULL DEFAULT FALSE;
+UPDATE view_ibc_channels
+SET status = 'NotEstablished'
+WHERE status = 'false';
+
+UPDATE view_ibc_channels
+SET status = 'Opened'
+WHERE status = 'true';

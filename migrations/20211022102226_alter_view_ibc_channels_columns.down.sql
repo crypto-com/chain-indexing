@@ -1,5 +1,14 @@
-ALTER TABLE view_ibc_channels
-DROP COLUMN closed;
+UPDATE view_ibc_channels
+SET status = 'true'
+WHERE status = 'Opened';
+
+UPDATE view_ibc_channels
+SET status = 'false'
+WHERE status = 'Closed';
+
+UPDATE view_ibc_channels
+SET status = 'false'
+WHERE status = 'NotEstablished';
 
 ALTER TABLE view_ibc_channels
-RENAME COLUMN established TO closed;
+ALTER COLUMN status TYPE VARCHAR;
