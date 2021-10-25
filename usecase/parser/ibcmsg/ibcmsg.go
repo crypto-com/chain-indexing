@@ -7,19 +7,20 @@ import (
 	"strings"
 	"time"
 
-	base64_internal "github.com/crypto-com/chain-indexing/internal/base64"
-	"github.com/crypto-com/chain-indexing/internal/json"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/mitchellh/mapstructure"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
+	base64_internal "github.com/crypto-com/chain-indexing/internal/base64"
+	"github.com/crypto-com/chain-indexing/internal/json"
+	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/internal/typeconv"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+	mapstructure_utils "github.com/crypto-com/chain-indexing/usecase/parser/utils/mapstructure"
 )
 
 const tendermintClientStateTypeV1 = "/ibc.lightclients.tendermint.v1.ClientState"
@@ -64,8 +65,8 @@ func parseRawMsgCreateTendermintLightClient(
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -127,8 +128,8 @@ func parseRawMsgCreateSoloMachineLightClient(
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -186,7 +187,7 @@ func ParseMsgConnectionOpenInit(
 	decoder, decoderErr := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMessage,
 	})
@@ -240,8 +241,8 @@ func ParseMsgConnectionOpenTry(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -300,8 +301,8 @@ func ParseMsgConnectionOpenAck(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -356,8 +357,8 @@ func ParseMsgConnectionOpenConfirm(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -409,8 +410,8 @@ func ParseMsgChannelOpenInit(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -461,8 +462,8 @@ func ParseMsgChannelOpenTry(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -513,8 +514,8 @@ func ParseMsgChannelOpenAck(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -565,8 +566,8 @@ func ParseMsgChannelOpenConfirm(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -646,7 +647,7 @@ func parseMsgUpdateTendermintLightClient(
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -708,7 +709,7 @@ func parseMsgUpdateSolomachineLightClient(
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -782,8 +783,8 @@ func ParseMsgTransfer(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -843,8 +844,8 @@ func ParseMsgRecvPacket(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -973,8 +974,8 @@ func ParseMsgAcknowledgement(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1084,8 +1085,8 @@ func ParseMsgTimeout(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1167,8 +1168,8 @@ func ParseMsgTimeoutOnClose(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1250,8 +1251,8 @@ func ParseMsgChannelCloseInit(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
@@ -1303,8 +1304,8 @@ func ParseMsgChannelCloseConfirm(
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
-			utils.StringToDurationHookFunc(),
-			utils.StringToByteSliceHookFunc(),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
 		),
 		Result: &rawMsg,
 	}
