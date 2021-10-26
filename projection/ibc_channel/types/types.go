@@ -3,7 +3,7 @@ package types
 type Status = string
 
 const (
-	STATUS_NOT_ESTABLISHED Status = "NotEstablished"
-	STATUS_OPENED          Status = "Opened"
-	STATUS_CLOSED          Status = "Closed"
+	STATUS_NOT_ESTABLISHED Status = "NOT_ESTABLISHED"
+	STATUS_OPENED          Status = "OPENED"
+	STATUS_CLOSED          Status = "CLOSED"
 )

@@ -1,14 +1,14 @@
 UPDATE view_ibc_channels
 SET status = 'true'
-WHERE status = 'Opened';
+WHERE status = 'OPENED';
 
 UPDATE view_ibc_channels
 SET status = 'false'
-WHERE status = 'Closed';
+WHERE status = 'CLOSED';
 
 UPDATE view_ibc_channels
 SET status = 'false'
-WHERE status = 'NotEstablished';
+WHERE status = 'NOT_ESTABLISHED';
 
 ALTER TABLE view_ibc_channels
 ALTER COLUMN status TYPE BOOLEAN;

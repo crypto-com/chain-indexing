@@ -8,7 +8,6 @@ import (
 	"github.com/crypto-com/chain-indexing/internal/json"
 	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
-	"github.com/crypto-com/chain-indexing/projection/ibc_channel/types"
 	ibc_channel_view "github.com/crypto-com/chain-indexing/projection/ibc_channel/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/stretchr/testify/assert"
@@ -415,7 +414,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						CounterpartyChannelID:        "CounterpartyChannelID",
 						CounterpartyPortID:           "CounterpartyPortID",
 						CounterpartyChainID:          "CounterpartyChainID",
-						Status:                       types.STATUS_NOT_ESTABLISHED,
+						Status:                       "NOT_ESTABLISHED",
 						PacketOrdering:               "Ordering",
 						LastInPacketSequence:         0,
 						LastOutPacketSequence:        0,
@@ -499,7 +498,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						CounterpartyChannelID:        "CounterpartyChannelID",
 						CounterpartyPortID:           "CounterpartyPortID",
 						CounterpartyChainID:          "CounterpartyChainID",
-						Status:                       types.STATUS_NOT_ESTABLISHED,
+						Status:                       "NOT_ESTABLISHED",
 						PacketOrdering:               "Ordering",
 						LastInPacketSequence:         0,
 						LastOutPacketSequence:        0,
@@ -603,7 +602,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				mockIbcChannelsView.On(
 					"UpdateStatus",
 					"ChannelID",
-					types.STATUS_OPENED,
+					"OPENED",
 				).Return(nil)
 
 				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
@@ -688,7 +687,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				mockIbcChannelsView.On(
 					"UpdateStatus",
 					"ChannelID",
-					types.STATUS_OPENED,
+					"OPENED",
 				).Return(nil)
 
 				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
@@ -1418,7 +1417,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				mockIbcChannelsView.On(
 					"UpdateStatus",
 					"ChannelID",
-					types.STATUS_CLOSED,
+					"CLOSED",
 				).Return(nil)
 
 				mockIbcChannelsView.On(
@@ -1472,7 +1471,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				mockIbcChannelsView.On(
 					"UpdateStatus",
 					"ChannelID",
-					types.STATUS_CLOSED,
+					"CLOSED",
 				).Return(nil)
 
 				mockIbcChannelsView.On(
