@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/crypto-com/chain-indexing/internal/json"
+	"github.com/crypto-com/chain-indexing/external/json"
 	V0_42_7_ibcmsg "github.com/crypto-com/chain-indexing/usecase/parser/v0_42_7/ibcmsg"
 
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"

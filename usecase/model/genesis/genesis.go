@@ -1,6 +1,8 @@
 package genesis
 
-import "github.com/crypto-com/chain-indexing/internal/json"
+import (
+	"github.com/crypto-com/chain-indexing/external/json"
+)
 
 type Genesis struct {
 	GenesisTime     string          `json:"genesis_time"`

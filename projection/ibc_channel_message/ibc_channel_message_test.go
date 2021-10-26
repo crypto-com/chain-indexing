@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/stretchr/testify/assert"
 	testify_mock "github.com/stretchr/testify/mock"
@@ -13,7 +14,6 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	"github.com/crypto-com/chain-indexing/internal/json"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	"github.com/crypto-com/chain-indexing/projection/ibc_channel_message"
 	"github.com/crypto-com/chain-indexing/projection/ibc_channel_message/view"

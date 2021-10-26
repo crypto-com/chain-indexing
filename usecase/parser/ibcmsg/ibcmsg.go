@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/crypto-com/chain-indexing/external/json"
 	jsoniter "github.com/json-iterator/go"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	base64_internal "github.com/crypto-com/chain-indexing/internal/base64"
-	"github.com/crypto-com/chain-indexing/internal/json"
 	"github.com/crypto-com/chain-indexing/internal/typeconv"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/event"

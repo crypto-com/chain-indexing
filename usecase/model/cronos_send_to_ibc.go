@@ -1,6 +1,8 @@
 package model
 
-import "github.com/crypto-com/chain-indexing/internal/json"
+import (
+	"github.com/crypto-com/chain-indexing/external/json"
+)
 
 type RawCronosSendToIBCParams struct {
 	PacketChannelOrdering  string
@@ -19,8 +21,8 @@ type RawCronosSendToIBCParams struct {
 type FungibleTokenPacketData struct {
 	Sender   string      `json:"sender"`
 	Receiver string      `json:"receiver"`
-	Denom    string      `json:"denom"`
-	Amount   json.Uint64 `json:"amount"`
+	Denom  string      `json:"denom"`
+	Amount json.Uint64 `json:"amount"`
 }
 
 type CronosSendToIBCParams struct {

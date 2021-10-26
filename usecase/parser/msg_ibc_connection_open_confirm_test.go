@@ -4,8 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/crypto-com/chain-indexing/internal/json"
-
+	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
 	. "github.com/onsi/ginkgo"

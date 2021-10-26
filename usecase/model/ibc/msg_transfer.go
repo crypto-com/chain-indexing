@@ -1,6 +1,8 @@
 package ibc
 
-import "github.com/crypto-com/chain-indexing/internal/json"
+import (
+	"github.com/crypto-com/chain-indexing/external/json"
+)
 
 type MsgTransferParams struct {
 	RawMsgTransfer

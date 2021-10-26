@@ -1,0 +1,15 @@
+# WARNING: This Docker Compose file is for development purpose only. Never use
+# it on production
+version: "3.3"
+services:
+  postgres: 
+    build: ./postgres
+    restart: always
+    ports:
+      - "${TEST_POSTGRES_PORT:-5433}:5432"
+    environment:
+      POSTGRES_USERNAME: "${TEST_POSTGRES_USERNAME:-postgres}"
+      POSTGRES_PASSWORD: "${TEST_POSTGRES_PASSWORD:-postgres}"
+      POSTGRES_DB: "${TEST_POSTGRES_DATABASE:-postgres}"
+      # Enable SSL with self-signed certificate generated on the fly
+      POSTGRES_SSL: "${TEST_POSTGRES_SSL:-1}"

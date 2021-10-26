@@ -1,11 +1,11 @@
 package event_test
 
 import (
+	json2 "github.com/crypto-com/chain-indexing/external/json"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
-	"github.com/crypto-com/chain-indexing/internal/json"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
 	mapstructure_utils "github.com/crypto-com/chain-indexing/usecase/parser/utils/mapstructure"
@@ -26,7 +26,7 @@ var _ = Describe("Event", func() {
 			anyMessageType := "MsgTransfer"
 			anyRefundReceiver := "cro1s7cu28403gzdvy5tttyskm3zxjejxcv63espre"
 			anyRefundDenom := "basecro"
-			anyRefundAmount := json.NewNumericStringFromUint64(1)
+			anyRefundAmount := json2.NewNumericStringFromUint64(1)
 			anyPacketTimeoutHeight := ibc_model.Height{
 				RevisionNumber: 4,
 				RevisionHeight: 6182017,
@@ -35,7 +35,7 @@ var _ = Describe("Event", func() {
 
 			var anyRawValue map[string]interface{}
 			var anyRawMsg ibc_model.RawMsgTimeout
-			json.MustUnmarshalFromString(`
+			json2.MustUnmarshalFromString(`
 {
   "@type": "/ibc.core.channel.v1.MsgTimeout",
   "packet": {
@@ -124,7 +124,7 @@ var _ = Describe("Event", func() {
 			anyMessageType := "MsgTransfer"
 			anyRefundReceiver := "cro1s7cu28403gzdvy5tttyskm3zxjejxcv63espre"
 			anyRefundDenom := "basecro"
-			anyRefundAmount := json.NewNumericStringFromUint64(1)
+			anyRefundAmount := json2.NewNumericStringFromUint64(1)
 			anyPacketTimeoutHeight := ibc_model.Height{
 				RevisionNumber: 4,
 				RevisionHeight: 6182017,
@@ -133,7 +133,7 @@ var _ = Describe("Event", func() {
 
 			var anyRawValue map[string]interface{}
 			var anyRawMsg ibc_model.RawMsgTimeout
-			json.MustUnmarshalFromString(`
+			json2.MustUnmarshalFromString(`
 {
   "@type": "/ibc.core.channel.v1.MsgTimeout",
   "packet": {

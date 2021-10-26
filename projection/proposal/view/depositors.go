@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 
 	sq "github.com/Masterminds/squirrel"
@@ -11,8 +12,6 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/pagination"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
-	"github.com/crypto-com/chain-indexing/internal/json"
-
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"

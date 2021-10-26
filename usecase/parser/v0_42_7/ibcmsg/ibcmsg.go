@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/mitchellh/mapstructure"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	base64_internal "github.com/crypto-com/chain-indexing/internal/base64"
-	"github.com/crypto-com/chain-indexing/internal/json"
 	"github.com/crypto-com/chain-indexing/internal/typeconv"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"

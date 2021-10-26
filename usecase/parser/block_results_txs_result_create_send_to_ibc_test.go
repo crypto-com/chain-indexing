@@ -1,7 +1,7 @@
 package parser_test
 
 import (
-	"github.com/crypto-com/chain-indexing/internal/json"
+	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
