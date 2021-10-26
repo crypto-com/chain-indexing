@@ -162,7 +162,7 @@ config := bootstrap.Config{
 ## 2. Test
 
 ```bash
-make test
+./test.sh [--install-dependency] [--no-db] [--watch]
 ```
 
 Providing `--install-dependency` will attempt to install test runner [Ginkgo](https://github.com/onsi/ginkgo) if it is not installed before.
