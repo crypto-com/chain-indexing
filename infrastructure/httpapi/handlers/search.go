@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
@@ -40,10 +39,6 @@ func NewSearch(logger applogger.Logger, rdbHandle *rdb.Handle) *Search {
 		validator_view.NewValidators(rdbHandle),
 		account_transaction_view.NewAccountTransactionsTotal(rdbHandle),
 	}
-}
-
-func (search *Search) Register(server *httpapi.Server, routePrefix string) {
-	server.GET(fmt.Sprintf("%s/api/v1/search", routePrefix), search.Search)
 }
 
 func (search *Search) Search(ctx *fasthttp.RequestCtx) {

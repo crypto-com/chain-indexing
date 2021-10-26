@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
@@ -37,12 +36,6 @@ func NewBridges(logger applogger.Logger, rdbHandle *rdb.Handle, cosmosAddressPre
 		bridge_activitiy_view.NewBridgeActivities(rdbHandle),
 		cosmosAddressPrefix,
 	}
-}
-
-func (handler *Bridges) Register(server *httpapi.Server, routePrefix string) {
-	server.GET(fmt.Sprintf("%s/api/v1/bridges/txs/{hash}", routePrefix), handler.FindByTransactionHash)
-	server.GET(fmt.Sprintf("%s/api/v1/bridges/activities", routePrefix), handler.ListActivities)
-	server.GET(fmt.Sprintf("%s/api/v1/bridges/{network}/account/{account}/activities", routePrefix), handler.ListActivitiesByNetwork)
 }
 
 func (handler *Bridges) FindByTransactionHash(ctx *fasthttp.RequestCtx) {

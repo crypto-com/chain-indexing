@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"math/big"
 	"strconv"
 	"time"
@@ -59,10 +58,6 @@ func NewStatusHandler(logger applogger.Logger, cosmosAppClient cosmosapp.Client,
 		coin.NewEmptyCoins(),
 		time.Unix(int64(0), int64(0)),
 	}
-}
-
-func (handler *StatusHandler) Register(server *httpapi.Server, routePrefix string) {
-	server.GET(fmt.Sprintf("%s/api/v1/status", routePrefix), handler.GetStatus)
 }
 
 func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {

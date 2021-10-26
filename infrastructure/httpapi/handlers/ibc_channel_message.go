@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"strings"
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
@@ -27,10 +26,6 @@ func NewIBCChannelMessage(logger applogger.Logger, rdbHandle *rdb.Handle) *IBCCh
 
 		ibc_channel_message_view.NewIBCChannelMessagesView(rdbHandle),
 	}
-}
-
-func (handler *IBCChannelMessage) Register(server *httpapi.Server, routePrefix string) {
-	server.GET(fmt.Sprintf("%s/api/v1/ibc/channels/{channelId}/messages", routePrefix), handler.ListByChannelID)
 }
 
 func (handler *IBCChannelMessage) ListByChannelID(ctx *fasthttp.RequestCtx) {

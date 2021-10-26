@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
@@ -29,11 +28,6 @@ func NewBlockEvents(logger applogger.Logger, rdbHandle *rdb.Handle) *BlockEvents
 
 		blockevents_view.NewBlockEvents(rdbHandle),
 	}
-}
-
-func (handler *BlockEvents) Register(server *httpapi.Server, routePrefix string) {
-	server.GET(fmt.Sprintf("%s/api/v1/events", routePrefix), handler.List)
-	server.GET(fmt.Sprintf("%s/api/v1/events/{id}", routePrefix), handler.FindById)
 }
 
 func (handler *BlockEvents) FindById(ctx *fasthttp.RequestCtx) {

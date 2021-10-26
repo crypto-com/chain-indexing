@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
@@ -32,23 +31,6 @@ func NewNFTs(
 		nft_view.NewTokensView(rdbHandle),
 		nft_view.NewMessagesView(rdbHandle),
 	}
-}
-
-func (handler *NFTs) Register(server *httpapi.Server, routePrefix string) {
-	server.GET(fmt.Sprintf("%s/api/v1/nfts/messages", routePrefix), handler.ListMessages)
-	server.GET(fmt.Sprintf("%s/api/v1/nfts/denom/name/{denomName}", routePrefix), handler.FindDenomByName)
-	server.GET(fmt.Sprintf("%s/api/v1/nfts/denom/id/{denomId}", routePrefix), handler.FindDenomById)
-	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms", routePrefix), handler.ListDenoms)
-	server.GET(fmt.Sprintf("%s/api/v1/nfts/tokens", routePrefix), handler.ListTokens)
-	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms/{denomId}", routePrefix), handler.FindDenomById)
-	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms/{denomId}/messages", routePrefix), handler.ListMessagesByDenom)
-	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms/{denomId}/tokens", routePrefix), handler.ListTokensByDenomId)
-	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms/{denomId}/tokens/{tokenId}", routePrefix), handler.FindTokenById)
-	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms/{denomId}/tokens/{tokenId}/transfers", routePrefix), handler.ListTransfersByToken)
-	server.GET(fmt.Sprintf("%s/api/v1/nfts/denoms/{denomId}/tokens/{tokenId}/messages", routePrefix), handler.ListMessagesByToken)
-	server.GET(fmt.Sprintf("%s/api/v1/nfts/drops", routePrefix), handler.ListDrops)
-	server.GET(fmt.Sprintf("%s/api/v1/nfts/drops/{drop}/tokens", routePrefix), handler.ListTokensByDrop)
-	server.GET(fmt.Sprintf("%s/api/v1/nfts/accounts/{account}/tokens", routePrefix), handler.ListTokensByAccount)
 }
 
 func (handler *NFTs) ListDenoms(ctx *fasthttp.RequestCtx) {

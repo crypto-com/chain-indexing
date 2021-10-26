@@ -27,10 +27,6 @@ func NewAccountMessages(logger applogger.Logger, rdbHandle *rdb.Handle) *Account
 	}
 }
 
-func (handler *AccountMessages) Register(server *httpapi.Server, routePrefix string) {
-	server.GET("/ListByAccount", handler.ListByAccount)
-}
-
 func (handler *AccountMessages) ListByAccount(ctx *fasthttp.RequestCtx) {
 	var err error
 

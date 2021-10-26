@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/valyala/fasthttp"
@@ -27,11 +26,6 @@ func NewTransactions(logger applogger.Logger, rdbHandle *rdb.Handle) *Transactio
 
 		transaction_view.NewTransactions(rdbHandle),
 	}
-}
-
-func (handler *Transactions) Register(server *httpapi.Server, routePrefix string) {
-	server.GET(fmt.Sprintf("%s/api/v1/transactions", routePrefix), handler.List)
-	server.GET(fmt.Sprintf("%s/api/v1/transactions/{hash}", routePrefix), handler.FindByHash)
 }
 
 func (handler *Transactions) FindByHash(ctx *fasthttp.RequestCtx) {
