@@ -20,7 +20,7 @@ type HTTPAPIServer struct {
 	httpServer *httpapi.Server
 }
 
-type Handler interface {
+type RouteRegistry interface {
 	Register(*httpapi.Server, string)
 }
 
@@ -43,11 +43,6 @@ func NewHTTPAPIServer(logger applogger.Logger, config *Config) *HTTPAPIServer {
 		})
 	}
 
-	httpServer.GET(fmt.Sprintf("%s/api/v1/health", httpRoutePrefix), func(ctx *fasthttp.RequestCtx) {
-		ctx.SetStatusCode(fasthttp.StatusOK)
-		ctx.SetBody([]byte("Ok"))
-	})
-
 	return &HTTPAPIServer{
 		logger: logger,
 
@@ -60,10 +55,13 @@ func NewHTTPAPIServer(logger applogger.Logger, config *Config) *HTTPAPIServer {
 	}
 }
 
-func (server *HTTPAPIServer) RegisterHandlers(handlers []Handler) {
-	for _, handler := range handlers {
-		handler.Register(server.httpServer, server.routePrefix)
-	}
+func (server *HTTPAPIServer) RegisterRoutes(registry RouteRegistry) {
+	server.httpServer.GET(fmt.Sprintf("%s/api/v1/health", server.routePrefix), func(ctx *fasthttp.RequestCtx) {
+		ctx.SetStatusCode(fasthttp.StatusOK)
+		ctx.SetBody([]byte("Ok"))
+	})
+
+	registry.Register(server.httpServer, server.routePrefix)
 }
 
 func (server *HTTPAPIServer) Run() error {

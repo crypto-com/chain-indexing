@@ -32,9 +32,9 @@ func (a *app) GetRDbConn() rdb.Conn {
 	return a.rdbConn
 }
 
-func (a *app) InitHTTPAPIServer(handlers []Handler) {
+func (a *app) InitHTTPAPIServer(registry RouteRegistry) {
 	a.httpAPIServer = NewHTTPAPIServer(a.logger, a.config)
-	a.httpAPIServer.RegisterHandlers(handlers)
+	a.httpAPIServer.RegisterRoutes(registry)
 }
 
 func (a *app) InitIndexService(projections []projection_entity.Projection, cronJobs []projection_entity.CronJob) {
