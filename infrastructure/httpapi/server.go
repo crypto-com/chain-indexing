@@ -38,6 +38,26 @@ func (server *Server) GET(path string, handler fasthttp.RequestHandler) *Server 
 	return server
 }
 
+func (server *Server) POST(path string, handler fasthttp.RequestHandler) *Server {
+	server.router.POST(path, handler)
+	return server
+}
+
+func (server *Server) PUT(path string, handler fasthttp.RequestHandler) *Server {
+	server.router.PUT(path, handler)
+	return server
+}
+
+func (server *Server) PATCH(path string, handler fasthttp.RequestHandler) *Server {
+	server.router.PATCH(path, handler)
+	return server
+}
+
+func (server *Server) DELETE(path string, handler fasthttp.RequestHandler) *Server {
+	server.router.DELETE(path, handler)
+	return server
+}
+
 func (server *Server) Use(middleware Middleware) *Server {
 	server.middlewares = append(server.middlewares, middleware)
 	return server
