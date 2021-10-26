@@ -11,4 +11,4 @@ SET status = 'false'
 WHERE status = 'NotEstablished';
 
 ALTER TABLE view_ibc_channels
-ALTER COLUMN status TYPE VARCHAR;
+ALTER COLUMN status TYPE BOOLEAN;

@@ -79,8 +79,6 @@ func (_ *IBCChannel) GetEventsToListen() []string {
 		event_usecase.MSG_IBC_ACKNOWLEDGEMENT_CREATED,
 		event_usecase.MSG_IBC_TIMEOUT_CREATED,
 		event_usecase.MSG_IBC_TIMEOUT_ON_CLOSE_CREATED,
-		event_usecase.MSG_IBC_CHANNEL_CLOSE_INIT_CREATED,
-		event_usecase.MSG_IBC_CHANNEL_CLOSE_CONFIRM_CREATED,
 	}
 }
 
