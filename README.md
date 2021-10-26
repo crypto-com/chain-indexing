@@ -32,7 +32,7 @@ func main() {
 		initProjections(logger, &config),
 		initCronJobs(logger, &config),
 	)
-	app.InitHTTPAPIServer(initHTTPAPIHandlers(logger, &config))
+	app.InitHTTPAPIServer(initRouteRegistry(logger, &config))
 
 	// Run indexing app
 	app.Run()
@@ -53,11 +53,11 @@ func initCronJobs(
 	// append your CronJobs
 }
 
-func initHTTPAPIHandlers(
+func initRouteRegistry(
 	logger applogger.Logger,
 	config *bootstrap.Config,
-) []bootstrap.Handler {
-	// append your Handlers
+) bootstrap.RouteRegistry {
+	// append your Routes
 }
 ```
 
