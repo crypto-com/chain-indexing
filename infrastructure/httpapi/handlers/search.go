@@ -23,7 +23,7 @@ type Search struct {
 	logger applogger.Logger
 
 	blocksView                   *block_view.Blocks
-	transactionsView             *transaction_view.BlockTransactions
+	transactionsView             transaction_view.BlockTransactions
 	validatorsView               *validator_view.Validators
 	accountTransactionsTotalView *account_transaction_view.AccountTransactionsTotal
 }
@@ -35,7 +35,7 @@ func NewSearch(logger applogger.Logger, rdbHandle *rdb.Handle) *Search {
 		}),
 
 		block_view.NewBlocks(rdbHandle),
-		transaction_view.NewTransactions(rdbHandle),
+		transaction_view.NewTransactionsView(rdbHandle),
 		validator_view.NewValidators(rdbHandle),
 		account_transaction_view.NewAccountTransactionsTotal(rdbHandle),
 	}

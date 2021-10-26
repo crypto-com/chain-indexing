@@ -1,7 +1,7 @@
 package transaction_test
 
 import (
-	. "github.com/crypto-com/chain-indexing/appinterface/rdb/test"
+	test_rdb "github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	. "github.com/crypto-com/chain-indexing/entity/event/test"
 	. "github.com/crypto-com/chain-indexing/internal/logger/test"
 	"github.com/crypto-com/chain-indexing/projection/block"
@@ -22,7 +22,7 @@ import (
 var _ = Describe("Transaction", func() {
 	It("should implement projection", func() {
 		fakeLogger := NewFakeLogger()
-		fakeRdbConn := NewFakeRDbConn()
+		fakeRdbConn := test_rdb.NewFakeRDbConn()
 		var _ entity_projection.Projection = block.NewBlock(fakeLogger, fakeRdbConn)
 	})
 
