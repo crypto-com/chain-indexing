@@ -16,8 +16,8 @@ type InfoManager struct {
 	rdbConn         rdb.Conn
 	client          *tendermint.HTTPClient
 	pollingInterval time.Duration
-	viewStatus *polling.Status
-	logger     applogger.Logger
+	viewStatus      *polling.Status
+	logger          applogger.Logger
 }
 
 func NewInfoManager(

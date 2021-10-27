@@ -25,9 +25,9 @@ const DEFAULT_MAX_RETRY_TIME = MAX_RETRY_TIME_ALWAYS_RETRY
 
 type SyncManager struct {
 	rdbConn              rdb.Conn
-	client          *tendermint.HTTPClient
-	logger          applogger.Logger
-	pollingInterval time.Duration
+	client               *tendermint.HTTPClient
+	logger               applogger.Logger
+	pollingInterval      time.Duration
 	maxRetryInterval     time.Duration
 	maxRetryTime         time.Duration
 	strictGenesisParsing bool
@@ -48,8 +48,8 @@ type SyncManager struct {
 }
 
 type SyncManagerParams struct {
-	Logger  applogger.Logger
-	RDbConn rdb.Conn
+	Logger    applogger.Logger
+	RDbConn   rdb.Conn
 	TxDecoder *utils.TxDecoder
 
 	Config SyncManagerConfig

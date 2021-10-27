@@ -15,8 +15,8 @@ import (
 )
 
 type IndexService struct {
-	logger  applogger.Logger
-	rdbConn rdb.Conn
+	logger      applogger.Logger
+	rdbConn     rdb.Conn
 	projections []projection_entity.Projection
 	cronJobs    []projection_entity.CronJob
 
