@@ -838,7 +838,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 								Denom:  "DENOM",
 								Amount: json.NewNumericStringFromUint64(100),
 							},
-							Success: false,
+							Success: true,
 						},
 						PacketSequence: 1,
 						PacketAck: ibc_model.MsgRecvPacketPacketAck{
@@ -972,7 +972,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 								Denom:  "DENOM",
 								Amount: json.NewNumericStringFromUint64(100),
 							},
-							Success: true,
+							Success: false,
 						},
 						PacketSequence: 1,
 						PacketAck: ibc_model.MsgRecvPacketPacketAck{
