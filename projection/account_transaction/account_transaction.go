@@ -341,6 +341,12 @@ func (projection *AccountTransaction) HandleEvents(height int64, events []event_
 		} else if typedEvent, ok := event.(*event_usecase.MsgIBCTimeoutOnClose); ok {
 			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
 
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCChannelCloseInit); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCChannelCloseConfirm); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
+
 		} else if typedEvent, ok := event.(*event_usecase.MsgGrant); ok {
 
 			if typedEvent.Params.MaybeSendGrant != nil {

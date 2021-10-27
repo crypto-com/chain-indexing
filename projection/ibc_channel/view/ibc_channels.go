@@ -4,13 +4,14 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/crypto-com/chain-indexing/appinterface/pagination"
-	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
-	"github.com/crypto-com/chain-indexing/internal/utctime"
+	sq "github.com/Masterminds/squirrel"
 	jsoniter "github.com/json-iterator/go"
 
-	sq "github.com/Masterminds/squirrel"
+	"github.com/crypto-com/chain-indexing/appinterface/pagination"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
+	"github.com/crypto-com/chain-indexing/projection/ibc_channel/types"
 )
 
 type IBCChannels interface {
@@ -20,7 +21,7 @@ type IBCChannels interface {
 	UpdateSequence(string, string, uint64) error
 	UpdateTotalTransferOutSuccessRate(string) error
 	UpdateLastActivityTimeAndHeight(string, utctime.UTCTime, int64) error
-	UpdateStatus(string, bool) error
+	UpdateStatus(string, types.Status) error
 	UpdateBondedTokens(string, *BondedTokens) error
 	FindBondedTokensBy(string) (*BondedTokens, error)
 	FindBy(string) (*IBCChannelRow, error)
@@ -277,24 +278,24 @@ func (ibcChannelsView *IBCChannelsView) UpdateLastActivityTimeAndHeight(channelI
 	return nil
 }
 
-func (ibcChannelsView *IBCChannelsView) UpdateStatus(channelID string, open bool) error {
+func (ibcChannelsView *IBCChannelsView) UpdateStatus(channelID string, status types.Status) error {
 	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
 		Update("view_ibc_channels").
 		SetMap(map[string]interface{}{
-			"status": open,
+			"status": status,
 		}).
 		Where("channel_id = ?", channelID).
 		ToSql()
 	if err != nil {
-		return fmt.Errorf("error building channel.status update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		return fmt.Errorf("error building channel.Status update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
 	result, err := ibcChannelsView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
-		return fmt.Errorf("error updating channel.status: %v: %w", err, rdb.ErrWrite)
+		return fmt.Errorf("error updating channel.Status: %v: %w", err, rdb.ErrWrite)
 	}
 	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error updating channel.status: no row updated: %w", rdb.ErrWrite)
+		return fmt.Errorf("error updating channel.Status: no row updated: %w", rdb.ErrWrite)
 	}
 
 	return nil
@@ -477,11 +478,7 @@ func (ibcChannelsView *IBCChannelsView) List(
 	)
 
 	if filter.MaybeStatus != nil {
-		if *filter.MaybeStatus {
-			stmtBuilder = addOpenedStatusFilterConditionTo(stmtBuilder)
-		} else {
-			stmtBuilder = addClosedStatusFilterConditionTo(stmtBuilder)
-		}
+		stmtBuilder = stmtBuilder.Where("status = ?", *filter.MaybeStatus)
 	}
 
 	// MaybeLastActivityBlockTime has a higher priority than MaybeCreatedAtBlockTime
@@ -616,11 +613,7 @@ func (ibcChannelsView *IBCChannelsView) ListChannelsGroupByChainId(
 	)
 
 	if filter.MaybeStatus != nil {
-		if *filter.MaybeStatus {
-			stmtBuilder = addOpenedStatusFilterConditionTo(stmtBuilder)
-		} else {
-			stmtBuilder = addClosedStatusFilterConditionTo(stmtBuilder)
-		}
+		stmtBuilder = stmtBuilder.Where("status = ?", *filter.MaybeStatus)
 	}
 
 	// MaybeLastActivityBlockTime has a higher priority than MaybeCreatedAtBlockTime
@@ -742,18 +735,10 @@ func convertChainChannelsMapToList(chainChannelsMap map[IBCChainID][]IBCChannelR
 	return chainChannelsList
 }
 
-func addOpenedStatusFilterConditionTo(stmtBuilder sq.SelectBuilder) sq.SelectBuilder {
-	return stmtBuilder.Where("status = ?", "true")
-}
-
-func addClosedStatusFilterConditionTo(stmtBuilder sq.SelectBuilder) sq.SelectBuilder {
-	return stmtBuilder.Where("status = ?", "false")
-}
-
 type IBCChainID string
 
 type IBCChannelsListFilter struct {
-	MaybeStatus *bool
+	MaybeStatus *types.Status
 }
 
 type IBCChannelsListOrder struct {
@@ -773,7 +758,7 @@ type IBCChannelRow struct {
 	CounterpartyChannelID        string          `json:"counterpartyChannelId"`
 	CounterpartyPortID           string          `json:"counterpartyPortId"`
 	CounterpartyChainID          string          `json:"counterpartyChainId"`
-	Status                       bool            `json:"status"`
+	Status                       string          `json:"status"`
 	PacketOrdering               string          `json:"packetOrdering"`
 	LastInPacketSequence         int64           `json:"lastInPacketSequence"`
 	LastOutPacketSequence        int64           `json:"lastOutPacketSequence"`

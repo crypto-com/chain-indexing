@@ -54,6 +54,8 @@ func (_ *IBCChannelMessage) GetEventsToListen() []string {
 		event_usecase.MSG_IBC_ACKNOWLEDGEMENT_CREATED,
 		event_usecase.MSG_IBC_TIMEOUT_CREATED,
 		event_usecase.MSG_IBC_TIMEOUT_ON_CLOSE_CREATED,
+		event_usecase.MSG_IBC_CHANNEL_CLOSE_INIT_CREATED,
+		event_usecase.MSG_IBC_CHANNEL_CLOSE_CONFIRM_CREATED,
 	}
 }
 
@@ -255,6 +257,36 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 				message.MaybeReceiver = primptr.String(typedEvent.Params.MaybeMsgTransfer.RefundReceiver)
 				message.MaybeDenom = primptr.String(typedEvent.Params.MaybeMsgTransfer.RefundDenom)
 				message.MaybeAmount = primptr.String(typedEvent.Params.MaybeMsgTransfer.RefundAmount.String())
+			}
+			messages = append(messages, message)
+
+		} else if msgIBCChannelCloseInit, ok := event.(*event_usecase.MsgIBCChannelCloseInit); ok {
+
+			channelID := msgIBCChannelCloseInit.Params.ChannelID
+
+			message := view.IBCChannelMessageRow{
+				ChannelID:       channelID,
+				BlockHeight:     height,
+				BlockTime:       blockTime,
+				TransactionHash: msgIBCChannelCloseInit.TxHash(),
+				MaybeRelayer:    primptr.String(msgIBCChannelCloseInit.Params.Signer),
+				MessageType:     msgIBCChannelCloseInit.MsgName,
+				Message:         msgIBCChannelCloseInit,
+			}
+			messages = append(messages, message)
+
+		} else if msgIBCChannelCloseConfirm, ok := event.(*event_usecase.MsgIBCChannelCloseConfirm); ok {
+
+			channelID := msgIBCChannelCloseConfirm.Params.ChannelID
+
+			message := view.IBCChannelMessageRow{
+				ChannelID:       channelID,
+				BlockHeight:     height,
+				BlockTime:       blockTime,
+				TransactionHash: msgIBCChannelCloseConfirm.TxHash(),
+				MaybeRelayer:    primptr.String(msgIBCChannelCloseConfirm.Params.Signer),
+				MessageType:     msgIBCChannelCloseConfirm.MsgName,
+				Message:         msgIBCChannelCloseConfirm,
 			}
 			messages = append(messages, message)
 

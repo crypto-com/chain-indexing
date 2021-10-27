@@ -10,6 +10,7 @@ import (
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/crypto-com/chain-indexing/internal/primptr"
+	ibc_channel_types "github.com/crypto-com/chain-indexing/projection/ibc_channel/types"
 	ibc_channel_view "github.com/crypto-com/chain-indexing/projection/ibc_channel/view"
 )
 
@@ -55,10 +56,12 @@ func (handler *IBCChannel) ListChannels(ctx *fasthttp.RequestCtx) {
 
 	var listFilter ibc_channel_view.IBCChannelsListFilter
 	if queryArgs.Has("status") {
-		if string(queryArgs.Peek("status")) == "true" {
-			listFilter.MaybeStatus = primptr.Bool(true)
-		} else if string(queryArgs.Peek("status")) == "false" {
-			listFilter.MaybeStatus = primptr.Bool(false)
+		if string(queryArgs.Peek("status")) == ibc_channel_types.STATUS_NOT_ESTABLISHED {
+			listFilter.MaybeStatus = primptr.String(ibc_channel_types.STATUS_NOT_ESTABLISHED)
+		} else if string(queryArgs.Peek("status")) == ibc_channel_types.STATUS_OPENED {
+			listFilter.MaybeStatus = primptr.String(ibc_channel_types.STATUS_OPENED)
+		} else if string(queryArgs.Peek("status")) == ibc_channel_types.STATUS_CLOSED {
+			listFilter.MaybeStatus = primptr.String(ibc_channel_types.STATUS_CLOSED)
 		}
 	}
 

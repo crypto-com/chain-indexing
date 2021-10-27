@@ -9,6 +9,7 @@ import (
 
 type IBCConnections interface {
 	Insert(*IBCConnectionRow) error
+	Update(*IBCConnectionRow) error
 	FindCounterpartyChainIDBy(string) (string, error)
 }
 
@@ -51,6 +52,35 @@ func (ibcConnectionsView *IBCConnectionsView) Insert(ibcConnection *IBCConnectio
 	}
 	if result.RowsAffected() != 1 {
 		return fmt.Errorf("error inserting ibc_connection into the table: no row inserted: %w", rdb.ErrWrite)
+	}
+
+	return nil
+}
+
+func (ibcConnectionsView *IBCConnectionsView) Update(ibcConnection *IBCConnectionRow) error {
+	sql, sqlArgs, err := ibcConnectionsView.rdb.StmtBuilder.
+		Update("view_ibc_connections").
+		SetMap(map[string]interface{}{
+			"client_id":                  ibcConnection.CounterpartyClientID,
+			"counterparty_connection_id": ibcConnection.CounterpartyConnectionID,
+			"counterparty_client_id":     ibcConnection.CounterpartyClientID,
+			"counterparty_chain_id":      ibcConnection.CounterpartyChainID,
+		}).
+		Where(
+			"connection_id = ?", ibcConnection.ConnectionID,
+		).
+		ToSql()
+
+	if err != nil {
+		return fmt.Errorf("error building ibc_connection update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	result, err := ibcConnectionsView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error updating ibc_connection on the table: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() != 1 {
+		return fmt.Errorf("error updating ibc_connection on the table: no row inserted: %w", rdb.ErrWrite)
 	}
 
 	return nil

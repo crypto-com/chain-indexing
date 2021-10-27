@@ -20,8 +20,8 @@ import (
 var _ projection_entity.Projection = &AccountMessage{}
 
 var (
-	NewAccountMessages = view.NewAccountMessagesView
-	NewAccountMessagesTotal = view.NewAccountMessagesTotalView
+	NewAccountMessages           = view.NewAccountMessagesView
+	NewAccountMessagesTotal      = view.NewAccountMessagesTotalView
 	UpdateLastHandledEventHeight = (*AccountMessage).UpdateLastHandledEventHeight
 )
 
@@ -715,6 +715,38 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 				},
 			})
 		} else if typedEvent, ok := event.(*event_usecase.MsgIBCTimeoutOnClose); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Signer,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCChannelCloseInit); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Signer,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCChannelCloseConfirm); ok {
 			accountMessages = append(accountMessages, view.AccountMessageRecord{
 				Row: view.AccountMessageRow{
 					BlockHeight:     height,

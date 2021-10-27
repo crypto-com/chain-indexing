@@ -18,6 +18,11 @@ func (ibcConnectionsView *MockIBCConnectionsView) Insert(ibcConnection *IBCConne
 	return mockArgs.Error(0)
 }
 
+func (ibcConnectionsView *MockIBCConnectionsView) Update(ibcConnection *IBCConnectionRow) error {
+	mockArgs := ibcConnectionsView.Called(ibcConnection)
+	return mockArgs.Error(0)
+}
+
 func (ibcConnectionsView *MockIBCConnectionsView) FindCounterpartyChainIDBy(connectionID string) (string, error) {
 	mockArgs := ibcConnectionsView.Called(connectionID)
 	result, _ := mockArgs.Get(0).(string)
