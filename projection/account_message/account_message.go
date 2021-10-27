@@ -20,8 +20,8 @@ import (
 var _ projection_entity.Projection = &AccountMessage{}
 
 var (
-	NewAccountMessages = view.NewAccountMessagesView
-	NewAccountMessagesTotal = view.NewAccountMessagesTotalView
+	NewAccountMessages           = view.NewAccountMessagesView
+	NewAccountMessagesTotal      = view.NewAccountMessagesTotalView
 	UpdateLastHandledEventHeight = (*AccountMessage).UpdateLastHandledEventHeight
 )
 
@@ -649,7 +649,8 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 				},
 			})
 		} else if typedEvent, ok := event.(*event_usecase.MsgIBCAcknowledgement); ok {
-			accountMessages = append(accountMessages, view.AccountMessageRecord{
+
+			record := view.AccountMessageRecord{
 				Row: view.AccountMessageRow{
 					BlockHeight:     height,
 					BlockHash:       "",
@@ -663,25 +664,38 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 				Accounts: []string{
 					typedEvent.Params.Signer,
 				},
-			})
-		} else if typedEvent, ok := event.(*event_usecase.MsgIBCRecvPacket); ok {
-			if typedEvent.Params.MaybeFungibleTokenPacketData != nil {
-				accountMessages = append(accountMessages, view.AccountMessageRecord{
-					Row: view.AccountMessageRow{
-						BlockHeight:     height,
-						BlockHash:       "",
-						BlockTime:       utctime.UTCTime{},
-						TransactionHash: typedEvent.TxHash(),
-						Success:         typedEvent.TxSuccess(),
-						MessageIndex:    typedEvent.MsgIndex,
-						MessageType:     typedEvent.MsgType(),
-						Data:            typedEvent,
-					},
-					Accounts: []string{
-						typedEvent.Params.MaybeFungibleTokenPacketData.Receiver,
-					},
-				})
 			}
+
+			if typedEvent.Params.MaybeFungibleTokenPacketData != nil {
+				record.Accounts = append(record.Accounts, typedEvent.Params.MaybeFungibleTokenPacketData.Sender)
+			}
+
+			accountMessages = append(accountMessages, record)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCRecvPacket); ok {
+
+			record := view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Signer,
+				},
+			}
+
+			if typedEvent.Params.MaybeFungibleTokenPacketData != nil {
+				record.Accounts = append(record.Accounts, typedEvent.Params.MaybeFungibleTokenPacketData.Receiver)
+			}
+
+			accountMessages = append(accountMessages, record)
+
 		} else if typedEvent, ok := event.(*event_usecase.MsgIBCTransferTransfer); ok {
 			accountMessages = append(accountMessages, view.AccountMessageRecord{
 				Row: view.AccountMessageRow{
@@ -699,6 +713,54 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 				},
 			})
 		} else if typedEvent, ok := event.(*event_usecase.MsgIBCTimeout); ok {
+
+			record := view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Signer,
+				},
+			}
+
+			if typedEvent.Params.MaybeMsgTransfer != nil {
+				record.Accounts = append(record.Accounts, typedEvent.Params.MaybeMsgTransfer.RefundReceiver)
+			}
+
+			accountMessages = append(accountMessages, record)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCTimeoutOnClose); ok {
+
+			record := view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Params.Signer,
+				},
+			}
+
+			if typedEvent.Params.MaybeMsgTransfer != nil {
+				record.Accounts = append(record.Accounts, typedEvent.Params.MaybeMsgTransfer.RefundReceiver)
+			}
+
+			accountMessages = append(accountMessages, record)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCChannelCloseInit); ok {
 			accountMessages = append(accountMessages, view.AccountMessageRecord{
 				Row: view.AccountMessageRow{
 					BlockHeight:     height,
@@ -714,7 +776,7 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 					typedEvent.Params.Signer,
 				},
 			})
-		} else if typedEvent, ok := event.(*event_usecase.MsgIBCTimeoutOnClose); ok {
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCChannelCloseConfirm); ok {
 			accountMessages = append(accountMessages, view.AccountMessageRecord{
 				Row: view.AccountMessageRow{
 					BlockHeight:     height,
