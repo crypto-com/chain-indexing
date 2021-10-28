@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"time"
 
-	json2 "github.com/crypto-com/chain-indexing/external/json"
+	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/mitchellh/mapstructure"
 
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -67,15 +67,15 @@ func StringToJsonUint64HookFunc() mapstructure.DecodeHookFunc {
 			return data, nil
 		}
 
-		if t == reflect.TypeOf(json2.Uint64{}) {
-			u, parseErr := json2.NewUint64FromString(data.(string))
+		if t == reflect.TypeOf(json.Uint64{}) {
+			u, parseErr := json.NewUint64FromString(data.(string))
 			if parseErr != nil {
 				return nil, parseErr
 			}
 			return *u, nil
 		}
-		if t == reflect.PtrTo(reflect.TypeOf(json2.Uint64{})) {
-			u, parseErr := json2.NewUint64FromString(data.(string))
+		if t == reflect.PtrTo(reflect.TypeOf(json.Uint64{})) {
+			u, parseErr := json.NewUint64FromString(data.(string))
 			if parseErr != nil {
 				return nil, parseErr
 			}
@@ -96,16 +96,16 @@ func StringToJsonNumericStringHookFunc() mapstructure.DecodeHookFunc {
 			return data, nil
 		}
 
-		if t == reflect.TypeOf(json2.NumericString{}) {
-			u, parseErr := json2.NewNumericString(data.(string))
+		if t == reflect.TypeOf(json.NumericString{}) {
+			u, parseErr := json.NewNumericString(data.(string))
 			if parseErr != nil {
 				return nil, parseErr
 			}
 			return *u, nil
 		}
 
-		if t == reflect.PtrTo(reflect.TypeOf(json2.NumericString{})) {
-			u, parseErr := json2.NewNumericString(data.(string))
+		if t == reflect.PtrTo(reflect.TypeOf(json.NumericString{})) {
+			u, parseErr := json.NewNumericString(data.(string))
 			if parseErr != nil {
 				return nil, parseErr
 			}
