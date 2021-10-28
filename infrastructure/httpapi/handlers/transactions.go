@@ -15,7 +15,7 @@ import (
 type Transactions struct {
 	logger applogger.Logger
 
-	transactionsView *transaction_view.BlockTransactions
+	transactionsView transaction_view.BlockTransactions
 }
 
 func NewTransactions(logger applogger.Logger, rdbHandle *rdb.Handle) *Transactions {
@@ -24,7 +24,7 @@ func NewTransactions(logger applogger.Logger, rdbHandle *rdb.Handle) *Transactio
 			"module": "TransactionsHandler",
 		}),
 
-		transaction_view.NewTransactions(rdbHandle),
+		transaction_view.NewTransactionsView(rdbHandle),
 	}
 }
 

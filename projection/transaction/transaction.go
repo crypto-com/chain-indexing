@@ -18,6 +18,12 @@ import (
 
 var _ projection_entity.Projection = &Transaction{}
 
+var (
+	NewTransactions              = transaction_view.NewTransactionsView
+	NewTransactionsTotal         = transaction_view.NewTransactionsTotalView
+	UpdateLastHandledEventHeight = (*Transaction).UpdateLastHandledEventHeight
+)
+
 type Transaction struct {
 	*rdbprojectionbase.Base
 
@@ -60,8 +66,8 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 	}()
 
 	rdbTxHandle := rdbTx.ToHandle()
-	transactionsView := transaction_view.NewTransactions(rdbTxHandle)
-	transactionsTotalView := transaction_view.NewTransactionsTotal(rdbTxHandle)
+	transactionsView := NewTransactions(rdbTxHandle)
+	transactionsTotalView := NewTransactionsTotal(rdbTxHandle)
 
 	var blockTime utctime.UTCTime
 	var blockHash string
@@ -179,7 +185,7 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 		return fmt.Errorf("error setting total blcok transactions: %w", err)
 	}
 
-	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
+	if err := UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
 		return fmt.Errorf("error updating last handled event height: %v", err)
 	}
 

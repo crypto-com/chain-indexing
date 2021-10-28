@@ -1,134 +1,384 @@
 package transaction_test
 
 import (
-	. "github.com/crypto-com/chain-indexing/appinterface/rdb/test"
-	. "github.com/crypto-com/chain-indexing/entity/event/test"
-	. "github.com/crypto-com/chain-indexing/internal/logger/test"
-	"github.com/crypto-com/chain-indexing/projection/block"
-	view2 "github.com/crypto-com/chain-indexing/projection/block/view"
-	. "github.com/crypto-com/chain-indexing/test"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"fmt"
+	"testing"
 
+	sq "github.com/Masterminds/squirrel"
+	"github.com/stretchr/testify/assert"
+	testify_mock "github.com/stretchr/testify/mock"
+
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
-	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
+	"github.com/crypto-com/chain-indexing/projection/transaction"
+	transaction_view "github.com/crypto-com/chain-indexing/projection/transaction/view"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
-	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
+	model_usecase "github.com/crypto-com/chain-indexing/usecase/model"
 )
 
-var _ = Describe("Transaction", func() {
-	It("should implement projection", func() {
-		fakeLogger := NewFakeLogger()
-		fakeRdbConn := NewFakeRDbConn()
-		var _ entity_projection.Projection = block.NewBlock(fakeLogger, fakeRdbConn)
+func NewTransactionProjection(rdbConn rdb.Conn) *transaction.Transaction {
+	return transaction.NewTransaction(
+		nil,
+		rdbConn,
+	)
+}
+
+func NewMockRDbConn() *test.MockRDbConn {
+	mock := test.NewMockRDbConn()
+	mock.On("ToHandle").Return(&rdb.Handle{
+		Runner:      mock,
+		TypeConv:    &pg.PgxTypeConv{},
+		StmtBuilder: sq.StatementBuilderType{},
 	})
 
-	WithTestPgxConn(func(pgConn *pg.PgxConn, pgMigrate *pg.Migrate) {
-		BeforeEach(func() {
-			_ = pgMigrate.Reset()
-			pgMigrate.MustUp()
-		})
+	return mock
+}
 
-		AfterEach(func() {
-			_ = pgMigrate.Reset()
-		})
+func NewMockRDbTx() *test.MockRDbTx {
+	mockTx := &test.MockRDbTx{}
+	mockTx.On("ToHandle").Return(&rdb.Handle{
+		Runner:      mockTx,
+		TypeConv:    &pg.PgxTypeConv{},
+		StmtBuilder: pg.PostgresStmtBuilder,
+	}).Maybe()
+	mockTx.On("Rollback").Return(nil).Maybe()
+	mockTx.On("Commit").Return(nil).Maybe()
 
-		It("should project Blocks view when event is BlockCreated", func() {
-			blocksView := view2.NewBlocks(pgConn.ToHandle())
+	return mockTx
+}
 
-			anyHeight := int64(1)
-			event := event_usecase.NewBlockCreated(&usecase_model.Block{
-				Height:          anyHeight,
-				Hash:            "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
-				Time:            utctime.FromUnixNano(int64(1000000)),
-				AppHash:         "24474D86CBFA7E6328D473C17A9E46CD5A80FFE82A348A74844BF3E2BA2B3AF1",
-				ProposerAddress: "F9E6FFB9B536956201AA138224FD888D03775AB4",
-				Txs: []string{
-					"AAAMZqICtpjLrA3uEe3Rkg6cqDgQl0iBwG1Wm8ORZRzKL9EBAE1R0oP73H8AhHG1E1dke4ppXA/+43AyxWX7oVBTlQGnAABsiqVxCipneyzo9n1t7xauih3rXxssZTChLv/oPHUaSAAAAgAAAAAAAAAAAMw4kh8pZRDC442WIIUIo6+fIE1cTHkwEiv++LwFjNLwNtPTO1AVJx+dGivu9FZK3cN8r0mvLPVunExBxwKqKDkwVUbVSaIejuSc6Wm38rp+ekZjIExhf41FIwkocStPzBY4VYQ31YE7pmNnKocfCEg9CcKH+MIFYJ0FSxoEiMratLXjKAD6B/aMZ3pRCxxL/YxFNs+YKzGbgdKcLtydZ1B/OTGUeNU3SLNQJGmJeTL0AOwvQ4j7KkiQFZGa8uoQQEJo9rXjIg+xPk7a+zBdwC91EY/ZZz7pdVQMUgHBeKgsVvy0o78BOPWfuziBK5xVsoz5K8ZlMYQNPC5mY+bguMKYNJ5PQ9rzn+LseYT5jhalUsQrPABhEFOoQVUH1id3rszDkLLTn2/d89N/JJGY1+mL+upWWAsmJw1yTHqibSJ7RbiGffnh93MCOHeRe5OLrfmDFfhqOLNt9yuMYNdyJ+noVsfI7Ws9Kpxe2SnuCWBs9yOgM0l7UTMuIokqhGCkarXge/DUWLUcV694Jr8qcJT3OtoQohN+p+Xj66nowJLgFW7xBdFsT4vv7xI8giFxUpB+JkLgRZz2d2eam3iLDCHR+sNyvIDuXDUXhKM6aIykGgvHVHr3bBJRy/JPZFC0A3kqmheMnJpbV6kHXaIbmbgeQeXc+wxq1swFVxkwp14zbRmHwSGVGRgihjmoFYl9MyorQzNFETgp28gq2AKrCHNnIRs63m2cD5X4jZaFzfYAv9ifpOKqRtDgIFG0olge/ig00FFL6KdHySg1Qaab7g==",
-				},
-				Signatures: []usecase_model.BlockSignature{
-					{
-						BlockIdFlag:      2,
-						ValidatorAddress: "F9E6FFB9B536956201AA138224FD888D03775AB4",
-						Timestamp:        utctime.FromUnixNano(int64(1000000)),
-						Signature:        "ZW2pUcKFN/oPQCmdCouchXmgpPyd/Ddo45dhHEMwsBeHTBuSJh15zUMmfl5FZsPHeKC8citFvOm/52bgl5XHCw==",
-					},
-					{
-						BlockIdFlag:      2,
-						ValidatorAddress: "031E3891DDB94FC7C7C132B7CD9736738110C889",
-						Timestamp:        utctime.FromUnixNano(int64(2000000)),
-						Signature:        "uhWDC9NDT86FbRVGbOM2lGY8sVkWU51JJ9F8gPwTfK0ebcui1R34oM+jhPKdStn/4sq4qDgzbsN66cQ5kl8NAw==",
-					},
-				},
-			})
-
-			fakeLogger := NewFakeLogger()
-			projection := block.NewBlock(fakeLogger, pgConn)
-
-			Expect(blocksView.Count()).To(Equal(int64(0)))
-
-			err := projection.HandleEvents(anyHeight, []event_entity.Event{event})
-			Expect(err).To(BeNil())
-			Expect(blocksView.Count()).To(Equal(int64(1)))
-
-			actual, err := blocksView.FindBy(&view2.BlockIdentity{
-				MaybeHeight: primptr.Int64(anyHeight),
-			})
-
-			Expect(err).To(BeNil())
-			Expect(actual).To(Equal(&view2.Block{
-				Height:           anyHeight,
-				Hash:             "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
-				Time:             utctime.FromUnixNano(int64(1000000)),
-				AppHash:          "24474D86CBFA7E6328D473C17A9E46CD5A80FFE82A348A74844BF3E2BA2B3AF1",
-				TransactionCount: 1,
-				CommittedCouncilNodes: []view2.BlockCommittedCouncilNode{
-					{
-						Address:    "F9E6FFB9B536956201AA138224FD888D03775AB4",
-						Time:       utctime.FromUnixNano(int64(1000000)),
-						Signature:  "ZW2pUcKFN/oPQCmdCouchXmgpPyd/Ddo45dhHEMwsBeHTBuSJh15zUMmfl5FZsPHeKC8citFvOm/52bgl5XHCw==",
-						IsProposer: true,
-					},
-					{
-						Address:    "031E3891DDB94FC7C7C132B7CD9736738110C889",
-						Time:       utctime.FromUnixNano(int64(2000000)),
-						Signature:  "uhWDC9NDT86FbRVGbOM2lGY8sVkWU51JJ9F8gPwTfK0ebcui1R34oM+jhPKdStn/4sq4qDgzbsN66cQ5kl8NAw==",
-						IsProposer: false,
+func TestTransaction_HandleEvents(t *testing.T) {
+	testCases := []struct {
+		Name     string
+		Events   []event_entity.Event
+		MockFunc func(events []event_entity.Event) []*testify_mock.Mock
+	}{
+		{
+			Name: "Handle TransactionCreated",
+			Events: []event_entity.Event{
+				&event_usecase.BlockCreated{
+					Base: event_entity.NewBase(event_entity.BaseParams{
+						Name:        event_usecase.BLOCK_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					Block: &model_usecase.Block{
+						Height:          1,
+						Hash:            "Hash",
+						Time:            utctime.UTCTime{},
+						AppHash:         "AppHash",
+						ProposerAddress: "ProposerAddress",
+						Txs:             nil,
+						Signatures:      nil,
+						Evidences:       nil,
 					},
 				},
-			}))
-		})
+				&event_usecase.TransactionCreated{
+					Base: event_entity.Base{
+						EventName:    "EventName",
+						EventVersion: 0,
+						BlockHeight:  1,
+						EventUUID:    "EventUUID",
+					},
+					TxHash:   "TxHash",
+					Index:    0,
+					Code:     0,
+					Log:      "Log",
+					MsgCount: 1,
+					Signers: []model_usecase.TransactionSigner{
+						{
+							Address: "SignerAddress",
+							TransactionSignerInfo: model_usecase.TransactionSignerInfo{
+								Type:       "SignerType",
+								IsMultiSig: true,
+								Pubkeys: []string{
+									"pubkey1", "pubkey2", "pubkey3",
+								},
+								MaybeThreshold:  primptr.Int(2),
+								AccountSequence: 0,
+							},
+						},
+					},
+					Senders:       []model_usecase.TransactionSigner{},
+					Fee:           coin.Coins{coin.MustNewCoinFromString("basetcro", "1")},
+					FeePayer:      "FeePayer",
+					FeeGranter:    "FeeGranter",
+					GasWanted:     200,
+					GasUsed:       100,
+					Memo:          "Memo",
+					TimeoutHeight: 10,
+				},
+				&event_usecase.MsgSend{
+					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
+						MsgName: event_usecase.MSG_SEND,
+						Version: 1,
+						MsgCommonParams: event_usecase.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					FromAddress: "FromAddress",
+					ToAddress:   "ToAddress",
+					Amount: coin.Coins{
+						coin.Coin{
+							Denom:  "Denom",
+							Amount: coin.NewInt(100),
+						},
+					},
+				},
+			},
+			MockFunc: func(events []event_entity.Event) (mocks []*testify_mock.Mock) {
 
-		It("should update projection last handled event height when there is no event at the height", func() {
-			anyHeight := int64(1)
+				msgEvent, _ := events[2].(event_usecase.MsgEvent)
 
-			fakeLogger := NewFakeLogger()
-			projection := block.NewBlock(fakeLogger, pgConn)
+				mockTransactionsView := transaction_view.NewMockTransactionsView(nil).(*transaction_view.MockTransactionsView)
+				mocks = append(mocks, &mockTransactionsView.Mock)
 
-			Expect(projection.GetLastHandledEventHeight()).To(BeNil())
+				transaction.NewTransactions = func(_ *rdb.Handle) transaction_view.BlockTransactions {
+					return mockTransactionsView
+				}
 
-			err := projection.HandleEvents(anyHeight, []event_entity.Event{})
-			Expect(err).To(BeNil())
+				mockTransactionsView.On(
+					"InsertAll",
+					[]transaction_view.TransactionRow{
+						{
+							BlockHeight:   1,
+							BlockTime:     utctime.UTCTime{},
+							BlockHash:     "Hash",
+							Hash:          "TxHash",
+							Index:         0,
+							Success:       true,
+							Code:          0,
+							Log:           "Log",
+							Fee:           coin.Coins{coin.MustNewCoinFromString("basetcro", "1")},
+							FeePayer:      "FeePayer",
+							FeeGranter:    "FeeGranter",
+							GasWanted:     200,
+							GasUsed:       100,
+							Memo:          "Memo",
+							TimeoutHeight: 10,
+							Signers: []transaction_view.TransactionRowSigner{
+								{
+									Type:       "SignerType",
+									IsMultiSig: true,
+									Pubkeys: []string{
+										"pubkey1", "pubkey2", "pubkey3",
+									},
+									MaybeThreshold:  primptr.Int(2),
+									AccountSequence: 0,
+									Address:         "SignerAddress",
+								},
+							},
+							Messages: []transaction_view.TransactionRowMessage{
+								{
+									Type:    "MsgSend",
+									Content: msgEvent,
+								},
+							},
+						},
+					},
+				).Return(nil)
 
-			Expect(projection.GetLastHandledEventHeight()).To(Equal(primptr.Int64(anyHeight)))
-		})
+				mockTransactionsTotalView := transaction_view.NewMockTransactionsTotalView(nil).(*transaction_view.MockTransactionsTotalView)
+				mocks = append(mocks, &mockTransactionsTotalView.Mock)
 
-		It("should not persist projection nor last handled event height on handling error", func() {
-			blocksView := view2.NewBlocks(pgConn.ToHandle())
+				transaction.NewTransactionsTotal = func(_ *rdb.Handle) transaction_view.TransactionsTotal {
+					return mockTransactionsTotalView
+				}
 
-			anyHeight := int64(1)
-			event := NewFakeEvent()
+				mockTransactionsTotalView.On(
+					"Increment",
+					"-",
+					int64(1),
+				).Return(nil)
 
-			fakeLogger := NewFakeLogger()
-			projection := block.NewBlock(fakeLogger, pgConn)
-			Expect(blocksView.Count()).To(Equal(int64(0)))
+				mockTransactionsTotalView.On(
+					"Set",
+					"1",
+					int64(1),
+				).Return(nil)
 
-			err := projection.HandleEvents(anyHeight, []event_entity.Event{event})
-			Expect(err).NotTo(BeNil())
-			Expect(blocksView.Count()).To(Equal(int64(0)))
-		})
-	})
-})
+				return mocks
+			},
+		},
+		{
+			Name: "Handle TransactionFailed",
+			Events: []event_entity.Event{
+				&event_usecase.BlockCreated{
+					Base: event_entity.NewBase(event_entity.BaseParams{
+						Name:        event_usecase.BLOCK_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					Block: &model_usecase.Block{
+						Height:          1,
+						Hash:            "Hash",
+						Time:            utctime.UTCTime{},
+						AppHash:         "AppHash",
+						ProposerAddress: "ProposerAddress",
+						Txs:             nil,
+						Signatures:      nil,
+						Evidences:       nil,
+					},
+				},
+				&event_usecase.TransactionFailed{
+					Base: event_entity.Base{
+						EventName:    "EventName",
+						EventVersion: 0,
+						BlockHeight:  1,
+						EventUUID:    "EventUUID",
+					},
+					TxHash:   "TxHash",
+					Index:    0,
+					Code:     0,
+					Log:      "Log",
+					MsgCount: 1,
+					Signers: []model_usecase.TransactionSigner{
+						{
+							Address: "SignerAddress",
+							TransactionSignerInfo: model_usecase.TransactionSignerInfo{
+								Type:       "SignerType",
+								IsMultiSig: true,
+								Pubkeys: []string{
+									"pubkey1", "pubkey2", "pubkey3",
+								},
+								MaybeThreshold:  primptr.Int(2),
+								AccountSequence: 0,
+							},
+						},
+					},
+					Senders:       []model_usecase.TransactionSigner{},
+					Fee:           coin.Coins{coin.MustNewCoinFromString("basetcro", "1")},
+					FeePayer:      "FeePayer",
+					FeeGranter:    "FeeGranter",
+					GasWanted:     200,
+					GasUsed:       100,
+					Memo:          "Memo",
+					TimeoutHeight: 10,
+				},
+				&event_usecase.MsgSend{
+					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
+						MsgName: event_usecase.MSG_SEND,
+						Version: 1,
+						MsgCommonParams: event_usecase.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					FromAddress: "FromAddress",
+					ToAddress:   "ToAddress",
+					Amount: coin.Coins{
+						coin.Coin{
+							Denom:  "Denom",
+							Amount: coin.NewInt(100),
+						},
+					},
+				},
+			},
+			MockFunc: func(events []event_entity.Event) (mocks []*testify_mock.Mock) {
+
+				msgEvent, _ := events[2].(event_usecase.MsgEvent)
+
+				mockTransactionsView := transaction_view.NewMockTransactionsView(nil).(*transaction_view.MockTransactionsView)
+				mocks = append(mocks, &mockTransactionsView.Mock)
+
+				transaction.NewTransactions = func(_ *rdb.Handle) transaction_view.BlockTransactions {
+					return mockTransactionsView
+				}
+
+				mockTransactionsView.On(
+					"InsertAll",
+					[]transaction_view.TransactionRow{
+						{
+							BlockHeight:   1,
+							BlockTime:     utctime.UTCTime{},
+							BlockHash:     "Hash",
+							Hash:          "TxHash",
+							Index:         0,
+							Success:       false,
+							Code:          0,
+							Log:           "Log",
+							Fee:           coin.Coins{coin.MustNewCoinFromString("basetcro", "1")},
+							FeePayer:      "FeePayer",
+							FeeGranter:    "FeeGranter",
+							GasWanted:     200,
+							GasUsed:       100,
+							Memo:          "Memo",
+							TimeoutHeight: 10,
+							Signers: []transaction_view.TransactionRowSigner{
+								{
+									Type:       "SignerType",
+									IsMultiSig: true,
+									Pubkeys: []string{
+										"pubkey1", "pubkey2", "pubkey3",
+									},
+									MaybeThreshold:  primptr.Int(2),
+									AccountSequence: 0,
+									Address:         "SignerAddress",
+								},
+							},
+							Messages: []transaction_view.TransactionRowMessage{
+								{
+									Type:    "MsgSend",
+									Content: msgEvent,
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				mockTransactionsTotalView := transaction_view.NewMockTransactionsTotalView(nil).(*transaction_view.MockTransactionsTotalView)
+				mocks = append(mocks, &mockTransactionsTotalView.Mock)
+
+				transaction.NewTransactionsTotal = func(_ *rdb.Handle) transaction_view.TransactionsTotal {
+					return mockTransactionsTotalView
+				}
+
+				mockTransactionsTotalView.On(
+					"Increment",
+					"-",
+					int64(1),
+				).Return(nil)
+
+				mockTransactionsTotalView.On(
+					"Set",
+					"1",
+					int64(1),
+				).Return(nil)
+
+				return mocks
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		mockRDbConn := NewMockRDbConn()
+		mockTx := NewMockRDbTx()
+		mockRDbConn.On("Begin").Return(mockTx, nil)
+		mocks := tc.MockFunc(tc.Events)
+
+		// We are not interested in testing the below function in unit test
+		transaction.UpdateLastHandledEventHeight = func(_ *transaction.Transaction, _ *rdb.Handle, _ int64) error {
+			return nil
+		}
+
+		projection := NewTransactionProjection(mockRDbConn)
+		err := projection.HandleEvents(1, tc.Events)
+		assert.NoError(t, err)
+
+		for _, m := range mocks {
+			m.AssertExpectations(t)
+		}
+
+		fmt.Println(tc.Name, "Passed")
+	}
+}
