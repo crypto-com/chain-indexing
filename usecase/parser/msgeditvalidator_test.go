@@ -3,9 +3,8 @@ package parser_test
 import (
 	"strings"
 
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"

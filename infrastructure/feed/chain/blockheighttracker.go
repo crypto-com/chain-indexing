@@ -6,11 +6,10 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
-
-	"github.com/crypto-com/chain-indexing/internal/primptr"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 
 	"github.com/crypto-com/chain-indexing/appinterface/tendermint"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 
 const MAX_RETRY_TIME_ALWAYS_RETRY = 0

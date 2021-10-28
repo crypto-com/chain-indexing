@@ -7,13 +7,13 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/google/go-querystring/query"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
-	"github.com/crypto-com/chain-indexing/internal/logger"
 )
 
 var PostgresStmtBuilder = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)

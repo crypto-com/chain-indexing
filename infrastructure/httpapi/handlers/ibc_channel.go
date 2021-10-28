@@ -3,13 +3,13 @@ package handlers
 import (
 	"errors"
 
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/valyala/fasthttp"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 	ibc_channel_types "github.com/crypto-com/chain-indexing/projection/ibc_channel/types"
 	ibc_channel_view "github.com/crypto-com/chain-indexing/projection/ibc_channel/view"
 )

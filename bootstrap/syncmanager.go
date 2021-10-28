@@ -1,10 +1,11 @@
-package main
+package bootstrap
 
 import (
 	"fmt"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -12,7 +13,6 @@ import (
 	"github.com/crypto-com/chain-indexing/entity/event"
 	chainfeed "github.com/crypto-com/chain-indexing/infrastructure/feed/chain"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	"github.com/crypto-com/chain-indexing/usecase/syncstrategy"

@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/projection/chainstats"
 
 	"github.com/valyala/fasthttp"
@@ -16,8 +18,6 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/appinterface/tendermint"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 	block_view "github.com/crypto-com/chain-indexing/projection/block/view"
 	chainstats_view "github.com/crypto-com/chain-indexing/projection/chainstats/view"
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"

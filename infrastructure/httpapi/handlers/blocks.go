@@ -4,14 +4,13 @@ import (
 	"errors"
 	"strconv"
 
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	validator_view "github.com/crypto-com/chain-indexing/projection/validator/view"
-
 	"github.com/valyala/fasthttp"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	block_view "github.com/crypto-com/chain-indexing/projection/block/view"
 	blockevent_view "github.com/crypto-com/chain-indexing/projection/blockevent/view"
 	transaction_view "github.com/crypto-com/chain-indexing/projection/transaction/view"

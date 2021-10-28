@@ -5,14 +5,14 @@ import (
 
 	. "github.com/crypto-com/chain-indexing/entity/event/test"
 	. "github.com/crypto-com/chain-indexing/entity/projection/test"
-	. "github.com/crypto-com/chain-indexing/internal/logger/test"
+	. "github.com/crypto-com/chain-indexing/external/logger/test"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/mock"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/entity/projection"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 )
 
 var _ = Describe("StoreBasedManager", func() {

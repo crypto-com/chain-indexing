@@ -4,10 +4,9 @@ import (
 	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
-
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
 

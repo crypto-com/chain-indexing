@@ -2,7 +2,7 @@ package event_test
 
 import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
-	"github.com/crypto-com/chain-indexing/internal/json"
+	"github.com/crypto-com/chain-indexing/external/json"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

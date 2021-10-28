@@ -1,4 +1,8 @@
-package main
+package bootstrap
+
+const SYSTEM_MODE_EVENT_STORE = "EVENT_STORE"
+const SYSTEM_MODE_TENDERMINT_DIRECT = "TENDERMINT_DIRECT"
+const SYSTEM_MODE_API_ONLY = "API_ONLY"
 
 type Config struct {
 	FileConfig

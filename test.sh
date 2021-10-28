@@ -62,7 +62,7 @@ setup() {
 
 wait_postgres_ready() {
     CONTAINER_ID=$(docker ps -aqf "name=${DOCKER_COMPOSE_PROJECT}_postgres")
-    
+
     while :
     do
         is_postgres_ready "${CONTAINER_ID}"
@@ -161,7 +161,7 @@ if [[ "${RET_VALUE}" != 0 ]]; then
         echoerr "Cannot find ginkgo. Provide \`--install-dependency\` to attempt to install it."
         exit 1
     fi
-    
+
     go get -u github.com/onsi/ginkgo/ginkgo
     check_ginkgo
     if [[ "${RET_VALUE}" != 0 ]]; then

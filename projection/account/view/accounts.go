@@ -4,8 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/crypto-com/chain-indexing/internal/json"
-
+	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"

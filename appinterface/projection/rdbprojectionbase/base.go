@@ -2,7 +2,7 @@ package rdbprojectionbase
 
 import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	projection_usecase "github.com/crypto-com/chain-indexing/usecase/projection"
 )
 

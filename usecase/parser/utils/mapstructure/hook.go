@@ -5,9 +5,9 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/mitchellh/mapstructure"
 
-	"github.com/crypto-com/chain-indexing/internal/json"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
