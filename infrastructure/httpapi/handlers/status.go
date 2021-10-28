@@ -32,7 +32,7 @@ type StatusHandler struct {
 	cosmosAppClient       cosmosapp.Client
 	blocksView            *block_view.Blocks
 	chainStatsView        *chainstats_view.ChainStats
-	transactionsTotalView *transaction_view.TransactionsTotal
+	transactionsTotalView transaction_view.TransactionsTotal
 	validatorsView        *validator_view.Validators
 	validatorStatsView    *validatorstats_view.ValidatorStats
 	statusView            *status_polling.Status
@@ -50,7 +50,7 @@ func NewStatusHandler(logger applogger.Logger, cosmosAppClient cosmosapp.Client,
 		cosmosAppClient,
 		block_view.NewBlocks(rdbHandle),
 		chainstats_view.NewChainStats(rdbHandle),
-		transaction_view.NewTransactionsTotal(rdbHandle),
+		transaction_view.NewTransactionsTotalView(rdbHandle),
 		validator_view.NewValidators(rdbHandle),
 		validatorstats_view.NewValidatorStats(rdbHandle),
 		status_polling.NewStatus(rdbHandle),

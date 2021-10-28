@@ -18,18 +18,31 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 )
 
+type BlockTransactions interface {
+	InsertAll(transactions []TransactionRow) error
+	Insert(transaction *TransactionRow) error
+	FindByHash(txHash string) (*TransactionRow, error)
+	List(
+		filter TransactionsListFilter,
+		order TransactionsListOrder,
+		pagination *pagination_interface.Pagination,
+	) ([]TransactionRow, *pagination_interface.PaginationResult, error)
+	Search(keyword string) ([]TransactionRow, error)
+	Count() (int64, error)
+}
+
 // BlockTransactions projection view implemented by relational database
-type BlockTransactions struct {
+type BlockTransactionsView struct {
 	rdb *rdb.Handle
 }
 
-func NewTransactions(handle *rdb.Handle) *BlockTransactions {
-	return &BlockTransactions{
+func NewTransactionsView(handle *rdb.Handle) BlockTransactions {
+	return &BlockTransactionsView{
 		handle,
 	}
 }
 
-func (transactionsView *BlockTransactions) InsertAll(transactions []TransactionRow) error {
+func (transactionsView *BlockTransactionsView) InsertAll(transactions []TransactionRow) error {
 	pendingRowCount := 0
 	var stmtBuilder sq.InsertBuilder
 
@@ -122,7 +135,7 @@ func (transactionsView *BlockTransactions) InsertAll(transactions []TransactionR
 	return nil
 }
 
-func (transactionsView *BlockTransactions) Insert(transaction *TransactionRow) error {
+func (transactionsView *BlockTransactionsView) Insert(transaction *TransactionRow) error {
 	var err error
 
 	var sql string
@@ -195,7 +208,7 @@ func (transactionsView *BlockTransactions) Insert(transaction *TransactionRow) e
 	return nil
 }
 
-func (transactionsView *BlockTransactions) FindByHash(txHash string) (*TransactionRow, error) {
+func (transactionsView *BlockTransactionsView) FindByHash(txHash string) (*TransactionRow, error) {
 	var err error
 
 	selectStmtBuilder := transactionsView.rdb.StmtBuilder.Select(
@@ -282,7 +295,7 @@ func (transactionsView *BlockTransactions) FindByHash(txHash string) (*Transacti
 	return &transaction, nil
 }
 
-func (transactionsView *BlockTransactions) List(
+func (transactionsView *BlockTransactionsView) List(
 	filter TransactionsListFilter,
 	order TransactionsListOrder,
 	pagination *pagination_interface.Pagination,
@@ -327,7 +340,7 @@ func (transactionsView *BlockTransactions) List(
 			if filter.MaybeBlockHeight != nil {
 				identity = strconv.FormatInt(*filter.MaybeBlockHeight, 10)
 			}
-			totalView := NewTransactionsTotal(rdbHandle)
+			totalView := NewTransactionsTotalView(rdbHandle)
 			total, err := totalView.FindBy(identity)
 			if err != nil {
 				return int64(0), err
@@ -412,7 +425,7 @@ func (transactionsView *BlockTransactions) List(
 	return transactions, paginationResult, nil
 }
 
-func (transactionsView *BlockTransactions) Search(keyword string) ([]TransactionRow, error) {
+func (transactionsView *BlockTransactionsView) Search(keyword string) ([]TransactionRow, error) {
 	keyword = strings.ToUpper(keyword)
 	sql, sqlArgs, err := transactionsView.rdb.StmtBuilder.Select(
 		"block_height",
@@ -509,7 +522,7 @@ func (transactionsView *BlockTransactions) Search(keyword string) ([]Transaction
 	return transactions, nil
 }
 
-func (transactionsView *BlockTransactions) Count() (int64, error) {
+func (transactionsView *BlockTransactionsView) Count() (int64, error) {
 	sql, _, err := transactionsView.rdb.StmtBuilder.Select("COUNT(1)").From(
 		"view_transactions",
 	).ToSql()
@@ -543,7 +556,7 @@ type TransactionRow struct {
 	Memo          string                  `json:"memo"`
 	TimeoutHeight int64                   `json:"timeoutHeight"`
 	Messages      []TransactionRowMessage `json:"messages"`
-	Signers       []TransactionRowSigner     `json:"signers"`
+	Signers       []TransactionRowSigner  `json:"signers"`
 }
 
 type TransactionRowMessage struct {

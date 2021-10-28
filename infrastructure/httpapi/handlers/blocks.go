@@ -20,7 +20,7 @@ type Blocks struct {
 	logger applogger.Logger
 
 	blocksView                    *block_view.Blocks
-	transactionsView              *transaction_view.BlockTransactions
+	transactionsView              transaction_view.BlockTransactions
 	blockEventsView               *blockevent_view.BlockEvents
 	validatorBlockCommitmentsView *validator_view.ValidatorBlockCommitments
 }
@@ -32,7 +32,7 @@ func NewBlocks(logger applogger.Logger, rdbHandle *rdb.Handle) *Blocks {
 		}),
 
 		block_view.NewBlocks(rdbHandle),
-		transaction_view.NewTransactions(rdbHandle),
+		transaction_view.NewTransactionsView(rdbHandle),
 		blockevent_view.NewBlockEvents(rdbHandle),
 		validator_view.NewValidatorBlockCommitments(rdbHandle),
 	}

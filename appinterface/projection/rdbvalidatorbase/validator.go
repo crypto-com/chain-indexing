@@ -14,6 +14,10 @@ import (
 
 const DO_NOT_MODIFY = "[do-not-modify]"
 
+var (
+	NewValidators = view.NewValidatorsView
+)
+
 // a generic Validator projection. For table schema refer to view/validators.go
 type Base struct {
 	tableName string
@@ -39,7 +43,7 @@ func (projection *Base) GetEventsToListen() []string {
 
 // Handle
 func (projection *Base) HandleEvents(conn *rdb.Handle, logger logger.Logger, events []event_entity.Event) error {
-	validatorsView := view.NewValidators(conn, projection.tableName)
+	validatorsView := NewValidators(conn, projection.tableName)
 	for _, event := range events {
 		if createGenesisValidator, ok := event.(*event_usecase.CreateGenesisValidator); ok {
 			logger.Debug("handling CreateGenesisValidator event")
@@ -116,6 +120,6 @@ func (projection *Base) HandleEvents(conn *rdb.Handle, logger logger.Logger, eve
 	return nil
 }
 
-func (projection *Base) GetView(conn *rdb.Handle) *view.Validators {
-	return view.NewValidators(conn, projection.tableName)
+func (projection *Base) GetView(conn *rdb.Handle) view.Validators {
+	return NewValidators(conn, projection.tableName)
 }
