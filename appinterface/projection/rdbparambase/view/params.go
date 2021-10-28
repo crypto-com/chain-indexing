@@ -20,22 +20,32 @@ import (
 // | key    | VARCHAR | PRIMARY KEY |
 // | value  | VARCHAR | NOT NULL    |
 
+type Params interface {
+	Set(accessor types.ParamAccessor, value string) error
+	FindBy(accessor types.ParamAccessor) (string, error)
+	FindInt64By(accessor types.ParamAccessor) (int64, error)
+	FindBigIntBy(accessor types.ParamAccessor) (*big.Int, error)
+	FindUint64By(accessor types.ParamAccessor) (uint64, error)
+	FindDurationBy(accessor types.ParamAccessor) (time.Duration, error)
+	FindBoolBy(accessor types.ParamAccessor) (bool, error)
+}
+
 // A generic param view
-type Params struct {
+type ParamsView struct {
 	rdbHandle *rdb.Handle
 
 	tableName string
 }
 
-func NewParams(rdbHandle *rdb.Handle, tableName string) *Params {
-	return &Params{
+func NewParamsView(rdbHandle *rdb.Handle, tableName string) Params {
+	return &ParamsView{
 		rdbHandle,
 
 		tableName,
 	}
 }
 
-func (view *Params) Set(accessor types.ParamAccessor, value string) error {
+func (view *ParamsView) Set(accessor types.ParamAccessor, value string) error {
 	sql, sqlArgs, err := view.rdbHandle.StmtBuilder.
 		Insert(view.tableName).
 		Columns("module", "key", "value").
@@ -57,7 +67,7 @@ func (view *Params) Set(accessor types.ParamAccessor, value string) error {
 	return nil
 }
 
-func (view *Params) FindBy(accessor types.ParamAccessor) (string, error) {
+func (view *ParamsView) FindBy(accessor types.ParamAccessor) (string, error) {
 	sql, sqlArgs, err := view.rdbHandle.StmtBuilder.Select(
 		"value",
 	).From(
@@ -82,7 +92,7 @@ func (view *Params) FindBy(accessor types.ParamAccessor) (string, error) {
 	return value, nil
 }
 
-func (view *Params) FindInt64By(accessor types.ParamAccessor) (int64, error) {
+func (view *ParamsView) FindInt64By(accessor types.ParamAccessor) (int64, error) {
 	value, err := view.FindBy(accessor)
 	if err != nil {
 		return int64(0), err
@@ -96,7 +106,7 @@ func (view *Params) FindInt64By(accessor types.ParamAccessor) (int64, error) {
 	return int64Val, nil
 }
 
-func (view *Params) FindBigIntBy(accessor types.ParamAccessor) (*big.Int, error) {
+func (view *ParamsView) FindBigIntBy(accessor types.ParamAccessor) (*big.Int, error) {
 	value, err := view.FindBy(accessor)
 	if err != nil {
 		return nil, err
@@ -110,7 +120,7 @@ func (view *Params) FindBigIntBy(accessor types.ParamAccessor) (*big.Int, error)
 	return bigIntVal, nil
 }
 
-func (view *Params) FindUint64By(accessor types.ParamAccessor) (uint64, error) {
+func (view *ParamsView) FindUint64By(accessor types.ParamAccessor) (uint64, error) {
 	value, err := view.FindBy(accessor)
 	if err != nil {
 		return uint64(0), err
@@ -124,7 +134,7 @@ func (view *Params) FindUint64By(accessor types.ParamAccessor) (uint64, error) {
 	return uint64Val, nil
 }
 
-func (view *Params) FindDurationBy(accessor types.ParamAccessor) (time.Duration, error) {
+func (view *ParamsView) FindDurationBy(accessor types.ParamAccessor) (time.Duration, error) {
 	value, err := view.FindBy(accessor)
 	if err != nil {
 		return 0 * time.Second, err
@@ -138,7 +148,7 @@ func (view *Params) FindDurationBy(accessor types.ParamAccessor) (time.Duration,
 	return durationVal, nil
 }
 
-func (view *Params) FindBoolBy(accessor types.ParamAccessor) (bool, error) {
+func (view *ParamsView) FindBoolBy(accessor types.ParamAccessor) (bool, error) {
 	value, err := view.FindBy(accessor)
 	if err != nil {
 		return false, err

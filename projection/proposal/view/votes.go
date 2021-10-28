@@ -5,31 +5,42 @@ import (
 	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/crypto-com/chain-indexing/appinterface/pagination"
-
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
-	"github.com/crypto-com/chain-indexing/internal/json"
-
-	"github.com/crypto-com/chain-indexing/internal/utctime"
-
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
-	jsoniter "github.com/json-iterator/go"
+	"github.com/crypto-com/chain-indexing/internal/json"
+	"github.com/crypto-com/chain-indexing/internal/utctime"
 )
 
 const VOTES_TABLE_NAME = "view_proposal_votes"
 
-type Votes struct {
+type Votes interface {
+	Insert(row *VoteRow) error
+	Update(row *VoteRow) error
+	FindByProposalIdVoter(
+		proposalId string,
+		voterAddress string,
+	) (*VoteWithMonikerRow, error)
+	ListByProposalId(
+		proposalId string,
+		order VoteListOrder,
+		pagination *pagination.Pagination,
+	) ([]VoteWithMonikerRow, *pagination.PaginationResult, error)
+}
+
+type VotesView struct {
 	rdb *rdb.Handle
 }
 
-func NewVotes(handle *rdb.Handle) *Votes {
-	return &Votes{
+func NewVotesView(handle *rdb.Handle) Votes {
+	return &VotesView{
 		handle,
 	}
 }
 
-func (proposalView *Votes) Insert(row *VoteRow) error {
+func (votesView *VotesView) Insert(row *VoteRow) error {
 	var err error
 
 	var historiesJSON string
@@ -37,7 +48,7 @@ func (proposalView *Votes) Insert(row *VoteRow) error {
 		return fmt.Errorf("error JSON marshalling vote histories for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	sql, sqlArgs, err := proposalView.rdb.StmtBuilder.Insert(
+	sql, sqlArgs, err := votesView.rdb.StmtBuilder.Insert(
 		VOTES_TABLE_NAME,
 	).Columns(
 		"proposal_id",
@@ -54,7 +65,7 @@ func (proposalView *Votes) Insert(row *VoteRow) error {
 		row.MaybeVoterOperatorAddress,
 		row.TransactionHash,
 		row.VoteAtBlockHeight,
-		proposalView.rdb.TypeConv.Tton(&row.VoteAtBlockTime),
+		votesView.rdb.TypeConv.Tton(&row.VoteAtBlockTime),
 		row.Answer,
 		historiesJSON,
 	).ToSql()
@@ -62,7 +73,7 @@ func (proposalView *Votes) Insert(row *VoteRow) error {
 		return fmt.Errorf("error building vote insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := proposalView.rdb.Exec(sql, sqlArgs...)
+	result, err := votesView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
 		return fmt.Errorf("error inserting vote into the table: %v: %w", err, rdb.ErrWrite)
 	}
@@ -73,25 +84,25 @@ func (proposalView *Votes) Insert(row *VoteRow) error {
 	return nil
 }
 
-func (proposalView *Votes) Update(row *VoteRow) error {
+func (votesView *VotesView) Update(row *VoteRow) error {
 	historiesJSON, err := jsoniter.MarshalToString(row.Histories)
 	if err != nil {
 		return fmt.Errorf("error JSON marshalling vote histories for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	sql, sqlArgs, err := proposalView.rdb.StmtBuilder.Update(
+	sql, sqlArgs, err := votesView.rdb.StmtBuilder.Update(
 		VOTES_TABLE_NAME,
 	).SetMap(map[string]interface{}{
 		"transaction_hash":     row.TransactionHash,
 		"vote_at_block_height": row.VoteAtBlockHeight,
-		"vote_at_block_time":   proposalView.rdb.TypeConv.Tton(&row.VoteAtBlockTime),
+		"vote_at_block_time":   votesView.rdb.TypeConv.Tton(&row.VoteAtBlockTime),
 		"answer":               row.Answer,
 		"histories":            historiesJSON,
 	}).Where("voter_address = ?", row.VoterAddress).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building vote update sql: %v: %w", err, rdb.ErrPrepare)
 	}
-	result, err := proposalView.rdb.Exec(sql, sqlArgs...)
+	result, err := votesView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
 		return fmt.Errorf("error updating vote: %v: %w", err, rdb.ErrWrite)
 	}
@@ -102,8 +113,8 @@ func (proposalView *Votes) Update(row *VoteRow) error {
 	return nil
 }
 
-func (proposalView *Votes) FindByProposalIdVoter(proposalId string, voterAddress string) (*VoteWithMonikerRow, error) {
-	sql, sqlArgs, err := proposalView.rdb.StmtBuilder.Select(
+func (votesView *VotesView) FindByProposalIdVoter(proposalId string, voterAddress string) (*VoteWithMonikerRow, error) {
+	sql, sqlArgs, err := votesView.rdb.StmtBuilder.Select(
 		fmt.Sprintf("%s.proposal_id", VOTES_TABLE_NAME),
 		fmt.Sprintf("%s.voter_address", VOTES_TABLE_NAME),
 		fmt.Sprintf("%s.maybe_voter_operator_address", VOTES_TABLE_NAME),
@@ -131,9 +142,9 @@ func (proposalView *Votes) FindByProposalIdVoter(proposalId string, voterAddress
 
 	var row VoteWithMonikerRow
 	var historiesJSON *string
-	voteAtBlockTimeReader := proposalView.rdb.NtotReader()
+	voteAtBlockTimeReader := votesView.rdb.NtotReader()
 
-	result := proposalView.rdb.QueryRow(sql, sqlArgs...)
+	result := votesView.rdb.QueryRow(sql, sqlArgs...)
 	if err != nil {
 		return nil, fmt.Errorf("error executing vote select SQL: %v: %w", err, rdb.ErrQuery)
 	}
@@ -165,12 +176,12 @@ func (proposalView *Votes) FindByProposalIdVoter(proposalId string, voterAddress
 	return &row, nil
 }
 
-func (proposalView *Votes) ListByProposalId(
+func (votesView *VotesView) ListByProposalId(
 	proposalId string,
 	order VoteListOrder,
 	pagination *pagination.Pagination,
 ) ([]VoteWithMonikerRow, *pagination.PaginationResult, error) {
-	stmtBuilder := proposalView.rdb.StmtBuilder.Select(
+	stmtBuilder := votesView.rdb.StmtBuilder.Select(
 		fmt.Sprintf("%s.proposal_id", VOTES_TABLE_NAME),
 		fmt.Sprintf("%s.voter_address", VOTES_TABLE_NAME),
 		fmt.Sprintf("%s.maybe_voter_operator_address", VOTES_TABLE_NAME),
@@ -199,10 +210,10 @@ func (proposalView *Votes) ListByProposalId(
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
-		proposalView.rdb,
+		votesView.rdb,
 	).WithCustomTotalQueryFn(
 		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
-			totalView := NewVotesTotal(rdbHandle)
+			totalView := NewVotesTotalView(rdbHandle)
 			total, err := totalView.FindBy(proposalId)
 			if err != nil {
 				return int64(0), err
@@ -216,9 +227,9 @@ func (proposalView *Votes) ListByProposalId(
 	}
 
 	var historiesJSON *string
-	voteAtBlockTimeReader := proposalView.rdb.NtotReader()
+	voteAtBlockTimeReader := votesView.rdb.NtotReader()
 
-	rowsResult, err := proposalView.rdb.Query(sql, sqlArgs...)
+	rowsResult, err := votesView.rdb.Query(sql, sqlArgs...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error executing vote select SQL: %v: %w", err, rdb.ErrQuery)
 	}
