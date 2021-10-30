@@ -178,14 +178,32 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
-	addressFilter := bridge_activitiy_view.BridgeActivitiesListAddressFilter{
-		MaybeCronosAddress:         nil,
-		MaybeCryptoOrgChainAddress: nil,
-	}
 	filter := bridge_activitiy_view.BridgeActivitiesListFilter{
 		MaybeIdGt:        nil,
 		MaybeCreatedAtGt: nil,
 		MaybeUpdatedAtGt: nil,
+	}
+	if queryArgs.Has("id.gt") {
+		filter.MaybeIdGt = primptr.String(string(queryArgs.Peek("id.gt")))
+	} else if queryArgs.Has("createdAt.gt") {
+		maybeCreatedAtGt, createdAtGtParseErr := parseTimeFilter(string(queryArgs.Peek("createdAt.gt")))
+		if createdAtGtParseErr != nil {
+			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			return
+		}
+		filter.MaybeCreatedAtGt = maybeCreatedAtGt
+	} else if queryArgs.Has("updatedAt.gt") {
+		maybeUpdatedAtGt, updatedAtGtParseErr := parseTimeFilter(string(queryArgs.Peek("updatedAt.gt")))
+		if updatedAtGtParseErr != nil {
+			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			return
+		}
+		filter.MaybeUpdatedAtGt = maybeUpdatedAtGt
+	}
+
+	addressFilter := bridge_activitiy_view.BridgeActivitiesListAddressFilter{
+		MaybeCronosAddress:         nil,
+		MaybeCryptoOrgChainAddress: nil,
 	}
 	if networkParam == "cronos" {
 		addressFilter.MaybeCronosAddress = primptr.String(accountParam)
