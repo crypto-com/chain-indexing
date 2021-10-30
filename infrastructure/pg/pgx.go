@@ -16,7 +16,10 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 )
 
-var PostgresStmtBuilder = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+var PostgresStmtBuilder = rdb.NewStatementBuilder(
+	sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
+	sq.Dollar,
+)
 
 type PgxConnLike interface {
 	Begin(ctx context.Context) (pgx.Tx, error)
