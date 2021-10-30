@@ -7,7 +7,7 @@ import (
 	"time"
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
-	"github.com/crypto-com/chain-indexing/internal/utctime"
+	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/pkg/errors"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"

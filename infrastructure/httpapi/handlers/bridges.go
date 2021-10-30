@@ -8,7 +8,7 @@ import (
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 
-	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 
 	"github.com/ethereum/go-ethereum/common"
 

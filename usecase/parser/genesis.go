@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
-	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"

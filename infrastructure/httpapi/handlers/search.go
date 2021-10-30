@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
-	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 
 	account_transaction_view "github.com/crypto-com/chain-indexing/projection/account_transaction/view"
 

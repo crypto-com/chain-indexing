@@ -6,7 +6,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/primptr"
-	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	validator_view "github.com/crypto-com/chain-indexing/projection/validator/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 
