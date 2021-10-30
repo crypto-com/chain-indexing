@@ -6,6 +6,7 @@ import (
 	"math/big"
 	"time"
 
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/projection/proposal/types"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbparambase"
@@ -16,13 +17,27 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	"github.com/crypto-com/chain-indexing/projection/proposal/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
 var _ projection_entity.Projection = &Proposal{}
+
+var (
+	NewProposals       = view.NewProposalsView
+	NewVotes           = view.NewVotesView
+	NewVotesTotal      = view.NewVotesTotalView
+	NewDepositors      = view.NewDepositorsView
+	NewDepositorsTotal = view.NewDepositorsTotalView
+
+	UpdateLastHandledEventHeight = (*Proposal).UpdateLastHandledEventHeight
+
+	ParamBaseHandleEvents     = (*rdbparambase.Base).HandleEvents
+	ValidatorBaseHandleEvents = (*rdbvalidatorbase.Base).HandleEvents
+	ParamBaseGetView          = (*rdbparambase.Base).GetView
+	ValidatorBaseGetView      = (*rdbvalidatorbase.Base).GetView
+)
 
 type Proposal struct {
 	*rdbprojectionbase.Base
@@ -104,14 +119,14 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 
 	rdbTxHandle := rdbTx.ToHandle()
 
-	if err := projection.paramBase.HandleEvents(rdbTxHandle, projection.logger, events); err != nil {
+	if err := ParamBaseHandleEvents(projection.paramBase, rdbTxHandle, projection.logger, events); err != nil {
 		return fmt.Errorf("error handling event in param base: %v", err)
 	}
-	if err := projection.validatorBase.HandleEvents(rdbTxHandle, projection.logger, events); err != nil {
+	if err := ValidatorBaseHandleEvents(projection.validatorBase, rdbTxHandle, projection.logger, events); err != nil {
 		return fmt.Errorf("error handling event in validator base: %v", err)
 	}
 
-	proposalsView := view.NewProposals(rdbTxHandle)
+	proposalsView := NewProposals(rdbTxHandle)
 
 	var blockTime utctime.UTCTime
 	for _, event := range events {
@@ -153,20 +168,10 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				return fmt.Errorf("error inserting  text proposal proposal into view: %v", insertProposalErr)
 			}
 
-			validatorsView := projection.validatorBase.GetView(rdbTxHandle)
-			maybeDepositorValidatorRow, err := validatorsView.FindLastBy(validatorbase_view.ValidatorIdentity{
-				MaybeInititalDelegatorAddress: &msgSubmitProposal.ProposerAddress,
-			})
-			var maybeDepositorValidatorAddress *string
-			if err != nil {
-				if !errors.Is(err, rdb.ErrNoRows) {
-					return fmt.Errorf("error querying proposer validator address: %v", err)
-				}
-			} else {
-				maybeDepositorValidatorAddress = &maybeDepositorValidatorRow.OperatorAddress
-			}
-			depositorsView := view.NewDepositors(rdbTxHandle)
-			depositorsTotalView := view.NewDepositorsTotal(rdbTxHandle)
+			maybeDepositorValidatorAddress := context.maybeProposerValidatorAddress
+
+			depositorsView := NewDepositors(rdbTxHandle)
+			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
 			if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
 				ProposalId:                    *msgSubmitProposal.MaybeProposalId,
 				DepositorAddress:              msgSubmitProposal.ProposerAddress,
@@ -216,20 +221,10 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				return fmt.Errorf("error inserting param change proposal into view: %v", insertProposalErr)
 			}
 
-			validatorsView := projection.validatorBase.GetView(rdbTxHandle)
-			maybeDepositorValidatorRow, err := validatorsView.FindLastBy(validatorbase_view.ValidatorIdentity{
-				MaybeInititalDelegatorAddress: &msgSubmitProposal.ProposerAddress,
-			})
-			var maybeDepositorValidatorAddress *string
-			if err != nil {
-				if !errors.Is(err, rdb.ErrNoRows) {
-					return fmt.Errorf("error querying proposer validator address: %v", err)
-				}
-			} else {
-				maybeDepositorValidatorAddress = &maybeDepositorValidatorRow.OperatorAddress
-			}
-			depositorsView := view.NewDepositors(rdbTxHandle)
-			depositorsTotalView := view.NewDepositorsTotal(rdbTxHandle)
+			maybeDepositorValidatorAddress := context.maybeProposerValidatorAddress
+
+			depositorsView := NewDepositors(rdbTxHandle)
+			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
 			if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
 				ProposalId:                    *msgSubmitProposal.MaybeProposalId,
 				DepositorAddress:              msgSubmitProposal.ProposerAddress,
@@ -282,20 +277,10 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				return fmt.Errorf("error inserting param change proposal into view: %v", insertProposalErr)
 			}
 
-			validatorsView := projection.validatorBase.GetView(rdbTxHandle)
-			maybeDepositorValidatorRow, err := validatorsView.FindLastBy(validatorbase_view.ValidatorIdentity{
-				MaybeInititalDelegatorAddress: &msgSubmitProposal.ProposerAddress,
-			})
-			var maybeDepositorValidatorAddress *string
-			if err != nil {
-				if !errors.Is(err, rdb.ErrNoRows) {
-					return fmt.Errorf("error querying proposer validator address: %v", err)
-				}
-			} else {
-				maybeDepositorValidatorAddress = &maybeDepositorValidatorRow.OperatorAddress
-			}
-			depositorsView := view.NewDepositors(rdbTxHandle)
-			depositorsTotalView := view.NewDepositorsTotal(rdbTxHandle)
+			maybeDepositorValidatorAddress := context.maybeProposerValidatorAddress
+
+			depositorsView := NewDepositors(rdbTxHandle)
+			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
 			if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
 				ProposalId:                    *msgSubmitProposal.MaybeProposalId,
 				DepositorAddress:              msgSubmitProposal.ProposerAddress,
@@ -345,20 +330,10 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				return fmt.Errorf("error inserting param software upgrade proposal into view: %v", insertProposalErr)
 			}
 
-			validatorsView := projection.validatorBase.GetView(rdbTxHandle)
-			maybeDepositorValidatorRow, err := validatorsView.FindLastBy(validatorbase_view.ValidatorIdentity{
-				MaybeInititalDelegatorAddress: &msgSubmitProposal.ProposerAddress,
-			})
-			var maybeDepositorValidatorAddress *string
-			if err != nil {
-				if !errors.Is(err, rdb.ErrNoRows) {
-					return fmt.Errorf("error querying proposer validator address: %v", err)
-				}
-			} else {
-				maybeDepositorValidatorAddress = &maybeDepositorValidatorRow.OperatorAddress
-			}
-			depositorsView := view.NewDepositors(rdbTxHandle)
-			depositorsTotalView := view.NewDepositorsTotal(rdbTxHandle)
+			maybeDepositorValidatorAddress := context.maybeProposerValidatorAddress
+
+			depositorsView := NewDepositors(rdbTxHandle)
+			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
 			if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
 				ProposalId:                    *msgSubmitProposal.MaybeProposalId,
 				DepositorAddress:              msgSubmitProposal.ProposerAddress,
@@ -408,20 +383,10 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				return fmt.Errorf("error inserting cancel software upgrade proposal proposal into view: %v", insertProposalErr)
 			}
 
-			validatorsView := projection.validatorBase.GetView(rdbTxHandle)
-			maybeDepositorValidatorRow, err := validatorsView.FindLastBy(validatorbase_view.ValidatorIdentity{
-				MaybeInititalDelegatorAddress: &msgSubmitProposal.ProposerAddress,
-			})
-			var maybeDepositorValidatorAddress *string
-			if err != nil {
-				if !errors.Is(err, rdb.ErrNoRows) {
-					return fmt.Errorf("error querying proposer validator address: %v", err)
-				}
-			} else {
-				maybeDepositorValidatorAddress = &maybeDepositorValidatorRow.OperatorAddress
-			}
-			depositorsView := view.NewDepositors(rdbTxHandle)
-			depositorsTotalView := view.NewDepositorsTotal(rdbTxHandle)
+			maybeDepositorValidatorAddress := context.maybeProposerValidatorAddress
+
+			depositorsView := NewDepositors(rdbTxHandle)
+			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
 			if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
 				ProposalId:                    *msgSubmitProposal.MaybeProposalId,
 				DepositorAddress:              msgSubmitProposal.ProposerAddress,
@@ -445,7 +410,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				return fmt.Errorf("error finding proposal which voting period has started: %v", err)
 			}
 
-			paramsView := projection.paramBase.GetView(rdbTxHandle)
+			paramsView := ParamBaseGetView(projection.paramBase, rdbTxHandle)
 			votingPeriod, err := paramsView.FindDurationBy(rdbparambase_types.ParamAccessor{
 				Module: "gov",
 				Key:    "voting_period",
@@ -504,7 +469,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				return fmt.Errorf("error updating proposal which has deposit: %v", updateProposalErr)
 			}
 
-			validatorsView := projection.validatorBase.GetView(rdbTxHandle)
+			validatorsView := ValidatorBaseGetView(projection.validatorBase, rdbTxHandle)
 			maybeDepositorValidatorRow, err := validatorsView.FindLastBy(validatorbase_view.ValidatorIdentity{
 				MaybeInititalDelegatorAddress: &deposit.Depositor,
 			})
@@ -517,8 +482,8 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				maybeDepositorValidatorAddress = &maybeDepositorValidatorRow.OperatorAddress
 			}
 
-			depositorsView := view.NewDepositors(rdbTxHandle)
-			depositorsTotalView := view.NewDepositorsTotal(rdbTxHandle)
+			depositorsView := NewDepositors(rdbTxHandle)
+			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
 			if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
 				ProposalId:                    deposit.ProposalId,
 				DepositorAddress:              deposit.Depositor,
@@ -537,7 +502,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 			}
 
 		} else if vote, ok := event.(*event_usecase.MsgVote); ok {
-			validatorsView := projection.validatorBase.GetView(rdbTxHandle)
+			validatorsView := ValidatorBaseGetView(projection.validatorBase, rdbTxHandle)
 			var maybeVoterOperatorAddress *string
 			maybeVoterValidatorRow, err := validatorsView.FindLastBy(validatorbase_view.ValidatorIdentity{
 				MaybeInititalDelegatorAddress: &vote.Voter,
@@ -550,7 +515,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				maybeVoterOperatorAddress = &maybeVoterValidatorRow.OperatorAddress
 			}
 
-			votesView := view.NewVotes(rdbTxHandle)
+			votesView := NewVotes(rdbTxHandle)
 
 			mutVoteRow, queryExistingVoteRowErr := votesView.FindByProposalIdVoter(vote.ProposalId, vote.Voter)
 			if queryExistingVoteRowErr != nil {
@@ -585,7 +550,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 					return fmt.Errorf("error updating proposal which has new vote: %v", updateProposalErr)
 				}
 
-				votesTotalView := view.NewVotesTotal(rdbTxHandle)
+				votesTotalView := NewVotesTotal(rdbTxHandle)
 				if updateVoteTotalErr := votesTotalView.Increment(vote.ProposalId, 1); updateVoteTotalErr != nil {
 					return fmt.Errorf("error updating votes total record: %v", updateVoteTotalErr)
 				}
@@ -610,7 +575,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 		}
 	}
 
-	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
+	if err := UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
 		return fmt.Errorf("error updating last handled event height: %v", err)
 	}
 
@@ -625,7 +590,7 @@ func (projection *Proposal) prepareNewProposalSubmissionContext(
 	rdbTxHandle *rdb.Handle,
 	proposerAddress string,
 ) (newProposalSubmissionContext, error) {
-	validatorsView := projection.validatorBase.GetView(rdbTxHandle)
+	validatorsView := ValidatorBaseGetView(projection.validatorBase, rdbTxHandle)
 	maybeProposerValidatorRow, err := validatorsView.FindLastBy(validatorbase_view.ValidatorIdentity{
 		MaybeInititalDelegatorAddress: &proposerAddress,
 	})
@@ -638,7 +603,7 @@ func (projection *Proposal) prepareNewProposalSubmissionContext(
 		maybeProposerValidatorAddress = &maybeProposerValidatorRow.OperatorAddress
 	}
 
-	paramsView := projection.paramBase.GetView(rdbTxHandle)
+	paramsView := ParamBaseGetView(projection.paramBase, rdbTxHandle)
 	maxDepositPeriod, err := paramsView.FindDurationBy(rdbparambase_types.ParamAccessor{
 		Module: "gov",
 		Key:    "max_deposit_period",

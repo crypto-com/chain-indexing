@@ -3,7 +3,8 @@ package block_test
 import (
 	. "github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	. "github.com/crypto-com/chain-indexing/entity/event/test"
-	. "github.com/crypto-com/chain-indexing/internal/logger/test"
+	. "github.com/crypto-com/chain-indexing/external/logger/test"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/projection/block"
 	view2 "github.com/crypto-com/chain-indexing/projection/block/view"
 	. "github.com/crypto-com/chain-indexing/test"
@@ -13,7 +14,6 @@ import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"

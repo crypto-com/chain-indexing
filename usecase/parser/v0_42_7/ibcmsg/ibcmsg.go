@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/mitchellh/mapstructure"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
 	base64_internal "github.com/crypto-com/chain-indexing/internal/base64"
-	"github.com/crypto-com/chain-indexing/internal/json"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/internal/typeconv"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
@@ -81,10 +80,6 @@ func ParseMsgRecvPacket(
 		// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/04-channel/keeper/packet.go#L239
 		// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/keeper/msg_server.go#L508
 
-		packetAck := ibc_model.MsgRecvPacketPacketAck{
-			MaybeError: primptr.String("missing `fungible_token_packet` event in TxsResult log, this could happen when the packet is already relayed"),
-		}
-
 		msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
 			RawMsgRecvPacket: rawMsg,
 
@@ -96,8 +91,6 @@ func ParseMsgRecvPacket(
 			},
 
 			PacketSequence: typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
-			// TODO: Remove this when IBCChannel projection no longer relies on packetAck.MaybeError to check if MsgRecvPacket is success or not
-			PacketAck: packetAck,
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
@@ -137,8 +130,7 @@ func ParseMsgRecvPacket(
 		PacketSequence:  typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
 		ChannelOrdering: recvPacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
 		ConnectionID:    recvPacketEvent.MustGetAttributeByKey("packet_connection"),
-		// TODO: Remove this when IBCChannel projection no longer relies on packetAck.MaybeError to check if MsgRecvPacket is success or not
-		PacketAck: packetAck,
+		PacketAck:       packetAck,
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(

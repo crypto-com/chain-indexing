@@ -8,7 +8,8 @@ connode_address_prefix = "crocnclcons"
 connode_pubkey_prefix = "crocnclconspub"
 
 [cosmos_version_enabled_height]
-v0_42_7 = 0
+# chain-maind v2.x.x starting height in mainnet 
+v0_42_7 = 922362
 
 [system]
 # mode of the system, possible values: EVENT_STORE,TENDERMINT_DIRECT

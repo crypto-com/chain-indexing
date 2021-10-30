@@ -4,127 +4,161 @@ Crypto.com Chain Indexing Service (chain-indexing) is a service to index all pub
 
 Right now it supports Postgres database and provides RESTful API as query interface.
 
-## 1. Build
+## 1. Usage
 
-### 1.1 Build using Docker (Not working yet)
+```go
+package main
 
-Using Docker is the easiest way to build chain-indexing. The Docker image contains
-`/app/chain-indexing` Compiled chain-indexing binary
-`/app/migrate` Program to perform migration
+import (
+	"os"
 
-```bash
-make docker
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/bootstrap"
+	"github.com/crypto-com/chain-indexing/infrastructure"
+	"github.com/crypto-com/chain-indexing/entity/projection"
+)
+
+func main() {
+	// Init configurations...
+	logger := infrastructure.NewZerologLogger(os.Stdout)
+	fileConfig := bootstrap.FileConfig{}
+	config := bootstrap.Config{
+		FileConfig: fileConfig,
+	}
+
+	// Init indexing app
+	app := bootstrap.NewApp(logger, &config)
+	app.InitIndexService(
+		initProjections(logger, &config),
+		initCronJobs(logger, &config),
+	)
+	app.InitHTTPAPIServer(initRouteRegistry(logger, &config))
+
+	// Run indexing app
+	app.Run()
+}
+
+func initProjections(
+	logger applogger.Logger,
+	config *bootstrap.Config,
+) []projection.Projection {
+    // append your Projections
+}
+
+
+func initCronJobs(
+	logger applogger.Logger,
+	config *bootstrap.Config,
+) []projection.CronJob {
+	// append your CronJobs
+}
+
+func initRouteRegistry(
+	logger applogger.Logger,
+	config *bootstrap.Config,
+) bootstrap.RouteRegistry {
+	// append your Routes
+}
 ```
 
-### 1.2 Build manually
-
-#### Prerequisite
-
-- [Go](https://golang.org/dl/) compiler
-
-```bash
-make all
+### Configuration
+```
+config := bootstrap.Config{
+    FileConfig: bootstrap.FileConfig{
+        Blockchain: bootstrap.BlockchainConfig{
+            // Bonding denom of the blockchain
+            BondingDenom:           "",
+            // Account address prefix of the blockchain
+            AccountAddressPrefix:   "",
+            // Account public key prefix of the blockchain
+            AccountPubKeyPrefix:    "",
+            // Validator address prefix of the blockchain
+            ValidatorAddressPrefix: "",
+            // Validator public key prefix of the blockchain
+            ValidatorPubKeyPrefix:  "",
+        },
+        System: bootstrap.SystemConfig{
+            // "EVENT_STORE", "TENDERMINT_DIRECT", "API_ONLY"
+            Mode: "",
+        },
+        Sync: bootstrap.SyncConfig{
+            // Window size of Sunc process
+            WindowSize: 0,
+        },
+        Tendermint: bootstrap.TendermintConfig{
+            // HTTP address of Tendermint client
+            HTTPRPCUrl:           "",
+            // Connection type
+            Insecure:             false,
+            StrictGenesisParsing: false,
+        },
+        CosmosApp: bootstrap.CosmosAppConfig{
+            // HTTP address of Cosmos app client
+            HTTPRPCUrl: "",
+            // Connection type
+            Insecure:   false,
+        },
+        HTTP: bootstrap.HTTPConfig{
+            // HTTP address to be listened
+            ListeningAddress:   "",
+            // Prefix of all routes
+            RoutePrefix:        "",
+            // Allowed CORS for Origins
+            CorsAllowedOrigins: nil,
+            // Allowed CORS for Methods
+            CorsAllowedMethods: nil,
+            // Allowed CORS for Headers
+            CorsAllowedHeaders: nil,
+        },
+        Debug: bootstrap.DebugConfig{
+            // Enable pprof server
+            PprofEnable:           false,
+            // Pprof server address to be listened
+            PprofListeningAddress: "",
+        },
+        Database: bootstrap.DatabaseConfig{
+            // Connection type
+            SSL:      false,
+            // Database host
+            Host:     "",
+            // Database port
+            Port:     0,
+            // Database username
+            Username: "",
+            // Database password
+            Password: "",
+            // Database name
+            Name:     "",
+            // Database schema name
+            Schema:   "",
+        },
+        Postgres: bootstrap.PostgresConfig{
+            // Max connections of Database
+            MaxConns:            0,
+            // Min connections of Database
+            MinConns:            0,
+            // Max connections life time of Database
+            MaxConnLifeTime:     "",
+            // Max connections idle time of Database
+            MaxConnIdleTime:     "",
+            // Health check interval of Database
+            HealthCheckInterval: "",
+        },
+        Logger: bootstrap.LoggerConfig{
+            // LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_ERROR, LOG_LEVEL_PANIC, LOG_DISABLED
+            Level: (logger.LogLevel),
+            // Enable colered logs
+            Color: false,
+        },
+        CosmosVersionEnabledHeight: bootstrap.CosmosVersionEnabledHeightConfig{
+            // BLock height from cosmos sdk version v0.42.7
+            V0_42_7: 0,
+        },
+}
 ```
 
-Please make sure `$GOPATH` is set and `$GOPATH/bin` includes in `$PATH`. You could include the following code into your `zsh` or `bash` file (`.zshrc` or `.bash_profile`).
 
-```bash
-# Add $GOPATH/bin to $PATH
-export GOPATH=$HOME/go
-export PATH=$GOPATH/bin:$PATH
-```
-
-Then `source` the file or open a new terminal session.
-
-## 2. How to Run
-
-### 2.1 Prerequisite
-
-- Crypto.com Chain full node
-- Postgres Database
-
-### 2.2 Configuration file
-
-A sample configuration is available under `config/config.sample.toml`.
-
-Copy it, update configuration based on your setup and rename it as `config/config.toml`.
-
-Note: Postgres database password is not available in `config.toml` nor command option. You must provide it as environment variable `DB_PASSWORD` on start.
-
-#### Reminder On Connecting Mainnet
-
-There is a rate limiter on our public nodes. If you hit the rate limit, you may want to run your own nodes.
-### 2.3 Postgres Database
-
-You can have your Postgres setup locally or remotely.
-
-**REMINDER**: I would suggest using our `docker-compose` script to start the DB instance. If you install through `homebrew`, its default setting will need to be adjusted in order to match the indexing server's configuration. 
-
-#### Run Postgres with Docker
-
-**WARNING**: The docker files available under `docker/` is intended only for development and testing purpose only. Never use them in production setup.
-
-For a local test run. A docker-compose file with Postgres database and PgAdmin console is available via running:
-
-```bash
-docker-compose --file docker/docker-compose.development.yml up -d
-```
-
-This will start the following docker instances on your local network when you use default credentials:
-| Docker image | Port | Username | Password | Other Config | Mounted volume |
-| --- | --- | --- | --- | --- | --- |
-| Postgres | 5432 | postgres | postgres | Database Name = postgres; SSL = true | ./pgdata-dev |
-| PgAdmin | 8080 | pgadmin@localhost | pgadmin | N/A | N/A |
-
-### 2.4 Execute Database Migration
-
-for DB_PASSWORD, never use common word such as "postgres" , "admin", "password", choose at least 16 characters including number, special character, capital letters even in testing environment.
-if you don't use strong password, pgmigrate will stop further processing
-
-#### Docker
-
-```bash
-docker run -it \
-    --env DB_USERNAME=postgres \
-    --env DB_PASSWORD=your_postgresql_password \
-    --env DB_HOST=host.docker.internal \
-    --env DB_PORT=5432 \
-    --env DB_NAME=postgres \
-    --env DB_SCHEMA=public \
-    chain-indexing /app/migrate -- -verbose up
-```
-
-#### Manual Build
-
-```bash
-# In your first run, you need to install the dependency `migrate`
-./pgmigrate.sh --install-dependency
-# Then you should have `migrate` under your `$PATH`
-which migrate
-
-# Run the below command to start the migrate
-./pgmigrate.sh -- -verbose up
-```
-
-### 2.5 Run the Service
-
-#### Docker
-
-```bash
-docker run \
-    -v `pwd`/config:/app/config --read-only \
-    -p 28857:28857 \
-    --env DB_PASSWORD=your_postgresql_password \
-    chain-indexing /app/chain-indexing
-```
-
-#### Manual build
-
-```bash
-env DB_PASSWORD=your_postgresql_password ./chain-indexing
-```
-
-## 3. Test
+## 2. Test
 
 ```bash
 ./test.sh [--install-dependency] [--no-db] [--watch]
@@ -132,7 +166,7 @@ env DB_PASSWORD=your_postgresql_password ./chain-indexing
 
 Providing `--install-dependency` will attempt to install test runner [Ginkgo](https://github.com/onsi/ginkgo) if it is not installed before.
 
-## 4. Lint
+## 3. Lint
 
 ### With Local Installed golangci-lint
 
@@ -150,11 +184,11 @@ Providing `--install-dependency` will attempt to install test runner [Ginkgo](ht
 docker run --rm -v $(pwd):/app -w /app golangci/golangci-lint:v1.33 golangci-lint run -v
 ```
 
-## 5. Contributing
+## 4. Contributing
 
 Please abide by the [Code of Conduct](CODE_OF_CONDUCT.md) in all interactions,
 and the [contributing guidelines](CONTRIBUTING.md) when submitting code.
 
-## 6. License
+## 5. License
 
 [Apache 2.0](./LICENSE)

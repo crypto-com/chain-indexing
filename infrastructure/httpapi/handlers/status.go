@@ -6,16 +6,16 @@ import (
 	"time"
 
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
+	"github.com/crypto-com/chain-indexing/external/json"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 
 	"github.com/crypto-com/chain-indexing/projection/chainstats"
 
-	"github.com/crypto-com/chain-indexing/internal/json"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 
 	status_polling "github.com/crypto-com/chain-indexing/appinterface/polling"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	block_view "github.com/crypto-com/chain-indexing/projection/block/view"
 	chainstats_view "github.com/crypto-com/chain-indexing/projection/chainstats/view"
 	transaction_view "github.com/crypto-com/chain-indexing/projection/transaction/view"
@@ -32,7 +32,7 @@ type StatusHandler struct {
 	cosmosAppClient       cosmosapp.Client
 	blocksView            *block_view.Blocks
 	chainStatsView        *chainstats_view.ChainStats
-	transactionsTotalView *transaction_view.TransactionsTotal
+	transactionsTotalView transaction_view.TransactionsTotal
 	validatorsView        *validator_view.Validators
 	validatorStatsView    *validatorstats_view.ValidatorStats
 	statusView            *status_polling.Status
@@ -50,7 +50,7 @@ func NewStatusHandler(logger applogger.Logger, cosmosAppClient cosmosapp.Client,
 		cosmosAppClient,
 		block_view.NewBlocks(rdbHandle),
 		chainstats_view.NewChainStats(rdbHandle),
-		transaction_view.NewTransactionsTotal(rdbHandle),
+		transaction_view.NewTransactionsTotalView(rdbHandle),
 		validator_view.NewValidators(rdbHandle),
 		validatorstats_view.NewValidatorStats(rdbHandle),
 		status_polling.NewStatus(rdbHandle),

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	"github.com/crypto-com/chain-indexing/projection/validator/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"

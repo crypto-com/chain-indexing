@@ -6,13 +6,13 @@ import (
 	"time"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbparambase/types"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	param_view "github.com/crypto-com/chain-indexing/appinterface/projection/rdbparambase/view"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	proposal_view "github.com/crypto-com/chain-indexing/projection/proposal/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/valyala/fasthttp"
@@ -22,10 +22,10 @@ type Proposals struct {
 	logger applogger.Logger
 
 	cosmosClient       cosmosapp.Client
-	proposalsView      *proposal_view.Proposals
-	votesView          *proposal_view.Votes
-	depositorsView     *proposal_view.Depositors
-	proposalParamsView *param_view.Params
+	proposalsView      proposal_view.Proposals
+	votesView          proposal_view.Votes
+	depositorsView     proposal_view.Depositors
+	proposalParamsView param_view.Params
 
 	totalBonded              coin.Coin
 	totalBondedLastUpdatedAt time.Time
@@ -36,10 +36,10 @@ func NewProposals(logger applogger.Logger, rdbHandle *rdb.Handle, cosmosClient c
 		logger,
 
 		cosmosClient,
-		proposal_view.NewProposals(rdbHandle),
-		proposal_view.NewVotes(rdbHandle),
-		proposal_view.NewDepositors(rdbHandle),
-		param_view.NewParams(rdbHandle, proposal_view.PARAMS_TABLE_NAME),
+		proposal_view.NewProposalsView(rdbHandle),
+		proposal_view.NewVotesView(rdbHandle),
+		proposal_view.NewDepositorsView(rdbHandle),
+		param_view.NewParamsView(rdbHandle, proposal_view.PARAMS_TABLE_NAME),
 
 		coin.Coin{},
 		time.Unix(int64(0), int64(0)),

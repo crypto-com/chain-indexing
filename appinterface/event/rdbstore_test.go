@@ -2,6 +2,7 @@ package event_test
 
 import (
 	"github.com/crypto-com/chain-indexing/entity/event/test"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	. "github.com/crypto-com/chain-indexing/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -9,7 +10,6 @@ import (
 	appinterface_event "github.com/crypto-com/chain-indexing/appinterface/event"
 	"github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 )
 
 var _ = Describe("RdbEventStore", func() {

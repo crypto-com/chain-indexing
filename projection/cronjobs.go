@@ -5,7 +5,7 @@ import (
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/bridge_activity_matcher"
 )
 

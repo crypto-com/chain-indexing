@@ -4,11 +4,11 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/crypto-com/chain-indexing/external/json"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
-	"github.com/crypto-com/chain-indexing/internal/json"
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
 	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
@@ -243,7 +243,7 @@ var _ = Describe("ParseMsgCommands", func() {
 		"connectionId": "",
 		"packetAck": {
 			"result": null,
-			"error": "{PACKET_ACK_ERROR}"
+			"error": null
 		}
 	}
 }
@@ -280,18 +280,11 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			regex, _ := regexp.Compile("\n?\r?\\s?")
 
-			expectedWithUUID := strings.Replace(
-				regex.ReplaceAllString(expected, ""),
-				"{UUID}",
-				typedEvent.UUID(),
-				-1,
-			)
-
 			Expect(json.MustMarshalToString(typedEvent)).To(Equal(
 				strings.Replace(
-					expectedWithUUID,
-					"{PACKET_ACK_ERROR}",
-					"missing `fungible_token_packet` event in TxsResult log, this could happen when the packet is already relayed",
+					regex.ReplaceAllString(expected, ""),
+					"{UUID}",
+					typedEvent.UUID(),
 					-1,
 				),
 			))

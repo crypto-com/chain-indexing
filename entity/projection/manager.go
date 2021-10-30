@@ -5,7 +5,7 @@ import (
 	"time"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 )
 
 // StoreBasedManager is a projection manager relies on replaying events from EventStore

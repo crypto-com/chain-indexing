@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/fasthttp/router"
 	"github.com/lab259/cors"
 	"github.com/valyala/fasthttp"
@@ -35,6 +35,26 @@ func NewServer(listeningAddress string) *Server {
 
 func (server *Server) GET(path string, handler fasthttp.RequestHandler) *Server {
 	server.router.GET(path, handler)
+	return server
+}
+
+func (server *Server) POST(path string, handler fasthttp.RequestHandler) *Server {
+	server.router.POST(path, handler)
+	return server
+}
+
+func (server *Server) PUT(path string, handler fasthttp.RequestHandler) *Server {
+	server.router.PUT(path, handler)
+	return server
+}
+
+func (server *Server) PATCH(path string, handler fasthttp.RequestHandler) *Server {
+	server.router.PATCH(path, handler)
+	return server
+}
+
+func (server *Server) DELETE(path string, handler fasthttp.RequestHandler) *Server {
+	server.router.DELETE(path, handler)
 	return server
 }
 

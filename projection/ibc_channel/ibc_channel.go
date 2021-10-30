@@ -11,8 +11,9 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
+	"github.com/crypto-com/chain-indexing/projection/ibc_channel/types"
 	ibc_channel_view "github.com/crypto-com/chain-indexing/projection/ibc_channel/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
@@ -63,12 +64,16 @@ func (_ *IBCChannel) GetEventsToListen() []string {
 		event_usecase.BLOCK_CREATED,
 
 		event_usecase.MSG_IBC_CREATE_CLIENT_CREATED,
+		event_usecase.MSG_IBC_CONNECTION_OPEN_INIT_CREATED,
+		event_usecase.MSG_IBC_CONNECTION_OPEN_TRY_CREATED,
 		event_usecase.MSG_IBC_CONNECTION_OPEN_ACK_CREATED,
 		event_usecase.MSG_IBC_CONNECTION_OPEN_CONFIRM_CREATED,
 		event_usecase.MSG_IBC_CHANNEL_OPEN_INIT_CREATED,
 		event_usecase.MSG_IBC_CHANNEL_OPEN_TRY_CREATED,
 		event_usecase.MSG_IBC_CHANNEL_OPEN_ACK_CREATED,
 		event_usecase.MSG_IBC_CHANNEL_OPEN_CONFIRM_CREATED,
+		event_usecase.MSG_IBC_CHANNEL_CLOSE_INIT_CREATED,
+		event_usecase.MSG_IBC_CHANNEL_CLOSE_CONFIRM_CREATED,
 		event_usecase.MSG_IBC_TRANSFER_TRANSFER_CREATED,
 		event_usecase.MSG_IBC_RECV_PACKET_CREATED,
 		event_usecase.MSG_IBC_ACKNOWLEDGEMENT_CREATED,
@@ -140,6 +145,44 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error inserting client: %w", err)
 			}
 
+		} else if msgIBCConnectionOpenInit, ok := event.(*event_usecase.MsgIBCConnectionOpenInit); ok {
+
+			clientID := msgIBCConnectionOpenInit.Params.ClientID
+			counterpartyChainID, err := ibcClientsView.FindCounterpartyChainIDBy(clientID)
+			if err != nil {
+				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
+			}
+
+			connection := &ibc_channel_view.IBCConnectionRow{
+				ConnectionID:             msgIBCConnectionOpenInit.Params.ConnectionID,
+				ClientID:                 msgIBCConnectionOpenInit.Params.ClientID,
+				CounterpartyConnectionID: msgIBCConnectionOpenInit.Params.Counterparty.ConnectionID,
+				CounterpartyClientID:     msgIBCConnectionOpenInit.Params.Counterparty.ClientID,
+				CounterpartyChainID:      counterpartyChainID,
+			}
+			if err := ibcConnectionsView.Insert(connection); err != nil {
+				return fmt.Errorf("error inserting connection: %w", err)
+			}
+
+		} else if msgIBCConnectionOpenTry, ok := event.(*event_usecase.MsgIBCConnectionOpenTry); ok {
+
+			clientID := msgIBCConnectionOpenTry.Params.ClientID
+			counterpartyChainID, err := ibcClientsView.FindCounterpartyChainIDBy(clientID)
+			if err != nil {
+				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
+			}
+
+			connection := &ibc_channel_view.IBCConnectionRow{
+				ConnectionID:             msgIBCConnectionOpenTry.Params.ConnectionID,
+				ClientID:                 msgIBCConnectionOpenTry.Params.ClientID,
+				CounterpartyConnectionID: msgIBCConnectionOpenTry.Params.Counterparty.ConnectionID,
+				CounterpartyClientID:     msgIBCConnectionOpenTry.Params.Counterparty.ClientID,
+				CounterpartyChainID:      counterpartyChainID,
+			}
+			if err := ibcConnectionsView.Insert(connection); err != nil {
+				return fmt.Errorf("error inserting connection: %w", err)
+			}
+
 		} else if msgIBCConnectionOpenConfirm, ok := event.(*event_usecase.MsgIBCConnectionOpenConfirm); ok {
 
 			clientID := msgIBCConnectionOpenConfirm.Params.ClientID
@@ -155,8 +198,8 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				CounterpartyClientID:     msgIBCConnectionOpenConfirm.Params.CounterpartyClientID,
 				CounterpartyChainID:      counterpartyChainID,
 			}
-			if err := ibcConnectionsView.Insert(connection); err != nil {
-				return fmt.Errorf("error inserting connection: %w", err)
+			if err := ibcConnectionsView.Update(connection); err != nil {
+				return fmt.Errorf("error updating connection: %w", err)
 			}
 
 		} else if msgIBCConnectionOpenAck, ok := event.(*event_usecase.MsgIBCConnectionOpenAck); ok {
@@ -174,8 +217,8 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				CounterpartyClientID:     msgIBCConnectionOpenAck.Params.CounterpartyClientID,
 				CounterpartyChainID:      counterpartyChainID,
 			}
-			if err := ibcConnectionsView.Insert(connection); err != nil {
-				return fmt.Errorf("error inserting connection: %w", err)
+			if err := ibcConnectionsView.Update(connection); err != nil {
+				return fmt.Errorf("error updating connection: %w", err)
 			}
 
 		} else if msgIBCChannelOpenInit, ok := event.(*event_usecase.MsgIBCChannelOpenInit); ok {
@@ -193,7 +236,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				CounterpartyChannelID:        msgIBCChannelOpenInit.Params.Channel.Counterparty.ChannelID,
 				CounterpartyPortID:           msgIBCChannelOpenInit.Params.Channel.Counterparty.PortID,
 				CounterpartyChainID:          counterpartyChainID,
-				Status:                       false,
+				Status:                       types.STATUS_NOT_ESTABLISHED,
 				PacketOrdering:               msgIBCChannelOpenInit.Params.Channel.Ordering,
 				LastInPacketSequence:         0,
 				LastOutPacketSequence:        0,
@@ -228,7 +271,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				CounterpartyChannelID:        msgIBCChannelOpenTry.Params.Channel.Counterparty.ChannelID,
 				CounterpartyPortID:           msgIBCChannelOpenTry.Params.Channel.Counterparty.PortID,
 				CounterpartyChainID:          counterpartyChainID,
-				Status:                       false,
+				Status:                       types.STATUS_NOT_ESTABLISHED,
 				PacketOrdering:               msgIBCChannelOpenTry.Params.Channel.Ordering,
 				LastInPacketSequence:         0,
 				LastOutPacketSequence:        0,
@@ -270,8 +313,8 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating channel: %w", err)
 			}
 
-			if err := ibcChannelsView.UpdateStatus(channel.ChannelID, true); err != nil {
-				return fmt.Errorf("error updating channel status: %w", err)
+			if err := ibcChannelsView.UpdateStatus(channel.ChannelID, types.STATUS_OPENED); err != nil {
+				return fmt.Errorf("error updating channel established: %w", err)
 			}
 
 		} else if msgIBCChannelOpenConfirm, ok := event.(*event_usecase.MsgIBCChannelOpenConfirm); ok {
@@ -296,8 +339,8 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating channel: %w", err)
 			}
 
-			if err := ibcChannelsView.UpdateStatus(channel.ChannelID, true); err != nil {
-				return fmt.Errorf("error updating channel status: %w", err)
+			if err := ibcChannelsView.UpdateStatus(channel.ChannelID, types.STATUS_OPENED); err != nil {
+				return fmt.Errorf("error updating channel established: %w", err)
 			}
 
 		} else if msgIBCTransferTransfer, ok := event.(*event_usecase.MsgIBCTransferTransfer); ok {
@@ -391,11 +434,8 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
-			// TODO:	1. Should use the below checking when we fix the `success value inverted bug`
-			//				in `ibcmsg.go -> ParseMsgRecvPacket()`.
-			//				2. After changing the below logic, need to update `ibcmsg.go -> ParseMsgRecvPacket()` handle `fungible_token_packet` related logic.
-			// if msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Success {
-			if msgIBCRecvPacket.Params.PacketAck.MaybeError == nil {
+			if msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData != nil &&
+				msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Success {
 
 				amount := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount.String()
 				denom := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Denom
@@ -669,6 +709,30 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 					return fmt.Errorf("error adding tx trace when MsgIBCTimeoutOnClose: %w", err)
 				}
 
+			}
+
+		} else if msgIBCChannelCloseInit, ok := event.(*event_usecase.MsgIBCChannelCloseInit); ok {
+
+			channelID := msgIBCChannelCloseInit.Params.ChannelID
+
+			if err := ibcChannelsView.UpdateStatus(channelID, types.STATUS_CLOSED); err != nil {
+				return fmt.Errorf("error updating channel closed: %w", err)
+			}
+
+			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
+				return fmt.Errorf("error updating channel last_activity_time: %w", err)
+			}
+
+		} else if msgIBCChannelCloseConfirm, ok := event.(*event_usecase.MsgIBCChannelCloseConfirm); ok {
+
+			channelID := msgIBCChannelCloseConfirm.Params.ChannelID
+
+			if err := ibcChannelsView.UpdateStatus(channelID, types.STATUS_CLOSED); err != nil {
+				return fmt.Errorf("error updating channel closed: %w", err)
+			}
+
+			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
+				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
 		}

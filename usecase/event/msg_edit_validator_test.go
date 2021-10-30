@@ -2,7 +2,7 @@ package event_test
 
 import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 

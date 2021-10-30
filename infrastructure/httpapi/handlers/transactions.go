@@ -3,19 +3,19 @@ package handlers
 import (
 	"errors"
 
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/valyala/fasthttp"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	transaction_view "github.com/crypto-com/chain-indexing/projection/transaction/view"
 )
 
 type Transactions struct {
 	logger applogger.Logger
 
-	transactionsView *transaction_view.BlockTransactions
+	transactionsView transaction_view.BlockTransactions
 }
 
 func NewTransactions(logger applogger.Logger, rdbHandle *rdb.Handle) *Transactions {
@@ -24,7 +24,7 @@ func NewTransactions(logger applogger.Logger, rdbHandle *rdb.Handle) *Transactio
 			"module": "TransactionsHandler",
 		}),
 
-		transaction_view.NewTransactions(rdbHandle),
+		transaction_view.NewTransactionsView(rdbHandle),
 	}
 }
 

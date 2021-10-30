@@ -8,7 +8,7 @@ import (
 	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
-	"github.com/crypto-com/chain-indexing/internal/json"
+	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	jsoniter "github.com/json-iterator/go"
@@ -18,17 +18,33 @@ const PROPOSALS_TABLE_NAME = "view_proposals"
 const PARAMS_TABLE_NAME = "view_proposal_params"
 const VALIDATORS_TABLE_NAME = "view_proposal_validators"
 
-type Proposals struct {
+type Proposals interface {
+	Insert(proposal *ProposalRow) error
+	IncrementTotalVoteBy(proposalId uint64, voteToAdd *big.Int) error
+	Update(row *ProposalRow) error
+	FindById(proposalId string) (*ProposalWithMonikerRow, error)
+	List(
+		filter ProposalListFilter,
+		order ProposalListOrder,
+		pagination *pagination_interface.Pagination,
+	) (
+		[]ProposalWithMonikerRow,
+		*pagination_interface.PaginationResult,
+		error,
+	)
+}
+
+type ProposalsView struct {
 	rdb *rdb.Handle
 }
 
-func NewProposals(handle *rdb.Handle) *Proposals {
-	return &Proposals{
+func NewProposalsView(handle *rdb.Handle) Proposals {
+	return &ProposalsView{
 		handle,
 	}
 }
 
-func (proposalView *Proposals) Insert(proposal *ProposalRow) error {
+func (proposalView *ProposalsView) Insert(proposal *ProposalRow) error {
 	var err error
 
 	var dataJSON string
@@ -92,7 +108,7 @@ func (proposalView *Proposals) Insert(proposal *ProposalRow) error {
 	return nil
 }
 
-func (proposalView *Proposals) IncrementTotalVoteBy(proposalId uint64, voteToAdd *big.Int) error {
+func (proposalView *ProposalsView) IncrementTotalVoteBy(proposalId uint64, voteToAdd *big.Int) error {
 	var err error
 
 	selectStmtBuilder := proposalView.rdb.StmtBuilder.Select(
@@ -142,7 +158,7 @@ func (proposalView *Proposals) IncrementTotalVoteBy(proposalId uint64, voteToAdd
 	return nil
 }
 
-func (proposalView *Proposals) Update(row *ProposalRow) error {
+func (proposalView *ProposalsView) Update(row *ProposalRow) error {
 	sql, sqlArgs, err := proposalView.rdb.StmtBuilder.Update(
 		PROPOSALS_TABLE_NAME,
 	).SetMap(map[string]interface{}{
@@ -178,7 +194,7 @@ func (proposalView *Proposals) Update(row *ProposalRow) error {
 	return nil
 }
 
-func (proposalView *Proposals) FindById(proposalId string) (*ProposalWithMonikerRow, error) {
+func (proposalView *ProposalsView) FindById(proposalId string) (*ProposalWithMonikerRow, error) {
 	selectStmtBuilder := proposalView.rdb.StmtBuilder.Select(
 		fmt.Sprintf("%s.proposal_id", PROPOSALS_TABLE_NAME),
 		fmt.Sprintf("%s.title", PROPOSALS_TABLE_NAME),
@@ -287,7 +303,7 @@ func (proposalView *Proposals) FindById(proposalId string) (*ProposalWithMoniker
 	return &row, nil
 }
 
-func (proposalView *Proposals) List(
+func (proposalView *ProposalsView) List(
 	filter ProposalListFilter,
 	order ProposalListOrder,
 	pagination *pagination_interface.Pagination,

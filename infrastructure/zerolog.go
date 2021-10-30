@@ -5,9 +5,8 @@ import (
 	"io"
 	"time"
 
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/rs/zerolog"
-
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 )
 
 // ZerologLogger implements applogger.Logger interface and provide logging service

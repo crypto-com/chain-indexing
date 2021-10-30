@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	transaction_view "github.com/crypto-com/chain-indexing/projection/transaction/view"
 
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
@@ -11,12 +12,17 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
 var _ projection_entity.Projection = &Transaction{}
+
+var (
+	NewTransactions              = transaction_view.NewTransactionsView
+	NewTransactionsTotal         = transaction_view.NewTransactionsTotalView
+	UpdateLastHandledEventHeight = (*Transaction).UpdateLastHandledEventHeight
+)
 
 type Transaction struct {
 	*rdbprojectionbase.Base
@@ -60,8 +66,8 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 	}()
 
 	rdbTxHandle := rdbTx.ToHandle()
-	transactionsView := transaction_view.NewTransactions(rdbTxHandle)
-	transactionsTotalView := transaction_view.NewTransactionsTotal(rdbTxHandle)
+	transactionsView := NewTransactions(rdbTxHandle)
+	transactionsTotalView := NewTransactionsTotal(rdbTxHandle)
 
 	var blockTime utctime.UTCTime
 	var blockHash string
@@ -179,7 +185,7 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 		return fmt.Errorf("error setting total blcok transactions: %w", err)
 	}
 
-	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
+	if err := UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
 		return fmt.Errorf("error updating last handled event height: %v", err)
 	}
 

@@ -8,8 +8,8 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	"github.com/crypto-com/chain-indexing/internal/json"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	"github.com/crypto-com/chain-indexing/projection/account_message"
 	account_message_view "github.com/crypto-com/chain-indexing/projection/account_message/view"
@@ -58,7 +58,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 	testCases := []struct {
 		Name     string
 		Events   []entity_event.Event
-		MockFunc func() []*testify_mock.Mock
+		MockFunc func(events []entity_event.Event) []*testify_mock.Mock
 	}{
 		{
 			Name: "HandleMsgSend",
@@ -101,7 +101,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -214,7 +214,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							MsgIndex:    0,
 						},
 					}),
-					Inputs: []model.MsgMultiSendInput{
+					Inputs: []usecase_model.MsgMultiSendInput{
 						{
 							Address: "InputAddress",
 							Amount: coin.Coins{
@@ -225,7 +225,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					Outputs: []model.MsgMultiSendOutput{
+					Outputs: []usecase_model.MsgMultiSendOutput{
 						{
 							Address: "OutputAddress",
 							Amount: coin.Coins{
@@ -238,7 +238,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -300,7 +300,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
-							Inputs: []model.MsgMultiSendInput{
+							Inputs: []usecase_model.MsgMultiSendInput{
 								{
 									Address: "InputAddress",
 									Amount: coin.Coins{
@@ -311,7 +311,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 									},
 								},
 							},
-							Outputs: []model.MsgMultiSendOutput{
+							Outputs: []usecase_model.MsgMultiSendOutput{
 								{
 									Address: "OutputAddress",
 									Amount: coin.Coins{
@@ -365,13 +365,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							MsgIndex:    0,
 						},
 					}),
-					MsgSetWithdrawAddressParams: model.MsgSetWithdrawAddressParams{
+					MsgSetWithdrawAddressParams: usecase_model.MsgSetWithdrawAddressParams{
 						DelegatorAddress: "DelegatorAddress",
 						WithdrawAddress:  "WithdrawAddress",
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -433,7 +433,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
-							MsgSetWithdrawAddressParams: model.MsgSetWithdrawAddressParams{
+							MsgSetWithdrawAddressParams: usecase_model.MsgSetWithdrawAddressParams{
 								DelegatorAddress: "DelegatorAddress",
 								WithdrawAddress:  "WithdrawAddress",
 							},
@@ -480,7 +480,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							MsgIndex:    0,
 						},
 					}),
-					MsgWithdrawDelegatorRewardParams: model.MsgWithdrawDelegatorRewardParams{
+					MsgWithdrawDelegatorRewardParams: usecase_model.MsgWithdrawDelegatorRewardParams{
 						DelegatorAddress: "DelegatorAddress",
 						ValidatorAddress: "ValidatorAddress",
 						RecipientAddress: "RecipientAddress",
@@ -493,7 +493,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -543,7 +543,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
-							MsgWithdrawDelegatorRewardParams: model.MsgWithdrawDelegatorRewardParams{
+							MsgWithdrawDelegatorRewardParams: usecase_model.MsgWithdrawDelegatorRewardParams{
 								DelegatorAddress: "DelegatorAddress",
 								ValidatorAddress: "ValidatorAddress",
 								RecipientAddress: "RecipientAddress",
@@ -597,7 +597,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							MsgIndex:    0,
 						},
 					}),
-					MsgWithdrawValidatorCommissionParams: model.MsgWithdrawValidatorCommissionParams{
+					MsgWithdrawValidatorCommissionParams: usecase_model.MsgWithdrawValidatorCommissionParams{
 						ValidatorAddress: "ValidatorAddress",
 						RecipientAddress: "RecipientAddress",
 						Amount: coin.Coins{
@@ -609,7 +609,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -659,7 +659,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
-							MsgWithdrawValidatorCommissionParams: model.MsgWithdrawValidatorCommissionParams{
+							MsgWithdrawValidatorCommissionParams: usecase_model.MsgWithdrawValidatorCommissionParams{
 								ValidatorAddress: "ValidatorAddress",
 								RecipientAddress: "RecipientAddress",
 								Amount: coin.Coins{
@@ -721,7 +721,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -821,13 +821,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							MsgIndex:    0,
 						},
 					}),
-					MsgSubmitParamChangeProposalParams: model.MsgSubmitParamChangeProposalParams{
+					MsgSubmitParamChangeProposalParams: usecase_model.MsgSubmitParamChangeProposalParams{
 						MaybeProposalId: nil,
-						Content: model.MsgSubmitParamChangeProposalContent{
+						Content: usecase_model.MsgSubmitParamChangeProposalContent{
 							Type:        "Type",
 							Title:       "Title",
 							Description: "Description",
-							Changes: []model.MsgSubmitParamChangeProposalChange{
+							Changes: []usecase_model.MsgSubmitParamChangeProposalChange{
 								{
 									Subspace: "Subspace",
 									Key:      "Key",
@@ -845,7 +845,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -895,13 +895,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
-							MsgSubmitParamChangeProposalParams: model.MsgSubmitParamChangeProposalParams{
+							MsgSubmitParamChangeProposalParams: usecase_model.MsgSubmitParamChangeProposalParams{
 								MaybeProposalId: nil,
-								Content: model.MsgSubmitParamChangeProposalContent{
+								Content: usecase_model.MsgSubmitParamChangeProposalContent{
 									Type:        "Type",
 									Title:       "Title",
 									Description: "Description",
-									Changes: []model.MsgSubmitParamChangeProposalChange{
+									Changes: []usecase_model.MsgSubmitParamChangeProposalChange{
 										{
 											Subspace: "Subspace",
 											Key:      "Key",
@@ -960,9 +960,9 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							MsgIndex:    0,
 						},
 					}),
-					MsgSubmitCommunityPoolSpendProposalParams: model.MsgSubmitCommunityPoolSpendProposalParams{
+					MsgSubmitCommunityPoolSpendProposalParams: usecase_model.MsgSubmitCommunityPoolSpendProposalParams{
 						MaybeProposalId: nil,
-						Content: model.MsgSubmitCommunityPoolSpendProposalContent{
+						Content: usecase_model.MsgSubmitCommunityPoolSpendProposalContent{
 							Type:             "Type",
 							Title:            "Title",
 							Description:      "Description",
@@ -984,7 +984,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -1034,9 +1034,9 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
-							MsgSubmitCommunityPoolSpendProposalParams: model.MsgSubmitCommunityPoolSpendProposalParams{
+							MsgSubmitCommunityPoolSpendProposalParams: usecase_model.MsgSubmitCommunityPoolSpendProposalParams{
 								MaybeProposalId: nil,
-								Content: model.MsgSubmitCommunityPoolSpendProposalContent{
+								Content: usecase_model.MsgSubmitCommunityPoolSpendProposalContent{
 									Type:             "Type",
 									Title:            "Title",
 									Description:      "Description",
@@ -1099,9 +1099,9 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							MsgIndex:    0,
 						},
 					}),
-					MsgSubmitCancelSoftwareUpgradeProposalParams: model.MsgSubmitCancelSoftwareUpgradeProposalParams{
+					MsgSubmitCancelSoftwareUpgradeProposalParams: usecase_model.MsgSubmitCancelSoftwareUpgradeProposalParams{
 						MaybeProposalId: nil,
-						Content: model.MsgSubmitCancelSoftwareUpgradeProposalContent{
+						Content: usecase_model.MsgSubmitCancelSoftwareUpgradeProposalContent{
 							Type:        "Type",
 							Title:       "Title",
 							Description: "Description",
@@ -1116,7 +1116,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -1166,9 +1166,9 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
-							MsgSubmitCancelSoftwareUpgradeProposalParams: model.MsgSubmitCancelSoftwareUpgradeProposalParams{
+							MsgSubmitCancelSoftwareUpgradeProposalParams: usecase_model.MsgSubmitCancelSoftwareUpgradeProposalParams{
 								MaybeProposalId: nil,
-								Content: model.MsgSubmitCancelSoftwareUpgradeProposalContent{
+								Content: usecase_model.MsgSubmitCancelSoftwareUpgradeProposalContent{
 									Type:        "Type",
 									Title:       "Title",
 									Description: "Description",
@@ -1234,7 +1234,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -1340,7 +1340,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					Option:     "Option",
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -1436,14 +1436,14 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							MsgIndex:    0,
 						},
 					}),
-					Description: model.ValidatorDescription{
+					Description: usecase_model.ValidatorDescription{
 						Moniker:         "Moniker",
 						Identity:        "Identity",
 						Website:         "Website",
 						SecurityContact: "SecurityContact",
 						Details:         "Details",
 					},
-					CommissionRates: model.ValidatorCommission{
+					CommissionRates: usecase_model.ValidatorCommission{
 						Rate:          "Rate",
 						MaxRate:       "MaxRate",
 						MaxChangeRate: "MaxChangeRate",
@@ -1458,7 +1458,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -1508,14 +1508,14 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
-							Description: model.ValidatorDescription{
+							Description: usecase_model.ValidatorDescription{
 								Moniker:         "Moniker",
 								Identity:        "Identity",
 								Website:         "Website",
 								SecurityContact: "SecurityContact",
 								Details:         "Details",
 							},
-							CommissionRates: model.ValidatorCommission{
+							CommissionRates: usecase_model.ValidatorCommission{
 								Rate:          "Rate",
 								MaxRate:       "MaxRate",
 								MaxChangeRate: "MaxChangeRate",
@@ -1571,7 +1571,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							MsgIndex:    0,
 						},
 					}),
-					Description: model.ValidatorDescription{
+					Description: usecase_model.ValidatorDescription{
 						Moniker:         "Moniker",
 						Identity:        "Identity",
 						Website:         "Website",
@@ -1583,7 +1583,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					MaybeMinSelfDelegation: nil,
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -1633,7 +1633,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
-							Description: model.ValidatorDescription{
+							Description: usecase_model.ValidatorDescription{
 								Moniker:         "Moniker",
 								Identity:        "Identity",
 								Website:         "Website",
@@ -1698,7 +1698,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					ValidatorAddress: "ValidatorAddress",
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -1814,7 +1814,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					MaybeUnbondCompleteAt: nil,
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -1931,7 +1931,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					ValidatorDstAddress: "ValidatorDstAddress",
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -2038,7 +2038,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					ValidatorAddr: "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -2138,7 +2138,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					Sender:    "Sender",
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -2244,7 +2244,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					Recipient: "Recipient",
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -2362,7 +2362,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					Recipient: "Recipient",
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -2479,7 +2479,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					Sender:    "Sender",
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -2583,7 +2583,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					Sender:  "Sender",
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -2687,7 +2687,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -2794,7 +2794,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -2901,7 +2901,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -3007,7 +3007,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -3112,7 +3112,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -3217,7 +3217,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -3322,7 +3322,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -3427,7 +3427,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -3532,7 +3532,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -3637,7 +3637,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -3736,13 +3736,22 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						},
 					}),
 					Params: ibc_model.MsgAcknowledgementParams{
+						MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
+							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
+								Sender:   "Sender",
+								Receiver: "Receiver",
+								Denom:    "Denom",
+								Amount:   json.NewNumericStringFromUint64(100),
+							},
+							Success: true,
+						},
 						RawMsgAcknowledgement: ibc_model.RawMsgAcknowledgement{
 							Signer: "Signer",
 						},
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -3759,6 +3768,18 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				mockAccountMessagesTotalView.On(
 					"Increment",
 					"Signer:MsgAcknowledgement",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Sender:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Sender:MsgAcknowledgement",
 					int64(1),
 				).Return(nil)
 
@@ -3793,13 +3814,22 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 								MsgIndex:  0,
 							},
 							Params: ibc_model.MsgAcknowledgementParams{
+								MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
+									FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
+										Sender:   "Sender",
+										Receiver: "Receiver",
+										Denom:    "Denom",
+										Amount:   json.NewNumericStringFromUint64(100),
+									},
+									Success: true,
+								},
 								RawMsgAcknowledgement: ibc_model.RawMsgAcknowledgement{
 									Signer: "Signer",
 								},
 							},
 						},
 					},
-					[]string{"Signer"},
+					[]string{"Signer", "Sender"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -3851,16 +3881,31 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							Success:                true,
 							MaybeDenominationTrace: nil,
 						},
+						RawMsgRecvPacket: ibc_model.RawMsgRecvPacket{
+							Signer: "Signer",
+						},
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
 				account_message.NewAccountMessagesTotal = func(_ *rdb.Handle) account_message_view.AccountMessagesTotal {
 					return mockAccountMessagesTotalView
 				}
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Signer:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Signer:MsgRecvPacket",
+					int64(1),
+				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
@@ -3915,10 +3960,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 									Success:                true,
 									MaybeDenominationTrace: nil,
 								},
+								RawMsgRecvPacket: ibc_model.RawMsgRecvPacket{
+									Signer: "Signer",
+								},
 							},
 						},
 					},
-					[]string{"Receiver"},
+					[]string{"Signer", "Receiver"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -3966,7 +4014,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -4071,7 +4119,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -4176,7 +4224,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func() (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
 				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
 
@@ -4243,13 +4291,708 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				return mocks
 			},
 		},
+		{
+			Name: "HandleMsgIBCChannelCloseInit",
+			Events: []entity_event.Event{
+				&event_usecase.BlockCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					Block: &usecase_model.Block{
+						Height:          1,
+						Hash:            "Hash",
+						Time:            utctime.UTCTime{},
+						AppHash:         "AppHash",
+						ProposerAddress: "ProposerAddress",
+						Txs:             nil,
+						Signatures:      nil,
+						Evidences:       nil,
+					},
+				},
+				&event_usecase.MsgIBCChannelCloseInit{
+					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
+						MsgName: event_usecase.MSG_IBC_CHANNEL_CLOSE_INIT,
+						Version: 1,
+						MsgCommonParams: event_usecase.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgChannelCloseInitParams{
+						RawMsgChannelCloseInit: ibc_model.RawMsgChannelCloseInit{
+							Signer: "Signer",
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[1].(*event_usecase.MsgIBCChannelCloseInit)
+
+				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
+				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
+
+				account_message.NewAccountMessagesTotal = func(_ *rdb.Handle) account_message_view.AccountMessagesTotal {
+					return mockAccountMessagesTotalView
+				}
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Signer:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Signer:MsgChannelCloseInit",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesView := account_message_view.NewMockAccountMessagesView(nil).(*account_message_view.MockAccountMessagesView)
+				mocks = append(mocks, &mockAccountMessagesView.Mock)
+
+				account_message.NewAccountMessages = func(_ *rdb.Handle) account_message_view.AccountMessages {
+					return mockAccountMessagesView
+				}
+
+				mockAccountMessagesView.On(
+					"Insert",
+					&account_message_view.AccountMessageRow{
+						MaybeAccount:    (*string)(nil),
+						BlockHeight:     1,
+						BlockHash:       "Hash",
+						BlockTime:       utctime.UTCTime{},
+						TransactionHash: "TxHash",
+						Success:         true,
+						MessageIndex:    0,
+						MessageType:     "MsgChannelCloseInit",
+						Data:            typedEvent,
+					},
+					[]string{"Signer"},
+				).Return(nil)
+
+				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgGrant",
+			Events: []entity_event.Event{
+				&event_usecase.BlockCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					Block: &usecase_model.Block{
+						Height:          1,
+						Hash:            "Hash",
+						Time:            utctime.UTCTime{},
+						AppHash:         "AppHash",
+						ProposerAddress: "ProposerAddress",
+						Txs:             nil,
+						Signatures:      nil,
+						Evidences:       nil,
+					},
+				},
+				&event_usecase.MsgGrant{
+					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
+						MsgName: event_usecase.MSG_GRANT,
+						Version: 1,
+						MsgCommonParams: event_usecase.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: usecase_model.MsgGrantParams{
+						MaybeSendGrant: &model.RawMsgSendGrant{
+							Granter: "Granter",
+							Grantee: "Grantee",
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[1].(*event_usecase.MsgGrant)
+
+				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
+				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
+
+				account_message.NewAccountMessagesTotal = func(_ *rdb.Handle) account_message_view.AccountMessagesTotal {
+					return mockAccountMessagesTotalView
+				}
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Granter:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Granter:MsgGrant",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Grantee:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Grantee:MsgGrant",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesView := account_message_view.NewMockAccountMessagesView(nil).(*account_message_view.MockAccountMessagesView)
+				mocks = append(mocks, &mockAccountMessagesView.Mock)
+
+				account_message.NewAccountMessages = func(_ *rdb.Handle) account_message_view.AccountMessages {
+					return mockAccountMessagesView
+				}
+
+				mockAccountMessagesView.On(
+					"Insert",
+					&account_message_view.AccountMessageRow{
+						MaybeAccount:    (*string)(nil),
+						BlockHeight:     1,
+						BlockHash:       "Hash",
+						BlockTime:       utctime.UTCTime{},
+						TransactionHash: "TxHash",
+						Success:         true,
+						MessageIndex:    0,
+						MessageType:     "MsgGrant",
+						Data:            typedEvent,
+					},
+					[]string{"Granter", "Grantee"},
+				).Return(nil)
+
+				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgRevoke",
+			Events: []entity_event.Event{
+				&event_usecase.BlockCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					Block: &usecase_model.Block{
+						Height:          1,
+						Hash:            "Hash",
+						Time:            utctime.UTCTime{},
+						AppHash:         "AppHash",
+						ProposerAddress: "ProposerAddress",
+						Txs:             nil,
+						Signatures:      nil,
+						Evidences:       nil,
+					},
+				},
+				&event_usecase.MsgRevoke{
+					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
+						MsgName: event_usecase.MSG_REVOKE,
+						Version: 1,
+						MsgCommonParams: event_usecase.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: usecase_model.MsgRevokeParams{
+						RawMsgRevoke: usecase_model.RawMsgRevoke{
+							Granter: "Granter",
+							Grantee: "Grantee",
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[1].(*event_usecase.MsgRevoke)
+
+				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
+				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
+
+				account_message.NewAccountMessagesTotal = func(_ *rdb.Handle) account_message_view.AccountMessagesTotal {
+					return mockAccountMessagesTotalView
+				}
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Granter:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Granter:MsgRevoke",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Grantee:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Grantee:MsgRevoke",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesView := account_message_view.NewMockAccountMessagesView(nil).(*account_message_view.MockAccountMessagesView)
+				mocks = append(mocks, &mockAccountMessagesView.Mock)
+
+				account_message.NewAccountMessages = func(_ *rdb.Handle) account_message_view.AccountMessages {
+					return mockAccountMessagesView
+				}
+
+				mockAccountMessagesView.On(
+					"Insert",
+					&account_message_view.AccountMessageRow{
+						MaybeAccount:    (*string)(nil),
+						BlockHeight:     1,
+						BlockHash:       "Hash",
+						BlockTime:       utctime.UTCTime{},
+						TransactionHash: "TxHash",
+						Success:         true,
+						MessageIndex:    0,
+						MessageType:     "MsgRevoke",
+						Data:            typedEvent,
+					},
+					[]string{"Granter", "Grantee"},
+				).Return(nil)
+
+				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgExec",
+			Events: []entity_event.Event{
+				&event_usecase.BlockCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					Block: &usecase_model.Block{
+						Height:          1,
+						Hash:            "Hash",
+						Time:            utctime.UTCTime{},
+						AppHash:         "AppHash",
+						ProposerAddress: "ProposerAddress",
+						Txs:             nil,
+						Signatures:      nil,
+						Evidences:       nil,
+					},
+				},
+				&event_usecase.MsgExec{
+					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
+						MsgName: event_usecase.MSG_EXEC,
+						Version: 1,
+						MsgCommonParams: event_usecase.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: usecase_model.MsgExecParams{
+						RawMsgExec: usecase_model.RawMsgExec{
+							Grantee: "Grantee",
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[1].(*event_usecase.MsgExec)
+
+				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
+				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
+
+				account_message.NewAccountMessagesTotal = func(_ *rdb.Handle) account_message_view.AccountMessagesTotal {
+					return mockAccountMessagesTotalView
+				}
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Grantee:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Grantee:MsgExec",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesView := account_message_view.NewMockAccountMessagesView(nil).(*account_message_view.MockAccountMessagesView)
+				mocks = append(mocks, &mockAccountMessagesView.Mock)
+
+				account_message.NewAccountMessages = func(_ *rdb.Handle) account_message_view.AccountMessages {
+					return mockAccountMessagesView
+				}
+
+				mockAccountMessagesView.On(
+					"Insert",
+					&account_message_view.AccountMessageRow{
+						MaybeAccount:    (*string)(nil),
+						BlockHeight:     1,
+						BlockHash:       "Hash",
+						BlockTime:       utctime.UTCTime{},
+						TransactionHash: "TxHash",
+						Success:         true,
+						MessageIndex:    0,
+						MessageType:     "MsgExec",
+						Data:            typedEvent,
+					},
+					[]string{"Grantee"},
+				).Return(nil)
+
+				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgGrantAllowance",
+			Events: []entity_event.Event{
+				&event_usecase.BlockCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					Block: &usecase_model.Block{
+						Height:          1,
+						Hash:            "Hash",
+						Time:            utctime.UTCTime{},
+						AppHash:         "AppHash",
+						ProposerAddress: "ProposerAddress",
+						Txs:             nil,
+						Signatures:      nil,
+						Evidences:       nil,
+					},
+				},
+				&event_usecase.MsgGrantAllowance{
+					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
+						MsgName: event_usecase.MSG_GRANT_ALLOWANCE,
+						Version: 1,
+						MsgCommonParams: event_usecase.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: usecase_model.MsgGrantAllowanceParams{
+						MaybeBasicAllowance: &usecase_model.RawMsgGrantBasicAllowance{
+							Granter: "Granter",
+							Grantee: "Grantee",
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[1].(*event_usecase.MsgGrantAllowance)
+
+				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
+				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
+
+				account_message.NewAccountMessagesTotal = func(_ *rdb.Handle) account_message_view.AccountMessagesTotal {
+					return mockAccountMessagesTotalView
+				}
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Granter:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Granter:MsgGrantAllowance",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Grantee:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Grantee:MsgGrantAllowance",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesView := account_message_view.NewMockAccountMessagesView(nil).(*account_message_view.MockAccountMessagesView)
+				mocks = append(mocks, &mockAccountMessagesView.Mock)
+
+				account_message.NewAccountMessages = func(_ *rdb.Handle) account_message_view.AccountMessages {
+					return mockAccountMessagesView
+				}
+
+				mockAccountMessagesView.On(
+					"Insert",
+					&account_message_view.AccountMessageRow{
+						MaybeAccount:    (*string)(nil),
+						BlockHeight:     1,
+						BlockHash:       "Hash",
+						BlockTime:       utctime.UTCTime{},
+						TransactionHash: "TxHash",
+						Success:         true,
+						MessageIndex:    0,
+						MessageType:     "MsgGrantAllowance",
+						Data:            typedEvent,
+					},
+					[]string{"Granter", "Grantee"},
+				).Return(nil)
+
+				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgRevokeAllowance",
+			Events: []entity_event.Event{
+				&event_usecase.BlockCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					Block: &usecase_model.Block{
+						Height:          1,
+						Hash:            "Hash",
+						Time:            utctime.UTCTime{},
+						AppHash:         "AppHash",
+						ProposerAddress: "ProposerAddress",
+						Txs:             nil,
+						Signatures:      nil,
+						Evidences:       nil,
+					},
+				},
+				&event_usecase.MsgRevokeAllowance{
+					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
+						MsgName: event_usecase.MSG_REVOKE_ALLOWANCE,
+						Version: 1,
+						MsgCommonParams: event_usecase.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: usecase_model.MsgRevokeAllowanceParams{
+						RawMsgRevokeAllowance: usecase_model.RawMsgRevokeAllowance{
+							Granter: "Granter",
+							Grantee: "Grantee",
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[1].(*event_usecase.MsgRevokeAllowance)
+
+				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
+				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
+
+				account_message.NewAccountMessagesTotal = func(_ *rdb.Handle) account_message_view.AccountMessagesTotal {
+					return mockAccountMessagesTotalView
+				}
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Granter:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Granter:MsgRevokeAllowance",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Grantee:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"Grantee:MsgRevokeAllowance",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesView := account_message_view.NewMockAccountMessagesView(nil).(*account_message_view.MockAccountMessagesView)
+				mocks = append(mocks, &mockAccountMessagesView.Mock)
+
+				account_message.NewAccountMessages = func(_ *rdb.Handle) account_message_view.AccountMessages {
+					return mockAccountMessagesView
+				}
+
+				mockAccountMessagesView.On(
+					"Insert",
+					&account_message_view.AccountMessageRow{
+						MaybeAccount:    (*string)(nil),
+						BlockHeight:     1,
+						BlockHash:       "Hash",
+						BlockTime:       utctime.UTCTime{},
+						TransactionHash: "TxHash",
+						Success:         true,
+						MessageIndex:    0,
+						MessageType:     "MsgRevokeAllowance",
+						Data:            typedEvent,
+					},
+					[]string{"Granter", "Grantee"},
+				).Return(nil)
+
+				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgCreateVestingAccount",
+			Events: []entity_event.Event{
+				&event_usecase.BlockCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					Block: &usecase_model.Block{
+						Height:          1,
+						Hash:            "Hash",
+						Time:            utctime.UTCTime{},
+						AppHash:         "AppHash",
+						ProposerAddress: "ProposerAddress",
+						Txs:             nil,
+						Signatures:      nil,
+						Evidences:       nil,
+					},
+				},
+				&event_usecase.MsgCreateVestingAccount{
+					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
+						MsgName: event_usecase.MSG_CREATE_VESTING_ACCOUNT,
+						Version: 1,
+						MsgCommonParams: event_usecase.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: usecase_model.MsgCreateVestingAccountParams{
+						RawMsgCreateVestingAccount: usecase_model.RawMsgCreateVestingAccount{
+							FromAddress: "FromAddress",
+							ToAddress:   "ToAddress",
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[1].(*event_usecase.MsgCreateVestingAccount)
+
+				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
+				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
+
+				account_message.NewAccountMessagesTotal = func(_ *rdb.Handle) account_message_view.AccountMessagesTotal {
+					return mockAccountMessagesTotalView
+				}
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"FromAddress:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"FromAddress:MsgCreateVestingAccount",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"ToAddress:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesTotalView.On(
+					"Increment",
+					"ToAddress:MsgCreateVestingAccount",
+					int64(1),
+				).Return(nil)
+
+				mockAccountMessagesView := account_message_view.NewMockAccountMessagesView(nil).(*account_message_view.MockAccountMessagesView)
+				mocks = append(mocks, &mockAccountMessagesView.Mock)
+
+				account_message.NewAccountMessages = func(_ *rdb.Handle) account_message_view.AccountMessages {
+					return mockAccountMessagesView
+				}
+
+				mockAccountMessagesView.On(
+					"Insert",
+					&account_message_view.AccountMessageRow{
+						MaybeAccount:    (*string)(nil),
+						BlockHeight:     1,
+						BlockHash:       "Hash",
+						BlockTime:       utctime.UTCTime{},
+						TransactionHash: "TxHash",
+						Success:         true,
+						MessageIndex:    0,
+						MessageType:     "MsgCreateVestingAccount",
+						Data:            typedEvent,
+					},
+					[]string{"FromAddress", "ToAddress"},
+				).Return(nil)
+
+				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
 	}
 
 	for _, tc := range testCases {
 		mockRDbConn := NewMockRDbConn()
 		mockTx := NewMockRDbTx()
 		mockRDbConn.On("Begin").Return(mockTx, nil)
-		mocks := tc.MockFunc()
+		mocks := tc.MockFunc(tc.Events)
 
 		projection := NewAccountMessageProjection(mockRDbConn)
 		err := projection.HandleEvents(1, tc.Events)

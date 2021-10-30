@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/crypto-com/chain-indexing/internal/json"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
+	"github.com/crypto-com/chain-indexing/external/json"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	ibc_channel_view "github.com/crypto-com/chain-indexing/projection/ibc_channel/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
@@ -107,6 +107,134 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 			},
 		},
 		{
+			Name: "HandleMsgIBCConnectionOpenInit",
+			Events: []entity_event.Event{
+				&event_usecase.MsgIBCConnectionOpenInit{
+					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
+						MsgName: event_usecase.MSG_IBC_CONNECTION_OPEN_INIT,
+						Version: 1,
+						MsgCommonParams: event_usecase.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgConnectionOpenInitParams{
+						ConnectionID: "ConnectionID",
+						RawMsgConnectionOpenInit: ibc_model.RawMsgConnectionOpenInit{
+							ClientID: "ClientID",
+							Counterparty: ibc_model.ConnectionCounterparty{
+								ConnectionID: "CounterpartyConnectionID",
+								ClientID:     "CounterpartyClientID",
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func() (mocks []*testify_mock.Mock) {
+				mockIbcClientsView := ibc_channel_view.NewMockIBCClientsView(nil).(*ibc_channel_view.MockIBCClientsView)
+				mocks = append(mocks, &mockIbcClientsView.Mock)
+
+				ibc_channel.NewIBCClients = func(_ *rdb.Handle) ibc_channel_view.IBCClients {
+					return mockIbcClientsView
+				}
+
+				mockIbcClientsView.On(
+					"FindCounterpartyChainIDBy",
+					"ClientID",
+				).Return("CounterpartyChainID", nil)
+
+				mockIbcConnectionsView := ibc_channel_view.NewMockIBCConnectionsView(nil).(*ibc_channel_view.MockIBCConnectionsView)
+				mocks = append(mocks, &mockIbcConnectionsView.Mock)
+
+				ibc_channel.NewIBCConnections = func(_ *rdb.Handle) ibc_channel_view.IBCConnections {
+					return mockIbcConnectionsView
+				}
+
+				mockIbcConnectionsView.On(
+					"Insert",
+					&ibc_channel_view.IBCConnectionRow{
+						ConnectionID:             "ConnectionID",
+						ClientID:                 "ClientID",
+						CounterpartyConnectionID: "CounterpartyConnectionID",
+						CounterpartyClientID:     "CounterpartyClientID",
+						CounterpartyChainID:      "CounterpartyChainID",
+					},
+				).Return(nil)
+
+				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgIBCConnectionOpenTry",
+			Events: []entity_event.Event{
+				&event_usecase.MsgIBCConnectionOpenTry{
+					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
+						MsgName: event_usecase.MSG_IBC_CONNECTION_OPEN_TRY,
+						Version: 1,
+						MsgCommonParams: event_usecase.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgConnectionOpenTryParams{
+						ConnectionID: "ConnectionID",
+						MsgConnectionOpenTryBaseParams: ibc_model.MsgConnectionOpenTryBaseParams{
+							ClientID: "ClientID",
+							Counterparty: ibc_model.ConnectionCounterparty{
+								ConnectionID: "CounterpartyConnectionID",
+								ClientID:     "CounterpartyClientID",
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func() (mocks []*testify_mock.Mock) {
+				mockIbcClientsView := ibc_channel_view.NewMockIBCClientsView(nil).(*ibc_channel_view.MockIBCClientsView)
+				mocks = append(mocks, &mockIbcClientsView.Mock)
+
+				ibc_channel.NewIBCClients = func(_ *rdb.Handle) ibc_channel_view.IBCClients {
+					return mockIbcClientsView
+				}
+
+				mockIbcClientsView.On(
+					"FindCounterpartyChainIDBy",
+					"ClientID",
+				).Return("CounterpartyChainID", nil)
+
+				mockIbcConnectionsView := ibc_channel_view.NewMockIBCConnectionsView(nil).(*ibc_channel_view.MockIBCConnectionsView)
+				mocks = append(mocks, &mockIbcConnectionsView.Mock)
+
+				ibc_channel.NewIBCConnections = func(_ *rdb.Handle) ibc_channel_view.IBCConnections {
+					return mockIbcConnectionsView
+				}
+
+				mockIbcConnectionsView.On(
+					"Insert",
+					&ibc_channel_view.IBCConnectionRow{
+						ConnectionID:             "ConnectionID",
+						ClientID:                 "ClientID",
+						CounterpartyConnectionID: "CounterpartyConnectionID",
+						CounterpartyClientID:     "CounterpartyClientID",
+						CounterpartyChainID:      "CounterpartyChainID",
+					},
+				).Return(nil)
+
+				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
 			Name: "HandleMsgIBCConnectionOpenConfirm",
 			Events: []entity_event.Event{
 				&event_usecase.MsgIBCConnectionOpenConfirm{
@@ -151,7 +279,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				}
 
 				mockIbcConnectionsView.On(
-					"Insert",
+					"Update",
 					&ibc_channel_view.IBCConnectionRow{
 						ConnectionID:             "ConnectionID",
 						ClientID:                 "ClientID",
@@ -213,7 +341,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				}
 
 				mockIbcConnectionsView.On(
-					"Insert",
+					"Update",
 					&ibc_channel_view.IBCConnectionRow{
 						ConnectionID:             "ConnectionID",
 						ClientID:                 "ClientID",
@@ -286,7 +414,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						CounterpartyChannelID:        "CounterpartyChannelID",
 						CounterpartyPortID:           "CounterpartyPortID",
 						CounterpartyChainID:          "CounterpartyChainID",
-						Status:                       false,
+						Status:                       "NOT_ESTABLISHED",
 						PacketOrdering:               "Ordering",
 						LastInPacketSequence:         0,
 						LastOutPacketSequence:        0,
@@ -370,7 +498,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						CounterpartyChannelID:        "CounterpartyChannelID",
 						CounterpartyPortID:           "CounterpartyPortID",
 						CounterpartyChainID:          "CounterpartyChainID",
-						Status:                       false,
+						Status:                       "NOT_ESTABLISHED",
 						PacketOrdering:               "Ordering",
 						LastInPacketSequence:         0,
 						LastOutPacketSequence:        0,
@@ -450,7 +578,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						CounterpartyChannelID:        "CounterpartyChannelID",
 						CounterpartyPortID:           "CounterpartyPortID",
 						CounterpartyChainID:          "CounterpartyChainID",
-						Status:                       false,
+						Status:                       "",
 						PacketOrdering:               "",
 						LastInPacketSequence:         0,
 						LastOutPacketSequence:        0,
@@ -474,7 +602,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				mockIbcChannelsView.On(
 					"UpdateStatus",
 					"ChannelID",
-					true,
+					"OPENED",
 				).Return(nil)
 
 				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
@@ -535,7 +663,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						CounterpartyChannelID:        "CounterpartyChannelID",
 						CounterpartyPortID:           "CounterpartyPortID",
 						CounterpartyChainID:          "CounterpartyChainID",
-						Status:                       false,
+						Status:                       "",
 						PacketOrdering:               "",
 						LastInPacketSequence:         0,
 						LastOutPacketSequence:        0,
@@ -559,7 +687,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				mockIbcChannelsView.On(
 					"UpdateStatus",
 					"ChannelID",
-					true,
+					"OPENED",
 				).Return(nil)
 
 				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
@@ -710,7 +838,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 								Denom:  "DENOM",
 								Amount: json.NewNumericStringFromUint64(100),
 							},
-							Success: false,
+							Success: true,
 						},
 						PacketSequence: 1,
 						PacketAck: ibc_model.MsgRecvPacketPacketAck{
@@ -844,7 +972,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 								Denom:  "DENOM",
 								Amount: json.NewNumericStringFromUint64(100),
 							},
-							Success: true,
+							Success: false,
 						},
 						PacketSequence: 1,
 						PacketAck: ibc_model.MsgRecvPacketPacketAck{
@@ -1243,6 +1371,114 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 							},
 						},
 					},
+				).Return(nil)
+
+				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgIBCChannelCloseInit",
+			Events: []entity_event.Event{
+				&event_usecase.MsgIBCChannelCloseInit{
+					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
+						MsgName: event_usecase.MSG_IBC_CHANNEL_CLOSE_INIT,
+						Version: 1,
+						MsgCommonParams: event_usecase.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgChannelCloseInitParams{
+						CounterpartyPortID:    "CounterpartyPortID",
+						ConnectionID:          "ConnectionID",
+						CounterpartyChannelID: "CounterpartyChannelID",
+						RawMsgChannelCloseInit: ibc_model.RawMsgChannelCloseInit{
+							PortID:    "PortID",
+							ChannelID: "ChannelID",
+						},
+					},
+				},
+			},
+			MockFunc: func() (mocks []*testify_mock.Mock) {
+
+				mockIbcChannelsView := ibc_channel_view.NewMockIBCChannelsView(nil).(*ibc_channel_view.MockIBCChannelsView)
+				mocks = append(mocks, &mockIbcChannelsView.Mock)
+
+				ibc_channel.NewIBCChannels = func(_ *rdb.Handle) ibc_channel_view.IBCChannels {
+					return mockIbcChannelsView
+				}
+
+				mockIbcChannelsView.On(
+					"UpdateStatus",
+					"ChannelID",
+					"CLOSED",
+				).Return(nil)
+
+				mockIbcChannelsView.On(
+					"UpdateLastActivityTimeAndHeight",
+					"ChannelID",
+					utctime.UTCTime{},
+					int64(1),
+				).Return(nil)
+
+				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgIBCChannelCloseConfirm",
+			Events: []entity_event.Event{
+				&event_usecase.MsgIBCChannelCloseConfirm{
+					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
+						MsgName: event_usecase.MSG_IBC_CHANNEL_CLOSE_CONFIRM,
+						Version: 1,
+						MsgCommonParams: event_usecase.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgChannelCloseConfirmParams{
+						CounterpartyPortID:    "CounterpartyPortID",
+						ConnectionID:          "ConnectionID",
+						CounterpartyChannelID: "CounterpartyChannelID",
+						RawMsgChannelCloseConfirm: ibc_model.RawMsgChannelCloseConfirm{
+							PortID:    "PortID",
+							ChannelID: "ChannelID",
+						},
+					},
+				},
+			},
+			MockFunc: func() (mocks []*testify_mock.Mock) {
+
+				mockIbcChannelsView := ibc_channel_view.NewMockIBCChannelsView(nil).(*ibc_channel_view.MockIBCChannelsView)
+				mocks = append(mocks, &mockIbcChannelsView.Mock)
+
+				ibc_channel.NewIBCChannels = func(_ *rdb.Handle) ibc_channel_view.IBCChannels {
+					return mockIbcChannelsView
+				}
+
+				mockIbcChannelsView.On(
+					"UpdateStatus",
+					"ChannelID",
+					"CLOSED",
+				).Return(nil)
+
+				mockIbcChannelsView.On(
+					"UpdateLastActivityTimeAndHeight",
+					"ChannelID",
+					utctime.UTCTime{},
+					int64(1),
 				).Return(nil)
 
 				ibc_channel.UpdateLastHandledEventHeight = func(_ *ibc_channel.IBCChannel, _ *rdb.Handle, _ int64) error {

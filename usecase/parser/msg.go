@@ -5,11 +5,11 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/crypto-com/chain-indexing/entity/command"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/mitchellh/mapstructure"
 
-	"github.com/crypto-com/chain-indexing/entity/command"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"

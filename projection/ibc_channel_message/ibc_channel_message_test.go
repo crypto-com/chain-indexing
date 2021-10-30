@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/crypto-com/chain-indexing/external/json"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/stretchr/testify/assert"
 	testify_mock "github.com/stretchr/testify/mock"
 
@@ -12,8 +14,6 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	"github.com/crypto-com/chain-indexing/internal/json"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	"github.com/crypto-com/chain-indexing/projection/ibc_channel_message"
 	"github.com/crypto-com/chain-indexing/projection/ibc_channel_message/view"
@@ -847,6 +847,132 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					Return(nil)
 				mockIBCChannelMessageTotalView.
 					On("Increment", fmt.Sprintf("%s:%s", "SourceChannel", "MsgTimeoutOnClose"), int64(1)).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
+					return mockIBCChannelMessageTotalView
+				}
+
+				ibc_channel_message.UpdateLastHandledEventHeight = func(_ *ibc_channel_message.IBCChannelMessage, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgIBCChannelCloseInit",
+			Events: []entity_event.Event{
+				&usecase_event.MsgIBCChannelCloseInit{
+					MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
+						MsgName: usecase_event.MSG_IBC_CHANNEL_CLOSE_INIT,
+						Version: 1,
+						MsgCommonParams: usecase_event.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgChannelCloseInitParams{
+						RawMsgChannelCloseInit: ibc_model.RawMsgChannelCloseInit{
+							Signer:    "Signer",
+							ChannelID: "ChannelID",
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[0].(*usecase_event.MsgIBCChannelCloseInit)
+
+				mockIBCChannelMessageView := &view.MockIBCChannelMessageView{}
+				mocks = append(mocks, &mockIBCChannelMessageView.Mock)
+				mockIBCChannelMessageView.
+					On("Insert", &view.IBCChannelMessageRow{
+						ChannelID:       "ChannelID",
+						BlockHeight:     int64(1),
+						BlockTime:       utctime.UTCTime{},
+						TransactionHash: "TxHash",
+						MaybeRelayer:    primptr.String("Signer"),
+						MessageType:     "MsgChannelCloseInit",
+						Message:         typedEvent,
+					}).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessages = func(handle *rdb.Handle) view.IBCChannelMessages {
+					return mockIBCChannelMessageView
+				}
+
+				mockIBCChannelMessageTotalView := &view.MockIBCChannelMessageTotalView{}
+				mocks = append(mocks, &mockIBCChannelMessageTotalView.Mock)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:-", "ChannelID"), int64(1)).
+					Return(nil)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:%s", "ChannelID", "MsgChannelCloseInit"), int64(1)).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
+					return mockIBCChannelMessageTotalView
+				}
+
+				ibc_channel_message.UpdateLastHandledEventHeight = func(_ *ibc_channel_message.IBCChannelMessage, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgIBCChannelCloseConfirm",
+			Events: []entity_event.Event{
+				&usecase_event.MsgIBCChannelCloseConfirm{
+					MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
+						MsgName: usecase_event.MSG_IBC_CHANNEL_CLOSE_CONFIRM,
+						Version: 1,
+						MsgCommonParams: usecase_event.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Params: ibc_model.MsgChannelCloseConfirmParams{
+						RawMsgChannelCloseConfirm: ibc_model.RawMsgChannelCloseConfirm{
+							Signer:    "Signer",
+							ChannelID: "ChannelID",
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[0].(*usecase_event.MsgIBCChannelCloseConfirm)
+
+				mockIBCChannelMessageView := &view.MockIBCChannelMessageView{}
+				mocks = append(mocks, &mockIBCChannelMessageView.Mock)
+				mockIBCChannelMessageView.
+					On("Insert", &view.IBCChannelMessageRow{
+						ChannelID:       "ChannelID",
+						BlockHeight:     int64(1),
+						BlockTime:       utctime.UTCTime{},
+						TransactionHash: "TxHash",
+						MaybeRelayer:    primptr.String("Signer"),
+						MessageType:     "MsgChannelCloseConfirm",
+						Message:         typedEvent,
+					}).
+					Return(nil)
+
+				ibc_channel_message.NewIBCChannelMessages = func(handle *rdb.Handle) view.IBCChannelMessages {
+					return mockIBCChannelMessageView
+				}
+
+				mockIBCChannelMessageTotalView := &view.MockIBCChannelMessageTotalView{}
+				mocks = append(mocks, &mockIBCChannelMessageTotalView.Mock)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:-", "ChannelID"), int64(1)).
+					Return(nil)
+				mockIBCChannelMessageTotalView.
+					On("Increment", fmt.Sprintf("%s:%s", "ChannelID", "MsgChannelCloseConfirm"), int64(1)).
 					Return(nil)
 
 				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {

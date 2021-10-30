@@ -4,12 +4,11 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/crypto-com/chain-indexing/internal/primptr"
-
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	nft_view "github.com/crypto-com/chain-indexing/projection/nft/view"
 	"github.com/valyala/fasthttp"
 )

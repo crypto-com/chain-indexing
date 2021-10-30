@@ -7,7 +7,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/appinterface/rdbstatusstore"
 	"github.com/crypto-com/chain-indexing/entity/event"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 )
 
 var _ Handler = &RDbEventStoreHandler{}

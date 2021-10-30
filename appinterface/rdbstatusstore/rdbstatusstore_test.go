@@ -1,8 +1,8 @@
 package rdbstatusstore_test
 
 import (
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
 	. "github.com/crypto-com/chain-indexing/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

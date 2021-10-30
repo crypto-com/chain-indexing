@@ -2,8 +2,9 @@ package syncstrategy
 
 import (
 	"context"
+
 	"github.com/crypto-com/chain-indexing/entity/command"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"golang.org/x/sync/errgroup"
 )
 

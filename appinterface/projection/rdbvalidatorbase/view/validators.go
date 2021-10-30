@@ -18,22 +18,31 @@ import (
 // | tendermint_address        | VARCHAR   | NOT NULL             |
 // | moniker                   | VARCHAR   | NOT NULL             |
 
+type Validators interface {
+	Upsert(validator *ValidatorRow) error
+	Insert(validator *ValidatorRow) error
+	Update(validator *ValidatorRow) error
+	ListAll() ([]ValidatorRow, error)
+	FindLastBy(identity ValidatorIdentity) (*ValidatorRow, error)
+	Count() (int64, error)
+}
+
 // A generic validator view
-type Validators struct {
+type ValidatorsView struct {
 	rdb *rdb.Handle
 
 	tableName string
 }
 
-func NewValidators(handle *rdb.Handle, tableName string) *Validators {
-	return &Validators{
+func NewValidatorsView(handle *rdb.Handle, tableName string) Validators {
+	return &ValidatorsView{
 		handle,
 
 		tableName,
 	}
 }
 
-func (validatorsView *Validators) Upsert(validator *ValidatorRow) error {
+func (validatorsView *ValidatorsView) Upsert(validator *ValidatorRow) error {
 	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Insert(
 		validatorsView.tableName,
 	).Columns(
@@ -67,7 +76,7 @@ func (validatorsView *Validators) Upsert(validator *ValidatorRow) error {
 	return nil
 }
 
-func (validatorsView *Validators) Insert(validator *ValidatorRow) error {
+func (validatorsView *ValidatorsView) Insert(validator *ValidatorRow) error {
 	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Insert(
 		validatorsView.tableName,
 	).Columns(
@@ -100,7 +109,7 @@ func (validatorsView *Validators) Insert(validator *ValidatorRow) error {
 	return nil
 }
 
-func (validatorsView *Validators) Update(validator *ValidatorRow) error {
+func (validatorsView *ValidatorsView) Update(validator *ValidatorRow) error {
 	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Update(
 		validatorsView.tableName,
 	).SetMap(map[string]interface{}{
@@ -123,7 +132,7 @@ func (validatorsView *Validators) Update(validator *ValidatorRow) error {
 	return nil
 }
 
-func (validatorsView *Validators) ListAll() ([]ValidatorRow, error) {
+func (validatorsView *ValidatorsView) ListAll() ([]ValidatorRow, error) {
 	orderClauses := make([]string, 0)
 
 	stmtBuilder := validatorsView.rdb.StmtBuilder.Select(
@@ -174,7 +183,7 @@ func (validatorsView *Validators) ListAll() ([]ValidatorRow, error) {
 	return validators, nil
 }
 
-func (validatorsView *Validators) FindLastBy(identity ValidatorIdentity) (*ValidatorRow, error) {
+func (validatorsView *ValidatorsView) FindLastBy(identity ValidatorIdentity) (*ValidatorRow, error) {
 	var err error
 
 	selectStmtBuilder := validatorsView.rdb.StmtBuilder.Select(
@@ -224,7 +233,7 @@ func (validatorsView *Validators) FindLastBy(identity ValidatorIdentity) (*Valid
 	return &validator, nil
 }
 
-func (validatorsView *Validators) Count() (int64, error) {
+func (validatorsView *ValidatorsView) Count() (int64, error) {
 	var count int64
 
 	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Select(

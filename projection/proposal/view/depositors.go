@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 
 	sq "github.com/Masterminds/squirrel"
@@ -11,8 +12,6 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/pagination"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
-	"github.com/crypto-com/chain-indexing/internal/json"
-
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -20,20 +19,33 @@ import (
 
 const DEPOSITORS_TABLE_NAME = "view_proposal_depositors"
 
-type Depositors struct {
+type Depositors interface {
+	Insert(row *DepositorRow) error
+	ListByProposalId(
+		proposalId string,
+		order DepositorListOrder,
+		pagination *pagination.Pagination,
+	) (
+		[]DepositorWithMonikerRow,
+		*pagination.PaginationResult,
+		error,
+	)
+}
+
+type DepositorsView struct {
 	rdb *rdb.Handle
 }
 
-func NewDepositors(handle *rdb.Handle) *Depositors {
-	return &Depositors{
+func NewDepositorsView(handle *rdb.Handle) Depositors {
+	return &DepositorsView{
 		handle,
 	}
 }
 
-func (proposalView *Depositors) Insert(row *DepositorRow) error {
+func (depositorsView *DepositorsView) Insert(row *DepositorRow) error {
 	var err error
 
-	sql, sqlArgs, err := proposalView.rdb.StmtBuilder.Insert(
+	sql, sqlArgs, err := depositorsView.rdb.StmtBuilder.Insert(
 		DEPOSITORS_TABLE_NAME,
 	).Columns(
 		"proposal_id",
@@ -49,14 +61,14 @@ func (proposalView *Depositors) Insert(row *DepositorRow) error {
 		row.MaybeDepositorOperatorAddress,
 		row.TransactionHash,
 		row.DepositAtBlockHeight,
-		proposalView.rdb.TypeConv.Tton(&row.DepositAtBlockTime),
+		depositorsView.rdb.TypeConv.Tton(&row.DepositAtBlockTime),
 		json.MustMarshalToString(row.Amount),
 	).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building depositor insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	result, err := proposalView.rdb.Exec(sql, sqlArgs...)
+	result, err := depositorsView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
 		return fmt.Errorf("error inserting depositor into the table: %v: %w", err, rdb.ErrWrite)
 	}
@@ -67,12 +79,12 @@ func (proposalView *Depositors) Insert(row *DepositorRow) error {
 	return nil
 }
 
-func (proposalView *Depositors) ListByProposalId(
+func (depositorsView *DepositorsView) ListByProposalId(
 	proposalId string,
 	order DepositorListOrder,
 	pagination *pagination.Pagination,
 ) ([]DepositorWithMonikerRow, *pagination.PaginationResult, error) {
-	stmtBuilder := proposalView.rdb.StmtBuilder.Select(
+	stmtBuilder := depositorsView.rdb.StmtBuilder.Select(
 		fmt.Sprintf("%s.proposal_id", DEPOSITORS_TABLE_NAME),
 		fmt.Sprintf("%s.depositor_address", DEPOSITORS_TABLE_NAME),
 		fmt.Sprintf("%s.maybe_depositor_operator_address", DEPOSITORS_TABLE_NAME),
@@ -100,10 +112,10 @@ func (proposalView *Depositors) ListByProposalId(
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
-		proposalView.rdb,
+		depositorsView.rdb,
 	).WithCustomTotalQueryFn(
 		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
-			totalView := NewDepositorsTotal(rdbHandle)
+			totalView := NewDepositorsTotalView(rdbHandle)
 			total, err := totalView.FindBy(proposalId)
 			if err != nil {
 				return int64(0), err
@@ -116,7 +128,7 @@ func (proposalView *Depositors) ListByProposalId(
 		return nil, nil, fmt.Errorf("error building depositor list SQL: %v: %w", err, rdb.ErrPrepare)
 	}
 
-	rowsResult, err := proposalView.rdb.Query(sql, sqlArgs...)
+	rowsResult, err := depositorsView.rdb.Query(sql, sqlArgs...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error executing depositor list query: %v: %w", err, rdb.ErrQuery)
 	}
@@ -126,7 +138,7 @@ func (proposalView *Depositors) ListByProposalId(
 	for rowsResult.Next() {
 		var row DepositorWithMonikerRow
 		var amountJSON *string
-		depositAtBlockTimeReader := proposalView.rdb.NtotReader()
+		depositAtBlockTimeReader := depositorsView.rdb.NtotReader()
 
 		if scanErr := rowsResult.Scan(
 			&row.ProposalId,

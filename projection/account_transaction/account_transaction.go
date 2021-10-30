@@ -7,8 +7,8 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/internal/base64"
-	applogger "github.com/crypto-com/chain-indexing/internal/logger"
 	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	"github.com/crypto-com/chain-indexing/projection/account_transaction/view"
@@ -329,8 +329,16 @@ func (projection *AccountTransaction) HandleEvents(height int64, events []event_
 		} else if typedEvent, ok := event.(*event_usecase.MsgIBCAcknowledgement); ok {
 			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
 
+			if typedEvent.Params.MaybeFungibleTokenPacketData != nil {
+				transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.MaybeFungibleTokenPacketData.Sender)
+			}
+
 		} else if typedEvent, ok := event.(*event_usecase.MsgIBCRecvPacket); ok {
-			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.MaybeFungibleTokenPacketData.Receiver)
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
+
+			if typedEvent.Params.MaybeFungibleTokenPacketData != nil {
+				transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.MaybeFungibleTokenPacketData.Receiver)
+			}
 
 		} else if typedEvent, ok := event.(*event_usecase.MsgIBCTransferTransfer); ok {
 			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Sender)
@@ -338,7 +346,21 @@ func (projection *AccountTransaction) HandleEvents(height int64, events []event_
 		} else if typedEvent, ok := event.(*event_usecase.MsgIBCTimeout); ok {
 			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
 
+			if typedEvent.Params.MaybeMsgTransfer != nil {
+				transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.MaybeMsgTransfer.RefundReceiver)
+			}
+
 		} else if typedEvent, ok := event.(*event_usecase.MsgIBCTimeoutOnClose); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
+
+			if typedEvent.Params.MaybeMsgTransfer != nil {
+				transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.MaybeMsgTransfer.RefundReceiver)
+			}
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCChannelCloseInit); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCChannelCloseConfirm); ok {
 			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Params.Signer)
 
 		} else if typedEvent, ok := event.(*event_usecase.MsgGrant); ok {

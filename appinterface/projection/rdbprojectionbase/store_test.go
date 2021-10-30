@@ -3,14 +3,13 @@ package rdbprojectionbase_test
 import (
 	"fmt"
 
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	. "github.com/crypto-com/chain-indexing/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	"github.com/crypto-com/chain-indexing/internal/primptr"
-
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 )
 
 var _ = Describe("RdbStoreImpl", func() {
