@@ -29,9 +29,12 @@ func NewAccountProjection(rdbConn rdb.Conn, client cosmosapp.Client) *account.Ac
 func NewMockRDbConn() *test.MockRDbConn {
 	mock := test.NewMockRDbConn()
 	mock.On("ToHandle").Return(&rdb.Handle{
-		Runner:      mock,
-		TypeConv:    &pg.PgxTypeConv{},
-		StmtBuilder: sq.StatementBuilderType{},
+		Runner:   mock,
+		TypeConv: &pg.PgxTypeConv{},
+		StmtBuilder: &rdb.StatementBuilder{
+			StatementBuilderType: sq.StatementBuilderType{},
+			PlaceholderFormat:    nil,
+		},
 	})
 
 	return mock

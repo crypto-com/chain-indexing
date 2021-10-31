@@ -11,8 +11,8 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
-	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/crypto-com/chain-indexing/external/primptr"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/crypto-com/chain-indexing/internal/utctime"
 	"github.com/crypto-com/chain-indexing/projection/nft"
 	"github.com/crypto-com/chain-indexing/projection/nft/view"
@@ -33,9 +33,12 @@ func NewNFTProjection(rdbConn rdb.Conn) *nft.NFT {
 func NewMockRDbConn() *test.MockRDbConn {
 	mock := test.NewMockRDbConn()
 	mock.On("ToHandle").Return(&rdb.Handle{
-		Runner:      mock,
-		TypeConv:    &pg.PgxTypeConv{},
-		StmtBuilder: sq.StatementBuilderType{},
+		Runner:   mock,
+		TypeConv: &pg.PgxTypeConv{},
+		StmtBuilder: &rdb.StatementBuilder{
+			StatementBuilderType: sq.StatementBuilderType{},
+			PlaceholderFormat:    nil,
+		},
 	})
 
 	return mock
