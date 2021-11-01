@@ -125,7 +125,7 @@ func (handler *Bridges) ListActivities(ctx *fasthttp.RequestCtx) {
 		addressFilter.MaybeCronosAddress = primptr.String(accountAddr)
 	}
 	if queryArgs.Has("cryptoorgchainAddress") {
-		addressFilter.MaybeCronosAddress = primptr.String(string(queryArgs.Peek("cryptoorgchainAddress")))
+		addressFilter.MaybeCryptoOrgChainAddress = primptr.String(string(queryArgs.Peek("cryptoorgchainAddress")))
 	}
 
 	order := bridge_activitiy_view.BridgeActivitiesListOrder{
