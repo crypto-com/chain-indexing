@@ -3,21 +3,20 @@ package handlers
 import (
 	"errors"
 	"strings"
-
-	applogger "github.com/crypto-com/chain-indexing/external/logger"
-	"github.com/crypto-com/chain-indexing/external/primptr"
-	"github.com/crypto-com/chain-indexing/usecase/coin"
-
-	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-
 	"github.com/valyala/fasthttp"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/external/primptr"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
+	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 	bridge_activitiy_view "github.com/crypto-com/chain-indexing/projection/bridge_activity/view"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
 )
 
 type Bridges struct {
@@ -80,11 +79,36 @@ func (handler *Bridges) ListActivities(ctx *fasthttp.RequestCtx) {
 	}
 
 	filter := bridge_activitiy_view.BridgeActivitiesListFilter{
+		MaybeIdGt:        nil,
+		MaybeCreatedAtGt: nil,
+		MaybeUpdatedAtGt: nil,
+	}
+	if queryArgs.Has("id.gt") {
+		filter.MaybeIdGt = primptr.String(string(queryArgs.Peek("id.gt")))
+	}
+	if queryArgs.Has("createdAt.gt") {
+		maybeCreatedAtGt, createdAtGtParseErr := parseTimeFilter(string(queryArgs.Peek("createdAt.gt")))
+		if createdAtGtParseErr != nil {
+			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			return
+		}
+		filter.MaybeCreatedAtGt = maybeCreatedAtGt
+	}
+	if queryArgs.Has("updatedAt.gt") {
+		maybeUpdatedAtGt, updatedAtGtParseErr := parseTimeFilter(string(queryArgs.Peek("updatedAt.gt")))
+		if updatedAtGtParseErr != nil {
+			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			return
+		}
+		filter.MaybeUpdatedAtGt = maybeUpdatedAtGt
+	}
+
+	addressFilter := bridge_activitiy_view.BridgeActivitiesListAddressFilter{
 		MaybeCronosAddress:         nil,
 		MaybeCryptoOrgChainAddress: nil,
 	}
 	if queryArgs.Has("cronosAddress") {
-		filter.MaybeCronosAddress = primptr.String(string(queryArgs.Peek("cronosAddress")))
+		addressFilter.MaybeCronosAddress = primptr.String(string(queryArgs.Peek("cronosAddress")))
 	}
 	if queryArgs.Has("cronosevmAddress") {
 		hexAddress := string(queryArgs.Peek("cronosevmAddress"))
@@ -100,17 +124,20 @@ func (handler *Bridges) ListActivities(ctx *fasthttp.RequestCtx) {
 			httpapi.InternalServerError(ctx)
 			return
 		}
-		filter.MaybeCronosAddress = primptr.String(accountAddr)
+		addressFilter.MaybeCronosAddress = primptr.String(accountAddr)
 	}
 	if queryArgs.Has("cryptoorgchainAddress") {
-		filter.MaybeCronosAddress = primptr.String(string(queryArgs.Peek("cryptoorgchainAddress")))
+		addressFilter.MaybeCryptoOrgChainAddress = primptr.String(string(queryArgs.Peek("cryptoorgchainAddress")))
+	}
+
+	order := bridge_activitiy_view.BridgeActivitiesListOrder{
+		MaybeSourceBlockTime: &sourceBlockTimeOrder,
 	}
 
 	activities, paginationResult, listErr := handler.bridgeActivitiesView.List(
+		addressFilter,
 		filter,
-		bridge_activitiy_view.BridgeActivitiesListOrder{
-			MaybeSourceBlockTime: &sourceBlockTimeOrder,
-		},
+		order,
 		pagination,
 	)
 	if listErr != nil {
@@ -154,11 +181,36 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 	}
 
 	filter := bridge_activitiy_view.BridgeActivitiesListFilter{
+		MaybeIdGt:        nil,
+		MaybeCreatedAtGt: nil,
+		MaybeUpdatedAtGt: nil,
+	}
+	if queryArgs.Has("id.gt") {
+		filter.MaybeIdGt = primptr.String(string(queryArgs.Peek("id.gt")))
+	}
+	if queryArgs.Has("createdAt.gt") {
+		maybeCreatedAtGt, createdAtGtParseErr := parseTimeFilter(string(queryArgs.Peek("createdAt.gt")))
+		if createdAtGtParseErr != nil {
+			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			return
+		}
+		filter.MaybeCreatedAtGt = maybeCreatedAtGt
+	}
+	if queryArgs.Has("updatedAt.gt") {
+		maybeUpdatedAtGt, updatedAtGtParseErr := parseTimeFilter(string(queryArgs.Peek("updatedAt.gt")))
+		if updatedAtGtParseErr != nil {
+			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			return
+		}
+		filter.MaybeUpdatedAtGt = maybeUpdatedAtGt
+	}
+
+	addressFilter := bridge_activitiy_view.BridgeActivitiesListAddressFilter{
 		MaybeCronosAddress:         nil,
 		MaybeCryptoOrgChainAddress: nil,
 	}
 	if networkParam == "cronos" {
-		filter.MaybeCronosAddress = primptr.String(accountParam)
+		addressFilter.MaybeCronosAddress = primptr.String(accountParam)
 	} else if networkParam == "cronosevm" {
 		hexAddress := accountParam
 		var addr []byte
@@ -173,16 +225,19 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 			httpapi.InternalServerError(ctx)
 			return
 		}
-		filter.MaybeCronosAddress = primptr.String(accountAddr)
+		addressFilter.MaybeCronosAddress = primptr.String(accountAddr)
 	} else if networkParam == "cryptoorgchain" {
-		filter.MaybeCryptoOrgChainAddress = primptr.String(accountParam)
+		addressFilter.MaybeCryptoOrgChainAddress = primptr.String(accountParam)
+	}
+
+	order := bridge_activitiy_view.BridgeActivitiesListOrder{
+		MaybeSourceBlockTime: &sourceBlockHeightOrder,
 	}
 
 	activities, paginationResult, listErr := handler.bridgeActivitiesView.List(
+		addressFilter,
 		filter,
-		bridge_activitiy_view.BridgeActivitiesListOrder{
-			MaybeSourceBlockTime: &sourceBlockHeightOrder,
-		},
+		order,
 		pagination,
 	)
 	if listErr != nil {
@@ -230,4 +285,12 @@ type BridgeActivityResponseRow struct {
 
 	DisplayAmount     string  `json:"displayAmount"`
 	MaybeDisplayDenom *string `json:"displayDenom"`
+}
+
+func parseTimeFilter(value string) (*utctime.UTCTime, error) {
+	if ut, utParseErr := utctime.Parse(time.RFC3339, value); utParseErr != nil {
+		return nil, utParseErr
+	} else {
+		return &ut, nil
+	}
 }
