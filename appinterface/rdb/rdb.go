@@ -25,7 +25,19 @@ type Handle struct {
 	Runner
 	TypeConv
 
-	StmtBuilder sq.StatementBuilderType
+	StmtBuilder *StatementBuilder
+}
+
+type StatementBuilder struct {
+	sq.StatementBuilderType
+	sq.PlaceholderFormat
+}
+
+func NewStatementBuilder(builder sq.StatementBuilderType, placeholderFormat sq.PlaceholderFormat) *StatementBuilder {
+	return &StatementBuilder{
+		builder,
+		placeholderFormat,
+	}
 }
 
 // Implementing Conn and Tx interface automatically fulfills Runner
