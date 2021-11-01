@@ -272,11 +272,13 @@ func (view *BridgeActivities) List(
 		stmtBuilder = stmtBuilder.Where(
 			"id > ?", filter.MaybeIdGt,
 		)
-	} else if filter.MaybeCreatedAtGt != nil {
+	}
+	if filter.MaybeCreatedAtGt != nil {
 		stmtBuilder = stmtBuilder.Where(
 			"created_at > ?", view.rdb.Tton(filter.MaybeCreatedAtGt),
 		)
-	} else if filter.MaybeUpdatedAtGt != nil {
+	}
+	if filter.MaybeUpdatedAtGt != nil {
 		stmtBuilder = stmtBuilder.Where(
 			"updated_at > ?", view.rdb.Tton(filter.MaybeCreatedAtGt),
 		)
