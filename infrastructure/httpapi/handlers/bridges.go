@@ -185,14 +185,16 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 	}
 	if queryArgs.Has("id.gt") {
 		filter.MaybeIdGt = primptr.String(string(queryArgs.Peek("id.gt")))
-	} else if queryArgs.Has("createdAt.gt") {
+	}
+	if queryArgs.Has("createdAt.gt") {
 		maybeCreatedAtGt, createdAtGtParseErr := parseTimeFilter(string(queryArgs.Peek("createdAt.gt")))
 		if createdAtGtParseErr != nil {
 			ctx.SetStatusCode(fasthttp.StatusBadRequest)
 			return
 		}
 		filter.MaybeCreatedAtGt = maybeCreatedAtGt
-	} else if queryArgs.Has("updatedAt.gt") {
+	}
+	if queryArgs.Has("updatedAt.gt") {
 		maybeUpdatedAtGt, updatedAtGtParseErr := parseTimeFilter(string(queryArgs.Peek("updatedAt.gt")))
 		if updatedAtGtParseErr != nil {
 			ctx.SetStatusCode(fasthttp.StatusBadRequest)
