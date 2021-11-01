@@ -191,19 +191,21 @@ func (view *BridgeActivities) ListByNetworkAddress(
 	order BridgeActivitiesListOrder,
 	pagination *pagination_interface.Pagination,
 ) ([]BridgeActivityReadRow, *pagination_interface.PaginationResult, error) {
-	filter := BridgeActivitiesListFilter{
+	addressFilter := BridgeActivitiesListAddressFilter{
 		MaybeCronosAddress:         nil,
 		MaybeCryptoOrgChainAddress: nil,
 	}
+	filter := BridgeActivitiesListFilter{}
 	if network == types.CHAIN_CRONOS {
-		filter.MaybeCronosAddress = &address
+		addressFilter.MaybeCronosAddress = &address
 	} else if network == types.CHAIN_CRYPTO_ORG_CHAIN {
-		filter.MaybeCryptoOrgChainAddress = &address
+		addressFilter.MaybeCryptoOrgChainAddress = &address
 	}
-	return view.List(filter, order, pagination)
+	return view.List(addressFilter, filter, order, pagination)
 }
 
 func (view *BridgeActivities) List(
+	addressFilter BridgeActivitiesListAddressFilter,
 	filter BridgeActivitiesListFilter,
 	order BridgeActivitiesListOrder,
 	pagination *pagination_interface.Pagination,
@@ -244,25 +246,41 @@ func (view *BridgeActivities) List(
 		TABLE_BRIDGE_ACTIVITIES,
 	)
 
-	if filter.MaybeCronosAddress != nil && filter.MaybeCryptoOrgChainAddress != nil {
+	if addressFilter.MaybeCronosAddress != nil && addressFilter.MaybeCryptoOrgChainAddress != nil {
 		stmtBuilder = stmtBuilder.Where(`
 ( source_chain = ? AND source_address = ?) OR (destination_chain = ? AND destination_address = ?) OR
 ( source_chain = ? AND source_address = ?) OR (destination_chain = ? AND destination_address = ?)
 `,
-			types.CHAIN_CRONOS, filter.MaybeCronosAddress, types.CHAIN_CRONOS, filter.MaybeCronosAddress,
-			types.CHAIN_CRYPTO_ORG_CHAIN, filter.MaybeCryptoOrgChainAddress,
-			types.CHAIN_CRYPTO_ORG_CHAIN, filter.MaybeCryptoOrgChainAddress,
+			types.CHAIN_CRONOS, addressFilter.MaybeCronosAddress, types.CHAIN_CRONOS, addressFilter.MaybeCronosAddress,
+			types.CHAIN_CRYPTO_ORG_CHAIN, addressFilter.MaybeCryptoOrgChainAddress,
+			types.CHAIN_CRYPTO_ORG_CHAIN, addressFilter.MaybeCryptoOrgChainAddress,
 		)
-	} else if filter.MaybeCronosAddress != nil {
+	} else if addressFilter.MaybeCronosAddress != nil {
 		stmtBuilder = stmtBuilder.Where(
 			"( source_chain = ? AND source_address = ?) OR (destination_chain = ? AND destination_address = ?)",
-			types.CHAIN_CRONOS, filter.MaybeCronosAddress, types.CHAIN_CRONOS, filter.MaybeCronosAddress,
+			types.CHAIN_CRONOS, addressFilter.MaybeCronosAddress, types.CHAIN_CRONOS, addressFilter.MaybeCronosAddress,
 		)
-	} else if filter.MaybeCryptoOrgChainAddress != nil {
+	} else if addressFilter.MaybeCryptoOrgChainAddress != nil {
 		stmtBuilder = stmtBuilder.Where(
 			"( source_chain = ? AND source_address = ?) OR (destination_chain = ? AND destination_address = ?)",
-			types.CHAIN_CRYPTO_ORG_CHAIN, filter.MaybeCryptoOrgChainAddress,
-			types.CHAIN_CRYPTO_ORG_CHAIN, filter.MaybeCryptoOrgChainAddress,
+			types.CHAIN_CRYPTO_ORG_CHAIN, addressFilter.MaybeCryptoOrgChainAddress,
+			types.CHAIN_CRYPTO_ORG_CHAIN, addressFilter.MaybeCryptoOrgChainAddress,
+		)
+	}
+
+	if filter.MaybeIdGt != nil {
+		stmtBuilder = stmtBuilder.Where(
+			"id > ?", filter.MaybeIdGt,
+		)
+	}
+	if filter.MaybeCreatedAtGt != nil {
+		stmtBuilder = stmtBuilder.Where(
+			"created_at > ?", view.rdb.Tton(filter.MaybeCreatedAtGt),
+		)
+	}
+	if filter.MaybeUpdatedAtGt != nil {
+		stmtBuilder = stmtBuilder.Where(
+			"updated_at > ?", view.rdb.Tton(filter.MaybeCreatedAtGt),
 		)
 	}
 
@@ -391,6 +409,12 @@ func (view *BridgeActivities) List(
 }
 
 type BridgeActivitiesListFilter struct {
+	MaybeIdGt        *string
+	MaybeCreatedAtGt *utctime.UTCTime
+	MaybeUpdatedAtGt *utctime.UTCTime
+}
+
+type BridgeActivitiesListAddressFilter struct {
 	MaybeCronosAddress         *string
 	MaybeCryptoOrgChainAddress *string
 }
@@ -537,7 +561,7 @@ func (view *BridgeActivities) Update(activity *BridgeActivityReadRow) error {
 type BridgeActivityReadRow struct {
 	BridgeActivityInsertRow
 
-	Id        int64            `json:"-"`
+	Id        int64            `json:"id"`
 	UUID      string           `json:"uuid"`
 	CreatedAt *utctime.UTCTime `json:"createdAt"`
 	UpdatedAt *utctime.UTCTime `json:"updatedAt"`
