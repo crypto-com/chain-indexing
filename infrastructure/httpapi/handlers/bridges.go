@@ -12,9 +12,9 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/primptr"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
+	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
-	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
-	"github.com/crypto-com/chain-indexing/internal/utctime"
 	bridge_activitiy_view "github.com/crypto-com/chain-indexing/projection/bridge_activity/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 )

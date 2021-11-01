@@ -10,8 +10,8 @@ import (
 	"github.com/mitchellh/mapstructure"
 
 	"github.com/crypto-com/chain-indexing/external/primptr"
-	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
-	"github.com/crypto-com/chain-indexing/internal/utctime"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
+	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"

@@ -10,7 +10,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
-	"github.com/crypto-com/chain-indexing/internal/utctime"
+	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/projection/nft/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )

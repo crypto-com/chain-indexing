@@ -13,8 +13,8 @@ import (
 
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
+	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	"github.com/crypto-com/chain-indexing/internal/utctime"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 )

@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgtype"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
-	"github.com/crypto-com/chain-indexing/internal/utctime"
+	"github.com/crypto-com/chain-indexing/external/utctime"
 )
 
 var (
