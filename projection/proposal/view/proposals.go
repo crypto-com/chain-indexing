@@ -342,9 +342,9 @@ func (proposalView *ProposalsView) List(
 	}
 
 	if order.Id == view.ORDER_DESC {
-		stmtBuilder = stmtBuilder.OrderBy(fmt.Sprintf("%s.proposal_id DESC", PROPOSALS_TABLE_NAME))
+		stmtBuilder = stmtBuilder.OrderBy(fmt.Sprintf("%s.proposal_id::bigserial DESC", PROPOSALS_TABLE_NAME))
 	} else {
-		stmtBuilder = stmtBuilder.OrderBy(fmt.Sprintf("%s.proposal_id", PROPOSALS_TABLE_NAME))
+		stmtBuilder = stmtBuilder.OrderBy(fmt.Sprintf("%s.proposal_id::bigserial", PROPOSALS_TABLE_NAME))
 	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
