@@ -9,7 +9,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/external/json"
-	"github.com/crypto-com/chain-indexing/internal/utctime"
+	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -342,9 +342,9 @@ func (proposalView *ProposalsView) List(
 	}
 
 	if order.Id == view.ORDER_DESC {
-		stmtBuilder = stmtBuilder.OrderBy(fmt.Sprintf("%s.proposal_id DESC", PROPOSALS_TABLE_NAME))
+		stmtBuilder = stmtBuilder.OrderBy(fmt.Sprintf("%s.proposal_id::bigint DESC", PROPOSALS_TABLE_NAME))
 	} else {
-		stmtBuilder = stmtBuilder.OrderBy(fmt.Sprintf("%s.proposal_id", PROPOSALS_TABLE_NAME))
+		stmtBuilder = stmtBuilder.OrderBy(fmt.Sprintf("%s.proposal_id::bigint", PROPOSALS_TABLE_NAME))
 	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(

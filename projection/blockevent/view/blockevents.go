@@ -10,7 +10,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
-	"github.com/crypto-com/chain-indexing/internal/utctime"
+	"github.com/crypto-com/chain-indexing/external/utctime"
 	jsoniter "github.com/json-iterator/go"
 )
 

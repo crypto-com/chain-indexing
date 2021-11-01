@@ -14,7 +14,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
-	"github.com/crypto-com/chain-indexing/internal/utctime"
+	"github.com/crypto-com/chain-indexing/external/utctime"
 	_ "github.com/crypto-com/chain-indexing/test/factory"
 )
 

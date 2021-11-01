@@ -13,8 +13,8 @@ import (
 	"github.com/onsi/gomega/ghttp"
 
 	"github.com/crypto-com/chain-indexing/appinterface/tendermint"
+	"github.com/crypto-com/chain-indexing/external/utctime"
 	. "github.com/crypto-com/chain-indexing/infrastructure/tendermint"
-	"github.com/crypto-com/chain-indexing/internal/utctime"
 
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 )
