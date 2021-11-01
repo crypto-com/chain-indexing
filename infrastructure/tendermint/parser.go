@@ -10,7 +10,7 @@ import (
 
 	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 
-	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	jsoniter "github.com/json-iterator/go"

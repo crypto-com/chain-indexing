@@ -12,7 +12,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
-	"github.com/crypto-com/chain-indexing/internal/utctime"
+	"github.com/crypto-com/chain-indexing/external/utctime"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 

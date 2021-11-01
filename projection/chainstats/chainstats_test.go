@@ -14,7 +14,7 @@ import (
 
 	. "github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	. "github.com/crypto-com/chain-indexing/entity/event/test"
-	"github.com/crypto-com/chain-indexing/internal/utctime"
+	"github.com/crypto-com/chain-indexing/external/utctime"
 	. "github.com/crypto-com/chain-indexing/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

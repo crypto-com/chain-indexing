@@ -8,7 +8,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
-	"github.com/crypto-com/chain-indexing/internal/utctime"
+	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/projection/blockevent/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )

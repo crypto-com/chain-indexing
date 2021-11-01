@@ -12,7 +12,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/pagination"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
-	"github.com/crypto-com/chain-indexing/internal/utctime"
+	"github.com/crypto-com/chain-indexing/external/utctime"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 )

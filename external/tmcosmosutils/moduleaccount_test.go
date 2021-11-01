@@ -1,7 +1,7 @@
 package tmcosmosutils_test
 
 import (
-	"github.com/crypto-com/chain-indexing/internal/tmcosmosutils"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
