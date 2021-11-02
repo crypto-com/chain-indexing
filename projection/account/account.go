@@ -3,17 +3,18 @@ package account
 import (
 	"fmt"
 
-	applogger "github.com/crypto-com/chain-indexing/external/logger"
-	"github.com/crypto-com/chain-indexing/usecase/coin"
-
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
-
-	account_view "github.com/crypto-com/chain-indexing/projection/account/view"
-
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	account_view "github.com/crypto-com/chain-indexing/projection/account/view"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 // Account number, sequence number, balances are fetched from the latest state (regardless of current replaying height)
@@ -51,6 +52,16 @@ func (_ *Account) GetEventsToListen() []string {
 }
 
 func (projection *Account) OnInit() error {
+	conn := projection.rdbConn.(*pg.PgxConn)
+	m, err := migrate.New(
+		"file://projection/account/migrations",
+		conn.ConnString() + "&x-migrations-table=account_schema_migrations")
+	if err != nil {
+		projection.logger.Panic(err.Error())
+	}
+	if err := m.Up(); err != nil {
+		projection.logger.Panic(err.Error())
+	}
 	return nil
 }
 

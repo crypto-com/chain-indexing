@@ -157,6 +157,9 @@ func (conn *PgxConn) ToHandle() *rdb.Handle {
 		StmtBuilder: PostgresStmtBuilder,
 	}
 }
+func (conn *PgxConn) ConnString() string {
+	return conn.pgxConn.(*pgx.Conn).Config().ConnString()
+}
 
 var _ rdb.Tx = &PgxRDbTx{}
 
