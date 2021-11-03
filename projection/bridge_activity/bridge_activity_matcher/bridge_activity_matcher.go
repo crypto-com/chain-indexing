@@ -8,12 +8,13 @@ import (
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
-	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/primptr"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/view"
 	projection_usecase "github.com/crypto-com/chain-indexing/usecase/projection"
+	"github.com/golang-migrate/migrate/v4"
 )
 
 var _ projection_entity.CronJob = &BridgeActivityMatcher{}
@@ -62,6 +63,21 @@ func (cronJob *BridgeActivityMatcher) Config() *Config {
 	return cronJob.Base.Config().(*Config)
 }
 
+const (
+	MIGRATION_TABLE_NAME = "bridge_activity_matcher_migrations"
+	MIGRATION_GITHUB_TARGET = "github://public:token@crypto-com/chain-indexing/projection/bridge_activity/bridge_activity_matcher/migrations#migration-sharing"
+)
+
+func (cronJob *BridgeActivityMatcher) migrationDBConnString() string {
+	conn := cronJob.thisRDbConn.(*pg.PgxConn)
+	connString := conn.ConnString()
+	if connString[len(connString)-1:] == "?" {
+		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
+	} else {
+		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
+	}
+}
+
 func (cronJob *BridgeActivityMatcher) OnInit() error {
 	config := cronJob.Config()
 
@@ -81,6 +97,20 @@ func (cronJob *BridgeActivityMatcher) OnInit() error {
 		SSL:           config.CryptoOrgChainDatabase.SSL,
 	}, cronJob.logger); err != nil {
 		return fmt.Errorf("error when initializing Crypto.org Chain indexing DB connection: %v", err)
+	}
+
+	m, err := migrate.New(
+		MIGRATION_GITHUB_TARGET,
+		cronJob.migrationDBConnString(),
+	)
+	if err != nil {
+		cronJob.logger.Errorf("failed to init migration: %v", err)
+		return err
+	}
+
+	if err := m.Up(); err != nil {
+		cronJob.logger.Errorf("failed to run migration: %v", err)
+		return err
 	}
 
 	return nil

@@ -13,10 +13,12 @@ import (
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/crypto-com/chain-indexing/projection/ibc_channel/types"
 	ibc_channel_view "github.com/crypto-com/chain-indexing/projection/ibc_channel/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	"github.com/golang-migrate/migrate/v4"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -82,7 +84,36 @@ func (_ *IBCChannel) GetEventsToListen() []string {
 	}
 }
 
+const (
+	MIGRATION_TABLE_NAME = "ibc_channel_schema_migrations"
+	MIGRATION_GITHUB_TARGET = "github://public:token@crypto-com/chain-indexing/projection/ibc_channel/migrations#migration-sharing"
+)
+
+func (projection *IBCChannel) migrationDBConnString() string {
+	conn := projection.rdbConn.(*pg.PgxConn)
+	connString := conn.ConnString()
+	if connString[len(connString)-1:] == "?" {
+		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
+	} else {
+		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
+	}
+}
+
 func (projection *IBCChannel) OnInit() error {
+	m, err := migrate.New(
+		MIGRATION_GITHUB_TARGET,
+		projection.migrationDBConnString(),
+	)
+	if err != nil {
+		projection.logger.Errorf("failed to init migration: %v", err)
+		return err
+	}
+
+	if err := m.Up(); err != nil {
+		projection.logger.Errorf("failed to run migration: %v", err)
+		return err
+	}
+
 	return nil
 }
 

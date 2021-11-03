@@ -4,7 +4,9 @@ import (
 	"fmt"
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/crypto-com/chain-indexing/projection/nft/utils"
+	"github.com/golang-migrate/migrate/v4"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -57,7 +59,7 @@ func NewNFT(logger applogger.Logger, rdbConn rdb.Conn, config Config) *NFT {
 	}
 }
 
-func (nft *NFT) GetEventsToListen() []string {
+func (projection *NFT) GetEventsToListen() []string {
 	return []string{
 		event_usecase.BLOCK_CREATED,
 		event_usecase.MSG_NFT_ISSUE_DENOM_CREATED,
@@ -68,12 +70,41 @@ func (nft *NFT) GetEventsToListen() []string {
 	}
 }
 
-func (nft *NFT) OnInit() error {
+const (
+	MIGRATION_TABLE_NAME = "nft_schema_migrations"
+	MIGRATION_GITHUB_TARGET = "github://public:token@crypto-com/chain-indexing/projection/nft/migrations#migration-sharing"
+)
+
+func (projection *NFT) migrationDBConnString() string {
+	conn := projection.rdbConn.(*pg.PgxConn)
+	connString := conn.ConnString()
+	if connString[len(connString)-1:] == "?" {
+		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
+	} else {
+		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
+	}
+}
+
+func (projection *NFT) OnInit() error {
+	m, err := migrate.New(
+		MIGRATION_GITHUB_TARGET,
+		projection.migrationDBConnString(),
+	)
+	if err != nil {
+		projection.logger.Errorf("failed to init migration: %v", err)
+		return err
+	}
+
+	if err := m.Up(); err != nil {
+		projection.logger.Errorf("failed to run migration: %v", err)
+		return err
+	}
+
 	return nil
 }
 
-func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
-	rdbTx, rdbTxErr := nft.rdbConn.Begin()
+func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) error {
+	rdbTx, rdbTxErr := projection.rdbConn.Begin()
 	if rdbTxErr != nil {
 		return fmt.Errorf("error beginning transaction: %v", rdbTxErr)
 	}
@@ -126,7 +157,7 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				return fmt.Errorf("error incrementing NFT denom to view: %v", incrementDenomTotalErr)
 			}
 
-			if insertMessageErr := nft.insertMessage(nftMessagesView, nftMessagesTotalView, view.MessageRow{
+			if insertMessageErr := projection.insertMessage(nftMessagesView, nftMessagesTotalView, view.MessageRow{
 				BlockHeight:     height,
 				BlockHash:       blockHash,
 				BlockTime:       blockTime,
@@ -144,9 +175,9 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 
 		} else if msgMintNFT, ok := event.(*event_usecase.MsgNFTMintNFT); ok {
 			var maybeDrop *string
-			if nft.config.EnableDrop {
+			if projection.config.EnableDrop {
 				rawDrop, getDropErr := utils.GetValueFromJSONData(
-					[]byte(msgMintNFT.Data), nft.config.DropDataAccessor,
+					[]byte(msgMintNFT.Data), projection.config.DropDataAccessor,
 				)
 				if getDropErr == nil {
 					rawDropStr, isDropOk := rawDrop.(string)
@@ -171,11 +202,11 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				LastTransferredAt:            blockTime,
 				LastTransferredAtBlockHeight: height,
 			}
-			if insertTokenErr := nft.insertToken(tokensView, tokenRow, tokensTotalView); insertTokenErr != nil {
+			if insertTokenErr := projection.insertToken(tokensView, tokenRow, tokensTotalView); insertTokenErr != nil {
 				return insertTokenErr
 			}
 
-			if insertMessageErr := nft.insertMessage(nftMessagesView, nftMessagesTotalView, view.MessageRow{
+			if insertMessageErr := projection.insertMessage(nftMessagesView, nftMessagesTotalView, view.MessageRow{
 				BlockHeight:     height,
 				BlockHash:       blockHash,
 				BlockTime:       blockTime,
@@ -198,9 +229,9 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 			}
 
 			drop := mutPrevTokenRow.MaybeDrop
-			if nft.config.EnableDrop {
+			if projection.config.EnableDrop {
 				rawDrop, getDropErr := utils.GetValueFromJSONData(
-					[]byte(msgEditNFT.Data), nft.config.DropDataAccessor,
+					[]byte(msgEditNFT.Data), projection.config.DropDataAccessor,
 				)
 				if getDropErr == nil {
 					rawDropStr, isDropOk := rawDrop.(string)
@@ -237,7 +268,7 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				LastTransferredAtBlockHeight: mutPrevTokenRow.LastTransferredAtBlockHeight,
 			}
 
-			if updateTokenErr := nft.updateToken(
+			if updateTokenErr := projection.updateToken(
 				tokensView,
 				mutPrevTokenRow.TokenRow,
 				tokenRow,
@@ -246,7 +277,7 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				return updateTokenErr
 			}
 
-			if insertMessageErr := nft.insertMessage(nftMessagesView, nftMessagesTotalView, view.MessageRow{
+			if insertMessageErr := projection.insertMessage(nftMessagesView, nftMessagesTotalView, view.MessageRow{
 				BlockHeight:     height,
 				BlockHash:       blockHash,
 				BlockTime:       blockTime,
@@ -268,7 +299,7 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				return fmt.Errorf("error querying NFT token being edited: %v", queryPrevTokenRowErr)
 			}
 
-			if deleteTokenErr := nft.deleteToken(
+			if deleteTokenErr := projection.deleteToken(
 				tokensView, tokensTotalView, nftMessagesView, prevTokenRow.TokenRow,
 			); deleteTokenErr != nil {
 				return fmt.Errorf("error deleteing burnt NFT token: %v", deleteTokenErr)
@@ -298,7 +329,7 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				LastTransferredAt:            blockTime,
 				LastTransferredAtBlockHeight: height,
 			}
-			if updateTokenErr := nft.updateToken(
+			if updateTokenErr := projection.updateToken(
 				tokensView,
 				prevTokenRow.TokenRow,
 				tokenRow,
@@ -307,7 +338,7 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 				return updateTokenErr
 			}
 
-			if insertMessageErr := nft.insertMessage(nftMessagesView, nftMessagesTotalView, view.MessageRow{
+			if insertMessageErr := projection.insertMessage(nftMessagesView, nftMessagesTotalView, view.MessageRow{
 				BlockHeight:     height,
 				BlockHash:       blockHash,
 				BlockTime:       blockTime,
@@ -325,7 +356,7 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 		}
 	}
 
-	if err := UpdateLastHandledEventHeight(nft, rdbTxHandle, height); err != nil {
+	if err := UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
 		return fmt.Errorf("error updating last handled event height: %v", err)
 	}
 
@@ -336,7 +367,7 @@ func (nft *NFT) HandleEvents(height int64, events []event_entity.Event) error {
 	return nil
 }
 
-func (nft *NFT) insertMessage(
+func (projection *NFT) insertMessage(
 	messagesView view.Messages,
 	messagesTotalView view.MessagesTotal,
 	message view.MessageRow,
@@ -370,7 +401,7 @@ func (nft *NFT) insertMessage(
 	return nil
 }
 
-func (nft *NFT) updateToken(
+func (projection *NFT) updateToken(
 	tokensView view.Tokens,
 	prevTokenRow view.TokenRow,
 	tokenRow view.TokenRow,
@@ -410,7 +441,7 @@ func (nft *NFT) updateToken(
 	return nil
 }
 
-func (nft *NFT) insertToken(
+func (projection *NFT) insertToken(
 	tokensView view.Tokens, tokenRow view.TokenRow, tokensTotalView view.TokensTotal,
 ) error {
 	if insertTokenErr := tokensView.Insert(&tokenRow); insertTokenErr != nil {
@@ -439,7 +470,7 @@ func (nft *NFT) insertToken(
 	return nil
 }
 
-func (nft *NFT) deleteToken(
+func (projection *NFT) deleteToken(
 	tokensView view.Tokens,
 	tokensTotalView view.TokensTotal,
 	nftMessagesView view.Messages,

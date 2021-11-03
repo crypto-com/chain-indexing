@@ -3,6 +3,11 @@ package account
 import (
 	"fmt"
 
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/golang-migrate/migrate/v4/source/github"
+
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -12,9 +17,6 @@ import (
 	account_view "github.com/crypto-com/chain-indexing/projection/account/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
-	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 // Account number, sequence number, balances are fetched from the latest state (regardless of current replaying height)
@@ -51,17 +53,36 @@ func (_ *Account) GetEventsToListen() []string {
 	}
 }
 
-func (projection *Account) OnInit() error {
+const (
+	MIGRATION_TABLE_NAME = "account_schema_migrations"
+	MIGRATION_GITHUB_TARGET = "github://public:token@crypto-com/chain-indexing/projection/account/migrations#migration-sharing"
+)
+
+func (projection *Account) migrationDBConnString() string {
 	conn := projection.rdbConn.(*pg.PgxConn)
+	connString := conn.ConnString()
+	if connString[len(connString)-1:] == "?" {
+		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
+	} else {
+		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
+	}
+}
+
+func (projection *Account) OnInit() error {
 	m, err := migrate.New(
-		"file://projection/account/migrations",
-		conn.ConnString() + "&x-migrations-table=account_schema_migrations")
+		MIGRATION_GITHUB_TARGET,
+		projection.migrationDBConnString(),
+	)
 	if err != nil {
-		projection.logger.Panic(err.Error())
+		projection.logger.Errorf("failed to init migration: %v", err)
+		return err
 	}
+
 	if err := m.Up(); err != nil {
-		projection.logger.Panic(err.Error())
+		projection.logger.Errorf("failed to run migration: %v", err)
+		return err
 	}
+
 	return nil
 }
 

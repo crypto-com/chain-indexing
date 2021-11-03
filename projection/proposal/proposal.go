@@ -7,7 +7,9 @@ import (
 	"time"
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/crypto-com/chain-indexing/projection/proposal/types"
+	"github.com/golang-migrate/migrate/v4"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbparambase"
 	rdbparambase_types "github.com/crypto-com/chain-indexing/appinterface/projection/rdbparambase/types"
@@ -100,7 +102,36 @@ func (proposal *Proposal) GetEventsToListen() []string {
 	)
 }
 
-func (_ *Proposal) OnInit() error {
+const (
+	MIGRATION_TABLE_NAME = "proposal_schema_migrations"
+	MIGRATION_GITHUB_TARGET = "github://public:token@crypto-com/chain-indexing/projection/proposal/migrations#migration-sharing"
+)
+
+func (projection *Proposal) migrationDBConnString() string {
+	conn := projection.rdbConn.(*pg.PgxConn)
+	connString := conn.ConnString()
+	if connString[len(connString)-1:] == "?" {
+		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
+	} else {
+		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
+	}
+}
+
+func (projection *Proposal) OnInit() error {
+	m, err := migrate.New(
+		MIGRATION_GITHUB_TARGET,
+		projection.migrationDBConnString(),
+	)
+	if err != nil {
+		projection.logger.Errorf("failed to init migration: %v", err)
+		return err
+	}
+
+	if err := m.Up(); err != nil {
+		projection.logger.Errorf("failed to run migration: %v", err)
+		return err
+	}
+
 	return nil
 }
 
