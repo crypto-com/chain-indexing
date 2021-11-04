@@ -8,6 +8,7 @@ import (
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	appprojection "github.com/crypto-com/chain-indexing/projection"
 	"github.com/crypto-com/chain-indexing/projection/proposal/types"
 	"github.com/golang-migrate/migrate/v4"
 
@@ -52,9 +53,20 @@ type Proposal struct {
 	conNodeAddressPrefix string
 }
 
-func NewProposal(logger applogger.Logger, rdbConn rdb.Conn, conNodeAddressPrefix string) *Proposal {
+func NewProposal(
+	logger applogger.Logger,
+	rdbConn rdb.Conn,
+	conNodeAddressPrefix string,
+	config *appprojection.Config,
+) *Proposal {
 	return &Proposal{
-		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Proposal"),
+		rdbprojectionbase.NewRDbBaseWithOptions(
+			rdbConn.ToHandle(),
+			"Proposal",
+			rdbprojectionbase.Options{
+				MaybeConfigPtr: config,
+			},
+		),
 
 		rdbparambase.NewBase(view.PARAMS_TABLE_NAME, []rdbparambase_types.ParamAccessor{{
 			Module: "gov",
@@ -104,8 +116,12 @@ func (proposal *Proposal) GetEventsToListen() []string {
 
 const (
 	MIGRATION_TABLE_NAME = "proposal_schema_migrations"
-	MIGRATION_GITHUB_TARGET = "github://public:token@crypto-com/chain-indexing/projection/proposal/migrations#migration-sharing"
+	MIGRATION_DIRECOTRY  = "projection/proposal/migrations"
 )
+
+func (projection *Proposal) Config() *appprojection.Config {
+	return projection.Base.Config().(*appprojection.Config)
+}
 
 func (projection *Proposal) migrationDBConnString() string {
 	conn := projection.rdbConn.(*pg.PgxConn)
@@ -119,7 +135,7 @@ func (projection *Proposal) migrationDBConnString() string {
 
 func (projection *Proposal) OnInit() error {
 	m, err := migrate.New(
-		MIGRATION_GITHUB_TARGET,
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {

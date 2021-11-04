@@ -157,7 +157,7 @@ var _ = Describe("Validator Events", func() {
 
 			fakeLogger := NewFakeLogger()
 
-			projection := block.NewBlock(fakeLogger, pgConn)
+			projection := block.NewBlock(fakeLogger, pgConn, nil)
 			projectionValidator := validatorstats.NewValidatorStats(fakeLogger, pgConn)
 
 			totalDelegateBeforeHandling, err := validatorStatsView.FindBy("total_delegate")
@@ -203,7 +203,7 @@ var _ = Describe("Validator Events", func() {
 			event := NewFakeEvent()
 
 			fakeLogger := NewFakeLogger()
-			projection := block.NewBlock(fakeLogger, pgConn)
+			projection := block.NewBlock(fakeLogger, pgConn, nil)
 			Expect(blocksView.Count()).To(Equal(int64(0)))
 
 			err := projection.HandleEvents(anyHeight, []event_entity.Event{event})

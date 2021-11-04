@@ -14,6 +14,7 @@ import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	appprojection "github.com/crypto-com/chain-indexing/projection"
 	account_view "github.com/crypto-com/chain-indexing/projection/account/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
@@ -32,9 +33,16 @@ func NewAccount(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	cosmosClient cosmosapp_interface.Client,
+	config *appprojection.Config,
 ) *Account {
 	return &Account{
-		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Account"),
+		rdbprojectionbase.NewRDbBaseWithOptions(
+			rdbConn.ToHandle(),
+			"Account",
+			rdbprojectionbase.Options{
+				MaybeConfigPtr: config,
+			},
+		),
 		rdbConn,
 		logger,
 		cosmosClient,
@@ -55,8 +63,12 @@ func (_ *Account) GetEventsToListen() []string {
 
 const (
 	MIGRATION_TABLE_NAME = "account_schema_migrations"
-	MIGRATION_GITHUB_TARGET = "github://public:token@crypto-com/chain-indexing/projection/account/migrations#migration-sharing"
+	MIGRATION_DIRECOTRY  = "projection/account/migrations"
 )
+
+func (projection *Account) Config() *appprojection.Config {
+	return projection.Base.Config().(*appprojection.Config)
+}
 
 func (projection *Account) migrationDBConnString() string {
 	conn := projection.rdbConn.(*pg.PgxConn)
@@ -70,7 +82,7 @@ func (projection *Account) migrationDBConnString() string {
 
 func (projection *Account) OnInit() error {
 	m, err := migrate.New(
-		MIGRATION_GITHUB_TARGET,
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {

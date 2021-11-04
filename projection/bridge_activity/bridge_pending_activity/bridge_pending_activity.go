@@ -7,6 +7,7 @@ import (
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	appprojection "github.com/crypto-com/chain-indexing/projection"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
 	"github.com/golang-migrate/migrate/v4"
 
@@ -30,6 +31,8 @@ type BridgePendingActivity struct {
 }
 
 type Config struct {
+	appprojection.Config
+
 	ThisChainId           string `mapstructure:"this_chain_id"`
 	ThisChainName         string `mapstructure:"this_chain_name"`
 	CounterpartyChainName string `mapstructure:"counterparty_chain_name"`
@@ -37,14 +40,17 @@ type Config struct {
 	StartingHeight        int64  `mapstructure:"starting_height"`
 }
 
-func NewBridgePendingActivity(logger applogger.Logger, rdbConn rdb.Conn) *BridgePendingActivity {
-	var config Config
+func NewBridgePendingActivity(
+	logger applogger.Logger,
+	rdbConn rdb.Conn,
+	config *Config,
+) *BridgePendingActivity {
 
 	return &BridgePendingActivity{
 		rdbprojectionbase.NewRDbBaseWithOptions(
 			rdbConn.ToHandle(), "BridgePendingActivity", rdbprojectionbase.Options{
 				MaybeTable:     nil,
-				MaybeConfigPtr: &config,
+				MaybeConfigPtr: config,
 			}),
 
 		rdbConn,
@@ -70,7 +76,7 @@ func (_ *BridgePendingActivity) GetEventsToListen() []string {
 
 const (
 	MIGRATION_TABLE_NAME = "bridge_pending_activity_schema_migrations"
-	MIGRATION_GITHUB_TARGET = "github://public:token@crypto-com/chain-indexing/projection/bridge_activity/bridge_pending_activity/migrations#migration-sharing"
+	MIGRATION_DIRECOTRY  = "projection/bridge_activity/bridge_pending_activity/migrations"
 )
 
 func (projection *BridgePendingActivity) migrationDBConnString() string {
@@ -85,7 +91,7 @@ func (projection *BridgePendingActivity) migrationDBConnString() string {
 
 func (projection *BridgePendingActivity) OnInit() error {
 	m, err := migrate.New(
-		MIGRATION_GITHUB_TARGET,
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {

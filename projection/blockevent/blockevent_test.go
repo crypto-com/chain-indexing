@@ -29,7 +29,7 @@ var _ = Describe("Block Events", func() {
 	It("should implement projection", func() {
 		fakeLogger := NewFakeLogger()
 		fakeRdbConn := NewFakeRDbConn()
-		var _ entity_projection.Projection = blockevent.NewBlockEvent(fakeLogger, fakeRdbConn)
+		var _ entity_projection.Projection = blockevent.NewBlockEvent(fakeLogger, fakeRdbConn, nil)
 	})
 
 	WithTestPgxConn(func(pgConn *pg.PgxConn, pgMigrate *pg.Migrate) {
@@ -71,7 +71,7 @@ var _ = Describe("Block Events", func() {
 			})
 
 			fakeLogger := NewFakeLogger()
-			projection := blockevent.NewBlockEvent(fakeLogger, pgConn)
+			projection := blockevent.NewBlockEvent(fakeLogger, pgConn, nil)
 			err := projection.HandleEvents(anyHeight, []event_entity.Event{event})
 			Expect(err).To(BeNil())
 
@@ -122,8 +122,8 @@ var _ = Describe("Block Events", func() {
 
 			fakeLogger := NewFakeLogger()
 
-			projection := block.NewBlock(fakeLogger, pgConn)
-			projectionBlockEvent := blockevent.NewBlockEvent(fakeLogger, pgConn)
+			projection := block.NewBlock(fakeLogger, pgConn, nil)
+			projectionBlockEvent := blockevent.NewBlockEvent(fakeLogger, pgConn, nil)
 
 			blockEventRow, mayBePaginationResult, err := blockEventsView.List(blockEventListFilter, blockEventListOrder, paginationPtr)
 
@@ -157,7 +157,7 @@ var _ = Describe("Block Events", func() {
 			anyHeight := int64(1)
 
 			fakeLogger := NewFakeLogger()
-			projection := blockevent.NewBlockEvent(fakeLogger, pgConn)
+			projection := blockevent.NewBlockEvent(fakeLogger, pgConn, nil)
 
 			Expect(projection.GetLastHandledEventHeight()).To(BeNil())
 
@@ -174,7 +174,7 @@ var _ = Describe("Block Events", func() {
 			event := NewFakeEvent()
 
 			fakeLogger := NewFakeLogger()
-			projection := block.NewBlock(fakeLogger, pgConn)
+			projection := block.NewBlock(fakeLogger, pgConn, nil)
 			Expect(blocksView.Count()).To(Equal(int64(0)))
 
 			err := projection.HandleEvents(anyHeight, []event_entity.Event{event})

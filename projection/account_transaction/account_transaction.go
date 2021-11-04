@@ -12,6 +12,7 @@ import (
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/crypto-com/chain-indexing/internal/base64"
+	appprojection "github.com/crypto-com/chain-indexing/projection"
 	"github.com/crypto-com/chain-indexing/projection/account_transaction/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -29,9 +30,20 @@ type AccountTransaction struct {
 	logger  applogger.Logger
 }
 
-func NewAccountTransaction(logger applogger.Logger, rdbConn rdb.Conn, accountAddressPrefix string) *AccountTransaction {
+func NewAccountTransaction(
+	logger applogger.Logger,
+	rdbConn rdb.Conn,
+	accountAddressPrefix string,
+	config *appprojection.Config,
+) *AccountTransaction {
 	return &AccountTransaction{
-		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "AccountTransaction"),
+		rdbprojectionbase.NewRDbBaseWithOptions(
+			rdbConn.ToHandle(),
+			"AccountTransaction",
+			rdbprojectionbase.Options{
+				MaybeConfigPtr: config,
+			},
+		),
 
 		accountAddressPrefix,
 
@@ -50,8 +62,12 @@ func (_ *AccountTransaction) GetEventsToListen() []string {
 
 const (
 	MIGRATION_TABLE_NAME = "account_transaction_schema_migrations"
-	MIGRATION_GITHUB_TARGET = "github://public:token@crypto-com/chain-indexing/projection/account_transaction/migrations#migration-sharing"
+	MIGRATION_DIRECOTRY  = "projection/account_transaction/migrations"
 )
+
+func (projection *AccountTransaction) Config() *appprojection.Config {
+	return projection.Base.Config().(*appprojection.Config)
+}
 
 func (projection *AccountTransaction) migrationDBConnString() string {
 	conn := projection.rdbConn.(*pg.PgxConn)
@@ -65,7 +81,7 @@ func (projection *AccountTransaction) migrationDBConnString() string {
 
 func (projection *AccountTransaction) OnInit() error {
 	m, err := migrate.New(
-		MIGRATION_GITHUB_TARGET,
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {

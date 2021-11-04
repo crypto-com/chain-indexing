@@ -9,6 +9,7 @@ import (
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	appprojection "github.com/crypto-com/chain-indexing/projection"
 	"github.com/crypto-com/chain-indexing/projection/block/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/golang-migrate/migrate/v4"
@@ -24,9 +25,19 @@ type Block struct {
 	logger  applogger.Logger
 }
 
-func NewBlock(logger applogger.Logger, rdbConn rdb.Conn) *Block {
+func NewBlock(
+	logger applogger.Logger,
+	rdbConn rdb.Conn,
+	config *appprojection.Config,
+) *Block {
 	return &Block{
-		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Block"),
+		rdbprojectionbase.NewRDbBaseWithOptions(
+			rdbConn.ToHandle(),
+			"Block",
+			rdbprojectionbase.Options{
+				MaybeConfigPtr: config,
+			},
+		),
 
 		rdbConn,
 		logger,
@@ -39,8 +50,12 @@ func (_ *Block) GetEventsToListen() []string {
 
 const (
 	MIGRATION_TABLE_NAME = "block_schema_migrations"
-	MIGRATION_GITHUB_TARGET = "github://public:token@crypto-com/chain-indexing/projection/block/migrations#migration-sharing"
+	MIGRATION_DIRECOTRY  = "projection/block/migrations"
 )
+
+func (projection *Block) Config() *appprojection.Config {
+	return projection.Base.Config().(*appprojection.Config)
+}
 
 func (projection *Block) migrationDBConnString() string {
 	conn := projection.rdbConn.(*pg.PgxConn)
@@ -54,7 +69,7 @@ func (projection *Block) migrationDBConnString() string {
 
 func (projection *Block) OnInit() error {
 	m, err := migrate.New(
-		MIGRATION_GITHUB_TARGET,
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {

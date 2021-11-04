@@ -16,6 +16,7 @@ import (
 	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	appprojection "github.com/crypto-com/chain-indexing/projection"
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 	"github.com/crypto-com/chain-indexing/projection/validator/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
@@ -35,9 +36,20 @@ type Validator struct {
 	conNodeAddressPrefix string
 }
 
-func NewValidator(logger applogger.Logger, rdbConn rdb.Conn, conNodeAddressPrefix string) *Validator {
+func NewValidator(
+	logger applogger.Logger,
+	rdbConn rdb.Conn,
+	conNodeAddressPrefix string,
+	config *appprojection.Config,
+) *Validator {
 	return &Validator{
-		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Validator"),
+		rdbprojectionbase.NewRDbBaseWithOptions(
+			rdbConn.ToHandle(),
+			"Validator",
+			rdbprojectionbase.Options{
+				MaybeConfigPtr: config,
+			},
+		),
 
 		rdbConn,
 		logger,
@@ -70,8 +82,12 @@ func (_ *Validator) GetEventsToListen() []string {
 
 const (
 	MIGRATION_TABLE_NAME = "validator_schema_migrations"
-	MIGRATION_GITHUB_TARGET = "github://public:token@crypto-com/chain-indexing/projection/validator/migrations#migration-sharing"
+	MIGRATION_DIRECOTRY  = "projection/validator/migrations"
 )
+
+func (projection *Validator) Config() *appprojection.Config {
+	return projection.Base.Config().(*appprojection.Config)
+}
 
 func (projection *Validator) migrationDBConnString() string {
 	conn := projection.rdbConn.(*pg.PgxConn)
@@ -85,7 +101,7 @@ func (projection *Validator) migrationDBConnString() string {
 
 func (projection *Validator) OnInit() error {
 	m, err := migrate.New(
-		MIGRATION_GITHUB_TARGET,
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {

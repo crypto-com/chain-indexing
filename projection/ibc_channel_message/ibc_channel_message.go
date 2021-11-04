@@ -11,6 +11,7 @@ import (
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	appprojection "github.com/crypto-com/chain-indexing/projection"
 	"github.com/crypto-com/chain-indexing/projection/ibc_channel_message/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/golang-migrate/migrate/v4"
@@ -34,9 +35,16 @@ type IBCChannelMessage struct {
 func NewIBCChannelMessage(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
+	config *appprojection.Config,
 ) *IBCChannelMessage {
 	return &IBCChannelMessage{
-		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "IBCChannelMessage"),
+		rdbprojectionbase.NewRDbBaseWithOptions(
+			rdbConn.ToHandle(),
+			"IBCChannelMessage",
+			rdbprojectionbase.Options{
+				MaybeConfigPtr: config,
+			},
+		),
 
 		rdbConn,
 		logger,
@@ -63,8 +71,12 @@ func (_ *IBCChannelMessage) GetEventsToListen() []string {
 
 const (
 	MIGRATION_TABLE_NAME = "ibc_channel_message_schema_migrations"
-	MIGRATION_GITHUB_TARGET = "github://public:token@crypto-com/chain-indexing/projection/ibc_channel_message/migrations#migration-sharing"
+	MIGRATION_DIRECOTRY  = "projection/ibc_channel_message/migrations"
 )
+
+func (projection *IBCChannelMessage) Config() *appprojection.Config {
+	return projection.Base.Config().(*appprojection.Config)
+}
 
 func (projection *IBCChannelMessage) migrationDBConnString() string {
 	conn := projection.rdbConn.(*pg.PgxConn)
@@ -78,7 +90,7 @@ func (projection *IBCChannelMessage) migrationDBConnString() string {
 
 func (projection *IBCChannelMessage) OnInit() error {
 	m, err := migrate.New(
-		MIGRATION_GITHUB_TARGET,
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {

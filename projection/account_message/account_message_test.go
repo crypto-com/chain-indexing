@@ -27,6 +27,7 @@ func NewAccountMessageProjection(rdbConn rdb.Conn) *account_message.AccountMessa
 		nil,
 		rdbConn,
 		"accountaddressprefix",
+		nil,
 	)
 }
 

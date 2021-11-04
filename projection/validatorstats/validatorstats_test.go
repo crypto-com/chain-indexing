@@ -29,7 +29,7 @@ var _ = Describe("Validator Events", func() {
 	It("should implement projection", func() {
 		fakeLogger := NewFakeLogger()
 		fakeRdbConn := NewFakeRDbConn()
-		var _ entity_projection.Projection = validatorstats.NewValidatorStats(fakeLogger, fakeRdbConn)
+		var _ entity_projection.Projection = validatorstats.NewValidatorStats(fakeLogger, fakeRdbConn, nil)
 	})
 
 	WithTestPgxConn(func(pgConn *pg.PgxConn, pgMigrate *pg.Migrate) {
@@ -71,7 +71,7 @@ var _ = Describe("Validator Events", func() {
 			})
 
 			fakeLogger := NewFakeLogger()
-			projection := validatorstats.NewValidatorStats(fakeLogger, pgConn)
+			projection := validatorstats.NewValidatorStats(fakeLogger, pgConn, nil)
 			err := projection.HandleEvents(anyHeight, []event_entity.Event{event})
 			Expect(err).To(BeNil())
 
@@ -140,8 +140,8 @@ var _ = Describe("Validator Events", func() {
 
 			fakeLogger := NewFakeLogger()
 
-			projection := block.NewBlock(fakeLogger, pgConn)
-			projectionValidator := validatorstats.NewValidatorStats(fakeLogger, pgConn)
+			projection := block.NewBlock(fakeLogger, pgConn, nil)
+			projectionValidator := validatorstats.NewValidatorStats(fakeLogger, pgConn, nil)
 
 			totalDelegateBeforeHandling, err := validatorStatsView.FindBy("total_delegate")
 
@@ -169,7 +169,7 @@ var _ = Describe("Validator Events", func() {
 			anyHeight := int64(1)
 
 			fakeLogger := NewFakeLogger()
-			projection := validatorstats.NewValidatorStats(fakeLogger, pgConn)
+			projection := validatorstats.NewValidatorStats(fakeLogger, pgConn, nil)
 
 			Expect(projection.GetLastHandledEventHeight()).To(BeNil())
 
@@ -186,7 +186,7 @@ var _ = Describe("Validator Events", func() {
 			event := NewFakeEvent()
 
 			fakeLogger := NewFakeLogger()
-			projection := block.NewBlock(fakeLogger, pgConn)
+			projection := block.NewBlock(fakeLogger, pgConn, nil)
 			Expect(blocksView.Count()).To(Equal(int64(0)))
 
 			err := projection.HandleEvents(anyHeight, []event_entity.Event{event})

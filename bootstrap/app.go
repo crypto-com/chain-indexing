@@ -1,6 +1,8 @@
 package bootstrap
 
 import (
+	"fmt"
+
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
@@ -24,7 +26,7 @@ func NewApp(logger applogger.Logger, config *Config) *app {
 	}
 
 	m, err := migrate.New(
-		MIGRATION_GITHUB_TARGET,
+		fmt.Sprintf(MIGRATION_GITHUB_TARGET, config.GithubAPI.Username, config.GithubAPI.Token),
 		migrationDBConnString(rdbConn),
 	)
 	if err != nil {
@@ -43,8 +45,8 @@ func NewApp(logger applogger.Logger, config *Config) *app {
 }
 
 const (
-	MIGRATION_TABLE_NAME = "schema_migrations"
-	MIGRATION_GITHUB_TARGET = "github://public:token@crypto-com/chain-indexing/migrations#migration-sharing"
+	MIGRATION_TABLE_NAME    = "schema_migrations"
+	MIGRATION_GITHUB_TARGET = "github://%s:%s@crypto-com/chain-indexing/migrations#migration-sharing"
 )
 
 func migrationDBConnString(conn rdb.Conn) string {

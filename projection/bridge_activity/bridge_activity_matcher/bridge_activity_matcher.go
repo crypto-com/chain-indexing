@@ -11,6 +11,7 @@ import (
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	appprojection "github.com/crypto-com/chain-indexing/projection"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/view"
 	projection_usecase "github.com/crypto-com/chain-indexing/usecase/projection"
@@ -20,6 +21,8 @@ import (
 var _ projection_entity.CronJob = &BridgeActivityMatcher{}
 
 type Config struct {
+	appprojection.Config
+
 	Interval               time.Duration `mapstructure:"interval"`
 	CryptoOrgChainDatabase struct {
 		SSL      bool   `mapstructure:"ssl"`
@@ -65,7 +68,7 @@ func (cronJob *BridgeActivityMatcher) Config() *Config {
 
 const (
 	MIGRATION_TABLE_NAME = "bridge_activity_matcher_migrations"
-	MIGRATION_GITHUB_TARGET = "github://public:token@crypto-com/chain-indexing/projection/bridge_activity/bridge_activity_matcher/migrations#migration-sharing"
+	MIGRATION_DIRECOTRY  = "projection/bridge_activity/bridge_activity_matcher/migrations"
 )
 
 func (cronJob *BridgeActivityMatcher) migrationDBConnString() string {
@@ -100,7 +103,7 @@ func (cronJob *BridgeActivityMatcher) OnInit() error {
 	}
 
 	m, err := migrate.New(
-		MIGRATION_GITHUB_TARGET,
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, cronJob.Config().GithubAPIUser, cronJob.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
 		cronJob.migrationDBConnString(),
 	)
 	if err != nil {

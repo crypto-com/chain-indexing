@@ -30,6 +30,9 @@ type IndexService struct {
 	strictGenesisParsing     bool
 
 	cosmosVersionBlockHeight utils.CosmosVersionBlockHeight
+
+	GithubAPIUser  string
+	GithubAPIToken string
 }
 
 // NewIndexService creates a new server instance for polling and indexing
@@ -57,6 +60,8 @@ func NewIndexService(
 		cosmosVersionBlockHeight: utils.CosmosVersionBlockHeight{
 			V0_42_7: utils.ParserBlockHeight(config.CosmosVersionEnabledHeight.V0_42_7),
 		},
+		GithubAPIUser:  config.GithubAPI.Username,
+		GithubAPIToken: config.GithubAPI.Token,
 	}
 }
 
