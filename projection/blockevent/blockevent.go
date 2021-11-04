@@ -83,7 +83,7 @@ func (projection *BlockEvent) OnInit() error {
 		return err
 	}
 
-	if err := m.Up(); err != nil && errors.Is(err, migrate.ErrNoChange) {
+	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		projection.logger.Errorf("failed to run migration: %v", err)
 		return err
 	}
