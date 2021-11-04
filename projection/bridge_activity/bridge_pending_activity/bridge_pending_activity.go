@@ -232,10 +232,15 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 			}
 			if msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData != nil {
 				var status types.Status
-				if msgIBCRecvPacket.Params.PacketAck.MaybeError == nil {
+				if msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Success {
 					status = types.STATUS_COUNTERPARTY_CONFIRMED
 				} else {
-					status = types.STATUS_COUNTERPARTY_REJECTED
+
+					if msgIBCRecvPacket.Params.PacketAck.MaybeError != nil {
+						status = types.STATUS_COUNTERPARTY_REJECTED
+					} else {
+						status = types.STATUS_NO_OPERATION
+					}
 				}
 
 				amount, amountOk := coin.NewIntFromString(msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount.String())

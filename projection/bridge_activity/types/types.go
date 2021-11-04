@@ -20,6 +20,9 @@ const (
 	STATUS_COUNTERPARTY_CONFIRMED Status = "CounterpartyConfirmed"
 	STATUS_FAILED                 Status = "Failed"
 	STATUS_COUNTERPARTY_REJECTED  Status = "CounterpartyRejected"
+	// Packet already relayed, do nothing (no-op)
+	// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/04-channel/keeper/packet.go#L239
+	STATUS_NO_OPERATION Status = "NoOperation"
 )
 
 const (
