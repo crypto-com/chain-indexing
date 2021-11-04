@@ -47,7 +47,7 @@ func NewApp(logger applogger.Logger, config *Config) *app {
 
 const (
 	MIGRATION_TABLE_NAME    = "schema_migrations"
-	MIGRATION_GITHUB_TARGET = "github://%s:%s@crypto-com/chain-indexing/migrations#migration-sharing"
+	MIGRATION_GITHUB_TARGET = "github://%s:%s@crypto-com/chain-indexing/migrations"
 )
 
 func migrationDBConnString(conn rdb.Conn) string {
