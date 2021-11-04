@@ -1,6 +1,7 @@
 package account_message
 
 import (
+	"errors"
 	"fmt"
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
@@ -90,7 +91,7 @@ func (projection *AccountMessage) OnInit() error {
 		return err
 	}
 
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+	if err := m.Up(); err != nil && errors.Is(err, migrate.ErrNoChange) {
 		projection.logger.Errorf("failed to run migration: %v", err)
 		return err
 	}
