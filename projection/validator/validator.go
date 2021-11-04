@@ -34,6 +34,8 @@ type Validator struct {
 	logger  applogger.Logger
 
 	conNodeAddressPrefix string
+
+	config *appprojection.Config
 }
 
 func NewValidator(
@@ -43,17 +45,15 @@ func NewValidator(
 	config *appprojection.Config,
 ) *Validator {
 	return &Validator{
-		rdbprojectionbase.NewRDbBaseWithOptions(
+		rdbprojectionbase.NewRDbBase(
 			rdbConn.ToHandle(),
 			"Validator",
-			rdbprojectionbase.Options{
-				MaybeConfigPtr: config,
-			},
 		),
 
 		rdbConn,
 		logger,
 		conNodeAddressPrefix,
+		config,
 	}
 }
 
@@ -85,10 +85,6 @@ const (
 	MIGRATION_DIRECOTRY  = "projection/validator/migrations"
 )
 
-func (projection *Validator) Config() *appprojection.Config {
-	return projection.Base.Config().(*appprojection.Config)
-}
-
 func (projection *Validator) migrationDBConnString() string {
 	conn := projection.rdbConn.(*pg.PgxConn)
 	connString := conn.ConnString()
@@ -101,7 +97,7 @@ func (projection *Validator) migrationDBConnString() string {
 
 func (projection *Validator) OnInit() error {
 	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {

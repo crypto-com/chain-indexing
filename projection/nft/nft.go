@@ -37,6 +37,8 @@ type NFT struct {
 
 	rdbConn rdb.Conn
 	logger  applogger.Logger
+
+	config *Config
 }
 
 type Config struct {
@@ -56,16 +58,14 @@ func NewNFT(
 		projectionId = "CryptoComNFT"
 	}
 	return &NFT{
-		rdbprojectionbase.NewRDbBaseWithOptions(
+		rdbprojectionbase.NewRDbBase(
 			rdbConn.ToHandle(),
 			projectionId,
-			rdbprojectionbase.Options{
-				MaybeConfigPtr: config,
-			},
 		),
 
 		rdbConn,
 		logger,
+		config,
 	}
 }
 
@@ -81,13 +81,9 @@ func (projection *NFT) GetEventsToListen() []string {
 }
 
 const (
-	MIGRATION_TABLE_NAME    = "nft_schema_migrations"
+	MIGRATION_TABLE_NAME = "nft_schema_migrations"
 	MIGRATION_DIRECOTRY  = "projection/nft/migrations"
 )
-
-func (projection *NFT) Config() *Config {
-	return projection.Base.Config().(*Config)
-}
 
 func (projection *NFT) migrationDBConnString() string {
 	conn := projection.rdbConn.(*pg.PgxConn)
@@ -101,7 +97,7 @@ func (projection *NFT) migrationDBConnString() string {
 
 func (projection *NFT) OnInit() error {
 	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {
@@ -189,9 +185,9 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 
 		} else if msgMintNFT, ok := event.(*event_usecase.MsgNFTMintNFT); ok {
 			var maybeDrop *string
-			if projection.Config().EnableDrop {
+			if projection.config.EnableDrop {
 				rawDrop, getDropErr := utils.GetValueFromJSONData(
-					[]byte(msgMintNFT.Data), projection.Config().DropDataAccessor,
+					[]byte(msgMintNFT.Data), projection.config.DropDataAccessor,
 				)
 				if getDropErr == nil {
 					rawDropStr, isDropOk := rawDrop.(string)
@@ -243,9 +239,9 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 			}
 
 			drop := mutPrevTokenRow.MaybeDrop
-			if projection.Config().EnableDrop {
+			if projection.config.EnableDrop {
 				rawDrop, getDropErr := utils.GetValueFromJSONData(
-					[]byte(msgEditNFT.Data), projection.Config().DropDataAccessor,
+					[]byte(msgEditNFT.Data), projection.config.DropDataAccessor,
 				)
 				if getDropErr == nil {
 					rawDropStr, isDropOk := rawDrop.(string)

@@ -23,6 +23,8 @@ type Block struct {
 
 	rdbConn rdb.Conn
 	logger  applogger.Logger
+
+	config *appprojection.Config
 }
 
 func NewBlock(
@@ -31,16 +33,15 @@ func NewBlock(
 	config *appprojection.Config,
 ) *Block {
 	return &Block{
-		rdbprojectionbase.NewRDbBaseWithOptions(
+		rdbprojectionbase.NewRDbBase(
 			rdbConn.ToHandle(),
 			"Block",
-			rdbprojectionbase.Options{
-				MaybeConfigPtr: config,
-			},
 		),
 
 		rdbConn,
 		logger,
+
+		config,
 	}
 }
 
@@ -52,10 +53,6 @@ const (
 	MIGRATION_TABLE_NAME = "block_schema_migrations"
 	MIGRATION_DIRECOTRY  = "projection/block/migrations"
 )
-
-func (projection *Block) Config() *appprojection.Config {
-	return projection.Base.Config().(*appprojection.Config)
-}
 
 func (projection *Block) migrationDBConnString() string {
 	conn := projection.rdbConn.(*pg.PgxConn)
@@ -69,7 +66,7 @@ func (projection *Block) migrationDBConnString() string {
 
 func (projection *Block) OnInit() error {
 	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {

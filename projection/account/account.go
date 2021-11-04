@@ -27,6 +27,8 @@ type Account struct {
 	rdbConn      rdb.Conn
 	logger       applogger.Logger
 	cosmosClient cosmosapp_interface.Client // cosmos light client deamon port : 1317 (default)
+
+	config *appprojection.Config
 }
 
 func NewAccount(
@@ -36,16 +38,13 @@ func NewAccount(
 	config *appprojection.Config,
 ) *Account {
 	return &Account{
-		rdbprojectionbase.NewRDbBaseWithOptions(
-			rdbConn.ToHandle(),
-			"Account",
-			rdbprojectionbase.Options{
-				MaybeConfigPtr: config,
-			},
+		rdbprojectionbase.NewRDbBase(
+			rdbConn.ToHandle(), "Account",
 		),
 		rdbConn,
 		logger,
 		cosmosClient,
+		config,
 	}
 }
 
@@ -66,10 +65,6 @@ const (
 	MIGRATION_DIRECOTRY  = "projection/account/migrations"
 )
 
-func (projection *Account) Config() *appprojection.Config {
-	return projection.Base.Config().(*appprojection.Config)
-}
-
 func (projection *Account) migrationDBConnString() string {
 	conn := projection.rdbConn.(*pg.PgxConn)
 	connString := conn.ConnString()
@@ -82,7 +77,7 @@ func (projection *Account) migrationDBConnString() string {
 
 func (projection *Account) OnInit() error {
 	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {

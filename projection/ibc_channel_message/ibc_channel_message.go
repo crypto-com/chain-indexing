@@ -30,6 +30,8 @@ type IBCChannelMessage struct {
 
 	rdbConn rdb.Conn
 	logger  applogger.Logger
+
+	config *appprojection.Config
 }
 
 func NewIBCChannelMessage(
@@ -38,16 +40,15 @@ func NewIBCChannelMessage(
 	config *appprojection.Config,
 ) *IBCChannelMessage {
 	return &IBCChannelMessage{
-		rdbprojectionbase.NewRDbBaseWithOptions(
+		rdbprojectionbase.NewRDbBase(
 			rdbConn.ToHandle(),
 			"IBCChannelMessage",
-			rdbprojectionbase.Options{
-				MaybeConfigPtr: config,
-			},
 		),
 
 		rdbConn,
 		logger,
+
+		config,
 	}
 }
 
@@ -74,10 +75,6 @@ const (
 	MIGRATION_DIRECOTRY  = "projection/ibc_channel_message/migrations"
 )
 
-func (projection *IBCChannelMessage) Config() *appprojection.Config {
-	return projection.Base.Config().(*appprojection.Config)
-}
-
 func (projection *IBCChannelMessage) migrationDBConnString() string {
 	conn := projection.rdbConn.(*pg.PgxConn)
 	connString := conn.ConnString()
@@ -90,7 +87,7 @@ func (projection *IBCChannelMessage) migrationDBConnString() string {
 
 func (projection *IBCChannelMessage) OnInit() error {
 	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {

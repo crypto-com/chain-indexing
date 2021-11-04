@@ -39,6 +39,8 @@ type IBCChannel struct {
 
 	rdbConn rdb.Conn
 	logger  applogger.Logger
+
+	config *Config
 }
 
 type Config struct {
@@ -53,16 +55,15 @@ func NewIBCChannel(logger applogger.Logger, rdbConn rdb.Conn, config *Config) *I
 		projectionID = "IBCChannelTxMsgTrace"
 	}
 	return &IBCChannel{
-		rdbprojectionbase.NewRDbBaseWithOptions(
+		rdbprojectionbase.NewRDbBase(
 			rdbConn.ToHandle(),
 			projectionID,
-			rdbprojectionbase.Options{
-				MaybeConfigPtr: config,
-			},
 		),
 
 		rdbConn,
 		logger,
+
+		config,
 	}
 }
 
@@ -90,13 +91,9 @@ func (_ *IBCChannel) GetEventsToListen() []string {
 }
 
 const (
-	MIGRATION_TABLE_NAME    = "ibc_channel_schema_migrations"
+	MIGRATION_TABLE_NAME = "ibc_channel_schema_migrations"
 	MIGRATION_DIRECOTRY  = "projection/ibc_channel/migrations"
 )
-
-func (projection *IBCChannel) Config() *Config {
-	return projection.Base.Config().(*Config)
-}
 
 func (projection *IBCChannel) migrationDBConnString() string {
 	conn := projection.rdbConn.(*pg.PgxConn)
@@ -110,7 +107,7 @@ func (projection *IBCChannel) migrationDBConnString() string {
 
 func (projection *IBCChannel) OnInit() error {
 	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {
@@ -425,7 +422,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updateBondedTokensWhenMsgIBCTransfer: %v", err)
 			}
 
-			if projection.Config().EnableTxMsgTrace {
+			if projection.config.EnableTxMsgTrace {
 
 				msg, err := msgIBCTransferTransfer.ToJSON()
 				if err != nil {
@@ -500,7 +497,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 			}
 
-			if projection.Config().EnableTxMsgTrace && msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData != nil {
+			if projection.config.EnableTxMsgTrace && msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData != nil {
 
 				msg, err := msgIBCRecvPacket.ToJSON()
 				if err != nil {
@@ -584,7 +581,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 			}
 
-			if projection.Config().EnableTxMsgTrace && msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData != nil {
+			if projection.config.EnableTxMsgTrace && msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData != nil {
 
 				msg, err := msgIBCAcknowledgement.ToJSON()
 				if err != nil {
@@ -654,7 +651,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 			}
 
-			if projection.Config().EnableTxMsgTrace && msgIBCTimeout.Params.MaybeMsgTransfer != nil {
+			if projection.config.EnableTxMsgTrace && msgIBCTimeout.Params.MaybeMsgTransfer != nil {
 
 				amount := msgIBCTimeout.Params.MaybeMsgTransfer.RefundAmount.String()
 				msg, err := msgIBCTimeout.ToJSON()
@@ -719,7 +716,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 			}
 
-			if projection.Config().EnableTxMsgTrace && msgIBCTimeoutOnClose.Params.MaybeMsgTransfer != nil {
+			if projection.config.EnableTxMsgTrace && msgIBCTimeoutOnClose.Params.MaybeMsgTransfer != nil {
 
 				amount := msgIBCTimeoutOnClose.Params.MaybeMsgTransfer.RefundAmount.String()
 				msg, err := msgIBCTimeoutOnClose.ToJSON()

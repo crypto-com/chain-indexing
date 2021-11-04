@@ -35,6 +35,8 @@ type ChainStats struct {
 
 	maybeGenesisBlockTime *int64 // Unix Nano
 	maybeTotalBlockCount  *big.Int
+
+	config *appprojection.Config
 }
 
 func NewChainStats(
@@ -43,12 +45,9 @@ func NewChainStats(
 	config *appprojection.Config,
 ) *ChainStats {
 	return &ChainStats{
-		rdbprojectionbase.NewRDbBaseWithOptions(
+		rdbprojectionbase.NewRDbBase(
 			rdbConn.ToHandle(),
 			"ChainStats",
-			rdbprojectionbase.Options{
-				MaybeConfigPtr: config,
-			},
 		),
 
 		rdbConn,
@@ -56,6 +55,8 @@ func NewChainStats(
 
 		nil,
 		nil,
+
+		config,
 	}
 }
 
@@ -71,10 +72,6 @@ const (
 	MIGRATION_DIRECOTRY  = "projection/chainstats/migrations"
 )
 
-func (projection *ChainStats) Config() *appprojection.Config {
-	return projection.Base.Config().(*appprojection.Config)
-}
-
 func (projection *ChainStats) migrationDBConnString() string {
 	conn := projection.rdbConn.(*pg.PgxConn)
 	connString := conn.ConnString()
@@ -87,7 +84,7 @@ func (projection *ChainStats) migrationDBConnString() string {
 
 func (projection *ChainStats) OnInit() error {
 	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {

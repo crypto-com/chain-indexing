@@ -21,8 +21,6 @@ import (
 var _ projection_entity.CronJob = &BridgeActivityMatcher{}
 
 type Config struct {
-	appprojection.Config
-
 	Interval               time.Duration `mapstructure:"interval"`
 	CryptoOrgChainDatabase struct {
 		SSL      bool   `mapstructure:"ssl"`
@@ -41,13 +39,14 @@ type BridgeActivityMatcher struct {
 	thisRDbConn           rdb.Conn
 	cryptoOrgChainRDbConn rdb.Conn
 	logger                applogger.Logger
+
+	config *appprojection.Config
 }
 
-func New(logger applogger.Logger, rdbConn rdb.Conn) *BridgeActivityMatcher {
-	var config Config
+func New(logger applogger.Logger, rdbConn rdb.Conn, config *appprojection.Config) *BridgeActivityMatcher {
 	return &BridgeActivityMatcher{
 		Base: projection_usecase.NewBaseWithOptions("BridgeActivityMatcher", projection_usecase.Options{
-			MaybeConfigPtr: &config,
+			MaybeConfigPtr: &Config{},
 		}),
 
 		thisRDbConn:           rdbConn,
@@ -55,6 +54,7 @@ func New(logger applogger.Logger, rdbConn rdb.Conn) *BridgeActivityMatcher {
 		logger: logger.WithFields(applogger.LogFields{
 			"module": "BridgeActivityMatcher",
 		}),
+		config: config,
 	}
 }
 
@@ -103,7 +103,7 @@ func (cronJob *BridgeActivityMatcher) OnInit() error {
 	}
 
 	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, cronJob.Config().GithubAPIUser, cronJob.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, cronJob.config.GithubAPIUser, cronJob.config.GithubAPIToken, MIGRATION_DIRECOTRY),
 		cronJob.migrationDBConnString(),
 	)
 	if err != nil {

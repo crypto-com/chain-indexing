@@ -28,6 +28,8 @@ type ValidatorStats struct {
 
 	rdbConn rdb.Conn
 	logger  applogger.Logger
+
+	config *appprojection.Config
 }
 
 func NewValidatorStats(
@@ -36,16 +38,15 @@ func NewValidatorStats(
 	config *appprojection.Config,
 ) *ValidatorStats {
 	return &ValidatorStats{
-		rdbprojectionbase.NewRDbBaseWithOptions(
+		rdbprojectionbase.NewRDbBase(
 			rdbConn.ToHandle(),
 			"ValidatorStats",
-			rdbprojectionbase.Options{
-				MaybeConfigPtr: config,
-			},
 		),
 
 		rdbConn,
 		logger,
+
+		config,
 	}
 }
 
@@ -65,10 +66,6 @@ const (
 	MIGRATION_DIRECOTRY  = "projection/validatorstats/migrations"
 )
 
-func (projection *ValidatorStats) Config() *appprojection.Config {
-	return projection.Base.Config().(*appprojection.Config)
-}
-
 func (projection *ValidatorStats) migrationDBConnString() string {
 	conn := projection.rdbConn.(*pg.PgxConn)
 	connString := conn.ConnString()
@@ -81,7 +78,7 @@ func (projection *ValidatorStats) migrationDBConnString() string {
 
 func (projection *ValidatorStats) OnInit() error {
 	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {

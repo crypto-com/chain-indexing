@@ -28,6 +28,8 @@ type AccountTransaction struct {
 
 	rdbConn rdb.Conn
 	logger  applogger.Logger
+
+	config *appprojection.Config
 }
 
 func NewAccountTransaction(
@@ -37,18 +39,17 @@ func NewAccountTransaction(
 	config *appprojection.Config,
 ) *AccountTransaction {
 	return &AccountTransaction{
-		rdbprojectionbase.NewRDbBaseWithOptions(
+		rdbprojectionbase.NewRDbBase(
 			rdbConn.ToHandle(),
 			"AccountTransaction",
-			rdbprojectionbase.Options{
-				MaybeConfigPtr: config,
-			},
 		),
 
 		accountAddressPrefix,
 
 		rdbConn,
 		logger,
+
+		config,
 	}
 }
 
@@ -65,10 +66,6 @@ const (
 	MIGRATION_DIRECOTRY  = "projection/account_transaction/migrations"
 )
 
-func (projection *AccountTransaction) Config() *appprojection.Config {
-	return projection.Base.Config().(*appprojection.Config)
-}
-
 func (projection *AccountTransaction) migrationDBConnString() string {
 	conn := projection.rdbConn.(*pg.PgxConn)
 	connString := conn.ConnString()
@@ -81,7 +78,7 @@ func (projection *AccountTransaction) migrationDBConnString() string {
 
 func (projection *AccountTransaction) OnInit() error {
 	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {

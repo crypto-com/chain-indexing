@@ -35,6 +35,8 @@ type AccountMessage struct {
 	logger  applogger.Logger
 
 	accountAddressPrefix string
+
+	config *appprojection.Config
 }
 
 func NewAccountMessage(
@@ -44,18 +46,16 @@ func NewAccountMessage(
 	config *appprojection.Config,
 ) *AccountMessage {
 	return &AccountMessage{
-		rdbprojectionbase.NewRDbBaseWithOptions(
+		rdbprojectionbase.NewRDbBase(
 			rdbConn.ToHandle(),
 			"AccountMessage",
-			rdbprojectionbase.Options{
-				MaybeConfigPtr: config,
-			},
 		),
 
 		rdbConn,
 		logger,
 
 		accountAddressPrefix,
+		config,
 	}
 }
 
@@ -70,10 +70,6 @@ const (
 	MIGRATION_DIRECOTRY  = "projection/account_message/migrations"
 )
 
-func (projection *AccountMessage) Config() *appprojection.Config {
-	return projection.Base.Config().(*appprojection.Config)
-}
-
 func (projection *AccountMessage) migrationDBConnString() string {
 	conn := projection.rdbConn.(*pg.PgxConn)
 	connString := conn.ConnString()
@@ -86,7 +82,7 @@ func (projection *AccountMessage) migrationDBConnString() string {
 
 func (projection *AccountMessage) OnInit() error {
 	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {

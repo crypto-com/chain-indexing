@@ -51,6 +51,8 @@ type Proposal struct {
 	logger  applogger.Logger
 
 	conNodeAddressPrefix string
+
+	config *appprojection.Config
 }
 
 func NewProposal(
@@ -60,12 +62,9 @@ func NewProposal(
 	config *appprojection.Config,
 ) *Proposal {
 	return &Proposal{
-		rdbprojectionbase.NewRDbBaseWithOptions(
+		rdbprojectionbase.NewRDbBase(
 			rdbConn.ToHandle(),
 			"Proposal",
-			rdbprojectionbase.Options{
-				MaybeConfigPtr: config,
-			},
 		),
 
 		rdbparambase.NewBase(view.PARAMS_TABLE_NAME, []rdbparambase_types.ParamAccessor{{
@@ -89,6 +88,7 @@ func NewProposal(
 		rdbConn,
 		logger,
 		conNodeAddressPrefix,
+		config,
 	}
 }
 
@@ -119,10 +119,6 @@ const (
 	MIGRATION_DIRECOTRY  = "projection/proposal/migrations"
 )
 
-func (projection *Proposal) Config() *appprojection.Config {
-	return projection.Base.Config().(*appprojection.Config)
-}
-
 func (projection *Proposal) migrationDBConnString() string {
 	conn := projection.rdbConn.(*pg.PgxConn)
 	connString := conn.ConnString()
@@ -135,7 +131,7 @@ func (projection *Proposal) migrationDBConnString() string {
 
 func (projection *Proposal) OnInit() error {
 	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {

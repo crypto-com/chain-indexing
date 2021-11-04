@@ -32,6 +32,8 @@ type Transaction struct {
 
 	rdbConn rdb.Conn
 	logger  applogger.Logger
+
+	config *appprojection.Config
 }
 
 func NewTransaction(
@@ -40,16 +42,14 @@ func NewTransaction(
 	config *appprojection.Config,
 ) *Transaction {
 	return &Transaction{
-		rdbprojectionbase.NewRDbBaseWithOptions(
+		rdbprojectionbase.NewRDbBase(
 			rdbConn.ToHandle(),
 			"Transaction",
-			rdbprojectionbase.Options{
-				MaybeConfigPtr: config,
-			},
 		),
 
 		rdbConn,
 		logger,
+		config,
 	}
 }
 
@@ -62,13 +62,9 @@ func (_ *Transaction) GetEventsToListen() []string {
 }
 
 const (
-	MIGRATION_TABLE_NAME    = "transaction_schema_migrations"
+	MIGRATION_TABLE_NAME = "transaction_schema_migrations"
 	MIGRATION_DIRECOTRY  = "projection/transaction/migrations"
 )
-
-func (projection *Transaction) Config() *appprojection.Config {
-	return projection.Base.Config().(*appprojection.Config)
-}
 
 func (projection *Transaction) migrationDBConnString() string {
 	conn := projection.rdbConn.(*pg.PgxConn)
@@ -82,7 +78,7 @@ func (projection *Transaction) migrationDBConnString() string {
 
 func (projection *Transaction) OnInit() error {
 	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {

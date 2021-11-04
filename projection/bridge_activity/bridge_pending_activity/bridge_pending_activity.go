@@ -28,11 +28,11 @@ type BridgePendingActivity struct {
 
 	rdbConn rdb.Conn
 	logger  applogger.Logger
+
+	config *appprojection.Config
 }
 
 type Config struct {
-	appprojection.Config
-
 	ThisChainId           string `mapstructure:"this_chain_id"`
 	ThisChainName         string `mapstructure:"this_chain_name"`
 	CounterpartyChainName string `mapstructure:"counterparty_chain_name"`
@@ -43,18 +43,18 @@ type Config struct {
 func NewBridgePendingActivity(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
-	config *Config,
+	config *appprojection.Config,
 ) *BridgePendingActivity {
-
 	return &BridgePendingActivity{
 		rdbprojectionbase.NewRDbBaseWithOptions(
 			rdbConn.ToHandle(), "BridgePendingActivity", rdbprojectionbase.Options{
 				MaybeTable:     nil,
-				MaybeConfigPtr: config,
+				MaybeConfigPtr: &Config{},
 			}),
 
 		rdbConn,
 		logger,
+		config,
 	}
 }
 
@@ -91,7 +91,7 @@ func (projection *BridgePendingActivity) migrationDBConnString() string {
 
 func (projection *BridgePendingActivity) OnInit() error {
 	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {

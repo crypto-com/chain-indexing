@@ -21,6 +21,8 @@ type BlockEvent struct {
 
 	rdbConn rdb.Conn
 	logger  applogger.Logger
+
+	config *appprojection.Config
 }
 
 func NewBlockEvent(
@@ -29,16 +31,14 @@ func NewBlockEvent(
 	config *appprojection.Config,
 ) *BlockEvent {
 	return &BlockEvent{
-		rdbprojectionbase.NewRDbBaseWithOptions(
+		rdbprojectionbase.NewRDbBase(
 			rdbConn.ToHandle(),
 			"BlockEvent",
-			rdbprojectionbase.Options{
-				MaybeConfigPtr: config,
-			},
 		),
 
 		rdbConn,
 		logger,
+		config,
 	}
 }
 
@@ -59,12 +59,8 @@ func (_ *BlockEvent) GetEventsToListen() []string {
 
 const (
 	MIGRATION_TABLE_NAME = "block_event_schema_migrations"
-	MIGRATION_DIRECOTRY  = "projection/block_event/migrations"
+	MIGRATION_DIRECOTRY  = "projection/blockevent/migrations"
 )
-
-func (projection *BlockEvent) Config() *appprojection.Config {
-	return projection.Base.Config().(*appprojection.Config)
-}
 
 func (projection *BlockEvent) migrationDBConnString() string {
 	conn := projection.rdbConn.(*pg.PgxConn)
@@ -78,7 +74,7 @@ func (projection *BlockEvent) migrationDBConnString() string {
 
 func (projection *BlockEvent) OnInit() error {
 	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.Config().GithubAPIUser, projection.Config().GithubAPIToken, MIGRATION_DIRECOTRY),
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {
