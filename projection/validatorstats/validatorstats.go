@@ -63,7 +63,7 @@ func (_ *ValidatorStats) GetEventsToListen() []string {
 }
 
 const (
-	MIGRATION_TABLE_NAME = "validator_stats_schema_migrations"
+	MIGRATION_TABLE_NAME = "validatorstats_schema_migrations"
 	MIGRATION_DIRECOTRY  = "projection/validatorstats/migrations"
 )
 
