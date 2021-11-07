@@ -73,7 +73,8 @@ func (handler *Bridges) ListActivities(ctx *fasthttp.RequestCtx) {
 	sourceBlockTimeOrder := view.ORDER_ASC
 	queryArgs := ctx.QueryArgs()
 	if queryArgs.Has("order") {
-		if string(queryArgs.Peek("order")) == "sourceBlockTime.desc" {
+		orderStr := string(queryArgs.Peek("order"))
+		if orderStr == "sourceBlockTime.desc" || orderStr == "sourceBlockHeight.desc" {
 			sourceBlockTimeOrder = view.ORDER_DESC
 		}
 	}
@@ -172,11 +173,12 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 	networkParam := ctx.UserValue("network").(string)
 	accountParam := ctx.UserValue("account").(string)
 
-	sourceBlockHeightOrder := view.ORDER_ASC
+	sourceBlockTimeOrder := view.ORDER_ASC
 	queryArgs := ctx.QueryArgs()
 	if queryArgs.Has("order") {
-		if string(queryArgs.Peek("order")) == "sourceBlockHeight.desc" {
-			sourceBlockHeightOrder = view.ORDER_DESC
+		orderStr := string(queryArgs.Peek("order"))
+		if orderStr == "sourceBlockTime.desc" || orderStr == "sourceBlockHeight.desc" {
+			sourceBlockTimeOrder = view.ORDER_DESC
 		}
 	}
 
@@ -231,7 +233,7 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 	}
 
 	order := bridge_activitiy_view.BridgeActivitiesListOrder{
-		MaybeSourceBlockTime: &sourceBlockHeightOrder,
+		MaybeSourceBlockTime: &sourceBlockTimeOrder,
 	}
 
 	activities, paginationResult, listErr := handler.bridgeActivitiesView.List(
