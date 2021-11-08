@@ -284,10 +284,10 @@ func (validatorsView *Validators) UpdateAllValidatorUpTime(validators []Validato
 
 			result, err := validatorsView.rdb.Exec(sql)
 			if err != nil {
-				return fmt.Errorf("error updating validators into the table: %v: %w", err, rdb.ErrWrite)
+				return fmt.Errorf("error updating validators up time into the table: %v: %w", err, rdb.ErrWrite)
 			}
 			if result.RowsAffected() != int64(pendingRowCount) {
-				return fmt.Errorf("error updating validators into the table: wrong number of affected rows %d: %w", result.RowsAffected(), rdb.ErrWrite)
+				return fmt.Errorf("error updating validators up time into the table: wrong number of affected rows %d: %w", result.RowsAffected(), rdb.ErrWrite)
 			}
 
 			pendingRowCount = 0

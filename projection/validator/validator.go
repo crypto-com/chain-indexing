@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-	"os"
 	"strconv"
 	"time"
 
@@ -35,16 +34,6 @@ type Validator struct {
 }
 
 func NewValidator(logger applogger.Logger, rdbConn rdb.Conn, conNodeAddressPrefix string) *Validator {
-
-	debugFile, err := os.OpenFile("validator.csv", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-	if err != nil {
-		panic(err)
-	}
-	defer debugFile.Close()
-	if _, err = debugFile.WriteString("Height,projectValidatorView,projectValidatorActivitiesView,ListAll,BlockCreated-insertCommit,BlockCreated-updateValidator,BlockCreated-Total,Total\n"); err != nil {
-		panic(err)
-	}
-
 	return &Validator{
 		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Validator"),
 
@@ -82,17 +71,6 @@ func (projection *Validator) OnInit() error {
 }
 
 func (projection *Validator) HandleEvents(height int64, events []event_entity.Event) error {
-
-	debugFile, err := os.OpenFile("validator.csv", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-	if err != nil {
-		panic(err)
-	}
-	defer debugFile.Close()
-	if _, err = debugFile.WriteString(strconv.FormatInt(height, 10) + ","); err != nil {
-		panic(err)
-	}
-
-	debugStart := time.Now()
 	rdbTx, err := projection.rdbConn.Begin()
 	if err != nil {
 		return fmt.Errorf("error beginning transaction: %v", err)
@@ -130,14 +108,6 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 		return fmt.Errorf("error projecting validator view: %v", projectErr)
 	}
 
-	debug1 := time.Now()
-	debugDiff1 := debug1.Sub(debugStart)
-	// projection.logger.Info(fmt.Sprintf("After projectValidatorView(): %s", debugDiff1))
-
-	if _, err = debugFile.WriteString(debugDiff1.String() + ","); err != nil {
-		panic(err)
-	}
-
 	if projectErr := projection.projectValidatorActivitiesView(
 		validatorsView,
 		validatorActivitiesView,
@@ -147,14 +117,6 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 		events,
 	); projectErr != nil {
 		return fmt.Errorf("error projecting validator activities view: %v", err)
-	}
-
-	debug2 := time.Now()
-	debugDiff2 := debug2.Sub(debug1)
-	// projection.logger.Info(fmt.Sprintf("Time for projectValidatorActivitiesView: %s", debugDiff2))
-
-	if _, err = debugFile.WriteString(debugDiff2.String() + ","); err != nil {
-		panic(err)
 	}
 
 	validatorList, listValidatorErr := validatorsView.ListAll(view.ValidatorsListFilter{
@@ -168,18 +130,8 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 		validatorMap[validator.TendermintAddress] = &validatorList[i]
 	}
 
-	debug3 := time.Now()
-	debugDiff3 := debug3.Sub(debug2)
-	// projection.logger.Info(fmt.Sprintf("Time for ListAll: %s", debugDiff3))
-
-	if _, err = debugFile.WriteString(debugDiff3.String() + ","); err != nil {
-		panic(err)
-	}
-
 	for _, event := range events {
 		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
-
-			debugBlockCreatedStart := time.Now()
 
 			signatureCount := len(blockCreatedEvent.Block.Signatures)
 			commitmentRows := make([]view.ValidatorBlockCommitmentRow, 0, signatureCount)
@@ -234,14 +186,6 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 				return fmt.Errorf("error incrementing overall validator block commitments total: %v", err)
 			}
 
-			debugBlockCreatedEnd1 := time.Now()
-			debugDiffBlockCreated1 := debugBlockCreatedEnd1.Sub(debugBlockCreatedStart)
-			// projection.logger.Info(fmt.Sprintf("BlockCreated insert commitment rows: %s", debugDiffBlockCreated1))
-
-			if _, err = debugFile.WriteString(debugDiffBlockCreated1.String() + ","); err != nil {
-				panic(err)
-			}
-
 			// Update validator up time
 			activeValidators, activeValidatorsQueryErr := validatorsView.ListAll(view.ValidatorsListFilter{
 				MaybeStatuses: []constants.Status{constants.BONDED},
@@ -275,25 +219,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 				return fmt.Errorf("error updating active validators up time data: %v", activeValidatorUpdateErr)
 			}
 
-			debugBlockCreatedEnd2 := time.Now()
-			debugDiffBlockCreated2 := debugBlockCreatedEnd2.Sub(debugBlockCreatedEnd1)
-			// projection.logger.Info(fmt.Sprintf("BlockCreated update validator up time: %s", debugDiffBlockCreated2))
-
-			if _, err = debugFile.WriteString(debugDiffBlockCreated2.String() + ","); err != nil {
-				panic(err)
-			}
-
-			debugBlockCreatedEnd := time.Now()
-			debugDiffBlockCreated := debugBlockCreatedEnd.Sub(debugBlockCreatedStart)
-			// projection.logger.Info(fmt.Sprintf("Total Time for BlockCreated: %s", debugDiffBlockCreated))
-
-			if _, err = debugFile.WriteString(debugDiffBlockCreated.String() + ","); err != nil {
-				panic(err)
-			}
-
 		} else if votedEvent, ok := event.(*event_usecase.MsgVote); ok {
-
-			debugMsgVoteStart := time.Now()
 
 			projection.logger.Debug("handling MsgVote event")
 
@@ -314,14 +240,6 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 				return fmt.Errorf("error updating voted validator: %v", votedValidatorUpdateErr)
 			}
 
-			debugMsgVoteEnd := time.Now()
-			debugDiffMsgVote := debugMsgVoteEnd.Sub(debugMsgVoteStart)
-			// projection.logger.Info(fmt.Sprintf("Total Time for MsgVote: %s", debugDiffMsgVote))
-
-			if _, err = debugFile.WriteString(debugDiffMsgVote.String() + ","); err != nil {
-				panic(err)
-			}
-
 		}
 	}
 
@@ -333,16 +251,6 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 		return fmt.Errorf("error committing changes: %v", err)
 	}
 	committed = true
-
-	debugEnd := time.Now()
-	debugTotalRunningTime := debugEnd.Sub(debugStart)
-	// projection.logger.Info(fmt.Sprintf("Total: %s", debugTotalRunningTime))
-
-	if _, err = debugFile.WriteString(debugTotalRunningTime.String() + "\n"); err != nil {
-		panic(err)
-	}
-
-	// time.Sleep(1 * time.Second)
 
 	return nil
 }
