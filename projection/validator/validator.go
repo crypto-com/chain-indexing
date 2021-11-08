@@ -132,7 +132,6 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 
 	for _, event := range events {
 		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
-
 			signatureCount := len(blockCreatedEvent.Block.Signatures)
 			commitmentRows := make([]view.ValidatorBlockCommitmentRow, 0, signatureCount)
 
@@ -220,7 +219,6 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 			}
 
 		} else if votedEvent, ok := event.(*event_usecase.MsgVote); ok {
-
 			projection.logger.Debug("handling MsgVote event")
 
 			mutVotedValidator, votedValidatorQueryErr := validatorsView.FindBy(view.ValidatorIdentity{
@@ -239,7 +237,6 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 			if votedValidatorUpdateErr := validatorsView.Update(mutVotedValidator); votedValidatorUpdateErr != nil {
 				return fmt.Errorf("error updating voted validator: %v", votedValidatorUpdateErr)
 			}
-
 		}
 	}
 
@@ -251,7 +248,6 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 		return fmt.Errorf("error committing changes: %v", err)
 	}
 	committed = true
-
 	return nil
 }
 
