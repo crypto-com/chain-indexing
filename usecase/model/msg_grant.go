@@ -53,9 +53,9 @@ type MsgGrantSpendLimit struct {
 
 type StakeAuthorization struct {
 	MaxTokens         MsgGrantMaxTokens `mapstructure:"max_tokens" json:"maxTokens,omitempty"`
-	AllowList         Validators        `mapstructure:"allow_list" json:"allowList,omitempty"`
-	DenyList          Validators        `mapstructure:"deny_list" json:"denyList,omitempty"`
-	AuthorizationType int32             `mapstructure:"authorization_type" json:"authorizationType,omitempty"`
+	MaybeAllowList    *Validators       `mapstructure:"allow_list" json:"allowList,omitempty"`
+	MaybeDenyList     *Validators       `mapstructure:"deny_list" json:"denyList,omitempty"`
+	AuthorizationType string            `mapstructure:"authorization_type" json:"authorizationType,omitempty"`
 }
 
 type MsgGrantMaxTokens struct {
