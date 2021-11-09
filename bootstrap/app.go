@@ -34,7 +34,7 @@ func NewApp(logger applogger.Logger, config *Config) *app {
 		logger.Panicf("failed to init migration: %v", err)
 	}
 
-	if err := m.Up(); err != nil && errors.Is(err, migrate.ErrNoChange) {
+	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		logger.Panicf("failed to run migration: %v", err)
 	}
 
