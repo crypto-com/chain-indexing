@@ -236,6 +236,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 				return fmt.Errorf("error querying active validators: %v", activeValidatorsQueryErr)
 			}
 
+			var mutActiveValidators []view.ValidatorRow
 			for _, activeValidator := range activeValidators {
 				mutActiveValidator := activeValidator
 				if commitmentMap[mutActiveValidator.ConsensusNodeAddress] {
@@ -253,9 +254,11 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 					new(big.Float).SetInt64(mutActiveValidator.TotalActiveBlock),
 				)
 
-				if activeValidatorUpdateErr := validatorsView.Update(&mutActiveValidator); activeValidatorUpdateErr != nil {
-					return fmt.Errorf("error updating active validators up time data: %v", activeValidatorUpdateErr)
-				}
+				mutActiveValidators = append(mutActiveValidators, mutActiveValidator)
+			}
+
+			if activeValidatorUpdateErr := validatorsView.UpdateAllValidatorUpTime(mutActiveValidators); activeValidatorUpdateErr != nil {
+				return fmt.Errorf("error updating active validators up time data: %v", activeValidatorUpdateErr)
 			}
 
 		} else if votedEvent, ok := event.(*event_usecase.MsgVote); ok {

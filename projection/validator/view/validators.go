@@ -241,6 +241,64 @@ func (validatorsView *Validators) Update(validator *ValidatorRow) error {
 	return nil
 }
 
+func (validatorsView *Validators) UpdateAllValidatorUpTime(validators []ValidatorRow) error {
+
+	pendingRowCount := 0
+	totalRowCount := len(validators)
+
+	sql := ""
+
+	for i, validator := range validators {
+
+		if pendingRowCount == 0 {
+
+			sql = `UPDATE view_validators AS view SET
+							total_signed_block = row.total_signed_block,
+							total_active_block = row.total_active_block,
+							imprecise_up_time = row.imprecise_up_time
+						FROM (VALUES
+						`
+		}
+
+		sql += fmt.Sprintf(
+			"(%d, %d, %d, %s),\n",
+			*validator.MaybeId,
+			validator.TotalSignedBlock,
+			validator.TotalActiveBlock,
+			validator.ImpreciseUpTime.String(),
+		)
+
+		pendingRowCount += 1
+
+		if pendingRowCount == 500 || i+1 == totalRowCount {
+
+			sql = strings.TrimSuffix(sql, ",\n")
+
+			sql += `) AS row(
+								id, 
+								total_signed_block,
+								total_active_block, 
+								imprecise_up_time
+							)
+							WHERE row.id = view.id;`
+
+			result, err := validatorsView.rdb.Exec(sql)
+			if err != nil {
+				return fmt.Errorf("error updating validators up time into the table: %v: %w", err, rdb.ErrWrite)
+			}
+			if result.RowsAffected() != int64(pendingRowCount) {
+				return fmt.Errorf("error updating validators up time into the table: wrong number of affected rows %d: %w", result.RowsAffected(), rdb.ErrWrite)
+			}
+
+			pendingRowCount = 0
+
+		}
+
+	}
+
+	return nil
+}
+
 type ValidatorsListFilter struct {
 	MaybeStatuses []constants.Status
 }
