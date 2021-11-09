@@ -26,6 +26,7 @@ func NewIBCChannelMessageProjection(rdbConn rdb.Conn) *ibc_channel_message.IBCCh
 	return ibc_channel_message.NewIBCChannelMessage(
 		nil,
 		rdbConn,
+		nil,
 	)
 }
 

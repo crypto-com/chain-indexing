@@ -1,12 +1,16 @@
 package bridge_pending_activity
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/primptr"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	appprojection "github.com/crypto-com/chain-indexing/projection"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
+	"github.com/golang-migrate/migrate/v4"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -25,6 +29,8 @@ type BridgePendingActivity struct {
 
 	rdbConn rdb.Conn
 	logger  applogger.Logger
+
+	config *appprojection.Config
 }
 
 type Config struct {
@@ -35,18 +41,21 @@ type Config struct {
 	StartingHeight        int64  `mapstructure:"starting_height"`
 }
 
-func NewBridgePendingActivity(logger applogger.Logger, rdbConn rdb.Conn) *BridgePendingActivity {
-	var config Config
-
+func NewBridgePendingActivity(
+	logger applogger.Logger,
+	rdbConn rdb.Conn,
+	config *appprojection.Config,
+) *BridgePendingActivity {
 	return &BridgePendingActivity{
 		rdbprojectionbase.NewRDbBaseWithOptions(
 			rdbConn.ToHandle(), "BridgePendingActivity", rdbprojectionbase.Options{
 				MaybeTable:     nil,
-				MaybeConfigPtr: &config,
+				MaybeConfigPtr: &Config{},
 			}),
 
 		rdbConn,
 		logger,
+		config,
 	}
 }
 
@@ -66,7 +75,36 @@ func (_ *BridgePendingActivity) GetEventsToListen() []string {
 	}
 }
 
+const (
+	MIGRATION_TABLE_NAME = "bridge_pending_activity_schema_migrations"
+	MIGRATION_DIRECOTRY  = "projection/bridge_activity/bridge_pending_activity/migrations"
+)
+
+func (projection *BridgePendingActivity) migrationDBConnString() string {
+	conn := projection.rdbConn.(*pg.PgxConn)
+	connString := conn.ConnString()
+	if connString[len(connString)-1:] == "?" {
+		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
+	} else {
+		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
+	}
+}
+
 func (projection *BridgePendingActivity) OnInit() error {
+	m, err := migrate.New(
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
+		projection.migrationDBConnString(),
+	)
+	if err != nil {
+		projection.logger.Errorf("failed to init migration: %v", err)
+		return err
+	}
+
+	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+		projection.logger.Errorf("failed to run migration: %v", err)
+		return err
+	}
+
 	return nil
 }
 

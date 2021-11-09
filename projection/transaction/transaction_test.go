@@ -25,6 +25,7 @@ func NewTransactionProjection(rdbConn rdb.Conn) *transaction.Transaction {
 	return transaction.NewTransaction(
 		nil,
 		rdbConn,
+		nil,
 	)
 }
 

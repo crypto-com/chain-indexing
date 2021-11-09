@@ -1,11 +1,15 @@
 package transaction
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	appprojection "github.com/crypto-com/chain-indexing/projection"
 	transaction_view "github.com/crypto-com/chain-indexing/projection/transaction/view"
+	"github.com/golang-migrate/migrate/v4"
 
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 
@@ -29,14 +33,24 @@ type Transaction struct {
 
 	rdbConn rdb.Conn
 	logger  applogger.Logger
+
+	config *appprojection.Config
 }
 
-func NewTransaction(logger applogger.Logger, rdbConn rdb.Conn) *Transaction {
+func NewTransaction(
+	logger applogger.Logger,
+	rdbConn rdb.Conn,
+	config *appprojection.Config,
+) *Transaction {
 	return &Transaction{
-		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Transaction"),
+		rdbprojectionbase.NewRDbBase(
+			rdbConn.ToHandle(),
+			"Transaction",
+		),
 
 		rdbConn,
 		logger,
+		config,
 	}
 }
 
@@ -48,7 +62,36 @@ func (_ *Transaction) GetEventsToListen() []string {
 	}, event_usecase.MSG_EVENTS...)
 }
 
+const (
+	MIGRATION_TABLE_NAME = "transaction_schema_migrations"
+	MIGRATION_DIRECOTRY  = "projection/transaction/migrations"
+)
+
+func (projection *Transaction) migrationDBConnString() string {
+	conn := projection.rdbConn.(*pg.PgxConn)
+	connString := conn.ConnString()
+	if connString[len(connString)-1:] == "?" {
+		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
+	} else {
+		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
+	}
+}
+
 func (projection *Transaction) OnInit() error {
+	m, err := migrate.New(
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
+		projection.migrationDBConnString(),
+	)
+	if err != nil {
+		projection.logger.Errorf("failed to init migration: %v", err)
+		return err
+	}
+
+	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+		projection.logger.Errorf("failed to run migration: %v", err)
+		return err
+	}
+
 	return nil
 }
 

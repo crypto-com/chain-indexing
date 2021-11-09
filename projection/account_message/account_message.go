@@ -1,10 +1,14 @@
 package account_message
 
 import (
+	"errors"
 	"fmt"
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	appprojection "github.com/crypto-com/chain-indexing/projection"
+	"github.com/golang-migrate/migrate/v4"
 
 	"github.com/crypto-com/chain-indexing/projection/account_message/view"
 
@@ -32,20 +36,27 @@ type AccountMessage struct {
 	logger  applogger.Logger
 
 	accountAddressPrefix string
+
+	config *appprojection.Config
 }
 
 func NewAccountMessage(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	accountAddressPrefix string,
+	config *appprojection.Config,
 ) *AccountMessage {
 	return &AccountMessage{
-		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "AccountMessage"),
+		rdbprojectionbase.NewRDbBase(
+			rdbConn.ToHandle(),
+			"AccountMessage",
+		),
 
 		rdbConn,
 		logger,
 
 		accountAddressPrefix,
+		config,
 	}
 }
 
@@ -55,7 +66,36 @@ func (_ *AccountMessage) GetEventsToListen() []string {
 	}, event_usecase.MSG_EVENTS...)
 }
 
+const (
+	MIGRATION_TABLE_NAME = "account_message_schema_migrations"
+	MIGRATION_DIRECOTRY  = "projection/account_message/migrations"
+)
+
+func (projection *AccountMessage) migrationDBConnString() string {
+	conn := projection.rdbConn.(*pg.PgxConn)
+	connString := conn.ConnString()
+	if connString[len(connString)-1:] == "?" {
+		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
+	} else {
+		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
+	}
+}
+
 func (projection *AccountMessage) OnInit() error {
+	m, err := migrate.New(
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
+		projection.migrationDBConnString(),
+	)
+	if err != nil {
+		projection.logger.Errorf("failed to init migration: %v", err)
+		return err
+	}
+
+	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+		projection.logger.Errorf("failed to run migration: %v", err)
+		return err
+	}
+
 	return nil
 }
 

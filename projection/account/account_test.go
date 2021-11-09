@@ -23,6 +23,7 @@ func NewAccountProjection(rdbConn rdb.Conn, client cosmosapp.Client) *account.Ac
 		nil,
 		rdbConn,
 		client,
+		nil,
 	)
 }
 

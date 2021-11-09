@@ -3,7 +3,6 @@ module github.com/crypto-com/chain-indexing
 go 1.15
 
 require (
-	github.com/BurntSushi/toml v0.4.1
 	github.com/Masterminds/squirrel v1.5.0
 	github.com/brianvoe/gofakeit/v5 v5.10.1
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
@@ -26,7 +25,6 @@ require (
 	github.com/lab259/cors v0.2.0
 	github.com/luci/go-render v0.0.0-20160219211803-9a04cc21af0f
 	github.com/mitchellh/mapstructure v1.4.2
-	github.com/nbutton23/zxcvbn-go v0.0.0-20210217022336-fa2cb2858354
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.13.0
 	github.com/peggyjv/gravity-bridge/module v0.2.17
@@ -35,7 +33,6 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/tendermint/tendermint v0.34.13
 	github.com/tharsis/ethermint v0.7.1
-	github.com/urfave/cli/v2 v2.3.0
 	github.com/valyala/fasthttp v1.17.0
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	gopkg.in/yaml.v2 v2.4.0

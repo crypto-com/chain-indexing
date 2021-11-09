@@ -7,7 +7,10 @@ import (
 	"time"
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	appprojection "github.com/crypto-com/chain-indexing/projection"
 	"github.com/crypto-com/chain-indexing/projection/proposal/types"
+	"github.com/golang-migrate/migrate/v4"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbparambase"
 	rdbparambase_types "github.com/crypto-com/chain-indexing/appinterface/projection/rdbparambase/types"
@@ -48,11 +51,21 @@ type Proposal struct {
 	logger  applogger.Logger
 
 	conNodeAddressPrefix string
+
+	config *appprojection.Config
 }
 
-func NewProposal(logger applogger.Logger, rdbConn rdb.Conn, conNodeAddressPrefix string) *Proposal {
+func NewProposal(
+	logger applogger.Logger,
+	rdbConn rdb.Conn,
+	conNodeAddressPrefix string,
+	config *appprojection.Config,
+) *Proposal {
 	return &Proposal{
-		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Proposal"),
+		rdbprojectionbase.NewRDbBase(
+			rdbConn.ToHandle(),
+			"Proposal",
+		),
 
 		rdbparambase.NewBase(view.PARAMS_TABLE_NAME, []rdbparambase_types.ParamAccessor{{
 			Module: "gov",
@@ -75,6 +88,7 @@ func NewProposal(logger applogger.Logger, rdbConn rdb.Conn, conNodeAddressPrefix
 		rdbConn,
 		logger,
 		conNodeAddressPrefix,
+		config,
 	}
 }
 
@@ -100,7 +114,36 @@ func (proposal *Proposal) GetEventsToListen() []string {
 	)
 }
 
-func (_ *Proposal) OnInit() error {
+const (
+	MIGRATION_TABLE_NAME = "proposal_schema_migrations"
+	MIGRATION_DIRECOTRY  = "projection/proposal/migrations"
+)
+
+func (projection *Proposal) migrationDBConnString() string {
+	conn := projection.rdbConn.(*pg.PgxConn)
+	connString := conn.ConnString()
+	if connString[len(connString)-1:] == "?" {
+		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
+	} else {
+		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
+	}
+}
+
+func (projection *Proposal) OnInit() error {
+	m, err := migrate.New(
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
+		projection.migrationDBConnString(),
+	)
+	if err != nil {
+		projection.logger.Errorf("failed to init migration: %v", err)
+		return err
+	}
+
+	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+		projection.logger.Errorf("failed to run migration: %v", err)
+		return err
+	}
+
 	return nil
 }
 
