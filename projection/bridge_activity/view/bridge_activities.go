@@ -268,9 +268,19 @@ func (view *BridgeActivities) List(
 		)
 	}
 
+	if filter.MaybeStatus != nil {
+		stmtBuilder = stmtBuilder.Where(
+			"status = ?", filter.MaybeStatus,
+		)
+	}
 	if filter.MaybeIdGt != nil {
 		stmtBuilder = stmtBuilder.Where(
 			"id > ?", filter.MaybeIdGt,
+		)
+	}
+	if filter.MaybeCreatedAtLt != nil {
+		stmtBuilder = stmtBuilder.Where(
+			"created_at < ?", view.rdb.Tton(filter.MaybeCreatedAtLt),
 		)
 	}
 	if filter.MaybeCreatedAtGt != nil {
@@ -280,7 +290,7 @@ func (view *BridgeActivities) List(
 	}
 	if filter.MaybeUpdatedAtGt != nil {
 		stmtBuilder = stmtBuilder.Where(
-			"updated_at > ?", view.rdb.Tton(filter.MaybeCreatedAtGt),
+			"updated_at > ?", view.rdb.Tton(filter.MaybeUpdatedAtGt),
 		)
 	}
 
@@ -409,7 +419,9 @@ func (view *BridgeActivities) List(
 }
 
 type BridgeActivitiesListFilter struct {
+	MaybeStatus      *types.Status
 	MaybeIdGt        *string
+	MaybeCreatedAtLt *utctime.UTCTime
 	MaybeCreatedAtGt *utctime.UTCTime
 	MaybeUpdatedAtGt *utctime.UTCTime
 }
