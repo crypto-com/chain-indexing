@@ -66,8 +66,12 @@ func (projection *Block) migrationDBConnString() string {
 }
 
 func (projection *Block) OnInit() error {
+	ref := ""
+	if projection.config.MigrationRepoRef != "" {
+		ref = "#" + projection.config.MigrationRepoRef
+	}
 	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY+ref),
 		projection.migrationDBConnString(),
 	)
 	if err != nil {
