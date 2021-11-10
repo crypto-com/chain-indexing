@@ -102,8 +102,12 @@ func (cronJob *BridgeActivityMatcher) OnInit() error {
 		return fmt.Errorf("error when initializing Crypto.org Chain indexing DB connection: %v", err)
 	}
 
+	ref := ""
+	if cronJob.config.MigrationRepoRef != "" {
+		ref = "#" + cronJob.config.MigrationRepoRef
+	}
 	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, cronJob.config.GithubAPIUser, cronJob.config.GithubAPIToken, MIGRATION_DIRECOTRY),
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, cronJob.config.GithubAPIUser, cronJob.config.GithubAPIToken, MIGRATION_DIRECOTRY+ref),
 		cronJob.migrationDBConnString(),
 	)
 	if err != nil {
