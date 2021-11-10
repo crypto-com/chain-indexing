@@ -27,8 +27,13 @@ func NewApp(logger applogger.Logger, config *Config) *app {
 	}
 
 	if config.System.Mode != SYSTEM_MODE_API_ONLY {
+		ref := ""
+		if config.GithubAPI.MigrationRepoRef != "" {
+			ref = "#" + config.GithubAPI.MigrationRepoRef
+		}
+
 		m, err := migrate.New(
-			fmt.Sprintf(MIGRATION_GITHUB_TARGET, config.GithubAPI.Username, config.GithubAPI.Token),
+			fmt.Sprintf(MIGRATION_GITHUB_TARGET, config.GithubAPI.Username, config.GithubAPI.Token, ref),
 			migrationDBConnString(rdbConn),
 		)
 		if err != nil {
@@ -49,7 +54,7 @@ func NewApp(logger applogger.Logger, config *Config) *app {
 
 const (
 	MIGRATION_TABLE_NAME    = "schema_migrations"
-	MIGRATION_GITHUB_TARGET = "github://%s:%s@crypto-com/chain-indexing/migrations"
+	MIGRATION_GITHUB_TARGET = "github://%s:%s@crypto-com/chain-indexing/migrations%s"
 )
 
 func migrationDBConnString(conn rdb.Conn) string {
