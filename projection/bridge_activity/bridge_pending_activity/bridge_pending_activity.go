@@ -223,7 +223,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 					MaybeDenom:                    primptr.String(msgIBCTransferTransfer.Params.Token.Denom),
 					MaybeBridgeFeeAmount:          nil,
 					MaybeBridgeFeeDenom:           nil,
-					Status:                        types.STATUS_FAILED,
+					Status:                        types.STATUS_FAILED_ON_CHAIN,
 					IsProcessed:                   false,
 				}); err != nil {
 					return fmt.Errorf("error inserting failed record when MsgIBCTransferTransfer: %w", err)
