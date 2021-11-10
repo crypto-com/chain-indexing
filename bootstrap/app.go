@@ -26,16 +26,18 @@ func NewApp(logger applogger.Logger, config *Config) *app {
 		logger.Panicf("error setting up RDb connection: %v", err)
 	}
 
-	m, err := migrate.New(
-		fmt.Sprintf(MIGRATION_GITHUB_TARGET, config.GithubAPI.Username, config.GithubAPI.Token),
-		migrationDBConnString(rdbConn),
-	)
-	if err != nil {
-		logger.Panicf("failed to init migration: %v", err)
-	}
+	if config.System.Mode != SYSTEM_MODE_API_ONLY {
+		m, err := migrate.New(
+			fmt.Sprintf(MIGRATION_GITHUB_TARGET, config.GithubAPI.Username, config.GithubAPI.Token),
+			migrationDBConnString(rdbConn),
+		)
+		if err != nil {
+			logger.Panicf("failed to init migration: %v", err)
+		}
 
-	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		logger.Panicf("failed to run migration: %v", err)
+		if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+			logger.Panicf("failed to run migration: %v", err)
+		}
 	}
 
 	return &app{
