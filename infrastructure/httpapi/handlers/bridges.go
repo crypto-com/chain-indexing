@@ -5,8 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
-
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/valyala/fasthttp"
 
@@ -17,6 +15,7 @@ import (
 	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
+	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
 	bridge_activitiy_view "github.com/crypto-com/chain-indexing/projection/bridge_activity/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 )
