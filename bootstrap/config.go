@@ -74,6 +74,7 @@ type FileConfig struct {
 	Projection                 ProjectionConfig
 	CronJob                    CronJobConfig                    `toml:"cronjob"`
 	CosmosVersionEnabledHeight CosmosVersionEnabledHeightConfig `toml:"cosmos_version_enabled_height"`
+	GithubAPI                  GithubAPIConfig                  `toml:"github_api"`
 }
 
 type BlockchainConfig struct {
@@ -151,4 +152,9 @@ type CronJobConfig struct {
 
 type CosmosVersionEnabledHeightConfig struct {
 	V0_42_7 uint64 `toml:"v0_42_7"`
+}
+
+type GithubAPIConfig struct {
+	Username string `toml:"username"`
+	Token    string `toml:"token"`
 }

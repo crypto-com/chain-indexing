@@ -157,6 +157,23 @@ func (conn *PgxConn) ToHandle() *rdb.Handle {
 		StmtBuilder: PostgresStmtBuilder,
 	}
 }
+func (conn *PgxConn) ConnString() string {
+	pool := conn.pgxConn.(*pgxpool.Pool)
+	authStr := pool.Config().ConnConfig.Config.User + ":" + pool.Config().ConnConfig.Config.Password + "@"
+
+	connStr := fmt.Sprintf(
+		"postgres://%s%s:%d/%s",
+		authStr,
+		pool.Config().ConnConfig.Config.Host,
+		pool.Config().ConnConfig.Config.Port,
+		pool.Config().ConnConfig.Config.Database,
+	)
+	if pool.Config().ConnConfig.TLSConfig != nil {
+		return connStr + "?"
+	} else {
+		return connStr + "?sslmode=disable"
+	}
+}
 
 var _ rdb.Tx = &PgxRDbTx{}
 

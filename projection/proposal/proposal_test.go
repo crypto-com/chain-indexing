@@ -37,6 +37,7 @@ func NewProposalProjection(rdbConn rdb.Conn) *proposal.Proposal {
 		nil,
 		rdbConn,
 		"",
+		nil,
 	)
 }
 

@@ -15,9 +15,12 @@ import (
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	appprojection "github.com/crypto-com/chain-indexing/projection"
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 	"github.com/crypto-com/chain-indexing/projection/validator/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	"github.com/golang-migrate/migrate/v4"
 )
 
 var _ projection_entity.Projection = &Validator{}
@@ -31,15 +34,26 @@ type Validator struct {
 	logger  applogger.Logger
 
 	conNodeAddressPrefix string
+
+	config *appprojection.Config
 }
 
-func NewValidator(logger applogger.Logger, rdbConn rdb.Conn, conNodeAddressPrefix string) *Validator {
+func NewValidator(
+	logger applogger.Logger,
+	rdbConn rdb.Conn,
+	conNodeAddressPrefix string,
+	config *appprojection.Config,
+) *Validator {
 	return &Validator{
-		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Validator"),
+		rdbprojectionbase.NewRDbBase(
+			rdbConn.ToHandle(),
+			"Validator",
+		),
 
 		rdbConn,
 		logger,
 		conNodeAddressPrefix,
+		config,
 	}
 }
 
@@ -66,7 +80,36 @@ func (_ *Validator) GetEventsToListen() []string {
 	}
 }
 
+const (
+	MIGRATION_TABLE_NAME = "validator_schema_migrations"
+	MIGRATION_DIRECOTRY  = "projection/validator/migrations"
+)
+
+func (projection *Validator) migrationDBConnString() string {
+	conn := projection.rdbConn.(*pg.PgxConn)
+	connString := conn.ConnString()
+	if connString[len(connString)-1:] == "?" {
+		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
+	} else {
+		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
+	}
+}
+
 func (projection *Validator) OnInit() error {
+	m, err := migrate.New(
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
+		projection.migrationDBConnString(),
+	)
+	if err != nil {
+		projection.logger.Errorf("failed to init migration: %v", err)
+		return err
+	}
+
+	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+		projection.logger.Errorf("failed to run migration: %v", err)
+		return err
+	}
+
 	return nil
 }
 
@@ -193,6 +236,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 				return fmt.Errorf("error querying active validators: %v", activeValidatorsQueryErr)
 			}
 
+			var mutActiveValidators []view.ValidatorRow
 			for _, activeValidator := range activeValidators {
 				mutActiveValidator := activeValidator
 				if commitmentMap[mutActiveValidator.ConsensusNodeAddress] {
@@ -210,9 +254,11 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 					new(big.Float).SetInt64(mutActiveValidator.TotalActiveBlock),
 				)
 
-				if activeValidatorUpdateErr := validatorsView.Update(&mutActiveValidator); activeValidatorUpdateErr != nil {
-					return fmt.Errorf("error updating active validators up time data: %v", activeValidatorUpdateErr)
-				}
+				mutActiveValidators = append(mutActiveValidators, mutActiveValidator)
+			}
+
+			if activeValidatorUpdateErr := validatorsView.UpdateAllValidatorUpTime(mutActiveValidators); activeValidatorUpdateErr != nil {
+				return fmt.Errorf("error updating active validators up time data: %v", activeValidatorUpdateErr)
 			}
 
 		} else if votedEvent, ok := event.(*event_usecase.MsgVote); ok {

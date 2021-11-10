@@ -1,6 +1,7 @@
 package block
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
@@ -8,8 +9,11 @@ import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	appprojection "github.com/crypto-com/chain-indexing/projection"
 	"github.com/crypto-com/chain-indexing/projection/block/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	"github.com/golang-migrate/migrate/v4"
 )
 
 var _ entity_projection.Projection = &Block{}
@@ -20,14 +24,25 @@ type Block struct {
 
 	rdbConn rdb.Conn
 	logger  applogger.Logger
+
+	config *appprojection.Config
 }
 
-func NewBlock(logger applogger.Logger, rdbConn rdb.Conn) *Block {
+func NewBlock(
+	logger applogger.Logger,
+	rdbConn rdb.Conn,
+	config *appprojection.Config,
+) *Block {
 	return &Block{
-		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Block"),
+		rdbprojectionbase.NewRDbBase(
+			rdbConn.ToHandle(),
+			"Block",
+		),
 
 		rdbConn,
 		logger,
+
+		config,
 	}
 }
 
@@ -35,7 +50,36 @@ func (_ *Block) GetEventsToListen() []string {
 	return []string{event_usecase.BLOCK_CREATED}
 }
 
+const (
+	MIGRATION_TABLE_NAME = "block_schema_migrations"
+	MIGRATION_DIRECOTRY  = "projection/block/migrations"
+)
+
+func (projection *Block) migrationDBConnString() string {
+	conn := projection.rdbConn.(*pg.PgxConn)
+	connString := conn.ConnString()
+	if connString[len(connString)-1:] == "?" {
+		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
+	} else {
+		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
+	}
+}
+
 func (projection *Block) OnInit() error {
+	m, err := migrate.New(
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
+		projection.migrationDBConnString(),
+	)
+	if err != nil {
+		projection.logger.Errorf("failed to init migration: %v", err)
+		return err
+	}
+
+	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+		projection.logger.Errorf("failed to run migration: %v", err)
+		return err
+	}
+
 	return nil
 }
 

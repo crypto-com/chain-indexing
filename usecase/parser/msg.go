@@ -1074,9 +1074,9 @@ func ParseMsgGrant(
 	switch authType {
 	case "/cosmos.bank.v1beta1.SendAuthorization":
 		return parseRawMsgSendGrant(parserParams.MsgCommonParams, parserParams.Msg)
-	case "/cosmos.bank.v1beta1.StakeAuthorization":
+	case "/cosmos.staking.v1beta1.StakeAuthorization":
 		return parseRawMsgStackGrant(parserParams.MsgCommonParams, parserParams.Msg)
-	case "/cosmos.bank.v1beta1.GenericAuthorization":
+	case "/cosmos.authz.v1beta1.GenericAuthorization":
 		return parseRawMsgGenericGrant(parserParams.MsgCommonParams, parserParams.Msg)
 	default:
 		return []command.Command{}

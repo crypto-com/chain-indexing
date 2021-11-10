@@ -27,7 +27,7 @@ var _ = Describe("Validator Events", func() {
 	It("should implement projection", func() {
 		fakeLogger := NewFakeLogger()
 		fakeRdbConn := NewFakeRDbConn()
-		var _ entity_projection.Projection = validator.NewValidator(fakeLogger, fakeRdbConn, prefixConsensusAddress)
+		var _ entity_projection.Projection = validator.NewValidator(fakeLogger, fakeRdbConn, prefixConsensusAddress, nil)
 	})
 
 	WithTestPgxConn(func(pgConn *pg.PgxConn, pgMigrate *pg.Migrate) {
@@ -92,7 +92,7 @@ var _ = Describe("Validator Events", func() {
 			}, createValidatorParams)
 			fakeLogger := NewFakeLogger()
 
-			projection := validator.NewValidator(fakeLogger, pgConn, prefixConsensusAddress)
+			projection := validator.NewValidator(fakeLogger, pgConn, prefixConsensusAddress, nil)
 
 			err := projection.HandleEvents(anyHeight, []event_entity.Event{
 				event,
@@ -165,7 +165,7 @@ var _ = Describe("Validator Events", func() {
 			}
 			fakeLogger := NewFakeLogger()
 
-			projection := validator.NewValidator(fakeLogger, pgConn, prefixConsensusAddress)
+			projection := validator.NewValidator(fakeLogger, pgConn, prefixConsensusAddress, nil)
 
 			validatorViewCountBeforeHandling, err := validatorView.Count(countFilter)
 
@@ -190,7 +190,7 @@ var _ = Describe("Validator Events", func() {
 			anyHeight := int64(1)
 
 			fakeLogger := NewFakeLogger()
-			projection := validator.NewValidator(fakeLogger, pgConn, prefixConsensusAddress)
+			projection := validator.NewValidator(fakeLogger, pgConn, prefixConsensusAddress, nil)
 
 			Expect(projection.GetLastHandledEventHeight()).To(BeNil())
 

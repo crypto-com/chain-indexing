@@ -8,6 +8,9 @@ import (
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	appprojection "github.com/crypto-com/chain-indexing/projection"
+	"github.com/golang-migrate/migrate/v4"
 	"github.com/pkg/errors"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
@@ -32,17 +35,28 @@ type ChainStats struct {
 
 	maybeGenesisBlockTime *int64 // Unix Nano
 	maybeTotalBlockCount  *big.Int
+
+	config *appprojection.Config
 }
 
-func NewChainStats(logger applogger.Logger, rdbConn rdb.Conn) *ChainStats {
+func NewChainStats(
+	logger applogger.Logger,
+	rdbConn rdb.Conn,
+	config *appprojection.Config,
+) *ChainStats {
 	return &ChainStats{
-		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "ChainStats"),
+		rdbprojectionbase.NewRDbBase(
+			rdbConn.ToHandle(),
+			"ChainStats",
+		),
 
 		rdbConn,
 		logger,
 
 		nil,
 		nil,
+
+		config,
 	}
 }
 
@@ -53,7 +67,36 @@ func (_ *ChainStats) GetEventsToListen() []string {
 	}
 }
 
+const (
+	MIGRATION_TABLE_NAME = "chain_stats_schema_migrations"
+	MIGRATION_DIRECOTRY  = "projection/chainstats/migrations"
+)
+
+func (projection *ChainStats) migrationDBConnString() string {
+	conn := projection.rdbConn.(*pg.PgxConn)
+	connString := conn.ConnString()
+	if connString[len(connString)-1:] == "?" {
+		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
+	} else {
+		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
+	}
+}
+
 func (projection *ChainStats) OnInit() error {
+	m, err := migrate.New(
+		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY),
+		projection.migrationDBConnString(),
+	)
+	if err != nil {
+		projection.logger.Errorf("failed to init migration: %v", err)
+		return err
+	}
+
+	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+		projection.logger.Errorf("failed to run migration: %v", err)
+		return err
+	}
+
 	chainStatsView := view.NewChainStats(projection.rdbConn.ToHandle())
 
 	var getErr error

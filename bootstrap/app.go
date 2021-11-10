@@ -1,9 +1,14 @@
 package bootstrap
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	"github.com/golang-migrate/migrate/v4"
 )
 
 type app struct {
@@ -21,10 +26,36 @@ func NewApp(logger applogger.Logger, config *Config) *app {
 		logger.Panicf("error setting up RDb connection: %v", err)
 	}
 
+	m, err := migrate.New(
+		fmt.Sprintf(MIGRATION_GITHUB_TARGET, config.GithubAPI.Username, config.GithubAPI.Token),
+		migrationDBConnString(rdbConn),
+	)
+	if err != nil {
+		logger.Panicf("failed to init migration: %v", err)
+	}
+
+	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+		logger.Panicf("failed to run migration: %v", err)
+	}
+
 	return &app{
 		logger:  logger,
 		config:  config,
 		rdbConn: rdbConn,
+	}
+}
+
+const (
+	MIGRATION_TABLE_NAME    = "schema_migrations"
+	MIGRATION_GITHUB_TARGET = "github://%s:%s@crypto-com/chain-indexing/migrations"
+)
+
+func migrationDBConnString(conn rdb.Conn) string {
+	connString := conn.(*pg.PgxConn).ConnString()
+	if connString[len(connString)-1:] == "?" {
+		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
+	} else {
+		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
 	}
 }
 

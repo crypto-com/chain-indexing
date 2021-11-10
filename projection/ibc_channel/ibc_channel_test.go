@@ -27,7 +27,7 @@ func NewIBCChannelProjection(rdbConn rdb.Conn) *ibc_channel.IBCChannel {
 	return ibc_channel.NewIBCChannel(
 		nil,
 		rdbConn,
-		ibc_channel.Config{
+		&ibc_channel.Config{
 			EnableTxMsgTrace: false,
 		},
 	)
@@ -411,26 +411,26 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				mockIbcChannelsView.On(
 					"Insert",
 					&ibc_channel_view.IBCChannelRow{
-						ChannelID:                    "ChannelID",
-						PortID:                       "PortID",
-						ConnectionID:                 "ConnectionID",
-						CounterpartyChannelID:        "CounterpartyChannelID",
-						CounterpartyPortID:           "CounterpartyPortID",
-						CounterpartyChainID:          "CounterpartyChainID",
-						Status:                       "NOT_ESTABLISHED",
-						PacketOrdering:               "Ordering",
-						LastInPacketSequence:         0,
-						LastOutPacketSequence:        0,
-						TotalTransferInCount:         0,
-						TotalTransferOutCount:        0,
-						TotalTransferOutSuccessCount: 0,
-						TotalTransferOutSuccessRate:  0,
-						CreatedAtBlockTime:           utctime.UTCTime{},
-						CreatedAtBlockHeight:         0,
-						Verified:                     false,
-						Description:                  "",
-						LastActivityBlockTime:        utctime.UTCTime{},
-						LastActivityBlockHeight:      0,
+						ChannelID:                 "ChannelID",
+						PortID:                    "PortID",
+						ConnectionID:              "ConnectionID",
+						CounterpartyChannelID:     "CounterpartyChannelID",
+						CounterpartyPortID:        "CounterpartyPortID",
+						CounterpartyChainID:       "CounterpartyChainID",
+						Status:                    "NOT_ESTABLISHED",
+						PacketOrdering:            "Ordering",
+						LastInPacketSequence:      0,
+						LastOutPacketSequence:     0,
+						TotalRelayInCount:         0,
+						TotalRelayOutCount:        0,
+						TotalRelayOutSuccessCount: 0,
+						TotalRelayOutSuccessRate:  0,
+						CreatedAtBlockTime:        utctime.UTCTime{},
+						CreatedAtBlockHeight:      0,
+						Verified:                  false,
+						Description:               "",
+						LastActivityBlockTime:     utctime.UTCTime{},
+						LastActivityBlockHeight:   0,
 						BondedTokens: ibc_channel_view.BondedTokens{
 							OnThisChain:         []ibc_channel_view.BondedToken{},
 							OnCounterpartyChain: []ibc_channel_view.BondedToken{},
@@ -495,26 +495,26 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				mockIbcChannelsView.On(
 					"Insert",
 					&ibc_channel_view.IBCChannelRow{
-						ChannelID:                    "ChannelID",
-						PortID:                       "PortID",
-						ConnectionID:                 "ConnectionID",
-						CounterpartyChannelID:        "CounterpartyChannelID",
-						CounterpartyPortID:           "CounterpartyPortID",
-						CounterpartyChainID:          "CounterpartyChainID",
-						Status:                       "NOT_ESTABLISHED",
-						PacketOrdering:               "Ordering",
-						LastInPacketSequence:         0,
-						LastOutPacketSequence:        0,
-						TotalTransferInCount:         0,
-						TotalTransferOutCount:        0,
-						TotalTransferOutSuccessCount: 0,
-						TotalTransferOutSuccessRate:  0,
-						CreatedAtBlockTime:           utctime.UTCTime{},
-						CreatedAtBlockHeight:         0,
-						Verified:                     false,
-						Description:                  "",
-						LastActivityBlockTime:        utctime.UTCTime{},
-						LastActivityBlockHeight:      0,
+						ChannelID:                 "ChannelID",
+						PortID:                    "PortID",
+						ConnectionID:              "ConnectionID",
+						CounterpartyChannelID:     "CounterpartyChannelID",
+						CounterpartyPortID:        "CounterpartyPortID",
+						CounterpartyChainID:       "CounterpartyChainID",
+						Status:                    "NOT_ESTABLISHED",
+						PacketOrdering:            "Ordering",
+						LastInPacketSequence:      0,
+						LastOutPacketSequence:     0,
+						TotalRelayInCount:         0,
+						TotalRelayOutCount:        0,
+						TotalRelayOutSuccessCount: 0,
+						TotalRelayOutSuccessRate:  0,
+						CreatedAtBlockTime:        utctime.UTCTime{},
+						CreatedAtBlockHeight:      0,
+						Verified:                  false,
+						Description:               "",
+						LastActivityBlockTime:     utctime.UTCTime{},
+						LastActivityBlockHeight:   0,
 						BondedTokens: ibc_channel_view.BondedTokens{
 							OnThisChain:         []ibc_channel_view.BondedToken{},
 							OnCounterpartyChain: []ibc_channel_view.BondedToken{},
@@ -575,26 +575,26 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				mockIbcChannelsView.On(
 					"UpdateFactualColumns",
 					&ibc_channel_view.IBCChannelRow{
-						ChannelID:                    "ChannelID",
-						PortID:                       "PortID",
-						ConnectionID:                 "ConnectionID",
-						CounterpartyChannelID:        "CounterpartyChannelID",
-						CounterpartyPortID:           "CounterpartyPortID",
-						CounterpartyChainID:          "CounterpartyChainID",
-						Status:                       "",
-						PacketOrdering:               "",
-						LastInPacketSequence:         0,
-						LastOutPacketSequence:        0,
-						TotalTransferInCount:         0,
-						TotalTransferOutCount:        0,
-						TotalTransferOutSuccessCount: 0,
-						TotalTransferOutSuccessRate:  0,
-						CreatedAtBlockTime:           utctime.UTCTime{},
-						CreatedAtBlockHeight:         1,
-						Verified:                     false,
-						Description:                  "",
-						LastActivityBlockTime:        utctime.UTCTime{},
-						LastActivityBlockHeight:      0,
+						ChannelID:                 "ChannelID",
+						PortID:                    "PortID",
+						ConnectionID:              "ConnectionID",
+						CounterpartyChannelID:     "CounterpartyChannelID",
+						CounterpartyPortID:        "CounterpartyPortID",
+						CounterpartyChainID:       "CounterpartyChainID",
+						Status:                    "",
+						PacketOrdering:            "",
+						LastInPacketSequence:      0,
+						LastOutPacketSequence:     0,
+						TotalRelayInCount:         0,
+						TotalRelayOutCount:        0,
+						TotalRelayOutSuccessCount: 0,
+						TotalRelayOutSuccessRate:  0,
+						CreatedAtBlockTime:        utctime.UTCTime{},
+						CreatedAtBlockHeight:      1,
+						Verified:                  false,
+						Description:               "",
+						LastActivityBlockTime:     utctime.UTCTime{},
+						LastActivityBlockHeight:   0,
 						BondedTokens: ibc_channel_view.BondedTokens{
 							OnThisChain:         []ibc_channel_view.BondedToken(nil),
 							OnCounterpartyChain: []ibc_channel_view.BondedToken(nil),
@@ -660,26 +660,26 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				mockIbcChannelsView.On(
 					"UpdateFactualColumns",
 					&ibc_channel_view.IBCChannelRow{
-						ChannelID:                    "ChannelID",
-						PortID:                       "PortID",
-						ConnectionID:                 "ConnectionID",
-						CounterpartyChannelID:        "CounterpartyChannelID",
-						CounterpartyPortID:           "CounterpartyPortID",
-						CounterpartyChainID:          "CounterpartyChainID",
-						Status:                       "",
-						PacketOrdering:               "",
-						LastInPacketSequence:         0,
-						LastOutPacketSequence:        0,
-						TotalTransferInCount:         0,
-						TotalTransferOutCount:        0,
-						TotalTransferOutSuccessCount: 0,
-						TotalTransferOutSuccessRate:  0,
-						CreatedAtBlockTime:           utctime.UTCTime{},
-						CreatedAtBlockHeight:         1,
-						Verified:                     false,
-						Description:                  "",
-						LastActivityBlockTime:        utctime.UTCTime{},
-						LastActivityBlockHeight:      0,
+						ChannelID:                 "ChannelID",
+						PortID:                    "PortID",
+						ConnectionID:              "ConnectionID",
+						CounterpartyChannelID:     "CounterpartyChannelID",
+						CounterpartyPortID:        "CounterpartyPortID",
+						CounterpartyChainID:       "CounterpartyChainID",
+						Status:                    "",
+						PacketOrdering:            "",
+						LastInPacketSequence:      0,
+						LastOutPacketSequence:     0,
+						TotalRelayInCount:         0,
+						TotalRelayOutCount:        0,
+						TotalRelayOutSuccessCount: 0,
+						TotalRelayOutSuccessRate:  0,
+						CreatedAtBlockTime:        utctime.UTCTime{},
+						CreatedAtBlockHeight:      1,
+						Verified:                  false,
+						Description:               "",
+						LastActivityBlockTime:     utctime.UTCTime{},
+						LastActivityBlockHeight:   0,
 						BondedTokens: ibc_channel_view.BondedTokens{
 							OnThisChain:         []ibc_channel_view.BondedToken(nil),
 							OnCounterpartyChain: []ibc_channel_view.BondedToken(nil),
@@ -740,12 +740,12 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				mockIbcChannelsView.On(
 					"Increment",
 					"SourceChannel",
-					"total_transfer_out_count",
+					"total_relay_out_count",
 					int64(1),
 				).Return(nil)
 
 				mockIbcChannelsView.On(
-					"UpdateTotalTransferOutSuccessRate",
+					"UpdateTotalRelayOutSuccessRate",
 					"SourceChannel",
 				).Return(nil)
 
@@ -862,7 +862,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				mockIbcChannelsView.On(
 					"Increment",
 					"DestinationChannel",
-					"total_transfer_in_count",
+					"total_relay_in_count",
 					int64(1),
 				).Return(nil)
 
@@ -996,7 +996,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				mockIbcChannelsView.On(
 					"Increment",
 					"DestinationChannel",
-					"total_transfer_in_count",
+					"total_relay_in_count",
 					int64(1),
 				).Return(nil)
 
@@ -1072,12 +1072,12 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				mockIbcChannelsView.On(
 					"Increment",
 					"SourceChannel",
-					"total_transfer_out_success_count",
+					"total_relay_out_success_count",
 					int64(1),
 				).Return(nil)
 
 				mockIbcChannelsView.On(
-					"UpdateTotalTransferOutSuccessRate",
+					"UpdateTotalRelayOutSuccessRate",
 					"SourceChannel",
 				).Return(nil)
 
@@ -1136,6 +1136,18 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					"SourceChannel",
 					utctime.UTCTime{},
 					int64(1),
+				).Return(nil)
+
+				mockIbcChannelsView.On(
+					"Increment",
+					"SourceChannel",
+					"total_relay_out_success_count",
+					int64(1),
+				).Return(nil)
+
+				mockIbcChannelsView.On(
+					"UpdateTotalRelayOutSuccessRate",
+					"SourceChannel",
 				).Return(nil)
 
 				mockIbcChannelsView.On(
@@ -1236,6 +1248,18 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 				).Return(nil)
 
 				mockIbcChannelsView.On(
+					"Increment",
+					"SourceChannel",
+					"total_relay_out_success_count",
+					int64(1),
+				).Return(nil)
+
+				mockIbcChannelsView.On(
+					"UpdateTotalRelayOutSuccessRate",
+					"SourceChannel",
+				).Return(nil)
+
+				mockIbcChannelsView.On(
 					"FindBondedTokensBy",
 					"SourceChannel",
 				).Return(
@@ -1330,6 +1354,18 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 					"SourceChannel",
 					utctime.UTCTime{},
 					int64(1),
+				).Return(nil)
+
+				mockIbcChannelsView.On(
+					"Increment",
+					"SourceChannel",
+					"total_relay_out_success_count",
+					int64(1),
+				).Return(nil)
+
+				mockIbcChannelsView.On(
+					"UpdateTotalRelayOutSuccessRate",
+					"SourceChannel",
 				).Return(nil)
 
 				mockIbcChannelsView.On(
