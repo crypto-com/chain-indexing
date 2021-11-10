@@ -36,7 +36,7 @@ func (ibcChannelsView *MockIBCChannelsView) UpdateSequence(channelID string, col
 	return mockArgs.Error(0)
 }
 
-func (ibcChannelsView *MockIBCChannelsView) UpdateTotalTransferOutSuccessRate(channelID string) error {
+func (ibcChannelsView *MockIBCChannelsView) UpdateTotalRelayOutSuccessRate(channelID string) error {
 	mockArgs := ibcChannelsView.Called(channelID)
 	return mockArgs.Error(0)
 }

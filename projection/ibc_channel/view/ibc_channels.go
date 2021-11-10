@@ -19,7 +19,7 @@ type IBCChannels interface {
 	UpdateFactualColumns(*IBCChannelRow) error
 	Increment(string, string, int64) error
 	UpdateSequence(string, string, uint64) error
-	UpdateTotalTransferOutSuccessRate(string) error
+	UpdateTotalRelayOutSuccessRate(string) error
 	UpdateLastActivityTimeAndHeight(string, utctime.UTCTime, int64) error
 	UpdateStatus(string, types.Status) error
 	UpdateBondedTokens(string, *BondedTokens) error
@@ -61,10 +61,10 @@ func (ibcChannelsView *IBCChannelsView) Insert(channel *IBCChannelRow) error {
 			"packet_ordering",
 			"last_in_packet_sequence",
 			"last_out_packet_sequence",
-			"total_transfer_in_count",
-			"total_transfer_out_count",
-			"total_transfer_out_success_count",
-			"total_transfer_out_success_rate",
+			"total_relay_in_count",
+			"total_relay_out_count",
+			"total_relay_out_success_count",
+			"total_relay_out_success_rate",
 			"created_at_block_time",
 			"created_at_block_height",
 			"verified",
@@ -84,10 +84,10 @@ func (ibcChannelsView *IBCChannelsView) Insert(channel *IBCChannelRow) error {
 			channel.PacketOrdering,
 			channel.LastInPacketSequence,
 			channel.LastOutPacketSequence,
-			channel.TotalTransferInCount,
-			channel.TotalTransferOutCount,
-			channel.TotalTransferOutSuccessCount,
-			channel.TotalTransferOutSuccessRate,
+			channel.TotalRelayInCount,
+			channel.TotalRelayOutCount,
+			channel.TotalRelayOutSuccessCount,
+			channel.TotalRelayOutSuccessRate,
 			ibcChannelsView.rdb.Tton(&channel.CreatedAtBlockTime),
 			channel.CreatedAtBlockHeight,
 			channel.Verified,
@@ -147,9 +147,9 @@ func (ibcChannelsView *IBCChannelsView) UpdateFactualColumns(channel *IBCChannel
 }
 
 func (ibcChannelsView *IBCChannelsView) Increment(channelID string, column string, increaseNumber int64) error {
-	if column != "total_transfer_in_count" &&
-		column != "total_transfer_out_count" &&
-		column != "total_transfer_out_success_count" {
+	if column != "total_relay_in_count" &&
+		column != "total_relay_out_count" &&
+		column != "total_relay_out_success_count" {
 		return fmt.Errorf("error unsupported column in Increment(): %v", column)
 	}
 
@@ -202,11 +202,11 @@ func (ibcChannelsView *IBCChannelsView) UpdateSequence(channelID string, column 
 	return nil
 }
 
-func (ibcChannelsView *IBCChannelsView) UpdateTotalTransferOutSuccessRate(channelID string) error {
+func (ibcChannelsView *IBCChannelsView) UpdateTotalRelayOutSuccessRate(channelID string) error {
 	sql, sqlArgs, err := ibcChannelsView.rdb.StmtBuilder.
 		Select(
-			"total_transfer_out_count",
-			"total_transfer_out_success_count",
+			"total_relay_out_count",
+			"total_relay_out_success_count",
 		).
 		From("view_ibc_channels").
 		Where("channel_id = ?", channelID).
@@ -217,8 +217,8 @@ func (ibcChannelsView *IBCChannelsView) UpdateTotalTransferOutSuccessRate(channe
 
 	var channel IBCChannelRow
 	if err = ibcChannelsView.rdb.QueryRow(sql, sqlArgs...).Scan(
-		&channel.TotalTransferOutCount,
-		&channel.TotalTransferOutSuccessCount,
+		&channel.TotalRelayOutCount,
+		&channel.TotalRelayOutSuccessCount,
 	); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			return rdb.ErrNoRows
@@ -227,15 +227,15 @@ func (ibcChannelsView *IBCChannelsView) UpdateTotalTransferOutSuccessRate(channe
 	}
 
 	// Rate = totalSuccessCount / totalCount
-	totalTransferOutSuccessRate := 0.0
-	if channel.TotalTransferOutCount > 0 {
-		totalTransferOutSuccessRate = float64(channel.TotalTransferOutSuccessCount) / float64(channel.TotalTransferOutCount)
+	totalRelayOutSuccessRate := 0.0
+	if channel.TotalRelayOutCount > 0 {
+		totalRelayOutSuccessRate = float64(channel.TotalRelayOutSuccessCount) / float64(channel.TotalRelayOutCount)
 	}
 
 	sql, sqlArgs, err = ibcChannelsView.rdb.StmtBuilder.
 		Update("view_ibc_channels").
 		SetMap(map[string]interface{}{
-			"total_transfer_out_success_rate": totalTransferOutSuccessRate,
+			"total_relay_out_success_rate": totalRelayOutSuccessRate,
 		}).
 		Where("channel_id = ?", channelID).
 		ToSql()
@@ -245,10 +245,10 @@ func (ibcChannelsView *IBCChannelsView) UpdateTotalTransferOutSuccessRate(channe
 
 	result, err := ibcChannelsView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
-		return fmt.Errorf("error updating total_transfer_out_success_rate: %v: %w", err, rdb.ErrWrite)
+		return fmt.Errorf("error updating total_relay_out_success_rate: %v: %w", err, rdb.ErrWrite)
 	}
 	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error updating total_transfer_out_success_rate: no row updated: %w", rdb.ErrWrite)
+		return fmt.Errorf("error updating total_relay_out_success_rate: no row updated: %w", rdb.ErrWrite)
 	}
 
 	return nil
@@ -370,10 +370,10 @@ func (ibcChannelsView *IBCChannelsView) FindBy(channelID string) (*IBCChannelRow
 			"packet_ordering",
 			"last_in_packet_sequence",
 			"last_out_packet_sequence",
-			"total_transfer_in_count",
-			"total_transfer_out_count",
-			"total_transfer_out_success_count",
-			"total_transfer_out_success_rate",
+			"total_relay_in_count",
+			"total_relay_out_count",
+			"total_relay_out_success_count",
+			"total_relay_out_success_rate",
 			"created_at_block_time",
 			"created_at_block_height",
 			"verified",
@@ -404,10 +404,10 @@ func (ibcChannelsView *IBCChannelsView) FindBy(channelID string) (*IBCChannelRow
 		&channel.PacketOrdering,
 		&channel.LastInPacketSequence,
 		&channel.LastOutPacketSequence,
-		&channel.TotalTransferInCount,
-		&channel.TotalTransferOutCount,
-		&channel.TotalTransferOutSuccessCount,
-		&channel.TotalTransferOutSuccessRate,
+		&channel.TotalRelayInCount,
+		&channel.TotalRelayOutCount,
+		&channel.TotalRelayOutSuccessCount,
+		&channel.TotalRelayOutSuccessRate,
 		createdAtTimeReader.ScannableArg(),
 		&channel.CreatedAtBlockHeight,
 		&channel.Verified,
@@ -462,10 +462,10 @@ func (ibcChannelsView *IBCChannelsView) List(
 		"packet_ordering",
 		"last_in_packet_sequence",
 		"last_out_packet_sequence",
-		"total_transfer_in_count",
-		"total_transfer_out_count",
-		"total_transfer_out_success_count",
-		"total_transfer_out_success_rate",
+		"total_relay_in_count",
+		"total_relay_out_count",
+		"total_relay_out_success_count",
+		"total_relay_out_success_rate",
 		"created_at_block_time",
 		"created_at_block_height",
 		"verified",
@@ -531,10 +531,10 @@ func (ibcChannelsView *IBCChannelsView) List(
 			&channel.PacketOrdering,
 			&channel.LastInPacketSequence,
 			&channel.LastOutPacketSequence,
-			&channel.TotalTransferInCount,
-			&channel.TotalTransferOutCount,
-			&channel.TotalTransferOutSuccessCount,
-			&channel.TotalTransferOutSuccessRate,
+			&channel.TotalRelayInCount,
+			&channel.TotalRelayOutCount,
+			&channel.TotalRelayOutSuccessCount,
+			&channel.TotalRelayOutSuccessRate,
 			createdAtTimeReader.ScannableArg(),
 			&channel.CreatedAtBlockHeight,
 			&channel.Verified,
@@ -597,10 +597,10 @@ func (ibcChannelsView *IBCChannelsView) ListChannelsGroupByChainId(
 		"packet_ordering",
 		"last_in_packet_sequence",
 		"last_out_packet_sequence",
-		"total_transfer_in_count",
-		"total_transfer_out_count",
-		"total_transfer_out_success_count",
-		"total_transfer_out_success_rate",
+		"total_relay_in_count",
+		"total_relay_out_count",
+		"total_relay_out_success_count",
+		"total_relay_out_success_rate",
 		"created_at_block_time",
 		"created_at_block_height",
 		"verified",
@@ -667,10 +667,10 @@ func (ibcChannelsView *IBCChannelsView) ListChannelsGroupByChainId(
 			&channel.PacketOrdering,
 			&channel.LastInPacketSequence,
 			&channel.LastOutPacketSequence,
-			&channel.TotalTransferInCount,
-			&channel.TotalTransferOutCount,
-			&channel.TotalTransferOutSuccessCount,
-			&channel.TotalTransferOutSuccessRate,
+			&channel.TotalRelayInCount,
+			&channel.TotalRelayOutCount,
+			&channel.TotalRelayOutSuccessCount,
+			&channel.TotalRelayOutSuccessRate,
 			createdAtTimeReader.ScannableArg(),
 			&channel.CreatedAtBlockHeight,
 			&channel.Verified,
@@ -752,25 +752,25 @@ type ChainChannels struct {
 }
 
 type IBCChannelRow struct {
-	ChannelID                    string          `json:"channelId"`
-	PortID                       string          `json:"portId"`
-	ConnectionID                 string          `json:"connectionId"`
-	CounterpartyChannelID        string          `json:"counterpartyChannelId"`
-	CounterpartyPortID           string          `json:"counterpartyPortId"`
-	CounterpartyChainID          string          `json:"counterpartyChainId"`
-	Status                       string          `json:"status"`
-	PacketOrdering               string          `json:"packetOrdering"`
-	LastInPacketSequence         int64           `json:"lastInPacketSequence"`
-	LastOutPacketSequence        int64           `json:"lastOutPacketSequence"`
-	TotalTransferInCount         int64           `json:"totalTransferInCount"`
-	TotalTransferOutCount        int64           `json:"totalTransferOutCount"`
-	TotalTransferOutSuccessCount int64           `json:"totalTransferOutSuccessCount"`
-	TotalTransferOutSuccessRate  float64         `json:"totalTransferOutSuccessRate"`
-	CreatedAtBlockTime           utctime.UTCTime `json:"createdAtBlockTime"`
-	CreatedAtBlockHeight         int64           `json:"createdAtBlockHeight"`
-	Verified                     bool            `json:"verified"`
-	Description                  string          `json:"description"`
-	LastActivityBlockTime        utctime.UTCTime `json:"lastActivityBlockTime"`
-	LastActivityBlockHeight      int64           `json:"lastActivityBlockHeight"`
-	BondedTokens                 BondedTokens    `json:"bondedTokens"`
+	ChannelID                 string          `json:"channelId"`
+	PortID                    string          `json:"portId"`
+	ConnectionID              string          `json:"connectionId"`
+	CounterpartyChannelID     string          `json:"counterpartyChannelId"`
+	CounterpartyPortID        string          `json:"counterpartyPortId"`
+	CounterpartyChainID       string          `json:"counterpartyChainId"`
+	Status                    string          `json:"status"`
+	PacketOrdering            string          `json:"packetOrdering"`
+	LastInPacketSequence      int64           `json:"lastInPacketSequence"`
+	LastOutPacketSequence     int64           `json:"lastOutPacketSequence"`
+	TotalRelayInCount         int64           `json:"totalRelayInCount"`
+	TotalRelayOutCount        int64           `json:"totalRelayOutCount"`
+	TotalRelayOutSuccessCount int64           `json:"totalRelayOutSuccessCount"`
+	TotalRelayOutSuccessRate  float64         `json:"totalRelayOutSuccessRate"`
+	CreatedAtBlockTime        utctime.UTCTime `json:"createdAtBlockTime"`
+	CreatedAtBlockHeight      int64           `json:"createdAtBlockHeight"`
+	Verified                  bool            `json:"verified"`
+	Description               string          `json:"description"`
+	LastActivityBlockTime     utctime.UTCTime `json:"lastActivityBlockTime"`
+	LastActivityBlockHeight   int64           `json:"lastActivityBlockHeight"`
+	BondedTokens              BondedTokens    `json:"bondedTokens"`
 }
