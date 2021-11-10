@@ -15,6 +15,7 @@ import (
 	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
+	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
 	bridge_activitiy_view "github.com/crypto-com/chain-indexing/projection/bridge_activity/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 )
@@ -80,12 +81,38 @@ func (handler *Bridges) ListActivities(ctx *fasthttp.RequestCtx) {
 	}
 
 	filter := bridge_activitiy_view.BridgeActivitiesListFilter{
+		MaybeStatus:      nil,
 		MaybeIdGt:        nil,
+		MaybeCreatedAtLt: nil,
 		MaybeCreatedAtGt: nil,
 		MaybeUpdatedAtGt: nil,
 	}
+	if queryArgs.Has("status") {
+		maybeStatus, maybeStatusErr := parseStatus(string(queryArgs.Peek("status")))
+		if maybeStatusErr != nil {
+			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			return
+		}
+		filter.MaybeStatus = maybeStatus
+	}
 	if queryArgs.Has("id.gt") {
 		filter.MaybeIdGt = primptr.String(string(queryArgs.Peek("id.gt")))
+	}
+	if queryArgs.Has("createdAt.lt") {
+		maybeCreatedAtLt, createdAtLtParseErr := parseTimeFilter(string(queryArgs.Peek("createdAt.lt")))
+		if createdAtLtParseErr != nil {
+			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			return
+		}
+		filter.MaybeCreatedAtLt = maybeCreatedAtLt
+	}
+	if queryArgs.Has("createdAt.ago") {
+		ago, agoErr := time.ParseDuration(string(queryArgs.Peek("createdAt.ago")))
+		if agoErr != nil {
+			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			return
+		}
+		filter.MaybeCreatedAtLt = primptr.UTCTime(utctime.Now().Add(-ago))
 	}
 	if queryArgs.Has("createdAt.gt") {
 		maybeCreatedAtGt, createdAtGtParseErr := parseTimeFilter(string(queryArgs.Peek("createdAt.gt")))
@@ -183,12 +210,38 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 	}
 
 	filter := bridge_activitiy_view.BridgeActivitiesListFilter{
+		MaybeStatus:      nil,
 		MaybeIdGt:        nil,
+		MaybeCreatedAtLt: nil,
 		MaybeCreatedAtGt: nil,
 		MaybeUpdatedAtGt: nil,
 	}
+	if queryArgs.Has("filter.status") {
+		maybeStatus, maybeStatusErr := parseStatus(string(queryArgs.Peek("filter.status")))
+		if maybeStatusErr != nil {
+			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			return
+		}
+		filter.MaybeStatus = maybeStatus
+	}
 	if queryArgs.Has("id.gt") {
 		filter.MaybeIdGt = primptr.String(string(queryArgs.Peek("id.gt")))
+	}
+	if queryArgs.Has("createdAt.lt") {
+		maybeCreatedAtLt, createdAtLtParseErr := parseTimeFilter(string(queryArgs.Peek("createdAt.lt")))
+		if createdAtLtParseErr != nil {
+			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			return
+		}
+		filter.MaybeCreatedAtLt = maybeCreatedAtLt
+	}
+	if queryArgs.Has("createdAt.ago") {
+		ago, agoErr := time.ParseDuration(string(queryArgs.Peek("createdAt.ago")))
+		if agoErr != nil {
+			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			return
+		}
+		filter.MaybeCreatedAtLt = primptr.UTCTime(utctime.Now().Add(-ago))
 	}
 	if queryArgs.Has("createdAt.gt") {
 		maybeCreatedAtGt, createdAtGtParseErr := parseTimeFilter(string(queryArgs.Peek("createdAt.gt")))
@@ -294,5 +347,24 @@ func parseTimeFilter(value string) (*utctime.UTCTime, error) {
 		return nil, utParseErr
 	} else {
 		return &ut, nil
+	}
+}
+
+func parseStatus(value string) (*types.Status, error) {
+	switch value {
+	case types.STATUS_PENDING:
+		return primptr.String(types.STATUS_PENDING), nil
+	case types.STATUS_CANCELLED:
+		return primptr.String(types.STATUS_CANCELLED), nil
+	case types.STATUS_COUNTERPARTY_CONFIRMED:
+		return primptr.String(types.STATUS_COUNTERPARTY_CONFIRMED), nil
+	case types.STATUS_FAILED:
+		return primptr.String(types.STATUS_FAILED), nil
+	case types.STATUS_COUNTERPARTY_REJECTED:
+		return primptr.String(types.STATUS_COUNTERPARTY_REJECTED), nil
+	case types.STATUS_NO_OPERATION:
+		return primptr.String(types.STATUS_NO_OPERATION), nil
+	default:
+		return nil, errors.New("unrecognized status")
 	}
 }
