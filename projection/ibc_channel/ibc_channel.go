@@ -268,27 +268,27 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 			}
 
 			channel := &ibc_channel_view.IBCChannelRow{
-				ChannelID:                    msgIBCChannelOpenInit.Params.ChannelID,
-				PortID:                       msgIBCChannelOpenInit.Params.PortID,
-				ConnectionID:                 msgIBCChannelOpenInit.Params.ConnectionID,
-				CounterpartyChannelID:        msgIBCChannelOpenInit.Params.Channel.Counterparty.ChannelID,
-				CounterpartyPortID:           msgIBCChannelOpenInit.Params.Channel.Counterparty.PortID,
-				CounterpartyChainID:          counterpartyChainID,
-				Status:                       types.STATUS_NOT_ESTABLISHED,
-				PacketOrdering:               msgIBCChannelOpenInit.Params.Channel.Ordering,
-				LastInPacketSequence:         0,
-				LastOutPacketSequence:        0,
-				TotalTransferInCount:         0,
-				TotalTransferOutCount:        0,
-				TotalTransferOutSuccessCount: 0,
-				TotalTransferOutSuccessRate:  0,
-				CreatedAtBlockTime:           utctime.FromUnixNano(0),
-				CreatedAtBlockHeight:         0,
-				Verified:                     false,
-				Description:                  "",
-				LastActivityBlockTime:        utctime.FromUnixNano(0),
-				LastActivityBlockHeight:      0,
-				BondedTokens:                 *ibc_channel_view.NewEmptyBondedTokens(),
+				ChannelID:                 msgIBCChannelOpenInit.Params.ChannelID,
+				PortID:                    msgIBCChannelOpenInit.Params.PortID,
+				ConnectionID:              msgIBCChannelOpenInit.Params.ConnectionID,
+				CounterpartyChannelID:     msgIBCChannelOpenInit.Params.Channel.Counterparty.ChannelID,
+				CounterpartyPortID:        msgIBCChannelOpenInit.Params.Channel.Counterparty.PortID,
+				CounterpartyChainID:       counterpartyChainID,
+				Status:                    types.STATUS_NOT_ESTABLISHED,
+				PacketOrdering:            msgIBCChannelOpenInit.Params.Channel.Ordering,
+				LastInPacketSequence:      0,
+				LastOutPacketSequence:     0,
+				TotalRelayInCount:         0,
+				TotalRelayOutCount:        0,
+				TotalRelayOutSuccessCount: 0,
+				TotalRelayOutSuccessRate:  0,
+				CreatedAtBlockTime:        utctime.FromUnixNano(0),
+				CreatedAtBlockHeight:      0,
+				Verified:                  false,
+				Description:               "",
+				LastActivityBlockTime:     utctime.FromUnixNano(0),
+				LastActivityBlockHeight:   0,
+				BondedTokens:              *ibc_channel_view.NewEmptyBondedTokens(),
 			}
 			if err := ibcChannelsView.Insert(channel); err != nil {
 				return fmt.Errorf("error inserting channel: %w", err)
@@ -303,27 +303,27 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 			}
 
 			channel := &ibc_channel_view.IBCChannelRow{
-				ChannelID:                    msgIBCChannelOpenTry.Params.ChannelID,
-				PortID:                       msgIBCChannelOpenTry.Params.PortID,
-				ConnectionID:                 msgIBCChannelOpenTry.Params.ConnectionID,
-				CounterpartyChannelID:        msgIBCChannelOpenTry.Params.Channel.Counterparty.ChannelID,
-				CounterpartyPortID:           msgIBCChannelOpenTry.Params.Channel.Counterparty.PortID,
-				CounterpartyChainID:          counterpartyChainID,
-				Status:                       types.STATUS_NOT_ESTABLISHED,
-				PacketOrdering:               msgIBCChannelOpenTry.Params.Channel.Ordering,
-				LastInPacketSequence:         0,
-				LastOutPacketSequence:        0,
-				TotalTransferInCount:         0,
-				TotalTransferOutCount:        0,
-				TotalTransferOutSuccessCount: 0,
-				TotalTransferOutSuccessRate:  0,
-				CreatedAtBlockTime:           utctime.FromUnixNano(0),
-				CreatedAtBlockHeight:         0,
-				Verified:                     false,
-				Description:                  "",
-				LastActivityBlockTime:        utctime.FromUnixNano(0),
-				LastActivityBlockHeight:      0,
-				BondedTokens:                 *ibc_channel_view.NewEmptyBondedTokens(),
+				ChannelID:                 msgIBCChannelOpenTry.Params.ChannelID,
+				PortID:                    msgIBCChannelOpenTry.Params.PortID,
+				ConnectionID:              msgIBCChannelOpenTry.Params.ConnectionID,
+				CounterpartyChannelID:     msgIBCChannelOpenTry.Params.Channel.Counterparty.ChannelID,
+				CounterpartyPortID:        msgIBCChannelOpenTry.Params.Channel.Counterparty.PortID,
+				CounterpartyChainID:       counterpartyChainID,
+				Status:                    types.STATUS_NOT_ESTABLISHED,
+				PacketOrdering:            msgIBCChannelOpenTry.Params.Channel.Ordering,
+				LastInPacketSequence:      0,
+				LastOutPacketSequence:     0,
+				TotalRelayInCount:         0,
+				TotalRelayOutCount:        0,
+				TotalRelayOutSuccessCount: 0,
+				TotalRelayOutSuccessRate:  0,
+				CreatedAtBlockTime:        utctime.FromUnixNano(0),
+				CreatedAtBlockHeight:      0,
+				Verified:                  false,
+				Description:               "",
+				LastActivityBlockTime:     utctime.FromUnixNano(0),
+				LastActivityBlockHeight:   0,
+				BondedTokens:              *ibc_channel_view.NewEmptyBondedTokens(),
 			}
 			if err := ibcChannelsView.Insert(channel); err != nil {
 				return fmt.Errorf("error inserting channel: %w", err)
@@ -386,12 +386,12 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 			// Transfer started by source chain
 			channelID := msgIBCTransferTransfer.Params.SourceChannel
 
-			// TotalTransferOutSuccessRate
-			if err := ibcChannelsView.Increment(channelID, "total_transfer_out_count", 1); err != nil {
-				return fmt.Errorf("error increasing total_transfer_out_count: %w", err)
+			// TotalRelayOutSuccessRate
+			if err := ibcChannelsView.Increment(channelID, "total_relay_out_count", 1); err != nil {
+				return fmt.Errorf("error increasing total_relay_out_count: %w", err)
 			}
-			if err := ibcChannelsView.UpdateTotalTransferOutSuccessRate(channelID); err != nil {
-				return fmt.Errorf("error updating total_transfer_out_success_rate: %w", err)
+			if err := ibcChannelsView.UpdateTotalRelayOutSuccessRate(channelID); err != nil {
+				return fmt.Errorf("error updating total_relay_out_success_rate: %w", err)
 			}
 
 			lastOutPacketSequence := msgIBCTransferTransfer.Params.PacketSequence
@@ -459,8 +459,8 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 			// Transfer started by destination chain
 			channelID := msgIBCRecvPacket.Params.Packet.DestinationChannel
 
-			if err := ibcChannelsView.Increment(channelID, "total_transfer_in_count", 1); err != nil {
-				return fmt.Errorf("error increasing total_transfer_in_count: %w", err)
+			if err := ibcChannelsView.Increment(channelID, "total_relay_in_count", 1); err != nil {
+				return fmt.Errorf("error increasing total_relay_in_count: %w", err)
 			}
 
 			lastInPacketSequence := msgIBCRecvPacket.Params.PacketSequence
@@ -544,19 +544,17 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
+			// TotalRelayOutSuccessRate
+			if err := ibcChannelsView.Increment(channelID, "total_relay_out_success_count", 1); err != nil {
+				return fmt.Errorf("error increasing total_relay_out_success_count: %w", err)
+			}
+			if err := ibcChannelsView.UpdateTotalRelayOutSuccessRate(channelID); err != nil {
+				return fmt.Errorf("error updating total_relay_out_success_rate: %w", err)
+			}
+
 			if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData != nil {
 
-				if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Success {
-
-					// TotalTransferOutSuccessRate
-					if err := ibcChannelsView.Increment(channelID, "total_transfer_out_success_count", 1); err != nil {
-						return fmt.Errorf("error increasing total_transfer_out_success_count: %w", err)
-					}
-					if err := ibcChannelsView.UpdateTotalTransferOutSuccessRate(channelID); err != nil {
-						return fmt.Errorf("error updating total_transfer_out_success_rate: %w", err)
-					}
-
-				} else {
+				if !msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Success {
 
 					amount := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount.String()
 					denom := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Denom
@@ -628,6 +626,14 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
+			// TotalRelayOutSuccessRate
+			if err := ibcChannelsView.Increment(channelID, "total_relay_out_success_count", 1); err != nil {
+				return fmt.Errorf("error increasing total_relay_out_success_count: %w", err)
+			}
+			if err := ibcChannelsView.UpdateTotalRelayOutSuccessRate(channelID); err != nil {
+				return fmt.Errorf("error updating total_relay_out_success_rate: %w", err)
+			}
+
 			if msgIBCTimeout.Params.MaybeMsgTransfer != nil {
 
 				amount := msgIBCTimeout.Params.MaybeMsgTransfer.RefundAmount.String()
@@ -691,6 +697,14 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
+			}
+
+			// TotalRelayOutSuccessRate
+			if err := ibcChannelsView.Increment(channelID, "total_relay_out_success_count", 1); err != nil {
+				return fmt.Errorf("error increasing total_relay_out_success_count: %w", err)
+			}
+			if err := ibcChannelsView.UpdateTotalRelayOutSuccessRate(channelID); err != nil {
+				return fmt.Errorf("error updating total_relay_out_success_rate: %w", err)
 			}
 
 			if msgIBCTimeoutOnClose.Params.MaybeMsgTransfer != nil {
