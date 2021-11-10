@@ -157,5 +157,5 @@ type CosmosVersionEnabledHeightConfig struct {
 type GithubAPIConfig struct {
 	Username         string `toml:"username"`
 	Token            string `toml:"token"`
-	MigrationRepoRef string `toml:"Migration_repo_ref"`
+	MigrationRepoRef string `toml:"migration_repo_ref"`
 }
