@@ -106,6 +106,14 @@ func (handler *Bridges) ListActivities(ctx *fasthttp.RequestCtx) {
 		}
 		filter.MaybeCreatedAtLt = maybeCreatedAtLt
 	}
+	if queryArgs.Has("createdAt.ago") {
+		ago, agoErr := time.ParseDuration(string(queryArgs.Peek("createdAt.ago")))
+		if agoErr != nil {
+			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			return
+		}
+		filter.MaybeCreatedAtLt = primptr.UTCTime(utctime.Now().Add(-ago))
+	}
 	if queryArgs.Has("createdAt.gt") {
 		maybeCreatedAtGt, createdAtGtParseErr := parseTimeFilter(string(queryArgs.Peek("createdAt.gt")))
 		if createdAtGtParseErr != nil {
@@ -226,6 +234,14 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 			return
 		}
 		filter.MaybeCreatedAtLt = maybeCreatedAtLt
+	}
+	if queryArgs.Has("createdAt.ago") {
+		ago, agoErr := time.ParseDuration(string(queryArgs.Peek("createdAt.ago")))
+		if agoErr != nil {
+			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			return
+		}
+		filter.MaybeCreatedAtLt = primptr.UTCTime(utctime.Now().Add(-ago))
 	}
 	if queryArgs.Has("createdAt.gt") {
 		maybeCreatedAtGt, createdAtGtParseErr := parseTimeFilter(string(queryArgs.Peek("createdAt.gt")))
