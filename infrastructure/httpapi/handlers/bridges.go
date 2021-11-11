@@ -358,8 +358,8 @@ func parseStatus(value string) (*types.Status, error) {
 		return primptr.String(types.STATUS_CANCELLED), nil
 	case types.STATUS_COUNTERPARTY_CONFIRMED:
 		return primptr.String(types.STATUS_COUNTERPARTY_CONFIRMED), nil
-	case types.STATUS_FAILED:
-		return primptr.String(types.STATUS_FAILED), nil
+	case types.STATUS_FAILED_ON_CHAIN:
+		return primptr.String(types.STATUS_FAILED_ON_CHAIN), nil
 	case types.STATUS_COUNTERPARTY_REJECTED:
 		return primptr.String(types.STATUS_COUNTERPARTY_REJECTED), nil
 	case types.STATUS_NO_OPERATION:
