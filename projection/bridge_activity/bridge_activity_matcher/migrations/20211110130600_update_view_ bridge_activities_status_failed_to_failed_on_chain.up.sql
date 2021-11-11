@@ -1,1 +1,1 @@
-UPDATE TABLE view_bridge_activities SET status='FailedOnChain' WHERE status='Failed';
+UPDATE view_bridge_activities SET status='FailedOnChain' WHERE status='Failed';
