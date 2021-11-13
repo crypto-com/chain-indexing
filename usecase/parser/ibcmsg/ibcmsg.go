@@ -807,16 +807,16 @@ func ParseMsgAcknowledgement(
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 
+	acknowledgePacketEvent := log.GetEventByType("acknowledge_packet")
+	if acknowledgePacketEvent == nil {
+		panic("missing `acknowledge_packet` event in TxsResult log")
+	}
+
 	fungibleTokenPacketEvents := log.GetEventsByType("fungible_token_packet")
 	if fungibleTokenPacketEvents == nil {
 		// Note: this could happen when the packet is already relayed.
 		// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/04-channel/keeper/packet.go#L428
 		// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/keeper/msg_server.go#L725
-
-		acknowledgePacketEvent := log.GetEventByType("acknowledge_packet")
-		if acknowledgePacketEvent == nil {
-			panic("missing `acknowledge_packet` event in TxsResult log")
-		}
 
 		msgAcknowledgementParams := ibc_model.MsgAcknowledgementParams{
 			RawMsgAcknowledgement: rawMsg,
@@ -858,11 +858,6 @@ func ParseMsgAcknowledgement(
 		if fungibleTokenPacketEvent.HasAttribute("error") {
 			maybeErr = fungibleTokenPacketEvent.GetAttributeByKey("error")
 		}
-	}
-
-	acknowledgePacketEvent := log.GetEventByType("acknowledge_packet")
-	if acknowledgePacketEvent == nil {
-		panic("missing `acknowledge_packet` event in TxsResult log")
 	}
 
 	msgAcknowledgementParams := ibc_model.MsgAcknowledgementParams{
