@@ -236,14 +236,17 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 			}
 			if msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData != nil {
 				var status types.Status
+				var isProcessed bool
 				if msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Success {
 					status = types.STATUS_COUNTERPARTY_CONFIRMED
+					isProcessed = false
 				} else {
-
 					if msgIBCRecvPacket.Params.PacketAck.MaybeError != nil {
 						status = types.STATUS_COUNTERPARTY_REJECTED
+						isProcessed = false
 					} else {
 						status = types.STATUS_NO_OPERATION
+						isProcessed = true
 					}
 				}
 
@@ -274,7 +277,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 					MaybeBridgeFeeAmount:          nil,
 					MaybeBridgeFeeDenom:           nil,
 					Status:                        status,
-					IsProcessed:                   false,
+					IsProcessed:                   isProcessed,
 				}); err != nil {
 					return fmt.Errorf("error inserting record when MsgIBCRecvPacket: %w", err)
 				}
@@ -286,10 +289,18 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 			}
 			if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData != nil {
 				var status types.Status
+				var isProcessed bool
 				if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Success {
 					status = types.STATUS_COUNTERPARTY_CONFIRMED
+					isProcessed = false
 				} else {
-					status = types.STATUS_COUNTERPARTY_REJECTED
+					if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.MaybeError != nil {
+						status = types.STATUS_COUNTERPARTY_REJECTED
+						isProcessed = false
+					} else {
+						status = types.STATUS_NO_OPERATION
+						isProcessed = true
+					}
 				}
 
 				amount, amountOk := coin.NewIntFromString(msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount.String())
@@ -319,7 +330,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 					MaybeBridgeFeeAmount:          nil,
 					MaybeBridgeFeeDenom:           nil,
 					Status:                        status,
-					IsProcessed:                   false,
+					IsProcessed:                   isProcessed,
 				}); err != nil {
 					return fmt.Errorf("error inserting record when MsgIBCAcknowledgement: %w", err)
 				}
