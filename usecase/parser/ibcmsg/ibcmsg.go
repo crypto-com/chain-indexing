@@ -807,14 +807,57 @@ func ParseMsgAcknowledgement(
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 
-	fungibleTokenPacketEvent := log.GetEventByType("fungible_token_packet")
-	if fungibleTokenPacketEvent == nil {
-		panic("missing `fungible_token_packet` event in TxsResult log")
-	}
-
 	acknowledgePacketEvent := log.GetEventByType("acknowledge_packet")
 	if acknowledgePacketEvent == nil {
 		panic("missing `acknowledge_packet` event in TxsResult log")
+	}
+
+	fungibleTokenPacketEvents := log.GetEventsByType("fungible_token_packet")
+	if fungibleTokenPacketEvents == nil {
+		// Note: this could happen when the packet is already relayed.
+		// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/04-channel/keeper/packet.go#L428
+		// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/keeper/msg_server.go#L725
+
+		msgAcknowledgementParams := ibc_model.MsgAcknowledgementParams{
+			RawMsgAcknowledgement: rawMsg,
+
+			Application: "transfer",
+			MessageType: "MsgTransfer",
+			MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
+				FungibleTokenPacketData: rawFungibleTokenPacketData,
+				Success:                 false,
+				Acknowledgement:         "",
+				MaybeError:              nil,
+			},
+
+			PacketSequence:  typeconv.MustAtou64(acknowledgePacketEvent.MustGetAttributeByKey("packet_sequence")),
+			ChannelOrdering: acknowledgePacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
+			ConnectionID:    acknowledgePacketEvent.MustGetAttributeByKey("packet_connection"),
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgIBCAcknowledgement(
+			parserParams.MsgCommonParams,
+
+			msgAcknowledgementParams,
+		)}
+	}
+
+	var success bool
+	var acknowledgement string
+	var maybeErr *string
+	for _, fungibleTokenPacketEvent := range fungibleTokenPacketEvents {
+		if fungibleTokenPacketEvent.HasAttribute("success") {
+			success = bytes.Equal(
+				[]byte(fungibleTokenPacketEvent.MustGetAttributeByKey("success")),
+				[]byte{byte(1)},
+			)
+		}
+		if fungibleTokenPacketEvent.HasAttribute("acknowledgement") {
+			acknowledgement = fungibleTokenPacketEvent.MustGetAttributeByKey("acknowledgement")
+		}
+		if fungibleTokenPacketEvent.HasAttribute("error") {
+			maybeErr = fungibleTokenPacketEvent.GetAttributeByKey("error")
+		}
 	}
 
 	msgAcknowledgementParams := ibc_model.MsgAcknowledgementParams{
@@ -825,14 +868,10 @@ func ParseMsgAcknowledgement(
 		MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
 			FungibleTokenPacketData: rawFungibleTokenPacketData,
 			// https://github.com/cosmos/ibc-go/blob/e98838612a4fa5d240e392aad3409db5ec428f50/modules/apps/transfer/module.go#L327
-			Success: fungibleTokenPacketEvent.HasAttribute("success") &&
-				bytes.Equal(
-					[]byte(fungibleTokenPacketEvent.MustGetAttributeByKey("success")),
-					[]byte{byte(1)},
-				),
-			Acknowledgement: fungibleTokenPacketEvent.MustGetAttributeByKey("acknowledgement"),
+			Success:         success,
+			Acknowledgement: acknowledgement,
 			// https://github.com/cosmos/ibc-go/blob/e98838612a4fa5d240e392aad3409db5ec428f50/modules/apps/transfer/module.go#L364
-			MaybeError: fungibleTokenPacketEvent.GetAttributeByKey("error"),
+			MaybeError: maybeErr,
 		},
 
 		PacketSequence:  typeconv.MustAtou64(acknowledgePacketEvent.MustGetAttributeByKey("packet_sequence")),
