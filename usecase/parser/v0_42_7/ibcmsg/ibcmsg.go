@@ -93,7 +93,7 @@ func ParseMsgRecvPacket(
 			PacketSequence: typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
 		}
 
-		return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
+		return []command.Command{command_usecase.NewCreateMsgAlreadyRelayedIBCRecvPacket(
 			parserParams.MsgCommonParams,
 
 			msgRecvPacketParams,
