@@ -260,11 +260,11 @@ var _ = Describe("ParseMsgCommands", func() {
 `
 
 			expectedSecondMsgAck := `{
-	"name": "MsgAcknowledgementCreated",
+	"name": "MsgAlreadyRelayedAcknowledgementCreated",
 	"version": 1,
 	"height": 68821,
 	"uuid": "{UUID}",
-	"msgName": "MsgAcknowledgement",
+	"msgName": "MsgAlreadyRelayedAcknowledgement",
 	"txHash": "961A752199E991F5653FB8773DF6A20F1381C3C7B3FAD2D817988BE6640FCF4E",
 	"msgIndex": 1,
 	"params": {

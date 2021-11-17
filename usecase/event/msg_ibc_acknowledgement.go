@@ -76,7 +76,7 @@ func NewMsgAlreadyRelayedIBCAcknowledgement(
 ) *MsgAlreadyRelayedIBCAcknowledgement {
 	return &MsgAlreadyRelayedIBCAcknowledgement{
 		NewMsgBase(MsgBaseParams{
-			MsgName:         MSG_IBC_ACKNOWLEDGEMENT,
+			MsgName:         MSG_ALREADY_RELAYED_IBC_ACKNOWLEDGEMENT,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
