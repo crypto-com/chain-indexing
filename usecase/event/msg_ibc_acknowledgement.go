@@ -59,3 +59,54 @@ func DecodeMsgIBCAcknowledgement(encoded []byte) (entity_event.Event, error) {
 
 	return event, nil
 }
+
+const MSG_ALREADY_RELAYED_IBC_ACKNOWLEDGEMENT = "MsgAlreadyRelayedAcknowledgement"
+const MSG_ALREADY_RELAYED_IBC_ACKNOWLEDGEMENT_CREATED = "MsgAlreadyRelayedAcknowledgementCreated"
+const MSG_ALREADY_RELAYED_IBC_ACKNOWLEDGEMENT_FAILED = "MsgAlreadyRelayedAcknowledgementFailed"
+
+type MsgAlreadyRelayedIBCAcknowledgement struct {
+	MsgBase
+
+	Params ibc_model.MsgAcknowledgementParams `json:"params"`
+}
+
+func NewMsgAlreadyRelayedIBCAcknowledgement(
+	msgCommonParams MsgCommonParams,
+	params ibc_model.MsgAcknowledgementParams,
+) *MsgAlreadyRelayedIBCAcknowledgement {
+	return &MsgAlreadyRelayedIBCAcknowledgement{
+		NewMsgBase(MsgBaseParams{
+			MsgName:         MSG_IBC_ACKNOWLEDGEMENT,
+			Version:         1,
+			MsgCommonParams: msgCommonParams,
+		}),
+
+		params,
+	}
+}
+
+// ToJSON encodes the event into JSON string payload
+func (event *MsgAlreadyRelayedIBCAcknowledgement) ToJSON() (string, error) {
+	encoded, err := jsoniter.Marshal(event)
+	if err != nil {
+		return "", err
+	}
+
+	return string(encoded), nil
+}
+
+func (event *MsgAlreadyRelayedIBCAcknowledgement) String() string {
+	return render.Render(event)
+}
+
+func DecodeMsgAlreadyRelayedIBCAcknowledgement(encoded []byte) (entity_event.Event, error) {
+	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
+	jsonDecoder.DisallowUnknownFields()
+
+	var event *MsgAlreadyRelayedIBCAcknowledgement
+	if err := jsonDecoder.Decode(&event); err != nil {
+		return nil, err
+	}
+
+	return event, nil
+}

@@ -33,3 +33,31 @@ func (cmd *CreateMsgIBCTimeoutOnClose) Exec() (entity_event.Event, error) {
 	event := event.NewMsgIBCTimeoutOnClose(cmd.msgCommonParams, cmd.params)
 	return event, nil
 }
+
+type CreateMsgAlreadyRelayedIBCTimeoutOnClose struct {
+	msgCommonParams event.MsgCommonParams
+	params          ibc_model.MsgTimeoutOnCloseParams
+}
+
+func NewCreateMsgAlreadyRelayedIBCTimeoutOnClose(
+	msgCommonParams event.MsgCommonParams,
+	params ibc_model.MsgTimeoutOnCloseParams,
+) *CreateMsgAlreadyRelayedIBCTimeoutOnClose {
+	return &CreateMsgAlreadyRelayedIBCTimeoutOnClose{
+		msgCommonParams,
+		params,
+	}
+}
+
+func (*CreateMsgAlreadyRelayedIBCTimeoutOnClose) Name() string {
+	return "CreateMsgAlreadyRelayedIBCTimeoutOnClose"
+}
+
+func (*CreateMsgAlreadyRelayedIBCTimeoutOnClose) Version() int {
+	return 1
+}
+
+func (cmd *CreateMsgAlreadyRelayedIBCTimeoutOnClose) Exec() (entity_event.Event, error) {
+	event := event.NewMsgIBCTimeoutOnClose(cmd.msgCommonParams, cmd.params)
+	return event, nil
+}

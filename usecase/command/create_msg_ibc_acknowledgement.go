@@ -33,3 +33,32 @@ func (cmd *CreateMsgIBCAcknowledgement) Exec() (entity_event.Event, error) {
 	event := event.NewMsgIBCAcknowledgement(cmd.msgCommonParams, cmd.params)
 	return event, nil
 }
+
+
+type CreateMsgAlreadyRelayedIBCAcknowledgement struct {
+	msgCommonParams event.MsgCommonParams
+	params          ibc_model.MsgAcknowledgementParams
+}
+
+func NewCreateMsgAlreadyRelayedIBCAcknowledgement(
+	msgCommonParams event.MsgCommonParams,
+	params ibc_model.MsgAcknowledgementParams,
+) *CreateMsgAlreadyRelayedIBCAcknowledgement {
+	return &CreateMsgAlreadyRelayedIBCAcknowledgement{
+		msgCommonParams,
+		params,
+	}
+}
+
+func (*CreateMsgAlreadyRelayedIBCAcknowledgement) Name() string {
+	return "CreateMsgAlreadyRelayedIBCAcknowledgement"
+}
+
+func (*CreateMsgAlreadyRelayedIBCAcknowledgement) Version() int {
+	return 1
+}
+
+func (cmd *CreateMsgAlreadyRelayedIBCAcknowledgement) Exec() (entity_event.Event, error) {
+	event := event.NewMsgAlreadyRelayedIBCAcknowledgement(cmd.msgCommonParams, cmd.params)
+	return event, nil
+}

@@ -709,6 +709,8 @@ func ParseMsgRecvPacket(
 		// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/04-channel/keeper/packet.go#L239
 		// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/keeper/msg_server.go#L508
 
+		// TODO: create MsgAlreadyRelayedRecvPacket
+
 		msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
 			RawMsgRecvPacket: rawMsg,
 
@@ -722,7 +724,7 @@ func ParseMsgRecvPacket(
 			PacketSequence: typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
 		}
 
-		return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
+		return []command.Command{command_usecase.NewCreateMsgAlreadyRelayedIBCRecvPacket(
 			parserParams.MsgCommonParams,
 
 			msgRecvPacketParams,
@@ -835,7 +837,7 @@ func ParseMsgAcknowledgement(
 			ConnectionID:    acknowledgePacketEvent.MustGetAttributeByKey("packet_connection"),
 		}
 
-		return []command.Command{command_usecase.NewCreateMsgIBCAcknowledgement(
+		return []command.Command{command_usecase.NewCreateMsgAlreadyRelayedIBCAcknowledgement(
 			parserParams.MsgCommonParams,
 
 			msgAcknowledgementParams,
@@ -967,11 +969,20 @@ func ParseMsgTimeout(
 		ChannelOrdering: timeoutPacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
 	}
 
-	return []command.Command{command_usecase.NewCreateMsgIBCTimeout(
-		parserParams.MsgCommonParams,
+	timeoutEvent := log.GetEventByType("timeout")
+	if timeoutEvent == nil {
+		return []command.Command{command_usecase.NewCreateMsgAlreadyRelayedIBCTimeout(
+			parserParams.MsgCommonParams,
 
-		msgTimeoutParams,
-	)}
+			msgTimeoutParams,
+		)}
+	} else {
+		return []command.Command{command_usecase.NewCreateMsgIBCTimeout(
+			parserParams.MsgCommonParams,
+
+			msgTimeoutParams,
+		)}
+	}
 }
 
 func ParseMsgTimeoutOnClose(
@@ -1036,11 +1047,20 @@ func ParseMsgTimeoutOnClose(
 		ChannelOrdering: timeoutPacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
 	}
 
-	return []command.Command{command_usecase.NewCreateMsgIBCTimeoutOnClose(
-		parserParams.MsgCommonParams,
+	timeoutEvent := log.GetEventByType("timeout")
+	if timeoutEvent == nil {
+		return []command.Command{command_usecase.NewCreateMsgAlreadyRelayedIBCTimeoutOnClose(
+			parserParams.MsgCommonParams,
 
-		msgTimeoutOnCloseParams,
-	)}
+			msgTimeoutOnCloseParams,
+		)}
+	} else {
+		return []command.Command{command_usecase.NewCreateMsgIBCTimeoutOnClose(
+			parserParams.MsgCommonParams,
+
+			msgTimeoutOnCloseParams,
+		)}
+	}
 }
 
 func ParseMsgChannelCloseInit(
