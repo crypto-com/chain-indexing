@@ -184,7 +184,7 @@ var _ = Describe("ParseMsgCommands", func() {
 		Expect(err).To(BeNil())
 		Expect(cmds).To(HaveLen(2))
 		cmd := cmds[1]
-		Expect(cmd.Name()).To(Equal("CreateMsgIBCTimeout"))
+		Expect(cmd.Name()).To(Equal("CreateMsgAlreadyRelayedIBCTimeout"))
 
 		untypedEvent, _ := cmd.Exec()
 		typedEvent := untypedEvent.(*event.MsgIBCTimeout)

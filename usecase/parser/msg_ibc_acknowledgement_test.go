@@ -332,7 +332,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(cmds[0].Name()).To(Equal("CreateMsgIBCUpdateClient"))
 			Expect(cmds[1].Name()).To(Equal("CreateMsgIBCAcknowledgement"))
 			Expect(cmds[2].Name()).To(Equal("CreateMsgIBCUpdateClient"))
-			Expect(cmds[3].Name()).To(Equal("CreateMsgIBCAcknowledgement"))
+			Expect(cmds[3].Name()).To(Equal("CreateMsgAlreadyRelayedIBCAcknowledgement"))
 
 			firstMsgAckCmd := cmds[1]
 			secondMsgAckCmd := cmds[3]
