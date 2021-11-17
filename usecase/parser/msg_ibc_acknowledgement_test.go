@@ -356,7 +356,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(json.MustMarshalToString(typedFistMsgAckEvent)).To(Equal(expectedFirstMsgAckWithAcknowledgement))
 
 			untypedSecondMsgAckEvent, _ := secondMsgAckCmd.Exec()
-			typedSecondMsgAckCmd := untypedSecondMsgAckEvent.(*event.MsgIBCAcknowledgement)
+			typedSecondMsgAckCmd := untypedSecondMsgAckEvent.(*event.MsgAlreadyRelayedIBCAcknowledgement)
 			expectedSecondMsgAckWithUUID := strings.Replace(
 				regex.ReplaceAllString(expectedSecondMsgAck, ""),
 				"{UUID}",
