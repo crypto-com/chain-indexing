@@ -714,10 +714,6 @@ func ParseMsgRecvPacket(
 
 			Application: "transfer",
 			MessageType: "MsgTransfer",
-			MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
-				FungibleTokenPacketData: rawFungibleTokenPacketData,
-				Success:                 false,
-			},
 
 			PacketSequence: typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
 		}
@@ -823,12 +819,6 @@ func ParseMsgAcknowledgement(
 
 			Application: "transfer",
 			MessageType: "MsgTransfer",
-			MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
-				FungibleTokenPacketData: rawFungibleTokenPacketData,
-				Success:                 false,
-				Acknowledgement:         "",
-				MaybeError:              nil,
-			},
 
 			PacketSequence:  typeconv.MustAtou64(acknowledgePacketEvent.MustGetAttributeByKey("packet_sequence")),
 			ChannelOrdering: acknowledgePacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
