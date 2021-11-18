@@ -230,14 +230,7 @@ var _ = Describe("ParseMsgCommands", func() {
 		"signer": "tcro18mcwp6vtlvpgxy62eledk3chhjguw636x8n7h6",
 		"application": "transfer",
 		"messageType": "MsgTransfer",
-		"maybeMsgTransfer": {
-			"sender": "eth1mtcn2505k37mlztywf8eg8spv0kpnsqam2zs02",
-			"receiver": "tcro1f6qcvp33dc79xzpuwll7mln5lnepuqv8d7led9",
-			"denom": "transfer/channel-0/basetcro",
-			"amount": "1000000000000",
-			"success": false,
-			"maybeDenominationTrace": null
-		},
+		"maybeMsgTransfer": null,
 		"packetSequence": "45",
 		"channelOrdering": "",
 		"connectionId": "",
