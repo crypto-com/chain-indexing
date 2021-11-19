@@ -59,3 +59,54 @@ func DecodeMsgIBCRecvPacket(encoded []byte) (entity_event.Event, error) {
 
 	return event, nil
 }
+
+const MSG_ALREADY_RELAYED_IBC_RECV_PACKET = "MsgAlreadyRelayedRecvPacket"
+const MSG_ALREADY_RELAYED_IBC_RECV_PACKET_CREATED = "MsgAlreadyRelayedRecvPacketCreated"
+const MSG_ALREADY_RELAYED_IBC_RECV_PACKET_FAILED = "MsgAlreadyRelayedRecvPacketFailed"
+
+type MsgAlreadyRelayedIBCRecvPacket struct {
+	MsgBase
+
+	Params ibc_model.MsgRecvPacketParams `json:"params"`
+}
+
+func NewMsgAlreadyRelayedIBCRecvPacket(
+	msgCommonParams MsgCommonParams,
+	params ibc_model.MsgRecvPacketParams,
+) *MsgAlreadyRelayedIBCRecvPacket {
+	return &MsgAlreadyRelayedIBCRecvPacket{
+		NewMsgBase(MsgBaseParams{
+			MsgName:         MSG_ALREADY_RELAYED_IBC_RECV_PACKET,
+			Version:         1,
+			MsgCommonParams: msgCommonParams,
+		}),
+
+		params,
+	}
+}
+
+// ToJSON encodes the event into JSON string payload
+func (event *MsgAlreadyRelayedIBCRecvPacket) ToJSON() (string, error) {
+	encoded, err := jsoniter.Marshal(event)
+	if err != nil {
+		return "", err
+	}
+
+	return string(encoded), nil
+}
+
+func (event *MsgAlreadyRelayedIBCRecvPacket) String() string {
+	return render.Render(event)
+}
+
+func DecodeMsgAlreadyRelayedIBCRecvPacket(encoded []byte) (entity_event.Event, error) {
+	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
+	jsonDecoder.DisallowUnknownFields()
+
+	var event *MsgAlreadyRelayedIBCRecvPacket
+	if err := jsonDecoder.Decode(&event); err != nil {
+		return nil, err
+	}
+
+	return event, nil
+}

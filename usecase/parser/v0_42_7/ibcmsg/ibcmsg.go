@@ -85,15 +85,11 @@ func ParseMsgRecvPacket(
 
 			Application: "transfer",
 			MessageType: "MsgTransfer",
-			MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
-				FungibleTokenPacketData: rawFungibleTokenPacketData,
-				Success:                 false,
-			},
 
 			PacketSequence: typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
 		}
 
-		return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
+		return []command.Command{command_usecase.NewCreateMsgAlreadyRelayedIBCRecvPacket(
 			parserParams.MsgCommonParams,
 
 			msgRecvPacketParams,

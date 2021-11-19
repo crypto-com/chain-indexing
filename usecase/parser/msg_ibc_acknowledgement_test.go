@@ -260,11 +260,11 @@ var _ = Describe("ParseMsgCommands", func() {
 `
 
 			expectedSecondMsgAck := `{
-	"name": "MsgAcknowledgementCreated",
+	"name": "MsgAlreadyRelayedAcknowledgementCreated",
 	"version": 1,
 	"height": 68821,
 	"uuid": "{UUID}",
-	"msgName": "MsgAcknowledgement",
+	"msgName": "MsgAlreadyRelayedAcknowledgement",
 	"txHash": "961A752199E991F5653FB8773DF6A20F1381C3C7B3FAD2D817988BE6640FCF4E",
 	"msgIndex": 1,
 	"params": {
@@ -290,15 +290,7 @@ var _ = Describe("ParseMsgCommands", func() {
 		"signer": "crc1aaxs058pksrq8cx3k0nrxv60p2a9c7nq527949",
 		"application": "transfer",
 		"messageType": "MsgTransfer",
-		"maybeMsgTransfer": {
-			"sender": "crc1zdaepq9wskhf5l5v0j2wm0hr4kucjuw5yel25u",
-			"receiver": "cro1d9j38wdkdpwf623uzl7s9nqw08up30cwkv2cml",
-			"denom": "transfer/channel-0/basecro",
-			"amount": "99793967500",
-			"success": false,
-			"acknowledgement": "",
-			"error": null
-		},
+		"maybeMsgTransfer": null,
 		"packetSequence": "933",
 		"channelOrdering": "ORDER_UNORDERED",
 		"connectionId": "connection-0"
@@ -332,7 +324,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(cmds[0].Name()).To(Equal("CreateMsgIBCUpdateClient"))
 			Expect(cmds[1].Name()).To(Equal("CreateMsgIBCAcknowledgement"))
 			Expect(cmds[2].Name()).To(Equal("CreateMsgIBCUpdateClient"))
-			Expect(cmds[3].Name()).To(Equal("CreateMsgIBCAcknowledgement"))
+			Expect(cmds[3].Name()).To(Equal("CreateMsgAlreadyRelayedIBCAcknowledgement"))
 
 			firstMsgAckCmd := cmds[1]
 			secondMsgAckCmd := cmds[3]
@@ -356,7 +348,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(json.MustMarshalToString(typedFistMsgAckEvent)).To(Equal(expectedFirstMsgAckWithAcknowledgement))
 
 			untypedSecondMsgAckEvent, _ := secondMsgAckCmd.Exec()
-			typedSecondMsgAckCmd := untypedSecondMsgAckEvent.(*event.MsgIBCAcknowledgement)
+			typedSecondMsgAckCmd := untypedSecondMsgAckEvent.(*event.MsgAlreadyRelayedIBCAcknowledgement)
 			expectedSecondMsgAckWithUUID := strings.Replace(
 				regex.ReplaceAllString(expectedSecondMsgAck, ""),
 				"{UUID}",

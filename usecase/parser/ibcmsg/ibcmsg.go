@@ -714,15 +714,11 @@ func ParseMsgRecvPacket(
 
 			Application: "transfer",
 			MessageType: "MsgTransfer",
-			MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
-				FungibleTokenPacketData: rawFungibleTokenPacketData,
-				Success:                 false,
-			},
 
 			PacketSequence: typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
 		}
 
-		return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
+		return []command.Command{command_usecase.NewCreateMsgAlreadyRelayedIBCRecvPacket(
 			parserParams.MsgCommonParams,
 
 			msgRecvPacketParams,
@@ -823,19 +819,13 @@ func ParseMsgAcknowledgement(
 
 			Application: "transfer",
 			MessageType: "MsgTransfer",
-			MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
-				FungibleTokenPacketData: rawFungibleTokenPacketData,
-				Success:                 false,
-				Acknowledgement:         "",
-				MaybeError:              nil,
-			},
 
 			PacketSequence:  typeconv.MustAtou64(acknowledgePacketEvent.MustGetAttributeByKey("packet_sequence")),
 			ChannelOrdering: acknowledgePacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
 			ConnectionID:    acknowledgePacketEvent.MustGetAttributeByKey("packet_connection"),
 		}
 
-		return []command.Command{command_usecase.NewCreateMsgIBCAcknowledgement(
+		return []command.Command{command_usecase.NewCreateMsgAlreadyRelayedIBCAcknowledgement(
 			parserParams.MsgCommonParams,
 
 			msgAcknowledgementParams,
@@ -967,11 +957,20 @@ func ParseMsgTimeout(
 		ChannelOrdering: timeoutPacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
 	}
 
-	return []command.Command{command_usecase.NewCreateMsgIBCTimeout(
-		parserParams.MsgCommonParams,
+	timeoutEvent := log.GetEventByType("timeout")
+	if timeoutEvent == nil {
+		return []command.Command{command_usecase.NewCreateMsgAlreadyRelayedIBCTimeout(
+			parserParams.MsgCommonParams,
 
-		msgTimeoutParams,
-	)}
+			msgTimeoutParams,
+		)}
+	} else {
+		return []command.Command{command_usecase.NewCreateMsgIBCTimeout(
+			parserParams.MsgCommonParams,
+
+			msgTimeoutParams,
+		)}
+	}
 }
 
 func ParseMsgTimeoutOnClose(
@@ -1036,11 +1035,20 @@ func ParseMsgTimeoutOnClose(
 		ChannelOrdering: timeoutPacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
 	}
 
-	return []command.Command{command_usecase.NewCreateMsgIBCTimeoutOnClose(
-		parserParams.MsgCommonParams,
+	timeoutEvent := log.GetEventByType("timeout")
+	if timeoutEvent == nil {
+		return []command.Command{command_usecase.NewCreateMsgAlreadyRelayedIBCTimeoutOnClose(
+			parserParams.MsgCommonParams,
 
-		msgTimeoutOnCloseParams,
-	)}
+			msgTimeoutOnCloseParams,
+		)}
+	} else {
+		return []command.Command{command_usecase.NewCreateMsgIBCTimeoutOnClose(
+			parserParams.MsgCommonParams,
+
+			msgTimeoutOnCloseParams,
+		)}
+	}
 }
 
 func ParseMsgChannelCloseInit(

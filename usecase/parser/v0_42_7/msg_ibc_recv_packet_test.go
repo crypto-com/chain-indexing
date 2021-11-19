@@ -210,11 +210,11 @@ var _ = Describe("ParseMsgCommands", func() {
 
 		It("should parse Msg commands when there is MsgIBCRecvPacket in the transaction and missing fungible_token_packet event in TxsResult log", func() {
 			expected := `{
-	"name": "MsgRecvPacketCreated",
+	"name": "MsgAlreadyRelayedRecvPacketCreated",
 	"version": 1,
 	"height": 317994,
 	"uuid": "{UUID}",
-	"msgName": "MsgRecvPacket",
+	"msgName": "MsgAlreadyRelayedRecvPacket",
 	"txHash": "D4BBE348AB746FCED63D2028D8886B9091312336142AC040C1C2841E7BF78C9C",
 	"msgIndex": 1,
 	"params": {
@@ -233,14 +233,7 @@ var _ = Describe("ParseMsgCommands", func() {
 		"signer": "tcro18mcwp6vtlvpgxy62eledk3chhjguw636x8n7h6",
 		"application": "transfer",
 		"messageType": "MsgTransfer",
-		"maybeMsgTransfer": {
-			"sender": "eth1mtcn2505k37mlztywf8eg8spv0kpnsqam2zs02",
-			"receiver": "tcro1f6qcvp33dc79xzpuwll7mln5lnepuqv8d7led9",
-			"denom": "transfer/channel-0/basetcro",
-			"amount": "1000000000000",
-			"success": false,
-			"maybeDenominationTrace": null
-		},
+		"maybeMsgTransfer": null,
 		"packetSequence": "45",
 		"channelOrdering": "",
 		"connectionId": "",
@@ -277,10 +270,10 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))
 			cmd := cmds[1]
-			Expect(cmd.Name()).To(Equal("CreateMsgIBCRecvPacket"))
+			Expect(cmd.Name()).To(Equal("CreateMsgAlreadyRelayedIBCRecvPacket"))
 
 			untypedEvent, _ := cmd.Exec()
-			typedEvent := untypedEvent.(*event.MsgIBCRecvPacket)
+			typedEvent := untypedEvent.(*event.MsgAlreadyRelayedIBCRecvPacket)
 
 			regex, _ := regexp.Compile("\n?\r?\\s?")
 

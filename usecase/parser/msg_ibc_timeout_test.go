@@ -112,11 +112,11 @@ var _ = Describe("ParseMsgCommands", func() {
 
 	It("should parse MsgIBCTimeout commands from IBC module v1.0", func() {
 		expected := `{
-  "name": "MsgTimeoutCreated",
+  "name": "MsgAlreadyRelayedTimeoutCreated",
   "version": 1,
   "height": 116603,
   "uuid": "{UUID}",
-  "msgName": "MsgTimeout",
+  "msgName": "MsgAlreadyRelayedTimeout",
   "txHash": "6E92746D301DDEABDE609C0C179F8590B19ACB116B84C34C3322DE1DD86E6F88",
   "msgIndex": 1,
   "params": {
@@ -184,10 +184,10 @@ var _ = Describe("ParseMsgCommands", func() {
 		Expect(err).To(BeNil())
 		Expect(cmds).To(HaveLen(2))
 		cmd := cmds[1]
-		Expect(cmd.Name()).To(Equal("CreateMsgIBCTimeout"))
+		Expect(cmd.Name()).To(Equal("CreateMsgAlreadyRelayedIBCTimeout"))
 
 		untypedEvent, _ := cmd.Exec()
-		typedEvent := untypedEvent.(*event.MsgIBCTimeout)
+		typedEvent := untypedEvent.(*event.MsgAlreadyRelayedIBCTimeout)
 
 		regex, _ := regexp.Compile("\n?\r?\\s?")
 
