@@ -74,7 +74,7 @@ var _ = Describe("Event", func() {
 				MessageType: anyMessageType,
 				MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
 					FungibleTokenPacketData: anyFungibleTokenPacketData,
-					Success:                 true,
+					MaybeSuccess:            true,
 					Acknowledgement:         "{0xc0038ae7a0}",
 				},
 
@@ -174,7 +174,7 @@ var _ = Describe("Event", func() {
 				MessageType: anyMessageType,
 				MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
 					FungibleTokenPacketData: anyFungibleTokenPacketData,
-					Success:                 true,
+					MaybeSuccess:            true,
 					Acknowledgement:         "{0xc0038ae7a0}",
 				},
 

@@ -37,12 +37,12 @@ func (cmd *CreateMsgIBCAcknowledgement) Exec() (entity_event.Event, error) {
 
 type CreateMsgAlreadyRelayedIBCAcknowledgement struct {
 	msgCommonParams event.MsgCommonParams
-	params          ibc_model.MsgAcknowledgementParams
+	params          ibc_model.MsgAlreadyRelayedAcknowledgementParams
 }
 
 func NewCreateMsgAlreadyRelayedIBCAcknowledgement(
 	msgCommonParams event.MsgCommonParams,
-	params ibc_model.MsgAcknowledgementParams,
+	params ibc_model.MsgAlreadyRelayedAcknowledgementParams,
 ) *CreateMsgAlreadyRelayedIBCAcknowledgement {
 	return &CreateMsgAlreadyRelayedIBCAcknowledgement{
 		msgCommonParams,

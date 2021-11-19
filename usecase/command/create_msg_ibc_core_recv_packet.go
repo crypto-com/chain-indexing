@@ -36,12 +36,12 @@ func (cmd *CreateMsgIBCRecvPacket) Exec() (entity_event.Event, error) {
 
 type CreateMsgAlreadyRelayedIBCRecvPacket struct {
 	msgCommonParams event.MsgCommonParams
-	params          ibc_model.MsgRecvPacketParams
+	params          ibc_model.MsgAlreadyRelayedRecvPacketParams
 }
 
 func NewCreateMsgAlreadyRelayedIBCRecvPacket(
 	msgCommonParams event.MsgCommonParams,
-	params ibc_model.MsgRecvPacketParams,
+	params ibc_model.MsgAlreadyRelayedRecvPacketParams,
 ) *CreateMsgAlreadyRelayedIBCRecvPacket {
 	return &CreateMsgAlreadyRelayedIBCRecvPacket{
 		msgCommonParams,

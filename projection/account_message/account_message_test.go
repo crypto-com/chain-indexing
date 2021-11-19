@@ -3747,7 +3747,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 								Denom:    "Denom",
 								Amount:   json.NewNumericStringFromUint64(100),
 							},
-							Success: true,
+							MaybeSuccess: true,
 						},
 						RawMsgAcknowledgement: ibc_model.RawMsgAcknowledgement{
 							Signer: "Signer",
@@ -3825,7 +3825,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 										Denom:    "Denom",
 										Amount:   json.NewNumericStringFromUint64(100),
 									},
-									Success: true,
+									MaybeSuccess: true,
 								},
 								RawMsgAcknowledgement: ibc_model.RawMsgAcknowledgement{
 									Signer: "Signer",

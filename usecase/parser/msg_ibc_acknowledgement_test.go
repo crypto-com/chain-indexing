@@ -290,7 +290,14 @@ var _ = Describe("ParseMsgCommands", func() {
 		"signer": "crc1aaxs058pksrq8cx3k0nrxv60p2a9c7nq527949",
 		"application": "transfer",
 		"messageType": "MsgTransfer",
-		"maybeMsgTransfer": null,
+   		"maybeMsgTransfer": {
+			"sender": "crc1zdaepq9wskhf5l5v0j2wm0hr4kucjuw5yel25u",
+			"receiver": "cro1d9j38wdkdpwf623uzl7s9nqw08up30cwkv2cml",
+			"denom": "transfer/channel-0/basecro",
+			"amount": "99793967500",
+			"acknowledgement": "",
+			"error": null
+		},
 		"packetSequence": "933",
 		"channelOrdering": "ORDER_UNORDERED",
 		"connectionId": "connection-0"

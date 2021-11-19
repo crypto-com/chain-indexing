@@ -36,3 +36,23 @@ type MsgRecvPacketPacketAck struct {
 	MaybeResult []byte  `mapstructure:"result" json:"result"`
 	MaybeError  *string `mapstructure:"error" json:"error"`
 }
+
+// Already relayed message type
+type MsgAlreadyRelayedRecvPacketParams struct {
+	RawMsgRecvPacket
+
+	Application                  string                                              `json:"application"`
+	MessageType                  string                                              `json:"messageType"`
+	MaybeFungibleTokenPacketData *MsgAlreadyRelayedRecvPacketFungibleTokenPacketData `json:"maybeMsgTransfer"`
+
+	PacketSequence  uint64                 `json:"packetSequence,string"`
+	ChannelOrdering string                 `json:"channelOrdering"`
+	ConnectionID    string                 `json:"connectionId"`
+	PacketAck       MsgRecvPacketPacketAck `json:"packetAck"`
+}
+
+type MsgAlreadyRelayedRecvPacketFungibleTokenPacketData struct {
+	FungibleTokenPacketData
+
+	MaybeDenominationTrace *MsgRecvPacketFungibleTokenDenominationTrace `json:"maybeDenominationTrace"`
+}

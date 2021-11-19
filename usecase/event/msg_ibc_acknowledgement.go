@@ -67,12 +67,12 @@ const MSG_ALREADY_RELAYED_IBC_ACKNOWLEDGEMENT_FAILED = "MsgAlreadyRelayedAcknowl
 type MsgAlreadyRelayedIBCAcknowledgement struct {
 	MsgBase
 
-	Params ibc_model.MsgAcknowledgementParams `json:"params"`
+	Params ibc_model.MsgAlreadyRelayedAcknowledgementParams `json:"params"`
 }
 
 func NewMsgAlreadyRelayedIBCAcknowledgement(
 	msgCommonParams MsgCommonParams,
-	params ibc_model.MsgAcknowledgementParams,
+	params ibc_model.MsgAlreadyRelayedAcknowledgementParams,
 ) *MsgAlreadyRelayedIBCAcknowledgement {
 	return &MsgAlreadyRelayedIBCAcknowledgement{
 		NewMsgBase(MsgBaseParams{
