@@ -253,7 +253,7 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 				Message:         typedEvent,
 			}
 			if typedEvent.Params.MaybeFungibleTokenPacketData != nil {
-				message.MaybeSuccess = primptr.Bool(typedEvent.Params.MaybeFungibleTokenPacketData.MaybeSuccess)
+				message.MaybeSuccess = primptr.Bool(typedEvent.Params.MaybeFungibleTokenPacketData.Success)
 				message.MaybeSender = primptr.String(typedEvent.Params.MaybeFungibleTokenPacketData.Sender)
 				message.MaybeReceiver = primptr.String(typedEvent.Params.MaybeFungibleTokenPacketData.Receiver)
 				message.MaybeDenom = primptr.String(typedEvent.Params.MaybeFungibleTokenPacketData.Denom)
