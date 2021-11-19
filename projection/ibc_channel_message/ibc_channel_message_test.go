@@ -575,7 +575,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 							},
 						},
 						MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
-							MaybeSuccess: true,
+							Success: true,
 							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
 								Sender:   "Sender",
 								Receiver: "Receiver",
@@ -657,7 +657,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 							},
 						},
 						MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
-							MaybeSuccess: false,
+							Success: false,
 							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
 								Sender:   "Sender",
 								Receiver: "Receiver",

@@ -558,7 +558,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 			if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData != nil {
 
-				if !msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.MaybeSuccess {
+				if !msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Success {
 
 					amount := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount.String()
 					denom := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Denom
@@ -590,7 +590,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				if err != nil {
 					return fmt.Errorf("error msgIBCAcknowledgement.ToJSON(): %w", err)
 				}
-				success := strconv.FormatBool(msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.MaybeSuccess)
+				success := strconv.FormatBool(msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Success)
 
 				maybeError := ""
 				if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.MaybeError != nil {

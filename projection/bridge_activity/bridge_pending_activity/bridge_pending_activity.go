@@ -290,7 +290,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 			if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData != nil {
 				var status types.Status
 				var isProcessed bool
-				if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.MaybeSuccess {
+				if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Success {
 					status = types.STATUS_COUNTERPARTY_CONFIRMED
 					isProcessed = false
 				} else {
