@@ -55,7 +55,7 @@ teardown() {
 
 setup() {
     if [[ "${TEST_DB}" == 1 ]]; then
-        docker-compose -f ./docker/docker-compose.test.yml -p "${DOCKER_COMPOSE_PROJECT}" up -d
+        docker-compose -f ./docker/docker-compose.test.yml -p "${DOCKER_COMPOSE_PROJECT}" up -d postgres
         wait_postgres_ready
     fi
 }
