@@ -13,3 +13,12 @@ services:
       POSTGRES_DB: "${TEST_POSTGRES_DATABASE:-postgres}"
       # Enable SSL with self-signed certificate generated on the fly
       POSTGRES_SSL: "${TEST_POSTGRES_SSL:-1}"
+  ginkgo:
+    image: crypto-com/ginkgo:1.16.4
+    build:
+      context: ..
+      dockerfile: ./docker/ginkgo/Dockerfile
+    depends_on:
+      - postgres
+    volumes:
+      - ..:/ginkgotest
