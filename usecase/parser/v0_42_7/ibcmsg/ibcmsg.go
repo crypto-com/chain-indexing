@@ -57,6 +57,7 @@ func ParseMsgRecvPacket(
 			MessageType: "MsgTransfer",
 			MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 				FungibleTokenPacketData: rawFungibleTokenPacketData,
+				Success:                 false,
 			},
 		}
 
@@ -80,11 +81,14 @@ func ParseMsgRecvPacket(
 		// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/04-channel/keeper/packet.go#L239
 		// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/keeper/msg_server.go#L508
 
-		msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
+		msgAlreadyRelayedRecvPacketParams := ibc_model.MsgAlreadyRelayedRecvPacketParams{
 			RawMsgRecvPacket: rawMsg,
 
 			Application: "transfer",
 			MessageType: "MsgTransfer",
+			MaybeFungibleTokenPacketData: &ibc_model.MsgAlreadyRelayedRecvPacketFungibleTokenPacketData{
+				FungibleTokenPacketData: rawFungibleTokenPacketData,
+			},
 
 			PacketSequence: typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
 		}
@@ -92,7 +96,7 @@ func ParseMsgRecvPacket(
 		return []command.Command{command_usecase.NewCreateMsgAlreadyRelayedIBCRecvPacket(
 			parserParams.MsgCommonParams,
 
-			msgRecvPacketParams,
+			msgAlreadyRelayedRecvPacketParams,
 		)}
 	}
 

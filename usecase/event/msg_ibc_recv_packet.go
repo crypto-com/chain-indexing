@@ -67,12 +67,12 @@ const MSG_ALREADY_RELAYED_IBC_RECV_PACKET_FAILED = "MsgAlreadyRelayedRecvPacketF
 type MsgAlreadyRelayedIBCRecvPacket struct {
 	MsgBase
 
-	Params ibc_model.MsgRecvPacketParams `json:"params"`
+	Params ibc_model.MsgAlreadyRelayedRecvPacketParams `json:"params"`
 }
 
 func NewMsgAlreadyRelayedIBCRecvPacket(
 	msgCommonParams MsgCommonParams,
-	params ibc_model.MsgRecvPacketParams,
+	params ibc_model.MsgAlreadyRelayedRecvPacketParams,
 ) *MsgAlreadyRelayedIBCRecvPacket {
 	return &MsgAlreadyRelayedIBCRecvPacket{
 		NewMsgBase(MsgBaseParams{

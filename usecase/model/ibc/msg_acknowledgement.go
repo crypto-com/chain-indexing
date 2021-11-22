@@ -27,3 +27,23 @@ type MsgAcknowledgementFungibleTokenPacketData struct {
 	Acknowledgement string  `json:"acknowledgement"`
 	MaybeError      *string `json:"error"`
 }
+
+// Already relayed message type
+type MsgAlreadyRelayedAcknowledgementParams struct {
+	RawMsgAcknowledgement
+
+	Application                  string                                                   `json:"application"`
+	MessageType                  string                                                   `json:"messageType"`
+	MaybeFungibleTokenPacketData *MsgAlreadyRelayedAcknowledgementFungibleTokenPacketData `json:"maybeMsgTransfer"`
+
+	PacketSequence  uint64 `json:"packetSequence,string"`
+	ChannelOrdering string `json:"channelOrdering"`
+	ConnectionID    string `json:"connectionId"`
+}
+
+type MsgAlreadyRelayedAcknowledgementFungibleTokenPacketData struct {
+	FungibleTokenPacketData
+
+	Acknowledgement string  `json:"acknowledgement"`
+	MaybeError      *string `json:"error"`
+}

@@ -686,6 +686,7 @@ func ParseMsgRecvPacket(
 			MessageType: "MsgTransfer",
 			MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 				FungibleTokenPacketData: rawFungibleTokenPacketData,
+				Success:                 false,
 			},
 		}
 
@@ -705,15 +706,14 @@ func ParseMsgRecvPacket(
 
 	fungibleTokenPacketEvent := log.GetEventByType("fungible_token_packet")
 	if fungibleTokenPacketEvent == nil {
-		// Note: this could happen when the packet is already relayed.
-		// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/04-channel/keeper/packet.go#L239
-		// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/keeper/msg_server.go#L508
-
-		msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
+		msgAlreadyRelayedRecvPacketParams := ibc_model.MsgAlreadyRelayedRecvPacketParams{
 			RawMsgRecvPacket: rawMsg,
 
 			Application: "transfer",
 			MessageType: "MsgTransfer",
+			MaybeFungibleTokenPacketData: &ibc_model.MsgAlreadyRelayedRecvPacketFungibleTokenPacketData{
+				FungibleTokenPacketData: rawFungibleTokenPacketData,
+			},
 
 			PacketSequence: typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
 		}
@@ -721,7 +721,7 @@ func ParseMsgRecvPacket(
 		return []command.Command{command_usecase.NewCreateMsgAlreadyRelayedIBCRecvPacket(
 			parserParams.MsgCommonParams,
 
-			msgRecvPacketParams,
+			msgAlreadyRelayedRecvPacketParams,
 		)}
 	}
 
@@ -791,6 +791,7 @@ func ParseMsgAcknowledgement(
 			MessageType: "MsgTransfer",
 			MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
 				FungibleTokenPacketData: rawFungibleTokenPacketData,
+				Success:                 false,
 			},
 		}
 
@@ -810,15 +811,14 @@ func ParseMsgAcknowledgement(
 
 	fungibleTokenPacketEvents := log.GetEventsByType("fungible_token_packet")
 	if fungibleTokenPacketEvents == nil {
-		// Note: this could happen when the packet is already relayed.
-		// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/04-channel/keeper/packet.go#L428
-		// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/keeper/msg_server.go#L725
-
-		msgAcknowledgementParams := ibc_model.MsgAcknowledgementParams{
+		msgAlreadyRelayedAcknowledgementParams := ibc_model.MsgAlreadyRelayedAcknowledgementParams{
 			RawMsgAcknowledgement: rawMsg,
 
 			Application: "transfer",
 			MessageType: "MsgTransfer",
+			MaybeFungibleTokenPacketData: &ibc_model.MsgAlreadyRelayedAcknowledgementFungibleTokenPacketData{
+				FungibleTokenPacketData: rawFungibleTokenPacketData,
+			},
 
 			PacketSequence:  typeconv.MustAtou64(acknowledgePacketEvent.MustGetAttributeByKey("packet_sequence")),
 			ChannelOrdering: acknowledgePacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
@@ -828,7 +828,7 @@ func ParseMsgAcknowledgement(
 		return []command.Command{command_usecase.NewCreateMsgAlreadyRelayedIBCAcknowledgement(
 			parserParams.MsgCommonParams,
 
-			msgAcknowledgementParams,
+			msgAlreadyRelayedAcknowledgementParams,
 		)}
 	}
 
