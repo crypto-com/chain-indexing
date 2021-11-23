@@ -41,6 +41,12 @@ func (config *Config) OverrideByCLIConfig(cliConfig *CLIConfig) {
 	if cliConfig.CosmosHTTPRPCUrl != "" {
 		config.CosmosApp.HTTPRPCUrl = cliConfig.CosmosHTTPRPCUrl
 	}
+	if cliConfig.GithubAPIUsername != "" {
+		config.GithubAPI.Username = cliConfig.GithubAPIUsername
+	}
+	if cliConfig.GithubAPIToken != "" {
+		config.GithubAPI.Token = cliConfig.GithubAPIToken
+	}
 }
 
 type CLIConfig struct {
@@ -57,6 +63,9 @@ type CLIConfig struct {
 
 	TendermintHTTPRPCUrl string
 	CosmosHTTPRPCUrl     string
+
+	GithubAPIUsername string
+	GithubAPIToken    string
 }
 
 // FileConfig is the struct matches config.toml
