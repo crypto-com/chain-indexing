@@ -7,9 +7,6 @@ import (
 	gomigrate "github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-
-	"github.com/crypto-com/chain-indexing/appinterface/rdb"
-	appprojection "github.com/crypto-com/chain-indexing/projection"
 )
 
 type Migrate struct {
@@ -124,21 +121,23 @@ func (m *Migrate) Reset() error {
 
 // Get the migration source files from Github, init the migrate and then run it.
 func InitAndRunMigrateFromGithub(
-	rdbConn rdb.Conn,
 	migrationGithubTarget string,
-	config *appprojection.Config,
+	githubAPIUser string,
+	githubAPIToken string,
+	migrationRepoRef string,
 	migrationDirectory string,
+	connString string,
 	migrationTableName string,
 ) error {
 	migrationSourceURL := GithubMigrationSourceURL(
 		migrationGithubTarget,
-		config.GithubAPIUser,
-		config.GithubAPIToken,
+		githubAPIUser,
+		githubAPIToken,
 		migrationDirectory,
-		config.MigrationRepoRef,
+		migrationRepoRef,
 	)
 	databaseURL := MigrationDBConnString(
-		rdbConn.(*PgxConn).ConnString(),
+		connString,
 		migrationTableName,
 	)
 	if err := InitAndRunMigrate(migrationSourceURL, databaseURL); err != nil {

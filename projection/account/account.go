@@ -66,10 +66,12 @@ const (
 
 func (projection *Account) OnInit() error {
 	if err := pg.InitAndRunMigrateFromGithub(
-		projection.rdbConn,
 		appprojection.MIGRATION_GITHUB_TARGET,
-		projection.config,
+		projection.config.GithubAPIUser,
+		projection.config.GithubAPIToken,
+		projection.config.MigrationRepoRef,
 		MIGRATION_DIRECOTRY,
+		projection.rdbConn.(*pg.PgxConn).ConnString(),
 		MIGRATION_TABLE_NAME,
 	); err != nil {
 		projection.logger.Errorf("failed to init and run migration: %v", err)
