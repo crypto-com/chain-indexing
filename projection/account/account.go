@@ -13,6 +13,7 @@ import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	github_migrate "github.com/crypto-com/chain-indexing/infrastructure/pg/migrate/github"
 	appprojection "github.com/crypto-com/chain-indexing/projection"
 	account_view "github.com/crypto-com/chain-indexing/projection/account/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
@@ -65,15 +66,18 @@ const (
 )
 
 func (projection *Account) OnInit() error {
-	if err := pg.InitAndRunMigrateFromGithub(
+	migrationSourceURL := github_migrate.GenerateSourceURL(
 		appprojection.MIGRATION_GITHUB_TARGET,
 		projection.config.GithubAPIUser,
 		projection.config.GithubAPIToken,
-		projection.config.MigrationRepoRef,
 		MIGRATION_DIRECOTRY,
+		projection.config.MigrationRepoRef,
+	)
+	databaseURL := github_migrate.GenerateDBConnString(
 		projection.rdbConn.(*pg.PgxConn).ConnString(),
 		MIGRATION_TABLE_NAME,
-	); err != nil {
+	)
+	if err := github_migrate.InitAndRunMigrate(migrationSourceURL, databaseURL); err != nil {
 		projection.logger.Errorf("failed to init and run migration: %v", err)
 		return err
 	}
