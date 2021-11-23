@@ -1,10 +1,8 @@
 package account
 
 import (
-	"errors"
 	"fmt"
 
-	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/golang-migrate/migrate/v4/source/github"
@@ -66,32 +64,15 @@ const (
 	MIGRATION_DIRECOTRY  = "projection/account/migrations"
 )
 
-func (projection *Account) migrationDBConnString() string {
-	conn := projection.rdbConn.(*pg.PgxConn)
-	connString := conn.ConnString()
-	if connString[len(connString)-1:] == "?" {
-		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
-	} else {
-		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
-	}
-}
-
 func (projection *Account) OnInit() error {
-	ref := ""
-	if projection.config.MigrationRepoRef != "" {
-		ref = "#" + projection.config.MigrationRepoRef
-	}
-	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY+ref),
-		projection.migrationDBConnString(),
-	)
-	if err != nil {
-		projection.logger.Errorf("failed to init migration: %v", err)
-		return err
-	}
-
-	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		projection.logger.Errorf("failed to run migration: %v", err)
+	if err := pg.InitAndRunMigrateFromGithub(
+		projection.rdbConn,
+		appprojection.MIGRATION_GITHUB_TARGET,
+		projection.config,
+		MIGRATION_DIRECOTRY,
+		MIGRATION_TABLE_NAME,
+	); err != nil {
+		projection.logger.Errorf("failed to init and run migration: %v", err)
 		return err
 	}
 

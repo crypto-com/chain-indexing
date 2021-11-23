@@ -7,6 +7,9 @@ import (
 	gomigrate "github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	appprojection "github.com/crypto-com/chain-indexing/projection"
 )
 
 type Migrate struct {
@@ -117,4 +120,73 @@ func (m *Migrate) Reset() error {
 	}
 
 	return nil
+}
+
+// Get the migration source files from Github, init the migrate and then run it.
+func InitAndRunMigrateFromGithub(
+	rdbConn rdb.Conn,
+	migrationGithubTarget string,
+	config *appprojection.Config,
+	migrationDirectory string,
+	migrationTableName string,
+) error {
+	migrationSourceURL := GithubMigrationSourceURL(
+		migrationGithubTarget,
+		config.GithubAPIUser,
+		config.GithubAPIToken,
+		migrationDirectory,
+		config.MigrationRepoRef,
+	)
+	databaseURL := MigrationDBConnString(
+		rdbConn.(*PgxConn).ConnString(),
+		migrationTableName,
+	)
+	if err := InitAndRunMigrate(migrationSourceURL, databaseURL); err != nil {
+		return err
+	}
+	return nil
+}
+
+func InitAndRunMigrate(
+	migrationSourceURL string,
+	databaseURL string,
+) error {
+	m, err := gomigrate.New(migrationSourceURL, databaseURL)
+	if err != nil {
+		return fmt.Errorf("failed to init migration: %v", err)
+	}
+
+	if err := m.Up(); err != nil && !errors.Is(err, gomigrate.ErrNoChange) {
+		return fmt.Errorf("failed to run migration: %v", err)
+	}
+
+	return nil
+}
+
+// Generate the Github URL to migration source files
+func GithubMigrationSourceURL(
+	format string,
+	apiUser string,
+	apiToken string,
+	migrationDirectory string,
+	migrationRepoRef string,
+) string {
+	ref := ""
+	if migrationRepoRef != "" {
+		ref = "#" + migrationRepoRef
+	}
+
+	return fmt.Sprintf(format, apiUser, apiToken, migrationDirectory+ref)
+}
+
+// Generate DB conn string with customized migration table name
+func MigrationDBConnString(
+	connString string,
+	migrationTableName string,
+) string {
+	if connString[len(connString)-1:] == "?" {
+		return connString + "x-migrations-table=" + migrationTableName
+	} else {
+		return connString + "&x-migrations-table=" + migrationTableName
+	}
 }
