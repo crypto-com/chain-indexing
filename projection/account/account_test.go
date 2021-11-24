@@ -19,7 +19,7 @@ import (
 )
 
 func NewAccountProjection(rdbConn rdb.Conn, client cosmosapp.Client) *account.Account {
-	return account.NewAccount(
+	return account.NewTestAccount(
 		nil,
 		rdbConn,
 		client,

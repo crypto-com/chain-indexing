@@ -65,6 +65,21 @@ func NewAccount(
 	}
 }
 
+func NewTestAccount(
+	logger applogger.Logger,
+	rdbConn rdb.Conn,
+	cosmosClient cosmosapp_interface.Client,
+	config *appprojection.Config,
+) *Account {
+	return &Account{
+		nil,
+		rdbConn,
+		logger,
+		cosmosClient,
+		config,
+	}
+}
+
 var (
 	NewAccountsView              = account_view.NewAccountsView
 	UpdateLastHandledEventHeight = (*Account).UpdateLastHandledEventHeight
