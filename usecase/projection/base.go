@@ -5,8 +5,11 @@ import (
 	"time"
 
 	"github.com/ettle/strcase"
-
 	"github.com/mitchellh/mapstructure"
+
+	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
+	filesystem_mh "github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper/filesystem"
+	github_mh "github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper/github"
 )
 
 type Base struct {
@@ -18,10 +21,18 @@ type Base struct {
 type Options struct {
 	// Pointer to the configuration
 	MaybeConfigPtr interface{}
+	// Pointer to MigrationHelper
+	MaybeMigrationHelper migrationhelper.MigrationHelper
 }
 
 func NewBase(projectionId string) Base {
-	return NewBaseWithOptions(projectionId, Options{MaybeConfigPtr: nil})
+	return NewBaseWithOptions(
+		projectionId,
+		Options{
+			MaybeConfigPtr:       nil,
+			MaybeMigrationHelper: nil,
+		},
+	)
 }
 
 func NewBaseWithOptions(projectionId string, options Options) Base {
@@ -57,6 +68,25 @@ func NewBaseWithOptions(projectionId string, options Options) Base {
 		base.config = options.MaybeConfigPtr
 	}
 
+	if options.MaybeMigrationHelper != nil {
+
+		switch migrationHelper := options.MaybeMigrationHelper.(type) {
+		case *github_mh.GithubMigrationHelper:
+
+			if migrationHelper.MaybeSourceURL == nil || migrationHelper.MaybeDatabaseURL == nil {
+				setupDefaultGithubMigration(projectionId, migrationHelper)
+			}
+
+			migrationHelper.InitAndRunMigrate()
+
+		case *filesystem_mh.FilesystemMigrationHelper:
+			migrationHelper.InitAndRunMigrate()
+		default:
+			panic("unknown MigrationHelper type")
+		}
+
+	}
+
 	return base
 }
 
@@ -67,4 +97,33 @@ func (base *Base) Id() string {
 
 func (base *Base) Config() interface{} {
 	return base.config
+}
+
+func setupDefaultGithubMigration(
+	projectionId string,
+	migrationHelper *github_mh.GithubMigrationHelper,
+) {
+	projectionSnakeId := strcase.ToSnake(projectionId)
+
+	if migrationHelper.MaybeSourceURL == nil {
+		migrationDirectory := fmt.Sprintf(github_mh.MIGRATION_DIRECTORY_FORMAT, projectionSnakeId)
+
+		sourceURL := github_mh.GenerateSourceURL(
+			github_mh.MIGRATION_GITHUB_URL_FORMAT,
+			migrationHelper.Config.GithubAPIUser,
+			migrationHelper.Config.GithubAPIToken,
+			migrationDirectory,
+			migrationHelper.Config.MigrationRepoRef,
+		)
+
+		migrationHelper.MaybeSourceURL = &sourceURL
+	}
+	if migrationHelper.MaybeSourceURL == nil {
+		migrationTableName := fmt.Sprintf(github_mh.MIGRATION_TABLE_NAME_FORMAT, projectionSnakeId)
+
+		databaseURL := migrationhelper.GenerateDatabaseURL(migrationHelper.Config.ConnString, migrationTableName)
+
+		migrationHelper.MaybeDatabaseURL = &databaseURL
+	}
+	return
 }

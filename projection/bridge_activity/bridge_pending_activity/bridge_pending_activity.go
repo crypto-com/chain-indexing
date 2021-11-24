@@ -1,7 +1,6 @@
 package bridge_pending_activity
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 
@@ -10,13 +9,13 @@ import (
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	appprojection "github.com/crypto-com/chain-indexing/projection"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
-	"github.com/golang-migrate/migrate/v4"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
 	"github.com/crypto-com/chain-indexing/external/utctime"
+	github_mh "github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper/github"
 	bridge_pending_activity_view "github.com/crypto-com/chain-indexing/projection/bridge_activity/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
@@ -41,17 +40,44 @@ type Config struct {
 	StartingHeight        int64  `mapstructure:"starting_height"`
 }
 
+const (
+	MIGRATION_DIRECOTRY = "projection/bridge_activity/bridge_pending_activity/migrations"
+)
+
 func NewBridgePendingActivity(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	config *appprojection.Config,
 ) *BridgePendingActivity {
+
+	// Here we customize the migrationSourceURL, as it is not following the same path convention
+	// in other projections. (extra `bridge_activity` folder in the path)
+	migrationSourceURL := github_mh.GenerateSourceURL(
+		github_mh.MIGRATION_GITHUB_URL_FORMAT,
+		config.GithubAPIUser,
+		config.GithubAPIToken,
+		MIGRATION_DIRECOTRY,
+		config.MigrationRepoRef,
+	)
+
 	return &BridgePendingActivity{
 		rdbprojectionbase.NewRDbBaseWithOptions(
-			rdbConn.ToHandle(), "BridgePendingActivity", rdbprojectionbase.Options{
+			rdbConn.ToHandle(),
+			"BridgePendingActivity",
+
+			rdbprojectionbase.Options{
 				MaybeTable:     nil,
 				MaybeConfigPtr: &Config{},
-			}),
+				MaybeMigrationHelper: github_mh.NewGithubMigrationHelper(
+					github_mh.Config{
+						Config:     *config,
+						ConnString: rdbConn.(*pg.PgxConn).ConnString(),
+					},
+					&migrationSourceURL,
+					nil,
+				),
+			},
+		),
 
 		rdbConn,
 		logger,
@@ -75,40 +101,7 @@ func (_ *BridgePendingActivity) GetEventsToListen() []string {
 	}
 }
 
-const (
-	MIGRATION_TABLE_NAME = "bridge_pending_activity_schema_migrations"
-	MIGRATION_DIRECOTRY  = "projection/bridge_activity/bridge_pending_activity/migrations"
-)
-
-func (projection *BridgePendingActivity) migrationDBConnString() string {
-	conn := projection.rdbConn.(*pg.PgxConn)
-	connString := conn.ConnString()
-	if connString[len(connString)-1:] == "?" {
-		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
-	} else {
-		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
-	}
-}
-
 func (projection *BridgePendingActivity) OnInit() error {
-	ref := ""
-	if projection.config.MigrationRepoRef != "" {
-		ref = "#" + projection.config.MigrationRepoRef
-	}
-	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY+ref),
-		projection.migrationDBConnString(),
-	)
-	if err != nil {
-		projection.logger.Errorf("failed to init migration: %v", err)
-		return err
-	}
-
-	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		projection.logger.Errorf("failed to run migration: %v", err)
-		return err
-	}
-
 	return nil
 }
 

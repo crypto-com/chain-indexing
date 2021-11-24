@@ -13,7 +13,7 @@ import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	github_migrate "github.com/crypto-com/chain-indexing/infrastructure/pg/migrate/github"
+	github_mh "github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper/github"
 	appprojection "github.com/crypto-com/chain-indexing/projection"
 	account_view "github.com/crypto-com/chain-indexing/projection/account/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
@@ -38,9 +38,26 @@ func NewAccount(
 	config *appprojection.Config,
 ) *Account {
 	return &Account{
-		rdbprojectionbase.NewRDbBase(
-			rdbConn.ToHandle(), "Account",
+		rdbprojectionbase.NewRDbBaseWithOptions(
+			rdbConn.ToHandle(),
+			"Account",
+
+			rdbprojectionbase.Options{
+				MaybeConfigPtr: nil,
+				MaybeTable:     nil,
+				MaybeMigrationHelper: github_mh.NewGithubMigrationHelper(
+					github_mh.Config{
+						Config:     *config,
+						ConnString: rdbConn.(*pg.PgxConn).ConnString(),
+					},
+					// MaybeSourceURL and MaybeDatabaseURL are empty, will generate these fields for the projection
+					// in usecase/projection/base.go
+					nil,
+					nil,
+				),
+			},
 		),
+
 		rdbConn,
 		logger,
 		cosmosClient,
@@ -60,28 +77,7 @@ func (_ *Account) GetEventsToListen() []string {
 	}
 }
 
-const (
-	MIGRATION_TABLE_NAME = "account_schema_migrations"
-	MIGRATION_DIRECOTRY  = "projection/account/migrations"
-)
-
 func (projection *Account) OnInit() error {
-	migrationSourceURL := github_migrate.GenerateSourceURL(
-		appprojection.MIGRATION_GITHUB_TARGET,
-		projection.config.GithubAPIUser,
-		projection.config.GithubAPIToken,
-		MIGRATION_DIRECOTRY,
-		projection.config.MigrationRepoRef,
-	)
-	databaseURL := github_migrate.GenerateDBConnString(
-		projection.rdbConn.(*pg.PgxConn).ConnString(),
-		MIGRATION_TABLE_NAME,
-	)
-	if err := github_migrate.InitAndRunMigrate(migrationSourceURL, databaseURL); err != nil {
-		projection.logger.Errorf("failed to init and run migration: %v", err)
-		return err
-	}
-
 	return nil
 }
 
