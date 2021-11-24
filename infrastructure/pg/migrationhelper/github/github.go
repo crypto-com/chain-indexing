@@ -31,6 +31,8 @@ func NewGithubMigrationHelper(
 	maybeDatabaeURL *string,
 ) *GithubMigrationHelper {
 	return &GithubMigrationHelper{
+		Config: config,
+
 		MaybeSourceURL:   maybeSourceURL,
 		MaybeDatabaseURL: maybeDatabaeURL,
 	}

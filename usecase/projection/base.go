@@ -118,7 +118,7 @@ func setupDefaultGithubMigration(
 
 		migrationHelper.MaybeSourceURL = &sourceURL
 	}
-	if migrationHelper.MaybeSourceURL == nil {
+	if migrationHelper.MaybeDatabaseURL == nil {
 		migrationTableName := fmt.Sprintf(github_mh.MIGRATION_TABLE_NAME_FORMAT, projectionSnakeId)
 
 		databaseURL := migrationhelper.GenerateDatabaseURL(migrationHelper.Config.ConnString, migrationTableName)
