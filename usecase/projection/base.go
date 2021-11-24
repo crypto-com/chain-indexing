@@ -125,5 +125,4 @@ func setupDefaultGithubMigration(
 
 		migrationHelper.MaybeDatabaseURL = &databaseURL
 	}
-	return
 }
