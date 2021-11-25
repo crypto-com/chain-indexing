@@ -12,9 +12,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
-	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	github_mh "github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper/github"
-	appprojection "github.com/crypto-com/chain-indexing/projection"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
 	account_view "github.com/crypto-com/chain-indexing/projection/account/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
@@ -28,40 +26,29 @@ type Account struct {
 	logger       applogger.Logger
 	cosmosClient cosmosapp_interface.Client // cosmos light client deamon port : 1317 (default)
 
-	config *appprojection.Config
+	migrationHelper migrationhelper.MigrationHelper
 }
 
 func NewAccount(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	cosmosClient cosmosapp_interface.Client,
-	config *appprojection.Config,
+	migrationHelper migrationhelper.MigrationHelper,
 ) *Account {
 	return &Account{
 		rdbprojectionbase.NewRDbBaseWithOptions(
 			rdbConn.ToHandle(),
 			"Account",
-
 			rdbprojectionbase.Options{
 				MaybeConfigPtr: nil,
 				MaybeTable:     nil,
-				MaybeMigrationHelper: github_mh.NewGithubMigrationHelper(
-					github_mh.Config{
-						Config:     *config,
-						ConnString: rdbConn.(*pg.PgxConn).ConnString(),
-					},
-					// SourceURL and DatabaseURL are empty, will generate these fields for the projection
-					// in usecase/projection/base.go
-					"",
-					"",
-				),
 			},
 		),
 
 		rdbConn,
 		logger,
 		cosmosClient,
-		config,
+		migrationHelper,
 	}
 }
 
@@ -78,6 +65,9 @@ func (_ *Account) GetEventsToListen() []string {
 }
 
 func (projection *Account) OnInit() error {
+	if projection.migrationHelper != nil {
+		projection.migrationHelper.Migrate()
+	}
 	return nil
 }
 

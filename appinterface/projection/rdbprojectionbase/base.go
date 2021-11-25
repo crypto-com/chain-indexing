@@ -3,7 +3,6 @@ package rdbprojectionbase
 import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/external/primptr"
-	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
 	projection_usecase "github.com/crypto-com/chain-indexing/usecase/projection"
 )
 
@@ -30,9 +29,8 @@ func NewRDbBase(rdbHandle *rdb.Handle, projectionId string) *Base {
 		rdbHandle,
 		projectionId,
 		Options{
-			MaybeConfigPtr:       nil,
-			MaybeTable:           primptr.String(DEFAULT_TABLE),
-			MaybeMigrationHelper: nil,
+			MaybeConfigPtr: nil,
+			MaybeTable:     primptr.String(DEFAULT_TABLE),
 		},
 	)
 }
@@ -47,8 +45,7 @@ func NewRDbBaseWithOptions(rdbHandle *rdb.Handle, projectionId string, options O
 		Base: projection_usecase.NewBaseWithOptions(
 			projectionId,
 			projection_usecase.Options{
-				MaybeConfigPtr:       options.MaybeConfigPtr,
-				MaybeMigrationHelper: options.MaybeMigrationHelper,
+				MaybeConfigPtr: options.MaybeConfigPtr,
 			},
 		),
 
@@ -65,9 +62,6 @@ type Options struct {
 
 	// Customize table name in the RDb too keep the projection handling records
 	MaybeTable *string
-
-	// Pointer to MigrationHelper
-	MaybeMigrationHelper migrationhelper.MigrationHelper
 }
 
 func (base *Base) UpdateLastHandledEventHeight(rdbHandle *rdb.Handle, height int64) error {

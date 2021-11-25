@@ -21,6 +21,13 @@ func NewFilesystemMigrationHelper(sourceURL, databaeURL string) *FilesystemMigra
 
 // Implement MigrationHelper interface
 func (fmh *FilesystemMigrationHelper) Migrate() {
+	if fmh.SourceURL == "" {
+		panic(fmt.Errorf("FilesystemMigrationHelper.SourceURL is empty when executing Migrate()"))
+	}
+	if fmh.DatabaseURL == "" {
+		panic(fmt.Errorf("FilesystemMigrationHelper.DatabaseURL is empty when executing Migrate()"))
+	}
+
 	m, err := migrate.New(fmh.SourceURL, fmh.DatabaseURL)
 	if err != nil {
 		panic(fmt.Errorf("failed to init migration: %v", err))

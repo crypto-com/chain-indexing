@@ -6,8 +6,6 @@ import (
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/primptr"
-	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	appprojection "github.com/crypto-com/chain-indexing/projection"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
@@ -15,7 +13,7 @@ import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
 	"github.com/crypto-com/chain-indexing/external/utctime"
-	github_mh "github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper/github"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
 	bridge_pending_activity_view "github.com/crypto-com/chain-indexing/projection/bridge_activity/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
@@ -29,7 +27,7 @@ type BridgePendingActivity struct {
 	rdbConn rdb.Conn
 	logger  applogger.Logger
 
-	config *appprojection.Config
+	migrationHelper migrationhelper.MigrationHelper
 }
 
 type Config struct {
@@ -47,41 +45,21 @@ const (
 func NewBridgePendingActivity(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
-	config *appprojection.Config,
+	migrationHelper migrationhelper.MigrationHelper,
 ) *BridgePendingActivity {
-
-	// Here we customize the migrationSourceURL, as it is not following the same path convention
-	// in other projections. (extra `bridge_activity` folder in the path)
-	migrationSourceURL := github_mh.GenerateSourceURL(
-		github_mh.MIGRATION_GITHUB_URL_FORMAT,
-		config.GithubAPIUser,
-		config.GithubAPIToken,
-		MIGRATION_DIRECOTRY,
-		config.MigrationRepoRef,
-	)
-
 	return &BridgePendingActivity{
 		rdbprojectionbase.NewRDbBaseWithOptions(
 			rdbConn.ToHandle(),
 			"BridgePendingActivity",
-
 			rdbprojectionbase.Options{
 				MaybeTable:     nil,
 				MaybeConfigPtr: &Config{},
-				MaybeMigrationHelper: github_mh.NewGithubMigrationHelper(
-					github_mh.Config{
-						Config:     *config,
-						ConnString: rdbConn.(*pg.PgxConn).ConnString(),
-					},
-					migrationSourceURL,
-					"",
-				),
 			},
 		),
 
 		rdbConn,
 		logger,
-		config,
+		migrationHelper,
 	}
 }
 
@@ -102,6 +80,9 @@ func (_ *BridgePendingActivity) GetEventsToListen() []string {
 }
 
 func (projection *BridgePendingActivity) OnInit() error {
+	if projection.migrationHelper != nil {
+		projection.migrationHelper.Migrate()
+	}
 	return nil
 }
 

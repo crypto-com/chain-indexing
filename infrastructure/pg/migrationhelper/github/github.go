@@ -4,35 +4,30 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/ettle/strcase"
 	"github.com/golang-migrate/migrate/v4"
-
-	appprojection "github.com/crypto-com/chain-indexing/projection"
 )
 
 type GithubMigrationHelper struct {
-	Config Config
-
 	SourceURL   string
 	DatabaseURL string
 }
 
 type Config struct {
-	appprojection.Config
-	ConnString string
+	GithubAPIUser    string
+	GithubAPIToken   string
+	MigrationRepoRef string
+	ConnString       string
 }
 
 const MIGRATION_GITHUB_URL_FORMAT = "github://%s:%s@crypto-com/chain-indexing/%s"
 const MIGRATION_DIRECTORY_FORMAT = "projection/%s/migrations"
-const MIGRATION_TABLE_NAME_FORMAT = "%s_schema_migrations"
 
 func NewGithubMigrationHelper(
-	config Config,
 	sourceURL string,
 	databaeURL string,
 ) *GithubMigrationHelper {
 	return &GithubMigrationHelper{
-		Config: config,
-
 		SourceURL:   sourceURL,
 		DatabaseURL: databaeURL,
 	}
@@ -71,4 +66,21 @@ func GenerateSourceURL(
 	}
 
 	return fmt.Sprintf(format, apiUser, apiToken, migrationDirectory+ref)
+}
+
+// Generate the default Github URL to migration source files
+func GenerateDefaultSourceURL(
+	projectionId string,
+	config Config,
+) string {
+	projectionSnakeId := strcase.ToSnake(projectionId)
+	migrationDirectory := fmt.Sprintf(MIGRATION_DIRECTORY_FORMAT, projectionSnakeId)
+
+	return GenerateSourceURL(
+		MIGRATION_GITHUB_URL_FORMAT,
+		config.GithubAPIUser,
+		config.GithubAPIToken,
+		migrationDirectory,
+		config.MigrationRepoRef,
+	)
 }
