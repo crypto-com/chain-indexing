@@ -9,8 +9,8 @@ import (
 )
 
 type GithubMigrationHelper struct {
-	SourceURL   string
-	DatabaseURL string
+	sourceURL   string
+	databaseURL string
 }
 
 type Config struct {
@@ -23,26 +23,23 @@ type Config struct {
 const MIGRATION_GITHUB_URL_FORMAT = "github://%s:%s@crypto-com/chain-indexing/%s"
 const MIGRATION_DIRECTORY_FORMAT = "projection/%s/migrations"
 
-func NewGithubMigrationHelper(
-	sourceURL string,
-	databaeURL string,
-) *GithubMigrationHelper {
+func NewGithubMigrationHelper(sourceURL string, databaseURL string) *GithubMigrationHelper {
+	if sourceURL == "" {
+		panic(fmt.Errorf("GithubMigrationHelper.SourceURL is empty when executing Migrate()"))
+	}
+	if databaseURL == "" {
+		panic(fmt.Errorf("GithubMigrationHelper.DatabaseURL is empty when executing Migrate()"))
+	}
+
 	return &GithubMigrationHelper{
-		SourceURL:   sourceURL,
-		DatabaseURL: databaeURL,
+		sourceURL:   sourceURL,
+		databaseURL: databaseURL,
 	}
 }
 
 // Implement MigrationHelper interface
 func (gmh *GithubMigrationHelper) Migrate() {
-	if gmh.SourceURL == "" {
-		panic(fmt.Errorf("GithubMigrationHelper.SourceURL is empty when executing Migrate()"))
-	}
-	if gmh.DatabaseURL == "" {
-		panic(fmt.Errorf("GithubMigrationHelper.DatabaseURL is empty when executing Migrate()"))
-	}
-
-	m, err := migrate.New(gmh.SourceURL, gmh.DatabaseURL)
+	m, err := migrate.New(gmh.sourceURL, gmh.databaseURL)
 	if err != nil {
 		panic(fmt.Errorf("failed to init migration: %v", err))
 	}

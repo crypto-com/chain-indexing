@@ -8,27 +8,27 @@ import (
 )
 
 type FilesystemMigrationHelper struct {
-	SourceURL   string
-	DatabaseURL string
+	sourceURL   string
+	databaseURL string
 }
 
-func NewFilesystemMigrationHelper(sourceURL, databaeURL string) *FilesystemMigrationHelper {
+func NewFilesystemMigrationHelper(sourceURL, databaseURL string) *FilesystemMigrationHelper {
+	if sourceURL == "" {
+		panic(fmt.Errorf("FilesystemMigrationHelper.SourceURL is empty when executing Migrate()"))
+	}
+	if databaseURL == "" {
+		panic(fmt.Errorf("FilesystemMigrationHelper.DatabaseURL is empty when executing Migrate()"))
+	}
+
 	return &FilesystemMigrationHelper{
-		SourceURL:   sourceURL,
-		DatabaseURL: databaeURL,
+		sourceURL:   sourceURL,
+		databaseURL: databaseURL,
 	}
 }
 
 // Implement MigrationHelper interface
 func (fmh *FilesystemMigrationHelper) Migrate() {
-	if fmh.SourceURL == "" {
-		panic(fmt.Errorf("FilesystemMigrationHelper.SourceURL is empty when executing Migrate()"))
-	}
-	if fmh.DatabaseURL == "" {
-		panic(fmt.Errorf("FilesystemMigrationHelper.DatabaseURL is empty when executing Migrate()"))
-	}
-
-	m, err := migrate.New(fmh.SourceURL, fmh.DatabaseURL)
+	m, err := migrate.New(fmh.sourceURL, fmh.databaseURL)
 	if err != nil {
 		panic(fmt.Errorf("failed to init migration: %v", err))
 	}
