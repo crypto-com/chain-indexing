@@ -50,10 +50,10 @@ func NewAccount(
 						Config:     *config,
 						ConnString: rdbConn.(*pg.PgxConn).ConnString(),
 					},
-					// MaybeSourceURL and MaybeDatabaseURL are empty, will generate these fields for the projection
+					// SourceURL and DatabaseURL are empty, will generate these fields for the projection
 					// in usecase/projection/base.go
-					nil,
-					nil,
+					"",
+					"",
 				),
 			},
 		),

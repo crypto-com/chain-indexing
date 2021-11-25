@@ -20,7 +20,7 @@ func NewFilesystemMigrationHelper(sourceURL, databaeURL string) *FilesystemMigra
 }
 
 // Implement MigrationHelper interface
-func (fmh *FilesystemMigrationHelper) InitAndRunMigrate() {
+func (fmh *FilesystemMigrationHelper) Migrate() {
 	m, err := migrate.New(fmh.SourceURL, fmh.DatabaseURL)
 	if err != nil {
 		panic(fmt.Errorf("failed to init migration: %v", err))

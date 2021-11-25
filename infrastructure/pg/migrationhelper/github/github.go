@@ -12,8 +12,8 @@ import (
 type GithubMigrationHelper struct {
 	Config Config
 
-	MaybeSourceURL   *string
-	MaybeDatabaseURL *string
+	SourceURL   string
+	DatabaseURL string
 }
 
 type Config struct {
@@ -27,27 +27,27 @@ const MIGRATION_TABLE_NAME_FORMAT = "%s_schema_migrations"
 
 func NewGithubMigrationHelper(
 	config Config,
-	maybeSourceURL *string,
-	maybeDatabaeURL *string,
+	sourceURL string,
+	databaeURL string,
 ) *GithubMigrationHelper {
 	return &GithubMigrationHelper{
 		Config: config,
 
-		MaybeSourceURL:   maybeSourceURL,
-		MaybeDatabaseURL: maybeDatabaeURL,
+		SourceURL:   sourceURL,
+		DatabaseURL: databaeURL,
 	}
 }
 
 // Implement MigrationHelper interface
-func (gmh *GithubMigrationHelper) InitAndRunMigrate() {
-	if gmh.MaybeSourceURL == nil {
-		panic(fmt.Errorf("GithubMigrationHelper.MaybeSourceURL is nil when executing InitAndRunMigrate"))
+func (gmh *GithubMigrationHelper) Migrate() {
+	if gmh.SourceURL == "" {
+		panic(fmt.Errorf("GithubMigrationHelper.SourceURL is empty when executing Migrate()"))
 	}
-	if gmh.MaybeDatabaseURL == nil {
-		panic(fmt.Errorf("GithubMigrationHelper.MaybeDatabaseURL is nil when executing InitAndRunMigrate"))
+	if gmh.DatabaseURL == "" {
+		panic(fmt.Errorf("GithubMigrationHelper.DatabaseURL is empty when executing Migrate()"))
 	}
 
-	m, err := migrate.New(*gmh.MaybeSourceURL, *gmh.MaybeDatabaseURL)
+	m, err := migrate.New(gmh.SourceURL, gmh.DatabaseURL)
 	if err != nil {
 		panic(fmt.Errorf("failed to init migration: %v", err))
 	}

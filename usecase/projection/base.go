@@ -73,14 +73,14 @@ func NewBaseWithOptions(projectionId string, options Options) Base {
 		switch migrationHelper := options.MaybeMigrationHelper.(type) {
 		case *github_mh.GithubMigrationHelper:
 
-			if migrationHelper.MaybeSourceURL == nil || migrationHelper.MaybeDatabaseURL == nil {
+			if migrationHelper.SourceURL == "" || migrationHelper.DatabaseURL == "" {
 				setupDefaultGithubMigration(projectionId, migrationHelper)
 			}
 
-			migrationHelper.InitAndRunMigrate()
+			migrationHelper.Migrate()
 
 		case *filesystem_mh.FilesystemMigrationHelper:
-			migrationHelper.InitAndRunMigrate()
+			migrationHelper.Migrate()
 		default:
 			panic("unknown MigrationHelper type")
 		}
@@ -105,24 +105,20 @@ func setupDefaultGithubMigration(
 ) {
 	projectionSnakeId := strcase.ToSnake(projectionId)
 
-	if migrationHelper.MaybeSourceURL == nil {
+	if migrationHelper.SourceURL == "" {
 		migrationDirectory := fmt.Sprintf(github_mh.MIGRATION_DIRECTORY_FORMAT, projectionSnakeId)
 
-		sourceURL := github_mh.GenerateSourceURL(
+		migrationHelper.SourceURL = github_mh.GenerateSourceURL(
 			github_mh.MIGRATION_GITHUB_URL_FORMAT,
 			migrationHelper.Config.GithubAPIUser,
 			migrationHelper.Config.GithubAPIToken,
 			migrationDirectory,
 			migrationHelper.Config.MigrationRepoRef,
 		)
-
-		migrationHelper.MaybeSourceURL = &sourceURL
 	}
-	if migrationHelper.MaybeDatabaseURL == nil {
+	if migrationHelper.DatabaseURL == "" {
 		migrationTableName := fmt.Sprintf(github_mh.MIGRATION_TABLE_NAME_FORMAT, projectionSnakeId)
 
-		databaseURL := migrationhelper.GenerateDatabaseURL(migrationHelper.Config.ConnString, migrationTableName)
-
-		migrationHelper.MaybeDatabaseURL = &databaseURL
+		migrationHelper.DatabaseURL = migrationhelper.GenerateDatabaseURL(migrationHelper.Config.ConnString, migrationTableName)
 	}
 }

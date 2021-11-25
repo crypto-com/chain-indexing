@@ -1,7 +1,7 @@
 package migrationhelper
 
 type MigrationHelper interface {
-	InitAndRunMigrate()
+	Migrate()
 }
 
 // Generate PostgreSQL DB conn string with customized migration table name
