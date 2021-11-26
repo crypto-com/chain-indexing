@@ -48,6 +48,7 @@ func NewAccount(
 		rdbConn,
 		logger,
 		cosmosClient,
+
 		migrationHelper,
 	}
 }

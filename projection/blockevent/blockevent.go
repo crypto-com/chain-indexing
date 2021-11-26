@@ -1,7 +1,6 @@
 package blockevent
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 
@@ -10,11 +9,9 @@ import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/utctime"
-	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	appprojection "github.com/crypto-com/chain-indexing/projection"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
 	"github.com/crypto-com/chain-indexing/projection/blockevent/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
-	"github.com/golang-migrate/migrate/v4"
 )
 
 type BlockEvent struct {
@@ -23,13 +20,13 @@ type BlockEvent struct {
 	rdbConn rdb.Conn
 	logger  applogger.Logger
 
-	config *appprojection.Config
+	migrationHelper migrationhelper.MigrationHelper
 }
 
 func NewBlockEvent(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
-	config *appprojection.Config,
+	migrationHelper migrationhelper.MigrationHelper,
 ) *BlockEvent {
 	return &BlockEvent{
 		rdbprojectionbase.NewRDbBase(
@@ -39,7 +36,8 @@ func NewBlockEvent(
 
 		rdbConn,
 		logger,
-		config,
+
+		migrationHelper,
 	}
 }
 
@@ -58,40 +56,15 @@ func (_ *BlockEvent) GetEventsToListen() []string {
 	}
 }
 
+// TODO: should change it to projection folder name to `block_event`, then we can remove it
 const (
-	MIGRATION_TABLE_NAME = "block_event_schema_migrations"
-	MIGRATION_DIRECOTRY  = "projection/blockevent/migrations"
+	MIGRATION_DIRECOTRY = "projection/blockevent/migrations"
 )
 
-func (projection *BlockEvent) migrationDBConnString() string {
-	conn := projection.rdbConn.(*pg.PgxConn)
-	connString := conn.ConnString()
-	if connString[len(connString)-1:] == "?" {
-		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
-	} else {
-		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
-	}
-}
-
 func (projection *BlockEvent) OnInit() error {
-	ref := ""
-	if projection.config.MigrationRepoRef != "" {
-		ref = "#" + projection.config.MigrationRepoRef
+	if projection.migrationHelper != nil {
+		projection.migrationHelper.Migrate()
 	}
-	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY+ref),
-		projection.migrationDBConnString(),
-	)
-	if err != nil {
-		projection.logger.Errorf("failed to init migration: %v", err)
-		return err
-	}
-
-	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		projection.logger.Errorf("failed to run migration: %v", err)
-		return err
-	}
-
 	return nil
 }
 

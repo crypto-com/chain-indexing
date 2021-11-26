@@ -27,6 +27,7 @@ func NewNFTProjection(rdbConn rdb.Conn) *nft.NFT {
 		&nft.Config{
 			EnableDrop: false,
 		},
+		nil,
 	)
 }
 
