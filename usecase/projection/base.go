@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/ettle/strcase"
-
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -21,7 +20,12 @@ type Options struct {
 }
 
 func NewBase(projectionId string) Base {
-	return NewBaseWithOptions(projectionId, Options{MaybeConfigPtr: nil})
+	return NewBaseWithOptions(
+		projectionId,
+		Options{
+			MaybeConfigPtr: nil,
+		},
+	)
 }
 
 func NewBaseWithOptions(projectionId string, options Options) Base {

@@ -1,10 +1,8 @@
 package account
 
 import (
-	"errors"
 	"fmt"
 
-	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/golang-migrate/migrate/v4/source/github"
@@ -14,8 +12,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
-	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	appprojection "github.com/crypto-com/chain-indexing/projection"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
 	account_view "github.com/crypto-com/chain-indexing/projection/account/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
@@ -29,23 +26,30 @@ type Account struct {
 	logger       applogger.Logger
 	cosmosClient cosmosapp_interface.Client // cosmos light client deamon port : 1317 (default)
 
-	config *appprojection.Config
+	migrationHelper migrationhelper.MigrationHelper
 }
 
 func NewAccount(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	cosmosClient cosmosapp_interface.Client,
-	config *appprojection.Config,
+	migrationHelper migrationhelper.MigrationHelper,
 ) *Account {
 	return &Account{
-		rdbprojectionbase.NewRDbBase(
-			rdbConn.ToHandle(), "Account",
+		rdbprojectionbase.NewRDbBaseWithOptions(
+			rdbConn.ToHandle(),
+			"Account",
+			rdbprojectionbase.Options{
+				MaybeConfigPtr: nil,
+				MaybeTable:     nil,
+			},
 		),
+
 		rdbConn,
 		logger,
 		cosmosClient,
-		config,
+
+		migrationHelper,
 	}
 }
 
@@ -61,40 +65,10 @@ func (_ *Account) GetEventsToListen() []string {
 	}
 }
 
-const (
-	MIGRATION_TABLE_NAME = "account_schema_migrations"
-	MIGRATION_DIRECOTRY  = "projection/account/migrations"
-)
-
-func (projection *Account) migrationDBConnString() string {
-	conn := projection.rdbConn.(*pg.PgxConn)
-	connString := conn.ConnString()
-	if connString[len(connString)-1:] == "?" {
-		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
-	} else {
-		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
-	}
-}
-
 func (projection *Account) OnInit() error {
-	ref := ""
-	if projection.config.MigrationRepoRef != "" {
-		ref = "#" + projection.config.MigrationRepoRef
+	if projection.migrationHelper != nil {
+		projection.migrationHelper.Migrate()
 	}
-	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY+ref),
-		projection.migrationDBConnString(),
-	)
-	if err != nil {
-		projection.logger.Errorf("failed to init migration: %v", err)
-		return err
-	}
-
-	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		projection.logger.Errorf("failed to run migration: %v", err)
-		return err
-	}
-
 	return nil
 }
 
