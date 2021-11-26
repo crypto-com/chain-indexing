@@ -71,7 +71,6 @@ func (cronJob *BridgeActivityMatcher) Config() *Config {
 }
 
 const (
-	// MIGRATION_TABLE_NAME = "bridge_activity_matcher_schema_migrations"
 	MIGRATION_DIRECOTRY = "projection/bridge_activity/bridge_activity_matcher/migrations"
 )
 
