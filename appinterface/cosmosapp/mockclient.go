@@ -4,6 +4,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/stretchr/testify/mock"
 )
+
 type MockClient struct {
 	mock.Mock
 }
@@ -21,12 +22,6 @@ func (conn *MockClient) Account(accountAddress string) (*Account, error) {
 func (conn *MockClient) Balances(accountAddress string) (coin.Coins, error) {
 	mockArgs := conn.Called(accountAddress)
 	result, _ := mockArgs.Get(0).(coin.Coins)
-	return result, mockArgs.Error(1)
-}
-
-func (conn *MockClient) BalanceByDenom(accountAddress string, denom string) (*coin.Coin, error) {
-	mockArgs := conn.Called(accountAddress)
-	result, _ := mockArgs.Get(0).(*coin.Coin)
 	return result, mockArgs.Error(1)
 }
 
