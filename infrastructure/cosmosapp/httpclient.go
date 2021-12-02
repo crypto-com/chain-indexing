@@ -3,10 +3,8 @@ package cosmosapp
 import (
 	"context"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -214,38 +212,6 @@ func (client *HTTPClient) Balances(accountAddress string) (coin.Coins, error) {
 	}
 
 	return balances, nil
-}
-
-func (client *HTTPClient) BalanceByDenom(accountAddress string, denom string) (*coin.Coin, error) {
-	rawRespBody, err := client.request(
-		fmt.Sprintf(
-			"%s/%s/%s",
-			client.getUrl("bank", "balances"), accountAddress, denom,
-		), "",
-	)
-	if err != nil {
-		return nil, err
-	}
-	defer rawRespBody.Close()
-
-	outputBytes, readErr := ioutil.ReadAll(rawRespBody)
-	if readErr != nil {
-		return nil, fmt.Errorf("GetAccountInfo error ioutil.ReadAll %v", readErr)
-	}
-	var rawResp map[string]interface{}
-
-	if unmarshalErr := json.Unmarshal(outputBytes, &rawResp); unmarshalErr != nil {
-		return nil, unmarshalErr
-	}
-
-	rawBalance := rawResp["balance"].(map[string]interface{})
-	amount := rawBalance["amount"].(string)
-
-	balance, err := coin.NewCoinFromString(denom, amount)
-	if err != nil {
-		return nil, err
-	}
-	return &balance, nil
 }
 
 func (client *HTTPClient) BondedBalance(accountAddress string) (coin.Coins, error) {
