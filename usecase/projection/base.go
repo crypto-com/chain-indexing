@@ -15,7 +15,11 @@ type Base struct {
 }
 
 type Options struct {
-	// Pointer to the configuration
+	// Pointer to the configuration to be read from Toml file
+	MaybeReadConfigPtr interface{}
+
+	// Pointer to projection configuration. This configuration, when specified, override
+	// the configuration read to MaybeReadConfigPtr
 	MaybeConfigPtr interface{}
 }
 
@@ -36,13 +40,15 @@ func NewBaseWithOptions(projectionId string, options Options) Base {
 	}
 
 	if options.MaybeConfigPtr != nil {
+		base.config = options.MaybeConfigPtr
+	} else if options.MaybeReadConfigPtr != nil {
 		decoderConfig := &mapstructure.DecoderConfig{
 			WeaklyTypedInput: true,
 			DecodeHook: mapstructure.ComposeDecodeHookFunc(
 				mapstructure.StringToTimeDurationHookFunc(),
 				mapstructure.StringToTimeHookFunc(time.RFC3339),
 			),
-			Result: options.MaybeConfigPtr,
+			Result: options.MaybeReadConfigPtr,
 		}
 		decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
 		if decoderErr != nil {
@@ -58,7 +64,7 @@ func NewBaseWithOptions(projectionId string, options Options) Base {
 			panic(fmt.Errorf("error decoding projection %s config: %v", projectionId, err))
 		}
 
-		base.config = options.MaybeConfigPtr
+		base.config = options.MaybeReadConfigPtr
 	}
 
 	return base

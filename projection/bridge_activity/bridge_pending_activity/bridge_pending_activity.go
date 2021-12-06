@@ -18,6 +18,11 @@ import (
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
+var (
+	NewBridgePendingActivities   = bridge_pending_activity_view.NewBridgePendingActivitiesView
+	UpdateLastHandledEventHeight = (*BridgePendingActivity).UpdateLastHandledEventHeight
+)
+
 var _ entity_projection.Projection = &BridgePendingActivity{}
 
 type BridgePendingActivity struct {
@@ -51,8 +56,30 @@ func NewBridgePendingActivity(
 			rdbConn.ToHandle(),
 			"BridgePendingActivity",
 			rdbprojectionbase.Options{
+				MaybeTable:         nil,
+				MaybeReadConfigPtr: &Config{},
+			},
+		),
+
+		rdbConn,
+		logger,
+		migrationHelper,
+	}
+}
+
+func NewBridgePendingActivityWithConfig(
+	config *Config,
+	logger applogger.Logger,
+	rdbConn rdb.Conn,
+	migrationHelper migrationhelper.MigrationHelper,
+) *BridgePendingActivity {
+	return &BridgePendingActivity{
+		rdbprojectionbase.NewRDbBaseWithOptions(
+			rdbConn.ToHandle(),
+			"BridgePendingActivity",
+			rdbprojectionbase.Options{
 				MaybeTable:     nil,
-				MaybeConfigPtr: &Config{},
+				MaybeConfigPtr: config,
 			},
 		),
 
@@ -105,7 +132,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 	rdbTxHandle := rdbTx.ToHandle()
 
 	commit := func() error {
-		if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
+		if err := UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
 			return fmt.Errorf("error updating last handled event height: %v", err)
 		}
 
@@ -121,7 +148,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 		return commit()
 	}
 
-	view := bridge_pending_activity_view.NewBridgePendingActivities(rdbTxHandle)
+	view := NewBridgePendingActivities(rdbTxHandle)
 
 	// Get the block time of current height
 	var blockTime utctime.UTCTime
@@ -214,13 +241,8 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 					status = types.STATUS_COUNTERPARTY_CONFIRMED
 					isProcessed = false
 				} else {
-					if msgIBCRecvPacket.Params.PacketAck.MaybeError != nil {
-						status = types.STATUS_COUNTERPARTY_REJECTED
-						isProcessed = false
-					} else {
-						status = types.STATUS_NO_OPERATION
-						isProcessed = true
-					}
+					status = types.STATUS_COUNTERPARTY_REJECTED
+					isProcessed = false
 				}
 
 				amount, amountOk := coin.NewIntFromString(msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount.String())
@@ -267,13 +289,8 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 					status = types.STATUS_COUNTERPARTY_CONFIRMED
 					isProcessed = false
 				} else {
-					if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.MaybeError != nil {
-						status = types.STATUS_COUNTERPARTY_REJECTED
-						isProcessed = false
-					} else {
-						status = types.STATUS_NO_OPERATION
-						isProcessed = true
-					}
+					status = types.STATUS_COUNTERPARTY_REJECTED
+					isProcessed = false
 				}
 
 				amount, amountOk := coin.NewIntFromString(msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount.String())
@@ -352,6 +369,15 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 			if cronosSendToIBCCreatedEvent.Params.SourceChannel != projection.Config().ChannelId {
 				continue
 			}
+
+			amount, amountOk := coin.NewIntFromString(cronosSendToIBCCreatedEvent.Params.Token.Amount.String())
+			if !amountOk {
+				return fmt.Errorf(
+					"error creating coin from token amount: %s",
+					msgIBCTimeout.Params.MaybeMsgTransfer.RefundAmount.String(),
+				)
+			}
+
 			if err := view.Insert(&bridge_pending_activity_view.BridgePendingActivityInsertRow{
 				BlockHeight:                   height,
 				BlockTime:                     &blockTime,
@@ -366,7 +392,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 				ToAddress:                     cronosSendToIBCCreatedEvent.Params.Receiver,
 				MaybeToSmartContractAddress:   nil,
 				MaybeChannelId:                primptr.String(cronosSendToIBCCreatedEvent.Params.SourceChannel),
-				Amount:                        coin.NewIntFromUint64(cronosSendToIBCCreatedEvent.Params.Token.Amount.Uint64()),
+				Amount:                        amount,
 				MaybeDenom:                    primptr.String(cronosSendToIBCCreatedEvent.Params.Token.Denom),
 				MaybeBridgeFeeAmount:          nil,
 				MaybeBridgeFeeDenom:           nil,
@@ -374,42 +400,6 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 				IsProcessed:                   false,
 			}); err != nil {
 				return fmt.Errorf("error inserting record when CronosSendToIBCCreated: %w", err)
-			}
-
-		} else if ethereumSendToCosmosHandledEvent, ok := event.(*event_usecase.GravityEthereumSendToCosmosHandled); ok {
-			if len(ethereumSendToCosmosHandledEvent.Params.Amount) == 0 {
-				continue
-			}
-
-			sourceChainName := types.CHAIN_ETHEREUM
-			if err := view.Insert(&bridge_pending_activity_view.BridgePendingActivityInsertRow{
-				BlockHeight:        height,
-				BlockTime:          &blockTime,
-				BridgeType:         types.BRIDGE_TYPE_GRAVITY,
-				MaybeTransactionId: nil,
-				LinkId: fmt.Sprintf(
-					"source:%s-receiver:%s-amount:%s-contract:%s",
-					sourceChainName,
-					ethereumSendToCosmosHandledEvent.Params.Receiver,
-					ethereumSendToCosmosHandledEvent.Params.Amount,
-					ethereumSendToCosmosHandledEvent.Params.EthereumTokenContract,
-				),
-				Direction:                     types.DIRECTION_INCOMING,
-				FromChainId:                   sourceChainName, // TODO: Parse Params.BridgeChainId?
-				MaybeFromAddress:              primptr.String(ethereumSendToCosmosHandledEvent.Params.Sender),
-				MaybeFromSmartContractAddress: primptr.String(ethereumSendToCosmosHandledEvent.Params.EthereumTokenContract),
-				ToChainId:                     projection.Config().ThisChainName,
-				ToAddress:                     ethereumSendToCosmosHandledEvent.Params.Receiver,
-				MaybeToSmartContractAddress:   nil,
-				MaybeChannelId:                nil,
-				Amount:                        ethereumSendToCosmosHandledEvent.Params.Amount[0].Amount,
-				MaybeDenom:                    primptr.String(ethereumSendToCosmosHandledEvent.Params.Amount[0].Denom),
-				MaybeBridgeFeeAmount:          nil,
-				MaybeBridgeFeeDenom:           nil,
-				Status:                        types.STATUS_COUNTERPARTY_CONFIRMED,
-				IsProcessed:                   false,
-			}); err != nil {
-				return fmt.Errorf("error inserting record when GravityEthereumSendToCosmosHandled: %w", err)
 			}
 		}
 	}

@@ -29,8 +29,8 @@ func NewRDbBase(rdbHandle *rdb.Handle, projectionId string) *Base {
 		rdbHandle,
 		projectionId,
 		Options{
-			MaybeConfigPtr: nil,
-			MaybeTable:     primptr.String(DEFAULT_TABLE),
+			MaybeReadConfigPtr: nil,
+			MaybeTable:         primptr.String(DEFAULT_TABLE),
 		},
 	)
 }
@@ -45,7 +45,8 @@ func NewRDbBaseWithOptions(rdbHandle *rdb.Handle, projectionId string, options O
 		Base: projection_usecase.NewBaseWithOptions(
 			projectionId,
 			projection_usecase.Options{
-				MaybeConfigPtr: options.MaybeConfigPtr,
+				MaybeReadConfigPtr: options.MaybeReadConfigPtr,
+				MaybeConfigPtr:     options.MaybeConfigPtr,
 			},
 		),
 
@@ -57,10 +58,14 @@ func NewRDbBaseWithOptions(rdbHandle *rdb.Handle, projectionId string, options O
 }
 
 type Options struct {
-	// Pointer to the configuration
+	// Pointer to the configuration to be read from Toml file
+	MaybeReadConfigPtr interface{}
+
+	// Pointer to projection configuration. This configuration, when specified, override
+	// the configuration read to MaybeReadConfigPtr
 	MaybeConfigPtr interface{}
 
-	// Customize table name in the RDb too keep the projection handling records
+	// Customize table name in the RDb to keep the projection block handling records
 	MaybeTable *string
 }
 

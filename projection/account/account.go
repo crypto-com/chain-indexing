@@ -40,8 +40,8 @@ func NewAccount(
 			rdbConn.ToHandle(),
 			"Account",
 			rdbprojectionbase.Options{
-				MaybeConfigPtr: nil,
-				MaybeTable:     nil,
+				MaybeReadConfigPtr: nil,
+				MaybeTable:         nil,
 			},
 		),
 
