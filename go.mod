@@ -26,7 +26,7 @@ require (
 	github.com/luci/go-render v0.0.0-20160219211803-9a04cc21af0f
 	github.com/mitchellh/mapstructure v1.4.2
 	github.com/onsi/ginkgo v1.16.4
-	github.com/onsi/gomega v1.13.0
+	github.com/onsi/gomega v1.17.0
 	github.com/peggyjv/gravity-bridge/module v0.2.17
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.25.0
