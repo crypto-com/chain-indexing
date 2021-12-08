@@ -1,6 +1,6 @@
 module github.com/crypto-com/chain-indexing
 
-go 1.17
+go 1.16
 
 require (
 	github.com/Masterminds/squirrel v1.5.0
