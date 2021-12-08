@@ -84,6 +84,7 @@ type FileConfig struct {
 	CronJob                    CronJobConfig                    `toml:"cronjob"`
 	CosmosVersionEnabledHeight CosmosVersionEnabledHeightConfig `toml:"cosmos_version_enabled_height"`
 	GithubAPI                  GithubAPIConfig                  `toml:"github_api"`
+	Prometheus                 PrometheusConfig                 `toml:"prometheus"`
 }
 
 type BlockchainConfig struct {
@@ -167,4 +168,9 @@ type GithubAPIConfig struct {
 	Username         string `toml:"username"`
 	Token            string `toml:"token"`
 	MigrationRepoRef string `toml:"migration_repo_ref"`
+}
+
+type PrometheusConfig struct {
+	exportPath string `toml:"path"`
+	port       string `toml:"port"`
 }
