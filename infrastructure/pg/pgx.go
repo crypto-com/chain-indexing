@@ -63,7 +63,7 @@ func (config *PgxConnPoolConfig) ToURL() string {
 var _ rdb.Conn = &PgxConn{}
 
 type PgxConn struct {
-	// pgxConn could be simple connection or connetion pool
+	// pgxConn could be simple connection or connection pool
 	pgxConn PgxConnLike
 }
 

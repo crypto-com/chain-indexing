@@ -89,7 +89,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 				mockBridgePendingActivitiesView := view.NewMockBridgePendingActivitiesView().(*view.MockBridgePendingActivitiesView)
 				mocks = append(mocks, &mockBridgePendingActivitiesView.Mock)
 
-				bridge_pending_activity.NewBridgePendingActivities = func(_ *rdb.Handle) view.BridgePendingActivities {
+				bridge_pending_activity.NewBridgePendingActivitiesView = func(_ *rdb.Handle) view.BridgePendingActivities {
 					return mockBridgePendingActivitiesView
 				}
 
@@ -267,7 +267,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 					IsProcessed:                   false,
 				}).Return(nil)
 
-				bridge_pending_activity.NewBridgePendingActivities = func(_ *rdb.Handle) view.BridgePendingActivities {
+				bridge_pending_activity.NewBridgePendingActivitiesView = func(_ *rdb.Handle) view.BridgePendingActivities {
 					return mockBridgePendingActivitiesView
 				}
 
@@ -379,7 +379,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 					IsProcessed:                   false,
 				}).Return(nil)
 
-				bridge_pending_activity.NewBridgePendingActivities = func(_ *rdb.Handle) view.BridgePendingActivities {
+				bridge_pending_activity.NewBridgePendingActivitiesView = func(_ *rdb.Handle) view.BridgePendingActivities {
 					return mockBridgePendingActivitiesView
 				}
 
@@ -491,7 +491,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 					IsProcessed:                   false,
 				}).Return(nil)
 
-				bridge_pending_activity.NewBridgePendingActivities = func(_ *rdb.Handle) view.BridgePendingActivities {
+				bridge_pending_activity.NewBridgePendingActivitiesView = func(_ *rdb.Handle) view.BridgePendingActivities {
 					return mockBridgePendingActivitiesView
 				}
 
@@ -598,7 +598,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 				mockBridgePendingActivitiesView := view.NewMockBridgePendingActivitiesView().(*view.MockBridgePendingActivitiesView)
 				mocks = append(mocks, &mockBridgePendingActivitiesView.Mock)
 
-				bridge_pending_activity.NewBridgePendingActivities = func(_ *rdb.Handle) view.BridgePendingActivities {
+				bridge_pending_activity.NewBridgePendingActivitiesView = func(_ *rdb.Handle) view.BridgePendingActivities {
 					return mockBridgePendingActivitiesView
 				}
 
@@ -727,7 +727,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 					IsProcessed:                   false,
 				}).Return(nil)
 
-				bridge_pending_activity.NewBridgePendingActivities = func(_ *rdb.Handle) view.BridgePendingActivities {
+				bridge_pending_activity.NewBridgePendingActivitiesView = func(_ *rdb.Handle) view.BridgePendingActivities {
 					return mockBridgePendingActivitiesView
 				}
 
@@ -939,7 +939,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 					IsProcessed:                   false,
 				}).Return(nil)
 
-				bridge_pending_activity.NewBridgePendingActivities = func(_ *rdb.Handle) view.BridgePendingActivities {
+				bridge_pending_activity.NewBridgePendingActivitiesView = func(_ *rdb.Handle) view.BridgePendingActivities {
 					return mockBridgePendingActivitiesView
 				}
 
@@ -1068,7 +1068,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 					IsProcessed:                   false,
 				}).Return(nil)
 
-				bridge_pending_activity.NewBridgePendingActivities = func(_ *rdb.Handle) view.BridgePendingActivities {
+				bridge_pending_activity.NewBridgePendingActivitiesView = func(_ *rdb.Handle) view.BridgePendingActivities {
 					return mockBridgePendingActivitiesView
 				}
 
@@ -1170,7 +1170,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 				mockBridgePendingActivitiesView := view.NewMockBridgePendingActivitiesView().(*view.MockBridgePendingActivitiesView)
 				mocks = append(mocks, &mockBridgePendingActivitiesView.Mock)
 
-				bridge_pending_activity.NewBridgePendingActivities = func(_ *rdb.Handle) view.BridgePendingActivities {
+				bridge_pending_activity.NewBridgePendingActivitiesView = func(_ *rdb.Handle) view.BridgePendingActivities {
 					return mockBridgePendingActivitiesView
 				}
 
@@ -1294,7 +1294,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 					IsProcessed:                   false,
 				}).Return(nil)
 
-				bridge_pending_activity.NewBridgePendingActivities = func(_ *rdb.Handle) view.BridgePendingActivities {
+				bridge_pending_activity.NewBridgePendingActivitiesView = func(_ *rdb.Handle) view.BridgePendingActivities {
 					return mockBridgePendingActivitiesView
 				}
 
@@ -1418,7 +1418,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 					IsProcessed:                   false,
 				}).Return(nil)
 
-				bridge_pending_activity.NewBridgePendingActivities = func(_ *rdb.Handle) view.BridgePendingActivities {
+				bridge_pending_activity.NewBridgePendingActivitiesView = func(_ *rdb.Handle) view.BridgePendingActivities {
 					return mockBridgePendingActivitiesView
 				}
 
@@ -1620,7 +1620,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 					IsProcessed:                   false,
 				}).Return(nil)
 
-				bridge_pending_activity.NewBridgePendingActivities = func(_ *rdb.Handle) view.BridgePendingActivities {
+				bridge_pending_activity.NewBridgePendingActivitiesView = func(_ *rdb.Handle) view.BridgePendingActivities {
 					return mockBridgePendingActivitiesView
 				}
 
@@ -1700,7 +1700,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 				mockBridgePendingActivitiesView := view.NewMockBridgePendingActivitiesView().(*view.MockBridgePendingActivitiesView)
 				mocks = append(mocks, &mockBridgePendingActivitiesView.Mock)
 
-				bridge_pending_activity.NewBridgePendingActivities = func(_ *rdb.Handle) view.BridgePendingActivities {
+				bridge_pending_activity.NewBridgePendingActivitiesView = func(_ *rdb.Handle) view.BridgePendingActivities {
 					return mockBridgePendingActivitiesView
 				}
 
@@ -1802,7 +1802,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 					IsProcessed:                   false,
 				}).Return(nil)
 
-				bridge_pending_activity.NewBridgePendingActivities = func(_ *rdb.Handle) view.BridgePendingActivities {
+				bridge_pending_activity.NewBridgePendingActivitiesView = func(_ *rdb.Handle) view.BridgePendingActivities {
 					return mockBridgePendingActivitiesView
 				}
 
@@ -1960,7 +1960,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 					IsProcessed:                   false,
 				}).Return(nil)
 
-				bridge_pending_activity.NewBridgePendingActivities = func(_ *rdb.Handle) view.BridgePendingActivities {
+				bridge_pending_activity.NewBridgePendingActivitiesView = func(_ *rdb.Handle) view.BridgePendingActivities {
 					return mockBridgePendingActivitiesView
 				}
 

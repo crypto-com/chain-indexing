@@ -19,8 +19,8 @@ import (
 )
 
 var (
-	NewBridgePendingActivities   = bridge_pending_activity_view.NewBridgePendingActivitiesView
-	UpdateLastHandledEventHeight = (*BridgePendingActivity).UpdateLastHandledEventHeight
+	NewBridgePendingActivitiesView = bridge_pending_activity_view.NewBridgePendingActivitiesView
+	UpdateLastHandledEventHeight   = (*BridgePendingActivity).UpdateLastHandledEventHeight
 )
 
 var _ entity_projection.Projection = &BridgePendingActivity{}
@@ -156,7 +156,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 		return nil
 	}
 
-	view := NewBridgePendingActivities(rdbTxHandle)
+	view := NewBridgePendingActivitiesView(rdbTxHandle)
 
 	// Get the block time of current height
 	var blockTime utctime.UTCTime

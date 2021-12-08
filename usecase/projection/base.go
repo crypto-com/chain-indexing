@@ -27,7 +27,8 @@ func NewBase(projectionId string) Base {
 	return NewBaseWithOptions(
 		projectionId,
 		Options{
-			MaybeConfigPtr: nil,
+			MaybeReadConfigPtr: nil,
+			MaybeConfigPtr:     nil,
 		},
 	)
 }

@@ -30,6 +30,7 @@ func NewRDbBase(rdbHandle *rdb.Handle, projectionId string) *Base {
 		projectionId,
 		Options{
 			MaybeReadConfigPtr: nil,
+			MaybeConfigPtr:     nil,
 			MaybeTable:         primptr.String(DEFAULT_TABLE),
 		},
 	)

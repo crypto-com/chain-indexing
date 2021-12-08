@@ -17,6 +17,13 @@ import (
 	projection_usecase "github.com/crypto-com/chain-indexing/usecase/projection"
 )
 
+var (
+	NewBridgePendingActivitiesView = view.NewBridgePendingActivitiesView
+	NewBridgeActivitiesView        = view.NewBridgeActivitiesView
+	NewPgxConnPool                 = func(config *pg.PgxConnPoolConfig, logger applogger.Logger) (rdb.Conn, error) {
+		return pg.NewPgxConnPool(config, logger)
+	}
+)
 var _ projection_entity.CronJob = &BridgeActivityMatcher{}
 
 type Config struct {
@@ -47,6 +54,10 @@ type BridgeActivityMatcher struct {
 	migrationHelper migrationhelper.MigrationHelper
 }
 
+const (
+	MIGRATION_DIRECOTRY = "projection/bridge_activity/bridge_activity_matcher/migrations"
+)
+
 func New(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
@@ -54,7 +65,28 @@ func New(
 ) *BridgeActivityMatcher {
 	return &BridgeActivityMatcher{
 		Base: projection_usecase.NewBaseWithOptions("BridgeActivityMatcher", projection_usecase.Options{
-			MaybeConfigPtr: &Config{},
+			MaybeReadConfigPtr: &Config{},
+		}),
+
+		thisRDbConn:           rdbConn,
+		cryptoOrgChainRDbConn: nil,
+		logger: logger.WithFields(applogger.LogFields{
+			"module": "BridgeActivityMatcher",
+		}),
+
+		migrationHelper: migrationHelper,
+	}
+}
+
+func NewWithConfig(
+	config *Config,
+	logger applogger.Logger,
+	rdbConn rdb.Conn,
+	migrationHelper migrationhelper.MigrationHelper,
+) *BridgeActivityMatcher {
+	return &BridgeActivityMatcher{
+		Base: projection_usecase.NewBaseWithOptions("BridgeActivityMatcher", projection_usecase.Options{
+			MaybeConfigPtr: config,
 		}),
 
 		thisRDbConn:           rdbConn,
@@ -75,10 +107,6 @@ func (cronJob *BridgeActivityMatcher) Config() *Config {
 	return cronJob.Base.Config().(*Config)
 }
 
-const (
-	MIGRATION_DIRECOTRY = "projection/bridge_activity/bridge_activity_matcher/migrations"
-)
-
 func (cronJob *BridgeActivityMatcher) OnInit() error {
 	config := cronJob.Config()
 
@@ -89,7 +117,7 @@ func (cronJob *BridgeActivityMatcher) OnInit() error {
 
 	// TODO: Refactor to generic rdbConn creator
 	var err error
-	if cronJob.cryptoOrgChainRDbConn, err = pg.NewPgxConnPool(&pg.PgxConnPoolConfig{
+	if cronJob.cryptoOrgChainRDbConn, err = NewPgxConnPool(&pg.PgxConnPoolConfig{
 		ConnConfig: pg.ConnConfig{
 			Host:          config.CryptoOrgChainDatabase.Host,
 			Port:          config.CryptoOrgChainDatabase.Port,
@@ -119,8 +147,8 @@ func (cronJob *BridgeActivityMatcher) Interval() time.Duration {
 }
 
 func (cronJob *BridgeActivityMatcher) Exec() error {
-	thisBridgePendingActivities := view.NewBridgePendingActivitiesView(cronJob.thisRDbConn.ToHandle())
-	cryptoOrgChainBridgePendingActivities := view.NewBridgePendingActivitiesView(cronJob.cryptoOrgChainRDbConn.ToHandle())
+	thisBridgePendingActivities := NewBridgePendingActivitiesView(cronJob.thisRDbConn.ToHandle())
+	cryptoOrgChainBridgePendingActivities := NewBridgePendingActivitiesView(cronJob.cryptoOrgChainRDbConn.ToHandle())
 
 	thisAllUnprocessedOutgoing, thisAllUnprocessedOutgoingErr := thisBridgePendingActivities.ListAllUnprocessedOutgoing()
 	if thisAllUnprocessedOutgoingErr != nil {
@@ -241,7 +269,7 @@ func (cronJob *BridgeActivityMatcher) handleOutgoingRow(
 
 	thisRDbTxHandle := thisRDbTx.ToHandle()
 
-	bridgeActivities := view.NewBridgeActivitiesView(thisRDbTxHandle)
+	bridgeActivities := NewBridgeActivitiesView(thisRDbTxHandle)
 
 	if insertErr := bridgeActivities.Insert(&view.BridgeActivityInsertRow{
 		BridgeType:                           row.BridgeType,
@@ -324,7 +352,7 @@ func (cronJob *BridgeActivityMatcher) handleIncomingRow(
 
 	thisRDbTxHandle := thisRDbTx.ToHandle()
 
-	bridgeActivities := view.NewBridgeActivitiesView(thisRDbTxHandle)
+	bridgeActivities := NewBridgeActivitiesView(thisRDbTxHandle)
 
 	commit := func() error {
 		if err := thisRDbTx.Commit(); err != nil {
