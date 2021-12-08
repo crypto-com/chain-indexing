@@ -21,10 +21,10 @@ var (
 	)
 )
 
-func RecordProjectionExecTime(projectionName string, value float64) {
+func RecordProjectionExecTime(projectionName string, timeInMilliseconds int64) {
 	projectionExecTime.With(
-		map[string]string{
+		prometheus.Labels{
 			projectionExecTimeProjectionLabel: projectionName,
 		},
-	).Observe(value)
+	).Observe(float64(timeInMilliseconds))
 }

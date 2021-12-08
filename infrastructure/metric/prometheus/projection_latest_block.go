@@ -21,10 +21,10 @@ var (
 	)
 )
 
-func RecordProjectionLatestHeight(projectionName string, value float64) {
+func RecordProjectionLatestHeight(projectionName string, height int64) {
 	projectionLatestHeight.With(
-		map[string]string{
+		prometheus.Labels{
 			projectionLatestHeightProjectionLabel: projectionName,
 		},
-	).Set(value)
+	).Set(float64(height))
 }
