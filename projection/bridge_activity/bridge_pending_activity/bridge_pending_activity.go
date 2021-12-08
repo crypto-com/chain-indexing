@@ -53,7 +53,7 @@ const (
 	MIGRATION_DIRECOTRY = "projection/bridge_activity/bridge_pending_activity/migrations"
 )
 
-func NewBridgePendingActivity(
+func New(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	migrationHelper migrationhelper.MigrationHelper,
@@ -75,7 +75,7 @@ func NewBridgePendingActivity(
 	}
 }
 
-func NewBridgePendingActivityWithConfig(
+func NewWithConfig(
 	config *Config,
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
