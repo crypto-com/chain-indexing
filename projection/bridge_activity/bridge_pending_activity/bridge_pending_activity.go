@@ -25,6 +25,8 @@ var (
 
 var _ entity_projection.Projection = &BridgePendingActivity{}
 
+type ChannelId = string
+
 type BridgePendingActivity struct {
 	*rdbprojectionbase.Base
 
@@ -32,14 +34,19 @@ type BridgePendingActivity struct {
 	logger  applogger.Logger
 
 	migrationHelper migrationhelper.MigrationHelper
+
+	listenedChannelIdToConfig map[ChannelId]*CounterPartyChainConfig
 }
 
 type Config struct {
-	ThisChainId           string `mapstructure:"this_chain_id"`
-	ThisChainName         string `mapstructure:"this_chain_name"`
-	CounterpartyChainName string `mapstructure:"counterparty_chain_name"`
-	ChannelId             string `mapstructure:"channel_id"`
-	StartingHeight        int64  `mapstructure:"starting_height"`
+	ThisChainName      string                    `mapstructure:"this_chain_name"`
+	CounterPartyChains []CounterPartyChainConfig `mapstructure:"counteparty"`
+}
+
+type CounterPartyChainConfig struct {
+	ChainName      string `mapstructure:"chain_name"`
+	ChannelId      string `mapstructure:"channel_id"`
+	StartingHeight int64  `mapstructure:"starting_height"`
 }
 
 const (
@@ -64,6 +71,7 @@ func NewBridgePendingActivity(
 		rdbConn,
 		logger,
 		migrationHelper,
+		make(map[ChannelId]*CounterPartyChainConfig),
 	}
 }
 
@@ -86,6 +94,7 @@ func NewBridgePendingActivityWithConfig(
 		rdbConn,
 		logger,
 		migrationHelper,
+		make(map[ChannelId]*CounterPartyChainConfig),
 	}
 }
 
@@ -100,14 +109,17 @@ func (_ *BridgePendingActivity) GetEventsToListen() []string {
 		event_usecase.MSG_IBC_TIMEOUT_CREATED,
 
 		event_usecase.CRONOS_SEND_TO_IBC_CREATED,
-
-		event_usecase.GRAVITY_ETHEREUM_SEND_TO_COSMOS_HANDLED,
 	}
 }
 
 func (projection *BridgePendingActivity) OnInit() error {
 	if projection.migrationHelper != nil {
 		projection.migrationHelper.Migrate()
+	}
+
+	counterPartyChainConfigs := projection.Config().CounterPartyChains
+	for i, chainConfig := range projection.Config().CounterPartyChains {
+		projection.listenedChannelIdToConfig[chainConfig.ChannelId] = &counterPartyChainConfigs[i]
 	}
 	return nil
 }
@@ -144,10 +156,6 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 		return nil
 	}
 
-	if height < projection.Config().StartingHeight {
-		return commit()
-	}
-
 	view := NewBridgePendingActivities(rdbTxHandle)
 
 	// Get the block time of current height
@@ -160,9 +168,11 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 
 	for _, event := range events {
 		if msgIBCTransferTransfer, ok := event.(*event_usecase.MsgIBCTransferTransfer); ok {
-			if msgIBCTransferTransfer.Params.SourceChannel != projection.Config().ChannelId {
+			channelId := msgIBCTransferTransfer.Params.SourceChannel
+			if !projection.isListenedChannel(channelId) {
 				continue
 			}
+			counterpartyConfig := projection.mustGetCounterpartyChainConfigByListenedChannel(channelId)
 			if msgIBCTransferTransfer.TxSuccess() {
 				tokenAmount, tokenAmountOk := coin.NewIntFromString(msgIBCTransferTransfer.Params.Token.Amount.String())
 				if !tokenAmountOk {
@@ -181,7 +191,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 					FromChainId:                   projection.Config().ThisChainName,
 					MaybeFromAddress:              primptr.String(msgIBCTransferTransfer.Params.Sender),
 					MaybeFromSmartContractAddress: nil,
-					ToChainId:                     projection.Config().CounterpartyChainName,
+					ToChainId:                     counterpartyConfig.ChainName,
 					ToAddress:                     msgIBCTransferTransfer.Params.Receiver,
 					MaybeToSmartContractAddress:   nil,
 					MaybeChannelId:                primptr.String(msgIBCTransferTransfer.Params.SourceChannel),
@@ -215,7 +225,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 					FromChainId:                   projection.Config().ThisChainName,
 					MaybeFromAddress:              primptr.String(msgIBCTransferTransfer.Params.Sender),
 					MaybeFromSmartContractAddress: nil,
-					ToChainId:                     projection.Config().CounterpartyChainName,
+					ToChainId:                     counterpartyConfig.ChainName,
 					ToAddress:                     msgIBCTransferTransfer.Params.Receiver,
 					MaybeToSmartContractAddress:   nil,
 					MaybeChannelId:                primptr.String(msgIBCTransferTransfer.Params.SourceChannel),
@@ -231,9 +241,11 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 			}
 
 		} else if msgIBCRecvPacket, ok := event.(*event_usecase.MsgIBCRecvPacket); ok {
-			if msgIBCRecvPacket.Params.Packet.DestinationChannel != projection.Config().ChannelId {
+			channelId := msgIBCRecvPacket.Params.Packet.DestinationChannel
+			if !projection.isListenedChannel(channelId) {
 				continue
 			}
+			counterpartyConfig := projection.mustGetCounterpartyChainConfigByListenedChannel(channelId)
 			if msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData != nil {
 				var status types.Status
 				var isProcessed bool
@@ -258,9 +270,9 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 					BlockTime:                     &blockTime,
 					MaybeTransactionId:            primptr.String(msgIBCRecvPacket.TxHash()),
 					BridgeType:                    types.BRIDGE_TYPE_IBC,
-					LinkId:                        ibcLinkId(projection.Config().CounterpartyChainName, msgIBCRecvPacket.Params.PacketSequence),
+					LinkId:                        ibcLinkId(counterpartyConfig.ChainName, msgIBCRecvPacket.Params.PacketSequence),
 					Direction:                     types.DIRECTION_INCOMING,
-					FromChainId:                   projection.Config().CounterpartyChainName,
+					FromChainId:                   counterpartyConfig.ChainName,
 					MaybeFromAddress:              primptr.String(msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Sender),
 					MaybeFromSmartContractAddress: nil,
 					ToChainId:                     projection.Config().ThisChainName,
@@ -279,9 +291,11 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 			}
 
 		} else if msgIBCAcknowledgement, ok := event.(*event_usecase.MsgIBCAcknowledgement); ok {
-			if msgIBCAcknowledgement.Params.Packet.SourceChannel != projection.Config().ChannelId {
+			channelId := msgIBCAcknowledgement.Params.Packet.SourceChannel
+			if !projection.isListenedChannel(channelId) {
 				continue
 			}
+			counterpartyConfig := projection.mustGetCounterpartyChainConfigByListenedChannel(channelId)
 			if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData != nil {
 				var status types.Status
 				var isProcessed bool
@@ -311,7 +325,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 					FromChainId:                   projection.Config().ThisChainName,
 					MaybeFromAddress:              primptr.String(msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Sender),
 					MaybeFromSmartContractAddress: nil,
-					ToChainId:                     projection.Config().CounterpartyChainName,
+					ToChainId:                     counterpartyConfig.ChainName,
 					ToAddress:                     msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Receiver,
 					MaybeToSmartContractAddress:   nil,
 					MaybeChannelId:                primptr.String(msgIBCAcknowledgement.Params.Packet.SourceChannel),
@@ -327,9 +341,11 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 			}
 
 		} else if msgIBCTimeout, ok := event.(*event_usecase.MsgIBCTimeout); ok {
-			if msgIBCTimeout.Params.Packet.SourceChannel != projection.Config().ChannelId {
+			channelId := msgIBCTimeout.Params.Packet.SourceChannel
+			if !projection.isListenedChannel(channelId) {
 				continue
 			}
+			counterpartyConfig := projection.mustGetCounterpartyChainConfigByListenedChannel(channelId)
 
 			amount, amountOk := coin.NewIntFromString(msgIBCTimeout.Params.MaybeMsgTransfer.RefundAmount.String())
 			if !amountOk {
@@ -350,7 +366,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 					FromChainId:                   projection.Config().ThisChainName,
 					MaybeFromAddress:              nil,
 					MaybeFromSmartContractAddress: nil,
-					ToChainId:                     projection.Config().CounterpartyChainName,
+					ToChainId:                     counterpartyConfig.ChainName,
 					ToAddress:                     msgIBCTimeout.Params.MaybeMsgTransfer.RefundReceiver,
 					MaybeToSmartContractAddress:   nil,
 					MaybeChannelId:                primptr.String(msgIBCTimeout.Params.Packet.SourceChannel),
@@ -366,9 +382,11 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 			}
 
 		} else if cronosSendToIBCCreatedEvent, ok := event.(*event_usecase.CronosSendToIBCCreated); ok {
-			if cronosSendToIBCCreatedEvent.Params.SourceChannel != projection.Config().ChannelId {
+			channelId := cronosSendToIBCCreatedEvent.Params.SourceChannel
+			if !projection.isListenedChannel(channelId) {
 				continue
 			}
+			counterpartyConfig := projection.mustGetCounterpartyChainConfigByListenedChannel(channelId)
 
 			amount, amountOk := coin.NewIntFromString(cronosSendToIBCCreatedEvent.Params.Token.Amount.String())
 			if !amountOk {
@@ -388,7 +406,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 				FromChainId:                   projection.Config().ThisChainName,
 				MaybeFromAddress:              primptr.String(cronosSendToIBCCreatedEvent.Params.Sender),
 				MaybeFromSmartContractAddress: nil,
-				ToChainId:                     projection.Config().CounterpartyChainName,
+				ToChainId:                     counterpartyConfig.ChainName,
 				ToAddress:                     cronosSendToIBCCreatedEvent.Params.Receiver,
 				MaybeToSmartContractAddress:   nil,
 				MaybeChannelId:                primptr.String(cronosSendToIBCCreatedEvent.Params.SourceChannel),
@@ -405,6 +423,18 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 	}
 
 	return commit()
+}
+
+func (projection *BridgePendingActivity) isListenedChannel(channelId string) bool {
+	_, exists := projection.listenedChannelIdToConfig[channelId]
+	return exists
+}
+
+func (projection *BridgePendingActivity) mustGetCounterpartyChainConfigByListenedChannel(channelId string) *CounterPartyChainConfig {
+	if !projection.isListenedChannel(channelId) {
+		panic(fmt.Sprintf("channel id %s not found", channelId))
+	}
+	return projection.listenedChannelIdToConfig[channelId]
 }
 
 func ibcLinkId(sourceChain string, sequence uint64) string {
