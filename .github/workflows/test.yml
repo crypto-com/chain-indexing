@@ -13,7 +13,7 @@ jobs:
         sudo apt install build-essential -y
     - uses: actions/setup-go@v2
       with:
-        go-version: '1.16'
+        go-version: '1.17'
     - name: Install golangci-lint
       run: |
         # binary will be $(go env GOPATH)/bin/golangci-lint
@@ -32,7 +32,7 @@ jobs:
     steps:
     - uses: actions/setup-go@v2
       with:
-        go-version: '1.16'
+        go-version: '1.17'
     - name: Env
       run: |
         go version
