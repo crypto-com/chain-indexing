@@ -105,7 +105,9 @@ func (a *app) Run() {
 		}()
 		if a.config.Prometheus.Enable {
 			go func() {
-				prometheus.Run(a.config.Prometheus.ExportPath, a.config.Prometheus.Port)
+				if runErr := prometheus.Run(a.config.Prometheus.ExportPath, a.config.Prometheus.Port); runErr != nil {
+					a.logger.Panicf("%v", runErr)
+				}
 			}()
 		}
 	}

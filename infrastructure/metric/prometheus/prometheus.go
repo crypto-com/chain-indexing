@@ -8,10 +8,14 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func Run(path, port string) {
+func Run(path, port string) error {
 	register()
 	http.Handle(path, promhttp.Handler())
-	http.ListenAndServe(fmt.Sprintf(":%s", port), nil)
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func register() {
