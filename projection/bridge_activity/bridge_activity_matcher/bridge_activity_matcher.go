@@ -22,13 +22,18 @@ var _ projection_entity.CronJob = &BridgeActivityMatcher{}
 type Config struct {
 	Interval               time.Duration `mapstructure:"interval"`
 	CryptoOrgChainDatabase struct {
-		SSL      bool   `mapstructure:"ssl"`
-		Host     string `mapstructure:"host"`
-		Port     int32  `mapstructure:"port"`
-		Username string `mapstructure:"username"`
-		Password string `mapstructure:"password"`
-		Name     string `mapstructure:"name"`
-		Schema   string `mapstructure:"schema"`
+		SSL                 bool          `mapstructure:"ssl"`
+		Host                string        `mapstructure:"host"`
+		Port                int32         `mapstructure:"port"`
+		Username            string        `mapstructure:"username"`
+		Password            string        `mapstructure:"password"`
+		Name                string        `mapstructure:"name"`
+		Schema              string        `mapstructure:"schema"`
+		MaxConns            int32         `mapstructure:"pool_max_conns"`
+		MinConns            int32         `mapstructure:"pool_min_conns"`
+		MaxConnLifeTime     time.Duration `mapstructure:"pool_max_conn_lifetime"`
+		MaxConnIdleTime     time.Duration `mapstructure:"pool_max_conn_idle_time"`
+		HealthCheckInterval time.Duration `mapstructure:"pool_health_check_interval"`
 	} `mapstructure:"crypto_org_chain_database"`
 }
 
@@ -84,13 +89,20 @@ func (cronJob *BridgeActivityMatcher) OnInit() error {
 
 	// TODO: Refactor to generic rdbConn creator
 	var err error
-	if cronJob.cryptoOrgChainRDbConn, err = pg.NewPgxConn(&pg.ConnConfig{
-		Host:          config.CryptoOrgChainDatabase.Host,
-		Port:          config.CryptoOrgChainDatabase.Port,
-		MaybeUsername: &config.CryptoOrgChainDatabase.Username,
-		MaybePassword: &cryptoOrgChainDBPassword,
-		Database:      config.CryptoOrgChainDatabase.Name,
-		SSL:           config.CryptoOrgChainDatabase.SSL,
+	if cronJob.cryptoOrgChainRDbConn, err = pg.NewPgxConnPool(&pg.PgxConnPoolConfig{
+		ConnConfig: pg.ConnConfig{
+			Host:          config.CryptoOrgChainDatabase.Host,
+			Port:          config.CryptoOrgChainDatabase.Port,
+			MaybeUsername: &config.CryptoOrgChainDatabase.Username,
+			MaybePassword: &cryptoOrgChainDBPassword,
+			Database:      config.CryptoOrgChainDatabase.Name,
+			SSL:           config.CryptoOrgChainDatabase.SSL,
+		},
+		MaybeMaxConns:          &config.CryptoOrgChainDatabase.MaxConns,
+		MaybeMinConns:          &config.CryptoOrgChainDatabase.MinConns,
+		MaybeMaxConnLifeTime:   &config.CryptoOrgChainDatabase.MaxConnLifeTime,
+		MaybeMaxConnIdleTime:   &config.CryptoOrgChainDatabase.MaxConnIdleTime,
+		MaybeHealthCheckPeriod: &config.CryptoOrgChainDatabase.HealthCheckInterval,
 	}, cronJob.logger); err != nil {
 		return fmt.Errorf("error when initializing Crypto.org Chain indexing DB connection: %v", err)
 	}
