@@ -126,7 +126,7 @@ func (manager *StoreBasedManager) projectionRunner(projection Projection) {
 			}
 
 			eventLogger.Infof("successfully handled events")
-			prometheus.RecordProjectionExecTime(projection.Id(), time.Now().Sub(startTime).Milliseconds())
+			prometheus.RecordProjectionExecTime(projection.Id(), time.Since(startTime).Milliseconds())
 			nextEventHeight += 1
 		}
 		prometheus.RecordProjectionLatestHeight(projection.Id(), nextEventHeight)

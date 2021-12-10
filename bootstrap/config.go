@@ -171,6 +171,7 @@ type GithubAPIConfig struct {
 }
 
 type PrometheusConfig struct {
+	Enable     bool   `toml:"enable"`
 	ExportPath string `toml:"path"`
 	Port       string `toml:"port"`
 }

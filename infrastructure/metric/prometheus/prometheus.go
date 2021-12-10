@@ -1,6 +1,7 @@
 package prometheus
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -10,7 +11,7 @@ import (
 func Run(path, port string) {
 	register()
 	http.Handle(path, promhttp.Handler())
-	http.ListenAndServe(":"+port, nil)
+	http.ListenAndServe(fmt.Sprintf(":%s", port), nil)
 }
 
 func register() {

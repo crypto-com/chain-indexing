@@ -162,7 +162,7 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64, isRetry bool) error {
 			if err != nil {
 				return fmt.Errorf("error handling events: %v", err)
 			}
-			prometheus.RecordProjectionExecTime(manager.eventHandler.Id(), time.Now().Sub(startTime).Milliseconds())
+			prometheus.RecordProjectionExecTime(manager.eventHandler.Id(), time.Since(startTime).Milliseconds())
 		}
 
 		// If there is any error before, short-circuit return in the error handling

@@ -103,9 +103,11 @@ func (a *app) Run() {
 				a.logger.Panicf("%v", runErr)
 			}
 		}()
-		go func() {
-			prometheus.Run(a.config.Prometheus.ExportPath, a.config.Prometheus.Port)
-		}()
+		if a.config.Prometheus.Enable {
+			go func() {
+				prometheus.Run(a.config.Prometheus.ExportPath, a.config.Prometheus.Port)
+			}()
+		}
 	}
 
 	select {}
