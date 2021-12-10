@@ -104,7 +104,7 @@ func (a *app) Run() {
 			}
 		}()
 		go func() {
-			prometheus.Run(a.config.Prometheus.exportPath, a.config.Prometheus.port)
+			prometheus.Run(a.config.Prometheus.ExportPath, a.config.Prometheus.Port)
 		}()
 	}
 

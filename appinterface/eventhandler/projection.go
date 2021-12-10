@@ -56,6 +56,10 @@ func (handler *ProjectionHandler) HandleEvents(blockHeight int64, events []event
 	return nil
 }
 
+func (handler *ProjectionHandler) Id() (string) {
+	return handler.projection.Id()
+}
+
 func isListeningEvent(event event.Event, eventsToListen []string) bool {
 	targetEventName := event.Name()
 	for _, eventName := range eventsToListen {

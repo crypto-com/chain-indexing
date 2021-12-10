@@ -2,7 +2,6 @@ package prometheus
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 const (
@@ -11,7 +10,7 @@ const (
 )
 
 var (
-	projectionExecTime = promauto.NewSummaryVec(
+	projectionExecTime = prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{
 			Name: projectionExecTimeName,
 		},

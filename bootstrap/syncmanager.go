@@ -5,13 +5,13 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
-	applogger "github.com/crypto-com/chain-indexing/external/logger"
-
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	command_entity "github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/entity/event"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	chainfeed "github.com/crypto-com/chain-indexing/infrastructure/feed/chain"
+	"github.com/crypto-com/chain-indexing/infrastructure/metric/prometheus"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
@@ -131,6 +131,7 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64, isRetry bool) error {
 	}
 	manager.logger.Infof("going to synchronized blocks from %d to %d", currentIndexingHeight, targetHeight)
 	for currentIndexingHeight <= targetHeight {
+		startTime := time.Now()
 		blocksCommands, syncedHeight, err := manager.windowSyncStrategy.Sync(
 			currentIndexingHeight, targetHeight, manager.syncBlockWorker,
 		)
@@ -161,11 +162,13 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64, isRetry bool) error {
 			if err != nil {
 				return fmt.Errorf("error handling events: %v", err)
 			}
+			prometheus.RecordProjectionExecTime(manager.eventHandler.Id(), time.Now().Sub(startTime).Milliseconds())
 		}
 
 		// If there is any error before, short-circuit return in the error handling
 		// while the local currentIndexingHeight won't be incremented and will be retried later
 		manager.logger.Infof("successfully synced to block height %d", syncedHeight)
+		prometheus.RecordProjectionLatestHeight(manager.eventHandler.Id(), syncedHeight)
 		currentIndexingHeight = syncedHeight + 1
 	}
 	return nil

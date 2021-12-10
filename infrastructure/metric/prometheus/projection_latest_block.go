@@ -2,7 +2,6 @@ package prometheus
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 const (
@@ -11,7 +10,7 @@ const (
 )
 
 var (
-	projectionLatestHeight = promauto.NewGaugeVec(
+	projectionLatestHeight = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: projectionLatestHeightName,
 		},
