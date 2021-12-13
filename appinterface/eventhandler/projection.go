@@ -56,7 +56,7 @@ func (handler *ProjectionHandler) HandleEvents(blockHeight int64, events []event
 	return nil
 }
 
-func (handler *ProjectionHandler) Id() (string) {
+func (handler *ProjectionHandler) Id() string {
 	return handler.projection.Id()
 }
 
