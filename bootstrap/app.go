@@ -103,13 +103,14 @@ func (a *app) Run() {
 				a.logger.Panicf("%v", runErr)
 			}
 		}()
-		if a.config.Prometheus.Enable {
-			go func() {
-				if runErr := prometheus.Run(a.config.Prometheus.ExportPath, a.config.Prometheus.Port); runErr != nil {
-					a.logger.Panicf("%v", runErr)
-				}
-			}()
-		}
+	}
+
+	if a.config.Prometheus.Enable {
+		go func() {
+			if runErr := prometheus.Run(a.config.Prometheus.ExportPath, a.config.Prometheus.Port); runErr != nil {
+				a.logger.Panicf("%v", runErr)
+			}
+		}()
 	}
 
 	select {}

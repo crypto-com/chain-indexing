@@ -8,9 +8,17 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+var (
+	defaultRegistry                       = prometheus.NewRegistry()
+	Registerer      prometheus.Registerer = defaultRegistry
+	Gatherer        prometheus.Gatherer   = defaultRegistry
+)
+
 func Run(path, port string) error {
 	register()
-	http.Handle(path, promhttp.Handler())
+	http.Handle(path, promhttp.InstrumentMetricHandler(
+		Registerer, promhttp.HandlerFor(Gatherer, promhttp.HandlerOpts{}),
+	))
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
 		return err
 	}
@@ -19,6 +27,6 @@ func Run(path, port string) error {
 }
 
 func register() {
-	prometheus.MustRegister(projectionExecTime)
-	prometheus.MustRegister(projectionLatestHeight)
+	Registerer.MustRegister(projectionExecTime)
+	Registerer.MustRegister(projectionLatestHeight)
 }
