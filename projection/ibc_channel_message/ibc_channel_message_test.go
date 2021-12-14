@@ -335,6 +335,12 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 								Amount: json.NewNumericStringFromUint64(1000),
 							},
 						},
+						PacketData: ibc_model.FungibleTokenPacketData{
+							Sender:   "PacketDataSender",
+							Receiver: "PacketDataReceiver",
+							Denom:    "PacketDataDenom",
+							Amount:   json.NewNumericStringFromUint64(10000),
+						},
 					},
 				},
 			},
@@ -351,8 +357,8 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						MaybeSender:     primptr.String("Sender"),
 						MaybeReceiver:   primptr.String("Receiver"),
-						MaybeDenom:      primptr.String("Denom"),
-						MaybeAmount:     primptr.String("1000"),
+						MaybeDenom:      primptr.String("PacketDataDenom"),
+						MaybeAmount:     primptr.String("10000"),
 						MessageType:     "MsgTransfer",
 						Message:         typedEvent,
 					}).
