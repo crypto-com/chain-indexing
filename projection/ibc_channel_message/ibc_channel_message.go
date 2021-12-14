@@ -174,8 +174,8 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 				TransactionHash: typedEvent.TxHash(),
 				MaybeSender:     primptr.String(typedEvent.Params.Sender),
 				MaybeReceiver:   primptr.String(typedEvent.Params.Receiver),
-				MaybeDenom:      primptr.String(typedEvent.Params.Token.Denom),
-				MaybeAmount:     primptr.String(typedEvent.Params.Token.Amount.String()),
+				MaybeDenom:      primptr.String(typedEvent.Params.PacketData.Denom),
+				MaybeAmount:     primptr.String(typedEvent.Params.PacketData.Amount.String()),
 				MessageType:     typedEvent.MsgName,
 				Message:         typedEvent,
 			}
