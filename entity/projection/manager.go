@@ -6,6 +6,7 @@ import (
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/infrastructure/metric/prometheus"
 )
 
 // StoreBasedManager is a projection manager relies on replaying events from EventStore
@@ -88,6 +89,7 @@ func (manager *StoreBasedManager) projectionRunner(projection Projection) {
 			continue
 		}
 		for nextEventHeight <= *latestEventHeight {
+			startTime := time.Now()
 			var err error
 
 			eventLogger := logger.WithFields(applogger.LogFields{
@@ -124,8 +126,10 @@ func (manager *StoreBasedManager) projectionRunner(projection Projection) {
 			}
 
 			eventLogger.Infof("successfully handled events")
+			prometheus.RecordProjectionExecTime(projection.Id(), time.Since(startTime).Milliseconds())
 			nextEventHeight += 1
 		}
+		prometheus.RecordProjectionLatestHeight(projection.Id(), nextEventHeight)
 		<-waitFor(5 * time.Second)
 	}
 }
