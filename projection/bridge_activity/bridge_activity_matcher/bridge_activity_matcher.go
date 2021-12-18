@@ -56,7 +56,7 @@ func New(
 	migrationHelper migrationhelper.MigrationHelper,
 ) *BridgeActivityMatcher {
 	return &BridgeActivityMatcher{
-		Base: projection_usecase.NewBase("BridgeActivityMatcher")
+		Base: projection_usecase.NewBase("BridgeActivityMatcher"),
 
 		config: config,
 
