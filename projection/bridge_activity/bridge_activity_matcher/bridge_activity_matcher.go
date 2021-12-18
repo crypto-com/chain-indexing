@@ -40,6 +40,8 @@ type Config struct {
 type BridgeActivityMatcher struct {
 	projection_usecase.Base
 
+	config Config
+
 	thisRDbConn           rdb.Conn
 	cryptoOrgChainRDbConn rdb.Conn
 	logger                applogger.Logger
@@ -48,14 +50,15 @@ type BridgeActivityMatcher struct {
 }
 
 func New(
+	config Config,
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	migrationHelper migrationhelper.MigrationHelper,
 ) *BridgeActivityMatcher {
 	return &BridgeActivityMatcher{
-		Base: projection_usecase.NewBaseWithOptions("BridgeActivityMatcher", projection_usecase.Options{
-			MaybeConfigPtr: &Config{},
-		}),
+		Base: projection_usecase.NewBase("BridgeActivityMatcher")
+
+		config: config,
 
 		thisRDbConn:           rdbConn,
 		cryptoOrgChainRDbConn: nil,
@@ -72,7 +75,7 @@ func (cronJob *BridgeActivityMatcher) Id() string {
 }
 
 func (cronJob *BridgeActivityMatcher) Config() *Config {
-	return cronJob.Base.Config().(*Config)
+	return &cronJob.config
 }
 
 const (
