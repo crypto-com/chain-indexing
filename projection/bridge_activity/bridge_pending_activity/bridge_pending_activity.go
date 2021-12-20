@@ -23,6 +23,8 @@ var _ entity_projection.Projection = &BridgePendingActivity{}
 type BridgePendingActivity struct {
 	*rdbprojectionbase.Base
 
+	config Config
+
 	rdbConn rdb.Conn
 	logger  applogger.Logger
 
@@ -42,19 +44,18 @@ const (
 )
 
 func NewBridgePendingActivity(
+	config Config,
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	migrationHelper migrationhelper.MigrationHelper,
 ) *BridgePendingActivity {
 	return &BridgePendingActivity{
-		rdbprojectionbase.NewRDbBaseWithOptions(
+		rdbprojectionbase.NewRDbBase(
 			rdbConn.ToHandle(),
 			"BridgePendingActivity",
-			rdbprojectionbase.Options{
-				MaybeTable:     nil,
-				MaybeConfigPtr: &Config{},
-			},
 		),
+
+		config,
 
 		rdbConn,
 		logger,
@@ -86,7 +87,7 @@ func (projection *BridgePendingActivity) OnInit() error {
 }
 
 func (projection *BridgePendingActivity) Config() *Config {
-	return projection.Base.Config().(*Config)
+	return &projection.config
 }
 
 func (projection *BridgePendingActivity) HandleEvents(height int64, events []event_entity.Event) error {
