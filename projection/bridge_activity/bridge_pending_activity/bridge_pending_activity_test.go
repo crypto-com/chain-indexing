@@ -2002,8 +2002,8 @@ func NewBridgePendingActivityProjection(
 	rdbConn rdb.Conn,
 	config bridge_pending_activity.Config,
 ) *bridge_pending_activity.BridgePendingActivity {
-	return bridge_pending_activity.NewWithConfig(
-		&config,
+	return bridge_pending_activity.New(
+		config,
 		nil,
 		rdbConn,
 		nil,
