@@ -64,6 +64,10 @@ func (handler *RDbEventStoreHandler) HandleEvents(blockHeight int64, events []ev
 	return nil
 }
 
+func (handler *RDbEventStoreHandler) Id() string {
+	return "RDbEventStoreHandler"
+}
+
 func initEventStore(rdbHandle *rdb.Handle, registry *event.Registry) *event_interface.RDbStore {
 	return event_interface.NewRDbStore(rdbHandle, registry)
 }

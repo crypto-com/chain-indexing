@@ -36,14 +36,9 @@ func NewAccount(
 	migrationHelper migrationhelper.MigrationHelper,
 ) *Account {
 	return &Account{
-		rdbprojectionbase.NewRDbBaseWithOptions(
+		rdbprojectionbase.NewRDbBase(
 			rdbConn.ToHandle(),
 			"Account",
-			rdbprojectionbase.Options{
-				MaybeReadConfigPtr: nil,
-				MaybeConfigPtr:     nil,
-				MaybeTable:         nil,
-			},
 		),
 
 		rdbConn,
