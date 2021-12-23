@@ -1985,9 +1985,11 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 		mocks, assertFunc := tc.MockFunc()
 
 		projection := NewBridgePendingActivityProjection(mockRDbConn, tc.Config)
-		projection.OnInit()
-		err := projection.HandleEvents(1, tc.Events)
-		assert.NoError(t, err)
+		onInitErr := projection.OnInit()
+		assert.NoError(t, onInitErr)
+
+		handleErr := projection.HandleEvents(1, tc.Events)
+		assert.NoError(t, handleErr)
 
 		for _, m := range mocks {
 			m.AssertExpectations(t)
