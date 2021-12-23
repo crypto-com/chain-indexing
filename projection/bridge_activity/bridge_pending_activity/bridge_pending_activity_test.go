@@ -1217,8 +1217,8 @@ func NewBridgePendingActivityProjection(
 	rdbConn rdb.Conn,
 	config bridge_pending_activity.Config,
 ) *bridge_pending_activity.BridgePendingActivity {
-	return bridge_pending_activity.NewBridgePendingActivityWithConfig(
-		&config,
+	return bridge_pending_activity.NewBridgePendingActivity(
+		config,
 		nil,
 		rdbConn,
 		nil,
