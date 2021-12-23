@@ -4,40 +4,58 @@ import (
 	"errors"
 	"fmt"
 
-	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
-	"github.com/crypto-com/chain-indexing/external/primptr"
-
-	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
-
 	"github.com/google/uuid"
 
-	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
-
+	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 )
 
+type BridgeActivities interface {
+	FindByLinkId(linkId string) (BridgeActivityReadRow, error)
+	FindBy(filter BridgeActivitiesFindByFilter) (BridgeActivityReadRow, error)
+	ListByNetworkAddress(
+		network string,
+		address string,
+		order BridgeActivitiesListOrder,
+		pagination *pagination_interface.Pagination,
+	) ([]BridgeActivityReadRow, *pagination_interface.PaginationResult, error)
+	List(
+		addressFilter BridgeActivitiesListAddressFilter,
+		filter BridgeActivitiesListFilter,
+		order BridgeActivitiesListOrder,
+		pagination *pagination_interface.Pagination,
+	) ([]BridgeActivityReadRow, *pagination_interface.PaginationResult, error)
+	Insert(activity *BridgeActivityInsertRow) error
+	Update(activity *BridgeActivityReadRow) error
+}
+
 const TABLE_BRIDGE_ACTIVITIES = "view_bridge_activities"
 
-type BridgeActivities struct {
+var _ BridgeActivities = &BridgeActivitiesView{}
+
+type BridgeActivitiesView struct {
 	rdb *rdb.Handle
 }
 
-func NewBridgeActivities(handle *rdb.Handle) *BridgeActivities {
-	return &BridgeActivities{
+func NewBridgeActivitiesView(handle *rdb.Handle) *BridgeActivitiesView {
+	return &BridgeActivitiesView{
 		handle,
 	}
 }
 
-func (view *BridgeActivities) FindByLinkId(linkId string) (BridgeActivityReadRow, error) {
+func (view *BridgeActivitiesView) FindByLinkId(linkId string) (BridgeActivityReadRow, error) {
 	return view.FindBy(BridgeActivitiesFindByFilter{
 		MaybeLinkId:        &linkId,
 		MaybeTransactionId: nil,
 	})
 }
 
-func (view *BridgeActivities) FindBy(filter BridgeActivitiesFindByFilter) (BridgeActivityReadRow, error) {
+func (view *BridgeActivitiesView) FindBy(filter BridgeActivitiesFindByFilter) (BridgeActivityReadRow, error) {
 	stmtBuilder := view.rdb.StmtBuilder.Select(
 		"id",
 		"uuid",
@@ -185,7 +203,7 @@ type BridgeActivitiesFindByFilter struct {
 	MaybeTransactionId *string
 }
 
-func (view *BridgeActivities) ListByNetworkAddress(
+func (view *BridgeActivitiesView) ListByNetworkAddress(
 	network string,
 	address string,
 	order BridgeActivitiesListOrder,
@@ -204,7 +222,7 @@ func (view *BridgeActivities) ListByNetworkAddress(
 	return view.List(addressFilter, filter, order, pagination)
 }
 
-func (view *BridgeActivities) List(
+func (view *BridgeActivitiesView) List(
 	addressFilter BridgeActivitiesListAddressFilter,
 	filter BridgeActivitiesListFilter,
 	order BridgeActivitiesListOrder,
@@ -435,7 +453,7 @@ type BridgeActivitiesListOrder struct {
 	MaybeSourceBlockTime *view.ORDER
 }
 
-func (view *BridgeActivities) Insert(activity *BridgeActivityInsertRow) error {
+func (view *BridgeActivitiesView) Insert(activity *BridgeActivityInsertRow) error {
 	timeNow := utctime.Now()
 	var maybeBridgeFeeAmount *string
 	if activity.MaybeBridgeFeeAmount != nil {
@@ -516,7 +534,7 @@ func (view *BridgeActivities) Insert(activity *BridgeActivityInsertRow) error {
 	return nil
 }
 
-func (view *BridgeActivities) Update(activity *BridgeActivityReadRow) error {
+func (view *BridgeActivitiesView) Update(activity *BridgeActivityReadRow) error {
 	timeNow := utctime.Now()
 	var maybeBridgeFeeAmount *string
 	if activity.MaybeBridgeFeeAmount != nil {

@@ -19,10 +19,10 @@ type RawCronosSendToIBCParams struct {
 }
 
 type FungibleTokenPacketData struct {
-	Sender   string      `json:"sender"`
-	Receiver string      `json:"receiver"`
-	Denom  string      `json:"denom"`
-	Amount json.Uint64 `json:"amount"`
+	Sender   string              `json:"sender"`
+	Receiver string              `json:"receiver"`
+	Denom    string              `json:"denom"`
+	Amount   *json.NumericString `json:"amount"`
 }
 
 type CronosSendToIBCParams struct {
@@ -44,8 +44,8 @@ type CronosSendToIBCParams struct {
 }
 
 type CronosSendToIBCToken struct {
-	Denom  string      `json:"denom"`
-	Amount json.Uint64 `json:"amount"`
+	Denom  string              `json:"denom"`
+	Amount *json.NumericString `json:"amount"`
 }
 
 type CronosSendToIBCHeight struct {

@@ -23,7 +23,7 @@ import (
 type Bridges struct {
 	logger applogger.Logger
 
-	bridgeActivitiesView *bridge_activitiy_view.BridgeActivities
+	bridgeActivitiesView bridge_activitiy_view.BridgeActivities
 	accountAddressPrefix string
 }
 
@@ -33,7 +33,7 @@ func NewBridges(logger applogger.Logger, rdbHandle *rdb.Handle, cosmosAddressPre
 			"module": "BridgesHandler",
 		}),
 
-		bridge_activitiy_view.NewBridgeActivities(rdbHandle),
+		bridge_activitiy_view.NewBridgeActivitiesView(rdbHandle),
 		cosmosAddressPrefix,
 	}
 }
@@ -362,8 +362,6 @@ func parseStatus(value string) (*types.Status, error) {
 		return primptr.String(types.STATUS_FAILED_ON_CHAIN), nil
 	case types.STATUS_COUNTERPARTY_REJECTED:
 		return primptr.String(types.STATUS_COUNTERPARTY_REJECTED), nil
-	case types.STATUS_NO_OPERATION:
-		return primptr.String(types.STATUS_NO_OPERATION), nil
 	default:
 		return nil, errors.New("unrecognized status")
 	}

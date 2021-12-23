@@ -53,7 +53,7 @@ func NewRDbBaseWithOptions(rdbHandle *rdb.Handle, projectionId string, options O
 }
 
 type Options struct {
-	// Customize table name in the RDb too keep the projection handling records
+	// Customize table name in the RDb to keep the projection block handling records
 	MaybeTable *string
 }
 

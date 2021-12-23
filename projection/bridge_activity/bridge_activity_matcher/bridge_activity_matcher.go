@@ -122,8 +122,8 @@ func (cronJob *BridgeActivityMatcher) Interval() time.Duration {
 }
 
 func (cronJob *BridgeActivityMatcher) Exec() error {
-	thisBridgePendingActivities := view.NewBridgePendingActivities(cronJob.thisRDbConn.ToHandle())
-	cryptoOrgChainBridgePendingActivities := view.NewBridgePendingActivities(cronJob.cryptoOrgChainRDbConn.ToHandle())
+	thisBridgePendingActivities := view.NewBridgePendingActivitiesView(cronJob.thisRDbConn.ToHandle())
+	cryptoOrgChainBridgePendingActivities := view.NewBridgePendingActivitiesView(cronJob.cryptoOrgChainRDbConn.ToHandle())
 
 	thisAllUnprocessedOutgoing, thisAllUnprocessedOutgoingErr := thisBridgePendingActivities.ListAllUnprocessedOutgoing()
 	if thisAllUnprocessedOutgoingErr != nil {
@@ -204,7 +204,7 @@ func (cronJob *BridgeActivityMatcher) Exec() error {
 
 func (cronJob *BridgeActivityMatcher) HandleOutgoing(
 	rows []view.BridgePendingActivityReadRow,
-	bridgePendingActivities *view.BridgePendingActivities,
+	bridgePendingActivities view.BridgePendingActivities,
 ) error {
 	if len(rows) == 0 {
 		return nil
@@ -221,7 +221,7 @@ func (cronJob *BridgeActivityMatcher) HandleOutgoing(
 
 func (cronJob *BridgeActivityMatcher) handleOutgoingRow(
 	row view.BridgePendingActivityReadRow,
-	bridgePendingActivities *view.BridgePendingActivities,
+	bridgePendingActivities view.BridgePendingActivities,
 ) error {
 	logger := cronJob.logger.WithFields(applogger.LogFields{
 		"rowType": types.DIRECTION_OUTGOING,
@@ -244,7 +244,7 @@ func (cronJob *BridgeActivityMatcher) handleOutgoingRow(
 
 	thisRDbTxHandle := thisRDbTx.ToHandle()
 
-	bridgeActivities := view.NewBridgeActivities(thisRDbTxHandle)
+	bridgeActivities := view.NewBridgeActivitiesView(thisRDbTxHandle)
 
 	if insertErr := bridgeActivities.Insert(&view.BridgeActivityInsertRow{
 		BridgeType:                           row.BridgeType,
@@ -288,7 +288,7 @@ func (cronJob *BridgeActivityMatcher) handleOutgoingRow(
 
 func (cronJob *BridgeActivityMatcher) HandleIncoming(
 	rows []view.BridgePendingActivityReadRow,
-	bridgePendingActivities *view.BridgePendingActivities,
+	bridgePendingActivities view.BridgePendingActivities,
 ) error {
 	if len(rows) == 0 {
 		return nil
@@ -305,7 +305,7 @@ func (cronJob *BridgeActivityMatcher) HandleIncoming(
 
 func (cronJob *BridgeActivityMatcher) handleIncomingRow(
 	row view.BridgePendingActivityReadRow,
-	bridgePendingActivities *view.BridgePendingActivities,
+	bridgePendingActivities view.BridgePendingActivities,
 ) error {
 	logger := cronJob.logger.WithFields(applogger.LogFields{
 		"rowType": types.DIRECTION_INCOMING,
@@ -327,7 +327,7 @@ func (cronJob *BridgeActivityMatcher) handleIncomingRow(
 
 	thisRDbTxHandle := thisRDbTx.ToHandle()
 
-	bridgeActivities := view.NewBridgeActivities(thisRDbTxHandle)
+	bridgeActivities := view.NewBridgeActivitiesView(thisRDbTxHandle)
 
 	commit := func() error {
 		if err := thisRDbTx.Commit(); err != nil {
