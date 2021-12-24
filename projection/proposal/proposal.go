@@ -6,12 +6,6 @@ import (
 	"math/big"
 	"time"
 
-	applogger "github.com/crypto-com/chain-indexing/external/logger"
-	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	appprojection "github.com/crypto-com/chain-indexing/projection"
-	"github.com/crypto-com/chain-indexing/projection/proposal/types"
-	"github.com/golang-migrate/migrate/v4"
-
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbparambase"
 	rdbparambase_types "github.com/crypto-com/chain-indexing/appinterface/projection/rdbparambase/types"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
@@ -20,7 +14,10 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
+	"github.com/crypto-com/chain-indexing/projection/proposal/types"
 	"github.com/crypto-com/chain-indexing/projection/proposal/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
@@ -52,14 +49,14 @@ type Proposal struct {
 
 	conNodeAddressPrefix string
 
-	config *appprojection.Config
+	migrationHelper migrationhelper.MigrationHelper
 }
 
 func NewProposal(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	conNodeAddressPrefix string,
-	config *appprojection.Config,
+	migrationHelper migrationhelper.MigrationHelper,
 ) *Proposal {
 	return &Proposal{
 		rdbprojectionbase.NewRDbBase(
@@ -88,7 +85,8 @@ func NewProposal(
 		rdbConn,
 		logger,
 		conNodeAddressPrefix,
-		config,
+
+		migrationHelper,
 	}
 }
 
@@ -114,38 +112,14 @@ func (proposal *Proposal) GetEventsToListen() []string {
 	)
 }
 
-const (
-	MIGRATION_TABLE_NAME = "proposal_schema_migrations"
-	MIGRATION_DIRECOTRY  = "projection/proposal/migrations"
-)
-
-func (projection *Proposal) migrationDBConnString() string {
-	conn := projection.rdbConn.(*pg.PgxConn)
-	connString := conn.ConnString()
-	if connString[len(connString)-1:] == "?" {
-		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
-	} else {
-		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
-	}
-}
+// const (
+// 	MIGRATION_TABLE_NAME = "proposal_schema_migrations"
+// 	MIGRATION_DIRECOTRY  = "projection/proposal/migrations"
+// )
 
 func (projection *Proposal) OnInit() error {
-	ref := ""
-	if projection.config.MigrationRepoRef != "" {
-		ref = "#" + projection.config.MigrationRepoRef
-	}
-	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY+ref),
-		projection.migrationDBConnString(),
-	)
-	if err != nil {
-		projection.logger.Errorf("failed to init migration: %v", err)
-		return err
-	}
-
-	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		projection.logger.Errorf("failed to run migration: %v", err)
-		return err
+	if projection.migrationHelper != nil {
+		projection.migrationHelper.Migrate()
 	}
 
 	return nil

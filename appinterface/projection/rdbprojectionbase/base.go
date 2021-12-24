@@ -25,11 +25,14 @@ type Base struct {
 
 // Create a new Base using table name in the RDb to keep the projection handling records
 func NewRDbBase(rdbHandle *rdb.Handle, projectionId string) *Base {
-	return NewRDbBaseWithOptions(rdbHandle, projectionId, Options{
-		MaybeConfigPtr: nil,
-
-		MaybeTable: primptr.String(DEFAULT_TABLE),
-	})
+	return NewRDbBaseWithOptions(
+		rdbHandle,
+		projectionId,
+		Options{
+			MaybeConfigPtr: nil,
+			MaybeTable:     primptr.String(DEFAULT_TABLE),
+		},
+	)
 }
 
 func NewRDbBaseWithOptions(rdbHandle *rdb.Handle, projectionId string, options Options) *Base {
@@ -39,9 +42,12 @@ func NewRDbBaseWithOptions(rdbHandle *rdb.Handle, projectionId string, options O
 	}
 
 	base := &Base{
-		Base: projection_usecase.NewBaseWithOptions(projectionId, projection_usecase.Options{
-			MaybeConfigPtr: options.MaybeConfigPtr,
-		}),
+		Base: projection_usecase.NewBaseWithOptions(
+			projectionId,
+			projection_usecase.Options{
+				MaybeConfigPtr: options.MaybeConfigPtr,
+			},
+		),
 
 		rdbHandle: rdbHandle,
 		store:     NewStore(table),
