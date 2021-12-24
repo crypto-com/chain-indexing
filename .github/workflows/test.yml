@@ -3,29 +3,6 @@ name: deploy
 on: [push, pull_request]
 
 jobs:
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-    - name: Install dependency
-      run: |
-        sudo apt update -y
-        sudo apt install build-essential -y
-    - uses: actions/setup-go@v2
-      with:
-        go-version: '1.17'
-    - name: Install golangci-lint
-      run: |
-        # binary will be $(go env GOPATH)/bin/golangci-lint
-        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.33.0
-    - name: Env
-      run: |
-        go version
-        golangci-lint --version
-    - uses: actions/checkout@v2
-    - name: Run check linting
-      run: GOLANGCI_LINT_PATH="$(go env GOPATH)/bin/golangci-lint" ./lint.sh
-
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -40,7 +17,9 @@ jobs:
         rustc --version
     - uses: actions/checkout@v2
     - name: Run test cases
-      run: ./test.sh run --install-dependency
+      run: |
+        go install github.com/onsi/ginkgo/ginkgo@v1.16.5
+
 
   # build:
   #   name: Test Building Docker Image
