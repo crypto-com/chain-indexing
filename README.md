@@ -22,6 +22,10 @@ func main() {
 	// Init configurations...
 	logger := infrastructure.NewZerologLogger(os.Stdout)
 	fileConfig := bootstrap.FileConfig{}
+	
+	// filling fileConfig
+	// ...
+	
 	config := bootstrap.Config{
 		FileConfig: fileConfig,
 	}
