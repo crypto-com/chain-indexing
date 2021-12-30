@@ -432,7 +432,7 @@ func initProjections(
     databaseURL := migrationhelper.GenerateDefaultDatabaseURL("Example", connString)
     migrationHelper := github_migrationhelper.NewGithubMigrationHelper(sourceURL, databaseURL)
 
-    projections = append(account_transaction.NewAccountTransaction(params.Logger, rdbConn, migrationHelper), projections)
+    projections = append(example.NewAdditionalProjection(params.Logger, rdbConn, migrationHelper), projections)
 
     return projections
 }
