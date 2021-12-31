@@ -11,7 +11,7 @@ func ValidatorIssueNewShares(
 	validator view.ValidatorRow,
 	amount coin.Int,
 ) (coin.Dec, error) {
-	issuedShares := coin.ZeroDec()
+	var issuedShares coin.Dec
 
 	if validator.Shares.IsZero() {
 		issuedShares = amount.ToDec()

@@ -106,11 +106,11 @@ func (projection *ValidatorDelegation) handleDelegate(
 			Shares:           coin.ZeroDec(),
 		}
 
-		if err := AddDelegationRecord(
+		if errAddDelRecord := AddDelegationRecord(
 			rdbTxHandle,
 			delegation,
-		); err != nil {
-			return fmt.Errorf("error CreateDelegation(): %v", err)
+		); errAddDelRecord != nil {
+			return fmt.Errorf("error CreateDelegation(): %v", errAddDelRecord)
 		}
 	}
 

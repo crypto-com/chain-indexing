@@ -164,9 +164,9 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 				return fmt.Errorf("error handleValidatorJailed: %v", err)
 			}
 
-		} else if _, ok := event.(*event_usecase.ValidatorSlashed); ok {
+			// } else if _, ok := event.(*event_usecase.ValidatorSlashed); ok {
 
-			// TODO: the real devil...
+			// 	// TODO: the real devil...
 
 		}
 	}
@@ -198,13 +198,13 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 				return fmt.Errorf("error handleDelegate: %v", err)
 			}
 
-		} else if _, ok := event.(*event_usecase.MsgUndelegate); ok {
+			// } else if _, ok := event.(*event_usecase.MsgUndelegate); ok {
 
-			// TODO
+			// 	// TODO
 
-		} else if _, ok := event.(*event_usecase.MsgBeginRedelegate); ok {
+			// } else if _, ok := event.(*event_usecase.MsgBeginRedelegate); ok {
 
-			// TODO
+			// 	// TODO
 
 		} else if typedEvent, ok := event.(*event_usecase.MsgUnjail); ok {
 
