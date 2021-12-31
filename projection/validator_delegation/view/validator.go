@@ -64,6 +64,13 @@ func (view *ValidatorsView) List(
 	return nil, nil, nil
 }
 
+// Notes on `Validator.Status`:
+//
+// - MsgCreateValidator, CreateGenesisValidator: Validator.Status = Unbonded
+// - PowerChanged event:
+//   - power > 0: Validator.Status = Bonded
+//   - power = 0: Validator.Status = Unbonding, UnbondingValidator entry created
+// - UnbondingValidator complete unbinding period: Validator.Status = Unbonded
 type ValidatorRow struct {
 	Height int64 `json:"height"`
 

@@ -36,7 +36,7 @@ func (projection *ValidatorDelegation) handleCreateNewValidator(
 		OperatorAddress:      validatorAddress,
 		ConsensusNodeAddress: consensusNodeAddress,
 
-		Status: types.Unbonded,
+		Status: types.UNBONDED,
 		Jailed: false,
 		Power:  "0",
 
@@ -218,7 +218,7 @@ func (projection *ValidatorDelegation) handlePowerChanged(
 	}
 
 	if power == "0" {
-		validator.Status = types.Unbonding
+		validator.Status = types.UNBONDING
 
 		// UnbindingHeight is the height when unbinding start
 		// UnbindingTime is the time when unbinding is finished
@@ -233,7 +233,7 @@ func (projection *ValidatorDelegation) handlePowerChanged(
 	} else {
 		// In this case, power should be larger than 0.
 
-		validator.Status = types.Bonded
+		validator.Status = types.BONDED
 
 		// Remove the validator from UnbindingValidators set, if exist
 		if err := unbindingValidatorsView.RemoveIfExist(validator.OperatorAddress); err != nil {
@@ -274,7 +274,7 @@ func (projection *ValidatorDelegation) unbindAllMatureUnbindingValidators(
 			return fmt.Errorf("error validatorsView.FindByOperatorAddr(): %v", err)
 		}
 
-		validator.Status = types.Unbonded
+		validator.Status = types.UNBONDED
 
 		if err := validatorsView.Update(validator); err != nil {
 			return fmt.Errorf("error validatorsView.Update(): %v", err)

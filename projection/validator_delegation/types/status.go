@@ -4,9 +4,9 @@ type ValidatorStatus string
 
 const (
 	// UNBONDED defines a validator that is not bonded.
-	Unbonded ValidatorStatus = "UNBONDED"
+	UNBONDED ValidatorStatus = "Unbonded"
 	// UNBONDING defines a validator that is unbonding.
-	Unbonding ValidatorStatus = "UNBONDING"
+	UNBONDING ValidatorStatus = "Unbinding"
 	// BONDED defines a validator that is bonded.
-	Bonded ValidatorStatus = "BONDED"
+	BONDED ValidatorStatus = "Bonded"
 )
