@@ -17,7 +17,7 @@ jobs:
         rustc --version
     - uses: actions/checkout@v2
     - name: Run test cases
-      run: make test_local
+      run: make test
 
   # build:
   #   name: Test Building Docker Image
