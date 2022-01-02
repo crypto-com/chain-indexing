@@ -3,12 +3,11 @@ package view
 import (
 	"errors"
 	"fmt"
+	sq "github.com/Masterminds/squirrel"
 	"strconv"
 
-	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
-
-	sq "github.com/Masterminds/squirrel"
 	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
+	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	jsoniter "github.com/json-iterator/go"
@@ -43,7 +42,7 @@ func (eventsView *BlockEvents) Insert(blockEvent *BlockEventRow) error {
 
 	var blockEventDataJSON string
 	if blockEventDataJSON, err = jsoniter.MarshalToString(blockEvent.Data); err != nil {
-		return fmt.Errorf("error JSON marshalling block transation messages for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
+		return fmt.Errorf("error JSON marshalling block event data for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
 	result, err := eventsView.rdb.Exec(sql,
@@ -53,10 +52,10 @@ func (eventsView *BlockEvents) Insert(blockEvent *BlockEventRow) error {
 		blockEventDataJSON,
 	)
 	if err != nil {
-		return fmt.Errorf("error inserting block transaction into the table: %v: %w", err, rdb.ErrWrite)
+		return fmt.Errorf("error inserting block event data into the table: %v: %w", err, rdb.ErrWrite)
 	}
 	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error inserting block transaction into the table: no rows inserted: %w", rdb.ErrWrite)
+		return fmt.Errorf("error inserting block event data into the table: no rows inserted: %w", rdb.ErrWrite)
 	}
 
 	return nil
@@ -86,7 +85,7 @@ func (eventsView *BlockEvents) InsertAll(blockEvents []BlockEventRow) error {
 		blockEventDataJSON, marshalErr := jsoniter.MarshalToString(blockEvent.Data)
 		if marshalErr != nil {
 			return fmt.Errorf(
-				"error JSON marshalling block transation messages for insertion: %v: %w",
+				"error JSON marshalling block event data for insertion: %v: %w",
 				marshalErr, rdb.ErrBuildSQLStmt,
 			)
 		}
@@ -103,16 +102,16 @@ func (eventsView *BlockEvents) InsertAll(blockEvents []BlockEventRow) error {
 		if pendingRowCount == 500 || i+1 == blockEventCount {
 			sql, sqlArgs, err := stmtBuilder.ToSql()
 			if err != nil {
-				return fmt.Errorf("error building events batch insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+				return fmt.Errorf("error building block events batch insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 			}
 
 			result, err := eventsView.rdb.Exec(sql, sqlArgs...)
 			if err != nil {
-				return fmt.Errorf("error inserting block transaction into the table: %v: %w", err, rdb.ErrWrite)
+				return fmt.Errorf("error batch inserting block events into the table: %v: %w", err, rdb.ErrWrite)
 			}
 			if result.RowsAffected() != int64(pendingRowCount) {
 				return fmt.Errorf(
-					"error batch inserting block transaction into the table: mismatched number of rows inserted: %w",
+					"error batch inserting block events into the table: mismatched number of rows inserted: %w",
 					rdb.ErrWrite,
 				)
 			}
@@ -158,17 +157,17 @@ func (eventsView *BlockEvents) FindById(id int64) (*BlockEventRow, error) {
 		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
 		}
-		return nil, fmt.Errorf("error scanning transaction row: %v: %w", err, rdb.ErrQuery)
+		return nil, fmt.Errorf("error scanning block event row: %v: %w", err, rdb.ErrQuery)
 	}
 	blockTime, parseErr := blockTimeReader.Parse()
 	if parseErr != nil {
-		return nil, fmt.Errorf("error parsing transaction block time: %v: %w", parseErr, rdb.ErrQuery)
+		return nil, fmt.Errorf("error parsing block event time: %v: %w", parseErr, rdb.ErrQuery)
 	}
 	blockEvent.BlockTime = *blockTime
 
 	var blockEventData BlockEventRowData
 	if unmarshalErr := jsoniter.Unmarshal([]byte(*blockEventDataJSON), &blockEventData); unmarshalErr != nil {
-		return nil, fmt.Errorf("error unmarshalling transaction messages JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
+		return nil, fmt.Errorf("error unmarshalling block event data JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 	}
 	blockEvent.Data = blockEventData
 
@@ -219,12 +218,12 @@ func (eventsView *BlockEvents) List(
 	).BuildStmt(stmtBuilder)
 	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
 	if err != nil {
-		return nil, nil, fmt.Errorf("error building transactions select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
+		return nil, nil, fmt.Errorf("error building block events select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
 	}
 
 	rowsResult, err := eventsView.rdb.Query(sql, sqlArgs...)
 	if err != nil {
-		return nil, nil, fmt.Errorf("error executing transactions select SQL: %v: %w", err, rdb.ErrQuery)
+		return nil, nil, fmt.Errorf("error executing block events select SQL: %v: %w", err, rdb.ErrQuery)
 	}
 	defer rowsResult.Close()
 
@@ -244,17 +243,17 @@ func (eventsView *BlockEvents) List(
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
 			}
-			return nil, nil, fmt.Errorf("error scanning transaction row: %v: %w", err, rdb.ErrQuery)
+			return nil, nil, fmt.Errorf("error scanning block event row: %v: %w", err, rdb.ErrQuery)
 		}
 		blockTime, parseErr := blockTimeReader.Parse()
 		if parseErr != nil {
-			return nil, nil, fmt.Errorf("error parsing transaction block time: %v: %w", parseErr, rdb.ErrQuery)
+			return nil, nil, fmt.Errorf("error parsing block event time: %v: %w", parseErr, rdb.ErrQuery)
 		}
 		blockEvent.BlockTime = *blockTime
 
 		var blockEventData BlockEventRowData
 		if unmarshalErr := jsoniter.Unmarshal([]byte(*blockEventDataJSON), &blockEventData); unmarshalErr != nil {
-			return nil, nil, fmt.Errorf("error unmarshalling transaction messages JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
+			return nil, nil, fmt.Errorf("error unmarshalling block event data JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 		}
 		blockEvent.Data = blockEventData
 

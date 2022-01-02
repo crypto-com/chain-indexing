@@ -8,7 +8,7 @@ GINKGO = $(shell command -v ginkgo)
 DOCKER = $(shell command -v docker)
 DOCKER_COMPOSE = $(shell command -v docker-compose)
 
-# TODO: Support no DB test options
+TEST_DB ?= 1
 
 has_golang:
 ifndef GO
@@ -50,6 +50,7 @@ build_ginkgo_image:
 test: has_docker has_docker_compose has_golang build_ginkgo_image
 	# TODO: Migrate coin test cases to Ginkgo
 	docker run --rm -v $(shell pwd):/app -w /app \
+		-e TEST_DB=$(TEST_DB) \
 		crypto-com/chain-indexing/ginkgo \
 		ginkgo -r && \
 		go test ./usecase/coin/...
@@ -65,7 +66,7 @@ ginkgo: has_docker has_docker_compose build_ginkgo_image
 		ginkgo $(filter-out $@,$(MAKECMDGOALS))
 
 test_local: has_golang install_ginkgo_local has_ginkgo
-	$(GINKGO) -r
+	TEST_DB=$(TEST_DB) $(GINKGO) -r
 	$(GO) test ./usecase/coin/...
 
 test_watch_local: has_golang install_ginkgo_local has_ginkgo

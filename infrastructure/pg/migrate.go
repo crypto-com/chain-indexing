@@ -3,11 +3,14 @@ package pg
 import (
 	"errors"
 	"fmt"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 
 	gomigrate "github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
+
+var _ rdb.Migrate = &Migrate{}
 
 type Migrate struct {
 	*gomigrate.Migrate
@@ -28,7 +31,7 @@ func MustNewMigrate(config *ConnConfig, sourceFolder string) *Migrate {
 }
 
 func NewMigrate(config *ConnConfig, sourceFolder string) (*Migrate, error) {
-	m, err := _newMigrate(config, sourceFolder)
+	m, err := newGoMigrate(config, sourceFolder)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +47,7 @@ func NewMigrate(config *ConnConfig, sourceFolder string) (*Migrate, error) {
 	}, nil
 }
 
-func _newMigrate(config *ConnConfig, sourceFolder string) (*gomigrate.Migrate, error) {
+func newGoMigrate(config *ConnConfig, sourceFolder string) (*gomigrate.Migrate, error) {
 	return gomigrate.New(
 		fmt.Sprintf("file://%s", sourceFolder),
 		config.ToURL(),
@@ -109,7 +112,7 @@ func (m *Migrate) Reset() error {
 	// There is a known bug of "golang-migrate" that after `Drop()`, "schema_migrations" won't be
 	// create by `Up()`. The solution is to re-create the "golang-migrate" client
 	if m.reCreateClientOnReset {
-		migrate, err := _newMigrate(m.config, m.sourceFolder)
+		migrate, err := newGoMigrate(m.config, m.sourceFolder)
 		if err != nil {
 			return err
 		}

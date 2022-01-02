@@ -17,9 +17,7 @@ jobs:
         rustc --version
     - uses: actions/checkout@v2
     - name: Run test cases
-      run: |
-        go install github.com/onsi/ginkgo/ginkgo@v1.16.5
-
+      run: make test_local
 
   # build:
   #   name: Test Building Docker Image

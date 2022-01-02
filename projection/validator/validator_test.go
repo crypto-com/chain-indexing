@@ -1,16 +1,16 @@
 package validator_test
 
 import (
-	. "github.com/crypto-com/chain-indexing/external/logger/test"
-	"github.com/crypto-com/chain-indexing/external/primptr"
+	"path"
+	"runtime"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
-	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
+	. "github.com/crypto-com/chain-indexing/external/logger/test"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/external/utctime"
-	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/crypto-com/chain-indexing/projection/validator"
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 	validator_view "github.com/crypto-com/chain-indexing/projection/validator/view"
@@ -23,21 +23,37 @@ import (
 
 const prefixConsensusAddress string = "crocnclcons"
 
-var _ = Describe("Validator Events", func() {
-	It("should implement projection", func() {
-		fakeLogger := NewFakeLogger()
-		fakeRdbConn := NewFakeRDbConn()
-		var _ entity_projection.Projection = validator.NewValidator(fakeLogger, fakeRdbConn, prefixConsensusAddress, nil)
-	})
+var VALIDATOR_MIGRATIONS_PATH = func() string {
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		panic("error retrieving file directory")
+	}
 
-	WithTestPgxConn(func(pgConn *pg.PgxConn, pgMigrate *pg.Migrate) {
+	return path.Join(filename, "../migrations")
+}()
+
+var _ = Describe("Validator projection", func() {
+	WithProjectionTestEnv(func(testEnv ProjectionTestEnv) {
+		pgxConn := testEnv.Conn
+
+		reset := func() {
+			// Only needs to run Reset() on one of the migrate instance because Reset() drops everything in the Database
+			_ = testEnv.RootMigrate.Reset()
+		}
+
 		BeforeEach(func() {
-			_ = pgMigrate.Reset()
-			pgMigrate.MustUp()
+			reset()
+
+			testEnv.RootMigrate.MustUp()
+			projectionMigrate := testEnv.MigrateCreator(
+				"validatorstats_schema_migrations",
+				VALIDATOR_MIGRATIONS_PATH,
+			)
+			projectionMigrate.MustUp()
 		})
 
 		AfterEach(func() {
-			_ = pgMigrate.Reset()
+			reset()
 		})
 
 		It("should match the last projection handled block height with the fired event block height", func() {
@@ -92,7 +108,7 @@ var _ = Describe("Validator Events", func() {
 			}, createValidatorParams)
 			fakeLogger := NewFakeLogger()
 
-			projection := validator.NewValidator(fakeLogger, pgConn, prefixConsensusAddress, nil)
+			projection := validator.NewValidator(fakeLogger, pgxConn, prefixConsensusAddress, nil)
 
 			err := projection.HandleEvents(anyHeight, []event_entity.Event{
 				event,
@@ -104,7 +120,7 @@ var _ = Describe("Validator Events", func() {
 		})
 
 		It("should increment the validator view count after handling MsgCreateValidator event", func() {
-			validatorView := validator_view.NewValidators(pgConn.ToHandle())
+			validatorView := validator_view.NewValidators(pgxConn.ToHandle())
 
 			anyHeight := int64(1)
 
@@ -165,7 +181,7 @@ var _ = Describe("Validator Events", func() {
 			}
 			fakeLogger := NewFakeLogger()
 
-			projection := validator.NewValidator(fakeLogger, pgConn, prefixConsensusAddress, nil)
+			projection := validator.NewValidator(fakeLogger, pgxConn, prefixConsensusAddress, nil)
 
 			validatorViewCountBeforeHandling, err := validatorView.Count(countFilter)
 
@@ -190,7 +206,7 @@ var _ = Describe("Validator Events", func() {
 			anyHeight := int64(1)
 
 			fakeLogger := NewFakeLogger()
-			projection := validator.NewValidator(fakeLogger, pgConn, prefixConsensusAddress, nil)
+			projection := validator.NewValidator(fakeLogger, pgxConn, prefixConsensusAddress, nil)
 
 			Expect(projection.GetLastHandledEventHeight()).To(BeNil())
 
