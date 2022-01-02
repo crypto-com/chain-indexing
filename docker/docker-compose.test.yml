@@ -22,7 +22,8 @@ services:
     volumes:
       - ..:/app
     working_dir: /app
-    command: ginkgo -r
+    command: >
+      bash -c "ginkgo -r && go test ./usecase/coin/..."
     environment:
       TEST_DB: "${TEST_DB:-1}"
       TEST_POSTGRES_HOST: "${TEST_POSTGRES_HOST:-postgres}"

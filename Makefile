@@ -48,12 +48,16 @@ build_ginkgo_image:
 	docker build -t crypto-com/chain-indexing/ginkgo docker/ginkgo
 
 test: has_docker has_docker_compose has_golang build_ginkgo_image
+ifeq ($(TEST_DB), 1)
+	docker-compose -f docker/docker-compose.test.yml up --abort-on-container-exit
+else
 	# TODO: Migrate coin test cases to Ginkgo
 	docker run --rm -v $(shell pwd):/app -w /app \
 		-e TEST_DB=$(TEST_DB) \
 		crypto-com/chain-indexing/ginkgo \
 		ginkgo -r && \
 		go test ./usecase/coin/...
+endif
 
 test_watch: has_docker has_docker_compose build_ginkgo_image
 	docker run --rm -v $(shell pwd):/app -w /app \
