@@ -1,43 +1,58 @@
 package block_test
 
 import (
-	. "github.com/crypto-com/chain-indexing/appinterface/rdb/test"
-	. "github.com/crypto-com/chain-indexing/entity/event/test"
-	. "github.com/crypto-com/chain-indexing/external/logger/test"
-	"github.com/crypto-com/chain-indexing/external/primptr"
-	"github.com/crypto-com/chain-indexing/projection/block"
-	view2 "github.com/crypto-com/chain-indexing/projection/block/view"
-	. "github.com/crypto-com/chain-indexing/test"
+	"path"
+	"runtime"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
-	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
+	. "github.com/crypto-com/chain-indexing/external/logger/test"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/external/utctime"
-	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	"github.com/crypto-com/chain-indexing/projection/block"
+	block_view "github.com/crypto-com/chain-indexing/projection/block/view"
+	. "github.com/crypto-com/chain-indexing/test"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 )
 
-var _ = Describe("Block", func() {
-	It("should implement projection", func() {
-		fakeLogger := NewFakeLogger()
-		fakeRdbConn := NewFakeRDbConn()
-		var _ entity_projection.Projection = block.NewBlock(fakeLogger, fakeRdbConn, nil)
-	})
+var BLOCK_MIGRATIONS_PATH = func() string {
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		panic("error retrieving file directory")
+	}
 
-	WithTestPgxConn(func(pgConn *pg.PgxConn, pgMigrate *pg.Migrate) {
+	return path.Join(filename, "../migrations")
+}()
+
+var _ = Describe("Block", func() {
+	WithProjectionTestEnv(func(testEnv ProjectionTestEnv) {
+		pgxConn := testEnv.Conn
+
+		reset := func() {
+			// Only needs to run Reset() on one of the migrate instance because Reset() drops everything in the Database
+			_ = testEnv.RootMigrate.Reset()
+		}
+
 		BeforeEach(func() {
-			_ = pgMigrate.Reset()
-			pgMigrate.MustUp()
+			reset()
+
+			testEnv.RootMigrate.MustUp()
+			blockMigrate := testEnv.MigrateCreator(
+				"block_schema_migrations",
+				BLOCK_MIGRATIONS_PATH,
+			)
+			blockMigrate.MustUp()
 		})
 
 		AfterEach(func() {
-			_ = pgMigrate.Reset()
+			reset()
 		})
 
 		It("should project Blocks view when event is BlockCreated", func() {
-			blocksView := view2.NewBlocks(pgConn.ToHandle())
+			blocksView := block_view.NewBlocks(pgxConn.ToHandle())
 
 			anyHeight := int64(1)
 			event := event_usecase.NewBlockCreated(&usecase_model.Block{
@@ -66,7 +81,7 @@ var _ = Describe("Block", func() {
 			})
 
 			fakeLogger := NewFakeLogger()
-			projection := block.NewBlock(fakeLogger, pgConn, nil)
+			projection := block.NewBlock(fakeLogger, pgxConn, nil)
 
 			Expect(blocksView.Count()).To(Equal(int64(0)))
 
@@ -74,18 +89,18 @@ var _ = Describe("Block", func() {
 			Expect(err).To(BeNil())
 			Expect(blocksView.Count()).To(Equal(int64(1)))
 
-			actual, err := blocksView.FindBy(&view2.BlockIdentity{
+			actual, err := blocksView.FindBy(&block_view.BlockIdentity{
 				MaybeHeight: primptr.Int64(anyHeight),
 			})
 
 			Expect(err).To(BeNil())
-			Expect(actual).To(Equal(&view2.Block{
+			Expect(actual).To(Equal(&block_view.Block{
 				Height:           anyHeight,
 				Hash:             "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
 				Time:             utctime.FromUnixNano(int64(1000000)),
 				AppHash:          "24474D86CBFA7E6328D473C17A9E46CD5A80FFE82A348A74844BF3E2BA2B3AF1",
 				TransactionCount: 1,
-				CommittedCouncilNodes: []view2.BlockCommittedCouncilNode{
+				CommittedCouncilNodes: []block_view.BlockCommittedCouncilNode{
 					{
 						Address:    "F9E6FFB9B536956201AA138224FD888D03775AB4",
 						Time:       utctime.FromUnixNano(int64(1000000)),
@@ -106,7 +121,7 @@ var _ = Describe("Block", func() {
 			anyHeight := int64(1)
 
 			fakeLogger := NewFakeLogger()
-			projection := block.NewBlock(fakeLogger, pgConn, nil)
+			projection := block.NewBlock(fakeLogger, pgxConn, nil)
 
 			Expect(projection.GetLastHandledEventHeight()).To(BeNil())
 
@@ -114,21 +129,6 @@ var _ = Describe("Block", func() {
 			Expect(err).To(BeNil())
 
 			Expect(projection.GetLastHandledEventHeight()).To(Equal(primptr.Int64(anyHeight)))
-		})
-
-		It("should not persist projection nor last handled event height on handling error", func() {
-			blocksView := view2.NewBlocks(pgConn.ToHandle())
-
-			anyHeight := int64(1)
-			event := NewFakeEvent()
-
-			fakeLogger := NewFakeLogger()
-			projection := block.NewBlock(fakeLogger, pgConn, nil)
-			Expect(blocksView.Count()).To(Equal(int64(0)))
-
-			err := projection.HandleEvents(anyHeight, []event_entity.Event{event})
-			Expect(err).NotTo(BeNil())
-			Expect(blocksView.Count()).To(Equal(int64(0)))
 		})
 	})
 })
