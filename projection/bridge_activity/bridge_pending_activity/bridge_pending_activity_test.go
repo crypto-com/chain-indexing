@@ -1975,6 +1975,121 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 				return mocks, assertFunc
 			},
 		},
+		{
+			Name: "It should not handle CronosSendToIBCCreated event that has not reach listened channel starting height",
+			Config: bridge_pending_activity.Config{
+				ThisChainName: "this",
+				CounterPartyChains: []bridge_pending_activity.CounterPartyChainConfig{
+					{
+						ChainName:      "counterparty0",
+						ChannelId:      "channel-0",
+						StartingHeight: 100,
+					},
+					{
+						ChainName:      "counterparty1",
+						ChannelId:      "channel-1",
+						StartingHeight: 100,
+					},
+				},
+			},
+			Events: []entity_event.Event{
+				&event_usecase.BlockCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					Block: &usecase_model.Block{
+						Height:          1,
+						Hash:            "Hash",
+						Time:            utctime.FromUnixNano(1),
+						AppHash:         "AppHash",
+						ProposerAddress: "ProposerAddress",
+						Txs:             nil,
+						Signatures:      nil,
+						Evidences:       nil,
+					},
+				},
+				&event_usecase.CronosSendToIBCCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.CRONOS_SEND_TO_IBC_CREATED,
+						Version:     0,
+						BlockHeight: 1,
+					}),
+					Params: usecase_model.CronosSendToIBCParams{
+						TxHash:         "TxHash",
+						EthereumTxHash: "EthereumTxHash",
+						SourcePort:     "transfer",
+						SourceChannel:  "channel-0",
+						Token: usecase_model.CronosSendToIBCToken{
+							Denom:  "basecro",
+							Amount: json.NewNumericStringFromUint64(100),
+						},
+						Sender:   "from",
+						Receiver: "to",
+						TimeoutHeight: usecase_model.CronosSendToIBCHeight{
+							RevisionNumber: 0,
+							RevisionHeight: 0,
+						},
+						TimeoutTimestamp:   "",
+						PacketDataHex:      "packetdatahex",
+						PacketSequence:     0,
+						DestinationPort:    "transfer",
+						DestinationChannel: "channel-2",
+						ChannelOrdering:    "UNORDERED",
+						ConnectionID:       "connection-0",
+					},
+				},
+				&event_usecase.CronosSendToIBCCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.CRONOS_SEND_TO_IBC_CREATED,
+						Version:     0,
+						BlockHeight: 1,
+					}),
+					Params: usecase_model.CronosSendToIBCParams{
+						TxHash:         "TxHash",
+						EthereumTxHash: "EthereumTxHash",
+						SourcePort:     "transfer",
+						SourceChannel:  "channel-1",
+						Token: usecase_model.CronosSendToIBCToken{
+							Denom:  "basecro",
+							Amount: json.NewNumericStringFromUint64(200),
+						},
+						Sender:   "from",
+						Receiver: "to",
+						TimeoutHeight: usecase_model.CronosSendToIBCHeight{
+							RevisionNumber: 0,
+							RevisionHeight: 0,
+						},
+						TimeoutTimestamp:   "",
+						PacketDataHex:      "packetdatahex",
+						PacketSequence:     0,
+						DestinationPort:    "transfer",
+						DestinationChannel: "channel-2",
+						ChannelOrdering:    "UNORDERED",
+						ConnectionID:       "connection-0",
+					},
+				},
+			},
+			MockFunc: func() (mocks []*testify_mock.Mock, assertFunc func()) {
+				mockBridgePendingActivitiesView := view.NewMockBridgePendingActivitiesView().(*view.MockBridgePendingActivitiesView)
+				mocks = append(mocks, &mockBridgePendingActivitiesView.Mock)
+
+				bridge_pending_activity.NewBridgePendingActivities = func(_ *rdb.Handle) view.BridgePendingActivities {
+					return mockBridgePendingActivitiesView
+				}
+
+				bridge_pending_activity.UpdateLastHandledEventHeight = func(_ *bridge_pending_activity.BridgePendingActivity, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				assertFunc = func() {
+					mockBridgePendingActivitiesView.AssertNumberOfCalls(t, "Insert", 0)
+				}
+
+				return mocks, assertFunc
+			},
+		},
 	}
 
 	for _, tc := range testCases {
