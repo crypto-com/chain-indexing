@@ -148,7 +148,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 	for _, event := range events {
 		if msgIBCTransferTransfer, ok := event.(*event_usecase.MsgIBCTransferTransfer); ok {
 			channelId := msgIBCTransferTransfer.Params.SourceChannel
-			if !projection.isListenedChannel(channelId) {
+			if !projection.isListenedChannelAtBlockHeight(channelId, height) {
 				continue
 			}
 			counterpartyConfig := projection.mustGetCounterpartyChainConfigByListenedChannel(channelId)
@@ -221,7 +221,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 
 		} else if msgIBCRecvPacket, ok := event.(*event_usecase.MsgIBCRecvPacket); ok {
 			channelId := msgIBCRecvPacket.Params.Packet.DestinationChannel
-			if !projection.isListenedChannel(channelId) {
+			if !projection.isListenedChannelAtBlockHeight(channelId, height) {
 				continue
 			}
 			counterpartyConfig := projection.mustGetCounterpartyChainConfigByListenedChannel(channelId)
@@ -271,7 +271,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 
 		} else if msgIBCAcknowledgement, ok := event.(*event_usecase.MsgIBCAcknowledgement); ok {
 			channelId := msgIBCAcknowledgement.Params.Packet.SourceChannel
-			if !projection.isListenedChannel(channelId) {
+			if !projection.isListenedChannelAtBlockHeight(channelId, height) {
 				continue
 			}
 			counterpartyConfig := projection.mustGetCounterpartyChainConfigByListenedChannel(channelId)
@@ -321,7 +321,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 
 		} else if msgIBCTimeout, ok := event.(*event_usecase.MsgIBCTimeout); ok {
 			channelId := msgIBCTimeout.Params.Packet.SourceChannel
-			if !projection.isListenedChannel(channelId) {
+			if !projection.isListenedChannelAtBlockHeight(channelId, height) {
 				continue
 			}
 			counterpartyConfig := projection.mustGetCounterpartyChainConfigByListenedChannel(channelId)
@@ -362,7 +362,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 
 		} else if cronosSendToIBCCreatedEvent, ok := event.(*event_usecase.CronosSendToIBCCreated); ok {
 			channelId := cronosSendToIBCCreatedEvent.Params.SourceChannel
-			if !projection.isListenedChannel(channelId) {
+			if !projection.isListenedChannelAtBlockHeight(channelId, height) {
 				continue
 			}
 			counterpartyConfig := projection.mustGetCounterpartyChainConfigByListenedChannel(channelId)
@@ -404,16 +404,24 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 	return commit()
 }
 
-func (projection *BridgePendingActivity) isListenedChannel(channelId string) bool {
-	_, exists := projection.listenedChannelIdToConfig[channelId]
-	return exists
+func (projection *BridgePendingActivity) isListenedChannelAtBlockHeight(
+	channelId string, blockHeight int64,
+) bool {
+	config, exists := projection.listenedChannelIdToConfig[channelId]
+	if !exists {
+		return false
+	}
+
+	return blockHeight >= config.StartingHeight
 }
 
 func (projection *BridgePendingActivity) mustGetCounterpartyChainConfigByListenedChannel(channelId string) *CounterPartyChainConfig {
-	if !projection.isListenedChannel(channelId) {
+	config, exists := projection.listenedChannelIdToConfig[channelId]
+	if !exists {
 		panic(fmt.Sprintf("channel id %s not found", channelId))
 	}
-	return projection.listenedChannelIdToConfig[channelId]
+
+	return config
 }
 
 func ibcLinkId(sourceChain string, sequence uint64) string {
