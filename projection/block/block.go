@@ -75,8 +75,6 @@ func (projection *Block) HandleEvents(height int64, events []event_entity.Event)
 			if handleErr := projection.handleBlockCreatedEvent(blocksView, blockCreatedEvent); handleErr != nil {
 				return fmt.Errorf("error handling BlockCreatedEvent: %v", handleErr)
 			}
-		} else {
-			return fmt.Errorf("received unexpected event %sV%d(%s)", event.Name(), event.Version(), event.UUID())
 		}
 	}
 	if err = projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {

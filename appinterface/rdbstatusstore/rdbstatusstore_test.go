@@ -1,24 +1,25 @@
 package rdbstatusstore_test
 
 import (
-	"github.com/crypto-com/chain-indexing/external/primptr"
-	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	. "github.com/crypto-com/chain-indexing/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/appinterface/rdbstatusstore"
+	"github.com/crypto-com/chain-indexing/external/primptr"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	. "github.com/crypto-com/chain-indexing/test"
 )
 
 var _ = Describe("RdbStatusStore", func() {
-	WithTestPgxConn(func(pgxConn *pg.PgxConn, pgMigrate *pg.Migrate) {
+	WithTestPgxConn(func(pgxConn *pg.PgxConn, migrate rdb.Migrate) {
 		BeforeEach(func() {
-			_ = pgMigrate.Reset()
-			pgMigrate.MustUp()
+			_ = migrate.Reset()
+			migrate.MustUp()
 		})
 
 		AfterEach(func() {
-			_ = pgMigrate.Reset()
+			_ = migrate.Reset()
 		})
 
 		Describe("GetLastIndexedBlockHeight", func() {
