@@ -9,12 +9,11 @@ import (
 type Delegations interface {
 	Clone(previousHeight int64, currentHeight int64) error
 
-	Insert(DelegationRow) error
-	Update(DelegationRow) error
+	Insert(row DelegationRow) error
+	Update(row DelegationRow) error
+	Delete(row DelegationRow) error
 
 	FindBy(validatorAddress string, delegatorAddress string, height int64) (DelegationRow, bool, error)
-	FindByValidatorAddr(validatorAddress string, height int64) (DelegationRow, error)
-	FindByDelegatorAddr(delegatorAddress string, height int64) (DelegationRow, error)
 
 	ListByValidatorAddr(
 		validatorAddress string,
@@ -53,6 +52,11 @@ func (view *DelegationsView) Update(row DelegationRow) error {
 	return nil
 }
 
+func (view *DelegationsView) Delete(row DelegationRow) error {
+
+	return nil
+}
+
 func (view *DelegationsView) FindBy(
 	validatorAddress string,
 	delegatorAddress string,
@@ -62,16 +66,6 @@ func (view *DelegationsView) FindBy(
 	// TODO need to handle the case when row NOT exist
 
 	return DelegationRow{}, false, nil
-}
-
-func (view *DelegationsView) FindByValidatorAddr(validatorAddress string, height int64) (DelegationRow, error) {
-
-	return DelegationRow{}, nil
-}
-
-func (view *DelegationsView) FindByDelegatorAddr(delegatorAddress string, height int64) (DelegationRow, error) {
-
-	return DelegationRow{}, nil
 }
 
 func (view *DelegationsView) ListByValidatorAddr(
@@ -92,6 +86,10 @@ func (view *DelegationsView) ListByDelegatorAddr(
 	return nil, nil, nil
 }
 
+// TODO:
+// - UNIQUE(height, validatorAddress, delegatorAddress)
+// - INDEX(height, validatorAddress)
+// - INDEX(height, delegatorAddress)
 type DelegationRow struct {
 	Height           int64    `json:"height"`
 	ValidatorAddress string   `json:"validatorAddress"`

@@ -10,8 +10,9 @@ import (
 
 type Validators interface {
 	Clone(previousHeight int64, currentHeight int64) error
-	Insert(ValidatorRow) error
-	Update(ValidatorRow) error
+	Insert(row ValidatorRow) error
+	Update(row ValidatorRow) error
+	Delete(row ValidatorRow) error
 	FindByOperatorAddr(operatorAddress string, height int64) (ValidatorRow, error)
 	FindByConsensusNodeAddr(consensusNodeAddress string, height int64) (ValidatorRow, error)
 	List(height int64, pagination *pagination.Pagination) ([]ValidatorRow, *pagination.PaginationResult, error)
@@ -38,6 +39,11 @@ func (view *ValidatorsView) Insert(row ValidatorRow) error {
 }
 
 func (view *ValidatorsView) Update(row ValidatorRow) error {
+
+	return nil
+}
+
+func (view *ValidatorsView) Delete(row ValidatorRow) error {
 
 	return nil
 }
@@ -70,7 +76,11 @@ func (view *ValidatorsView) List(
 // - PowerChanged event:
 //   - power > 0: Validator.Status = Bonded
 //   - power = 0: Validator.Status = Unbonding, UnbondingValidator entry created
-// - UnbondingValidator complete unbinding period: Validator.Status = Unbonded
+// - UnbondingValidator complete Unbonding period: Validator.Status = Unbonded
+
+// TODO:
+// - UNIQUE(height, operatorAddress)
+// - UNIQUE(height, consensusNodeAddress)
 type ValidatorRow struct {
 	Height int64 `json:"height"`
 
@@ -81,12 +91,13 @@ type ValidatorRow struct {
 	Jailed bool                  `json:"jailed"`
 	Power  string                `json:"power"`
 
-	// `UnbindingHeight` and `UnbindingTime` only useful when `Status` is `unbinding`
-	// The height start the unbinding
-	UnbindingHeight int64 `json:"unbindingHeight"`
-	// The time when unbinding is finished
-	UnbindingTime utctime.UTCTime `json:"unbindingTime"`
+	// `UnbondingHeight` and `UnbondingTime` only useful when `Status` is `Unbonding`
+	// The height start the Unbonding
+	UnbondingHeight int64 `json:"UnbondingHeight"`
+	// The time when Unbonding is finished
+	UnbondingTime utctime.UTCTime `json:"UnbondingTime"`
 
-	Tokens coin.Int `json:"tokens"`
-	Shares coin.Dec `json:"shares"`
+	Tokens            coin.Int `json:"tokens"`
+	Shares            coin.Dec `json:"shares"`
+	MinSelfDelegation coin.Int `json:"minSelfDelegation"`
 }

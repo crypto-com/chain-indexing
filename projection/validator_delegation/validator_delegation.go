@@ -19,10 +19,10 @@ var _ projection_entity.Projection = &ValidatorDelegation{}
 
 var (
 	NewValidators                = view.NewValidatorsView
-	NewValidatorTotal            = view.NewValidatorTotalView
-	NewUnbindingValidators       = view.NewUnbindingValidatorsView
+	NewUnbondingValidators       = view.NewUnbondingValidatorsView
 	NewDelegations               = view.NewDelegationsView
-	NewDelegationTotal           = view.NewDelegationTotalView
+	NewUnbondingDelegations      = view.NewUnbondingDelegationsView
+	NewUBDQueue                  = view.NewUBDQueueView
 	UpdateLastHandledEventHeight = (*ValidatorDelegation).UpdateLastHandledEventHeight
 )
 
@@ -32,8 +32,10 @@ type ValidatorDelegation struct {
 	rdbConn rdb.Conn
 	logger  applogger.Logger
 
-	conNodeAddressPrefix string
-	unbindingTime        time.Duration
+	accountAddressPrefix   string
+	validatorAddressPrefix string
+	conNodeAddressPrefix   string
+	UnbondingTime          time.Duration
 
 	migrationHelper migrationhelper.MigrationHelper
 }
@@ -41,8 +43,10 @@ type ValidatorDelegation struct {
 func NewValidatorDelegation(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
+	accountAddressPrefix string,
+	validatorAddressPrefix string,
 	conNodeAddressPrefix string,
-	unbindingTime time.Duration,
+	UnbondingTime time.Duration,
 	migrationHelper migrationhelper.MigrationHelper,
 ) *ValidatorDelegation {
 	return &ValidatorDelegation{
@@ -54,8 +58,10 @@ func NewValidatorDelegation(
 		rdbConn,
 		logger,
 
+		accountAddressPrefix,
+		validatorAddressPrefix,
 		conNodeAddressPrefix,
-		unbindingTime,
+		UnbondingTime,
 
 		migrationHelper,
 	}
@@ -75,6 +81,7 @@ func (_ *ValidatorDelegation) GetEventsToListen() []string {
 
 		// Tx
 		event_usecase.MSG_CREATE_VALIDATOR_CREATED,
+		event_usecase.MSG_EDIT_VALIDATOR_CREATED,
 		event_usecase.MSG_DELEGATE_CREATED,
 		event_usecase.MSG_BEGIN_REDELEGATE_CREATED,
 		event_usecase.MSG_UNDELEGATE_CREATED,
@@ -119,18 +126,22 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 	}
 
 	// Genesis block height is 0
-	// If this is NOT a Genesis block, then always clone ValidatorRow, DelegationRow in previous height.
+	// If this is NOT a Genesis block, then always clone ValidatorRow, DelegationRow, UnbondingDelegationRow in previous height.
 	// This is to keep track historical states in all height.
 	if height > 0 {
 		validatorsView := NewValidators(rdbTxHandle)
-		delegationsView := NewDelegations(rdbTxHandle)
-
 		if err := validatorsView.Clone(height-1, height); err != nil {
 			return fmt.Errorf("error in validatorsView.Clone(): %v", err)
 		}
 
+		delegationsView := NewDelegations(rdbTxHandle)
 		if err := delegationsView.Clone(height-1, height); err != nil {
 			return fmt.Errorf("error in delegationsView.Clone(): %v", err)
+		}
+
+		unbondingDelegationsView := NewUnbondingDelegations(rdbTxHandle)
+		if err := unbondingDelegationsView.Clone(height-1, height); err != nil {
+			return fmt.Errorf("error in unbondingDelegationsView.Clone(): %v", err)
 		}
 	}
 
@@ -145,6 +156,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 				typedEvent.DelegatorAddress,
 				typedEvent.TendermintPubkey,
 				typedEvent.Amount.Amount,
+				typedEvent.MinSelfDelegation,
 			); err != nil {
 				return fmt.Errorf("error handleCreateNewValidator when CreateGenesisValidator: %v", err)
 			}
@@ -182,8 +194,24 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 				typedEvent.DelegatorAddress,
 				typedEvent.TendermintPubkey,
 				typedEvent.Amount.Amount,
+				typedEvent.MinSelfDelegation,
 			); err != nil {
 				return fmt.Errorf("error handleCreateNewValidator when MsgCreateValidator: %v", err)
+			}
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgEditValidator); ok {
+
+			if typedEvent.MaybeMinSelfDelegation != nil {
+
+				if err := projection.handleEditValidator(
+					rdbTxHandle,
+					height,
+					typedEvent.ValidatorAddress,
+					*typedEvent.MaybeMinSelfDelegation,
+				); err != nil {
+					return fmt.Errorf("error handleEditValidator: %v", err)
+				}
+
 			}
 
 		} else if typedEvent, ok := event.(*event_usecase.MsgDelegate); ok {
@@ -198,9 +226,23 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 				return fmt.Errorf("error handleDelegate: %v", err)
 			}
 
-			// } else if _, ok := event.(*event_usecase.MsgUndelegate); ok {
+		} else if typedEvent, ok := event.(*event_usecase.MsgUndelegate); ok {
 
-			// 	// TODO
+			// Successful tx with MsgUndelegate always has unbonding completion in the Msg.
+			if typedEvent.MaybeUnbondCompleteAt != nil {
+
+				if err := projection.handleUndelegate(
+					rdbTxHandle,
+					height,
+					typedEvent.ValidatorAddress,
+					typedEvent.DelegatorAddress,
+					typedEvent.Amount.Amount,
+					*typedEvent.MaybeUnbondCompleteAt,
+				); err != nil {
+					return fmt.Errorf("error handleUndelegate: %v", err)
+				}
+
+			}
 
 			// } else if _, ok := event.(*event_usecase.MsgBeginRedelegate); ok {
 
@@ -238,16 +280,21 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 		}
 	}
 
-	// Update Validator.Status to `bonded` if it finish the unbinding period.
-	if err := projection.unbindAllMatureUnbindingValidators(
+	if err := projection.handleMatureUnbondingValidators(
 		rdbTxHandle,
 		height,
 		blockTime,
 	); err != nil {
-		return fmt.Errorf("error unbindAllMatureUnbindingValidators(): %v", err)
+		return fmt.Errorf("error HandleMatureUnbondingValidators(): %v", err)
 	}
 
-	// TODO: check mature Unbinding Delegation
+	if err := projection.handleMatureUBDQueueEntries(
+		rdbTxHandle,
+		height,
+		blockTime,
+	); err != nil {
+		return fmt.Errorf("error HandleMatureUBDQueueEntries(): %v", err)
+	}
 
 	// TODO: check mature Redelegation
 
