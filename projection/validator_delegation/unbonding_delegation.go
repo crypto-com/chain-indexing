@@ -59,7 +59,7 @@ func (projection *ValidatorDelegation) CompleteUnbonding(
 		return fmt.Errorf("UnbondingDelegation not found: %v, %v, %v", delegatorAddress, validatorAddress, height)
 	}
 
-	for i := 0; i > len(ubd.Entries); i++ {
+	for i := 0; i < len(ubd.Entries); i++ {
 		entry := ubd.Entries[i]
 
 		if entry.IsMature(currentBlockTime) {
