@@ -1,0 +1,127 @@
+package validator_delegation
+
+import (
+	"fmt"
+
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/projection/validator_delegation/view"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
+)
+
+func (projection *ValidatorDelegation) calculateRedelegationCompleteTime(
+	rdbTxHandle *rdb.Handle,
+	height int64,
+	blockTime utctime.UTCTime,
+	validatorSrcAddress string,
+) (completionTime utctime.UTCTime, completeNow bool, err error) {
+
+	validatorsView := NewValidators(rdbTxHandle)
+
+	// Get the validator
+	validator, found, err := validatorsView.FindByOperatorAddr(validatorSrcAddress, height)
+	if err != nil {
+		return completionTime, false, fmt.Errorf("error validatorsView.FindByOperatorAddr(): %v", err)
+	}
+
+	switch {
+	case !found || validator.IsBonded():
+		// the longest wait - just unbonding period from now
+		completionTime = blockTime.Add(projection.UnbondingTime)
+
+		return completionTime, false, nil
+
+	case validator.IsUnbonded():
+		return completionTime, true, nil
+
+	case validator.IsUnbonding():
+		return validator.UnbondingTime, false, nil
+
+	default:
+		return completionTime, false, fmt.Errorf("unknown validator status: %s", validator.Status)
+	}
+}
+
+func (projection *ValidatorDelegation) setRedelegationEntry(
+	rdbTxHandle *rdb.Handle,
+	delegatorAddress string,
+	validatorSrcAddress string,
+	validatorDstAddress string,
+	creationHeight int64,
+	completionTime utctime.UTCTime,
+	balance coin.Int,
+	sharesDst coin.Dec,
+) (view.RedelegationRow, error) {
+
+	redelegationsView := NewRedelegations(rdbTxHandle)
+
+	red, found, err := redelegationsView.FindBy(delegatorAddress, validatorSrcAddress, validatorDstAddress, creationHeight)
+	if err != nil {
+		return red, fmt.Errorf("error redelegationsView.FindBy(): %v", err)
+	}
+	if found {
+		red.AddEntry(creationHeight, completionTime, balance, sharesDst)
+	} else {
+		red = view.NewRedelegationRow(
+			delegatorAddress,
+			validatorSrcAddress,
+			validatorDstAddress,
+			creationHeight,
+			completionTime,
+			balance,
+			sharesDst,
+		)
+	}
+
+	if err := redelegationsView.Upsert(red); err != nil {
+		return red, fmt.Errorf("error redelegationsView.Upsert(): %v", err)
+	}
+
+	return red, nil
+}
+
+func (projection *ValidatorDelegation) completeRedelegation(
+	rdbTxHandle *rdb.Handle,
+	height int64,
+	currentBlockTime utctime.UTCTime,
+	delegatorAddress string,
+	validatorSrcAddress string,
+	validatorDstAddress string,
+) error {
+
+	redelegationsView := NewRedelegations(rdbTxHandle)
+
+	red, found, err := redelegationsView.FindBy(delegatorAddress, validatorSrcAddress, validatorDstAddress, height)
+	if err != nil {
+		return fmt.Errorf("error in redelegationsView.FindBy(): %v", err)
+	}
+	if !found {
+		return fmt.Errorf("Redelegation not found: %v, %v, %v, %v", delegatorAddress, validatorSrcAddress, validatorDstAddress, height)
+	}
+
+	for i := 0; i < len(red.Entries); i++ {
+		entry := red.Entries[i]
+
+		if entry.IsMature(currentBlockTime) {
+			red.RemoveEntry(int64(i))
+			i--
+		}
+
+		// Update the redelegation or delete it if there are no more entries
+		if len(red.Entries) == 0 {
+
+			if err := redelegationsView.Delete(red); err != nil {
+				return fmt.Errorf("error in redelegationsView.Remove(): %v", err)
+			}
+
+		} else {
+
+			if err := redelegationsView.Upsert(red); err != nil {
+				return fmt.Errorf("error in redelegationsView.Upsert(): %v", err)
+			}
+
+		}
+	}
+
+	return nil
+}

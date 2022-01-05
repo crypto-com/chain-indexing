@@ -11,8 +11,7 @@ import (
 type UnbondingDelegations interface {
 	Clone(previousHeight int64, currentHeight int64) error
 
-	Insert(row UnbondingDelegationRow) error
-	Update(row UnbondingDelegationRow) error
+	Upsert(row UnbondingDelegationRow) error
 	Delete(row UnbondingDelegationRow) error
 	FindBy(delegatorAddress, validatorAddress string, height int64) (UnbondingDelegationRow, bool, error)
 }
@@ -32,12 +31,7 @@ func (view *UnbondingDelegationsView) Clone(previousHeight, currentHeight int64)
 	return nil
 }
 
-func (view *UnbondingDelegationsView) Insert(row UnbondingDelegationRow) error {
-
-	return nil
-}
-
-func (view *UnbondingDelegationsView) Update(row UnbondingDelegationRow) error {
+func (view *UnbondingDelegationsView) Upsert(row UnbondingDelegationRow) error {
 
 	return nil
 }

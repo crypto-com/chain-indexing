@@ -6,11 +6,9 @@ import (
 )
 
 type UBDQueue interface {
-	Insert(row UBDQueueRow) error
-	Update(row UBDQueueRow) error
+	Upsert(row UBDQueueRow) error
 	FindBy(completionTime utctime.UTCTime) (UBDQueueRow, bool, error)
-	GetMatureEntries(blockTime utctime.UTCTime) ([]DVPair, error)
-	DeleteMatureEntries(blockTime utctime.UTCTime) error
+	DequeueAllMatureUBDQueue(blockTime utctime.UTCTime) ([]DVPair, error)
 }
 
 type UBDQueueView struct {
@@ -23,12 +21,7 @@ func NewUBDQueueView(handle *rdb.Handle) UBDQueue {
 	}
 }
 
-func (view *UBDQueueView) Insert(row UBDQueueRow) error {
-
-	return nil
-}
-
-func (view *UBDQueueView) Update(row UBDQueueRow) error {
+func (view *UBDQueueView) Upsert(row UBDQueueRow) error {
 
 	return nil
 }
@@ -41,18 +34,15 @@ func (view *UBDQueueView) FindBy(completionTime utctime.UTCTime) (UBDQueueRow, b
 	return row, true, nil
 }
 
-func (view *UBDQueueView) GetMatureEntries(blockTime utctime.UTCTime) ([]DVPair, error) {
+func (view *UBDQueueView) DequeueAllMatureUBDQueue(blockTime utctime.UTCTime) ([]DVPair, error) {
 
 	// TODO find all mature UDBQueueRow, then concate their DVPairs
 
-	// TODO de-duplicate, a same DVPair could appear multiple times, we should avoid that
+	// Optional TODO: de-duplicate, a same DVPair could appear multiple times, we should avoid that
+
+	// TODO Delete the mature rows
 
 	return nil, nil
-}
-
-func (view *UBDQueueView) DeleteMatureEntries(blockTime utctime.UTCTime) error {
-
-	return nil
 }
 
 // TODO UNIQUE CompletionTime

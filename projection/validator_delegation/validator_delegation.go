@@ -23,6 +23,8 @@ var (
 	NewDelegations               = view.NewDelegationsView
 	NewUnbondingDelegations      = view.NewUnbondingDelegationsView
 	NewUBDQueue                  = view.NewUBDQueueView
+	NewRedelegations             = view.NewRedelegationsView
+	NewRedelegationQueue         = view.NewRedelegationQueueView
 	UpdateLastHandledEventHeight = (*ValidatorDelegation).UpdateLastHandledEventHeight
 )
 
@@ -125,8 +127,14 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 		}
 	}
 
-	// Genesis block height is 0
-	// If this is NOT a Genesis block, then always clone ValidatorRow, DelegationRow, UnbondingDelegationRow in previous height.
+	// Genesis block height is 0.
+	//
+	// If this is NOT a Genesis block, then always clone the following rows in previous height:
+	// - ValidatorRow
+	// - DelegationRow
+	// - UnbondingDelegationRow
+	// - RedelegationRow
+	//
 	// This is to keep track historical states in all height.
 	if height > 0 {
 		validatorsView := NewValidators(rdbTxHandle)
@@ -142,6 +150,11 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 		unbondingDelegationsView := NewUnbondingDelegations(rdbTxHandle)
 		if err := unbondingDelegationsView.Clone(height-1, height); err != nil {
 			return fmt.Errorf("error in unbondingDelegationsView.Clone(): %v", err)
+		}
+
+		redelegationsView := NewRedelegations(rdbTxHandle)
+		if err := redelegationsView.Clone(height-1, height); err != nil {
+			return fmt.Errorf("error in redelegationsView.Clone(): %v", err)
 		}
 	}
 
@@ -216,7 +229,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 
 		} else if typedEvent, ok := event.(*event_usecase.MsgDelegate); ok {
 
-			if err := projection.handleDelegate(
+			if _, err := projection.handleDelegate(
 				rdbTxHandle,
 				height,
 				typedEvent.ValidatorAddress,
@@ -244,9 +257,19 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 
 			}
 
-			// } else if _, ok := event.(*event_usecase.MsgBeginRedelegate); ok {
+		} else if typedEvent, ok := event.(*event_usecase.MsgBeginRedelegate); ok {
 
-			// 	// TODO
+			if err := projection.handleRedelegate(
+				rdbTxHandle,
+				height,
+				blockTime,
+				typedEvent.DelegatorAddress,
+				typedEvent.ValidatorSrcAddress,
+				typedEvent.ValidatorDstAddress,
+				typedEvent.Amount.Amount,
+			); err != nil {
+				return fmt.Errorf("error handleRedelegate: %v", err)
+			}
 
 		} else if typedEvent, ok := event.(*event_usecase.MsgUnjail); ok {
 
@@ -285,7 +308,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 		height,
 		blockTime,
 	); err != nil {
-		return fmt.Errorf("error HandleMatureUnbondingValidators(): %v", err)
+		return fmt.Errorf("error handleMatureUnbondingValidators(): %v", err)
 	}
 
 	if err := projection.handleMatureUBDQueueEntries(
@@ -293,10 +316,16 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 		height,
 		blockTime,
 	); err != nil {
-		return fmt.Errorf("error HandleMatureUBDQueueEntries(): %v", err)
+		return fmt.Errorf("error handleMatureUBDQueueEntries(): %v", err)
 	}
 
-	// TODO: check mature Redelegation
+	if err := projection.handleMatureRedelegationQueueEntries(
+		rdbTxHandle,
+		height,
+		blockTime,
+	); err != nil {
+		return fmt.Errorf("error handleMatureRedelegationQueueEntries(): %v", err)
+	}
 
 	if err := UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
 		return fmt.Errorf("error updating last handled event height: %v", err)

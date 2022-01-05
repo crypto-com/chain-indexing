@@ -8,7 +8,7 @@ import (
 	"github.com/crypto-com/chain-indexing/projection/validator_delegation/view"
 )
 
-func (projection *ValidatorDelegation) InsertUBDQueue(
+func (projection *ValidatorDelegation) insertUBDQueue(
 	rdbTxHandle *rdb.Handle,
 	ubd view.UnbondingDelegationRow,
 	completionTime utctime.UTCTime,
@@ -33,8 +33,8 @@ func (projection *ValidatorDelegation) InsertUBDQueue(
 		row.DVPairs = append(row.DVPairs, dvPair)
 	}
 
-	if err := ubdQueueView.Update(row); err != nil {
-		return fmt.Errorf("error ubdQueueView.Update(): %v", err)
+	if err := ubdQueueView.Upsert(row); err != nil {
+		return fmt.Errorf("error ubdQueueView.Upsert(): %v", err)
 	}
 
 	return nil

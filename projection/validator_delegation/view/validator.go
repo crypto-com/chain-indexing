@@ -13,7 +13,7 @@ type Validators interface {
 	Insert(row ValidatorRow) error
 	Update(row ValidatorRow) error
 	Delete(row ValidatorRow) error
-	FindByOperatorAddr(operatorAddress string, height int64) (ValidatorRow, error)
+	FindByOperatorAddr(operatorAddress string, height int64) (ValidatorRow, bool, error)
 	FindByConsensusNodeAddr(consensusNodeAddress string, height int64) (ValidatorRow, error)
 	List(height int64, pagination *pagination.Pagination) ([]ValidatorRow, *pagination.PaginationResult, error)
 }
@@ -48,9 +48,11 @@ func (view *ValidatorsView) Delete(row ValidatorRow) error {
 	return nil
 }
 
-func (view *ValidatorsView) FindByOperatorAddr(operatorAddress string, height int64) (ValidatorRow, error) {
+func (view *ValidatorsView) FindByOperatorAddr(operatorAddress string, height int64) (ValidatorRow, bool, error) {
 
-	return ValidatorRow{}, nil
+	// TODO handle the error when validator is NOT FOUND
+
+	return ValidatorRow{}, true, nil
 }
 
 func (view *ValidatorsView) FindByConsensusNodeAddr(consensusNodeAddress string, height int64) (ValidatorRow, error) {
@@ -100,4 +102,16 @@ type ValidatorRow struct {
 	Tokens            coin.Int `json:"tokens"`
 	Shares            coin.Dec `json:"shares"`
 	MinSelfDelegation coin.Int `json:"minSelfDelegation"`
+}
+
+func (v *ValidatorRow) IsBonded() bool {
+	return v.Status == types.BONDED
+}
+
+func (v *ValidatorRow) IsUnbonded() bool {
+	return v.Status == types.UNBONDED
+}
+
+func (v *ValidatorRow) IsUnbonding() bool {
+	return v.Status == types.UNBONDING
 }

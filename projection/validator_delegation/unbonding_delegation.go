@@ -9,7 +9,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 )
 
-func (projection *ValidatorDelegation) SetUnbondingDelegationEntry(
+func (projection *ValidatorDelegation) setUnbondingDelegationEntry(
 	rdbTxHandle *rdb.Handle,
 	delegatorAddress string,
 	validatorAddress string,
@@ -26,22 +26,18 @@ func (projection *ValidatorDelegation) SetUnbondingDelegationEntry(
 	}
 	if found {
 		ubd.AddEntry(creationHeight, completionTime, balance)
-
-		if err := unbondingDelegationsView.Update(ubd); err != nil {
-			return ubd, fmt.Errorf("error unbondingDelegationsView.Update(): %v", err)
-		}
 	} else {
 		ubd = view.NewUnbondingDelegationRow(delegatorAddress, validatorAddress, creationHeight, completionTime, balance)
+	}
 
-		if err := unbondingDelegationsView.Insert(ubd); err != nil {
-			return ubd, fmt.Errorf("error unbondingDelegationsView.Insert(): %v", err)
-		}
+	if err := unbondingDelegationsView.Upsert(ubd); err != nil {
+		return ubd, fmt.Errorf("error unbondingDelegationsView.Upsert(): %v", err)
 	}
 
 	return ubd, nil
 }
 
-func (projection *ValidatorDelegation) CompleteUnbonding(
+func (projection *ValidatorDelegation) completeUnbonding(
 	rdbTxHandle *rdb.Handle,
 	height int64,
 	currentBlockTime utctime.UTCTime,
@@ -76,8 +72,8 @@ func (projection *ValidatorDelegation) CompleteUnbonding(
 
 		} else {
 
-			if err := unbondingDelegationsView.Update(ubd); err != nil {
-				return fmt.Errorf("error in unbondingDelegationsView.Update(): %v", err)
+			if err := unbondingDelegationsView.Upsert(ubd); err != nil {
+				return fmt.Errorf("error in unbondingDelegationsView.Upsert(): %v", err)
 			}
 
 		}

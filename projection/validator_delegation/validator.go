@@ -7,35 +7,7 @@ import (
 	"github.com/crypto-com/chain-indexing/projection/validator_delegation/view"
 )
 
-func (projection *ValidatorDelegation) AddValidatorRecord(
-	rdbTxHandle *rdb.Handle,
-	validator view.ValidatorRow,
-) error {
-	validatorsView := NewValidators(rdbTxHandle)
-
-	// Insert an ValidatorRow record
-	if err := validatorsView.Insert(validator); err != nil {
-		return fmt.Errorf("error validatorsView.Insert(): %v", err)
-	}
-
-	return nil
-}
-
-func (projection *ValidatorDelegation) RemoveValidatorRecord(
-	rdbTxHandle *rdb.Handle,
-	validator view.ValidatorRow,
-) error {
-	validatorsView := NewValidators(rdbTxHandle)
-
-	// Delete an ValidatorRow record
-	if err := validatorsView.Delete(validator); err != nil {
-		return fmt.Errorf("error validatorsView.Delete(): %v", err)
-	}
-
-	return nil
-}
-
-func JailValidator(
+func (projection *ValidatorDelegation) jailValidator(
 	rdbTxHandle *rdb.Handle,
 	validator view.ValidatorRow,
 ) error {

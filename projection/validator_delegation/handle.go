@@ -32,6 +32,7 @@ func (projection *ValidatorDelegation) handleCreateNewValidator(
 	}
 
 	// Insert an ValidatorRow.
+	validatorsView := NewValidators(rdbTxHandle)
 	validatorRow := view.ValidatorRow{
 		Height: height,
 
@@ -49,11 +50,11 @@ func (projection *ValidatorDelegation) handleCreateNewValidator(
 		Shares:            coin.ZeroDec(),
 		MinSelfDelegation: minSelfDelegation,
 	}
-	if err := projection.AddValidatorRecord(rdbTxHandle, validatorRow); err != nil {
-		return fmt.Errorf("error in projection.AddValidatorRecord(): %v", err)
+	if err := validatorsView.Insert(validatorRow); err != nil {
+		return fmt.Errorf("error validatorsView.Insert(): %v", err)
 	}
 
-	if err := projection.handleDelegate(
+	if _, err := projection.handleDelegate(
 		rdbTxHandle,
 		height,
 		validatorAddress,
@@ -76,12 +77,12 @@ func (projection *ValidatorDelegation) handleEditValidator(
 	validatorsView := NewValidators(rdbTxHandle)
 
 	// Get the validator
-	validator, err := validatorsView.FindByOperatorAddr(
-		validatorAddress,
-		height,
-	)
+	validator, found, err := validatorsView.FindByOperatorAddr(validatorAddress, height)
 	if err != nil {
 		return fmt.Errorf("error validatorsView.FindByOperatorAddr(): %v", err)
+	}
+	if !found {
+		return fmt.Errorf("error validator not found: %v, %v", validatorAddress, height)
 	}
 
 	minSelfDelegation, ok := coin.NewIntFromString(minSelfDelegationInString)
@@ -99,24 +100,25 @@ func (projection *ValidatorDelegation) handleEditValidator(
 	return nil
 }
 
+// handleDelegate - Handle create/update delegation. Return newShares and error.
 func (projection *ValidatorDelegation) handleDelegate(
 	rdbTxHandle *rdb.Handle,
 	height int64,
 	validatorAddress string,
 	delegatorAddress string,
 	amount coin.Int,
-) error {
+) (coin.Dec, error) {
 
 	validatorsView := NewValidators(rdbTxHandle)
 	delegationsView := NewDelegations(rdbTxHandle)
 
 	// Get the validator
-	validator, err := validatorsView.FindByOperatorAddr(
-		validatorAddress,
-		height,
-	)
+	validator, found, err := validatorsView.FindByOperatorAddr(validatorAddress, height)
 	if err != nil {
-		return fmt.Errorf("error validatorsView.FindByOperatorAddr(): %v", err)
+		return coin.ZeroDec(), fmt.Errorf("error validatorsView.FindByOperatorAddr(): %v", err)
+	}
+	if !found {
+		return coin.ZeroDec(), fmt.Errorf("error validator not found: %v, %v", validatorAddress, height)
 	}
 
 	// Create/Get Delegation
@@ -126,7 +128,7 @@ func (projection *ValidatorDelegation) handleDelegate(
 		height,
 	)
 	if err != nil {
-		return fmt.Errorf("error delegationsView.FindBy(): %v", err)
+		return coin.ZeroDec(), fmt.Errorf("error delegationsView.FindBy(): %v", err)
 	}
 	if !found {
 		delegation = view.DelegationRow{
@@ -136,31 +138,32 @@ func (projection *ValidatorDelegation) handleDelegate(
 			Shares:           coin.ZeroDec(),
 		}
 
-		if errAddDelRecord := projection.AddDelegationRecord(rdbTxHandle, delegation); errAddDelRecord != nil {
-			return fmt.Errorf("error projection.AddDelegationRecord(): %v", errAddDelRecord)
+		// Insert an DelegationRow record
+		if errAddDelRecord := delegationsView.Insert(delegation); errAddDelRecord != nil {
+			return coin.ZeroDec(), fmt.Errorf("error delegationsView.Insert(): %v", errAddDelRecord)
 		}
 	}
 
 	// Calculate new shares
 	newShares, err := utils.ValidatorIssueNewShares(validator, amount)
 	if err != nil {
-		return fmt.Errorf("error IssueNewShares(): %v", err)
+		return coin.ZeroDec(), fmt.Errorf("error IssueNewShares(): %v", err)
 	}
 
 	// Update Delegation
 	delegation.Shares = delegation.Shares.Add(newShares)
 	if err := delegationsView.Update(delegation); err != nil {
-		return fmt.Errorf("error delegationsView.Update(): %v", err)
+		return coin.ZeroDec(), fmt.Errorf("error delegationsView.Update(): %v", err)
 	}
 
 	// Update Validator
 	validator.Tokens = validator.Tokens.Add(amount)
 	validator.Shares = validator.Shares.Add(newShares)
 	if err := validatorsView.Update(validator); err != nil {
-		return fmt.Errorf("error validatorsView.Update(): %v", err)
+		return coin.ZeroDec(), fmt.Errorf("error validatorsView.Update(): %v", err)
 	}
 
-	return nil
+	return newShares, nil
 }
 
 func (projection *ValidatorDelegation) handleUndelegate(
@@ -172,7 +175,7 @@ func (projection *ValidatorDelegation) handleUndelegate(
 	completionTime utctime.UTCTime,
 ) error {
 
-	shares, err := projection.UnbondAmountToShares(
+	shares, err := projection.unbondAmountToShares(
 		rdbTxHandle,
 		height,
 		validatorAddress,
@@ -180,10 +183,10 @@ func (projection *ValidatorDelegation) handleUndelegate(
 		amount,
 	)
 	if err != nil {
-		return fmt.Errorf("error projection.UnbondAmountToShares(): %v", err)
+		return fmt.Errorf("error projection.unbondAmountToShares(): %v", err)
 	}
 
-	returnAmount, err := projection.Unbond(
+	returnAmount, err := projection.unbond(
 		rdbTxHandle,
 		height,
 		validatorAddress,
@@ -191,10 +194,10 @@ func (projection *ValidatorDelegation) handleUndelegate(
 		shares,
 	)
 	if err != nil {
-		return fmt.Errorf("error projection.Unbond(): %v", err)
+		return fmt.Errorf("error projection.unbond(): %v", err)
 	}
 
-	ubd, err := projection.SetUnbondingDelegationEntry(
+	ubd, err := projection.setUnbondingDelegationEntry(
 		rdbTxHandle,
 		delegatorAddress,
 		validatorAddress,
@@ -203,11 +206,86 @@ func (projection *ValidatorDelegation) handleUndelegate(
 		returnAmount,
 	)
 	if err != nil {
-		return fmt.Errorf("error projection.SetUnbondingDelegationEntry(): %v", err)
+		return fmt.Errorf("error projection.setUnbondingDelegationEntry(): %v", err)
 	}
 
-	if err := projection.InsertUBDQueue(rdbTxHandle, ubd, completionTime); err != nil {
-		return fmt.Errorf("error projection.InsertUBDQueue(): %v", err)
+	if err := projection.insertUBDQueue(rdbTxHandle, ubd, completionTime); err != nil {
+		return fmt.Errorf("error projection.insertUBDQueue(): %v", err)
+	}
+
+	return nil
+}
+
+func (projection *ValidatorDelegation) handleRedelegate(
+	rdbTxHandle *rdb.Handle,
+	height int64,
+	blockTime utctime.UTCTime,
+	delegatorAddress string,
+	validatorSrcAddress string,
+	validatorDstAddress string,
+	amount coin.Int,
+) error {
+
+	shares, err := projection.unbondAmountToShares(
+		rdbTxHandle,
+		height,
+		validatorSrcAddress,
+		delegatorAddress,
+		amount,
+	)
+	if err != nil {
+		return fmt.Errorf("error projection.unbondAmountToShares(): %v", err)
+	}
+
+	srcValReturnAmount, err := projection.unbond(
+		rdbTxHandle,
+		height,
+		validatorSrcAddress,
+		delegatorAddress,
+		shares,
+	)
+	if err != nil {
+		return fmt.Errorf("error projection.unbond(): %v", err)
+	}
+
+	dstValSharesCreated, err := projection.handleDelegate(
+		rdbTxHandle,
+		height,
+		validatorDstAddress,
+		delegatorAddress,
+		srcValReturnAmount,
+	)
+	if err != nil {
+		return fmt.Errorf("error projection.handleDelegate(): %v", err)
+	}
+
+	completionTime, completeNow, err := projection.calculateRedelegationCompleteTime(
+		rdbTxHandle,
+		height,
+		blockTime,
+		validatorSrcAddress,
+	)
+
+	if completeNow { // no need to create the redelegation object
+		return nil
+	}
+
+	red, err := projection.setRedelegationEntry(
+		rdbTxHandle,
+		delegatorAddress,
+		validatorSrcAddress,
+		validatorDstAddress,
+		height,
+		completionTime,
+		srcValReturnAmount,
+		dstValSharesCreated,
+	)
+	if err != nil {
+		return fmt.Errorf("error projection.setRedelegationEntry(): %v", err)
+	}
+
+	if err := projection.insertRedelegationQueue(rdbTxHandle, red, completionTime); err != nil {
+		return fmt.Errorf("error projection.insertRedelegationQueue(): %v", err)
 	}
 
 	return nil
@@ -230,8 +308,8 @@ func (projection *ValidatorDelegation) handleValidatorJailed(
 		return fmt.Errorf("error validatorsView.FindByConsensusNodeAddr(): %v", err)
 	}
 
-	if err := JailValidator(rdbTxHandle, validator); err != nil {
-		return fmt.Errorf("error in JailValidator(): %v", err)
+	if err := projection.jailValidator(rdbTxHandle, validator); err != nil {
+		return fmt.Errorf("error in projection.jailValidator(): %v", err)
 	}
 
 	return nil
@@ -246,12 +324,12 @@ func (projection *ValidatorDelegation) handleValidatorUnjailed(
 	validatorsView := NewValidators(rdbTxHandle)
 
 	// Get the validator
-	validator, err := validatorsView.FindByOperatorAddr(
-		validatorAddress,
-		height,
-	)
+	validator, found, err := validatorsView.FindByOperatorAddr(validatorAddress, height)
 	if err != nil {
 		return fmt.Errorf("error validatorsView.FindByOperatorAddr(): %v", err)
+	}
+	if !found {
+		return fmt.Errorf("error validator not found: %v, %v", validatorAddress, height)
 	}
 
 	// Update Valdiator
@@ -340,12 +418,12 @@ func (projection *ValidatorDelegation) handleMatureUnbondingValidators(
 
 	// Update validators status
 	for _, entry := range matureEntries {
-		validator, err := validatorsView.FindByOperatorAddr(
-			entry.OperatorAddress,
-			height,
-		)
+		validator, found, err := validatorsView.FindByOperatorAddr(entry.OperatorAddress, height)
 		if err != nil {
 			return fmt.Errorf("error validatorsView.FindByOperatorAddr(): %v", err)
+		}
+		if !found {
+			return fmt.Errorf("error validator not found: %v, %v", entry.OperatorAddress, height)
 		}
 
 		validator.Status = types.UNBONDED
@@ -373,32 +451,63 @@ func (projection *ValidatorDelegation) handleMatureUBDQueueEntries(
 
 	ubdQueueView := NewUBDQueue(rdbTxHandle)
 
-	// Get all mature DVPair from UBDQueue
-	matureEntries, err := ubdQueueView.GetMatureEntries(blockTime)
+	// Get all mature unbonding delegations from UBDQueue
+	matureUnbonds, err := ubdQueueView.DequeueAllMatureUBDQueue(blockTime)
 	if err != nil {
-		return fmt.Errorf("error ubdQueueView.GetMatureEntries(): %v", err)
+		return fmt.Errorf("error ubdQueueView.DequeueAllMatureUBDQueue(): %v", err)
 	}
 
-	for _, entry := range matureEntries {
+	for _, dvPair := range matureUnbonds {
 
-		if err := projection.CompleteUnbonding(
+		if err := projection.completeUnbonding(
 			rdbTxHandle,
 			height,
 			blockTime,
-			entry.DelegatorAddress,
-			entry.ValidatorAddress,
+			dvPair.DelegatorAddress,
+			dvPair.ValidatorAddress,
 		); err != nil {
 			// Not 100% sure why the error is ignored here.
-			// This is probably due to a same DVPair could show up in matureEntries for multiple time.
+			// This is probably due to a same DVPair could show up in matureUnbonds for multiple time.
 			// reference: https://github.com/cosmos/cosmos-sdk/blob/59793e68fd7227c0ea31cf9456822dd566db4da7/x/staking/keeper/val_state_change.go#L46
 			continue
 		}
 
 	}
 
-	// Remove mature UBDQueue entries
-	if err := ubdQueueView.DeleteMatureEntries(blockTime); err != nil {
-		return fmt.Errorf("error ubdQueueView.DeleteMatureEntries(): %v", err)
+	return nil
+}
+
+// Find mature Redelegation through RedelegationQueue and then handle them one by one
+func (projection *ValidatorDelegation) handleMatureRedelegationQueueEntries(
+	rdbTxHandle *rdb.Handle,
+	height int64,
+	blockTime utctime.UTCTime,
+) error {
+
+	redelegationQueueView := NewRedelegationQueue(rdbTxHandle)
+
+	// Get all mature redelegations from RedelegationQueue
+	matureRelegations, err := redelegationQueueView.DequeueAllMatureRedelegationQueue(blockTime)
+	if err != nil {
+		return fmt.Errorf("error redelegationQueueView.DequeueAllMatureRedelegationQueue(): %v", err)
+	}
+
+	for _, dvvTriplet := range matureRelegations {
+
+		if err := projection.completeRedelegation(
+			rdbTxHandle,
+			height,
+			blockTime,
+			dvvTriplet.DelegatorAddress,
+			dvvTriplet.ValidatorSrcAddress,
+			dvvTriplet.ValidatorDstAddress,
+		); err != nil {
+			// Not 100% sure why the error is ignored here.
+			// This is probably due to a same DVVTriplet could show up in matureEntries for multiple time.
+			// reference: https://github.com/cosmos/cosmos-sdk/blob/28541e7ca36097d6a98637c26c276a5d55f408b0/x/staking/keeper/val_state_change.go#L82
+			continue
+		}
+
 	}
 
 	return nil
