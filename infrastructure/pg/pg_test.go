@@ -48,5 +48,33 @@ var _ = Describe("ConnConfig", func() {
 
 			Expect(config.ToURL()).To(Equal("postgres://user:password@127.0.0.1:5432/chain-indexing"))
 		})
+
+		It("should return x-migrations-table in connection string when it is specified", func() {
+			config := ConnConfig{
+				Host:                  "127.0.0.1",
+				Port:                  5432,
+				MaybeUsername:         primptr.String("user"),
+				MaybePassword:         primptr.String("password"),
+				MaybeXMigrationsTable: primptr.String("migrations"),
+				Database:              "chain-indexing",
+				SSL:                   true,
+			}
+
+			Expect(config.ToURL()).To(Equal("postgres://user:password@127.0.0.1:5432/chain-indexing?x-migrations-table=migrations"))
+		})
+
+		It("should return Postgres connection string with params when XMigrationsTable is specified and SSL is disabled", func() {
+			config := ConnConfig{
+				Host:                  "127.0.0.1",
+				Port:                  5432,
+				MaybeUsername:         primptr.String("user"),
+				MaybePassword:         primptr.String("password"),
+				MaybeXMigrationsTable: primptr.String("migrations"),
+				Database:              "chain-indexing",
+				SSL:                   false,
+			}
+
+			Expect(config.ToURL()).To(Equal("postgres://user:password@127.0.0.1:5432/chain-indexing?sslmode=disable&x-migrations-table=migrations"))
+		})
 	})
 })

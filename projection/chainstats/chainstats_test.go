@@ -1,39 +1,35 @@
 package chainstats_test
 
 import (
+	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
+	"path"
+	"runtime"
 	"time"
 
-	. "github.com/crypto-com/chain-indexing/external/logger/test"
-	"github.com/crypto-com/chain-indexing/external/primptr"
-	"github.com/crypto-com/chain-indexing/projection/block"
-	viewBlock "github.com/crypto-com/chain-indexing/projection/block/view"
-	"github.com/crypto-com/chain-indexing/projection/validatorstats"
-	viewValidatorStats "github.com/crypto-com/chain-indexing/projection/validatorstats/view"
-	"github.com/crypto-com/chain-indexing/usecase/coin"
-	"github.com/crypto-com/chain-indexing/usecase/model"
-
-	. "github.com/crypto-com/chain-indexing/appinterface/rdb/test"
-	. "github.com/crypto-com/chain-indexing/entity/event/test"
-	"github.com/crypto-com/chain-indexing/external/utctime"
-	. "github.com/crypto-com/chain-indexing/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
-	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
-
-	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	. "github.com/crypto-com/chain-indexing/external/logger/test"
+	"github.com/crypto-com/chain-indexing/external/primptr"
+	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/projection/chainstats"
+	chainstats_view "github.com/crypto-com/chain-indexing/projection/chainstats/view"
+	. "github.com/crypto-com/chain-indexing/test"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
-	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
+	model_usecase "github.com/crypto-com/chain-indexing/usecase/model"
 )
 
-var _ = Describe("Validator Events", func() {
-	It("should implement projection", func() {
-		fakeLogger := NewFakeLogger()
-		fakeRdbConn := NewFakeRDbConn()
-		var _ entity_projection.Projection = validatorstats.NewValidatorStats(fakeLogger, fakeRdbConn, nil)
-	})
+var CHAINSTATS_MIGRATIONS_PATH = func() string {
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		panic("error retrieving file directory")
+	}
 
+	return path.Join(filename, "../migrations")
+}()
+
+var _ = Describe("Chain Stats", func() {
 	Describe("genesis time parsing learning test", func() {
 		It("should parse correctly different variations of time format", func() {
 			Expect(
@@ -49,21 +45,56 @@ var _ = Describe("Validator Events", func() {
 		})
 	})
 
-	WithTestPgxConn(func(pgConn *pg.PgxConn, pgMigrate *pg.Migrate) {
+	WithProjectionTestEnv(func(testEnv ProjectionTestEnv) {
+		pgxConn := testEnv.Conn
+
+		reset := func() {
+			// Only needs to run Reset() on one of the migrate instance because Reset() drops everything in the Database
+			_ = testEnv.RootMigrate.Reset()
+		}
+
 		BeforeEach(func() {
-			_ = pgMigrate.Reset()
-			pgMigrate.MustUp()
+			reset()
+
+			testEnv.RootMigrate.MustUp()
+			projectionMigrate := testEnv.MigrateCreator(
+				"chainstats_schema_migrations",
+				CHAINSTATS_MIGRATIONS_PATH,
+			)
+			projectionMigrate.MustUp()
 		})
 
 		AfterEach(func() {
-			_ = pgMigrate.Reset()
+			reset()
 		})
 
 		It("should update the last projection handled block height with the fired event block height", func() {
+			genesisEvent := event_usecase.NewGenesisCreated(genesis.Genesis{
+				GenesisTime:   "2021-03-25T01:00:00Z",
+				ChainID:       "test-chain-1",
+				InitialHeight: "1",
+				ConsensusParams: genesis.ConsensusParams{
+					Block: genesis.Block{
+						MaxBytes:   "500000",
+						MaxGas:     "81500000",
+						TimeIotaMS: "1000",
+					},
+					Evidence: genesis.ConsensusParamsEvidence{
+						MaxAgeNumBlocks: "403200",
+						MaxAgeDuration:  "2419200000000000",
+						MaxBytes:        "150000",
+					},
+					Validator: genesis.ConsensusParamsValidator{PubKeyTypes: []string{"ed25519"}},
+					Version:   genesis.Chainmain{},
+				},
+				AppHash:    "",
+				AppState:   genesis.AppState{},
+				Validators: nil,
+			})
 
-			anyHeight := int64(1)
-			event := event_usecase.NewBlockCreated(&usecase_model.Block{
-				Height:          anyHeight,
+			blockHeight1 := int64(1)
+			blockHeight1Event := event_usecase.NewBlockCreated(&model_usecase.Block{
+				Height:          blockHeight1,
 				Hash:            "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
 				Time:            utctime.FromUnixNano(int64(1000000)),
 				AppHash:         "24474D86CBFA7E6328D473C17A9E46CD5A80FFE82A348A74844BF3E2BA2B3AF1",
@@ -71,7 +102,7 @@ var _ = Describe("Validator Events", func() {
 				Txs: []string{
 					"AAAMZqICtpjLrA3uEe3Rkg6cqDgQl0iBwG1Wm8ORZRzKL9EBAE1R0oP73H8AhHG1E1dke4ppXA/+43AyxWX7oVBTlQGnAABsiqVxCipneyzo9n1t7xauih3rXxssZTChLv/oPHUaSAAAAgAAAAAAAAAAAMw4kh8pZRDC442WIIUIo6+fIE1cTHkwEiv++LwFjNLwNtPTO1AVJx+dGivu9FZK3cN8r0mvLPVunExBxwKqKDkwVUbVSaIejuSc6Wm38rp+ekZjIExhf41FIwkocStPzBY4VYQ31YE7pmNnKocfCEg9CcKH+MIFYJ0FSxoEiMratLXjKAD6B/aMZ3pRCxxL/YxFNs+YKzGbgdKcLtydZ1B/OTGUeNU3SLNQJGmJeTL0AOwvQ4j7KkiQFZGa8uoQQEJo9rXjIg+xPk7a+zBdwC91EY/ZZz7pdVQMUgHBeKgsVvy0o78BOPWfuziBK5xVsoz5K8ZlMYQNPC5mY+bguMKYNJ5PQ9rzn+LseYT5jhalUsQrPABhEFOoQVUH1id3rszDkLLTn2/d89N/JJGY1+mL+upWWAsmJw1yTHqibSJ7RbiGffnh93MCOHeRe5OLrfmDFfhqOLNt9yuMYNdyJ+noVsfI7Ws9Kpxe2SnuCWBs9yOgM0l7UTMuIokqhGCkarXge/DUWLUcV694Jr8qcJT3OtoQohN+p+Xj66nowJLgFW7xBdFsT4vv7xI8giFxUpB+JkLgRZz2d2eam3iLDCHR+sNyvIDuXDUXhKM6aIykGgvHVHr3bBJRy/JPZFC0A3kqmheMnJpbV6kHXaIbmbgeQeXc+wxq1swFVxkwp14zbRmHwSGVGRgihjmoFYl9MyorQzNFETgp28gq2AKrCHNnIRs63m2cD5X4jZaFzfYAv9ifpOKqRtDgIFG0olge/ig00FFL6KdHySg1Qaab7g==",
 				},
-				Signatures: []usecase_model.BlockSignature{
+				Signatures: []model_usecase.BlockSignature{
 					{
 						BlockIdFlag:      2,
 						ValidatorAddress: "F9E6FFB9B536956201AA138224FD888D03775AB4",
@@ -88,43 +119,51 @@ var _ = Describe("Validator Events", func() {
 			})
 
 			fakeLogger := NewFakeLogger()
-			projection := validatorstats.NewValidatorStats(fakeLogger, pgConn, nil)
-			err := projection.HandleEvents(anyHeight, []event_entity.Event{event})
-			Expect(err).To(BeNil())
+			projection := chainstats.NewChainStats(fakeLogger, pgxConn, nil)
 
-			Expect(projection.GetLastHandledEventHeight()).To(Equal(primptr.Int64(anyHeight)))
+			handleGenesisEventsErr := projection.HandleEvents(0, []event_entity.Event{
+				genesisEvent,
+			})
+			Expect(handleGenesisEventsErr).To(BeNil())
+			genesisHeight := primptr.Int64(0)
+			Expect(projection.GetLastHandledEventHeight()).To(Equal(genesisHeight))
+
+			handleBlockEventsErr := projection.HandleEvents(blockHeight1, []event_entity.Event{
+				blockHeight1Event,
+			})
+			Expect(handleBlockEventsErr).To(BeNil())
+			Expect(projection.GetLastHandledEventHeight()).To(Equal(primptr.Int64(blockHeight1)))
 		})
 
-		It("should update the totalDelegate amount after handling NewMsgCreateValidator event", func() {
-			validatorStatsView := viewValidatorStats.NewValidatorStats(pgConn.ToHandle())
-			blocksView := viewBlock.NewBlocks(pgConn.ToHandle())
+		It("should update update the total block height after handling BlockCreated event", func() {
+			chainStatsView := chainstats_view.NewChainStats(pgxConn.ToHandle())
 
-			anyHeight := int64(1)
+			genesisEvent := event_usecase.NewGenesisCreated(genesis.Genesis{
+				GenesisTime:   "2021-03-25T01:00:00Z",
+				ChainID:       "test-chain-1",
+				InitialHeight: "1",
+				ConsensusParams: genesis.ConsensusParams{
+					Block: genesis.Block{
+						MaxBytes:   "500000",
+						MaxGas:     "81500000",
+						TimeIotaMS: "1000",
+					},
+					Evidence: genesis.ConsensusParamsEvidence{
+						MaxAgeNumBlocks: "403200",
+						MaxAgeDuration:  "2419200000000000",
+						MaxBytes:        "150000",
+					},
+					Validator: genesis.ConsensusParamsValidator{PubKeyTypes: []string{"ed25519"}},
+					Version:   genesis.Chainmain{},
+				},
+				AppHash:    "",
+				AppState:   genesis.AppState{},
+				Validators: nil,
+			})
 
-			description := model.ValidatorDescription{
-				Moniker:         "mymonicker",
-				Identity:        "myidentity",
-				Website:         "mywebsite",
-				SecurityContact: "mysecuritycontact",
-				Details:         "mydetails",
-			}
-			commission := model.ValidatorCommission{
-				Rate:          "0.100000000000000000",
-				MaxRate:       "0.200000000000000000",
-				MaxChangeRate: "0.010000000000000000",
-			}
-
-			createValidatorParams := usecase_model.MsgCreateValidatorParams{
-				Description:       description,
-				Commission:        commission,
-				MinSelfDelegation: "1",
-				DelegatorAddress:  "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-				ValidatorAddress:  "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
-				TendermintPubkey:  "wWw0e9tZcVmev/NyJlZv5Apd7U5IONoyx3U/9rD5fHI=",
-				Amount:            coin.MustParseCoinNormalized("10basetcro"),
-			}
-			event := event_usecase.NewBlockCreated(&usecase_model.Block{
-				Height:          anyHeight,
+			blockHeight1 := int64(1)
+			blockHeight1Event := event_usecase.NewBlockCreated(&model_usecase.Block{
+				Height:          blockHeight1,
 				Hash:            "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
 				Time:            utctime.FromUnixNano(int64(1000000)),
 				AppHash:         "24474D86CBFA7E6328D473C17A9E46CD5A80FFE82A348A74844BF3E2BA2B3AF1",
@@ -132,7 +171,7 @@ var _ = Describe("Validator Events", func() {
 				Txs: []string{
 					"AAAMZqICtpjLrA3uEe3Rkg6cqDgQl0iBwG1Wm8ORZRzKL9EBAE1R0oP73H8AhHG1E1dke4ppXA/+43AyxWX7oVBTlQGnAABsiqVxCipneyzo9n1t7xauih3rXxssZTChLv/oPHUaSAAAAgAAAAAAAAAAAMw4kh8pZRDC442WIIUIo6+fIE1cTHkwEiv++LwFjNLwNtPTO1AVJx+dGivu9FZK3cN8r0mvLPVunExBxwKqKDkwVUbVSaIejuSc6Wm38rp+ekZjIExhf41FIwkocStPzBY4VYQ31YE7pmNnKocfCEg9CcKH+MIFYJ0FSxoEiMratLXjKAD6B/aMZ3pRCxxL/YxFNs+YKzGbgdKcLtydZ1B/OTGUeNU3SLNQJGmJeTL0AOwvQ4j7KkiQFZGa8uoQQEJo9rXjIg+xPk7a+zBdwC91EY/ZZz7pdVQMUgHBeKgsVvy0o78BOPWfuziBK5xVsoz5K8ZlMYQNPC5mY+bguMKYNJ5PQ9rzn+LseYT5jhalUsQrPABhEFOoQVUH1id3rszDkLLTn2/d89N/JJGY1+mL+upWWAsmJw1yTHqibSJ7RbiGffnh93MCOHeRe5OLrfmDFfhqOLNt9yuMYNdyJ+noVsfI7Ws9Kpxe2SnuCWBs9yOgM0l7UTMuIokqhGCkarXge/DUWLUcV694Jr8qcJT3OtoQohN+p+Xj66nowJLgFW7xBdFsT4vv7xI8giFxUpB+JkLgRZz2d2eam3iLDCHR+sNyvIDuXDUXhKM6aIykGgvHVHr3bBJRy/JPZFC0A3kqmheMnJpbV6kHXaIbmbgeQeXc+wxq1swFVxkwp14zbRmHwSGVGRgihjmoFYl9MyorQzNFETgp28gq2AKrCHNnIRs63m2cD5X4jZaFzfYAv9ifpOKqRtDgIFG0olge/ig00FFL6KdHySg1Qaab7g==",
 				},
-				Signatures: []usecase_model.BlockSignature{
+				Signatures: []model_usecase.BlockSignature{
 					{
 						BlockIdFlag:      2,
 						ValidatorAddress: "F9E6FFB9B536956201AA138224FD888D03775AB4",
@@ -148,68 +187,39 @@ var _ = Describe("Validator Events", func() {
 				},
 			})
 
-			eventCreateValidator := event_usecase.NewMsgCreateValidator(event_usecase.MsgCommonParams{
-				BlockHeight: anyHeight,
-				TxHash:      "E69985AC8168383A81B7952DBE03EB9B3400FF80AEC0F362369DD7F38B1C2FE9",
-				TxSuccess:   false,
-				MsgIndex:    0,
-			}, createValidatorParams)
-
 			fakeLogger := NewFakeLogger()
 
-			projection := block.NewBlock(fakeLogger, pgConn, nil)
-			projectionValidator := validatorstats.NewValidatorStats(fakeLogger, pgConn, nil)
+			chainStatsProjection := chainstats.NewChainStats(fakeLogger, pgxConn, nil)
 
-			totalDelegateBeforeHandling, err := validatorStatsView.FindBy("total_delegate")
+			totalBlockCountBeforeHandling, findByErrBeforeHandling := chainStatsView.
+				FindBy(chainstats.TOTAL_BLOCK_COUNT)
 
-			//check before handling event
-			Expect(totalDelegateBeforeHandling).To(BeEmpty())
-			Expect(err).To(BeNil())
+			Expect(totalBlockCountBeforeHandling).To(BeEmpty())
+			Expect(findByErrBeforeHandling).To(BeNil())
 
-			//handle event below
-			errHandleEvents := projection.HandleEvents(anyHeight, []event_entity.Event{event})
-			errHandleBlockEvent := projectionValidator.HandleEvents(anyHeight, []event_entity.Event{eventCreateValidator})
-			Expect(errHandleEvents).To(BeNil())
-			Expect(errHandleBlockEvent).To(BeNil())
+			handleGenesisEventsErr := chainStatsProjection.HandleEvents(blockHeight1, []event_entity.Event{
+				genesisEvent,
+			})
+			Expect(handleGenesisEventsErr).To(BeNil())
 
-			//check the list after event handling
-			totalDelegateAfterHandling, errAfterHandling := validatorStatsView.FindBy("total_delegate")
+			totalBlockCountAfterHandlingGenesis, findByErrAfterHandlingGenesis := chainStatsView.
+				FindBy(chainstats.TOTAL_BLOCK_COUNT)
 
-			//check before handling event
-			Expect(blocksView.Count()).To(Equal(int64(1)))
-			Expect(projectionValidator.GetLastHandledEventHeight()).To(Equal(primptr.Int64(anyHeight)))
-			Expect(totalDelegateAfterHandling).To(Equal("[{\"denom\":\"basetcro\",\"amount\":\"10\"}]"))
-			Expect(errAfterHandling).To(BeNil())
-		})
+			Expect(chainStatsProjection.GetLastHandledEventHeight()).To(Equal(primptr.Int64(blockHeight1)))
+			Expect(totalBlockCountAfterHandlingGenesis).To(Equal("0"))
+			Expect(findByErrAfterHandlingGenesis).To(BeNil())
 
-		It("should update projection last handled event height when there is no event at the height", func() {
-			anyHeight := int64(1)
+			handleBlockHeight1EventsErr := chainStatsProjection.HandleEvents(blockHeight1, []event_entity.Event{
+				blockHeight1Event,
+			})
+			Expect(handleBlockHeight1EventsErr).To(BeNil())
 
-			fakeLogger := NewFakeLogger()
-			projection := validatorstats.NewValidatorStats(fakeLogger, pgConn, nil)
+			totalBlockCountAfterHandlingBlock, findByErrAfterHandlingBlock := chainStatsView.
+				FindBy(chainstats.TOTAL_BLOCK_COUNT)
 
-			Expect(projection.GetLastHandledEventHeight()).To(BeNil())
-
-			err := projection.HandleEvents(anyHeight, []event_entity.Event{})
-			Expect(err).To(BeNil())
-
-			Expect(projection.GetLastHandledEventHeight()).To(Equal(primptr.Int64(anyHeight)))
-		})
-
-		It("should not persist projection nor last handled event height on handling error", func() {
-			blocksView := viewBlock.NewBlocks(pgConn.ToHandle())
-
-			anyHeight := int64(1)
-			event := NewFakeEvent()
-
-			fakeLogger := NewFakeLogger()
-			projection := block.NewBlock(fakeLogger, pgConn, nil)
-			Expect(blocksView.Count()).To(Equal(int64(0)))
-
-			err := projection.HandleEvents(anyHeight, []event_entity.Event{event})
-			Expect(err).NotTo(BeNil())
-			Expect(blocksView.Count()).To(Equal(int64(0)))
+			Expect(chainStatsProjection.GetLastHandledEventHeight()).To(Equal(primptr.Int64(blockHeight1)))
+			Expect(totalBlockCountAfterHandlingBlock).To(Equal("1"))
+			Expect(findByErrAfterHandlingBlock).To(BeNil())
 		})
 	})
-
 })
