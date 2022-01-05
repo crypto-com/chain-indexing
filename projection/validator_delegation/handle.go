@@ -265,6 +265,9 @@ func (projection *ValidatorDelegation) handleRedelegate(
 		blockTime,
 		validatorSrcAddress,
 	)
+	if err != nil {
+		return fmt.Errorf("error projection.calculateRedelegationCompleteTime(): %v", err)
+	}
 
 	if completeNow { // no need to create the redelegation object
 		return nil
