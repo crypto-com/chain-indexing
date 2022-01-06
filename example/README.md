@@ -19,6 +19,9 @@ A sample configuration is available under `config/config.toml`.
 app/
     example-app/
     
+        // Custom Config
+        config.go
+        
         // Containing functions to initialize cronjobs
         cronjobs.go
         
@@ -71,6 +74,9 @@ projections/
             
         // Projection implementation
         example.go
+    
+    // projections utility
+    projection.go
 ```
 
 
