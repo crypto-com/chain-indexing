@@ -1,12 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/bootstrap"
+
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
+	custom_projection "github.com/crypto-com/chain-indexing/example/projections"
 	"github.com/crypto-com/chain-indexing/example/projections/example"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
@@ -27,6 +30,7 @@ import (
 	"github.com/crypto-com/chain-indexing/projection/transaction"
 	"github.com/crypto-com/chain-indexing/projection/validator"
 	"github.com/crypto-com/chain-indexing/projection/validatorstats"
+	"github.com/ettle/strcase"
 )
 
 func initProjections(
@@ -107,17 +111,17 @@ func initProjections(
 func InitAdditionalProjection(name string, params InitProjectionParams) projection_entity.Projection {
 	connString := params.RdbConn.(*pg.PgxConn).ConnString()
 
-	githubMigrationHelperConfig := github_migrationhelper.Config{
+	githubMigrationHelperConfigForCustomProjection := github_migrationhelper.Config{
 		GithubAPIUser:    params.GithubAPIUser,
 		GithubAPIToken:   params.GithubAPIToken,
-		MigrationRepoRef: params.MigrationRepoRef,
+		MigrationRepoRef: params.ServerMigrationRepoRef,
 		ConnString:       connString,
 	}
 
 	switch name {
 	case "Example":
-		sourceURL := github_migrationhelper.GenerateDefaultSourceURL("Example", githubMigrationHelperConfig)
-		databaseURL := migrationhelper.GenerateDefaultDatabaseURL("Example", connString)
+		sourceURL := generateGithubMigrationSrouceURLForCustomProjection(name, githubMigrationHelperConfigForCustomProjection)
+		databaseURL := migrationhelper.GenerateDefaultDatabaseURL(name, connString)
 		migrationHelper := github_migrationhelper.NewGithubMigrationHelper(sourceURL, databaseURL)
 
 		return example.NewAdditionalProjection(params.Logger, params.RdbConn, migrationHelper)
@@ -313,6 +317,22 @@ func InitProjection(name string, params InitProjectionParams) projection_entity.
 	return nil
 }
 
+func generateGithubMigrationSrouceURLForCustomProjection(
+	projectionId string,
+	config github_migrationhelper.Config,
+) string {
+	projectionSnakeId := strcase.ToSnake(projectionId)
+	migrationDirectory := fmt.Sprintf(github_migrationhelper.MIGRATION_DIRECTORY_FORMAT, projectionSnakeId)
+
+	return github_migrationhelper.GenerateSourceURL(
+		custom_projection.MIGRATION_GITHUB_URL_FORMAT,
+		config.GithubAPIUser,
+		config.GithubAPIToken,
+		migrationDirectory,
+		config.MigrationRepoRef,
+	)
+}
+
 type InitProjectionParams struct {
 	Logger  applogger.Logger
 	RdbConn rdb.Conn
@@ -324,4 +344,6 @@ type InitProjectionParams struct {
 	GithubAPIUser    string
 	GithubAPIToken   string
 	MigrationRepoRef string
+
+	ServerMigrationRepoRef string
 }
