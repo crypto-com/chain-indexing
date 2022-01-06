@@ -38,7 +38,7 @@ func initCronJobs(
 		cronJobs = append(cronJobs, cronJob)
 	}
 
-	logger.Infof("Enabled the follow cron jobs: [%s]", strings.Join(config.CronJob.Enables, ", "))
+	logger.Infof("Enabled the following cron jobs: [%s]", strings.Join(config.CronJob.Enables, ", "))
 
 	return cronJobs
 }
