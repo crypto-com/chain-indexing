@@ -12,6 +12,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/external/json"
+	test_logger "github.com/crypto-com/chain-indexing/external/logger/test"
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
@@ -2075,7 +2076,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 				mockBridgePendingActivitiesView := view.NewMockBridgePendingActivitiesView().(*view.MockBridgePendingActivitiesView)
 				mocks = append(mocks, &mockBridgePendingActivitiesView.Mock)
 
-				bridge_pending_activity.NewBridgePendingActivities = func(_ *rdb.Handle) view.BridgePendingActivities {
+				bridge_pending_activity.NewBridgePendingActivitiesView = func(_ *rdb.Handle) view.BridgePendingActivities {
 					return mockBridgePendingActivitiesView
 				}
 
@@ -2119,9 +2120,10 @@ func NewBridgePendingActivityProjection(
 	rdbConn rdb.Conn,
 	config bridge_pending_activity.Config,
 ) *bridge_pending_activity.BridgePendingActivity {
+	fakeLogger := test_logger.NewFakeLogger()
 	return bridge_pending_activity.New(
 		config,
-		nil,
+		fakeLogger,
 		rdbConn,
 		nil,
 	)

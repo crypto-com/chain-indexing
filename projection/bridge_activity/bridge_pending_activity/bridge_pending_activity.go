@@ -69,7 +69,9 @@ func New(
 
 		config:  config,
 		rdbConn: rdbConn,
-		logger:  logger,
+		logger:  logger.WithFields(applogger.LogFields{
+			"module": "BridgePendingActivity",
+		}),,
 
 		migrationHelper: migrationHelper,
 
