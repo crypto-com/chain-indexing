@@ -7,7 +7,6 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/bootstrap"
-
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	custom_projection "github.com/crypto-com/chain-indexing/example/projection"
 	"github.com/crypto-com/chain-indexing/example/projection/example"
