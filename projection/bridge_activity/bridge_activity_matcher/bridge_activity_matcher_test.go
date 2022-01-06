@@ -454,17 +454,441 @@ func TestBridgeActivityMatcher_HandleEvents(t *testing.T) {
 				return mockThisRDbConn, mocks, assertFunc
 			},
 		},
-		//{
-		//	Name:   "It should do nothing when there is unprocessed incoming bridge activity at the counterparty chain but the corresponding outgoing activity is not inserted yet",
-		//	Config: bridge_activity_matcher.Config{},
-		//	MockFunc: func() (
-		//		mockThisRDbConn *test.MockRDbConn,
-		//		mocks []*testify_mock.Mock,
-		//		assertFunc func(),
-		//	) {
-		//		return nil, []*testify_mock.Mock{}, func() {}
-		//	},
-		//},
+		{
+			Name:   "Given outgoing bridge activity at counterparty chain, It should update the activity status when there is unprocessed incoming bridge activity at the local chain",
+			Config: bridge_activity_matcher.Config{},
+			MockFunc: func(
+				config *bridge_activity_matcher.Config,
+			) (
+				mockThisRDbConn *test.MockRDbConn,
+				mocks []*testify_mock.Mock,
+				assertFunc func(),
+			) {
+				mockThisRdbHandle := NewMockRdbHandle()
+				mockThisRDbConn = NewMockRDbConn(mockThisRdbHandle)
+				mockThisTx := NewMockRDbTx(mockThisRdbHandle)
+				mockThisRDbConn.On("Begin").Return(mockThisTx, nil)
+
+				mockCounterpartyRdbHandle := NewMockRdbHandle()
+				mockCounterpartyRDbConn := NewMockRDbConn(mockCounterpartyRdbHandle)
+				mockCounterpartyTx := NewMockRDbTx(mockCounterpartyRdbHandle)
+				mockCounterpartyRDbConn.On("Begin").Return(mockCounterpartyTx, nil)
+
+				bridge_activity_matcher.NewPgxConnPool = func(
+					_ *pg.PgxConnPoolConfig, _ applogger.Logger,
+				) (rdb.Conn, error) {
+					return mockCounterpartyRDbConn, nil
+				}
+
+				mockThisBridgePendingActivitiesView := view.NewMockBridgePendingActivitiesView().(*view.MockBridgePendingActivitiesView)
+				mockCounterpartyBridgePendingActivitiesView := view.NewMockBridgePendingActivitiesView().(*view.MockBridgePendingActivitiesView)
+				mockBridgeActivitiesView := view.NewMockBridgeActivitiesView().(*view.MockBridgeActivitiesView)
+
+				mocks = append(mocks, &mockThisBridgePendingActivitiesView.Mock)
+				mocks = append(mocks, &mockCounterpartyBridgePendingActivitiesView.Mock)
+
+				bridge_activity_matcher.NewBridgeActivitiesView = func(conn *rdb.Handle) view.BridgeActivities {
+					if conn == mockThisRDbConn.ToHandle() {
+						return mockBridgeActivitiesView
+					} else if conn == mockCounterpartyRDbConn.ToHandle() {
+						panic("unexpected Counterparty Chain RDb handle")
+					}
+					panic("unrecognized RDb handle")
+				}
+
+				bridge_activity_matcher.NewBridgePendingActivitiesView = func(conn *rdb.Handle) view.BridgePendingActivities {
+					if conn == mockThisRDbConn.ToHandle() {
+						return mockThisBridgePendingActivitiesView
+					} else if conn == mockCounterpartyRDbConn.ToHandle() {
+						return mockCounterpartyBridgePendingActivitiesView
+					}
+					panic("unrecognized RDb handle")
+				}
+
+				counterpartyOutgoingRow := view.BridgeActivityReadRow{
+					BridgeActivityInsertRow: view.BridgeActivityInsertRow{
+						BridgeType:                           types.BRIDGE_TYPE_IBC,
+						SourceBlockHeight:                    1,
+						SourceBlockTime:                      primptr.UTCTime(utctime.FromUnixNano(1000)),
+						SourceTransactionId:                  "txid",
+						SourceChain:                          "from-chain",
+						SourceAddress:                        "from-address",
+						MaybeSourceSmartContractAddress:      nil,
+						MaybeDestinationBlockHeight:          nil,
+						MaybeDestinationBlockTime:            nil,
+						MaybeDestinationTransactionId:        nil,
+						DestinationChain:                     "to-chain",
+						DestinationAddress:                   "to-address",
+						MaybeDestinationSmartContractAddress: nil,
+						MaybeChannelId:                       nil,
+						LinkId:                               "link-id",
+						Amount:                               coin.NewInt(100),
+						MaybeDenom:                           primptr.String("basecro"),
+						MaybeBridgeFeeAmount:                 nil,
+						MaybeBridgeFeeDenom:                  nil,
+						Status:                               types.STATUS_PENDING,
+					},
+					Id:        0,
+					UUID:      "uuid",
+					CreatedAt: primptr.UTCTime(utctime.FromUnixNano(2000)),
+					UpdatedAt: primptr.UTCTime(utctime.FromUnixNano(2000)),
+				}
+				thisIncomingRow := view.BridgePendingActivityReadRow{
+					BridgePendingActivityInsertRow: view.BridgePendingActivityInsertRow{
+						BlockHeight:                   2,
+						BlockTime:                     primptr.UTCTime(utctime.FromUnixNano(2000)),
+						MaybeTransactionId:            primptr.String("txid2"),
+						BridgeType:                    types.BRIDGE_TYPE_IBC,
+						LinkId:                        counterpartyOutgoingRow.LinkId,
+						Direction:                     types.DIRECTION_INCOMING,
+						FromChainId:                   counterpartyOutgoingRow.SourceChain,
+						MaybeFromAddress:              primptr.String(counterpartyOutgoingRow.SourceAddress),
+						MaybeFromSmartContractAddress: counterpartyOutgoingRow.MaybeSourceSmartContractAddress,
+						ToChainId:                     counterpartyOutgoingRow.DestinationChain,
+						ToAddress:                     counterpartyOutgoingRow.DestinationAddress,
+						MaybeToSmartContractAddress:   counterpartyOutgoingRow.MaybeDestinationSmartContractAddress,
+						MaybeChannelId:                primptr.String("channel-1"),
+						Amount:                        counterpartyOutgoingRow.Amount,
+						MaybeDenom:                    counterpartyOutgoingRow.MaybeDenom,
+						MaybeBridgeFeeAmount:          counterpartyOutgoingRow.MaybeBridgeFeeAmount,
+						MaybeBridgeFeeDenom:           counterpartyOutgoingRow.MaybeBridgeFeeDenom,
+						Status:                        types.STATUS_COUNTERPARTY_CONFIRMED,
+						IsProcessed:                   false,
+					},
+					Id:        0,
+					CreatedAt: primptr.UTCTime(utctime.FromUnixNano(2000)),
+					UpdatedAt: primptr.UTCTime(utctime.FromUnixNano(2000)),
+				}
+				mockThisBridgePendingActivitiesView.On("ListAllUnprocessedOutgoing").Return(
+					[]view.BridgePendingActivityReadRow{}, nil,
+				)
+				mockThisBridgePendingActivitiesView.On("ListAllUnprocessedIncoming").Return(
+					[]view.BridgePendingActivityReadRow{
+						thisIncomingRow,
+					},
+					nil,
+				)
+				mockCounterpartyBridgePendingActivitiesView.On("ListAllUnprocessedOutgoing").Return(
+					[]view.BridgePendingActivityReadRow{}, nil,
+				)
+				mockCounterpartyBridgePendingActivitiesView.On("ListAllUnprocessedIncoming").Return(
+					[]view.BridgePendingActivityReadRow{}, nil,
+				)
+				mockBridgeActivitiesView.On("FindByLinkId", counterpartyOutgoingRow.LinkId).Return(
+					counterpartyOutgoingRow, nil,
+				)
+
+				mockBridgeActivitiesView.On("Update", &view.BridgeActivityReadRow{
+					BridgeActivityInsertRow: view.BridgeActivityInsertRow{
+						BridgeType:                           counterpartyOutgoingRow.BridgeType,
+						SourceBlockHeight:                    counterpartyOutgoingRow.SourceBlockHeight,
+						SourceBlockTime:                      counterpartyOutgoingRow.SourceBlockTime,
+						SourceTransactionId:                  counterpartyOutgoingRow.SourceTransactionId,
+						SourceChain:                          counterpartyOutgoingRow.SourceChain,
+						SourceAddress:                        counterpartyOutgoingRow.SourceAddress,
+						MaybeSourceSmartContractAddress:      counterpartyOutgoingRow.MaybeSourceSmartContractAddress,
+						MaybeDestinationBlockHeight:          primptr.Int64(thisIncomingRow.BlockHeight),
+						MaybeDestinationBlockTime:            thisIncomingRow.BlockTime,
+						MaybeDestinationTransactionId:        thisIncomingRow.MaybeTransactionId,
+						DestinationChain:                     counterpartyOutgoingRow.DestinationChain,
+						DestinationAddress:                   counterpartyOutgoingRow.DestinationAddress,
+						MaybeDestinationSmartContractAddress: counterpartyOutgoingRow.MaybeDestinationSmartContractAddress,
+						MaybeChannelId:                       counterpartyOutgoingRow.MaybeChannelId,
+						LinkId:                               counterpartyOutgoingRow.LinkId,
+						Amount:                               counterpartyOutgoingRow.Amount,
+						MaybeDenom:                           counterpartyOutgoingRow.MaybeDenom,
+						MaybeBridgeFeeAmount:                 counterpartyOutgoingRow.MaybeBridgeFeeAmount,
+						MaybeBridgeFeeDenom:                  counterpartyOutgoingRow.MaybeBridgeFeeDenom,
+						Status:                               thisIncomingRow.Status,
+					},
+
+					Id:        counterpartyOutgoingRow.Id,
+					UUID:      counterpartyOutgoingRow.UUID,
+					CreatedAt: counterpartyOutgoingRow.CreatedAt,
+					UpdatedAt: counterpartyOutgoingRow.UpdatedAt,
+				}).Return(nil)
+				mockThisBridgePendingActivitiesView.On(
+					"UpdateToProcessed",
+					thisIncomingRow.Id,
+				).Return(nil)
+
+				assertFunc = func() {
+					mockBridgeActivitiesView.AssertNumberOfCalls(t, "Update", 1)
+				}
+
+				return mockThisRDbConn, mocks, assertFunc
+			},
+		},
+		{
+			Name:   "It should do nothing when there is unprocessed incoming bridge activity at the counterparty chain but the corresponding outgoing activity at this chain is not inserted yet",
+			Config: bridge_activity_matcher.Config{},
+			MockFunc: func(
+				config *bridge_activity_matcher.Config,
+			) (
+				mockThisRDbConn *test.MockRDbConn,
+				mocks []*testify_mock.Mock,
+				assertFunc func(),
+			) {
+				mockThisRdbHandle := NewMockRdbHandle()
+				mockThisRDbConn = NewMockRDbConn(mockThisRdbHandle)
+				mockThisTx := NewMockRDbTx(mockThisRdbHandle)
+				mockThisRDbConn.On("Begin").Return(mockThisTx, nil)
+
+				mockCounterpartyRdbHandle := NewMockRdbHandle()
+				mockCounterpartyRDbConn := NewMockRDbConn(mockCounterpartyRdbHandle)
+				mockCounterpartyTx := NewMockRDbTx(mockCounterpartyRdbHandle)
+				mockCounterpartyRDbConn.On("Begin").Return(mockCounterpartyTx, nil)
+
+				bridge_activity_matcher.NewPgxConnPool = func(
+					_ *pg.PgxConnPoolConfig, _ applogger.Logger,
+				) (rdb.Conn, error) {
+					return mockCounterpartyRDbConn, nil
+				}
+
+				mockThisBridgePendingActivitiesView := view.NewMockBridgePendingActivitiesView().(*view.MockBridgePendingActivitiesView)
+				mockCounterpartyBridgePendingActivitiesView := view.NewMockBridgePendingActivitiesView().(*view.MockBridgePendingActivitiesView)
+				mockBridgeActivitiesView := view.NewMockBridgeActivitiesView().(*view.MockBridgeActivitiesView)
+
+				mocks = append(mocks, &mockThisBridgePendingActivitiesView.Mock)
+				mocks = append(mocks, &mockCounterpartyBridgePendingActivitiesView.Mock)
+
+				bridge_activity_matcher.NewBridgeActivitiesView = func(conn *rdb.Handle) view.BridgeActivities {
+					if conn == mockThisRDbConn.ToHandle() {
+						return mockBridgeActivitiesView
+					} else if conn == mockCounterpartyRDbConn.ToHandle() {
+						panic("unexpected Counterparty Chain RDb handle")
+					}
+					panic("unrecognized RDb handle")
+				}
+
+				bridge_activity_matcher.NewBridgePendingActivitiesView = func(conn *rdb.Handle) view.BridgePendingActivities {
+					if conn == mockThisRDbConn.ToHandle() {
+						return mockThisBridgePendingActivitiesView
+					} else if conn == mockCounterpartyRDbConn.ToHandle() {
+						return mockCounterpartyBridgePendingActivitiesView
+					}
+					panic("unrecognized RDb handle")
+				}
+
+				thisOutgoingRow := view.BridgeActivityReadRow{
+					BridgeActivityInsertRow: view.BridgeActivityInsertRow{
+						BridgeType:                           types.BRIDGE_TYPE_IBC,
+						SourceBlockHeight:                    1,
+						SourceBlockTime:                      primptr.UTCTime(utctime.FromUnixNano(1000)),
+						SourceTransactionId:                  "txid",
+						SourceChain:                          "from-chain",
+						SourceAddress:                        "from-address",
+						MaybeSourceSmartContractAddress:      nil,
+						MaybeDestinationBlockHeight:          nil,
+						MaybeDestinationBlockTime:            nil,
+						MaybeDestinationTransactionId:        nil,
+						DestinationChain:                     "to-chain",
+						DestinationAddress:                   "to-address",
+						MaybeDestinationSmartContractAddress: nil,
+						MaybeChannelId:                       nil,
+						LinkId:                               "link-id",
+						Amount:                               coin.NewInt(100),
+						MaybeDenom:                           primptr.String("basecro"),
+						MaybeBridgeFeeAmount:                 nil,
+						MaybeBridgeFeeDenom:                  nil,
+						Status:                               types.STATUS_PENDING,
+					},
+					Id:        0,
+					UUID:      "uuid",
+					CreatedAt: primptr.UTCTime(utctime.FromUnixNano(2000)),
+					UpdatedAt: primptr.UTCTime(utctime.FromUnixNano(2000)),
+				}
+				counterpartyIncomingRow := view.BridgePendingActivityReadRow{
+					BridgePendingActivityInsertRow: view.BridgePendingActivityInsertRow{
+						BlockHeight:                   2,
+						BlockTime:                     primptr.UTCTime(utctime.FromUnixNano(2000)),
+						MaybeTransactionId:            primptr.String("txid2"),
+						BridgeType:                    types.BRIDGE_TYPE_IBC,
+						LinkId:                        thisOutgoingRow.LinkId,
+						Direction:                     types.DIRECTION_INCOMING,
+						FromChainId:                   thisOutgoingRow.SourceChain,
+						MaybeFromAddress:              primptr.String(thisOutgoingRow.SourceAddress),
+						MaybeFromSmartContractAddress: thisOutgoingRow.MaybeSourceSmartContractAddress,
+						ToChainId:                     thisOutgoingRow.DestinationChain,
+						ToAddress:                     thisOutgoingRow.DestinationAddress,
+						MaybeToSmartContractAddress:   thisOutgoingRow.MaybeDestinationSmartContractAddress,
+						MaybeChannelId:                primptr.String("channel-1"),
+						Amount:                        thisOutgoingRow.Amount,
+						MaybeDenom:                    thisOutgoingRow.MaybeDenom,
+						MaybeBridgeFeeAmount:          thisOutgoingRow.MaybeBridgeFeeAmount,
+						MaybeBridgeFeeDenom:           thisOutgoingRow.MaybeBridgeFeeDenom,
+						Status:                        types.STATUS_COUNTERPARTY_CONFIRMED,
+						IsProcessed:                   false,
+					},
+					Id:        0,
+					CreatedAt: primptr.UTCTime(utctime.FromUnixNano(2000)),
+					UpdatedAt: primptr.UTCTime(utctime.FromUnixNano(2000)),
+				}
+				mockThisBridgePendingActivitiesView.On("ListAllUnprocessedOutgoing").Return(
+					[]view.BridgePendingActivityReadRow{}, nil,
+				)
+				mockThisBridgePendingActivitiesView.On("ListAllUnprocessedIncoming").Return(
+					[]view.BridgePendingActivityReadRow{}, nil,
+				)
+				mockCounterpartyBridgePendingActivitiesView.On("ListAllUnprocessedOutgoing").Return(
+					[]view.BridgePendingActivityReadRow{}, nil,
+				)
+				mockCounterpartyBridgePendingActivitiesView.On("ListAllUnprocessedIncoming").Return(
+					[]view.BridgePendingActivityReadRow{
+						counterpartyIncomingRow,
+					},
+					nil,
+				)
+				mockBridgeActivitiesView.On("FindByLinkId", thisOutgoingRow.LinkId).Return(
+					nil, rdb.ErrNoRows,
+				)
+
+				assertFunc = func() {
+					mockBridgeActivitiesView.AssertNumberOfCalls(t, "Insert", 0)
+					mockBridgeActivitiesView.AssertNumberOfCalls(t, "Update", 0)
+					mockCounterpartyBridgePendingActivitiesView.AssertNumberOfCalls(
+						t, "UpdateToProcessed", 0,
+					)
+				}
+
+				return mockThisRDbConn, mocks, assertFunc
+			},
+		},
+		{
+			Name:   "It should do nothing when there is unprocessed incoming bridge activity at this chain but the corresponding outgoing activity at counterparty chain at this chain is not inserted yet",
+			Config: bridge_activity_matcher.Config{},
+			MockFunc: func(
+				config *bridge_activity_matcher.Config,
+			) (
+				mockThisRDbConn *test.MockRDbConn,
+				mocks []*testify_mock.Mock,
+				assertFunc func(),
+			) {
+				mockThisRdbHandle := NewMockRdbHandle()
+				mockThisRDbConn = NewMockRDbConn(mockThisRdbHandle)
+				mockThisTx := NewMockRDbTx(mockThisRdbHandle)
+				mockThisRDbConn.On("Begin").Return(mockThisTx, nil)
+
+				mockCounterpartyRdbHandle := NewMockRdbHandle()
+				mockCounterpartyRDbConn := NewMockRDbConn(mockCounterpartyRdbHandle)
+				mockCounterpartyTx := NewMockRDbTx(mockCounterpartyRdbHandle)
+				mockCounterpartyRDbConn.On("Begin").Return(mockCounterpartyTx, nil)
+
+				bridge_activity_matcher.NewPgxConnPool = func(
+					_ *pg.PgxConnPoolConfig, _ applogger.Logger,
+				) (rdb.Conn, error) {
+					return mockCounterpartyRDbConn, nil
+				}
+
+				mockThisBridgePendingActivitiesView := view.NewMockBridgePendingActivitiesView().(*view.MockBridgePendingActivitiesView)
+				mockCounterpartyBridgePendingActivitiesView := view.NewMockBridgePendingActivitiesView().(*view.MockBridgePendingActivitiesView)
+				mockBridgeActivitiesView := view.NewMockBridgeActivitiesView().(*view.MockBridgeActivitiesView)
+
+				mocks = append(mocks, &mockThisBridgePendingActivitiesView.Mock)
+				mocks = append(mocks, &mockCounterpartyBridgePendingActivitiesView.Mock)
+
+				bridge_activity_matcher.NewBridgeActivitiesView = func(conn *rdb.Handle) view.BridgeActivities {
+					if conn == mockThisRDbConn.ToHandle() {
+						return mockBridgeActivitiesView
+					} else if conn == mockCounterpartyRDbConn.ToHandle() {
+						panic("unexpected Counterparty Chain RDb handle")
+					}
+					panic("unrecognized RDb handle")
+				}
+
+				bridge_activity_matcher.NewBridgePendingActivitiesView = func(conn *rdb.Handle) view.BridgePendingActivities {
+					if conn == mockThisRDbConn.ToHandle() {
+						return mockThisBridgePendingActivitiesView
+					} else if conn == mockCounterpartyRDbConn.ToHandle() {
+						return mockCounterpartyBridgePendingActivitiesView
+					}
+					panic("unrecognized RDb handle")
+				}
+
+				counterpartyOutgoingRow := view.BridgeActivityReadRow{
+					BridgeActivityInsertRow: view.BridgeActivityInsertRow{
+						BridgeType:                           types.BRIDGE_TYPE_IBC,
+						SourceBlockHeight:                    1,
+						SourceBlockTime:                      primptr.UTCTime(utctime.FromUnixNano(1000)),
+						SourceTransactionId:                  "txid",
+						SourceChain:                          "from-chain",
+						SourceAddress:                        "from-address",
+						MaybeSourceSmartContractAddress:      nil,
+						MaybeDestinationBlockHeight:          nil,
+						MaybeDestinationBlockTime:            nil,
+						MaybeDestinationTransactionId:        nil,
+						DestinationChain:                     "to-chain",
+						DestinationAddress:                   "to-address",
+						MaybeDestinationSmartContractAddress: nil,
+						MaybeChannelId:                       nil,
+						LinkId:                               "link-id",
+						Amount:                               coin.NewInt(100),
+						MaybeDenom:                           primptr.String("basecro"),
+						MaybeBridgeFeeAmount:                 nil,
+						MaybeBridgeFeeDenom:                  nil,
+						Status:                               types.STATUS_PENDING,
+					},
+					Id:        0,
+					UUID:      "uuid",
+					CreatedAt: primptr.UTCTime(utctime.FromUnixNano(2000)),
+					UpdatedAt: primptr.UTCTime(utctime.FromUnixNano(2000)),
+				}
+				thisIncomingRow := view.BridgePendingActivityReadRow{
+					BridgePendingActivityInsertRow: view.BridgePendingActivityInsertRow{
+						BlockHeight:                   2,
+						BlockTime:                     primptr.UTCTime(utctime.FromUnixNano(2000)),
+						MaybeTransactionId:            primptr.String("txid2"),
+						BridgeType:                    types.BRIDGE_TYPE_IBC,
+						LinkId:                        counterpartyOutgoingRow.LinkId,
+						Direction:                     types.DIRECTION_INCOMING,
+						FromChainId:                   counterpartyOutgoingRow.SourceChain,
+						MaybeFromAddress:              primptr.String(counterpartyOutgoingRow.SourceAddress),
+						MaybeFromSmartContractAddress: counterpartyOutgoingRow.MaybeSourceSmartContractAddress,
+						ToChainId:                     counterpartyOutgoingRow.DestinationChain,
+						ToAddress:                     counterpartyOutgoingRow.DestinationAddress,
+						MaybeToSmartContractAddress:   counterpartyOutgoingRow.MaybeDestinationSmartContractAddress,
+						MaybeChannelId:                primptr.String("channel-1"),
+						Amount:                        counterpartyOutgoingRow.Amount,
+						MaybeDenom:                    counterpartyOutgoingRow.MaybeDenom,
+						MaybeBridgeFeeAmount:          counterpartyOutgoingRow.MaybeBridgeFeeAmount,
+						MaybeBridgeFeeDenom:           counterpartyOutgoingRow.MaybeBridgeFeeDenom,
+						Status:                        types.STATUS_COUNTERPARTY_CONFIRMED,
+						IsProcessed:                   false,
+					},
+					Id:        0,
+					CreatedAt: primptr.UTCTime(utctime.FromUnixNano(2000)),
+					UpdatedAt: primptr.UTCTime(utctime.FromUnixNano(2000)),
+				}
+				mockThisBridgePendingActivitiesView.On("ListAllUnprocessedOutgoing").Return(
+					[]view.BridgePendingActivityReadRow{}, nil,
+				)
+				mockThisBridgePendingActivitiesView.On("ListAllUnprocessedIncoming").Return(
+					[]view.BridgePendingActivityReadRow{
+						thisIncomingRow,
+					},
+					nil,
+				)
+				mockCounterpartyBridgePendingActivitiesView.On("ListAllUnprocessedOutgoing").Return(
+					[]view.BridgePendingActivityReadRow{}, nil,
+				)
+				mockCounterpartyBridgePendingActivitiesView.On("ListAllUnprocessedIncoming").Return(
+					[]view.BridgePendingActivityReadRow{}, nil,
+				)
+				mockBridgeActivitiesView.On("FindByLinkId", thisIncomingRow.LinkId).Return(
+					nil, rdb.ErrNoRows,
+				)
+
+				assertFunc = func() {
+					mockBridgeActivitiesView.AssertNumberOfCalls(t, "Insert", 0)
+					mockBridgeActivitiesView.AssertNumberOfCalls(t, "Update", 0)
+					mockCounterpartyBridgePendingActivitiesView.AssertNumberOfCalls(
+						t, "UpdateToProcessed", 0,
+					)
+				}
+
+				return mockThisRDbConn, mocks, assertFunc
+			},
+		},
 	}
 
 	for _, tc := range testCases {
