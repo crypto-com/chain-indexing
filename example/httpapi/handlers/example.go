@@ -19,7 +19,7 @@ type Example struct {
 func NewExample(logger applogger.Logger, rdbHandle *rdb.Handle) *Example {
 	return &Example{
 		logger.WithFields(applogger.LogFields{
-			"module": "DesktopWalletAnalytics",
+			"module": "ExampleModule",
 		}),
 
 		example_view.NewExamplesView(rdbHandle),
