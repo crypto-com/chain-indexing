@@ -4,7 +4,7 @@ Example implementation for [crypto.com/chain-indexing](https://github.com/crypto
 
 ## How to Run
 
-### 1 Prerequisite
+### 1. Prerequisite
 
 - Crypto.com Chain full node
 - Postgres Database
