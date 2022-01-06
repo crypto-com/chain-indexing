@@ -19,7 +19,7 @@ import (
 func run(args []string) error {
 	cliApp := &cli.App{
 		Name:                 filepath.Base(args[0]),
-		Usage:                "Crypto.com Chain Indexing Service",
+		Usage:                "Crypto.org Chain Indexing Service",
 		Version:              "v0.0.1",
 		Copyright:            "(c) 2020 Crypto.com",
 		EnableBashCompletion: true,
