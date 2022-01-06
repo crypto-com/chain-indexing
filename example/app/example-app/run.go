@@ -132,7 +132,7 @@ func run(args []string) error {
 			if ctx.IsSet("dbSSL") {
 				cliConfig.DatabaseSSL = primptr.Bool(ctx.Bool("dbSSL"))
 			}
-			if ctx.IsSet("dgPort") {
+			if ctx.IsSet("dbPort") {
 				cliConfig.DatabasePort = primptr.Int32(int32(ctx.Int("dbPort")))
 			}
 
