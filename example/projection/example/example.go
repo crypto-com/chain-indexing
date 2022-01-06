@@ -2,7 +2,6 @@ package example
 
 import (
 	"fmt"
-	"log"
 
 	example_view "github.com/crypto-com/chain-indexing/example/projection/example/view"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
@@ -73,7 +72,6 @@ func (projection *AdditionalExampleProjection) HandleEvents(height int64, events
 	examplesView := NewExamplesView(rdbTxHandle)
 
 	for _, event := range events {
-		log.Println(event)
 		if typedEvent, ok := event.(*event_usecase.MsgSend); ok {
 			row := &example_view.ExampleRow{
 				Address: typedEvent.ToAddress,
