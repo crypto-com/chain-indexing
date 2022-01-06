@@ -36,7 +36,7 @@ app/
         
         routes/
             // Implementation for `Route` interface
-            routerregistry.go
+            routeregistry.go
             
             // Containing functions to initialize routes
             routes.go
