@@ -19,7 +19,7 @@ A sample configuration is available under `config/config.toml`.
 app/
     example-app/
     
-        // Custom Config
+        // Custom configuartion
         config.go
         
         // Containing functions to initialize cronjobs
