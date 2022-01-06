@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	example_view "github.com/crypto-com/chain-indexing/example/projections/example/view"
+	example_view "github.com/crypto-com/chain-indexing/example/projection/example/view"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
 

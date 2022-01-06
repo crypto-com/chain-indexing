@@ -85,6 +85,7 @@ enables = [
 #    "IBCChannelTxMsgTrace",
     "IBCChannelMessage",
     "BridgePendingActivity",
+    "Example",
 ]
 
 [cronjob]

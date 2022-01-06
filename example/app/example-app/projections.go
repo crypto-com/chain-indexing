@@ -9,8 +9,8 @@ import (
 	"github.com/crypto-com/chain-indexing/bootstrap"
 
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
-	custom_projection "github.com/crypto-com/chain-indexing/example/projections"
-	"github.com/crypto-com/chain-indexing/example/projections/example"
+	custom_projection "github.com/crypto-com/chain-indexing/example/projection"
+	"github.com/crypto-com/chain-indexing/example/projection/example"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
@@ -37,6 +37,7 @@ func initProjections(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	config *bootstrap.Config,
+	customConfig *CustomConfig,
 ) []projection_entity.Projection {
 	if config.System.Mode == bootstrap.SYSTEM_MODE_API_ONLY {
 		return []projection_entity.Projection{}
@@ -65,6 +66,8 @@ func initProjections(
 		GithubAPIUser:    config.GithubAPI.Username,
 		GithubAPIToken:   config.GithubAPI.Token,
 		MigrationRepoRef: config.GithubAPI.MigrationRepoRef,
+
+		ServerMigrationRepoRef: customConfig.ServerGithubAPI.MigrationRepoRef,
 	}
 	for _, projectionName := range config.Projection.Enables {
 		projection := InitProjection(
@@ -84,7 +87,7 @@ func initProjections(
 		projections = append(projections, projection)
 	}
 
-	// Append additional projections
+	// Append additional projection
 	for _, projectionName := range config.Projection.Enables {
 		projection := InitAdditionalProjection(
 			projectionName, initParams,
@@ -103,7 +106,7 @@ func initProjections(
 		projections = append(projections, projection)
 	}
 
-	logger.Infof("Enabled the follow projections: [%s]", strings.Join(config.Projection.Enables, ", "))
+	logger.Infof("Enabled the follow projection: [%s]", strings.Join(config.Projection.Enables, ", "))
 
 	return projections
 }

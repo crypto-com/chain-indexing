@@ -111,6 +111,16 @@ func run(args []string) error {
 				return fmt.Errorf("error reading global projection Toml config: %v", readProjectionConfigErr)
 			}
 
+			// Read custom config for chain-indexing-server
+			customConfigReader, err := toml.FromFile(configPath)
+			if err != nil {
+				return fmt.Errorf("error creating Toml custom config reader: %v", err)
+			}
+			var customConfig CustomConfig
+			if readConfigErr := customConfigReader.Read(&customConfig); readConfigErr != nil {
+				return fmt.Errorf("error reading custom Toml config: %v", readConfigErr)
+			}
+
 			cliConfig := bootstrap.CLIConfig{
 				LogLevel: ctx.String("logLevel"),
 
@@ -149,7 +159,7 @@ func run(args []string) error {
 			app := bootstrap.NewApp(logger, &config)
 
 			app.InitIndexService(
-				initProjections(logger, app.GetRDbConn(), &config),
+				initProjections(logger, app.GetRDbConn(), &config, &customConfig),
 				initCronJobs(logger, app.GetRDbConn(), &config),
 			)
 			app.InitHTTPAPIServer(routes.InitRouteRegistry(logger, app.GetRDbConn(), &config))
