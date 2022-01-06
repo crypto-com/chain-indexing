@@ -1,6 +1,7 @@
 package event_test
 
 import (
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/entity/event/test"
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	. "github.com/crypto-com/chain-indexing/test"
@@ -13,14 +14,14 @@ import (
 )
 
 var _ = Describe("RdbEventStore", func() {
-	WithTestPgxConn(func(pgxConn *pg.PgxConn, pgMigrate *pg.Migrate) {
+	WithTestPgxConn(func(pgxConn *pg.PgxConn, migrate rdb.Migrate) {
 		BeforeEach(func() {
-			_ = pgMigrate.Reset()
-			pgMigrate.MustUp()
+			_ = migrate.Reset()
+			migrate.MustUp()
 		})
 
 		AfterEach(func() {
-			_ = pgMigrate.Reset()
+			_ = migrate.Reset()
 		})
 
 		Describe("Insert", func() {
