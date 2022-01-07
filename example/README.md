@@ -13,6 +13,8 @@ Example implementation for [crypto.com/chain-indexing](https://github.com/crypto
 
 A sample configuration is available under `config/config.toml`.
 
+**Reminder**
+Please generate your own `Personal access tokens` in Github. And then input your own username and token under `github_api.username` and `github_api.token`. This is for pulling migration files on `crypto.com/chain-indexing`.
 ### 3 Example file structure
 
 ```
