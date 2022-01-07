@@ -360,7 +360,7 @@ func InitRouteRegistry(
 	routes = append(routes,
 		Route{
 			Method:  GET,
-			path:    "api/v1/exmaples",
+			path:    "api/v1/examples",
 			handler: exampleHandler.List,
 		},
 	)
