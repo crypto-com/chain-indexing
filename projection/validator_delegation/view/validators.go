@@ -15,6 +15,7 @@ type Validators interface {
 	Delete(row ValidatorRow) error
 	FindByOperatorAddr(operatorAddress string, height int64) (ValidatorRow, bool, error)
 	FindByConsensusNodeAddr(consensusNodeAddress string, height int64) (ValidatorRow, error)
+	FindByTendermintAddr(tendermintAddress string, height int64) (ValidatorRow, error)
 	List(height int64, pagination *pagination.Pagination) ([]ValidatorRow, *pagination.PaginationResult, error)
 }
 
@@ -60,6 +61,11 @@ func (view *ValidatorsView) FindByConsensusNodeAddr(consensusNodeAddress string,
 	return ValidatorRow{}, nil
 }
 
+func (view *ValidatorsView) FindByTendermintAddr(tendermintAddress string, height int64) (ValidatorRow, error) {
+
+	return ValidatorRow{}, nil
+}
+
 func (view *ValidatorsView) List(
 	height int64,
 	pagination *pagination.Pagination,
@@ -88,6 +94,7 @@ type ValidatorRow struct {
 
 	OperatorAddress      string `json:"operatorAddress"`
 	ConsensusNodeAddress string `json:"consensusNodeAddress"`
+	TendermintAddress    string `json:"tendermintAddress"`
 
 	Status types.ValidatorStatus `json:"status"`
 	Jailed bool                  `json:"jailed"`

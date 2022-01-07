@@ -25,6 +25,7 @@ var (
 	NewUBDQueue                  = view.NewUBDQueueView
 	NewRedelegations             = view.NewRedelegationsView
 	NewRedelegationQueue         = view.NewRedelegationQueueView
+	NewEvidences                 = view.NewEvidencesView
 	UpdateLastHandledEventHeight = (*ValidatorDelegation).UpdateLastHandledEventHeight
 )
 
@@ -78,6 +79,7 @@ func (_ *ValidatorDelegation) GetEventsToListen() []string {
 		event_usecase.GENESIS_VALIDATOR_CREATED, // parsed from genesis.
 
 		// BeginBlock
+		event_usecase.EVIDENCE,
 		event_usecase.VALIDATOR_SLASHED, // parsed from BlockResult.BeginBlockEvents, emitted in BeginBlock.
 		event_usecase.VALIDATOR_JAILED,  // generated along with `slash` event, introduced by ourselves.
 
@@ -177,6 +179,28 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 		}
 	}
 
+	// Handle evidence.
+	//
+	// NOTES: Although Evidences are handled by CosmosSDK in BeginBlock,
+	//        here, we use a separate loop to handle Evidences.
+	//        As later, `slash` event will need the information from Evidences.
+	//        Therefore Evidence must be written to DB before we handle `slash` event in BeginBlock.
+	for _, event := range events {
+		if typedEvent, ok := event.(*event_usecase.Evidence); ok {
+
+			if err := projection.handleEvidence(
+				rdbTxHandle,
+				height,
+				typedEvent.TendermintAddress,
+				typedEvent.InfractionHeight,
+				typedEvent.RawEvidence,
+			); err != nil {
+				return fmt.Errorf("error handleEvidence: %v", err)
+			}
+
+		}
+	}
+
 	// Handle events in BeginBlock.
 	for _, event := range events {
 		if typedEvent, ok := event.(*event_usecase.ValidatorJailed); ok {
@@ -189,7 +213,24 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 				return fmt.Errorf("error handleValidatorJailed: %v", err)
 			}
 
-			// } else if _, ok := event.(*event_usecase.ValidatorSlashed); ok {
+		} else if _, ok := event.(*event_usecase.ValidatorSlashed); ok {
+
+			// Important NOTES:
+			//
+			// There are two cases when a slash will happen:
+			// - Missing Validator Signature
+			// - Double Signing
+			//
+			// One important information for slashing is `infractionHeight`.
+			// Unluckily, it is not in a `slash` event.
+			//
+			// In the case of `Missing Validator Signature`, we can always calculate it by ourselves:
+			// - `infractionHeight = currentBlockHeight - 2`.
+			// https://github.com/cosmos/cosmos-sdk/blob/b5477dfee9e0785fe651fc603ca53f72a34d9bfd/x/slashing/keeper/infractions.go#L85
+			//
+			// In the case of `Double Signing`, we can retrieve the `infractionHeight` through Evidence.
+			// - `infractionHeight = evidence.InfractionHeight - 1`
+			// https://github.com/cosmos/cosmos-sdk/blob/b5477dfee9e0785fe651fc603ca53f72a34d9bfd/x/evidence/keeper/infraction.go#L101
 
 			// 	// TODO: the real devil...
 
@@ -241,7 +282,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 
 		} else if typedEvent, ok := event.(*event_usecase.MsgUndelegate); ok {
 
-			// Successful tx with MsgUndelegate always has unbonding completion in the Msg.
+			// Successful tx with MsgUndelegate always has unbonding completion time in the Msg.
 			if typedEvent.MaybeUnbondCompleteAt != nil {
 
 				if err := projection.handleUndelegate(
@@ -286,7 +327,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 
 	// Handle events in EndBlock.
 	//
-	// Handle ValidatorUpdate events. These events are calculated in each EndBlock.
+	// Handle ValidatorUpdate events. These events are emitted in each EndBlock.
 	for _, event := range events {
 		if typedEvent, ok := event.(*event_usecase.PowerChanged); ok {
 

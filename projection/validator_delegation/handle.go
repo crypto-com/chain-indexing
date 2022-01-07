@@ -9,6 +9,7 @@ import (
 	"github.com/crypto-com/chain-indexing/projection/validator_delegation/utils"
 	"github.com/crypto-com/chain-indexing/projection/validator_delegation/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 func (projection *ValidatorDelegation) handleCreateNewValidator(
@@ -26,6 +27,11 @@ func (projection *ValidatorDelegation) handleCreateNewValidator(
 		return fmt.Errorf("error in GetConsensusNodeAddress: %v", err)
 	}
 
+	tendermintAddress, err := utils.GetTendermintAddress(tendermintPubKey)
+	if err != nil {
+		return fmt.Errorf("error in GetTendermintAddress: %v", err)
+	}
+
 	minSelfDelegation, ok := coin.NewIntFromString(minSelfDelegationInString)
 	if !ok {
 		return fmt.Errorf("Failed to parse minSelfDelegationInString: %v", minSelfDelegationInString)
@@ -38,6 +44,7 @@ func (projection *ValidatorDelegation) handleCreateNewValidator(
 
 		OperatorAddress:      validatorAddress,
 		ConsensusNodeAddress: consensusNodeAddress,
+		TendermintAddress:    tendermintAddress,
 
 		Status: types.UNBONDED,
 		Jailed: false,
@@ -289,6 +296,30 @@ func (projection *ValidatorDelegation) handleRedelegate(
 
 	if err := projection.insertRedelegationQueue(rdbTxHandle, red, completionTime); err != nil {
 		return fmt.Errorf("error projection.insertRedelegationQueue(): %v", err)
+	}
+
+	return nil
+}
+
+func (projection *ValidatorDelegation) handleEvidence(
+	rdbTxHandle *rdb.Handle,
+	height int64,
+	tendermintAddress string,
+	infractionHeight int64,
+	rawEvidence model.BlockEvidence,
+) error {
+
+	evidencesView := NewEvidences(rdbTxHandle)
+
+	evidence := view.EvidenceRow{
+		Height:            height,
+		TendermintAddress: tendermintAddress,
+		InfractionHeight:  infractionHeight,
+		RawEvidence:       rawEvidence,
+	}
+
+	if err := evidencesView.Insert(evidence); err != nil {
+		return fmt.Errorf("error in evidencesView.Insert(): %v", err)
 	}
 
 	return nil

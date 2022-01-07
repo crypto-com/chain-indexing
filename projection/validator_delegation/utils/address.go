@@ -34,6 +34,15 @@ func GetConsensusNodeAddress(
 	return consensusNodeAddress, nil
 }
 
+func GetTendermintAddress(tendermintPubKeyInString string) (string, error) {
+	tendermintPubKey, err := base64.StdEncoding.DecodeString(tendermintPubKeyInString)
+	if err != nil {
+		return "", fmt.Errorf("error base64 decoding Tendermint node pubkey: %v", err)
+	}
+
+	return tmcosmosutils.TmAddressFromTmPubKey(tendermintPubKey), nil
+}
+
 func IsValAddrEqualsDelAddr(
 	validatorAddress string,
 	delegatorAddress string,
