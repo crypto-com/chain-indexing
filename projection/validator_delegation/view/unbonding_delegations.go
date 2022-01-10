@@ -14,6 +14,7 @@ type UnbondingDelegations interface {
 	Upsert(row UnbondingDelegationRow) error
 	Delete(row UnbondingDelegationRow) error
 	FindBy(delegatorAddress, validatorAddress string, height int64) (UnbondingDelegationRow, bool, error)
+	ListByValidator(validatorAddress string, height int64) ([]UnbondingDelegationRow, error)
 }
 
 type UnbondingDelegationsView struct {
@@ -48,6 +49,14 @@ func (view *UnbondingDelegationsView) FindBy(
 ) (UnbondingDelegationRow, bool, error) {
 
 	return UnbondingDelegationRow{}, true, nil
+}
+
+func (view *UnbondingDelegationsView) ListByValidator(
+	validatorAddress string,
+	height int64,
+) ([]UnbondingDelegationRow, error) {
+
+	return nil, nil
 }
 
 // TODO:

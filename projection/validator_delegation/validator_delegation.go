@@ -2,6 +2,7 @@ package validator_delegation
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
@@ -11,7 +12,9 @@ import (
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
+	"github.com/crypto-com/chain-indexing/projection/validator_delegation/types"
 	"github.com/crypto-com/chain-indexing/projection/validator_delegation/view"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
@@ -35,21 +38,28 @@ type ValidatorDelegation struct {
 	rdbConn rdb.Conn
 	logger  applogger.Logger
 
-	accountAddressPrefix   string
-	validatorAddressPrefix string
-	conNodeAddressPrefix   string
-	UnbondingTime          time.Duration
+	config Config
 
 	migrationHelper migrationhelper.MigrationHelper
+}
+
+type Config struct {
+	accountAddressPrefix    string
+	validatorAddressPrefix  string
+	conNodeAddressPrefix    string
+	unbondingTime           time.Duration // set in genesis `unbonding_time`
+	slashFractionDoubleSign coin.Dec      // set in genesis `slash_fraction_double_sign`
+	slashFractionDowntime   coin.Dec      // set in genesis `slash_fraction_downtime`
+	// PowerReduction - is the amount of staking tokens required for 1 unit of consensus-engine power.
+	// Currently, this returns a global variable that the app developer can tweak.
+	// https://github.com/cosmos/cosmos-sdk/blob/0cb7fd081e05317ed7a2f13b0e142349a163fe4d/x/staking/keeper/params.go#L46
+	defaultPowerReduction coin.Int
 }
 
 func NewValidatorDelegation(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
-	accountAddressPrefix string,
-	validatorAddressPrefix string,
-	conNodeAddressPrefix string,
-	UnbondingTime time.Duration,
+	config Config,
 	migrationHelper migrationhelper.MigrationHelper,
 ) *ValidatorDelegation {
 	return &ValidatorDelegation{
@@ -61,10 +71,7 @@ func NewValidatorDelegation(
 		rdbConn,
 		logger,
 
-		accountAddressPrefix,
-		validatorAddressPrefix,
-		conNodeAddressPrefix,
-		UnbondingTime,
+		config,
 
 		migrationHelper,
 	}
@@ -213,7 +220,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 				return fmt.Errorf("error handleValidatorJailed: %v", err)
 			}
 
-		} else if _, ok := event.(*event_usecase.ValidatorSlashed); ok {
+		} else if typedEvent, ok := event.(*event_usecase.ValidatorSlashed); ok {
 
 			// Important NOTES:
 			//
@@ -221,18 +228,79 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 			// - Missing Validator Signature
 			// - Double Signing
 			//
-			// One important information for slashing is `infractionHeight`.
+			// One important information for slashing is `distributionHeight`.
+			// This field is used to retrieve the affected UnbondingDelegations and Redelegations.
 			// Unluckily, it is not in a `slash` event.
 			//
 			// In the case of `Missing Validator Signature`, we can always calculate it by ourselves:
-			// - `infractionHeight = currentBlockHeight - 2`.
+			// - `distributionHeight = currentBlockHeight - 2`.
 			// https://github.com/cosmos/cosmos-sdk/blob/b5477dfee9e0785fe651fc603ca53f72a34d9bfd/x/slashing/keeper/infractions.go#L85
 			//
 			// In the case of `Double Signing`, we can retrieve the `infractionHeight` through Evidence.
-			// - `infractionHeight = evidence.InfractionHeight - 1`
+			// - `distributionHeight = evidence.InfractionHeight - 1`
 			// https://github.com/cosmos/cosmos-sdk/blob/b5477dfee9e0785fe651fc603ca53f72a34d9bfd/x/evidence/keeper/infraction.go#L101
 
-			// 	// TODO: the real devil...
+			if typedEvent.Reason == string(types.MISSING_SIGNATURE) {
+
+				distributionHeight := height - 2
+
+				power, err := strconv.ParseInt(typedEvent.SlashedPower, 10, 64)
+				if err != nil {
+					return fmt.Errorf("error in parsing event.SlashedPower to int64: %v", err)
+				}
+
+				if err := projection.handleSlash(
+					rdbTxHandle,
+					height,
+					blockTime,
+					typedEvent.ConsensusNodeAddress,
+					distributionHeight,
+					power,
+					projection.config.slashFractionDowntime,
+				); err != nil {
+					return fmt.Errorf("error in projection.handleSlash() with missing_signature: %v", err)
+				}
+
+			} else if typedEvent.Reason == string(types.DOUBLE_SIGN) {
+
+				evidencesView := NewEvidences(rdbTxHandle)
+				validatorsView := NewValidators(rdbTxHandle)
+
+				// Get the validator, to retrieve the TendermintAddress
+				validator, found, err := validatorsView.FindByConsensusNodeAddr(typedEvent.ConsensusNodeAddress, height)
+				if err != nil {
+					return fmt.Errorf("error validatorsView.FindByConsensusNodeAddr(): %v", err)
+				}
+				if !found {
+					return fmt.Errorf("error validator not found, conNodeAddr: %v", typedEvent.ConsensusNodeAddress)
+				}
+
+				// Get evidence related to this slash, to retrieve the infractionHeight
+				evidence, err := evidencesView.FindBy(height, validator.TendermintAddress)
+				if err != nil {
+					return fmt.Errorf("error evidencesView.FindBy(): %v", err)
+				}
+
+				distributionHeight := evidence.InfractionHeight - 1
+
+				power, err := strconv.ParseInt(typedEvent.SlashedPower, 10, 64)
+				if err != nil {
+					return fmt.Errorf("error in parsing event.SlashedPower to int64: %v", err)
+				}
+
+				if err := projection.handleSlash(
+					rdbTxHandle,
+					height,
+					blockTime,
+					typedEvent.ConsensusNodeAddress,
+					distributionHeight,
+					power,
+					projection.config.slashFractionDoubleSign,
+				); err != nil {
+					return fmt.Errorf("error in projection.handleSlash() with double_sign: %v", err)
+				}
+
+			}
 
 		}
 	}

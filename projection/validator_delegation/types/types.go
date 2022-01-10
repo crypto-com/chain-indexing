@@ -10,3 +10,10 @@ const (
 	// BONDED defines a validator that is bonded.
 	BONDED ValidatorStatus = "Bonded"
 )
+
+type SlashReason string
+
+const (
+	DOUBLE_SIGN       SlashReason = "double_sign"
+	MISSING_SIGNATURE SlashReason = "missing_signature"
+)

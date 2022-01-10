@@ -14,6 +14,7 @@ type Redelegations interface {
 	Upsert(row RedelegationRow) error
 	Delete(row RedelegationRow) error
 	FindBy(delegatorAddress, validatorSrcAddress, validatorDstAddress string, height int64) (RedelegationRow, bool, error)
+	ListBySrcValidator(validatorSrcAddress string, height int64) ([]RedelegationRow, error)
 }
 
 type RedelegationsView struct {
@@ -53,8 +54,17 @@ func (view *RedelegationsView) FindBy(
 	return RedelegationRow{}, true, nil
 }
 
+func (view *RedelegationsView) ListBySrcValidator(
+	validatorSrcAddress string,
+	height int64,
+) ([]RedelegationRow, error) {
+
+	return nil, nil
+}
+
 // TODO:
 // - UNIQUE(height, delegatorAddress, validatorSrcAddress, validatorDstAddress)
+// - Index(height, validatorSrcAddress)
 type RedelegationRow struct {
 	Height              int64               `json:"height"`
 	DelegatorAddress    string              `json:"delegatorAddress"`

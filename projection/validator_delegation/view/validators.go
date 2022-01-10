@@ -14,7 +14,7 @@ type Validators interface {
 	Update(row ValidatorRow) error
 	Delete(row ValidatorRow) error
 	FindByOperatorAddr(operatorAddress string, height int64) (ValidatorRow, bool, error)
-	FindByConsensusNodeAddr(consensusNodeAddress string, height int64) (ValidatorRow, error)
+	FindByConsensusNodeAddr(consensusNodeAddress string, height int64) (ValidatorRow, bool, error)
 	FindByTendermintAddr(tendermintAddress string, height int64) (ValidatorRow, error)
 	List(height int64, pagination *pagination.Pagination) ([]ValidatorRow, *pagination.PaginationResult, error)
 }
@@ -56,9 +56,11 @@ func (view *ValidatorsView) FindByOperatorAddr(operatorAddress string, height in
 	return ValidatorRow{}, true, nil
 }
 
-func (view *ValidatorsView) FindByConsensusNodeAddr(consensusNodeAddress string, height int64) (ValidatorRow, error) {
+func (view *ValidatorsView) FindByConsensusNodeAddr(consensusNodeAddress string, height int64) (ValidatorRow, bool, error) {
 
-	return ValidatorRow{}, nil
+	// TODO handle the error when validator is NOT FOUND
+
+	return ValidatorRow{}, true, nil
 }
 
 func (view *ValidatorsView) FindByTendermintAddr(tendermintAddress string, height int64) (ValidatorRow, error) {
