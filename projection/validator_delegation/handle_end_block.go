@@ -120,7 +120,7 @@ func (projection *ValidatorDelegation) handleMatureUBDQueueEntries(
 	// Get all mature unbonding delegations from UBDQueue
 	matureUnbonds, err := ubdQueueView.DequeueAllMatureUBDQueue(blockTime)
 	if err != nil {
-		return fmt.Errorf("error ubdQueueView.DequeueAllMatureUBDQueue(): %v", err)
+		return fmt.Errorf("error ubdQueueView.DequeueAllMatureUnbondingDelegationQueue(): %v", err)
 	}
 
 	for _, dvPair := range matureUnbonds {

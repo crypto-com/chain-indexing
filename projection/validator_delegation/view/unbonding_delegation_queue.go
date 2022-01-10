@@ -36,7 +36,7 @@ func (view *UBDQueueView) FindBy(completionTime utctime.UTCTime) (UBDQueueRow, b
 
 func (view *UBDQueueView) DequeueAllMatureUBDQueue(blockTime utctime.UTCTime) ([]DVPair, error) {
 
-	// TODO find all mature UDBQueueRow, then concate their DVPairs
+	// TODO find all mature UBDQueueRow, then concate their DVPairs
 
 	// Optional TODO: de-duplicate, a same DVPair could appear multiple times, we should avoid that
 

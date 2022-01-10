@@ -9,6 +9,84 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 )
 
+func (projection *ValidatorDelegation) handleRedelegate(
+	rdbTxHandle *rdb.Handle,
+	height int64,
+	blockTime utctime.UTCTime,
+	delegatorAddress string,
+	validatorSrcAddress string,
+	validatorDstAddress string,
+	amount coin.Int,
+) error {
+
+	shares, err := projection.unbondAmountToShares(
+		rdbTxHandle,
+		height,
+		validatorSrcAddress,
+		delegatorAddress,
+		amount,
+	)
+	if err != nil {
+		return fmt.Errorf("error projection.unbondAmountToShares(): %v", err)
+	}
+
+	srcValReturnAmount, err := projection.unbond(
+		rdbTxHandle,
+		height,
+		validatorSrcAddress,
+		delegatorAddress,
+		shares,
+	)
+	if err != nil {
+		return fmt.Errorf("error projection.unbond(): %v", err)
+	}
+
+	dstValSharesCreated, err := projection.handleDelegate(
+		rdbTxHandle,
+		height,
+		validatorDstAddress,
+		delegatorAddress,
+		srcValReturnAmount,
+	)
+	if err != nil {
+		return fmt.Errorf("error projection.handleDelegate(): %v", err)
+	}
+
+	completionTime, completeNow, err := projection.calculateRedelegationCompleteTime(
+		rdbTxHandle,
+		height,
+		blockTime,
+		validatorSrcAddress,
+	)
+	if err != nil {
+		return fmt.Errorf("error projection.calculateRedelegationCompleteTime(): %v", err)
+	}
+
+	if completeNow { // no need to create the redelegation object
+		return nil
+	}
+
+	red, err := projection.setRedelegationEntry(
+		rdbTxHandle,
+		delegatorAddress,
+		validatorSrcAddress,
+		validatorDstAddress,
+		height,
+		completionTime,
+		srcValReturnAmount,
+		dstValSharesCreated,
+	)
+	if err != nil {
+		return fmt.Errorf("error projection.setRedelegationEntry(): %v", err)
+	}
+
+	if err := projection.insertRedelegationQueue(rdbTxHandle, red, completionTime); err != nil {
+		return fmt.Errorf("error projection.insertRedelegationQueue(): %v", err)
+	}
+
+	return nil
+}
+
 func (projection *ValidatorDelegation) calculateRedelegationCompleteTime(
 	rdbTxHandle *rdb.Handle,
 	height int64,
