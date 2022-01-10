@@ -123,15 +123,15 @@ func (projection *ValidatorDelegation) handleSlash(
 		}
 
 		for _, unbondingDelegation := range unbondingDelegations {
-			amountSlashed, err := projection.slashUnbondingDelegation(
+			amountSlashed, slashErr := projection.slashUnbondingDelegation(
 				rdbTxHandle,
 				blockTime,
 				unbondingDelegation,
 				distributionHeight,
 				slashFactor,
 			)
-			if err != nil {
-				return fmt.Errorf("error in projection.slashUnbondingDelegation(): %v", err)
+			if slashErr != nil {
+				return fmt.Errorf("error in projection.slashUnbondingDelegation(): %v", slashErr)
 			}
 			if amountSlashed.IsZero() {
 				continue
@@ -146,7 +146,7 @@ func (projection *ValidatorDelegation) handleSlash(
 			return fmt.Errorf("error in redelegationsView.ListBySrcValidator(): %v", err)
 		}
 		for _, redelegation := range redelegations {
-			amountSlashed, err := projection.slashRedelegation(
+			amountSlashed, slashErr := projection.slashRedelegation(
 				rdbTxHandle,
 				height,
 				blockTime,
@@ -154,8 +154,8 @@ func (projection *ValidatorDelegation) handleSlash(
 				distributionHeight,
 				slashFactor,
 			)
-			if err != nil {
-				return fmt.Errorf("error in projection.slashRedelegation(): %v", err)
+			if slashErr != nil {
+				return fmt.Errorf("error in projection.slashRedelegation(): %v", slashErr)
 			}
 			if amountSlashed.IsZero() {
 				continue
