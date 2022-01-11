@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/crypto-com/chain-indexing/bootstrap"
+	configuration "github.com/crypto-com/chain-indexing/bootstrap/config"
 	"github.com/crypto-com/chain-indexing/example/app/example-app/routes"
 	"github.com/crypto-com/chain-indexing/example/internal/filereader/yaml"
 	"github.com/urfave/cli/v2"
@@ -93,7 +94,7 @@ func run(args []string) error {
 
 			// Prepare FileConfig
 			configPath := ctx.String("config")
-			var config bootstrap.Config
+			var config configuration.Config
 			err := yaml.FromYAMLFile(configPath, &config)
 			if err != nil {
 				return fmt.Errorf("error config from yaml: %v", err)

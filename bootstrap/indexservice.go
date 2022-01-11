@@ -21,8 +21,8 @@ type IndexService struct {
 	projections []projection_entity.Projection
 	cronJobs    []projection_entity.CronJob
 
-	mode                 string
-	accountAddressPrefix string
+	mode                     string
+	accountAddressPrefix     string
 	consNodeAddressPrefix    string
 	bondingDenom             string
 	windowSize               int
@@ -51,9 +51,9 @@ func NewIndexService(
 		cronJobs:    cronJobs,
 
 		mode:                     config.IndexService.Mode,
-		consNodeAddressPrefix:    config.IndexService.Blockchain.ConNodeAddressPrefix,
-		accountAddressPrefix:     config.IndexService.Blockchain.AccountAddressPrefix,
-		bondingDenom:             config.IndexService.Blockchain.BondingDenom,
+		consNodeAddressPrefix:    config.Blockchain.ConNodeAddressPrefix,
+		accountAddressPrefix:     config.Blockchain.AccountAddressPrefix,
+		bondingDenom:             config.Blockchain.BondingDenom,
 		windowSize:               config.IndexService.WindowSize,
 		tendermintHTTPRPCURL:     config.TendermintApp.HTTPRPCUrl,
 		insecureTendermintClient: config.TendermintApp.Insecure,

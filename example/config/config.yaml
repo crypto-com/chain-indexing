@@ -1,15 +1,16 @@
+blockchain:
+  bonding_denom: "basetcro"
+  account_address_prefix: "tcro"
+  account_pubkey_prefix: "tcropub"
+  validator_address_prefix: "tcrocncl"
+  validator_pub_key_prefix: "tcrocncl"
+  con_node_address_prefix: "tcrocnclcons"
+  con_node_pubkey_prefix: "tcrocnclconspub"
+
 index_service:
   enable: true
   mode: "TENDERMINT_DIRECT"
   window_size: 50
-  blockchain:
-    bonding_denom: "basetcro"
-    account_address_prefix: "tcro"
-    account_pubkey_prefix: "tcropub"
-    validator_address_prefix: "tcrocncl"
-    validator_pubkey_prefix: "tcrocncl"
-    connode_address_prefix: "tcrocnclcons"
-    connode_pubkey_prefix: "tcrocnclconspub"
   projection:
     enables: [
         "AccountMessage",
@@ -30,7 +31,7 @@ index_service:
         "Example",
     ]
     extra_configs:
-      bridge_pending_activity:
+      BridgePendingActivity:
         this_chain_id: "testnet-croeseid-4"
         this_chain_name: "Crypto.org-Chain"
         counterparty_chain_name: "Cronos"
@@ -78,7 +79,7 @@ postgres:
   ssl: true
   pool_max_conns: 100
   pool_min_conns: 0
-  pool_max_conn_lifetime: "1h"
+  pool_max_conn_life_time: "1h"
   pool_max_conn_idle_time: "30m"
   pool_health_check_interval: "1m"
 
@@ -88,8 +89,8 @@ logger:
 
 prometheus:
   enable: false
-  path: "/metrics"
+  exportpath: "/metrics"
   port: "9090"
 
 server_github_api:
-  migration_repo_ref: "
+  migration_repo_ref: ""

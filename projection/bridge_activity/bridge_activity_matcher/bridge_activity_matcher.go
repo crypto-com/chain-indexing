@@ -15,6 +15,7 @@ import (
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/view"
 	projection_usecase "github.com/crypto-com/chain-indexing/usecase/projection"
+	"github.com/mitchellh/mapstructure"
 )
 
 var _ projection_entity.CronJob = &BridgeActivityMatcher{}
@@ -35,6 +36,27 @@ type Config struct {
 		MaxConnIdleTime     time.Duration `mapstructure:"pool_max_conn_idle_time"`
 		HealthCheckInterval time.Duration `mapstructure:"pool_health_check_interval"`
 	} `mapstructure:"crypto_org_chain_database"`
+}
+
+func (c *Config) Fill(data interface{}) error {
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+		),
+		Result: c,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		return fmt.Errorf("error creating projection config decoder: %v", decoderErr)
+	}
+
+	if err := decoder.Decode(data); err != nil {
+		return fmt.Errorf("error decoding projection BridgePendingActivity config: %v", err)
+	}
+
+	return nil
 }
 
 type BridgeActivityMatcher struct {

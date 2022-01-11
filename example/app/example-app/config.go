@@ -1,15 +1,15 @@
 package main
 
 import (
-	"github.com/crypto-com/chain-indexing/bootstrap"
+	"github.com/crypto-com/chain-indexing/bootstrap/config"
 )
 
 type CustomConfig struct {
-	ServerGithubAPI ServerGithubAPIConfig `toml:"server_github_api"`
+	ServerGithubAPI ServerGithubAPIConfig
 }
 
 type ServerGithubAPIConfig struct {
-	MigrationRepoRef string `toml:"migration_repo_ref"`
+	MigrationRepoRef string
 }
 
 type CLIConfig struct {
@@ -31,7 +31,7 @@ type CLIConfig struct {
 	GithubAPIToken    string
 }
 
-func OverrideByCLIConfig(config *bootstrap.Config, cliConfig *CLIConfig) {
+func OverrideByCLIConfig(config *config.Config, cliConfig *CLIConfig) {
 	if cliConfig.LogLevel != "" {
 		config.Logger.Level = cliConfig.LogLevel
 	}
@@ -39,36 +39,35 @@ func OverrideByCLIConfig(config *bootstrap.Config, cliConfig *CLIConfig) {
 		config.Logger.Color = *cliConfig.LoggerColor
 	}
 	if cliConfig.DatabaseSSL != nil {
-		config.Database.SSL = *cliConfig.DatabaseSSL
+		config.Postgres.SSL = *cliConfig.DatabaseSSL
 	}
 	if cliConfig.DatabaseHost != "" {
-		config.Database.Host = cliConfig.DatabaseHost
+		config.Postgres.Host = cliConfig.DatabaseHost
 	}
 	if cliConfig.DatabasePort != nil {
-		config.Database.Port = *cliConfig.DatabasePort
+		config.Postgres.Port = *cliConfig.DatabasePort
 	}
 	if cliConfig.DatabaseUsername != "" {
-		config.Database.Username = cliConfig.DatabaseUsername
+		config.Postgres.Username = cliConfig.DatabaseUsername
 	}
 	// Always overwrite database password with CLI (ENV)
-	config.Database.Password = cliConfig.DatabasePassword
+	config.Postgres.Password = cliConfig.DatabasePassword
 	if cliConfig.DatabaseName != "" {
-		config.Database.Name = cliConfig.DatabaseName
+		config.Postgres.Name = cliConfig.DatabaseName
 	}
 	if cliConfig.DatabaseSchema != "" {
-		config.Database.Schema = cliConfig.DatabaseSchema
+		config.Postgres.Schema = cliConfig.DatabaseSchema
 	}
 	if cliConfig.TendermintHTTPRPCUrl != "" {
-		config.Tendermint.HTTPRPCUrl = cliConfig.TendermintHTTPRPCUrl
+		config.TendermintApp.HTTPRPCUrl = cliConfig.TendermintHTTPRPCUrl
 	}
 	if cliConfig.CosmosHTTPRPCUrl != "" {
 		config.CosmosApp.HTTPRPCUrl = cliConfig.CosmosHTTPRPCUrl
 	}
 	if cliConfig.GithubAPIUsername != "" {
-		config.GithubAPI.Username = cliConfig.GithubAPIUsername
+		config.IndexService.GithubAPI.Username = cliConfig.GithubAPIUsername
 	}
 	if cliConfig.GithubAPIToken != "" {
-		config.GithubAPI.Token = cliConfig.GithubAPIToken
+		config.IndexService.GithubAPI.Token = cliConfig.GithubAPIToken
 	}
 }
-

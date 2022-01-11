@@ -35,7 +35,7 @@ func NewApp(logger applogger.Logger, config *config.Config) *app {
 		}
 
 		m, err := migrate.New(
-			fmt.Sprintf(MIGRATION_GITHUB_TARGET, config.IndexService.GithubAPI.Username, config.GithubAPI.Token, ref),
+			fmt.Sprintf(MIGRATION_GITHUB_TARGET, config.IndexService.GithubAPI.Username, config.IndexService.GithubAPI.Token, ref),
 			migrationDBConnString(rdbConn),
 		)
 		if err != nil {

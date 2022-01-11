@@ -16,6 +16,7 @@ import (
 	bridge_pending_activity_view "github.com/crypto-com/chain-indexing/projection/bridge_activity/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	"github.com/mitchellh/mapstructure"
 )
 
 var _ entity_projection.Projection = &BridgePendingActivity{}
@@ -35,6 +36,23 @@ type Config struct {
 	CounterpartyChainName string `mapstructure:"counterparty_chain_name"`
 	ChannelId             string `mapstructure:"channel_id"`
 	StartingHeight        int64  `mapstructure:"starting_height"`
+}
+
+func (c *Config) Fill(data interface{}) error {
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		Result: c,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		return fmt.Errorf("error creating projection config decoder: %v", decoderErr)
+	}
+
+	if err := decoder.Decode(data); err != nil {
+		return fmt.Errorf("error decoding projection BridgePendingActivity config: %v", err)
+	}
+
+	return nil
 }
 
 const (

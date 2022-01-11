@@ -15,15 +15,15 @@ func SetupRDbConn(config *config.Config, logger applogger.Logger) (rdb.Conn, err
 	var err error
 
 	// GetFee duration strings to duration
-	maxConnLifeTime, err := time.ParseDuration(config.Postgres.MaxConnLifeTime)
+	maxConnLifeTime, err := time.ParseDuration(config.Postgres.PoolMaxConnLifeTime)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing MaxConnLifeTime string to duration %v", err)
 	}
-	maxConnIdleTime, err := time.ParseDuration(config.Postgres.MaxConnIdleTime)
+	maxConnIdleTime, err := time.ParseDuration(config.Postgres.PoolMaxConnIdleTime)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing MaxConnIdleTime string to duration %v", err)
 	}
-	healthCheckInterval, err := time.ParseDuration(config.Postgres.HealthCheckInterval)
+	healthCheckInterval, err := time.ParseDuration(config.Postgres.PoolHealthCheckInterval)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing HealthCheckInterval string to duration %v", err)
 	}
@@ -38,8 +38,8 @@ func SetupRDbConn(config *config.Config, logger applogger.Logger) (rdb.Conn, err
 				Database:      config.Postgres.Name,
 				SSL:           config.Postgres.SSL,
 			},
-			MaybeMaxConns:          &config.Postgres.MaxConns,
-			MaybeMinConns:          &config.Postgres.MinConns,
+			MaybeMaxConns:          &config.Postgres.PoolMaxConns,
+			MaybeMinConns:          &config.Postgres.PoolMinConns,
 			MaybeMaxConnLifeTime:   &maxConnLifeTime,
 			MaybeMaxConnIdleTime:   &maxConnIdleTime,
 			MaybeHealthCheckPeriod: &healthCheckInterval,
