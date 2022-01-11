@@ -85,7 +85,7 @@ func (projection *ValidatorDelegation) handleEditValidator(
 	// Get the validator
 	validator, found, err := validatorsView.FindByOperatorAddr(validatorAddress, height)
 	if err != nil {
-		return fmt.Errorf("error validatorsView.FindByOperatorAddr(): %v", err)
+		return fmt.Errorf("error finding validator by OperatorAddress (AKA ValidatorAddress): %v", err)
 	}
 	if !found {
 		return fmt.Errorf("error validator not found: %v, %v", validatorAddress, height)
@@ -95,12 +95,12 @@ func (projection *ValidatorDelegation) handleEditValidator(
 	if !ok {
 		return fmt.Errorf("Failed to parse minSelfDelegationInString: %v", minSelfDelegationInString)
 	}
-	// Update Valdiator
+	// Update Validator
 	validator.MinSelfDelegation = minSelfDelegation
 
 	// Write the updated Validator to DB
 	if err := validatorsView.Update(validator); err != nil {
-		return fmt.Errorf("error validatorsView.Update(): %v", err)
+		return fmt.Errorf("error updating validator: %v", err)
 	}
 
 	return nil
@@ -120,14 +120,14 @@ func (projection *ValidatorDelegation) handleValidatorJailed(
 		height,
 	)
 	if err != nil {
-		return fmt.Errorf("error validatorsView.FindByConsensusNodeAddr(): %v", err)
+		return fmt.Errorf("error finding validator by consensusNodeAddr: %v", err)
 	}
 	if !found {
 		return fmt.Errorf("error validator not found, conNodeAddr: %v", consensusNodeAddress)
 	}
 
 	if err := projection.jailValidator(rdbTxHandle, validator); err != nil {
-		return fmt.Errorf("error in projection.jailValidator(): %v", err)
+		return fmt.Errorf("error in jailing the validator: %v", err)
 	}
 
 	return nil
@@ -139,12 +139,12 @@ func (projection *ValidatorDelegation) jailValidator(
 ) error {
 	validatorsView := NewValidators(rdbTxHandle)
 
-	// Update Valdiator
+	// Update Validator
 	validator.Jailed = true
 
 	// Write the updated Validator to DB
 	if err := validatorsView.Update(validator); err != nil {
-		return fmt.Errorf("error validatorsView.Update(): %v", err)
+		return fmt.Errorf("error updating validator: %v", err)
 	}
 
 	return nil
@@ -161,23 +161,24 @@ func (projection *ValidatorDelegation) handleValidatorUnjailed(
 	// Get the validator
 	validator, found, err := validatorsView.FindByOperatorAddr(validatorAddress, height)
 	if err != nil {
-		return fmt.Errorf("error validatorsView.FindByOperatorAddr(): %v", err)
+		return fmt.Errorf("error finding validator by OperatorAddress (AKA ValidatorAddress): %v", err)
 	}
 	if !found {
 		return fmt.Errorf("error validator not found: %v, %v", validatorAddress, height)
 	}
 
-	// Update Valdiator
+	// Update Validator
 	validator.Jailed = false
 
 	// Write the updated Validator to DB
 	if err := validatorsView.Update(validator); err != nil {
-		return fmt.Errorf("error validatorsView.Update(): %v", err)
+		return fmt.Errorf("error updating validator: %v", err)
 	}
 
 	return nil
 }
 
+// removeValidatorTokens - Deduct from validator's bonded tokens and update the validator.
 func (projection *ValidatorDelegation) removeValidatorTokens(
 	rdbTxHandle *rdb.Handle,
 	validator view.ValidatorRow,
@@ -196,7 +197,7 @@ func (projection *ValidatorDelegation) removeValidatorTokens(
 	validator.Tokens = validator.Tokens.Sub(tokensToRemove)
 
 	if err := validatorsView.Update(validator); err != nil {
-		return fmt.Errorf("error validatorsView.Update(): %v", err)
+		return fmt.Errorf("error updating validator: %v", err)
 	}
 
 	return nil

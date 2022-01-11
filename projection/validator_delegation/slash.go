@@ -29,7 +29,7 @@ func (projection *ValidatorDelegation) handleEvidence(
 	}
 
 	if err := evidencesView.Insert(evidence); err != nil {
-		return fmt.Errorf("error in evidencesView.Insert(): %v", err)
+		return fmt.Errorf("error in inserting evidence record: %v", err)
 	}
 
 	return nil
@@ -58,7 +58,7 @@ func (projection *ValidatorDelegation) handleSlash(
 
 	validator, found, err := validatorsView.FindByConsensusNodeAddr(consensusNodeAddress, height)
 	if err != nil {
-		return fmt.Errorf("error validatorsView.FindByConsensusNodeAddr(): %v", err)
+		return fmt.Errorf("error finding validator by consensusNodeAddr: %v", err)
 	}
 	if !found {
 		// If not found, the validator must have been overslashed and removed - so we don't need to do anything
@@ -92,7 +92,7 @@ func (projection *ValidatorDelegation) handleSlash(
 		// Iterate through unbonding delegations from slashed validator
 		unbondingDelegations, err := unbondingDelegationsView.ListByValidator(validator.OperatorAddress, height)
 		if err != nil {
-			return fmt.Errorf("error in unbondingDelegationsView.ListByValidator(): %v", err)
+			return fmt.Errorf("error finding all unbonding delegations under the validator: %v", err)
 		}
 
 		for _, unbondingDelegation := range unbondingDelegations {
@@ -104,7 +104,7 @@ func (projection *ValidatorDelegation) handleSlash(
 				slashFactor,
 			)
 			if slashErr != nil {
-				return fmt.Errorf("error in projection.slashUnbondingDelegation(): %v", slashErr)
+				return fmt.Errorf("error slashing an unbonding delegation: %v", slashErr)
 			}
 			if amountSlashed.IsZero() {
 				continue
@@ -116,7 +116,7 @@ func (projection *ValidatorDelegation) handleSlash(
 		// Iterate through redelegations from slashed source validator
 		redelegations, err := redelegationsView.ListBySrcValidator(validator.OperatorAddress, height)
 		if err != nil {
-			return fmt.Errorf("error in redelegationsView.ListBySrcValidator(): %v", err)
+			return fmt.Errorf("error getting all redelegations under the src validator: %v", err)
 		}
 		for _, redelegation := range redelegations {
 			amountSlashed, slashErr := projection.slashRedelegation(
@@ -128,7 +128,7 @@ func (projection *ValidatorDelegation) handleSlash(
 				slashFactor,
 			)
 			if slashErr != nil {
-				return fmt.Errorf("error in projection.slashRedelegation(): %v", slashErr)
+				return fmt.Errorf("error slashing an redelegation: %v", slashErr)
 			}
 			if amountSlashed.IsZero() {
 				continue
@@ -144,7 +144,7 @@ func (projection *ValidatorDelegation) handleSlash(
 
 	// Deduct from validator's bonded tokens and update the validator.
 	if err := projection.removeValidatorTokens(rdbTxHandle, validator, tokensToBurn); err != nil {
-		return fmt.Errorf("error in projection.removeValidatorTokens(): %v", err)
+		return fmt.Errorf("error removing tokens from validator: %v", err)
 	}
 
 	return nil
@@ -194,7 +194,7 @@ func (projection *ValidatorDelegation) slashUnbondingDelegation(
 
 	unbondingDelegationsView := NewUnbondingDelegations(rdbTxHandle)
 	if err := unbondingDelegationsView.Upsert(unbondingDelegation); err != nil {
-		return coin.ZeroInt(), fmt.Errorf("error in unbondingDelegationsView.Upsert(): %v", err)
+		return coin.ZeroInt(), fmt.Errorf("error upserting unbonding delegation record: %v", err)
 	}
 
 	return totalSlashAmount, nil
@@ -241,7 +241,7 @@ func (projection *ValidatorDelegation) slashRedelegation(
 
 		delegation, found, err := delegationsView.FindBy(valDstAddr, delegatorAddress, height)
 		if err != nil {
-			return coin.ZeroInt(), fmt.Errorf("error in unbondingDelegationsView.Upsert(): %v", err)
+			return coin.ZeroInt(), fmt.Errorf("error finding delegation: %v", err)
 		}
 		if !found {
 			// If deleted, delegation has zero shares, and we can't unbond any more
@@ -260,7 +260,7 @@ func (projection *ValidatorDelegation) slashRedelegation(
 			sharesToUnbond,
 		)
 		if err != nil {
-			return coin.ZeroInt(), fmt.Errorf("error projection.unbond(): %v", err)
+			return coin.ZeroInt(), fmt.Errorf("error unbonding shares from delegation and dst validator: %v", err)
 		}
 	}
 

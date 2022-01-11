@@ -23,7 +23,7 @@ func (projection *ValidatorDelegation) insertRedelegationQueue(
 
 	row, found, err := redelegationQueueView.FindBy(completionTime)
 	if err != nil {
-		return fmt.Errorf("error redelegationQueueView.FindBy(): %v", err)
+		return fmt.Errorf("error finding RedelegationQueue entry: %v", err)
 	}
 	if !found {
 		row = view.RedelegationQueueRow{
@@ -35,7 +35,7 @@ func (projection *ValidatorDelegation) insertRedelegationQueue(
 	}
 
 	if err := redelegationQueueView.Upsert(row); err != nil {
-		return fmt.Errorf("error redelegationQueueView.Upsert(): %v", err)
+		return fmt.Errorf("error upserting RedelegationQueue entry: %v", err)
 	}
 
 	return nil

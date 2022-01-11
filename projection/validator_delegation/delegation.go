@@ -25,7 +25,7 @@ func (projection *ValidatorDelegation) handleDelegate(
 	// Get the validator
 	validator, found, err := validatorsView.FindByOperatorAddr(validatorAddress, height)
 	if err != nil {
-		return coin.ZeroDec(), fmt.Errorf("error validatorsView.FindByOperatorAddr(): %v", err)
+		return coin.ZeroDec(), fmt.Errorf("error finding validator by OperatorAddress (AKA ValidatorAddress): %v", err)
 	}
 	if !found {
 		return coin.ZeroDec(), fmt.Errorf("error validator not found: %v, %v", validatorAddress, height)
@@ -38,7 +38,7 @@ func (projection *ValidatorDelegation) handleDelegate(
 		height,
 	)
 	if err != nil {
-		return coin.ZeroDec(), fmt.Errorf("error delegationsView.FindBy(): %v", err)
+		return coin.ZeroDec(), fmt.Errorf("error finding delegation: %v", err)
 	}
 	if !found {
 		delegation = view.DelegationRow{
@@ -50,27 +50,27 @@ func (projection *ValidatorDelegation) handleDelegate(
 
 		// Insert an DelegationRow record
 		if errAddDelRecord := delegationsView.Insert(delegation); errAddDelRecord != nil {
-			return coin.ZeroDec(), fmt.Errorf("error delegationsView.Insert(): %v", errAddDelRecord)
+			return coin.ZeroDec(), fmt.Errorf("error inserting delegation record: %v", errAddDelRecord)
 		}
 	}
 
 	// Calculate new shares
 	newShares, err := utils.ValidatorIssueNewShares(validator, amount)
 	if err != nil {
-		return coin.ZeroDec(), fmt.Errorf("error IssueNewShares(): %v", err)
+		return coin.ZeroDec(), fmt.Errorf("error in validator issuing new shares: %v", err)
 	}
 
 	// Update Delegation
 	delegation.Shares = delegation.Shares.Add(newShares)
 	if err := delegationsView.Update(delegation); err != nil {
-		return coin.ZeroDec(), fmt.Errorf("error delegationsView.Update(): %v", err)
+		return coin.ZeroDec(), fmt.Errorf("error updating delegation: %v", err)
 	}
 
 	// Update Validator
 	validator.Tokens = validator.Tokens.Add(amount)
 	validator.Shares = validator.Shares.Add(newShares)
 	if err := validatorsView.Update(validator); err != nil {
-		return coin.ZeroDec(), fmt.Errorf("error validatorsView.Update(): %v", err)
+		return coin.ZeroDec(), fmt.Errorf("error updating validator: %v", err)
 	}
 
 	return newShares, nil
@@ -93,7 +93,7 @@ func (projection *ValidatorDelegation) handleUndelegate(
 		amount,
 	)
 	if err != nil {
-		return fmt.Errorf("error projection.unbondAmountToShares(): %v", err)
+		return fmt.Errorf("error converting the unbond amout to corresponding shares on that validator: %v", err)
 	}
 
 	returnAmount, err := projection.unbond(
@@ -104,7 +104,7 @@ func (projection *ValidatorDelegation) handleUndelegate(
 		shares,
 	)
 	if err != nil {
-		return fmt.Errorf("error projection.unbond(): %v", err)
+		return fmt.Errorf("error unbonding shares from delegation and validator: %v", err)
 	}
 
 	ubd, err := projection.setUnbondingDelegationEntry(
@@ -116,16 +116,17 @@ func (projection *ValidatorDelegation) handleUndelegate(
 		returnAmount,
 	)
 	if err != nil {
-		return fmt.Errorf("error projection.setUnbondingDelegationEntry(): %v", err)
+		return fmt.Errorf("error setting an unbonding delegation entry: %v", err)
 	}
 
 	if err := projection.insertUBDQueue(rdbTxHandle, ubd, completionTime); err != nil {
-		return fmt.Errorf("error projection.insertUBDQueue(): %v", err)
+		return fmt.Errorf("error inserting an entry to unbonding delegation queue: %v", err)
 	}
 
 	return nil
 }
 
+// unbondAmountToShares - convert the unbond amout to shares on the target validator
 func (projection *ValidatorDelegation) unbondAmountToShares(
 	rdbTxHandle *rdb.Handle,
 	height int64,
@@ -140,7 +141,7 @@ func (projection *ValidatorDelegation) unbondAmountToShares(
 	// Get the validator
 	validator, found, err := validatorsView.FindByOperatorAddr(validatorAddress, height)
 	if err != nil {
-		return coin.ZeroDec(), fmt.Errorf("error validatorsView.FindByOperatorAddr(): %v", err)
+		return coin.ZeroDec(), fmt.Errorf("error finding validator by OperatorAddress (AKA ValidatorAddress): %v", err)
 	}
 	if !found {
 		return coin.ZeroDec(), fmt.Errorf("error validator not found: %v, %v", validatorAddress, height)
@@ -153,7 +154,7 @@ func (projection *ValidatorDelegation) unbondAmountToShares(
 		height,
 	)
 	if err != nil {
-		return coin.ZeroDec(), fmt.Errorf("error delegationsView.FindBy(): %v", err)
+		return coin.ZeroDec(), fmt.Errorf("error finding delegation: %v", err)
 	}
 	if !found {
 		return coin.ZeroDec(), fmt.Errorf("error delegation not found: %v, %v, %v", validatorAddress, delegatorAddress, height)
@@ -162,7 +163,7 @@ func (projection *ValidatorDelegation) unbondAmountToShares(
 	var shares coin.Dec
 	shares, err = utils.ValidatorSharesFromTokens(validator, amount)
 	if err != nil {
-		return coin.ZeroDec(), fmt.Errorf("error utils.ValidatorSharesFromTokens(): %v", err)
+		return coin.ZeroDec(), fmt.Errorf("error converting unbond amount to shares on that validator: %v", err)
 	}
 	// Cap the shares at the delegation's shares.
 	if shares.GT(delegation.Shares) {
@@ -172,6 +173,7 @@ func (projection *ValidatorDelegation) unbondAmountToShares(
 	return shares, nil
 }
 
+// unbond - remove shares on both the delegation and validator
 func (projection *ValidatorDelegation) unbond(
 	rdbTxHandle *rdb.Handle,
 	height int64,
@@ -186,7 +188,7 @@ func (projection *ValidatorDelegation) unbond(
 	// Get the validator
 	validator, found, err := validatorsView.FindByOperatorAddr(validatorAddress, height)
 	if err != nil {
-		return coin.ZeroInt(), fmt.Errorf("error validatorsView.FindByOperatorAddr(): %v", err)
+		return coin.ZeroInt(), fmt.Errorf("error finding validator by OperatorAddress (AKA ValidatorAddress): %v", err)
 	}
 	if !found {
 		return coin.ZeroInt(), fmt.Errorf("error validator not found: %v, %v", validatorAddress, height)
@@ -199,7 +201,7 @@ func (projection *ValidatorDelegation) unbond(
 		height,
 	)
 	if err != nil {
-		return coin.ZeroInt(), fmt.Errorf("error delegationsView.FindBy(): %v", err)
+		return coin.ZeroInt(), fmt.Errorf("error finding delegation: %v", err)
 	}
 	if !found {
 		return coin.ZeroInt(), fmt.Errorf("error delegation not found: %v, %v, %v", validatorAddress, delegatorAddress, height)
@@ -216,7 +218,7 @@ func (projection *ValidatorDelegation) unbond(
 		projection.config.accountAddressPrefix,
 	)
 	if err != nil {
-		return coin.ZeroInt(), fmt.Errorf("error in IsValAddrEqualsDelAddr: %v", err)
+		return coin.ZeroInt(), fmt.Errorf("error in checking if ValidatorAddr and DelegatorAddr are the same address: %v", err)
 	}
 
 	// Remaining tokens in the delegation
@@ -227,8 +229,8 @@ func (projection *ValidatorDelegation) unbond(
 	if isOperatorDelegation && !validator.Jailed &&
 		delegationRemainingTokens.TruncateInt().LT(validator.MinSelfDelegation) {
 
-		if err := projection.jailValidator(rdbTxHandle, validator); err != nil {
-			return coin.ZeroInt(), fmt.Errorf("error in projection.jailValidator(): %v", err)
+		if errJailVal := projection.jailValidator(rdbTxHandle, validator); errJailVal != nil {
+			return coin.ZeroInt(), fmt.Errorf("error jailing the validator: %v", errJailVal)
 		}
 		validator.Jailed = true
 	}
@@ -237,31 +239,34 @@ func (projection *ValidatorDelegation) unbond(
 	if delegation.Shares.IsZero() {
 
 		// Delete the DelegationRow
-		if err := delegationsView.Delete(delegation); err != nil {
-			return coin.ZeroInt(), fmt.Errorf("error delegationsView.Delete(): %v", err)
+		if errDeleteDel := delegationsView.Delete(delegation); errDeleteDel != nil {
+			return coin.ZeroInt(), fmt.Errorf("error deleting delegation: %v", errDeleteDel)
 		}
 
 	} else {
 
-		if err := delegationsView.Update(delegation); err != nil {
-			return coin.ZeroInt(), fmt.Errorf("error in delegationsView.Remove(): %v", err)
+		if errUpdateDel := delegationsView.Update(delegation); errUpdateDel != nil {
+			return coin.ZeroInt(), fmt.Errorf("error in updating delegation: %v", errUpdateDel)
 		}
 
 	}
 
 	// remove the shares and tokens from the validator
 	var removedValTokens coin.Int
-	validator, removedValTokens = utils.ValidatorRemoveDelShares(validator, shares)
+	validator, removedValTokens, err = utils.ValidatorRemoveDelShares(validator, shares)
+	if err != nil {
+		return coin.ZeroInt(), fmt.Errorf("error in removing shares and tokens on validator: %v", err)
+	}
 
 	// Update validator
 	if err := validatorsView.Update(validator); err != nil {
-		return coin.ZeroInt(), fmt.Errorf("error validatorsView.Update(): %v", err)
+		return coin.ZeroInt(), fmt.Errorf("error updating validator: %v", err)
 	}
 
 	if validator.Shares.IsZero() && validator.IsUnbonded() {
 		// if not unbonded, we must instead remove validator in EndBlocker once it finishes its unbonding period
 		if err := validatorsView.Delete(validator); err != nil {
-			return coin.ZeroInt(), fmt.Errorf("error validatorsView.Delete(): %v", err)
+			return coin.ZeroInt(), fmt.Errorf("error deleting validator: %v", err)
 		}
 	}
 

@@ -54,7 +54,7 @@ func ValidatorTokensFromShares(
 func ValidatorRemoveDelShares(
 	v view.ValidatorRow,
 	delShares coin.Dec,
-) (view.ValidatorRow, coin.Int) {
+) (view.ValidatorRow, coin.Int, error) {
 	remainingShares := v.Shares.Sub(delShares)
 
 	var issuedTokens coin.Int
@@ -69,11 +69,11 @@ func ValidatorRemoveDelShares(
 		v.Tokens = v.Tokens.Sub(issuedTokens)
 
 		if v.Tokens.IsNegative() {
-			panic("attempting to remove more tokens than available in validator")
+			return view.ValidatorRow{}, coin.ZeroInt(), errors.New("attempting to remove more tokens than available in validator")
 		}
 	}
 
 	v.Shares = remainingShares
 
-	return v, issuedTokens
+	return v, issuedTokens, nil
 }

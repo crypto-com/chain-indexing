@@ -148,22 +148,22 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 	if height > 0 {
 		validatorsView := NewValidators(rdbTxHandle)
 		if err := validatorsView.Clone(height-1, height); err != nil {
-			return fmt.Errorf("error in validatorsView.Clone(): %v", err)
+			return fmt.Errorf("error in cloning validator records in previous height: %v", err)
 		}
 
 		delegationsView := NewDelegations(rdbTxHandle)
 		if err := delegationsView.Clone(height-1, height); err != nil {
-			return fmt.Errorf("error in delegationsView.Clone(): %v", err)
+			return fmt.Errorf("error in cloning delegation records in previous height: %v", err)
 		}
 
 		unbondingDelegationsView := NewUnbondingDelegations(rdbTxHandle)
 		if err := unbondingDelegationsView.Clone(height-1, height); err != nil {
-			return fmt.Errorf("error in unbondingDelegationsView.Clone(): %v", err)
+			return fmt.Errorf("error in cloning unbonding delegation records in previous height: %v", err)
 		}
 
 		redelegationsView := NewRedelegations(rdbTxHandle)
 		if err := redelegationsView.Clone(height-1, height); err != nil {
-			return fmt.Errorf("error in redelegationsView.Clone(): %v", err)
+			return fmt.Errorf("error in cloning redelegation records in previous height: %v", err)
 		}
 	}
 
@@ -202,7 +202,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 				typedEvent.InfractionHeight,
 				typedEvent.RawEvidence,
 			); err != nil {
-				return fmt.Errorf("error handleEvidence: %v", err)
+				return fmt.Errorf("error handling Evidence: %v", err)
 			}
 
 		}
@@ -217,7 +217,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 				height,
 				typedEvent.ConsensusNodeAddress,
 			); err != nil {
-				return fmt.Errorf("error handleValidatorJailed: %v", err)
+				return fmt.Errorf("error handling ValidatorJailed event: %v", err)
 			}
 
 		} else if typedEvent, ok := event.(*event_usecase.ValidatorSlashed); ok {
@@ -258,7 +258,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 					power,
 					projection.config.slashFractionDowntime,
 				); err != nil {
-					return fmt.Errorf("error in projection.handleSlash() with missing_signature: %v", err)
+					return fmt.Errorf("error in handling slash event with missing_signature: %v", err)
 				}
 
 			} else if typedEvent.Reason == string(types.DOUBLE_SIGN) {
@@ -269,7 +269,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 				// Get the validator, to retrieve the TendermintAddress
 				validator, found, err := validatorsView.FindByConsensusNodeAddr(typedEvent.ConsensusNodeAddress, height)
 				if err != nil {
-					return fmt.Errorf("error validatorsView.FindByConsensusNodeAddr(): %v", err)
+					return fmt.Errorf("error finding validator by consensusNodeAddr: %v", err)
 				}
 				if !found {
 					return fmt.Errorf("error validator not found, conNodeAddr: %v", typedEvent.ConsensusNodeAddress)
@@ -278,7 +278,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 				// Get evidence related to this slash, to retrieve the infractionHeight
 				evidence, err := evidencesView.FindBy(height, validator.TendermintAddress)
 				if err != nil {
-					return fmt.Errorf("error evidencesView.FindBy(): %v", err)
+					return fmt.Errorf("error in finding the evidence: %v", err)
 				}
 
 				distributionHeight := evidence.InfractionHeight - 1
@@ -297,7 +297,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 					power,
 					projection.config.slashFractionDoubleSign,
 				); err != nil {
-					return fmt.Errorf("error in projection.handleSlash() with double_sign: %v", err)
+					return fmt.Errorf("error in handling slash event with double_sign: %v", err)
 				}
 
 			}
@@ -331,7 +331,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 					typedEvent.ValidatorAddress,
 					*typedEvent.MaybeMinSelfDelegation,
 				); err != nil {
-					return fmt.Errorf("error handleEditValidator: %v", err)
+					return fmt.Errorf("error handling MsgEditValidator: %v", err)
 				}
 
 			}
@@ -345,7 +345,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 				typedEvent.DelegatorAddress,
 				typedEvent.Amount.Amount,
 			); err != nil {
-				return fmt.Errorf("error handleDelegate: %v", err)
+				return fmt.Errorf("error handling MsgDelegate: %v", err)
 			}
 
 		} else if typedEvent, ok := event.(*event_usecase.MsgUndelegate); ok {
@@ -361,7 +361,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 					typedEvent.Amount.Amount,
 					*typedEvent.MaybeUnbondCompleteAt,
 				); err != nil {
-					return fmt.Errorf("error handleUndelegate: %v", err)
+					return fmt.Errorf("error handling MsgUndelegate: %v", err)
 				}
 
 			}
@@ -377,7 +377,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 				typedEvent.ValidatorDstAddress,
 				typedEvent.Amount.Amount,
 			); err != nil {
-				return fmt.Errorf("error handleRedelegate: %v", err)
+				return fmt.Errorf("error handling MsgBeginRedelegate: %v", err)
 			}
 
 		} else if typedEvent, ok := event.(*event_usecase.MsgUnjail); ok {
@@ -387,7 +387,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 				height,
 				typedEvent.ValidatorAddr,
 			); err != nil {
-				return fmt.Errorf("error handleValidatorUnjailed: %v", err)
+				return fmt.Errorf("error handling MsgUnjail: %v", err)
 			}
 
 		}
@@ -406,7 +406,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 				typedEvent.TendermintPubkey,
 				typedEvent.Power,
 			); err != nil {
-				return fmt.Errorf("error handlePowerChanged: %v", err)
+				return fmt.Errorf("error handling PowerChanged event: %v", err)
 			}
 
 		}
@@ -417,7 +417,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 		height,
 		blockTime,
 	); err != nil {
-		return fmt.Errorf("error handleMatureUnbondingValidators(): %v", err)
+		return fmt.Errorf("error handling mature unbonding validators: %v", err)
 	}
 
 	if err := projection.handleMatureUBDQueueEntries(
@@ -425,7 +425,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 		height,
 		blockTime,
 	); err != nil {
-		return fmt.Errorf("error handleMatureUBDQueueEntries(): %v", err)
+		return fmt.Errorf("error handling mature UBD (unbonding delegation) queue entries: %v", err)
 	}
 
 	if err := projection.handleMatureRedelegationQueueEntries(
@@ -433,7 +433,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 		height,
 		blockTime,
 	); err != nil {
-		return fmt.Errorf("error handleMatureRedelegationQueueEntries(): %v", err)
+		return fmt.Errorf("error handling mature redelegation queue entries(): %v", err)
 	}
 
 	if err := UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {

@@ -19,7 +19,7 @@ func (projection *ValidatorDelegation) handlePowerChanged(
 
 	consensusNodeAddress, err := utils.GetConsensusNodeAddress(tendermintPubKey, projection.config.conNodeAddressPrefix)
 	if err != nil {
-		return fmt.Errorf("error GetConsensusNodeAddress(): %v", err)
+		return fmt.Errorf("error getting consensusNodeAddress from tendermint pub key: %v", err)
 	}
 
 	validatorsView := NewValidators(rdbTxHandle)
@@ -28,7 +28,7 @@ func (projection *ValidatorDelegation) handlePowerChanged(
 	// Get the validator
 	validator, found, err := validatorsView.FindByConsensusNodeAddr(consensusNodeAddress, height)
 	if err != nil {
-		return fmt.Errorf("error validatorsView.FindByConsensusNodeAddr(): %v", err)
+		return fmt.Errorf("error finding validator by consensusNodeAddr: %v", err)
 	}
 	if !found {
 		return fmt.Errorf("error validator not found, conNodeAddr: %v", consensusNodeAddress)
@@ -44,7 +44,7 @@ func (projection *ValidatorDelegation) handlePowerChanged(
 
 		// Insert the validator to UnbondingValidators set
 		if err := unbondingValidatorsView.Insert(validator.OperatorAddress, validator.UnbondingTime); err != nil {
-			return fmt.Errorf("error unbondingValidatorsView.Insert(): %v", err)
+			return fmt.Errorf("error inserting unbonding validator entry: %v", err)
 		}
 
 	} else {
@@ -54,13 +54,13 @@ func (projection *ValidatorDelegation) handlePowerChanged(
 
 		// Remove the validator from UnbondingValidators set, if exist
 		if err := unbondingValidatorsView.RemoveIfExist(validator.OperatorAddress); err != nil {
-			return fmt.Errorf("error unbondingValidatorsView.RemoveIfExist(): %v", err)
+			return fmt.Errorf("error removing unbonding validator entry: %v", err)
 		}
 	}
 
 	// Update the validator
 	if err := validatorsView.Update(validator); err != nil {
-		return fmt.Errorf("error validatorsView.Update(): %v", err)
+		return fmt.Errorf("error updating validator: %v", err)
 	}
 
 	return nil
@@ -79,14 +79,14 @@ func (projection *ValidatorDelegation) handleMatureUnbondingValidators(
 	// Get all UnbondingValidator entry that finish the Unbonding period
 	matureEntries, err := unbondingValidatorsView.GetMatureEntries(blockTime)
 	if err != nil {
-		return fmt.Errorf("error unbondingValidatorsView.GetMatureEntries(): %v", err)
+		return fmt.Errorf("error getting all mature unbonding validator entries: %v", err)
 	}
 
 	// Update validators status
 	for _, entry := range matureEntries {
 		validator, found, err := validatorsView.FindByOperatorAddr(entry.OperatorAddress, height)
 		if err != nil {
-			return fmt.Errorf("error validatorsView.FindByOperatorAddr(): %v", err)
+			return fmt.Errorf("error finding validator by OperatorAddress (AKA ValidatorAddress): %v", err)
 		}
 		if !found {
 			return fmt.Errorf("error validator not found: %v, %v", entry.OperatorAddress, height)
@@ -95,14 +95,14 @@ func (projection *ValidatorDelegation) handleMatureUnbondingValidators(
 		validator.Status = types.UNBONDED
 
 		if err := validatorsView.Update(validator); err != nil {
-			return fmt.Errorf("error validatorsView.Update(): %v", err)
+			return fmt.Errorf("error updating validator: %v", err)
 		}
 
 	}
 
 	// Remove those mature UnbondingValidator entry
 	if err := unbondingValidatorsView.DeleteMatureEntries(blockTime); err != nil {
-		return fmt.Errorf("error unbondingValidatorsView.DeleteMatureEntries(): %v", err)
+		return fmt.Errorf("error removing all mature unbonding validator entries: %v", err)
 	}
 
 	return nil
@@ -120,7 +120,7 @@ func (projection *ValidatorDelegation) handleMatureUBDQueueEntries(
 	// Get all mature unbonding delegations from UBDQueue
 	matureUnbonds, err := ubdQueueView.DequeueAllMatureUBDQueue(blockTime)
 	if err != nil {
-		return fmt.Errorf("error ubdQueueView.DequeueAllMatureUnbondingDelegationQueue(): %v", err)
+		return fmt.Errorf("error dequeue all mature entries from unbonding delegation queue (UBDQueue): %v", err)
 	}
 
 	for _, dvPair := range matureUnbonds {
@@ -155,7 +155,7 @@ func (projection *ValidatorDelegation) handleMatureRedelegationQueueEntries(
 	// Get all mature redelegations from RedelegationQueue
 	matureRelegations, err := redelegationQueueView.DequeueAllMatureRedelegationQueue(blockTime)
 	if err != nil {
-		return fmt.Errorf("error redelegationQueueView.DequeueAllMatureRedelegationQueue(): %v", err)
+		return fmt.Errorf("error dequeue all mature entries from redelegation queue: %v", err)
 	}
 
 	for _, dvvTriplet := range matureRelegations {

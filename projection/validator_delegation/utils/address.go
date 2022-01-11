@@ -43,6 +43,7 @@ func GetTendermintAddress(tendermintPubKeyInString string) (string, error) {
 	return tmcosmosutils.TmAddressFromTmPubKey(tendermintPubKey), nil
 }
 
+// IsValAddrEqualsDelAddr - check if the ValidatorAddress and DelegatorAddress are the same address with different prefix
 func IsValAddrEqualsDelAddr(
 	validatorAddress string,
 	delegatorAddress string,
@@ -52,11 +53,11 @@ func IsValAddrEqualsDelAddr(
 
 	valAddr, err := ValAddressFromBech32(validatorAddress, validatorAddressPrefix) // OperatorAddress
 	if err != nil {
-		return false, fmt.Errorf("error in ValAddressFromBech32: %v", err)
+		return false, fmt.Errorf("error in converting validatorAddress to bytes: %v", err)
 	}
 	delAddr, err := AccAddressFromBech32(delegatorAddress, accountAddressPrefix)
 	if err != nil {
-		return false, fmt.Errorf("error in AccAddressFromBech32: %v", err)
+		return false, fmt.Errorf("error converting delegatorAddress to bytes: %v", err)
 	}
 
 	return bytes.Equal(valAddr, delAddr), nil

@@ -27,7 +27,7 @@ func (projection *ValidatorDelegation) handleRedelegate(
 		amount,
 	)
 	if err != nil {
-		return fmt.Errorf("error projection.unbondAmountToShares(): %v", err)
+		return fmt.Errorf("error converting the unbond amout to corresponding shares on that validator: %v", err)
 	}
 
 	srcValReturnAmount, err := projection.unbond(
@@ -38,7 +38,7 @@ func (projection *ValidatorDelegation) handleRedelegate(
 		shares,
 	)
 	if err != nil {
-		return fmt.Errorf("error projection.unbond(): %v", err)
+		return fmt.Errorf("error unbonding shares from delegation and validator: %v", err)
 	}
 
 	dstValSharesCreated, err := projection.handleDelegate(
@@ -49,7 +49,7 @@ func (projection *ValidatorDelegation) handleRedelegate(
 		srcValReturnAmount,
 	)
 	if err != nil {
-		return fmt.Errorf("error projection.handleDelegate(): %v", err)
+		return fmt.Errorf("error hanlding delegate operation: %v", err)
 	}
 
 	completionTime, completeNow, err := projection.calculateRedelegationCompleteTime(
@@ -59,7 +59,7 @@ func (projection *ValidatorDelegation) handleRedelegate(
 		validatorSrcAddress,
 	)
 	if err != nil {
-		return fmt.Errorf("error projection.calculateRedelegationCompleteTime(): %v", err)
+		return fmt.Errorf("error calculating relegation completion time: %v", err)
 	}
 
 	if completeNow { // no need to create the redelegation object
@@ -77,11 +77,11 @@ func (projection *ValidatorDelegation) handleRedelegate(
 		dstValSharesCreated,
 	)
 	if err != nil {
-		return fmt.Errorf("error projection.setRedelegationEntry(): %v", err)
+		return fmt.Errorf("error setting redelegation entry: %v", err)
 	}
 
 	if err := projection.insertRedelegationQueue(rdbTxHandle, red, completionTime); err != nil {
-		return fmt.Errorf("error projection.insertRedelegationQueue(): %v", err)
+		return fmt.Errorf("error inserting RedelegationQueue entry: %v", err)
 	}
 
 	return nil
@@ -99,7 +99,7 @@ func (projection *ValidatorDelegation) calculateRedelegationCompleteTime(
 	// Get the validator
 	validator, found, err := validatorsView.FindByOperatorAddr(validatorSrcAddress, height)
 	if err != nil {
-		return completionTime, false, fmt.Errorf("error validatorsView.FindByOperatorAddr(): %v", err)
+		return completionTime, false, fmt.Errorf("error finding validator by OperatorAddress (AKA ValidatorAddress): %v", err)
 	}
 
 	switch {
@@ -135,7 +135,7 @@ func (projection *ValidatorDelegation) setRedelegationEntry(
 
 	red, found, err := redelegationsView.FindBy(delegatorAddress, validatorSrcAddress, validatorDstAddress, creationHeight)
 	if err != nil {
-		return red, fmt.Errorf("error redelegationsView.FindBy(): %v", err)
+		return red, fmt.Errorf("error finding redelegation: %v", err)
 	}
 	if found {
 		red.AddEntry(creationHeight, completionTime, balance, sharesDst)
@@ -152,7 +152,7 @@ func (projection *ValidatorDelegation) setRedelegationEntry(
 	}
 
 	if err := redelegationsView.Upsert(red); err != nil {
-		return red, fmt.Errorf("error redelegationsView.Upsert(): %v", err)
+		return red, fmt.Errorf("error upserting reledegation record: %v", err)
 	}
 
 	return red, nil
@@ -171,7 +171,7 @@ func (projection *ValidatorDelegation) completeRedelegation(
 
 	red, found, err := redelegationsView.FindBy(delegatorAddress, validatorSrcAddress, validatorDstAddress, height)
 	if err != nil {
-		return fmt.Errorf("error in redelegationsView.FindBy(): %v", err)
+		return fmt.Errorf("error in finding redelegation: %v", err)
 	}
 	if !found {
 		return fmt.Errorf("Redelegation not found: %v, %v, %v, %v", delegatorAddress, validatorSrcAddress, validatorDstAddress, height)
@@ -189,13 +189,13 @@ func (projection *ValidatorDelegation) completeRedelegation(
 		if len(red.Entries) == 0 {
 
 			if err := redelegationsView.Delete(red); err != nil {
-				return fmt.Errorf("error in redelegationsView.Remove(): %v", err)
+				return fmt.Errorf("error deleting redelegation entry: %v", err)
 			}
 
 		} else {
 
 			if err := redelegationsView.Upsert(red); err != nil {
-				return fmt.Errorf("error in redelegationsView.Upsert(): %v", err)
+				return fmt.Errorf("error upserting reledegation record: %v", err)
 			}
 
 		}

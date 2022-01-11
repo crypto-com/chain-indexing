@@ -28,6 +28,7 @@ func (view *UnbondingValidatorsView) Insert(operatorAddress string, UnbondingTim
 }
 
 func (view *UnbondingValidatorsView) RemoveIfExist(operatorAddress string) error {
+	// First to check if the row exist, then remove it
 
 	return nil
 }

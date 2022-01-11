@@ -22,7 +22,7 @@ func (projection *ValidatorDelegation) insertUBDQueue(
 
 	row, found, err := ubdQueueView.FindBy(completionTime)
 	if err != nil {
-		return fmt.Errorf("error ubdQueueView.FindBy(): %v", err)
+		return fmt.Errorf("error finding unbonding delegation queue entry: %v", err)
 	}
 	if !found {
 		row = view.UBDQueueRow{
@@ -34,7 +34,7 @@ func (projection *ValidatorDelegation) insertUBDQueue(
 	}
 
 	if err := ubdQueueView.Upsert(row); err != nil {
-		return fmt.Errorf("error ubdQueueView.Upsert(): %v", err)
+		return fmt.Errorf("error upserting unbonding delegation queue entry: %v", err)
 	}
 
 	return nil
