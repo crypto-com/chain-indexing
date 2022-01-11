@@ -5,11 +5,12 @@ import (
 	"time"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/bootstrap/config"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 )
 
-func SetupRDbConn(config *Config, logger applogger.Logger) (rdb.Conn, error) {
+func SetupRDbConn(config *config.Config, logger applogger.Logger) (rdb.Conn, error) {
 	var pgxConnPool *pg.PgxConn
 	var err error
 
@@ -30,12 +31,12 @@ func SetupRDbConn(config *Config, logger applogger.Logger) (rdb.Conn, error) {
 	for pgxConnPool == nil {
 		pgxConnPool, err = pg.NewPgxConnPool(&pg.PgxConnPoolConfig{
 			ConnConfig: pg.ConnConfig{
-				Host:          config.Database.Host,
-				Port:          config.Database.Port,
-				MaybeUsername: &config.Database.Username,
-				MaybePassword: &config.Database.Password,
-				Database:      config.Database.Name,
-				SSL:           config.Database.SSL,
+				Host:          config.Postgres.Host,
+				Port:          config.Postgres.Port,
+				MaybeUsername: &config.Postgres.Username,
+				MaybePassword: &config.Postgres.Password,
+				Database:      config.Postgres.Name,
+				SSL:           config.Postgres.SSL,
 			},
 			MaybeMaxConns:          &config.Postgres.MaxConns,
 			MaybeMinConns:          &config.Postgres.MinConns,

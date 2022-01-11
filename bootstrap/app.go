@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	config "github.com/crypto-com/chain-indexing/bootstrap/config"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/infrastructure/metric/prometheus"
@@ -14,27 +15,27 @@ import (
 
 type app struct {
 	logger applogger.Logger
-	config *Config
+	config *config.Config
 
 	rdbConn       rdb.Conn
 	httpAPIServer *HTTPAPIServer
 	indexService  *IndexService
 }
 
-func NewApp(logger applogger.Logger, config *Config) *app {
+func NewApp(logger applogger.Logger, config *config.Config) *app {
 	rdbConn, err := SetupRDbConn(config, logger)
 	if err != nil {
 		logger.Panicf("error setting up RDb connection: %v", err)
 	}
 
-	if config.System.Mode != SYSTEM_MODE_API_ONLY {
+	if config.IndexService.Enable {
 		ref := ""
-		if config.GithubAPI.MigrationRepoRef != "" {
-			ref = "#" + config.GithubAPI.MigrationRepoRef
+		if config.IndexService.GithubAPI.MigrationRepoRef != "" {
+			ref = "#" + config.IndexService.GithubAPI.MigrationRepoRef
 		}
 
 		m, err := migrate.New(
-			fmt.Sprintf(MIGRATION_GITHUB_TARGET, config.GithubAPI.Username, config.GithubAPI.Token, ref),
+			fmt.Sprintf(MIGRATION_GITHUB_TARGET, config.IndexService.GithubAPI.Username, config.GithubAPI.Token, ref),
 			migrationDBConnString(rdbConn),
 		)
 		if err != nil {
@@ -72,23 +73,19 @@ func (a *app) GetRDbConn() rdb.Conn {
 }
 
 func (a *app) InitHTTPAPIServer(registry RouteRegistry) {
-	a.httpAPIServer = NewHTTPAPIServer(a.logger, a.config)
-	a.httpAPIServer.RegisterRoutes(registry)
+	if a.config.HTTPService.Enable {
+		a.httpAPIServer = NewHTTPAPIServer(a.logger, a.config)
+		a.httpAPIServer.RegisterRoutes(registry)
+	}
 }
 
 func (a *app) InitIndexService(projections []projection_entity.Projection, cronJobs []projection_entity.CronJob) {
-	a.indexService = NewIndexService(a.logger, a.rdbConn, a.config, projections, cronJobs)
+	if a.config.IndexService.Enable {
+		a.indexService = NewIndexService(a.logger, a.rdbConn, a.config, projections, cronJobs)
+	}
 }
 
 func (a *app) Run() {
-	switch a.config.System.Mode {
-	case SYSTEM_MODE_EVENT_STORE,
-		SYSTEM_MODE_TENDERMINT_DIRECT,
-		SYSTEM_MODE_API_ONLY:
-	default:
-		a.logger.Panicf("unrecognized system mode: %s", a.config.System.Mode)
-	}
-
 	if a.httpAPIServer != nil {
 		go func() {
 			if runErr := a.httpAPIServer.Run(); runErr != nil {

@@ -283,13 +283,13 @@ func (projection *Validator) projectValidatorView(
 			projection.logger.Debug("handling CreateGenesisValidator event")
 			tendermintPubkey, err := base64.StdEncoding.DecodeString(createGenesisValidator.TendermintPubkey)
 			if err != nil {
-				return fmt.Errorf("error base64 decoding Tendermint node pubkey: %v", err)
+				return fmt.Errorf("error base64 decoding TendermintApp node pubkey: %v", err)
 			}
 			consensusNodeAddress, err := tmcosmosutils.ConsensusNodeAddressFromTmPubKey(
 				projection.conNodeAddressPrefix, tendermintPubkey,
 			)
 			if err != nil {
-				return fmt.Errorf("error converting Tendermint node pubkey to address: %v", err)
+				return fmt.Errorf("error converting TendermintApp node pubkey to address: %v", err)
 			}
 			tendermintAddress := tmcosmosutils.TmAddressFromTmPubKey(tendermintPubkey)
 
@@ -342,13 +342,13 @@ func (projection *Validator) projectValidatorView(
 			projection.logger.Debug("handling MsgCreateValidator event")
 			tendermintPubkey, err := base64.StdEncoding.DecodeString(msgCreateValidatorEvent.TendermintPubkey)
 			if err != nil {
-				return fmt.Errorf("error base64 decoding Tendermint node pubkey: %v", err)
+				return fmt.Errorf("error base64 decoding TendermintApp node pubkey: %v", err)
 			}
 			consensusNodeAddress, err := tmcosmosutils.ConsensusNodeAddressFromTmPubKey(
 				projection.conNodeAddressPrefix, tendermintPubkey,
 			)
 			if err != nil {
-				return fmt.Errorf("error converting Tendermint node pubkey to address: %v", err)
+				return fmt.Errorf("error converting TendermintApp node pubkey to address: %v", err)
 			}
 			tendermintAddress := tmcosmosutils.TmAddressFromTmPubKey(tendermintPubkey)
 			status := constants.UNBONDED

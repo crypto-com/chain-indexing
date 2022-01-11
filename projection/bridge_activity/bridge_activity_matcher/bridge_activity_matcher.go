@@ -51,10 +51,11 @@ func New(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	migrationHelper migrationhelper.MigrationHelper,
+	config Config,
 ) *BridgeActivityMatcher {
 	return &BridgeActivityMatcher{
 		Base: projection_usecase.NewBaseWithOptions("BridgeActivityMatcher", projection_usecase.Options{
-			MaybeConfigPtr: &Config{},
+			MaybeConfigPtr: &config,
 		}),
 
 		thisRDbConn:           rdbConn,

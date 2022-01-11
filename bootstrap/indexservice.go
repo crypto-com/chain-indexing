@@ -7,6 +7,7 @@ import (
 	event_interface "github.com/crypto-com/chain-indexing/appinterface/event"
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/bootstrap/config"
 	"github.com/crypto-com/chain-indexing/entity/event"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
@@ -20,8 +21,8 @@ type IndexService struct {
 	projections []projection_entity.Projection
 	cronJobs    []projection_entity.CronJob
 
-	systemMode               string
-	accountAddressPrefix     string
+	mode                 string
+	accountAddressPrefix string
 	consNodeAddressPrefix    string
 	bondingDenom             string
 	windowSize               int
@@ -39,7 +40,7 @@ type IndexService struct {
 func NewIndexService(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
-	config *Config,
+	config *config.Config,
 	projections []projection_entity.Projection,
 	cronJobs []projection_entity.CronJob,
 ) *IndexService {
@@ -49,19 +50,19 @@ func NewIndexService(
 		projections: projections,
 		cronJobs:    cronJobs,
 
-		systemMode:               config.System.Mode,
-		consNodeAddressPrefix:    config.Blockchain.ConNodeAddressPrefix,
-		accountAddressPrefix:     config.Blockchain.AccountAddressPrefix,
-		bondingDenom:             config.Blockchain.BondingDenom,
-		windowSize:               config.Sync.WindowSize,
-		tendermintHTTPRPCURL:     config.Tendermint.HTTPRPCUrl,
-		insecureTendermintClient: config.Tendermint.Insecure,
-		strictGenesisParsing:     config.Tendermint.StrictGenesisParsing,
+		mode:                     config.IndexService.Mode,
+		consNodeAddressPrefix:    config.IndexService.Blockchain.ConNodeAddressPrefix,
+		accountAddressPrefix:     config.IndexService.Blockchain.AccountAddressPrefix,
+		bondingDenom:             config.IndexService.Blockchain.BondingDenom,
+		windowSize:               config.IndexService.WindowSize,
+		tendermintHTTPRPCURL:     config.TendermintApp.HTTPRPCUrl,
+		insecureTendermintClient: config.TendermintApp.Insecure,
+		strictGenesisParsing:     config.TendermintApp.StrictGenesisParsing,
 		cosmosVersionBlockHeight: utils.CosmosVersionBlockHeight{
-			V0_42_7: utils.ParserBlockHeight(config.CosmosVersionEnabledHeight.V0_42_7),
+			V0_42_7: utils.ParserBlockHeight(config.IndexService.CosmosVersionEnabledHeight.V0_42_7),
 		},
-		GithubAPIUser:  config.GithubAPI.Username,
-		GithubAPIToken: config.GithubAPI.Token,
+		GithubAPIUser:  config.IndexService.GithubAPI.Username,
+		GithubAPIToken: config.IndexService.GithubAPI.Token,
 	}
 }
 
@@ -75,20 +76,17 @@ func (service *IndexService) Run() error {
 		service.strictGenesisParsing,
 	)
 
-	switch service.systemMode {
-	case SYSTEM_MODE_EVENT_STORE:
+	switch service.mode {
+	case config.SYSTEM_MODE_EVENT_STORE:
 		infoManager.Run()
 		service.runCronJobs()
 		return service.RunEventStoreMode()
-	case SYSTEM_MODE_TENDERMINT_DIRECT:
+	case config.SYSTEM_MODE_TENDERMINT_DIRECT:
 		infoManager.Run()
 		service.runCronJobs()
 		return service.RunTendermintDirectMode()
-	case SYSTEM_MODE_API_ONLY:
-		// No index process to be run on API ONLY mode
-		return nil
 	default:
-		return fmt.Errorf("unsupported system mode: %s", service.systemMode)
+		return fmt.Errorf("unsupported system mode: %s", service.mode)
 	}
 }
 

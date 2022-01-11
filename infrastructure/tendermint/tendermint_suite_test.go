@@ -9,5 +9,5 @@ import (
 
 func TestTendermint(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Tendermint Suite")
+	RunSpecs(t, "TendermintApp Suite")
 }

@@ -45,6 +45,7 @@ func NewBridgePendingActivity(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	migrationHelper migrationhelper.MigrationHelper,
+	config Config,
 ) *BridgePendingActivity {
 	return &BridgePendingActivity{
 		rdbprojectionbase.NewRDbBaseWithOptions(
@@ -52,7 +53,7 @@ func NewBridgePendingActivity(
 			"BridgePendingActivity",
 			rdbprojectionbase.Options{
 				MaybeTable:     nil,
-				MaybeConfigPtr: &Config{},
+				MaybeConfigPtr: &config,
 			},
 		),
 

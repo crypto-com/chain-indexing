@@ -5,3 +5,9 @@ type TomlConfig struct {
 }
 
 var GlobalConfig TomlConfig
+
+type Config struct {
+	Projection map[string]interface{}
+}
+
+var GlobalConfig2 Config

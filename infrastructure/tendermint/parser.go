@@ -24,7 +24,7 @@ func ParseGenesisResp(rawRespReader io.Reader, strictParsing bool) (*genesis.Gen
 		jsonDecoder.DisallowUnknownFields()
 	}
 	if err := jsonDecoder.Decode(&genesisResp); err != nil {
-		return nil, fmt.Errorf("error decoding Tendermint genesis response: %v", err)
+		return nil, fmt.Errorf("error decoding TendermintApp genesis response: %v", err)
 	}
 
 	return &genesisResp.Result.Genesis, nil
@@ -37,7 +37,7 @@ func ParseBlockResp(rawRespReader io.Reader) (*model.Block, *model.RawBlock, err
 	jsonDecoder := jsoniter.NewDecoder(rawRespReader)
 	jsonDecoder.DisallowUnknownFields()
 	if err = jsonDecoder.Decode(&resp); err != nil {
-		return nil, nil, fmt.Errorf("error decoding Tendermint block response: %v", err)
+		return nil, nil, fmt.Errorf("error decoding TendermintApp block response: %v", err)
 	}
 
 	height, err := strconv.ParseInt(resp.Result.Block.Header.Height, 10, 64)
@@ -86,7 +86,7 @@ func ParseBlockResultsResp(rawRespReader io.Reader) (*model.BlockResults, error)
 	jsonDecoder := jsoniter.NewDecoder(rawRespReader)
 	jsonDecoder.DisallowUnknownFields()
 	if err = jsonDecoder.Decode(&resp); err != nil {
-		return nil, fmt.Errorf("error unmarshalling Tendermint block_results response: %v", err)
+		return nil, fmt.Errorf("error unmarshalling TendermintApp block_results response: %v", err)
 	}
 
 	rawBlockResults := resp.Result
