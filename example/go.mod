@@ -12,7 +12,7 @@ require (
 )
 
 require (
-	github.com/crypto-com/chain-indexing v1.2.1
+	github.com/crypto-com/chain-indexing v1.3.0
 	github.com/ettle/strcase v0.1.1
 	github.com/valyala/fasthttp v1.17.0
 	gopkg.in/yaml.v2 v2.4.0
