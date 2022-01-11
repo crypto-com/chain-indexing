@@ -9,7 +9,12 @@ blockchain:
 
 index_service:
   enable: true
+  # Mode of index service, possible values: EVENT_STORE, TENDERMINT_DIRECT
+  # EVENT_STORE mode: synced blocks are parsed to events and persist to event store. Projections will replay events from
+  # event store.
+  # TENDERMINT_DIRECT mode: synced blocks are parsed to events and are replayed directly by projections.
   mode: "TENDERMINT_DIRECT"
+  # Number of sync jobs running in parallel
   window_size: 50
   projection:
     enables: [
@@ -42,6 +47,7 @@ index_service:
   cosmos_version_enabled_height:
     v0_42_7: 0
   github_api:
+    # For `username` and `token`, please generate your own `Personal access tokens` in Github.
     username: "public"
     token: "token"
     migration_repo_ref: ""
@@ -50,6 +56,9 @@ http_service:
   enable: true
   listening_address: "0.0.0.0:8080"
   route_prefix: "/"
+  # A list of origins a cross-domain request is allowed to be requested from
+  # Default value '[]' disables CORS support
+  # Use '["*"]' to allow request from any origin
   cors_allowed_origins: [ ]
   cors_allowed_methods: [ "HEAD", "GET" ]
   cors_allowed_headers: [ "Origin", "Accept", "Content-Type", "X-Requested-With", "X-Server-Time" ]
@@ -73,7 +82,8 @@ postgres:
   host: "localhost"
   port: 5432
   username: "postgres"
-  password: "postgres"
+  # password can only be provided through CLI or Environment variable `DB_PASSWORD`
+  # password: "postgres"
   name: "postgres"
   schema: "public"
   ssl: true
@@ -84,6 +94,7 @@ postgres:
   pool_health_check_interval: "1m"
 
 logger:
+  # Comma separated log levels. possible values: debug,info,error,panic
   level: "debug"
   color: false
 
@@ -92,5 +103,6 @@ prometheus:
   exportpath: "/metrics"
   port: "9090"
 
+# Custom config for example
 server_github_api:
   migration_repo_ref: ""
