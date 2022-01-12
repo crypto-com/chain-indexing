@@ -108,19 +108,19 @@ func (projection *ValidatorDelegation) handleMatureUnbondingValidators(
 	return nil
 }
 
-// Find mature UnbindingDelegation through UBDQueue and then handle them one by one
-func (projection *ValidatorDelegation) handleMatureUBDQueueEntries(
+// Find mature UnbindingDelegation through UnbondingDelegationQueue and then handle them one by one
+func (projection *ValidatorDelegation) handleMatureUnbondingDelegationQueueEntries(
 	rdbTxHandle *rdb.Handle,
 	height int64,
 	blockTime utctime.UTCTime,
 ) error {
 
-	ubdQueueView := NewUBDQueue(rdbTxHandle)
+	ubdQueueView := NewUnbondingDelegationQueue(rdbTxHandle)
 
-	// Get all mature unbonding delegations from UBDQueue
-	matureUnbonds, err := ubdQueueView.DequeueAllMatureUBDQueue(blockTime)
+	// Get all mature unbonding delegations from UnbondingDelegationQueue
+	matureUnbonds, err := ubdQueueView.DequeueAllMatureUnbondingDelegationQueue(blockTime)
 	if err != nil {
-		return fmt.Errorf("error dequeue all mature entries from unbonding delegation queue (UBDQueue): %v", err)
+		return fmt.Errorf("error dequeue all mature entries from unbonding delegation queue: %v", err)
 	}
 
 	for _, dvPair := range matureUnbonds {

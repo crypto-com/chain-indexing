@@ -5,38 +5,38 @@ import (
 	"github.com/crypto-com/chain-indexing/external/utctime"
 )
 
-type UBDQueue interface {
-	Upsert(row UBDQueueRow) error
-	FindBy(completionTime utctime.UTCTime) (UBDQueueRow, bool, error)
-	DequeueAllMatureUBDQueue(blockTime utctime.UTCTime) ([]DVPair, error)
+type UnbondingDelegationQueue interface {
+	Upsert(row UnbondingDelegationQueueRow) error
+	FindBy(completionTime utctime.UTCTime) (UnbondingDelegationQueueRow, bool, error)
+	DequeueAllMatureUnbondingDelegationQueue(blockTime utctime.UTCTime) ([]DVPair, error)
 }
 
-type UBDQueueView struct {
+type UnbondingDelegationQueueView struct {
 	rdb *rdb.Handle
 }
 
-func NewUBDQueueView(handle *rdb.Handle) UBDQueue {
-	return &UBDQueueView{
+func NewUnbondingDelegationQueueView(handle *rdb.Handle) UnbondingDelegationQueue {
+	return &UnbondingDelegationQueueView{
 		handle,
 	}
 }
 
-func (view *UBDQueueView) Upsert(row UBDQueueRow) error {
+func (view *UnbondingDelegationQueueView) Upsert(row UnbondingDelegationQueueRow) error {
 
 	return nil
 }
 
-func (view *UBDQueueView) FindBy(completionTime utctime.UTCTime) (UBDQueueRow, bool, error) {
-	var row UBDQueueRow
+func (view *UnbondingDelegationQueueView) FindBy(completionTime utctime.UTCTime) (UnbondingDelegationQueueRow, bool, error) {
+	var row UnbondingDelegationQueueRow
 
 	// TODO handle the row not found
 
 	return row, true, nil
 }
 
-func (view *UBDQueueView) DequeueAllMatureUBDQueue(blockTime utctime.UTCTime) ([]DVPair, error) {
+func (view *UnbondingDelegationQueueView) DequeueAllMatureUnbondingDelegationQueue(blockTime utctime.UTCTime) ([]DVPair, error) {
 
-	// TODO find all mature UBDQueueRow, then concate their DVPairs
+	// TODO find all mature UnbondingDelegationQueueRow, then concate their DVPairs
 
 	// Optional TODO: de-duplicate, a same DVPair could appear multiple times, we should avoid that
 
@@ -46,7 +46,7 @@ func (view *UBDQueueView) DequeueAllMatureUBDQueue(blockTime utctime.UTCTime) ([
 }
 
 // TODO UNIQUE CompletionTime
-type UBDQueueRow struct {
+type UnbondingDelegationQueueRow struct {
 	CompletionTime utctime.UTCTime `json:"completionTime"`
 	DVPairs        []DVPair        `json:"dvPairs"`
 }

@@ -119,7 +119,7 @@ func (projection *ValidatorDelegation) handleUndelegate(
 		return fmt.Errorf("error setting an unbonding delegation entry: %v", err)
 	}
 
-	if err := projection.insertUBDQueue(rdbTxHandle, ubd, completionTime); err != nil {
+	if err := projection.insertUnbondingDelegationQueue(rdbTxHandle, ubd, completionTime); err != nil {
 		return fmt.Errorf("error inserting an entry to unbonding delegation queue: %v", err)
 	}
 

@@ -25,7 +25,7 @@ var (
 	NewUnbondingValidators       = view.NewUnbondingValidatorsView
 	NewDelegations               = view.NewDelegationsView
 	NewUnbondingDelegations      = view.NewUnbondingDelegationsView
-	NewUBDQueue                  = view.NewUBDQueueView
+	NewUnbondingDelegationQueue  = view.NewUnbondingDelegationQueueView
 	NewRedelegations             = view.NewRedelegationsView
 	NewRedelegationQueue         = view.NewRedelegationQueueView
 	NewEvidences                 = view.NewEvidencesView
@@ -420,12 +420,12 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 		return fmt.Errorf("error handling mature unbonding validators: %v", err)
 	}
 
-	if err := projection.handleMatureUBDQueueEntries(
+	if err := projection.handleMatureUnbondingDelegationQueueEntries(
 		rdbTxHandle,
 		height,
 		blockTime,
 	); err != nil {
-		return fmt.Errorf("error handling mature UBD (unbonding delegation) queue entries: %v", err)
+		return fmt.Errorf("error handling mature unbonding delegation queue entries: %v", err)
 	}
 
 	if err := projection.handleMatureRedelegationQueueEntries(
