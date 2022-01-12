@@ -59,7 +59,7 @@ func (manager *InfoManager) Run() {
 		for {
 			status, err := manager.client.Status()
 			if err != nil {
-				manager.logger.Errorf("error querying TendermintApp status: %v", err)
+				manager.logger.Errorf("error querying Tendermint status: %v", err)
 				time.Sleep(manager.pollingInterval)
 				continue
 			}

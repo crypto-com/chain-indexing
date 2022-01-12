@@ -5,7 +5,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-// RawBlock defines the structure for TendermintApp /block API response JSON
+// RawBlock defines the structure for Tendermint /block API response JSON
 type RawBlock struct {
 	BlockID struct {
 		Hash  string `json:"hash" fake:"{blockheight}"`

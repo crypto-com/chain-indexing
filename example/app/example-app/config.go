@@ -5,11 +5,11 @@ import (
 )
 
 type CustomConfig struct {
-	ServerGithubAPI ServerGithubAPIConfig
+	ServerGithubAPI ServerGithubAPIConfig `yaml:"server_github_api"`
 }
 
 type ServerGithubAPIConfig struct {
-	MigrationRepoRef string
+	MigrationRepoRef string `yaml:"migration_repo_ref"`
 }
 
 type CLIConfig struct {

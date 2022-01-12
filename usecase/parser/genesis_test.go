@@ -24,7 +24,7 @@ var _ = Describe("Parse Genesis", func() {
 		strict := true
 		_, err := tendermint.ParseGenesisResp(genesisReader, strict)
 		Expect(err).Should(HaveOccurred())
-		Expect(err.Error()).To(ContainSubstring("error decoding TendermintApp genesis response"))
+		Expect(err.Error()).To(ContainSubstring("error decoding Tendermint genesis response"))
 	})
 
 	It("should throw when parsing unknown fields with strict mode on", func() {
