@@ -49,11 +49,11 @@ func (c *Config) Fill(data interface{}) error {
 	}
 	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
 	if decoderErr != nil {
-		return fmt.Errorf("error creating projection config decoder: %v", decoderErr)
+		return fmt.Errorf("error creating cronjob config decoder: %v", decoderErr)
 	}
 
 	if err := decoder.Decode(data); err != nil {
-		return fmt.Errorf("error decoding projection BridgePendingActivity config: %v", err)
+		return fmt.Errorf("error decoding cronjob BridgeActivityMatcher config: %v", err)
 	}
 
 	return nil
