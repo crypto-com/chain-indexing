@@ -86,7 +86,8 @@ type Projection struct {
 }
 
 type CronJob struct {
-	Enables []string `yaml:"enables" toml:"enables" xml:"enables" json:"enables,omitempty"`
+	Enables      []string               `yaml:"enables" toml:"enables" xml:"enables" json:"enables,omitempty"`
+	ExtraConfigs map[string]interface{} `yaml:"extra_configs" toml:"extra_configs" xml:"extra_configs" json:"extra_configs,omitempty"`
 }
 
 type CosmosVersionEnabledHeight struct {

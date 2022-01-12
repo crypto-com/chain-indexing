@@ -24,7 +24,7 @@ func initCronJobs(
 		Logger:  logger,
 		RdbConn: rdbConn,
 
-		ExtraConfigs: config.IndexService.Projection.ExtraConfigs,
+		ExtraConfigs: config.IndexService.CronJob.ExtraConfigs,
 	}
 
 	for _, cronJobName := range config.IndexService.CronJob.Enables {
