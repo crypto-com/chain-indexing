@@ -23,7 +23,7 @@ func ParseEvidencesCommands(
 			return nil, fmt.Errorf("error in parsing evidence.Value.VoteA.Height to int64: %v", err)
 		}
 
-		commands = append(commands, command_usecase.NewEvidence(blockHeight, model.EvidenceParams{
+		commands = append(commands, command_usecase.NewCreateEvidence(blockHeight, model.EvidenceParams{
 			TendermintAddress: evidence.Value.VoteA.ValidatorAddress, // the same as evidence.Value.VoteB.ValidatorAddress
 			InfractionHeight:  infractionHeight,                      // the same as evidence.Value.VoteB.Height
 			RawEvidence:       evidence,

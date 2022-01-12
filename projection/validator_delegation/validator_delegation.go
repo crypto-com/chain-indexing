@@ -86,7 +86,7 @@ func (_ *ValidatorDelegation) GetEventsToListen() []string {
 		event_usecase.GENESIS_VALIDATOR_CREATED, // parsed from genesis.
 
 		// BeginBlock
-		event_usecase.EVIDENCE,
+		event_usecase.EVIDENCE_SUBMITTED,
 		event_usecase.VALIDATOR_SLASHED, // parsed from BlockResult.BeginBlockEvents, emitted in BeginBlock.
 		event_usecase.VALIDATOR_JAILED,  // generated along with `slash` event, introduced by ourselves.
 
@@ -193,7 +193,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 	//        As later, `slash` event will need the information from Evidences.
 	//        Therefore Evidence must be written to DB before we handle `slash` event in BeginBlock.
 	for _, event := range events {
-		if typedEvent, ok := event.(*event_usecase.Evidence); ok {
+		if typedEvent, ok := event.(*event_usecase.EvidenceSubmitted); ok {
 
 			if err := projection.handleEvidence(
 				rdbTxHandle,
@@ -202,7 +202,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 				typedEvent.InfractionHeight,
 				typedEvent.RawEvidence,
 			); err != nil {
-				return fmt.Errorf("error handling Evidence: %v", err)
+				return fmt.Errorf("error handling EvidenceSubmitted event: %v", err)
 			}
 
 		}

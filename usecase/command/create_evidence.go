@@ -6,30 +6,30 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
-type Evidence struct {
+type CreateEvidence struct {
 	blockHeight int64
 	params      model.EvidenceParams
 }
 
-func NewEvidence(blockHeight int64, params model.EvidenceParams) *Evidence {
-	return &Evidence{
+func NewCreateEvidence(blockHeight int64, params model.EvidenceParams) *CreateEvidence {
+	return &CreateEvidence{
 		blockHeight,
 		params,
 	}
 }
 
 // Name returns name of command
-func (*Evidence) Name() string {
-	return "Evidence"
+func (*CreateEvidence) Name() string {
+	return "CreateEvidence"
 }
 
 // Version returns version of command
-func (*Evidence) Version() int {
+func (*CreateEvidence) Version() int {
 	return 1
 }
 
 // Exec process the command data and return the event accordingly
-func (cmd *Evidence) Exec() (entity_event.Event, error) {
-	event := event.NewEvidence(cmd.blockHeight, cmd.params)
+func (cmd *CreateEvidence) Exec() (entity_event.Event, error) {
+	event := event.NewEvidenceSubmitted(cmd.blockHeight, cmd.params)
 	return event, nil
 }

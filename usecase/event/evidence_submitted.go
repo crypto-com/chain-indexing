@@ -11,18 +11,18 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const EVIDENCE = "Evidence"
+const EVIDENCE_SUBMITTED = "EvidenceSubmitted"
 
-type Evidence struct {
+type EvidenceSubmitted struct {
 	event_entity.Base
 
 	model.EvidenceParams
 }
 
-func NewEvidence(blockHeight int64, params model.EvidenceParams) *Evidence {
-	return &Evidence{
+func NewEvidenceSubmitted(blockHeight int64, params model.EvidenceParams) *EvidenceSubmitted {
+	return &EvidenceSubmitted{
 		event_entity.NewBase(event_entity.BaseParams{
-			Name:        EVIDENCE,
+			Name:        EVIDENCE_SUBMITTED,
 			Version:     1,
 			BlockHeight: blockHeight,
 		}),
@@ -31,7 +31,7 @@ func NewEvidence(blockHeight int64, params model.EvidenceParams) *Evidence {
 	}
 
 }
-func (event *Evidence) ToJSON() (string, error) {
+func (event *EvidenceSubmitted) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
 		return "", err
@@ -40,15 +40,15 @@ func (event *Evidence) ToJSON() (string, error) {
 	return string(encoded), nil
 }
 
-func (event *Evidence) String() string {
+func (event *EvidenceSubmitted) String() string {
 	return render.Render(event)
 }
 
-func DecodeEvidence(encoded []byte) (event_entity.Event, error) {
+func DecodeEvidenceSubmitted(encoded []byte) (event_entity.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *Evidence
+	var event *EvidenceSubmitted
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}

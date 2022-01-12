@@ -12,7 +12,7 @@ import (
 	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
 )
 
-var _ = Describe("ParseEvidencesCommands", func() {
+var _ = Describe("ParseCreateEvidenceCommands", func() {
 
 	It("should return commands corresponding to evidences in block", func() {
 		block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
@@ -26,10 +26,10 @@ var _ = Describe("ParseEvidencesCommands", func() {
 		Expect(err).To(BeNil())
 		Expect(cmds).To(HaveLen(1))
 		cmd := cmds[0]
-		Expect(cmd.Name()).To(Equal("Evidence"))
+		Expect(cmd.Name()).To(Equal("CreateEvidence"))
 
 		untypedEvent, _ := cmd.Exec()
-		typedEvent := untypedEvent.(*event.Evidence)
+		typedEvent := untypedEvent.(*event.EvidenceSubmitted)
 
 		expectedBlockHeight := int64(58346)
 		expectedInfractionHeight := int64(58344)
