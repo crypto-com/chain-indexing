@@ -2,16 +2,7 @@ package bridge_activity_matcher_test
 
 import (
 	"fmt"
-	test_logger "github.com/crypto-com/chain-indexing/external/logger/test"
-	"github.com/crypto-com/chain-indexing/external/primptr"
-	"github.com/crypto-com/chain-indexing/external/utctime"
-	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
-	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"testing"
-
-	applogger "github.com/crypto-com/chain-indexing/external/logger"
-
-	"github.com/crypto-com/chain-indexing/projection/bridge_activity/bridge_activity_matcher"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/stretchr/testify/assert"
@@ -19,8 +10,15 @@ import (
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb/test"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	test_logger "github.com/crypto-com/chain-indexing/external/logger/test"
+	"github.com/crypto-com/chain-indexing/external/primptr"
+	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	"github.com/crypto-com/chain-indexing/projection/bridge_activity/bridge_activity_matcher"
+	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/view"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
 )
 
 func TestBridgeActivityMatcher_HandleEvents(t *testing.T) {
