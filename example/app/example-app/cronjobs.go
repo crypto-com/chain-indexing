@@ -60,8 +60,7 @@ func InitCronJob(name string, params InitCronJobParams) projection_entity.CronJo
 		databaseURL := migrationhelper.GenerateDefaultDatabaseURL(name, connString)
 		migrationHelper := github_migrationhelper.NewGithubMigrationHelper(sourceURL, databaseURL)
 
-		config := bridge_activity_matcher.Config{}
-		err := config.Fill(params.ExtraConfigs[name])
+		config, err := bridge_activity_matcher.ConfigFromInterface(params.ExtraConfigs[name])
 		if err != nil {
 			params.Logger.Panicf(err.Error())
 		}

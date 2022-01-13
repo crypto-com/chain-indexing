@@ -78,7 +78,7 @@ func run(args []string) error {
 
 			&cli.StringFlag{
 				Name:    "tendermintURL",
-				Usage:   "TendermintApp HTTP RPC URL",
+				Usage:   "Tendermint HTTP RPC URL",
 				EnvVars: []string{"TENDERMINT_URL"},
 			},
 			&cli.StringFlag{

@@ -315,13 +315,12 @@ func InitProjection(name string, params InitProjectionParams) projection_entity.
 		databaseURL := migrationhelper.GenerateDefaultDatabaseURL(name, connString)
 		migrationHelper := github_migrationhelper.NewGithubMigrationHelper(sourceURL, databaseURL)
 
-		config := bridge_pending_activity.Config{}
-		err := config.Fill(params.ExtraConfigs[name])
+		config, err := bridge_pending_activity.ConfigFromInterface(params.ExtraConfigs[name])
 		if err != nil {
 			params.Logger.Panicf(err.Error())
 		}
 
-		return bridge_pending_activity.NewBridgePendingActivity(params.Logger, params.RdbConn, migrationHelper, bridge_pending_activity.Config{})
+		return bridge_pending_activity.NewBridgePendingActivity(params.Logger, params.RdbConn, migrationHelper, config)
 	}
 
 	return nil

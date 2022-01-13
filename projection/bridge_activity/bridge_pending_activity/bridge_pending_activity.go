@@ -38,21 +38,23 @@ type Config struct {
 	StartingHeight        int64  `mapstructure:"starting_height"`
 }
 
-func (c *Config) Fill(data interface{}) error {
+func ConfigFromInterface(data interface{}) (Config, error) {
+	config := Config{}
+
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
-		Result: c,
+		Result:           &config,
 	}
 	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
 	if decoderErr != nil {
-		return fmt.Errorf("error creating projection config decoder: %v", decoderErr)
+		return config, fmt.Errorf("error creating projection config decoder: %v", decoderErr)
 	}
 
 	if err := decoder.Decode(data); err != nil {
-		return fmt.Errorf("error decoding projection BridgePendingActivity config: %v", err)
+		return config, fmt.Errorf("error decoding projection BridgePendingActivity config: %v", err)
 	}
 
-	return nil
+	return config, nil
 }
 
 const (

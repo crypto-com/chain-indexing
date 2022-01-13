@@ -38,25 +38,27 @@ type Config struct {
 	} `mapstructure:"crypto_org_chain_database"`
 }
 
-func (c *Config) Fill(data interface{}) error {
+func ConfigFromInterface(data interface{}) (Config, error) {
+	config := Config{}
+
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
 		),
-		Result: c,
+		Result:           &config,
 	}
 	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
 	if decoderErr != nil {
-		return fmt.Errorf("error creating cronjob config decoder: %v", decoderErr)
+		return config, fmt.Errorf("error creating projection config decoder: %v", decoderErr)
 	}
 
 	if err := decoder.Decode(data); err != nil {
-		return fmt.Errorf("error decoding cronjob BridgeActivityMatcher config: %v", err)
+		return config, fmt.Errorf("error decoding projection BridgePendingActivity config: %v", err)
 	}
 
-	return nil
+	return config, nil
 }
 
 type BridgeActivityMatcher struct {
