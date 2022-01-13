@@ -100,6 +100,7 @@ func ParseBlockResultsResp(rawRespReader io.Reader) (*model.BlockResults, error)
 	return &model.BlockResults{
 		Height:                int64(height),
 		TxsResults:            txsResults,
+		BlockEvents:           parseBlockResultsEvents(rawBlockResults.BlockEvents),
 		BeginBlockEvents:      parseBlockResultsEvents(rawBlockResults.BeginBlockEvents),
 		EndBlockEvents:        parseBlockResultsEvents(rawBlockResults.EndBlockEvents),
 		ValidatorUpdates:      parseBlockResultsValidatorUpdates(rawBlockResults.ValidatorUpdates),

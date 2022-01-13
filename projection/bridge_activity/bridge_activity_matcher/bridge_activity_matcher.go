@@ -11,11 +11,10 @@ import (
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	appprojection "github.com/crypto-com/chain-indexing/projection"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/view"
 	projection_usecase "github.com/crypto-com/chain-indexing/usecase/projection"
-	"github.com/golang-migrate/migrate/v4"
 )
 
 var _ projection_entity.CronJob = &BridgeActivityMatcher{}
@@ -23,13 +22,18 @@ var _ projection_entity.CronJob = &BridgeActivityMatcher{}
 type Config struct {
 	Interval               time.Duration `mapstructure:"interval"`
 	CryptoOrgChainDatabase struct {
-		SSL      bool   `mapstructure:"ssl"`
-		Host     string `mapstructure:"host"`
-		Port     int32  `mapstructure:"port"`
-		Username string `mapstructure:"username"`
-		Password string `mapstructure:"password"`
-		Name     string `mapstructure:"name"`
-		Schema   string `mapstructure:"schema"`
+		SSL                 bool          `mapstructure:"ssl"`
+		Host                string        `mapstructure:"host"`
+		Port                int32         `mapstructure:"port"`
+		Username            string        `mapstructure:"username"`
+		Password            string        `mapstructure:"password"`
+		Name                string        `mapstructure:"name"`
+		Schema              string        `mapstructure:"schema"`
+		MaxConns            int32         `mapstructure:"pool_max_conns"`
+		MinConns            int32         `mapstructure:"pool_min_conns"`
+		MaxConnLifeTime     time.Duration `mapstructure:"pool_max_conn_lifetime"`
+		MaxConnIdleTime     time.Duration `mapstructure:"pool_max_conn_idle_time"`
+		HealthCheckInterval time.Duration `mapstructure:"pool_health_check_interval"`
 	} `mapstructure:"crypto_org_chain_database"`
 }
 
@@ -40,10 +44,14 @@ type BridgeActivityMatcher struct {
 	cryptoOrgChainRDbConn rdb.Conn
 	logger                applogger.Logger
 
-	config *appprojection.Config
+	migrationHelper migrationhelper.MigrationHelper
 }
 
-func New(logger applogger.Logger, rdbConn rdb.Conn, config *appprojection.Config) *BridgeActivityMatcher {
+func New(
+	logger applogger.Logger,
+	rdbConn rdb.Conn,
+	migrationHelper migrationhelper.MigrationHelper,
+) *BridgeActivityMatcher {
 	return &BridgeActivityMatcher{
 		Base: projection_usecase.NewBaseWithOptions("BridgeActivityMatcher", projection_usecase.Options{
 			MaybeConfigPtr: &Config{},
@@ -54,7 +62,8 @@ func New(logger applogger.Logger, rdbConn rdb.Conn, config *appprojection.Config
 		logger: logger.WithFields(applogger.LogFields{
 			"module": "BridgeActivityMatcher",
 		}),
-		config: config,
+
+		migrationHelper: migrationHelper,
 	}
 }
 
@@ -67,19 +76,8 @@ func (cronJob *BridgeActivityMatcher) Config() *Config {
 }
 
 const (
-	MIGRATION_TABLE_NAME = "bridge_activity_matcher_schema_migrations"
-	MIGRATION_DIRECOTRY  = "projection/bridge_activity/bridge_activity_matcher/migrations"
+	MIGRATION_DIRECOTRY = "projection/bridge_activity/bridge_activity_matcher/migrations"
 )
-
-func (cronJob *BridgeActivityMatcher) migrationDBConnString() string {
-	conn := cronJob.thisRDbConn.(*pg.PgxConn)
-	connString := conn.ConnString()
-	if connString[len(connString)-1:] == "?" {
-		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
-	} else {
-		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
-	}
-}
 
 func (cronJob *BridgeActivityMatcher) OnInit() error {
 	config := cronJob.Config()
@@ -91,33 +89,26 @@ func (cronJob *BridgeActivityMatcher) OnInit() error {
 
 	// TODO: Refactor to generic rdbConn creator
 	var err error
-	if cronJob.cryptoOrgChainRDbConn, err = pg.NewPgxConn(&pg.ConnConfig{
-		Host:          config.CryptoOrgChainDatabase.Host,
-		Port:          config.CryptoOrgChainDatabase.Port,
-		MaybeUsername: &config.CryptoOrgChainDatabase.Username,
-		MaybePassword: &cryptoOrgChainDBPassword,
-		Database:      config.CryptoOrgChainDatabase.Name,
-		SSL:           config.CryptoOrgChainDatabase.SSL,
+	if cronJob.cryptoOrgChainRDbConn, err = pg.NewPgxConnPool(&pg.PgxConnPoolConfig{
+		ConnConfig: pg.ConnConfig{
+			Host:          config.CryptoOrgChainDatabase.Host,
+			Port:          config.CryptoOrgChainDatabase.Port,
+			MaybeUsername: &config.CryptoOrgChainDatabase.Username,
+			MaybePassword: &cryptoOrgChainDBPassword,
+			Database:      config.CryptoOrgChainDatabase.Name,
+			SSL:           config.CryptoOrgChainDatabase.SSL,
+		},
+		MaybeMaxConns:          &config.CryptoOrgChainDatabase.MaxConns,
+		MaybeMinConns:          &config.CryptoOrgChainDatabase.MinConns,
+		MaybeMaxConnLifeTime:   &config.CryptoOrgChainDatabase.MaxConnLifeTime,
+		MaybeMaxConnIdleTime:   &config.CryptoOrgChainDatabase.MaxConnIdleTime,
+		MaybeHealthCheckPeriod: &config.CryptoOrgChainDatabase.HealthCheckInterval,
 	}, cronJob.logger); err != nil {
 		return fmt.Errorf("error when initializing Crypto.org Chain indexing DB connection: %v", err)
 	}
 
-	ref := ""
-	if cronJob.config.MigrationRepoRef != "" {
-		ref = "#" + cronJob.config.MigrationRepoRef
-	}
-	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, cronJob.config.GithubAPIUser, cronJob.config.GithubAPIToken, MIGRATION_DIRECOTRY+ref),
-		cronJob.migrationDBConnString(),
-	)
-	if err != nil {
-		cronJob.logger.Errorf("failed to init migration: %v", err)
-		return err
-	}
-
-	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		cronJob.logger.Errorf("failed to run migration: %v", err)
-		return err
+	if cronJob.migrationHelper != nil {
+		cronJob.migrationHelper.Migrate()
 	}
 
 	return nil

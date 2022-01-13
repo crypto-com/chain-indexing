@@ -7,6 +7,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/infrastructure/metric/prometheus"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/golang-migrate/migrate/v4"
 )
@@ -99,6 +100,14 @@ func (a *app) Run() {
 	if a.indexService != nil {
 		go func() {
 			if runErr := a.indexService.Run(); runErr != nil {
+				a.logger.Panicf("%v", runErr)
+			}
+		}()
+	}
+
+	if a.config.Prometheus.Enable {
+		go func() {
+			if runErr := prometheus.Run(a.config.Prometheus.ExportPath, a.config.Prometheus.Port); runErr != nil {
 				a.logger.Panicf("%v", runErr)
 			}
 		}()

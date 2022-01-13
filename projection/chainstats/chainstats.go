@@ -6,17 +6,15 @@ import (
 	"strconv"
 	"time"
 
-	applogger "github.com/crypto-com/chain-indexing/external/logger"
-	"github.com/crypto-com/chain-indexing/external/utctime"
-	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	appprojection "github.com/crypto-com/chain-indexing/projection"
-	"github.com/golang-migrate/migrate/v4"
 	"github.com/pkg/errors"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
 	"github.com/crypto-com/chain-indexing/projection/chainstats/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
@@ -36,13 +34,13 @@ type ChainStats struct {
 	maybeGenesisBlockTime *int64 // Unix Nano
 	maybeTotalBlockCount  *big.Int
 
-	config *appprojection.Config
+	migrationHelper migrationhelper.MigrationHelper
 }
 
 func NewChainStats(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
-	config *appprojection.Config,
+	migrationHelper migrationhelper.MigrationHelper,
 ) *ChainStats {
 	return &ChainStats{
 		rdbprojectionbase.NewRDbBase(
@@ -56,7 +54,7 @@ func NewChainStats(
 		nil,
 		nil,
 
-		config,
+		migrationHelper,
 	}
 }
 
@@ -67,38 +65,14 @@ func (_ *ChainStats) GetEventsToListen() []string {
 	}
 }
 
+// TODO: should change it to projection folder name to `chain_stats`, then we can remove it
 const (
-	MIGRATION_TABLE_NAME = "chain_stats_schema_migrations"
-	MIGRATION_DIRECOTRY  = "projection/chainstats/migrations"
+	MIGRATION_DIRECOTRY = "projection/chainstats/migrations"
 )
 
-func (projection *ChainStats) migrationDBConnString() string {
-	conn := projection.rdbConn.(*pg.PgxConn)
-	connString := conn.ConnString()
-	if connString[len(connString)-1:] == "?" {
-		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
-	} else {
-		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
-	}
-}
-
 func (projection *ChainStats) OnInit() error {
-	ref := ""
-	if projection.config.MigrationRepoRef != "" {
-		ref = "#" + projection.config.MigrationRepoRef
-	}
-	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY+ref),
-		projection.migrationDBConnString(),
-	)
-	if err != nil {
-		projection.logger.Errorf("failed to init migration: %v", err)
-		return err
-	}
-
-	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		projection.logger.Errorf("failed to run migration: %v", err)
-		return err
+	if projection.migrationHelper != nil {
+		projection.migrationHelper.Migrate()
 	}
 
 	chainStatsView := view.NewChainStats(projection.rdbConn.ToHandle())

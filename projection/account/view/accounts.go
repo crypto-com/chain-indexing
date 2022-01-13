@@ -4,10 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/crypto-com/chain-indexing/external/json"
-	"github.com/crypto-com/chain-indexing/usecase/coin"
-
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
+	"github.com/crypto-com/chain-indexing/external/json"
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -15,9 +14,11 @@ import (
 )
 
 type Accounts interface {
-	Upsert(*AccountRow) error
 	FindBy(*AccountIdentity) (*AccountRow, error)
 	List(AccountsListOrder, *pagination.Pagination) ([]AccountRow, *pagination.PaginationResult, error)
+	IncrementUsableBalance(string, string, int64) error
+	DecrementUsableBalance(string, string, int64) error
+	InsertAccountEvent(AccountEvent) error
 }
 
 type AccountsView struct {
@@ -38,42 +39,147 @@ func NewAccountsView(handle *rdb.Handle) Accounts {
 	}
 }
 
-func (accountsView *AccountsView) Upsert(account *AccountRow) error {
+func (accountsView *AccountsView) InsertAccountEvent(accountEvent AccountEvent) error {
+	var accountEventDataJSON string
+	var err error
+	if accountEventDataJSON, err = jsoniter.MarshalToString(accountEvent.Data); err != nil {
+		return fmt.Errorf("error JSON marshalling block event data for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	sql, sqlArgs, err := accountsView.rdb.StmtBuilder.
+		Insert(
+			"account_events",
+		).
+		Columns(
+			"address",
+			"data",
+			"type",
+			"block_height",
+		).
+		Values(
+			accountEvent.Address,
+			accountEventDataJSON,
+			accountEvent.Type,
+			accountEvent.BlockHeight,
+		).
+		ToSql()
+
+	if err != nil {
+		return fmt.Errorf("error building account events insert sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	result, err := accountsView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error inserting account events into the table: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() != 1 {
+		return fmt.Errorf("error inserting account events into the table: no rows updated: %w", rdb.ErrWrite)
+	}
+
+	return nil
+}
+
+func (accountsView *AccountsView) IncrementUsableBalance(address string, denom string, increment int64) error {
 	sql, sqlArgs, err := accountsView.rdb.StmtBuilder.
 		Insert(
 			"view_accounts",
 		).
 		Columns(
 			"address",
-			"account_type",
-			"name",
-			"pubkey",
-			"account_number",
-			"sequence_number",
-			"balance",
+			"usable_balance",
 		).
 		Values(
-			account.Address,
-			account.Type,
-			account.MaybeName,
-			account.MaybePubkey,
-			account.AccountNumber,
-			account.SequenceNumber,
-			json.MustMarshalToString(account.Balance),
+			address,
+			"{}",
 		).
-		Suffix("ON CONFLICT(address) DO UPDATE SET balance = EXCLUDED.balance").
+		Suffix("ON CONFLICT(address) DO NOTHING").
 		ToSql()
 
 	if err != nil {
-		return fmt.Errorf("error building accounts insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		return fmt.Errorf("error building accounts update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	_, err = accountsView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error updating account into the table: %v: %w", err, rdb.ErrWrite)
+	}
+
+	sql, sqlArgs, err = accountsView.rdb.StmtBuilder.
+		Update(
+			"view_accounts",
+		).
+		Set(
+			"usable_balance",
+			fmt.Sprintf("jsonb_set(usable_balance, '{%s}', (COALESCE(usable_balance->>'%s','0')::bigint + %d)::text::jsonb)", denom, denom, increment),
+		).
+		Where(
+			"address = ?", address,
+		).
+		ToSql()
+
+	if err != nil {
+		return fmt.Errorf("error building accounts update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
 	result, err := accountsView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
-		return fmt.Errorf("error inserting account into the table: %v: %w", err, rdb.ErrWrite)
+		return fmt.Errorf("error updating account into the table: %v: %w", err, rdb.ErrWrite)
 	}
 	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error inserting account into the table: no rows inserted: %w", rdb.ErrWrite)
+		return fmt.Errorf("error updating account into the table: no rows updated: %w", rdb.ErrWrite)
+	}
+
+	return nil
+}
+
+func (accountsView *AccountsView) DecrementUsableBalance(address string, denom string, decrement int64) error {
+	sql, sqlArgs, err := accountsView.rdb.StmtBuilder.
+		Insert(
+			"view_accounts",
+		).
+		Columns(
+			"address",
+			"usable_balance",
+		).
+		Values(
+			address,
+			"{}",
+		).
+		Suffix("ON CONFLICT(address) DO NOTHING").
+		ToSql()
+
+	if err != nil {
+		return fmt.Errorf("error building accounts update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	_, err = accountsView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error updating account into the table: %v: %w", err, rdb.ErrWrite)
+	}
+
+	sql, sqlArgs, err = accountsView.rdb.StmtBuilder.
+		Update(
+			"view_accounts",
+		).
+		Set(
+			"usable_balance",
+			fmt.Sprintf("jsonb_set(usable_balance, '{%s}', (COALESCE(usable_balance->>'%s','0')::bigint - %d)::text::jsonb)", denom, denom, decrement),
+		).
+		Where(
+			"address = ?", address,
+		).
+		ToSql()
+
+	if err != nil {
+		return fmt.Errorf("error building accounts update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	result, err := accountsView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error updating account into the table: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() != 1 {
+		return fmt.Errorf("error updating account into the table: no rows updated: %w", rdb.ErrWrite)
 	}
 
 	return nil
@@ -84,13 +190,9 @@ func (accountsView *AccountsView) FindBy(identity *AccountIdentity) (*AccountRow
 
 	selectStmtBuilder := accountsView.rdb.StmtBuilder.Select(
 		"address",
-		"account_type",
-		"name",
-		"pubkey",
 		"account_number",
 		"sequence_number",
-
-		"account_balance", "account_denom",
+		"usable_balance",
 	).From("view_accounts")
 
 	selectStmtBuilder = selectStmtBuilder.Where("address = ?", identity.Address)
@@ -101,15 +203,12 @@ func (accountsView *AccountsView) FindBy(identity *AccountIdentity) (*AccountRow
 	}
 
 	var account AccountRow
-	var balance string
+	var usableBalance string
 	if err = accountsView.rdb.QueryRow(sql, sqlArgs...).Scan(
 		&account.Address,
-		&account.Type,
-		&account.MaybeName,
-		&account.MaybePubkey,
 		&account.AccountNumber,
 		&account.SequenceNumber,
-		&balance,
+		&usableBalance,
 	); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
@@ -117,7 +216,7 @@ func (accountsView *AccountsView) FindBy(identity *AccountIdentity) (*AccountRow
 		return nil, fmt.Errorf("error scanning account row: %v: %w", err, rdb.ErrQuery)
 	}
 
-	json.MustUnmarshalFromString(balance, &account.Balance)
+	json.MustUnmarshalFromString(usableBalance, &account.UsableBalance)
 	return &account, nil
 }
 
@@ -127,12 +226,9 @@ func (accountsView *AccountsView) List(
 ) ([]AccountRow, *pagination.PaginationResult, error) {
 	stmtBuilder := accountsView.rdb.StmtBuilder.Select(
 		"address",
-		"account_type",
-		"name",
-		"pubkey",
 		"account_number",
 		"sequence_number",
-		"balance",
+		"usable_balance",
 	).From(
 		"view_accounts",
 	)
@@ -161,15 +257,12 @@ func (accountsView *AccountsView) List(
 	accounts := make([]AccountRow, 0)
 	for rowsResult.Next() {
 		var account AccountRow
-		var balance string
+		var usableBalance string
 		if err = rowsResult.Scan(
 			&account.Address,
-			&account.Type,
-			&account.MaybeName,
-			&account.MaybePubkey,
 			&account.AccountNumber,
 			&account.SequenceNumber,
-			&balance,
+			&usableBalance,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
@@ -177,7 +270,7 @@ func (accountsView *AccountsView) List(
 			return nil, nil, fmt.Errorf("error scanning account row: %v: %w", err, rdb.ErrQuery)
 		}
 
-		json.MustUnmarshalFromString(balance, &account.Balance)
+		json.MustUnmarshalFromString(usableBalance, &account.UsableBalance)
 		accounts = append(accounts, account)
 	}
 
@@ -190,11 +283,19 @@ func (accountsView *AccountsView) List(
 }
 
 type AccountRow struct {
-	Address        string     `json:"address"`
-	Type           string     `json:"type"`
-	MaybeName      *string    `json:"name"`
-	MaybePubkey    *string    `json:"pubkey"`
-	AccountNumber  string     `json:"accountNumber"`
-	SequenceNumber string     `json:"sequenceNumber"`
-	Balance        coin.Coins `json:"balance"`
+	Address        string         `json:"address"`
+	AccountNumber  string         `json:"accountNumber"`
+	SequenceNumber string         `json:"sequenceNumber"`
+	UsableBalance  AccountBalance `json:"usableBalance"`
+}
+
+type AccountBalanceDenom string
+
+type AccountBalance map[AccountBalanceDenom]int64
+
+type AccountEvent struct {
+	Address     string      `json:"address"`
+	Type        string      `json:"type"`
+	Data        interface{} `json:"data"`
+	BlockHeight int64       `json:"block_height"`
 }

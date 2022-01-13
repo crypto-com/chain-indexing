@@ -10,14 +10,8 @@ type MockAccountsView struct {
 	mock.Mock
 }
 
-
 func NewMockAccountsView(_ *rdb.Handle) Accounts {
 	return &MockAccountsView{}
-}
-
-func (accountsView *MockAccountsView) Upsert(account *AccountRow) error {
-	mockArgs := accountsView.Called(account)
-	return mockArgs.Error(0)
 }
 
 func (accountsView *MockAccountsView) FindBy(identity *AccountIdentity) (*AccountRow, error) {
@@ -34,4 +28,19 @@ func (accountsView *MockAccountsView) List(
 	result0, _ := mockArgs.Get(0).([]AccountRow)
 	result1, _ := mockArgs.Get(1).(*pagination.PaginationResult)
 	return result0, result1, mockArgs.Error(2)
+}
+
+func (accountsView *MockAccountsView) IncrementUsableBalance(address string, denom string, increment int64) error {
+	mockArgs := accountsView.Called(address, denom, increment)
+	return mockArgs.Error(0)
+}
+
+func (accountsView *MockAccountsView) DecrementUsableBalance(address string, denom string, decrement int64) error {
+	mockArgs := accountsView.Called(address, denom, decrement)
+	return mockArgs.Error(0)
+}
+
+func (accountsView *MockAccountsView) InsertAccountEvent(event AccountEvent) error {
+	mockArgs := accountsView.Called(event)
+	return mockArgs.Error(0)
 }

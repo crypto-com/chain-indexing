@@ -70,6 +70,58 @@ func ParseEndBlockEventsCommands(blockHeight int64, endBlockEvents []model.Block
 					EthereumEventVoteRecordId: []byte(ethereumSendToCosmosHandledEvent.MustGetAttributeByKey("ethereum_event_vote_record_id")),
 				},
 			))
+		} else if event.Type == "coin_spent" {
+			coinSpentEvent := utils.NewParsedTxsResultLogEvent(&endBlockEvents[i])
+
+			amount := coinSpentEvent.MustGetAttributeByKey("amount")
+			if amount == "" {
+				continue
+			}
+			commands = append(commands, command_usecase.NewCreateCoinSpent(
+				blockHeight,
+				model.CoinSpentParams{
+					Address: coinSpentEvent.MustGetAttributeByKey("spender"),
+					Amount:  coin.MustParseCoinsNormalized(amount),
+				}))
+		} else if event.Type == "coin_received" {
+			coinReceivedEvent := utils.NewParsedTxsResultLogEvent(&endBlockEvents[i])
+
+			amount := coinReceivedEvent.MustGetAttributeByKey("amount")
+			if amount == "" {
+				continue
+			}
+			commands = append(commands, command_usecase.NewCreateCoinReceived(
+				blockHeight,
+				model.CoinReceivedParams{
+					Address: coinReceivedEvent.MustGetAttributeByKey("receiver"),
+					Amount:  coin.MustParseCoinsNormalized(amount),
+				}))
+		} else if event.Type == "coinbase" {
+			coinMintEvent := utils.NewParsedTxsResultLogEvent(&endBlockEvents[i])
+
+			amount := coinMintEvent.MustGetAttributeByKey("amount")
+			if amount == "" {
+				continue
+			}
+			commands = append(commands, command_usecase.NewCreateCoinMint(
+				blockHeight,
+				model.CoinMintParams{
+					Address: coinMintEvent.MustGetAttributeByKey("minter"),
+					Amount:  coin.MustParseCoinsNormalized(amount),
+				}))
+		} else if event.Type == "burn" {
+			coinBurnEvent := utils.NewParsedTxsResultLogEvent(&endBlockEvents[i])
+
+			amount := coinBurnEvent.MustGetAttributeByKey("amount")
+			if amount == "" {
+				continue
+			}
+			commands = append(commands, command_usecase.NewCreateCoinBurn(
+				blockHeight,
+				model.CoinBurnParams{
+					Address: coinBurnEvent.MustGetAttributeByKey("burner"),
+					Amount:  coin.MustParseCoinsNormalized(amount),
+				}))
 		}
 	}
 

@@ -1,24 +1,48 @@
 package view_test
 
 import (
+	"path"
+	"runtime"
+
 	random "github.com/brianvoe/gofakeit/v5"
-	"github.com/crypto-com/chain-indexing/projection/block/view"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/crypto-com/chain-indexing/infrastructure/pg"
+	"github.com/crypto-com/chain-indexing/projection/block/view"
 	. "github.com/crypto-com/chain-indexing/test"
 )
 
+var BLOCK_MIGRATIONS_PATH = func() string {
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		panic("error retrieving file directory")
+	}
+
+	return path.Join(filename, "../../migrations")
+}()
+
 var _ = Describe("Blocks", func() {
-	WithTestPgxConn(func(conn *pg.PgxConn, migrate *pg.Migrate) {
+	WithProjectionTestEnv(func(testEnv ProjectionTestEnv) {
+		pgxConn := testEnv.Conn
+
+		reset := func() {
+			// Only needs to run Reset() on one of the migrate instance because Reset() drops everything in the Database
+			_ = testEnv.RootMigrate.Reset()
+		}
+
 		BeforeEach(func() {
-			_ = migrate.Reset()
-			migrate.MustUp()
+			reset()
+
+			testEnv.RootMigrate.MustUp()
+			blockMigrate := testEnv.MigrateCreator(
+				"block_schema_migrations",
+				BLOCK_MIGRATIONS_PATH,
+			)
+			blockMigrate.MustUp()
 		})
 
 		AfterEach(func() {
-			_ = migrate.Reset()
+			reset()
 		})
 
 		Describe("Insert", func() {
@@ -28,7 +52,7 @@ var _ = Describe("Blocks", func() {
 				var block view.Block
 				random.Struct(&block)
 
-				blocksView := view.NewBlocks(conn.ToHandle())
+				blocksView := view.NewBlocks(pgxConn.ToHandle())
 
 				Expect(blocksView.Count()).To(Equal(int64(0)))
 

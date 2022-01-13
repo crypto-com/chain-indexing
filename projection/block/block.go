@@ -1,7 +1,6 @@
 package block
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
@@ -9,11 +8,9 @@ import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	entity_projection "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
-	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	appprojection "github.com/crypto-com/chain-indexing/projection"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
 	"github.com/crypto-com/chain-indexing/projection/block/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
-	"github.com/golang-migrate/migrate/v4"
 )
 
 var _ entity_projection.Projection = &Block{}
@@ -25,13 +22,13 @@ type Block struct {
 	rdbConn rdb.Conn
 	logger  applogger.Logger
 
-	config *appprojection.Config
+	migrationHelper migrationhelper.MigrationHelper
 }
 
 func NewBlock(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
-	config *appprojection.Config,
+	migrationHelper migrationhelper.MigrationHelper,
 ) *Block {
 	return &Block{
 		rdbprojectionbase.NewRDbBase(
@@ -42,7 +39,7 @@ func NewBlock(
 		rdbConn,
 		logger,
 
-		config,
+		migrationHelper,
 	}
 }
 
@@ -50,40 +47,10 @@ func (_ *Block) GetEventsToListen() []string {
 	return []string{event_usecase.BLOCK_CREATED}
 }
 
-const (
-	MIGRATION_TABLE_NAME = "block_schema_migrations"
-	MIGRATION_DIRECOTRY  = "projection/block/migrations"
-)
-
-func (projection *Block) migrationDBConnString() string {
-	conn := projection.rdbConn.(*pg.PgxConn)
-	connString := conn.ConnString()
-	if connString[len(connString)-1:] == "?" {
-		return connString + "x-migrations-table=" + MIGRATION_TABLE_NAME
-	} else {
-		return connString + "&x-migrations-table=" + MIGRATION_TABLE_NAME
-	}
-}
-
 func (projection *Block) OnInit() error {
-	ref := ""
-	if projection.config.MigrationRepoRef != "" {
-		ref = "#" + projection.config.MigrationRepoRef
+	if projection.migrationHelper != nil {
+		projection.migrationHelper.Migrate()
 	}
-	m, err := migrate.New(
-		fmt.Sprintf(appprojection.MIGRATION_GITHUB_TARGET, projection.config.GithubAPIUser, projection.config.GithubAPIToken, MIGRATION_DIRECOTRY+ref),
-		projection.migrationDBConnString(),
-	)
-	if err != nil {
-		projection.logger.Errorf("failed to init migration: %v", err)
-		return err
-	}
-
-	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		projection.logger.Errorf("failed to run migration: %v", err)
-		return err
-	}
-
 	return nil
 }
 
@@ -108,8 +75,6 @@ func (projection *Block) HandleEvents(height int64, events []event_entity.Event)
 			if handleErr := projection.handleBlockCreatedEvent(blocksView, blockCreatedEvent); handleErr != nil {
 				return fmt.Errorf("error handling BlockCreatedEvent: %v", handleErr)
 			}
-		} else {
-			return fmt.Errorf("received unexpected event %sV%d(%s)", event.Name(), event.Version(), event.UUID())
 		}
 	}
 	if err = projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {

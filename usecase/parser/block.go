@@ -68,6 +68,16 @@ func ParseBlockToCommands(
 			return nil, fmt.Errorf("error parsing block_results txs_results commands: %v", parseErr)
 		}
 		commands = append(commands, txsResultsCommand...)
+
+		blockEventsCommands, parseErr := ParseTxsResultsEventsCommands(
+			block.Height,
+			blockResults.TxsResults,
+			bondingDenom,
+		)
+		if parseErr != nil {
+			return nil, fmt.Errorf("error parsing events commands: %v", parseErr)
+		}
+		commands = append(commands, blockEventsCommands...)
 	}
 
 	beginBlockEventsCommands, parseErr := ParseBeginBlockEventsCommands(

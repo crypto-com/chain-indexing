@@ -2,6 +2,7 @@ package account_test
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	sq "github.com/Masterminds/squirrel"
@@ -14,6 +15,8 @@ import (
 	account_view "github.com/crypto-com/chain-indexing/projection/account/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	"github.com/crypto-com/chain-indexing/usecase/model"
+	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 	"github.com/stretchr/testify/assert"
 	testify_mock "github.com/stretchr/testify/mock"
 )
@@ -22,6 +25,7 @@ func NewAccountProjection(rdbConn rdb.Conn, client cosmosapp.Client) *account.Ac
 	return account.NewAccount(
 		nil,
 		rdbConn,
+		"prefix",
 		client,
 		nil,
 	)
@@ -61,69 +65,59 @@ func TestAccount_HandleEvents(t *testing.T) {
 		MockFunc func(mockClient *cosmosapp.MockClient) []*testify_mock.Mock
 	}{
 		{
-			Name: "HandleAccountTransferred",
+			Name: "HandleGenesisCreatedEvent",
 			Events: []entity_event.Event{
-				&event_usecase.AccountTransferred{
+				&event_usecase.GenesisCreated{
 					Base: entity_event.NewBase(entity_event.BaseParams{
-						Name:        event_usecase.ACCOUNT_TRANSFERRED,
+						Name:        event_usecase.GENESIS_CREATED,
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					Sender:    "Sender",
-					Recipient: "Recipient",
-					Amount:    coin.Coins{},
+					Genesis: genesis.Genesis{
+						GenesisTime:     "",
+						ChainID:         "",
+						InitialHeight:   "",
+						ConsensusParams: genesis.ConsensusParams{},
+						AppHash:         "",
+						AppState: genesis.AppState{
+							Auth: genesis.Auth{},
+							Bank: genesis.Bank{
+								Params: genesis.BankParams{},
+								Balances: []genesis.Balance{
+									{
+										Address: "Address",
+										Coins: []genesis.MinDeposit{
+											{
+												Denom:  "Denom",
+												Amount: strconv.Itoa(10),
+											},
+										},
+									},
+								},
+								Supply:        nil,
+								DenomMetadata: nil,
+							},
+							Capability:   genesis.Capability{},
+							Chainmain:    genesis.Chainmain{},
+							Distribution: genesis.Distribution{},
+							Evidence:     genesis.AppStateEvidence{},
+							Genutil:      genesis.Genutil{},
+							Gov:          genesis.Gov{},
+							Ibc:          genesis.Ibc{},
+							Mint:         genesis.Mint{},
+							Params:       nil,
+							Slashing:     genesis.Slashing{},
+							Staking:      genesis.Staking{},
+							Supply:       genesis.Supply{},
+							Transfer:     genesis.Transfer{},
+							Upgrade:      genesis.Upgrade{},
+							Vesting:      genesis.Vesting{},
+						},
+						Validators: nil,
+					},
 				},
 			},
 			MockFunc: func(mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
-				mockClient.On("Account", "Recipient").Return(
-					&cosmosapp.Account{
-						Type:    "AccountType",
-						Address: "Recipient",
-						MaybePubkey: &cosmosapp.PubKey{
-							Type: "PubKeyType",
-							Key:  "Key",
-						},
-						AccountNumber: "AccountNumber",
-						Sequence:      "Sequence",
-						MaybeModuleAccount: &cosmosapp.ModuleAccount{
-							Name:        "",
-							Permissions: []string{},
-						},
-						MaybeDelayedVestingAccount: &cosmosapp.DelayedVestingAccount{
-							OriginalVesting:  []cosmosapp.VestingBalance{},
-							DelegatedFree:    []cosmosapp.VestingBalance{},
-							DelegatedVesting: []cosmosapp.VestingBalance{},
-							EndTime:          "",
-						},
-						MaybeContinuousVestingAccount: &cosmosapp.ContinuousVestingAccount{
-							OriginalVesting:  []cosmosapp.VestingBalance{},
-							DelegatedFree:    []cosmosapp.VestingBalance{},
-							DelegatedVesting: []cosmosapp.VestingBalance{},
-							StartTime:        "",
-							EndTime:          "",
-						},
-						MaybePeriodicVestingAccount: &cosmosapp.PeriodicVestingAccount{
-							OriginalVesting:  []cosmosapp.VestingBalance{},
-							DelegatedFree:    []cosmosapp.VestingBalance{},
-							DelegatedVesting: []cosmosapp.VestingBalance{},
-							StartTime:        "",
-							EndTime:          "",
-							VestingPeriods:   []cosmosapp.VestingPeriod{},
-						},
-					},
-					nil,
-				)
-
-				mockClient.On("Balances", "Recipient").Return(
-					coin.Coins{
-						coin.Coin{
-							Denom:  "Denom",
-							Amount: coin.NewInt(100),
-						},
-					},
-					nil,
-				)
-
 				mockAccountsView := account_view.NewMockAccountsView(nil).(*account_view.MockAccountsView)
 				mocks = append(mocks, &mockAccountsView.Mock)
 
@@ -131,90 +125,310 @@ func TestAccount_HandleEvents(t *testing.T) {
 					return mockAccountsView
 				}
 
-				pubkey := "Key"
+				mockAccountsView.On(
+					"IncrementUsableBalance",
+					"Address",
+					"Denom",
+					int64(10),
+				).Return(nil)
+
+				account.UpdateLastHandledEventHeight = func(_ *account.Account, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleCoinSpentEvent",
+			Events: []entity_event.Event{
+				&event_usecase.CoinSpent{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.COIN_SPENT,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					Address: "Address",
+					Amount: []coin.Coin{
+						{
+							Denom:  "Denom",
+							Amount: coin.NewInt(10),
+						},
+					},
+				},
+			},
+			MockFunc: func(mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
+				mockAccountsView := account_view.NewMockAccountsView(nil).(*account_view.MockAccountsView)
+				mocks = append(mocks, &mockAccountsView.Mock)
+
+				account.NewAccountsView = func(_ *rdb.Handle) account_view.Accounts {
+					return mockAccountsView
+				}
 
 				mockAccountsView.On(
-					"Upsert",
-					&account_view.AccountRow{
-						Address:        "Recipient",
-						Type:           "AccountType",
-						MaybeName:      (*string)(nil),
-						MaybePubkey:    &pubkey,
-						AccountNumber:  "AccountNumber",
-						SequenceNumber: "Sequence",
-						Balance: coin.Coins{
-							{
+					"DecrementUsableBalance",
+					"Address",
+					"Denom",
+					int64(10),
+				).Return(nil)
+
+				mockAccountsView.On(
+					"InsertAccountEvent",
+					account_view.AccountEvent{
+						Address: "Address",
+						Type:    "CoinSpent",
+						Data: coin.Coins{
+							coin.Coin{
 								Denom:  "Denom",
-								Amount: coin.NewInt(100),
+								Amount: coin.NewInt(10),
 							},
 						},
+						BlockHeight: 1,
 					},
 				).Return(nil)
 
-				mockClient.On("Account", "Sender").Return(
-					&cosmosapp.Account{
-						Type:    "AccountType",
-						Address: "Sender",
-						MaybePubkey: &cosmosapp.PubKey{
-							Type: "PubKeyType",
-							Key:  pubkey,
-						},
-						AccountNumber: "AccountNumber",
-						Sequence:      "Sequence",
-						MaybeModuleAccount: &cosmosapp.ModuleAccount{
-							Name:        "",
-							Permissions: []string{},
-						},
-						MaybeDelayedVestingAccount: &cosmosapp.DelayedVestingAccount{
-							OriginalVesting:  []cosmosapp.VestingBalance{},
-							DelegatedFree:    []cosmosapp.VestingBalance{},
-							DelegatedVesting: []cosmosapp.VestingBalance{},
-							EndTime:          "",
-						},
-						MaybeContinuousVestingAccount: &cosmosapp.ContinuousVestingAccount{
-							OriginalVesting:  []cosmosapp.VestingBalance{},
-							DelegatedFree:    []cosmosapp.VestingBalance{},
-							DelegatedVesting: []cosmosapp.VestingBalance{},
-							StartTime:        "",
-							EndTime:          "",
-						},
-						MaybePeriodicVestingAccount: &cosmosapp.PeriodicVestingAccount{
-							OriginalVesting:  []cosmosapp.VestingBalance{},
-							DelegatedFree:    []cosmosapp.VestingBalance{},
-							DelegatedVesting: []cosmosapp.VestingBalance{},
-							StartTime:        "",
-							EndTime:          "",
-							VestingPeriods:   []cosmosapp.VestingPeriod{},
-						},
-					},
-					nil,
-				)
+				account.UpdateLastHandledEventHeight = func(_ *account.Account, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
 
-				mockClient.On("Balances", "Sender").Return(
-					coin.Coins{
-						coin.Coin{
+				return mocks
+			},
+		},
+		{
+			Name: "HandleCoinReceivedEvent",
+			Events: []entity_event.Event{
+				&event_usecase.CoinReceived{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.COIN_RECEIVED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					Address: "Address",
+					Amount: []coin.Coin{
+						{
 							Denom:  "Denom",
-							Amount: coin.NewInt(1000),
+							Amount: coin.NewInt(10),
 						},
 					},
-					nil,
-				)
+				},
+			},
+			MockFunc: func(mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
+				mockAccountsView := account_view.NewMockAccountsView(nil).(*account_view.MockAccountsView)
+				mocks = append(mocks, &mockAccountsView.Mock)
+
+				account.NewAccountsView = func(_ *rdb.Handle) account_view.Accounts {
+					return mockAccountsView
+				}
 
 				mockAccountsView.On(
-					"Upsert",
-					&account_view.AccountRow{
-						Address:        "Sender",
-						Type:           "AccountType",
-						MaybeName:      (*string)(nil),
-						MaybePubkey:    &pubkey,
-						AccountNumber:  "AccountNumber",
-						SequenceNumber: "Sequence",
-						Balance: coin.Coins{
-							{
+					"IncrementUsableBalance",
+					"Address",
+					"Denom",
+					int64(10),
+				).Return(nil)
+
+				mockAccountsView.On(
+					"InsertAccountEvent",
+					account_view.AccountEvent{
+						Address: "Address",
+						Type:    "CoinReceived",
+						Data: coin.Coins{
+							coin.Coin{
 								Denom:  "Denom",
-								Amount: coin.NewInt(1000),
+								Amount: coin.NewInt(10),
 							},
 						},
+						BlockHeight: 1,
+					},
+				).Return(nil)
+
+				account.UpdateLastHandledEventHeight = func(_ *account.Account, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleCoinMintEvent",
+			Events: []entity_event.Event{
+				&event_usecase.CoinMint{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.COIN_MINT,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					Address: "Address",
+					Amount: []coin.Coin{
+						{
+							Denom:  "Denom",
+							Amount: coin.NewInt(10),
+						},
+					},
+				},
+			},
+			MockFunc: func(mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
+				mockAccountsView := account_view.NewMockAccountsView(nil).(*account_view.MockAccountsView)
+				mocks = append(mocks, &mockAccountsView.Mock)
+
+				account.NewAccountsView = func(_ *rdb.Handle) account_view.Accounts {
+					return mockAccountsView
+				}
+
+				mockAccountsView.On(
+					"IncrementUsableBalance",
+					"Address",
+					"Denom",
+					int64(10),
+				).Return(nil)
+
+				mockAccountsView.On(
+					"InsertAccountEvent",
+					account_view.AccountEvent{
+						Address: "Address",
+						Type:    "CoinMint",
+						Data: coin.Coins{
+							coin.Coin{
+								Denom:  "Denom",
+								Amount: coin.NewInt(10),
+							},
+						},
+						BlockHeight: 1,
+					},
+				).Return(nil)
+
+				account.UpdateLastHandledEventHeight = func(_ *account.Account, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleCoinBurnEvent",
+			Events: []entity_event.Event{
+				&event_usecase.CoinBurn{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.COIN_BURN,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					Address: "Address",
+					Amount: []coin.Coin{
+						{
+							Denom:  "Denom",
+							Amount: coin.NewInt(10),
+						},
+					},
+				},
+			},
+			MockFunc: func(mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
+				mockAccountsView := account_view.NewMockAccountsView(nil).(*account_view.MockAccountsView)
+				mocks = append(mocks, &mockAccountsView.Mock)
+
+				account.NewAccountsView = func(_ *rdb.Handle) account_view.Accounts {
+					return mockAccountsView
+				}
+
+				mockAccountsView.On(
+					"DecrementUsableBalance",
+					"Address",
+					"Denom",
+					int64(10),
+				).Return(nil)
+
+				mockAccountsView.On(
+					"InsertAccountEvent",
+					account_view.AccountEvent{
+						Address: "Address",
+						Type:    "CoinBurn",
+						Data: coin.Coins{
+							coin.Coin{
+								Denom:  "Denom",
+								Amount: coin.NewInt(10),
+							},
+						},
+						BlockHeight: 1,
+					},
+				).Return(nil)
+
+				account.UpdateLastHandledEventHeight = func(_ *account.Account, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleTransactionFailedEvent",
+			Events: []entity_event.Event{
+				&event_usecase.TransactionFailed{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.TRANSACTION_FAILED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					TxHash:   "",
+					Index:    0,
+					Code:     0,
+					Log:      "",
+					MsgCount: 0,
+					Signers: []model.TransactionSigner{
+						{
+							TransactionSignerInfo: model.TransactionSignerInfo{
+								Type:            "",
+								IsMultiSig:      false,
+								Pubkeys:         []string{
+									"A5N3/S/r5nQjjvJpdXR5eY1QiebM9ULBsWVbCw/a6dA4",
+								},
+								MaybeThreshold:  nil,
+								AccountSequence: 0,
+							},
+							Address: "prefix18mcwp6vtlvpgxy62eledk3chhjguw636muuqul",
+						},
+					},
+					Senders: nil,
+					Fee: []coin.Coin{
+						{
+							Denom:  "Denom",
+							Amount: coin.NewInt(10),
+						},
+					},
+					FeePayer:      "",
+					FeeGranter:    "",
+					GasWanted:     0,
+					GasUsed:       0,
+					Memo:          "",
+					TimeoutHeight: 0,
+				},
+			},
+			MockFunc: func(mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
+				mockAccountsView := account_view.NewMockAccountsView(nil).(*account_view.MockAccountsView)
+				mocks = append(mocks, &mockAccountsView.Mock)
+
+				account.NewAccountsView = func(_ *rdb.Handle) account_view.Accounts {
+					return mockAccountsView
+				}
+
+				mockAccountsView.On(
+					"DecrementUsableBalance",
+					"prefix18mcwp6vtlvpgxy62eledk3chhjguw636muuqul",
+					"Denom",
+					int64(10),
+				).Return(nil)
+
+				mockAccountsView.On(
+					"InsertAccountEvent",
+					account_view.AccountEvent{
+						Address: "prefix18mcwp6vtlvpgxy62eledk3chhjguw636muuqul",
+						Type:    "TransactionFailed",
+						Data: coin.Coins{
+							coin.Coin{
+								Denom:  "Denom",
+								Amount: coin.NewInt(10),
+							},
+						},
+						BlockHeight: 1,
 					},
 				).Return(nil)
 

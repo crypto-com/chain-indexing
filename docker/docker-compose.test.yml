@@ -6,10 +6,29 @@ services:
     build: ./postgres
     restart: always
     ports:
-      - "${TEST_POSTGRES_PORT:-5433}:5432"
+      - "${TEST_POSTGRES_PORT:-5432}:5432"
     environment:
       POSTGRES_USERNAME: "${TEST_POSTGRES_USERNAME:-postgres}"
       POSTGRES_PASSWORD: "${TEST_POSTGRES_PASSWORD:-postgres}"
       POSTGRES_DB: "${TEST_POSTGRES_DATABASE:-postgres}"
       # Enable SSL with self-signed certificate generated on the fly
       POSTGRES_SSL: "${TEST_POSTGRES_SSL:-1}"
+  ginkgo:
+    build: ./ginkgo
+    depends_on:
+      - postgres
+    links:
+      - postgres
+    volumes:
+      - ..:/app
+    working_dir: /app
+    command: >
+      bash -c "ginkgo -r && go test ./usecase/coin/..."
+    environment:
+      TEST_DB: "${TEST_DB:-1}"
+      TEST_POSTGRES_HOST: "${TEST_POSTGRES_HOST:-postgres}"
+      TEST_POSTGRES_PORT: "${TEST_POSTGRES_PORT:-5432}"
+      TEST_POSTGRES_USERNAME: "${TEST_POSTGRES_USERNAME:-postgres}"
+      TEST_POSTGRES_PASSWORD: "${TEST_POSTGRES_PASSWORD:-postgres}"
+      TEST_POSTGRES_DATABASE: "${TEST_POSTGRES_DATABASE:-postgres}"
+      TEST_POSTGRES_SCHEMA: "${TEST_POSTGRES_SCHEMA:-public}"

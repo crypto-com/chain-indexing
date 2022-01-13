@@ -3,6 +3,7 @@ package tendermint
 type RawBlockResults struct {
 	Height                string                               `json:"height"`
 	TxsResults            []RawBlockResultsTxsResult           `json:"txs_results"`
+	BlockEvents           []RawBlockResultsEvent               `json:"events"`
 	BeginBlockEvents      []RawBlockResultsEvent               `json:"begin_block_events"`
 	EndBlockEvents        []RawBlockResultsEvent               `json:"end_block_events"`
 	ValidatorUpdates      []RawBlockResultsValidatorUpdate     `json:"validator_updates"`

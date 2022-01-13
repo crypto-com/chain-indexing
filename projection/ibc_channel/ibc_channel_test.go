@@ -30,6 +30,7 @@ func NewIBCChannelProjection(rdbConn rdb.Conn) *ibc_channel.IBCChannel {
 		&ibc_channel.Config{
 			EnableTxMsgTrace: false,
 		},
+		nil,
 	)
 }
 
