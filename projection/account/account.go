@@ -70,7 +70,6 @@ var (
 func (_ *Account) GetEventsToListen() []string {
 	return []string{
 		event_usecase.GENESIS_CREATED,
-		//event_usecase.ACCOUNT_TRANSFERRED,
 		event_usecase.COIN_SPENT,
 		event_usecase.COIN_RECEIVED,
 		event_usecase.COIN_MINT,
