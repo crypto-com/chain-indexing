@@ -19,6 +19,7 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(MINTED, 1, DecodeMinted)
 
 	registry.Register(POWER_CHANGED, 1, DecodePowerChanged)
+	registry.Register(EVIDENCE_SUBMITTED, 1, DecodeEvidenceSubmitted)
 	registry.Register(VALIDATOR_SLASHED, 1, DecodeValidatorSlashed)
 	registry.Register(VALIDATOR_JAILED, 1, DecodeValidatorJailed)
 

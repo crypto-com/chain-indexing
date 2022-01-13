@@ -1,0 +1,449 @@
+package validator_delegation
+
+import (
+	"fmt"
+	"strconv"
+	"time"
+
+	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
+	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	event_entity "github.com/crypto-com/chain-indexing/entity/event"
+	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
+	"github.com/crypto-com/chain-indexing/projection/validator_delegation/types"
+	"github.com/crypto-com/chain-indexing/projection/validator_delegation/view"
+	"github.com/crypto-com/chain-indexing/usecase/coin"
+	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+)
+
+var _ projection_entity.Projection = &ValidatorDelegation{}
+
+var (
+	NewValidators                = view.NewValidatorsView
+	NewUnbondingValidators       = view.NewUnbondingValidatorsView
+	NewDelegations               = view.NewDelegationsView
+	NewUnbondingDelegations      = view.NewUnbondingDelegationsView
+	NewUnbondingDelegationQueue  = view.NewUnbondingDelegationQueueView
+	NewRedelegations             = view.NewRedelegationsView
+	NewRedelegationQueue         = view.NewRedelegationQueueView
+	NewEvidences                 = view.NewEvidencesView
+	UpdateLastHandledEventHeight = (*ValidatorDelegation).UpdateLastHandledEventHeight
+)
+
+type ValidatorDelegation struct {
+	*rdbprojectionbase.Base
+
+	rdbConn rdb.Conn
+	logger  applogger.Logger
+
+	config Config
+
+	migrationHelper migrationhelper.MigrationHelper
+}
+
+type Config struct {
+	accountAddressPrefix    string
+	validatorAddressPrefix  string
+	conNodeAddressPrefix    string
+	unbondingTime           time.Duration // set in genesis `unbonding_time`
+	slashFractionDoubleSign coin.Dec      // set in genesis `slash_fraction_double_sign`
+	slashFractionDowntime   coin.Dec      // set in genesis `slash_fraction_downtime`
+	// PowerReduction - is the amount of staking tokens required for 1 unit of consensus-engine power.
+	// Currently, this returns a global variable that the app developer can tweak.
+	// https://github.com/cosmos/cosmos-sdk/blob/0cb7fd081e05317ed7a2f13b0e142349a163fe4d/x/staking/keeper/params.go#L46
+	defaultPowerReduction coin.Int
+}
+
+func NewValidatorDelegation(
+	logger applogger.Logger,
+	rdbConn rdb.Conn,
+	config Config,
+	migrationHelper migrationhelper.MigrationHelper,
+) *ValidatorDelegation {
+	return &ValidatorDelegation{
+		rdbprojectionbase.NewRDbBase(
+			rdbConn.ToHandle(),
+			"ValidatorDelegation",
+		),
+
+		rdbConn,
+		logger,
+
+		config,
+
+		migrationHelper,
+	}
+}
+
+func (_ *ValidatorDelegation) GetEventsToListen() []string {
+	return []string{
+		event_usecase.GENESIS_CREATED,
+		event_usecase.BLOCK_CREATED,
+
+		// Genesis
+		event_usecase.GENESIS_VALIDATOR_CREATED, // parsed from genesis.
+
+		// BeginBlock
+		event_usecase.EVIDENCE_SUBMITTED,
+		event_usecase.VALIDATOR_SLASHED, // parsed from BlockResult.BeginBlockEvents, emitted in BeginBlock.
+		event_usecase.VALIDATOR_JAILED,  // generated along with `slash` event, introduced by ourselves.
+
+		// Tx
+		event_usecase.MSG_CREATE_VALIDATOR_CREATED,
+		event_usecase.MSG_EDIT_VALIDATOR_CREATED,
+		event_usecase.MSG_DELEGATE_CREATED,
+		event_usecase.MSG_BEGIN_REDELEGATE_CREATED,
+		event_usecase.MSG_UNDELEGATE_CREATED,
+		event_usecase.MSG_UNJAIL_CREATED,
+
+		// EndBlock
+		event_usecase.POWER_CHANGED, // parsed from BlockResult.ValidatorUpdates, emitted in EndBlock.
+	}
+}
+
+func (projection *ValidatorDelegation) OnInit() error {
+	if projection.migrationHelper != nil {
+		projection.migrationHelper.Migrate()
+	}
+
+	return nil
+}
+
+func (projection *ValidatorDelegation) HandleEvents(height int64, events []event_entity.Event) error {
+	rdbTx, err := projection.rdbConn.Begin()
+	if err != nil {
+		return fmt.Errorf("error beginning transaction: %v", err)
+	}
+
+	committed := false
+	defer func() {
+		if !committed {
+			_ = rdbTx.Rollback()
+		}
+	}()
+
+	rdbTxHandle := rdbTx.ToHandle()
+
+	// Get block time
+	var blockTime utctime.UTCTime
+	for _, event := range events {
+		if genesisEvent, ok := event.(*event_usecase.GenesisCreated); ok {
+			blockTime = utctime.MustParse(time.RFC3339, genesisEvent.Genesis.GenesisTime)
+		} else if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
+			blockTime = blockCreatedEvent.Block.Time
+		}
+	}
+
+	// Genesis block height is 0.
+	//
+	// If this is NOT a Genesis block, then always clone the following rows in previous height:
+	// - ValidatorRow
+	// - DelegationRow
+	// - UnbondingDelegationRow
+	// - RedelegationRow
+	//
+	// This is to keep track historical states in all height.
+	if height > 0 {
+		validatorsView := NewValidators(rdbTxHandle)
+		if err := validatorsView.Clone(height-1, height); err != nil {
+			return fmt.Errorf("error in cloning validator records in previous height: %v", err)
+		}
+
+		delegationsView := NewDelegations(rdbTxHandle)
+		if err := delegationsView.Clone(height-1, height); err != nil {
+			return fmt.Errorf("error in cloning delegation records in previous height: %v", err)
+		}
+
+		unbondingDelegationsView := NewUnbondingDelegations(rdbTxHandle)
+		if err := unbondingDelegationsView.Clone(height-1, height); err != nil {
+			return fmt.Errorf("error in cloning unbonding delegation records in previous height: %v", err)
+		}
+
+		redelegationsView := NewRedelegations(rdbTxHandle)
+		if err := redelegationsView.Clone(height-1, height); err != nil {
+			return fmt.Errorf("error in cloning redelegation records in previous height: %v", err)
+		}
+	}
+
+	// Handle events in Genesis block
+	for _, event := range events {
+		if typedEvent, ok := event.(*event_usecase.CreateGenesisValidator); ok {
+
+			if err := projection.handleCreateNewValidator(
+				rdbTxHandle,
+				height,
+				typedEvent.ValidatorAddress,
+				typedEvent.DelegatorAddress,
+				typedEvent.TendermintPubkey,
+				typedEvent.Amount.Amount,
+				typedEvent.MinSelfDelegation,
+			); err != nil {
+				return fmt.Errorf("error handleCreateNewValidator when CreateGenesisValidator: %v", err)
+			}
+
+		}
+	}
+
+	// Handle evidence.
+	//
+	// NOTES: Although Evidences are handled by CosmosSDK in BeginBlock,
+	//        here, we use a separate loop to handle Evidences.
+	//        As later, `slash` event will need the information from Evidences.
+	//        Therefore Evidence must be written to DB before we handle `slash` event in BeginBlock.
+	for _, event := range events {
+		if typedEvent, ok := event.(*event_usecase.EvidenceSubmitted); ok {
+
+			if err := projection.handleEvidence(
+				rdbTxHandle,
+				height,
+				typedEvent.TendermintAddress,
+				typedEvent.InfractionHeight,
+				typedEvent.RawEvidence,
+			); err != nil {
+				return fmt.Errorf("error handling EvidenceSubmitted event: %v", err)
+			}
+
+		}
+	}
+
+	// Handle events in BeginBlock.
+	for _, event := range events {
+		if typedEvent, ok := event.(*event_usecase.ValidatorJailed); ok {
+
+			if err := projection.handleValidatorJailed(
+				rdbTxHandle,
+				height,
+				typedEvent.ConsensusNodeAddress,
+			); err != nil {
+				return fmt.Errorf("error handling ValidatorJailed event: %v", err)
+			}
+
+		} else if typedEvent, ok := event.(*event_usecase.ValidatorSlashed); ok {
+
+			// Important NOTES:
+			//
+			// There are two cases when a slash will happen:
+			// - Missing Validator Signature
+			// - Double Signing
+			//
+			// One important information for slashing is `distributionHeight`.
+			// This field is used to retrieve the affected UnbondingDelegations and Redelegations.
+			// Unluckily, it is not in a `slash` event.
+			//
+			// In the case of `Missing Validator Signature`, we can always calculate it by ourselves:
+			// - `distributionHeight = currentBlockHeight - 2`.
+			// https://github.com/cosmos/cosmos-sdk/blob/b5477dfee9e0785fe651fc603ca53f72a34d9bfd/x/slashing/keeper/infractions.go#L85
+			//
+			// In the case of `Double Signing`, we can retrieve the `infractionHeight` through Evidence.
+			// - `distributionHeight = evidence.InfractionHeight - 1`
+			// https://github.com/cosmos/cosmos-sdk/blob/b5477dfee9e0785fe651fc603ca53f72a34d9bfd/x/evidence/keeper/infraction.go#L101
+
+			if typedEvent.Reason == string(types.MISSING_SIGNATURE) {
+
+				distributionHeight := height - 2
+
+				power, err := strconv.ParseInt(typedEvent.SlashedPower, 10, 64)
+				if err != nil {
+					return fmt.Errorf("error in parsing event.SlashedPower to int64: %v", err)
+				}
+
+				if err := projection.handleSlash(
+					rdbTxHandle,
+					height,
+					blockTime,
+					typedEvent.ConsensusNodeAddress,
+					distributionHeight,
+					power,
+					projection.config.slashFractionDowntime,
+				); err != nil {
+					return fmt.Errorf("error in handling slash event with missing_signature: %v", err)
+				}
+
+			} else if typedEvent.Reason == string(types.DOUBLE_SIGN) {
+
+				evidencesView := NewEvidences(rdbTxHandle)
+				validatorsView := NewValidators(rdbTxHandle)
+
+				// Get the validator, to retrieve the TendermintAddress
+				validator, found, err := validatorsView.FindByConsensusNodeAddr(typedEvent.ConsensusNodeAddress, height)
+				if err != nil {
+					return fmt.Errorf("error finding validator by consensusNodeAddr: %v", err)
+				}
+				if !found {
+					return fmt.Errorf("error validator not found, conNodeAddr: %v", typedEvent.ConsensusNodeAddress)
+				}
+
+				// Get evidence related to this slash, to retrieve the infractionHeight
+				evidence, err := evidencesView.FindBy(height, validator.TendermintAddress)
+				if err != nil {
+					return fmt.Errorf("error in finding the evidence: %v", err)
+				}
+
+				distributionHeight := evidence.InfractionHeight - 1
+
+				power, err := strconv.ParseInt(typedEvent.SlashedPower, 10, 64)
+				if err != nil {
+					return fmt.Errorf("error in parsing event.SlashedPower to int64: %v", err)
+				}
+
+				if err := projection.handleSlash(
+					rdbTxHandle,
+					height,
+					blockTime,
+					typedEvent.ConsensusNodeAddress,
+					distributionHeight,
+					power,
+					projection.config.slashFractionDoubleSign,
+				); err != nil {
+					return fmt.Errorf("error in handling slash event with double_sign: %v", err)
+				}
+
+			}
+
+		}
+	}
+
+	// Handle events and msgs in Tx
+	for _, event := range events {
+		if typedEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
+
+			if err := projection.handleCreateNewValidator(
+				rdbTxHandle,
+				height,
+				typedEvent.ValidatorAddress,
+				typedEvent.DelegatorAddress,
+				typedEvent.TendermintPubkey,
+				typedEvent.Amount.Amount,
+				typedEvent.MinSelfDelegation,
+			); err != nil {
+				return fmt.Errorf("error handleCreateNewValidator when MsgCreateValidator: %v", err)
+			}
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgEditValidator); ok {
+
+			if typedEvent.MaybeMinSelfDelegation != nil {
+
+				if err := projection.handleEditValidator(
+					rdbTxHandle,
+					height,
+					typedEvent.ValidatorAddress,
+					*typedEvent.MaybeMinSelfDelegation,
+				); err != nil {
+					return fmt.Errorf("error handling MsgEditValidator: %v", err)
+				}
+
+			}
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgDelegate); ok {
+
+			if _, err := projection.handleDelegate(
+				rdbTxHandle,
+				height,
+				typedEvent.ValidatorAddress,
+				typedEvent.DelegatorAddress,
+				typedEvent.Amount.Amount,
+			); err != nil {
+				return fmt.Errorf("error handling MsgDelegate: %v", err)
+			}
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgUndelegate); ok {
+
+			// Successful tx with MsgUndelegate always has unbonding completion time in the Msg.
+			if typedEvent.MaybeUnbondCompleteAt != nil {
+
+				if err := projection.handleUndelegate(
+					rdbTxHandle,
+					height,
+					typedEvent.ValidatorAddress,
+					typedEvent.DelegatorAddress,
+					typedEvent.Amount.Amount,
+					*typedEvent.MaybeUnbondCompleteAt,
+				); err != nil {
+					return fmt.Errorf("error handling MsgUndelegate: %v", err)
+				}
+
+			}
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgBeginRedelegate); ok {
+
+			if err := projection.handleRedelegate(
+				rdbTxHandle,
+				height,
+				blockTime,
+				typedEvent.DelegatorAddress,
+				typedEvent.ValidatorSrcAddress,
+				typedEvent.ValidatorDstAddress,
+				typedEvent.Amount.Amount,
+			); err != nil {
+				return fmt.Errorf("error handling MsgBeginRedelegate: %v", err)
+			}
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgUnjail); ok {
+
+			if err := projection.handleValidatorUnjailed(
+				rdbTxHandle,
+				height,
+				typedEvent.ValidatorAddr,
+			); err != nil {
+				return fmt.Errorf("error handling MsgUnjail: %v", err)
+			}
+
+		}
+	}
+
+	// Handle events in EndBlock.
+	//
+	// Handle ValidatorUpdate events. These events are emitted in each EndBlock.
+	for _, event := range events {
+		if typedEvent, ok := event.(*event_usecase.PowerChanged); ok {
+
+			if err := projection.handlePowerChanged(
+				rdbTxHandle,
+				height,
+				blockTime,
+				typedEvent.TendermintPubkey,
+				typedEvent.Power,
+			); err != nil {
+				return fmt.Errorf("error handling PowerChanged event: %v", err)
+			}
+
+		}
+	}
+
+	if err := projection.handleMatureUnbondingValidators(
+		rdbTxHandle,
+		height,
+		blockTime,
+	); err != nil {
+		return fmt.Errorf("error handling mature unbonding validators: %v", err)
+	}
+
+	if err := projection.handleMatureUnbondingDelegationQueueEntries(
+		rdbTxHandle,
+		height,
+		blockTime,
+	); err != nil {
+		return fmt.Errorf("error handling mature unbonding delegation queue entries: %v", err)
+	}
+
+	if err := projection.handleMatureRedelegationQueueEntries(
+		rdbTxHandle,
+		height,
+		blockTime,
+	); err != nil {
+		return fmt.Errorf("error handling mature redelegation queue entries(): %v", err)
+	}
+
+	if err := UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
+		return fmt.Errorf("error updating last handled event height: %v", err)
+	}
+
+	if err := rdbTx.Commit(); err != nil {
+		return fmt.Errorf("error committing changes: %v", err)
+	}
+	committed = true
+
+	return nil
+}
