@@ -54,10 +54,10 @@ func (view *MockBridgeActivitiesView) List(
 
 func (view *MockBridgeActivitiesView) Insert(activity *BridgeActivityInsertRow) error {
 	mockArgs := view.Called(activity)
-	return mockArgs.Error(1)
+	return mockArgs.Error(0)
 }
 
 func (view *MockBridgeActivitiesView) Update(activity *BridgeActivityReadRow) error {
 	mockArgs := view.Called(activity)
-	return mockArgs.Error(1)
+	return mockArgs.Error(0)
 }

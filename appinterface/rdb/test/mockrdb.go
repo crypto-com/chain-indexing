@@ -20,6 +20,10 @@ func (conn *MockRDbConn) Begin() (rdb.Tx, error) {
 	args := conn.Called()
 	return args.Get(0).(*MockRDbTx), args.Error(1)
 }
+func (conn *MockRDbConn) BeginTx() (rdb.Tx, error) {
+	args := conn.Called()
+	return args.Get(0).(*MockRDbTx), args.Error(1)
+}
 func (conn *MockRDbConn) Exec(sql string, args ...interface{}) (rdb.ExecResult, error) {
 	mockArgs := conn.Called(append([]interface{}{sql}, args...)...)
 	result, _ := mockArgs.Get(0).(*MockRDbExecResult)

@@ -42,7 +42,7 @@ type BridgeActivitiesView struct {
 	rdb *rdb.Handle
 }
 
-func NewBridgeActivitiesView(handle *rdb.Handle) *BridgeActivitiesView {
+func NewBridgeActivitiesView(handle *rdb.Handle) BridgeActivities {
 	return &BridgeActivitiesView{
 		handle,
 	}
