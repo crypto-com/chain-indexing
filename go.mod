@@ -168,3 +168,5 @@ require (
 replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.2-alpha.regen.4
 
 replace github.com/rs/zerolog => github.com/rs/zerolog v1.23.0
+
+replace github.com/enigmampc/btcutil => github.com/scrtlabs/btcutil v1.0.3-0.20200723161021-e2fb6adb2a25
