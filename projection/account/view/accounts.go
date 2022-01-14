@@ -48,7 +48,7 @@ func (accountsView *AccountsView) InsertAccountEvent(accountEvent AccountEvent) 
 
 	sql, sqlArgs, err := accountsView.rdb.StmtBuilder.
 		Insert(
-			"account_events",
+			"view_account_events",
 		).
 		Columns(
 			"address",
@@ -80,6 +80,15 @@ func (accountsView *AccountsView) InsertAccountEvent(accountEvent AccountEvent) 
 }
 
 func (accountsView *AccountsView) IncrementUsableBalance(address string, denom string, increment int64) error {
+	initUsableBalance := make(map[string]int64)
+	initUsableBalance[denom] = increment
+
+	var initUsableBalanceJSON string
+	var err error
+	if initUsableBalanceJSON, err = jsoniter.MarshalToString(initUsableBalance); err != nil {
+		return fmt.Errorf("error JSON marshalling block event data for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
 	sql, sqlArgs, err := accountsView.rdb.StmtBuilder.
 		Insert(
 			"view_accounts",
@@ -90,31 +99,9 @@ func (accountsView *AccountsView) IncrementUsableBalance(address string, denom s
 		).
 		Values(
 			address,
-			"{}",
+			initUsableBalanceJSON,
 		).
-		Suffix("ON CONFLICT(address) DO NOTHING").
-		ToSql()
-
-	if err != nil {
-		return fmt.Errorf("error building accounts update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
-
-	_, err = accountsView.rdb.Exec(sql, sqlArgs...)
-	if err != nil {
-		return fmt.Errorf("error updating account into the table: %v: %w", err, rdb.ErrWrite)
-	}
-
-	sql, sqlArgs, err = accountsView.rdb.StmtBuilder.
-		Update(
-			"view_accounts",
-		).
-		Set(
-			"usable_balance",
-			fmt.Sprintf("jsonb_set(usable_balance, '{%s}', (COALESCE(usable_balance->>'%s','0')::bigint + %d)::text::jsonb)", denom, denom, increment),
-		).
-		Where(
-			"address = ?", address,
-		).
+		Suffix(fmt.Sprintf("ON CONFLICT(address) DO UPDATE SET usable_balance = jsonb_set(view_accounts.usable_balance, '{%s}', (COALESCE(view_accounts.usable_balance->>'%s','0')::bigint + %d)::text::jsonb)", denom, denom, increment)).
 		ToSql()
 
 	if err != nil {
@@ -133,6 +120,15 @@ func (accountsView *AccountsView) IncrementUsableBalance(address string, denom s
 }
 
 func (accountsView *AccountsView) DecrementUsableBalance(address string, denom string, decrement int64) error {
+	initUsableBalance := make(map[string]int64)
+	initUsableBalance[denom] = -decrement
+
+	var initUsableBalanceJSON string
+	var err error
+	if initUsableBalanceJSON, err = jsoniter.MarshalToString(initUsableBalance); err != nil {
+		return fmt.Errorf("error JSON marshalling block event data for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
 	sql, sqlArgs, err := accountsView.rdb.StmtBuilder.
 		Insert(
 			"view_accounts",
@@ -143,40 +139,18 @@ func (accountsView *AccountsView) DecrementUsableBalance(address string, denom s
 		).
 		Values(
 			address,
-			"{}",
+			initUsableBalanceJSON,
 		).
-		Suffix("ON CONFLICT(address) DO NOTHING").
+		Suffix(fmt.Sprintf("ON CONFLICT(address) DO UPDATE SET usable_balance = jsonb_set(view_accounts.usable_balance, '{%s}', (COALESCE(view_accounts.usable_balance->>'%s','0')::bigint - %d)::text::jsonb)", denom, denom, decrement)).
 		ToSql()
 
 	if err != nil {
-		return fmt.Errorf("error building accounts update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
-
-	_, err = accountsView.rdb.Exec(sql, sqlArgs...)
-	if err != nil {
-		return fmt.Errorf("error updating account into the table: %v: %w", err, rdb.ErrWrite)
-	}
-
-	sql, sqlArgs, err = accountsView.rdb.StmtBuilder.
-		Update(
-			"view_accounts",
-		).
-		Set(
-			"usable_balance",
-			fmt.Sprintf("jsonb_set(usable_balance, '{%s}', (COALESCE(usable_balance->>'%s','0')::bigint - %d)::text::jsonb)", denom, denom, decrement),
-		).
-		Where(
-			"address = ?", address,
-		).
-		ToSql()
-
-	if err != nil {
-		return fmt.Errorf("error building accounts update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		return fmt.Errorf("error building accounts insert sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
 	result, err := accountsView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
-		return fmt.Errorf("error updating account into the table: %v: %w", err, rdb.ErrWrite)
+		return fmt.Errorf("error inserting account into the table: %v: %w", err, rdb.ErrWrite)
 	}
 	if result.RowsAffected() != 1 {
 		return fmt.Errorf("error updating account into the table: no rows updated: %w", rdb.ErrWrite)
