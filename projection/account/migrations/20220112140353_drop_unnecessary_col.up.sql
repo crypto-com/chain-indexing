@@ -1,5 +1,5 @@
 ALTER TABLE view_accounts
-    DROP `name`;
+    DROP name;
 
 ALTER TABLE view_accounts
     DROP pubkey;
