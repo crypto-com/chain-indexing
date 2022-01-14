@@ -111,10 +111,10 @@ func (projection *Account) HandleEvents(height int64, events []event_entity.Even
 			if handleErr := projection.decrementUsableBalance(accountsView, coinSpentEvent.Address, coinSpentEvent.Amount); handleErr != nil {
 				return fmt.Errorf("error handling CoinSpentEvent: %v", handleErr)
 			}
-			if handleErr := projection.addCoinEvent(
+			if handleErr := projection.addAccountEvent(
 				accountsView,
 				coinSpentEvent.Address,
-				coinSpentEvent.Amount,
+				coinSpentEvent,
 				coinSpentEvent.EventName,
 				coinSpentEvent.BlockHeight,
 			); handleErr != nil {
@@ -124,10 +124,10 @@ func (projection *Account) HandleEvents(height int64, events []event_entity.Even
 			if handleErr := projection.incrementUsableBalance(accountsView, coinReceivedEvent.Address, coinReceivedEvent.Amount); handleErr != nil {
 				return fmt.Errorf("error handling CoinReceivedEvent: %v", handleErr)
 			}
-			if handleErr := projection.addCoinEvent(
+			if handleErr := projection.addAccountEvent(
 				accountsView,
 				coinReceivedEvent.Address,
-				coinReceivedEvent.Amount,
+				coinReceivedEvent,
 				coinReceivedEvent.EventName,
 				coinReceivedEvent.BlockHeight,
 			); handleErr != nil {
@@ -137,10 +137,10 @@ func (projection *Account) HandleEvents(height int64, events []event_entity.Even
 			if handleErr := projection.incrementUsableBalance(accountsView, coinMintEvent.Address, coinMintEvent.Amount); handleErr != nil {
 				return fmt.Errorf("error handling coinMintEvent: %v", handleErr)
 			}
-			if handleErr := projection.addCoinEvent(
+			if handleErr := projection.addAccountEvent(
 				accountsView,
 				coinMintEvent.Address,
-				coinMintEvent.Amount,
+				coinMintEvent,
 				coinMintEvent.EventName,
 				coinMintEvent.BlockHeight,
 			); handleErr != nil {
@@ -150,10 +150,10 @@ func (projection *Account) HandleEvents(height int64, events []event_entity.Even
 			if handleErr := projection.decrementUsableBalance(accountsView, coinBurnEvent.Address, coinBurnEvent.Amount); handleErr != nil {
 				return fmt.Errorf("error handling coinBurnEvent: %v", handleErr)
 			}
-			if handleErr := projection.addCoinEvent(
+			if handleErr := projection.addAccountEvent(
 				accountsView,
 				coinBurnEvent.Address,
-				coinBurnEvent.Amount,
+				coinBurnEvent,
 				coinBurnEvent.EventName,
 				coinBurnEvent.BlockHeight,
 			); handleErr != nil {
@@ -183,10 +183,10 @@ func (projection *Account) HandleEvents(height int64, events []event_entity.Even
 					); handleErr != nil {
 						return fmt.Errorf("error handling TransactionFaileddEvent: %v", handleErr)
 					}
-					if handleErr := projection.addCoinEvent(
+					if handleErr := projection.addAccountEvent(
 						accountsView,
 						feePayer,
-						coin.Coins{transactionFailedEvent.Fee[i]},
+						transactionFailedEvent,
 						transactionFailedEvent.EventName,
 						transactionFailedEvent.BlockHeight,
 					); handleErr != nil {
@@ -212,15 +212,25 @@ func (projection *Account) HandleEvents(height int64, events []event_entity.Even
 func (projection *Account) handleGenesisCreatedEvent(accountsView account_view.Accounts, event *event_usecase.GenesisCreated) error {
 
 	for _, account := range event.Genesis.AppState.Bank.Balances {
-		for _, coin := range account.Coins {
-			amount, err := strconv.ParseInt(coin.Amount, 10, 0)
+		for _, accountBalance := range account.Coins {
+			amount, err := strconv.ParseInt(accountBalance.Amount, 10, 0)
 			if err != nil {
 				return err
 			}
 			if err := accountsView.IncrementUsableBalance(
-				account.Address, coin.Denom, amount,
+				account.Address, accountBalance.Denom, amount,
 			); err != nil {
 				return err
+			}
+
+			if handleErr := projection.addAccountEvent(
+				accountsView,
+				account.Address,
+				event,
+				event.EventName,
+				event.BlockHeight,
+			); handleErr != nil {
+				return fmt.Errorf("error handling CoinSpentEvent: %v", handleErr)
 			}
 		}
 	}
@@ -252,7 +262,7 @@ func (projection *Account) decrementUsableBalance(accountsView account_view.Acco
 	return nil
 }
 
-func (projection *Account) addCoinEvent(
+func (projection *Account) addAccountEvent(
 	accountsView account_view.Accounts,
 	address string,
 	data interface{},
