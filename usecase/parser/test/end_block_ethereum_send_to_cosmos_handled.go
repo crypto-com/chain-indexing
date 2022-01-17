@@ -367,66 +367,6 @@ const END_BLOCK_ETHEREUM_SEND_TO_COSMOS_HANDLED_BLOCK_RESULTS_RESP = `{
         ]
       },
       {
-        "type": "coin_received",
-        "attributes": [
-          {
-            "key": "cmVjZWl2ZXI=",
-            "value": "dGNyYzE2bjNsYzdjeXdhNjhtZzUwcWhwODQ3MDM0dzg4cG50cWxhc3U4dQ==",
-            "index": true
-          },
-          {
-            "key": "YW1vdW50",
-            "value": "MjUwZ3Jhdml0eTB4NTY0QTFjM0FGMDg5RDAyRDBCNkMzMTFDNjUwZUEzNzY4NDI0Y2JmYQ==",
-            "index": true
-          }
-        ]
-      },
-      {
-        "type": "coinbase",
-        "attributes": [
-          {
-            "key": "bWludGVy",
-            "value": "dGNyYzE2bjNsYzdjeXdhNjhtZzUwcWhwODQ3MDM0dzg4cG50cWxhc3U4dQ==",
-            "index": true
-          },
-          {
-            "key": "YW1vdW50",
-            "value": "MjUwZ3Jhdml0eTB4NTY0QTFjM0FGMDg5RDAyRDBCNkMzMTFDNjUwZUEzNzY4NDI0Y2JmYQ==",
-            "index": true
-          }
-        ]
-      },
-      {
-        "type": "coin_spent",
-        "attributes": [
-          {
-            "key": "c3BlbmRlcg==",
-            "value": "dGNyYzE2bjNsYzdjeXdhNjhtZzUwcWhwODQ3MDM0dzg4cG50cWxhc3U4dQ==",
-            "index": true
-          },
-          {
-            "key": "YW1vdW50",
-            "value": "MjUwZ3Jhdml0eTB4NTY0QTFjM0FGMDg5RDAyRDBCNkMzMTFDNjUwZUEzNzY4NDI0Y2JmYQ==",
-            "index": true
-          }
-        ]
-      },
-      {
-        "type": "coin_received",
-        "attributes": [
-          {
-            "key": "cmVjZWl2ZXI=",
-            "value": "dGNyYzEzeXV4Nno4bWg2dzV0M3Y0dXE3Y2xld25oMzV6bnJnZGd5ZTBrMg==",
-            "index": true
-          },
-          {
-            "key": "YW1vdW50",
-            "value": "MjUwZ3Jhdml0eTB4NTY0QTFjM0FGMDg5RDAyRDBCNkMzMTFDNjUwZUEzNzY4NDI0Y2JmYQ==",
-            "index": true
-          }
-        ]
-      },
-      {
         "type": "transfer",
         "attributes": [
           {
@@ -497,36 +437,6 @@ const END_BLOCK_ETHEREUM_SEND_TO_COSMOS_HANDLED_BLOCK_RESULTS_RESP = `{
           {
             "key": "ZXRoZXJldW1fZXZlbnRfdm90ZV9yZWNvcmRfaWQ=",
             "value": "BQAAAAAAAAAGwJnOR0/u1YSdaJ44Nv8loZAxLDtntz7EVYgQSYcx8qc=",
-            "index": true
-          }
-        ]
-      },
-      {
-        "type": "coin_spent",
-        "attributes": [
-          {
-            "key": "c3BlbmRlcg==",
-            "value": "dGNyYzEzeXV4Nno4bWg2dzV0M3Y0dXE3Y2xld25oMzV6bnJnZGd5ZTBrMg==",
-            "index": true
-          },
-          {
-            "key": "YW1vdW50",
-            "value": "MjUwZ3Jhdml0eTB4NTY0QTFjM0FGMDg5RDAyRDBCNkMzMTFDNjUwZUEzNzY4NDI0Y2JmYQ==",
-            "index": true
-          }
-        ]
-      },
-      {
-        "type": "coin_received",
-        "attributes": [
-          {
-            "key": "cmVjZWl2ZXI=",
-            "value": "dGNyYzE2d3c1eWh1MDJzZGM3NGE0MjZndTB3ODAwbGVxa2d3a2xqcHNwZg==",
-            "index": true
-          },
-          {
-            "key": "YW1vdW50",
-            "value": "MjUwZ3Jhdml0eTB4NTY0QTFjM0FGMDg5RDAyRDBCNkMzMTFDNjUwZUEzNzY4NDI0Y2JmYQ==",
             "index": true
           }
         ]
