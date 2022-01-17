@@ -71,7 +71,7 @@ func TestAccount_HandleEvents(t *testing.T) {
 					Base: entity_event.NewBase(entity_event.BaseParams{
 						Name:        event_usecase.GENESIS_CREATED,
 						Version:     1,
-						BlockHeight: 1,
+						BlockHeight: 0,
 					}),
 					Genesis: genesis.Genesis{
 						GenesisTime:     "",
@@ -132,6 +132,64 @@ func TestAccount_HandleEvents(t *testing.T) {
 					int64(10),
 				).Return(nil)
 
+				mockAccountsView.On(
+					"InsertAccountEvent",
+					account_view.AccountEvent{
+						Address: "Address",
+						Type:    "GenesisCreated",
+						Data: &event_usecase.GenesisCreated{
+							Base: entity_event.Base{
+								EventName:    "GenesisCreated",
+								EventVersion: 1,
+								BlockHeight:  0,
+								EventUUID:    "TESTUUID",
+							},
+							Genesis: genesis.Genesis{
+								GenesisTime:     "",
+								ChainID:         "",
+								InitialHeight:   "",
+								ConsensusParams: genesis.ConsensusParams{},
+								AppHash:         "",
+								AppState: genesis.AppState{
+									Auth: genesis.Auth{},
+									Bank: genesis.Bank{
+										Params: genesis.BankParams{},
+										Balances: []genesis.Balance{
+											{
+												Address: "Address",
+												Coins: []genesis.MinDeposit{
+													{
+														Denom:  "Denom",
+														Amount: strconv.Itoa(10),
+													},
+												},
+											},
+										},
+										Supply:        nil,
+										DenomMetadata: nil,
+									},
+									Capability:   genesis.Capability{},
+									Chainmain:    genesis.Chainmain{},
+									Distribution: genesis.Distribution{},
+									Evidence:     genesis.AppStateEvidence{},
+									Genutil:      genesis.Genutil{},
+									Gov:          genesis.Gov{},
+									Ibc:          genesis.Ibc{},
+									Mint:         genesis.Mint{},
+									Params:       nil,
+									Slashing:     genesis.Slashing{},
+									Staking:      genesis.Staking{},
+									Supply:       genesis.Supply{},
+									Transfer:     genesis.Transfer{},
+									Upgrade:      genesis.Upgrade{},
+									Vesting:      genesis.Vesting{},
+								},
+								Validators: nil,
+							},
+						},
+					},
+				).Return(nil)
+
 				account.UpdateLastHandledEventHeight = func(_ *account.Account, _ *rdb.Handle, _ int64) error {
 					return nil
 				}
@@ -177,10 +235,19 @@ func TestAccount_HandleEvents(t *testing.T) {
 					account_view.AccountEvent{
 						Address: "Address",
 						Type:    "CoinSpent",
-						Data: coin.Coins{
-							coin.Coin{
-								Denom:  "Denom",
-								Amount: coin.NewInt(10),
+						Data: &event_usecase.CoinSpent{
+							Base: entity_event.Base{
+								EventName:    "CoinSpent",
+								EventVersion: 1,
+								BlockHeight:  1,
+								EventUUID:    "TESTUUID",
+							},
+							Address: "Address",
+							Amount: []coin.Coin{
+								{
+									Denom:  "Denom",
+									Amount: coin.NewInt(10),
+								},
 							},
 						},
 						BlockHeight: 1,
@@ -232,10 +299,19 @@ func TestAccount_HandleEvents(t *testing.T) {
 					account_view.AccountEvent{
 						Address: "Address",
 						Type:    "CoinReceived",
-						Data: coin.Coins{
-							coin.Coin{
-								Denom:  "Denom",
-								Amount: coin.NewInt(10),
+						Data: &event_usecase.CoinReceived{
+							Base: entity_event.Base{
+								EventName:    "CoinReceived",
+								EventVersion: 1,
+								BlockHeight:  1,
+								EventUUID:    "TESTUUID",
+							},
+							Address: "Address",
+							Amount: []coin.Coin{
+								{
+									Denom:  "Denom",
+									Amount: coin.NewInt(10),
+								},
 							},
 						},
 						BlockHeight: 1,
@@ -287,10 +363,19 @@ func TestAccount_HandleEvents(t *testing.T) {
 					account_view.AccountEvent{
 						Address: "Address",
 						Type:    "CoinMint",
-						Data: coin.Coins{
-							coin.Coin{
-								Denom:  "Denom",
-								Amount: coin.NewInt(10),
+						Data: &event_usecase.CoinMint{
+							Base: entity_event.Base{
+								EventName:    "CoinMint",
+								EventVersion: 1,
+								BlockHeight:  1,
+								EventUUID:    "TESTUUID",
+							},
+							Address: "Address",
+							Amount: []coin.Coin{
+								{
+									Denom:  "Denom",
+									Amount: coin.NewInt(10),
+								},
 							},
 						},
 						BlockHeight: 1,
@@ -342,10 +427,19 @@ func TestAccount_HandleEvents(t *testing.T) {
 					account_view.AccountEvent{
 						Address: "Address",
 						Type:    "CoinBurn",
-						Data: coin.Coins{
-							coin.Coin{
-								Denom:  "Denom",
-								Amount: coin.NewInt(10),
+						Data: &event_usecase.CoinBurn{
+							Base: entity_event.Base{
+								EventName:    "CoinBurn",
+								EventVersion: 1,
+								BlockHeight:  1,
+								EventUUID:    "TESTUUID",
+							},
+							Address: "Address",
+							Amount: []coin.Coin{
+								{
+									Denom:  "Denom",
+									Amount: coin.NewInt(10),
+								},
 							},
 						},
 						BlockHeight: 1,
@@ -376,9 +470,9 @@ func TestAccount_HandleEvents(t *testing.T) {
 					Signers: []model.TransactionSigner{
 						{
 							TransactionSignerInfo: model.TransactionSignerInfo{
-								Type:            "",
-								IsMultiSig:      false,
-								Pubkeys:         []string{
+								Type:       "",
+								IsMultiSig: false,
+								Pubkeys: []string{
 									"A5N3/S/r5nQjjvJpdXR5eY1QiebM9ULBsWVbCw/a6dA4",
 								},
 								MaybeThreshold:  nil,
@@ -422,11 +516,45 @@ func TestAccount_HandleEvents(t *testing.T) {
 					account_view.AccountEvent{
 						Address: "prefix18mcwp6vtlvpgxy62eledk3chhjguw636muuqul",
 						Type:    "TransactionFailed",
-						Data: coin.Coins{
-							coin.Coin{
-								Denom:  "Denom",
-								Amount: coin.NewInt(10),
+						Data: &event_usecase.TransactionFailed{
+							Base: entity_event.Base{
+								EventName:    "TransactionFailed",
+								EventVersion: 1,
+								BlockHeight:  1,
+								EventUUID:    "TESTUUID",
 							},
+							TxHash:   "",
+							Index:    0,
+							Code:     0,
+							Log:      "",
+							MsgCount: 0,
+							Signers: []model.TransactionSigner{
+								{
+									TransactionSignerInfo: model.TransactionSignerInfo{
+										Type:       "",
+										IsMultiSig: false,
+										Pubkeys: []string{
+											"A5N3/S/r5nQjjvJpdXR5eY1QiebM9ULBsWVbCw/a6dA4",
+										},
+										MaybeThreshold:  nil,
+										AccountSequence: 0,
+									},
+									Address: "prefix18mcwp6vtlvpgxy62eledk3chhjguw636muuqul",
+								},
+							},
+							Senders: nil,
+							Fee: []coin.Coin{
+								{
+									Denom:  "Denom",
+									Amount: coin.NewInt(10),
+								},
+							},
+							FeePayer:      "",
+							FeeGranter:    "",
+							GasWanted:     0,
+							GasUsed:       0,
+							Memo:          "",
+							TimeoutHeight: 0,
 						},
 						BlockHeight: 1,
 					},

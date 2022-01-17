@@ -124,6 +124,7 @@ func (projection *Account) HandleEvents(height int64, events []event_entity.Even
 			if handleErr := projection.incrementUsableBalance(accountsView, coinReceivedEvent.Address, coinReceivedEvent.Amount); handleErr != nil {
 				return fmt.Errorf("error handling CoinReceivedEvent: %v", handleErr)
 			}
+
 			if handleErr := projection.addAccountEvent(
 				accountsView,
 				coinReceivedEvent.Address,

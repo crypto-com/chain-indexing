@@ -3,6 +3,7 @@ package view
 import (
 	"github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -41,6 +42,19 @@ func (accountsView *MockAccountsView) DecrementUsableBalance(address string, den
 }
 
 func (accountsView *MockAccountsView) InsertAccountEvent(event AccountEvent) error {
+	if data, ok := event.Data.(*event_usecase.GenesisCreated); ok {
+		data.EventUUID = "TESTUUID"
+	} else if data, ok := event.Data.(*event_usecase.CoinSpent); ok {
+		data.EventUUID = "TESTUUID"
+	} else if data, ok := event.Data.(*event_usecase.CoinReceived); ok {
+		data.EventUUID = "TESTUUID"
+	} else if data, ok := event.Data.(*event_usecase.CoinMint); ok {
+		data.EventUUID = "TESTUUID"
+	} else if data, ok := event.Data.(*event_usecase.CoinBurn); ok {
+		data.EventUUID = "TESTUUID"
+	} else if data, ok := event.Data.(*event_usecase.TransactionFailed); ok {
+		data.EventUUID = "TESTUUID"
+	}
 	mockArgs := accountsView.Called(event)
 	return mockArgs.Error(0)
 }
