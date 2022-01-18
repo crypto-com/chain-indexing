@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS view_vd_unbonding_validators;

@@ -88,9 +88,12 @@ func (view *ValidatorsView) List(
 //   - power = 0: Validator.Status = Unbonding, UnbondingValidator entry created
 // - UnbondingValidator complete Unbonding period: Validator.Status = Unbonded
 
-// TODO:
-// - UNIQUE(height, operatorAddress)
-// - UNIQUE(height, consensusNodeAddress)
+// NOTES:
+// - UNIQUE(operatorAddress, consensusNodeAddress, tendermintAddress, height)
+// - INDEX(operatorAddress, height)
+// - INDEX(consensusNodeAddress, height)
+// - INDEX(tendermintAddress, height)
+// - INDEX(height)
 type ValidatorRow struct {
 	Height int64 `json:"height"`
 

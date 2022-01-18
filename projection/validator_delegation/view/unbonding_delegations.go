@@ -59,10 +59,10 @@ func (view *UnbondingDelegationsView) ListByValidator(
 	return nil, nil
 }
 
-// TODO:
-// - UNIQUE(height, delegatorAddress, validatorAddress)
-// - INDEX(height, validatorAddress)
-// - INDEX(height, delegatorAddress)
+// NOTES:
+// - UNIQUE(delegatorAddress, validatorAddress, height)
+// - INDEX(validatorAddress, height)
+// - INDEX(delegatorAddress, height)
 type UnbondingDelegationRow struct {
 	Height           int64                      `json:"height"`
 	DelegatorAddress string                     `json:"delegatorAddress"`

@@ -62,9 +62,9 @@ func (view *RedelegationsView) ListBySrcValidator(
 	return nil, nil
 }
 
-// TODO:
-// - UNIQUE(height, delegatorAddress, validatorSrcAddress, validatorDstAddress)
-// - Index(height, validatorSrcAddress)
+// Notes:
+// - UNIQUE(delegatorAddress, validatorSrcAddress, validatorDstAddress, height)
+// - Index(validatorSrcAddress, height)
 type RedelegationRow struct {
 	Height              int64               `json:"height"`
 	DelegatorAddress    string              `json:"delegatorAddress"`

@@ -45,7 +45,8 @@ func (view *UnbondingDelegationQueueView) DequeueAllMatureUnbondingDelegationQue
 	return nil, nil
 }
 
-// TODO UNIQUE CompletionTime
+// NOTES:
+// - UNIQUE CompletionTime
 type UnbondingDelegationQueueRow struct {
 	CompletionTime utctime.UTCTime `json:"completionTime"`
 	DVPairs        []DVPair        `json:"dvPairs"`

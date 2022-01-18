@@ -43,8 +43,10 @@ func (view *UnbondingValidatorsView) DeleteMatureEntries(blockTime utctime.UTCTi
 	return nil
 }
 
-// TODO: UNIQUE OperatorAddress
+// NOTES:
+// - UNIQUE OperatorAddress
 type UnbondingValidatorRow struct {
-	OperatorAddress string          `json:"operatorAddress"`
-	UnbondingTime   utctime.UTCTime `json:"UnbondingTime"`
+	OperatorAddress string `json:"operatorAddress"`
+	// UnbondingTime is the time when Unbonding is finished
+	UnbondingTime utctime.UTCTime `json:"UnbondingTime"`
 }
