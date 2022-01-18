@@ -11,7 +11,6 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/golang-migrate/migrate/v4/source/github"
 
-	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
@@ -30,7 +29,6 @@ type Account struct {
 
 	rdbConn      rdb.Conn
 	logger       applogger.Logger
-	cosmosClient cosmosapp_interface.Client // cosmos light client deamon port : 1317 (default)
 
 	migrationHelper migrationhelper.MigrationHelper
 }
@@ -39,7 +37,6 @@ func NewAccount(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	accountAddressPrefix string,
-	cosmosClient cosmosapp_interface.Client,
 	migrationHelper migrationhelper.MigrationHelper,
 ) *Account {
 	return &Account{
@@ -56,7 +53,6 @@ func NewAccount(
 
 		rdbConn,
 		logger,
-		cosmosClient,
 
 		migrationHelper,
 	}
