@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
-	"github.com/crypto-com/chain-indexing/bootstrap"
+	configuration "github.com/crypto-com/chain-indexing/bootstrap/config"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
@@ -17,15 +17,17 @@ import (
 func initCronJobs(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
-	config *bootstrap.Config,
+	config *configuration.Config,
 ) []projection_entity.CronJob {
-	cronJobs := make([]projection_entity.CronJob, 0, len(config.CronJob.Enables))
+	cronJobs := make([]projection_entity.CronJob, 0, len(config.IndexService.CronJob.Enables))
 	initParams := InitCronJobParams{
 		Logger:  logger,
 		RdbConn: rdbConn,
+
+		ExtraConfigs: config.IndexService.CronJob.ExtraConfigs,
 	}
 
-	for _, cronJobName := range config.CronJob.Enables {
+	for _, cronJobName := range config.IndexService.CronJob.Enables {
 		cronJob := InitCronJob(
 			cronJobName, initParams,
 		)
@@ -38,7 +40,7 @@ func initCronJobs(
 		cronJobs = append(cronJobs, cronJob)
 	}
 
-	logger.Infof("Enabled the following cron jobs: [%s]", strings.Join(config.CronJob.Enables, ", "))
+	logger.Infof("Enabled the following cron jobs: [%s]", strings.Join(config.IndexService.CronJob.Enables, ", "))
 
 	return cronJobs
 }
@@ -58,7 +60,12 @@ func InitCronJob(name string, params InitCronJobParams) projection_entity.CronJo
 		databaseURL := migrationhelper.GenerateDefaultDatabaseURL(name, connString)
 		migrationHelper := github_migrationhelper.NewGithubMigrationHelper(sourceURL, databaseURL)
 
-		return bridge_activity_matcher.New(params.Logger, params.RdbConn, migrationHelper)
+		config, err := bridge_activity_matcher.ConfigFromInterface(params.ExtraConfigs[name])
+		if err != nil {
+			params.Logger.Panicf(err.Error())
+		}
+
+		return bridge_activity_matcher.New(params.Logger, params.RdbConn, migrationHelper, config)
 	// register more cronjobs here
 	default:
 		panic(fmt.Sprintf("Unrecognized cron job: %s", name))
@@ -68,6 +75,8 @@ func InitCronJob(name string, params InitCronJobParams) projection_entity.CronJo
 type InitCronJobParams struct {
 	Logger  applogger.Logger
 	RdbConn rdb.Conn
+
+	ExtraConfigs map[string]interface{}
 
 	GithubAPIUser    string
 	GithubAPIToken   string

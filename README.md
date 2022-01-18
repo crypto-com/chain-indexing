@@ -201,7 +201,7 @@ func initProjections(
     customConfig *CustomConfig,
 ) (projections []projection_entity.Projection) {
     // Skip if API_ONLY is on
-    if config.System.Mode == bootstrap.SYSTEM_MODE_API_ONLY {
+	if !config.IndexService.Enable {
         return projections
     }
 
@@ -458,7 +458,7 @@ func initCronJobs(
 	customConfig *CustomConfig,
 ) (crons []projection_entity.CronJob) {
     // Skip if API_ONLY is on
-    if config.System.Mode == bootstrap.SYSTEM_MODE_API_ONLY {
+	if !config.IndexService.Enable {
         return crons
     }
 

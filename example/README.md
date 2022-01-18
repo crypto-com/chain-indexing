@@ -45,7 +45,7 @@ app/
 config/
 
     // Configuration file
-    config.toml
+    config.yaml
     
 httpapi/
     handlers/
@@ -55,9 +55,9 @@ httpapi/
     
 internal/
     filereader/
-        toml/
+        yaml/
         
-            // Toml configuration reader
+            // YAML configuration reader
             ...
             
 projections/

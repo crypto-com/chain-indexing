@@ -16,6 +16,7 @@ import (
 	bridge_pending_activity_view "github.com/crypto-com/chain-indexing/projection/bridge_activity/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	"github.com/mitchellh/mapstructure"
 )
 
 var _ entity_projection.Projection = &BridgePendingActivity{}
@@ -37,6 +38,25 @@ type Config struct {
 	StartingHeight        int64  `mapstructure:"starting_height"`
 }
 
+func ConfigFromInterface(data interface{}) (Config, error) {
+	config := Config{}
+
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		Result:           &config,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		return config, fmt.Errorf("error creating projection config decoder: %v", decoderErr)
+	}
+
+	if err := decoder.Decode(data); err != nil {
+		return config, fmt.Errorf("error decoding projection BridgePendingActivity config: %v", err)
+	}
+
+	return config, nil
+}
+
 const (
 	MIGRATION_DIRECOTRY = "projection/bridge_activity/bridge_pending_activity/migrations"
 )
@@ -45,6 +65,7 @@ func NewBridgePendingActivity(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	migrationHelper migrationhelper.MigrationHelper,
+	config Config,
 ) *BridgePendingActivity {
 	return &BridgePendingActivity{
 		rdbprojectionbase.NewRDbBaseWithOptions(
@@ -52,7 +73,7 @@ func NewBridgePendingActivity(
 			"BridgePendingActivity",
 			rdbprojectionbase.Options{
 				MaybeTable:     nil,
-				MaybeConfigPtr: &Config{},
+				MaybeConfigPtr: &config,
 			},
 		),
 

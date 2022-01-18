@@ -6,14 +6,14 @@ import (
 	"path/filepath"
 
 	"github.com/crypto-com/chain-indexing/bootstrap"
+	configuration "github.com/crypto-com/chain-indexing/bootstrap/config"
 	"github.com/crypto-com/chain-indexing/example/app/example-app/routes"
-	"github.com/crypto-com/chain-indexing/example/internal/filereader/toml"
+	"github.com/crypto-com/chain-indexing/example/internal/filereader/yaml"
 	"github.com/urfave/cli/v2"
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/infrastructure"
-	projection_usecase "github.com/crypto-com/chain-indexing/usecase/projection"
 )
 
 func run(args []string) error {
@@ -26,8 +26,8 @@ func run(args []string) error {
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "config",
-				Value: "./config/config.toml",
-				Usage: "TOML `FILE` to load configuration from",
+				Value: "./config/config.yaml",
+				Usage: "YAML `FILE` to load configuration from",
 			},
 
 			&cli.StringFlag{
@@ -94,34 +94,19 @@ func run(args []string) error {
 
 			// Prepare FileConfig
 			configPath := ctx.String("config")
-			configReader, configFileErr := toml.FromFile(configPath)
-			if configFileErr != nil {
-				return fmt.Errorf("error creating Toml config reader: %v", configFileErr)
-			}
-			var fileConfig bootstrap.FileConfig
-			if readConfigErr := configReader.Read(&fileConfig); readConfigErr != nil {
-				return fmt.Errorf("error reading Toml config: %v", readConfigErr)
-			}
-
-			projectionConfigReader, projectionConfigFileErr := toml.FromFile(configPath)
-			if projectionConfigFileErr != nil {
-				return fmt.Errorf("error creating projection Toml config reader: %v", configFileErr)
-			}
-			if readProjectionConfigErr := projectionConfigReader.Read(&projection_usecase.GlobalConfig); readProjectionConfigErr != nil {
-				return fmt.Errorf("error reading global projection Toml config: %v", readProjectionConfigErr)
-			}
-
-			// Read custom config for chain-indexing-server
-			customConfigReader, err := toml.FromFile(configPath)
+			var config configuration.Config
+			err := yaml.FromYAMLFile(configPath, &config)
 			if err != nil {
-				return fmt.Errorf("error creating Toml custom config reader: %v", err)
-			}
-			var customConfig CustomConfig
-			if readConfigErr := customConfigReader.Read(&customConfig); readConfigErr != nil {
-				return fmt.Errorf("error reading custom Toml config: %v", readConfigErr)
+				return fmt.Errorf("error config from yaml: %v", err)
 			}
 
-			cliConfig := bootstrap.CLIConfig{
+			var customConfig CustomConfig
+			err = yaml.FromYAMLFile(configPath, &customConfig)
+			if err != nil {
+				return fmt.Errorf("error custom config from yaml: %v", err)
+			}
+
+			cliConfig := CLIConfig{
 				LogLevel: ctx.String("logLevel"),
 
 				DatabaseHost:     ctx.String("dbHost"),
@@ -146,10 +131,7 @@ func run(args []string) error {
 				cliConfig.DatabasePort = primptr.Int32(int32(ctx.Int("dbPort")))
 			}
 
-			config := bootstrap.Config{
-				FileConfig: fileConfig,
-			}
-			config.OverrideByCLIConfig(&cliConfig)
+			OverrideByCLIConfig(&config, &cliConfig)
 
 			// Create logger
 			logLevel := parseLogLevel(config.Logger.Level)

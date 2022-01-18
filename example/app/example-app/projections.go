@@ -6,7 +6,7 @@ import (
 
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
-	"github.com/crypto-com/chain-indexing/bootstrap"
+	configuration "github.com/crypto-com/chain-indexing/bootstrap/config"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	custom_projection "github.com/crypto-com/chain-indexing/example/projection"
 	"github.com/crypto-com/chain-indexing/example/projection/example"
@@ -35,10 +35,10 @@ import (
 func initProjections(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
-	config *bootstrap.Config,
+	config *configuration.Config,
 	customConfig *CustomConfig,
 ) []projection_entity.Projection {
-	if config.System.Mode == bootstrap.SYSTEM_MODE_API_ONLY {
+	if !config.IndexService.Enable {
 		return []projection_entity.Projection{}
 	}
 
@@ -53,22 +53,24 @@ func initProjections(
 		)
 	}
 
-	projections := make([]projection_entity.Projection, 0, len(config.Projection.Enables))
+	projections := make([]projection_entity.Projection, 0, len(config.IndexService.Projection.Enables))
 	initParams := InitProjectionParams{
 		Logger:  logger,
 		RdbConn: rdbConn,
+
+		ExtraConfigs: config.IndexService.Projection.ExtraConfigs,
 
 		CosmosAppClient:       cosmosAppClient,
 		AccountAddressPrefix:  config.Blockchain.AccountAddressPrefix,
 		ConsNodeAddressPrefix: config.Blockchain.ConNodeAddressPrefix,
 
-		GithubAPIUser:    config.GithubAPI.Username,
-		GithubAPIToken:   config.GithubAPI.Token,
-		MigrationRepoRef: config.GithubAPI.MigrationRepoRef,
+		GithubAPIUser:    config.IndexService.GithubAPI.Username,
+		GithubAPIToken:   config.IndexService.GithubAPI.Token,
+		MigrationRepoRef: config.IndexService.GithubAPI.MigrationRepoRef,
 
 		ServerMigrationRepoRef: customConfig.ServerGithubAPI.MigrationRepoRef,
 	}
-	for _, projectionName := range config.Projection.Enables {
+	for _, projectionName := range config.IndexService.Projection.Enables {
 		projection := InitProjection(
 			projectionName, initParams,
 		)
@@ -87,7 +89,7 @@ func initProjections(
 	}
 
 	// Append additional projection
-	for _, projectionName := range config.Projection.Enables {
+	for _, projectionName := range config.IndexService.Projection.Enables {
 		projection := InitAdditionalProjection(
 			projectionName, initParams,
 		)
@@ -105,7 +107,7 @@ func initProjections(
 		projections = append(projections, projection)
 	}
 
-	logger.Infof("Enabled the follow projection: [%s]", strings.Join(config.Projection.Enables, ", "))
+	logger.Infof("Enabled the follow projection: [%s]", strings.Join(config.IndexService.Projection.Enables, ", "))
 
 	return projections
 }
@@ -313,7 +315,12 @@ func InitProjection(name string, params InitProjectionParams) projection_entity.
 		databaseURL := migrationhelper.GenerateDefaultDatabaseURL(name, connString)
 		migrationHelper := github_migrationhelper.NewGithubMigrationHelper(sourceURL, databaseURL)
 
-		return bridge_pending_activity.NewBridgePendingActivity(params.Logger, params.RdbConn, migrationHelper)
+		config, err := bridge_pending_activity.ConfigFromInterface(params.ExtraConfigs[name])
+		if err != nil {
+			params.Logger.Panicf(err.Error())
+		}
+
+		return bridge_pending_activity.NewBridgePendingActivity(params.Logger, params.RdbConn, migrationHelper, config)
 	}
 
 	return nil
@@ -338,6 +345,8 @@ func generateGithubMigrationSrouceURLForCustomProjection(
 type InitProjectionParams struct {
 	Logger  applogger.Logger
 	RdbConn rdb.Conn
+
+	ExtraConfigs map[string]interface{}
 
 	CosmosAppClient       cosmosapp.Client
 	AccountAddressPrefix  string
