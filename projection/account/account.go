@@ -231,7 +231,7 @@ func (projection *Account) handleGenesisCreatedEvent(accountsView account_view.A
 				event.EventName,
 				event.BlockHeight,
 			); handleErr != nil {
-				return fmt.Errorf("error handling CoinSpentEvent: %v", handleErr)
+				return fmt.Errorf("error handling accounts in GenesisCreatedEvent: %v", handleErr)
 			}
 		}
 	}
