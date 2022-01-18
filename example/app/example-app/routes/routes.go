@@ -5,17 +5,18 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/appinterface/tendermint"
 	"github.com/crypto-com/chain-indexing/bootstrap"
+	"github.com/crypto-com/chain-indexing/bootstrap/config"
+	custom_httpapi_handlers "github.com/crypto-com/chain-indexing/example/httpapi/handlers"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	httpapi_handlers "github.com/crypto-com/chain-indexing/infrastructure/httpapi/handlers"
 	tendermint_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/tendermint"
-	custom_httpapi_handlers "github.com/crypto-com/chain-indexing/example/httpapi/handlers"
 )
 
 func InitRouteRegistry(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
-	config *bootstrap.Config,
+	config *config.Config,
 ) bootstrap.RouteRegistry {
 	var cosmosAppClient cosmosapp.Client
 	if config.CosmosApp.Insecure {
@@ -31,15 +32,15 @@ func InitRouteRegistry(
 	}
 
 	var tendermintClient tendermint.Client
-	if config.Tendermint.Insecure {
+	if config.TendermintApp.Insecure {
 		tendermintClient = tendermint_infrastructure.NewInsecureHTTPClient(
-			config.Tendermint.HTTPRPCUrl,
-			config.Tendermint.StrictGenesisParsing,
+			config.TendermintApp.HTTPRPCUrl,
+			config.TendermintApp.StrictGenesisParsing,
 		)
 	} else {
 		tendermintClient = tendermint_infrastructure.NewHTTPClient(
-			config.Tendermint.HTTPRPCUrl,
-			config.Tendermint.StrictGenesisParsing,
+			config.TendermintApp.HTTPRPCUrl,
+			config.TendermintApp.StrictGenesisParsing,
 		)
 	}
 

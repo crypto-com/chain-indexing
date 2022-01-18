@@ -1,13 +1,5 @@
 package projection
 
-import (
-	"fmt"
-	"time"
-
-	"github.com/ettle/strcase"
-	"github.com/mitchellh/mapstructure"
-)
-
 type Base struct {
 	projectionId string
 
@@ -36,28 +28,6 @@ func NewBaseWithOptions(projectionId string, options Options) Base {
 	}
 
 	if options.MaybeConfigPtr != nil {
-		decoderConfig := &mapstructure.DecoderConfig{
-			WeaklyTypedInput: true,
-			DecodeHook: mapstructure.ComposeDecodeHookFunc(
-				mapstructure.StringToTimeDurationHookFunc(),
-				mapstructure.StringToTimeHookFunc(time.RFC3339),
-			),
-			Result: options.MaybeConfigPtr,
-		}
-		decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
-		if decoderErr != nil {
-			panic(fmt.Errorf("error creating projection config decoder: %v", decoderErr))
-		}
-
-		projectionConfigId := strcase.ToSnake(projectionId)
-		projectionConfig, projectionConfigFound := GlobalConfig.Projection[projectionConfigId]
-		if !projectionConfigFound {
-			panic(fmt.Sprintf("no projection config found for projection id: %s", projectionConfigId))
-		}
-		if err := decoder.Decode(projectionConfig); err != nil {
-			panic(fmt.Errorf("error decoding projection %s config: %v", projectionId, err))
-		}
-
 		base.config = options.MaybeConfigPtr
 	}
 

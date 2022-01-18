@@ -95,7 +95,6 @@ github.com/Azure/go-autorest/logger v0.2.1/go.mod h1:T9E3cAhj2VqvPOtCYAvby9aBXkZ
 github.com/Azure/go-autorest/tracing v0.5.0/go.mod h1:r/s2XiOKccPW3HrqB+W0TQzfbtp2fGCgRFtBroKn4Dk=
 github.com/Azure/go-autorest/tracing v0.6.0/go.mod h1:+vhtPC754Xsa23ID7GlGsrdKBpUA79WCAKPPZVC2DeU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/BurntSushi/toml v0.4.1 h1:GaI7EiDXDRfa8VshkTj7Fym7ha+y8/XxIgD2okUIjLw=
 github.com/BurntSushi/toml v0.4.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d h1:nalkkPQcITbvhmL4+C4cKA87NW0tfm3Kl9VXRoPywFg=
@@ -480,8 +479,8 @@ github.com/cpuguy83/go-md2man/v2 v2.0.0/go.mod h1:maD7wRr/U5Z6m/iR4s+kqSMx2CaBsr
 github.com/creack/pty v1.1.7/go.mod h1:lj5s0c3V2DBrqTV7llrYr5NG6My20zk30Fl46Y7DoTY=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/creack/pty v1.1.11/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
-github.com/crypto-com/chain-indexing v1.3.0 h1:W5NXiSrwYjpa88wXegNI46aNot1xw888k9Kxl7A55gU=
-github.com/crypto-com/chain-indexing v1.3.0/go.mod h1:0KBBR7C2RZDavMpCBKlNtHkMZZ7tyndioZQRWUTD4YI=
+github.com/crypto-com/chain-indexing v1.3.1 h1:EaFTbJp8kLZdKhzBqLhKGl1MOeDBe9ljS1Tc8yktyMQ=
+github.com/crypto-com/chain-indexing v1.3.1/go.mod h1:ur0Fv7beja9AJxr59ZhxtGKME/wXkhuXh4aPZ7zZzXM=
 github.com/crypto-org-chain/chain-main/v3 v3.0.0-croeseid h1:YAffq+tYiSqYXgIb11Vc6dvBtgSvRsf2g1wPaMFkQUA=
 github.com/crypto-org-chain/chain-main/v3 v3.0.0-croeseid/go.mod h1:92Z70bDbsScrWzIHB496p7nXKydtq5am9rqa0fCpbM8=
 github.com/crypto-org-chain/cronos v0.6.0-testnet h1:iFLwra4QMZ6HgIEB1P0vMCa9pnQTeXjwSuYbH4glxqA=
