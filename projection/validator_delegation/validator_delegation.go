@@ -1,9 +1,12 @@
 package validator_delegation
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
+
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -19,6 +22,89 @@ import (
 )
 
 var _ projection_entity.Projection = &ValidatorDelegation{}
+
+type Config struct {
+	accountAddressPrefix   string
+	validatorAddressPrefix string
+	conNodeAddressPrefix   string
+	// set in genesis `unbonding_time`
+	unbondingTime time.Duration
+	// set in genesis `slash_fraction_double_sign`
+	slashFractionDoubleSign coin.Dec
+	// set in genesis `slash_fraction_downtime`
+	slashFractionDowntime coin.Dec
+	// PowerReduction - is the amount of staking tokens required for 1 unit of consensus-engine power.
+	// Currently, this returns a global variable that the app developer can tweak.
+	// https://github.com/cosmos/cosmos-sdk/blob/0cb7fd081e05317ed7a2f13b0e142349a163fe4d/x/staking/keeper/params.go#L46
+	defaultPowerReduction coin.Int
+}
+
+type RawConfig struct {
+	unbondingTime           string `mapstructure:"unbonding_time"`
+	slashFractionDoubleSign string `mapstructure:"slash_fraction_double_sign"`
+	slashFractionDowntime   string `mapstructure:"slash_fraction_downtime"`
+	defaultPowerReduction   string `mapstructure:"default_power_reduction"`
+}
+
+func RawConfigFromInterface(data interface{}) (RawConfig, error) {
+	rawConfig := RawConfig{}
+
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		Result:           &rawConfig,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		return rawConfig, fmt.Errorf("error creating projection config decoder: %v", decoderErr)
+	}
+
+	if err := decoder.Decode(data); err != nil {
+		return rawConfig, fmt.Errorf("error decoding projection ValidatorDelegation config: %v", err)
+	}
+
+	return rawConfig, nil
+}
+
+func PrepareConfig(
+	rawConfig RawConfig,
+	accountAddressPrefix string,
+	validatorAddressPrefix string,
+	conNodeAddressPrefix string,
+) (Config, error) {
+
+	config := Config{}
+	config.accountAddressPrefix = accountAddressPrefix
+	config.validatorAddressPrefix = validatorAddressPrefix
+	config.conNodeAddressPrefix = conNodeAddressPrefix
+
+	var err error
+	var ok bool
+
+	config.unbondingTime, err = time.ParseDuration(rawConfig.unbondingTime)
+	if err != nil {
+		return config, fmt.Errorf("error parsing unbondingTime from RawConfig: %v", err)
+	}
+
+	config.slashFractionDoubleSign, err = coin.NewDecFromStr(rawConfig.slashFractionDoubleSign)
+	if err != nil {
+		return config, fmt.Errorf("error parsing slashFractionDoubleSign from RawConfig: %v", err)
+	}
+
+	config.slashFractionDowntime, err = coin.NewDecFromStr(rawConfig.slashFractionDowntime)
+	if err != nil {
+		return config, fmt.Errorf("error parsing slashFractionDowntime from RawConfig: %v", err)
+	}
+
+	config.defaultPowerReduction, ok = coin.NewIntFromString(rawConfig.defaultPowerReduction)
+	if !ok {
+		return config, errors.New("error parsing defaultPowerReduction from RawConfig")
+	}
+
+	fmt.Println(config)
+	fmt.Printf(">>>>>>>>>>>>\n")
+
+	return config, nil
+}
 
 var (
 	NewValidators                = view.NewValidatorsView
@@ -41,19 +127,6 @@ type ValidatorDelegation struct {
 	config Config
 
 	migrationHelper migrationhelper.MigrationHelper
-}
-
-type Config struct {
-	accountAddressPrefix    string
-	validatorAddressPrefix  string
-	conNodeAddressPrefix    string
-	unbondingTime           time.Duration // set in genesis `unbonding_time`
-	slashFractionDoubleSign coin.Dec      // set in genesis `slash_fraction_double_sign`
-	slashFractionDowntime   coin.Dec      // set in genesis `slash_fraction_downtime`
-	// PowerReduction - is the amount of staking tokens required for 1 unit of consensus-engine power.
-	// Currently, this returns a global variable that the app developer can tweak.
-	// https://github.com/cosmos/cosmos-sdk/blob/0cb7fd081e05317ed7a2f13b0e142349a163fe4d/x/staking/keeper/params.go#L46
-	defaultPowerReduction coin.Int
 }
 
 func NewValidatorDelegation(
