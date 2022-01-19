@@ -52,7 +52,7 @@ func (view *DelegationsView) Clone(previousHeight, currentHeight int64) error {
 		?,
 		validator_address,
 		delegator_address,
-		shares?
+		shares
 	FROM view_vd_delegations WHERE height = ?
 	`)
 	if sqlErr != nil {
@@ -99,7 +99,7 @@ func (view *DelegationsView) Insert(row DelegationRow) error {
 		return fmt.Errorf("error inserting delegation into the table: %v: %w", err, rdb.ErrWrite)
 	}
 	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error inserting delegation into the table: no rows inserted: %w", rdb.ErrWrite)
+		return fmt.Errorf("error inserting delegation into the table: rows inserted: %v: %w", result.RowsAffected(), rdb.ErrWrite)
 	}
 
 	return nil
@@ -131,7 +131,7 @@ func (view *DelegationsView) Update(row DelegationRow) error {
 		return fmt.Errorf("error updating delegation into the table: %v: %w", err, rdb.ErrWrite)
 	}
 	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error updating delegation into the table: no row updated: %w", rdb.ErrWrite)
+		return fmt.Errorf("error updating delegation into the table: row updated: %v: %w", result.RowsAffected(), rdb.ErrWrite)
 	}
 
 	return nil

@@ -13,13 +13,9 @@ CREATE TABLE view_vd_validators (
     shares VARCHAR NOT NULL,
     min_self_delegation VARCHAR NOT NULL,
     PRIMARY KEY (id),
-    UNIQUE(operator_address, consensus_node_address, tendermint_address, height)
+    UNIQUE(operator_address, height)
+    UNIQUE(consensus_node_address, height)
+    UNIQUE(tendermint_address, height)
 );
-
-CREATE INDEX view_vd_validators_operator_height_index ON view_vd_validators USING btree (operator_address, height);
-
-CREATE INDEX view_vd_validators_consensus_height_index ON view_vd_validators USING btree (consensus_node_address, height);
-
-CREATE INDEX view_vd_validators_tendermint_height_index ON view_vd_validators USING btree (tendermint_address, height);
 
 CREATE INDEX view_vd_validators_height_index ON view_vd_validators USING btree (height);

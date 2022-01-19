@@ -112,7 +112,7 @@ func (view *RedelegationQueueView) DequeueAllMatureRedelegationQueue(blockTime u
 		).
 		Where(
 			"completion_time <= ?",
-			blockTime,
+			view.rdb.Tton(&blockTime),
 		).
 		ToSql()
 	if err != nil {
@@ -143,8 +143,8 @@ func (view *RedelegationQueueView) DequeueAllMatureRedelegationQueue(blockTime u
 		matureDVVTriplets = append(matureDVVTriplets, dvvTriplets...)
 	}
 
-	// TODO: De-duplicate the return slice. A same DVVTriplet could appear multiple times, we could avoid it here.
-	//       At the moment, we are following CosmosSDK implementation, so not doing the de-duplicate.
+	// Optional TODO: De-duplicate the return slice. A same DVVTriplet could appear multiple times, we could avoid it here.
+	//                At the moment, we are following CosmosSDK implementation, so not doing the de-duplicate.
 
 	// Delete the mature rows
 
@@ -154,7 +154,7 @@ func (view *RedelegationQueueView) DequeueAllMatureRedelegationQueue(blockTime u
 		).
 		Where(
 			"completion_time <= ?",
-			blockTime,
+			view.rdb.Tton(&blockTime),
 		).
 		ToSql()
 	if err != nil {
