@@ -52,7 +52,7 @@ func (projection *ValidatorDelegation) handleSlash(
 		return fmt.Errorf("attempted to slash with a negative slash factor: %v", slashFactor)
 	}
 
-	amount := utils.TokensFromConsensusPower(power, projection.config.defaultPowerReduction)
+	amount := utils.TokensFromConsensusPower(power, projection.config.DefaultPowerReduction)
 	slashAmountDec := amount.ToDec().Mul(slashFactor)
 	slashAmount := slashAmountDec.TruncateInt()
 

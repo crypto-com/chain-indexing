@@ -214,8 +214,8 @@ func (projection *ValidatorDelegation) unbond(
 	isOperatorDelegation, err := utils.IsValAddrEqualsDelAddr(
 		validatorAddress,
 		delegatorAddress,
-		projection.config.validatorAddressPrefix,
-		projection.config.accountAddressPrefix,
+		projection.config.ValidatorAddressPrefix,
+		projection.config.AccountAddressPrefix,
 	)
 	if err != nil {
 		return coin.ZeroInt(), fmt.Errorf("error in checking if ValidatorAddr and DelegatorAddr are the same address: %v", err)

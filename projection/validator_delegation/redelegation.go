@@ -105,7 +105,7 @@ func (projection *ValidatorDelegation) calculateRedelegationCompleteTime(
 	switch {
 	case !found || validator.IsBonded():
 		// the longest wait - just unbonding period from now
-		completionTime = blockTime.Add(projection.config.unbondingTime)
+		completionTime = blockTime.Add(projection.config.UnbondingTime)
 
 		return completionTime, false, nil
 

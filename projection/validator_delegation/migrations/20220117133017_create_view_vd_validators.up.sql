@@ -13,8 +13,8 @@ CREATE TABLE view_vd_validators (
     shares VARCHAR NOT NULL,
     min_self_delegation VARCHAR NOT NULL,
     PRIMARY KEY (id),
-    UNIQUE(operator_address, height)
-    UNIQUE(consensus_node_address, height)
+    UNIQUE(operator_address, height),
+    UNIQUE(consensus_node_address, height),
     UNIQUE(tendermint_address, height)
 );
 

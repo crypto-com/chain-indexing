@@ -21,7 +21,7 @@ func (projection *ValidatorDelegation) handleCreateNewValidator(
 	minSelfDelegationInString string,
 ) error {
 
-	consensusNodeAddress, err := utils.GetConsensusNodeAddress(tendermintPubKey, projection.config.conNodeAddressPrefix)
+	consensusNodeAddress, err := utils.GetConsensusNodeAddress(tendermintPubKey, projection.config.ConNodeAddressPrefix)
 	if err != nil {
 		return fmt.Errorf("error in GetConsensusNodeAddress: %v", err)
 	}

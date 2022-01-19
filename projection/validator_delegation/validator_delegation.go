@@ -24,84 +24,82 @@ import (
 var _ projection_entity.Projection = &ValidatorDelegation{}
 
 type Config struct {
-	accountAddressPrefix   string
-	validatorAddressPrefix string
-	conNodeAddressPrefix   string
+	AccountAddressPrefix   string
+	ValidatorAddressPrefix string
+	ConNodeAddressPrefix   string
 	// set in genesis `unbonding_time`
-	unbondingTime time.Duration
+	UnbondingTime time.Duration
 	// set in genesis `slash_fraction_double_sign`
-	slashFractionDoubleSign coin.Dec
+	SlashFractionDoubleSign coin.Dec
 	// set in genesis `slash_fraction_downtime`
-	slashFractionDowntime coin.Dec
+	SlashFractionDowntime coin.Dec
 	// PowerReduction - is the amount of staking tokens required for 1 unit of consensus-engine power.
 	// Currently, this returns a global variable that the app developer can tweak.
 	// https://github.com/cosmos/cosmos-sdk/blob/0cb7fd081e05317ed7a2f13b0e142349a163fe4d/x/staking/keeper/params.go#L46
-	defaultPowerReduction coin.Int
+	DefaultPowerReduction coin.Int
 }
 
-type RawConfig struct {
-	unbondingTime           string `mapstructure:"unbonding_time"`
-	slashFractionDoubleSign string `mapstructure:"slash_fraction_double_sign"`
-	slashFractionDowntime   string `mapstructure:"slash_fraction_downtime"`
-	defaultPowerReduction   string `mapstructure:"default_power_reduction"`
+type CustomConfig struct {
+	UnbondingTime           time.Duration `mapstructure:"unbonding_time"`
+	SlashFractionDoubleSign string        `mapstructure:"slash_fraction_double_sign"`
+	SlashFractionDowntime   string        `mapstructure:"slash_fraction_downtime"`
+	DefaultPowerReduction   string        `mapstructure:"default_power_reduction"`
 }
 
-func RawConfigFromInterface(data interface{}) (RawConfig, error) {
-	rawConfig := RawConfig{}
+func CustomConfigFromInterface(data interface{}) (CustomConfig, error) {
+	customConfig := CustomConfig{}
 
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
-		Result:           &rawConfig,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+		),
+		Result: &customConfig,
 	}
 	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
 	if decoderErr != nil {
-		return rawConfig, fmt.Errorf("error creating projection config decoder: %v", decoderErr)
+		return customConfig, fmt.Errorf("error creating projection config decoder: %v", decoderErr)
 	}
 
 	if err := decoder.Decode(data); err != nil {
-		return rawConfig, fmt.Errorf("error decoding projection ValidatorDelegation config: %v", err)
+		return customConfig, fmt.Errorf("error decoding projection ValidatorDelegation config: %v", err)
 	}
 
-	return rawConfig, nil
+	return customConfig, nil
 }
 
 func PrepareConfig(
-	rawConfig RawConfig,
+	customConfig CustomConfig,
 	accountAddressPrefix string,
 	validatorAddressPrefix string,
 	conNodeAddressPrefix string,
 ) (Config, error) {
 
 	config := Config{}
-	config.accountAddressPrefix = accountAddressPrefix
-	config.validatorAddressPrefix = validatorAddressPrefix
-	config.conNodeAddressPrefix = conNodeAddressPrefix
+	config.AccountAddressPrefix = accountAddressPrefix
+	config.ValidatorAddressPrefix = validatorAddressPrefix
+	config.ConNodeAddressPrefix = conNodeAddressPrefix
+	config.UnbondingTime = customConfig.UnbondingTime
 
 	var err error
 	var ok bool
 
-	config.unbondingTime, err = time.ParseDuration(rawConfig.unbondingTime)
-	if err != nil {
-		return config, fmt.Errorf("error parsing unbondingTime from RawConfig: %v", err)
-	}
-
-	config.slashFractionDoubleSign, err = coin.NewDecFromStr(rawConfig.slashFractionDoubleSign)
+	config.SlashFractionDoubleSign, err = coin.NewDecFromStr(customConfig.SlashFractionDoubleSign)
 	if err != nil {
 		return config, fmt.Errorf("error parsing slashFractionDoubleSign from RawConfig: %v", err)
 	}
-
-	config.slashFractionDowntime, err = coin.NewDecFromStr(rawConfig.slashFractionDowntime)
+	config.SlashFractionDowntime, err = coin.NewDecFromStr(customConfig.SlashFractionDowntime)
 	if err != nil {
 		return config, fmt.Errorf("error parsing slashFractionDowntime from RawConfig: %v", err)
 	}
-
-	config.defaultPowerReduction, ok = coin.NewIntFromString(rawConfig.defaultPowerReduction)
+	config.DefaultPowerReduction, ok = coin.NewIntFromString(customConfig.DefaultPowerReduction)
 	if !ok {
 		return config, errors.New("error parsing defaultPowerReduction from RawConfig")
 	}
 
 	fmt.Println(config)
 	fmt.Printf(">>>>>>>>>>>>\n")
+	time.Sleep(10 * time.Second)
 
 	return config, nil
 }
@@ -329,7 +327,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 					typedEvent.ConsensusNodeAddress,
 					distributionHeight,
 					power,
-					projection.config.slashFractionDowntime,
+					projection.config.SlashFractionDowntime,
 				); err != nil {
 					return fmt.Errorf("error in handling slash event with missing_signature: %v", err)
 				}
@@ -368,7 +366,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 					typedEvent.ConsensusNodeAddress,
 					distributionHeight,
 					power,
-					projection.config.slashFractionDoubleSign,
+					projection.config.SlashFractionDoubleSign,
 				); err != nil {
 					return fmt.Errorf("error in handling slash event with double_sign: %v", err)
 				}
