@@ -27,6 +27,10 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(MSG_SEND_FAILED, 1, DecodeMsgSend)
 	registry.Register(MSG_MULTI_SEND_CREATED, 1, DecodeMsgMultiSend)
 	registry.Register(MSG_MULTI_SEND_FAILED, 1, DecodeMsgMultiSend)
+	registry.Register(COIN_SPENT, 1, DecodeCoinSpent)
+	registry.Register(COIN_RECEIVED, 1, DecodeCoinReceived)
+	registry.Register(COIN_BURN, 1, DecodeCoinBurn)
+	registry.Register(COIN_MINT, 1, DecodeCoinMint)
 
 	// Distribution
 	registry.Register(MSG_SET_WITHDRAW_ADDRESS_CREATED, 1, DecodeMsgSetWithdrawAddress)
