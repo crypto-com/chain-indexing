@@ -150,7 +150,7 @@ func InitProjection(name string, params InitProjectionParams) projection_entity.
 		databaseURL := migrationhelper.GenerateDefaultDatabaseURL(name, connString)
 		migrationHelper := github_migrationhelper.NewGithubMigrationHelper(sourceURL, databaseURL)
 
-		return account.NewAccount(params.Logger, params.RdbConn, params.AccountAddressPrefix, params.CosmosAppClient, migrationHelper)
+		return account.NewAccount(params.Logger, params.RdbConn, params.AccountAddressPrefix, migrationHelper)
 	case "AccountTransaction":
 		sourceURL := github_migrationhelper.GenerateDefaultSourceURL(name, githubMigrationHelperConfig)
 		databaseURL := migrationhelper.GenerateDefaultDatabaseURL(name, connString)
