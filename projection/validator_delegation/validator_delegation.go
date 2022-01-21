@@ -97,10 +97,6 @@ func PrepareConfig(
 		return config, errors.New("error parsing defaultPowerReduction from RawConfig")
 	}
 
-	fmt.Println(config)
-	fmt.Printf(">>>>>>>>>>>>\n")
-	time.Sleep(10 * time.Second)
-
 	return config, nil
 }
 
@@ -242,7 +238,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 	for _, event := range events {
 		if typedEvent, ok := event.(*event_usecase.CreateGenesisValidator); ok {
 
-			if err := projection.handleCreateNewValidator(
+			if err := projection.handleGenesisCreateNewValidator(
 				rdbTxHandle,
 				height,
 				typedEvent.ValidatorAddress,

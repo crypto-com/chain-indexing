@@ -11,6 +11,75 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 )
 
+func (projection *ValidatorDelegation) handleGenesisCreateNewValidator(
+	rdbTxHandle *rdb.Handle,
+	height int64,
+	validatorAddress string,
+	delegatorAddress string,
+	tendermintPubKey string,
+	amount coin.Int,
+	minSelfDelegationInString string,
+) error {
+
+	consensusNodeAddress, err := utils.GetConsensusNodeAddress(tendermintPubKey, projection.config.ConNodeAddressPrefix)
+	if err != nil {
+		return fmt.Errorf("error in GetConsensusNodeAddress: %v", err)
+	}
+
+	tendermintAddress, err := utils.GetTendermintAddress(tendermintPubKey)
+	if err != nil {
+		return fmt.Errorf("error in GetTendermintAddress: %v", err)
+	}
+
+	minSelfDelegation, ok := coin.NewIntFromString(minSelfDelegationInString)
+	if !ok {
+		return fmt.Errorf("Failed to parse minSelfDelegationInString: %v", minSelfDelegationInString)
+	}
+
+	// Insert an ValidatorRow.
+	validatorsView := NewValidators(rdbTxHandle)
+	validatorRow := view.ValidatorRow{
+		Height: height,
+
+		OperatorAddress:      validatorAddress,
+		ConsensusNodeAddress: consensusNodeAddress,
+		TendermintAddress:    tendermintAddress,
+
+		// For MsgCreateValidator in genesis block, we assumed they are always BONDED.
+		// Here, as genesis has no block_results and power_changed event, we just set the power as `1`,
+		// indicating that's a bonded validator.
+		//
+		// TODO: What if gen_txs contains more validators than maximum validators?
+		//       In that case, may consider parsing `max_validators` from genesis.
+		//       And only marked top `max_validators` validators as bonded.
+		Status: types.BONDED,
+		Jailed: false,
+		Power:  "1",
+
+		UnbondingHeight: int64(0),
+		UnbondingTime:   utctime.UTCTime{},
+
+		Tokens:            coin.ZeroInt(),
+		Shares:            coin.ZeroDec(),
+		MinSelfDelegation: minSelfDelegation,
+	}
+	if err := validatorsView.Insert(validatorRow); err != nil {
+		return fmt.Errorf("error inserting ValidatorRow: %v", err)
+	}
+
+	if _, err := projection.handleDelegate(
+		rdbTxHandle,
+		height,
+		validatorAddress,
+		delegatorAddress,
+		amount,
+	); err != nil {
+		return fmt.Errorf("error handling Delegate: %v", err)
+	}
+
+	return nil
+}
+
 func (projection *ValidatorDelegation) handleCreateNewValidator(
 	rdbTxHandle *rdb.Handle,
 	height int64,
@@ -57,7 +126,7 @@ func (projection *ValidatorDelegation) handleCreateNewValidator(
 		MinSelfDelegation: minSelfDelegation,
 	}
 	if err := validatorsView.Insert(validatorRow); err != nil {
-		return fmt.Errorf("error validatorsView.Insert(): %v", err)
+		return fmt.Errorf("error inserting ValidatorRow: %v", err)
 	}
 
 	if _, err := projection.handleDelegate(
@@ -67,7 +136,7 @@ func (projection *ValidatorDelegation) handleCreateNewValidator(
 		delegatorAddress,
 		amount,
 	); err != nil {
-		return fmt.Errorf("error in projection.handleDelegate(): %v", err)
+		return fmt.Errorf("error handling Delegate: %v", err)
 	}
 
 	return nil

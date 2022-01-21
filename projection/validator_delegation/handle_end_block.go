@@ -57,6 +57,7 @@ func (projection *ValidatorDelegation) handlePowerChanged(
 			return fmt.Errorf("error removing unbonding validator entry: %v", err)
 		}
 	}
+	validator.Power = power
 
 	// Update the validator
 	if err := validatorsView.Update(validator); err != nil {
