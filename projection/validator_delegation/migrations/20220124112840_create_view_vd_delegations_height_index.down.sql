@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS view_vd_delegations_height_index;
