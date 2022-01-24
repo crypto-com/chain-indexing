@@ -1,1 +1,0 @@
-CREATE INDEX view_vd_delegations_height_index ON view_vd_delegations USING btree (height);
