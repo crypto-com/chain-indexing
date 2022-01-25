@@ -119,7 +119,8 @@ func ParseBlockTxsMsgToCommands(
 				// cosmos authz
 				"/cosmos.authz.v1beta1.MsgGrant",
 				"/cosmos.authz.v1beta1.MsgRevoke",
-				"/cosmos.authz.v1beta1.MsgExec",
+				// FIXME: https://github.com/crypto-com/chain-indexing/issues/673
+				//"/cosmos.authz.v1beta1.MsgExec",
 
 				// cosmos feegrant
 				"/cosmos.feegrant.v1beta1.MsgGrantAllowance",
