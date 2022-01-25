@@ -437,9 +437,9 @@ type ValidatorRow struct {
 
 	// `UnbondingHeight` and `UnbondingTime` only useful when `Status` is `Unbonding`
 	// The height start the Unbonding
-	UnbondingHeight int64 `json:"UnbondingHeight"`
+	UnbondingHeight int64 `json:"unbondingHeight"`
 	// The time when Unbonding is finished
-	UnbondingTime utctime.UTCTime `json:"UnbondingTime"`
+	UnbondingTime utctime.UTCTime `json:"unbondingTime"`
 
 	Tokens            coin.Int `json:"tokens"`
 	Shares            coin.Dec `json:"shares"`
