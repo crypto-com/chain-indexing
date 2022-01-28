@@ -16,7 +16,7 @@ import (
 )
 
 var _ = Describe("ParseMsgCommands", func() {
-	Describe("MsgExec", func() {
+	XDescribe("MsgExec", func() {
 		It("should parse Msg commands when there is MsgExec (inner message MsgSend) in the transaction", func() {
 			expected := `{
             "name": "MsgExecCreated",

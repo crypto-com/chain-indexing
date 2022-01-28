@@ -15,6 +15,7 @@ import (
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/view"
 	projection_usecase "github.com/crypto-com/chain-indexing/usecase/projection"
+	"github.com/mitchellh/mapstructure"
 )
 
 var (
@@ -42,6 +43,29 @@ type Config struct {
 		MaxConnIdleTime     time.Duration `mapstructure:"pool_max_conn_idle_time"`
 		HealthCheckInterval time.Duration `mapstructure:"pool_health_check_interval"`
 	} `mapstructure:"crypto_org_chain_database"`
+}
+
+func ConfigFromInterface(data interface{}) (Config, error) {
+	config := Config{}
+
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+		),
+		Result: &config,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		return config, fmt.Errorf("error creating projection config decoder: %v", decoderErr)
+	}
+
+	if err := decoder.Decode(data); err != nil {
+		return config, fmt.Errorf("error decoding projection BridgePendingActivity config: %v", err)
+	}
+
+	return config, nil
 }
 
 type BridgeActivityMatcher struct {
