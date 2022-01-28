@@ -201,7 +201,7 @@ func initProjections(
     customConfig *CustomConfig,
 ) (projections []projection_entity.Projection) {
     // Skip if API_ONLY is on
-    if config.System.Mode == bootstrap.SYSTEM_MODE_API_ONLY {
+	if !config.IndexService.Enable {
         return projections
     }
 
@@ -458,7 +458,7 @@ func initCronJobs(
 	customConfig *CustomConfig,
 ) (crons []projection_entity.CronJob) {
     // Skip if API_ONLY is on
-    if config.System.Mode == bootstrap.SYSTEM_MODE_API_ONLY {
+	if !config.IndexService.Enable {
         return crons
     }
 
@@ -594,7 +594,11 @@ const (
 )
 ```
 
-## 2. Test
+## 2. Example implementation
+
+[Go here](https://github.com/crypto-com/chain-indexing/tree/master/example)
+
+## 3. Test
 
 ```bash
 ./test.sh [--install-dependency] [--no-db] [--watch]
@@ -602,7 +606,7 @@ const (
 
 Providing `--install-dependency` will attempt to install test runner [Ginkgo](https://github.com/onsi/ginkgo) if it is not installed before.
 
-## 3. Lint
+## 4. Lint
 
 ### With Local Installed golangci-lint
 
@@ -620,11 +624,11 @@ Providing `--install-dependency` will attempt to install test runner [Ginkgo](ht
 docker run --rm -v $(pwd):/app -w /app golangci/golangci-lint:v1.33 golangci-lint run -v
 ```
 
-## 4. Contributing
+## 5. Contributing
 
 Please abide by the [Code of Conduct](CODE_OF_CONDUCT.md) in all interactions,
 and the [contributing guidelines](CONTRIBUTING.md) when submitting code.
 
-## 5. License
+## 6. License
 
 [Apache 2.0](./LICENSE)

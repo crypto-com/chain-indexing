@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"fmt"
 
+	"github.com/crypto-com/chain-indexing/bootstrap/config"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 	"github.com/lab259/cors"
@@ -15,7 +16,7 @@ type HTTPAPIServer struct {
 	listeningAddress string
 	routePrefix      string
 
-	pprof DebugConfig
+	pprof config.Debug
 
 	httpServer *httpapi.Server
 }
@@ -24,9 +25,9 @@ type RouteRegistry interface {
 	Register(*httpapi.Server, string)
 }
 
-func NewHTTPAPIServer(logger applogger.Logger, config *Config) *HTTPAPIServer {
-	httpListeningAddress := config.HTTP.ListeningAddress
-	httpRoutePrefix := config.HTTP.RoutePrefix
+func NewHTTPAPIServer(logger applogger.Logger, config *config.Config) *HTTPAPIServer {
+	httpListeningAddress := config.HTTPService.ListeningAddress
+	httpRoutePrefix := config.HTTPService.RoutePrefix
 
 	httpServer := httpapi.NewServer(
 		httpListeningAddress,
@@ -34,11 +35,11 @@ func NewHTTPAPIServer(logger applogger.Logger, config *Config) *HTTPAPIServer {
 		logger,
 	)
 
-	if len(config.HTTP.CorsAllowedOrigins) != 0 {
+	if len(config.HTTPService.CorsAllowedOrigins) != 0 {
 		httpServer = httpServer.WithCors(cors.Options{
-			AllowedOrigins: config.HTTP.CorsAllowedOrigins,
-			AllowedMethods: config.HTTP.CorsAllowedMethods,
-			AllowedHeaders: config.HTTP.CorsAllowedHeaders,
+			AllowedOrigins: config.HTTPService.CorsAllowedOrigins,
+			AllowedMethods: config.HTTPService.CorsAllowedMethods,
+			AllowedHeaders: config.HTTPService.CorsAllowedHeaders,
 			Debug:          true,
 		})
 	}
