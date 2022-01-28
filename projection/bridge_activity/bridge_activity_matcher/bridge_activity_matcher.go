@@ -51,6 +51,11 @@ type CounterpartyDatabaseConfig struct {
 	HealthCheckInterval time.Duration `mapstructure:"pool_health_check_interval"`
 }
 
+type counterpartyChainRDbConfig struct {
+	Name string
+	Conn rdb.Conn
+}
+
 func ConfigFromInterface(data interface{}) (Config, error) {
 	config := Config{}
 
@@ -79,9 +84,9 @@ type BridgeActivityMatcher struct {
 
 	config Config
 
-	thisRDbConn          rdb.Conn
-	counterpartyRDbConns []rdb.Conn
-	logger               applogger.Logger
+	thisRDbConn            rdb.Conn
+	counterpartyRDbConfigs []counterpartyChainRDbConfig
+	logger                 applogger.Logger
 
 	migrationHelper migrationhelper.MigrationHelper
 }
@@ -101,8 +106,8 @@ func New(
 
 		config: config,
 
-		thisRDbConn:          rdbConn,
-		counterpartyRDbConns: make([]rdb.Conn, 0),
+		thisRDbConn:            rdbConn,
+		counterpartyRDbConfigs: make([]counterpartyChainRDbConfig, 0),
 		logger: logger.WithFields(applogger.LogFields{
 			"module": "BridgeActivityMatcher",
 		}),
@@ -146,7 +151,10 @@ func (cronJob *BridgeActivityMatcher) OnInit() error {
 			)
 		}
 
-		cronJob.counterpartyRDbConns = append(cronJob.counterpartyRDbConns, rdbConn)
+		cronJob.counterpartyRDbConfigs = append(cronJob.counterpartyRDbConfigs, counterpartyChainRDbConfig{
+			Name: counterpartyChain.Name,
+			Conn: rdbConn,
+		})
 	}
 
 	if cronJob.migrationHelper != nil {
@@ -199,44 +207,44 @@ func (cronJob *BridgeActivityMatcher) Exec() error {
 		)
 	}
 
-	for _, counterpartyRDbConn := range cronJob.counterpartyRDbConns {
-		counterpartyBridgePendingActivities := NewBridgePendingActivitiesView(counterpartyRDbConn.ToHandle())
+	for _, counterpartyRDbConfig := range cronJob.counterpartyRDbConfigs {
+		counterpartyBridgePendingActivities := NewBridgePendingActivitiesView(counterpartyRDbConfig.Conn.ToHandle())
 
-		cryptoOrgChainAllUnprocessedOutgoing, cryptoOrgChainAllUnprocessedOutgoingErr := counterpartyBridgePendingActivities.
+		counterpartyAllUnprocessedOutgoing, counterpartyAllUnprocessedOutgoingErr := counterpartyBridgePendingActivities.
 			ListAllUnprocessedOutgoing()
-		if cryptoOrgChainAllUnprocessedOutgoingErr != nil {
+		if counterpartyAllUnprocessedOutgoingErr != nil {
 			return fmt.Errorf(
-				"error querying Crypto.org Chain unprocessed outgoing pending activities of this projection: %v",
-				thisAllUnprocessedOutgoingErr,
+				"error querying %s unprocessed outgoing pending activities of this projection: %v",
+				counterpartyRDbConfig.Name, thisAllUnprocessedOutgoingErr,
 			)
 		}
 
 		if handleThisUnprocessedOutgoingErr := cronJob.HandleOutgoing(
-			cryptoOrgChainAllUnprocessedOutgoing,
+			counterpartyAllUnprocessedOutgoing,
 			counterpartyBridgePendingActivities,
 		); handleThisUnprocessedOutgoingErr != nil {
 			return fmt.Errorf(
-				"error handling Crypto.org Chain unprocessed outgoing bridge pending activities: %v",
-				handleThisUnprocessedOutgoingErr,
+				"error handling %s unprocessed outgoing bridge pending activities: %v",
+				counterpartyRDbConfig.Name, handleThisUnprocessedOutgoingErr,
 			)
 		}
 
-		cryptoOrgChainAllUnprocessedIncoming, cryptoOrgChainAllUnprocessedIncomingErr := counterpartyBridgePendingActivities.
+		counterpartyAllUnprocessedIncoming, counterpartyAllUnprocessedIncomingErr := counterpartyBridgePendingActivities.
 			ListAllUnprocessedIncoming()
-		if cryptoOrgChainAllUnprocessedIncomingErr != nil {
+		if counterpartyAllUnprocessedIncomingErr != nil {
 			return fmt.Errorf(
-				"error querying unprocessed Crypto.org Chain incoming pending activities of projection: %v",
-				thisAllUnprocessedOutgoingErr,
+				"error querying unprocessed %s incoming pending activities of projection: %v",
+				counterpartyRDbConfig.Name, thisAllUnprocessedOutgoingErr,
 			)
 		}
 
-		if handleCryptoOrgChainUnprocessedIncomingErr := cronJob.HandleIncoming(
-			cryptoOrgChainAllUnprocessedIncoming,
+		if handleCounterpartyUnprocessedIncomingErr := cronJob.HandleIncoming(
+			counterpartyAllUnprocessedIncoming,
 			counterpartyBridgePendingActivities,
-		); handleCryptoOrgChainUnprocessedIncomingErr != nil {
+		); handleCounterpartyUnprocessedIncomingErr != nil {
 			return fmt.Errorf(
-				"error handling Crypto.org Chain unprocessed incoming bridge pending activities: %v",
-				handleCryptoOrgChainUnprocessedIncomingErr,
+				"error handling %s unprocessed incoming bridge pending activities: %v",
+				counterpartyRDbConfig.Name, handleCounterpartyUnprocessedIncomingErr,
 			)
 		}
 	}
