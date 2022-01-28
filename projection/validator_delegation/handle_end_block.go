@@ -99,6 +99,13 @@ func (projection *ValidatorDelegation) handleMatureUnbondingValidators(
 			return fmt.Errorf("error updating validator: %v", err)
 		}
 
+		// Remove validator if the shares is zero
+		if validator.Shares.IsZero() {
+			if err := validatorsView.Delete(validator); err != nil {
+				return fmt.Errorf("error deleting validator: %v", err)
+			}
+		}
+
 	}
 
 	// Remove those mature UnbondingValidator entry
