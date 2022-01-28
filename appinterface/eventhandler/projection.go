@@ -34,9 +34,6 @@ func (handler *ProjectionHandler) HandleEvents(blockHeight int64, events []event
 	filteredEvents := make([]event.Event, 0)
 	for _, event := range events {
 		if !isListeningEvent(event, handler.projection.GetEventsToListen()) {
-			//eventLogger.WithFields(applogger.LogFields{
-			//	"eventName": event.Name(),
-			//}).Debugf("skipping because event is not one of the listening events")
 			continue
 		}
 		filteredEvents = append(filteredEvents, event)

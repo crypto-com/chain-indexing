@@ -41,3 +41,5 @@ check-password-strength
 !*/check-password-strength/
 
 pgdata*
+
+example/example-app
