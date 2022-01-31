@@ -28,7 +28,7 @@ var _ projection_entity.CronJob = &BridgeActivityMatcher{}
 
 type Config struct {
 	Interval           time.Duration             `mapstructure:"interval"`
-	CounterpartyChains []CounterpartyChainConfig `mapstructure:"counterpartyChains"`
+	CounterpartyChains []CounterpartyChainConfig `mapstructure:"counterparty_chains"`
 }
 
 type CounterpartyChainConfig struct {
