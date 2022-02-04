@@ -43,11 +43,11 @@ type BridgePendingActivity struct {
 
 type Config struct {
 	ThisChainName      string                    `mapstructure:"this_chain_name"`
-	CounterPartyChains []CounterPartyChainConfig `mapstructure:"counteparty"`
+	CounterPartyChains []CounterPartyChainConfig `mapstructure:"counterparty_chains"`
 }
 
 type CounterPartyChainConfig struct {
-	ChainName      string `mapstructure:"chain_name"`
+	ChainName      string `mapstructure:"name"`
 	ChannelId      string `mapstructure:"channel_id"`
 	StartingHeight int64  `mapstructure:"starting_height"`
 }
