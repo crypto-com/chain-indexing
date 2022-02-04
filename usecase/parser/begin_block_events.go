@@ -33,6 +33,11 @@ func ParseBeginBlockEventsCommands(
 		if event.Type == "transfer" {
 			transferEvent := utils.NewParsedTxsResultLogEvent(&beginBlockEvents[i])
 
+			// TODO: Missing Multi-send support (https://github.com/crypto-com/chain-indexing/issues/682)
+			if !transferEvent.HasAttribute("sender") {
+				continue
+			}
+
 			amount := transferEvent.MustGetAttributeByKey("amount")
 			if amount == "" {
 				continue
