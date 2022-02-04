@@ -1,6 +1,6 @@
 CREATE TABLE view_vd_validators (
     id BIGSERIAL,
-    height BIGINT NOT NULL,
+    height INT8RANGE NOT NULL,
     operator_address VARCHAR NOT NULL,
     consensus_node_address VARCHAR NOT NULL,
     tendermint_address VARCHAR NOT NULL,
@@ -13,9 +13,12 @@ CREATE TABLE view_vd_validators (
     shares VARCHAR NOT NULL,
     min_self_delegation VARCHAR NOT NULL,
     PRIMARY KEY (id),
-    UNIQUE(operator_address, height),
-    UNIQUE(consensus_node_address, height),
-    UNIQUE(tendermint_address, height)
+    -- Below is a constraint and it is also an index.
+    -- It prevents a delegation record appear twice at any given height. 
+    EXCLUDE USING gist (
+        operator_address WITH =, 
+        consensus_node_address WITH =, 
+        tendermint_address WITH =, 
+        height WITH &&
+    )
 );
-
-CREATE INDEX view_vd_validators_height_index ON view_vd_validators USING btree (height);

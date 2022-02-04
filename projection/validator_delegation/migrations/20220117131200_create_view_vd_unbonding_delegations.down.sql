@@ -1,5 +1,1 @@
-DROP INDEX IF EXISTS view_vd_unbonding_delegations_delegator_height_index;
-
-DROP INDEX IF EXISTS view_vd_unbonding_delegations_validator_height_index;
-
 DROP TABLE IF EXISTS view_vd_unbonding_delegations;
