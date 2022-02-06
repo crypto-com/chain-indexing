@@ -3,6 +3,7 @@ package bridge_activity_matcher
 import (
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -41,7 +42,7 @@ type CounterpartyDatabaseConfig struct {
 	Host                string        `mapstructure:"host"`
 	Port                int32         `mapstructure:"port"`
 	Username            string        `mapstructure:"username"`
-	Password            string        `mapstructure:"password"`
+	PasswordEnv         string        `mapstructure:"password_env"`
 	Name                string        `mapstructure:"name"`
 	Schema              string        `mapstructure:"schema"`
 	MaxConns            int32         `mapstructure:"pool_max_conns"`
@@ -129,12 +130,14 @@ func (cronJob *BridgeActivityMatcher) OnInit() error {
 
 	// TODO: Refactor to generic rdbConn creator
 	for _, counterpartyChain := range config.CounterpartyChains {
+		dbPassword := os.Getenv(counterpartyChain.Database.PasswordEnv)
+
 		rdbConn, rdbConnErr := NewPgxConnPool(&pg.PgxConnPoolConfig{
 			ConnConfig: pg.ConnConfig{
 				Host:          counterpartyChain.Database.Host,
 				Port:          counterpartyChain.Database.Port,
 				MaybeUsername: &counterpartyChain.Database.Username,
-				MaybePassword: &counterpartyChain.Database.Password,
+				MaybePassword: &dbPassword,
 				Database:      counterpartyChain.Database.Name,
 				SSL:           counterpartyChain.Database.SSL,
 			},
