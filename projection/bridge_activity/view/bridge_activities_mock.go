@@ -28,13 +28,13 @@ func (view *MockBridgeActivitiesView) FindBy(filter BridgeActivitiesFindByFilter
 	return row, mockArgs.Error(1)
 }
 
-func (view *MockBridgeActivitiesView) ListByNetworkAddress(
-	network string,
+func (view *MockBridgeActivitiesView) ListByChainAddress(
+	chain string,
 	address string,
 	order BridgeActivitiesListOrder,
 	pagination *pagination_interface.Pagination,
 ) ([]BridgeActivityReadRow, *pagination_interface.PaginationResult, error) {
-	mockArgs := view.Called(network, address, order, pagination)
+	mockArgs := view.Called(chain, address, order, pagination)
 	rows, _ := mockArgs.Get(0).([]BridgeActivityReadRow)
 	paginationResult, _ := mockArgs.Get(0).(*pagination_interface.PaginationResult)
 	return rows, paginationResult, mockArgs.Error(1)

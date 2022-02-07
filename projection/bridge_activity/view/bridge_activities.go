@@ -3,8 +3,8 @@ package view
 import (
 	"errors"
 	"fmt"
-
 	"github.com/google/uuid"
+	"strings"
 
 	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
@@ -18,8 +18,8 @@ import (
 type BridgeActivities interface {
 	FindByLinkId(linkId string) (BridgeActivityReadRow, error)
 	FindBy(filter BridgeActivitiesFindByFilter) (BridgeActivityReadRow, error)
-	ListByNetworkAddress(
-		network string,
+	ListByChainAddress(
+		chain string,
 		address string,
 		order BridgeActivitiesListOrder,
 		pagination *pagination_interface.Pagination,
@@ -203,22 +203,19 @@ type BridgeActivitiesFindByFilter struct {
 	MaybeTransactionId *string
 }
 
-func (view *BridgeActivitiesView) ListByNetworkAddress(
-	network string,
+func (view *BridgeActivitiesView) ListByChainAddress(
+	chain string,
 	address string,
 	order BridgeActivitiesListOrder,
 	pagination *pagination_interface.Pagination,
 ) ([]BridgeActivityReadRow, *pagination_interface.PaginationResult, error) {
-	addressFilter := BridgeActivitiesListAddressFilter{
-		MaybeCronosAddress:         nil,
-		MaybeCryptoOrgChainAddress: nil,
+	addressFilter := []BridgeActivitiesListAddressFilterCond{
+		{
+			Chain:   chain,
+			Address: address,
+		},
 	}
 	filter := BridgeActivitiesListFilter{}
-	if network == types.CHAIN_CRONOS {
-		addressFilter.MaybeCronosAddress = &address
-	} else if network == types.CHAIN_CRYPTO_ORG_CHAIN {
-		addressFilter.MaybeCryptoOrgChainAddress = &address
-	}
 	return view.List(addressFilter, filter, order, pagination)
 }
 
@@ -264,27 +261,14 @@ func (view *BridgeActivitiesView) List(
 		TABLE_BRIDGE_ACTIVITIES,
 	)
 
-	if addressFilter.MaybeCronosAddress != nil && addressFilter.MaybeCryptoOrgChainAddress != nil {
-		stmtBuilder = stmtBuilder.Where(`
-( source_chain = ? AND source_address = ?) OR (destination_chain = ? AND destination_address = ?) OR
-( source_chain = ? AND source_address = ?) OR (destination_chain = ? AND destination_address = ?)
-`,
-			types.CHAIN_CRONOS, addressFilter.MaybeCronosAddress, types.CHAIN_CRONOS, addressFilter.MaybeCronosAddress,
-			types.CHAIN_CRYPTO_ORG_CHAIN, addressFilter.MaybeCryptoOrgChainAddress,
-			types.CHAIN_CRYPTO_ORG_CHAIN, addressFilter.MaybeCryptoOrgChainAddress,
-		)
-	} else if addressFilter.MaybeCronosAddress != nil {
-		stmtBuilder = stmtBuilder.Where(
-			"( source_chain = ? AND source_address = ?) OR (destination_chain = ? AND destination_address = ?)",
-			types.CHAIN_CRONOS, addressFilter.MaybeCronosAddress, types.CHAIN_CRONOS, addressFilter.MaybeCronosAddress,
-		)
-	} else if addressFilter.MaybeCryptoOrgChainAddress != nil {
-		stmtBuilder = stmtBuilder.Where(
-			"( source_chain = ? AND source_address = ?) OR (destination_chain = ? AND destination_address = ?)",
-			types.CHAIN_CRYPTO_ORG_CHAIN, addressFilter.MaybeCryptoOrgChainAddress,
-			types.CHAIN_CRYPTO_ORG_CHAIN, addressFilter.MaybeCryptoOrgChainAddress,
-		)
+	preds := make([]string, 0)
+	args := make([]interface{}, 0)
+	for _, filter := range addressFilter {
+		preds = append(preds, "( source_chain = ? AND source_address = ?) OR (destination_chain = ? AND destination_address = ?)")
+		args = append(args, filter.Chain, filter.Address, filter.Chain, filter.Address)
 	}
+	pred := strings.Join(preds, " OR ")
+	stmtBuilder = stmtBuilder.Where(pred, args...)
 
 	if filter.MaybeStatus != nil {
 		stmtBuilder = stmtBuilder.Where(
@@ -444,9 +428,11 @@ type BridgeActivitiesListFilter struct {
 	MaybeUpdatedAtGt *utctime.UTCTime
 }
 
-type BridgeActivitiesListAddressFilter struct {
-	MaybeCronosAddress         *string
-	MaybeCryptoOrgChainAddress *string
+type BridgeActivitiesListAddressFilter = []BridgeActivitiesListAddressFilterCond
+
+type BridgeActivitiesListAddressFilterCond struct {
+	Chain   string
+	Address string
 }
 
 type BridgeActivitiesListOrder struct {

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -25,9 +26,15 @@ type Bridges struct {
 
 	bridgeActivitiesView bridge_activitiy_view.BridgeActivities
 	accountAddressPrefix string
+	config               BridgeConfig
 }
 
-func NewBridges(logger applogger.Logger, rdbHandle *rdb.Handle, cosmosAddressPrefix string) *Bridges {
+func NewBridges(
+	logger applogger.Logger,
+	rdbHandle *rdb.Handle,
+	cosmosAddressPrefix string,
+	config BridgeConfig,
+) *Bridges {
 	return &Bridges{
 		logger.WithFields(applogger.LogFields{
 			"module": "BridgesHandler",
@@ -35,8 +42,34 @@ func NewBridges(logger applogger.Logger, rdbHandle *rdb.Handle, cosmosAddressPre
 
 		bridge_activitiy_view.NewBridgeActivitiesView(rdbHandle),
 		cosmosAddressPrefix,
+		config,
 	}
 }
+
+type BridgeConfig struct {
+	Networks []BridgeNetworkConfig
+	Chains   []BridgeChainConfig
+}
+
+type BridgeNetworkConfig struct {
+	ChainName string
+	// Chain network unique abbreviation, used in URL query params
+	Abbreviation     NetworkAbbreviation
+	MaybeAddressHook func(string) (string, error)
+}
+
+type BridgeChainConfig struct {
+	Name       string
+	Currencies []BridgeChainCurrency
+}
+
+type BridgeChainCurrency struct {
+	MinimalCoinDenom string
+	ConDecimals      uint64
+	DisplayCoinDenom string
+}
+
+type NetworkAbbreviation = string
 
 func (handler *Bridges) FindByTransactionHash(ctx *fasthttp.RequestCtx) {
 	hashParam, _ := ctx.UserValue("hash").(string)
@@ -54,7 +87,7 @@ func (handler *Bridges) FindByTransactionHash(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	displayAmount, maybeDisplayDenom := toDisplayCoin(activity.Amount, activity.MaybeDenom)
+	displayAmount, maybeDisplayDenom := handler.toDisplayCoin(&activity)
 	httpapi.Success(ctx, BridgeActivityResponseRow{
 		BridgeActivityReadRow: activity,
 		DisplayAmount:         displayAmount,
@@ -131,31 +164,26 @@ func (handler *Bridges) ListActivities(ctx *fasthttp.RequestCtx) {
 		filter.MaybeUpdatedAtGt = maybeUpdatedAtGt
 	}
 
-	addressFilter := bridge_activitiy_view.BridgeActivitiesListAddressFilter{
-		MaybeCronosAddress:         nil,
-		MaybeCryptoOrgChainAddress: nil,
-	}
-	if queryArgs.Has("cronosAddress") {
-		addressFilter.MaybeCronosAddress = primptr.String(string(queryArgs.Peek("cronosAddress")))
-	}
-	if queryArgs.Has("cronosevmAddress") {
-		hexAddress := string(queryArgs.Peek("cronosevmAddress"))
-		var addr []byte
-		if strings.HasPrefix(hexAddress, "0x") {
-			addr = common.HexToAddress(hexAddress[2:]).Bytes()
-		} else {
-			addr = common.HexToAddress(hexAddress).Bytes()
+	addressFilter := make([]bridge_activitiy_view.BridgeActivitiesListAddressFilterCond, 0)
+	for _, chain := range handler.config.Networks {
+		paramName := fmt.Sprintf("%sAddress", chain.Abbreviation)
+		if queryArgs.Has(paramName) {
+			address := string(queryArgs.Peek(paramName))
+			if chain.MaybeAddressHook != nil {
+				if parsedAddr, addrErr := chain.MaybeAddressHook(address); addrErr != nil {
+					handler.logger.Errorf("error converting address: %v", addrErr)
+					httpapi.InternalServerError(ctx)
+					return
+				} else {
+					address = parsedAddr
+				}
+			}
+
+			addressFilter = append(addressFilter, bridge_activitiy_view.BridgeActivitiesListAddressFilterCond{
+				Chain:   chain.Abbreviation,
+				Address: address,
+			})
 		}
-		accountAddr, accountAddrErr := tmcosmosutils.AccountAddressFromBytes(handler.accountAddressPrefix, addr)
-		if accountAddrErr != nil {
-			handler.logger.Errorf("error converting cronosevm address to account address: %v", accountAddrErr)
-			httpapi.InternalServerError(ctx)
-			return
-		}
-		addressFilter.MaybeCronosAddress = primptr.String(accountAddr)
-	}
-	if queryArgs.Has("cryptoorgchainAddress") {
-		addressFilter.MaybeCryptoOrgChainAddress = primptr.String(string(queryArgs.Peek("cryptoorgchainAddress")))
 	}
 
 	order := bridge_activitiy_view.BridgeActivitiesListOrder{
@@ -176,7 +204,7 @@ func (handler *Bridges) ListActivities(ctx *fasthttp.RequestCtx) {
 
 	activityRespRows := make([]BridgeActivityResponseRow, 0)
 	for i, activity := range activities {
-		displayAmount, maybeDisplayDenom := toDisplayCoin(activity.Amount, activity.MaybeDenom)
+		displayAmount, maybeDisplayDenom := handler.toDisplayCoin(&activity)
 
 		activityRespRows = append(activityRespRows, BridgeActivityResponseRow{
 			BridgeActivityReadRow: activities[i],
@@ -260,29 +288,26 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 		filter.MaybeUpdatedAtGt = maybeUpdatedAtGt
 	}
 
-	addressFilter := bridge_activitiy_view.BridgeActivitiesListAddressFilter{
-		MaybeCronosAddress:         nil,
-		MaybeCryptoOrgChainAddress: nil,
-	}
-	if networkParam == "cronos" {
-		addressFilter.MaybeCronosAddress = primptr.String(accountParam)
-	} else if networkParam == "cronosevm" {
-		hexAddress := accountParam
-		var addr []byte
-		if strings.HasPrefix(hexAddress, "0x") {
-			addr = common.HexToAddress(hexAddress[2:]).Bytes()
-		} else {
-			addr = common.HexToAddress(hexAddress).Bytes()
+	var addressFilter []bridge_activitiy_view.BridgeActivitiesListAddressFilterCond
+	for _, network := range handler.config.Networks {
+		if network.Abbreviation == networkParam {
+			address := accountParam
+			if network.MaybeAddressHook != nil {
+				if parsedAddr, addrErr := network.MaybeAddressHook(accountParam); addrErr != nil {
+					handler.logger.Errorf("error converting address: %v", addrErr)
+					httpapi.InternalServerError(ctx)
+					return
+				} else {
+					address = parsedAddr
+				}
+			}
+			addressFilter = []bridge_activitiy_view.BridgeActivitiesListAddressFilterCond{
+				{
+					Chain:   network.ChainName,
+					Address: address,
+				},
+			}
 		}
-		accountAddr, accountAddrErr := tmcosmosutils.AccountAddressFromBytes(handler.accountAddressPrefix, addr)
-		if accountAddrErr != nil {
-			handler.logger.Errorf("error converting cronosevm address to account address: %v", accountAddrErr)
-			httpapi.InternalServerError(ctx)
-			return
-		}
-		addressFilter.MaybeCronosAddress = primptr.String(accountAddr)
-	} else if networkParam == "cryptoorgchain" {
-		addressFilter.MaybeCryptoOrgChainAddress = primptr.String(accountParam)
 	}
 
 	order := bridge_activitiy_view.BridgeActivitiesListOrder{
@@ -303,7 +328,7 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 
 	activityRespRows := make([]BridgeActivityResponseRow, 0)
 	for i, activity := range activities {
-		displayAmount, maybeDisplayDenom := toDisplayCoin(activity.Amount, activity.MaybeDenom)
+		displayAmount, maybeDisplayDenom := handler.toDisplayCoin(&activity)
 
 		activityRespRows = append(activityRespRows, BridgeActivityResponseRow{
 			BridgeActivityReadRow: activities[i],
@@ -315,21 +340,26 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 	httpapi.SuccessWithPagination(ctx, activityRespRows, paginationResult)
 }
 
-func toDisplayCoin(amount coin.Int, maybeDenom *string) (string, *string) {
-	displayAmount := amount.String()
-	displayDenom := maybeDenom
-	if maybeDenom == nil {
+func (handler *Bridges) toDisplayCoin(
+	activity *bridge_activitiy_view.BridgeActivityReadRow,
+) (string, *string) {
+	displayAmount := activity.Amount.String()
+	displayDenom := activity.MaybeDenom
+	if activity.MaybeDenom == nil {
 		return displayAmount, displayDenom
 	}
 
-	parts := strings.Split(*maybeDenom, "/")
-	lastPart := parts[len(parts)-1]
-	if lastPart == "basecro" {
-		displayAmount = amount.ToDec().Quo(coin.NewDec(100000000)).String()
-		displayDenom = primptr.String("CRO")
-	} else if lastPart == "basetcro" {
-		displayAmount = amount.ToDec().Quo(coin.NewDec(100000000)).String()
-		displayDenom = primptr.String("TCRO")
+	for _, chain := range handler.config.Chains {
+		if activity.SourceChain == chain.Name {
+			for _, currency := range chain.Currencies {
+				if currency.MinimalCoinDenom == *activity.MaybeDenom {
+					displayAmount = activity.Amount.ToDec().Quo(
+						coin.NewDec(10).Power(currency.ConDecimals),
+					).String()
+					displayDenom = primptr.String(currency.DisplayCoinDenom)
+				}
+			}
+		}
 	}
 
 	return displayAmount, displayDenom
@@ -364,5 +394,22 @@ func parseStatus(value string) (*types.Status, error) {
 		return primptr.String(types.STATUS_COUNTERPARTY_REJECTED), nil
 	default:
 		return nil, errors.New("unrecognized status")
+	}
+}
+
+func DefaultCronosEVMAddressHookGenerator(accountAddressPrefix string) func(string) (string, error) {
+	return func(hexAddress string) (string, error) {
+		var addr []byte
+		if strings.HasPrefix(hexAddress, "0x") {
+			addr = common.HexToAddress(hexAddress[2:]).Bytes()
+		} else {
+			addr = common.HexToAddress(hexAddress).Bytes()
+		}
+		accountAddr, accountAddrErr := tmcosmosutils.AccountAddressFromBytes(accountAddressPrefix, addr)
+		if accountAddrErr != nil {
+			return "", fmt.Errorf("error converting cronosevm address to account address: %v", accountAddrErr)
+		}
+
+		return accountAddr, nil
 	}
 }
