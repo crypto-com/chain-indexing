@@ -203,8 +203,8 @@ func (handler *Bridges) ListActivities(ctx *fasthttp.RequestCtx) {
 	}
 
 	activityRespRows := make([]BridgeActivityResponseRow, 0)
-	for i, activity := range activities {
-		displayAmount, maybeDisplayDenom := handler.toDisplayCoin(&activity)
+	for i, _ := range activities {
+		displayAmount, maybeDisplayDenom := handler.toDisplayCoin(&activities[i])
 
 		activityRespRows = append(activityRespRows, BridgeActivityResponseRow{
 			BridgeActivityReadRow: activities[i],
@@ -327,8 +327,8 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 	}
 
 	activityRespRows := make([]BridgeActivityResponseRow, 0)
-	for i, activity := range activities {
-		displayAmount, maybeDisplayDenom := handler.toDisplayCoin(&activity)
+	for i, _ := range activities {
+		displayAmount, maybeDisplayDenom := handler.toDisplayCoin(&activities[i])
 
 		activityRespRows = append(activityRespRows, BridgeActivityResponseRow{
 			BridgeActivityReadRow: activities[i],
