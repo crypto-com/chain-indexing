@@ -21,8 +21,10 @@ type ValidatorDelegation struct {
 	validatorAddressPrefix string
 	consNodeAddressPrefix  string
 
-	validatorsView  validator_delegation_view.Validators
-	delegationsView validator_delegation_view.Delegations
+	validatorsView           validator_delegation_view.Validators
+	delegationsView          validator_delegation_view.Delegations
+	unbondingDelegationsView validator_delegation_view.UnbondingDelegations
+	redelegationsView        validator_delegation_view.Redelegations
 }
 
 func NewValidatorDelegation(
@@ -43,6 +45,8 @@ func NewValidatorDelegation(
 
 		validator_delegation_view.NewValidatorsView(rdbHandle),
 		validator_delegation_view.NewDelegationsView(rdbHandle),
+		validator_delegation_view.NewUnbondingDelegationsView(rdbHandle),
+		validator_delegation_view.NewRedelegationsView(rdbHandle),
 	}
 }
 
@@ -54,7 +58,7 @@ func (handler *ValidatorDelegation) FindValidatorByAddress(ctx *fasthttp.Request
 		return
 	}
 
-	address, ok := ctx.UserValue("address").(string)
+	validatorAddress, ok := ctx.UserValue("address").(string)
 	if !ok {
 		httpapi.BadRequest(ctx, errors.New("error parsing input address"))
 		return
@@ -63,9 +67,9 @@ func (handler *ValidatorDelegation) FindValidatorByAddress(ctx *fasthttp.Request
 	var validator validator_delegation_view.ValidatorRow
 	var found bool
 
-	if strings.HasPrefix(address, handler.consNodeAddressPrefix) {
+	if strings.HasPrefix(validatorAddress, handler.consNodeAddressPrefix) {
 
-		validator, found, err = handler.validatorsView.FindByConsensusNodeAddr(address, height)
+		validator, found, err = handler.validatorsView.FindByConsensusNodeAddr(validatorAddress, height)
 		if err != nil {
 			handler.logger.Errorf("error finding validator by ConsensusNodeAddress: %v", err)
 			httpapi.InternalServerError(ctx)
@@ -76,9 +80,9 @@ func (handler *ValidatorDelegation) FindValidatorByAddress(ctx *fasthttp.Request
 			return
 		}
 
-	} else if strings.HasPrefix(address, handler.validatorAddressPrefix) {
+	} else if strings.HasPrefix(validatorAddress, handler.validatorAddressPrefix) {
 
-		validator, found, err = handler.validatorsView.FindByOperatorAddr(address, height)
+		validator, found, err = handler.validatorsView.FindByOperatorAddr(validatorAddress, height)
 		if err != nil {
 			handler.logger.Errorf("error finding validaotr by OperatorAddress: %v", err)
 			httpapi.InternalServerError(ctx)
@@ -135,13 +139,13 @@ func (handler *ValidatorDelegation) ListDelegationByValidator(ctx *fasthttp.Requ
 		return
 	}
 
-	address, ok := ctx.UserValue("address").(string)
+	validatorAddress, ok := ctx.UserValue("address").(string)
 	if !ok {
 		httpapi.BadRequest(ctx, errors.New("error parsing input address"))
 		return
 	}
 
-	delegations, paginationResult, err := handler.delegationsView.ListByValidatorAddr(address, height, pagination)
+	delegations, paginationResult, err := handler.delegationsView.ListByValidatorAddr(validatorAddress, height, pagination)
 	if err != nil {
 		handler.logger.Errorf("error listing delegations by ValidatorAddress: %v", err)
 		httpapi.InternalServerError(ctx)
@@ -165,15 +169,75 @@ func (handler *ValidatorDelegation) ListDelegationByDelegator(ctx *fasthttp.Requ
 		return
 	}
 
-	address, ok := ctx.UserValue("address").(string)
+	delegatorAddress, ok := ctx.UserValue("address").(string)
 	if !ok {
 		httpapi.BadRequest(ctx, errors.New("error parsing input address"))
 		return
 	}
 
-	delegations, paginationResult, err := handler.delegationsView.ListByDelegatorAddr(address, height, pagination)
+	delegations, paginationResult, err := handler.delegationsView.ListByDelegatorAddr(delegatorAddress, height, pagination)
 	if err != nil {
 		handler.logger.Errorf("error listing delegations by DelegatorAddress: %v", err)
+		httpapi.InternalServerError(ctx)
+		return
+	}
+
+	httpapi.SuccessWithPagination(ctx, delegations, paginationResult)
+}
+
+func (handler *ValidatorDelegation) ListUnbondingDelegationByValidator(ctx *fasthttp.RequestCtx) {
+
+	pagination, err := httpapi.ParsePagination(ctx)
+	if err != nil {
+		ctx.SetStatusCode(fasthttp.StatusBadRequest)
+		return
+	}
+
+	height, err := parseInputHeight(ctx)
+	if err != nil {
+		httpapi.BadRequest(ctx, fmt.Errorf("error parsing input height: %v", err))
+		return
+	}
+
+	validatorAddress, ok := ctx.UserValue("address").(string)
+	if !ok {
+		httpapi.BadRequest(ctx, errors.New("error parsing input address"))
+		return
+	}
+
+	delegations, paginationResult, err := handler.unbondingDelegationsView.ListByValidatorWithPagination(validatorAddress, height, pagination)
+	if err != nil {
+		handler.logger.Errorf("error listing unbonding delegations by ValidatorAddress: %v", err)
+		httpapi.InternalServerError(ctx)
+		return
+	}
+
+	httpapi.SuccessWithPagination(ctx, delegations, paginationResult)
+}
+
+func (handler *ValidatorDelegation) ListRedelegationBySrcValidator(ctx *fasthttp.RequestCtx) {
+
+	pagination, err := httpapi.ParsePagination(ctx)
+	if err != nil {
+		ctx.SetStatusCode(fasthttp.StatusBadRequest)
+		return
+	}
+
+	height, err := parseInputHeight(ctx)
+	if err != nil {
+		httpapi.BadRequest(ctx, fmt.Errorf("error parsing input height: %v", err))
+		return
+	}
+
+	srcValidatorAddress, ok := ctx.UserValue("srcValAddress").(string)
+	if !ok {
+		httpapi.BadRequest(ctx, errors.New("error parsing input address"))
+		return
+	}
+
+	delegations, paginationResult, err := handler.redelegationsView.ListBySrcValidatorWithPagination(srcValidatorAddress, height, pagination)
+	if err != nil {
+		handler.logger.Errorf("error listing redelegations by SrcValidatorAddress: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
 	}
