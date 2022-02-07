@@ -165,12 +165,12 @@ func (handler *Bridges) ListActivities(ctx *fasthttp.RequestCtx) {
 	}
 
 	addressFilter := make([]bridge_activitiy_view.BridgeActivitiesListAddressFilterCond, 0)
-	for _, chain := range handler.config.Networks {
-		paramName := fmt.Sprintf("%sAddress", chain.Abbreviation)
+	for _, network := range handler.config.Networks {
+		paramName := fmt.Sprintf("%sAddress", network.Abbreviation)
 		if queryArgs.Has(paramName) {
 			address := string(queryArgs.Peek(paramName))
-			if chain.MaybeAddressHook != nil {
-				if parsedAddr, addrErr := chain.MaybeAddressHook(address); addrErr != nil {
+			if network.MaybeAddressHook != nil {
+				if parsedAddr, addrErr := network.MaybeAddressHook(address); addrErr != nil {
 					handler.logger.Errorf("error converting address: %v", addrErr)
 					httpapi.InternalServerError(ctx)
 					return
@@ -180,7 +180,7 @@ func (handler *Bridges) ListActivities(ctx *fasthttp.RequestCtx) {
 			}
 
 			addressFilter = append(addressFilter, bridge_activitiy_view.BridgeActivitiesListAddressFilterCond{
-				Chain:   chain.Abbreviation,
+				Chain:   network.ChainName,
 				Address: address,
 			})
 		}
