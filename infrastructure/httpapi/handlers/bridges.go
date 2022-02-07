@@ -26,14 +26,14 @@ type Bridges struct {
 
 	bridgeActivitiesView bridge_activitiy_view.BridgeActivities
 	accountAddressPrefix string
-	config               BridgeConfig
+	config               BridgesConfig
 }
 
 func NewBridges(
 	logger applogger.Logger,
 	rdbHandle *rdb.Handle,
 	cosmosAddressPrefix string,
-	config BridgeConfig,
+	config BridgesConfig,
 ) *Bridges {
 	return &Bridges{
 		logger.WithFields(applogger.LogFields{
@@ -46,7 +46,7 @@ func NewBridges(
 	}
 }
 
-type BridgeConfig struct {
+type BridgesConfig struct {
 	Networks []BridgeNetworkConfig
 	Chains   []BridgeChainConfig
 }
