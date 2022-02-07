@@ -190,6 +190,8 @@ func (projection *Account) HandleEvents(height int64, events []event_entity.Even
 						return fmt.Errorf("error handling TransactionFailedEvent: %v", handleErr)
 					}
 				}
+			} else {
+				fmt.Errorf("empty fee payer on handling event: %v", transactionFailedEvent)
 			}
 		}
 	}
