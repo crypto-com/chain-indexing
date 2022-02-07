@@ -410,6 +410,10 @@ func DefaultCronosEVMAddressHookGenerator(accountAddressPrefix string) func(stri
 			return "", fmt.Errorf("error converting cronosevm address to account address: %v", accountAddrErr)
 		}
 
-		return accountAddr, nil
+		return strings.ToLower(accountAddr), nil
 	}
+}
+
+func DefaultLowercaseAddressHook(address string) (string, error) {
+	return strings.ToLower(address), nil
 }
