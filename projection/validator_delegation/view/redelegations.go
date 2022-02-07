@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	pagination_appinterface "github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
@@ -12,12 +13,18 @@ import (
 )
 
 type Redelegations interface {
-	Clone(previousHeight int64, currentHeight int64) error
-
-	Upsert(row RedelegationRow) error
+	Insert(row RedelegationRow) error
+	Update(row RedelegationRow) error
 	Delete(row RedelegationRow) error
 	FindBy(delegatorAddress, validatorSrcAddress, validatorDstAddress string, height int64) (RedelegationRow, bool, error)
+	// For internal projection logic
 	ListBySrcValidator(validatorSrcAddress string, height int64) ([]RedelegationRow, error)
+	// For HTTP API
+	ListBySrcValidatorWithPagination(
+		validatorSrcAddress string,
+		height int64,
+		pagination *pagination_appinterface.Pagination,
+	) ([]RedelegationRow, *pagination_appinterface.PaginationResult, error)
 }
 
 type RedelegationsView struct {
@@ -30,38 +37,7 @@ func NewRedelegationsView(handle *rdb.Handle) Redelegations {
 	}
 }
 
-func (view *RedelegationsView) Clone(previousHeight, currentHeight int64) error {
-
-	sql, sqlErr := view.rdb.StmtBuilder.ReplacePlaceholders(`INSERT INTO view_vd_redelegations(
-		height,
-		delegator_address,
-		validator_src_address,
-		validator_dst_address,
-		entries
-	) SELECT
-		?,
-		delegator_address,
-		validator_src_address,
-		validator_dst_address,
-		entries
-	FROM view_vd_redelegations WHERE height = ?
-	`)
-	if sqlErr != nil {
-		return fmt.Errorf("error building redelegation clone sql: %v: %w", sqlErr, rdb.ErrBuildSQLStmt)
-	}
-	sqlArgs := []interface{}{
-		currentHeight,
-		previousHeight,
-	}
-
-	if _, execErr := view.rdb.Exec(sql, sqlArgs...); execErr != nil {
-		return fmt.Errorf("error cloning redelegation into the table: %v: %w", execErr, rdb.ErrWrite)
-	}
-
-	return nil
-}
-
-func (view *RedelegationsView) Upsert(row RedelegationRow) error {
+func (view *RedelegationsView) Insert(row RedelegationRow) error {
 
 	entriesJSON, err := jsoniter.MarshalToString(row.Entries)
 	if err != nil {
@@ -80,38 +56,99 @@ func (view *RedelegationsView) Upsert(row RedelegationRow) error {
 			"entries",
 		).
 		Values(
-			row.Height,
+			fmt.Sprintf("[%v,)", row.Height),
 			row.DelegatorAddress,
 			row.ValidatorSrcAddress,
 			row.ValidatorDstAddress,
 			entriesJSON,
 		).
-		Suffix("ON CONFLICT(delegator_address, validator_src_address, validator_dst_address, height) DO UPDATE SET entries = EXCLUDED.entries").
 		ToSql()
 
 	if err != nil {
-		return fmt.Errorf("error building redelegation upsertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		return fmt.Errorf("error building redelegation insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
 	result, err := view.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
-		return fmt.Errorf("error upserting redelegation into the table: %v: %w", err, rdb.ErrWrite)
+		return fmt.Errorf("error inserting redelegation into the table: %v: %w", err, rdb.ErrWrite)
 	}
 	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error upserting redelegation into the table: no row upserted: %w", rdb.ErrWrite)
+		return fmt.Errorf("error inserting redelegation into the table: no row upserted: %w", rdb.ErrWrite)
 	}
 
 	return nil
 }
 
-func (view *RedelegationsView) Delete(row RedelegationRow) error {
+func (view *RedelegationsView) Update(row RedelegationRow) error {
+
+	// Check if there is an record's lower bound start with this height.
+	found, err := view.checkIfRedelegationRecordExistByHeightLowerBound(row)
+	if err != nil {
+		return fmt.Errorf("error in checking new Redelegation record existence at this height: %v", err)
+	}
+
+	if found {
+		// If there is a record lower(height) == row.Height, then update the existed one
+
+		entriesJSON, err := jsoniter.MarshalToString(row.Entries)
+		if err != nil {
+			return fmt.Errorf("error JSON marshalling RedelegationRow.Entries for upsertion: %v: %w", err, rdb.ErrBuildSQLStmt)
+		}
+
+		sql, sqlArgs, err := view.rdb.StmtBuilder.
+			Update(
+				"view_vd_redelegations",
+			).
+			SetMap(map[string]interface{}{
+				"entries": entriesJSON,
+			}).
+			Where(
+				"delegator_address = ? AND validator_src_address = ? AND validator_dst_address = ? AND height @> ?::int8",
+				row.DelegatorAddress,
+				row.ValidatorSrcAddress,
+				row.ValidatorDstAddress,
+				row.Height,
+			).
+			ToSql()
+
+		if err != nil {
+			return fmt.Errorf("error building Redelegation update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		}
+
+		result, err := view.rdb.Exec(sql, sqlArgs...)
+		if err != nil {
+			return fmt.Errorf("error updating Redelegation into the table: %v: %w", err, rdb.ErrWrite)
+		}
+		if result.RowsAffected() != 1 {
+			return fmt.Errorf("error updating Redelegation into the table: row updated: %v: %w", result.RowsAffected(), rdb.ErrWrite)
+		}
+
+	} else {
+		// If there is not an existed record, then update the previous record's height range and insert a new record
+
+		err := view.setRedelegationRecordHeightUpperBound(row)
+		if err != nil {
+			return fmt.Errorf("error updating Redelegation.Height upper bound: %v", err)
+		}
+		err = view.Insert(row)
+		if err != nil {
+			return fmt.Errorf("error inserting a new record for this Redelegation: %v", err)
+		}
+
+	}
+
+	return nil
+}
+
+func (view *RedelegationsView) checkIfRedelegationRecordExistByHeightLowerBound(row RedelegationRow) (bool, error) {
 
 	sql, sqlArgs, err := view.rdb.StmtBuilder.
-		Delete(
-			"view_vd_redelegations",
+		Select(
+			"COUNT(*)",
 		).
+		From("view_vd_redelegations").
 		Where(
-			"delegator_address = ? AND validator_src_address = ? AND validator_dst_address = ? AND height = ?",
+			"delegator_address = ? AND validator_src_address = ? AND validator_dst_address = ? AND lower(height) = ?",
 			row.DelegatorAddress,
 			row.ValidatorSrcAddress,
 			row.ValidatorDstAddress,
@@ -119,15 +156,45 @@ func (view *RedelegationsView) Delete(row RedelegationRow) error {
 		).
 		ToSql()
 	if err != nil {
-		return fmt.Errorf("error building redelegation deletion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		return false, fmt.Errorf("error building 'checking Redelegation at specific lower(height) sql: %v: %w", err, rdb.ErrPrepare)
 	}
 
-	result, err := view.rdb.Exec(sql, sqlArgs...)
-	if err != nil {
-		return fmt.Errorf("error deleting redelegation from the table: %v: %w", err, rdb.ErrWrite)
+	var count int64
+	if err = view.rdb.QueryRow(sql, sqlArgs...).Scan(
+		&count,
+	); err != nil {
+		return false, fmt.Errorf("error scanning count: %v: %w", err, rdb.ErrQuery)
 	}
-	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error deleting redelegation from the table: no row deleted: %w", rdb.ErrWrite)
+
+	return count == 1, nil
+}
+
+func (view *RedelegationsView) Delete(row RedelegationRow) error {
+
+	return view.setRedelegationRecordHeightUpperBound(row)
+}
+
+func (view *RedelegationsView) setRedelegationRecordHeightUpperBound(row RedelegationRow) error {
+
+	// Set the upper bound for record height: `[<PREVIOUS-LOWER-BOUND>, row.Height)`.
+	sql, sqlErr := view.rdb.StmtBuilder.ReplacePlaceholders(`
+		UPDATE view_vd_redelegations
+		SET height = int8range(lower(height), ?, '[)')
+		WHERE delegator_address = ? AND validator_src_address = ? AND validator_dst_address = ? AND height @> ?::int8
+	`)
+	if sqlErr != nil {
+		return fmt.Errorf("error building Redelegation upper(height) update sql: %v: %w", sqlErr, rdb.ErrBuildSQLStmt)
+	}
+	sqlArgs := []interface{}{
+		row.Height,
+		row.DelegatorAddress,
+		row.ValidatorSrcAddress,
+		row.ValidatorDstAddress,
+		row.Height,
+	}
+
+	if _, execErr := view.rdb.Exec(sql, sqlArgs...); execErr != nil {
+		return fmt.Errorf("error executing Redelegation upper(height)update sql: %v: %w", execErr, rdb.ErrWrite)
 	}
 
 	return nil
@@ -146,7 +213,7 @@ func (view *RedelegationsView) FindBy(
 		).
 		From("view_vd_redelegations").
 		Where(
-			"delegator_address = ? AND validator_src_address = ? AND validator_dst_address = ? AND height = ?",
+			"delegator_address = ? AND validator_src_address = ? AND validator_dst_address = ? AND height @> ?::int8",
 			delegatorAddress,
 			validatorSrcAddress,
 			validatorDstAddress,
@@ -196,7 +263,7 @@ func (view *RedelegationsView) ListBySrcValidator(
 			"view_vd_redelegations",
 		).
 		Where(
-			"validator_src_address = ? AND height = ?",
+			"validator_src_address = ? AND height @> ?::int8",
 			validatorSrcAddress,
 			height,
 		).
@@ -220,7 +287,7 @@ func (view *RedelegationsView) ListBySrcValidator(
 		var entriesJSON string
 		if err = rowsResult.Scan(
 			&redelegation.DelegatorAddress,
-			&redelegation.ValidatorSrcAddress,
+			&redelegation.ValidatorDstAddress,
 			&entriesJSON,
 		); err != nil {
 			return nil, fmt.Errorf("error scanning redelegation row: %v: %w", err, rdb.ErrQuery)
@@ -236,9 +303,72 @@ func (view *RedelegationsView) ListBySrcValidator(
 	return redelegations, nil
 }
 
-// Notes:
-// - UNIQUE(delegatorAddress, validatorSrcAddress, validatorDstAddress, height)
-// - Index(validatorSrcAddress, height)
+func (view *RedelegationsView) ListBySrcValidatorWithPagination(
+	validatorSrcAddress string,
+	height int64,
+	pagination *pagination_appinterface.Pagination,
+) ([]RedelegationRow, *pagination_appinterface.PaginationResult, error) {
+
+	stmtBuilder := view.rdb.StmtBuilder.
+		Select(
+			"delegator_address",
+			"validator_dst_address",
+			"entries",
+		).
+		From(
+			"view_vd_redelegations",
+		).
+		Where(
+			"validator_src_address = ? AND height @> ?::int8",
+			validatorSrcAddress,
+			height,
+		)
+
+	rDbPagination := rdb.NewRDbPaginationBuilder(
+		pagination,
+		view.rdb,
+	).BuildStmt(stmtBuilder)
+	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
+	if err != nil {
+		return nil, nil, fmt.Errorf("error building redelegation select by src validator SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	rowsResult, err := view.rdb.Query(sql, sqlArgs...)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error executing redelegation select by src validator SQL: %v: %w", err, rdb.ErrQuery)
+	}
+	defer rowsResult.Close()
+
+	redelegations := make([]RedelegationRow, 0)
+	for rowsResult.Next() {
+		var redelegation RedelegationRow
+		redelegation.Height = height
+		redelegation.ValidatorSrcAddress = validatorSrcAddress
+
+		var entriesJSON string
+		if err = rowsResult.Scan(
+			&redelegation.DelegatorAddress,
+			&redelegation.ValidatorDstAddress,
+			&entriesJSON,
+		); err != nil {
+			return nil, nil, fmt.Errorf("error scanning redelegation row: %v: %w", err, rdb.ErrQuery)
+		}
+
+		if err = jsoniter.UnmarshalFromString(entriesJSON, &redelegation.Entries); err != nil {
+			return nil, nil, fmt.Errorf("error unmarshalling RedelegationRow.Entries JSON: %v: %w", err, rdb.ErrQuery)
+		}
+
+		redelegations = append(redelegations, redelegation)
+	}
+
+	paginationResult, err := rDbPagination.Result()
+	if err != nil {
+		return nil, nil, fmt.Errorf("error preparing pagination result: %v", err)
+	}
+
+	return redelegations, paginationResult, nil
+}
+
 type RedelegationRow struct {
 	Height              int64               `json:"height"`
 	DelegatorAddress    string              `json:"delegatorAddress"`
@@ -257,9 +387,10 @@ func NewRedelegationRow(
 	sharesDst coin.Dec,
 ) RedelegationRow {
 	return RedelegationRow{
+		Height:              creationHeight,
 		DelegatorAddress:    delegatorAddress,
 		ValidatorSrcAddress: validatorSrcAddress,
-		ValidatorDstAddress: validatorSrcAddress,
+		ValidatorDstAddress: validatorDstAddress,
 		Entries: []RedelegationEntry{
 			NewRedelegationEntry(creationHeight, completionTime, balance, sharesDst),
 		},

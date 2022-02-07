@@ -193,8 +193,8 @@ func (projection *ValidatorDelegation) slashUnbondingDelegation(
 	}
 
 	unbondingDelegationsView := NewUnbondingDelegations(rdbTxHandle)
-	if err := unbondingDelegationsView.Upsert(unbondingDelegation); err != nil {
-		return coin.ZeroInt(), fmt.Errorf("error upserting unbonding delegation record: %v", err)
+	if err := unbondingDelegationsView.Update(unbondingDelegation); err != nil {
+		return coin.ZeroInt(), fmt.Errorf("error updating unbonding delegation record: %v", err)
 	}
 
 	return totalSlashAmount, nil

@@ -26,12 +26,16 @@ func (projection *ValidatorDelegation) setUnbondingDelegationEntry(
 	}
 	if found {
 		ubd.AddEntry(creationHeight, completionTime, balance)
+
+		if err := unbondingDelegationsView.Update(ubd); err != nil {
+			return ubd, fmt.Errorf("error updating unbonding delegation record: %v", err)
+		}
 	} else {
 		ubd = view.NewUnbondingDelegationRow(delegatorAddress, validatorAddress, creationHeight, completionTime, balance)
-	}
 
-	if err := unbondingDelegationsView.Upsert(ubd); err != nil {
-		return ubd, fmt.Errorf("error upserting unbonding delegation record: %v", err)
+		if err := unbondingDelegationsView.Insert(ubd); err != nil {
+			return ubd, fmt.Errorf("error inserting unbonding delegation record: %v", err)
+		}
 	}
 
 	return ubd, nil
@@ -72,8 +76,8 @@ func (projection *ValidatorDelegation) completeUnbonding(
 
 		} else {
 
-			if err := unbondingDelegationsView.Upsert(ubd); err != nil {
-				return fmt.Errorf("error upserting unbonding delegation: %v", err)
+			if err := unbondingDelegationsView.Update(ubd); err != nil {
+				return fmt.Errorf("error updating unbonding delegation: %v", err)
 			}
 
 		}

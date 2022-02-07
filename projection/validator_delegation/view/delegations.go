@@ -4,15 +4,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/crypto-com/chain-indexing/appinterface/pagination"
 	pagination_appinterface "github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 )
 
 type Delegations interface {
-	Clone(previousHeight int64, currentHeight int64) error
-
 	Insert(row DelegationRow) error
 	Update(row DelegationRow) error
 	Delete(row DelegationRow) error
@@ -22,13 +19,13 @@ type Delegations interface {
 	ListByValidatorAddr(
 		validatorAddress string,
 		height int64,
-		pagination *pagination.Pagination,
-	) ([]DelegationRow, *pagination.PaginationResult, error)
+		pagination *pagination_appinterface.Pagination,
+	) ([]DelegationRow, *pagination_appinterface.PaginationResult, error)
 	ListByDelegatorAddr(
 		delegatorAddress string,
 		height int64,
-		pagination *pagination.Pagination,
-	) ([]DelegationRow, *pagination.PaginationResult, error)
+		pagination *pagination_appinterface.Pagination,
+	) ([]DelegationRow, *pagination_appinterface.PaginationResult, error)
 }
 
 type DelegationsView struct {
@@ -39,35 +36,6 @@ func NewDelegationsView(handle *rdb.Handle) Delegations {
 	return &DelegationsView{
 		handle,
 	}
-}
-
-func (view *DelegationsView) Clone(previousHeight, currentHeight int64) error {
-
-	sql, sqlErr := view.rdb.StmtBuilder.ReplacePlaceholders(`INSERT INTO view_vd_delegations(
-		height,
-		validator_address,
-		delegator_address,
-		shares
-	) SELECT
-		?,
-		validator_address,
-		delegator_address,
-		shares
-	FROM view_vd_delegations WHERE height = ?
-	`)
-	if sqlErr != nil {
-		return fmt.Errorf("error building delegation clone sql: %v: %w", sqlErr, rdb.ErrBuildSQLStmt)
-	}
-	sqlArgs := []interface{}{
-		currentHeight,
-		previousHeight,
-	}
-
-	if _, execErr := view.rdb.Exec(sql, sqlArgs...); execErr != nil {
-		return fmt.Errorf("error cloning delegation into the table: %v: %w", execErr, rdb.ErrWrite)
-	}
-
-	return nil
 }
 
 func (view *DelegationsView) Insert(row DelegationRow) error {
@@ -83,7 +51,7 @@ func (view *DelegationsView) Insert(row DelegationRow) error {
 			"shares",
 		).
 		Values(
-			row.Height,
+			fmt.Sprintf("[%v,)", row.Height),
 			row.ValidatorAddress,
 			row.DelegatorAddress,
 			row.Shares.String(),
@@ -107,59 +75,112 @@ func (view *DelegationsView) Insert(row DelegationRow) error {
 
 func (view *DelegationsView) Update(row DelegationRow) error {
 
-	sql, sqlArgs, err := view.rdb.StmtBuilder.
-		Update(
-			"view_vd_delegations",
-		).
-		SetMap(map[string]interface{}{
-			"shares": row.Shares.String(),
-		}).
-		Where(
-			"validator_address = ? AND delegator_address = ? AND height = ?",
-			row.ValidatorAddress,
-			row.DelegatorAddress,
-			row.Height,
-		).
-		ToSql()
-
+	// Check if there is an record's lower bound start with this height.
+	found, err := view.checkIfDelegationRecordExistByHeightLowerBound(row)
 	if err != nil {
-		return fmt.Errorf("error building delegation update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		return fmt.Errorf("error in checking new delegation record existence at this height: %v", err)
 	}
 
-	result, err := view.rdb.Exec(sql, sqlArgs...)
-	if err != nil {
-		return fmt.Errorf("error updating delegation into the table: %v: %w", err, rdb.ErrWrite)
-	}
-	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error updating delegation into the table: row updated: %v: %w", result.RowsAffected(), rdb.ErrWrite)
+	if found {
+		// If there is a record lower(height) == row.Height, then update the existed one
+
+		sql, sqlArgs, err := view.rdb.StmtBuilder.
+			Update(
+				"view_vd_delegations",
+			).
+			SetMap(map[string]interface{}{
+				"shares": row.Shares.String(),
+			}).
+			Where(
+				"validator_address = ? AND delegator_address = ? AND height @> ?::int8",
+				row.ValidatorAddress,
+				row.DelegatorAddress,
+				row.Height,
+			).
+			ToSql()
+
+		if err != nil {
+			return fmt.Errorf("error building delegation update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		}
+
+		result, err := view.rdb.Exec(sql, sqlArgs...)
+		if err != nil {
+			return fmt.Errorf("error updating delegation into the table: %v: %w", err, rdb.ErrWrite)
+		}
+		if result.RowsAffected() != 1 {
+			return fmt.Errorf("error updating delegation into the table: row updated: %v: %w", result.RowsAffected(), rdb.ErrWrite)
+		}
+
+	} else {
+		// Else, update the previous record's height range, then insert a new record
+
+		err := view.setDelegationRecordHeightUpperBound(row)
+		if err != nil {
+			return fmt.Errorf("error updating delegation.Height upper bound: %v", err)
+		}
+		err = view.Insert(row)
+		if err != nil {
+			return fmt.Errorf("error inserting a new record for this delegation: %v", err)
+		}
+
 	}
 
 	return nil
 }
 
-func (view *DelegationsView) Delete(row DelegationRow) error {
+func (view *DelegationsView) checkIfDelegationRecordExistByHeightLowerBound(row DelegationRow) (bool, error) {
 
 	sql, sqlArgs, err := view.rdb.StmtBuilder.
-		Delete(
-			"view_vd_delegations",
+		Select(
+			"COUNT(*)",
 		).
+		From("view_vd_delegations").
 		Where(
-			"validator_address = ? AND delegator_address = ? AND height = ?",
+			"validator_address = ? AND delegator_address = ? AND lower(height) = ?",
 			row.ValidatorAddress,
 			row.DelegatorAddress,
 			row.Height,
 		).
 		ToSql()
 	if err != nil {
-		return fmt.Errorf("error building delegation deletion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		return false, fmt.Errorf("error building 'checking delegation at specific lower(height) sql: %v: %w", err, rdb.ErrPrepare)
 	}
 
-	result, err := view.rdb.Exec(sql, sqlArgs...)
-	if err != nil {
-		return fmt.Errorf("error deleting delegation from the table: %v: %w", err, rdb.ErrWrite)
+	var count int64
+	if err = view.rdb.QueryRow(sql, sqlArgs...).Scan(
+		&count,
+	); err != nil {
+		return false, fmt.Errorf("error scanning count: %v: %w", err, rdb.ErrQuery)
 	}
-	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error deleting delegation into the table: no row deleted: %w", rdb.ErrWrite)
+
+	return count == 1, nil
+}
+
+func (view *DelegationsView) Delete(row DelegationRow) error {
+
+	return view.setDelegationRecordHeightUpperBound(row)
+}
+
+func (view *DelegationsView) setDelegationRecordHeightUpperBound(row DelegationRow) error {
+
+	// Set the upper bound for record height: `[<PREVIOUS-LOWER-BOUND>, row.Height)`.
+	sql, sqlErr := view.rdb.StmtBuilder.ReplacePlaceholders(`
+		UPDATE view_vd_delegations
+		SET height = int8range(lower(height), ?, '[)')
+		WHERE validator_address = ? AND delegator_address = ? AND height @> ?::int8
+	`)
+	if sqlErr != nil {
+		return fmt.Errorf("error building delegation upper(height) update sql: %v: %w", sqlErr, rdb.ErrBuildSQLStmt)
+	}
+	sqlArgs := []interface{}{
+		row.Height,
+		row.ValidatorAddress,
+		row.DelegatorAddress,
+		row.Height,
+	}
+
+	if _, execErr := view.rdb.Exec(sql, sqlArgs...); execErr != nil {
+		return fmt.Errorf("error executing delegation upper(height)update sql: %v: %w", execErr, rdb.ErrWrite)
 	}
 
 	return nil
@@ -177,7 +198,7 @@ func (view *DelegationsView) FindBy(
 		).
 		From("view_vd_delegations").
 		Where(
-			"validator_address = ? AND delegator_address = ? AND height = ?",
+			"validator_address = ? AND delegator_address = ? AND height @> ?::int8",
 			validatorAddress,
 			delegatorAddress,
 			height,
@@ -226,7 +247,7 @@ func (view *DelegationsView) ListByValidatorAddr(
 			"view_vd_delegations",
 		).
 		Where(
-			"validator_address = ? AND height = ?",
+			"validator_address = ? AND height @> ?::int8",
 			validatorAddress,
 			height,
 		)
@@ -291,7 +312,7 @@ func (view *DelegationsView) ListByDelegatorAddr(
 			"view_vd_delegations",
 		).
 		Where(
-			"delegator_address = ? AND height = ?",
+			"delegator_address = ? AND height @> ?::int8",
 			delegatorAddress,
 			height,
 		)
@@ -341,10 +362,6 @@ func (view *DelegationsView) ListByDelegatorAddr(
 	return delegations, paginationResult, nil
 }
 
-// Notes:
-// - UNIQUE(validatorAddress, delegatorAddress, height)
-// - INDEX(validatorAddress, height)
-// - INDEX(delegatorAddress, height)
 type DelegationRow struct {
 	Height           int64    `json:"height"`
 	ValidatorAddress string   `json:"validatorAddress"`
