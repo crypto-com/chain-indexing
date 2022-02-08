@@ -44,26 +44,26 @@ func NewBridges(
 }
 
 type BridgesConfig struct {
-	Networks []BridgeNetworkConfig
-	Chains   []BridgeChainConfig
+	Networks []BridgeNetworkConfig `mapstructure:"networks"`
+	Chains   []BridgeChainConfig   `mapstructure:"chains"`
 }
 
 type BridgeNetworkConfig struct {
-	ChainName string
+	ChainName string `mapstructure:"chain_name"`
 	// Chain network unique abbreviation, used in URL query params
-	Abbreviation     NetworkAbbreviation
+	Abbreviation     NetworkAbbreviation `mapstructure:"abbreviation"`
 	MaybeAddressHook func(string) (string, error)
 }
 
 type BridgeChainConfig struct {
-	Name       string
-	Currencies []BridgeChainCurrency
+	Name       string                `mapstructure:"name"`
+	Currencies []BridgeChainCurrency `mapstructure:"currencies"`
 }
 
 type BridgeChainCurrency struct {
-	MinimalCoinDenom string
-	ConDecimals      uint64
-	DisplayCoinDenom string
+	MinimalCoinDenom string `mapstructure:"minimal_coin_denom"`
+	CoinDecimals     uint64 `mapstructure:"coin_decimals"`
+	DisplayCoinDenom string `mapstructure:"display_coin_denom"`
 }
 
 type NetworkAbbreviation = string
@@ -351,7 +351,7 @@ func (handler *Bridges) toDisplayCoin(
 			for _, currency := range chain.Currencies {
 				if currency.MinimalCoinDenom == *activity.MaybeDenom {
 					displayAmount = activity.Amount.ToDec().Quo(
-						coin.NewDec(10).Power(currency.ConDecimals),
+						coin.NewDec(10).Power(currency.CoinDecimals),
 					).String()
 					displayDenom = primptr.String(currency.DisplayCoinDenom)
 				}
