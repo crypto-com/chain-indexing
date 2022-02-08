@@ -18,7 +18,7 @@ CREATE TABLE view_vd_validators (
     EXCLUDE USING gist (
         operator_address WITH =, 
         height WITH &&
-    )
+    ),
     EXCLUDE USING gist (
         consensus_node_address WITH =, 
         height WITH &&
