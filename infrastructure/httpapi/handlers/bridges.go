@@ -3,17 +3,14 @@ package handlers
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/valyala/fasthttp"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/primptr"
-	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
@@ -294,7 +291,7 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 			address := accountParam
 			if network.MaybeAddressHook != nil {
 				if parsedAddr, addrErr := network.MaybeAddressHook(accountParam); addrErr != nil {
-					handler.logger.Errorf("error converting address: %v", addrErr)
+					handler.logger.Errorf("error running address hook: %v", addrErr)
 					httpapi.InternalServerError(ctx)
 					return
 				} else {
@@ -395,25 +392,4 @@ func parseStatus(value string) (*types.Status, error) {
 	default:
 		return nil, errors.New("unrecognized status")
 	}
-}
-
-func DefaultCronosEVMAddressHookGenerator(accountAddressPrefix string) func(string) (string, error) {
-	return func(hexAddress string) (string, error) {
-		var addr []byte
-		if strings.HasPrefix(hexAddress, "0x") {
-			addr = common.HexToAddress(hexAddress[2:]).Bytes()
-		} else {
-			addr = common.HexToAddress(hexAddress).Bytes()
-		}
-		accountAddr, accountAddrErr := tmcosmosutils.AccountAddressFromBytes(accountAddressPrefix, addr)
-		if accountAddrErr != nil {
-			return "", fmt.Errorf("error converting cronosevm address to account address: %v", accountAddrErr)
-		}
-
-		return strings.ToLower(accountAddr), nil
-	}
-}
-
-func DefaultLowercaseAddressHook(address string) (string, error) {
-	return strings.ToLower(address), nil
 }
