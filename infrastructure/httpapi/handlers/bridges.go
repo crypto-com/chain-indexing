@@ -169,7 +169,7 @@ func (handler *Bridges) ListActivities(ctx *fasthttp.RequestCtx) {
 		if queryArgs.Has(paramName) {
 			address := string(queryArgs.Peek(paramName))
 			if network.MaybeAddressHook != nil {
-				if parsedAddr, addrErr := network.MaybeAddressHook(address); addrErr != nil {
+				if parsedAddr, addrErr := (*network.MaybeAddressHook)(address); addrErr != nil {
 					handler.logger.Errorf("error converting address: %v", addrErr)
 					httpapi.InternalServerError(ctx)
 					return
@@ -292,7 +292,7 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 		if network.Abbreviation == networkParam {
 			address := accountParam
 			if network.MaybeAddressHook != nil {
-				if parsedAddr, addrErr := network.MaybeAddressHook(accountParam); addrErr != nil {
+				if parsedAddr, addrErr := (*network.MaybeAddressHook)(accountParam); addrErr != nil {
 					handler.logger.Errorf("error running address hook: %v", addrErr)
 					httpapi.InternalServerError(ctx)
 					return
