@@ -52,8 +52,10 @@ type BridgeNetworkConfig struct {
 	ChainName string `mapstructure:"chain_name"`
 	// Chain network unique abbreviation, used in URL query params
 	Abbreviation     NetworkAbbreviation `mapstructure:"abbreviation"`
-	MaybeAddressHook func(string) (string, error)
+	MaybeAddressHook *AddressHook
 }
+
+type AddressHook = func(string) (string, error)
 
 type BridgeChainConfig struct {
 	Name       string                `mapstructure:"name"`
