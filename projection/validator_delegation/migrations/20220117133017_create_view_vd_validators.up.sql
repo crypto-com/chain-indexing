@@ -14,11 +14,15 @@ CREATE TABLE view_vd_validators (
     min_self_delegation VARCHAR NOT NULL,
     PRIMARY KEY (id),
     -- Below is a constraint and it is also an index.
-    -- It prevents a delegation record appear twice at any given height. 
+    -- It prevents a delegation record appear twice at any given height.
     EXCLUDE USING gist (
         operator_address WITH =, 
+        height WITH &&
+    )
+    EXCLUDE USING gist (
         consensus_node_address WITH =, 
-        tendermint_address WITH =, 
         height WITH &&
     )
 );
+
+CREATE INDEX view_vd_validators_height_index ON view_vd_validators USING gist (height);

@@ -15,3 +15,5 @@ CREATE TABLE view_vd_redelegations (
         height WITH &&
     )
 );
+
+CREATE INDEX view_vd_redelegations_validator_src_addr_index ON view_vd_redelegations USING gist (height, validator_src_address);
