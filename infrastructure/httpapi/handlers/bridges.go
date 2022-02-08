@@ -44,28 +44,28 @@ func NewBridges(
 }
 
 type BridgesConfig struct {
-	Networks []BridgeNetworkConfig `mapstructure:"networks"`
-	Chains   []BridgeChainConfig   `mapstructure:"chains"`
+	Networks []BridgeNetworkConfig `yaml:"networks" mapstructure:"networks"`
+	Chains   []BridgeChainConfig   `yaml:"chains" mapstructure:"chains"`
 }
 
 type BridgeNetworkConfig struct {
-	ChainName string `mapstructure:"chain_name"`
+	ChainName string `yaml:"chain_name" mapstructure:"chain_name"`
 	// Chain network unique abbreviation, used in URL query params
-	Abbreviation     NetworkAbbreviation `mapstructure:"abbreviation"`
+	Abbreviation     NetworkAbbreviation `yaml:"abbreviation" mapstructure:"abbreviation"`
 	MaybeAddressHook *AddressHook
 }
 
 type AddressHook = func(string) (string, error)
 
 type BridgeChainConfig struct {
-	Name       string                `mapstructure:"name"`
-	Currencies []BridgeChainCurrency `mapstructure:"currencies"`
+	Name       string                `yaml:"name" mapstructure:"name"`
+	Currencies []BridgeChainCurrency `yaml:"currencies" mapstructure:"currencies"`
 }
 
 type BridgeChainCurrency struct {
-	MinimalCoinDenom string `mapstructure:"minimal_coin_denom"`
-	CoinDecimals     uint64 `mapstructure:"coin_decimals"`
-	DisplayCoinDenom string `mapstructure:"display_coin_denom"`
+	MinimalCoinDenom string `yaml:"minimal_coin_denom" mapstructure:"minimal_coin_denom"`
+	CoinDecimals     uint64 `yaml:"coin_decimals" mapstructure:"coin_decimals"`
+	DisplayCoinDenom string `yaml:"display_coin_denom" mapstructure:"display_coin_denom"`
 }
 
 type NetworkAbbreviation = string
