@@ -9,9 +9,9 @@ require (
 	github.com/calvinlauyh/cosmosutils v0.1.0
 	github.com/cenkalti/backoff/v4 v4.0.2
 	github.com/cosmos/cosmos-sdk v0.45.0
-	github.com/cosmos/ibc-go v1.2.1
+	github.com/cosmos/ibc-go v1.2.2
 	github.com/crypto-org-chain/chain-main/v3 v3.0.0-croeseid
-	github.com/crypto-org-chain/cronos v0.6.0-testnet
+	github.com/crypto-org-chain/cronos v0.6.5
 	github.com/ethereum/go-ethereum v1.10.3
 	github.com/ettle/strcase v0.1.1
 	github.com/fasthttp/router v1.3.3
@@ -34,7 +34,7 @@ require (
 	github.com/rs/zerolog v1.25.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tendermint/tendermint v0.34.14
-	github.com/tharsis/ethermint v0.7.1
+	github.com/tharsis/ethermint v0.7.2
 	github.com/valyala/fasthttp v1.17.0
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	gopkg.in/yaml.v2 v2.4.0
