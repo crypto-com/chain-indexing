@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS view_nft_denoms_id_btree_index ON view_nft_denoms USING btree (denom_id);

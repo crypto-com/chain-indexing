@@ -4,44 +4,53 @@ import (
 	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/crypto-com/chain-indexing/external/primptr"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
-
-	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
-
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/projection/bridge_activity/types"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 )
 
+type BridgePendingActivities interface {
+	ListAllUnprocessedOutgoing() ([]BridgePendingActivityReadRow, error)
+	ListAllUnprocessedIncoming() ([]BridgePendingActivityReadRow, error)
+	List(
+		filter BridgePendingActivitiesFilter,
+		order BridgePendingActivitiesOrder,
+	) ([]BridgePendingActivityReadRow, error)
+	UpdateToProcessed(id int64) error
+	Insert(activity *BridgePendingActivityInsertRow) error
+}
+
 const TABLE_BRIDGE_PENDING_ACTIVITIES = "view_bridge_pending_activities"
 
-type BridgePendingActivities struct {
+type BridgePendingActivitiesView struct {
 	rdb *rdb.Handle
 }
 
-func NewBridgePendingActivities(handle *rdb.Handle) *BridgePendingActivities {
-	return &BridgePendingActivities{
+func NewBridgePendingActivitiesView(handle *rdb.Handle) BridgePendingActivities {
+	return &BridgePendingActivitiesView{
 		handle,
 	}
 }
 
-func (thisView *BridgePendingActivities) ListAllUnprocessedOutgoing() ([]BridgePendingActivityReadRow, error) {
+func (thisView *BridgePendingActivitiesView) ListAllUnprocessedOutgoing() ([]BridgePendingActivityReadRow, error) {
 	return thisView.List(BridgePendingActivitiesFilter{
 		MaybeDirections:  []types.Direction{types.DIRECTION_OUTGOING},
 		MaybeIsProcessed: primptr.Bool(false),
 	}, BridgePendingActivitiesOrder{MaybeId: primptr.String(view.ORDER_ASC)})
 }
 
-func (thisView *BridgePendingActivities) ListAllUnprocessedIncoming() ([]BridgePendingActivityReadRow, error) {
+func (thisView *BridgePendingActivitiesView) ListAllUnprocessedIncoming() ([]BridgePendingActivityReadRow, error) {
 	return thisView.List(BridgePendingActivitiesFilter{
 		MaybeDirections:  []types.Direction{types.DIRECTION_INCOMING, types.DIRECTION_RESPONSE},
 		MaybeIsProcessed: primptr.Bool(false),
 	}, BridgePendingActivitiesOrder{MaybeId: primptr.String(view.ORDER_ASC)})
 }
 
-func (thisView *BridgePendingActivities) List(
+func (thisView *BridgePendingActivitiesView) List(
 	filter BridgePendingActivitiesFilter,
 	order BridgePendingActivitiesOrder,
 ) ([]BridgePendingActivityReadRow, error) {
@@ -175,7 +184,7 @@ func (thisView *BridgePendingActivities) List(
 	return rows, nil
 }
 
-func (thisView *BridgePendingActivities) UpdateToProcessed(id int64) error {
+func (thisView *BridgePendingActivitiesView) UpdateToProcessed(id int64) error {
 	sql, sqlArgs, sqlErr := thisView.rdb.StmtBuilder.Update(
 		TABLE_BRIDGE_PENDING_ACTIVITIES,
 	).Set(
@@ -199,7 +208,7 @@ func (thisView *BridgePendingActivities) UpdateToProcessed(id int64) error {
 	return nil
 }
 
-func (thisView *BridgePendingActivities) Insert(activity *BridgePendingActivityInsertRow) error {
+func (thisView *BridgePendingActivitiesView) Insert(activity *BridgePendingActivityInsertRow) error {
 	timeNow := utctime.Now()
 	var maybeBridgeFeeAmount *string
 	if activity.MaybeBridgeFeeAmount != nil {

@@ -18,24 +18,43 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+var (
+	NewBridgePendingActivitiesView = view.NewBridgePendingActivitiesView
+	NewBridgeActivitiesView        = view.NewBridgeActivitiesView
+	NewPgxConnPool                 = func(config *pg.PgxConnPoolConfig, logger applogger.Logger) (rdb.Conn, error) {
+		return pg.NewPgxConnPool(config, logger)
+	}
+)
 var _ projection_entity.CronJob = &BridgeActivityMatcher{}
 
 type Config struct {
-	Interval               time.Duration `mapstructure:"interval"`
-	CryptoOrgChainDatabase struct {
-		SSL                 bool          `mapstructure:"ssl"`
-		Host                string        `mapstructure:"host"`
-		Port                int32         `mapstructure:"port"`
-		Username            string        `mapstructure:"username"`
-		Password            string        `mapstructure:"password"`
-		Name                string        `mapstructure:"name"`
-		Schema              string        `mapstructure:"schema"`
-		MaxConns            int32         `mapstructure:"pool_max_conns"`
-		MinConns            int32         `mapstructure:"pool_min_conns"`
-		MaxConnLifeTime     time.Duration `mapstructure:"pool_max_conn_lifetime"`
-		MaxConnIdleTime     time.Duration `mapstructure:"pool_max_conn_idle_time"`
-		HealthCheckInterval time.Duration `mapstructure:"pool_health_check_interval"`
-	} `mapstructure:"crypto_org_chain_database"`
+	Interval           time.Duration             `mapstructure:"interval"`
+	CounterpartyChains []CounterpartyChainConfig `mapstructure:"counterparty_chains"`
+}
+
+type CounterpartyChainConfig struct {
+	Name     string                     `mapstructure:"name"`
+	Database CounterpartyDatabaseConfig `mapstructure:"database"`
+}
+
+type CounterpartyDatabaseConfig struct {
+	SSL                 bool          `mapstructure:"ssl"`
+	Host                string        `mapstructure:"host"`
+	Port                int32         `mapstructure:"port"`
+	Username            string        `mapstructure:"username"`
+	PasswordEnv         string        `mapstructure:"password_env"`
+	Name                string        `mapstructure:"name"`
+	Schema              string        `mapstructure:"schema"`
+	MaxConns            int32         `mapstructure:"pool_max_conns"`
+	MinConns            int32         `mapstructure:"pool_min_conns"`
+	MaxConnLifeTime     time.Duration `mapstructure:"pool_max_conn_lifetime"`
+	MaxConnIdleTime     time.Duration `mapstructure:"pool_max_conn_idle_time"`
+	HealthCheckInterval time.Duration `mapstructure:"pool_health_check_interval"`
+}
+
+type counterpartyChainRDbConfig struct {
+	Name string
+	Conn rdb.Conn
 }
 
 func ConfigFromInterface(data interface{}) (Config, error) {
@@ -47,7 +66,7 @@ func ConfigFromInterface(data interface{}) (Config, error) {
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToTimeHookFunc(time.RFC3339),
 		),
-		Result:           &config,
+		Result: &config,
 	}
 	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
 	if decoderErr != nil {
@@ -64,26 +83,32 @@ func ConfigFromInterface(data interface{}) (Config, error) {
 type BridgeActivityMatcher struct {
 	projection_usecase.Base
 
-	thisRDbConn           rdb.Conn
-	cryptoOrgChainRDbConn rdb.Conn
-	logger                applogger.Logger
+	config Config
+
+	thisRDbConn            rdb.Conn
+	counterpartyRDbConfigs []counterpartyChainRDbConfig
+	logger                 applogger.Logger
 
 	migrationHelper migrationhelper.MigrationHelper
 }
 
+const (
+	MIGRATION_DIRECOTRY = "projection/bridge_activity/bridge_activity_matcher/migrations"
+)
+
 func New(
+	config Config,
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	migrationHelper migrationhelper.MigrationHelper,
-	config Config,
 ) *BridgeActivityMatcher {
 	return &BridgeActivityMatcher{
-		Base: projection_usecase.NewBaseWithOptions("BridgeActivityMatcher", projection_usecase.Options{
-			MaybeConfigPtr: &config,
-		}),
+		Base: projection_usecase.NewBase("BridgeActivityMatcher"),
 
-		thisRDbConn:           rdbConn,
-		cryptoOrgChainRDbConn: nil,
+		config: config,
+
+		thisRDbConn:            rdbConn,
+		counterpartyRDbConfigs: make([]counterpartyChainRDbConfig, 0),
 		logger: logger.WithFields(applogger.LogFields{
 			"module": "BridgeActivityMatcher",
 		}),
@@ -97,39 +122,42 @@ func (cronJob *BridgeActivityMatcher) Id() string {
 }
 
 func (cronJob *BridgeActivityMatcher) Config() *Config {
-	return cronJob.Base.Config().(*Config)
+	return &cronJob.config
 }
-
-const (
-	MIGRATION_DIRECOTRY = "projection/bridge_activity/bridge_activity_matcher/migrations"
-)
 
 func (cronJob *BridgeActivityMatcher) OnInit() error {
 	config := cronJob.Config()
 
-	cryptoOrgChainDBPassword := os.Getenv("PROJECTION_BRIDGE_ACTIVITY_MATCHER_CRYPTO_ORG_CHAIN_DB_PASSWORD")
-	if cryptoOrgChainDBPassword == "" {
-		cryptoOrgChainDBPassword = config.CryptoOrgChainDatabase.Password
-	}
-
 	// TODO: Refactor to generic rdbConn creator
-	var err error
-	if cronJob.cryptoOrgChainRDbConn, err = pg.NewPgxConnPool(&pg.PgxConnPoolConfig{
-		ConnConfig: pg.ConnConfig{
-			Host:          config.CryptoOrgChainDatabase.Host,
-			Port:          config.CryptoOrgChainDatabase.Port,
-			MaybeUsername: &config.CryptoOrgChainDatabase.Username,
-			MaybePassword: &cryptoOrgChainDBPassword,
-			Database:      config.CryptoOrgChainDatabase.Name,
-			SSL:           config.CryptoOrgChainDatabase.SSL,
-		},
-		MaybeMaxConns:          &config.CryptoOrgChainDatabase.MaxConns,
-		MaybeMinConns:          &config.CryptoOrgChainDatabase.MinConns,
-		MaybeMaxConnLifeTime:   &config.CryptoOrgChainDatabase.MaxConnLifeTime,
-		MaybeMaxConnIdleTime:   &config.CryptoOrgChainDatabase.MaxConnIdleTime,
-		MaybeHealthCheckPeriod: &config.CryptoOrgChainDatabase.HealthCheckInterval,
-	}, cronJob.logger); err != nil {
-		return fmt.Errorf("error when initializing Crypto.org Chain indexing DB connection: %v", err)
+	for _, counterpartyChain := range config.CounterpartyChains {
+		dbPassword := os.Getenv(counterpartyChain.Database.PasswordEnv)
+
+		rdbConn, rdbConnErr := NewPgxConnPool(&pg.PgxConnPoolConfig{
+			ConnConfig: pg.ConnConfig{
+				Host:          counterpartyChain.Database.Host,
+				Port:          counterpartyChain.Database.Port,
+				MaybeUsername: &counterpartyChain.Database.Username,
+				MaybePassword: &dbPassword,
+				Database:      counterpartyChain.Database.Name,
+				SSL:           counterpartyChain.Database.SSL,
+			},
+			MaybeMaxConns:          &counterpartyChain.Database.MaxConns,
+			MaybeMinConns:          &counterpartyChain.Database.MinConns,
+			MaybeMaxConnLifeTime:   &counterpartyChain.Database.MaxConnLifeTime,
+			MaybeMaxConnIdleTime:   &counterpartyChain.Database.MaxConnIdleTime,
+			MaybeHealthCheckPeriod: &counterpartyChain.Database.HealthCheckInterval,
+		}, cronJob.logger)
+		if rdbConnErr != nil {
+			return fmt.Errorf(
+				"error when initializing %s indexing DB connection: %w",
+				counterpartyChain.Name, rdbConnErr,
+			)
+		}
+
+		cronJob.counterpartyRDbConfigs = append(cronJob.counterpartyRDbConfigs, counterpartyChainRDbConfig{
+			Name: counterpartyChain.Name,
+			Conn: rdbConn,
+		})
 	}
 
 	if cronJob.migrationHelper != nil {
@@ -144,8 +172,7 @@ func (cronJob *BridgeActivityMatcher) Interval() time.Duration {
 }
 
 func (cronJob *BridgeActivityMatcher) Exec() error {
-	thisBridgePendingActivities := view.NewBridgePendingActivities(cronJob.thisRDbConn.ToHandle())
-	cryptoOrgChainBridgePendingActivities := view.NewBridgePendingActivities(cronJob.cryptoOrgChainRDbConn.ToHandle())
+	thisBridgePendingActivities := NewBridgePendingActivitiesView(cronJob.thisRDbConn.ToHandle())
 
 	thisAllUnprocessedOutgoing, thisAllUnprocessedOutgoingErr := thisBridgePendingActivities.ListAllUnprocessedOutgoing()
 	if thisAllUnprocessedOutgoingErr != nil {
@@ -161,25 +188,6 @@ func (cronJob *BridgeActivityMatcher) Exec() error {
 	); handleThisUnprocessedOutgoingErr != nil {
 		return fmt.Errorf(
 			"error handling this unprocessed outgoing bridge pending activities: %v",
-			handleThisUnprocessedOutgoingErr,
-		)
-	}
-
-	cryptoOrgChainAllUnprocessedOutgoing, cryptoOrgChainAllUnprocessedOutgoingErr := cryptoOrgChainBridgePendingActivities.
-		ListAllUnprocessedOutgoing()
-	if cryptoOrgChainAllUnprocessedOutgoingErr != nil {
-		return fmt.Errorf(
-			"error querying Crypto.org Chain unprocessed outgoing pending activities of this projection: %v",
-			thisAllUnprocessedOutgoingErr,
-		)
-	}
-
-	if handleThisUnprocessedOutgoingErr := cronJob.HandleOutgoing(
-		cryptoOrgChainAllUnprocessedOutgoing,
-		cryptoOrgChainBridgePendingActivities,
-	); handleThisUnprocessedOutgoingErr != nil {
-		return fmt.Errorf(
-			"error handling Crypto.org Chain unprocessed outgoing bridge pending activities: %v",
 			handleThisUnprocessedOutgoingErr,
 		)
 	}
@@ -202,23 +210,46 @@ func (cronJob *BridgeActivityMatcher) Exec() error {
 		)
 	}
 
-	cryptoOrgChainAllUnprocessedIncoming, cryptoOrgChainAllUnprocessedIncomingErr := cryptoOrgChainBridgePendingActivities.
-		ListAllUnprocessedIncoming()
-	if cryptoOrgChainAllUnprocessedIncomingErr != nil {
-		return fmt.Errorf(
-			"error querying unprocessed Crypto.org Chain incoming pending activities of projection: %v",
-			thisAllUnprocessedOutgoingErr,
-		)
-	}
+	for _, counterpartyRDbConfig := range cronJob.counterpartyRDbConfigs {
+		counterpartyBridgePendingActivities := NewBridgePendingActivitiesView(counterpartyRDbConfig.Conn.ToHandle())
 
-	if handleCryptoOrgChainUnprocessedIncomingErr := cronJob.HandleIncoming(
-		cryptoOrgChainAllUnprocessedIncoming,
-		cryptoOrgChainBridgePendingActivities,
-	); handleCryptoOrgChainUnprocessedIncomingErr != nil {
-		return fmt.Errorf(
-			"error handling Crypto.org Chain unprocessed incoming bridge pending activities: %v",
-			handleCryptoOrgChainUnprocessedIncomingErr,
-		)
+		counterpartyAllUnprocessedOutgoing, counterpartyAllUnprocessedOutgoingErr := counterpartyBridgePendingActivities.
+			ListAllUnprocessedOutgoing()
+		if counterpartyAllUnprocessedOutgoingErr != nil {
+			return fmt.Errorf(
+				"error querying %s unprocessed outgoing pending activities of this projection: %v",
+				counterpartyRDbConfig.Name, thisAllUnprocessedOutgoingErr,
+			)
+		}
+
+		if handleThisUnprocessedOutgoingErr := cronJob.HandleOutgoing(
+			counterpartyAllUnprocessedOutgoing,
+			counterpartyBridgePendingActivities,
+		); handleThisUnprocessedOutgoingErr != nil {
+			return fmt.Errorf(
+				"error handling %s unprocessed outgoing bridge pending activities: %v",
+				counterpartyRDbConfig.Name, handleThisUnprocessedOutgoingErr,
+			)
+		}
+
+		counterpartyAllUnprocessedIncoming, counterpartyAllUnprocessedIncomingErr := counterpartyBridgePendingActivities.
+			ListAllUnprocessedIncoming()
+		if counterpartyAllUnprocessedIncomingErr != nil {
+			return fmt.Errorf(
+				"error querying unprocessed %s incoming pending activities of projection: %v",
+				counterpartyRDbConfig.Name, thisAllUnprocessedOutgoingErr,
+			)
+		}
+
+		if handleCounterpartyUnprocessedIncomingErr := cronJob.HandleIncoming(
+			counterpartyAllUnprocessedIncoming,
+			counterpartyBridgePendingActivities,
+		); handleCounterpartyUnprocessedIncomingErr != nil {
+			return fmt.Errorf(
+				"error handling %s unprocessed incoming bridge pending activities: %v",
+				counterpartyRDbConfig.Name, handleCounterpartyUnprocessedIncomingErr,
+			)
+		}
 	}
 
 	return nil
@@ -226,7 +257,7 @@ func (cronJob *BridgeActivityMatcher) Exec() error {
 
 func (cronJob *BridgeActivityMatcher) HandleOutgoing(
 	rows []view.BridgePendingActivityReadRow,
-	bridgePendingActivities *view.BridgePendingActivities,
+	bridgePendingActivities view.BridgePendingActivities,
 ) error {
 	if len(rows) == 0 {
 		return nil
@@ -243,7 +274,7 @@ func (cronJob *BridgeActivityMatcher) HandleOutgoing(
 
 func (cronJob *BridgeActivityMatcher) handleOutgoingRow(
 	row view.BridgePendingActivityReadRow,
-	bridgePendingActivities *view.BridgePendingActivities,
+	bridgePendingActivities view.BridgePendingActivities,
 ) error {
 	logger := cronJob.logger.WithFields(applogger.LogFields{
 		"rowType": types.DIRECTION_OUTGOING,
@@ -266,7 +297,7 @@ func (cronJob *BridgeActivityMatcher) handleOutgoingRow(
 
 	thisRDbTxHandle := thisRDbTx.ToHandle()
 
-	bridgeActivities := view.NewBridgeActivities(thisRDbTxHandle)
+	bridgeActivities := NewBridgeActivitiesView(thisRDbTxHandle)
 
 	if insertErr := bridgeActivities.Insert(&view.BridgeActivityInsertRow{
 		BridgeType:                           row.BridgeType,
@@ -310,7 +341,7 @@ func (cronJob *BridgeActivityMatcher) handleOutgoingRow(
 
 func (cronJob *BridgeActivityMatcher) HandleIncoming(
 	rows []view.BridgePendingActivityReadRow,
-	bridgePendingActivities *view.BridgePendingActivities,
+	bridgePendingActivities view.BridgePendingActivities,
 ) error {
 	if len(rows) == 0 {
 		return nil
@@ -327,7 +358,7 @@ func (cronJob *BridgeActivityMatcher) HandleIncoming(
 
 func (cronJob *BridgeActivityMatcher) handleIncomingRow(
 	row view.BridgePendingActivityReadRow,
-	bridgePendingActivities *view.BridgePendingActivities,
+	bridgePendingActivities view.BridgePendingActivities,
 ) error {
 	logger := cronJob.logger.WithFields(applogger.LogFields{
 		"rowType": types.DIRECTION_INCOMING,
@@ -349,7 +380,7 @@ func (cronJob *BridgeActivityMatcher) handleIncomingRow(
 
 	thisRDbTxHandle := thisRDbTx.ToHandle()
 
-	bridgeActivities := view.NewBridgeActivities(thisRDbTxHandle)
+	bridgeActivities := NewBridgeActivitiesView(thisRDbTxHandle)
 
 	commit := func() error {
 		if err := thisRDbTx.Commit(); err != nil {

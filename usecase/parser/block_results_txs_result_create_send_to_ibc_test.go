@@ -33,7 +33,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 					SourcePort:     "transfer",
 					SourceChannel:  "channel-0",
 					Token: model.CronosSendToIBCToken{
-						Amount: json.NewUint64(1000000000),
+						Amount: json.NewNumericStringFromUint64(1000000000),
 						Denom:  "transfer/channel-0/basetcro",
 					},
 					Sender:   "tcrc13yux6z8mh6w5t3v4uq7clewnh35znrgdgye0k2",
