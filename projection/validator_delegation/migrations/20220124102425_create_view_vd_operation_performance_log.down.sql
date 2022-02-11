@@ -1,3 +1,0 @@
-DROP INDEX IF EXISTS view_vd_operation_performance_log_height_index;
-
-DROP TABLE IF EXISTS view_vd_operation_performance_log;

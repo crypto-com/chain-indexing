@@ -3,7 +3,6 @@ package view
 import (
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -84,28 +83,11 @@ func (view *ValidatorsView) Insert(row ValidatorRow) error {
 
 func (view *ValidatorsView) Update(row ValidatorRow) error {
 
-	// DEBUG
-	start := time.Now()
-	performanceView := NewOperationPerformanceLogsView(view.rdb)
-
 	// Check if there is an record's lower bound start with this height.
 	found, err := view.checkIfValidatorRecordExistByHeightLowerBound(row)
 	if err != nil {
 		return fmt.Errorf("error in checking new validator record existence at this height: %v", err)
 	}
-
-	// DEBUG
-	end := time.Now()
-	if err := performanceView.Insert(
-		OperationPerformanceRow{
-			Height:   row.Height,
-			Action:   "UpdateValidator-CheckIfExist",
-			Duration: end.Sub(start),
-		},
-	); err != nil {
-		return fmt.Errorf("error in inserting performance log: %v", err)
-	}
-	start = end
 
 	if found {
 		// If there is a record that height = `[row.Height,)`, then update the existed one
@@ -143,19 +125,6 @@ func (view *ValidatorsView) Update(row ValidatorRow) error {
 			return fmt.Errorf("error updating validator into the table: row updated: %v: %w", result.RowsAffected(), rdb.ErrWrite)
 		}
 
-		// DEBUG
-		end = time.Now()
-		if err := performanceView.Insert(
-			OperationPerformanceRow{
-				Height:   row.Height,
-				Action:   "UpdateValidator-UpdateExistedOne",
-				Duration: end.Sub(start),
-			},
-		); err != nil {
-			return fmt.Errorf("error in inserting performance log: %v", err)
-		}
-		start = end
-
 	} else {
 		// If there is not an existed record, then update the previous record's height range and insert a new record
 
@@ -164,36 +133,10 @@ func (view *ValidatorsView) Update(row ValidatorRow) error {
 			return fmt.Errorf("error updating Validator.Height upper bound: %v", err)
 		}
 
-		// DEBUG
-		end = time.Now()
-		if err := performanceView.Insert(
-			OperationPerformanceRow{
-				Height:   row.Height,
-				Action:   "UpdateValidator-UpdatePreviousOne",
-				Duration: end.Sub(start),
-			},
-		); err != nil {
-			return fmt.Errorf("error in inserting performance log: %v", err)
-		}
-		start = end
-
 		err = view.Insert(row)
 		if err != nil {
 			return fmt.Errorf("error inserting a new record for this validator: %v", err)
 		}
-
-		// DEBUG
-		end = time.Now()
-		if err := performanceView.Insert(
-			OperationPerformanceRow{
-				Height:   row.Height,
-				Action:   "UpdateValidator-Insert",
-				Duration: end.Sub(start),
-			},
-		); err != nil {
-			return fmt.Errorf("error in inserting performance log: %v", err)
-		}
-		start = end
 
 	}
 
