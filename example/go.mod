@@ -9,7 +9,7 @@ replace github.com/rs/zerolog => github.com/rs/zerolog v1.23.0
 require github.com/urfave/cli/v2 v2.3.0
 
 require (
-	github.com/crypto-com/chain-indexing v1.3.4
+	github.com/crypto-com/chain-indexing v1.3.5-0.20220211051758-0e0c234a6a0f
 	github.com/ettle/strcase v0.1.1
 	github.com/valyala/fasthttp v1.17.0
 	gopkg.in/yaml.v2 v2.4.0

@@ -28,6 +28,7 @@ import (
 	"github.com/crypto-com/chain-indexing/projection/proposal"
 	"github.com/crypto-com/chain-indexing/projection/transaction"
 	"github.com/crypto-com/chain-indexing/projection/validator"
+	"github.com/crypto-com/chain-indexing/projection/validator_delegation"
 	"github.com/crypto-com/chain-indexing/projection/validatorstats"
 	"github.com/ettle/strcase"
 
@@ -324,27 +325,27 @@ func InitProjection(name string, params InitProjectionParams) projection_entity.
 		}
 
 		return bridge_pending_activity.New(config, params.Logger, params.RdbConn, migrationHelper)
-		// case "ValidatorDelegation":
-		// 	sourceURL := github_migrationhelper.GenerateDefaultSourceURL(name, githubMigrationHelperConfig)
-		// 	databaseURL := migrationhelper.GenerateDefaultDatabaseURL(name, connString)
-		// 	migrationHelper := github_migrationhelper.NewGithubMigrationHelper(sourceURL, databaseURL)
+	case "ValidatorDelegation":
+		sourceURL := github_migrationhelper.GenerateDefaultSourceURL(name, githubMigrationHelperConfig)
+		databaseURL := migrationhelper.GenerateDefaultDatabaseURL(name, connString)
+		migrationHelper := github_migrationhelper.NewGithubMigrationHelper(sourceURL, databaseURL)
 
-		// 	customConfig, err := validator_delegation.CustomConfigFromInterface(params.ExtraConfigs[name])
-		// 	if err != nil {
-		// 		params.Logger.Panicf(err.Error())
-		// 	}
+		customConfig, err := validator_delegation.CustomConfigFromInterface(params.ExtraConfigs[name])
+		if err != nil {
+			params.Logger.Panicf(err.Error())
+		}
 
-		// 	config, err := validator_delegation.PrepareConfig(
-		// 		customConfig,
-		// 		params.AccountAddressPrefix,
-		// 		params.ValidatorAddressPrefix,
-		// 		params.ConsNodeAddressPrefix,
-		// 	)
-		// 	if err != nil {
-		// 		params.Logger.Panicf(err.Error())
-		// 	}
+		config, err := validator_delegation.PrepareConfig(
+			customConfig,
+			params.AccountAddressPrefix,
+			params.ValidatorAddressPrefix,
+			params.ConsNodeAddressPrefix,
+		)
+		if err != nil {
+			params.Logger.Panicf(err.Error())
+		}
 
-		// 	return validator_delegation.NewValidatorDelegation(params.Logger, params.RdbConn, config, migrationHelper)
+		return validator_delegation.NewValidatorDelegation(params.Logger, params.RdbConn, config, migrationHelper)
 	}
 
 	return nil

@@ -370,45 +370,45 @@ func InitRouteRegistry(
 		},
 	)
 
-	// validatorDelegationHandler := httpapi_handlers.NewValidatorDelegation(
-	// 	logger,
-	// 	config.Blockchain.AccountAddressPrefix,
-	// 	config.Blockchain.ValidatorAddressPrefix,
-	// 	config.Blockchain.ConNodeAddressPrefix,
-	// 	rdbConn.ToHandle(),
-	// )
-	// routes = append(routes,
-	// 	Route{
-	// 		Method:  GET,
-	// 		path:    "api/test/validators",
-	// 		handler: validatorDelegationHandler.ListValidator,
-	// 	},
-	// 	Route{
-	// 		Method:  GET,
-	// 		path:    "api/test/validators/{address}",
-	// 		handler: validatorDelegationHandler.FindValidatorByAddress,
-	// 	},
-	// 	Route{
-	// 		Method:  GET,
-	// 		path:    "api/test/validators/{address}/delegations",
-	// 		handler: validatorDelegationHandler.ListDelegationByValidator,
-	// 	},
-	// 	Route{
-	// 		Method:  GET,
-	// 		path:    "api/test/validators/{address}/unbonding_delegations",
-	// 		handler: validatorDelegationHandler.ListUnbondingDelegationByValidator,
-	// 	},
-	// 	Route{
-	// 		Method:  GET,
-	// 		path:    "api/test/validators/{srcValAddress}/redelegations",
-	// 		handler: validatorDelegationHandler.ListRedelegationBySrcValidator,
-	// 	},
-	// 	Route{
-	// 		Method:  GET,
-	// 		path:    "api/test/delegators/{address}/delegations",
-	// 		handler: validatorDelegationHandler.ListDelegationByDelegator,
-	// 	},
-	// )
+	validatorDelegationHandler := httpapi_handlers.NewValidatorDelegation(
+		logger,
+		config.Blockchain.AccountAddressPrefix,
+		config.Blockchain.ValidatorAddressPrefix,
+		config.Blockchain.ConNodeAddressPrefix,
+		rdbConn.ToHandle(),
+	)
+	routes = append(routes,
+		Route{
+			Method:  GET,
+			path:    "api/test/validators",
+			handler: validatorDelegationHandler.ListValidator,
+		},
+		Route{
+			Method:  GET,
+			path:    "api/test/validators/{address}",
+			handler: validatorDelegationHandler.FindValidatorByAddress,
+		},
+		Route{
+			Method:  GET,
+			path:    "api/test/validators/{address}/delegations",
+			handler: validatorDelegationHandler.ListDelegationByValidator,
+		},
+		Route{
+			Method:  GET,
+			path:    "api/test/validators/{address}/unbonding_delegations",
+			handler: validatorDelegationHandler.ListUnbondingDelegationByValidator,
+		},
+		Route{
+			Method:  GET,
+			path:    "api/test/validators/{srcValAddress}/redelegations",
+			handler: validatorDelegationHandler.ListRedelegationBySrcValidator,
+		},
+		Route{
+			Method:  GET,
+			path:    "api/test/delegators/{address}/delegations",
+			handler: validatorDelegationHandler.ListDelegationByDelegator,
+		},
+	)
 
 	return &RouteRegistry{routes: routes}
 }
