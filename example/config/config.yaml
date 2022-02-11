@@ -91,7 +91,7 @@ postgres:
   username: "postgres"
   # password can only be provided through CLI or Environment variable `DB_PASSWORD`
   # password: "postgres"
-  name: "testnet-no-trace"
+  name: "postgres"
   schema: "public"
   ssl: true
   pool_max_conns: 100
