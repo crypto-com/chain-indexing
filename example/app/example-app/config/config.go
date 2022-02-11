@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"github.com/crypto-com/chain-indexing/bootstrap/config"
@@ -6,6 +6,7 @@ import (
 
 type CustomConfig struct {
 	ServerGithubAPI ServerGithubAPIConfig `yaml:"server_github_api"`
+	BridgeAPI       BridgesAPIConfig      `yaml:"bridges_api"`
 }
 
 type ServerGithubAPIConfig struct {

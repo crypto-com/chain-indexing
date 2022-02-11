@@ -34,6 +34,7 @@ index_service:
         "IBCChannelMessage",
         "BridgePendingActivity",
         "Example",
+      # "ValidatorDelegation",
     ]
     extra_configs:
       BridgePendingActivity:
@@ -42,6 +43,11 @@ index_service:
         counterparty_chain_name: "Cronos"
         channel_id: "channel-131"
         starting_height: 899374
+      # ValidatorDelegation:
+      #   unbonding_time: "2419200000000000ns"
+      #   slash_fraction_double_sign: "0.050000000000000000"
+      #   slash_fraction_downtime: "0.000000000000000000"
+      #   default_power_reduction: "1000000"
   cronjob:
     enables: [ ]
   cosmos_version_enabled_height:
