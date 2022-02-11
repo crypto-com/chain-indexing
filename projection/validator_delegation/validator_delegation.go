@@ -110,6 +110,9 @@ var (
 	NewRedelegationQueue         = view.NewRedelegationQueueView
 	NewEvidences                 = view.NewEvidencesView
 	UpdateLastHandledEventHeight = (*ValidatorDelegation).UpdateLastHandledEventHeight
+
+	// DEBUG
+	NewOperationPerformanceLogs = view.NewOperationPerformanceLogsView
 )
 
 type ValidatorDelegation struct {
@@ -203,37 +206,6 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 		}
 	}
 
-	// Genesis block height is 0.
-	//
-	// If this is NOT a Genesis block, then always clone the following rows in previous height:
-	// - ValidatorRow
-	// - DelegationRow
-	// - UnbondingDelegationRow
-	// - RedelegationRow
-	//
-	// This is to keep track historical states in all height.
-	if height > 0 {
-		validatorsView := NewValidators(rdbTxHandle)
-		if err := validatorsView.Clone(height-1, height); err != nil {
-			return fmt.Errorf("error in cloning validator records in previous height: %v", err)
-		}
-
-		delegationsView := NewDelegations(rdbTxHandle)
-		if err := delegationsView.Clone(height-1, height); err != nil {
-			return fmt.Errorf("error in cloning delegation records in previous height: %v", err)
-		}
-
-		unbondingDelegationsView := NewUnbondingDelegations(rdbTxHandle)
-		if err := unbondingDelegationsView.Clone(height-1, height); err != nil {
-			return fmt.Errorf("error in cloning unbonding delegation records in previous height: %v", err)
-		}
-
-		redelegationsView := NewRedelegations(rdbTxHandle)
-		if err := redelegationsView.Clone(height-1, height); err != nil {
-			return fmt.Errorf("error in cloning redelegation records in previous height: %v", err)
-		}
-	}
-
 	// Handle events in Genesis block
 	for _, event := range events {
 		if typedEvent, ok := event.(*event_usecase.CreateGenesisValidator); ok {
@@ -252,6 +224,9 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 
 		}
 	}
+
+	// DEBUG
+	start := time.Now()
 
 	// Handle evidence.
 	//
@@ -274,6 +249,19 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 
 		}
 	}
+	// DEBUG
+	end := time.Now()
+	performanceView := NewOperationPerformanceLogs(rdbTxHandle)
+	if err := performanceView.Insert(
+		view.OperationPerformanceRow{
+			Height:   height,
+			Action:   "Evidence",
+			Duration: end.Sub(start),
+		},
+	); err != nil {
+		return fmt.Errorf("error in inserting performance log: %v", err)
+	}
+	start = end
 
 	// Handle events in BeginBlock.
 	for _, event := range events {
@@ -371,6 +359,18 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 
 		}
 	}
+	// DEBUG
+	end = time.Now()
+	if err := performanceView.Insert(
+		view.OperationPerformanceRow{
+			Height:   height,
+			Action:   "BeginBlock",
+			Duration: end.Sub(start),
+		},
+	); err != nil {
+		return fmt.Errorf("error in inserting performance log: %v", err)
+	}
+	start = end
 
 	// Handle events and msgs in Tx
 	for _, event := range events {
@@ -387,6 +387,18 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 			); err != nil {
 				return fmt.Errorf("error handleCreateNewValidator when MsgCreateValidator: %v", err)
 			}
+			// DEBUG
+			end = time.Now()
+			if err := performanceView.Insert(
+				view.OperationPerformanceRow{
+					Height:   height,
+					Action:   "MsgCreateValidator",
+					Duration: end.Sub(start),
+				},
+			); err != nil {
+				return fmt.Errorf("error in inserting performance log: %v", err)
+			}
+			start = end
 
 		} else if typedEvent, ok := event.(*event_usecase.MsgEditValidator); ok {
 
@@ -400,6 +412,18 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 				); err != nil {
 					return fmt.Errorf("error handling MsgEditValidator: %v", err)
 				}
+				// DEBUG
+				end = time.Now()
+				if err := performanceView.Insert(
+					view.OperationPerformanceRow{
+						Height:   height,
+						Action:   "MsgEditValidator",
+						Duration: end.Sub(start),
+					},
+				); err != nil {
+					return fmt.Errorf("error in inserting performance log: %v", err)
+				}
+				start = end
 
 			}
 
@@ -414,6 +438,18 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 			); err != nil {
 				return fmt.Errorf("error handling MsgDelegate: %v", err)
 			}
+			// DEBUG
+			end = time.Now()
+			if err := performanceView.Insert(
+				view.OperationPerformanceRow{
+					Height:   height,
+					Action:   "MsgDelegate",
+					Duration: end.Sub(start),
+				},
+			); err != nil {
+				return fmt.Errorf("error in inserting performance log: %v", err)
+			}
+			start = end
 
 		} else if typedEvent, ok := event.(*event_usecase.MsgUndelegate); ok {
 
@@ -430,6 +466,18 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 				); err != nil {
 					return fmt.Errorf("error handling MsgUndelegate: %v", err)
 				}
+				// DEBUG
+				end = time.Now()
+				if err := performanceView.Insert(
+					view.OperationPerformanceRow{
+						Height:   height,
+						Action:   "MsgUndelegate",
+						Duration: end.Sub(start),
+					},
+				); err != nil {
+					return fmt.Errorf("error in inserting performance log: %v", err)
+				}
+				start = end
 
 			}
 
@@ -446,6 +494,18 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 			); err != nil {
 				return fmt.Errorf("error handling MsgBeginRedelegate: %v", err)
 			}
+			// DEBUG
+			end = time.Now()
+			if err := performanceView.Insert(
+				view.OperationPerformanceRow{
+					Height:   height,
+					Action:   "MsgBeginRedelegate",
+					Duration: end.Sub(start),
+				},
+			); err != nil {
+				return fmt.Errorf("error in inserting performance log: %v", err)
+			}
+			start = end
 
 		} else if typedEvent, ok := event.(*event_usecase.MsgUnjail); ok {
 
@@ -456,6 +516,18 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 			); err != nil {
 				return fmt.Errorf("error handling MsgUnjail: %v", err)
 			}
+			// DEBUG
+			end = time.Now()
+			if err := performanceView.Insert(
+				view.OperationPerformanceRow{
+					Height:   height,
+					Action:   "MsgUnjail",
+					Duration: end.Sub(start),
+				},
+			); err != nil {
+				return fmt.Errorf("error in inserting performance log: %v", err)
+			}
+			start = end
 
 		}
 	}
@@ -478,6 +550,18 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 
 		}
 	}
+	// DEBUG
+	end = time.Now()
+	if err := performanceView.Insert(
+		view.OperationPerformanceRow{
+			Height:   height,
+			Action:   "EndBlock",
+			Duration: end.Sub(start),
+		},
+	); err != nil {
+		return fmt.Errorf("error in inserting performance log: %v", err)
+	}
+	start = end
 
 	if err := projection.handleMatureUnbondingValidators(
 		rdbTxHandle,
@@ -486,6 +570,18 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 	); err != nil {
 		return fmt.Errorf("error handling mature unbonding validators: %v", err)
 	}
+	// DEBUG
+	end = time.Now()
+	if err := performanceView.Insert(
+		view.OperationPerformanceRow{
+			Height:   height,
+			Action:   "MatureUnbondingValidators",
+			Duration: end.Sub(start),
+		},
+	); err != nil {
+		return fmt.Errorf("error in inserting performance log: %v", err)
+	}
+	start = end
 
 	if err := projection.handleMatureUnbondingDelegationQueueEntries(
 		rdbTxHandle,
@@ -494,6 +590,18 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 	); err != nil {
 		return fmt.Errorf("error handling mature unbonding delegation queue entries: %v", err)
 	}
+	// DEBUG
+	end = time.Now()
+	if err := performanceView.Insert(
+		view.OperationPerformanceRow{
+			Height:   height,
+			Action:   "MatureUnbondingDelegations",
+			Duration: end.Sub(start),
+		},
+	); err != nil {
+		return fmt.Errorf("error in inserting performance log: %v", err)
+	}
+	start = end
 
 	if err := projection.handleMatureRedelegationQueueEntries(
 		rdbTxHandle,
@@ -502,6 +610,18 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 	); err != nil {
 		return fmt.Errorf("error handling mature redelegation queue entries(): %v", err)
 	}
+	// DEBUG
+	end = time.Now()
+	if err := performanceView.Insert(
+		view.OperationPerformanceRow{
+			Height:   height,
+			Action:   "MatureRedelegations",
+			Duration: end.Sub(start),
+		},
+	); err != nil {
+		return fmt.Errorf("error in inserting performance log: %v", err)
+	}
+	start = end
 
 	if err := UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
 		return fmt.Errorf("error updating last handled event height: %v", err)

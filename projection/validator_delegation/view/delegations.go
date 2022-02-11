@@ -82,7 +82,7 @@ func (view *DelegationsView) Update(row DelegationRow) error {
 	}
 
 	if found {
-		// If there is a record lower(height) == row.Height, then update the existed one
+		// If there is a record that height = `[row.Height,)`, then update the existed one
 
 		sql, sqlArgs, err := view.rdb.StmtBuilder.
 			Update(
@@ -136,14 +136,14 @@ func (view *DelegationsView) checkIfDelegationRecordExistByHeightLowerBound(row 
 		).
 		From("view_vd_delegations").
 		Where(
-			"validator_address = ? AND delegator_address = ? AND lower(height) = ?",
+			"validator_address = ? AND delegator_address = ? AND height = ?",
 			row.ValidatorAddress,
 			row.DelegatorAddress,
-			row.Height,
+			fmt.Sprintf("[%v,)", row.Height),
 		).
 		ToSql()
 	if err != nil {
-		return false, fmt.Errorf("error building 'checking delegation at specific lower(height) sql: %v: %w", err, rdb.ErrPrepare)
+		return false, fmt.Errorf("error building sql to check delegation at specific height: %v: %w", err, rdb.ErrPrepare)
 	}
 
 	var count int64

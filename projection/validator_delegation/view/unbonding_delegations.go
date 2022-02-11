@@ -85,7 +85,7 @@ func (view *UnbondingDelegationsView) Update(row UnbondingDelegationRow) error {
 	}
 
 	if found {
-		// If there is a record lower(height) == row.Height, then update the existed one
+		// If there is a record that height = `[row.Height,)`, then update the existed one
 
 		entriesJSON, err := jsoniter.MarshalToString(row.Entries)
 		if err != nil {
@@ -144,14 +144,14 @@ func (view *UnbondingDelegationsView) checkIfUnbondingDelegationRecordExistByHei
 		).
 		From("view_vd_unbonding_delegations").
 		Where(
-			"delegator_address = ? AND validator_address = ? AND lower(height) = ?",
+			"delegator_address = ? AND validator_address = ? AND height = ?",
 			row.DelegatorAddress,
 			row.ValidatorAddress,
-			row.Height,
+			fmt.Sprintf("[%v,)", row.Height),
 		).
 		ToSql()
 	if err != nil {
-		return false, fmt.Errorf("error building 'checking UnbondingDelegation at specific lower(height) sql: %v: %w", err, rdb.ErrPrepare)
+		return false, fmt.Errorf("error building sql to check unbonding delegation at specific height: %v: %w", err, rdb.ErrPrepare)
 	}
 
 	var count int64

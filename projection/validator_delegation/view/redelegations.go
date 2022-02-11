@@ -88,7 +88,7 @@ func (view *RedelegationsView) Update(row RedelegationRow) error {
 	}
 
 	if found {
-		// If there is a record lower(height) == row.Height, then update the existed one
+		// If there is a record that height = `[row.Height,)`, then update the existed one
 
 		entriesJSON, err := jsoniter.MarshalToString(row.Entries)
 		if err != nil {
@@ -148,15 +148,15 @@ func (view *RedelegationsView) checkIfRedelegationRecordExistByHeightLowerBound(
 		).
 		From("view_vd_redelegations").
 		Where(
-			"delegator_address = ? AND validator_src_address = ? AND validator_dst_address = ? AND lower(height) = ?",
+			"delegator_address = ? AND validator_src_address = ? AND validator_dst_address = ? AND height = ?",
 			row.DelegatorAddress,
 			row.ValidatorSrcAddress,
 			row.ValidatorDstAddress,
-			row.Height,
+			fmt.Sprintf("[%v,)", row.Height),
 		).
 		ToSql()
 	if err != nil {
-		return false, fmt.Errorf("error building 'checking Redelegation at specific lower(height) sql: %v: %w", err, rdb.ErrPrepare)
+		return false, fmt.Errorf("error building sql to check redelegation at specific height: %v: %w", err, rdb.ErrPrepare)
 	}
 
 	var count int64
