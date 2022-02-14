@@ -96,16 +96,16 @@ func TestTransaction_HandleEvents(t *testing.T) {
 					MsgCount: 1,
 					Signers: []model_usecase.TransactionSigner{
 						{
-							Address: "SignerAddress",
-							TransactionSignerInfo: model_usecase.TransactionSignerInfo{
+							MaybeKeyInfo: &model_usecase.TransactionSignerKeyInfo{
 								Type:       "SignerType",
 								IsMultiSig: true,
 								Pubkeys: []string{
 									"pubkey1", "pubkey2", "pubkey3",
 								},
-								MaybeThreshold:  primptr.Int(2),
-								AccountSequence: 0,
+								MaybeThreshold: primptr.Int(2),
 							},
+							Address:         "SignerAddress",
+							AccountSequence: 0,
 						},
 					},
 					Senders:       []model_usecase.TransactionSigner{},
@@ -170,12 +170,14 @@ func TestTransaction_HandleEvents(t *testing.T) {
 							TimeoutHeight: 10,
 							Signers: []transaction_view.TransactionRowSigner{
 								{
-									Type:       "SignerType",
-									IsMultiSig: true,
-									Pubkeys: []string{
-										"pubkey1", "pubkey2", "pubkey3",
+									MaybeKeyInfo: &transaction_view.TransactionRowSignerKeyInfo{
+										Type:       "SignerType",
+										IsMultiSig: true,
+										Pubkeys: []string{
+											"pubkey1", "pubkey2", "pubkey3",
+										},
+										MaybeThreshold: primptr.Int(2),
 									},
-									MaybeThreshold:  primptr.Int(2),
 									AccountSequence: 0,
 									Address:         "SignerAddress",
 								},
@@ -246,16 +248,16 @@ func TestTransaction_HandleEvents(t *testing.T) {
 					MsgCount: 1,
 					Signers: []model_usecase.TransactionSigner{
 						{
-							Address: "SignerAddress",
-							TransactionSignerInfo: model_usecase.TransactionSignerInfo{
+							MaybeKeyInfo: &model_usecase.TransactionSignerKeyInfo{
 								Type:       "SignerType",
 								IsMultiSig: true,
 								Pubkeys: []string{
 									"pubkey1", "pubkey2", "pubkey3",
 								},
-								MaybeThreshold:  primptr.Int(2),
-								AccountSequence: 0,
+								MaybeThreshold: primptr.Int(2),
 							},
+							Address:         "SignerAddress",
+							AccountSequence: 0,
 						},
 					},
 					Senders:       []model_usecase.TransactionSigner{},
@@ -320,12 +322,14 @@ func TestTransaction_HandleEvents(t *testing.T) {
 							TimeoutHeight: 10,
 							Signers: []transaction_view.TransactionRowSigner{
 								{
-									Type:       "SignerType",
-									IsMultiSig: true,
-									Pubkeys: []string{
-										"pubkey1", "pubkey2", "pubkey3",
+									MaybeKeyInfo: &transaction_view.TransactionRowSignerKeyInfo{
+										Type:       "SignerType",
+										IsMultiSig: true,
+										Pubkeys: []string{
+											"pubkey1", "pubkey2", "pubkey3",
+										},
+										MaybeThreshold: primptr.Int(2),
 									},
-									MaybeThreshold:  primptr.Int(2),
 									AccountSequence: 0,
 									Address:         "SignerAddress",
 								},

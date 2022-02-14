@@ -87,28 +87,6 @@ func ParseTransactionCommands(
 	return cmds, nil
 }
 
-//func getTxFee(feeCollectorAddress string, txsResult model.BlockResultsTxsResult) coin.Coin {
-//	for _, event := range txsResult.Events {
-//		if event.Type == "transfer" {
-//			isFeeEvent := false
-//			var amount string
-//			for _, attribute := range event.Attributes {
-//				if attribute.Key == "recipient" && attribute.Amount == feeCollectorAddress {
-//					isFeeEvent = true
-//				} else if attribute.Key == "amount" {
-//					amount = attribute.Amount
-//				}
-//			}
-//
-//			if isFeeEvent {
-//				return coin.MustNewCoinFromString(TrimAmountDenom(amount))
-//			}
-//		}
-//	}
-//
-//	return coin.MustNewCoinFromInt(int64(0))
-//}
-
 func TxHash(base64EncodedTxHex string) string {
 	txHexBytes, err := base64.StdEncoding.DecodeString(base64EncodedTxHex)
 	if err != nil {

@@ -3,7 +3,6 @@ package parser_test
 import (
 	"strings"
 
-	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
 	. "github.com/onsi/ginkgo"
@@ -53,28 +52,28 @@ var _ = Describe("TransactionParser", func() {
 					MsgCount: 2,
 					Signers: []model.TransactionSigner{
 						{
-							TransactionSignerInfo: model.TransactionSignerInfo{
+							MaybeKeyInfo: &model.TransactionSignerKeyInfo{
 								Type:       "/cosmos.crypto.secp256k1.PubKey",
 								IsMultiSig: false,
 								Pubkeys: []string{
 									"AgiLen9uwpvsreYibwgnQtzupil7kyNJl4oTG3Wl6oIE",
 								},
-								MaybeThreshold:  nil,
-								AccountSequence: 10167,
+								MaybeThreshold: nil,
 							},
-							Address: "tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3",
+							Address:         "tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3",
+							AccountSequence: 10167,
 						},
 						{
-							TransactionSignerInfo: model.TransactionSignerInfo{
+							MaybeKeyInfo: &model.TransactionSignerKeyInfo{
 								Type:       "/cosmos.crypto.secp256k1.PubKey",
 								IsMultiSig: false,
 								Pubkeys: []string{
 									"A8PSgaKFkq3Ogb7jCU8A6uJpMsvGgvuiObkPR9rJ/nA2",
 								},
-								MaybeThreshold:  nil,
-								AccountSequence: 10186,
+								MaybeThreshold: nil,
 							},
-							Address: "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3",
+							Address:         "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3",
+							AccountSequence: 10186,
 						},
 					},
 					Fee:           coin.NewEmptyCoins(),
@@ -112,16 +111,16 @@ var _ = Describe("TransactionParser", func() {
 					MsgCount: 1,
 					Signers: []model.TransactionSigner{
 						{
-							TransactionSignerInfo: model.TransactionSignerInfo{
+							MaybeKeyInfo: &model.TransactionSignerKeyInfo{
 								Type:       "/cosmos.crypto.secp256k1.PubKey",
 								IsMultiSig: false,
 								Pubkeys: []string{
 									"Ax+Rgmd2ta8FxUOoFJ9Dvo3782nMWJzdYP0Jcyrk5XwO",
 								},
-								MaybeThreshold:  nil,
-								AccountSequence: 59,
+								MaybeThreshold: nil,
 							},
-							Address: "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
+							Address:         "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
+							AccountSequence: 59,
 						},
 					},
 
@@ -160,16 +159,16 @@ var _ = Describe("TransactionParser", func() {
 					MsgCount: 1,
 					Signers: []model.TransactionSigner{
 						{
-							TransactionSignerInfo: model.TransactionSignerInfo{
+							MaybeKeyInfo: &model.TransactionSignerKeyInfo{
 								Type:       "/cosmos.crypto.secp256k1.PubKey",
 								IsMultiSig: false,
 								Pubkeys: []string{
 									"Ax+Rgmd2ta8FxUOoFJ9Dvo3782nMWJzdYP0Jcyrk5XwO",
 								},
-								MaybeThreshold:  nil,
-								AccountSequence: 59,
+								MaybeThreshold: nil,
 							},
-							Address: "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
+							Address:         "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
+							AccountSequence: 59,
 						},
 					},
 					Fee:           coin.MustParseCoinsNormalized("8000000basetcro"),
@@ -207,16 +206,16 @@ var _ = Describe("TransactionParser", func() {
 					MsgCount: 5,
 					Signers: []model.TransactionSigner{
 						{
-							TransactionSignerInfo: model.TransactionSignerInfo{
+							MaybeKeyInfo: &model.TransactionSignerKeyInfo{
 								Type:       "/cosmos.crypto.secp256k1.PubKey",
 								IsMultiSig: false,
 								Pubkeys: []string{
 									"AhLYCDVbpM12Jafqp0poKEdIEpeTn03mJ5+mIgRz4PWa",
 								},
-								MaybeThreshold:  nil,
-								AccountSequence: 5,
+								MaybeThreshold: nil,
 							},
-							Address: "tcro1l38ze5fmgrgzw6rn3afx3gtpare3jgs8ke4n69",
+							Address:         "tcro1l38ze5fmgrgzw6rn3afx3gtpare3jgs8ke4n69",
+							AccountSequence: 5,
 						},
 					},
 					Fee:           coin.NewEmptyCoins(),
@@ -254,16 +253,16 @@ var _ = Describe("TransactionParser", func() {
 					MsgCount: 1,
 					Signers: []model.TransactionSigner{
 						{
-							TransactionSignerInfo: model.TransactionSignerInfo{
+							MaybeKeyInfo: &model.TransactionSignerKeyInfo{
 								Type:       "/cosmos.crypto.secp256k1.PubKey",
 								IsMultiSig: false,
 								Pubkeys: []string{
 									"A1mhVLohDEidpGYmpNYxxvikcaL72jQhZN1fxKFYkB8m",
 								},
-								MaybeThreshold:  nil,
-								AccountSequence: 25,
+								MaybeThreshold: nil,
 							},
-							Address: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+							Address:         "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+							AccountSequence: 25,
 						},
 					},
 					Fee:           coin.NewEmptyCoins(),
@@ -301,16 +300,16 @@ var _ = Describe("TransactionParser", func() {
 					MsgCount: 1,
 					Signers: []model.TransactionSigner{
 						{
-							TransactionSignerInfo: model.TransactionSignerInfo{
+							MaybeKeyInfo: &model.TransactionSignerKeyInfo{
 								Type:       "/cosmos.crypto.secp256k1.PubKey",
 								IsMultiSig: false,
 								Pubkeys: []string{
 									"A1mhVLohDEidpGYmpNYxxvikcaL72jQhZN1fxKFYkB8m",
 								},
-								MaybeThreshold:  nil,
-								AccountSequence: 26,
+								MaybeThreshold: nil,
 							},
-							Address: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+							Address:         "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+							AccountSequence: 26,
 						},
 					},
 					Fee:           coin.NewEmptyCoins(),
@@ -324,11 +323,11 @@ var _ = Describe("TransactionParser", func() {
 			)}))
 		})
 
-		It("should parse Transaction commands when the signer is multisig address", func() {
+		It("should parse Transaction commands when the signer public key is empty", func() {
 			txFeeParser := utils.NewTxDecoder()
-			block, _ := mustParseBlockResp(usecase_parser_test.TX_MULTISIG_BLOCK_RESP)
-			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MULTISIG_BLOCK_RESULTS_RESP)
-			anyAccountAddressPrefix := "tcro"
+			block, _ := mustParseBlockResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_BLOCK_RESP)
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_BLOCK_RESULTS_RESP)
+			anyAccountAddressPrefix := "cosmos"
 
 			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
@@ -337,40 +336,32 @@ var _ = Describe("TransactionParser", func() {
 				anyAccountAddressPrefix,
 			)
 			Expect(err).To(BeNil())
-			Expect(cmds).To(HaveLen(1))
-			expectedBlockHeight := int64(1014129)
-			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateTransaction(
+			Expect(cmds).To(HaveLen(3))
+			expectedBlockHeight := int64(9399574)
+			Expect(cmds[2]).To(Equal(command_usecase.NewCreateTransaction(
 				expectedBlockHeight,
 				model.CreateTransactionParams{
-					TxHash:   "82E32812C744066B2865FD5E5EADB791815127DE3746A4194B1FCEBA195BDCA6",
+					TxHash:   "AC2BD4EF48A13B81641AC1CD3A60894718A66FC597A1353B8ACC4E5B6311DB1D",
+					Index:    2,
 					Code:     0,
-					Log:      "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro12ygwdvfvgt4c72e0mu7h6gmfv9ywh34r9kacjr\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro12ygwdvfvgt4c72e0mu7h6gmfv9ywh34r9kacjr\"},{\"key\":\"sender\",\"value\":\"tcro12ygwdvfvgt4c72e0mu7h6gmfv9ywh34r9kacjr\"},{\"key\":\"amount\",\"value\":\"100000000basetcro\"}]}]}]",
+					Log:      "[{\"msgIndex\":0,\"events\":[{\"type\":\"coin_received\",\"attributes\":[{\"key\":\"receiver\",\"value\":\"cosmos1k4r9xelttshp5jq7c9a2khwpyj0r69j7lzhu77\"},{\"key\":\"amount\",\"value\":\"900uatom\"}]},{\"type\":\"coin_spent\",\"attributes\":[{\"key\":\"spender\",\"value\":\"cosmos10v888l3d44rh65mjku0m96dgkegnwcxwpm3har\"},{\"key\":\"amount\",\"value\":\"900uatom\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"/cosmos.bank.v1beta1.MsgSend\"},{\"key\":\"sender\",\"value\":\"cosmos10v888l3d44rh65mjku0m96dgkegnwcxwpm3har\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"cosmos1k4r9xelttshp5jq7c9a2khwpyj0r69j7lzhu77\"},{\"key\":\"sender\",\"value\":\"cosmos10v888l3d44rh65mjku0m96dgkegnwcxwpm3har\"},{\"key\":\"amount\",\"value\":\"900uatom\"}]}]}]",
 					MsgCount: 1,
 					Signers: []model.TransactionSigner{
 						{
-							TransactionSignerInfo: model.TransactionSignerInfo{
-								Type:           "/cosmos.crypto.multisig.LegacyAminoPubKey",
-								IsMultiSig:     true,
-								MaybeThreshold: primptr.Int(3),
-								Pubkeys: []string{
-									"AyYeIUDy4m8rW6DgbRbX+k8uJn46trwyyuBE871lRsDE",
-									"Ahe94UU90Bzry7/CnxzKJJ5XFJJqJ4u8cOv9rq632B/Z",
-									"AgvNhfDEbHrUDP4gBpiEOmxMog+BHCEg4SB49KPUB7m+",
-								},
-								AccountSequence: 0,
-							},
-							Address: "tcro12ygwdvfvgt4c72e0mu7h6gmfv9ywh34r9kacjr",
+							MaybeKeyInfo:    nil,
+							Address:         "",
+							AccountSequence: 35,
 						},
 					},
-					Fee:           coin.NewEmptyCoins(),
+					Fee:           coin.MustParseCoinsNormalized("500uatom"),
 					FeePayer:      "",
 					FeeGranter:    "",
 					GasWanted:     200000,
-					GasUsed:       78093,
+					GasUsed:       66595,
 					Memo:          "",
 					TimeoutHeight: 0,
 				},
-			)}))
+			)))
 		})
 	})
 })
