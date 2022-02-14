@@ -490,9 +490,8 @@ func (projection *AccountTransaction) ParseSenderAddresses(senders []model.Trans
 	for _, sender := range senders {
 		// FIXME: Address should not be empty after https://github.com/crypto-com/chain-indexing/issues/685
 		if sender.Address != "" {
-			continue
+			addresses = append(addresses, sender.Address)
 		}
-		addresses = append(addresses, sender.Address)
 	}
 	return addresses
 }
