@@ -280,19 +280,19 @@ func (view *BridgeActivitiesView) List(
 			"id > ?", filter.MaybeIdGt,
 		)
 	}
-	if filter.MaybeCreatedAtLt != nil {
+	if filter.MaybeSourceBlockTimeLt != nil {
 		stmtBuilder = stmtBuilder.Where(
-			"created_at < ?", view.rdb.Tton(filter.MaybeCreatedAtLt),
+			"source_block_time < ?", view.rdb.Tton(filter.MaybeSourceBlockTimeLt),
 		)
 	}
-	if filter.MaybeCreatedAtGt != nil {
+	if filter.MaybeSourceBlockTimeGt != nil {
 		stmtBuilder = stmtBuilder.Where(
-			"created_at > ?", view.rdb.Tton(filter.MaybeCreatedAtGt),
+			"source_block_time > ?", view.rdb.Tton(filter.MaybeSourceBlockTimeGt),
 		)
 	}
-	if filter.MaybeUpdatedAtGt != nil {
+	if filter.MaybeDestinationBlockTimeGt != nil {
 		stmtBuilder = stmtBuilder.Where(
-			"updated_at > ?", view.rdb.Tton(filter.MaybeUpdatedAtGt),
+			"maybe_destination_block_time > ?", view.rdb.Tton(filter.MaybeDestinationBlockTimeGt),
 		)
 	}
 
@@ -421,11 +421,11 @@ func (view *BridgeActivitiesView) List(
 }
 
 type BridgeActivitiesListFilter struct {
-	MaybeStatus      *types.Status
-	MaybeIdGt        *string
-	MaybeCreatedAtLt *utctime.UTCTime
-	MaybeCreatedAtGt *utctime.UTCTime
-	MaybeUpdatedAtGt *utctime.UTCTime
+	MaybeStatus                 *types.Status
+	MaybeIdGt                   *string
+	MaybeSourceBlockTimeLt      *utctime.UTCTime
+	MaybeSourceBlockTimeGt      *utctime.UTCTime
+	MaybeDestinationBlockTimeGt *utctime.UTCTime
 }
 
 type BridgeActivitiesListAddressFilter = []BridgeActivitiesListAddressFilterCond
