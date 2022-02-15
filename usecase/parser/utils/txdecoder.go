@@ -153,9 +153,9 @@ type Amount struct {
 }
 
 type SignerInfo struct {
-	PublicKey SignerInfoPublicKey `json:"public_key"`
-	ModeInfo  ModeInfo            `json:"mode_info"`
-	Sequence  string              `json:"sequence"`
+	MaybePublicKey *SignerInfoPublicKey `json:"public_key"`
+	ModeInfo       ModeInfo             `json:"mode_info"`
+	Sequence       string               `json:"sequence"`
 }
 
 type SignerInfoPublicKey struct {

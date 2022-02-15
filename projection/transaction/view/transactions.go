@@ -573,11 +573,15 @@ type TransactionsListOrder struct {
 }
 
 type TransactionRowSigner struct {
-	Type            string   `json:"type"`
-	IsMultiSig      bool     `json:"isMultiSig"`
-	Pubkeys         []string `json:"pubkeys"`
-	MaybeThreshold  *int     `json:"threshold,omitempty"`
-	AccountSequence uint64   `json:"accountSequence"`
+	MaybeKeyInfo *TransactionRowSignerKeyInfo `json:"keyInfo"`
 
-	Address string `json:"address"`
+	Address         string `json:"address"`
+	AccountSequence uint64 `json:"accountSequence"`
+}
+
+type TransactionRowSignerKeyInfo struct {
+	Type           string   `json:"type"`
+	IsMultiSig     bool     `json:"isMultiSig"`
+	Pubkeys        []string `json:"pubkeys"`
+	MaybeThreshold *int     `json:"threshold,omitempty"`
 }

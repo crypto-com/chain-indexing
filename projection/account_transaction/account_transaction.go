@@ -11,7 +11,6 @@ import (
 	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
-	"github.com/crypto-com/chain-indexing/internal/base64"
 	"github.com/crypto-com/chain-indexing/projection/account_transaction/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -489,24 +488,10 @@ func (projection *AccountTransaction) HandleEvents(height int64, events []event_
 func (projection *AccountTransaction) ParseSenderAddresses(senders []model.TransactionSigner) []string {
 	addresses := make([]string, 0, len(senders))
 	for _, sender := range senders {
-		var address string
-		if sender.IsMultiSig {
-			addrPubKeys := make([][]byte, 0, len(sender.Pubkeys))
-			for _, pubKey := range sender.Pubkeys {
-				rawPubKey := base64.MustDecodeString(pubKey)
-				addrPubKeys = append(addrPubKeys, rawPubKey)
-			}
-			address = tmcosmosutils.MustMultiSigAddressFromPubKeys(
-				projection.accountAddressPrefix,
-				addrPubKeys,
-				*sender.MaybeThreshold,
-				false,
-			)
-		} else {
-			pubKey := base64.MustDecodeString(sender.Pubkeys[0])
-			address = tmcosmosutils.MustAccountAddressFromPubKey(projection.accountAddressPrefix, pubKey)
+		// FIXME: Address should not be empty after https://github.com/crypto-com/chain-indexing/issues/685
+		if sender.Address != "" {
+			addresses = append(addresses, sender.Address)
 		}
-		addresses = append(addresses, address)
 	}
 	return addresses
 }

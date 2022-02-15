@@ -17,39 +17,53 @@ func ParseSignerInfosToTransactionSigners(
 	var signers []model.TransactionSigner
 
 	for _, signer := range signerInfos {
-		var transactionSignerInfo model.TransactionSignerInfo
+		var transactionSignerInfo *model.TransactionSignerKeyInfo
+		var address string
+
 		sequence, parseErr := strconv.ParseUint(signer.Sequence, 10, 64)
 		if parseErr != nil {
 			return nil, fmt.Errorf("error parsing account sequence: %v", parseErr)
 		}
 		if signer.ModeInfo.MaybeSingle != nil {
-			transactionSignerInfo = model.TransactionSignerInfo{
-				Type:            signer.PublicKey.Type,
-				IsMultiSig:      false,
-				Pubkeys:         []string{*signer.PublicKey.MaybeKey},
-				AccountSequence: sequence,
+			if signer.MaybePublicKey == nil {
+				// FIXME: extract signer address from message: https://github.com/crypto-com/chain-indexing/issues/685
+				address = ""
+			} else {
+				transactionSignerInfo = &model.TransactionSignerKeyInfo{
+					Type:       signer.MaybePublicKey.Type,
+					IsMultiSig: false,
+					Pubkeys:    []string{*signer.MaybePublicKey.MaybeKey},
+				}
+
+				parsedAddr, parseAddrErr := ParseTransactionSignerInfoToAddress(*transactionSignerInfo, accountAddressPrefix)
+				if parseAddrErr != nil {
+					return nil, fmt.Errorf("error parsing signer info to address: %v", parseAddrErr)
+				}
+				address = parsedAddr
 			}
 		} else {
-			pubkeys := make([]string, 0, len(signer.PublicKey.MaybePublicKeys))
-			for _, pubkey := range signer.PublicKey.MaybePublicKeys {
+			pubkeys := make([]string, 0, len(signer.MaybePublicKey.MaybePublicKeys))
+			for _, pubkey := range signer.MaybePublicKey.MaybePublicKeys {
 				pubkeys = append(pubkeys, pubkey.Key)
 			}
-			transactionSignerInfo = model.TransactionSignerInfo{
-				Type:            signer.PublicKey.Type,
-				IsMultiSig:      true,
-				Pubkeys:         pubkeys,
-				MaybeThreshold:  signer.PublicKey.MaybeThreshold,
-				AccountSequence: sequence,
+			transactionSignerInfo = &model.TransactionSignerKeyInfo{
+				Type:           signer.MaybePublicKey.Type,
+				IsMultiSig:     true,
+				Pubkeys:        pubkeys,
+				MaybeThreshold: signer.MaybePublicKey.MaybeThreshold,
 			}
+
+			parsedAddr, parseAddrErr := ParseTransactionSignerInfoToAddress(*transactionSignerInfo, accountAddressPrefix)
+			if parseAddrErr != nil {
+				return nil, fmt.Errorf("error parsing signer info to address: %v", parseAddrErr)
+			}
+			address = parsedAddr
 		}
 
-		address, parseAddrErr := ParseTransactionSignerInfoToAddress(transactionSignerInfo, accountAddressPrefix)
-		if parseAddrErr != nil {
-			return nil, fmt.Errorf("error parsing signer info to address: %v", parseAddrErr)
-		}
 		signers = append(signers, model.TransactionSigner{
-			TransactionSignerInfo: transactionSignerInfo,
-			Address:               address,
+			MaybeKeyInfo:    transactionSignerInfo,
+			Address:         address,
+			AccountSequence: sequence,
 		})
 	}
 
@@ -57,7 +71,7 @@ func ParseSignerInfosToTransactionSigners(
 }
 
 func ParseTransactionSignerInfoToAddress(
-	signerInfo model.TransactionSignerInfo,
+	signerInfo model.TransactionSignerKeyInfo,
 	accountAddressPrefix string,
 ) (string, error) {
 	var address string

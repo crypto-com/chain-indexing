@@ -116,14 +116,19 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 
 			signers := make([]transaction_view.TransactionRowSigner, 0)
 			for _, transactionCreatedEventSigner := range transactionCreatedEvent.Signers {
-				signers = append(signers, transaction_view.TransactionRowSigner{
-					Type:            transactionCreatedEventSigner.Type,
-					IsMultiSig:      transactionCreatedEventSigner.IsMultiSig,
-					Pubkeys:         transactionCreatedEventSigner.Pubkeys,
-					MaybeThreshold:  transactionCreatedEventSigner.MaybeThreshold,
+				transactionRowSigner := transaction_view.TransactionRowSigner{
 					AccountSequence: transactionCreatedEventSigner.AccountSequence,
 					Address:         transactionCreatedEventSigner.Address,
-				})
+				}
+				if transactionCreatedEventSigner.MaybeKeyInfo != nil {
+					transactionRowSigner.MaybeKeyInfo = &transaction_view.TransactionRowSignerKeyInfo{
+						Type:           transactionCreatedEventSigner.MaybeKeyInfo.Type,
+						IsMultiSig:     transactionCreatedEventSigner.MaybeKeyInfo.IsMultiSig,
+						Pubkeys:        transactionCreatedEventSigner.MaybeKeyInfo.Pubkeys,
+						MaybeThreshold: transactionCreatedEventSigner.MaybeKeyInfo.MaybeThreshold,
+					}
+				}
+				signers = append(signers, transactionRowSigner)
 			}
 			tx.Signers = signers
 			txs = append(txs, tx)
@@ -148,14 +153,19 @@ func (projection *Transaction) HandleEvents(height int64, events []event_entity.
 
 			signers := make([]transaction_view.TransactionRowSigner, 0)
 			for _, transactionFailedEventSigner := range transactionFailedEvent.Signers {
-				signers = append(signers, transaction_view.TransactionRowSigner{
-					Type:            transactionFailedEventSigner.Type,
-					IsMultiSig:      transactionFailedEventSigner.IsMultiSig,
-					Pubkeys:         transactionFailedEventSigner.Pubkeys,
-					MaybeThreshold:  transactionFailedEventSigner.MaybeThreshold,
+				transactionRowSigner := transaction_view.TransactionRowSigner{
 					AccountSequence: transactionFailedEventSigner.AccountSequence,
 					Address:         transactionFailedEventSigner.Address,
-				})
+				}
+				if transactionFailedEventSigner.MaybeKeyInfo != nil {
+					transactionRowSigner.MaybeKeyInfo = &transaction_view.TransactionRowSignerKeyInfo{
+						Type:           transactionFailedEventSigner.MaybeKeyInfo.Type,
+						IsMultiSig:     transactionFailedEventSigner.MaybeKeyInfo.IsMultiSig,
+						Pubkeys:        transactionFailedEventSigner.MaybeKeyInfo.Pubkeys,
+						MaybeThreshold: transactionFailedEventSigner.MaybeKeyInfo.MaybeThreshold,
+					}
+				}
+				signers = append(signers, transactionRowSigner)
 			}
 
 			tx.Signers = signers

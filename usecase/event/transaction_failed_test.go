@@ -27,16 +27,16 @@ var _ = Describe("Event", func() {
 				MsgCount: 1,
 				Signers: []model.TransactionSigner{
 					{
-						TransactionSignerInfo: model.TransactionSignerInfo{
-							Type:            "/cosmos.crypto.secp256k1.PubKey",
-							IsMultiSig:      false,
-							Pubkeys:         []string{"pubkey"},
-							AccountSequence: uint64(1),
+						MaybeKeyInfo: &model.TransactionSignerKeyInfo{
+							Type:       "/cosmos.crypto.secp256k1.PubKey",
+							IsMultiSig: false,
+							Pubkeys:    []string{"pubkey"},
 						},
-						Address: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+						Address:         "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+						AccountSequence: uint64(1),
 					},
 					{
-						TransactionSignerInfo: model.TransactionSignerInfo{
+						MaybeKeyInfo: &model.TransactionSignerKeyInfo{
 							Type:       "/cosmos.crypto.multisig.LegacyAminoPubKey",
 							IsMultiSig: true,
 							Pubkeys: []string{
@@ -44,10 +44,10 @@ var _ = Describe("Event", func() {
 								"pubkey2",
 								"pubkey3",
 							},
-							MaybeThreshold:  primptr.Int(2),
-							AccountSequence: uint64(1),
+							MaybeThreshold: primptr.Int(2),
 						},
-						Address: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+						Address:         "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+						AccountSequence: uint64(1),
 					},
 				},
 				Fee:           coin.MustParseCoinsNormalized("1000basetcro,2000tcro"),

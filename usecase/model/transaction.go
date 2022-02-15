@@ -19,15 +19,15 @@ type CreateTransactionParams struct {
 }
 
 type TransactionSigner struct {
-	TransactionSignerInfo
+	MaybeKeyInfo *TransactionSignerKeyInfo `json:"keyInfo"`
 
-	Address string `json:"address"`
+	Address         string `json:"address"`
+	AccountSequence uint64 `json:"accountSequence"`
 }
 
-type TransactionSignerInfo struct {
-	Type            string   `json:"type"`
-	IsMultiSig      bool     `json:"isMultiSig"`
-	Pubkeys         []string `json:"pubkeys"`
-	MaybeThreshold  *int     `json:"threshold,omitempty"`
-	AccountSequence uint64   `json:"accountSequence"`
+type TransactionSignerKeyInfo struct {
+	Type           string   `json:"type"`
+	IsMultiSig     bool     `json:"isMultiSig"`
+	Pubkeys        []string `json:"pubkeys"`
+	MaybeThreshold *int     `json:"threshold,omitempty"`
 }
