@@ -28,15 +28,16 @@ func NewAccountMessages(logger applogger.Logger, rdbHandle *rdb.Handle) *Account
 }
 
 func (handler *AccountMessages) ListByAccount(ctx *fasthttp.RequestCtx) {
-	var err error
-
 	pagination, err := httpapi.ParsePagination(ctx)
 	if err != nil {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
 		return
 	}
 
-	account := ctx.UserValue("account").(string)
+	account, accountOk := URLValueGuard(ctx, handler.logger, "account")
+	if !accountOk {
+		return
+	}
 	filter := account_message_view.AccountMessagesListFilter{
 		Account:       account,
 		MaybeMsgTypes: nil,

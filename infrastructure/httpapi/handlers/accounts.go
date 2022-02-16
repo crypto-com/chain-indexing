@@ -48,7 +48,10 @@ func NewAccounts(
 }
 
 func (handler *Accounts) FindBy(ctx *fasthttp.RequestCtx) {
-	accountParam, _ := ctx.UserValue("account").(string)
+	accountParam, accountParamOk := URLValueGuard(ctx, handler.logger, "account")
+	if !accountParamOk {
+		return
+	}
 
 	info := AccountInfo{
 		Balance:             coin.NewEmptyCoins(),

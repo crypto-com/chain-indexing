@@ -31,7 +31,10 @@ func NewBlockEvents(logger applogger.Logger, rdbHandle *rdb.Handle) *BlockEvents
 }
 
 func (handler *BlockEvents) FindById(ctx *fasthttp.RequestCtx) {
-	idParam, _ := ctx.UserValue("id").(string)
+	idParam, idParamOk := URLValueGuard(ctx, handler.logger, "id")
+	if !idParamOk {
+		return
+	}
 	id, err := strconv.ParseInt(idParam, 10, 64)
 	if err != nil {
 		httpapi.BadRequest(ctx, errors.New("invalid event id"))
@@ -52,8 +55,6 @@ func (handler *BlockEvents) FindById(ctx *fasthttp.RequestCtx) {
 }
 
 func (handler *BlockEvents) List(ctx *fasthttp.RequestCtx) {
-	var err error
-
 	pagination, err := httpapi.ParsePagination(ctx)
 	if err != nil {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)

@@ -39,7 +39,11 @@ func NewBlocks(logger applogger.Logger, rdbHandle *rdb.Handle) *Blocks {
 }
 
 func (handler *Blocks) FindBy(ctx *fasthttp.RequestCtx) {
-	heightOrHashParam, _ := ctx.UserValue("height-or-hash").(string)
+	heightOrHashParam, heightOrHashParamOk := URLValueGuard(ctx, handler.logger, "height-or-hash")
+	if !heightOrHashParamOk {
+		return
+	}
+
 	height, err := strconv.ParseInt(heightOrHashParam, 10, 64)
 	var identity block_view.BlockIdentity
 	if err == nil {
@@ -62,8 +66,6 @@ func (handler *Blocks) FindBy(ctx *fasthttp.RequestCtx) {
 }
 
 func (handler *Blocks) List(ctx *fasthttp.RequestCtx) {
-	var err error
-
 	pagination, err := httpapi.ParsePagination(ctx)
 	if err != nil {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
@@ -97,8 +99,11 @@ func (handler *Blocks) ListTransactionsByHeight(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	blockHeightParam := ctx.UserValue("height")
-	blockHeight, err := strconv.ParseInt(blockHeightParam.(string), 10, 64)
+	blockHeightParam, blockHeightParamOk := URLValueGuard(ctx, handler.logger, "height")
+	if !blockHeightParamOk {
+		return
+	}
+	blockHeight, err := strconv.ParseInt(blockHeightParam, 10, 64)
 	if err != nil {
 		httpapi.BadRequest(ctx, errors.New("invalid block height"))
 		return
@@ -141,8 +146,11 @@ func (handler *Blocks) ListEventsByHeight(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
-	blockHeightParam := ctx.UserValue("height")
-	blockHeight, err := strconv.ParseInt(blockHeightParam.(string), 10, 64)
+	blockHeightParam, blockHeightParamOk := URLValueGuard(ctx, handler.logger, "height")
+	if !blockHeightParamOk {
+		return
+	}
+	blockHeight, err := strconv.ParseInt(blockHeightParam, 10, 64)
 	if err != nil {
 		httpapi.BadRequest(ctx, errors.New("invalid block height"))
 		return
@@ -169,12 +177,11 @@ func (handler *Blocks) ListCommitmentsByHeight(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	blockHeightParam := ctx.UserValue("height")
-	if blockHeightParam == nil {
-		httpapi.BadRequest(ctx, errors.New("missing block height"))
+	blockHeightParam, blockHeightParamOk := URLValueGuard(ctx, handler.logger, "height")
+	if !blockHeightParamOk {
 		return
 	}
-	blockHeight, err := strconv.ParseInt(blockHeightParam.(string), 10, 64)
+	blockHeight, err := strconv.ParseInt(blockHeightParam, 10, 64)
 	if err != nil {
 		httpapi.BadRequest(ctx, errors.New("invalid block height"))
 		return

@@ -29,11 +29,12 @@ func NewTransactions(logger applogger.Logger, rdbHandle *rdb.Handle) *Transactio
 }
 
 func (handler *Transactions) FindByHash(ctx *fasthttp.RequestCtx) {
-	var err error
+	hashParam, hashParamOk := URLValueGuard(ctx, handler.logger, "hash")
+	if !hashParamOk {
+		return
+	}
 
-	transaction, err := handler.transactionsView.FindByHash(
-		ctx.UserValue("hash").(string),
-	)
+	transaction, err := handler.transactionsView.FindByHash(hashParam)
 	if err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			httpapi.NotFound(ctx)
@@ -48,8 +49,6 @@ func (handler *Transactions) FindByHash(ctx *fasthttp.RequestCtx) {
 }
 
 func (handler *Transactions) List(ctx *fasthttp.RequestCtx) {
-	var err error
-
 	pagination, err := httpapi.ParsePagination(ctx)
 	if err != nil {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)

@@ -47,7 +47,10 @@ func NewProposals(logger applogger.Logger, rdbHandle *rdb.Handle, cosmosClient c
 }
 
 func (handler *Proposals) FindById(ctx *fasthttp.RequestCtx) {
-	idParam, _ := ctx.UserValue("id").(string)
+	idParam, idParamOk := URLValueGuard(ctx, handler.logger, "id")
+	if !idParamOk {
+		return
+	}
 	proposal, err := handler.proposalsView.FindById(idParam)
 	if err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
@@ -180,7 +183,10 @@ func (handler *Proposals) List(ctx *fasthttp.RequestCtx) {
 }
 
 func (handler *Proposals) ListVotesById(ctx *fasthttp.RequestCtx) {
-	idParam, _ := ctx.UserValue("id").(string)
+	idParam, idParamOk := URLValueGuard(ctx, handler.logger, "id")
+	if !idParamOk {
+		return
+	}
 
 	pagination, paginationError := httpapi.ParsePagination(ctx)
 	if paginationError != nil {
@@ -209,7 +215,10 @@ func (handler *Proposals) ListVotesById(ctx *fasthttp.RequestCtx) {
 }
 
 func (handler *Proposals) ListDepositorsById(ctx *fasthttp.RequestCtx) {
-	idParam, _ := ctx.UserValue("id").(string)
+	idParam, idParamOk := URLValueGuard(ctx, handler.logger, "id")
+	if !idParamOk {
+		return
+	}
 
 	pagination, paginationError := httpapi.ParsePagination(ctx)
 	if paginationError != nil {

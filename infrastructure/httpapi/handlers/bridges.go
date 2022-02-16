@@ -71,7 +71,11 @@ type BridgeChainCurrency struct {
 type NetworkAbbreviation = string
 
 func (handler *Bridges) FindByTransactionHash(ctx *fasthttp.RequestCtx) {
-	hashParam, _ := ctx.UserValue("hash").(string)
+	hashParam, hashParamOk := URLValueGuard(ctx, handler.logger, "hash")
+	if !hashParamOk {
+		return
+	}
+
 	activity, activityErr := handler.bridgeActivitiesView.FindBy(bridge_activitiy_view.BridgeActivitiesFindByFilter{
 		MaybeLinkId:        nil,
 		MaybeTransactionId: &hashParam,
@@ -95,8 +99,6 @@ func (handler *Bridges) FindByTransactionHash(ctx *fasthttp.RequestCtx) {
 }
 
 func (handler *Bridges) ListActivities(ctx *fasthttp.RequestCtx) {
-	var err error
-
 	pagination, err := httpapi.ParsePagination(ctx)
 	if err != nil {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
@@ -248,16 +250,20 @@ func (handler *Bridges) ListActivities(ctx *fasthttp.RequestCtx) {
 }
 
 func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
-	var err error
-
 	pagination, err := httpapi.ParsePagination(ctx)
 	if err != nil {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
 		return
 	}
 
-	networkParam := ctx.UserValue("network").(string)
-	accountParam := ctx.UserValue("account").(string)
+	networkParam, networkParamOk := URLValueGuard(ctx, handler.logger, "network")
+	if !networkParamOk {
+		return
+	}
+	accountParam, accountParamOk := URLValueGuard(ctx, handler.logger, "account")
+	if !accountParamOk {
+		return
+	}
 
 	sourceBlockTimeOrder := view.ORDER_ASC
 	queryArgs := ctx.QueryArgs()
@@ -377,14 +383,14 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 		MaybeSourceBlockTime: &sourceBlockTimeOrder,
 	}
 
-	activities, paginationResult, listErr := handler.bridgeActivitiesView.List(
+	activities, paginationResult, err := handler.bridgeActivitiesView.List(
 		addressFilter,
 		filter,
 		order,
 		pagination,
 	)
-	if listErr != nil {
-		handler.logger.Errorf("error listing bridge activities: %v", listErr)
+	if err != nil {
+		handler.logger.Errorf("error listing bridge activities: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
 	}
