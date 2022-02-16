@@ -35,7 +35,10 @@ func (handler *IBCChannelMessage) ListByChannelID(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	channelID := ctx.UserValue("channelId").(string)
+	channelID, channelIDOk := URLValueGuard(ctx, handler.logger, "channelId")
+	if !channelIDOk {
+		return
+	}
 
 	queryArgs := ctx.QueryArgs()
 

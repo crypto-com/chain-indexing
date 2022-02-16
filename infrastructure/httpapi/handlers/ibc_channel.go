@@ -89,9 +89,11 @@ func (handler *IBCChannel) ListChannels(ctx *fasthttp.RequestCtx) {
 	httpapi.SuccessWithPagination(ctx, ibcChannels, paginationResult)
 }
 func (handler *IBCChannel) FindChannelById(ctx *fasthttp.RequestCtx) {
-	ibcChannel, err := handler.ibcChannelsView.FindBy(
-		ctx.UserValue("channelId").(string),
-	)
+	channelId, channelIdOk := URLValueGuard(ctx, handler.logger, "channelId")
+	if !channelIdOk {
+		return
+	}
+	ibcChannel, err := handler.ibcChannelsView.FindBy(channelId)
 	if err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			httpapi.NotFound(ctx)

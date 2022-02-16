@@ -80,7 +80,10 @@ func NewValidators(
 }
 
 func (handler *Validators) FindBy(ctx *fasthttp.RequestCtx) {
-	addressParams, _ := ctx.UserValue("address").(string)
+	addressParams, addressParamsOk := URLValueGuard(ctx, handler.logger, "address")
+	if !addressParamsOk {
+		return
+	}
 	var identity validator_view.ValidatorIdentity
 	if strings.HasPrefix(addressParams, handler.validatorAddressPrefix) {
 		identity = validator_view.ValidatorIdentity{
@@ -131,8 +134,6 @@ func (handler *Validators) FindBy(ctx *fasthttp.RequestCtx) {
 }
 
 func (handler *Validators) List(ctx *fasthttp.RequestCtx) {
-	var err error
-
 	pagination, err := httpapi.ParsePagination(ctx)
 	if err != nil {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
@@ -418,7 +419,10 @@ func (handler *Validators) ListActivities(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	addressParams, _ := ctx.UserValue("address").(string)
+	addressParams, addressParamsOk := URLValueGuard(ctx, handler.logger, "address")
+	if !addressParamsOk {
+		return
+	}
 	var filter validator_view.ValidatorActivitiesListFilter
 	if strings.HasPrefix(addressParams, handler.validatorAddressPrefix) {
 		filter = validator_view.ValidatorActivitiesListFilter{

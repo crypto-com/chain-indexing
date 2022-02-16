@@ -69,7 +69,10 @@ func (handler *NFTs) ListDenoms(ctx *fasthttp.RequestCtx) {
 }
 
 func (handler *NFTs) FindDenomById(ctx *fasthttp.RequestCtx) {
-	idParam, _ := ctx.UserValue("denomId").(string)
+	idParam, idParamOk := URLValueGuard(ctx, handler.logger, "denomId")
+	if !idParamOk {
+		return
+	}
 	denom, err := handler.denomsView.FindById(idParam)
 	if err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
@@ -85,7 +88,10 @@ func (handler *NFTs) FindDenomById(ctx *fasthttp.RequestCtx) {
 }
 
 func (handler *NFTs) FindDenomByName(ctx *fasthttp.RequestCtx) {
-	nameParam, _ := ctx.UserValue("denomName").(string)
+	nameParam, nameParamOk := URLValueGuard(ctx, handler.logger, "denomName")
+	if !nameParamOk {
+		return
+	}
 	denom, err := handler.denomsView.FindByName(nameParam)
 	if err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
@@ -151,7 +157,10 @@ func (handler *NFTs) ListTokens(ctx *fasthttp.RequestCtx) {
 }
 
 func (handler *NFTs) ListTokensByDenomId(ctx *fasthttp.RequestCtx) {
-	denomId, _ := ctx.UserValue("denomId").(string)
+	denomId, denomIdOk := URLValueGuard(ctx, handler.logger, "denomId")
+	if !denomIdOk {
+		return
+	}
 
 	pagination, paginationErr := httpapi.ParsePagination(ctx)
 	if paginationErr != nil {
@@ -201,8 +210,14 @@ func (handler *NFTs) ListTokensByDenomId(ctx *fasthttp.RequestCtx) {
 }
 
 func (handler *NFTs) FindTokenById(ctx *fasthttp.RequestCtx) {
-	denomIdParam, _ := ctx.UserValue("denomId").(string)
-	tokenIdParam, _ := ctx.UserValue("tokenId").(string)
+	denomIdParam, denomIdParamOk := URLValueGuard(ctx, handler.logger, "denomId")
+	if !denomIdParamOk {
+		return
+	}
+	tokenIdParam, tokenIdParamOk := URLValueGuard(ctx, handler.logger, "tokenId")
+	if !tokenIdParamOk {
+		return
+	}
 	token, err := handler.tokensView.FindById(denomIdParam, tokenIdParam)
 	if err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
@@ -235,7 +250,10 @@ func (handler *NFTs) ListDrops(ctx *fasthttp.RequestCtx) {
 }
 
 func (handler *NFTs) ListTokensByDrop(ctx *fasthttp.RequestCtx) {
-	dropParam, _ := ctx.UserValue("drop").(string)
+	dropParam, dropParamOk := URLValueGuard(ctx, handler.logger, "drop")
+	if !dropParamOk {
+		return
+	}
 
 	pagination, paginationErr := httpapi.ParsePagination(ctx)
 	if paginationErr != nil {
@@ -285,7 +303,10 @@ func (handler *NFTs) ListTokensByDrop(ctx *fasthttp.RequestCtx) {
 }
 
 func (handler *NFTs) ListTokensByAccount(ctx *fasthttp.RequestCtx) {
-	accountParam, _ := ctx.UserValue("account").(string)
+	accountParam, accountParamOk := URLValueGuard(ctx, handler.logger, "account")
+	if !accountParamOk {
+		return
+	}
 
 	pagination, paginationErr := httpapi.ParsePagination(ctx)
 	if paginationErr != nil {
@@ -335,8 +356,14 @@ func (handler *NFTs) ListTokensByAccount(ctx *fasthttp.RequestCtx) {
 }
 
 func (handler *NFTs) ListTransfersByToken(ctx *fasthttp.RequestCtx) {
-	denomIdParam, _ := ctx.UserValue("denomId").(string)
-	tokenIdParam, _ := ctx.UserValue("tokenId").(string)
+	denomIdParam, denomIdParamOk := URLValueGuard(ctx, handler.logger, "denomId")
+	if !denomIdParamOk {
+		return
+	}
+	tokenIdParam, tokenIdParamOk := URLValueGuard(ctx, handler.logger, "tokenId")
+	if !tokenIdParamOk {
+		return
+	}
 
 	pagination, paginationErr := httpapi.ParsePagination(ctx)
 	if paginationErr != nil {
@@ -380,7 +407,10 @@ func (handler *NFTs) ListMessagesByDenom(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	denomId := ctx.UserValue("denomId").(string)
+	denomId, denomIdOk := URLValueGuard(ctx, handler.logger, "denomId")
+	if !denomIdOk {
+		return
+	}
 	filter := nft_view.MessagesListFilter{
 		MaybeDenomId:  &denomId,
 		MaybeTokenId:  nil,
@@ -420,8 +450,14 @@ func (handler *NFTs) ListMessagesByToken(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	denomId := ctx.UserValue("denomId").(string)
-	tokenId := ctx.UserValue("tokenId").(string)
+	denomId, denomIdOk := URLValueGuard(ctx, handler.logger, "denomId")
+	if !denomIdOk {
+		return
+	}
+	tokenId, tokenIdOk := URLValueGuard(ctx, handler.logger, "tokenId")
+	if !tokenIdOk {
+		return
+	}
 	filter := nft_view.MessagesListFilter{
 		MaybeDenomId:  &denomId,
 		MaybeTokenId:  &tokenId,

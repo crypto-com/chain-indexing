@@ -27,11 +27,14 @@ func NewAccountTransactions(logger applogger.Logger, rdbHandle *rdb.Handle) *Acc
 }
 
 func (handler *AccountTransactions) ListByAccount(ctx *fasthttp.RequestCtx) {
-	var err error
-
 	pagination, err := httpapi.ParsePagination(ctx)
 	if err != nil {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
+		return
+	}
+
+	account, accountOk := URLValueGuard(ctx, handler.logger, "account")
+	if !accountOk {
 		return
 	}
 
@@ -48,7 +51,6 @@ func (handler *AccountTransactions) ListByAccount(ctx *fasthttp.RequestCtx) {
 		memo = string(queryArgs.Peek("memo"))
 	}
 
-	account := ctx.UserValue("account").(string)
 	filter := account_transaction_view.AccountTransactionsListFilter{
 		Account: account,
 		Memo:    memo,
