@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"fmt"
-	applogger "github.com/crypto-com/chain-indexing/external/logger"
 
 	"github.com/valyala/fasthttp"
 
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 )
 
