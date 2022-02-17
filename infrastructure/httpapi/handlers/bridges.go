@@ -377,6 +377,7 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 	}
 	if addressFilter == nil {
 		httpapi.BadRequest(ctx, errors.New("unknown network"))
+		return
 	}
 
 	order := bridge_activitiy_view.BridgeActivitiesListOrder{
