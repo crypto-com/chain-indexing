@@ -215,9 +215,6 @@ func (handler *Bridges) ListActivities(ctx *fasthttp.RequestCtx) {
 			})
 		}
 	}
-	if addressFilter == nil {
-		httpapi.BadRequest(ctx, errors.New("unknown network"))
-	}
 
 	order := bridge_activitiy_view.BridgeActivitiesListOrder{
 		MaybeSourceBlockTime: &sourceBlockTimeOrder,
@@ -375,7 +372,7 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 			}
 		}
 	}
-	if addressFilter == nil {
+	if len(addressFilter) == 0 {
 		httpapi.BadRequest(ctx, errors.New("unknown network"))
 		return
 	}
