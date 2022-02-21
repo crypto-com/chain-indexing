@@ -34,7 +34,7 @@ index_service:
         "IBCChannelMessage",
         "BridgePendingActivity",
         "Example",
-        "ValidatorDelegation",
+        # "ValidatorDelegation",
       ]
     extra_configs:
       BridgePendingActivity:
@@ -56,7 +56,7 @@ index_service:
     # For `username` and `token`, please generate your own `Personal access tokens` in Github.
     username: "public"
     token: "token"
-    migration_repo_ref: "feature/652-part-2"
+    migration_repo_ref: ""
 
 http_service:
   enable: true
@@ -102,7 +102,7 @@ postgres:
 
 logger:
   # Comma separated log levels. possible values: debug,info,error,panic
-  level: "error"
+  level: "debug"
   color: false
 
 prometheus:
