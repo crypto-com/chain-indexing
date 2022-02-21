@@ -28,13 +28,14 @@ index_service:
         "Validator",
         "ValidatorStats",
         "NFT",
-      #      "CryptoComNFT",
+        #      "CryptoComNFT",
         "IBCChannel",
-      #      "IBCChannelTxMsgTrace",
+        #      "IBCChannelTxMsgTrace",
         "IBCChannelMessage",
         "BridgePendingActivity",
         "Example",
-    ]
+        # "ValidatorDelegation",
+      ]
     extra_configs:
       BridgePendingActivity:
         this_chain_id: "testnet-croeseid-4"
@@ -42,8 +43,13 @@ index_service:
         counterparty_chain_name: "Cronos"
         channel_id: "channel-131"
         starting_height: 899374
+      ValidatorDelegation:
+        unbonding_time: "2419200000000000ns"
+        slash_fraction_double_sign: "0.050000000000000000"
+        slash_fraction_downtime: "0.000000000000000000"
+        default_power_reduction: "1000000"
   cronjob:
-    enables: [ ]
+    enables: []
   cosmos_version_enabled_height:
     v0_42_7: 0
   github_api:
@@ -59,9 +65,10 @@ http_service:
   # A list of origins a cross-domain request is allowed to be requested from
   # Default value '[]' disables CORS support
   # Use '["*"]' to allow request from any origin
-  cors_allowed_origins: [ ]
-  cors_allowed_methods: [ "HEAD", "GET" ]
-  cors_allowed_headers: [ "Origin", "Accept", "Content-Type", "X-Requested-With", "X-Server-Time" ]
+  cors_allowed_origins: []
+  cors_allowed_methods: ["HEAD", "GET"]
+  cors_allowed_headers:
+    ["Origin", "Accept", "Content-Type", "X-Requested-With", "X-Server-Time"]
 
 tendermint_app:
   http_rpc_url: "https://testnet-croeseid-4.crypto.org:26657"

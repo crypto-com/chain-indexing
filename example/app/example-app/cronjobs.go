@@ -65,7 +65,7 @@ func InitCronJob(name string, params InitCronJobParams) projection_entity.CronJo
 			params.Logger.Panicf(err.Error())
 		}
 
-		return bridge_activity_matcher.New(params.Logger, params.RdbConn, migrationHelper, config)
+		return bridge_activity_matcher.New(config, params.Logger, params.RdbConn, migrationHelper)
 	// register more cronjobs here
 	default:
 		panic(fmt.Sprintf("Unrecognized cron job: %s", name))

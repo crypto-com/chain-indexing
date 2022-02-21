@@ -1,0 +1,3 @@
+DROP INDEX IF EXISTS view_validator_delegation_unbonding_delegations_validator_addr_height_index;
+
+DROP TABLE IF EXISTS view_validator_delegation_unbonding_delegations;

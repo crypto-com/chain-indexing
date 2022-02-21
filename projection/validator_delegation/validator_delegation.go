@@ -1,9 +1,12 @@
 package validator_delegation
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
+
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -19,6 +22,83 @@ import (
 )
 
 var _ projection_entity.Projection = &ValidatorDelegation{}
+
+type Config struct {
+	AccountAddressPrefix   string
+	ValidatorAddressPrefix string
+	ConNodeAddressPrefix   string
+	// set in genesis `unbonding_time`
+	UnbondingTime time.Duration
+	// set in genesis `slash_fraction_double_sign`
+	SlashFractionDoubleSign coin.Dec
+	// set in genesis `slash_fraction_downtime`
+	SlashFractionDowntime coin.Dec
+	// PowerReduction - is the amount of staking tokens required for 1 unit of consensus-engine power.
+	// Currently, this returns a global variable that the app developer can tweak.
+	// https://github.com/cosmos/cosmos-sdk/blob/0cb7fd081e05317ed7a2f13b0e142349a163fe4d/x/staking/keeper/params.go#L46
+	DefaultPowerReduction coin.Int
+}
+
+type CustomConfig struct {
+	UnbondingTime           time.Duration `mapstructure:"unbonding_time"`
+	SlashFractionDoubleSign string        `mapstructure:"slash_fraction_double_sign"`
+	SlashFractionDowntime   string        `mapstructure:"slash_fraction_downtime"`
+	DefaultPowerReduction   string        `mapstructure:"default_power_reduction"`
+}
+
+func CustomConfigFromInterface(data interface{}) (CustomConfig, error) {
+	customConfig := CustomConfig{}
+
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+		),
+		Result: &customConfig,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		return customConfig, fmt.Errorf("error creating projection config decoder: %v", decoderErr)
+	}
+
+	if err := decoder.Decode(data); err != nil {
+		return customConfig, fmt.Errorf("error decoding projection ValidatorDelegation config: %v", err)
+	}
+
+	return customConfig, nil
+}
+
+func PrepareConfig(
+	customConfig CustomConfig,
+	accountAddressPrefix string,
+	validatorAddressPrefix string,
+	conNodeAddressPrefix string,
+) (Config, error) {
+
+	config := Config{}
+	config.AccountAddressPrefix = accountAddressPrefix
+	config.ValidatorAddressPrefix = validatorAddressPrefix
+	config.ConNodeAddressPrefix = conNodeAddressPrefix
+	config.UnbondingTime = customConfig.UnbondingTime
+
+	var err error
+	var ok bool
+
+	config.SlashFractionDoubleSign, err = coin.NewDecFromStr(customConfig.SlashFractionDoubleSign)
+	if err != nil {
+		return config, fmt.Errorf("error parsing slashFractionDoubleSign from RawConfig: %v", err)
+	}
+	config.SlashFractionDowntime, err = coin.NewDecFromStr(customConfig.SlashFractionDowntime)
+	if err != nil {
+		return config, fmt.Errorf("error parsing slashFractionDowntime from RawConfig: %v", err)
+	}
+	config.DefaultPowerReduction, ok = coin.NewIntFromString(customConfig.DefaultPowerReduction)
+	if !ok {
+		return config, errors.New("error parsing defaultPowerReduction from RawConfig")
+	}
+
+	return config, nil
+}
 
 var (
 	NewValidators                = view.NewValidatorsView
@@ -41,19 +121,6 @@ type ValidatorDelegation struct {
 	config Config
 
 	migrationHelper migrationhelper.MigrationHelper
-}
-
-type Config struct {
-	accountAddressPrefix    string
-	validatorAddressPrefix  string
-	conNodeAddressPrefix    string
-	unbondingTime           time.Duration // set in genesis `unbonding_time`
-	slashFractionDoubleSign coin.Dec      // set in genesis `slash_fraction_double_sign`
-	slashFractionDowntime   coin.Dec      // set in genesis `slash_fraction_downtime`
-	// PowerReduction - is the amount of staking tokens required for 1 unit of consensus-engine power.
-	// Currently, this returns a global variable that the app developer can tweak.
-	// https://github.com/cosmos/cosmos-sdk/blob/0cb7fd081e05317ed7a2f13b0e142349a163fe4d/x/staking/keeper/params.go#L46
-	defaultPowerReduction coin.Int
 }
 
 func NewValidatorDelegation(
@@ -136,42 +203,11 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 		}
 	}
 
-	// Genesis block height is 0.
-	//
-	// If this is NOT a Genesis block, then always clone the following rows in previous height:
-	// - ValidatorRow
-	// - DelegationRow
-	// - UnbondingDelegationRow
-	// - RedelegationRow
-	//
-	// This is to keep track historical states in all height.
-	if height > 0 {
-		validatorsView := NewValidators(rdbTxHandle)
-		if err := validatorsView.Clone(height-1, height); err != nil {
-			return fmt.Errorf("error in cloning validator records in previous height: %v", err)
-		}
-
-		delegationsView := NewDelegations(rdbTxHandle)
-		if err := delegationsView.Clone(height-1, height); err != nil {
-			return fmt.Errorf("error in cloning delegation records in previous height: %v", err)
-		}
-
-		unbondingDelegationsView := NewUnbondingDelegations(rdbTxHandle)
-		if err := unbondingDelegationsView.Clone(height-1, height); err != nil {
-			return fmt.Errorf("error in cloning unbonding delegation records in previous height: %v", err)
-		}
-
-		redelegationsView := NewRedelegations(rdbTxHandle)
-		if err := redelegationsView.Clone(height-1, height); err != nil {
-			return fmt.Errorf("error in cloning redelegation records in previous height: %v", err)
-		}
-	}
-
 	// Handle events in Genesis block
 	for _, event := range events {
 		if typedEvent, ok := event.(*event_usecase.CreateGenesisValidator); ok {
 
-			if err := projection.handleCreateNewValidator(
+			if err := projection.handleGenesisCreateNewValidator(
 				rdbTxHandle,
 				height,
 				typedEvent.ValidatorAddress,
@@ -256,7 +292,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 					typedEvent.ConsensusNodeAddress,
 					distributionHeight,
 					power,
-					projection.config.slashFractionDowntime,
+					projection.config.SlashFractionDowntime,
 				); err != nil {
 					return fmt.Errorf("error in handling slash event with missing_signature: %v", err)
 				}
@@ -295,7 +331,7 @@ func (projection *ValidatorDelegation) HandleEvents(height int64, events []event
 					typedEvent.ConsensusNodeAddress,
 					distributionHeight,
 					power,
-					projection.config.slashFractionDoubleSign,
+					projection.config.SlashFractionDoubleSign,
 				); err != nil {
 					return fmt.Errorf("error in handling slash event with double_sign: %v", err)
 				}

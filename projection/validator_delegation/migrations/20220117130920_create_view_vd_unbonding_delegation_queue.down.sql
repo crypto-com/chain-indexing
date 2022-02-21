@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS view_validator_delegation_unbonding_delegation_queue;

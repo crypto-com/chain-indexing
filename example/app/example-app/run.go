@@ -5,15 +5,17 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/crypto-com/chain-indexing/bootstrap"
-	configuration "github.com/crypto-com/chain-indexing/bootstrap/config"
-	"github.com/crypto-com/chain-indexing/example/app/example-app/routes"
-	"github.com/crypto-com/chain-indexing/example/internal/filereader/yaml"
 	"github.com/urfave/cli/v2"
 
+	"github.com/crypto-com/chain-indexing/bootstrap"
+	configuration "github.com/crypto-com/chain-indexing/bootstrap/config"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/infrastructure"
+
+	appconfig "github.com/crypto-com/chain-indexing/example/app/example-app/config"
+	"github.com/crypto-com/chain-indexing/example/app/example-app/routes"
+	"github.com/crypto-com/chain-indexing/example/internal/filereader/yaml"
 )
 
 func run(args []string) error {
@@ -100,13 +102,13 @@ func run(args []string) error {
 				return fmt.Errorf("error config from yaml: %v", err)
 			}
 
-			var customConfig CustomConfig
+			var customConfig appconfig.CustomConfig
 			err = yaml.FromYAMLFile(configPath, &customConfig)
 			if err != nil {
 				return fmt.Errorf("error custom config from yaml: %v", err)
 			}
 
-			cliConfig := CLIConfig{
+			cliConfig := appconfig.CLIConfig{
 				LogLevel: ctx.String("logLevel"),
 
 				DatabaseHost:     ctx.String("dbHost"),
@@ -131,7 +133,7 @@ func run(args []string) error {
 				cliConfig.DatabasePort = primptr.Int32(int32(ctx.Int("dbPort")))
 			}
 
-			OverrideByCLIConfig(&config, &cliConfig)
+			appconfig.OverrideByCLIConfig(&config, &cliConfig)
 
 			// Create logger
 			logLevel := parseLogLevel(config.Logger.Level)
@@ -144,7 +146,7 @@ func run(args []string) error {
 				initProjections(logger, app.GetRDbConn(), &config, &customConfig),
 				initCronJobs(logger, app.GetRDbConn(), &config),
 			)
-			app.InitHTTPAPIServer(routes.InitRouteRegistry(logger, app.GetRDbConn(), &config))
+			app.InitHTTPAPIServer(routes.InitRouteRegistry(logger, app.GetRDbConn(), &config, &customConfig))
 
 			app.Run()
 

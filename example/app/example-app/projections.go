@@ -28,15 +28,18 @@ import (
 	"github.com/crypto-com/chain-indexing/projection/proposal"
 	"github.com/crypto-com/chain-indexing/projection/transaction"
 	"github.com/crypto-com/chain-indexing/projection/validator"
+	"github.com/crypto-com/chain-indexing/projection/validator_delegation"
 	"github.com/crypto-com/chain-indexing/projection/validatorstats"
 	"github.com/ettle/strcase"
+
+	appconfig "github.com/crypto-com/chain-indexing/example/app/example-app/config"
 )
 
 func initProjections(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	config *configuration.Config,
-	customConfig *CustomConfig,
+	customConfig *appconfig.CustomConfig,
 ) []projection_entity.Projection {
 	if !config.IndexService.Enable {
 		return []projection_entity.Projection{}
@@ -60,9 +63,10 @@ func initProjections(
 
 		ExtraConfigs: config.IndexService.Projection.ExtraConfigs,
 
-		CosmosAppClient:       cosmosAppClient,
-		AccountAddressPrefix:  config.Blockchain.AccountAddressPrefix,
-		ConsNodeAddressPrefix: config.Blockchain.ConNodeAddressPrefix,
+		CosmosAppClient:        cosmosAppClient,
+		AccountAddressPrefix:   config.Blockchain.AccountAddressPrefix,
+		ValidatorAddressPrefix: config.Blockchain.ValidatorAddressPrefix,
+		ConsNodeAddressPrefix:  config.Blockchain.ConNodeAddressPrefix,
 
 		GithubAPIUser:    config.IndexService.GithubAPI.Username,
 		GithubAPIToken:   config.IndexService.GithubAPI.Token,
@@ -320,7 +324,28 @@ func InitProjection(name string, params InitProjectionParams) projection_entity.
 			params.Logger.Panicf(err.Error())
 		}
 
-		return bridge_pending_activity.NewBridgePendingActivity(params.Logger, params.RdbConn, migrationHelper, config)
+		return bridge_pending_activity.New(config, params.Logger, params.RdbConn, migrationHelper)
+	case "ValidatorDelegation":
+		sourceURL := github_migrationhelper.GenerateDefaultSourceURL(name, githubMigrationHelperConfig)
+		databaseURL := migrationhelper.GenerateDefaultDatabaseURL(name, connString)
+		migrationHelper := github_migrationhelper.NewGithubMigrationHelper(sourceURL, databaseURL)
+
+		customConfig, err := validator_delegation.CustomConfigFromInterface(params.ExtraConfigs[name])
+		if err != nil {
+			params.Logger.Panicf(err.Error())
+		}
+
+		config, err := validator_delegation.PrepareConfig(
+			customConfig,
+			params.AccountAddressPrefix,
+			params.ValidatorAddressPrefix,
+			params.ConsNodeAddressPrefix,
+		)
+		if err != nil {
+			params.Logger.Panicf(err.Error())
+		}
+
+		return validator_delegation.NewValidatorDelegation(params.Logger, params.RdbConn, config, migrationHelper)
 	}
 
 	return nil
@@ -348,9 +373,10 @@ type InitProjectionParams struct {
 
 	ExtraConfigs map[string]interface{}
 
-	CosmosAppClient       cosmosapp.Client
-	AccountAddressPrefix  string
-	ConsNodeAddressPrefix string
+	CosmosAppClient        cosmosapp.Client
+	AccountAddressPrefix   string
+	ValidatorAddressPrefix string
+	ConsNodeAddressPrefix  string
 
 	GithubAPIUser    string
 	GithubAPIToken   string

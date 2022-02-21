@@ -17,7 +17,7 @@ func (projection *ValidatorDelegation) handlePowerChanged(
 	power string,
 ) error {
 
-	consensusNodeAddress, err := utils.GetConsensusNodeAddress(tendermintPubKey, projection.config.conNodeAddressPrefix)
+	consensusNodeAddress, err := utils.GetConsensusNodeAddress(tendermintPubKey, projection.config.ConNodeAddressPrefix)
 	if err != nil {
 		return fmt.Errorf("error getting consensusNodeAddress from tendermint pub key: %v", err)
 	}
@@ -40,7 +40,7 @@ func (projection *ValidatorDelegation) handlePowerChanged(
 		// UnbondingHeight is the height when Unbonding start
 		// UnbondingTime is the time when Unbonding is finished
 		validator.UnbondingHeight = height
-		validator.UnbondingTime = blockTime.Add(projection.config.unbondingTime)
+		validator.UnbondingTime = blockTime.Add(projection.config.UnbondingTime)
 
 		// Insert the validator to UnbondingValidators set
 		if err := unbondingValidatorsView.Insert(validator.OperatorAddress, validator.UnbondingTime); err != nil {
@@ -57,6 +57,7 @@ func (projection *ValidatorDelegation) handlePowerChanged(
 			return fmt.Errorf("error removing unbonding validator entry: %v", err)
 		}
 	}
+	validator.Power = power
 
 	// Update the validator
 	if err := validatorsView.Update(validator); err != nil {
@@ -96,6 +97,13 @@ func (projection *ValidatorDelegation) handleMatureUnbondingValidators(
 
 		if err := validatorsView.Update(validator); err != nil {
 			return fmt.Errorf("error updating validator: %v", err)
+		}
+
+		// Remove validator if the shares is zero
+		if validator.Shares.IsZero() {
+			if err := validatorsView.Delete(validator); err != nil {
+				return fmt.Errorf("error deleting validator: %v", err)
+			}
 		}
 
 	}

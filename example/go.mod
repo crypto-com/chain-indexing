@@ -6,13 +6,10 @@ replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.2-alp
 
 replace github.com/rs/zerolog => github.com/rs/zerolog v1.23.0
 
-require (
-	github.com/BurntSushi/toml v0.4.1
-	github.com/urfave/cli/v2 v2.3.0
-)
+require github.com/urfave/cli/v2 v2.3.0
 
 require (
-	github.com/crypto-com/chain-indexing v1.3.0
+	github.com/crypto-com/chain-indexing v1.3.5-0.20220221024425-38ae3fe094d6
 	github.com/ettle/strcase v0.1.1
 	github.com/valyala/fasthttp v1.17.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -38,9 +35,10 @@ require (
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/confio/ics23/go v0.6.6 // indirect
-	github.com/cosmos/cosmos-sdk v0.44.2 // indirect
+	github.com/cosmos/btcutil v1.0.4 // indirect
+	github.com/cosmos/cosmos-sdk v0.45.0 // indirect
 	github.com/cosmos/go-bip39 v1.0.0 // indirect
-	github.com/cosmos/iavl v0.17.1 // indirect
+	github.com/cosmos/iavl v0.17.3 // indirect
 	github.com/cosmos/ibc-go v1.2.1 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.11.1 // indirect
 	github.com/cosmos/ledger-go v0.9.2 // indirect
@@ -55,7 +53,6 @@ require (
 	github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/dvsekhvalnov/jose2go v0.0.0-20200901110807-248326c1351b // indirect
-	github.com/enigmampc/btcutil v1.0.3-0.20200723161021-e2fb6adb2a25 // indirect
 	github.com/ethereum/go-ethereum v1.10.3 // indirect
 	github.com/fasthttp/router v1.3.3 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
@@ -74,8 +71,10 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
+	github.com/gravity-devs/liquidity v1.4.5 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.0.1 // indirect
 	github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c // indirect
 	github.com/gtank/merlin v0.1.1 // indirect
 	github.com/gtank/ristretto255 v0.1.2 // indirect
@@ -150,7 +149,7 @@ require (
 	github.com/tendermint/btcd v0.1.1 // indirect
 	github.com/tendermint/crypto v0.0.0-20191022145703-50d29ede1e15 // indirect
 	github.com/tendermint/go-amino v0.16.0 // indirect
-	github.com/tendermint/tendermint v0.34.13 // indirect
+	github.com/tendermint/tendermint v0.34.14 // indirect
 	github.com/tendermint/tm-db v0.6.4 // indirect
 	github.com/tharsis/ethermint v0.7.1 // indirect
 	github.com/tklauser/go-sysconf v0.3.7 // indirect
@@ -167,7 +166,7 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/genproto v0.0.0-20211013025323-ce878158c4d4 // indirect
-	google.golang.org/grpc v1.41.0 // indirect
+	google.golang.org/grpc v1.42.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/ini.v1 v1.63.2 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect

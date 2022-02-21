@@ -1,0 +1,3 @@
+DROP INDEX IF EXISTS view_validator_delegation_redelegations_validator_src_addr_index;
+
+DROP TABLE IF EXISTS view_validator_delegation_redelegations;

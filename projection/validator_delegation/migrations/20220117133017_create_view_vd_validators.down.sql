@@ -1,0 +1,3 @@
+DROP INDEX IF EXISTS view_validator_delegation_validators_height_index;
+
+DROP TABLE IF EXISTS view_validator_delegation_validators;

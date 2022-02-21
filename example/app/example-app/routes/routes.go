@@ -6,17 +6,20 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/tendermint"
 	"github.com/crypto-com/chain-indexing/bootstrap"
 	"github.com/crypto-com/chain-indexing/bootstrap/config"
-	custom_httpapi_handlers "github.com/crypto-com/chain-indexing/example/httpapi/handlers"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	httpapi_handlers "github.com/crypto-com/chain-indexing/infrastructure/httpapi/handlers"
 	tendermint_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/tendermint"
+
+	appconfig "github.com/crypto-com/chain-indexing/example/app/example-app/config"
+	custom_httpapi_handlers "github.com/crypto-com/chain-indexing/example/httpapi/handlers"
 )
 
 func InitRouteRegistry(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	config *config.Config,
+	customConfig *appconfig.CustomConfig,
 ) bootstrap.RouteRegistry {
 	var cosmosAppClient cosmosapp.Client
 	if config.CosmosApp.Insecure {
@@ -335,6 +338,7 @@ func InitRouteRegistry(
 		logger,
 		rdbConn.ToHandle(),
 		accountAddressPrefix,
+		appconfig.ParseBridgesConfig(&customConfig.BridgeAPI),
 	)
 	routes = append(routes,
 		Route{
@@ -363,6 +367,46 @@ func InitRouteRegistry(
 			Method:  GET,
 			path:    "api/v1/examples",
 			handler: exampleHandler.List,
+		},
+	)
+
+	validatorDelegationHandler := httpapi_handlers.NewValidatorDelegation(
+		logger,
+		config.Blockchain.AccountAddressPrefix,
+		config.Blockchain.ValidatorAddressPrefix,
+		config.Blockchain.ConNodeAddressPrefix,
+		rdbConn.ToHandle(),
+	)
+	routes = append(routes,
+		Route{
+			Method:  GET,
+			path:    "api/test/validators",
+			handler: validatorDelegationHandler.ListValidator,
+		},
+		Route{
+			Method:  GET,
+			path:    "api/test/validators/{address}",
+			handler: validatorDelegationHandler.FindValidatorByAddress,
+		},
+		Route{
+			Method:  GET,
+			path:    "api/test/validators/{address}/delegations",
+			handler: validatorDelegationHandler.ListDelegationByValidator,
+		},
+		Route{
+			Method:  GET,
+			path:    "api/test/validators/{address}/unbonding_delegations",
+			handler: validatorDelegationHandler.ListUnbondingDelegationByValidator,
+		},
+		Route{
+			Method:  GET,
+			path:    "api/test/validators/{srcValAddress}/redelegations",
+			handler: validatorDelegationHandler.ListRedelegationBySrcValidator,
+		},
+		Route{
+			Method:  GET,
+			path:    "api/test/delegators/{address}/delegations",
+			handler: validatorDelegationHandler.ListDelegationByDelegator,
 		},
 	)
 

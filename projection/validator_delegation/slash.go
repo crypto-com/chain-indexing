@@ -52,7 +52,7 @@ func (projection *ValidatorDelegation) handleSlash(
 		return fmt.Errorf("attempted to slash with a negative slash factor: %v", slashFactor)
 	}
 
-	amount := utils.TokensFromConsensusPower(power, projection.config.defaultPowerReduction)
+	amount := utils.TokensFromConsensusPower(power, projection.config.DefaultPowerReduction)
 	slashAmountDec := amount.ToDec().Mul(slashFactor)
 	slashAmount := slashAmountDec.TruncateInt()
 
@@ -193,8 +193,8 @@ func (projection *ValidatorDelegation) slashUnbondingDelegation(
 	}
 
 	unbondingDelegationsView := NewUnbondingDelegations(rdbTxHandle)
-	if err := unbondingDelegationsView.Upsert(unbondingDelegation); err != nil {
-		return coin.ZeroInt(), fmt.Errorf("error upserting unbonding delegation record: %v", err)
+	if err := unbondingDelegationsView.Update(unbondingDelegation); err != nil {
+		return coin.ZeroInt(), fmt.Errorf("error updating unbonding delegation record: %v", err)
 	}
 
 	return totalSlashAmount, nil

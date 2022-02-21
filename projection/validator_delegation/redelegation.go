@@ -105,7 +105,7 @@ func (projection *ValidatorDelegation) calculateRedelegationCompleteTime(
 	switch {
 	case !found || validator.IsBonded():
 		// the longest wait - just unbonding period from now
-		completionTime = blockTime.Add(projection.config.unbondingTime)
+		completionTime = blockTime.Add(projection.config.UnbondingTime)
 
 		return completionTime, false, nil
 
@@ -139,6 +139,10 @@ func (projection *ValidatorDelegation) setRedelegationEntry(
 	}
 	if found {
 		red.AddEntry(creationHeight, completionTime, balance, sharesDst)
+
+		if err := redelegationsView.Update(red); err != nil {
+			return red, fmt.Errorf("error updating reledegation record: %v", err)
+		}
 	} else {
 		red = view.NewRedelegationRow(
 			delegatorAddress,
@@ -149,10 +153,10 @@ func (projection *ValidatorDelegation) setRedelegationEntry(
 			balance,
 			sharesDst,
 		)
-	}
 
-	if err := redelegationsView.Upsert(red); err != nil {
-		return red, fmt.Errorf("error upserting reledegation record: %v", err)
+		if err := redelegationsView.Insert(red); err != nil {
+			return red, fmt.Errorf("error inserting reledegation record: %v", err)
+		}
 	}
 
 	return red, nil
@@ -194,8 +198,8 @@ func (projection *ValidatorDelegation) completeRedelegation(
 
 		} else {
 
-			if err := redelegationsView.Upsert(red); err != nil {
-				return fmt.Errorf("error upserting reledegation record: %v", err)
+			if err := redelegationsView.Update(red); err != nil {
+				return fmt.Errorf("error updating reledegation record: %v", err)
 			}
 
 		}
