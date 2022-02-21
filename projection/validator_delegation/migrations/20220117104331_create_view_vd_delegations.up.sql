@@ -1,6 +1,6 @@
 CREATE EXTENSION btree_gist;
 
-CREATE TABLE view_vd_delegations (
+CREATE TABLE view_validator_delegation_delegations (
     id BIGSERIAL,
     height INT8RANGE NOT NULL,
     validator_address VARCHAR NOT NULL,

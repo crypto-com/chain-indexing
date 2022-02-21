@@ -1,4 +1,4 @@
-CREATE TABLE view_vd_validators (
+CREATE TABLE view_validator_delegation_validators (
     id BIGSERIAL,
     height INT8RANGE NOT NULL,
     operator_address VARCHAR NOT NULL,
@@ -25,4 +25,4 @@ CREATE TABLE view_vd_validators (
     )
 );
 
-CREATE INDEX view_vd_validators_height_index ON view_vd_validators USING gist (height);
+CREATE INDEX view_validator_delegation_validators_height_index ON view_validator_delegation_validators USING gist (height);

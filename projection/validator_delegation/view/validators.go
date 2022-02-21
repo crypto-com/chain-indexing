@@ -34,7 +34,7 @@ func (view *ValidatorsView) Insert(row ValidatorRow) error {
 
 	sql, sqlArgs, err := view.rdb.StmtBuilder.
 		Insert(
-			"view_vd_validators",
+			"view_validator_delegation_validators",
 		).
 		Columns(
 			"height",
@@ -84,7 +84,7 @@ func (view *ValidatorsView) Insert(row ValidatorRow) error {
 func (view *ValidatorsView) Update(row ValidatorRow) error {
 
 	// Check if there is an record's lower bound start with this height.
-	found, err := view.checkIfValidatorRecordExistByHeightLowerBound(row)
+	found, err := view.isExistedByLowerBoundHeight(row.OperatorAddress, row.Height)
 	if err != nil {
 		return fmt.Errorf("error in checking new validator record existence at this height: %v", err)
 	}
@@ -94,7 +94,7 @@ func (view *ValidatorsView) Update(row ValidatorRow) error {
 
 		sql, sqlArgs, err := view.rdb.StmtBuilder.
 			Update(
-				"view_vd_validators",
+				"view_validator_delegation_validators",
 			).
 			SetMap(map[string]interface{}{
 				"status":              row.Status,
@@ -128,7 +128,7 @@ func (view *ValidatorsView) Update(row ValidatorRow) error {
 	} else {
 		// If there is not an existed record, then update the previous record's height range and insert a new record
 
-		err := view.setValidatorRecordHeightUpperBound(row)
+		err := view.updateUpperBoundHeight(row)
 		if err != nil {
 			return fmt.Errorf("error updating Validator.Height upper bound: %v", err)
 		}
@@ -143,17 +143,17 @@ func (view *ValidatorsView) Update(row ValidatorRow) error {
 	return nil
 }
 
-func (view *ValidatorsView) checkIfValidatorRecordExistByHeightLowerBound(row ValidatorRow) (bool, error) {
+func (view *ValidatorsView) isExistedByLowerBoundHeight(operatorAddress string, height int64) (bool, error) {
 
 	sql, sqlArgs, err := view.rdb.StmtBuilder.
 		Select(
 			"COUNT(*)",
 		).
-		From("view_vd_validators").
+		From("view_validator_delegation_validators").
 		Where(
 			"operator_address = ? AND height = ?",
-			row.OperatorAddress,
-			fmt.Sprintf("[%v,)", row.Height),
+			operatorAddress,
+			fmt.Sprintf("[%v,)", height),
 		).
 		ToSql()
 	if err != nil {
@@ -172,14 +172,14 @@ func (view *ValidatorsView) checkIfValidatorRecordExistByHeightLowerBound(row Va
 
 func (view *ValidatorsView) Delete(row ValidatorRow) error {
 
-	return view.setValidatorRecordHeightUpperBound(row)
+	return view.updateUpperBoundHeight(row)
 }
 
-func (view *ValidatorsView) setValidatorRecordHeightUpperBound(row ValidatorRow) error {
+func (view *ValidatorsView) updateUpperBoundHeight(row ValidatorRow) error {
 
 	// Set the upper bound for record height: `[<PREVIOUS-LOWER-BOUND>, row.Height)`.
 	sql, sqlErr := view.rdb.StmtBuilder.ReplacePlaceholders(`
-		UPDATE view_vd_validators
+		UPDATE view_validator_delegation_validators
 		SET height = int8range(lower(height), ?, '[)')
 		WHERE operator_address = ? AND height @> ?::int8
 	`)
@@ -239,7 +239,7 @@ func (view *ValidatorsView) findBy(
 			"shares",
 			"min_self_delegation",
 		).
-		From("view_vd_validators")
+		From("view_validator_delegation_validators")
 
 	if maybeOperatorAddress != nil {
 		stmtBuilder = stmtBuilder.Where(
@@ -338,7 +338,7 @@ func (view *ValidatorsView) List(
 			"min_self_delegation",
 		).
 		From(
-			"view_vd_validators",
+			"view_validator_delegation_validators",
 		).
 		Where(
 			"height @> ?::int8",

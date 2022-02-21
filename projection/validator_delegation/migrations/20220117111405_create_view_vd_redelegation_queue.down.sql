@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS view_vd_redelegation_queue;
+DROP TABLE IF EXISTS view_validator_delegation_redelegation_queue;

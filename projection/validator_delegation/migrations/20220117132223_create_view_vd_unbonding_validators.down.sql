@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS view_vd_unbonding_validators;
+DROP TABLE IF EXISTS view_validator_delegation_unbonding_validators;

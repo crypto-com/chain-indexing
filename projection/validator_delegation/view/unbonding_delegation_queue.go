@@ -34,7 +34,7 @@ func (view *UnbondingDelegationQueueView) Upsert(row UnbondingDelegationQueueRow
 
 	sql, sqlArgs, err := view.rdb.StmtBuilder.
 		Insert(
-			"view_vd_unbonding_delegation_queue",
+			"view_validator_delegation_unbonding_delegation_queue",
 		).
 		Columns(
 			"completion_time",
@@ -68,7 +68,7 @@ func (view *UnbondingDelegationQueueView) FindBy(completionTime utctime.UTCTime)
 		Select(
 			"dv_pairs",
 		).
-		From("view_vd_unbonding_delegation_queue").
+		From("view_validator_delegation_unbonding_delegation_queue").
 		Where(
 			"completion_time = ?",
 			view.rdb.Tton(&completionTime),
@@ -108,7 +108,7 @@ func (view *UnbondingDelegationQueueView) DequeueAllMatureUnbondingDelegationQue
 			"dv_pairs",
 		).
 		From(
-			"view_vd_unbonding_delegation_queue",
+			"view_validator_delegation_unbonding_delegation_queue",
 		).
 		Where(
 			"completion_time <= ?",
@@ -150,7 +150,7 @@ func (view *UnbondingDelegationQueueView) DequeueAllMatureUnbondingDelegationQue
 
 	sql, sqlArgs, err = view.rdb.StmtBuilder.
 		Delete(
-			"view_vd_unbonding_delegation_queue",
+			"view_validator_delegation_unbonding_delegation_queue",
 		).
 		Where(
 			"completion_time <= ?",

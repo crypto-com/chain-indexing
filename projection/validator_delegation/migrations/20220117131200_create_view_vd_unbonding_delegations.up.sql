@@ -1,4 +1,4 @@
-CREATE TABLE view_vd_unbonding_delegations (
+CREATE TABLE view_validator_delegation_unbonding_delegations (
     id BIGSERIAL,
     height INT8RANGE NOT NULL,
     delegator_address VARCHAR NOT NULL,
@@ -10,4 +10,4 @@ CREATE TABLE view_vd_unbonding_delegations (
     EXCLUDE USING gist (delegator_address WITH =, validator_address WITH =, height WITH &&)
 );
 
-CREATE INDEX view_vd_unbonding_delegations_validator_addr_height_index ON view_vd_unbonding_delegations USING gist (height, validator_address);
+CREATE INDEX view_validator_delegation_unbonding_delegations_validator_addr_height_index ON view_validator_delegation_unbonding_delegations USING gist (height, validator_address);

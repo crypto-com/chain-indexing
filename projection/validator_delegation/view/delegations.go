@@ -42,7 +42,7 @@ func (view *DelegationsView) Insert(row DelegationRow) error {
 
 	sql, sqlArgs, err := view.rdb.StmtBuilder.
 		Insert(
-			"view_vd_delegations",
+			"view_validator_delegation_delegations",
 		).
 		Columns(
 			"height",
@@ -76,7 +76,7 @@ func (view *DelegationsView) Insert(row DelegationRow) error {
 func (view *DelegationsView) Update(row DelegationRow) error {
 
 	// Check if there is an record's lower bound start with this height.
-	found, err := view.checkIfDelegationRecordExistByHeightLowerBound(row)
+	found, err := view.isExistedByLowerBoundHeight(row.ValidatorAddress, row.DelegatorAddress, row.Height)
 	if err != nil {
 		return fmt.Errorf("error in checking new delegation record existence at this height: %v", err)
 	}
@@ -86,7 +86,7 @@ func (view *DelegationsView) Update(row DelegationRow) error {
 
 		sql, sqlArgs, err := view.rdb.StmtBuilder.
 			Update(
-				"view_vd_delegations",
+				"view_validator_delegation_delegations",
 			).
 			SetMap(map[string]interface{}{
 				"shares": row.Shares.String(),
@@ -114,7 +114,7 @@ func (view *DelegationsView) Update(row DelegationRow) error {
 	} else {
 		// Else, update the previous record's height range, then insert a new record
 
-		err := view.setDelegationRecordHeightUpperBound(row)
+		err := view.updateUpperBoundHeight(row)
 		if err != nil {
 			return fmt.Errorf("error updating delegation.Height upper bound: %v", err)
 		}
@@ -128,18 +128,18 @@ func (view *DelegationsView) Update(row DelegationRow) error {
 	return nil
 }
 
-func (view *DelegationsView) checkIfDelegationRecordExistByHeightLowerBound(row DelegationRow) (bool, error) {
+func (view *DelegationsView) isExistedByLowerBoundHeight(validatorAddress, delegatorAddress string, height int64) (bool, error) {
 
 	sql, sqlArgs, err := view.rdb.StmtBuilder.
 		Select(
 			"COUNT(*)",
 		).
-		From("view_vd_delegations").
+		From("view_validator_delegation_delegations").
 		Where(
 			"validator_address = ? AND delegator_address = ? AND height = ?",
-			row.ValidatorAddress,
-			row.DelegatorAddress,
-			fmt.Sprintf("[%v,)", row.Height),
+			validatorAddress,
+			delegatorAddress,
+			fmt.Sprintf("[%v,)", height),
 		).
 		ToSql()
 	if err != nil {
@@ -158,14 +158,14 @@ func (view *DelegationsView) checkIfDelegationRecordExistByHeightLowerBound(row 
 
 func (view *DelegationsView) Delete(row DelegationRow) error {
 
-	return view.setDelegationRecordHeightUpperBound(row)
+	return view.updateUpperBoundHeight(row)
 }
 
-func (view *DelegationsView) setDelegationRecordHeightUpperBound(row DelegationRow) error {
+func (view *DelegationsView) updateUpperBoundHeight(row DelegationRow) error {
 
 	// Set the upper bound for record height: `[<PREVIOUS-LOWER-BOUND>, row.Height)`.
 	sql, sqlErr := view.rdb.StmtBuilder.ReplacePlaceholders(`
-		UPDATE view_vd_delegations
+		UPDATE view_validator_delegation_delegations
 		SET height = int8range(lower(height), ?, '[)')
 		WHERE validator_address = ? AND delegator_address = ? AND height @> ?::int8
 	`)
@@ -196,7 +196,7 @@ func (view *DelegationsView) FindBy(
 		Select(
 			"shares",
 		).
-		From("view_vd_delegations").
+		From("view_validator_delegation_delegations").
 		Where(
 			"validator_address = ? AND delegator_address = ? AND height @> ?::int8",
 			validatorAddress,
@@ -244,7 +244,7 @@ func (view *DelegationsView) ListByValidatorAddr(
 			"shares",
 		).
 		From(
-			"view_vd_delegations",
+			"view_validator_delegation_delegations",
 		).
 		Where(
 			"validator_address = ? AND height @> ?::int8",
@@ -309,7 +309,7 @@ func (view *DelegationsView) ListByDelegatorAddr(
 			"shares",
 		).
 		From(
-			"view_vd_delegations",
+			"view_validator_delegation_delegations",
 		).
 		Where(
 			"delegator_address = ? AND height @> ?::int8",

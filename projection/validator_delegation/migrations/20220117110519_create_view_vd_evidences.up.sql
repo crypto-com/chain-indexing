@@ -1,4 +1,4 @@
-CREATE TABLE view_vd_evidences (
+CREATE TABLE view_validator_delegation_evidences (
     id BIGSERIAL,
     height BIGINT NOT NULL,
     tendermint_address VARCHAR NOT NULL,

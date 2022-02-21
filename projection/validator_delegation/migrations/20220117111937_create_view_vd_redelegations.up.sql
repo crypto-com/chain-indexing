@@ -1,4 +1,4 @@
-CREATE TABLE view_vd_redelegations (
+CREATE TABLE view_validator_delegation_redelegations (
     id BIGSERIAL,
     height INT8RANGE NOT NULL,
     delegator_address VARCHAR NOT NULL,
@@ -16,4 +16,4 @@ CREATE TABLE view_vd_redelegations (
     )
 );
 
-CREATE INDEX view_vd_redelegations_validator_src_addr_index ON view_vd_redelegations USING gist (height, validator_src_address);
+CREATE INDEX view_validator_delegation_redelegations_validator_src_addr_index ON view_validator_delegation_redelegations USING gist (height, validator_src_address);

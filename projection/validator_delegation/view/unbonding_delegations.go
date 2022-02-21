@@ -45,7 +45,7 @@ func (view *UnbondingDelegationsView) Insert(row UnbondingDelegationRow) error {
 
 	sql, sqlArgs, err := view.rdb.StmtBuilder.
 		Insert(
-			"view_vd_unbonding_delegations",
+			"view_validator_delegation_unbonding_delegations",
 		).
 		Columns(
 			"height",
@@ -79,7 +79,7 @@ func (view *UnbondingDelegationsView) Insert(row UnbondingDelegationRow) error {
 func (view *UnbondingDelegationsView) Update(row UnbondingDelegationRow) error {
 
 	// Check if there is an record's lower bound start with this height.
-	found, err := view.checkIfUnbondingDelegationRecordExistByHeightLowerBound(row)
+	found, err := view.isExistedByLowerBoundHeight(row.DelegatorAddress, row.ValidatorAddress, row.Height)
 	if err != nil {
 		return fmt.Errorf("error in checking new UnbondingDelegation record existence at this height: %v", err)
 	}
@@ -94,7 +94,7 @@ func (view *UnbondingDelegationsView) Update(row UnbondingDelegationRow) error {
 
 		sql, sqlArgs, err := view.rdb.StmtBuilder.
 			Update(
-				"view_vd_unbonding_delegations",
+				"view_validator_delegation_unbonding_delegations",
 			).
 			SetMap(map[string]interface{}{
 				"entries": entriesJSON,
@@ -122,7 +122,7 @@ func (view *UnbondingDelegationsView) Update(row UnbondingDelegationRow) error {
 	} else {
 		// If there is not an existed record, then update the previous record's height range and insert a new record
 
-		err := view.setUnbondingDelegationRecordHeightUpperBound(row)
+		err := view.updateUpperBoundHeight(row)
 		if err != nil {
 			return fmt.Errorf("error updating UnbondingDelegation.Height upper bound: %v", err)
 		}
@@ -136,18 +136,22 @@ func (view *UnbondingDelegationsView) Update(row UnbondingDelegationRow) error {
 	return nil
 }
 
-func (view *UnbondingDelegationsView) checkIfUnbondingDelegationRecordExistByHeightLowerBound(row UnbondingDelegationRow) (bool, error) {
+func (view *UnbondingDelegationsView) isExistedByLowerBoundHeight(
+	delegatorAddress string,
+	validatorAddress string,
+	height int64,
+) (bool, error) {
 
 	sql, sqlArgs, err := view.rdb.StmtBuilder.
 		Select(
 			"COUNT(*)",
 		).
-		From("view_vd_unbonding_delegations").
+		From("view_validator_delegation_unbonding_delegations").
 		Where(
 			"delegator_address = ? AND validator_address = ? AND height = ?",
-			row.DelegatorAddress,
-			row.ValidatorAddress,
-			fmt.Sprintf("[%v,)", row.Height),
+			delegatorAddress,
+			validatorAddress,
+			fmt.Sprintf("[%v,)", height),
 		).
 		ToSql()
 	if err != nil {
@@ -166,14 +170,14 @@ func (view *UnbondingDelegationsView) checkIfUnbondingDelegationRecordExistByHei
 
 func (view *UnbondingDelegationsView) Delete(row UnbondingDelegationRow) error {
 
-	return view.setUnbondingDelegationRecordHeightUpperBound(row)
+	return view.updateUpperBoundHeight(row)
 }
 
-func (view *UnbondingDelegationsView) setUnbondingDelegationRecordHeightUpperBound(row UnbondingDelegationRow) error {
+func (view *UnbondingDelegationsView) updateUpperBoundHeight(row UnbondingDelegationRow) error {
 
 	// Set the upper bound for record height: `[<PREVIOUS-LOWER-BOUND>, row.Height)`.
 	sql, sqlErr := view.rdb.StmtBuilder.ReplacePlaceholders(`
-		UPDATE view_vd_unbonding_delegations
+		UPDATE view_validator_delegation_unbonding_delegations
 		SET height = int8range(lower(height), ?, '[)')
 		WHERE delegator_address = ? AND validator_address = ? AND height @> ?::int8
 	`)
@@ -204,7 +208,7 @@ func (view *UnbondingDelegationsView) FindBy(
 		Select(
 			"entries",
 		).
-		From("view_vd_unbonding_delegations").
+		From("view_validator_delegation_unbonding_delegations").
 		Where(
 			"delegator_address = ? AND validator_address = ? AND height @> ?::int8",
 			delegatorAddress,
@@ -250,7 +254,7 @@ func (view *UnbondingDelegationsView) ListByValidator(
 			"entries",
 		).
 		From(
-			"view_vd_unbonding_delegations",
+			"view_validator_delegation_unbonding_delegations",
 		).
 		Where(
 			"validator_address = ? AND height @> ?::int8",
@@ -304,7 +308,7 @@ func (view *UnbondingDelegationsView) ListByValidatorWithPagination(
 			"entries",
 		).
 		From(
-			"view_vd_unbonding_delegations",
+			"view_validator_delegation_unbonding_delegations",
 		).
 		Where(
 			"validator_address = ? AND height @> ?::int8",

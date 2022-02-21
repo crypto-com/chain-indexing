@@ -46,7 +46,7 @@ func (view *RedelegationsView) Insert(row RedelegationRow) error {
 
 	sql, sqlArgs, err := view.rdb.StmtBuilder.
 		Insert(
-			"view_vd_redelegations",
+			"view_validator_delegation_redelegations",
 		).
 		Columns(
 			"height",
@@ -82,7 +82,12 @@ func (view *RedelegationsView) Insert(row RedelegationRow) error {
 func (view *RedelegationsView) Update(row RedelegationRow) error {
 
 	// Check if there is an record's lower bound start with this height.
-	found, err := view.checkIfRedelegationRecordExistByHeightLowerBound(row)
+	found, err := view.isExistedByLowerBoundHeight(
+		row.DelegatorAddress,
+		row.ValidatorSrcAddress,
+		row.ValidatorDstAddress,
+		row.Height,
+	)
 	if err != nil {
 		return fmt.Errorf("error in checking new Redelegation record existence at this height: %v", err)
 	}
@@ -97,7 +102,7 @@ func (view *RedelegationsView) Update(row RedelegationRow) error {
 
 		sql, sqlArgs, err := view.rdb.StmtBuilder.
 			Update(
-				"view_vd_redelegations",
+				"view_validator_delegation_redelegations",
 			).
 			SetMap(map[string]interface{}{
 				"entries": entriesJSON,
@@ -126,7 +131,7 @@ func (view *RedelegationsView) Update(row RedelegationRow) error {
 	} else {
 		// If there is not an existed record, then update the previous record's height range and insert a new record
 
-		err := view.setRedelegationRecordHeightUpperBound(row)
+		err := view.updateUpperBoundHeight(row)
 		if err != nil {
 			return fmt.Errorf("error updating Redelegation.Height upper bound: %v", err)
 		}
@@ -140,19 +145,24 @@ func (view *RedelegationsView) Update(row RedelegationRow) error {
 	return nil
 }
 
-func (view *RedelegationsView) checkIfRedelegationRecordExistByHeightLowerBound(row RedelegationRow) (bool, error) {
+func (view *RedelegationsView) isExistedByLowerBoundHeight(
+	delegatorAddress string,
+	validatorSrcAddress string,
+	validatorDstAddress string,
+	height int64,
+) (bool, error) {
 
 	sql, sqlArgs, err := view.rdb.StmtBuilder.
 		Select(
 			"COUNT(*)",
 		).
-		From("view_vd_redelegations").
+		From("view_validator_delegation_redelegations").
 		Where(
 			"delegator_address = ? AND validator_src_address = ? AND validator_dst_address = ? AND height = ?",
-			row.DelegatorAddress,
-			row.ValidatorSrcAddress,
-			row.ValidatorDstAddress,
-			fmt.Sprintf("[%v,)", row.Height),
+			delegatorAddress,
+			validatorSrcAddress,
+			validatorDstAddress,
+			fmt.Sprintf("[%v,)", height),
 		).
 		ToSql()
 	if err != nil {
@@ -171,14 +181,14 @@ func (view *RedelegationsView) checkIfRedelegationRecordExistByHeightLowerBound(
 
 func (view *RedelegationsView) Delete(row RedelegationRow) error {
 
-	return view.setRedelegationRecordHeightUpperBound(row)
+	return view.updateUpperBoundHeight(row)
 }
 
-func (view *RedelegationsView) setRedelegationRecordHeightUpperBound(row RedelegationRow) error {
+func (view *RedelegationsView) updateUpperBoundHeight(row RedelegationRow) error {
 
 	// Set the upper bound for record height: `[<PREVIOUS-LOWER-BOUND>, row.Height)`.
 	sql, sqlErr := view.rdb.StmtBuilder.ReplacePlaceholders(`
-		UPDATE view_vd_redelegations
+		UPDATE view_validator_delegation_redelegations
 		SET height = int8range(lower(height), ?, '[)')
 		WHERE delegator_address = ? AND validator_src_address = ? AND validator_dst_address = ? AND height @> ?::int8
 	`)
@@ -211,7 +221,7 @@ func (view *RedelegationsView) FindBy(
 		Select(
 			"entries",
 		).
-		From("view_vd_redelegations").
+		From("view_validator_delegation_redelegations").
 		Where(
 			"delegator_address = ? AND validator_src_address = ? AND validator_dst_address = ? AND height @> ?::int8",
 			delegatorAddress,
@@ -260,7 +270,7 @@ func (view *RedelegationsView) ListBySrcValidator(
 			"entries",
 		).
 		From(
-			"view_vd_redelegations",
+			"view_validator_delegation_redelegations",
 		).
 		Where(
 			"validator_src_address = ? AND height @> ?::int8",
@@ -316,7 +326,7 @@ func (view *RedelegationsView) ListBySrcValidatorWithPagination(
 			"entries",
 		).
 		From(
-			"view_vd_redelegations",
+			"view_validator_delegation_redelegations",
 		).
 		Where(
 			"validator_src_address = ? AND height @> ?::int8",

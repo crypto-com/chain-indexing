@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS view_vd_evidences;
+DROP TABLE IF EXISTS view_validator_delegation_evidences;

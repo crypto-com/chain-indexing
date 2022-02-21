@@ -28,7 +28,7 @@ func (view *UnbondingValidatorsView) Insert(operatorAddress string, unbondingTim
 
 	sql, sqlArgs, err := view.rdb.StmtBuilder.
 		Insert(
-			"view_vd_unbonding_validators",
+			"view_validator_delegation_unbonding_validators",
 		).
 		Columns(
 			"operator_address",
@@ -59,7 +59,7 @@ func (view *UnbondingValidatorsView) RemoveIfExist(operatorAddress string) error
 
 	sql, sqlArgs, err := view.rdb.StmtBuilder.
 		Delete(
-			"view_vd_unbonding_validators",
+			"view_validator_delegation_unbonding_validators",
 		).
 		Where(
 			"operator_address = ?",
@@ -87,7 +87,7 @@ func (view *UnbondingValidatorsView) GetMatureEntries(blockTime utctime.UTCTime)
 			"unbonding_time",
 		).
 		From(
-			"view_vd_unbonding_validators",
+			"view_validator_delegation_unbonding_validators",
 		).
 		Where(
 			"unbonding_time <= ?",
@@ -133,7 +133,7 @@ func (view *UnbondingValidatorsView) DeleteMatureEntries(blockTime utctime.UTCTi
 
 	sql, sqlArgs, err := view.rdb.StmtBuilder.
 		Delete(
-			"view_vd_unbonding_validators",
+			"view_validator_delegation_unbonding_validators",
 		).
 		Where(
 			"unbonding_time <= ?",

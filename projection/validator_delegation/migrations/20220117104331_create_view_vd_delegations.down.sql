@@ -1,3 +1,3 @@
-DROP TABLE IF EXISTS view_vd_delegations;
+DROP TABLE IF EXISTS view_validator_delegation_delegations;
 
 DROP EXTENSION IF EXISTS btree_gist;

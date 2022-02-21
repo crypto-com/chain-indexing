@@ -34,7 +34,7 @@ func (view *RedelegationQueueView) Upsert(row RedelegationQueueRow) error {
 
 	sql, sqlArgs, err := view.rdb.StmtBuilder.
 		Insert(
-			"view_vd_redelegation_queue",
+			"view_validator_delegation_redelegation_queue",
 		).
 		Columns(
 			"completion_time",
@@ -68,7 +68,7 @@ func (view *RedelegationQueueView) FindBy(completionTime utctime.UTCTime) (Redel
 		Select(
 			"dvv_triplets",
 		).
-		From("view_vd_redelegation_queue").
+		From("view_validator_delegation_redelegation_queue").
 		Where(
 			"completion_time = ?",
 			view.rdb.Tton(&completionTime),
@@ -108,7 +108,7 @@ func (view *RedelegationQueueView) DequeueAllMatureRedelegationQueue(blockTime u
 			"dvv_triplets",
 		).
 		From(
-			"view_vd_redelegation_queue",
+			"view_validator_delegation_redelegation_queue",
 		).
 		Where(
 			"completion_time <= ?",
@@ -150,7 +150,7 @@ func (view *RedelegationQueueView) DequeueAllMatureRedelegationQueue(blockTime u
 
 	sql, sqlArgs, err = view.rdb.StmtBuilder.
 		Delete(
-			"view_vd_redelegation_queue",
+			"view_validator_delegation_redelegation_queue",
 		).
 		Where(
 			"completion_time <= ?",

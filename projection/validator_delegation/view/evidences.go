@@ -32,7 +32,7 @@ func (view *EvidencesView) Insert(row EvidenceRow) error {
 
 	sql, sqlArgs, err := view.rdb.StmtBuilder.
 		Insert(
-			"view_vd_evidences",
+			"view_validator_delegation_evidences",
 		).
 		Columns(
 			"height",
@@ -70,7 +70,7 @@ func (view *EvidencesView) FindBy(height int64, tendermintAddress string) (Evide
 			"infraction_height",
 			"raw_evidence",
 		).
-		From("view_vd_evidences").
+		From("view_validator_delegation_evidences").
 		Where(
 			"tendermint_address = ? AND height = ?",
 			tendermintAddress,
