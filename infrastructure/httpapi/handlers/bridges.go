@@ -111,20 +111,17 @@ func (handler *Bridges) ListActivities(ctx *fasthttp.RequestCtx) {
 		orderStr := string(queryArgs.Peek("order"))
 		if orderStr == "sourceBlockTime.desc" || orderStr == "sourceBlockHeight.desc" {
 			sourceBlockTimeOrder = view.ORDER_DESC
+		} else {
+			httpapi.BadRequest(ctx, errors.New("unrecognized order"))
+			return
 		}
 	}
 
-	filter := bridge_activitiy_view.BridgeActivitiesListFilter{
-		MaybeStatus:                 nil,
-		MaybeIdGt:                   nil,
-		MaybeSourceBlockTimeLt:      nil,
-		MaybeSourceBlockTimeGt:      nil,
-		MaybeDestinationBlockTimeGt: nil,
-	}
+	filter := bridge_activitiy_view.BridgeActivitiesListFilter{}
 	if queryArgs.Has("status") {
 		maybeStatus, maybeStatusErr := parseStatus(string(queryArgs.Peek("status")))
 		if maybeStatusErr != nil {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			httpapi.BadRequest(ctx, errors.New("invalid status"))
 			return
 		}
 		filter.MaybeStatus = maybeStatus
@@ -135,63 +132,63 @@ func (handler *Bridges) ListActivities(ctx *fasthttp.RequestCtx) {
 	if queryArgs.Has("createdAt.lt") {
 		maybeCreatedAtLt, createdAtLtParseErr := parseTimeFilter(string(queryArgs.Peek("createdAt.lt")))
 		if createdAtLtParseErr != nil {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			httpapi.BadRequest(ctx, errors.New("invalid createdAt.lt"))
 			return
 		}
-		filter.MaybeSourceBlockTimeLt = maybeCreatedAtLt
-	}
-	if queryArgs.Has("sourceBlockTime.lt") {
-		maybeSourceBlockTimeLt, sourceBlockTimeLtParseErr := parseTimeFilter(string(queryArgs.Peek("sourceBlockTime.lt")))
-		if sourceBlockTimeLtParseErr != nil {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
-			return
-		}
-		filter.MaybeSourceBlockTimeLt = maybeSourceBlockTimeLt
+		filter.MaybeCreatedAtLt = maybeCreatedAtLt
 	}
 	if queryArgs.Has("createdAt.ago") {
 		ago, agoErr := time.ParseDuration(string(queryArgs.Peek("createdAt.ago")))
 		if agoErr != nil {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			httpapi.BadRequest(ctx, errors.New("invalid createdAt.ago"))
 			return
 		}
-		filter.MaybeSourceBlockTimeLt = primptr.UTCTime(utctime.Now().Add(-ago))
-	}
-	if queryArgs.Has("sourceBlockTime.ago") {
-		ago, agoErr := time.ParseDuration(string(queryArgs.Peek("sourceBlockTime.ago")))
-		if agoErr != nil {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
-			return
-		}
-		filter.MaybeSourceBlockTimeLt = primptr.UTCTime(utctime.Now().Add(-ago))
+		filter.MaybeCreatedAtLt = primptr.UTCTime(utctime.Now().Add(-ago))
 	}
 	if queryArgs.Has("createdAt.gt") {
 		maybeCreatedAtGt, createdAtGtParseErr := parseTimeFilter(string(queryArgs.Peek("createdAt.gt")))
 		if createdAtGtParseErr != nil {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			httpapi.BadRequest(ctx, errors.New("invalid createdAt.gt"))
 			return
 		}
-		filter.MaybeSourceBlockTimeGt = maybeCreatedAtGt
-	}
-	if queryArgs.Has("sourceBlockTime.gt") {
-		maybeSourceBlockTimeGt, sourceBlockTimeGtParseErr := parseTimeFilter(string(queryArgs.Peek("sourceBlockTime.gt")))
-		if sourceBlockTimeGtParseErr != nil {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
-			return
-		}
-		filter.MaybeSourceBlockTimeGt = maybeSourceBlockTimeGt
+		filter.MaybeCreatedAtGt = maybeCreatedAtGt
 	}
 	if queryArgs.Has("updatedAt.gt") {
 		maybeUpdatedAtGt, updatedAtGtParseErr := parseTimeFilter(string(queryArgs.Peek("updatedAt.gt")))
 		if updatedAtGtParseErr != nil {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			httpapi.BadRequest(ctx, errors.New("invalid updatedAt.gt"))
 			return
 		}
-		filter.MaybeDestinationBlockTimeGt = maybeUpdatedAtGt
+		filter.MaybeUpdatedAtGt = maybeUpdatedAtGt
+	}
+	if queryArgs.Has("sourceBlockTime.lt") {
+		maybeSourceBlockTimeLt, sourceBlockTimeLtParseErr := parseTimeFilter(string(queryArgs.Peek("sourceBlockTime.lt")))
+		if sourceBlockTimeLtParseErr != nil {
+			httpapi.BadRequest(ctx, errors.New("invalid sourceBlockTime.lt"))
+			return
+		}
+		filter.MaybeSourceBlockTimeLt = maybeSourceBlockTimeLt
+	}
+	if queryArgs.Has("sourceBlockTime.ago") {
+		ago, agoErr := time.ParseDuration(string(queryArgs.Peek("sourceBlockTime.ago")))
+		if agoErr != nil {
+			httpapi.BadRequest(ctx, errors.New("invalid sourceBlockTime.ago"))
+			return
+		}
+		filter.MaybeSourceBlockTimeLt = primptr.UTCTime(utctime.Now().Add(-ago))
+	}
+	if queryArgs.Has("sourceBlockTime.gt") {
+		maybeSourceBlockTimeGt, sourceBlockTimeGtParseErr := parseTimeFilter(string(queryArgs.Peek("sourceBlockTime.gt")))
+		if sourceBlockTimeGtParseErr != nil {
+			httpapi.BadRequest(ctx, errors.New("invalid sourceBlockTime.gt"))
+			return
+		}
+		filter.MaybeSourceBlockTimeGt = maybeSourceBlockTimeGt
 	}
 	if queryArgs.Has("destinationBlockTime.gt") {
 		maybeDestinationBlockTimeGt, destinationBlockTimeGtParseErr := parseTimeFilter(string(queryArgs.Peek("destinationBlockTime.gt")))
 		if destinationBlockTimeGtParseErr != nil {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			httpapi.BadRequest(ctx, errors.New("invalid destinationBlockTime.gt"))
 			return
 		}
 		filter.MaybeDestinationBlockTimeGt = maybeDestinationBlockTimeGt
@@ -271,20 +268,17 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 		orderStr := string(queryArgs.Peek("order"))
 		if orderStr == "sourceBlockTime.desc" || orderStr == "sourceBlockHeight.desc" {
 			sourceBlockTimeOrder = view.ORDER_DESC
+		} else {
+			httpapi.BadRequest(ctx, errors.New("unrecognized order"))
+			return
 		}
 	}
 
-	filter := bridge_activitiy_view.BridgeActivitiesListFilter{
-		MaybeStatus:                 nil,
-		MaybeIdGt:                   nil,
-		MaybeSourceBlockTimeLt:      nil,
-		MaybeSourceBlockTimeGt:      nil,
-		MaybeDestinationBlockTimeGt: nil,
-	}
+	filter := bridge_activitiy_view.BridgeActivitiesListFilter{}
 	if queryArgs.Has("filter.status") {
 		maybeStatus, maybeStatusErr := parseStatus(string(queryArgs.Peek("filter.status")))
 		if maybeStatusErr != nil {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			httpapi.BadRequest(ctx, errors.New("invalid filter.status"))
 			return
 		}
 		filter.MaybeStatus = maybeStatus
@@ -295,63 +289,63 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 	if queryArgs.Has("createdAt.lt") {
 		maybeCreatedAtLt, createdAtLtParseErr := parseTimeFilter(string(queryArgs.Peek("createdAt.lt")))
 		if createdAtLtParseErr != nil {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			httpapi.BadRequest(ctx, errors.New("invalid createdAt.lt"))
 			return
 		}
-		filter.MaybeSourceBlockTimeLt = maybeCreatedAtLt
-	}
-	if queryArgs.Has("sourceBlockTime.lt") {
-		maybeSourceBlockTimeLt, sourceBlockTimeLtParseErr := parseTimeFilter(string(queryArgs.Peek("sourceBlockTime.lt")))
-		if sourceBlockTimeLtParseErr != nil {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
-			return
-		}
-		filter.MaybeSourceBlockTimeLt = maybeSourceBlockTimeLt
+		filter.MaybeCreatedAtLt = maybeCreatedAtLt
 	}
 	if queryArgs.Has("createdAt.ago") {
 		ago, agoErr := time.ParseDuration(string(queryArgs.Peek("createdAt.ago")))
 		if agoErr != nil {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			httpapi.BadRequest(ctx, errors.New("invalid createdAt.ago"))
 			return
 		}
-		filter.MaybeSourceBlockTimeLt = primptr.UTCTime(utctime.Now().Add(-ago))
-	}
-	if queryArgs.Has("sourceBlockTime.ago") {
-		ago, agoErr := time.ParseDuration(string(queryArgs.Peek("sourceBlockTime.ago")))
-		if agoErr != nil {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
-			return
-		}
-		filter.MaybeSourceBlockTimeLt = primptr.UTCTime(utctime.Now().Add(-ago))
+		filter.MaybeCreatedAtLt = primptr.UTCTime(utctime.Now().Add(-ago))
 	}
 	if queryArgs.Has("createdAt.gt") {
 		maybeCreatedAtGt, createdAtGtParseErr := parseTimeFilter(string(queryArgs.Peek("createdAt.gt")))
 		if createdAtGtParseErr != nil {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			httpapi.BadRequest(ctx, errors.New("invalid createdAt.gt"))
 			return
 		}
-		filter.MaybeSourceBlockTimeGt = maybeCreatedAtGt
-	}
-	if queryArgs.Has("sourceBlockTime.gt") {
-		maybeSourceBlockTimeGt, sourceBlockTimeGtParseErr := parseTimeFilter(string(queryArgs.Peek("sourceBlockTime.gt")))
-		if sourceBlockTimeGtParseErr != nil {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
-			return
-		}
-		filter.MaybeSourceBlockTimeGt = maybeSourceBlockTimeGt
+		filter.MaybeCreatedAtGt = maybeCreatedAtGt
 	}
 	if queryArgs.Has("updatedAt.gt") {
 		maybeUpdatedAtGt, updatedAtGtParseErr := parseTimeFilter(string(queryArgs.Peek("updatedAt.gt")))
 		if updatedAtGtParseErr != nil {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			httpapi.BadRequest(ctx, errors.New("invalid updatedAt.gt"))
 			return
 		}
-		filter.MaybeDestinationBlockTimeGt = maybeUpdatedAtGt
+		filter.MaybeUpdatedAtGt = maybeUpdatedAtGt
+	}
+	if queryArgs.Has("sourceBlockTime.lt") {
+		maybeSourceBlockTimeLt, sourceBlockTimeLtParseErr := parseTimeFilter(string(queryArgs.Peek("sourceBlockTime.lt")))
+		if sourceBlockTimeLtParseErr != nil {
+			httpapi.BadRequest(ctx, errors.New("invalid sourceBlockTime.lt"))
+			return
+		}
+		filter.MaybeSourceBlockTimeLt = maybeSourceBlockTimeLt
+	}
+	if queryArgs.Has("sourceBlockTime.ago") {
+		ago, agoErr := time.ParseDuration(string(queryArgs.Peek("sourceBlockTime.ago")))
+		if agoErr != nil {
+			httpapi.BadRequest(ctx, errors.New("invalid sourceBlockTime.ago"))
+			return
+		}
+		filter.MaybeSourceBlockTimeLt = primptr.UTCTime(utctime.Now().Add(-ago))
+	}
+	if queryArgs.Has("sourceBlockTime.gt") {
+		maybeSourceBlockTimeGt, sourceBlockTimeGtParseErr := parseTimeFilter(string(queryArgs.Peek("sourceBlockTime.gt")))
+		if sourceBlockTimeGtParseErr != nil {
+			httpapi.BadRequest(ctx, errors.New("invalid sourceBlockTime.gt"))
+			return
+		}
+		filter.MaybeSourceBlockTimeGt = maybeSourceBlockTimeGt
 	}
 	if queryArgs.Has("destinationBlockTime.gt") {
 		maybeDestinationBlockTimeGt, destinationBlockTimeGtParseErr := parseTimeFilter(string(queryArgs.Peek("destinationBlockTime.gt")))
 		if destinationBlockTimeGtParseErr != nil {
-			ctx.SetStatusCode(fasthttp.StatusBadRequest)
+			httpapi.BadRequest(ctx, errors.New("invalid destinationBlockTime.gt"))
 			return
 		}
 		filter.MaybeDestinationBlockTimeGt = maybeDestinationBlockTimeGt
@@ -377,6 +371,10 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 				},
 			}
 		}
+	}
+	if len(addressFilter) == 0 {
+		httpapi.BadRequest(ctx, errors.New("unknown network"))
+		return
 	}
 
 	order := bridge_activitiy_view.BridgeActivitiesListOrder{
