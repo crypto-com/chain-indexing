@@ -183,11 +183,15 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 					)
 				}
 				if err := view.Insert(&bridge_pending_activity_view.BridgePendingActivityInsertRow{
-					BlockHeight:                   height,
-					BlockTime:                     &blockTime,
-					MaybeTransactionId:            primptr.String(msgIBCTransferTransfer.TxHash()),
-					BridgeType:                    types.BRIDGE_TYPE_IBC,
-					LinkId:                        ibcLinkId(projection.Config().ThisChainName, msgIBCTransferTransfer.Params.PacketSequence),
+					BlockHeight:        height,
+					BlockTime:          &blockTime,
+					MaybeTransactionId: primptr.String(msgIBCTransferTransfer.TxHash()),
+					BridgeType:         types.BRIDGE_TYPE_IBC,
+					LinkId: ibcLinkId(
+						projection.Config().ThisChainName,
+						msgIBCTransferTransfer.Params.SourceChannel,
+						msgIBCTransferTransfer.Params.PacketSequence,
+					),
 					Direction:                     types.DIRECTION_OUTGOING,
 					FromChainId:                   projection.Config().ThisChainName,
 					MaybeFromAddress:              primptr.String(msgIBCTransferTransfer.Params.Sender),
@@ -219,7 +223,7 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 					MaybeTransactionId: primptr.String(msgIBCTransferTransfer.TxHash()),
 					BridgeType:         types.BRIDGE_TYPE_IBC,
 					LinkId: fmt.Sprintf(
-						"source:%s-transactionId:%s-failedOnChain",
+						"source:%s;transactionId:%s;status:failedOnChain",
 						projection.Config().ThisChainName, msgIBCTransferTransfer.TxHash(),
 					),
 					Direction:                     types.DIRECTION_OUTGOING,
@@ -267,11 +271,15 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 				}
 
 				if err := view.Insert(&bridge_pending_activity_view.BridgePendingActivityInsertRow{
-					BlockHeight:                   height,
-					BlockTime:                     &blockTime,
-					MaybeTransactionId:            primptr.String(msgIBCRecvPacket.TxHash()),
-					BridgeType:                    types.BRIDGE_TYPE_IBC,
-					LinkId:                        ibcLinkId(counterpartyConfig.ChainName, msgIBCRecvPacket.Params.PacketSequence),
+					BlockHeight:        height,
+					BlockTime:          &blockTime,
+					MaybeTransactionId: primptr.String(msgIBCRecvPacket.TxHash()),
+					BridgeType:         types.BRIDGE_TYPE_IBC,
+					LinkId: ibcLinkId(
+						counterpartyConfig.ChainName,
+						msgIBCRecvPacket.Params.Packet.SourceChannel,
+						msgIBCRecvPacket.Params.PacketSequence,
+					),
 					Direction:                     types.DIRECTION_INCOMING,
 					FromChainId:                   counterpartyConfig.ChainName,
 					MaybeFromAddress:              primptr.String(msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Sender),
@@ -317,11 +325,15 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 				}
 
 				if err := view.Insert(&bridge_pending_activity_view.BridgePendingActivityInsertRow{
-					BlockHeight:                   height,
-					BlockTime:                     &blockTime,
-					BridgeType:                    types.BRIDGE_TYPE_IBC,
-					MaybeTransactionId:            primptr.String(msgIBCAcknowledgement.TxHash()),
-					LinkId:                        ibcLinkId(projection.Config().ThisChainName, msgIBCAcknowledgement.Params.PacketSequence),
+					BlockHeight:        height,
+					BlockTime:          &blockTime,
+					BridgeType:         types.BRIDGE_TYPE_IBC,
+					MaybeTransactionId: primptr.String(msgIBCAcknowledgement.TxHash()),
+					LinkId: ibcLinkId(
+						projection.Config().ThisChainName,
+						msgIBCAcknowledgement.Params.Packet.SourceChannel,
+						msgIBCAcknowledgement.Params.PacketSequence,
+					),
 					Direction:                     types.DIRECTION_RESPONSE,
 					FromChainId:                   projection.Config().ThisChainName,
 					MaybeFromAddress:              primptr.String(msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Sender),
@@ -358,11 +370,15 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 
 			if msgIBCTimeout.Params.MaybeMsgTransfer != nil {
 				if err := view.Insert(&bridge_pending_activity_view.BridgePendingActivityInsertRow{
-					BlockHeight:                   height,
-					BlockTime:                     &blockTime,
-					BridgeType:                    types.BRIDGE_TYPE_IBC,
-					MaybeTransactionId:            primptr.String(msgIBCTimeout.TxHash()),
-					LinkId:                        ibcLinkId(projection.Config().ThisChainName, msgIBCTimeout.Params.PacketSequence),
+					BlockHeight:        height,
+					BlockTime:          &blockTime,
+					BridgeType:         types.BRIDGE_TYPE_IBC,
+					MaybeTransactionId: primptr.String(msgIBCTimeout.TxHash()),
+					LinkId: ibcLinkId(
+						projection.Config().ThisChainName,
+						msgIBCTimeout.Params.Packet.SourceChannel,
+						msgIBCTimeout.Params.PacketSequence,
+					),
 					Direction:                     types.DIRECTION_RESPONSE,
 					FromChainId:                   projection.Config().ThisChainName,
 					MaybeFromAddress:              nil,
@@ -398,11 +414,15 @@ func (projection *BridgePendingActivity) HandleEvents(height int64, events []eve
 			}
 
 			if err := view.Insert(&bridge_pending_activity_view.BridgePendingActivityInsertRow{
-				BlockHeight:                   height,
-				BlockTime:                     &blockTime,
-				MaybeTransactionId:            primptr.String(cronosSendToIBCCreatedEvent.Params.EthereumTxHash),
-				BridgeType:                    types.BRIDGE_TYPE_IBC,
-				LinkId:                        ibcLinkId(projection.Config().ThisChainName, cronosSendToIBCCreatedEvent.Params.PacketSequence),
+				BlockHeight:        height,
+				BlockTime:          &blockTime,
+				MaybeTransactionId: primptr.String(cronosSendToIBCCreatedEvent.Params.EthereumTxHash),
+				BridgeType:         types.BRIDGE_TYPE_IBC,
+				LinkId: ibcLinkId(
+					projection.Config().ThisChainName,
+					cronosSendToIBCCreatedEvent.Params.SourceChannel,
+					cronosSendToIBCCreatedEvent.Params.PacketSequence,
+				),
 				Direction:                     types.DIRECTION_OUTGOING,
 				FromChainId:                   projection.Config().ThisChainName,
 				MaybeFromAddress:              primptr.String(cronosSendToIBCCreatedEvent.Params.Sender),
@@ -446,6 +466,10 @@ func (projection *BridgePendingActivity) mustGetCounterpartyChainConfigByListene
 	return config
 }
 
-func ibcLinkId(sourceChain string, sequence uint64) string {
-	return fmt.Sprintf("source:%s-sequence:%s", sourceChain, strconv.FormatUint(sequence, 10))
+func ibcLinkId(sourceChain string, sourceChainChannelId string, sequence uint64) string {
+	return fmt.Sprintf(
+		"source:%s;channel:%s;sequence:%s",
+		sourceChain, sourceChainChannelId,
+		strconv.FormatUint(sequence, 10),
+	)
 }
