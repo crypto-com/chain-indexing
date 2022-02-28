@@ -660,7 +660,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							Packet: ibc_model.Packet{
 								Sequence:           "0",
 								SourcePort:         "transfer",
-								SourceChannel:      "channel-0",
+								SourceChannel:      "channel-1",
 								DestinationPort:    "transfer",
 								DestinationChannel: "channel-0",
 								Data:               "data=",
@@ -711,7 +711,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 					BlockTime:                     primptr.UTCTime(utctime.FromUnixNano(1)),
 					MaybeTransactionId:            primptr.String("TxHash"),
 					BridgeType:                    types.BRIDGE_TYPE_IBC,
-					LinkId:                        "source:counterparty;channel:channel-0;sequence:0",
+					LinkId:                        "source:counterparty;channel:channel-1;sequence:0",
 					Direction:                     types.DIRECTION_INCOMING,
 					FromChainId:                   "counterparty",
 					MaybeFromAddress:              primptr.String("from"),
@@ -749,11 +749,15 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 				ThisChainName: "this",
 				CounterPartyChains: []bridge_pending_activity.CounterPartyChainConfig{
 					{
+						// this --- channel-0 --> counterparty0
+						// this <-- channel-2 --- counterparty0
 						ChainName:      "counterparty0",
 						ChannelId:      "channel-0",
 						StartingHeight: 0,
 					},
 					{
+						// this --- channel-1 --> counterparty1
+						// this <-- channel-3 --- counterparty1
 						ChainName:      "counterparty1",
 						ChannelId:      "channel-1",
 						StartingHeight: 0,
@@ -794,7 +798,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							Packet: ibc_model.Packet{
 								Sequence:           "0",
 								SourcePort:         "transfer",
-								SourceChannel:      "channel-0",
+								SourceChannel:      "channel-2",
 								DestinationPort:    "transfer",
 								DestinationChannel: "channel-0",
 								Data:               "data=",
@@ -851,7 +855,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							Packet: ibc_model.Packet{
 								Sequence:           "0",
 								SourcePort:         "transfer",
-								SourceChannel:      "channel-0",
+								SourceChannel:      "channel-3",
 								DestinationPort:    "transfer",
 								DestinationChannel: "channel-1",
 								Data:               "data=",
@@ -902,7 +906,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 					BlockTime:                     primptr.UTCTime(utctime.FromUnixNano(1)),
 					MaybeTransactionId:            primptr.String("TxHash"),
 					BridgeType:                    types.BRIDGE_TYPE_IBC,
-					LinkId:                        "source:counterparty0;channel:channel-0;sequence:0",
+					LinkId:                        "source:counterparty0;channel:channel-2;sequence:0",
 					Direction:                     types.DIRECTION_INCOMING,
 					FromChainId:                   "counterparty0",
 					MaybeFromAddress:              primptr.String("from"),
@@ -923,7 +927,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 					BlockTime:                     primptr.UTCTime(utctime.FromUnixNano(1)),
 					MaybeTransactionId:            primptr.String("TxHash"),
 					BridgeType:                    types.BRIDGE_TYPE_IBC,
-					LinkId:                        "source:counterparty1;channel:channel-0;sequence:0",
+					LinkId:                        "source:counterparty1;channel:channel-3;sequence:0",
 					Direction:                     types.DIRECTION_INCOMING,
 					FromChainId:                   "counterparty1",
 					MaybeFromAddress:              primptr.String("from"),
@@ -961,6 +965,8 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 				ThisChainName: "this",
 				CounterPartyChains: []bridge_pending_activity.CounterPartyChainConfig{
 					{
+						// this --- channel-0 --> counterparty
+						// this <-- channel-1 --- counterparty
 						ChainName:      "counterparty",
 						ChannelId:      "channel-0",
 						StartingHeight: 0,
@@ -1001,7 +1007,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							Packet: ibc_model.Packet{
 								Sequence:           "0",
 								SourcePort:         "transfer",
-								SourceChannel:      "channel-0",
+								SourceChannel:      "channel-1",
 								DestinationPort:    "transfer",
 								DestinationChannel: "channel-0",
 								Data:               "data=",
@@ -1052,7 +1058,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 					BlockTime:                     primptr.UTCTime(utctime.FromUnixNano(1)),
 					MaybeTransactionId:            primptr.String("TxHash"),
 					BridgeType:                    types.BRIDGE_TYPE_IBC,
-					LinkId:                        "source:counterparty;channel:channel-0;sequence:0",
+					LinkId:                        "source:counterparty;channel:channel-1;sequence:0",
 					Direction:                     types.DIRECTION_INCOMING,
 					FromChainId:                   "counterparty",
 					MaybeFromAddress:              primptr.String("from"),
@@ -1090,6 +1096,8 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 				ThisChainName: "this",
 				CounterPartyChains: []bridge_pending_activity.CounterPartyChainConfig{
 					{
+						// this --- channel-0 --> counterparty
+						// this <-- channel-1 --- counterparty
 						ChainName:      "counterparty",
 						ChannelId:      "channel-0",
 						StartingHeight: 0,
@@ -1192,6 +1200,8 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 				ThisChainName: "this",
 				CounterPartyChains: []bridge_pending_activity.CounterPartyChainConfig{
 					{
+						// this --- channel-0 --> counterparty
+						// this <-- channel-1 --- counterparty
 						ChainName:      "counterparty",
 						ChannelId:      "channel-0",
 						StartingHeight: 0,
@@ -1234,7 +1244,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 								SourcePort:         "transfer",
 								SourceChannel:      "channel-0",
 								DestinationPort:    "transfer",
-								DestinationChannel: "channel-2",
+								DestinationChannel: "channel-1",
 								Data:               "data=",
 								TimeoutHeight: ibc_model.Height{
 									RevisionNumber: 0,
@@ -1316,6 +1326,8 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 				ThisChainName: "this",
 				CounterPartyChains: []bridge_pending_activity.CounterPartyChainConfig{
 					{
+						// this --- channel-0 --> counterparty
+						// this <-- channel-1 --- counterparty
 						ChainName:      "counterparty",
 						ChannelId:      "channel-0",
 						StartingHeight: 0,
@@ -1358,7 +1370,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 								SourcePort:         "transfer",
 								SourceChannel:      "channel-0",
 								DestinationPort:    "transfer",
-								DestinationChannel: "channel-2",
+								DestinationChannel: "channel-1",
 								Data:               "data=",
 								TimeoutHeight: ibc_model.Height{
 									RevisionNumber: 0,
@@ -1440,11 +1452,15 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 				ThisChainName: "this",
 				CounterPartyChains: []bridge_pending_activity.CounterPartyChainConfig{
 					{
+						// this --- channel-0 --> counterparty
+						// this <-- channel-2 --- counterparty
 						ChainName:      "counterparty0",
 						ChannelId:      "channel-0",
 						StartingHeight: 0,
 					},
 					{
+						// this --- channel-1 --> counterparty1
+						// this <-- channel-3 --- counterparty1
 						ChainName:      "counterparty1",
 						ChannelId:      "channel-1",
 						StartingHeight: 0,
@@ -1539,7 +1555,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 								SourcePort:         "transfer",
 								SourceChannel:      "channel-1",
 								DestinationPort:    "transfer",
-								DestinationChannel: "channel-2",
+								DestinationChannel: "channel-3",
 								Data:               "data=",
 								TimeoutHeight: ibc_model.Height{
 									RevisionNumber: 0,
@@ -1642,6 +1658,8 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 				ThisChainName: "this",
 				CounterPartyChains: []bridge_pending_activity.CounterPartyChainConfig{
 					{
+						// this --- channel-0 --> counterparty
+						// this <-- channel-1 --- counterparty
 						ChainName:      "counterparty",
 						ChannelId:      "channel-0",
 						StartingHeight: 0,
@@ -1722,6 +1740,8 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 				ThisChainName: "this",
 				CounterPartyChains: []bridge_pending_activity.CounterPartyChainConfig{
 					{
+						// this --- channel-0 --> counterparty
+						// this <-- channel-1 --- counterparty
 						ChainName:      "counterparty",
 						ChannelId:      "channel-0",
 						StartingHeight: 0,
@@ -1771,7 +1791,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 						PacketDataHex:      "packetdatahex",
 						PacketSequence:     0,
 						DestinationPort:    "transfer",
-						DestinationChannel: "channel-2",
+						DestinationChannel: "channel-1",
 						ChannelOrdering:    "UNORDERED",
 						ConnectionID:       "connection-0",
 					},
@@ -1824,11 +1844,15 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 				ThisChainName: "this",
 				CounterPartyChains: []bridge_pending_activity.CounterPartyChainConfig{
 					{
+						// this --- channel-0 --> counterparty0
+						// this <-- channel-2 --- counterparty0
 						ChainName:      "counterparty0",
 						ChannelId:      "channel-0",
 						StartingHeight: 0,
 					},
 					{
+						// this --- channel-1 --> counterparty0
+						// this <-- channel-3 --- counterparty0
 						ChainName:      "counterparty1",
 						ChannelId:      "channel-1",
 						StartingHeight: 0,
@@ -1982,11 +2006,15 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 				ThisChainName: "this",
 				CounterPartyChains: []bridge_pending_activity.CounterPartyChainConfig{
 					{
+						// this --- channel-0 --> counterparty0
+						// this <-- channel-2 --- counterparty0
 						ChainName:      "counterparty0",
 						ChannelId:      "channel-0",
 						StartingHeight: 100,
 					},
 					{
+						// this --- channel-1 --> counterparty1
+						// this <-- channel-3 --- counterparty1
 						ChainName:      "counterparty1",
 						ChannelId:      "channel-1",
 						StartingHeight: 100,
@@ -2066,7 +2094,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 						PacketDataHex:      "packetdatahex",
 						PacketSequence:     0,
 						DestinationPort:    "transfer",
-						DestinationChannel: "channel-2",
+						DestinationChannel: "channel-3",
 						ChannelOrdering:    "UNORDERED",
 						ConnectionID:       "connection-0",
 					},
