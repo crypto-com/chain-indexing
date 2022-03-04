@@ -10,10 +10,8 @@ import (
 
 	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
-
-	jsoniter "github.com/json-iterator/go"
-
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 )
@@ -73,21 +71,21 @@ func (transactionsView *BlockTransactionsView) InsertAll(transactions []Transact
 		}
 		var transactionMessagesJSON string
 		var marshalErr error
-		if transactionMessagesJSON, marshalErr = jsoniter.MarshalToString(transaction.Messages); marshalErr != nil {
+		if transactionMessagesJSON, marshalErr = json.MarshalToString(transaction.Messages); marshalErr != nil {
 			return fmt.Errorf(
 				"error JSON marshalling block transation messages for insertion: %v: %w", marshalErr, rdb.ErrBuildSQLStmt,
 			)
 		}
 
 		var feeJSON string
-		if feeJSON, marshalErr = jsoniter.MarshalToString(transaction.Fee); marshalErr != nil {
+		if feeJSON, marshalErr = json.MarshalToString(transaction.Fee); marshalErr != nil {
 			return fmt.Errorf(
 				"error JSON marshalling block transation fee for insertion: %v: %w", marshalErr, rdb.ErrBuildSQLStmt,
 			)
 		}
 
 		var signersJSON string
-		if signersJSON, marshalErr = jsoniter.MarshalToString(transaction.Signers); marshalErr != nil {
+		if signersJSON, marshalErr = json.MarshalToString(transaction.Signers); marshalErr != nil {
 			return fmt.Errorf(
 				"error JSON marshalling block transation signers for insertion: %v: %w", marshalErr, rdb.ErrBuildSQLStmt,
 			)
@@ -165,17 +163,17 @@ func (transactionsView *BlockTransactionsView) Insert(transaction *TransactionRo
 	}
 
 	var transactionMessagesJSON string
-	if transactionMessagesJSON, err = jsoniter.MarshalToString(transaction.Messages); err != nil {
+	if transactionMessagesJSON, err = json.MarshalToString(transaction.Messages); err != nil {
 		return fmt.Errorf("error JSON marshalling block transation messages for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
 	var feeJSON string
-	if feeJSON, err = jsoniter.MarshalToString(transaction.Fee); err != nil {
+	if feeJSON, err = json.MarshalToString(transaction.Fee); err != nil {
 		return fmt.Errorf("error JSON marshalling block transation fee for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
 	var signersJSON string
-	if signersJSON, err = jsoniter.MarshalToString(transaction.Signers); err != nil {
+	if signersJSON, err = json.MarshalToString(transaction.Signers); err != nil {
 		return fmt.Errorf("error JSON marshalling block transation signers for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
@@ -275,19 +273,19 @@ func (transactionsView *BlockTransactionsView) FindByHash(txHash string) (*Trans
 	transaction.BlockTime = *blockTime
 
 	var fee coin.Coins
-	if unmarshalErr := jsoniter.UnmarshalFromString(*feeJSON, &fee); unmarshalErr != nil {
+	if unmarshalErr := json.UnmarshalFromString(*feeJSON, &fee); unmarshalErr != nil {
 		return nil, fmt.Errorf("error unmarshalling transaction fee JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 	}
 	transaction.Fee = fee
 
 	var messages []TransactionRowMessage
-	if unmarshalErr := jsoniter.UnmarshalFromString(*messagesJSON, &messages); unmarshalErr != nil {
+	if unmarshalErr := json.UnmarshalFromString(*messagesJSON, &messages); unmarshalErr != nil {
 		return nil, fmt.Errorf("error unmarshalling transaction messages JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 	}
 	transaction.Messages = messages
 
 	var signers []TransactionRowSigner
-	if unmarshalErr := jsoniter.UnmarshalFromString(*signersJSON, &signers); unmarshalErr != nil {
+	if unmarshalErr := json.UnmarshalFromString(*signersJSON, &signers); unmarshalErr != nil {
 		return nil, fmt.Errorf("error unmarshalling transaction signers JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 	}
 	transaction.Signers = signers
@@ -397,19 +395,19 @@ func (transactionsView *BlockTransactionsView) List(
 		transaction.BlockTime = *blockTime
 
 		var fee coin.Coins
-		if unmarshalErr := jsoniter.UnmarshalFromString(*feeJSON, &fee); unmarshalErr != nil {
+		if unmarshalErr := json.UnmarshalFromString(*feeJSON, &fee); unmarshalErr != nil {
 			return nil, nil, fmt.Errorf("error unmarshalling transaction fee JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 		}
 		transaction.Fee = fee
 
 		var messages []TransactionRowMessage
-		if unmarshalErr := jsoniter.UnmarshalFromString(*messagesJSON, &messages); unmarshalErr != nil {
+		if unmarshalErr := json.UnmarshalFromString(*messagesJSON, &messages); unmarshalErr != nil {
 			return nil, nil, fmt.Errorf("error unmarshalling transaction messages JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 		}
 		transaction.Messages = messages
 
 		var signers []TransactionRowSigner
-		if unmarshalErr := jsoniter.UnmarshalFromString(*signersJSON, &signers); unmarshalErr != nil {
+		if unmarshalErr := json.UnmarshalFromString(*signersJSON, &signers); unmarshalErr != nil {
 			return nil, nil, fmt.Errorf("error unmarshalling transaction signers JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 		}
 		transaction.Signers = signers
@@ -499,19 +497,19 @@ func (transactionsView *BlockTransactionsView) Search(keyword string) ([]Transac
 		transaction.BlockTime = *blockTime
 
 		var fee coin.Coins
-		if unmarshalErr := jsoniter.UnmarshalFromString(*feeJSON, &fee); unmarshalErr != nil {
+		if unmarshalErr := json.UnmarshalFromString(*feeJSON, &fee); unmarshalErr != nil {
 			return nil, fmt.Errorf("error unmarshalling transaction fee JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 		}
 		transaction.Fee = fee
 
 		var messages []TransactionRowMessage
-		if unmarshalErr := jsoniter.UnmarshalFromString(*messagesJSON, &messages); unmarshalErr != nil {
+		if unmarshalErr := json.UnmarshalFromString(*messagesJSON, &messages); unmarshalErr != nil {
 			return nil, fmt.Errorf("error unmarshalling transaction messages JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 		}
 		transaction.Messages = messages
 
 		var signers []TransactionRowSigner
-		if unmarshalErr := jsoniter.UnmarshalFromString(*signersJSON, &signers); unmarshalErr != nil {
+		if unmarshalErr := json.UnmarshalFromString(*signersJSON, &signers); unmarshalErr != nil {
 			return nil, fmt.Errorf("error unmarshalling transaction signers JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 		}
 		transaction.Signers = signers

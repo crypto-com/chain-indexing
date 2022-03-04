@@ -2,14 +2,11 @@ package view
 
 import (
 	"fmt"
-
 	sq "github.com/Masterminds/squirrel"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
-
-	jsoniter "github.com/json-iterator/go"
-
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 )
@@ -53,12 +50,12 @@ func (transactionsView *AccountTransactionData) InsertAll(transactions []Transac
 				"messages",
 			)
 		}
-		transactionMessagesJSON, err := jsoniter.MarshalToString(transaction.Messages)
+		transactionMessagesJSON, err := json.MarshalToString(transaction.Messages)
 		if err != nil {
 			return fmt.Errorf("error JSON marshalling block transation messages for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 		}
 
-		feeJSON, err := jsoniter.MarshalToString(transaction.Fee)
+		feeJSON, err := json.MarshalToString(transaction.Fee)
 		if err != nil {
 			return fmt.Errorf("error JSON marshalling block transation fee for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 		}
@@ -132,12 +129,12 @@ func (transactionsView *AccountTransactionData) Insert(transaction *TransactionR
 	}
 
 	var transactionMessagesJSON string
-	if transactionMessagesJSON, err = jsoniter.MarshalToString(transaction.Messages); err != nil {
+	if transactionMessagesJSON, err = json.MarshalToString(transaction.Messages); err != nil {
 		return fmt.Errorf("error JSON marshalling block transation messages for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
 	var feeJSON string
-	if feeJSON, err = jsoniter.MarshalToString(transaction.Fee); err != nil {
+	if feeJSON, err = json.MarshalToString(transaction.Fee); err != nil {
 		return fmt.Errorf("error JSON marshalling block transation fee for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 

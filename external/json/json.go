@@ -1,9 +1,13 @@
 package json
 
-import jsoniter "github.com/json-iterator/go"
+import (
+	"strings"
+
+	jsoniter "github.com/json-iterator/go"
+)
 
 func MustMarshalToString(v interface{}) string {
-	s, err := jsoniter.MarshalToString(v)
+	s, err := MarshalToString(v)
 	if err != nil {
 		panic(err)
 	}
@@ -11,8 +15,17 @@ func MustMarshalToString(v interface{}) string {
 	return s
 }
 
+func MarshalToString(v interface{}) (string, error) {
+	s, err := jsoniter.ConfigCompatibleWithStandardLibrary.MarshalToString(v)
+	if err != nil {
+		return "", err
+	}
+
+	return strings.ReplaceAll(s, "\\u0000", ""), nil
+}
+
 func MustMarshal(v interface{}) []byte {
-	b, err := jsoniter.Marshal(v)
+	b, err := jsoniter.ConfigCompatibleWithStandardLibrary.Marshal(v)
 	if err != nil {
 		panic(err)
 	}
@@ -21,13 +34,21 @@ func MustMarshal(v interface{}) []byte {
 }
 
 func MustUnmarshalFromString(s string, v interface{}) {
-	if err := jsoniter.UnmarshalFromString(s, v); err != nil {
+	if err := UnmarshalFromString(s, v); err != nil {
 		panic(err)
 	}
 }
 
+func UnmarshalFromString(str string, v interface{}) error {
+	return jsoniter.ConfigCompatibleWithStandardLibrary.UnmarshalFromString(str, v)
+}
+
 func MustUnmarshal(b []byte, v interface{}) {
-	if err := jsoniter.Unmarshal(b, v); err != nil {
+	if err := Unmarshal(b, v); err != nil {
 		panic(err)
 	}
+}
+
+func Unmarshal(data []byte, v interface{}) error {
+	return jsoniter.ConfigCompatibleWithStandardLibrary.Unmarshal(data, v)
 }

@@ -8,10 +8,8 @@ import (
 
 	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
-
-	jsoniter "github.com/json-iterator/go"
-
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 )
 
@@ -38,7 +36,7 @@ func NewMessagesView(handle *rdb.Handle) Messages {
 }
 
 func (nftMessagesView *MessagesView) Insert(messageRow *MessageRow) error {
-	nftMessageDataJSON, err := jsoniter.MarshalToString(messageRow.Data)
+	nftMessageDataJSON, err := json.MarshalToString(messageRow.Data)
 	if err != nil {
 		return fmt.Errorf("error JSON marshalling NFT message for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
@@ -212,7 +210,7 @@ func (nftMessagesView *MessagesView) List(
 		nftMessage.BlockTime = *blockTime
 
 		var data interface{}
-		if unmarshalErr := jsoniter.Unmarshal([]byte(*accountMessageDataJSON), &data); unmarshalErr != nil {
+		if unmarshalErr := json.Unmarshal([]byte(*accountMessageDataJSON), &data); unmarshalErr != nil {
 			return nil, nil, fmt.Errorf(
 				"error unmarshalling nft message data JSON: %v: %w", unmarshalErr, rdb.ErrQuery,
 			)
