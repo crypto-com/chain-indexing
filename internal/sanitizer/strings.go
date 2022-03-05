@@ -1,8 +1,9 @@
 package sanitizer
 
 import (
-	"github.com/crypto-com/chain-indexing/external/primptr"
 	"strings"
+
+	"github.com/crypto-com/chain-indexing/external/primptr"
 )
 
 func SanitizePostgresString(s string) string {

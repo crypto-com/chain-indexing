@@ -3,7 +3,6 @@ package view
 import (
 	"errors"
 	"fmt"
-	"github.com/crypto-com/chain-indexing/internal/sanitizer"
 
 	sq "github.com/Masterminds/squirrel"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/internal/sanitizer"
 )
 
 const DENOMS_TABLE_NAME = "view_nft_denoms"

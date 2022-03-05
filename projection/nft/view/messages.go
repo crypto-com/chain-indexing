@@ -3,7 +3,6 @@ package view
 import (
 	"errors"
 	"fmt"
-	"github.com/crypto-com/chain-indexing/internal/sanitizer"
 
 	sq "github.com/Masterminds/squirrel"
 
@@ -12,6 +11,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/internal/sanitizer"
 )
 
 const MESSAGES_TABLE_NAME = "view_nft_messages"
