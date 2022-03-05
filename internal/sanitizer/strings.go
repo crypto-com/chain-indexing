@@ -7,7 +7,13 @@ import (
 )
 
 func SanitizePostgresString(s string) string {
-	return strings.ReplaceAll(s, "\\u0000", "")
+	return strings.ReplaceAll(
+		strings.ReplaceAll(
+			s,
+			string([]byte{0x00}), "",
+		),
+		"\\u0000", "",
+	)
 }
 
 func SanitizePostgresStringPtr(s *string) *string {
