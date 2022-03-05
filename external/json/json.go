@@ -1,7 +1,7 @@
 package json
 
 import (
-	"strings"
+	"github.com/crypto-com/chain-indexing/internal/sanitizer"
 
 	jsoniter "github.com/json-iterator/go"
 )
@@ -21,7 +21,7 @@ func MarshalToString(v interface{}) (string, error) {
 		return "", err
 	}
 
-	return strings.ReplaceAll(s, "\\u0000", ""), nil
+	return sanitizer.SanitizePostgresString(s), nil
 }
 
 func MustMarshal(v interface{}) []byte {

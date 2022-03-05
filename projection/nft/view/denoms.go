@@ -3,6 +3,7 @@ package view
 import (
 	"errors"
 	"fmt"
+	"github.com/crypto-com/chain-indexing/internal/sanitizer"
 
 	sq "github.com/Masterminds/squirrel"
 
@@ -48,9 +49,9 @@ func (denomsView *DenomsView) Insert(denomRow *DenomRow) error {
 		"created_at",
 		"created_at_block_height",
 	).Values(
-		denomRow.DenomId,
-		denomRow.Name,
-		denomRow.Schema,
+		sanitizer.SanitizePostgresString(denomRow.DenomId),
+		sanitizer.SanitizePostgresString(denomRow.Name),
+		sanitizer.SanitizePostgresString(denomRow.Schema),
 		denomRow.Creator,
 		denomsView.rdb.Tton(&denomRow.CreatedAt),
 		denomRow.CreatedAtBlockHeight,

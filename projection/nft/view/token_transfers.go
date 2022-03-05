@@ -3,6 +3,7 @@ package view
 import (
 	"errors"
 	"fmt"
+	"github.com/crypto-com/chain-indexing/internal/sanitizer"
 
 	sq "github.com/Masterminds/squirrel"
 
@@ -41,8 +42,8 @@ func (tokenTransfersView *TokenTransfers) Insert(
 		"recipient",
 		"transferred_at",
 	).Values(
-		tokenTransferRow.DenomId,
-		tokenTransferRow.TokenId,
+		sanitizer.SanitizePostgresString(tokenTransferRow.DenomId),
+		sanitizer.SanitizePostgresString(tokenTransferRow.TokenId),
 		tokenTransferRow.BlockHeight,
 		tokenTransferRow.TransactionHash,
 		tokenTransferRow.Sender,

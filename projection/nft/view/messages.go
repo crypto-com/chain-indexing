@@ -3,6 +3,7 @@ package view
 import (
 	"errors"
 	"fmt"
+	"github.com/crypto-com/chain-indexing/internal/sanitizer"
 
 	sq "github.com/Masterminds/squirrel"
 
@@ -62,9 +63,9 @@ func (nftMessagesView *MessagesView) Insert(messageRow *MessageRow) error {
 		messageRow.BlockHeight,
 		messageRow.BlockHash,
 		blockTime,
-		messageRow.DenomId,
-		messageRow.MaybeTokenId,
-		messageRow.MaybeDrop,
+		sanitizer.SanitizePostgresString(messageRow.DenomId),
+		sanitizer.SanitizePostgresStringPtr(messageRow.MaybeTokenId),
+		sanitizer.SanitizePostgresStringPtr(messageRow.MaybeDrop),
 		messageRow.TransactionHash,
 		messageRow.Success,
 		messageRow.MessageIndex,
