@@ -1,9 +1,9 @@
 package json
 
 import (
-	"github.com/crypto-com/chain-indexing/internal/sanitizer"
-
 	jsoniter "github.com/json-iterator/go"
+
+	"github.com/crypto-com/chain-indexing/internal/sanitizer"
 )
 
 func MustMarshalToString(v interface{}) string {
