@@ -11,6 +11,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/internal/sanitizer"
 )
 
 const MESSAGES_TABLE_NAME = "view_nft_messages"
@@ -62,9 +63,9 @@ func (nftMessagesView *MessagesView) Insert(messageRow *MessageRow) error {
 		messageRow.BlockHeight,
 		messageRow.BlockHash,
 		blockTime,
-		messageRow.DenomId,
-		messageRow.MaybeTokenId,
-		messageRow.MaybeDrop,
+		sanitizer.SanitizePostgresString(messageRow.DenomId),
+		sanitizer.SanitizePostgresStringPtr(messageRow.MaybeTokenId),
+		sanitizer.SanitizePostgresStringPtr(messageRow.MaybeDrop),
 		messageRow.TransactionHash,
 		messageRow.Success,
 		messageRow.MessageIndex,

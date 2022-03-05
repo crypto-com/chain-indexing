@@ -3,6 +3,7 @@ package view
 import (
 	"errors"
 	"fmt"
+	"github.com/crypto-com/chain-indexing/internal/sanitizer"
 
 	sq "github.com/Masterminds/squirrel"
 
@@ -61,12 +62,12 @@ func (tokensView *TokensView) Insert(tokenRow *TokenRow) error {
 		"last_transferred_at",
 		"last_transferred_at_block_height",
 	).Values(
-		tokenRow.DenomId,
-		tokenRow.TokenId,
-		tokenRow.MaybeDrop,
-		tokenRow.Name,
-		tokenRow.URI,
-		tokenRow.Data,
+		sanitizer.SanitizePostgresString(tokenRow.DenomId),
+		sanitizer.SanitizePostgresString(tokenRow.TokenId),
+		sanitizer.SanitizePostgresStringPtr(tokenRow.MaybeDrop),
+		sanitizer.SanitizePostgresString(tokenRow.Name),
+		sanitizer.SanitizePostgresString(tokenRow.URI),
+		sanitizer.SanitizePostgresString(tokenRow.Data),
 		tokenRow.Minter,
 		tokenRow.Owner,
 		tokensView.rdb.Tton(&tokenRow.MintedAt),
@@ -205,17 +206,19 @@ func (tokensView *TokensView) Update(tokenRow TokenRow) error {
 	sql, sqlArgs, err := tokensView.rdb.StmtBuilder.Update(
 		TOKENS_TABLE_NAME,
 	).SetMap(map[string]interface{}{
-		"drop":                             tokenRow.MaybeDrop,
-		"name":                             tokenRow.Name,
-		"uri":                              tokenRow.URI,
-		"data":                             tokenRow.Data,
+		"drop":                             sanitizer.SanitizePostgresStringPtr(tokenRow.MaybeDrop),
+		"name":                             sanitizer.SanitizePostgresString(tokenRow.Name),
+		"uri":                              sanitizer.SanitizePostgresString(tokenRow.URI),
+		"data":                             sanitizer.SanitizePostgresString(tokenRow.Data),
 		"owner":                            tokenRow.Owner,
 		"last_edited_at":                   tokensView.rdb.TypeConv.Tton(&tokenRow.LastEditedAt),
 		"last_edited_at_block_height":      tokenRow.LastEditedAtBlockHeight,
 		"last_transferred_at":              tokensView.rdb.TypeConv.Tton(&tokenRow.LastTransferredAt),
 		"last_transferred_at_block_height": tokenRow.LastTransferredAtBlockHeight,
 	}).Where(
-		"denom_id = ? AND token_id = ?", tokenRow.DenomId, tokenRow.TokenId,
+		"denom_id = ? AND token_id = ?",
+		sanitizer.SanitizePostgresString(tokenRow.DenomId),
+		sanitizer.SanitizePostgresString(tokenRow.TokenId),
 	).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building NFT token update sql: %v: %w", err, rdb.ErrBuildSQLStmt)

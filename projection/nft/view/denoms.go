@@ -10,6 +10,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/internal/sanitizer"
 )
 
 const DENOMS_TABLE_NAME = "view_nft_denoms"
@@ -48,9 +49,9 @@ func (denomsView *DenomsView) Insert(denomRow *DenomRow) error {
 		"created_at",
 		"created_at_block_height",
 	).Values(
-		denomRow.DenomId,
-		denomRow.Name,
-		denomRow.Schema,
+		sanitizer.SanitizePostgresString(denomRow.DenomId),
+		sanitizer.SanitizePostgresString(denomRow.Name),
+		sanitizer.SanitizePostgresString(denomRow.Schema),
 		denomRow.Creator,
 		denomsView.rdb.Tton(&denomRow.CreatedAt),
 		denomRow.CreatedAtBlockHeight,
