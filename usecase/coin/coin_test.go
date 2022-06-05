@@ -36,7 +36,7 @@ func (s *coinTestSuite) TestCoin() {
 	s.Require().Panics(func() { sdk.NewInt64Coin(testDenom1, -1) })
 	s.Require().Panics(func() { sdk.MustNewCoin(testDenom1, sdk.NewInt(-1)) })
 	s.Require().Equal(sdk.NewInt(10), sdk.NewInt64Coin(strings.ToUpper(testDenom1), 10).Amount)
-	s.Require().Equal(sdk.NewInt(10), sdk.NewCoin(strings.ToUpper(testDenom1), sdk.NewInt(10)).Amount)
+	s.Require().Equal(sdk.NewInt(10), sdk.MustNewCoin(strings.ToUpper(testDenom1), sdk.NewInt(10)).Amount)
 	s.Require().Equal(sdk.NewInt(5), sdk.NewInt64Coin(testDenom1, 5).Amount)
 	s.Require().Equal(sdk.NewInt(5), sdk.MustNewCoin(testDenom1, sdk.NewInt(5)).Amount)
 }

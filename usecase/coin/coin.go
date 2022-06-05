@@ -65,6 +65,7 @@ func NewCoinFromString(denom string, amountStr string) (Coin, error) {
 // if the amount is negative.
 func NewInt64Coin(denom string, amount int64) Coin {
 	result, err := NewCoin(denom, NewInt(amount))
+	// TODO: Return error instead of panic
 	if err != nil {
 		panic(err)
 	}
