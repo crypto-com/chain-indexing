@@ -49,7 +49,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					ValidatorAddress:      "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
 					Amount:                coin.MustParseCoinNormalized("1000000000basetcro"),
 					MaybeUnbondCompleteAt: primptr.UTCTime(utctime.FromUnixNano(int64(1605152654000000000))),
-					AutoClaimedRewards:    coin.NewCoin("basetcro", coin.NewInt(76688)),
+					AutoClaimedRewards:    coin.MustNewCoin("basetcro", coin.NewInt(76688)),
 				},
 			)}))
 		})

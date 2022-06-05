@@ -28,7 +28,7 @@ func NewCoinFromAmountInterface(amount map[string]interface{}) (coin.Coin, error
 	return result, nil
 }
 
-// NewCoinsFromAmountInterface returns Coins from the list of amount in the
+// MustNewCoinsFromAmountInterface returns Coins from the list of amount in the
 // from of []interface{}. It behaves the same as NewCoinsFromAmountInterface
 // except it panics on any error.
 func MustNewCoinsFromAmountInterface(amounts []interface{}) coin.Coins {
@@ -44,7 +44,10 @@ func MustNewCoinsFromAmountInterface(amounts []interface{}) coin.Coins {
 // from of []interface{}. It returns error when any of the amount inside is
 // invalid
 func NewCoinsFromAmountInterface(amounts []interface{}) (coin.Coins, error) {
-	coins := coin.NewCoins()
+	coins, newCoinsErr := coin.NewCoins()
+	if newCoinsErr != nil {
+		return nil, newCoinsErr
+	}
 	for _, rawAmount := range amounts {
 		amount, ok := rawAmount.(map[string]interface{})
 		if !ok {

@@ -512,7 +512,10 @@ func (client *HTTPClient) TotalBondedBalance() (coin.Coin, error) {
 		},
 	}
 
-	totalBondedBalance := coin.NewCoin(client.bondingDenom, coin.ZeroInt())
+	totalBondedBalance, newCoinErr := coin.NewCoin(client.bondingDenom, coin.ZeroInt())
+	if newCoinErr != nil {
+		return coin.Coin{}, fmt.Errorf("error when creating new coin: %v", newCoinErr)
+	}
 	for {
 		queryUrl := client.getUrl("staking", "validators")
 		if resp.MaybePagination.MaybeNextKey != nil {

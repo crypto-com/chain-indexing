@@ -47,7 +47,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					ValidatorSrcAddress: "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
 					ValidatorDstAddress: "tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6",
 					Amount:              coin.MustParseCoinNormalized("10000000000basetcro"),
-					AutoClaimedRewards:  coin.NewCoin("basetcro", coin.NewInt(281334)),
+					AutoClaimedRewards:  coin.MustNewCoin("basetcro", coin.NewInt(281334)),
 				},
 			)}))
 		})

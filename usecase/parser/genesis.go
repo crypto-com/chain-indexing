@@ -2,6 +2,7 @@ package parser
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
@@ -38,9 +39,14 @@ func ParseGenesisCommands(
 		case "BOND_STATUS_UNBONDED":
 			status = constants.UNBONDED
 		}
-		amount, parseAmountOk := coin.NewIntFromString(validator.Tokens)
-		if !parseAmountOk {
+		amountInt, parseAmountIntOk := coin.NewIntFromString(validator.Tokens)
+		if !parseAmountIntOk {
 			return nil, errors.New("error parsing genesis validator amount")
+		}
+
+		amount, parseAmountErr := coin.NewCoin(rawGenesis.AppState.Staking.Params.BondDenom, amountInt)
+		if parseAmountErr != nil {
+			return nil, fmt.Errorf("error parsing genesis validator amount: %v", parseAmountErr)
 		}
 		commands = append(commands, command_usecase.NewCreateGenesisValidator(
 			genesis.CreateGenesisValidatorParams{
@@ -64,7 +70,7 @@ func ParseGenesisCommands(
 				),
 				ValidatorAddress: validator.OperatorAddress,
 				TendermintPubkey: validator.ConsensusPubkey.Key,
-				Amount:           coin.NewCoin(rawGenesis.AppState.Staking.Params.BondDenom, amount),
+				Amount:           amount,
 				Jailed:           validator.Jailed,
 			},
 		))

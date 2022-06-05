@@ -18,7 +18,8 @@ type DecCoin struct {
 
 // NewDecCoin creates a new DecCoin instance from an Int.
 func NewDecCoin(denom string, amount Int) DecCoin {
-	coin := NewCoin(denom, amount)
+	// TODO: Return error from NewCoin.validate() instead of panic
+	coin := MustNewCoin(denom, amount)
 
 	return DecCoin{
 		Denom:  coin.Denom,
@@ -129,7 +130,7 @@ func (coin DecCoin) Sub(coinB DecCoin) DecCoin {
 func (coin DecCoin) TruncateDecimal() (Coin, DecCoin) {
 	truncated := coin.Amount.TruncateInt()
 	change := coin.Amount.Sub(truncated.ToDec())
-	return NewCoin(coin.Denom, truncated), NewDecCoinFromDec(coin.Denom, change)
+	return MustNewCoin(coin.Denom, truncated), NewDecCoinFromDec(coin.Denom, change)
 }
 
 // IsPositive returns true if coin amount is positive.
@@ -205,7 +206,8 @@ func NewEmptyDecCoins() DecCoins {
 // from regular Coins.
 func NewDecCoinsFromCoins(coins ...Coin) DecCoins {
 	decCoins := make(DecCoins, len(coins))
-	newCoins := NewCoins(coins...)
+	// TODO: Return error from NewCoins.validate() instead of panic
+	newCoins := MustNewCoins(coins...)
 	for i, coin := range newCoins {
 		decCoins[i] = NewDecCoinFromCoin(coin)
 	}

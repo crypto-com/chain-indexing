@@ -34,15 +34,15 @@ func (s *coinTestSuite) SetupSuite() {
 
 func (s *coinTestSuite) TestCoin() {
 	s.Require().Panics(func() { sdk.NewInt64Coin(testDenom1, -1) })
-	s.Require().Panics(func() { sdk.NewCoin(testDenom1, sdk.NewInt(-1)) })
+	s.Require().Panics(func() { sdk.MustNewCoin(testDenom1, sdk.NewInt(-1)) })
 	s.Require().Equal(sdk.NewInt(10), sdk.NewInt64Coin(strings.ToUpper(testDenom1), 10).Amount)
-	s.Require().Equal(sdk.NewInt(10), sdk.NewCoin(strings.ToUpper(testDenom1), sdk.NewInt(10)).Amount)
+	s.Require().Equal(sdk.NewInt(10), sdk.MustNewCoin(strings.ToUpper(testDenom1), sdk.NewInt(10)).Amount)
 	s.Require().Equal(sdk.NewInt(5), sdk.NewInt64Coin(testDenom1, 5).Amount)
-	s.Require().Equal(sdk.NewInt(5), sdk.NewCoin(testDenom1, sdk.NewInt(5)).Amount)
+	s.Require().Equal(sdk.NewInt(5), sdk.MustNewCoin(testDenom1, sdk.NewInt(5)).Amount)
 }
 
 func (s *coinTestSuite) TestCoin_String() {
-	coin := sdk.NewCoin(testDenom1, sdk.NewInt(10))
+	coin := sdk.MustNewCoin(testDenom1, sdk.NewInt(10))
 	s.Require().Equal(fmt.Sprintf("10%s", testDenom1), coin.String())
 }
 
@@ -284,7 +284,7 @@ func (s *coinTestSuite) TestFilteredZeroCoins() {
 	}
 
 	for _, tt := range cases {
-		undertest := sdk.NewCoins(tt.input...)
+		undertest := sdk.MustNewCoins(tt.input...)
 		s.Require().Equal(tt.expected, undertest.String(), "NewCoins must return expected results")
 		s.Require().Equal(tt.original, tt.input.String(), "input must be unmodified and match original")
 	}
@@ -520,7 +520,7 @@ func (s *coinTestSuite) TestCoins_Validate() {
 		},
 		{
 			"empty (1)",
-			sdk.NewCoins(),
+			sdk.MustNewCoins(),
 			true,
 		},
 		{
@@ -869,10 +869,10 @@ func (s *coinTestSuite) TestNewCoins() {
 	for _, tt := range tests {
 		if tt.wantPanic {
 			// nolint:scopelint
-			s.Require().Panics(func() { sdk.NewCoins(tt.coins...) })
+			s.Require().Panics(func() { sdk.MustNewCoins(tt.coins...) })
 			continue
 		}
-		got := sdk.NewCoins(tt.coins...)
+		got := sdk.MustNewCoins(tt.coins...)
 		s.Require().True(got.IsEqual(tt.want))
 	}
 }
@@ -912,7 +912,7 @@ func (s *coinTestSuite) TestMarshalJSONCoins() {
 	}{
 		{"nil coins", nil, `[]`},
 		{"empty coins", sdk.Coins{}, `[]`},
-		{"non-empty coins", sdk.NewCoins(sdk.NewInt64Coin("foo", 50)), `[{"denom":"foo","amount":"50"}]`},
+		{"non-empty coins", sdk.MustNewCoins(sdk.NewInt64Coin("foo", 50)), `[{"denom":"foo","amount":"50"}]`},
 	}
 
 	for _, tc := range testCases {
