@@ -239,7 +239,7 @@ func (s *decCoinTestSuite) TestSubDecCoins() {
 		msg        string
 	}{
 		{
-			sdk.NewDecCoinsFromCoins(sdk.NewCoin("mytoken", sdk.NewInt(10)), sdk.NewCoin("btc", sdk.NewInt(20)), sdk.NewCoin("eth", sdk.NewInt(30))),
+			sdk.NewDecCoinsFromCoins(sdk.MustNewCoin("mytoken", sdk.NewInt(10)), sdk.MustNewCoin("btc", sdk.NewInt(20)), sdk.MustNewCoin("eth", sdk.NewInt(30))),
 			true,
 			"sorted coins should have passed",
 		},
@@ -255,7 +255,7 @@ func (s *decCoinTestSuite) TestSubDecCoins() {
 		},
 	}
 
-	decCoins := sdk.NewDecCoinsFromCoins(sdk.NewCoin("btc", sdk.NewInt(10)), sdk.NewCoin("eth", sdk.NewInt(15)), sdk.NewCoin("mytoken", sdk.NewInt(5)))
+	decCoins := sdk.NewDecCoinsFromCoins(sdk.MustNewCoin("btc", sdk.NewInt(10)), sdk.MustNewCoin("eth", sdk.NewInt(15)), sdk.MustNewCoin("mytoken", sdk.NewInt(5)))
 
 	for _, tc := range tests {
 		tc := tc

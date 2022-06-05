@@ -22,7 +22,7 @@ var _ = Describe("Event", func() {
 				Module:                    "Gravity",
 				Sender:                    "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 				Receiver:                  "tcrc1j6xhntmfqauwn0rqhqc89yr9a2xqe8vxthedhp",
-				Amount:                    coin.NewCoins(coin.MustNewCoinFromString("basetcro", "1")),
+				Amount:                    coin.MustNewCoins(coin.MustNewCoinFromString("basetcro", "1")),
 				BridgeChainId:             338,
 				EthereumTokenContract:     "0x564a1c3af089d02d0b6c311c650ea3768424cbfa",
 				Nonce:                     2,

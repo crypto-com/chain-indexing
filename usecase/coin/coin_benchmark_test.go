@@ -16,10 +16,10 @@ func BenchmarkCoinsAdditionIntersect(b *testing.B) {
 			coinsB := Coins(make([]Coin, numCoinsB))
 
 			for i := 0; i < numCoinsA; i++ {
-				coinsA[i] = NewCoin(coinName(i), NewInt(int64(i)))
+				coinsA[i] = MustNewCoin(coinName(i), NewInt(int64(i)))
 			}
 			for i := 0; i < numCoinsB; i++ {
-				coinsB[i] = NewCoin(coinName(i), NewInt(int64(i)))
+				coinsB[i] = MustNewCoin(coinName(i), NewInt(int64(i)))
 			}
 
 			b.ResetTimer()

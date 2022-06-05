@@ -15,19 +15,29 @@ type Coin struct {
 	Amount Int    `json:"amount"`
 }
 
-// NewCoin returns a new coin with a denomination and amount. It will panic if
-// the amount is negative or if the denomination is invalid.
-func NewCoin(denom string, amount Int) Coin {
+// MustNewCoin returns a new coin with a denomination and amount. It will panic
+// if the amount is negative or if the denomination is invalid.
+func MustNewCoin(denom string, amount Int) Coin {
+	result, err := NewCoin(denom, amount)
+	if err != nil {
+		panic(err)
+	}
+	return result
+}
+
+// NewCoin returns a new coin with a denomination and amount. It returns error
+// if the amount is negative or if the denomination is invalid.
+func NewCoin(denom string, amount Int) (Coin, error) {
 	coin := Coin{
 		Denom:  denom,
 		Amount: amount,
 	}
 
 	if err := coin.Validate(); err != nil {
-		panic(err)
+		return Coin{}, err
 	}
 
-	return coin
+	return coin, nil
 }
 
 // MustNewCoinFromString returns a new coin from calling NewCoinFromString. It
@@ -41,20 +51,25 @@ func MustNewCoinFromString(denom string, amountStr string) Coin {
 }
 
 // NewCoinFromString returns a new coin with a denomination and string amount.
-// It return an error if the amount is non-integer, negative or if the denom
+// It returns an error if the amount is non-integer, negative or if the denom
 // is invalid.
 func NewCoinFromString(denom string, amountStr string) (Coin, error) {
 	amount, ok := NewIntFromString(amountStr)
 	if !ok {
 		return Coin{}, fmt.Errorf("invalid coin amount: %s", amountStr)
 	}
-	return NewCoin(denom, amount), nil
+	return NewCoin(denom, amount)
 }
 
 // NewInt64Coin returns a new coin with a denomination and amount. It will panic
 // if the amount is negative.
 func NewInt64Coin(denom string, amount int64) Coin {
-	return NewCoin(denom, NewInt(amount))
+	result, err := NewCoin(denom, NewInt(amount))
+	if err != nil {
+		panic(err)
+	}
+
+	return result
 }
 
 // NewZeroCoin returns a new coin with zero unit of denomination. It will panic
@@ -183,15 +198,26 @@ func (coin Coin) IsNegative() bool {
 // Coins is a set of Coin, one per currency
 type Coins []Coin
 
-// NewCoins constructs a new coin set. The provided coins will be sanitized by removing
+// MustNewCoins constructs a new coin set. The provided coins will be sanitized byremoving
 // zero coins and sorting the coin set. A panic will occur if the coin set is not valid.
-func NewCoins(coins ...Coin) Coins {
-	newCoins := sanitizeCoins(coins)
-	if err := newCoins.Validate(); err != nil {
-		panic(fmt.Errorf("invalid coin set %s: %w", newCoins, err))
+func MustNewCoins(coins ...Coin) Coins {
+	result, err := NewCoins(coins...)
+	if err != nil {
+		panic(err)
 	}
 
-	return newCoins
+	return result
+}
+
+// NewCoins constructs a new coin set. The provided coins will be sanitized by removing
+// zero coins and sorting the coin set. A panic will occur if the coin set is not valid.
+func NewCoins(coins ...Coin) (Coins, error) {
+	newCoins := sanitizeCoins(coins)
+	if err := newCoins.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid coin set %s: %w", newCoins, err)
+	}
+
+	return newCoins, nil
 }
 
 // NewEmptyCoins constructs an empty coin set.
