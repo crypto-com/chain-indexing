@@ -677,7 +677,10 @@ func ParseMsgDelegate(
 	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	amountValue, _ := parserParams.Msg["amount"].(map[string]interface{})
-	amount := tmcosmosutils.MustNewCoinFromAmountInterface(amountValue)
+	amount, amountErr := tmcosmosutils.NewCoinFromAmountInterface(amountValue)
+	if amountErr != nil {
+		amount = coin.Coin{}
+	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
 		return []command.Command{command_usecase.NewCreateMsgDelegate(
@@ -726,7 +729,10 @@ func ParseMsgUndelegate(
 	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	amountValue, _ := parserParams.Msg["amount"].(map[string]interface{})
-	amount := tmcosmosutils.MustNewCoinFromAmountInterface(amountValue)
+	amount, amountErr := tmcosmosutils.NewCoinFromAmountInterface(amountValue)
+	if amountErr != nil {
+		amount = coin.Coin{}
+	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
 		return []command.Command{command_usecase.NewCreateMsgUndelegate(
@@ -788,7 +794,10 @@ func ParseMsgBeginRedelegate(
 	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	amountValue, _ := parserParams.Msg["amount"].(map[string]interface{})
-	amount := tmcosmosutils.MustNewCoinFromAmountInterface(amountValue)
+	amount, amountErr := tmcosmosutils.NewCoinFromAmountInterface(amountValue)
+	if amountErr != nil {
+		amount = coin.Coin{}
+	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
 		return []command.Command{command_usecase.NewCreateMsgBeginRedelegate(
@@ -851,7 +860,10 @@ func parseGenesisGenTxsMsgCreateValidator(
 	msg map[string]interface{},
 ) []command.Command {
 	amountValue, _ := msg["value"].(map[string]interface{})
-	amount := tmcosmosutils.MustNewCoinFromAmountInterface(amountValue)
+	amount, amountErr := tmcosmosutils.NewCoinFromAmountInterface(amountValue)
+	if amountErr != nil {
+		amount = coin.Coin{}
+	}
 	tendermintPubkey, _ := msg["pubkey"].(map[string]interface{})
 	description := model.ValidatorDescription{
 		Moniker:         "",
@@ -905,7 +917,10 @@ func ParseMsgCreateValidator(
 	parserParams utils.CosmosParserParams,
 ) []command.Command {
 	amountValue, _ := parserParams.Msg["value"].(map[string]interface{})
-	amount := tmcosmosutils.MustNewCoinFromAmountInterface(amountValue)
+	amount, amountErr := tmcosmosutils.NewCoinFromAmountInterface(amountValue)
+	if amountErr != nil {
+		amount = coin.Coin{}
+	}
 	tendermintPubkey, _ := parserParams.Msg["pubkey"].(map[string]interface{})
 	description := model.ValidatorDescription{
 		Moniker:         "",
