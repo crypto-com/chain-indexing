@@ -204,6 +204,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 
 	commands, err := parser.ParseBlockToCommands(
 		manager.parserManager,
+		manager.logger,
 		manager.txDecoder,
 		block,
 		rawBlock,

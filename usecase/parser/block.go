@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
@@ -12,6 +13,7 @@ import (
 
 func ParseBlockToCommands(
 	parserManager *utils.CosmosParserManager,
+	logger applogger.Logger,
 	txDecoder *utils.TxDecoder,
 	block *usecase_model.Block,
 	rawBlock *usecase_model.RawBlock,
@@ -24,7 +26,7 @@ func ParseBlockToCommands(
 			panic(fmt.Sprintf("panic when parsing block at height %d: %v", block.Height, r))
 		}
 	}()
-
+	
 	var err error
 	var commands []entity_command.Command
 
@@ -43,6 +45,7 @@ func ParseBlockToCommands(
 
 		msgCommands, parseErr := ParseBlockTxsMsgToCommands(
 			parserManager,
+			logger,
 			txDecoder,
 			block,
 			blockResults,
