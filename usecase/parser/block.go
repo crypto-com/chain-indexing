@@ -26,7 +26,7 @@ func ParseBlockToCommands(
 			panic(fmt.Sprintf("panic when parsing block at height %d: %v", block.Height, r))
 		}
 	}()
-	
+
 	var err error
 	var commands []entity_command.Command
 
