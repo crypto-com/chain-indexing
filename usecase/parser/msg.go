@@ -326,7 +326,6 @@ func ParseMsgSubmitProposal(
 	} else if proposalContent.Type == "/cosmos.gov.v1beta1.TextProposal" {
 		cmds = parseMsgSubmitTextProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 		} else {
-		// FIXME: https://github.com/crypto-com/chain-indexing/issues/707
 		parserParams.Logger.Errorf("unrecognzied govenance proposal type `%s`", proposalContent.Type)
 	}
 
