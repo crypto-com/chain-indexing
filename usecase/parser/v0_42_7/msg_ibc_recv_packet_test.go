@@ -87,8 +87,11 @@ var _ = Describe("ParseMsgCommands", func() {
 			pm := usecase_parser_test.InitParserManager()
 			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_42_7_ibcmsg.ParseMsgRecvPacket)
 
+			logger := test.NewFakeLogger()
+			
 			cmds, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
+				logger,
 				txDecoder,
 				block,
 				blockResults,
@@ -171,10 +174,13 @@ var _ = Describe("ParseMsgCommands", func() {
 			stakingDenom := "basecro"
 
 			pm := usecase_parser_test.InitParserManager()
-			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_42_7_ibcmsg.ParseMsgRecvPacket)
+			logger := test.NewFakeLogger()			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_42_7_ibcmsg.ParseMsgRecvPacket)
 
+			logger := test.NewFakeLogger()
+			
 			cmds, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
+				logger,
 				txDecoder,
 				block,
 				blockResults,
@@ -263,10 +269,13 @@ var _ = Describe("ParseMsgCommands", func() {
 			stakingDenom := "basecro"
 
 			pm := usecase_parser_test.InitParserManager()
-			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_42_7_ibcmsg.ParseMsgRecvPacket)
+			logger := test.NewFakeLogger()			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_42_7_ibcmsg.ParseMsgRecvPacket)
 
+			logger := test.NewFakeLogger()
+			
 			cmds, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
+				logger,
 				txDecoder,
 				block,
 				blockResults,
