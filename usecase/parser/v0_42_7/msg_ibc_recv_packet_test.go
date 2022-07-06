@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/crypto-com/chain-indexing/external/json"
+	"github.com/crypto-com/chain-indexing/external/logger/test"
 	V0_42_7_ibcmsg "github.com/crypto-com/chain-indexing/usecase/parser/v0_42_7/ibcmsg"
 
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
@@ -174,8 +175,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			stakingDenom := "basecro"
 
 			pm := usecase_parser_test.InitParserManager()
-			logger := test.NewFakeLogger()			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_42_7_ibcmsg.ParseMsgRecvPacket)
-
+			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_42_7_ibcmsg.ParseMsgRecvPacket)
 			logger := test.NewFakeLogger()
 			
 			cmds, err := parser.ParseBlockTxsMsgToCommands(
@@ -269,8 +269,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			stakingDenom := "basecro"
 
 			pm := usecase_parser_test.InitParserManager()
-			logger := test.NewFakeLogger()			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_42_7_ibcmsg.ParseMsgRecvPacket)
-
+			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_42_7_ibcmsg.ParseMsgRecvPacket)
 			logger := test.NewFakeLogger()
 			
 			cmds, err := parser.ParseBlockTxsMsgToCommands(
