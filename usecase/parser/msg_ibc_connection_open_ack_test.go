@@ -143,7 +143,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			cmds, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-                logger,
+				logger,
 				txDecoder,
 				block,
 				blockResults,
