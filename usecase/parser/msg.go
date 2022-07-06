@@ -139,7 +139,7 @@ func ParseBlockTxsMsgToCommands(
 					Msg:             msg,
 					MsgIndex:        msgIndex,
 					ParserManager:   parserManager,
-					Logger: 		 logger,
+					Logger:          logger,
 				})
 			}
 
@@ -325,7 +325,7 @@ func ParseMsgSubmitProposal(
 		cmds = parseMsgSubmitCancelSoftwareUpgradeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.gov.v1beta1.TextProposal" {
 		cmds = parseMsgSubmitTextProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
-		} else {
+	} else {
 		parserParams.Logger.Errorf("unrecognzied govenance proposal type `%s`", proposalContent.Type)
 	}
 
