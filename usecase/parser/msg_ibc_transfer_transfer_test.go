@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/crypto-com/chain-indexing/external/json"
-	"github.com/crypto-com/chain-indexing/external/logger/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -69,11 +68,10 @@ var _ = Describe("ParseMsgCommands", func() {
 			stakingDenom := "basecro"
 
 			pm := usecase_parser_test.InitParserManager()
-			logger := test.NewFakeLogger()
 
 			cmds, _, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				logger,
+
 				txDecoder,
 				block,
 				blockResults,
@@ -151,11 +149,10 @@ var _ = Describe("ParseMsgCommands", func() {
 			stakingDenom := "basecro"
 
 			pm := usecase_parser_test.InitParserManager()
-			logger := test.NewFakeLogger()
 
 			cmds, _, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				logger,
+
 				txDecoder,
 				block,
 				blockResults,

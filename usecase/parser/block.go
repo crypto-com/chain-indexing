@@ -3,7 +3,6 @@ package parser
 import (
 	"fmt"
 
-	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
@@ -13,7 +12,6 @@ import (
 
 func ParseBlockToCommands(
 	parserManager *utils.CosmosParserManager,
-	logger applogger.Logger,
 	txDecoder *utils.TxDecoder,
 	block *usecase_model.Block,
 	rawBlock *usecase_model.RawBlock,
@@ -39,7 +37,6 @@ func ParseBlockToCommands(
 	if len(blockResults.TxsResults) > 0 {
 		msgCommands, address, parseErr := ParseBlockTxsMsgToCommands(
 			parserManager,
-			logger,
 			txDecoder,
 			block,
 			blockResults,

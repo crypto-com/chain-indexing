@@ -5,7 +5,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
-	"github.com/crypto-com/chain-indexing/external/logger/test"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -26,11 +25,10 @@ var _ = Describe("ParseMsgCommands", func() {
 			bondingDenom := "basecro"
 
 			pm := usecase_parser_test.InitParserManager()
-			logger := test.NewFakeLogger()
 
 			cmds, _, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				logger,
+
 				txDecoder,
 				block,
 				blockResults,
