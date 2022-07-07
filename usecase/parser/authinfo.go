@@ -26,9 +26,7 @@ func ParseSignerInfosToTransactionSigners(
 			return nil, fmt.Errorf("error parsing account sequence: %v", parseErr)
 		}
 		if signer.ModeInfo.MaybeSingle != nil {
-			if signer.MaybePublicKey != nil {
-				// if signer.MaybePublicKey == nil {
-				// FIXME: extract signer address from message: https://github.com/crypto-com/chain-indexing/issues/685
+			if signer.MaybePublicKey == nil {
 				address = msgAddress
 			} else {
 				transactionSignerInfo = &model.TransactionSignerKeyInfo{
