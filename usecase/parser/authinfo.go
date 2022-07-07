@@ -13,6 +13,7 @@ import (
 func ParseSignerInfosToTransactionSigners(
 	signerInfos []utils.SignerInfo,
 	accountAddressPrefix string,
+	msgAddress string,
 ) ([]model.TransactionSigner, error) {
 	var signers []model.TransactionSigner
 
@@ -25,9 +26,10 @@ func ParseSignerInfosToTransactionSigners(
 			return nil, fmt.Errorf("error parsing account sequence: %v", parseErr)
 		}
 		if signer.ModeInfo.MaybeSingle != nil {
-			if signer.MaybePublicKey == nil {
+			if signer.MaybePublicKey != nil {
+				// if signer.MaybePublicKey == nil {
 				// FIXME: extract signer address from message: https://github.com/crypto-com/chain-indexing/issues/685
-				address = ""
+				address = msgAddress
 			} else {
 				transactionSignerInfo = &model.TransactionSignerKeyInfo{
 					Type:       signer.MaybePublicKey.Type,

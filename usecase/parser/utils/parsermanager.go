@@ -36,7 +36,7 @@ type CosmosParserManagerParams struct {
 
 type CosmosParser func(
 	CosmosParserParams,
-) []command.Command
+) ([]command.Command, string)
 
 type CosmosParserParams struct {
 	AddressPrefix   string

@@ -37,13 +37,7 @@ func ParseBlockToCommands(
 	commands = append(commands, createBlockCommand)
 
 	if len(blockResults.TxsResults) > 0 {
-		transactionCommands, parseErr := ParseTransactionCommands(txDecoder, block, blockResults, accountAddressPrefix)
-		if parseErr != nil {
-			return nil, fmt.Errorf("error parsing transaction commands: %v", parseErr)
-		}
-		commands = append(commands, transactionCommands...)
-
-		msgCommands, parseErr := ParseBlockTxsMsgToCommands(
+		msgCommands, address, parseErr := ParseBlockTxsMsgToCommands(
 			parserManager,
 			logger,
 			txDecoder,
@@ -55,6 +49,12 @@ func ParseBlockToCommands(
 		if parseErr != nil {
 			return nil, fmt.Errorf("error parsing message commands: %v", parseErr)
 		}
+
+		transactionCommands, parseErr := ParseTransactionCommands(txDecoder, block, blockResults, accountAddressPrefix, address)
+		if parseErr != nil {
+			return nil, fmt.Errorf("error parsing transaction commands: %v", parseErr)
+		}
+		commands = append(commands, transactionCommands...)
 		commands = append(commands, msgCommands...)
 
 		txsAccountTransferCommands, parseErr := ParseTxAccountTransferCommands(

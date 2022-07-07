@@ -19,7 +19,7 @@ import (
 
 func ParseMsgRecvPacket(
 	parserParams utils.CosmosParserParams,
-) []command.Command {
+) ([]command.Command, string) {
 	var rawMsg ibc_model.RawMsgRecvPacket
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -41,7 +41,7 @@ func ParseMsgRecvPacket(
 
 	if !ibcmsg.IsPacketMsgTransfer(rawMsg.Packet) {
 		// unsupported application
-		return []command.Command{}
+		return []command.Command{}, ""
 	}
 
 	// Transfer application, MsgTransfer
@@ -65,7 +65,7 @@ func ParseMsgRecvPacket(
 			parserParams.MsgCommonParams,
 
 			msgRecvPacketParams,
-		)}
+		)}, msgRecvPacketParams.Signer
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -97,7 +97,7 @@ func ParseMsgRecvPacket(
 			parserParams.MsgCommonParams,
 
 			msgAlreadyRelayedRecvPacketParams,
-		)}
+		)}, msgAlreadyRelayedRecvPacketParams.Signer
 	}
 
 	var maybeDenominationTrace *ibc_model.MsgRecvPacketFungibleTokenDenominationTrace
@@ -137,5 +137,5 @@ func ParseMsgRecvPacket(
 		parserParams.MsgCommonParams,
 
 		msgRecvPacketParams,
-	)}
+	)}, msgRecvPacketParams.Signer
 }

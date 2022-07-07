@@ -69,8 +69,8 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 			logger := test.NewFakeLogger()
-			
-			cmds, err := parser.ParseBlockTxsMsgToCommands(
+
+			cmds, _, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				logger,
 				txDecoder,
@@ -160,7 +160,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			pm := usecase_parser_test.InitParserManager()
 			logger := test.NewFakeLogger()
 
-			cmds, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, _, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				logger,
 				txDecoder,
