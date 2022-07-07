@@ -39,6 +39,7 @@ var _ = Describe("TransactionParser", func() {
 				block,
 				blockResults,
 				anyAccountAddressPrefix,
+				"",
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
@@ -98,6 +99,7 @@ var _ = Describe("TransactionParser", func() {
 				block,
 				blockResults,
 				anyAccountAddressPrefix,
+				"",
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
@@ -146,6 +148,7 @@ var _ = Describe("TransactionParser", func() {
 				block,
 				blockResults,
 				anyAccountAddressPrefix,
+				"",
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
@@ -193,6 +196,7 @@ var _ = Describe("TransactionParser", func() {
 				block,
 				blockResults,
 				anyAccountAddressPrefix,
+				"",
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
@@ -240,6 +244,7 @@ var _ = Describe("TransactionParser", func() {
 				block,
 				blockResults,
 				anyAccountAddressPrefix,
+				"",
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
@@ -287,6 +292,7 @@ var _ = Describe("TransactionParser", func() {
 				block,
 				blockResults,
 				anyAccountAddressPrefix,
+				"",
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
@@ -334,6 +340,7 @@ var _ = Describe("TransactionParser", func() {
 				block,
 				blockResults,
 				anyAccountAddressPrefix,
+				"",
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(3))
