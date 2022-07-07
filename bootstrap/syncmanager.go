@@ -105,8 +105,7 @@ func NewSyncManager(
 
 		eventHandler: eventHandler,
 
-		parserManager: pm,
-	}
+		parserManager: pm}
 }
 
 // SyncBlocks makes request to tendermint, create and dispatch notifications

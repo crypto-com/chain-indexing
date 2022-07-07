@@ -32,7 +32,6 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			cmds, _, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-
 				txDecoder,
 				block,
 				blockResults,
@@ -83,7 +82,6 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			cmds, _, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-
 				txDecoder,
 				block,
 				blockResults,

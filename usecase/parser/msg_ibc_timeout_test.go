@@ -83,7 +83,6 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			cmds, _, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-
 				txDecoder,
 				block,
 				blockResults,
@@ -175,8 +174,7 @@ var _ = Describe("ParseMsgCommands", func() {
 		pm := usecase_parser_test.InitParserManager()
 
 		cmds, _, err := parser.ParseBlockTxsMsgToCommands(
-			pm,
-			txDecoder,
+			pm, txDecoder,
 			block,
 			blockResults,
 			accountAddressPrefix,
