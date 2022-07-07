@@ -1192,7 +1192,7 @@ func parseRawMsgStackGrant(
 		msgCommonParams,
 
 		params,
-	)}, params.MaybeSendGrant.Granter
+	)}, params.MaybeStakeGrant.Granter
 }
 
 func parseRawMsgGenericGrant(
