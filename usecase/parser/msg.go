@@ -56,7 +56,7 @@ func ParseBlockTxsMsgToCommands(
 			}
 
 			var msgCommands []command.Command
-			var msgAddress string
+			var possibleSignerAddress string
 
 			msgType := msg["@type"]
 			switch msgType {
@@ -132,7 +132,7 @@ func ParseBlockTxsMsgToCommands(
 				"/cosmos.vesting.v1beta1.MsgCreateVestingAccount":
 				parser := parserManager.GetParser(utils.CosmosParserKey(msgType.(string)), utils.ParserBlockHeight(blockHeight))
 
-				msgCommands, msgAddress = parser(utils.CosmosParserParams{
+				msgCommands, possibleSignerAddress = parser(utils.CosmosParserParams{
 					AddressPrefix:   accountAddressPrefix,
 					StakingDenom:    stakingDenom,
 					TxsResult:       txsResult,
@@ -142,7 +142,7 @@ func ParseBlockTxsMsgToCommands(
 					ParserManager:   parserManager,
 				})
 			}
-			address = msgAddress
+			address = possibleSignerAddress
 			commands = append(commands, msgCommands...)
 		}
 	}
@@ -193,7 +193,7 @@ func ParseMsgMultiSend(
 			Inputs:  inputs,
 			Outputs: outputs,
 		},
-	)}, "" // ???
+	)}, ""
 }
 
 func ParseMsgSetWithdrawAddress(
@@ -1037,7 +1037,7 @@ func ParseMsgNFTMintNFT(
 			Sender:    parserParams.Msg["sender"].(string),
 			Recipient: parserParams.Msg["recipient"].(string),
 		},
-	)}, parserParams.Msg["recipient"].(string) //??
+	)}, parserParams.Msg["recipient"].(string)
 }
 
 func ParseMsgNFTTransferNFT(
@@ -1362,7 +1362,7 @@ func parseMsgExecInnerMsgs(
 
 		parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(innerMsgType), utils.ParserBlockHeight(blockHeight))
 
-		msgCommands, msgAddress := parser(utils.CosmosParserParams{
+		msgCommands, possibleSignerAddress := parser(utils.CosmosParserParams{
 			AddressPrefix:   parserParams.AddressPrefix,
 			StakingDenom:    parserParams.StakingDenom,
 			TxsResult:       parserParams.TxsResult,
@@ -1371,7 +1371,7 @@ func parseMsgExecInnerMsgs(
 			MsgIndex:        parserParams.MsgIndex,
 			ParserManager:   parserParams.ParserManager,
 		})
-		address = msgAddress
+		address = possibleSignerAddress
 		commands = append(commands, msgCommands...)
 	}
 

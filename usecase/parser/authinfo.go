@@ -13,7 +13,7 @@ import (
 func ParseSignerInfosToTransactionSigners(
 	signerInfos []utils.SignerInfo,
 	accountAddressPrefix string,
-	msgAddress string,
+	possibleSignerAddress string,
 ) ([]model.TransactionSigner, error) {
 	var signers []model.TransactionSigner
 
@@ -27,7 +27,7 @@ func ParseSignerInfosToTransactionSigners(
 		}
 		if signer.ModeInfo.MaybeSingle != nil {
 			if signer.MaybePublicKey == nil {
-				address = msgAddress
+				address = possibleSignerAddress
 			} else {
 				transactionSignerInfo = &model.TransactionSignerKeyInfo{
 					Type:       signer.MaybePublicKey.Type,
