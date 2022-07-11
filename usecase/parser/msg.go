@@ -168,14 +168,12 @@ func ParseMsgMultiSend(
 ) ([]command.Command, string) {
 	rawInputs, _ := parserParams.Msg["inputs"].([]interface{})
 	inputs := make([]model.MsgMultiSendInput, 0, len(rawInputs))
-	address := ""
 	for _, rawInput := range rawInputs {
 		input, _ := rawInput.(map[string]interface{})
 		inputs = append(inputs, model.MsgMultiSendInput{
 			Address: input["address"].(string),
 			Amount:  tmcosmosutils.MustNewCoinsFromAmountInterface(input["coins"].([]interface{})),
 		})
-		address = input["address"].(string)
 	}
 
 	rawOutputs, _ := parserParams.Msg["outputs"].([]interface{})
@@ -195,7 +193,7 @@ func ParseMsgMultiSend(
 			Inputs:  inputs,
 			Outputs: outputs,
 		},
-	)}, address
+	)}, ""
 }
 
 func ParseMsgSetWithdrawAddress(
