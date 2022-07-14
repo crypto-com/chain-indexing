@@ -29,9 +29,9 @@ func ParseBlockTxsMsgToCommands(
 	blockResults *model.BlockResults,
 	accountAddressPrefix string,
 	stakingDenom string,
-) ([]command.Command, string, error) {
+) ([]command.Command, []string, error) {
 	commands := make([]command.Command, 0)
-	var address string
+	var address []string
 
 	blockHeight := block.Height
 	for i, txHex := range block.Txs {
@@ -56,7 +56,7 @@ func ParseBlockTxsMsgToCommands(
 			}
 
 			var msgCommands []command.Command
-			var possibleSignerAddress string
+			var possibleSignerAddress []string
 
 			msgType := msg["@type"]
 			switch msgType {
@@ -151,7 +151,7 @@ func ParseBlockTxsMsgToCommands(
 
 func ParseMsgSend(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	return []command.Command{command_usecase.NewCreateMsgSend(
 		parserParams.MsgCommonParams,
 
@@ -160,12 +160,12 @@ func ParseMsgSend(
 			ToAddress:   parserParams.Msg["to_address"].(string),
 			Amount:      tmcosmosutils.MustNewCoinsFromAmountInterface(parserParams.Msg["amount"].([]interface{})),
 		},
-	)}, parserParams.Msg["from_address"].(string)
+	)}, []string{parserParams.Msg["from_address"].(string)}
 }
 
 func ParseMsgMultiSend(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	rawInputs, _ := parserParams.Msg["inputs"].([]interface{})
 	inputs := make([]model.MsgMultiSendInput, 0, len(rawInputs))
 	for _, rawInput := range rawInputs {
@@ -193,12 +193,12 @@ func ParseMsgMultiSend(
 			Inputs:  inputs,
 			Outputs: outputs,
 		},
-	)}, ""
+	)}, []string{}
 }
 
 func ParseMsgSetWithdrawAddress(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	return []command.Command{command_usecase.NewCreateMsgSetWithdrawAddress(
 		parserParams.MsgCommonParams,
 
@@ -206,12 +206,12 @@ func ParseMsgSetWithdrawAddress(
 			DelegatorAddress: parserParams.Msg["delegator_address"].(string),
 			WithdrawAddress:  parserParams.Msg["withdraw_address"].(string),
 		},
-	)}, parserParams.Msg["delegator_address"].(string)
+	)}, []string{parserParams.Msg["delegator_address"].(string)}
 }
 
 func ParseMsgWithdrawDelegatorReward(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	if !parserParams.MsgCommonParams.TxSuccess {
 		delegatorAddress, _ := parserParams.Msg["delegator_address"].(string)
 		return []command.Command{command_usecase.NewCreateMsgWithdrawDelegatorReward(
@@ -223,7 +223,7 @@ func ParseMsgWithdrawDelegatorReward(
 				RecipientAddress: delegatorAddress,
 				Amount:           coin.NewEmptyCoins(),
 			},
-		)}, delegatorAddress
+		)}, []string{delegatorAddress}
 	}
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	var recipient string
@@ -247,12 +247,12 @@ func ParseMsgWithdrawDelegatorReward(
 			RecipientAddress: recipient,
 			Amount:           amount,
 		},
-	)}, parserParams.Msg["delegator_address"].(string)
+	)}, []string{parserParams.Msg["delegator_address"].(string)}
 }
 
 func ParseMsgWithdrawValidatorCommission(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	if !parserParams.MsgCommonParams.TxSuccess {
 		return []command.Command{command_usecase.NewCreateMsgWithdrawValidatorCommission(
 			parserParams.MsgCommonParams,
@@ -262,7 +262,7 @@ func ParseMsgWithdrawValidatorCommission(
 				RecipientAddress: "",
 				Amount:           coin.NewEmptyCoins(),
 			},
-		)}, parserParams.Msg["validator_address"].(string)
+		)}, []string{parserParams.Msg["validator_address"].(string)}
 	}
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	var recipient string
@@ -285,12 +285,12 @@ func ParseMsgWithdrawValidatorCommission(
 			RecipientAddress: recipient,
 			Amount:           amount,
 		},
-	)}, parserParams.Msg["validator_address"].(string)
+	)}, []string{parserParams.Msg["validator_address"].(string)}
 }
 
 func ParseMsgFundCommunityPool(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	return []command.Command{command_usecase.NewCreateMsgFundCommunityPool(
 		parserParams.MsgCommonParams,
 
@@ -298,12 +298,12 @@ func ParseMsgFundCommunityPool(
 			Depositor: parserParams.Msg["depositor"].(string),
 			Amount:    tmcosmosutils.MustNewCoinsFromAmountInterface(parserParams.Msg["amount"].([]interface{})),
 		},
-	)}, parserParams.Msg["depositor"].(string)
+	)}, []string{parserParams.Msg["depositor"].(string)}
 }
 
 func ParseMsgSubmitProposal(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	rawContent, err := jsoniter.Marshal(parserParams.Msg["content"])
 	if err != nil {
 		panic(fmt.Sprintf("error encoding proposal content: %v", err))
@@ -314,17 +314,17 @@ func ParseMsgSubmitProposal(
 	}
 
 	var cmds []command.Command
-	var address string
+	var addresses = []string{}
 	if proposalContent.Type == "/cosmos.params.v1beta1.ParameterChangeProposal" {
-		cmds, address = parseMsgSubmitParamChangeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
+		cmds, addresses = parseMsgSubmitParamChangeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal" {
-		cmds, address = parseMsgSubmitCommunityFundSpendProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
+		cmds, addresses = parseMsgSubmitCommunityFundSpendProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal" {
-		cmds, address = parseMsgSubmitSoftwareUpgradeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
+		cmds, addresses = parseMsgSubmitSoftwareUpgradeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal" {
-		cmds, address = parseMsgSubmitCancelSoftwareUpgradeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
+		cmds, addresses = parseMsgSubmitCancelSoftwareUpgradeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.gov.v1beta1.TextProposal" {
-		cmds, address = parseMsgSubmitTextProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
+		cmds, addresses = parseMsgSubmitTextProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 		// FIXME: https://github.com/crypto-com/chain-indexing/issues/707
 		//} else {
 		//	panic(fmt.Sprintf("unrecognzied govenance proposal type `%s`", proposalContent.Type))
@@ -344,7 +344,7 @@ func ParseMsgSubmitProposal(
 		}
 	}
 
-	return cmds, address
+	return cmds, addresses
 }
 
 func parseMsgSubmitParamChangeProposal(
@@ -354,7 +354,7 @@ func parseMsgSubmitParamChangeProposal(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 	rawContent []byte,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var proposalContent model.MsgSubmitParamChangeProposalContent
 	if err := jsoniter.Unmarshal(rawContent, &proposalContent); err != nil {
 		panic("error decoding param change proposal content")
@@ -372,7 +372,7 @@ func parseMsgSubmitParamChangeProposal(
 					msg["initial_deposit"].([]interface{}),
 				),
 			},
-		)}, msg["proposer"].(string)
+		)}, []string{msg["proposer"].(string)}
 	}
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	event := log.GetEventByType("submit_proposal")
@@ -395,7 +395,7 @@ func parseMsgSubmitParamChangeProposal(
 				msg["initial_deposit"].([]interface{}),
 			),
 		},
-	)}, msg["proposer"].(string)
+	)}, []string{msg["proposer"].(string)}
 }
 
 func parseMsgSubmitCommunityFundSpendProposal(
@@ -405,7 +405,7 @@ func parseMsgSubmitCommunityFundSpendProposal(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 	rawContent []byte,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawProposalContent model.RawMsgSubmitCommunityPoolSpendProposalContent
 	if err := jsoniter.Unmarshal(rawContent, &rawProposalContent); err != nil {
 		panic("error decoding community pool spend proposal content")
@@ -430,7 +430,7 @@ func parseMsgSubmitCommunityFundSpendProposal(
 					msg["initial_deposit"].([]interface{}),
 				),
 			},
-		)}, msg["proposer"].(string)
+		)}, []string{msg["proposer"].(string)}
 	}
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
@@ -454,7 +454,7 @@ func parseMsgSubmitCommunityFundSpendProposal(
 				msg["initial_deposit"].([]interface{}),
 			),
 		},
-	)}, msg["proposer"].(string)
+	)}, []string{msg["proposer"].(string)}
 }
 
 func parseMsgSubmitSoftwareUpgradeProposal(
@@ -464,7 +464,7 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 	rawContent []byte,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawProposalContent model.RawMsgSubmitSoftwareUpgradeProposalContent
 	if err := jsoniter.Unmarshal(rawContent, &rawProposalContent); err != nil {
 		panic("error decoding software upgrade proposal content")
@@ -498,7 +498,7 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 					msg["initial_deposit"].([]interface{}),
 				),
 			},
-		)}, msg["proposer"].(string)
+		)}, []string{msg["proposer"].(string)}
 	}
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
@@ -522,7 +522,7 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 				msg["initial_deposit"].([]interface{}),
 			),
 		},
-	)}, msg["proposer"].(string)
+	)}, []string{msg["proposer"].(string)}
 }
 
 func parseMsgSubmitCancelSoftwareUpgradeProposal(
@@ -532,7 +532,7 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 	rawContent []byte,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var proposalContent model.MsgSubmitCancelSoftwareUpgradeProposalContent
 	if err := jsoniter.Unmarshal(rawContent, &proposalContent); err != nil {
 		panic("error decoding software upgrade proposal content")
@@ -550,7 +550,7 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 					msg["initial_deposit"].([]interface{}),
 				),
 			},
-		)}, msg["proposer"].(string)
+		)}, []string{msg["proposer"].(string)}
 	}
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
@@ -574,7 +574,7 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 				msg["initial_deposit"].([]interface{}),
 			),
 		},
-	)}, msg["proposer"].(string)
+	)}, []string{msg["proposer"].(string)}
 }
 
 func parseMsgSubmitTextProposal(
@@ -584,7 +584,7 @@ func parseMsgSubmitTextProposal(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 	rawContent []byte,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var proposalContent model.MsgSubmitTextProposalContent
 	if err := jsoniter.Unmarshal(rawContent, &proposalContent); err != nil {
 		panic("error decoding text proposal content")
@@ -602,7 +602,7 @@ func parseMsgSubmitTextProposal(
 					msg["initial_deposit"].([]interface{}),
 				),
 			},
-		)}, msg["proposer"].(string)
+		)}, []string{msg["proposer"].(string)}
 	}
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
@@ -626,12 +626,12 @@ func parseMsgSubmitTextProposal(
 				msg["initial_deposit"].([]interface{}),
 			),
 		},
-	)}, msg["proposer"].(string)
+	)}, []string{msg["proposer"].(string)}
 }
 
 func ParseMsgVote(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	return []command.Command{command_usecase.NewCreateMsgVote(
 		parserParams.MsgCommonParams,
 
@@ -640,12 +640,12 @@ func ParseMsgVote(
 			Voter:      parserParams.Msg["voter"].(string),
 			Option:     parserParams.Msg["option"].(string),
 		},
-	)}, parserParams.Msg["voter"].(string)
+	)}, []string{parserParams.Msg["voter"].(string)}
 }
 
 func ParseMsgDeposit(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	cmds := []command.Command{command_usecase.NewCreateMsgDeposit(
 		parserParams.MsgCommonParams,
 
@@ -673,12 +673,12 @@ func ParseMsgDeposit(
 		}
 	}
 
-	return cmds, parserParams.Msg["depositor"].(string)
+	return cmds, []string{parserParams.Msg["depositor"].(string)}
 }
 
 func ParseMsgDelegate(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	amountValue, _ := parserParams.Msg["amount"].(map[string]interface{})
 	amount, amountErr := tmcosmosutils.NewCoinFromAmountInterface(amountValue)
 	if amountErr != nil {
@@ -695,7 +695,7 @@ func ParseMsgDelegate(
 				Amount:             amount,
 				AutoClaimedRewards: coin.Coin{},
 			},
-		)}, parserParams.Msg["delegator_address"].(string)
+		)}, []string{parserParams.Msg["delegator_address"].(string)}
 	}
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 
@@ -725,12 +725,12 @@ func ParseMsgDelegate(
 			Amount:             amount,
 			AutoClaimedRewards: autoClaimedRewards,
 		},
-	)}, parserParams.Msg["delegator_address"].(string)
+	)}, []string{parserParams.Msg["delegator_address"].(string)}
 }
 
 func ParseMsgUndelegate(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	amountValue, _ := parserParams.Msg["amount"].(map[string]interface{})
 	amount, amountErr := tmcosmosutils.NewCoinFromAmountInterface(amountValue)
 	if amountErr != nil {
@@ -748,7 +748,7 @@ func ParseMsgUndelegate(
 				Amount:                amount,
 				AutoClaimedRewards:    coin.Coin{},
 			},
-		)}, parserParams.Msg["delegator_address"].(string)
+		)}, []string{parserParams.Msg["delegator_address"].(string)}
 	}
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
@@ -790,12 +790,12 @@ func ParseMsgUndelegate(
 			Amount:                amount,
 			AutoClaimedRewards:    autoClaimedRewards,
 		},
-	)}, parserParams.Msg["delegator_address"].(string)
+	)}, []string{parserParams.Msg["delegator_address"].(string)}
 }
 
 func ParseMsgBeginRedelegate(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	amountValue, _ := parserParams.Msg["amount"].(map[string]interface{})
 	amount, amountErr := tmcosmosutils.NewCoinFromAmountInterface(amountValue)
 	if amountErr != nil {
@@ -813,7 +813,7 @@ func ParseMsgBeginRedelegate(
 				Amount:              amount,
 				AutoClaimedRewards:  coin.Coin{},
 			},
-		)}, parserParams.Msg["delegator_address"].(string)
+		)}, []string{parserParams.Msg["delegator_address"].(string)}
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -844,19 +844,19 @@ func ParseMsgBeginRedelegate(
 			Amount:              amount,
 			AutoClaimedRewards:  autoClaimedRewards,
 		},
-	)}, parserParams.Msg["delegator_address"].(string)
+	)}, []string{parserParams.Msg["delegator_address"].(string)}
 }
 
 func ParseMsgUnjail(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	return []command.Command{command_usecase.NewCreateMsgUnjail(
 		parserParams.MsgCommonParams,
 
 		model.MsgUnjailParams{
 			ValidatorAddr: parserParams.Msg["validator_addr"].(string),
 		},
-	)}, parserParams.Msg["validator_addr"].(string)
+	)}, []string{parserParams.Msg["validator_addr"].(string)}
 }
 
 func parseGenesisGenTxsMsgCreateValidator(
@@ -918,7 +918,7 @@ func parseGenesisGenTxsMsgCreateValidator(
 
 func ParseMsgCreateValidator(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	amountValue, _ := parserParams.Msg["value"].(map[string]interface{})
 	amount, amountErr := tmcosmosutils.NewCoinFromAmountInterface(amountValue)
 	if amountErr != nil {
@@ -968,12 +968,12 @@ func ParseMsgCreateValidator(
 			TendermintPubkey:  tendermintPubkey["key"].(string),
 			Amount:            amount,
 		},
-	)}, parserParams.Msg["validator_address"].(string)
+	)}, []string{parserParams.Msg["validator_address"].(string)}
 }
 
 func ParseMsgEditValidator(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var description model.ValidatorDescription
 	if descriptionJSON, ok := parserParams.Msg["description"].(map[string]interface{}); ok {
 		description = model.ValidatorDescription{
@@ -1004,12 +1004,12 @@ func ParseMsgEditValidator(
 			MaybeCommissionRate:    maybeCommissionRate,
 			MaybeMinSelfDelegation: maybeMinSelfDelegation,
 		},
-	)}, parserParams.Msg["validator_address"].(string)
+	)}, []string{parserParams.Msg["validator_address"].(string)}
 }
 
 func ParseMsgNFTIssueDenom(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	return []command.Command{command_usecase.NewCreateMsgNFTIssueDenom(
 		parserParams.MsgCommonParams,
 
@@ -1019,12 +1019,12 @@ func ParseMsgNFTIssueDenom(
 			Schema:    parserParams.Msg["schema"].(string),
 			Sender:    parserParams.Msg["sender"].(string),
 		},
-	)}, parserParams.Msg["sender"].(string)
+	)}, []string{parserParams.Msg["sender"].(string)}
 }
 
 func ParseMsgNFTMintNFT(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	return []command.Command{command_usecase.NewCreateMsgNFTMintNFT(
 		parserParams.MsgCommonParams,
 
@@ -1037,12 +1037,12 @@ func ParseMsgNFTMintNFT(
 			Sender:    parserParams.Msg["sender"].(string),
 			Recipient: parserParams.Msg["recipient"].(string),
 		},
-	)}, parserParams.Msg["recipient"].(string)
+	)}, []string{parserParams.Msg["recipient"].(string)}
 }
 
 func ParseMsgNFTTransferNFT(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	return []command.Command{command_usecase.NewCreateMsgNFTTransferNFT(
 		parserParams.MsgCommonParams,
 
@@ -1052,12 +1052,12 @@ func ParseMsgNFTTransferNFT(
 			Sender:    parserParams.Msg["sender"].(string),
 			Recipient: parserParams.Msg["recipient"].(string),
 		},
-	)}, parserParams.Msg["sender"].(string)
+	)}, []string{parserParams.Msg["sender"].(string)}
 }
 
 func ParseMsgNFTEditNFT(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	return []command.Command{command_usecase.NewCreateMsgNFTEditNFT(
 		parserParams.MsgCommonParams,
 
@@ -1069,12 +1069,12 @@ func ParseMsgNFTEditNFT(
 			Data:      parserParams.Msg["data"].(string),
 			Sender:    parserParams.Msg["sender"].(string),
 		},
-	)}, parserParams.Msg["sender"].(string)
+	)}, []string{parserParams.Msg["sender"].(string)}
 }
 
 func ParseMsgNFTBurnNFT(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	return []command.Command{command_usecase.NewCreateMsgNFTBurnNFT(
 		parserParams.MsgCommonParams,
 
@@ -1083,12 +1083,12 @@ func ParseMsgNFTBurnNFT(
 			TokenId: parserParams.Msg["id"].(string),
 			Sender:  parserParams.Msg["sender"].(string),
 		},
-	)}, parserParams.Msg["sender"].(string)
+	)}, []string{parserParams.Msg["sender"].(string)}
 }
 
 func ParseMsgGrant(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	authType := parserParams.Msg["grant"].(map[string]interface{})["authorization"].(map[string]interface{})["@type"]
 
 	switch authType {
@@ -1099,14 +1099,14 @@ func ParseMsgGrant(
 	case "/cosmos.authz.v1beta1.GenericAuthorization":
 		return parseRawMsgGenericGrant(parserParams.MsgCommonParams, parserParams.Msg)
 	default:
-		return []command.Command{}, ""
+		return []command.Command{}, []string{}
 	}
 }
 
 func parseRawMsgSendGrant(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg model.RawMsgSendGrant
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -1135,7 +1135,7 @@ func parseRawMsgSendGrant(
 			msgCommonParams,
 
 			params,
-		)}, params.MaybeSendGrant.Granter
+		)}, []string{params.MaybeSendGrant.Granter}
 	}
 
 	params := model.MsgGrantParams{
@@ -1146,13 +1146,13 @@ func parseRawMsgSendGrant(
 		msgCommonParams,
 
 		params,
-	)}, params.MaybeSendGrant.Granter
+	)}, []string{params.MaybeSendGrant.Granter}
 }
 
 func parseRawMsgStackGrant(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg model.RawMsgStakeGrant
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -1181,7 +1181,7 @@ func parseRawMsgStackGrant(
 			msgCommonParams,
 
 			params,
-		)}, params.MaybeSendGrant.Granter
+		)}, []string{params.MaybeSendGrant.Granter}
 	}
 
 	params := model.MsgGrantParams{
@@ -1192,13 +1192,13 @@ func parseRawMsgStackGrant(
 		msgCommonParams,
 
 		params,
-	)}, params.MaybeStakeGrant.Granter
+	)}, []string{params.MaybeStakeGrant.Granter}
 }
 
 func parseRawMsgGenericGrant(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg model.RawMsgGenericGrant
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -1227,7 +1227,7 @@ func parseRawMsgGenericGrant(
 			msgCommonParams,
 
 			params,
-		)}, params.MaybeSendGrant.Granter
+		)}, []string{params.MaybeSendGrant.Granter}
 	}
 
 	params := model.MsgGrantParams{
@@ -1238,12 +1238,12 @@ func parseRawMsgGenericGrant(
 		msgCommonParams,
 
 		params,
-	)}, params.MaybeSendGrant.Granter
+	)}, []string{params.MaybeSendGrant.Granter}
 }
 
 func ParseMsgRevoke(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg model.RawMsgRevoke
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -1272,7 +1272,7 @@ func ParseMsgRevoke(
 			parserParams.MsgCommonParams,
 
 			revokeParams,
-		)}, revokeParams.Granter
+		)}, []string{revokeParams.Granter}
 	}
 
 	revokeParams := model.MsgRevokeParams{
@@ -1283,12 +1283,12 @@ func ParseMsgRevoke(
 		parserParams.MsgCommonParams,
 
 		revokeParams,
-	)}, revokeParams.Granter
+	)}, []string{revokeParams.Granter}
 }
 
 func ParseMsgExec(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg model.RawMsgExec
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -1337,10 +1337,10 @@ func ParseMsgExec(
 
 func parseMsgExecInnerMsgs(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 
 	var commands []command.Command
-	var address string
+	var address []string
 
 	blockHeight := parserParams.MsgCommonParams.BlockHeight
 
@@ -1380,7 +1380,7 @@ func parseMsgExecInnerMsgs(
 
 func ParseMsgGrantAllowance(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	allowanceType := parserParams.Msg["allowance"].(map[string]interface{})["@type"]
 
 	switch allowanceType {
@@ -1391,14 +1391,14 @@ func ParseMsgGrantAllowance(
 	case "/cosmos.feegrant.v1beta1.AllowedMsgAllowance":
 		return parseRawMsgGrantAllowedMsgAllowance(parserParams.MsgCommonParams, parserParams.Msg)
 	default:
-		return []command.Command{}, ""
+		return []command.Command{}, []string{}
 	}
 }
 
 func parseRawMsgGrantBasicAllowance(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg model.RawMsgGrantBasicAllowance
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -1427,7 +1427,7 @@ func parseRawMsgGrantBasicAllowance(
 			msgCommonParams,
 
 			params,
-		)}, params.MaybeBasicAllowance.Granter
+		)}, []string{params.MaybeBasicAllowance.Granter}
 	}
 
 	params := model.MsgGrantAllowanceParams{
@@ -1438,13 +1438,13 @@ func parseRawMsgGrantBasicAllowance(
 		msgCommonParams,
 
 		params,
-	)}, params.MaybeBasicAllowance.Granter
+	)}, []string{params.MaybeBasicAllowance.Granter}
 }
 
 func parseRawMsgGrantPeriodicAllowance(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg model.RawMsgGrantPeriodicAllowance
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -1473,7 +1473,7 @@ func parseRawMsgGrantPeriodicAllowance(
 			msgCommonParams,
 
 			params,
-		)}, params.MaybeBasicAllowance.Granter
+		)}, []string{params.MaybeBasicAllowance.Granter}
 	}
 
 	params := model.MsgGrantAllowanceParams{
@@ -1484,13 +1484,13 @@ func parseRawMsgGrantPeriodicAllowance(
 		msgCommonParams,
 
 		params,
-	)}, params.MaybeBasicAllowance.Granter
+	)}, []string{params.MaybeBasicAllowance.Granter}
 }
 
 func parseRawMsgGrantAllowedMsgAllowance(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg model.RawMsgGrantAllowedMsgAllowance
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -1519,7 +1519,7 @@ func parseRawMsgGrantAllowedMsgAllowance(
 			msgCommonParams,
 
 			params,
-		)}, params.MaybeBasicAllowance.Granter
+		)}, []string{params.MaybeBasicAllowance.Granter}
 	}
 
 	params := model.MsgGrantAllowanceParams{
@@ -1530,12 +1530,12 @@ func parseRawMsgGrantAllowedMsgAllowance(
 		msgCommonParams,
 
 		params,
-	)}, params.MaybeBasicAllowance.Granter
+	)}, []string{params.MaybeBasicAllowance.Granter}
 }
 
 func ParseMsgRevokeAllowance(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg model.RawMsgRevokeAllowance
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -1564,7 +1564,7 @@ func ParseMsgRevokeAllowance(
 			parserParams.MsgCommonParams,
 
 			revokeAllowanceParams,
-		)}, revokeAllowanceParams.Granter
+		)}, []string{revokeAllowanceParams.Granter}
 	}
 
 	revokeAllowanceParams := model.MsgRevokeAllowanceParams{
@@ -1575,12 +1575,12 @@ func ParseMsgRevokeAllowance(
 		parserParams.MsgCommonParams,
 
 		revokeAllowanceParams,
-	)}, revokeAllowanceParams.Granter
+	)}, []string{revokeAllowanceParams.Granter}
 }
 
 func ParseMsgCreateVestingAccount(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg model.RawMsgCreateVestingAccount
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -1609,7 +1609,7 @@ func ParseMsgCreateVestingAccount(
 			parserParams.MsgCommonParams,
 
 			msgCreateVestingAccountParams,
-		)}, msgCreateVestingAccountParams.FromAddress
+		)}, []string{msgCreateVestingAccountParams.FromAddress}
 	}
 
 	msgCreateVestingAccountParams := model.MsgCreateVestingAccountParams{
@@ -1620,5 +1620,5 @@ func ParseMsgCreateVestingAccount(
 		parserParams.MsgCommonParams,
 
 		msgCreateVestingAccountParams,
-	)}, msgCreateVestingAccountParams.FromAddress
+	)}, []string{msgCreateVestingAccountParams.FromAddress}
 }

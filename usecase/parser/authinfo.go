@@ -13,11 +13,11 @@ import (
 func ParseSignerInfosToTransactionSigners(
 	signerInfos []utils.SignerInfo,
 	accountAddressPrefix string,
-	possibleSignerAddress string,
+	possibleSignerAddress []string,
 ) ([]model.TransactionSigner, error) {
 	var signers []model.TransactionSigner
 
-	for _, signer := range signerInfos {
+	for i, signer := range signerInfos {
 		var transactionSignerInfo *model.TransactionSignerKeyInfo
 		var address string
 
@@ -27,7 +27,7 @@ func ParseSignerInfosToTransactionSigners(
 		}
 		if signer.ModeInfo.MaybeSingle != nil {
 			if signer.MaybePublicKey == nil {
-				address = possibleSignerAddress
+				address = possibleSignerAddress[i]
 			} else {
 				transactionSignerInfo = &model.TransactionSignerKeyInfo{
 					Type:       signer.MaybePublicKey.Type,
