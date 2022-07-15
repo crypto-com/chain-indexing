@@ -168,12 +168,14 @@ func ParseMsgMultiSend(
 ) ([]command.Command, []string) {
 	rawInputs, _ := parserParams.Msg["inputs"].([]interface{})
 	inputs := make([]model.MsgMultiSendInput, 0, len(rawInputs))
+	addresses := make([]string, 0, len(rawInputs))
 	for _, rawInput := range rawInputs {
 		input, _ := rawInput.(map[string]interface{})
 		inputs = append(inputs, model.MsgMultiSendInput{
 			Address: input["address"].(string),
 			Amount:  tmcosmosutils.MustNewCoinsFromAmountInterface(input["coins"].([]interface{})),
 		})
+		addresses = append(addresses, input["address"].(string))
 	}
 
 	rawOutputs, _ := parserParams.Msg["outputs"].([]interface{})
@@ -193,7 +195,7 @@ func ParseMsgMultiSend(
 			Inputs:  inputs,
 			Outputs: outputs,
 		},
-	)}, []string{}
+	)}, addresses
 }
 
 func ParseMsgSetWithdrawAddress(
@@ -968,7 +970,7 @@ func ParseMsgCreateValidator(
 			TendermintPubkey:  tendermintPubkey["key"].(string),
 			Amount:            amount,
 		},
-	)}, []string{parserParams.Msg["validator_address"].(string)}
+	)}, []string{parserParams.Msg["delegator_address"].(string), parserParams.Msg["validator_address"].(string)}
 }
 
 func ParseMsgEditValidator(
@@ -1037,7 +1039,7 @@ func ParseMsgNFTMintNFT(
 			Sender:    parserParams.Msg["sender"].(string),
 			Recipient: parserParams.Msg["recipient"].(string),
 		},
-	)}, []string{parserParams.Msg["recipient"].(string)}
+	)}, []string{parserParams.Msg["sender"].(string)}
 }
 
 func ParseMsgNFTTransferNFT(
@@ -1313,26 +1315,26 @@ func ParseMsgExec(
 			RawMsgExec: rawMsg,
 		}
 
-		innerCommands, address := parseMsgExecInnerMsgs(parserParams)
+		innerCommands, _ := parseMsgExecInnerMsgs(parserParams)
 
 		return append([]command.Command{command_usecase.NewCreateMsgExec(
 			parserParams.MsgCommonParams,
 
 			execParams,
-		)}, innerCommands...), address
+		)}, innerCommands...), []string{rawMsg.Grantee}
 	}
 
 	execParams := model.MsgExecParams{
 		RawMsgExec: rawMsg,
 	}
 
-	innerCommands, address := parseMsgExecInnerMsgs(parserParams)
+	innerCommands, _ := parseMsgExecInnerMsgs(parserParams)
 
 	return append([]command.Command{command_usecase.NewCreateMsgExec(
 		parserParams.MsgCommonParams,
 
 		execParams,
-	)}, innerCommands...), address
+	)}, innerCommands...), []string{rawMsg.Grantee}
 }
 
 func parseMsgExecInnerMsgs(

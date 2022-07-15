@@ -356,7 +356,7 @@ var _ = Describe("TransactionParser", func() {
 					Signers: []model.TransactionSigner{
 						{
 							MaybeKeyInfo:    nil,
-							Address:         "",
+							Address:         "cosmos10v888l3d44rh65mjku0m96dgkegnwcxwpm3har",
 							AccountSequence: 35,
 						},
 					},
