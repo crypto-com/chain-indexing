@@ -27,7 +27,11 @@ func ParseSignerInfosToTransactionSigners(
 		}
 		if signer.ModeInfo.MaybeSingle != nil {
 			if signer.MaybePublicKey == nil {
-				address = possibleSignerAddress[i]
+				if len(possibleSignerAddress) != len(signerInfos) {
+					address = ""
+				} else {
+					address = possibleSignerAddress[i]
+				}
 			} else {
 				transactionSignerInfo = &model.TransactionSignerKeyInfo{
 					Type:       signer.MaybePublicKey.Type,

@@ -1315,7 +1315,7 @@ func ParseMsgExec(
 			RawMsgExec: rawMsg,
 		}
 
-		innerCommands, _ := parseMsgExecInnerMsgs(parserParams)
+		innerCommands := parseMsgExecInnerMsgs(parserParams)
 
 		return append([]command.Command{command_usecase.NewCreateMsgExec(
 			parserParams.MsgCommonParams,
@@ -1328,7 +1328,7 @@ func ParseMsgExec(
 		RawMsgExec: rawMsg,
 	}
 
-	innerCommands, _ := parseMsgExecInnerMsgs(parserParams)
+	innerCommands := parseMsgExecInnerMsgs(parserParams)
 
 	return append([]command.Command{command_usecase.NewCreateMsgExec(
 		parserParams.MsgCommonParams,
@@ -1339,10 +1339,9 @@ func ParseMsgExec(
 
 func parseMsgExecInnerMsgs(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, []string) {
+) []command.Command {
 
 	var commands []command.Command
-	var address []string
 
 	blockHeight := parserParams.MsgCommonParams.BlockHeight
 
@@ -1364,7 +1363,7 @@ func parseMsgExecInnerMsgs(
 
 		parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(innerMsgType), utils.ParserBlockHeight(blockHeight))
 
-		msgCommands, possibleSignerAddress := parser(utils.CosmosParserParams{
+		msgCommands, _ := parser(utils.CosmosParserParams{
 			AddressPrefix:   parserParams.AddressPrefix,
 			StakingDenom:    parserParams.StakingDenom,
 			TxsResult:       parserParams.TxsResult,
@@ -1373,11 +1372,10 @@ func parseMsgExecInnerMsgs(
 			MsgIndex:        parserParams.MsgIndex,
 			ParserManager:   parserParams.ParserManager,
 		})
-		address = possibleSignerAddress
 		commands = append(commands, msgCommands...)
 	}
 
-	return commands, address
+	return commands
 }
 
 func ParseMsgGrantAllowance(
