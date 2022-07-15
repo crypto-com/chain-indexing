@@ -27,7 +27,7 @@ const soloMachineHeaderTypeV2 = "/ibc.lightclients.solomachine.v2.Header"
 
 func ParseMsgCreateClient(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	clientStateType := parserParams.Msg["client_state"].(map[string]interface{})["@type"]
 
 	switch clientStateType {
@@ -46,7 +46,7 @@ func ParseMsgCreateClient(
 			parserParams.Msg,
 		)
 	default:
-		return []command.Command{}, ""
+		return []command.Command{}, []string{}
 
 	}
 }
@@ -56,7 +56,7 @@ func parseRawMsgCreateTendermintLightClient(
 	txsResult model.BlockResultsTxsResult,
 	msgIndex int,
 	msg map[string]interface{},
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg ibc_model.RawMsgCreateTendermintLightClient
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding MsgCreateClient: %v", err))
@@ -75,7 +75,7 @@ func parseRawMsgCreateTendermintLightClient(
 			msgCommonParams,
 
 			params,
-		)}, params.Signer
+		)}, []string{params.Signer}
 	}
 
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
@@ -98,7 +98,7 @@ func parseRawMsgCreateTendermintLightClient(
 		msgCommonParams,
 
 		params,
-	)}, params.Signer
+	)}, []string{params.Signer}
 }
 
 func parseRawMsgCreateSoloMachineLightClient(
@@ -106,7 +106,7 @@ func parseRawMsgCreateSoloMachineLightClient(
 	txsResult model.BlockResultsTxsResult,
 	msgIndex int,
 	msg map[string]interface{},
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg ibc_model.RawMsgCreateSoloMachineLightClient
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding MsgCreateClient: %v", err))
@@ -125,7 +125,7 @@ func parseRawMsgCreateSoloMachineLightClient(
 			msgCommonParams,
 
 			params,
-		)}, params.Signer
+		)}, []string{params.Signer}
 	}
 
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
@@ -148,12 +148,12 @@ func parseRawMsgCreateSoloMachineLightClient(
 		msgCommonParams,
 
 		params,
-	)}, params.Signer
+	)}, []string{params.Signer}
 }
 
 func ParseMsgConnectionOpenInit(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMessage ibc_model.RawMsgConnectionOpenInit
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMessage); err != nil {
 		panic(fmt.Errorf("error decoding message: %v", err))
@@ -166,7 +166,7 @@ func ParseMsgConnectionOpenInit(
 			ibc_model.MsgConnectionOpenInitParams{
 				RawMsgConnectionOpenInit: rawMessage,
 			},
-		)}, rawMessage.Signer
+		)}, []string{rawMessage.Signer}
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -184,16 +184,16 @@ func ParseMsgConnectionOpenInit(
 		parserParams.MsgCommonParams,
 
 		msgConnectionOpenInitParams,
-	)}, msgConnectionOpenInitParams.Signer
+	)}, []string{msgConnectionOpenInitParams.Signer}
 }
 
 func ParseMsgConnectionOpenTry(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	clientStateType := parserParams.Msg["client_state"].(map[string]interface{})["@type"]
 	if clientStateType != "/ibc.lightclients.tendermint.v1.ClientState" {
 		// TODO: SoloMachine and Localhost LightClient
-		return []command.Command{}, ""
+		return []command.Command{}, []string{}
 	}
 
 	var rawMsg ibc_model.RawMsgConnectionOpenTryTendermintClient
@@ -211,7 +211,7 @@ func ParseMsgConnectionOpenTry(
 			parserParams.MsgCommonParams,
 
 			msgConnectionOpenTryParams,
-		)}, msgConnectionOpenTryParams.Signer
+		)}, []string{msgConnectionOpenTryParams.Signer}
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -230,16 +230,16 @@ func ParseMsgConnectionOpenTry(
 		parserParams.MsgCommonParams,
 
 		msgConnectionOpenTryParams,
-	)}, msgConnectionOpenTryParams.Signer
+	)}, []string{msgConnectionOpenTryParams.Signer}
 }
 
 func ParseMsgConnectionOpenAck(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	clientStateType := parserParams.Msg["client_state"].(map[string]interface{})["@type"]
 	if clientStateType != "/ibc.lightclients.tendermint.v1.ClientState" {
 		// TODO: SoloMachine and Localhost LightClient
-		return []command.Command{}, ""
+		return []command.Command{}, []string{}
 	}
 
 	var rawMsg ibc_model.RawMsgConnectionOpenAckTendermintClient
@@ -257,7 +257,7 @@ func ParseMsgConnectionOpenAck(
 			parserParams.MsgCommonParams,
 
 			msgConnectionOpenAckParams,
-		)}, msgConnectionOpenAckParams.Signer
+		)}, []string{msgConnectionOpenAckParams.Signer}
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -278,12 +278,12 @@ func ParseMsgConnectionOpenAck(
 		parserParams.MsgCommonParams,
 
 		msgConnectionOpenAckParams,
-	)}, msgConnectionOpenAckParams.Signer
+	)}, []string{msgConnectionOpenAckParams.Signer}
 }
 
 func ParseMsgConnectionOpenConfirm(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg ibc_model.RawMsgConnectionOpenConfirm
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding MsgConnectionOpenConfirm: %v", err))
@@ -296,7 +296,7 @@ func ParseMsgConnectionOpenConfirm(
 			ibc_model.MsgConnectionOpenConfirmParams{
 				RawMsgConnectionOpenConfirm: rawMsg,
 			},
-		)}, rawMsg.Signer
+		)}, []string{rawMsg.Signer}
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -317,12 +317,12 @@ func ParseMsgConnectionOpenConfirm(
 		parserParams.MsgCommonParams,
 
 		msgConnectionOpenConfirmParams,
-	)}, msgConnectionOpenConfirmParams.Signer
+	)}, []string{msgConnectionOpenConfirmParams.Signer}
 }
 
 func ParseMsgChannelOpenInit(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg ibc_model.RawMsgChannelOpenInit
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgChannelOpenInit: %v", err))
@@ -335,7 +335,7 @@ func ParseMsgChannelOpenInit(
 			ibc_model.MsgChannelOpenInitParams{
 				RawMsgChannelOpenInit: rawMsg,
 			},
-		)}, rawMsg.Signer
+		)}, []string{rawMsg.Signer}
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -355,12 +355,12 @@ func ParseMsgChannelOpenInit(
 		parserParams.MsgCommonParams,
 
 		msgChannelOpenInitParams,
-	)}, msgChannelOpenInitParams.Signer
+	)}, []string{msgChannelOpenInitParams.Signer}
 }
 
 func ParseMsgChannelOpenTry(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg ibc_model.RawMsgChannelOpenTry
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgChannelOpenTry: %v", err))
@@ -373,7 +373,7 @@ func ParseMsgChannelOpenTry(
 			ibc_model.MsgChannelOpenTryParams{
 				RawMsgChannelOpenTry: rawMsg,
 			},
-		)}, rawMsg.Signer
+		)}, []string{rawMsg.Signer}
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -393,12 +393,12 @@ func ParseMsgChannelOpenTry(
 		parserParams.MsgCommonParams,
 
 		msgChannelOpenTryParams,
-	)}, msgChannelOpenTryParams.Signer
+	)}, []string{msgChannelOpenTryParams.Signer}
 }
 
 func ParseMsgChannelOpenAck(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg ibc_model.RawMsgChannelOpenAck
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgChannelOpenAck: %v", err))
@@ -411,7 +411,7 @@ func ParseMsgChannelOpenAck(
 			ibc_model.MsgChannelOpenAckParams{
 				RawMsgChannelOpenAck: rawMsg,
 			},
-		)}, rawMsg.Signer
+		)}, []string{rawMsg.Signer}
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -431,12 +431,12 @@ func ParseMsgChannelOpenAck(
 		parserParams.MsgCommonParams,
 
 		msgChannelOpenAckParams,
-	)}, msgChannelOpenAckParams.Signer
+	)}, []string{msgChannelOpenAckParams.Signer}
 }
 
 func ParseMsgChannelOpenConfirm(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg ibc_model.RawMsgChannelOpenConfirm
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgChannelOpenConfirm: %v", err))
@@ -449,7 +449,7 @@ func ParseMsgChannelOpenConfirm(
 			ibc_model.MsgChannelOpenConfirmParams{
 				RawMsgChannelOpenConfirm: rawMsg,
 			},
-		)}, rawMsg.Signer
+		)}, []string{rawMsg.Signer}
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -470,12 +470,12 @@ func ParseMsgChannelOpenConfirm(
 		parserParams.MsgCommonParams,
 
 		msgChannelOpenConfirmParams,
-	)}, msgChannelOpenConfirmParams.Signer
+	)}, []string{msgChannelOpenConfirmParams.Signer}
 }
 
 func ParseMsgUpdateClient(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	headerType := parserParams.Msg["header"].(map[string]interface{})["@type"]
 
 	switch headerType {
@@ -494,7 +494,7 @@ func ParseMsgUpdateClient(
 			parserParams.Msg,
 		)
 	default:
-		return []command.Command{}, ""
+		return []command.Command{}, []string{}
 
 	}
 }
@@ -504,7 +504,7 @@ func parseMsgUpdateTendermintLightClient(
 	txsResult model.BlockResultsTxsResult,
 	msgIndex int,
 	msg map[string]interface{},
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg ibc_model.RawMsgUpdateTendermintLightClient
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding MsgUpdateClient: %v", err))
@@ -524,7 +524,7 @@ func parseMsgUpdateTendermintLightClient(
 			msgCommonParams,
 
 			params,
-		)}, params.Signer
+		)}, []string{params.Signer}
 	}
 
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
@@ -546,7 +546,7 @@ func parseMsgUpdateTendermintLightClient(
 		msgCommonParams,
 
 		params,
-	)}, params.Signer
+	)}, []string{params.Signer}
 }
 
 func parseMsgUpdateSolomachineLightClient(
@@ -554,7 +554,7 @@ func parseMsgUpdateSolomachineLightClient(
 	txsResult model.BlockResultsTxsResult,
 	msgIndex int,
 	msg map[string]interface{},
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg ibc_model.RawMsgUpdateSoloMachineLightClient
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding MsgUpdateClient: %v", err))
@@ -574,7 +574,7 @@ func parseMsgUpdateSolomachineLightClient(
 			msgCommonParams,
 
 			params,
-		)}, params.Signer
+		)}, []string{params.Signer}
 	}
 
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
@@ -596,7 +596,7 @@ func parseMsgUpdateSolomachineLightClient(
 		msgCommonParams,
 
 		params,
-	)}, params.Signer
+	)}, []string{params.Signer}
 }
 
 func mustParseHeight(height string) ibc_model.Height {
@@ -615,7 +615,7 @@ func mustParseHeight(height string) ibc_model.Height {
 
 func ParseMsgTransfer(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg ibc_model.RawMsgTransfer
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgTransfer: %v", err))
@@ -627,7 +627,7 @@ func ParseMsgTransfer(
 			ibc_model.MsgTransferParams{
 				RawMsgTransfer: rawMsg,
 			},
-		)}, rawMsg.Sender
+		)}, []string{rawMsg.Sender}
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -657,12 +657,12 @@ func ParseMsgTransfer(
 		parserParams.MsgCommonParams,
 
 		msgTransferParams,
-	)}, msgTransferParams.Sender
+	)}, []string{msgTransferParams.Sender}
 }
 
 func ParseMsgRecvPacket(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg ibc_model.RawMsgRecvPacket
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgRecvPacket: %v", err))
@@ -670,7 +670,7 @@ func ParseMsgRecvPacket(
 
 	if !IsPacketMsgTransfer(rawMsg.Packet) {
 		// unsupported application
-		return []command.Command{}, ""
+		return []command.Command{}, []string{}
 	}
 
 	// Transfer application, MsgTransfer
@@ -694,7 +694,7 @@ func ParseMsgRecvPacket(
 			parserParams.MsgCommonParams,
 
 			msgRecvPacketParams,
-		)}, msgRecvPacketParams.Signer
+		)}, []string{msgRecvPacketParams.Signer}
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -722,7 +722,7 @@ func ParseMsgRecvPacket(
 			parserParams.MsgCommonParams,
 
 			msgAlreadyRelayedRecvPacketParams,
-		)}, msgAlreadyRelayedRecvPacketParams.Signer
+		)}, []string{msgAlreadyRelayedRecvPacketParams.Signer}
 	}
 
 	var maybeDenominationTrace *ibc_model.MsgRecvPacketFungibleTokenDenominationTrace
@@ -762,12 +762,12 @@ func ParseMsgRecvPacket(
 		parserParams.MsgCommonParams,
 
 		msgRecvPacketParams,
-	)}, msgRecvPacketParams.Signer
+	)}, []string{msgRecvPacketParams.Signer}
 }
 
 func ParseMsgAcknowledgement(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg ibc_model.RawMsgAcknowledgement
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgAcknowledgement: %v", err))
@@ -775,7 +775,7 @@ func ParseMsgAcknowledgement(
 
 	if !IsPacketMsgTransfer(rawMsg.Packet) {
 		// unsupported application
-		return []command.Command{}, ""
+		return []command.Command{}, []string{}
 	}
 
 	// Transfer application, MsgTransfer
@@ -799,7 +799,7 @@ func ParseMsgAcknowledgement(
 			parserParams.MsgCommonParams,
 
 			msgAcknowledgementParams,
-		)}, msgAcknowledgementParams.Signer
+		)}, []string{msgAcknowledgementParams.Signer}
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -829,7 +829,7 @@ func ParseMsgAcknowledgement(
 			parserParams.MsgCommonParams,
 
 			msgAlreadyRelayedAcknowledgementParams,
-		)}, msgAlreadyRelayedAcknowledgementParams.Signer
+		)}, []string{msgAlreadyRelayedAcknowledgementParams.Signer}
 	}
 
 	var success bool
@@ -873,7 +873,7 @@ func ParseMsgAcknowledgement(
 		parserParams.MsgCommonParams,
 
 		msgAcknowledgementParams,
-	)}, msgAcknowledgementParams.Signer
+	)}, []string{msgAcknowledgementParams.Signer}
 }
 
 func IsPacketMsgTransfer(
@@ -897,7 +897,7 @@ func IsPacketMsgTransfer(
 
 func ParseMsgTimeout(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg ibc_model.RawMsgTimeout
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgTimeout: %v", err))
@@ -905,7 +905,7 @@ func ParseMsgTimeout(
 
 	if !IsPacketMsgTransfer(rawMsg.Packet) {
 		// unsupported application
-		return []command.Command{}, ""
+		return []command.Command{}, []string{}
 	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
@@ -920,7 +920,7 @@ func ParseMsgTimeout(
 			parserParams.MsgCommonParams,
 
 			msgTimeoutParams,
-		)}, msgTimeoutParams.Signer
+		)}, []string{msgTimeoutParams.Signer}
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -963,19 +963,19 @@ func ParseMsgTimeout(
 			parserParams.MsgCommonParams,
 
 			msgTimeoutParams,
-		)}, msgTimeoutParams.Signer
+		)}, []string{msgTimeoutParams.Signer}
 	} else {
 		return []command.Command{command_usecase.NewCreateMsgIBCTimeout(
 			parserParams.MsgCommonParams,
 
 			msgTimeoutParams,
-		)}, msgTimeoutParams.Signer
+		)}, []string{msgTimeoutParams.Signer}
 	}
 }
 
 func ParseMsgTimeoutOnClose(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg ibc_model.RawMsgTimeoutOnClose
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgTimeoutOnClose: %v", err))
@@ -983,7 +983,7 @@ func ParseMsgTimeoutOnClose(
 
 	if !IsPacketMsgTransfer(rawMsg.Packet) {
 		// unsupported application
-		return []command.Command{}, ""
+		return []command.Command{}, []string{}
 	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
@@ -998,7 +998,7 @@ func ParseMsgTimeoutOnClose(
 			parserParams.MsgCommonParams,
 
 			msgTimeoutOnCloseParams,
-		)}, msgTimeoutOnCloseParams.Signer
+		)}, []string{msgTimeoutOnCloseParams.Signer}
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -1041,19 +1041,19 @@ func ParseMsgTimeoutOnClose(
 			parserParams.MsgCommonParams,
 
 			msgTimeoutOnCloseParams,
-		)}, msgTimeoutOnCloseParams.Signer
+		)}, []string{msgTimeoutOnCloseParams.Signer}
 	} else {
 		return []command.Command{command_usecase.NewCreateMsgIBCTimeoutOnClose(
 			parserParams.MsgCommonParams,
 
 			msgTimeoutOnCloseParams,
-		)}, msgTimeoutOnCloseParams.Signer
+		)}, []string{msgTimeoutOnCloseParams.Signer}
 	}
 }
 
 func ParseMsgChannelCloseInit(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg ibc_model.RawMsgChannelCloseInit
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgChannelCloseInit: %v", err))
@@ -1066,7 +1066,7 @@ func ParseMsgChannelCloseInit(
 			ibc_model.MsgChannelCloseInitParams{
 				RawMsgChannelCloseInit: rawMsg,
 			},
-		)}, rawMsg.Signer
+		)}, []string{rawMsg.Signer}
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -1087,12 +1087,12 @@ func ParseMsgChannelCloseInit(
 		parserParams.MsgCommonParams,
 
 		msgChannelCloseInitParams,
-	)}, msgChannelCloseInitParams.Signer
+	)}, []string{msgChannelCloseInitParams.Signer}
 }
 
 func ParseMsgChannelCloseConfirm(
 	parserParams utils.CosmosParserParams,
-) ([]command.Command, string) {
+) ([]command.Command, []string) {
 	var rawMsg ibc_model.RawMsgChannelCloseConfirm
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgChannelCloseConfirm: %v", err))
@@ -1105,7 +1105,7 @@ func ParseMsgChannelCloseConfirm(
 			ibc_model.MsgChannelCloseConfirmParams{
 				RawMsgChannelCloseConfirm: rawMsg,
 			},
-		)}, rawMsg.Signer
+		)}, []string{rawMsg.Signer}
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -1126,5 +1126,5 @@ func ParseMsgChannelCloseConfirm(
 		parserParams.MsgCommonParams,
 
 		msgChannelCloseConfirmParams,
-	)}, msgChannelCloseConfirmParams.Signer
+	)}, []string{msgChannelCloseConfirmParams.Signer}
 }

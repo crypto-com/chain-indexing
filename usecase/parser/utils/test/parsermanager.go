@@ -30,14 +30,14 @@ func (c commandB) Exec() (entity_event.Event, error) {
 	return nil, nil
 }
 
-func ParserA(_ utils.CosmosParserParams) ([]command.Command, string) {
+func ParserA(_ utils.CosmosParserParams) ([]command.Command, []string) {
 	return []command.Command{
 		commandA{},
-	}, ""
+	}, []string{}
 }
 
-func ParserB(_ utils.CosmosParserParams) ([]command.Command, string) {
+func ParserB(_ utils.CosmosParserParams) ([]command.Command, []string) {
 	return []command.Command{
 		commandB{},
-	}, ""
+	}, []string{}
 }
