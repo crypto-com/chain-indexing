@@ -91,6 +91,10 @@ func (cpm *CosmosParserManager) GetParser(name CosmosParserKey, blockHeight Pars
 	return parser
 }
 
+func (cpm *CosmosParserManager) GetLogger() applogger.Logger {
+	return cpm.logger
+}
+
 func isEnabledBlock(enabledBlockHeight ParserBlockHeight, blockHeight ParserBlockHeight) bool {
 	return enabledBlockHeight <= blockHeight
 }
