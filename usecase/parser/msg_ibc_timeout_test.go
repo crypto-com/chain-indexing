@@ -81,11 +81,9 @@ var _ = Describe("ParseMsgCommands", func() {
 			stakingDenom := "basecro"
 
 			pm := usecase_parser_test.InitParserManager()
-			logger := test.NewFakeLogger()
-			
+
 			cmds, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				logger,
 				txDecoder,
 				block,
 				blockResults,

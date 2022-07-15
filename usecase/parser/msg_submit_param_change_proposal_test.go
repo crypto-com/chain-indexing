@@ -3,7 +3,6 @@ package parser_test
 import (
 	"encoding/json"
 
-	"github.com/crypto-com/chain-indexing/external/logger/test"
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
@@ -32,11 +31,9 @@ var _ = Describe("ParseMsgCommands", func() {
 			bondingDenom := "basetcro"
 
 			pm := usecase_parser_test.InitParserManager()
-			logger := test.NewFakeLogger()
-			
+
 			cmds, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				logger,
 				txDecoder,
 				block,
 				blockResults,
@@ -84,11 +81,9 @@ var _ = Describe("ParseMsgCommands", func() {
 			bondingDenom := "basetcro"
 
 			pm := usecase_parser_test.InitParserManager()
-			logger := test.NewFakeLogger()
-			
+
 			cmds, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				logger,
 				txDecoder,
 				block,
 				blockResults,
