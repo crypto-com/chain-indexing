@@ -46,6 +46,7 @@ type CosmosParserParams struct {
 	MsgIndex        int
 	Msg             map[string]interface{}
 	ParserManager   *CosmosParserManager
+	Logger          applogger.Logger
 }
 
 func NewCosmosParserManager(params CosmosParserManagerParams) *CosmosParserManager {
@@ -88,6 +89,10 @@ func (cpm *CosmosParserManager) GetParser(name CosmosParserKey, blockHeight Pars
 	}
 
 	return parser
+}
+
+func (cpm *CosmosParserManager) GetLogger() applogger.Logger {
+	return cpm.logger
 }
 
 func isEnabledBlock(enabledBlockHeight ParserBlockHeight, blockHeight ParserBlockHeight) bool {
