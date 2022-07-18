@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/internal/base64"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -11,6 +12,7 @@ import (
 )
 
 func ParseSignerInfosToTransactionSigners(
+	cosmosClient cosmosapp_interface.Client,
 	signerInfos []utils.SignerInfo,
 	accountAddressPrefix string,
 	possibleSignerAddress []string,
@@ -29,9 +31,19 @@ func ParseSignerInfosToTransactionSigners(
 			if signer.MaybePublicKey == nil {
 				if len(possibleSignerAddress) != len(signerInfos) {
 					address = ""
+
 				} else {
 					address = possibleSignerAddress[i]
+					accountInfo, _ := cosmosClient.Account(address)
+					if accountInfo != nil {
+						transactionSignerInfo = &model.TransactionSignerKeyInfo{
+							Type:       accountInfo.MaybePubkey.Type,
+							IsMultiSig: false,
+							Pubkeys:    []string{accountInfo.MaybePubkey.Key},
+						}
+					}
 				}
+				////////////if	get pubkey null and signerinfo null, then panic / mark down the assumption
 			} else {
 				transactionSignerInfo = &model.TransactionSignerKeyInfo{
 					Type:       signer.MaybePublicKey.Type,

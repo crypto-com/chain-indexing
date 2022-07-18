@@ -27,7 +27,9 @@ type IndexService struct {
 	bondingDenom             string
 	windowSize               int
 	tendermintHTTPRPCURL     string
+	cosmosAppHTTPRPCURL      string
 	insecureTendermintClient bool
+	insecureCosmosAppClient  bool
 	strictGenesisParsing     bool
 
 	cosmosVersionBlockHeight utils.CosmosVersionBlockHeight
@@ -56,7 +58,9 @@ func NewIndexService(
 		bondingDenom:             config.Blockchain.BondingDenom,
 		windowSize:               config.IndexService.WindowSize,
 		tendermintHTTPRPCURL:     config.TendermintApp.HTTPRPCUrl,
+		cosmosAppHTTPRPCURL:      config.CosmosApp.HTTPRPCUrl,
 		insecureTendermintClient: config.TendermintApp.Insecure,
+		insecureCosmosAppClient:  config.CosmosApp.Insecure,
 		strictGenesisParsing:     config.TendermintApp.StrictGenesisParsing,
 		cosmosVersionBlockHeight: utils.CosmosVersionBlockHeight{
 			V0_42_7: utils.ParserBlockHeight(config.IndexService.CosmosVersionEnabledHeight.V0_42_7),
@@ -136,7 +140,9 @@ func (service *IndexService) RunEventStoreMode() error {
 			Config: SyncManagerConfig{
 				WindowSize:               service.windowSize,
 				TendermintRPCUrl:         service.tendermintHTTPRPCURL,
+				CosmosAppHTTPRPCURL:      service.cosmosAppHTTPRPCURL,
 				InsecureTendermintClient: service.insecureTendermintClient,
+				InsecureCosmosAppClient:  service.insecureCosmosAppClient,
 				StrictGenesisParsing:     service.strictGenesisParsing,
 				AccountAddressPrefix:     service.accountAddressPrefix,
 				StakingDenom:             service.bondingDenom,
@@ -174,7 +180,9 @@ func (service *IndexService) RunTendermintDirectMode() error {
 					Config: SyncManagerConfig{
 						WindowSize:               service.windowSize,
 						TendermintRPCUrl:         service.tendermintHTTPRPCURL,
+						CosmosAppHTTPRPCURL:      service.cosmosAppHTTPRPCURL,
 						InsecureTendermintClient: service.insecureTendermintClient,
+						InsecureCosmosAppClient:  service.insecureCosmosAppClient,
 						AccountAddressPrefix:     service.accountAddressPrefix,
 						StakingDenom:             service.bondingDenom,
 					},

@@ -5,11 +5,14 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
+	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
+	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	command_entity "github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/entity/event"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	chainfeed "github.com/crypto-com/chain-indexing/infrastructure/feed/chain"
 	"github.com/crypto-com/chain-indexing/infrastructure/metric/prometheus"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
@@ -26,6 +29,7 @@ const DEFAULT_MAX_RETRY_TIME = MAX_RETRY_TIME_ALWAYS_RETRY
 type SyncManager struct {
 	rdbConn              rdb.Conn
 	client               *tendermint.HTTPClient
+	cosmosClient         cosmosapp_interface.Client
 	logger               applogger.Logger
 	pollingInterval      time.Duration
 	maxRetryInterval     time.Duration
@@ -58,7 +62,9 @@ type SyncManagerParams struct {
 type SyncManagerConfig struct {
 	WindowSize               int
 	TendermintRPCUrl         string
+	CosmosAppHTTPRPCURL      string
 	InsecureTendermintClient bool
+	InsecureCosmosAppClient  bool
 	StrictGenesisParsing     bool
 
 	AccountAddressPrefix string
@@ -84,9 +90,21 @@ func NewSyncManager(
 		)
 	}
 
+	var cosmosClient cosmosapp.Client
+	if params.Config.InsecureCosmosAppClient {
+		cosmosClient = cosmosapp_infrastructure.NewInsecureHTTPClient(
+			params.Config.CosmosAppHTTPRPCURL, params.Config.StakingDenom,
+		)
+	} else {
+		cosmosClient = cosmosapp_infrastructure.NewHTTPClient(
+			params.Config.CosmosAppHTTPRPCURL, params.Config.StakingDenom,
+		)
+	}
+
 	return &SyncManager{
-		rdbConn: params.RDbConn,
-		client:  tendermintClient,
+		rdbConn:      params.RDbConn,
+		client:       tendermintClient,
+		cosmosClient: cosmosClient,
 		logger: params.Logger.WithFields(applogger.LogFields{
 			"module": "SyncManager",
 		}),
@@ -204,6 +222,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 
 	commands, err := parser.ParseBlockToCommands(
 		manager.parserManager,
+		manager.cosmosClient,
 		manager.txDecoder,
 		block,
 		rawBlock,
