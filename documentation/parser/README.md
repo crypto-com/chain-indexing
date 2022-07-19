@@ -27,4 +27,4 @@
 | `MsgExec`                         | `msg.Grantee`                                  | [x/authz/msgs.go](https://github.com/cosmos/cosmos-sdk/blob/main/x/authz/msgs.go#L46)                          |
 | `MsgGrantAllowance`               | `msg.Granter`                                  | [x/feegrant/msgs.go](https://github.com/cosmos/cosmos-sdk/blob/main/x/feegrant/msgs.go#L58)                    |
 | `MsgRevokeAllowance`              | `msg.Granter`                                  | [x/feegrant/msgs.go](https://github.com/cosmos/cosmos-sdk/blob/main/x/feegrant/msgs.go#L118)                   |
-| `MsgCreateVestingAccount`         | `msg.FromAddress`                              | [x/auth/vesting/types/msgs.go](https://github.com/cosmos/cosmos-sdk/blob/main/x/auth/vesting/types/msgs.go#L74 |          
+| `MsgCreateVestingAccount`         | `msg.FromAddress`                              | [x/auth/vesting/types/msgs.go](https://github.com/cosmos/cosmos-sdk/blob/main/x/auth/vesting/types/msgs.go#L74) |          
