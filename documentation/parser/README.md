@@ -1,4 +1,4 @@
-# Possible signer in each msg type
+# Possible signer of each msg type
 
 | Msg Type                          | Possible Signer                                | Code Reference from Cosmos SDK                                                                                 |
 | --------------------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
