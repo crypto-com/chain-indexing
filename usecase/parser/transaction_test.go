@@ -3,13 +3,12 @@ package parser_test
 import (
 	"strings"
 
+	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
-	cosmosapp "github.com/crypto-com/chain-indexing/appinterface/cosmosapp/mockclient"
 	"github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
