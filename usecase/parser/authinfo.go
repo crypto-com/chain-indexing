@@ -19,6 +19,10 @@ func ParseSignerInfosToTransactionSigners(
 ) ([]model.TransactionSigner, error) {
 	var signers []model.TransactionSigner
 
+	if len(signerInfos) <= 0 && len(possibleSignerAddress) <= 0 {
+		panic("error signer info not found")
+	}
+
 	for i, signer := range signerInfos {
 		var transactionSignerInfo *model.TransactionSignerKeyInfo
 		var address string
@@ -27,11 +31,11 @@ func ParseSignerInfosToTransactionSigners(
 		if parseErr != nil {
 			return nil, fmt.Errorf("error parsing account sequence: %v", parseErr)
 		}
+
 		if signer.ModeInfo.MaybeSingle != nil {
 			if signer.MaybePublicKey == nil {
-				if len(possibleSignerAddress) != len(signerInfos) {
-					panic("error signer info not found")
-
+				if len(possibleSignerAddress) < i+1 {
+					address = ""
 				} else {
 					address = possibleSignerAddress[i]
 					accountInfo, _ := cosmosClient.Account(address)
