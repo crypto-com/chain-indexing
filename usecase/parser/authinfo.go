@@ -30,7 +30,7 @@ func ParseSignerInfosToTransactionSigners(
 		if signer.ModeInfo.MaybeSingle != nil {
 			if signer.MaybePublicKey == nil {
 				if len(possibleSignerAddress) != len(signerInfos) {
-					address = ""
+					panic("error signer info not found")
 
 				} else {
 					address = possibleSignerAddress[i]
@@ -43,7 +43,6 @@ func ParseSignerInfosToTransactionSigners(
 						}
 					}
 				}
-				////////////if	get pubkey null and signerinfo null, then panic / mark down the assumption
 			} else {
 				transactionSignerInfo = &model.TransactionSignerKeyInfo{
 					Type:       signer.MaybePublicKey.Type,
