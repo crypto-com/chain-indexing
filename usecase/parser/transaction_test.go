@@ -1,19 +1,15 @@
 package parser_test
 
 import (
-	"fmt"
-	"net/http"
 	"strings"
 
+	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/ghttp"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
-	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
-	infrastructure_cosmosapp_test "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp/test"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
@@ -23,12 +19,6 @@ import (
 )
 
 var _ = Describe("TransactionParser", func() {
-	var server *ghttp.Server
-
-	BeforeEach(func() {
-		server = ghttp.NewServer()
-	})
-
 	Describe("TxHash", func() {
 		It("should return transaction hash from hex encouded tx data", func() {
 			txHex := "Cp4CCowBChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEmwKK3Rjcm8xNjV0emNyaDJ5bDgzZzhxZXF4dWVnMmc1Z3pndTU3eTNmZTNrYzMSK3Rjcm8xODRsdGEybHN5dTQ3dnd5cDJlOHptdGNhM2s1eXE4NXA2YzR2cDMaEAoIYmFzZXRjcm8SBDEwMDAKjAEKHC9jb3Ntb3MuYmFuay52MWJldGExLk1zZ1NlbmQSbAordGNybzE4NGx0YTJsc3l1NDd2d3lwMmU4em10Y2EzazV5cTg1cDZjNHZwMxIrdGNybzE2NXR6Y3JoMnlsODNnOHFlcXh1ZWcyZzVnemd1NTd5M2ZlM2tjMxoQCghiYXNldGNybxIEMjAwMBKsAQpRCkYKHy9jb3Ntb3MuY3J5cHRvLnNlY3AyNTZrMS5QdWJLZXkSIwohAgiLen9uwpvsreYibwgnQtzupil7kyNJl4oTG3Wl6oIEEgQKAggBGLdPClEKRgofL2Nvc21vcy5jcnlwdG8uc2VjcDI1NmsxLlB1YktleRIjCiEDw9KBooWSrc6BvuMJTwDq4mkyy8aC+6I5uQ9H2sn+cDYSBAoCCAEYyk8SBBDAmgwaQMtPcJacL5aryCBZz7bL4vKrOLFi07rejX0nMvBRA7BSd09ywefL+VMSkC/UwqhHC28pRTHhEDiNApbxrIYBVvIaQE0+gltCOfawUGDJU9nXJJkFLPmjMKJMYvt3UtTMjPR2bws7l78EzaUfrjtbmrkIokoxAW8GBgTuhEkC2Frr6Q0="
@@ -41,7 +31,7 @@ var _ = Describe("TransactionParser", func() {
 	Describe("ParseTransactionCommands", func() {
 		It("should parse Transaction commands when there is two Msg in one transaction", func() {
 			txFeeParser := utils.NewTxDecoder()
-			mockClient := cosmosapp_infrastructure.NewHTTPClient(server.URL(), "basetcro")
+			mockClient := cosmosapp.NewMockClient()
 			block, _ := mustParseBlockResp(usecase_parser_test.ONE_TX_TWO_MSG_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.ONE_TX_TWO_MSG_BLOCK_RESULTS_RESP)
 			anyAccountAddressPrefix := "tcro"
@@ -103,7 +93,7 @@ var _ = Describe("TransactionParser", func() {
 
 		It("should parse Transaction commands when there is transaction fee", func() {
 			txFeeParser := utils.NewTxDecoder()
-			mockClient := cosmosapp_infrastructure.NewHTTPClient(server.URL(), "basetcro")
+			mockClient := cosmosapp.NewMockClient()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_WITH_FEE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_WITH_FEE_BLOCK_RESULTS_RESP)
 			anyAccountAddressPrefix := "tcro"
@@ -154,7 +144,7 @@ var _ = Describe("TransactionParser", func() {
 
 		It("should parse Transaction commands when transaction failed with fee", func() {
 			txFeeParser := utils.NewTxDecoder()
-			mockClient := cosmosapp_infrastructure.NewHTTPClient(server.URL(), "basetcro")
+			mockClient := cosmosapp.NewMockClient()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESULTS_RESP)
 			anyAccountAddressPrefix := "tcro"
@@ -204,7 +194,7 @@ var _ = Describe("TransactionParser", func() {
 
 		It("should parse Transaction commands when transaction failed without fee", func() {
 			txFeeParser := utils.NewTxDecoder()
-			mockClient := cosmosapp_infrastructure.NewHTTPClient(server.URL(), "basetcro")
+			mockClient := cosmosapp.NewMockClient()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_FAILED_WITHOUT_FEE_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_FAILED_WITHOUT_FEE_BLOCK_RESULTS_RESP))
 			anyAccountAddressPrefix := "tcro"
@@ -254,7 +244,7 @@ var _ = Describe("TransactionParser", func() {
 
 		It("should parse Transaction commands when there is transaction memo and timeout_height", func() {
 			txFeeParser := utils.NewTxDecoder()
-			mockClient := cosmosapp_infrastructure.NewHTTPClient(server.URL(), "basetcro")
+			mockClient := cosmosapp.NewMockClient()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESULTS_RESP)
 			anyAccountAddressPrefix := "tcro"
@@ -304,7 +294,7 @@ var _ = Describe("TransactionParser", func() {
 
 		It("should parse failed Transaction commands when there is transaction memo and timeout_height", func() {
 			txFeeParser := utils.NewTxDecoder()
-			mockClient := cosmosapp_infrastructure.NewHTTPClient(server.URL(), "basetcro")
+			mockClient := cosmosapp.NewMockClient()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESULTS_RESP)
 			anyAccountAddressPrefix := "tcro"
@@ -354,7 +344,7 @@ var _ = Describe("TransactionParser", func() {
 
 		It("should parse Transaction commands when the signer public key is empty", func() {
 			txFeeParser := utils.NewTxDecoder()
-			mockClient := cosmosapp_infrastructure.NewHTTPClient(server.URL(), "uatom")
+			mockClient := cosmosapp.NewMockClient()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_BLOCK_RESULTS_RESP)
 			anyAccountAddressPrefix := "cosmos"
@@ -397,27 +387,91 @@ var _ = Describe("TransactionParser", func() {
 		})
 		It("should parse Transaction commands when the signer public key is in state", func() {
 			txFeeParser := utils.NewTxDecoder()
-			mockClient := cosmosapp_infrastructure.NewHTTPClient(server.URL(), "basecro")
+			mockClient := cosmosapp.MockClient{}
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_SIGNER_PUBKEY_IN_STATE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_SIGNER_PUBKEY_IN_STATE_BLOCK_RESULTS_RESP)
-			anyAccountAddressPrefix := "cro"
+			anyAccountAddressPrefix := "basecro"
 
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", fmt.Sprintf("/cosmos/auth/v1beta1/accounts/%s", "cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7")),
-					ghttp.RespondWith(http.StatusOK, infrastructure_cosmosapp_test.AUTH_ACCOUNT_1_JSON),
-				),
+			mockClient.On("Account", "cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7").Return(
+				&cosmosapp.Account{
+					Type:    "AccountType",
+					Address: "cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7",
+					MaybePubkey: &cosmosapp.PubKey{
+						Type: "/cosmos.crypto.secp256k1.PubKey",
+						Key:  "AomWNLM+dBB76InhfghTzlUDOPevNG2AClk286KuSODS",
+					},
+					AccountNumber: "AccountNumber",
+					Sequence:      "1",
+					MaybeModuleAccount: &cosmosapp.ModuleAccount{
+						Name:        "",
+						Permissions: []string{},
+					},
+					MaybeDelayedVestingAccount: &cosmosapp.DelayedVestingAccount{
+						OriginalVesting:  []cosmosapp.VestingBalance{},
+						DelegatedFree:    []cosmosapp.VestingBalance{},
+						DelegatedVesting: []cosmosapp.VestingBalance{},
+						EndTime:          "",
+					},
+					MaybeContinuousVestingAccount: &cosmosapp.ContinuousVestingAccount{
+						OriginalVesting:  []cosmosapp.VestingBalance{},
+						DelegatedFree:    []cosmosapp.VestingBalance{},
+						DelegatedVesting: []cosmosapp.VestingBalance{},
+						StartTime:        "",
+						EndTime:          "",
+					},
+					MaybePeriodicVestingAccount: &cosmosapp.PeriodicVestingAccount{
+						OriginalVesting:  []cosmosapp.VestingBalance{},
+						DelegatedFree:    []cosmosapp.VestingBalance{},
+						DelegatedVesting: []cosmosapp.VestingBalance{},
+						StartTime:        "",
+						EndTime:          "",
+						VestingPeriods:   []cosmosapp.VestingPeriod{},
+					},
+				},
+				nil,
 			)
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", fmt.Sprintf("/cosmos/auth/v1beta1/accounts/%s", "cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc")),
-					ghttp.RespondWith(http.StatusOK, infrastructure_cosmosapp_test.AUTH_ACCOUNT_2_JSON),
-				),
+			mockClient.On("Account", "cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc").Return(
+				&cosmosapp.Account{
+					Type:    "AccountType",
+					Address: "cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc",
+					MaybePubkey: &cosmosapp.PubKey{
+						Type: "/cosmos.crypto.secp256k1.PubKey",
+						Key:  "ApTiQlAs/mTr9a1RQwmm5G+bXe2MvGRypncY9pAHcWKO",
+					},
+					AccountNumber: "AccountNumber",
+					Sequence:      "1",
+					MaybeModuleAccount: &cosmosapp.ModuleAccount{
+						Name:        "",
+						Permissions: []string{},
+					},
+					MaybeDelayedVestingAccount: &cosmosapp.DelayedVestingAccount{
+						OriginalVesting:  []cosmosapp.VestingBalance{},
+						DelegatedFree:    []cosmosapp.VestingBalance{},
+						DelegatedVesting: []cosmosapp.VestingBalance{},
+						EndTime:          "",
+					},
+					MaybeContinuousVestingAccount: &cosmosapp.ContinuousVestingAccount{
+						OriginalVesting:  []cosmosapp.VestingBalance{},
+						DelegatedFree:    []cosmosapp.VestingBalance{},
+						DelegatedVesting: []cosmosapp.VestingBalance{},
+						StartTime:        "",
+						EndTime:          "",
+					},
+					MaybePeriodicVestingAccount: &cosmosapp.PeriodicVestingAccount{
+						OriginalVesting:  []cosmosapp.VestingBalance{},
+						DelegatedFree:    []cosmosapp.VestingBalance{},
+						DelegatedVesting: []cosmosapp.VestingBalance{},
+						StartTime:        "",
+						EndTime:          "",
+						VestingPeriods:   []cosmosapp.VestingPeriod{},
+					},
+				},
+				nil,
 			)
 
 			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
-				mockClient,
+				&mockClient,
 				block,
 				blockResults,
 				anyAccountAddressPrefix,

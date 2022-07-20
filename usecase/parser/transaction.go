@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
+	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
@@ -19,7 +19,7 @@ import (
 
 func ParseTransactionCommands(
 	txDecoder *utils.TxDecoder,
-	cosmosClient *cosmosapp_infrastructure.HTTPClient,
+	cosmosClient cosmosapp_interface.Client,
 	block *model.Block,
 	blockResults *model.BlockResults,
 	accountAddressPrefix string,

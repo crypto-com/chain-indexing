@@ -5,12 +5,14 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
+	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
+	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
+
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	command_entity "github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/entity/event"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
-	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	chainfeed "github.com/crypto-com/chain-indexing/infrastructure/feed/chain"
 	"github.com/crypto-com/chain-indexing/infrastructure/metric/prometheus"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
@@ -27,7 +29,7 @@ const DEFAULT_MAX_RETRY_TIME = MAX_RETRY_TIME_ALWAYS_RETRY
 type SyncManager struct {
 	rdbConn              rdb.Conn
 	client               *tendermint.HTTPClient
-	cosmosClient         *cosmosapp_infrastructure.HTTPClient
+	cosmosClient         cosmosapp_interface.Client
 	logger               applogger.Logger
 	pollingInterval      time.Duration
 	maxRetryInterval     time.Duration
@@ -88,7 +90,7 @@ func NewSyncManager(
 		)
 	}
 
-	var cosmosClient *cosmosapp_infrastructure.HTTPClient
+	var cosmosClient cosmosapp_interface.Client
 	if params.Config.InsecureCosmosAppClient {
 		cosmosClient = cosmosapp_infrastructure.NewInsecureHTTPClient(
 			params.Config.CosmosAppHTTPRPCURL, params.Config.StakingDenom,

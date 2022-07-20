@@ -142,7 +142,7 @@ func ParseBlockTxsMsgToCommands(
 					ParserManager:   parserManager,
 				})
 			}
-			address = possibleSignerAddress
+			address = append(address, possibleSignerAddress...)
 			commands = append(commands, msgCommands...)
 		}
 	}
@@ -996,7 +996,6 @@ func ParseMsgEditValidator(
 	if parserParams.Msg["min_self_delegation"] != nil {
 		maybeMinSelfDelegation = primptr.String(parserParams.Msg["min_self_delegation"].(string))
 	}
-
 	return []command.Command{command_usecase.NewCreateMsgEditValidator(
 		parserParams.MsgCommonParams,
 

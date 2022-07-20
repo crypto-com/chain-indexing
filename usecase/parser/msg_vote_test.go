@@ -26,7 +26,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, _, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddress, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -52,6 +52,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					},
 				),
 			}))
+			Expect(possibleSignerAddress).To(Equal([]string{"cro1tg4xpryye2v4fp3smpfc3s2kqmvnrkwfyd63y7"}))
 		})
 	})
 })

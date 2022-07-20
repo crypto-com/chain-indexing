@@ -69,7 +69,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, _, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddress, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -95,6 +95,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					-1,
 				),
 			))
+			Expect(possibleSignerAddress).To(Equal([]string{"cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"}))
 		})
 
 		It("should parse Msg commands when there is MsgTransfer with exceed uint64 amount in the transaction", func() {
@@ -149,7 +150,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, _, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddress, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -175,6 +176,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					-1,
 				),
 			))
+			Expect(possibleSignerAddress).To(Equal([]string{"tcrc1v76r7u4uyr3ewdks8cqmuw7ca4lejvc89pxhev"}))
 		})
 	})
 })
