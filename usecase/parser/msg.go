@@ -137,6 +137,7 @@ func ParseBlockTxsMsgToCommands(
 					Msg:             msg,
 					MsgIndex:        msgIndex,
 					ParserManager:   parserManager,
+					Logger:          parserManager.GetLogger(),
 				})
 			}
 
@@ -322,9 +323,8 @@ func ParseMsgSubmitProposal(
 		cmds = parseMsgSubmitCancelSoftwareUpgradeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.gov.v1beta1.TextProposal" {
 		cmds = parseMsgSubmitTextProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
-		// FIXME: https://github.com/crypto-com/chain-indexing/issues/707
-		//} else {
-		//	panic(fmt.Sprintf("unrecognzied govenance proposal type `%s`", proposalContent.Type))
+	} else {
+		parserParams.Logger.Errorf("unrecognzied govenance proposal type `%s`", proposalContent.Type)
 	}
 
 	if parserParams.MsgCommonParams.TxSuccess {
