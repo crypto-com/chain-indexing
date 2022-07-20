@@ -1,6 +1,6 @@
 # Possible signer in each msg type
 
-| Msg Type                          | Possible Signer                                | Code Reference from Cosmos SDK                                                                                 |
+| Msg Type                          | Possible Signer                                | Code Reference from Cosmos SDK / IBC                                                                             |
 | --------------------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `MsgSend`                         | `msg.FromAddress`                              | [x/bank/types/msgs.go](https://github.com/cosmos/cosmos-sdk/blob/main/x/bank/types/msgs.go#L56)                |
 | `MsgMultiSend`                    | `msg.Inputs`                                   | [x/bank/types/msgs.go](https://github.com/cosmos/cosmos-sdk/blob/main/x/bank/types/msgs.go#L95)                |
@@ -27,4 +27,21 @@
 | `MsgExec`                         | `msg.Grantee`                                  | [x/authz/msgs.go](https://github.com/cosmos/cosmos-sdk/blob/main/x/authz/msgs.go#L46)                          |
 | `MsgGrantAllowance`               | `msg.Granter`                                  | [x/feegrant/msgs.go](https://github.com/cosmos/cosmos-sdk/blob/main/x/feegrant/msgs.go#L58)                    |
 | `MsgRevokeAllowance`              | `msg.Granter`                                  | [x/feegrant/msgs.go](https://github.com/cosmos/cosmos-sdk/blob/main/x/feegrant/msgs.go#L118)                   |
-| `MsgCreateVestingAccount`         | `msg.FromAddress`                              | [x/auth/vesting/types/msgs.go](https://github.com/cosmos/cosmos-sdk/blob/main/x/auth/vesting/types/msgs.go#L74) |          
+| `MsgCreateVestingAccount`         | `msg.FromAddress`                              | [x/auth/vesting/types/msgs.go](https://github.com/cosmos/cosmos-sdk/blob/main/x/auth/vesting/types/msgs.go#L74) |
+| `MsgCreateClient`                 | `msg.Signer`                                   | [modules/core/02-client/types/msgs.go](https://github.com/cosmos/ibc-go/blob/main/modules/core/02-client/types/msgs.go#L84) |
+| `MsgUpdateClient`                 | `msg.Signer`                                   | [modules/core/02-client/types/msgs.go](https://github.com/cosmos/ibc-go/blob/main/modules/core/02-client/types/msgs.go#L139) |
+| `MsgConnectionOpenInit`           | `msg.Signer`                                   | [modules/core/03-connection/types/msgs.go](https://github.com/cosmos/ibc-go/blob/main/modules/core/03-connection/types/msgs.go#L66) |
+| `MsgConnectionOpenTry`            | `msg.Signer`                                   | [modules/core/03-connection/types/msgs.go](https://github.com/cosmos/ibc-go/blob/main/modules/core/03-connection/types/msgs.go#L163) |
+| `MsgConnectionOpenAck`            | `msg.Signer`                                   | [modules/core/03-connection/types/msgs.go](https://github.com/cosmos/ibc-go/blob/main/modules/core/03-connection/types/msgs.go#L244) |
+| `MsgConnectionOpenConfirm`        | `msg.Signer`                                   | [modules/core/03-connection/types/msgs.go](https://github.com/cosmos/ibc-go/blob/main/modules/core/03-connection/types/msgs.go#L285) |
+| `MsgChannelOpenInit`              | `msg.Signer`                                   | [modules/core/04-channel/types/msgs.go](https://github.com/cosmos/ibc-go/blob/main/modules/core/04-channel/types/msgs.go#L54) |
+| `MsgChannelOpenTry`               | `msg.Signer`                                   | [modules/core/04-channel/types/msgs.go](https://github.com/cosmos/ibc-go/blob/main/modules/core/04-channel/types/msgs.go#L121) |
+| `MsgChannelOpenAck`               | `msg.Signer`                                   | [modules/core/04-channel/types/msgs.go](https://github.com/cosmos/ibc-go/blob/main/modules/core/04-channel/types/msgs.go#L173) |
+| `MsgChannelOpenConfirm`           | `msg.Signer`                                   | [modules/core/04-channel/types/msgs.go](https://github.com/cosmos/ibc-go/blob/main/modules/core/04-channel/types/msgs.go#L220) |
+| `MsgRecvPacket`                   | `msg.Signer`                                   | [modules/core/04-channel/types/msgs.go](https://github.com/cosmos/ibc-go/blob/main/modules/core/04-channel/types/msgs.go#L352) |
+| `MsgAcknowledgement`              | `msg.Signer`                                   | [modules/core/04-channel/types/msgs.go](https://github.com/cosmos/ibc-go/blob/main/modules/core/04-channel/types/msgs.go#L489) |
+| `MsgTimeout`                      | `msg.Signer`                                   | [modules/core/04-channel/types/msgs.go](https://github.com/cosmos/ibc-go/blob/main/modules/core/04-channel/types/msgs.go#L396) |
+| `MsgTimeoutOnClose`               | `msg.Signer`                                   | [modules/core/04-channel/types/msgs.go](https://github.com/cosmos/ibc-go/blob/main/modules/core/04-channel/types/msgs.go#L443) |
+| `MsgChannelCloseInit`             | `msg.Signer`                                   | [modules/core/04-channel/types/msgs.go](https://github.com/cosmos/ibc-go/blob/main/modules/core/04-channel/types/msgs.go#L258) |
+| `MsgChannelCloseConfirm`          | `msg.Signer`                                   | [modules/core/04-channel/types/msgs.go](https://github.com/cosmos/ibc-go/blob/main/modules/core/04-channel/types/msgs.go#L305) |
+| `MsgTransfer`                     | `msg.Sender`                                   | [modules/apps/transfer/types/msgs.go](https://github.com/cosmos/ibc-go/blob/main/modules/apps/transfer/types/msgs.go#L80) |
