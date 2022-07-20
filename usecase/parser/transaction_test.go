@@ -397,7 +397,7 @@ var _ = Describe("TransactionParser", func() {
 		})
 		It("should parse Transaction commands when the signer public key is in state", func() {
 			txFeeParser := utils.NewTxDecoder()
-			mockClient := *cosmosapp_infrastructure.NewHTTPClient(server.URL(), "basecro")
+			mockClient := cosmosapp_infrastructure.NewHTTPClient(server.URL(), "basecro")
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_SIGNER_PUBKEY_IN_STATE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_SIGNER_PUBKEY_IN_STATE_BLOCK_RESULTS_RESP)
 			anyAccountAddressPrefix := "cro"
@@ -417,7 +417,7 @@ var _ = Describe("TransactionParser", func() {
 
 			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
-				&mockClient,
+				mockClient,
 				block,
 				blockResults,
 				anyAccountAddressPrefix,
