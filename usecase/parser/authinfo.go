@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"strconv"
 
-	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
+	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	"github.com/crypto-com/chain-indexing/internal/base64"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
 func ParseSignerInfosToTransactionSigners(
-	cosmosClient cosmosapp_interface.Client,
+	cosmosClient *cosmosapp_infrastructure.HTTPClient,
 	signerInfos []utils.SignerInfo,
 	accountAddressPrefix string,
 	possibleSignerAddress []string,

@@ -3,17 +3,17 @@ package parser
 import (
 	"fmt"
 
+	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	"github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
-	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	entity_command "github.com/crypto-com/chain-indexing/entity/command"
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 func ParseBlockToCommands(
 	parserManager *utils.CosmosParserManager,
-	cosmosClient cosmosapp_interface.Client,
+	cosmosClient *cosmosapp_infrastructure.HTTPClient,
 	txDecoder *utils.TxDecoder,
 	block *usecase_model.Block,
 	rawBlock *usecase_model.RawBlock,
