@@ -19,10 +19,6 @@ func ParseSignerInfosToTransactionSigners(
 ) ([]model.TransactionSigner, error) {
 	var signers []model.TransactionSigner
 
-	if len(signerInfos) <= 0 && len(possibleSignerAddresses) <= 0 {
-		panic("error signer info not found")
-	}
-
 	for i, signer := range signerInfos {
 		var transactionSignerInfo *model.TransactionSignerKeyInfo
 		var address string
