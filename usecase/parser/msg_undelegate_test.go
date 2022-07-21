@@ -27,7 +27,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, possibleSignerAddress, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -52,7 +52,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					AutoClaimedRewards:    coin.MustNewCoin("basetcro", coin.NewInt(76688)),
 				},
 			)}))
-			Expect(possibleSignerAddress).To(Equal([]string{"tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64"}))
+			Expect(possibleSignerAddresses).To(Equal([]string{"tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64"}))
 		})
 
 		It("should parse MsgUndelegate command in failed transaction", func() {
@@ -64,7 +64,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, possibleSignerAddress, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -88,7 +88,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					MaybeUnbondCompleteAt: nil,
 				},
 			)}))
-			Expect(possibleSignerAddress).To(Equal([]string{"tcro1llst0cguh5azl9t8wr6mz5yzjuwukz7f67z7f6"}))
+			Expect(possibleSignerAddresses).To(Equal([]string{"tcro1llst0cguh5azl9t8wr6mz5yzjuwukz7f67z7f6"}))
 		})
 	})
 })

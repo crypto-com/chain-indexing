@@ -31,7 +31,7 @@ func ParseBlockTxsMsgToCommands(
 	stakingDenom string,
 ) ([]command.Command, []string, error) {
 	commands := make([]command.Command, 0)
-	var address []string
+	var addresses []string
 
 	blockHeight := block.Height
 	for i, txHex := range block.Txs {
@@ -56,7 +56,7 @@ func ParseBlockTxsMsgToCommands(
 			}
 
 			var msgCommands []command.Command
-			var possibleSignerAddress []string
+			var possibleSignerAddresses []string
 
 			msgType := msg["@type"]
 			switch msgType {
@@ -132,7 +132,7 @@ func ParseBlockTxsMsgToCommands(
 				"/cosmos.vesting.v1beta1.MsgCreateVestingAccount":
 				parser := parserManager.GetParser(utils.CosmosParserKey(msgType.(string)), utils.ParserBlockHeight(blockHeight))
 
-				msgCommands, possibleSignerAddress = parser(utils.CosmosParserParams{
+				msgCommands, possibleSignerAddresses = parser(utils.CosmosParserParams{
 					AddressPrefix:   accountAddressPrefix,
 					StakingDenom:    stakingDenom,
 					TxsResult:       txsResult,
@@ -142,11 +142,11 @@ func ParseBlockTxsMsgToCommands(
 					ParserManager:   parserManager,
 				})
 			}
-			address = append(address, possibleSignerAddress...)
+			addresses = append(addresses, possibleSignerAddresses...)
 			commands = append(commands, msgCommands...)
 		}
 	}
-	return commands, address, nil
+	return commands, addresses, nil
 }
 
 func ParseMsgSend(

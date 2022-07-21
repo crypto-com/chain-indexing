@@ -81,7 +81,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, possibleSignerAddress, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -107,7 +107,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					-1,
 				),
 			))
-			Expect(possibleSignerAddress[3]).To(Equal("cro1q040rm026jmpfmxdsj6q9phm9tdceepnsau6me"))
+			Expect(possibleSignerAddresses[3]).To(Equal("cro1q040rm026jmpfmxdsj6q9phm9tdceepnsau6me"))
 		})
 	})
 
@@ -174,7 +174,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 		pm := usecase_parser_test.InitParserManager()
 
-		cmds, possibleSignerAddress, err := parser.ParseBlockTxsMsgToCommands(
+		cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 			pm, txDecoder,
 			block,
 			blockResults,
@@ -199,6 +199,6 @@ var _ = Describe("ParseMsgCommands", func() {
 				-1,
 			),
 		))
-		Expect(possibleSignerAddress[1]).To(Equal("tcro18mcwp6vtlvpgxy62eledk3chhjguw636x8n7h6"))
+		Expect(possibleSignerAddresses[1]).To(Equal("tcro18mcwp6vtlvpgxy62eledk3chhjguw636x8n7h6"))
 	})
 })

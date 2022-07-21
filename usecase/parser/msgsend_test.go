@@ -25,7 +25,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, possibleSignerAddress, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -48,7 +48,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					Amount:      coin.MustParseCoinsNormalized("1000000000basetcro"),
 				},
 			)}))
-			Expect(possibleSignerAddress).To(Equal([]string{"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv"}))
+			Expect(possibleSignerAddresses).To(Equal([]string{"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv"}))
 		})
 
 		It("should parse Msg commands when there are multiple bank.MsgSend in one transaction", func() {
@@ -60,7 +60,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, possibleSignerAddress, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -95,7 +95,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					Amount:      coin.MustParseCoinsNormalized("2000basetcro"),
 				},
 			)}))
-			Expect(possibleSignerAddress).To(Equal([]string{"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3", "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3"}))
+			Expect(possibleSignerAddresses).To(Equal([]string{"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3", "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3"}))
 		})
 	})
 })

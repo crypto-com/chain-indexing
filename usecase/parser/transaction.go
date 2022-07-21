@@ -23,7 +23,7 @@ func ParseTransactionCommands(
 	block *model.Block,
 	blockResults *model.BlockResults,
 	accountAddressPrefix string,
-	possibleSignerAddress []string,
+	possibleSignerAddresses []string,
 ) ([]command.Command, error) {
 	blockHeight := blockResults.Height
 	cmds := make([]command.Command, 0, len(blockResults.TxsResults))
@@ -64,7 +64,7 @@ func ParseTransactionCommands(
 		}
 
 		signers, parseSignerInfosErr := ParseSignerInfosToTransactionSigners(
-			cosmosClient, tx.AuthInfo.SignerInfos, accountAddressPrefix, possibleSignerAddress,
+			cosmosClient, tx.AuthInfo.SignerInfos, accountAddressPrefix, possibleSignerAddresses,
 		)
 		if parseSignerInfosErr != nil {
 			return nil, fmt.Errorf("error parsing SignerInfos: %v", parseSignerInfosErr)

@@ -29,7 +29,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, possibleSignerAddress, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -64,7 +64,7 @@ var _ = Describe("ParseMsgCommands", func() {
 						MaybeMinSelfDelegation: primptr.String("2"),
 					},
 				)))
-			Expect(possibleSignerAddress[0]).To(Equal("tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus"))
+			Expect(possibleSignerAddresses[0]).To(Equal("tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus"))
 
 		})
 	})

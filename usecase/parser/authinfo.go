@@ -15,11 +15,11 @@ func ParseSignerInfosToTransactionSigners(
 	cosmosClient cosmosapp_interface.Client,
 	signerInfos []utils.SignerInfo,
 	accountAddressPrefix string,
-	possibleSignerAddress []string,
+	possibleSignerAddresses []string,
 ) ([]model.TransactionSigner, error) {
 	var signers []model.TransactionSigner
 
-	if len(signerInfos) <= 0 && len(possibleSignerAddress) <= 0 {
+	if len(signerInfos) <= 0 && len(possibleSignerAddresses) <= 0 {
 		panic("error signer info not found")
 	}
 
@@ -34,10 +34,10 @@ func ParseSignerInfosToTransactionSigners(
 
 		if signer.ModeInfo.MaybeSingle != nil {
 			if signer.MaybePublicKey == nil {
-				if len(possibleSignerAddress) < i+1 {
+				if len(possibleSignerAddresses) < i+1 {
 					address = ""
 				} else {
-					address = possibleSignerAddress[i]
+					address = possibleSignerAddresses[i]
 					accountInfo, _ := cosmosClient.Account(address)
 					if accountInfo != nil {
 						transactionSignerInfo = &model.TransactionSignerKeyInfo{

@@ -80,7 +80,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, possibleSignerAddress, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -106,7 +106,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					-1,
 				),
 			))
-			Expect(possibleSignerAddress[1]).To(Equal("cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"))
+			Expect(possibleSignerAddresses[1]).To(Equal("cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"))
 		})
 
 		It("should parse Msg commands when there is MsgIBCAcknowledgement in the transaction, and MsgIBCAcknowledgement.maybeMsgTransfer.Error is NOT empty string", func() {
@@ -170,7 +170,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, possibleSignerAddress, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -210,7 +210,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			)
 
 			Expect(json.MustMarshalToString(typedEvent)).To(Equal(expectedWithAcknowledgement))
-			Expect(possibleSignerAddress[1]).To(Equal("tcro18mcwp6vtlvpgxy62eledk3chhjguw636x8n7h6"))
+			Expect(possibleSignerAddresses[1]).To(Equal("tcro18mcwp6vtlvpgxy62eledk3chhjguw636x8n7h6"))
 		})
 
 		It("should return two MsgIBCAcknowledgement with different success values when there are two MsgAcknowledgement of same packet sequence in the block, and in the second messages the fungible_token_packet event is missing", func() {
@@ -320,7 +320,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, possibleSignerAddress, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -365,8 +365,8 @@ var _ = Describe("ParseMsgCommands", func() {
 				-1,
 			)
 			Expect(json.MustMarshalToString(typedSecondMsgAckCmd)).To(Equal(expectedSecondMsgAckWithUUID))
-			Expect(possibleSignerAddress[0]).To(Equal("crc1yzl6cnq3f66ew24d7u97vmp45nkckhwg4ak8hl"))
-			Expect(possibleSignerAddress[2]).To(Equal("crc1aaxs058pksrq8cx3k0nrxv60p2a9c7nq527949"))
+			Expect(possibleSignerAddresses[0]).To(Equal("crc1yzl6cnq3f66ew24d7u97vmp45nkckhwg4ak8hl"))
+			Expect(possibleSignerAddresses[2]).To(Equal("crc1aaxs058pksrq8cx3k0nrxv60p2a9c7nq527949"))
 		})
 	})
 

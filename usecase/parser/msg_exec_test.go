@@ -68,7 +68,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, possibleSignerAddress, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -110,7 +110,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					-1,
 				),
 			))
-			Expect(possibleSignerAddress).To(Equal([]string{"tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2"}))
+			Expect(possibleSignerAddresses).To(Equal([]string{"tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2"}))
 		})
 
 		It("should parse Msg commands when there is MsgExec (inner message MsgDelegate) in the transaction", func() {
@@ -156,7 +156,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, possibleSignerAddress, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -198,7 +198,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					-1,
 				),
 			))
-			Expect(possibleSignerAddress).To(Equal([]string{"tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2"}))
+			Expect(possibleSignerAddresses).To(Equal([]string{"tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2"}))
 
 		})
 	})
