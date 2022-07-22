@@ -33,9 +33,6 @@ func ParseTransactionCommands(
 		if err != nil {
 			panic(fmt.Sprintf("error decoding transaction: %v", err))
 		}
-		if len(tx.AuthInfo.SignerInfos) <= 0 && len(possibleSignerAddresses) <= 0 {
-			panic("error signer info not found")
-		}
 
 		var log string
 		if len(txsResult.Log) == 0 {
