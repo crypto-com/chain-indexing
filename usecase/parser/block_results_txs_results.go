@@ -42,7 +42,6 @@ func parseCronosSendToIBC(
 			isEthereumTx = true
 			ethereumTxEvent := utils.NewParsedTxsResultLogEvent(&txResults.Events[i])
 			ethereumTxHash = ethereumTxEvent.MustGetAttributeByKey("ethereumTxHash")
-			break
 		} else if event.Type == "send_packet" {
 			maybeIBCSendPacketEvent = utils.NewParsedTxsResultLogEvent(&txResults.Events[i])
 		}
