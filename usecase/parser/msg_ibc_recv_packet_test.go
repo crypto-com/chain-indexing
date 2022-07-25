@@ -85,7 +85,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -111,6 +111,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					-1,
 				),
 			))
+			Expect(possibleSignerAddresses[1]).To(Equal("cro1dulwqgcdpemn8c34sjd92fxepz5p0sqpeevw7f"))
 		})
 
 		It("should parse Msg commands when there is MsgIBCRecvPacket in the transaction and MsgIBCRecvPacket.PacketAck.Error is NOT empty string", func() {
@@ -170,7 +171,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -203,6 +204,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					-1,
 				),
 			))
+			Expect(possibleSignerAddresses[1]).To(Equal("tcro18mcwp6vtlvpgxy62eledk3chhjguw636x8n7h6"))
 		})
 
 		It("should parse Msg commands when there is MsgIBCRecvPacket in the transaction and missing fungible_token_packet event in TxsResult log", func() {
@@ -261,7 +263,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -287,6 +289,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					-1,
 				),
 			))
+			Expect(possibleSignerAddresses[1]).To(Equal("tcro18mcwp6vtlvpgxy62eledk3chhjguw636x8n7h6"))
 		})
 
 		It("should parse Msg commands when there is SoloMachine MsgIBCRecvPacket in the transaction", func() {
@@ -349,7 +352,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -375,6 +378,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			)
 
 			Expect(json.MustMarshalToString(typedEvent)).To(Equal(expectedWithUUID))
+			Expect(possibleSignerAddresses[0]).To(Equal("tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy"))
 		})
 	})
 })

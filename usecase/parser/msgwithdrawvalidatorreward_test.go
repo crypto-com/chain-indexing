@@ -33,7 +33,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -72,6 +72,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					},
 				),
 			}))
+			Expect(possibleSignerAddresses).To(Equal([]string{"tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4", "tcrocncl15grftg88l0gdw4mg9t9pwnl0pde2asjzekz0ek"}))
 		})
 
 		It("should parse failed MsgWithdrawValidatorCommission in the transaction", func() {
@@ -87,7 +88,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -126,6 +127,8 @@ var _ = Describe("ParseMsgCommands", func() {
 					},
 				),
 			}))
+			Expect(possibleSignerAddresses).To(Equal([]string{"tcro1pm27djcs5djxjsxw3unrkv3m3jtxdexk73hqel", "tcrocncl1pm27djcs5djxjsxw3unrkv3m3jtxdexktw5epu"}))
+
 		})
 
 		It("should parse Msg commands when there is no reward withdraw in the MsgWithdrawDelegatorReward", func() {
@@ -140,7 +143,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -166,6 +169,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					},
 				),
 			}))
+			Expect(possibleSignerAddresses).To(Equal([]string{"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"}))
 		})
 	})
 })

@@ -7,6 +7,7 @@ import (
 )
 
 type commandA struct{}
+
 func (c commandA) Name() string {
 	return "commandA"
 }
@@ -18,6 +19,7 @@ func (c commandA) Exec() (entity_event.Event, error) {
 }
 
 type commandB struct{}
+
 func (c commandB) Name() string {
 	return "commandB"
 }
@@ -28,14 +30,14 @@ func (c commandB) Exec() (entity_event.Event, error) {
 	return nil, nil
 }
 
-func ParserA(_ utils.CosmosParserParams) []command.Command {
+func ParserA(_ utils.CosmosParserParams) ([]command.Command, []string) {
 	return []command.Command{
 		commandA{},
-	}
+	}, []string{}
 }
 
-func ParserB(_ utils.CosmosParserParams) []command.Command {
+func ParserB(_ utils.CosmosParserParams) ([]command.Command, []string) {
 	return []command.Command{
 		commandB{},
-	}
+	}, []string{}
 }

@@ -5,7 +5,10 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
+	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
+	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
+
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	command_entity "github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/entity/event"
@@ -25,7 +28,8 @@ const DEFAULT_MAX_RETRY_TIME = MAX_RETRY_TIME_ALWAYS_RETRY
 
 type SyncManager struct {
 	rdbConn              rdb.Conn
-	client               *tendermint.HTTPClient
+	tendermintClient     *tendermint.HTTPClient
+	cosmosClient         cosmosapp_interface.Client
 	logger               applogger.Logger
 	pollingInterval      time.Duration
 	maxRetryInterval     time.Duration
@@ -58,7 +62,9 @@ type SyncManagerParams struct {
 type SyncManagerConfig struct {
 	WindowSize               int
 	TendermintRPCUrl         string
+	CosmosAppHTTPRPCURL      string
 	InsecureTendermintClient bool
+	InsecureCosmosAppClient  bool
 	StrictGenesisParsing     bool
 
 	AccountAddressPrefix string
@@ -84,9 +90,21 @@ func NewSyncManager(
 		)
 	}
 
+	var cosmosClient cosmosapp_interface.Client
+	if params.Config.InsecureCosmosAppClient {
+		cosmosClient = cosmosapp_infrastructure.NewInsecureHTTPClient(
+			params.Config.CosmosAppHTTPRPCURL, params.Config.StakingDenom,
+		)
+	} else {
+		cosmosClient = cosmosapp_infrastructure.NewHTTPClient(
+			params.Config.CosmosAppHTTPRPCURL, params.Config.StakingDenom,
+		)
+	}
+
 	return &SyncManager{
-		rdbConn: params.RDbConn,
-		client:  tendermintClient,
+		rdbConn:          params.RDbConn,
+		tendermintClient: tendermintClient,
+		cosmosClient:     cosmosClient,
 		logger: params.Logger.WithFields(applogger.LogFields{
 			"module": "SyncManager",
 		}),
@@ -183,7 +201,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 	logger.Info("synchronizing block")
 
 	if blockHeight == int64(0) {
-		genesis, err := manager.client.Genesis()
+		genesis, err := manager.tendermintClient.Genesis()
 		if err != nil {
 			return nil, fmt.Errorf("error requesting chain genesis: %v", err)
 		}
@@ -192,18 +210,19 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 	}
 
 	// Request tendermint RPC
-	block, rawBlock, err := manager.client.Block(blockHeight)
+	block, rawBlock, err := manager.tendermintClient.Block(blockHeight)
 	if err != nil {
 		return nil, fmt.Errorf("error requesting chain block at height %d: %v", blockHeight, err)
 	}
 
-	blockResults, err := manager.client.BlockResults(blockHeight)
+	blockResults, err := manager.tendermintClient.BlockResults(blockHeight)
 	if err != nil {
 		return nil, fmt.Errorf("error requesting chain block_results at height %d: %v", blockHeight, err)
 	}
 
 	commands, err := parser.ParseBlockToCommands(
 		manager.parserManager,
+		manager.cosmosClient,
 		manager.txDecoder,
 		block,
 		rawBlock,
@@ -220,7 +239,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 
 // Run starts the polling service for blocks
 func (manager *SyncManager) Run() error {
-	tracker := chainfeed.NewBlockHeightTracker(manager.logger, manager.client)
+	tracker := chainfeed.NewBlockHeightTracker(manager.logger, manager.tendermintClient)
 	manager.latestBlockHeight = tracker.GetLatestBlockHeight()
 	blockHeightCh := make(chan int64, 1)
 	go func() {

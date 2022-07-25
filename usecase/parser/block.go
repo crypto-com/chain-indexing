@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 
+	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
@@ -12,6 +13,7 @@ import (
 
 func ParseBlockToCommands(
 	parserManager *utils.CosmosParserManager,
+	cosmosClient cosmosapp_interface.Client,
 	txDecoder *utils.TxDecoder,
 	block *usecase_model.Block,
 	rawBlock *usecase_model.RawBlock,
@@ -35,13 +37,7 @@ func ParseBlockToCommands(
 	commands = append(commands, createBlockCommand)
 
 	if len(blockResults.TxsResults) > 0 {
-		transactionCommands, parseErr := ParseTransactionCommands(txDecoder, block, blockResults, accountAddressPrefix)
-		if parseErr != nil {
-			return nil, fmt.Errorf("error parsing transaction commands: %v", parseErr)
-		}
-		commands = append(commands, transactionCommands...)
-
-		msgCommands, parseErr := ParseBlockTxsMsgToCommands(
+		msgCommands, possibleSignerAddresses, parseErr := ParseBlockTxsMsgToCommands(
 			parserManager,
 			txDecoder,
 			block,
@@ -52,6 +48,12 @@ func ParseBlockToCommands(
 		if parseErr != nil {
 			return nil, fmt.Errorf("error parsing message commands: %v", parseErr)
 		}
+
+		transactionCommands, parseErr := ParseTransactionCommands(txDecoder, cosmosClient, block, blockResults, accountAddressPrefix, possibleSignerAddresses)
+		if parseErr != nil {
+			return nil, fmt.Errorf("error parsing transaction commands: %v", parseErr)
+		}
+		commands = append(commands, transactionCommands...)
 		commands = append(commands, msgCommands...)
 
 		txsAccountTransferCommands, parseErr := ParseTxAccountTransferCommands(

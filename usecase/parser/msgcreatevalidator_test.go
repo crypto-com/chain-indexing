@@ -29,7 +29,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -72,6 +72,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					Amount:            coin.MustParseCoinNormalized("10000000000000basetcro"),
 				},
 			)))
+			Expect(possibleSignerAddresses).To(Equal([]string{"tcro109ww3ss92v4vsaq470vvgw528mtqp98mq0vvp9", "tcrocncl109ww3ss92v4vsaq470vvgw528mtqp98m4s04ex"}))
 		})
 	})
 })
