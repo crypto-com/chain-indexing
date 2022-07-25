@@ -21,7 +21,7 @@ func run(args []string) error {
 		Name:                 filepath.Base(args[0]),
 		Usage:                "Crypto.org Chain Indexing Service",
 		Version:              "v0.0.1",
-		Copyright:            "(c) 2020 Crypto.com",
+		Copyright:            "(c) 2020-present Crypto.com",
 		EnableBashCompletion: true,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
