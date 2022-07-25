@@ -42,12 +42,12 @@ var _ = Describe("ParseManager", func() {
 		pm.RegisterParser(parserKey, 0, test.ParserA)
 
 		p := pm.GetParser(parserKey, 0)
-		cmds := p(utils.CosmosParserParams{})
+		cmds, _ := p(utils.CosmosParserParams{})
 
 		Expect(cmds[0].Name()).To(Equal("commandA"))
 
 		p = pm.GetParser(parserKey, 1)
-		cmds = p(utils.CosmosParserParams{})
+		cmds, _ = p(utils.CosmosParserParams{})
 
 		Expect(cmds[0].Name()).To(Equal("commandA"))
 	})
@@ -72,12 +72,12 @@ var _ = Describe("ParseManager", func() {
 		pm.RegisterParser(parserKey, 10, test.ParserB)
 
 		p := pm.GetParser(parserKey, 10)
-		cmds := p(utils.CosmosParserParams{})
+		cmds, _ := p(utils.CosmosParserParams{})
 
 		Expect(cmds[0].Name()).To(Equal("commandB"))
 
 		p = pm.GetParser(parserKey, 1)
-		cmds = p(utils.CosmosParserParams{})
+		cmds, _ = p(utils.CosmosParserParams{})
 
 		Expect(cmds[0].Name()).To(Equal("commandA"))
 	})
@@ -100,14 +100,14 @@ var _ = Describe("ParseManager", func() {
 		pm.RegisterParser(parserKey, 0, test.ParserA)
 
 		p := pm.GetParser(parserKey, 1)
-		cmds := p(utils.CosmosParserParams{})
+		cmds, _ := p(utils.CosmosParserParams{})
 
 		Expect(cmds[0].Name()).To(Equal("commandA"))
 
 		pm.RegisterParser(parserKey, 0, test.ParserB)
 
 		p = pm.GetParser(parserKey, 1)
-		cmds = p(utils.CosmosParserParams{})
+		cmds, _ = p(utils.CosmosParserParams{})
 
 		Expect(cmds[0].Name()).To(Equal("commandB"))
 	})

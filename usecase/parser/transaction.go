@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
@@ -18,9 +19,11 @@ import (
 
 func ParseTransactionCommands(
 	txDecoder *utils.TxDecoder,
+	cosmosClient cosmosapp_interface.Client,
 	block *model.Block,
 	blockResults *model.BlockResults,
 	accountAddressPrefix string,
+	possibleSignerAddresses []string,
 ) ([]command.Command, error) {
 	blockHeight := blockResults.Height
 	cmds := make([]command.Command, 0, len(blockResults.TxsResults))
@@ -61,7 +64,7 @@ func ParseTransactionCommands(
 		}
 
 		signers, parseSignerInfosErr := ParseSignerInfosToTransactionSigners(
-			tx.AuthInfo.SignerInfos, accountAddressPrefix,
+			cosmosClient, tx.AuthInfo.SignerInfos, accountAddressPrefix, possibleSignerAddresses,
 		)
 		if parseSignerInfosErr != nil {
 			return nil, fmt.Errorf("error parsing SignerInfos: %v", parseSignerInfosErr)

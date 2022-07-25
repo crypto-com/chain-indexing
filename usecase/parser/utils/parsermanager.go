@@ -36,7 +36,7 @@ type CosmosParserManagerParams struct {
 
 type CosmosParser func(
 	CosmosParserParams,
-) []command.Command
+) ([]command.Command, []string)
 
 type CosmosParserParams struct {
 	AddressPrefix   string
@@ -46,7 +46,6 @@ type CosmosParserParams struct {
 	MsgIndex        int
 	Msg             map[string]interface{}
 	ParserManager   *CosmosParserManager
-	Logger          applogger.Logger
 }
 
 func NewCosmosParserManager(params CosmosParserManagerParams) *CosmosParserManager {

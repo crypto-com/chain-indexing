@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/internal/base64"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -11,12 +12,18 @@ import (
 )
 
 func ParseSignerInfosToTransactionSigners(
+	cosmosClient cosmosapp_interface.Client,
 	signerInfos []utils.SignerInfo,
 	accountAddressPrefix string,
+	possibleSignerAddresses []string,
 ) ([]model.TransactionSigner, error) {
 	var signers []model.TransactionSigner
 
-	for _, signer := range signerInfos {
+	if len(signerInfos) <= 0 && len(possibleSignerAddresses) <= 0 {
+		panic("error signer info not found")
+	}
+
+	for i, signer := range signerInfos {
 		var transactionSignerInfo *model.TransactionSignerKeyInfo
 		var address string
 
@@ -24,10 +31,22 @@ func ParseSignerInfosToTransactionSigners(
 		if parseErr != nil {
 			return nil, fmt.Errorf("error parsing account sequence: %v", parseErr)
 		}
+
 		if signer.ModeInfo.MaybeSingle != nil {
 			if signer.MaybePublicKey == nil {
-				// FIXME: extract signer address from message: https://github.com/crypto-com/chain-indexing/issues/685
-				address = ""
+				if len(possibleSignerAddresses) < i+1 {
+					address = ""
+				} else {
+					address = possibleSignerAddresses[i]
+					accountInfo, _ := cosmosClient.Account(address)
+					if accountInfo != nil {
+						transactionSignerInfo = &model.TransactionSignerKeyInfo{
+							Type:       accountInfo.MaybePubkey.Type,
+							IsMultiSig: false,
+							Pubkeys:    []string{accountInfo.MaybePubkey.Key},
+						}
+					}
+				}
 			} else {
 				transactionSignerInfo = &model.TransactionSignerKeyInfo{
 					Type:       signer.MaybePublicKey.Type,

@@ -3,6 +3,7 @@ package parser_test
 import (
 	"strings"
 
+	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
 	. "github.com/onsi/ginkgo"
@@ -30,15 +31,18 @@ var _ = Describe("TransactionParser", func() {
 	Describe("ParseTransactionCommands", func() {
 		It("should parse Transaction commands when there is two Msg in one transaction", func() {
 			txFeeParser := utils.NewTxDecoder()
+			mockClient := cosmosapp.NewMockClient()
 			block, _ := mustParseBlockResp(usecase_parser_test.ONE_TX_TWO_MSG_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.ONE_TX_TWO_MSG_BLOCK_RESULTS_RESP)
 			anyAccountAddressPrefix := "tcro"
 
 			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
+				mockClient,
 				block,
 				blockResults,
 				anyAccountAddressPrefix,
+				[]string{},
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
@@ -89,15 +93,18 @@ var _ = Describe("TransactionParser", func() {
 
 		It("should parse Transaction commands when there is transaction fee", func() {
 			txFeeParser := utils.NewTxDecoder()
+			mockClient := cosmosapp.NewMockClient()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_WITH_FEE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_WITH_FEE_BLOCK_RESULTS_RESP)
 			anyAccountAddressPrefix := "tcro"
 
 			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
+				mockClient,
 				block,
 				blockResults,
 				anyAccountAddressPrefix,
+				[]string{},
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
@@ -137,15 +144,18 @@ var _ = Describe("TransactionParser", func() {
 
 		It("should parse Transaction commands when transaction failed with fee", func() {
 			txFeeParser := utils.NewTxDecoder()
+			mockClient := cosmosapp.NewMockClient()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESULTS_RESP)
 			anyAccountAddressPrefix := "tcro"
 
 			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
+				mockClient,
 				block,
 				blockResults,
 				anyAccountAddressPrefix,
+				[]string{},
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
@@ -184,15 +194,18 @@ var _ = Describe("TransactionParser", func() {
 
 		It("should parse Transaction commands when transaction failed without fee", func() {
 			txFeeParser := utils.NewTxDecoder()
+			mockClient := cosmosapp.NewMockClient()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_FAILED_WITHOUT_FEE_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_FAILED_WITHOUT_FEE_BLOCK_RESULTS_RESP))
 			anyAccountAddressPrefix := "tcro"
 
 			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
+				mockClient,
 				block,
 				blockResults,
 				anyAccountAddressPrefix,
+				[]string{},
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
@@ -231,15 +244,18 @@ var _ = Describe("TransactionParser", func() {
 
 		It("should parse Transaction commands when there is transaction memo and timeout_height", func() {
 			txFeeParser := utils.NewTxDecoder()
+			mockClient := cosmosapp.NewMockClient()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESULTS_RESP)
 			anyAccountAddressPrefix := "tcro"
 
 			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
+				mockClient,
 				block,
 				blockResults,
 				anyAccountAddressPrefix,
+				[]string{},
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
@@ -278,15 +294,18 @@ var _ = Describe("TransactionParser", func() {
 
 		It("should parse failed Transaction commands when there is transaction memo and timeout_height", func() {
 			txFeeParser := utils.NewTxDecoder()
+			mockClient := cosmosapp.NewMockClient()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESULTS_RESP)
 			anyAccountAddressPrefix := "tcro"
 
 			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
+				mockClient,
 				block,
 				blockResults,
 				anyAccountAddressPrefix,
+				[]string{},
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
@@ -325,15 +344,18 @@ var _ = Describe("TransactionParser", func() {
 
 		It("should parse Transaction commands when the signer public key is empty", func() {
 			txFeeParser := utils.NewTxDecoder()
+			mockClient := cosmosapp.NewMockClient()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_BLOCK_RESULTS_RESP)
 			anyAccountAddressPrefix := "cosmos"
 
 			cmds, err := parser.ParseTransactionCommands(
 				txFeeParser,
+				mockClient,
 				block,
 				blockResults,
 				anyAccountAddressPrefix,
+				[]string{},
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(3))
@@ -358,6 +380,146 @@ var _ = Describe("TransactionParser", func() {
 					FeeGranter:    "",
 					GasWanted:     200000,
 					GasUsed:       66595,
+					Memo:          "",
+					TimeoutHeight: 0,
+				},
+			)))
+		})
+		It("should parse Transaction commands when the signer public key is in state", func() {
+			txFeeParser := utils.NewTxDecoder()
+			mockClient := cosmosapp.MockClient{}
+			block, _ := mustParseBlockResp(usecase_parser_test.TX_SIGNER_PUBKEY_IN_STATE_BLOCK_RESP)
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_SIGNER_PUBKEY_IN_STATE_BLOCK_RESULTS_RESP)
+			anyAccountAddressPrefix := "basecro"
+
+			mockClient.On("Account", "cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7").Return(
+				&cosmosapp.Account{
+					Type:    "AccountType",
+					Address: "cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7",
+					MaybePubkey: &cosmosapp.PubKey{
+						Type: "/cosmos.crypto.secp256k1.PubKey",
+						Key:  "AomWNLM+dBB76InhfghTzlUDOPevNG2AClk286KuSODS",
+					},
+					AccountNumber: "AccountNumber",
+					Sequence:      "1",
+					MaybeModuleAccount: &cosmosapp.ModuleAccount{
+						Name:        "",
+						Permissions: []string{},
+					},
+					MaybeDelayedVestingAccount: &cosmosapp.DelayedVestingAccount{
+						OriginalVesting:  []cosmosapp.VestingBalance{},
+						DelegatedFree:    []cosmosapp.VestingBalance{},
+						DelegatedVesting: []cosmosapp.VestingBalance{},
+						EndTime:          "",
+					},
+					MaybeContinuousVestingAccount: &cosmosapp.ContinuousVestingAccount{
+						OriginalVesting:  []cosmosapp.VestingBalance{},
+						DelegatedFree:    []cosmosapp.VestingBalance{},
+						DelegatedVesting: []cosmosapp.VestingBalance{},
+						StartTime:        "",
+						EndTime:          "",
+					},
+					MaybePeriodicVestingAccount: &cosmosapp.PeriodicVestingAccount{
+						OriginalVesting:  []cosmosapp.VestingBalance{},
+						DelegatedFree:    []cosmosapp.VestingBalance{},
+						DelegatedVesting: []cosmosapp.VestingBalance{},
+						StartTime:        "",
+						EndTime:          "",
+						VestingPeriods:   []cosmosapp.VestingPeriod{},
+					},
+				},
+				nil,
+			)
+			mockClient.On("Account", "cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc").Return(
+				&cosmosapp.Account{
+					Type:    "AccountType",
+					Address: "cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc",
+					MaybePubkey: &cosmosapp.PubKey{
+						Type: "/cosmos.crypto.secp256k1.PubKey",
+						Key:  "ApTiQlAs/mTr9a1RQwmm5G+bXe2MvGRypncY9pAHcWKO",
+					},
+					AccountNumber: "AccountNumber",
+					Sequence:      "1",
+					MaybeModuleAccount: &cosmosapp.ModuleAccount{
+						Name:        "",
+						Permissions: []string{},
+					},
+					MaybeDelayedVestingAccount: &cosmosapp.DelayedVestingAccount{
+						OriginalVesting:  []cosmosapp.VestingBalance{},
+						DelegatedFree:    []cosmosapp.VestingBalance{},
+						DelegatedVesting: []cosmosapp.VestingBalance{},
+						EndTime:          "",
+					},
+					MaybeContinuousVestingAccount: &cosmosapp.ContinuousVestingAccount{
+						OriginalVesting:  []cosmosapp.VestingBalance{},
+						DelegatedFree:    []cosmosapp.VestingBalance{},
+						DelegatedVesting: []cosmosapp.VestingBalance{},
+						StartTime:        "",
+						EndTime:          "",
+					},
+					MaybePeriodicVestingAccount: &cosmosapp.PeriodicVestingAccount{
+						OriginalVesting:  []cosmosapp.VestingBalance{},
+						DelegatedFree:    []cosmosapp.VestingBalance{},
+						DelegatedVesting: []cosmosapp.VestingBalance{},
+						StartTime:        "",
+						EndTime:          "",
+						VestingPeriods:   []cosmosapp.VestingPeriod{},
+					},
+				},
+				nil,
+			)
+
+			cmds, err := parser.ParseTransactionCommands(
+				txFeeParser,
+				&mockClient,
+				block,
+				blockResults,
+				anyAccountAddressPrefix,
+				[]string{"cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7", "cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc"},
+			)
+
+			Expect(err).To(BeNil())
+			Expect(cmds).To(HaveLen(1))
+			expectedBlockHeight := int64(324)
+			Expect(cmds[0]).To(Equal(command_usecase.NewCreateTransaction(
+				expectedBlockHeight,
+				model.CreateTransactionParams{
+					TxHash:   "C98FF5B5B95DC21F6D614D914FDA0A546DAE65E826ABFFE5C89BCF56A6F4112C",
+					Index:    0,
+					Code:     0,
+					Log:      "[{\"msgIndex\":0,\"events\":[{\"type\":\"coin_received\",\"attributes\":[{\"key\":\"receiver\",\"value\":\"cro1mzh0ps49m7ur7y8fwhy5xtt06mq7fnk3xuqset\"},{\"key\":\"amount\",\"value\":\"2basecro\"}]},{\"type\":\"coin_spent\",\"attributes\":[{\"key\":\"spender\",\"value\":\"cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7\"},{\"key\":\"amount\",\"value\":\"1basecro\"},{\"key\":\"spender\",\"value\":\"cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc\"},{\"key\":\"amount\",\"value\":\"1basecro\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"/cosmos.bank.v1beta1.MsgMultiSend\"},{\"key\":\"sender\",\"value\":\"cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7\"},{\"key\":\"sender\",\"value\":\"cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"cro1mzh0ps49m7ur7y8fwhy5xtt06mq7fnk3xuqset\"},{\"key\":\"amount\",\"value\":\"2basecro\"}]}]}]",
+					MsgCount: 1,
+					Signers: []model.TransactionSigner{
+						{
+							MaybeKeyInfo: &model.TransactionSignerKeyInfo{
+								Type:       "/cosmos.crypto.secp256k1.PubKey",
+								IsMultiSig: false,
+								Pubkeys: []string{
+									"AomWNLM+dBB76InhfghTzlUDOPevNG2AClk286KuSODS",
+								},
+								MaybeThreshold: nil,
+							},
+							Address:         "cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7",
+							AccountSequence: 1,
+						},
+						{
+							MaybeKeyInfo: &model.TransactionSignerKeyInfo{
+								Type:       "/cosmos.crypto.secp256k1.PubKey",
+								IsMultiSig: false,
+								Pubkeys: []string{
+									"ApTiQlAs/mTr9a1RQwmm5G+bXe2MvGRypncY9pAHcWKO",
+								},
+								MaybeThreshold: nil,
+							},
+							Address:         "cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc",
+							AccountSequence: 1,
+						},
+					},
+					Fee:           coin.MustParseCoinsNormalized("0basecro"),
+					FeePayer:      "",
+					FeeGranter:    "",
+					GasWanted:     200000,
+					GasUsed:       77224,
 					Memo:          "",
 					TimeoutHeight: 0,
 				},

@@ -488,10 +488,7 @@ func (projection *AccountTransaction) HandleEvents(height int64, events []event_
 func (projection *AccountTransaction) ParseSenderAddresses(senders []model.TransactionSigner) []string {
 	addresses := make([]string, 0, len(senders))
 	for _, sender := range senders {
-		// FIXME: Address should not be empty after https://github.com/crypto-com/chain-indexing/issues/685
-		if sender.Address != "" {
-			addresses = append(addresses, sender.Address)
-		}
+		addresses = append(addresses, sender.Address)
 	}
 	return addresses
 }

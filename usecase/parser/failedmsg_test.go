@@ -24,7 +24,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 
-			cmds, err := parser.ParseBlockTxsMsgToCommands(
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				txDecoder,
 				block,
@@ -47,6 +47,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					Amount:      coin.MustParseCoinsNormalized("1000000000basetcro"),
 				},
 			)}))
+			Expect(possibleSignerAddresses).To(Equal([]string{"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv"}))
 		})
 	})
 })
