@@ -49,6 +49,8 @@ type SyncManager struct {
 	shouldSyncCh      chan bool
 
 	parserManager *utils.CosmosParserManager
+
+	startingBlockHeight int64
 }
 
 type SyncManagerParams struct {
@@ -66,9 +68,9 @@ type SyncManagerConfig struct {
 	InsecureTendermintClient bool
 	InsecureCosmosAppClient  bool
 	StrictGenesisParsing     bool
-
-	AccountAddressPrefix string
-	StakingDenom         string
+	AccountAddressPrefix     string
+	StakingDenom             string
+	StartingBlockHeight      int64
 }
 
 // NewSyncManager creates a new feed with polling for latest block starts at a specific height
@@ -124,6 +126,8 @@ func NewSyncManager(
 		eventHandler: eventHandler,
 
 		parserManager: pm,
+
+		startingBlockHeight: params.Config.StartingBlockHeight,
 	}
 }
 
@@ -138,6 +142,10 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64, isRetry bool) error {
 	currentIndexingHeight := int64(0)
 	if maybeLastIndexedHeight != nil {
 		currentIndexingHeight = *maybeLastIndexedHeight + 1
+	}
+
+	if currentIndexingHeight > 0 && currentIndexingHeight < manager.startingBlockHeight {
+		currentIndexingHeight = manager.startingBlockHeight
 	}
 
 	targetHeight := latestHeight
