@@ -144,10 +144,6 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64, isRetry bool) error {
 		currentIndexingHeight = *maybeLastIndexedHeight + 1
 	}
 
-	if currentIndexingHeight > 0 && currentIndexingHeight < manager.startingBlockHeight {
-		currentIndexingHeight = manager.startingBlockHeight
-	}
-
 	targetHeight := latestHeight
 	if isRetry {
 		// Reduce the block size to be synced when retrying to avoid spamming and wasting resource
@@ -158,8 +154,16 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64, isRetry bool) error {
 	manager.logger.Infof("going to synchronized blocks from %d to %d", currentIndexingHeight, targetHeight)
 	for currentIndexingHeight <= targetHeight {
 		startTime := time.Now()
+		endHeight := targetHeight
+		if currentIndexingHeight == 0 {
+			// Genesis Block as an individual window, size = 1
+			endHeight = 0
+		} else if currentIndexingHeight < manager.startingBlockHeight {
+			currentIndexingHeight = manager.startingBlockHeight
+		}
+
 		blocksCommands, syncedHeight, err := manager.windowSyncStrategy.Sync(
-			currentIndexingHeight, targetHeight, manager.syncBlockWorker,
+			currentIndexingHeight, endHeight, manager.syncBlockWorker,
 		)
 		if err != nil {
 			return fmt.Errorf("error when synchronizing block with window strategy: %v", err)
@@ -195,7 +199,12 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64, isRetry bool) error {
 		// while the local currentIndexingHeight won't be incremented and will be retried later
 		manager.logger.Infof("successfully synced to block height %d", syncedHeight)
 		prometheus.RecordProjectionLatestHeight(manager.eventHandler.Id(), syncedHeight)
-		currentIndexingHeight = syncedHeight + 1
+
+		if syncedHeight == 0 {
+			currentIndexingHeight = manager.startingBlockHeight
+		} else {
+			currentIndexingHeight = syncedHeight + 1
+		}
 	}
 	return nil
 }
