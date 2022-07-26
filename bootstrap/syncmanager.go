@@ -200,11 +200,7 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64, isRetry bool) error {
 		manager.logger.Infof("successfully synced to block height %d", syncedHeight)
 		prometheus.RecordProjectionLatestHeight(manager.eventHandler.Id(), syncedHeight)
 
-		if syncedHeight == 0 {
-			currentIndexingHeight = manager.startingBlockHeight
-		} else {
-			currentIndexingHeight = syncedHeight + 1
-		}
+		currentIndexingHeight = syncedHeight + 1
 	}
 	return nil
 }
