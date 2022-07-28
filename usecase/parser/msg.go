@@ -1257,7 +1257,7 @@ func parseRawMsgGenericGrant(
 		msgCommonParams,
 
 		params,
-	)}, []string{params.MaybeSendGrant.Granter}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgRevoke(
