@@ -154,7 +154,7 @@ func ParseMsgSend(
 ) ([]command.Command, []string) {
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
-	if parserParams.Msg["from_address"] != nil {
+	if parserParams.Msg != nil && parserParams.Msg["from_address"] != nil {
 		possibleSignerAddresses = append(possibleSignerAddresses, parserParams.Msg["from_address"].(string))
 	}
 
