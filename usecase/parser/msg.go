@@ -152,6 +152,14 @@ func ParseBlockTxsMsgToCommands(
 func ParseMsgSend(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if fromAddress, ok := parserParams.Msg["from_address"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, fromAddress.(string))
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgSend(
 		parserParams.MsgCommonParams,
 
@@ -160,7 +168,7 @@ func ParseMsgSend(
 			ToAddress:   parserParams.Msg["to_address"].(string),
 			Amount:      tmcosmosutils.MustNewCoinsFromAmountInterface(parserParams.Msg["amount"].([]interface{})),
 		},
-	)}, []string{parserParams.Msg["from_address"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgMultiSend(
@@ -1224,22 +1232,34 @@ func parseRawMsgGenericGrant(
 			MaybeGenericGrant: &rawMsg,
 		}
 
+		// Getting possible signer address from Msh
+		var possibleSignerAddresses []string
+		if params.MaybeSendGrant != nil {
+			possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeSendGrant.Granter)
+		}
+
 		return []command.Command{command_usecase.NewCreateMsgGrant(
 			msgCommonParams,
 
 			params,
-		)}, []string{params.MaybeSendGrant.Granter}
+		)}, possibleSignerAddresses
 	}
 
 	params := model.MsgGrantParams{
 		MaybeGenericGrant: &rawMsg,
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if params.MaybeSendGrant != nil {
+		possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeSendGrant.Granter)
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgGrant(
 		msgCommonParams,
 
 		params,
-	)}, []string{params.MaybeSendGrant.Granter}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgRevoke(
