@@ -166,7 +166,7 @@ func ParseMsgSend(
 			ToAddress:   parserParams.Msg["to_address"].(string),
 			Amount:      tmcosmosutils.MustNewCoinsFromAmountInterface(parserParams.Msg["amount"].([]interface{})),
 		},
-	)}, possibleSignerAddresses}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgMultiSend(
@@ -1230,11 +1230,17 @@ func parseRawMsgGenericGrant(
 			MaybeGenericGrant: &rawMsg,
 		}
 
+		// Getting possible signer address from Msh
+		var possibleSignerAddresses []string
+		if params.MaybeSendGrant != nil {
+			possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeSendGrant.Granter)
+		}
+
 		return []command.Command{command_usecase.NewCreateMsgGrant(
 			msgCommonParams,
 
 			params,
-		)}, []string{params.MaybeSendGrant.Granter}
+		)}, possibleSignerAddresses
 	}
 
 	params := model.MsgGrantParams{
