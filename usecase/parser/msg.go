@@ -152,7 +152,7 @@ func ParseBlockTxsMsgToCommands(
 func ParseMsgSend(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
-	// Getting possible signer address from Msh
+	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
 	if parserParams.Msg["from_address"] != nil {
 		possibleSignerAddresses = append(possibleSignerAddresses, parserParams.Msg["from_address"].(string))
