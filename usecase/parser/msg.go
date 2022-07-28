@@ -1247,7 +1247,7 @@ func parseRawMsgGenericGrant(
 		MaybeGenericGrant: &rawMsg,
 	}
 
-	// Getting possible signer address from Msh
+	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
 	if params.MaybeSendGrant != nil {
 		possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeSendGrant.Granter)
