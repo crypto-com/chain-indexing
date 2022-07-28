@@ -154,8 +154,10 @@ func ParseMsgSend(
 ) ([]command.Command, []string) {
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
-	if parserParams.Msg != nil && parserParams.Msg["from_address"] != nil {
-		possibleSignerAddresses = append(possibleSignerAddresses, parserParams.Msg["from_address"].(string))
+	if parserParams.Msg != nil {
+		if fromAddress, ok := parserParams.Msg["from_address"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, fromAddress.(string))
+		}
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgSend(
