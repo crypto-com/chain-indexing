@@ -152,6 +152,12 @@ func ParseBlockTxsMsgToCommands(
 func ParseMsgSend(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
+	// Getting possible signer address from Msh
+	var possibleSignerAddresses []string
+	if parserParams.Msg["from_address"] != nil {
+		possibleSignerAddresses = append(possibleSignerAddresses, parserParams.Msg["from_address"].(string))
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgSend(
 		parserParams.MsgCommonParams,
 
@@ -160,7 +166,7 @@ func ParseMsgSend(
 			ToAddress:   parserParams.Msg["to_address"].(string),
 			Amount:      tmcosmosutils.MustNewCoinsFromAmountInterface(parserParams.Msg["amount"].([]interface{})),
 		},
-	)}, []string{parserParams.Msg["from_address"].(string)}
+	)}, possibleSignerAddresses}
 }
 
 func ParseMsgMultiSend(
@@ -1233,6 +1239,12 @@ func parseRawMsgGenericGrant(
 
 	params := model.MsgGrantParams{
 		MaybeGenericGrant: &rawMsg,
+	}
+
+	// Getting possible signer address from Msh
+	var possibleSignerAddresses []string
+	if params.MaybeSendGrant != nil {
+		possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeSendGrant.Granter)
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgGrant(
