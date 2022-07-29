@@ -140,6 +140,7 @@ func ParseBlockTxsMsgToCommands(
 					Msg:             msg,
 					MsgIndex:        msgIndex,
 					ParserManager:   parserManager,
+					Logger:          parserManager.GetLogger(),
 				})
 			}
 			addresses = append(addresses, possibleSignerAddresses...)
@@ -176,14 +177,14 @@ func ParseMsgMultiSend(
 ) ([]command.Command, []string) {
 	rawInputs, _ := parserParams.Msg["inputs"].([]interface{})
 	inputs := make([]model.MsgMultiSendInput, 0, len(rawInputs))
-	addresses := make([]string, 0, len(rawInputs))
+	possibleSignerAddresses := make([]string, 0, len(rawInputs))
 	for _, rawInput := range rawInputs {
 		input, _ := rawInput.(map[string]interface{})
 		inputs = append(inputs, model.MsgMultiSendInput{
 			Address: input["address"].(string),
 			Amount:  tmcosmosutils.MustNewCoinsFromAmountInterface(input["coins"].([]interface{})),
 		})
-		addresses = append(addresses, input["address"].(string))
+		possibleSignerAddresses = append(possibleSignerAddresses, input["address"].(string))
 	}
 
 	rawOutputs, _ := parserParams.Msg["outputs"].([]interface{})
@@ -203,12 +204,20 @@ func ParseMsgMultiSend(
 			Inputs:  inputs,
 			Outputs: outputs,
 		},
-	)}, addresses
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgSetWithdrawAddress(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if delegatorAddress, ok := parserParams.Msg["delegator_address"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, delegatorAddress.(string))
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgSetWithdrawAddress(
 		parserParams.MsgCommonParams,
 
@@ -216,12 +225,20 @@ func ParseMsgSetWithdrawAddress(
 			DelegatorAddress: parserParams.Msg["delegator_address"].(string),
 			WithdrawAddress:  parserParams.Msg["withdraw_address"].(string),
 		},
-	)}, []string{parserParams.Msg["delegator_address"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgWithdrawDelegatorReward(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if delegatorAddress, ok := parserParams.Msg["delegator_address"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, delegatorAddress.(string))
+		}
+	}
+
 	if !parserParams.MsgCommonParams.TxSuccess {
 		delegatorAddress, _ := parserParams.Msg["delegator_address"].(string)
 		return []command.Command{command_usecase.NewCreateMsgWithdrawDelegatorReward(
@@ -233,7 +250,7 @@ func ParseMsgWithdrawDelegatorReward(
 				RecipientAddress: delegatorAddress,
 				Amount:           coin.NewEmptyCoins(),
 			},
-		)}, []string{delegatorAddress}
+		)}, possibleSignerAddresses
 	}
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	var recipient string
@@ -257,12 +274,20 @@ func ParseMsgWithdrawDelegatorReward(
 			RecipientAddress: recipient,
 			Amount:           amount,
 		},
-	)}, []string{parserParams.Msg["delegator_address"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgWithdrawValidatorCommission(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if validatorAddress, ok := parserParams.Msg["validator_address"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, validatorAddress.(string))
+		}
+	}
+
 	if !parserParams.MsgCommonParams.TxSuccess {
 		return []command.Command{command_usecase.NewCreateMsgWithdrawValidatorCommission(
 			parserParams.MsgCommonParams,
@@ -272,7 +297,7 @@ func ParseMsgWithdrawValidatorCommission(
 				RecipientAddress: "",
 				Amount:           coin.NewEmptyCoins(),
 			},
-		)}, []string{parserParams.Msg["validator_address"].(string)}
+		)}, possibleSignerAddresses
 	}
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	var recipient string
@@ -295,12 +320,20 @@ func ParseMsgWithdrawValidatorCommission(
 			RecipientAddress: recipient,
 			Amount:           amount,
 		},
-	)}, []string{parserParams.Msg["validator_address"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgFundCommunityPool(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if depositor, ok := parserParams.Msg["depositor"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, depositor.(string))
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgFundCommunityPool(
 		parserParams.MsgCommonParams,
 
@@ -308,7 +341,7 @@ func ParseMsgFundCommunityPool(
 			Depositor: parserParams.Msg["depositor"].(string),
 			Amount:    tmcosmosutils.MustNewCoinsFromAmountInterface(parserParams.Msg["amount"].([]interface{})),
 		},
-	)}, []string{parserParams.Msg["depositor"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgSubmitProposal(
@@ -335,9 +368,8 @@ func ParseMsgSubmitProposal(
 		cmds, addresses = parseMsgSubmitCancelSoftwareUpgradeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.gov.v1beta1.TextProposal" {
 		cmds, addresses = parseMsgSubmitTextProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
-		// FIXME: https://github.com/crypto-com/chain-indexing/issues/707
-		//} else {
-		//	panic(fmt.Sprintf("unrecognzied govenance proposal type `%s`", proposalContent.Type))
+	} else {
+		parserParams.Logger.Errorf("unrecognzied govenance proposal type `%s`", proposalContent.Type)
 	}
 
 	if parserParams.MsgCommonParams.TxSuccess {
@@ -370,6 +402,14 @@ func parseMsgSubmitParamChangeProposal(
 		panic("error decoding param change proposal content")
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if msg != nil {
+		if proposer, ok := msg["proposer"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, proposer.(string))
+		}
+	}
+
 	if !txSuccess {
 		return []command.Command{command_usecase.NewCreateMsgSubmitParamChangeProposal(
 			msgCommonParams,
@@ -382,7 +422,7 @@ func parseMsgSubmitParamChangeProposal(
 					msg["initial_deposit"].([]interface{}),
 				),
 			},
-		)}, []string{msg["proposer"].(string)}
+		)}, possibleSignerAddresses
 	}
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	event := log.GetEventByType("submit_proposal")
@@ -405,7 +445,7 @@ func parseMsgSubmitParamChangeProposal(
 				msg["initial_deposit"].([]interface{}),
 			),
 		},
-	)}, []string{msg["proposer"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func parseMsgSubmitCommunityFundSpendProposal(
@@ -428,6 +468,14 @@ func parseMsgSubmitCommunityFundSpendProposal(
 		Amount:           tmcosmosutils.MustNewCoinsFromAmountInterface(rawProposalContent.Amount),
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if msg != nil {
+		if proposer, ok := msg["proposer"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, proposer.(string))
+		}
+	}
+
 	if !txSuccess {
 		return []command.Command{command_usecase.NewCreateMsgSubmitCommunityPoolSpendProposal(
 			msgCommonParams,
@@ -440,7 +488,7 @@ func parseMsgSubmitCommunityFundSpendProposal(
 					msg["initial_deposit"].([]interface{}),
 				),
 			},
-		)}, []string{msg["proposer"].(string)}
+		)}, possibleSignerAddresses
 	}
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
@@ -464,7 +512,7 @@ func parseMsgSubmitCommunityFundSpendProposal(
 				msg["initial_deposit"].([]interface{}),
 			),
 		},
-	)}, []string{msg["proposer"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func parseMsgSubmitSoftwareUpgradeProposal(
@@ -496,6 +544,14 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 		},
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if msg != nil {
+		if proposer, ok := msg["proposer"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, proposer.(string))
+		}
+	}
+
 	if !txSuccess {
 		return []command.Command{command_usecase.NewCreateMsgSubmitSoftwareUpgradeProposal(
 			msgCommonParams,
@@ -508,7 +564,7 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 					msg["initial_deposit"].([]interface{}),
 				),
 			},
-		)}, []string{msg["proposer"].(string)}
+		)}, possibleSignerAddresses
 	}
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
@@ -532,7 +588,7 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 				msg["initial_deposit"].([]interface{}),
 			),
 		},
-	)}, []string{msg["proposer"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func parseMsgSubmitCancelSoftwareUpgradeProposal(
@@ -548,6 +604,14 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 		panic("error decoding software upgrade proposal content")
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if msg != nil {
+		if proposer, ok := msg["proposer"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, proposer.(string))
+		}
+	}
+
 	if !txSuccess {
 		return []command.Command{command_usecase.NewCreateMsgSubmitCancelSoftwareUpgradeProposal(
 			msgCommonParams,
@@ -560,7 +624,7 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 					msg["initial_deposit"].([]interface{}),
 				),
 			},
-		)}, []string{msg["proposer"].(string)}
+		)}, possibleSignerAddresses
 	}
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
@@ -584,7 +648,7 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 				msg["initial_deposit"].([]interface{}),
 			),
 		},
-	)}, []string{msg["proposer"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func parseMsgSubmitTextProposal(
@@ -600,6 +664,14 @@ func parseMsgSubmitTextProposal(
 		panic("error decoding text proposal content")
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if msg != nil {
+		if proposer, ok := msg["proposer"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, proposer.(string))
+		}
+	}
+
 	if !txSuccess {
 		return []command.Command{command_usecase.NewCreateMsgSubmitTextProposal(
 			msgCommonParams,
@@ -612,7 +684,7 @@ func parseMsgSubmitTextProposal(
 					msg["initial_deposit"].([]interface{}),
 				),
 			},
-		)}, []string{msg["proposer"].(string)}
+		)}, possibleSignerAddresses
 	}
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
@@ -636,12 +708,21 @@ func parseMsgSubmitTextProposal(
 				msg["initial_deposit"].([]interface{}),
 			),
 		},
-	)}, []string{msg["proposer"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgVote(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
+
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if voter, ok := parserParams.Msg["voter"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, voter.(string))
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgVote(
 		parserParams.MsgCommonParams,
 
@@ -650,7 +731,7 @@ func ParseMsgVote(
 			Voter:      parserParams.Msg["voter"].(string),
 			Option:     parserParams.Msg["option"].(string),
 		},
-	)}, []string{parserParams.Msg["voter"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgDeposit(
@@ -665,6 +746,14 @@ func ParseMsgDeposit(
 			Amount:     tmcosmosutils.MustNewCoinsFromAmountInterface(parserParams.Msg["amount"].([]interface{})),
 		},
 	)}
+
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if depositor, ok := parserParams.Msg["depositor"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, depositor.(string))
+		}
+	}
 
 	if parserParams.MsgCommonParams.TxSuccess {
 		log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -683,7 +772,7 @@ func ParseMsgDeposit(
 		}
 	}
 
-	return cmds, []string{parserParams.Msg["depositor"].(string)}
+	return cmds, possibleSignerAddresses
 }
 
 func ParseMsgDelegate(
@@ -693,6 +782,14 @@ func ParseMsgDelegate(
 	amount, amountErr := tmcosmosutils.NewCoinFromAmountInterface(amountValue)
 	if amountErr != nil {
 		amount = coin.Coin{}
+	}
+
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if delegatorAddress, ok := parserParams.Msg["delegator_address"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, delegatorAddress.(string))
+		}
 	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
@@ -705,7 +802,7 @@ func ParseMsgDelegate(
 				Amount:             amount,
 				AutoClaimedRewards: coin.Coin{},
 			},
-		)}, []string{parserParams.Msg["delegator_address"].(string)}
+		)}, possibleSignerAddresses
 	}
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 
@@ -735,7 +832,7 @@ func ParseMsgDelegate(
 			Amount:             amount,
 			AutoClaimedRewards: autoClaimedRewards,
 		},
-	)}, []string{parserParams.Msg["delegator_address"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgUndelegate(
@@ -745,6 +842,14 @@ func ParseMsgUndelegate(
 	amount, amountErr := tmcosmosutils.NewCoinFromAmountInterface(amountValue)
 	if amountErr != nil {
 		amount = coin.Coin{}
+	}
+
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if delegatorAddress, ok := parserParams.Msg["delegator_address"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, delegatorAddress.(string))
+		}
 	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
@@ -758,7 +863,7 @@ func ParseMsgUndelegate(
 				Amount:                amount,
 				AutoClaimedRewards:    coin.Coin{},
 			},
-		)}, []string{parserParams.Msg["delegator_address"].(string)}
+		)}, possibleSignerAddresses
 	}
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
@@ -800,7 +905,7 @@ func ParseMsgUndelegate(
 			Amount:                amount,
 			AutoClaimedRewards:    autoClaimedRewards,
 		},
-	)}, []string{parserParams.Msg["delegator_address"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgBeginRedelegate(
@@ -810,6 +915,14 @@ func ParseMsgBeginRedelegate(
 	amount, amountErr := tmcosmosutils.NewCoinFromAmountInterface(amountValue)
 	if amountErr != nil {
 		amount = coin.Coin{}
+	}
+
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if delegatorAddress, ok := parserParams.Msg["delegator_address"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, delegatorAddress.(string))
+		}
 	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
@@ -823,7 +936,7 @@ func ParseMsgBeginRedelegate(
 				Amount:              amount,
 				AutoClaimedRewards:  coin.Coin{},
 			},
-		)}, []string{parserParams.Msg["delegator_address"].(string)}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -854,24 +967,32 @@ func ParseMsgBeginRedelegate(
 			Amount:              amount,
 			AutoClaimedRewards:  autoClaimedRewards,
 		},
-	)}, []string{parserParams.Msg["delegator_address"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgUnjail(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if validatorAddr, ok := parserParams.Msg["validator_addr"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, validatorAddr.(string))
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgUnjail(
 		parserParams.MsgCommonParams,
 
 		model.MsgUnjailParams{
 			ValidatorAddr: parserParams.Msg["validator_addr"].(string),
 		},
-	)}, []string{parserParams.Msg["validator_addr"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func parseGenesisGenTxsMsgCreateValidator(
 	msg map[string]interface{},
-) []command.Command {
+) ([]command.Command, []string) {
 	amountValue, _ := msg["value"].(map[string]interface{})
 	amount, amountErr := tmcosmosutils.NewCoinFromAmountInterface(amountValue)
 	if amountErr != nil {
@@ -909,6 +1030,17 @@ func parseGenesisGenTxsMsgCreateValidator(
 		}
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if msg != nil {
+		if delegatorAddress, ok := msg["delegator_address"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, delegatorAddress.(string))
+		}
+		if validatorAddress, ok := msg["validator_address"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, validatorAddress.(string))
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateGenesisValidator(
 		genesis.CreateGenesisValidatorParams{
 			// Genesis validator are always bonded
@@ -923,7 +1055,7 @@ func parseGenesisGenTxsMsgCreateValidator(
 			Amount:            amount,
 			Jailed:            false,
 		},
-	)}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgCreateValidator(
@@ -966,6 +1098,17 @@ func ParseMsgCreateValidator(
 		}
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if delegatorAddress, ok := parserParams.Msg["delegator_address"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, delegatorAddress.(string))
+		}
+		if validatorAddress, ok := parserParams.Msg["validator_address"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, validatorAddress.(string))
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgCreateValidator(
 		parserParams.MsgCommonParams,
 
@@ -978,7 +1121,7 @@ func ParseMsgCreateValidator(
 			TendermintPubkey:  tendermintPubkey["key"].(string),
 			Amount:            amount,
 		},
-	)}, []string{parserParams.Msg["delegator_address"].(string), parserParams.Msg["validator_address"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgEditValidator(
@@ -1004,6 +1147,15 @@ func ParseMsgEditValidator(
 	if parserParams.Msg["min_self_delegation"] != nil {
 		maybeMinSelfDelegation = primptr.String(parserParams.Msg["min_self_delegation"].(string))
 	}
+
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if validatorAddress, ok := parserParams.Msg["validator_address"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, validatorAddress.(string))
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgEditValidator(
 		parserParams.MsgCommonParams,
 
@@ -1013,12 +1165,20 @@ func ParseMsgEditValidator(
 			MaybeCommissionRate:    maybeCommissionRate,
 			MaybeMinSelfDelegation: maybeMinSelfDelegation,
 		},
-	)}, []string{parserParams.Msg["validator_address"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgNFTIssueDenom(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if sender, ok := parserParams.Msg["sender"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, sender.(string))
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgNFTIssueDenom(
 		parserParams.MsgCommonParams,
 
@@ -1028,12 +1188,20 @@ func ParseMsgNFTIssueDenom(
 			Schema:    parserParams.Msg["schema"].(string),
 			Sender:    parserParams.Msg["sender"].(string),
 		},
-	)}, []string{parserParams.Msg["sender"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgNFTMintNFT(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if sender, ok := parserParams.Msg["sender"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, sender.(string))
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgNFTMintNFT(
 		parserParams.MsgCommonParams,
 
@@ -1046,12 +1214,20 @@ func ParseMsgNFTMintNFT(
 			Sender:    parserParams.Msg["sender"].(string),
 			Recipient: parserParams.Msg["recipient"].(string),
 		},
-	)}, []string{parserParams.Msg["sender"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgNFTTransferNFT(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if sender, ok := parserParams.Msg["sender"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, sender.(string))
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgNFTTransferNFT(
 		parserParams.MsgCommonParams,
 
@@ -1061,12 +1237,20 @@ func ParseMsgNFTTransferNFT(
 			Sender:    parserParams.Msg["sender"].(string),
 			Recipient: parserParams.Msg["recipient"].(string),
 		},
-	)}, []string{parserParams.Msg["sender"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgNFTEditNFT(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if sender, ok := parserParams.Msg["sender"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, sender.(string))
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgNFTEditNFT(
 		parserParams.MsgCommonParams,
 
@@ -1078,12 +1262,20 @@ func ParseMsgNFTEditNFT(
 			Data:      parserParams.Msg["data"].(string),
 			Sender:    parserParams.Msg["sender"].(string),
 		},
-	)}, []string{parserParams.Msg["sender"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgNFTBurnNFT(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if sender, ok := parserParams.Msg["sender"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, sender.(string))
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgNFTBurnNFT(
 		parserParams.MsgCommonParams,
 
@@ -1092,7 +1284,7 @@ func ParseMsgNFTBurnNFT(
 			TokenId: parserParams.Msg["id"].(string),
 			Sender:  parserParams.Msg["sender"].(string),
 		},
-	)}, []string{parserParams.Msg["sender"].(string)}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgGrant(
@@ -1140,22 +1332,34 @@ func parseRawMsgSendGrant(
 			MaybeSendGrant: &rawMsg,
 		}
 
+		// Getting possible signer address from Msh
+		var possibleSignerAddresses []string
+		if params.MaybeSendGrant != nil {
+			possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeSendGrant.Granter)
+		}
+
 		return []command.Command{command_usecase.NewCreateMsgGrant(
 			msgCommonParams,
 
 			params,
-		)}, []string{params.MaybeSendGrant.Granter}
+		)}, possibleSignerAddresses
 	}
 
 	params := model.MsgGrantParams{
 		MaybeSendGrant: &rawMsg,
 	}
 
+	// Getting possible signer address from Msh
+	var possibleSignerAddresses []string
+	if params.MaybeSendGrant != nil {
+		possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeSendGrant.Granter)
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgGrant(
 		msgCommonParams,
 
 		params,
-	)}, []string{params.MaybeSendGrant.Granter}
+	)}, possibleSignerAddresses
 }
 
 func parseRawMsgStackGrant(
@@ -1186,22 +1390,34 @@ func parseRawMsgStackGrant(
 			MaybeStakeGrant: &rawMsg,
 		}
 
+		// Getting possible signer address from Msh
+		var possibleSignerAddresses []string
+		if params.MaybeStakeGrant != nil {
+			possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeStakeGrant.Granter)
+		}
+
 		return []command.Command{command_usecase.NewCreateMsgGrant(
 			msgCommonParams,
 
 			params,
-		)}, []string{params.MaybeSendGrant.Granter}
+		)}, possibleSignerAddresses
 	}
 
 	params := model.MsgGrantParams{
 		MaybeStakeGrant: &rawMsg,
 	}
 
+	// Getting possible signer address from Msh
+	var possibleSignerAddresses []string
+	if params.MaybeStakeGrant != nil {
+		possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeStakeGrant.Granter)
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgGrant(
 		msgCommonParams,
 
 		params,
-	)}, []string{params.MaybeStakeGrant.Granter}
+	)}, possibleSignerAddresses
 }
 
 func parseRawMsgGenericGrant(
@@ -1289,22 +1505,30 @@ func ParseMsgRevoke(
 			RawMsgRevoke: rawMsg,
 		}
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, revokeParams.Granter)
+
 		return []command.Command{command_usecase.NewCreateMsgRevoke(
 			parserParams.MsgCommonParams,
 
 			revokeParams,
-		)}, []string{revokeParams.Granter}
+		)}, possibleSignerAddresses
 	}
 
 	revokeParams := model.MsgRevokeParams{
 		RawMsgRevoke: rawMsg,
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, revokeParams.Granter)
+
 	return []command.Command{command_usecase.NewCreateMsgRevoke(
 		parserParams.MsgCommonParams,
 
 		revokeParams,
-	)}, []string{revokeParams.Granter}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgExec(
@@ -1442,22 +1666,34 @@ func parseRawMsgGrantBasicAllowance(
 			MaybeBasicAllowance: &rawMsg,
 		}
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		if params.MaybeBasicAllowance != nil {
+			possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeBasicAllowance.Granter)
+		}
+
 		return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
 			msgCommonParams,
 
 			params,
-		)}, []string{params.MaybeBasicAllowance.Granter}
+		)}, possibleSignerAddresses
 	}
 
 	params := model.MsgGrantAllowanceParams{
 		MaybeBasicAllowance: &rawMsg,
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if params.MaybeBasicAllowance != nil {
+		possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeBasicAllowance.Granter)
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
 		msgCommonParams,
 
 		params,
-	)}, []string{params.MaybeBasicAllowance.Granter}
+	)}, possibleSignerAddresses
 }
 
 func parseRawMsgGrantPeriodicAllowance(
@@ -1488,22 +1724,34 @@ func parseRawMsgGrantPeriodicAllowance(
 			MaybePeriodicAllowance: &rawMsg,
 		}
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		if params.MaybePeriodicAllowance != nil {
+			possibleSignerAddresses = append(possibleSignerAddresses, params.MaybePeriodicAllowance.Granter)
+		}
+
 		return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
 			msgCommonParams,
 
 			params,
-		)}, []string{params.MaybeBasicAllowance.Granter}
+		)}, possibleSignerAddresses
 	}
 
 	params := model.MsgGrantAllowanceParams{
 		MaybePeriodicAllowance: &rawMsg,
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if params.MaybePeriodicAllowance != nil {
+		possibleSignerAddresses = append(possibleSignerAddresses, params.MaybePeriodicAllowance.Granter)
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
 		msgCommonParams,
 
 		params,
-	)}, []string{params.MaybeBasicAllowance.Granter}
+	)}, possibleSignerAddresses
 }
 
 func parseRawMsgGrantAllowedMsgAllowance(
@@ -1534,22 +1782,34 @@ func parseRawMsgGrantAllowedMsgAllowance(
 			MaybeAllowedMsgAllowance: &rawMsg,
 		}
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		if params.MaybeAllowedMsgAllowance != nil {
+			possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeAllowedMsgAllowance.Granter)
+		}
+
 		return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
 			msgCommonParams,
 
 			params,
-		)}, []string{params.MaybeBasicAllowance.Granter}
+		)}, possibleSignerAddresses
 	}
 
 	params := model.MsgGrantAllowanceParams{
 		MaybeAllowedMsgAllowance: &rawMsg,
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if params.MaybeAllowedMsgAllowance != nil {
+		possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeAllowedMsgAllowance.Granter)
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
 		msgCommonParams,
 
 		params,
-	)}, []string{params.MaybeBasicAllowance.Granter}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgRevokeAllowance(
@@ -1579,22 +1839,30 @@ func ParseMsgRevokeAllowance(
 			RawMsgRevokeAllowance: rawMsg,
 		}
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, revokeAllowanceParams.Granter)
+
 		return []command.Command{command_usecase.NewCreateMsgRevokeAllowance(
 			parserParams.MsgCommonParams,
 
 			revokeAllowanceParams,
-		)}, []string{revokeAllowanceParams.Granter}
+		)}, possibleSignerAddresses
 	}
 
 	revokeAllowanceParams := model.MsgRevokeAllowanceParams{
 		RawMsgRevokeAllowance: rawMsg,
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, revokeAllowanceParams.Granter)
+
 	return []command.Command{command_usecase.NewCreateMsgRevokeAllowance(
 		parserParams.MsgCommonParams,
 
 		revokeAllowanceParams,
-	)}, []string{revokeAllowanceParams.Granter}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgCreateVestingAccount(
@@ -1624,20 +1892,28 @@ func ParseMsgCreateVestingAccount(
 			RawMsgCreateVestingAccount: rawMsg,
 		}
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgCreateVestingAccountParams.FromAddress)
+
 		return []command.Command{command_usecase.NewCreateMsgCreateVestingAccount(
 			parserParams.MsgCommonParams,
 
 			msgCreateVestingAccountParams,
-		)}, []string{msgCreateVestingAccountParams.FromAddress}
+		)}, possibleSignerAddresses
 	}
 
 	msgCreateVestingAccountParams := model.MsgCreateVestingAccountParams{
 		RawMsgCreateVestingAccount: rawMsg,
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, msgCreateVestingAccountParams.FromAddress)
+
 	return []command.Command{command_usecase.NewCreateMsgCreateVestingAccount(
 		parserParams.MsgCommonParams,
 
 		msgCreateVestingAccountParams,
-	)}, []string{msgCreateVestingAccountParams.FromAddress}
+	)}, possibleSignerAddresses
 }
