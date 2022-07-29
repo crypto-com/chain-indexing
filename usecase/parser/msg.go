@@ -180,11 +180,15 @@ func ParseMsgMultiSend(
 	possibleSignerAddresses := make([]string, 0, len(rawInputs))
 	for _, rawInput := range rawInputs {
 		input, _ := rawInput.(map[string]interface{})
+
+		if fromAddress, ok := input["address"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, fromAddress.(string))
+		}
+
 		inputs = append(inputs, model.MsgMultiSendInput{
 			Address: input["address"].(string),
 			Amount:  tmcosmosutils.MustNewCoinsFromAmountInterface(input["coins"].([]interface{})),
 		})
-		possibleSignerAddresses = append(possibleSignerAddresses, input["address"].(string))
 	}
 
 	rawOutputs, _ := parserParams.Msg["outputs"].([]interface{})
