@@ -61,11 +61,15 @@ func ParseMsgRecvPacket(
 			},
 		}
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgRecvPacketParams.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
 			parserParams.MsgCommonParams,
 
 			msgRecvPacketParams,
-		)}, []string{msgRecvPacketParams.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -93,11 +97,15 @@ func ParseMsgRecvPacket(
 			PacketSequence: typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
 		}
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgAlreadyRelayedRecvPacketParams.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgAlreadyRelayedIBCRecvPacket(
 			parserParams.MsgCommonParams,
 
 			msgAlreadyRelayedRecvPacketParams,
-		)}, []string{msgAlreadyRelayedRecvPacketParams.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	var maybeDenominationTrace *ibc_model.MsgRecvPacketFungibleTokenDenominationTrace
@@ -133,9 +141,13 @@ func ParseMsgRecvPacket(
 		PacketAck:       packetAck,
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, msgRecvPacketParams.Signer)
+
 	return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
 		parserParams.MsgCommonParams,
 
 		msgRecvPacketParams,
-	)}, []string{msgRecvPacketParams.Signer}
+	)}, possibleSignerAddresses
 }
