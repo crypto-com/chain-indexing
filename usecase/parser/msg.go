@@ -992,7 +992,7 @@ func ParseMsgUnjail(
 
 func parseGenesisGenTxsMsgCreateValidator(
 	msg map[string]interface{},
-) ([]command.Command, []string) {
+) []command.Command {
 	amountValue, _ := msg["value"].(map[string]interface{})
 	amount, amountErr := tmcosmosutils.NewCoinFromAmountInterface(amountValue)
 	if amountErr != nil {
@@ -1030,17 +1030,6 @@ func parseGenesisGenTxsMsgCreateValidator(
 		}
 	}
 
-	// Getting possible signer address from Msg
-	var possibleSignerAddresses []string
-	if msg != nil {
-		if delegatorAddress, ok := msg["delegator_address"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, delegatorAddress.(string))
-		}
-		if validatorAddress, ok := msg["validator_address"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, validatorAddress.(string))
-		}
-	}
-
 	return []command.Command{command_usecase.NewCreateGenesisValidator(
 		genesis.CreateGenesisValidatorParams{
 			// Genesis validator are always bonded
@@ -1055,7 +1044,7 @@ func parseGenesisGenTxsMsgCreateValidator(
 			Amount:            amount,
 			Jailed:            false,
 		},
-	)}, possibleSignerAddresses
+	)}
 }
 
 func ParseMsgCreateValidator(
