@@ -1500,7 +1500,7 @@ func ParseMsgRevoke(
 
 		// Getting possible signer address from Msg
 		var possibleSignerAddresses []string
-		possibleSignerAddresses = append(possibleSignerAddresses, revokeParams.Granter)
+		possibleSignerAddresses = append(possibleSignerAddresses, revokeParams.RawMsgRevoke.Granter)
 
 		return []command.Command{command_usecase.NewCreateMsgRevoke(
 			parserParams.MsgCommonParams,
@@ -1515,7 +1515,7 @@ func ParseMsgRevoke(
 
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
-	possibleSignerAddresses = append(possibleSignerAddresses, revokeParams.Granter)
+	possibleSignerAddresses = append(possibleSignerAddresses, revokeParams.RawMsgRevoke.Granter)
 
 	return []command.Command{command_usecase.NewCreateMsgRevoke(
 		parserParams.MsgCommonParams,
