@@ -46,6 +46,7 @@ type CosmosParserParams struct {
 	MsgIndex        int
 	Msg             map[string]interface{}
 	ParserManager   *CosmosParserManager
+	Logger          applogger.Logger
 }
 
 func NewCosmosParserManager(params CosmosParserManagerParams) *CosmosParserManager {
