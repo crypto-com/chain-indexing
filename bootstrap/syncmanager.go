@@ -148,8 +148,16 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64, isRetry bool) error {
 	if isRetry {
 		// Reduce the block size to be synced when retrying to avoid spamming and wasting resource
 		if latestHeight > currentIndexingHeight {
-			targetHeight = currentIndexingHeight + 1
+			targetHeight = currentIndexingHeight
+			if targetHeight < manager.startingBlockHeight {
+				targetHeight = manager.startingBlockHeight
+			}
 		}
+	}
+
+	// Skip for latest height < statring block height
+	if currentIndexingHeight != 0 && latestHeight < manager.startingBlockHeight {
+		return nil
 	}
 	manager.logger.Infof("going to synchronized blocks from %d to %d", currentIndexingHeight, targetHeight)
 	for currentIndexingHeight <= targetHeight {
