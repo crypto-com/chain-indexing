@@ -361,17 +361,17 @@ func ParseMsgSubmitProposal(
 	}
 
 	var cmds []command.Command
-	var addresses = []string{}
+	var possibleSignerAddresses = []string{}
 	if proposalContent.Type == "/cosmos.params.v1beta1.ParameterChangeProposal" {
-		cmds, addresses = parseMsgSubmitParamChangeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
+		cmds, possibleSignerAddresses = parseMsgSubmitParamChangeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal" {
-		cmds, addresses = parseMsgSubmitCommunityFundSpendProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
+		cmds, possibleSignerAddresses = parseMsgSubmitCommunityFundSpendProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal" {
-		cmds, addresses = parseMsgSubmitSoftwareUpgradeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
+		cmds, possibleSignerAddresses = parseMsgSubmitSoftwareUpgradeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal" {
-		cmds, addresses = parseMsgSubmitCancelSoftwareUpgradeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
+		cmds, possibleSignerAddresses = parseMsgSubmitCancelSoftwareUpgradeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.gov.v1beta1.TextProposal" {
-		cmds, addresses = parseMsgSubmitTextProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
+		cmds, possibleSignerAddresses = parseMsgSubmitTextProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else {
 		parserParams.Logger.Errorf("unrecognzied govenance proposal type `%s`", proposalContent.Type)
 	}
@@ -390,7 +390,7 @@ func ParseMsgSubmitProposal(
 		}
 	}
 
-	return cmds, addresses
+	return cmds, possibleSignerAddresses
 }
 
 func parseMsgSubmitParamChangeProposal(
@@ -1325,10 +1325,13 @@ func parseRawMsgSendGrant(
 			MaybeSendGrant: &rawMsg,
 		}
 
-		// Getting possible signer address from Msh
+		// Getting possible signer address from Msg
 		var possibleSignerAddresses []string
+
 		if params.MaybeSendGrant != nil {
-			possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeSendGrant.Granter)
+			if params.MaybeSendGrant.Granter != "" {
+				possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeSendGrant.Granter)
+			}
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgGrant(
@@ -1342,10 +1345,12 @@ func parseRawMsgSendGrant(
 		MaybeSendGrant: &rawMsg,
 	}
 
-	// Getting possible signer address from Msh
+	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
 	if params.MaybeSendGrant != nil {
-		possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeSendGrant.Granter)
+		if params.MaybeSendGrant.Granter != "" {
+			possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeSendGrant.Granter)
+		}
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgGrant(
@@ -1383,10 +1388,12 @@ func parseRawMsgStackGrant(
 			MaybeStakeGrant: &rawMsg,
 		}
 
-		// Getting possible signer address from Msh
+		// Getting possible signer address from Msg
 		var possibleSignerAddresses []string
 		if params.MaybeStakeGrant != nil {
-			possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeStakeGrant.Granter)
+			if params.MaybeStakeGrant.Granter != "" {
+				possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeStakeGrant.Granter)
+			}
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgGrant(
@@ -1400,10 +1407,12 @@ func parseRawMsgStackGrant(
 		MaybeStakeGrant: &rawMsg,
 	}
 
-	// Getting possible signer address from Msh
+	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
 	if params.MaybeStakeGrant != nil {
-		possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeStakeGrant.Granter)
+		if params.MaybeStakeGrant.Granter != "" {
+			possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeStakeGrant.Granter)
+		}
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgGrant(
@@ -1441,10 +1450,12 @@ func parseRawMsgGenericGrant(
 			MaybeGenericGrant: &rawMsg,
 		}
 
-		// Getting possible signer address from Msh
+		// Getting possible signer address from Msg
 		var possibleSignerAddresses []string
-		if params.MaybeSendGrant != nil {
-			possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeSendGrant.Granter)
+		if params.MaybeGenericGrant != nil {
+			if params.MaybeGenericGrant.Granter != "" {
+				possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeGenericGrant.Granter)
+			}
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgGrant(
@@ -1460,8 +1471,10 @@ func parseRawMsgGenericGrant(
 
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
-	if params.MaybeSendGrant != nil {
-		possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeSendGrant.Granter)
+	if params.MaybeGenericGrant != nil {
+		if params.MaybeGenericGrant.Granter != "" {
+			possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeGenericGrant.Granter)
+		}
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgGrant(
@@ -1500,7 +1513,9 @@ func ParseMsgRevoke(
 
 		// Getting possible signer address from Msg
 		var possibleSignerAddresses []string
-		possibleSignerAddresses = append(possibleSignerAddresses, revokeParams.RawMsgRevoke.Granter)
+		if revokeParams.RawMsgRevoke.Granter != "" {
+			possibleSignerAddresses = append(possibleSignerAddresses, revokeParams.RawMsgRevoke.Granter)
+		}
 
 		return []command.Command{command_usecase.NewCreateMsgRevoke(
 			parserParams.MsgCommonParams,
@@ -1515,7 +1530,9 @@ func ParseMsgRevoke(
 
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
-	possibleSignerAddresses = append(possibleSignerAddresses, revokeParams.RawMsgRevoke.Granter)
+	if revokeParams.RawMsgRevoke.Granter != "" {
+		possibleSignerAddresses = append(possibleSignerAddresses, revokeParams.RawMsgRevoke.Granter)
+	}
 
 	return []command.Command{command_usecase.NewCreateMsgRevoke(
 		parserParams.MsgCommonParams,
@@ -1553,11 +1570,17 @@ func ParseMsgExec(
 
 		innerCommands := parseMsgExecInnerMsgs(parserParams)
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		if execParams.RawMsgExec.Grantee != "" {
+			possibleSignerAddresses = append(possibleSignerAddresses, execParams.RawMsgExec.Grantee)
+		}
+
 		return append([]command.Command{command_usecase.NewCreateMsgExec(
 			parserParams.MsgCommonParams,
 
 			execParams,
-		)}, innerCommands...), []string{rawMsg.Grantee}
+		)}, innerCommands...), possibleSignerAddresses
 	}
 
 	execParams := model.MsgExecParams{
@@ -1566,11 +1589,17 @@ func ParseMsgExec(
 
 	innerCommands := parseMsgExecInnerMsgs(parserParams)
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if execParams.RawMsgExec.Grantee != "" {
+		possibleSignerAddresses = append(possibleSignerAddresses, execParams.RawMsgExec.Grantee)
+	}
+
 	return append([]command.Command{command_usecase.NewCreateMsgExec(
 		parserParams.MsgCommonParams,
 
 		execParams,
-	)}, innerCommands...), []string{rawMsg.Grantee}
+	)}, innerCommands...), possibleSignerAddresses
 }
 
 func parseMsgExecInnerMsgs(
@@ -1662,7 +1691,9 @@ func parseRawMsgGrantBasicAllowance(
 		// Getting possible signer address from Msg
 		var possibleSignerAddresses []string
 		if params.MaybeBasicAllowance != nil {
-			possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeBasicAllowance.Granter)
+			if params.MaybeBasicAllowance.Granter != "" {
+				possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeBasicAllowance.Granter)
+			}
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
@@ -1679,7 +1710,9 @@ func parseRawMsgGrantBasicAllowance(
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
 	if params.MaybeBasicAllowance != nil {
-		possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeBasicAllowance.Granter)
+		if params.MaybeBasicAllowance.Granter != "" {
+			possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeBasicAllowance.Granter)
+		}
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
@@ -1720,7 +1753,9 @@ func parseRawMsgGrantPeriodicAllowance(
 		// Getting possible signer address from Msg
 		var possibleSignerAddresses []string
 		if params.MaybePeriodicAllowance != nil {
-			possibleSignerAddresses = append(possibleSignerAddresses, params.MaybePeriodicAllowance.Granter)
+			if params.MaybePeriodicAllowance.Granter != "" {
+				possibleSignerAddresses = append(possibleSignerAddresses, params.MaybePeriodicAllowance.Granter)
+			}
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
@@ -1737,7 +1772,9 @@ func parseRawMsgGrantPeriodicAllowance(
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
 	if params.MaybePeriodicAllowance != nil {
-		possibleSignerAddresses = append(possibleSignerAddresses, params.MaybePeriodicAllowance.Granter)
+		if params.MaybePeriodicAllowance.Granter != "" {
+			possibleSignerAddresses = append(possibleSignerAddresses, params.MaybePeriodicAllowance.Granter)
+		}
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
@@ -1778,7 +1815,9 @@ func parseRawMsgGrantAllowedMsgAllowance(
 		// Getting possible signer address from Msg
 		var possibleSignerAddresses []string
 		if params.MaybeAllowedMsgAllowance != nil {
-			possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeAllowedMsgAllowance.Granter)
+			if params.MaybeAllowedMsgAllowance.Granter != "" {
+				possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeAllowedMsgAllowance.Granter)
+			}
 		}
 
 		return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
@@ -1795,7 +1834,9 @@ func parseRawMsgGrantAllowedMsgAllowance(
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
 	if params.MaybeAllowedMsgAllowance != nil {
-		possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeAllowedMsgAllowance.Granter)
+		if params.MaybeAllowedMsgAllowance.Granter != "" {
+			possibleSignerAddresses = append(possibleSignerAddresses, params.MaybeAllowedMsgAllowance.Granter)
+		}
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgGrantAllowance(
@@ -1834,7 +1875,9 @@ func ParseMsgRevokeAllowance(
 
 		// Getting possible signer address from Msg
 		var possibleSignerAddresses []string
-		possibleSignerAddresses = append(possibleSignerAddresses, revokeAllowanceParams.Granter)
+		if revokeAllowanceParams.RawMsgRevokeAllowance.Granter != "" {
+			possibleSignerAddresses = append(possibleSignerAddresses, revokeAllowanceParams.RawMsgRevokeAllowance.Granter)
+		}
 
 		return []command.Command{command_usecase.NewCreateMsgRevokeAllowance(
 			parserParams.MsgCommonParams,
@@ -1849,7 +1892,9 @@ func ParseMsgRevokeAllowance(
 
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
-	possibleSignerAddresses = append(possibleSignerAddresses, revokeAllowanceParams.Granter)
+	if revokeAllowanceParams.RawMsgRevokeAllowance.Granter != "" {
+		possibleSignerAddresses = append(possibleSignerAddresses, revokeAllowanceParams.RawMsgRevokeAllowance.Granter)
+	}
 
 	return []command.Command{command_usecase.NewCreateMsgRevokeAllowance(
 		parserParams.MsgCommonParams,
@@ -1887,7 +1932,9 @@ func ParseMsgCreateVestingAccount(
 
 		// Getting possible signer address from Msg
 		var possibleSignerAddresses []string
-		possibleSignerAddresses = append(possibleSignerAddresses, msgCreateVestingAccountParams.FromAddress)
+		if msgCreateVestingAccountParams.RawMsgCreateVestingAccount.FromAddress != "" {
+			possibleSignerAddresses = append(possibleSignerAddresses, msgCreateVestingAccountParams.RawMsgCreateVestingAccount.FromAddress)
+		}
 
 		return []command.Command{command_usecase.NewCreateMsgCreateVestingAccount(
 			parserParams.MsgCommonParams,
@@ -1902,7 +1949,9 @@ func ParseMsgCreateVestingAccount(
 
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
-	possibleSignerAddresses = append(possibleSignerAddresses, msgCreateVestingAccountParams.FromAddress)
+	if msgCreateVestingAccountParams.RawMsgCreateVestingAccount.FromAddress != "" {
+		possibleSignerAddresses = append(possibleSignerAddresses, msgCreateVestingAccountParams.RawMsgCreateVestingAccount.FromAddress)
+	}
 
 	return []command.Command{command_usecase.NewCreateMsgCreateVestingAccount(
 		parserParams.MsgCommonParams,
