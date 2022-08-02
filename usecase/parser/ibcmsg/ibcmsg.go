@@ -71,11 +71,15 @@ func parseRawMsgCreateTendermintLightClient(
 			Signer: rawMsg.Signer,
 		}
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, params.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgIBCCreateClient(
 			msgCommonParams,
 
 			params,
-		)}, []string{params.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
@@ -94,11 +98,15 @@ func parseRawMsgCreateTendermintLightClient(
 		ClientType: event.MustGetAttributeByKey("client_type"),
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, params.Signer)
+
 	return []command.Command{command_usecase.NewCreateMsgIBCCreateClient(
 		msgCommonParams,
 
 		params,
-	)}, []string{params.Signer}
+	)}, possibleSignerAddresses
 }
 
 func parseRawMsgCreateSoloMachineLightClient(
@@ -121,11 +129,15 @@ func parseRawMsgCreateSoloMachineLightClient(
 			Signer: rawMsg.Signer,
 		}
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, params.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgIBCCreateClient(
 			msgCommonParams,
 
 			params,
-		)}, []string{params.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
@@ -144,11 +156,15 @@ func parseRawMsgCreateSoloMachineLightClient(
 		ClientType: event.MustGetAttributeByKey("client_type"),
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, params.Signer)
+
 	return []command.Command{command_usecase.NewCreateMsgIBCCreateClient(
 		msgCommonParams,
 
 		params,
-	)}, []string{params.Signer}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgConnectionOpenInit(
@@ -160,13 +176,17 @@ func ParseMsgConnectionOpenInit(
 	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMessage.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenInit(
 			parserParams.MsgCommonParams,
 
 			ibc_model.MsgConnectionOpenInitParams{
 				RawMsgConnectionOpenInit: rawMessage,
 			},
-		)}, []string{rawMessage.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -180,11 +200,15 @@ func ParseMsgConnectionOpenInit(
 		ConnectionID: event.MustGetAttributeByKey("connection_id"),
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, msgConnectionOpenInitParams.Signer)
+
 	return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenInit(
 		parserParams.MsgCommonParams,
 
 		msgConnectionOpenInitParams,
-	)}, []string{msgConnectionOpenInitParams.Signer}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgConnectionOpenTry(
@@ -207,11 +231,15 @@ func ParseMsgConnectionOpenTry(
 			MaybeTendermintClientState:     &rawMsg.TendermintClientState,
 		}
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgConnectionOpenTryParams.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenTry(
 			parserParams.MsgCommonParams,
 
 			msgConnectionOpenTryParams,
-		)}, []string{msgConnectionOpenTryParams.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -226,11 +254,15 @@ func ParseMsgConnectionOpenTry(
 		ConnectionID:                   event.MustGetAttributeByKey("connection_id"),
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, msgConnectionOpenTryParams.Signer)
+
 	return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenTry(
 		parserParams.MsgCommonParams,
 
 		msgConnectionOpenTryParams,
-	)}, []string{msgConnectionOpenTryParams.Signer}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgConnectionOpenAck(
@@ -253,11 +285,15 @@ func ParseMsgConnectionOpenAck(
 			MaybeTendermintClientState:     &rawMsg.TendermintClientState,
 		}
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgConnectionOpenAckParams.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenAck(
 			parserParams.MsgCommonParams,
 
 			msgConnectionOpenAckParams,
-		)}, []string{msgConnectionOpenAckParams.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -274,11 +310,15 @@ func ParseMsgConnectionOpenAck(
 		CounterpartyClientID: event.MustGetAttributeByKey("counterparty_client_id"),
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, msgConnectionOpenAckParams.Signer)
+
 	return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenAck(
 		parserParams.MsgCommonParams,
 
 		msgConnectionOpenAckParams,
-	)}, []string{msgConnectionOpenAckParams.Signer}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgConnectionOpenConfirm(
@@ -290,13 +330,17 @@ func ParseMsgConnectionOpenConfirm(
 	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenConfirm(
 			parserParams.MsgCommonParams,
 
 			ibc_model.MsgConnectionOpenConfirmParams{
 				RawMsgConnectionOpenConfirm: rawMsg,
 			},
-		)}, []string{rawMsg.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -313,11 +357,15 @@ func ParseMsgConnectionOpenConfirm(
 		CounterpartyConnectionID: event.MustGetAttributeByKey("counterparty_connection_id"),
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, msgConnectionOpenConfirmParams.Signer)
+
 	return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenConfirm(
 		parserParams.MsgCommonParams,
 
 		msgConnectionOpenConfirmParams,
-	)}, []string{msgConnectionOpenConfirmParams.Signer}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgChannelOpenInit(
@@ -329,13 +377,17 @@ func ParseMsgChannelOpenInit(
 	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenInit(
 			parserParams.MsgCommonParams,
 
 			ibc_model.MsgChannelOpenInitParams{
 				RawMsgChannelOpenInit: rawMsg,
 			},
-		)}, []string{rawMsg.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -351,11 +403,15 @@ func ParseMsgChannelOpenInit(
 		ConnectionID: event.MustGetAttributeByKey("connection_id"),
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, msgChannelOpenInitParams.Signer)
+
 	return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenInit(
 		parserParams.MsgCommonParams,
 
 		msgChannelOpenInitParams,
-	)}, []string{msgChannelOpenInitParams.Signer}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgChannelOpenTry(
@@ -367,13 +423,18 @@ func ParseMsgChannelOpenTry(
 	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
+
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenTry(
 			parserParams.MsgCommonParams,
 
 			ibc_model.MsgChannelOpenTryParams{
 				RawMsgChannelOpenTry: rawMsg,
 			},
-		)}, []string{rawMsg.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -389,11 +450,15 @@ func ParseMsgChannelOpenTry(
 		ConnectionID: event.MustGetAttributeByKey("connection_id"),
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, msgChannelOpenTryParams.Signer)
+
 	return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenTry(
 		parserParams.MsgCommonParams,
 
 		msgChannelOpenTryParams,
-	)}, []string{msgChannelOpenTryParams.Signer}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgChannelOpenAck(
@@ -405,13 +470,18 @@ func ParseMsgChannelOpenAck(
 	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
+
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenAck(
 			parserParams.MsgCommonParams,
 
 			ibc_model.MsgChannelOpenAckParams{
 				RawMsgChannelOpenAck: rawMsg,
 			},
-		)}, []string{rawMsg.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -427,11 +497,15 @@ func ParseMsgChannelOpenAck(
 		ConnectionID:       event.MustGetAttributeByKey("connection_id"),
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, msgChannelOpenAckParams.Signer)
+
 	return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenAck(
 		parserParams.MsgCommonParams,
 
 		msgChannelOpenAckParams,
-	)}, []string{msgChannelOpenAckParams.Signer}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgChannelOpenConfirm(
@@ -443,13 +517,17 @@ func ParseMsgChannelOpenConfirm(
 	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenConfirm(
 			parserParams.MsgCommonParams,
 
 			ibc_model.MsgChannelOpenConfirmParams{
 				RawMsgChannelOpenConfirm: rawMsg,
 			},
-		)}, []string{rawMsg.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -466,11 +544,15 @@ func ParseMsgChannelOpenConfirm(
 		ConnectionID:          event.MustGetAttributeByKey("connection_id"),
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, msgChannelOpenConfirmParams.Signer)
+
 	return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenConfirm(
 		parserParams.MsgCommonParams,
 
 		msgChannelOpenConfirmParams,
-	)}, []string{msgChannelOpenConfirmParams.Signer}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgUpdateClient(
@@ -520,11 +602,15 @@ func parseMsgUpdateTendermintLightClient(
 			Signer:          rawMsg.Signer,
 		}
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, params.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgIBCUpdateClient(
 			msgCommonParams,
 
 			params,
-		)}, []string{params.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
@@ -542,11 +628,15 @@ func parseMsgUpdateTendermintLightClient(
 		Signer:          rawMsg.Signer,
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, params.Signer)
+
 	return []command.Command{command_usecase.NewCreateMsgIBCUpdateClient(
 		msgCommonParams,
 
 		params,
-	)}, []string{params.Signer}
+	)}, possibleSignerAddresses
 }
 
 func parseMsgUpdateSolomachineLightClient(
@@ -570,11 +660,15 @@ func parseMsgUpdateSolomachineLightClient(
 			Signer:          rawMsg.Signer,
 		}
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, params.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgIBCUpdateClient(
 			msgCommonParams,
 
 			params,
-		)}, []string{params.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
@@ -592,11 +686,15 @@ func parseMsgUpdateSolomachineLightClient(
 		Signer:          rawMsg.Signer,
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, params.Signer)
+
 	return []command.Command{command_usecase.NewCreateMsgIBCUpdateClient(
 		msgCommonParams,
 
 		params,
-	)}, []string{params.Signer}
+	)}, possibleSignerAddresses
 }
 
 func mustParseHeight(height string) ibc_model.Height {
@@ -622,12 +720,16 @@ func ParseMsgTransfer(
 	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Sender)
+
 		return []command.Command{command_usecase.NewCreateMsgIBCTransferTransfer(
 			parserParams.MsgCommonParams,
 			ibc_model.MsgTransferParams{
 				RawMsgTransfer: rawMsg,
 			},
-		)}, []string{rawMsg.Sender}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -653,11 +755,15 @@ func ParseMsgTransfer(
 		PacketData:         fungiblePacketData,
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, msgTransferParams.Sender)
+
 	return []command.Command{command_usecase.NewCreateMsgIBCTransferTransfer(
 		parserParams.MsgCommonParams,
 
 		msgTransferParams,
-	)}, []string{msgTransferParams.Sender}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgRecvPacket(
@@ -690,11 +796,15 @@ func ParseMsgRecvPacket(
 			},
 		}
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgRecvPacketParams.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
 			parserParams.MsgCommonParams,
 
 			msgRecvPacketParams,
-		)}, []string{msgRecvPacketParams.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -718,11 +828,15 @@ func ParseMsgRecvPacket(
 			PacketSequence: typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
 		}
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgAlreadyRelayedRecvPacketParams.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgAlreadyRelayedIBCRecvPacket(
 			parserParams.MsgCommonParams,
 
 			msgAlreadyRelayedRecvPacketParams,
-		)}, []string{msgAlreadyRelayedRecvPacketParams.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	var maybeDenominationTrace *ibc_model.MsgRecvPacketFungibleTokenDenominationTrace
@@ -758,11 +872,15 @@ func ParseMsgRecvPacket(
 		PacketAck:       packetAck,
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, msgRecvPacketParams.Signer)
+
 	return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
 		parserParams.MsgCommonParams,
 
 		msgRecvPacketParams,
-	)}, []string{msgRecvPacketParams.Signer}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgAcknowledgement(
@@ -795,11 +913,15 @@ func ParseMsgAcknowledgement(
 			},
 		}
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgAcknowledgementParams.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgIBCAcknowledgement(
 			parserParams.MsgCommonParams,
 
 			msgAcknowledgementParams,
-		)}, []string{msgAcknowledgementParams.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -825,11 +947,15 @@ func ParseMsgAcknowledgement(
 			ConnectionID:    acknowledgePacketEvent.MustGetAttributeByKey("packet_connection"),
 		}
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgAlreadyRelayedAcknowledgementParams.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgAlreadyRelayedIBCAcknowledgement(
 			parserParams.MsgCommonParams,
 
 			msgAlreadyRelayedAcknowledgementParams,
-		)}, []string{msgAlreadyRelayedAcknowledgementParams.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	var success bool
@@ -869,11 +995,15 @@ func ParseMsgAcknowledgement(
 		ConnectionID:    acknowledgePacketEvent.MustGetAttributeByKey("packet_connection"),
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, msgAcknowledgementParams.Signer)
+
 	return []command.Command{command_usecase.NewCreateMsgIBCAcknowledgement(
 		parserParams.MsgCommonParams,
 
 		msgAcknowledgementParams,
-	)}, []string{msgAcknowledgementParams.Signer}
+	)}, possibleSignerAddresses
 }
 
 func IsPacketMsgTransfer(
@@ -916,11 +1046,15 @@ func ParseMsgTimeout(
 			MessageType: "MsgTransfer",
 		}
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgTimeoutParams.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgIBCTimeout(
 			parserParams.MsgCommonParams,
 
 			msgTimeoutParams,
-		)}, []string{msgTimeoutParams.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -958,18 +1092,23 @@ func ParseMsgTimeout(
 	}
 
 	timeoutEvent := log.GetEventByType("timeout")
+
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, msgTimeoutParams.Signer)
+
 	if timeoutEvent == nil {
 		return []command.Command{command_usecase.NewCreateMsgAlreadyRelayedIBCTimeout(
 			parserParams.MsgCommonParams,
 
 			msgTimeoutParams,
-		)}, []string{msgTimeoutParams.Signer}
+		)}, possibleSignerAddresses
 	} else {
 		return []command.Command{command_usecase.NewCreateMsgIBCTimeout(
 			parserParams.MsgCommonParams,
 
 			msgTimeoutParams,
-		)}, []string{msgTimeoutParams.Signer}
+		)}, possibleSignerAddresses
 	}
 }
 
@@ -994,11 +1133,15 @@ func ParseMsgTimeoutOnClose(
 			MessageType: "MsgTransfer",
 		}
 
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgTimeoutOnCloseParams.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgIBCTimeoutOnClose(
 			parserParams.MsgCommonParams,
 
 			msgTimeoutOnCloseParams,
-		)}, []string{msgTimeoutOnCloseParams.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -1036,18 +1179,23 @@ func ParseMsgTimeoutOnClose(
 	}
 
 	timeoutEvent := log.GetEventByType("timeout")
+
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, msgTimeoutOnCloseParams.Signer)
+
 	if timeoutEvent == nil {
 		return []command.Command{command_usecase.NewCreateMsgAlreadyRelayedIBCTimeoutOnClose(
 			parserParams.MsgCommonParams,
 
 			msgTimeoutOnCloseParams,
-		)}, []string{msgTimeoutOnCloseParams.Signer}
+		)}, possibleSignerAddresses
 	} else {
 		return []command.Command{command_usecase.NewCreateMsgIBCTimeoutOnClose(
 			parserParams.MsgCommonParams,
 
 			msgTimeoutOnCloseParams,
-		)}, []string{msgTimeoutOnCloseParams.Signer}
+		)}, possibleSignerAddresses
 	}
 }
 
@@ -1060,13 +1208,17 @@ func ParseMsgChannelCloseInit(
 	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgIBCChannelCloseInit(
 			parserParams.MsgCommonParams,
 
 			ibc_model.MsgChannelCloseInitParams{
 				RawMsgChannelCloseInit: rawMsg,
 			},
-		)}, []string{rawMsg.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -1083,11 +1235,15 @@ func ParseMsgChannelCloseInit(
 		ConnectionID:          event.MustGetAttributeByKey("connection_id"),
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, msgChannelCloseInitParams.Signer)
+
 	return []command.Command{command_usecase.NewCreateMsgIBCChannelCloseInit(
 		parserParams.MsgCommonParams,
 
 		msgChannelCloseInitParams,
-	)}, []string{msgChannelCloseInitParams.Signer}
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgChannelCloseConfirm(
@@ -1099,13 +1255,17 @@ func ParseMsgChannelCloseConfirm(
 	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Signer)
+
 		return []command.Command{command_usecase.NewCreateMsgIBCChannelCloseConfirm(
 			parserParams.MsgCommonParams,
 
 			ibc_model.MsgChannelCloseConfirmParams{
 				RawMsgChannelCloseConfirm: rawMsg,
 			},
-		)}, []string{rawMsg.Signer}
+		)}, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -1122,9 +1282,13 @@ func ParseMsgChannelCloseConfirm(
 		ConnectionID:          event.MustGetAttributeByKey("connection_id"),
 	}
 
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	possibleSignerAddresses = append(possibleSignerAddresses, msgChannelCloseConfirmParams.Signer)
+
 	return []command.Command{command_usecase.NewCreateMsgIBCChannelCloseConfirm(
 		parserParams.MsgCommonParams,
 
 		msgChannelCloseConfirmParams,
-	)}, []string{msgChannelCloseConfirmParams.Signer}
+	)}, possibleSignerAddresses
 }
