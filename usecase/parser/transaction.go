@@ -63,11 +63,18 @@ func ParseTransactionCommands(
 			return nil, fmt.Errorf("error parsing timeout height: %v", err)
 		}
 
-		signers, parseSignerInfosErr := ParseSignerInfosToTransactionSigners(
-			cosmosClient, tx.AuthInfo.SignerInfos, accountAddressPrefix, possibleSignerAddresses,
-		)
-		if parseSignerInfosErr != nil {
-			return nil, fmt.Errorf("error parsing SignerInfos: %v", parseSignerInfosErr)
+		var signers []model.TransactionSigner
+		if len(tx.Body.Messages) > 0 {
+			if tx.Body.Messages[0]["@type"] != "/ethermint.evm.v1.MsgEthereumTx" {
+				signersResult, parseSignerInfosErr := ParseSignerInfosToTransactionSigners(
+					cosmosClient, tx.AuthInfo.SignerInfos, accountAddressPrefix, possibleSignerAddresses, TxHash(txHex),
+				)
+				signers = signersResult
+
+				if parseSignerInfosErr != nil {
+					return nil, fmt.Errorf("error parsing SignerInfos: %v", parseSignerInfosErr)
+				}
+			}
 		}
 
 		cmds = append(cmds, command_usecase.NewCreateTransaction(blockHeight, model.CreateTransactionParams{
