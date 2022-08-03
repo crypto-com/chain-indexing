@@ -1614,6 +1614,23 @@ func parseMsgExecInnerMsgs(
 		panic(fmt.Errorf("error parsing MsgExec.msgs to []interface{}: %v", parserParams.Msg["msgs"]))
 	}
 
+	var events []model.BlockResultsEvent
+	msgIndex := 0
+	for _, event := range parserParams.TxsResult.Events {
+		if event.Type == "tx" {
+			continue
+		}
+
+		events = append(events, event)
+
+		if event.Type == "message" {
+			msgIndex++
+			fmt.Println("===> message: ", msgIndex)
+		}
+	}
+
+	fmt.Println("===> events: ", events)
+
 	for innerMsgIndex, innerMsgInterface := range msgs {
 		innerMsg, ok := innerMsgInterface.(map[string]interface{})
 		if !ok {
