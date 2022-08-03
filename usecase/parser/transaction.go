@@ -64,7 +64,7 @@ func ParseTransactionCommands(
 		}
 
 		signers, parseSignerInfosErr := ParseSignerInfosToTransactionSigners(
-			cosmosClient, tx.AuthInfo.SignerInfos, accountAddressPrefix, possibleSignerAddresses,
+			cosmosClient, tx.AuthInfo.SignerInfos, accountAddressPrefix, possibleSignerAddresses, TxHash(txHex),
 		)
 		if parseSignerInfosErr != nil {
 			return nil, fmt.Errorf("error parsing SignerInfos: %v", parseSignerInfosErr)
