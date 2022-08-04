@@ -129,7 +129,10 @@ func ParseBlockTxsMsgToCommands(
 				"/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
 
 				// cosmos vesting
-				"/cosmos.vesting.v1beta1.MsgCreateVestingAccount":
+				"/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
+
+				// ethermint evm
+				"/ethermint.evm.v1.MsgEthereumTx":
 				parser := parserManager.GetParser(utils.CosmosParserKey(msgType.(string)), utils.ParserBlockHeight(blockHeight))
 
 				msgCommands, possibleSignerAddresses = parser(utils.CosmosParserParams{
@@ -1957,5 +1960,64 @@ func ParseMsgCreateVestingAccount(
 		parserParams.MsgCommonParams,
 
 		msgCreateVestingAccountParams,
+	)}, possibleSignerAddresses
+}
+
+func ParseMsgEthereumTx(
+	parserParams utils.CosmosParserParams,
+) ([]command.Command, []string) {
+	var rawMsg model.RawMsgEthereumTx
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating RawMsgEthereumTx decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(parserParams.Msg); err != nil {
+		panic(fmt.Errorf("error decoding RawMsgEthereumTx: %v", err))
+	}
+
+	if !parserParams.MsgCommonParams.TxSuccess {
+		msgEthereumTxParams := model.MsgEthereumTxParams{
+			RawMsgEthereumTx: rawMsg,
+		}
+
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		// TODO: get signer
+		if msgEthereumTxParams.From == "" {
+			possibleSignerAddresses = append(possibleSignerAddresses, msgEthereumTxParams.From)
+		}
+
+		return []command.Command{command_usecase.NewCreateMsgEthereumTx(
+			parserParams.MsgCommonParams,
+
+			msgEthereumTxParams,
+		)}, possibleSignerAddresses
+	}
+
+	msgEthereumTxParams := model.MsgEthereumTxParams{
+		RawMsgEthereumTx: rawMsg,
+	}
+
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	// TODO: get signer
+	if msgEthereumTxParams.From == "" {
+		possibleSignerAddresses = append(possibleSignerAddresses, msgEthereumTxParams.From)
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgEthereumTx(
+		parserParams.MsgCommonParams,
+
+		msgEthereumTxParams,
 	)}, possibleSignerAddresses
 }
