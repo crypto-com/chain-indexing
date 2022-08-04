@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
@@ -255,6 +256,7 @@ func ParseMsgWithdrawDelegatorReward(
 			},
 		)}, possibleSignerAddresses
 	}
+	fmt.Println("===> parserParams.MsgIndex: ", parserParams.MsgIndex, "ParseMsgWithdrawDelegatorReward:", parserParams.TxsResult.Log)
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	var recipient string
 	var amount coin.Coins
@@ -1567,7 +1569,7 @@ func ParseMsgExec(
 			RawMsgExec: rawMsg,
 		}
 
-		innerCommands := parseMsgExecInnerMsgs(parserParams)
+		innerCommands := parseMsgExecInnerMsgs(&parserParams)
 
 		// Getting possible signer address from Msg
 		var possibleSignerAddresses []string
@@ -1586,7 +1588,7 @@ func ParseMsgExec(
 		RawMsgExec: rawMsg,
 	}
 
-	innerCommands := parseMsgExecInnerMsgs(parserParams)
+	innerCommands := parseMsgExecInnerMsgs(&parserParams)
 
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
@@ -1602,7 +1604,7 @@ func ParseMsgExec(
 }
 
 func parseMsgExecInnerMsgs(
-	parserParams utils.CosmosParserParams,
+	parserParams *utils.CosmosParserParams,
 ) []command.Command {
 
 	var commands []command.Command
@@ -1614,22 +1616,37 @@ func parseMsgExecInnerMsgs(
 		panic(fmt.Errorf("error parsing MsgExec.msgs to []interface{}: %v", parserParams.Msg["msgs"]))
 	}
 
-	var events []model.BlockResultsEvent
-	msgIndex := 0
-	for _, event := range parserParams.TxsResult.Events {
-		if event.Type == "tx" {
-			continue
+	events := parserParams.TxsResult.Events
+	parserParams.TxsResult.Log = []model.BlockResultsTxsResultLog{}
+
+	for innerMsgIndex, innerMsgInterface := range msgs {
+		innerMsg, ok := innerMsgInterface.(map[string]interface{})
+		if !ok {
+			panic(fmt.Errorf("error parsing MsgExec.msgs[%v] to map[string]interface{}: %v", innerMsgIndex, innerMsgInterface))
 		}
 
-		events = append(events, event)
-
-		if event.Type == "message" {
-			msgIndex++
-			fmt.Println("===> message: ", msgIndex)
+		innerMsgType, ok := innerMsg["@type"].(string)
+		if !ok {
+			panic(fmt.Errorf("error missing '@type' in MsgExec.msgs[%v]: %v", innerMsgIndex, innerMsg))
 		}
+
+		validateEvents, remainingEvents := parseInnerMsgsEvents(innerMsgType, events)
+		events = remainingEvents
+
+		log := model.BlockResultsTxsResultLog{
+			MsgIndex: innerMsgIndex,
+			Events:   validateEvents,
+		}
+
+		fmt.Println("===> parseMsgExecInnerMsgs:", events)
+		fmt.Println("===> log:", log)
+		parserParams.TxsResult.Log = append(parserParams.TxsResult.Log, log)
 	}
+	fmt.Println("===> parserParams.TxsResult.Log:", parserParams.TxsResult.Log)
+	bytes, _ := json.Marshal(parserParams.TxsResult.Log)
+	rawLog, _ := json.Marshal(bytes)
 
-	fmt.Println("===> events: ", events)
+	parserParams.TxsResult.RawLog = string(rawLog)
 
 	for innerMsgIndex, innerMsgInterface := range msgs {
 		innerMsg, ok := innerMsgInterface.(map[string]interface{})
@@ -1650,7 +1667,7 @@ func parseMsgExecInnerMsgs(
 			TxsResult:       parserParams.TxsResult,
 			MsgCommonParams: parserParams.MsgCommonParams,
 			Msg:             innerMsg,
-			MsgIndex:        parserParams.MsgIndex,
+			MsgIndex:        innerMsgIndex,
 			ParserManager:   parserParams.ParserManager,
 		})
 		commands = append(commands, msgCommands...)
