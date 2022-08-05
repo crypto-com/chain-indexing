@@ -21,7 +21,7 @@ func ParseSignerInfosToTransactionSigners(
 	var signers []model.TransactionSigner
 
 	if len(signerInfos) <= 0 && len(possibleSignerAddresses) <= 0 {
-		panic(fmt.Sprintf("error signer info not found at tx %q", txHash))
+		return nil, fmt.Errorf("error signer info not found at tx %q", txHash)
 	}
 
 	for i, signer := range signerInfos {
