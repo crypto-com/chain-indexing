@@ -235,6 +235,7 @@ func ParseMsgSetWithdrawAddress(
 func ParseMsgWithdrawDelegatorReward(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
+	fmt.Println("===> ParseMsgWithdrawDelegatorReward: ", parserParams.Msg)
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {

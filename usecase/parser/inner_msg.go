@@ -35,9 +35,18 @@ func parseInnerMsgsEvents(
 
 func withdrawDelegatorReward(events []model.BlockResultsEvent,
 ) ([]model.BlockResultsEvent, []model.BlockResultsEvent) {
-	validateType := []string{"coin_spent", "coin_received", "transfer", "message", "withdraw_rewards", "message"}
+	var withdrawRewardEvent []model.BlockResultsEvent
+	var remainingEvents []model.BlockResultsEvent
 
-	withdrawRewardEvent, remainingEvents := validateEvents(validateType, events)
+	validateType := []string{"coin_spent", "coin_received", "transfer", "message", "withdraw_rewards", "message"}
+	validateTypeWithoutAmount := []string{"withdraw_rewards", "message"}
+
+	withdrawRewardEvent, remainingEvents = validateEvents(validateType, events)
+
+	if len(withdrawRewardEvent) <= 0 {
+		withdrawRewardEvent, remainingEvents = validateEvents(validateTypeWithoutAmount, events)
+	}
+
 	return withdrawRewardEvent, remainingEvents
 }
 
