@@ -235,7 +235,6 @@ func ParseMsgSetWithdrawAddress(
 func ParseMsgWithdrawDelegatorReward(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
-	fmt.Println("===> ParseMsgWithdrawDelegatorReward: ", parserParams.Msg)
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
@@ -257,12 +256,12 @@ func ParseMsgWithdrawDelegatorReward(
 			},
 		)}, possibleSignerAddresses
 	}
-	fmt.Println("===> parserParams.MsgIndex: ", parserParams.MsgIndex, "ParseMsgWithdrawDelegatorReward:", parserParams.TxsResult.Log)
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	var recipient string
 	var amount coin.Coins
 	// When there is no reward withdrew, `transfer` event would not exist
 	if event := log.GetEventByType("transfer"); event == nil {
+		// if event := log.GetEventByType("transfer"); event == nil {
 		recipient, _ = parserParams.Msg["delegator_address"].(string)
 		amount = coin.NewEmptyCoins()
 	} else {
@@ -1570,7 +1569,7 @@ func ParseMsgExec(
 			RawMsgExec: rawMsg,
 		}
 
-		innerCommands := parseMsgExecInnerMsgs(&parserParams)
+		innerCommands := parseMsgExecInnerMsgs(parserParams)
 
 		// Getting possible signer address from Msg
 		var possibleSignerAddresses []string
@@ -1589,7 +1588,7 @@ func ParseMsgExec(
 		RawMsgExec: rawMsg,
 	}
 
-	innerCommands := parseMsgExecInnerMsgs(&parserParams)
+	innerCommands := parseMsgExecInnerMsgs(parserParams)
 
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
@@ -1605,7 +1604,7 @@ func ParseMsgExec(
 }
 
 func parseMsgExecInnerMsgs(
-	parserParams *utils.CosmosParserParams,
+	parserParams utils.CosmosParserParams,
 ) []command.Command {
 
 	var commands []command.Command
@@ -1617,36 +1616,10 @@ func parseMsgExecInnerMsgs(
 		panic(fmt.Errorf("error parsing MsgExec.msgs to []interface{}: %v", parserParams.Msg["msgs"]))
 	}
 
-	events := parserParams.TxsResult.Events
-	parserParams.TxsResult.Log = []model.BlockResultsTxsResultLog{}
+	parserParams.TxsResult.Log = ParseTxsResultsEvents(msgs, &parserParams.TxsResult.Events)
 
-	for innerMsgIndex, innerMsgInterface := range msgs {
-		innerMsg, ok := innerMsgInterface.(map[string]interface{})
-		if !ok {
-			panic(fmt.Errorf("error parsing MsgExec.msgs[%v] to map[string]interface{}: %v", innerMsgIndex, innerMsgInterface))
-		}
-
-		innerMsgType, ok := innerMsg["@type"].(string)
-		if !ok {
-			panic(fmt.Errorf("error missing '@type' in MsgExec.msgs[%v]: %v", innerMsgIndex, innerMsg))
-		}
-
-		validateEvents, remainingEvents := parseInnerMsgsEvents(innerMsgType, events)
-		events = remainingEvents
-
-		log := model.BlockResultsTxsResultLog{
-			MsgIndex: innerMsgIndex,
-			Events:   validateEvents,
-		}
-
-		fmt.Println("===> parseMsgExecInnerMsgs:", events)
-		fmt.Println("===> log:", log)
-		parserParams.TxsResult.Log = append(parserParams.TxsResult.Log, log)
-	}
-	fmt.Println("===> parserParams.TxsResult.Log:", parserParams.TxsResult.Log)
 	bytes, _ := json.Marshal(parserParams.TxsResult.Log)
 	rawLog, _ := json.Marshal(bytes)
-
 	parserParams.TxsResult.RawLog = string(rawLog)
 
 	for innerMsgIndex, innerMsgInterface := range msgs {
@@ -1661,6 +1634,8 @@ func parseMsgExecInnerMsgs(
 		}
 
 		parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(innerMsgType), utils.ParserBlockHeight(blockHeight))
+
+		parserParams.MsgCommonParams.MsgIndex = innerMsgIndex
 
 		msgCommands, _ := parser(utils.CosmosParserParams{
 			AddressPrefix:   parserParams.AddressPrefix,
