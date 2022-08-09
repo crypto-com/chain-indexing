@@ -13,6 +13,7 @@ import (
 )
 
 func ParseBlockToCommands(
+	logger applogger.Logger,
 	parserManager *utils.CosmosParserManager,
 	cosmosClient cosmosapp_interface.Client,
 	txDecoder *utils.TxDecoder,
@@ -49,7 +50,7 @@ func ParseBlockToCommands(
 		if parseErr != nil {
 			return nil, fmt.Errorf("error parsing message commands: %v", parseErr)
 		}
-		logger := parserManager.GetLogger().WithFields(applogger.LogFields{
+		logger := logger.WithFields(applogger.LogFields{
 			"submodule": "ParseTransactionCommands",
 		})
 		transactionCommands, parseErr := ParseTransactionCommands(logger, txDecoder, cosmosClient, block, blockResults, accountAddressPrefix, possibleSignerAddresses)
