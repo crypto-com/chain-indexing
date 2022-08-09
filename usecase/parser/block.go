@@ -49,7 +49,7 @@ func ParseBlockToCommands(
 			return nil, fmt.Errorf("error parsing message commands: %v", parseErr)
 		}
 
-		transactionCommands, parseErr := ParseTransactionCommands(txDecoder, cosmosClient, block, blockResults, accountAddressPrefix, possibleSignerAddresses)
+		transactionCommands, parseErr := ParseTransactionCommands(parserManager.GetLogger(), txDecoder, cosmosClient, block, blockResults, accountAddressPrefix, possibleSignerAddresses)
 		if parseErr != nil {
 			return nil, fmt.Errorf("error parsing transaction commands: %v", parseErr)
 		}
