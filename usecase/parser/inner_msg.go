@@ -41,7 +41,7 @@ func ParseTxsResultsEvents(
 			panic(fmt.Errorf("error missing '@type' in MsgExec.msgs[%v]: %v", innerMsgIndex, innerMsg))
 		}
 
-		validateEvents := parseInnerMsgsEvents(innerMsgType, innerMsgIndex, parsedEvents)
+		validateEvents := ParseInnerMsgsEvents(innerMsgType, innerMsgIndex, parsedEvents)
 
 		log := model.BlockResultsTxsResultLog{
 			MsgIndex: innerMsgIndex,
@@ -53,7 +53,7 @@ func ParseTxsResultsEvents(
 	return resultLog
 }
 
-func parseInnerMsgsEvents(
+func ParseInnerMsgsEvents(
 	innerMsgType string,
 	innerMsgIndex int,
 	parsedEvents *utils.ParsedTxsResultsEvents,
@@ -62,17 +62,19 @@ func parseInnerMsgsEvents(
 
 	switch innerMsgType {
 	case "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress":
-		extractedEvents = msgSetWithdrawAddress(parsedEvents, innerMsgIndex)
+		extractedEvents = MsgSetWithdrawAddress(parsedEvents, innerMsgIndex)
 	case "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward":
-		extractedEvents = msgWithdrawDelegatorReward(parsedEvents, innerMsgIndex)
+		extractedEvents = MsgWithdrawDelegatorReward(parsedEvents, innerMsgIndex)
 	case "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission":
-		extractedEvents = msgWithdrawValidatorCommission(parsedEvents, innerMsgIndex)
+		extractedEvents = MsgWithdrawValidatorCommission(parsedEvents, innerMsgIndex)
+	case "/cosmos.distribution.v1beta1.MsgFundCommunityPool":
+		extractedEvents = MsgFundCommunityPool(parsedEvents, innerMsgIndex)
 
 	}
 	return extractedEvents
 }
 
-func msgSetWithdrawAddress(events *utils.ParsedTxsResultsEvents,
+func MsgSetWithdrawAddress(events *utils.ParsedTxsResultsEvents,
 	innerMsgIndex int,
 ) []model.BlockResultsEvent {
 	var extractedEvents []model.BlockResultsEvent
@@ -92,7 +94,7 @@ func msgSetWithdrawAddress(events *utils.ParsedTxsResultsEvents,
 	return extractedEvents
 }
 
-func msgWithdrawDelegatorReward(events *utils.ParsedTxsResultsEvents,
+func MsgWithdrawDelegatorReward(events *utils.ParsedTxsResultsEvents,
 	innerMsgIndex int,
 ) []model.BlockResultsEvent {
 	var extractedEvents []model.BlockResultsEvent
@@ -138,7 +140,7 @@ func msgWithdrawDelegatorReward(events *utils.ParsedTxsResultsEvents,
 	return extractedEvents
 }
 
-func msgWithdrawValidatorCommission(events *utils.ParsedTxsResultsEvents,
+func MsgWithdrawValidatorCommission(events *utils.ParsedTxsResultsEvents,
 	innerMsgIndex int,
 ) []model.BlockResultsEvent {
 	var extractedEvents []model.BlockResultsEvent
@@ -170,6 +172,44 @@ func msgWithdrawValidatorCommission(events *utils.ParsedTxsResultsEvents,
 		},
 		{
 			Type:  "withdraw_commission",
+			Count: 1,
+		},
+	}
+
+	// extract events
+	extractedEvents = extractMsgEvents(innerMsgIndex, eventTypes, events)
+	if len(extractedEvents) <= 0 {
+		// extract events
+		extractedEvents = extractMsgEvents(innerMsgIndex, eventTypesWithoutAmount, events)
+	}
+
+	return extractedEvents
+}
+
+func MsgFundCommunityPool(events *utils.ParsedTxsResultsEvents,
+	innerMsgIndex int,
+) []model.BlockResultsEvent {
+	var extractedEvents []model.BlockResultsEvent
+	eventTypes := []EventType{
+		{
+			Type:  "coin_spent",
+			Count: 1,
+		},
+		{
+			Type:  "coin_received",
+			Count: 1},
+		{
+			Type:  "transfer",
+			Count: 1},
+		{
+			Type:  "message",
+			Count: 2,
+		},
+	}
+
+	eventTypesWithoutAmount := []EventType{
+		{
+			Type:  "message",
 			Count: 1,
 		},
 	}

@@ -40,6 +40,7 @@ func ParseBlockTxsMsgToCommands(
 		txSuccess := true
 		txsResult := blockResults.TxsResults[i]
 
+		fmt.Println("===> txsResult", txsResult)
 		if txsResult.Code != 0 {
 			txSuccess = false
 		}
@@ -47,6 +48,7 @@ func ParseBlockTxsMsgToCommands(
 		if err != nil {
 			panic(fmt.Sprintf("error decoding transaction: %v", err))
 		}
+		fmt.Println("===> tx", tx)
 
 		for msgIndex, msg := range tx.Body.Messages {
 			msgCommonParams := event.MsgCommonParams{
