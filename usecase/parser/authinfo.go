@@ -23,8 +23,10 @@ func ParseSignerInfosToTransactionSigners(
 	if len(signerInfos) <= 0 && len(possibleSignerAddresses) <= 0 {
 		return nil, fmt.Errorf("error signer info not found at tx %q", txHash)
 	}
-	if possibleSignerAddresses[0] == "" {
-		fmt.Errorf("error msgEthereumTx signer not found %q", txHash)
+	if len(possibleSignerAddresses) == 1 {
+		if possibleSignerAddresses[0] == "" {
+			fmt.Printf("error msgEthereumTx signer not found %q", txHash)
+		}
 	}
 
 	for i, signer := range signerInfos {
