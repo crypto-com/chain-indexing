@@ -1986,6 +1986,7 @@ func ParseMsgEthereumTx(
 	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
+		// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
 		msgEthereumTxParams := model.MsgEthereumTxParams{
 			RawMsgEthereumTx: rawMsg,
 		}
@@ -2002,6 +2003,7 @@ func ParseMsgEthereumTx(
 		)}, possibleSignerAddresses
 	}
 
+	// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
 	msgEthereumTxParams := model.MsgEthereumTxParams{
 		RawMsgEthereumTx: rawMsg,
 	}

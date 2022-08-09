@@ -5,8 +5,9 @@ type MsgEthereumTxParams struct {
 }
 
 type RawMsgEthereumTx struct {
-	Type string   `mapstructure:"@type" json:"@type"`
-	Size int      `mapstructure:"size" json:"size"`
+	Type string `mapstructure:"@type" json:"@type"`
+	Size int    `mapstructure:"size" json:"size"`
+	// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
 	Data LegacyTx `mapstructure:"data" json:"data"`
 	From string   `mapstructure:"from" json:"from"`
 	Hash string   `mapstructure:"hash" json:"hash"`
@@ -17,6 +18,7 @@ type MsgEthereumTx struct {
 	Amount string `mapstructure:"amount" json:"amount"`
 }
 
+// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
 type LegacyTx struct {
 	Type     string `mapstructure:"@type" json:"@type"`
 	Nonce    string `mapstructure:"nonce" json:"nonce"`
