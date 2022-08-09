@@ -65,19 +65,9 @@ func ParseTransactionCommands(
 			return nil, fmt.Errorf("error parsing timeout height: %v", err)
 		}
 
-		if len(tx.AuthInfo.SignerInfos) <= 0 && len(possibleSignerAddresses) <= 0 {
-			return nil, fmt.Errorf("error signer info not found at tx %q", TxHash(txHex))
-		}
-
 		signers, parseSignerInfosErr := ParseSignerInfosToTransactionSigners(
-			cosmosClient, tx.AuthInfo.SignerInfos, accountAddressPrefix, possibleSignerAddresses, TxHash(txHex),
+			logger, cosmosClient, tx.AuthInfo.SignerInfos, accountAddressPrefix, possibleSignerAddresses, TxHash(txHex),
 		)
-
-		if len(possibleSignerAddresses) == 1 {
-			if possibleSignerAddresses[0] == "" {
-				logger.Debugf("error msgEthereumTx signer not found %q", TxHash(txHex))
-			}
-		}
 
 		if parseSignerInfosErr != nil {
 			return nil, fmt.Errorf("error parsing SignerInfos: %v", parseSignerInfosErr)

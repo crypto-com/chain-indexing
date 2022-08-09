@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/internal/base64"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -12,6 +13,7 @@ import (
 )
 
 func ParseSignerInfosToTransactionSigners(
+	logger applogger.Logger,
 	cosmosClient cosmosapp_interface.Client,
 	signerInfos []utils.SignerInfo,
 	accountAddressPrefix string,
@@ -19,6 +21,16 @@ func ParseSignerInfosToTransactionSigners(
 	txHash string,
 ) ([]model.TransactionSigner, error) {
 	var signers []model.TransactionSigner
+
+	if len(signerInfos) <= 0 && len(possibleSignerAddresses) <= 0 {
+		return nil, fmt.Errorf("error signer info not found at tx %q", txHash)
+	}
+
+	if len(possibleSignerAddresses) == 1 {
+		if possibleSignerAddresses[0] == "" {
+			logger.Errorf("error msgEthereumTx signer not found %q", TxHash(txHash))
+		}
+	}
 
 	for i, signer := range signerInfos {
 		var transactionSignerInfo *model.TransactionSignerKeyInfo
