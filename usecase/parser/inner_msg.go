@@ -61,6 +61,11 @@ func ParseInnerMsgsEvents(
 	var extractedEvents []model.BlockResultsEvent
 
 	switch innerMsgType {
+	// cosmos bank
+	case "/cosmos.bank.v1beta1.MsgSend":
+		extractedEvents = MsgSend(parsedEvents, innerMsgIndex)
+
+	// cosmos distribution
 	case "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress":
 		extractedEvents = MsgSetWithdrawAddress(parsedEvents, innerMsgIndex)
 	case "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward":
@@ -70,7 +75,52 @@ func ParseInnerMsgsEvents(
 	case "/cosmos.distribution.v1beta1.MsgFundCommunityPool":
 		extractedEvents = MsgFundCommunityPool(parsedEvents, innerMsgIndex)
 
+	// cosmos staking
+	case "/cosmos.staking.v1beta1.MsgDelegate":
+		extractedEvents = MsgDelegate(parsedEvents, innerMsgIndex)
+	case "/cosmos.staking.v1beta1.MsgUndelegate":
+		extractedEvents = MsgUndelegate(parsedEvents, innerMsgIndex)
+	case "/cosmos.staking.v1beta1.MsgBeginRedelegate":
+		extractedEvents = MsgBeginRedelegate(parsedEvents, innerMsgIndex)
+
+	// cosmos gov
+	case "/cosmos.gov.v1beta1.MsgSubmitProposal":
+		extractedEvents = MsgFundCommunityPool(parsedEvents, innerMsgIndex)
+	case "/cosmos.gov.v1beta1.MsgVote":
+		extractedEvents = MsgFundCommunityPool(parsedEvents, innerMsgIndex)
+	case "/cosmos.gov.v1beta1.MsgDeposit":
+		extractedEvents = MsgFundCommunityPool(parsedEvents, innerMsgIndex)
+
 	}
+	return extractedEvents
+}
+
+func MsgSend(events *utils.ParsedTxsResultsEvents,
+	innerMsgIndex int,
+) []model.BlockResultsEvent {
+	var extractedEvents []model.BlockResultsEvent
+	eventTypes := []EventType{
+		{
+			Type:  "coin_spent",
+			Count: 1,
+		},
+		{
+			Type:  "coin_received",
+			Count: 1,
+		},
+		{
+			Type:  "transfer",
+			Count: 1,
+		},
+		{
+			Type:  "message",
+			Count: 2,
+		},
+	}
+
+	// extract events
+	extractedEvents = extractMsgEvents(innerMsgIndex, eventTypes, events)
+
 	return extractedEvents
 }
 
@@ -108,7 +158,8 @@ func MsgWithdrawDelegatorReward(events *utils.ParsedTxsResultsEvents,
 			Count: 1},
 		{
 			Type:  "transfer",
-			Count: 1},
+			Count: 1,
+		},
 		{
 			Type:  "message",
 			Count: 2,
@@ -197,10 +248,12 @@ func MsgFundCommunityPool(events *utils.ParsedTxsResultsEvents,
 		},
 		{
 			Type:  "coin_received",
-			Count: 1},
+			Count: 1,
+		},
 		{
 			Type:  "transfer",
-			Count: 1},
+			Count: 1,
+		},
 		{
 			Type:  "message",
 			Count: 2,
@@ -211,6 +264,62 @@ func MsgFundCommunityPool(events *utils.ParsedTxsResultsEvents,
 		{
 			Type:  "message",
 			Count: 1,
+		},
+	}
+
+	// extract events
+	extractedEvents = extractMsgEvents(innerMsgIndex, eventTypes, events)
+	if len(extractedEvents) <= 0 {
+		// extract events
+		extractedEvents = extractMsgEvents(innerMsgIndex, eventTypesWithoutAmount, events)
+	}
+
+	return extractedEvents
+}
+
+func MsgDelegate(events *utils.ParsedTxsResultsEvents,
+	innerMsgIndex int,
+) []model.BlockResultsEvent {
+	var extractedEvents []model.BlockResultsEvent
+	eventTypes := []EventType{
+		{
+			Type:  "coin_spent",
+			Count: 1,
+		},
+		{
+			Type:  "coin_received",
+			Count: 1,
+		},
+		{
+			Type:  "transfer",
+			Count: 1,
+		},
+		{
+			Type:  "delegate",
+			Count: 1,
+		},
+		{
+			Type:  "message",
+			Count: 2,
+		},
+	}
+
+	eventTypesWithoutAmount := []EventType{
+		{
+			Type:  "coin_spent",
+			Count: 1,
+		},
+		{
+			Type:  "coin_received",
+			Count: 1,
+		},
+		{
+			Type:  "delegate",
+			Count: 1,
+		},
+		{
+			Type:  "message",
+			Count: 2,
 		},
 	}
 
