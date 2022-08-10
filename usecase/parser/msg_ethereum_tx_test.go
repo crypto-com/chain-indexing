@@ -73,7 +73,8 @@ var _ = Describe("ParseMsgCommands", func() {
 					},
 				},
 			)))
-			Expect(possibleSignerAddresses).To(Equal([]string{""}))
+			var emptyAddress []string
+			Expect(possibleSignerAddresses).To(Equal(emptyAddress))
 		})
 	})
 })
