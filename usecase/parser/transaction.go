@@ -65,8 +65,11 @@ func ParseTransactionCommands(
 			return nil, fmt.Errorf("error parsing timeout height: %v", err)
 		}
 
+		newLogger := logger.WithFields(applogger.LogFields{
+			"submodule": "ParseSignerInfosToTransactionSigners",
+		})
 		signers, parseSignerInfosErr := ParseSignerInfosToTransactionSigners(
-			logger, cosmosClient, tx.AuthInfo.SignerInfos, accountAddressPrefix, possibleSignerAddresses, TxHash(txHex),
+			newLogger, cosmosClient, tx.AuthInfo.SignerInfos, accountAddressPrefix, possibleSignerAddresses, TxHash(txHex),
 		)
 
 		if parseSignerInfosErr != nil {

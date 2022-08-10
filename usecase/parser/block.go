@@ -50,10 +50,10 @@ func ParseBlockToCommands(
 		if parseErr != nil {
 			return nil, fmt.Errorf("error parsing message commands: %v", parseErr)
 		}
-		logger = logger.WithFields(applogger.LogFields{
+		newLogger := logger.WithFields(applogger.LogFields{
 			"submodule": "ParseTransactionCommands",
 		})
-		transactionCommands, parseErr := ParseTransactionCommands(logger, txDecoder, cosmosClient, block, blockResults, accountAddressPrefix, possibleSignerAddresses)
+		transactionCommands, parseErr := ParseTransactionCommands(newLogger, txDecoder, cosmosClient, block, blockResults, accountAddressPrefix, possibleSignerAddresses)
 		if parseErr != nil {
 			return nil, fmt.Errorf("error parsing transaction commands: %v", parseErr)
 		}
