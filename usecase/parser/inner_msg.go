@@ -21,7 +21,7 @@ func ParseTxsResultsEvents(
 
 	// remove event type = tx and message action = MsgExec
 	for _, event := range *events {
-		fmt.Println("===> ", event)
+		fmt.Println("===> event", event)
 		if event.Type == "message" && event.Attributes[0].Key == "action" {
 			continue
 		}
@@ -320,6 +320,102 @@ func MsgDelegate(events *utils.ParsedTxsResultsEvents,
 		{
 			Type:  "message",
 			Count: 2,
+		},
+	}
+
+	// extract events
+	extractedEvents = extractMsgEvents(innerMsgIndex, eventTypes, events)
+	if len(extractedEvents) <= 0 {
+		// extract events
+		extractedEvents = extractMsgEvents(innerMsgIndex, eventTypesWithoutAmount, events)
+	}
+
+	return extractedEvents
+}
+
+func MsgUndelegate(events *utils.ParsedTxsResultsEvents,
+	innerMsgIndex int,
+) []model.BlockResultsEvent {
+	var extractedEvents []model.BlockResultsEvent
+	eventTypes := []EventType{
+		{
+			Type:  "coin_spent",
+			Count: 1,
+		},
+		{
+			Type:  "coin_received",
+			Count: 1,
+		},
+		{
+			Type:  "transfer",
+			Count: 1,
+		},
+		{
+			Type:  "unbond",
+			Count: 1,
+		},
+		{
+			Type:  "message",
+			Count: 2,
+		},
+	}
+
+	eventTypesWithoutAmount := []EventType{
+		{
+			Type:  "unbond",
+			Count: 1,
+		},
+		{
+			Type:  "message",
+			Count: 1,
+		},
+	}
+
+	// extract events
+	extractedEvents = extractMsgEvents(innerMsgIndex, eventTypes, events)
+	if len(extractedEvents) <= 0 {
+		// extract events
+		extractedEvents = extractMsgEvents(innerMsgIndex, eventTypesWithoutAmount, events)
+	}
+
+	return extractedEvents
+}
+
+func MsgBeginRedelegate(events *utils.ParsedTxsResultsEvents,
+	innerMsgIndex int,
+) []model.BlockResultsEvent {
+	var extractedEvents []model.BlockResultsEvent
+	eventTypes := []EventType{
+		{
+			Type:  "coin_spent",
+			Count: 1,
+		},
+		{
+			Type:  "coin_received",
+			Count: 1,
+		},
+		{
+			Type:  "transfer",
+			Count: 1,
+		},
+		{
+			Type:  "unbond",
+			Count: 1,
+		},
+		{
+			Type:  "message",
+			Count: 2,
+		},
+	}
+
+	eventTypesWithoutAmount := []EventType{
+		{
+			Type:  "unbond",
+			Count: 1,
+		},
+		{
+			Type:  "message",
+			Count: 1,
 		},
 	}
 
