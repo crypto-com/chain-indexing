@@ -55,7 +55,6 @@ func NewParsedTxsResultLogEventsSplitByKey(
 			}
 		}
 		event.keyIndex[attribute.Key] = i
-		fmt.Println("===> event.keyIndex[attribute.Key]: ", attribute.Key, i)
 	}
 	events = append(events, event)
 
@@ -84,7 +83,6 @@ func NewParsedTxsResultLogEventsSplitByKeyReverseOrder(
 			}
 		}
 		event.keyIndex[attribute.Key] = i
-		fmt.Println("===> event.keyIndex[attribute.Key]: ", attribute.Key, i)
 	}
 	events = append(events, event)
 

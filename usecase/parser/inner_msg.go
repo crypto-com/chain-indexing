@@ -21,7 +21,7 @@ func ParseTxsResultsEvents(
 
 	// remove event type = tx and message action = MsgExec
 	for _, event := range *events {
-		fmt.Println("===> event", event)
+		fmt.Println("===> event: ", event)
 		if event.Type == "message" && event.Attributes[0].Key == "action" {
 			continue
 		}
