@@ -1994,7 +1994,7 @@ func ParseMsgEthereumTx(
 		// Getting possible signer address from Msg
 		var possibleSignerAddresses []string
 		// FIXME: https://github.com/crypto-com/chain-indexing/issues/729
-		possibleSignerAddresses = append(possibleSignerAddresses, msgEthereumTxParams.From)
+		// possibleSignerAddresses = append(possibleSignerAddresses, msgEthereumTxParams.From)
 
 		return []command.Command{command_usecase.NewCreateMsgEthereumTx(
 			parserParams.MsgCommonParams,
@@ -2011,7 +2011,7 @@ func ParseMsgEthereumTx(
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
 	// FIXME: https://github.com/crypto-com/chain-indexing/issues/729
-	possibleSignerAddresses = append(possibleSignerAddresses, msgEthereumTxParams.From)
+	// possibleSignerAddresses = append(possibleSignerAddresses, msgEthereumTxParams.From)
 
 	return []command.Command{command_usecase.NewCreateMsgEthereumTx(
 		parserParams.MsgCommonParams,

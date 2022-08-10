@@ -23,12 +23,13 @@ func ParseSignerInfosToTransactionSigners(
 	var signers []model.TransactionSigner
 
 	if len(signerInfos) <= 0 && len(possibleSignerAddresses) <= 0 {
-		return nil, fmt.Errorf("error signer info not found at tx %q", txHash)
+		logger.Errorf("error signer info not found at tx %q", txHash)
 	}
 
-	if len(possibleSignerAddresses) == 1 {
-		if possibleSignerAddresses[0] == "" {
-			logger.Errorf("error msgEthereumTx signer not found %q", TxHash(txHash))
+	for _, possibleSignerAddress := range possibleSignerAddresses {
+		if possibleSignerAddress == "" {
+			logger.Errorf("error empty address in possibleSignerAddresses: %v at txHash %q", possibleSignerAddresses, txHash)
+			break
 		}
 	}
 
