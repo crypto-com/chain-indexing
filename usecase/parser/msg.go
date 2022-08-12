@@ -55,7 +55,6 @@ func ParseBlockTxsMsgToCommands(
 				TxSuccess:   txSuccess,
 				MsgIndex:    msgIndex,
 			}
-			fmt.Println("===> TxHash", txHash)
 
 			var msgCommands []command.Command
 			var possibleSignerAddresses []string
@@ -1617,7 +1616,7 @@ func parseMsgExecInnerMsgs(
 		panic(fmt.Errorf("error parsing MsgExec.msgs to []interface{}: %v", parserParams.Msg["msgs"]))
 	}
 
-	parserParams.TxsResult.Log = ParseTxsResultsEvents(msgs, &parserParams.TxsResult.Events)
+	parserParams.TxsResult.Log = ParseTxsResultsEvents(msgs, parserParams.TxsResult.Events)
 
 	bytes, _ := json.Marshal(parserParams.TxsResult.Log)
 	rawLog, _ := json.Marshal(bytes)
