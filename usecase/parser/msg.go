@@ -1616,8 +1616,8 @@ func parseMsgExecInnerMsgs(
 		panic(fmt.Errorf("error parsing MsgExec.msgs to []interface{}: %v", parserParams.Msg["msgs"]))
 	}
 
+	// group event by message type
 	parserParams.TxsResult.Log = ParseTxsResultsEvents(msgs, parserParams.TxsResult.Events)
-
 	bytes, _ := json.Marshal(parserParams.TxsResult.Log)
 	rawLog, _ := json.Marshal(bytes)
 	parserParams.TxsResult.RawLog = string(rawLog)

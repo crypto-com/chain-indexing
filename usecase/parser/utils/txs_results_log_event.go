@@ -61,34 +61,6 @@ func NewParsedTxsResultLogEventsSplitByKey(
 	return events
 }
 
-func NewParsedTxsResultLogEventsSplitByKeyReverseOrder(
-	rawEvent *model.BlockResultsEvent,
-) []ParsedTxsResultLogEvent {
-	events := make([]ParsedTxsResultLogEvent, 0)
-	event := ParsedTxsResultLogEvent{
-		make(map[string]int),
-
-		*rawEvent,
-	}
-
-	for i := range rawEvent.Attributes {
-		attribute := rawEvent.Attributes[len(rawEvent.Attributes)-i-1]
-		if event.HasAttribute(attribute.Key) {
-			events = append(events, event)
-
-			event = ParsedTxsResultLogEvent{
-				make(map[string]int),
-
-				*rawEvent,
-			}
-		}
-		event.keyIndex[attribute.Key] = i
-	}
-	events = append(events, event)
-
-	return events
-}
-
 func (log *ParsedTxsResultLogEvent) HasAttribute(key string) bool {
 	_, ok := log.keyIndex[key]
 	return ok
