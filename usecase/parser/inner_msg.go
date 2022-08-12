@@ -124,6 +124,7 @@ func MsgSetWithdrawAddress(events *utils.ParsedTxsResultsEvents,
 
 	// extract events
 	extractedEvents = extractMsgEvents(eventTypes, events)
+
 	return extractedEvents
 }
 
@@ -153,24 +154,9 @@ func MsgWithdrawDelegatorReward(events *utils.ParsedTxsResultsEvents,
 			Count: 1,
 		},
 	}
-	eventTypesWithoutAmount := []EventType{
-		{
-			Type:  "message",
-			Count: 1,
-		},
-		{
-			Type:  "withdraw_rewards",
-			Count: 1,
-		},
-	}
 
 	// extract events
 	extractedEvents = extractMsgEvents(eventTypes, events)
-
-	if len(extractedEvents) <= 0 {
-		// extract events
-		extractedEvents = extractMsgEvents(eventTypesWithoutAmount, events)
-	}
 
 	return extractedEvents
 }
@@ -202,23 +188,8 @@ func MsgWithdrawValidatorCommission(events *utils.ParsedTxsResultsEvents,
 		},
 	}
 
-	eventTypesWithoutAmount := []EventType{
-		{
-			Type:  "message",
-			Count: 1,
-		},
-		{
-			Type:  "withdraw_commission",
-			Count: 1,
-		},
-	}
 	// extract events
 	extractedEvents = extractMsgEvents(eventTypes, events)
-	if len(extractedEvents) <= 0 {
-		// extract events
-		extractedEvents = extractMsgEvents(eventTypesWithoutAmount, events)
-	}
-
 	return extractedEvents
 }
 
@@ -245,19 +216,8 @@ func MsgFundCommunityPool(events *utils.ParsedTxsResultsEvents,
 		},
 	}
 
-	eventTypesWithoutAmount := []EventType{
-		{
-			Type:  "message",
-			Count: 1,
-		},
-	}
-
 	// extract events
 	extractedEvents = extractMsgEvents(eventTypes, events)
-	if len(extractedEvents) <= 0 {
-		// extract events
-		extractedEvents = extractMsgEvents(eventTypesWithoutAmount, events)
-	}
 
 	return extractedEvents
 }
@@ -268,7 +228,7 @@ func extractMsgEvents(eventTypes []EventType, events *utils.ParsedTxsResultsEven
 	for _, eventType := range eventTypes {
 		for i := 0; i < int(eventType.Count); i++ {
 			if i > len(events.GetTypeIndex(eventType.Type)) || len(events.GetTypeIndex(eventType.Type)) <= 0 {
-				return []model.BlockResultsEvent{}
+				continue
 			}
 			eventIndex := events.GetTypeIndex(eventType.Type)[0]
 			extractedEvents = append(extractedEvents, events.GetRawEvents()[eventIndex])
