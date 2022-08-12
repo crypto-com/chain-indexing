@@ -58,6 +58,7 @@ func ParseInnerMsgsEvents(
 ) []model.BlockResultsEvent {
 	var extractedEvents []model.BlockResultsEvent
 	switch innerMsgType {
+
 	// cosmos bank
 	case "/cosmos.bank.v1beta1.MsgSend":
 		extractedEvents = MsgSend(parsedEvents, innerMsgIndex)

@@ -71,7 +71,7 @@ func NewParsedTxsResultLogEventsSplitByKeyReverseOrder(
 		*rawEvent,
 	}
 
-	for i, _ := range rawEvent.Attributes {
+	for i := range rawEvent.Attributes {
 		attribute := rawEvent.Attributes[len(rawEvent.Attributes)-i-1]
 		if event.HasAttribute(attribute.Key) {
 			events = append(events, event)
