@@ -211,14 +211,12 @@ func MsgWithdrawValidatorCommission(events *utils.ParsedTxsResultsEvents,
 			Count: 1,
 		},
 	}
-	tempEvents := *events
 	// extract events
-	extractedEvents = extractMsgEvents(eventTypes, &tempEvents)
+	extractedEvents = extractMsgEvents(eventTypes, events)
 	if len(extractedEvents) <= 0 {
 		// extract events
-		extractedEvents = extractMsgEvents(eventTypesWithoutAmount, &tempEvents)
+		extractedEvents = extractMsgEvents(eventTypesWithoutAmount, events)
 	}
-	events = &tempEvents
 
 	return extractedEvents
 }
