@@ -8,8 +8,8 @@ import (
 )
 
 type EventType struct {
-	Type  string `json:"type"`
-	Count int64  `json:"count"`
+	Type  string
+	Count int64
 }
 
 func ParseTxsResultsEvents(
@@ -59,11 +59,11 @@ func ParseInnerMsgsEvents(
 	var extractedEvents []model.BlockResultsEvent
 	switch innerMsgType {
 
-	// cosmos bank
+	// bank
 	case "/cosmos.bank.v1beta1.MsgSend":
 		extractedEvents = MsgSend(parsedEvents, innerMsgIndex)
 
-	// cosmos distribution
+	// distribution
 	case "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress":
 		extractedEvents = MsgSetWithdrawAddress(parsedEvents, innerMsgIndex)
 	case "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward":
@@ -80,7 +80,6 @@ func ParseInnerMsgsEvents(
 func MsgSend(events *utils.ParsedTxsResultsEvents,
 	innerMsgIndex int,
 ) []model.BlockResultsEvent {
-	var extractedEvents []model.BlockResultsEvent
 	eventTypes := []EventType{
 		{
 			Type:  "coin_spent",
@@ -100,17 +99,12 @@ func MsgSend(events *utils.ParsedTxsResultsEvents,
 		},
 	}
 
-	// extract events
-	extractedEvents = extractMsgEvents(eventTypes, events)
-
-	return extractedEvents
+	return extract(eventTypes, []EventType{}, events)
 }
 
 func MsgSetWithdrawAddress(events *utils.ParsedTxsResultsEvents,
 	innerMsgIndex int,
 ) []model.BlockResultsEvent {
-	var extractedEvents []model.BlockResultsEvent
-	//
 	eventTypes := []EventType{
 		{
 			Type:  "set_withdraw_address",
@@ -122,16 +116,12 @@ func MsgSetWithdrawAddress(events *utils.ParsedTxsResultsEvents,
 		},
 	}
 
-	// extract events
-	extractedEvents = extractMsgEvents(eventTypes, events)
-
-	return extractedEvents
+	return extract(eventTypes, []EventType{}, events)
 }
 
 func MsgWithdrawDelegatorReward(events *utils.ParsedTxsResultsEvents,
 	innerMsgIndex int,
 ) []model.BlockResultsEvent {
-	var extractedEvents []model.BlockResultsEvent
 	eventTypes := []EventType{
 		{
 			Type:  "coin_spent",
@@ -155,16 +145,22 @@ func MsgWithdrawDelegatorReward(events *utils.ParsedTxsResultsEvents,
 		},
 	}
 
-	// extract events
-	extractedEvents = extractMsgEvents(eventTypes, events)
-
-	return extractedEvents
+	eventTypesNoTransfer := []EventType{
+		{
+			Type:  "message",
+			Count: 1,
+		},
+		{
+			Type:  "withdraw_rewards",
+			Count: 1,
+		},
+	}
+	return extract(eventTypes, eventTypesNoTransfer, events)
 }
 
 func MsgWithdrawValidatorCommission(events *utils.ParsedTxsResultsEvents,
 	innerMsgIndex int,
 ) []model.BlockResultsEvent {
-	var extractedEvents []model.BlockResultsEvent
 	eventTypes := []EventType{
 		{
 			Type:  "coin_spent",
@@ -188,15 +184,23 @@ func MsgWithdrawValidatorCommission(events *utils.ParsedTxsResultsEvents,
 		},
 	}
 
-	// extract events
-	extractedEvents = extractMsgEvents(eventTypes, events)
-	return extractedEvents
+	eventTypesNoTransfer := []EventType{
+		{
+			Type:  "message",
+			Count: 1,
+		},
+		{
+			Type:  "withdraw_commission",
+			Count: 1,
+		},
+	}
+
+	return extract(eventTypes, eventTypesNoTransfer, events)
 }
 
 func MsgFundCommunityPool(events *utils.ParsedTxsResultsEvents,
 	innerMsgIndex int,
 ) []model.BlockResultsEvent {
-	var extractedEvents []model.BlockResultsEvent
 	eventTypes := []EventType{
 		{
 			Type:  "coin_spent",
@@ -216,19 +220,35 @@ func MsgFundCommunityPool(events *utils.ParsedTxsResultsEvents,
 		},
 	}
 
+	eventTypesNoTransfer := []EventType{
+		{
+			Type:  "message",
+			Count: 1,
+		},
+	}
+
+	return extract(eventTypes, eventTypesNoTransfer, events)
+}
+
+func extract(eventTypes []EventType, eventTypesRetry []EventType, events *utils.ParsedTxsResultsEvents) []model.BlockResultsEvent {
 	// extract events
-	extractedEvents = extractMsgEvents(eventTypes, events)
+	extractedEvents := getMsgEvents(eventTypes, events)
+
+	// retry
+	if len(extractedEvents) <= 0 {
+		extractedEvents = getMsgEvents(eventTypesRetry, events)
+	}
 
 	return extractedEvents
 }
 
-func extractMsgEvents(eventTypes []EventType, events *utils.ParsedTxsResultsEvents) []model.BlockResultsEvent {
+func getMsgEvents(eventTypes []EventType, events *utils.ParsedTxsResultsEvents) []model.BlockResultsEvent {
 	var extractedEvents []model.BlockResultsEvent
 
 	for _, eventType := range eventTypes {
 		for i := 0; i < int(eventType.Count); i++ {
 			if i > len(events.GetTypeIndex(eventType.Type)) || len(events.GetTypeIndex(eventType.Type)) <= 0 {
-				continue
+				return []model.BlockResultsEvent{}
 			}
 			eventIndex := events.GetTypeIndex(eventType.Type)[0]
 			extractedEvents = append(extractedEvents, events.GetRawEvents()[eventIndex])
