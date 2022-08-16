@@ -100,6 +100,7 @@ func (proposal *Proposal) GetEventsToListen() []string {
 				event_usecase.MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_CREATED,
 				event_usecase.MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_CREATED,
 				event_usecase.MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_CREATED,
+				event_usecase.MSG_SUBMIT_UNKNOWN_PROPOSAL_CREATED,
 				event_usecase.PROPOSAL_VOTING_PERIOD_STARTED,
 				event_usecase.PROPOSAL_INACTIVED,
 				event_usecase.PROPOSAL_ENDED,
