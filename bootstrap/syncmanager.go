@@ -220,7 +220,13 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		return nil, fmt.Errorf("error requesting chain block_results at height %d: %v", blockHeight, err)
 	}
 
+	parseBlockToCommandsLogger := manager.logger.WithFields(applogger.LogFields{
+		"submodule":   "ParseBlockToCommands",
+		"blockHeight": blockHeight,
+	})
+
 	commands, err := parser.ParseBlockToCommands(
+		parseBlockToCommandsLogger,
 		manager.parserManager,
 		manager.cosmosClient,
 		manager.txDecoder,
