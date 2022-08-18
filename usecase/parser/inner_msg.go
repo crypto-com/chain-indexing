@@ -7,45 +7,36 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
-type EventType struct {
-	Type  string
-	Count int64
-}
-
 func ParseTxsResultsEvents(
 	msgs []interface{},
-	events []model.BlockResultsEvent,
+	logs []model.BlockResultsTxsResultLog,
 ) []model.BlockResultsTxsResultLog {
-	var filteredEvents []model.BlockResultsEvent
 	var resultLog []model.BlockResultsTxsResultLog
+	var parsedEvents *utils.ParsedTxsResultsEvents
 
-	// remove event type = tx and message action = MsgExec
-	for _, event := range events {
-		if event.Type == "message" && event.Attributes[0].Key == "action" {
-			continue
+	if len(logs) == 1 && len(logs) != len(msgs) {
+		log := logs[0]
+		parsedEvents = utils.NewParsedTxsResultsEvents(log.Events)
+
+		for innerMsgIndex, innerMsgInterface := range msgs {
+			innerMsg, ok := innerMsgInterface.(map[string]interface{})
+			if !ok {
+				panic(fmt.Errorf("error parsing MsgExec.msgs[%v] to map[string]interface{}: %v", innerMsgIndex, innerMsgInterface))
+			}
+
+			innerMsgType, ok := innerMsg["@type"].(string)
+			if !ok {
+				panic(fmt.Errorf("error missing '@type' in MsgExec.msgs[%v]: %v", innerMsgIndex, innerMsg))
+			}
+
+			validateEvents := ParseInnerMsgsEvents(innerMsgType, innerMsgIndex, parsedEvents)
+
+			log := model.BlockResultsTxsResultLog{
+				MsgIndex: innerMsgIndex,
+				Events:   validateEvents,
+			}
+			resultLog = append(resultLog, log)
 		}
-		filteredEvents = append(filteredEvents, event)
-	}
-
-	parsedEvents := utils.NewParsedTxsResultsEvents(filteredEvents)
-	for innerMsgIndex, innerMsgInterface := range msgs {
-		innerMsg, ok := innerMsgInterface.(map[string]interface{})
-		if !ok {
-			panic(fmt.Errorf("error parsing MsgExec.msgs[%v] to map[string]interface{}: %v", innerMsgIndex, innerMsgInterface))
-		}
-
-		innerMsgType, ok := innerMsg["@type"].(string)
-		if !ok {
-			panic(fmt.Errorf("error missing '@type' in MsgExec.msgs[%v]: %v", innerMsgIndex, innerMsg))
-		}
-
-		validateEvents := ParseInnerMsgsEvents(innerMsgType, innerMsgIndex, parsedEvents)
-
-		log := model.BlockResultsTxsResultLog{
-			MsgIndex: innerMsgIndex,
-			Events:   validateEvents,
-		}
-		resultLog = append(resultLog, log)
 	}
 
 	return resultLog
@@ -77,183 +68,91 @@ func ParseInnerMsgsEvents(
 	return extractedEvents
 }
 
-func MsgSend(events *utils.ParsedTxsResultsEvents,
+func MsgSend(parsedEvents *utils.ParsedTxsResultsEvents,
 	innerMsgIndex int,
 ) []model.BlockResultsEvent {
-	eventTypes := []EventType{
-		{
-			Type:  "coin_spent",
-			Count: 1,
-		},
-		{
-			Type:  "coin_received",
-			Count: 1,
-		},
-		{
-			Type:  "transfer",
-			Count: 1,
-		},
-		{
-			Type:  "message",
-			Count: 2,
-		},
-	}
+	eventTypes := []string{"coin_spent", "coin_received", "transfer", "message"}
 
-	return extract(eventTypes, []EventType{}, events)
+	return extract(innerMsgIndex, eventTypes, []string{}, parsedEvents)
 }
 
-func MsgSetWithdrawAddress(events *utils.ParsedTxsResultsEvents,
+func MsgSetWithdrawAddress(parsedEvents *utils.ParsedTxsResultsEvents,
 	innerMsgIndex int,
 ) []model.BlockResultsEvent {
-	eventTypes := []EventType{
-		{
-			Type:  "set_withdraw_address",
-			Count: 1,
-		},
-		{
-			Type:  "message",
-			Count: 1,
-		},
-	}
+	eventTypes := []string{"set_withdraw_address", "message"}
 
-	return extract(eventTypes, []EventType{}, events)
+	return extract(innerMsgIndex, eventTypes, []string{}, parsedEvents)
 }
 
-func MsgWithdrawDelegatorReward(events *utils.ParsedTxsResultsEvents,
+func MsgWithdrawDelegatorReward(parsedEvents *utils.ParsedTxsResultsEvents,
 	innerMsgIndex int,
 ) []model.BlockResultsEvent {
-	eventTypes := []EventType{
-		{
-			Type:  "coin_spent",
-			Count: 1,
-		},
-		{
-			Type:  "coin_received",
-			Count: 1,
-		},
-		{
-			Type:  "transfer",
-			Count: 1,
-		},
-		{
-			Type:  "message",
-			Count: 2,
-		},
-		{
-			Type:  "withdraw_rewards",
-			Count: 1,
-		},
-	}
+	eventTypes := []string{"coin_spent", "coin_received", "transfer", "message", "withdraw_rewards"}
 
-	eventTypesNoTransfer := []EventType{
-		{
-			Type:  "message",
-			Count: 1,
-		},
-		{
-			Type:  "withdraw_rewards",
-			Count: 1,
-		},
+	eventTypesNoTransfer := []string{
+		"message",
+		"withdraw_rewards",
 	}
-	return extract(eventTypes, eventTypesNoTransfer, events)
+	return extract(innerMsgIndex, eventTypes, eventTypesNoTransfer, parsedEvents)
 }
 
-func MsgWithdrawValidatorCommission(events *utils.ParsedTxsResultsEvents,
+func MsgWithdrawValidatorCommission(parsedEvents *utils.ParsedTxsResultsEvents,
 	innerMsgIndex int,
 ) []model.BlockResultsEvent {
-	eventTypes := []EventType{
-		{
-			Type:  "coin_spent",
-			Count: 1,
-		},
-		{
-			Type:  "coin_received",
-			Count: 1,
-		},
-		{
-			Type:  "transfer",
-			Count: 1,
-		},
-		{
-			Type:  "message",
-			Count: 2,
-		},
-		{
-			Type:  "withdraw_commission",
-			Count: 1,
-		},
-	}
+	eventTypes := []string{"coin_spent", "coin_received", "transfer", "message", "withdraw_commission"}
 
-	eventTypesNoTransfer := []EventType{
-		{
-			Type:  "message",
-			Count: 1,
-		},
-		{
-			Type:  "withdraw_commission",
-			Count: 1,
-		},
-	}
+	eventTypesNoTransfer := []string{"message", "withdraw_commission"}
 
-	return extract(eventTypes, eventTypesNoTransfer, events)
+	return extract(innerMsgIndex, eventTypes, eventTypesNoTransfer, parsedEvents)
 }
 
-func MsgFundCommunityPool(events *utils.ParsedTxsResultsEvents,
+func MsgFundCommunityPool(parsedEvents *utils.ParsedTxsResultsEvents,
 	innerMsgIndex int,
 ) []model.BlockResultsEvent {
-	eventTypes := []EventType{
-		{
-			Type:  "coin_spent",
-			Count: 1,
-		},
-		{
-			Type:  "coin_received",
-			Count: 1,
-		},
-		{
-			Type:  "transfer",
-			Count: 1,
-		},
-		{
-			Type:  "message",
-			Count: 2,
-		},
-	}
+	eventTypes := []string{"coin_spent", "coin_received", "transfer", "message"}
 
-	eventTypesNoTransfer := []EventType{
-		{
-			Type:  "message",
-			Count: 1,
-		},
-	}
+	eventTypesNoTransfer := []string{"message"}
 
-	return extract(eventTypes, eventTypesNoTransfer, events)
+	return extract(innerMsgIndex, eventTypes, eventTypesNoTransfer, parsedEvents)
 }
 
-func extract(eventTypes []EventType, eventTypesRetry []EventType, events *utils.ParsedTxsResultsEvents) []model.BlockResultsEvent {
+func extract(innerMsgIndex int, eventTypes []string, eventTypesRetry []string, parsedEvents *utils.ParsedTxsResultsEvents) []model.BlockResultsEvent {
 	// extract events
-	extractedEvents := getMsgEvents(eventTypes, events)
+	extractedEvents := getMsgEvents(innerMsgIndex, eventTypes, parsedEvents)
 
 	// retry
 	if len(extractedEvents) <= 0 {
-		extractedEvents = getMsgEvents(eventTypesRetry, events)
+		extractedEvents = getMsgEvents(innerMsgIndex, eventTypesRetry, parsedEvents)
 	}
 
 	return extractedEvents
 }
 
-func getMsgEvents(eventTypes []EventType, events *utils.ParsedTxsResultsEvents) []model.BlockResultsEvent {
+func getMsgEvents(innerMsgIndex int, eventTypes []string, parsedEvents *utils.ParsedTxsResultsEvents) []model.BlockResultsEvent {
 	var extractedEvents []model.BlockResultsEvent
 
 	for _, eventType := range eventTypes {
-		for i := 0; i < int(eventType.Count); i++ {
-			if i > len(events.GetTypeIndex(eventType.Type)) || len(events.GetTypeIndex(eventType.Type)) <= 0 {
-				return []model.BlockResultsEvent{}
-			}
-			eventIndex := events.GetTypeIndex(eventType.Type)[0]
-			extractedEvents = append(extractedEvents, events.GetRawEvents()[eventIndex])
-			events.RemoveIndexType(eventType.Type, 0)
 
+		events := parsedEvents.GetRawEvents()
+
+		for _, event := range events {
+			splitBykey := utils.NewParsedTxsResultLogEventsSplitByKey(&event)
+
+			rawEvent := splitBykey[innerMsgIndex].GetRawEvents()
+			keyIndex := splitBykey[innerMsgIndex].GetKeyIndex()
+
+			var extractedAttributes model.BlockResultsEvent
+
+			for _, key := range keyIndex {
+				extractedAttributes.Type = rawEvent.Type
+				extractedAttributes.Attributes = append(extractedAttributes.Attributes, rawEvent.Attributes[key])
+			}
+
+			// check attribute key
+			if rawEvent.Type == eventType {
+				extractedEvents = append(extractedEvents, extractedAttributes)
+
+			}
 		}
 	}
 
