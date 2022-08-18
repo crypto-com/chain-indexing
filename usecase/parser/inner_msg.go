@@ -14,29 +14,30 @@ func ParseTxsResultsEvents(
 	var resultLog []model.BlockResultsTxsResultLog
 	var parsedEvents *utils.ParsedTxsResultsEvents
 
-	if len(logs) == 1 && len(logs) != len(msgs) {
-		log := logs[0]
-		parsedEvents = utils.NewParsedTxsResultsEvents(log.Events)
+	if len(msgs) == len(logs) || len(logs) <= 0 {
+		return logs
+	}
+	log := logs[0]
+	parsedEvents = utils.NewParsedTxsResultsEvents(log.Events)
 
-		for innerMsgIndex, innerMsgInterface := range msgs {
-			innerMsg, ok := innerMsgInterface.(map[string]interface{})
-			if !ok {
-				panic(fmt.Errorf("error parsing MsgExec.msgs[%v] to map[string]interface{}: %v", innerMsgIndex, innerMsgInterface))
-			}
-
-			innerMsgType, ok := innerMsg["@type"].(string)
-			if !ok {
-				panic(fmt.Errorf("error missing '@type' in MsgExec.msgs[%v]: %v", innerMsgIndex, innerMsg))
-			}
-
-			validateEvents := ParseInnerMsgsEvents(innerMsgType, innerMsgIndex, parsedEvents)
-
-			log := model.BlockResultsTxsResultLog{
-				MsgIndex: innerMsgIndex,
-				Events:   validateEvents,
-			}
-			resultLog = append(resultLog, log)
+	for innerMsgIndex, innerMsgInterface := range msgs {
+		innerMsg, ok := innerMsgInterface.(map[string]interface{})
+		if !ok {
+			panic(fmt.Errorf("error parsing MsgExec.msgs[%v] to map[string]interface{}: %v", innerMsgIndex, innerMsgInterface))
 		}
+
+		innerMsgType, ok := innerMsg["@type"].(string)
+		if !ok {
+			panic(fmt.Errorf("error missing '@type' in MsgExec.msgs[%v]: %v", innerMsgIndex, innerMsg))
+		}
+
+		validateEvents := ParseInnerMsgsEvents(innerMsgType, innerMsgIndex, parsedEvents)
+
+		log := model.BlockResultsTxsResultLog{
+			MsgIndex: innerMsgIndex,
+			Events:   validateEvents,
+		}
+		resultLog = append(resultLog, log)
 	}
 
 	return resultLog

@@ -264,7 +264,6 @@ func ParseMsgWithdrawDelegatorReward(
 	var amount coin.Coins
 	// When there is no reward withdrew, `transfer` event would not exist
 	if event := log.GetEventByType("transfer"); event == nil {
-		// if event := log.GetEventByType("transfer"); event == nil {
 		recipient, _ = parserParams.Msg["delegator_address"].(string)
 		amount = coin.NewEmptyCoins()
 	} else {
