@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
@@ -121,8 +122,7 @@ func ParseBlockTxsMsgToCommands(
 				// cosmos authz
 				"/cosmos.authz.v1beta1.MsgGrant",
 				"/cosmos.authz.v1beta1.MsgRevoke",
-				// FIXME: https://github.com/crypto-com/chain-indexing/issues/673
-				//"/cosmos.authz.v1beta1.MsgExec",
+				"/cosmos.authz.v1beta1.MsgExec",
 
 				// cosmos feegrant
 				"/cosmos.feegrant.v1beta1.MsgGrantAllowance",
@@ -259,6 +259,7 @@ func ParseMsgWithdrawDelegatorReward(
 			},
 		)}, possibleSignerAddresses
 	}
+
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	var recipient string
 	var amount coin.Coins
@@ -1618,7 +1619,9 @@ func parseMsgExecInnerMsgs(
 		panic(fmt.Errorf("error parsing MsgExec.msgs to []interface{}: %v", parserParams.Msg["msgs"]))
 	}
 
+	txLog := parserParams.TxsResult.Log
 	for innerMsgIndex, innerMsgInterface := range msgs {
+		parserParams.TxsResult.Log = txLog
 		innerMsg, ok := innerMsgInterface.(map[string]interface{})
 		if !ok {
 			panic(fmt.Errorf("error parsing MsgExec.msgs[%v] to map[string]interface{}: %v", innerMsgIndex, innerMsgInterface))
@@ -1631,13 +1634,19 @@ func parseMsgExecInnerMsgs(
 
 		parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(innerMsgType), utils.ParserBlockHeight(blockHeight))
 
+		parserParams.TxsResult.Log = ParseTxsResultsEvents(innerMsgType, parserParams.TxsResult.Log[parserParams.MsgCommonParams.MsgIndex], innerMsgIndex)
+
+		bytes, _ := json.Marshal(parserParams.TxsResult.Log)
+		rawLog, _ := json.Marshal(bytes)
+		parserParams.TxsResult.RawLog = string(rawLog)
+
 		msgCommands, _ := parser(utils.CosmosParserParams{
 			AddressPrefix:   parserParams.AddressPrefix,
 			StakingDenom:    parserParams.StakingDenom,
 			TxsResult:       parserParams.TxsResult,
 			MsgCommonParams: parserParams.MsgCommonParams,
 			Msg:             innerMsg,
-			MsgIndex:        parserParams.MsgIndex,
+			MsgIndex:        0,
 			ParserManager:   parserParams.ParserManager,
 		})
 		commands = append(commands, msgCommands...)

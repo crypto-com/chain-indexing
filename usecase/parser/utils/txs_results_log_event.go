@@ -80,3 +80,10 @@ func (log *ParsedTxsResultLogEvent) GetAttributeByKey(key string) *string {
 	}
 	return &log.rawEvent.Attributes[log.keyIndex[key]].Value
 }
+
+func (log *ParsedTxsResultLogEvent) GetRawEvents() model.BlockResultsEvent {
+	return log.rawEvent
+}
+func (log *ParsedTxsResultLogEvent) GetKeyIndex() map[string]int {
+	return log.keyIndex
+}
