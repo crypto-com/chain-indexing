@@ -117,7 +117,7 @@ func getMsgEvents(innerMsgIndex int, eventTypes []string, parsedEvents *utils.Pa
 
 		events := parsedEvents.GetRawEvents()
 
-		for i, event := range events {
+		for i := range events {
 			splitBykey := utils.NewParsedTxsResultLogEventsSplitByKey(&events[i])
 
 			if len(splitBykey)-1 >= innerMsgIndex {
