@@ -1,6 +1,7 @@
 package parser_test
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -716,8 +717,8 @@ var _ = Describe("ParseMsgCommands", func() {
 			}
 			`
 
-			expectedInnerMsg :=
-				`{
+			expectedInnerMsg := `
+			{
 				"name": "MsgWithdrawDelegatorRewardCreated",
 				"version": 1,
 				"height": 386,
@@ -757,8 +758,8 @@ var _ = Describe("ParseMsgCommands", func() {
 			}
 			`
 
-			expectedInnerMsg2 :=
-				`{
+			expectedInnerMsg2 := `
+			{
 				"name": "MsgWithdrawDelegatorRewardCreated",
 				"version": 1,
 				"height": 386,
@@ -862,6 +863,180 @@ var _ = Describe("ParseMsgCommands", func() {
 			))
 
 			Expect(possibleSignerAddresses).To(Equal([]string{"cro1406y009n43awa0e5n6t2t06a8tty9azpu9at25", "cro1406y009n43awa0e5n6t2t06a8tty9azpu9at25"}))
+
+		})
+		It("should parse Msg commands when there is nested MsgExec in the transaction", func() {
+
+			expected := `
+			{
+				"name": "MsgExecCreated",
+				"version": 1,
+				"height": 58,
+				"uuid": "{UUID}",
+				"msgName": "MsgExec",
+				"txHash": "A84A1CF811BA7E9E908F4067EBD1BBABC7E12C939C0CA5CBA8DEADAA5B66EDFE",
+				"msgIndex": 0,
+				"params": {
+					"@type": "/cosmos.authz.v1beta1.MsgExec",
+					"grantee": "cro1htqsxfj4k9hhagtvlmqx6l4j593pzdk7ddv50n",
+					"msgs": [
+						{
+							"@type": "/cosmos.authz.v1beta1.MsgExec"
+						}
+					]
+				}
+			}
+			`
+
+			expectedInnerMsg := `
+			{
+				"name": "MsgExecCreated",
+				"version": 1,
+				"height": 58,
+				"uuid": "{UUID}",
+				"msgName": "MsgExec",
+				"txHash": "A84A1CF811BA7E9E908F4067EBD1BBABC7E12C939C0CA5CBA8DEADAA5B66EDFE",
+				"msgIndex": 0,
+				"params": {
+					"@type": "/cosmos.authz.v1beta1.MsgExec",
+					"grantee": "cro1htqsxfj4k9hhagtvlmqx6l4j593pzdk7ddv50n",
+					"msgs": [
+						{
+							"@type": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward"
+						},
+						{
+							"@type": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward"
+						}
+					]
+				}
+			}
+			`
+
+			expectedNestedInnerMsg := []string{`
+			{
+				"name": "MsgWithdrawDelegatorRewardCreated",
+				"version": 1,
+				"height": 58,
+				"uuid": "{UUID}",
+				"msgName": "MsgWithdrawDelegatorReward",
+				"txHash": "A84A1CF811BA7E9E908F4067EBD1BBABC7E12C939C0CA5CBA8DEADAA5B66EDFE",
+				"msgIndex": 0,
+				"delegatorAddress": "cro1htqsxfj4k9hhagtvlmqx6l4j593pzdk7ddv50n",
+				"validatorAddress": "crocncl1htqsxfj4k9hhagtvlmqx6l4j593pzdk7wq0ad0",
+				"recipientAddress": "cro1htqsxfj4k9hhagtvlmqx6l4j593pzdk7ddv50n",
+				"amount": [
+					{
+						"denom": "basecro",
+						"amount": "874045"
+					}
+				]
+			}
+			`, `
+			{
+				"name": "MsgWithdrawDelegatorRewardCreated",
+				"version": 1,
+				"height": 58,
+				"uuid": "{UUID}",
+				"msgName": "MsgWithdrawDelegatorReward",
+				"txHash": "A84A1CF811BA7E9E908F4067EBD1BBABC7E12C939C0CA5CBA8DEADAA5B66EDFE",
+				"msgIndex": 0,
+				"delegatorAddress": "cro1htqsxfj4k9hhagtvlmqx6l4j593pzdk7ddv50n",
+				"validatorAddress": "crocncl17cye5gmealmpgz3tclfjga7urdjxj6nah3u8w2",
+				"recipientAddress": "cro1htqsxfj4k9hhagtvlmqx6l4j593pzdk7ddv50n",
+				"amount": []
+			}
+			`}
+
+			txDecoder := utils.NewTxDecoder()
+			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
+				usecase_parser_test_msg_exec.TX_MSG_EXEC_NESTED_MSG_EXEC_BLOCK_RESP,
+			))
+			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
+				usecase_parser_test_msg_exec.TX_MSG_EXEC_NESTED_MSG_EXEC_RESULTS_RESP,
+			))
+
+			accountAddressPrefix := "cro"
+			stakingDenom := "basecro"
+
+			pm := usecase_parser_test.InitParserManager()
+
+			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
+				pm,
+				txDecoder,
+				block,
+				blockResults,
+				accountAddressPrefix,
+				stakingDenom,
+			)
+			fmt.Println("===> cmds:", cmds)
+			Expect(err).To(BeNil())
+			Expect(cmds).To(HaveLen(4))
+
+			cmd := cmds[0]
+			Expect(cmd.Name()).To(Equal("CreateMsgExec"))
+
+			untypedEvent, _ := cmd.Exec()
+			createMsgExecEvent := untypedEvent.(*event.MsgExec)
+
+			regex, _ := regexp.Compile("\n?\r?\\s?")
+
+			Expect(json.MustMarshalToString(createMsgExecEvent)).To(Equal(
+				strings.Replace(
+					regex.ReplaceAllString(expected, ""),
+					"{UUID}",
+					createMsgExecEvent.UUID(),
+					-1,
+				),
+			))
+
+			innerCmd := cmds[1]
+			Expect(innerCmd.Name()).To(Equal("CreateMsgExec"))
+
+			untypedInnerEvent, _ := innerCmd.Exec()
+			createInnerMsgExecEvent := untypedInnerEvent.(*event.MsgExec)
+
+			Expect(json.MustMarshalToString(createInnerMsgExecEvent)).To(Equal(
+				strings.Replace(
+					regex.ReplaceAllString(expectedInnerMsg, ""),
+					"{UUID}",
+					createInnerMsgExecEvent.UUID(),
+					-1,
+				),
+			))
+
+			nestedCmd := cmds[2]
+			Expect(nestedCmd.Name()).To(Equal("CreateMsgWithdrawDelegatorReward"))
+
+			untypedInnerEvent, _ = nestedCmd.Exec()
+			createMsgWithdrawDelegatorRewardEvent := untypedInnerEvent.(*event.MsgWithdrawDelegatorReward)
+
+			regex, _ = regexp.Compile("\n?\r?\\s?")
+
+			Expect(json.MustMarshalToString(createMsgWithdrawDelegatorRewardEvent)).To(Equal(
+				strings.Replace(
+					regex.ReplaceAllString(expectedNestedInnerMsg[0], ""),
+					"{UUID}",
+					createMsgWithdrawDelegatorRewardEvent.UUID(),
+					-1,
+				),
+			))
+
+			nestedCmd = cmds[3]
+			Expect(nestedCmd.Name()).To(Equal("CreateMsgWithdrawDelegatorReward"))
+
+			untypedInnerEvent, _ = nestedCmd.Exec()
+			createMsgWithdrawDelegatorRewardEvent = untypedInnerEvent.(*event.MsgWithdrawDelegatorReward)
+
+			Expect(json.MustMarshalToString(createMsgWithdrawDelegatorRewardEvent)).To(Equal(
+				strings.Replace(
+					regex.ReplaceAllString(expectedNestedInnerMsg[1], ""),
+					"{UUID}",
+					createMsgWithdrawDelegatorRewardEvent.UUID(),
+					-1,
+				),
+			))
+
+			Expect(possibleSignerAddresses).To(Equal([]string{"cro1htqsxfj4k9hhagtvlmqx6l4j593pzdk7ddv50n"}))
 
 		})
 	})
