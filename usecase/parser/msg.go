@@ -1620,6 +1620,7 @@ func parseMsgExecInnerMsgs(
 	}
 
 	txLog := parserParams.TxsResult.Log
+
 	for innerMsgIndex, innerMsgInterface := range msgs {
 		parserParams.TxsResult.Log = txLog
 		innerMsg, ok := innerMsgInterface.(map[string]interface{})
@@ -1632,24 +1633,49 @@ func parseMsgExecInnerMsgs(
 			panic(fmt.Errorf("error missing '@type' in MsgExec.msgs[%v]: %v", innerMsgIndex, innerMsg))
 		}
 
-		parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(innerMsgType), utils.ParserBlockHeight(blockHeight))
+		//  skip ParseTxsResultsEvents for inner MsgExec
+		if innerMsgType == "/cosmos.authz.v1beta1.MsgExec" {
+			_, ok := innerMsg["msgs"].([]interface{})
+			if !ok {
+				panic(fmt.Errorf("error parsing innerMsgExec.msgs.msgs to []interface{}: %v", innerMsg["msgs"]))
+			}
 
-		parserParams.TxsResult.Log = ParseTxsResultsEvents(innerMsgType, parserParams.TxsResult.Log[parserParams.MsgCommonParams.MsgIndex], innerMsgIndex)
+			parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(innerMsgType), utils.ParserBlockHeight(blockHeight))
+			parserParams.Msg = innerMsg
 
-		bytes, _ := json.Marshal(parserParams.TxsResult.Log)
-		rawLog, _ := json.Marshal(bytes)
-		parserParams.TxsResult.RawLog = string(rawLog)
+			msgCommands, _ := parser(utils.CosmosParserParams{
+				AddressPrefix:   parserParams.AddressPrefix,
+				StakingDenom:    parserParams.StakingDenom,
+				TxsResult:       parserParams.TxsResult,
+				MsgCommonParams: parserParams.MsgCommonParams,
+				Msg:             innerMsg,
+				MsgIndex:        innerMsgIndex,
+				ParserManager:   parserParams.ParserManager,
+			})
+			commands = append(commands, msgCommands...)
 
-		msgCommands, _ := parser(utils.CosmosParserParams{
-			AddressPrefix:   parserParams.AddressPrefix,
-			StakingDenom:    parserParams.StakingDenom,
-			TxsResult:       parserParams.TxsResult,
-			MsgCommonParams: parserParams.MsgCommonParams,
-			Msg:             innerMsg,
-			MsgIndex:        0,
-			ParserManager:   parserParams.ParserManager,
-		})
-		commands = append(commands, msgCommands...)
+		} else {
+			parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(innerMsgType), utils.ParserBlockHeight(blockHeight))
+
+			if len(parserParams.TxsResult.Log) > 0 {
+				// parse events by msg type
+				parserParams.TxsResult.Log = ParseTxsResultsEvents(innerMsgIndex, innerMsg, parserParams.TxsResult.Log[parserParams.MsgCommonParams.MsgIndex])
+				bytes, _ := json.Marshal(parserParams.TxsResult.Log)
+				rawLog, _ := json.Marshal(bytes)
+				parserParams.TxsResult.RawLog = string(rawLog)
+			}
+
+			msgCommands, _ := parser(utils.CosmosParserParams{
+				AddressPrefix:   parserParams.AddressPrefix,
+				StakingDenom:    parserParams.StakingDenom,
+				TxsResult:       parserParams.TxsResult,
+				MsgCommonParams: parserParams.MsgCommonParams,
+				Msg:             innerMsg,
+				MsgIndex:        0,
+				ParserManager:   parserParams.ParserManager,
+			})
+			commands = append(commands, msgCommands...)
+		}
 	}
 
 	return commands
