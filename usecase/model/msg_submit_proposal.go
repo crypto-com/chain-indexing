@@ -114,8 +114,8 @@ type MsgSubmitUnknownProposalParams struct {
 }
 
 type MsgSubmitUnknownProposalContent struct {
-	Type        string                 `json:"@type"`
-	Title       string                 `json:"title"`
-	Description string                 `json:"description"`
-	RawContent  map[string]interface{} `json:"rawContent"`
+	Type        string      `json:"@type"`
+	Title       string      `json:"title"`
+	Description string      `json:"description"`
+	RawContent  interface{} `json:"rawContent"`
 }
