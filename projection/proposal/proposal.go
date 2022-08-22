@@ -426,6 +426,59 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
 			}
 
+		} else if MsgSubmitUnknownProposal, ok := event.(*event_usecase.MsgSubmitUnknownProposal); ok {
+			context, err := projection.prepareNewProposalSubmissionContext(rdbTxHandle, MsgSubmitUnknownProposal.ProposerAddress)
+			if err != nil {
+				return err
+			}
+
+			depositEndTime := blockTime.Add(context.maxDepositPeriod)
+			row := view.ProposalRow{
+				ProposalId:                   *MsgSubmitUnknownProposal.MaybeProposalId,
+				Title:                        MsgSubmitUnknownProposal.Content.Title,
+				Description:                  MsgSubmitUnknownProposal.Content.Description,
+				Type:                         MsgSubmitUnknownProposal.Content.Type,
+				Status:                       view.PROPOSAL_STATUS_DEPOSIT_PERIOD,
+				ProposerAddress:              MsgSubmitUnknownProposal.ProposerAddress,
+				MaybeProposerOperatorAddress: context.maybeProposerValidatorAddress,
+				Data:                         MsgSubmitUnknownProposal.Content.RawContent,
+				InitialDeposit:               MsgSubmitUnknownProposal.InitialDeposit,
+				TotalDeposit:                 MsgSubmitUnknownProposal.InitialDeposit,
+				TotalVote:                    big.NewInt(0),
+				TransactionHash:              MsgSubmitUnknownProposal.TxHash(),
+				SubmitBlockHeight:            height,
+				SubmitTime:                   blockTime,
+				DepositEndTime:               depositEndTime,
+				MaybeVotingStartTime:         nil,
+				MaybeVotingEndTime:           nil,
+				MaybeVotingEndBlockHeight:    nil,
+			}
+
+			if insertProposalErr := proposalsView.Insert(&row); insertProposalErr != nil {
+				return fmt.Errorf("error inserting unknown proposal into view: %v", insertProposalErr)
+			}
+
+			maybeDepositorValidatorAddress := context.maybeProposerValidatorAddress
+
+			depositorsView := NewDepositors(rdbTxHandle)
+			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
+			if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
+				ProposalId:                    *MsgSubmitUnknownProposal.MaybeProposalId,
+				DepositorAddress:              MsgSubmitUnknownProposal.ProposerAddress,
+				MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
+				TransactionHash:               MsgSubmitUnknownProposal.TxHash(),
+				DepositAtBlockHeight:          height,
+				DepositAtBlockTime:            blockTime,
+				Amount:                        MsgSubmitUnknownProposal.InitialDeposit,
+			}); insertDepositorErr != nil {
+				return fmt.Errorf("error inserting proposer deposit record into view: %v", insertDepositorErr)
+			}
+			if updateDepositorTotalErr := depositorsTotalView.Increment(
+				*MsgSubmitUnknownProposal.MaybeProposalId, 1,
+			); updateDepositorTotalErr != nil {
+				return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
+			}
+
 		} else if proposalVotingPeriodStarted, ok := event.(*event_usecase.ProposalVotingPeriodStarted); ok {
 			mutProposal, err := proposalsView.FindById(proposalVotingPeriodStarted.ProposalId)
 			if err != nil {

@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
@@ -366,8 +367,8 @@ func ParseMsgSubmitProposal(
 		cmds, possibleSignerAddresses = parseMsgSubmitParamChangeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal" {
 		cmds, possibleSignerAddresses = parseMsgSubmitCommunityFundSpendProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
-	} else if proposalContent.Type == "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal" {
-		cmds, possibleSignerAddresses = parseMsgSubmitSoftwareUpgradeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
+		// } else if proposalContent.Type == "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal" {
+		// 	cmds, possibleSignerAddresses = parseMsgSubmitSoftwareUpgradeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal" {
 		cmds, possibleSignerAddresses = parseMsgSubmitCancelSoftwareUpgradeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.gov.v1beta1.TextProposal" {
@@ -728,7 +729,8 @@ func parseMsgSubmitUnknownProposal(
 	if err := jsoniter.Unmarshal(rawContent, &proposalContent); err != nil {
 		panic("error decoding text proposal content")
 	}
-	proposalContent.RawContent = string(rawContent)
+
+	json.Unmarshal(rawContent, &proposalContent.RawContent)
 
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
