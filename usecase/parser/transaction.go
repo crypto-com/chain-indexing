@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
@@ -18,6 +19,7 @@ import (
 )
 
 func ParseTransactionCommands(
+	logger applogger.Logger,
 	txDecoder *utils.TxDecoder,
 	cosmosClient cosmosapp_interface.Client,
 	block *model.Block,
@@ -63,9 +65,13 @@ func ParseTransactionCommands(
 			return nil, fmt.Errorf("error parsing timeout height: %v", err)
 		}
 
+		parseSignerInfosToTransactionSignersLogger := logger.WithFields(applogger.LogFields{
+			"submodule": "ParseSignerInfosToTransactionSigners",
+		})
 		signers, parseSignerInfosErr := ParseSignerInfosToTransactionSigners(
-			cosmosClient, tx.AuthInfo.SignerInfos, accountAddressPrefix, possibleSignerAddresses,
+			parseSignerInfosToTransactionSignersLogger, cosmosClient, tx.AuthInfo.SignerInfos, accountAddressPrefix, possibleSignerAddresses, TxHash(txHex),
 		)
+
 		if parseSignerInfosErr != nil {
 			return nil, fmt.Errorf("error parsing SignerInfos: %v", parseSignerInfosErr)
 		}

@@ -17,6 +17,7 @@ type Config struct {
 
 type IndexService struct {
 	Enable                     bool                       `yaml:"enable" toml:"enable" xml:"enable" json:"enable,omitempty"`
+	StartingBlockHeight        int64                      `yaml:"starting_block_height" toml:"starting_block_height" xml:"starting_block_height" json:"starting_block_height,omitempty"`
 	Mode                       string                     `yaml:"mode" toml:"mode" xml:"mode" json:"mode,omitempty"`
 	WindowSize                 int                        `yaml:"window_size" toml:"window_size" xml:"window_size" json:"window_size,omitempty"`
 	Projection                 Projection                 `yaml:"projection" toml:"projection" xml:"projection" json:"projection"`

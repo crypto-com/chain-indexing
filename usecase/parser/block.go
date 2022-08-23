@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
@@ -12,6 +13,7 @@ import (
 )
 
 func ParseBlockToCommands(
+	logger applogger.Logger,
 	parserManager *utils.CosmosParserManager,
 	cosmosClient cosmosapp_interface.Client,
 	txDecoder *utils.TxDecoder,
@@ -48,8 +50,10 @@ func ParseBlockToCommands(
 		if parseErr != nil {
 			return nil, fmt.Errorf("error parsing message commands: %v", parseErr)
 		}
-
-		transactionCommands, parseErr := ParseTransactionCommands(txDecoder, cosmosClient, block, blockResults, accountAddressPrefix, possibleSignerAddresses)
+		parseTransactionCommandLogger := logger.WithFields(applogger.LogFields{
+			"submodule": "ParseTransactionCommands",
+		})
+		transactionCommands, parseErr := ParseTransactionCommands(parseTransactionCommandLogger, txDecoder, cosmosClient, block, blockResults, accountAddressPrefix, possibleSignerAddresses)
 		if parseErr != nil {
 			return nil, fmt.Errorf("error parsing transaction commands: %v", parseErr)
 		}
