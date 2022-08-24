@@ -105,3 +105,17 @@ type MsgSubmitTextProposalContent struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 }
+
+type MsgSubmitUnknownProposalParams struct {
+	MaybeProposalId *string                         `json:"proposalId"`
+	Content         MsgSubmitUnknownProposalContent `json:"content"`
+	ProposerAddress string                          `json:"proposerAddress"`
+	InitialDeposit  coin.Coins                      `json:"initialDeposit"`
+}
+
+type MsgSubmitUnknownProposalContent struct {
+	Type        string      `json:"@type"`
+	Title       string      `json:"title"`
+	Description string      `json:"description"`
+	RawContent  interface{} `json:"rawContent"`
+}

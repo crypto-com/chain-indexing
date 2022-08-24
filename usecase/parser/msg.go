@@ -364,7 +364,7 @@ func ParseMsgSubmitProposal(
 	}
 
 	var cmds []command.Command
-	var possibleSignerAddresses = []string{}
+	var possibleSignerAddresses []string
 	if proposalContent.Type == "/cosmos.params.v1beta1.ParameterChangeProposal" {
 		cmds, possibleSignerAddresses = parseMsgSubmitParamChangeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal" {
@@ -377,6 +377,7 @@ func ParseMsgSubmitProposal(
 		cmds, possibleSignerAddresses = parseMsgSubmitTextProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else {
 		parserParams.Logger.Errorf("unrecognzied govenance proposal type `%s`", proposalContent.Type)
+		cmds, possibleSignerAddresses = parseMsgSubmitUnknownProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	}
 
 	if parserParams.MsgCommonParams.TxSuccess {
@@ -708,6 +709,71 @@ func parseMsgSubmitTextProposal(
 		msgCommonParams,
 
 		model.MsgSubmitTextProposalParams{
+			MaybeProposalId: proposalId,
+			Content:         proposalContent,
+			ProposerAddress: msg["proposer"].(string),
+			InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
+				msg["initial_deposit"].([]interface{}),
+			),
+		},
+	)}, possibleSignerAddresses
+}
+
+func parseMsgSubmitUnknownProposal(
+	txSuccess bool,
+	txsResult model.BlockResultsTxsResult,
+	msgIndex int,
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+	rawContent []byte,
+) ([]command.Command, []string) {
+	var proposalContent model.MsgSubmitUnknownProposalContent
+	if err := jsoniter.Unmarshal(rawContent, &proposalContent); err != nil {
+		panic("error decoding text proposal content")
+	}
+
+	if err := jsoniter.Unmarshal(rawContent, &proposalContent.RawContent); err != nil {
+		panic("error decoding text proposal rawContent")
+	}
+
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if msg != nil {
+		if proposer, ok := msg["proposer"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, proposer.(string))
+		}
+	}
+
+	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
+	// When there is no reward withdrew, `transfer` event would not exist
+	event := log.GetEventByType("submit_proposal")
+	if event == nil {
+		panic("missing `submit_proposal` event in TxsResult log")
+	}
+	proposalId := event.GetAttributeByKey("proposal_id")
+	if proposalId == nil {
+		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+	}
+
+	if !txSuccess {
+		return []command.Command{command_usecase.NewCreateMsgSubmitUnknownProposal(
+			msgCommonParams,
+
+			model.MsgSubmitUnknownProposalParams{
+				MaybeProposalId: proposalId,
+				Content:         proposalContent,
+				ProposerAddress: msg["proposer"].(string),
+				InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
+					msg["initial_deposit"].([]interface{}),
+				),
+			},
+		)}, possibleSignerAddresses
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgSubmitUnknownProposal(
+		msgCommonParams,
+
+		model.MsgSubmitUnknownProposalParams{
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
 			ProposerAddress: msg["proposer"].(string),
