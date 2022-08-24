@@ -48,7 +48,6 @@ func ParseMsgRecvPacket(
 	var rawFungibleTokenPacketData ibc_model.FungibleTokenPacketData
 	rawPacketData, err := base64_internal.DecodeString(rawMsg.Packet.Data)
 	if err != nil {
-		rawPacketData = []byte{}
 		rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
 	} else  {
 		if err := json.Unmarshal(rawPacketData, &rawFungibleTokenPacketData); err != nil {
