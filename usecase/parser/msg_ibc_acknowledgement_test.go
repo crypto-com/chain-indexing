@@ -1,6 +1,7 @@
 package parser_test
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -329,14 +330,14 @@ var _ = Describe("ParseMsgCommands", func() {
 				stakingDenom,
 			)
 			Expect(err).To(BeNil())
-			Expect(cmds).To(HaveLen(4))
-			Expect(cmds[0].Name()).To(Equal("CreateMsgIBCUpdateClient"))
-			Expect(cmds[1].Name()).To(Equal("CreateMsgIBCAcknowledgement"))
-			Expect(cmds[2].Name()).To(Equal("CreateMsgIBCUpdateClient"))
-			Expect(cmds[3].Name()).To(Equal("CreateMsgAlreadyRelayedIBCAcknowledgement"))
+			Expect(cmds).To(HaveLen(11))
+			Expect(cmds[6].Name()).To(Equal("CreateMsgIBCUpdateClient"))
+			Expect(cmds[7].Name()).To(Equal("CreateMsgIBCAcknowledgement"))
+			Expect(cmds[8].Name()).To(Equal("CreateMsgIBCUpdateClient"))
+			Expect(cmds[9].Name()).To(Equal("CreateMsgAlreadyRelayedIBCAcknowledgement"))
 
-			firstMsgAckCmd := cmds[1]
-			secondMsgAckCmd := cmds[3]
+			firstMsgAckCmd := cmds[7]
+			secondMsgAckCmd := cmds[9]
 
 			regex, _ := regexp.Compile("\n?\r?\\s?")
 
@@ -364,6 +365,7 @@ var _ = Describe("ParseMsgCommands", func() {
 				typedSecondMsgAckCmd.UUID(),
 				-1,
 			)
+			fmt.Println(possibleSignerAddresses)
 			Expect(json.MustMarshalToString(typedSecondMsgAckCmd)).To(Equal(expectedSecondMsgAckWithUUID))
 			Expect(possibleSignerAddresses[0]).To(Equal("crc1yzl6cnq3f66ew24d7u97vmp45nkckhwg4ak8hl"))
 			Expect(possibleSignerAddresses[2]).To(Equal("crc1aaxs058pksrq8cx3k0nrxv60p2a9c7nq527949"))

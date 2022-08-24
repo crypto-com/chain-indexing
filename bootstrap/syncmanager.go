@@ -49,6 +49,8 @@ type SyncManager struct {
 	shouldSyncCh      chan bool
 
 	parserManager *utils.CosmosParserManager
+
+	startingBlockHeight int64
 }
 
 type SyncManagerParams struct {
@@ -66,9 +68,9 @@ type SyncManagerConfig struct {
 	InsecureTendermintClient bool
 	InsecureCosmosAppClient  bool
 	StrictGenesisParsing     bool
-
-	AccountAddressPrefix string
-	StakingDenom         string
+	AccountAddressPrefix     string
+	StakingDenom             string
+	StartingBlockHeight      int64
 }
 
 // NewSyncManager creates a new feed with polling for latest block starts at a specific height
@@ -124,6 +126,8 @@ func NewSyncManager(
 		eventHandler: eventHandler,
 
 		parserManager: pm,
+
+		startingBlockHeight: params.Config.StartingBlockHeight,
 	}
 }
 
@@ -144,14 +148,30 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64, isRetry bool) error {
 	if isRetry {
 		// Reduce the block size to be synced when retrying to avoid spamming and wasting resource
 		if latestHeight > currentIndexingHeight {
-			targetHeight = currentIndexingHeight + 1
+			targetHeight = currentIndexingHeight
+			if targetHeight < manager.startingBlockHeight {
+				targetHeight = manager.startingBlockHeight
+			}
 		}
+	}
+
+	// Skip for latest height < statring block height
+	if currentIndexingHeight != 0 && latestHeight < manager.startingBlockHeight {
+		return nil
 	}
 	manager.logger.Infof("going to synchronized blocks from %d to %d", currentIndexingHeight, targetHeight)
 	for currentIndexingHeight <= targetHeight {
 		startTime := time.Now()
+		endHeight := targetHeight
+		if currentIndexingHeight == 0 {
+			// Genesis Block as an individual window, size = 1
+			endHeight = 0
+		} else if currentIndexingHeight < manager.startingBlockHeight {
+			currentIndexingHeight = manager.startingBlockHeight
+		}
+
 		blocksCommands, syncedHeight, err := manager.windowSyncStrategy.Sync(
-			currentIndexingHeight, targetHeight, manager.syncBlockWorker,
+			currentIndexingHeight, endHeight, manager.syncBlockWorker,
 		)
 		if err != nil {
 			return fmt.Errorf("error when synchronizing block with window strategy: %v", err)
@@ -187,6 +207,7 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64, isRetry bool) error {
 		// while the local currentIndexingHeight won't be incremented and will be retried later
 		manager.logger.Infof("successfully synced to block height %d", syncedHeight)
 		prometheus.RecordProjectionLatestHeight(manager.eventHandler.Id(), syncedHeight)
+
 		currentIndexingHeight = syncedHeight + 1
 	}
 	return nil
@@ -220,7 +241,13 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		return nil, fmt.Errorf("error requesting chain block_results at height %d: %v", blockHeight, err)
 	}
 
+	parseBlockToCommandsLogger := manager.logger.WithFields(applogger.LogFields{
+		"submodule":   "ParseBlockToCommands",
+		"blockHeight": blockHeight,
+	})
+
 	commands, err := parser.ParseBlockToCommands(
+		parseBlockToCommandsLogger,
 		manager.parserManager,
 		manager.cosmosClient,
 		manager.txDecoder,

@@ -35,7 +35,7 @@ func (window *Window) Sync(
 ) ([][]command.Command, SyncedHeight, error) {
 	beginHeight := currentHeight
 	var endHeight int64
-	if latestHeight-currentHeight+1 < int64(window.size) {
+	if (latestHeight - beginHeight + 1) < int64(window.size) {
 		endHeight = latestHeight
 	} else {
 		endHeight = beginHeight + int64(window.size) - 1
@@ -51,8 +51,8 @@ func (window *Window) Sync(
 
 	commandWindow := newUnsafeCommandWindow(beginHeight, endHeight)
 
-	for height := beginHeight; height <= endHeight; height += 1 {
-		height := height
+	for currentHeight := beginHeight; currentHeight <= endHeight; currentHeight += 1 {
+		height := currentHeight
 		workersErrGroup.Go(func() error {
 			commands, err := worker(height)
 			if err != nil {
