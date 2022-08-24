@@ -800,11 +800,11 @@ func parseMsgSubmitUnknownProposal(
 ) ([]command.Command, []string) {
 	var proposalContent model.MsgSubmitUnknownProposalContent
 	if err := jsoniter.Unmarshal(rawContent, &proposalContent); err != nil {
-		panic("error decoding text proposal content")
+		panic("error decoding unknown proposal content")
 	}
 
 	if err := jsoniter.Unmarshal(rawContent, &proposalContent.RawContent); err != nil {
-		panic("error decoding text proposal rawContent")
+		panic("error decoding unknown proposal rawContent")
 	}
 
 	// Getting possible signer address from Msg
