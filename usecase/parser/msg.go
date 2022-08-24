@@ -815,6 +815,28 @@ func parseMsgSubmitUnknownProposal(
 		}
 	}
 
+	initialDepositAmountInterface := msg["initial_deposit"].([]interface{})
+	initialDepositAmount, err := tmcosmosutils.NewCoinsFromAmountInterface(initialDepositAmountInterface)
+	if err != nil {
+		initialDepositAmount = make([]coin.Coin, 0)
+		for i := 0; i < len(initialDepositAmountInterface); i++ {
+			initialDepositAmount = append(initialDepositAmount, coin.Coin{})
+		}
+	}
+
+	if !txSuccess {
+		return []command.Command{command_usecase.NewCreateMsgSubmitUnknownProposal(
+			msgCommonParams,
+
+			model.MsgSubmitUnknownProposalParams{
+				MaybeProposalId: nil,
+				Content:         proposalContent,
+				ProposerAddress: msg["proposer"].(string),
+				InitialDeposit:  initialDepositAmount,
+			},
+		)}, possibleSignerAddresses
+	}
+
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
 	event := log.GetEventByType("submit_proposal")
@@ -826,21 +848,6 @@ func parseMsgSubmitUnknownProposal(
 		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
 	}
 
-	if !txSuccess {
-		return []command.Command{command_usecase.NewCreateMsgSubmitUnknownProposal(
-			msgCommonParams,
-
-			model.MsgSubmitUnknownProposalParams{
-				MaybeProposalId: proposalId,
-				Content:         proposalContent,
-				ProposerAddress: msg["proposer"].(string),
-				InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
-					msg["initial_deposit"].([]interface{}),
-				),
-			},
-		)}, possibleSignerAddresses
-	}
-
 	return []command.Command{command_usecase.NewCreateMsgSubmitUnknownProposal(
 		msgCommonParams,
 
@@ -848,9 +855,7 @@ func parseMsgSubmitUnknownProposal(
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
 			ProposerAddress: msg["proposer"].(string),
-			InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
-				msg["initial_deposit"].([]interface{}),
-			),
+			InitialDeposit:  initialDepositAmount,
 		},
 	)}, possibleSignerAddresses
 }
