@@ -2,6 +2,7 @@ package event
 
 import (
 	"bytes"
+
 	"github.com/crypto-com/chain-indexing/usecase/model"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
@@ -9,7 +10,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_GRANT_ALLOWANCE = "MsgGrantAllowance"
+const MSG_GRANT_ALLOWANCE = "/cosmos.feegrant.v1beta1.MsgGrantAllowance"
 const MSG_GRANT_ALLOWANCE_CREATED = "MsgGrantAllowanceCreated"
 const MSG_GRANT_ALLOWANCE_FAILED = "MsgGrantAllowanceFailed"
 
@@ -26,6 +27,8 @@ func NewMsgGrantAllowance(
 	return &MsgGrantAllowance{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_GRANT_ALLOWANCE,
+			MsgSuccess:      MSG_GRANT_ALLOWANCE_CREATED,
+			MsgFailed:       MSG_GRANT_ALLOWANCE_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

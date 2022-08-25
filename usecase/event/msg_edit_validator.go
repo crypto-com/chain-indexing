@@ -10,7 +10,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_EDIT_VALIDATOR = "MsgEditValidator"
+const MSG_EDIT_VALIDATOR = "/cosmos.staking.v1beta1.MsgEditValidator"
 const MSG_EDIT_VALIDATOR_CREATED = "MsgEditValidatorCreated"
 const MSG_EDIT_VALIDATOR_FAILED = "MsgEditValidatorFailed"
 
@@ -27,6 +27,8 @@ func NewMsgEditValidator(msgCommonParams MsgCommonParams, params model.MsgEditVa
 	return &MsgEditValidator{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_EDIT_VALIDATOR,
+			MsgSuccess:      MSG_EDIT_VALIDATOR_CREATED,
+			MsgFailed:       MSG_EDIT_VALIDATOR_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

@@ -11,7 +11,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_BEGIN_REDELEGATE = "MsgBeginRedelegate"
+const MSG_BEGIN_REDELEGATE = "/cosmos.staking.v1beta1.MsgBeginRedelegate"
 const MSG_BEGIN_REDELEGATE_CREATED = "MsgBeginRedelegateCreated"
 const MSG_BEGIN_REDELEGATE_FAILED = "MsgBeginRedelegateFailed"
 
@@ -32,6 +32,8 @@ func NewMsgBeginRedelegate(msgCommonParams MsgCommonParams, params model.MsgBegi
 	return &MsgBeginRedelegate{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_BEGIN_REDELEGATE,
+			MsgSuccess:      MSG_BEGIN_REDELEGATE_CREATED,
+			MsgFailed:       MSG_BEGIN_REDELEGATE_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

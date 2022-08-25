@@ -10,7 +10,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_SEND = "MsgSend"
+const MSG_SEND = "/cosmos.bank.v1beta1.MsgSend"
 const MSG_SEND_CREATED = "MsgSendCreated"
 const MSG_SEND_FAILED = "MsgSendFailed"
 
@@ -26,6 +26,8 @@ func NewMsgSend(msgCommonParams MsgCommonParams, params MsgSendCreatedParams) *M
 	return &MsgSend{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_SEND,
+			MsgSuccess:      MSG_SEND_CREATED,
+			MsgFailed:       MSG_SEND_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

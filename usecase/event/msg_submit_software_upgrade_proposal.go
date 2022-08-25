@@ -10,7 +10,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL = "MsgSubmitSoftwareUpgradeProposal"
+const MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL = "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal"
 const MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_CREATED = "MsgSubmitSoftwareUpgradeProposalCreated"
 const MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_FAILED = "MsgSubmitSoftwareUpgradeProposalFailed"
 
@@ -26,9 +26,10 @@ func NewMsgSubmitSoftwareUpgradeProposal(
 ) *MsgSubmitSoftwareUpgradeProposal {
 	return &MsgSubmitSoftwareUpgradeProposal{
 		NewMsgBase(MsgBaseParams{
-			MsgName: MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL,
-			Version: 1,
-
+			MsgName:         MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL,
+			MsgSuccess:      MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_CREATED,
+			MsgFailed:       MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_FAILED,
+			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
 

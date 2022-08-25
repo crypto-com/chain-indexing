@@ -9,7 +9,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_CONNECTION_OPEN_TRY = "MsgConnectionOpenTry"
+const MSG_IBC_CONNECTION_OPEN_TRY = "/ibc.core.connection.v1.MsgConnectionOpenTry"
 const MSG_IBC_CONNECTION_OPEN_TRY_CREATED = "MsgConnectionOpenTryCreated"
 const MSG_IBC_CONNECTION_OPEN_TRY_FAILED = "MsgConnectionOpenTryFailed"
 
@@ -26,6 +26,8 @@ func NewMsgIBCConnectionOpenTry(
 	return &MsgIBCConnectionOpenTry{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_CONNECTION_OPEN_TRY,
+			MsgSuccess:      MSG_IBC_CONNECTION_OPEN_TRY_CREATED,
+			MsgFailed:       MSG_IBC_CONNECTION_OPEN_TRY_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

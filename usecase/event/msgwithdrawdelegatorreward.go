@@ -10,7 +10,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_WITHDRAW_DELEGATOR_REWARD = "MsgWithdrawDelegatorReward"
+const MSG_WITHDRAW_DELEGATOR_REWARD = "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward"
 const MSG_WITHDRAW_DELEGATOR_REWARD_CREATED = "MsgWithdrawDelegatorRewardCreated"
 const MSG_WITHDRAW_DELEGATOR_REWARD_FAILED = "MsgWithdrawDelegatorRewardFailed"
 
@@ -26,9 +26,10 @@ func NewMsgWithdrawDelegatorReward(
 ) *MsgWithdrawDelegatorReward {
 	return &MsgWithdrawDelegatorReward{
 		NewMsgBase(MsgBaseParams{
-			MsgName: MSG_WITHDRAW_DELEGATOR_REWARD,
-			Version: 1,
-
+			MsgName:         MSG_WITHDRAW_DELEGATOR_REWARD,
+			MsgSuccess:      MSG_WITHDRAW_DELEGATOR_REWARD_CREATED,
+			MsgFailed:       MSG_WITHDRAW_DELEGATOR_REWARD_FAILED,
+			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
 

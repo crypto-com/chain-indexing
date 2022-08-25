@@ -9,7 +9,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_CHANNEL_CLOSE_INIT = "MsgChannelCloseInit"
+const MSG_IBC_CHANNEL_CLOSE_INIT = "/ibc.core.channel.v1.MsgChannelCloseInit"
 const MSG_IBC_CHANNEL_CLOSE_INIT_CREATED = "MsgChannelCloseInitCreated"
 const MSG_IBC_CHANNEL_CLOSE_INIT_FAILED = "MsgChannelCloseInitFailed"
 
@@ -26,6 +26,8 @@ func NewMsgIBCChannelCloseInit(
 	return &MsgIBCChannelCloseInit{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_CHANNEL_CLOSE_INIT,
+			MsgSuccess:      MSG_IBC_CHANNEL_CLOSE_INIT_CREATED,
+			MsgFailed:       MSG_IBC_CHANNEL_CLOSE_INIT_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

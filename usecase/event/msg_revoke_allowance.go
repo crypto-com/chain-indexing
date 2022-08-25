@@ -2,6 +2,7 @@ package event
 
 import (
 	"bytes"
+
 	"github.com/crypto-com/chain-indexing/usecase/model"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
@@ -9,7 +10,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_REVOKE_ALLOWANCE = "MsgRevokeAllowance"
+const MSG_REVOKE_ALLOWANCE = "/cosmos.feegrant.v1beta1.MsgRevokeAllowance"
 const MSG_REVOKE_ALLOWANCE_CREATED = "MsgRevokeAllowanceCreated"
 const MSG_REVOKE_ALLOWANCE_FAILED = "MsgRevokeAllowanceFailed"
 
@@ -26,6 +27,8 @@ func NewMsgRevokeAllowance(
 	return &MsgRevokeAllowance{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_REVOKE_ALLOWANCE,
+			MsgSuccess:      MSG_REVOKE_ALLOWANCE_CREATED,
+			MsgFailed:       MSG_REVOKE_ALLOWANCE_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

@@ -13,7 +13,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_UNDELEGATE = "MsgUndelegate"
+const MSG_UNDELEGATE = "/cosmos.staking.v1beta1.MsgUndelegate"
 const MSG_UNDELEGATE_CREATED = "MsgUndelegateCreated"
 const MSG_UNDELEGATE_FAILED = "MsgUndelegateFailed"
 
@@ -34,6 +34,8 @@ func NewMsgUndelegate(msgCommonParams MsgCommonParams, params model.MsgUndelegat
 	return &MsgUndelegate{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_UNDELEGATE,
+			MsgSuccess:      MSG_UNDELEGATE_CREATED,
+			MsgFailed:       MSG_UNDELEGATE_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

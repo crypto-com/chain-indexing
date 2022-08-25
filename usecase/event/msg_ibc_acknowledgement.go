@@ -9,7 +9,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_ACKNOWLEDGEMENT = "MsgAcknowledgement"
+const MSG_IBC_ACKNOWLEDGEMENT = "/ibc.core.channel.v1.MsgAcknowledgement"
 const MSG_IBC_ACKNOWLEDGEMENT_CREATED = "MsgAcknowledgementCreated"
 const MSG_IBC_ACKNOWLEDGEMENT_FAILED = "MsgAcknowledgementFailed"
 
@@ -26,6 +26,8 @@ func NewMsgIBCAcknowledgement(
 	return &MsgIBCAcknowledgement{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_ACKNOWLEDGEMENT,
+			MsgSuccess:      MSG_IBC_ACKNOWLEDGEMENT_CREATED,
+			MsgFailed:       MSG_IBC_ACKNOWLEDGEMENT_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
@@ -77,6 +79,8 @@ func NewMsgAlreadyRelayedIBCAcknowledgement(
 	return &MsgAlreadyRelayedIBCAcknowledgement{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_ALREADY_RELAYED_IBC_ACKNOWLEDGEMENT,
+			MsgSuccess:      MSG_ALREADY_RELAYED_IBC_ACKNOWLEDGEMENT_CREATED,
+			MsgFailed:       MSG_ALREADY_RELAYED_IBC_ACKNOWLEDGEMENT_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

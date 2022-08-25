@@ -2,6 +2,7 @@ package event
 
 import (
 	"bytes"
+
 	"github.com/crypto-com/chain-indexing/usecase/model"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
@@ -9,7 +10,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_CREATE_VESTING_ACCOUNT = "MsgCreateVestingAccount"
+const MSG_CREATE_VESTING_ACCOUNT = "/cosmos.vesting.v1beta1.MsgCreateVestingAccount"
 const MSG_CREATE_VESTING_ACCOUNT_CREATED = "MsgCreateVestingAccountCreated"
 const MSG_CREATE_VESTING_ACCOUNT_FAILED = "MsgCreateVestingAccountFailed"
 
@@ -26,6 +27,8 @@ func NewMsgCreateVestingAccount(
 	return &MsgCreateVestingAccount{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_CREATE_VESTING_ACCOUNT,
+			MsgSuccess:      MSG_CREATE_VESTING_ACCOUNT_CREATED,
+			MsgFailed:       MSG_CREATE_VESTING_ACCOUNT_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

@@ -9,7 +9,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_CHANNEL_OPEN_TRY = "MsgChannelOpenTry"
+const MSG_IBC_CHANNEL_OPEN_TRY = "/ibc.core.channel.v1.MsgChannelOpenTry"
 const MSG_IBC_CHANNEL_OPEN_TRY_CREATED = "MsgChannelOpenTryCreated"
 const MSG_IBC_CHANNEL_OPEN_TRY_FAILED = "MsgChannelOpenTryFailed"
 
@@ -26,6 +26,8 @@ func NewMsgIBCChannelOpenTry(
 	return &MsgIBCChannelOpenTry{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_CHANNEL_OPEN_TRY,
+			MsgSuccess:      MSG_IBC_CHANNEL_OPEN_TRY_CREATED,
+			MsgFailed:       MSG_IBC_CHANNEL_OPEN_TRY_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

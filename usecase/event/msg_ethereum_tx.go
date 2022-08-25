@@ -10,7 +10,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_ETHEREUM_TX = "MsgEthereumTx"
+const MSG_ETHEREUM_TX = "/ethermint.evm.v1.MsgEthereumTx"
 const MSG_ETHEREUM_TX_CREATED = "MsgEthereumTxCreated"
 const MSG_ETHEREUM_TX_FAILED = "MsgEthereumTxFailed"
 
@@ -27,6 +27,8 @@ func NewMsgEthereumTx(
 	return &MsgEthereumTx{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_ETHEREUM_TX,
+			MsgSuccess:      MSG_ETHEREUM_TX_CREATED,
+			MsgFailed:       MSG_ETHEREUM_TX_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

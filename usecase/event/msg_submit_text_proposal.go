@@ -10,7 +10,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_SUBMIT_TEXT_PROPOSAL = "MsgSubmitTextProposal"
+const MSG_SUBMIT_TEXT_PROPOSAL = "/cosmos.gov.v1beta1.TextProposal"
 const MSG_SUBMIT_TEXT_PROPOSAL_CREATED = "MsgSubmitTextProposalCreated"
 const MSG_SUBMIT_TEXT_PROPOSAL_FAILED = "MsgSubmitTextProposalFailed"
 
@@ -26,9 +26,10 @@ func NewMsgSubmitTextProposal(
 ) *MsgSubmitTextProposal {
 	return &MsgSubmitTextProposal{
 		NewMsgBase(MsgBaseParams{
-			MsgName: MSG_SUBMIT_TEXT_PROPOSAL,
-			Version: 1,
-
+			MsgName:         MSG_SUBMIT_TEXT_PROPOSAL,
+			MsgSuccess:      MSG_SUBMIT_TEXT_PROPOSAL_CREATED,
+			MsgFailed:       MSG_SUBMIT_TEXT_PROPOSAL_FAILED,
+			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
 

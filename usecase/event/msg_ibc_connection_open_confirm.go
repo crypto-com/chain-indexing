@@ -9,7 +9,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_CONNECTION_OPEN_CONFIRM = "MsgConnectionOpenConfirm"
+const MSG_IBC_CONNECTION_OPEN_CONFIRM = "/ibc.core.connection.v1.MsgConnectionOpenConfirm"
 const MSG_IBC_CONNECTION_OPEN_CONFIRM_CREATED = "MsgConnectionOpenConfirmCreated"
 const MSG_IBC_CONNECTION_OPEN_CONFIRM_FAILED = "MsgConnectionOpenConfirmFailed"
 
@@ -26,6 +26,8 @@ func NewMsgIBCConnectionOpenConfirm(
 	return &MsgIBCConnectionOpenConfirm{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_CONNECTION_OPEN_CONFIRM,
+			MsgSuccess:      MSG_IBC_CONNECTION_OPEN_CONFIRM_CREATED,
+			MsgFailed:       MSG_IBC_CONNECTION_OPEN_CONFIRM_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

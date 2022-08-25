@@ -10,7 +10,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_NFT_TRANSFER_NFT = "MsgTransferNFT"
+const MSG_NFT_TRANSFER_NFT = "/chainmain.nft.v1.MsgTransferNFT"
 const MSG_NFT_TRANSFER_NFT_CREATED = "MsgTransferNFTCreated"
 const MSG_NFT_TRANSFER_NFT_FAILED = "MsgTransferNFTFailed"
 
@@ -30,6 +30,8 @@ func NewMsgNFTTransferNFT(
 	return &MsgNFTTransferNFT{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_NFT_TRANSFER_NFT,
+			MsgSuccess:      MSG_NFT_TRANSFER_NFT_CREATED,
+			MsgFailed:       MSG_NFT_TRANSFER_NFT_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

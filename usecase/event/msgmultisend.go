@@ -10,7 +10,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_MULTI_SEND = "MsgMultiSend"
+const MSG_MULTI_SEND = "/cosmos.bank.v1beta1.MsgMultiSend"
 const MSG_MULTI_SEND_CREATED = "MsgMultiSendCreated"
 const MSG_MULTI_SEND_FAILED = "MsgMultiSendFailed"
 
@@ -24,9 +24,10 @@ type MsgMultiSend struct {
 func NewMsgMultiSend(msgCommonParams MsgCommonParams, params model.MsgMultiSendParams) *MsgMultiSend {
 	return &MsgMultiSend{
 		NewMsgBase(MsgBaseParams{
-			MsgName: MSG_MULTI_SEND,
-			Version: 1,
-
+			MsgName:         MSG_MULTI_SEND,
+			MsgSuccess:      MSG_MULTI_SEND_CREATED,
+			MsgFailed:       MSG_MULTI_SEND_FAILED,
+			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
 

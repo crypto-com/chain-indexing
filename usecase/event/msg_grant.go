@@ -2,6 +2,7 @@ package event
 
 import (
 	"bytes"
+
 	"github.com/crypto-com/chain-indexing/usecase/model"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
@@ -9,7 +10,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_GRANT = "MsgGrant"
+const MSG_GRANT = "/cosmos.authz.v1beta1.MsgGrant"
 const MSG_GRANT_CREATED = "MsgGrantCreated"
 const MSG_GRANT_FAILED = "MsgGrantFailed"
 
@@ -26,6 +27,8 @@ func NewMsgGrant(
 	return &MsgGrant{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_GRANT,
+			MsgSuccess:      MSG_GRANT_CREATED,
+			MsgFailed:       MSG_GRANT_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

@@ -9,7 +9,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_TIMEOUT = "MsgTimeout"
+const MSG_IBC_TIMEOUT = "/ibc.core.channel.v1.MsgTimeout"
 const MSG_IBC_TIMEOUT_CREATED = "MsgTimeoutCreated"
 const MSG_IBC_TIMEOUT_FAILED = "MsgTimeoutFailed"
 
@@ -26,6 +26,8 @@ func NewMsgIBCTimeout(
 	return &MsgIBCTimeout{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_TIMEOUT,
+			MsgSuccess:      MSG_IBC_TIMEOUT_CREATED,
+			MsgFailed:       MSG_IBC_TIMEOUT_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
@@ -77,6 +79,8 @@ func NewMsgAlreadyRelayedIBCTimeout(
 	return &MsgAlreadyRelayedIBCTimeout{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_ALREADY_RELAYED_IBC_TIMEOUT,
+			MsgSuccess:      MSG_ALREADY_RELAYED_IBC_TIMEOUT_CREATED,
+			MsgFailed:       MSG_ALREADY_RELAYED_IBC_TIMEOUT_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

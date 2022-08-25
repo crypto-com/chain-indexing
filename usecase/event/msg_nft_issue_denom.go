@@ -10,7 +10,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_NFT_ISSUE_DENOM = "MsgIssueDenom"
+const MSG_NFT_ISSUE_DENOM = "/chainmain.nft.v1.MsgIssueDenom"
 const MSG_NFT_ISSUE_DENOM_CREATED = "MsgIssueDenomCreated"
 const MSG_NFT_ISSUE_DENOM_FAILED = "MsgIssueDenomFailed"
 
@@ -30,6 +30,8 @@ func NewMsgNFTIssueDenom(
 	return &MsgNFTIssueDenom{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_NFT_ISSUE_DENOM,
+			MsgSuccess:      MSG_NFT_ISSUE_DENOM_CREATED,
+			MsgFailed:       MSG_NFT_ISSUE_DENOM_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

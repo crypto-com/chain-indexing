@@ -11,7 +11,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_FUND_COMMUNITY_POOL = "MsgFundCommunityPool"
+const MSG_FUND_COMMUNITY_POOL = "/cosmos.distribution.v1beta1.MsgFundCommunityPool"
 const MSG_FUND_COMMUNITY_POOL_CREATED = "MsgFundCommunityPoolCreated"
 const MSG_FUND_COMMUNITY_POOL_FAILED = "MsgFundCommunityPoolFailed"
 
@@ -26,6 +26,8 @@ func NewMsgFundCommunityPool(msgCommonParams MsgCommonParams, params model.MsgFu
 	return &MsgFundCommunityPool{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_FUND_COMMUNITY_POOL,
+			MsgSuccess:      MSG_FUND_COMMUNITY_POOL_CREATED,
+			MsgFailed:       MSG_FUND_COMMUNITY_POOL_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

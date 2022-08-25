@@ -11,7 +11,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_CREATE_VALIDATOR = "MsgCreateValidator"
+const MSG_CREATE_VALIDATOR = "/cosmos.staking.v1beta1.MsgCreateValidator"
 const MSG_CREATE_VALIDATOR_CREATED = "MsgCreateValidatorCreated"
 const MSG_CREATE_VALIDATOR_FAILED = "MsgCreateValidatorFailed"
 
@@ -31,6 +31,8 @@ func NewMsgCreateValidator(msgCommonParams MsgCommonParams, params model.MsgCrea
 	return &MsgCreateValidator{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_CREATE_VALIDATOR,
+			MsgSuccess:      MSG_CREATE_VALIDATOR_CREATED,
+			MsgFailed:       MSG_CREATE_VALIDATOR_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

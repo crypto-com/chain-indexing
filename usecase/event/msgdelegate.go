@@ -11,7 +11,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_DELEGATE = "MsgDelegate"
+const MSG_DELEGATE = "/cosmos.staking.v1beta1.MsgDelegate"
 const MSG_DELEGATE_CREATED = "MsgDelegateCreated"
 const MSG_DELEGATE_FAILED = "MsgDelegateFailed"
 
@@ -31,6 +31,8 @@ func NewMsgDelegate(msgCommonParams MsgCommonParams, params model.MsgDelegatePar
 	return &MsgDelegate{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_DELEGATE,
+			MsgSuccess:      MSG_DELEGATE_CREATED,
+			MsgFailed:       MSG_DELEGATE_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

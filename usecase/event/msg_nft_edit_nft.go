@@ -10,7 +10,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_NFT_EDIT_NFT = "MsgEditNFT"
+const MSG_NFT_EDIT_NFT = "/chainmain.nft.v1.MsgEditNFT"
 const MSG_NFT_EDIT_NFT_CREATED = "MsgEditNFTCreated"
 const MSG_NFT_EDIT_NFT_FAILED = "MsgEditNFTFailed"
 
@@ -32,6 +32,8 @@ func NewMsgNFTEditNFT(
 	return &MsgNFTEditNFT{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_NFT_EDIT_NFT,
+			MsgSuccess:      MSG_NFT_EDIT_NFT_CREATED,
+			MsgFailed:       MSG_NFT_EDIT_NFT_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

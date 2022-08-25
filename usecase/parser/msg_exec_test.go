@@ -42,7 +42,7 @@ var _ = Describe("ParseMsgCommands", func() {
 				"version": 1,
 				"height": 113382,
 				"uuid": "{UUID}",
-				"msgName": "MsgSend",
+				"msgName": "/cosmos.bank.v1beta1.MsgSend",
 				"txHash": "0CE949FAB0CB8EFB6E80F8ED785A6313FE7C094C336D4A7E8630E7D81AECD946",
 				"msgIndex": 0,
 				"fromAddress": "tcro1vurfhqf0j2jgfpjahlja6g6uq2ts2r60swm2d9",

@@ -10,7 +10,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_UNJAIL = "MsgUnjail"
+const MSG_UNJAIL = "/cosmos.slashing.v1beta1.MsgUnjail"
 const MSG_UNJAIL_CREATED = "MsgUnjailCreated"
 const MSG_UNJAIL_FAILED = "MsgUnjailFailed"
 
@@ -28,6 +28,8 @@ func NewMsgUnjail(msgCommonParams MsgCommonParams, params model.MsgUnjailParams)
 	return &MsgUnjail{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_UNJAIL,
+			MsgSuccess:      MSG_UNJAIL_CREATED,
+			MsgFailed:       MSG_UNJAIL_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

@@ -12,7 +12,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_DEPOSIT = "MsgDeposit"
+const MSG_DEPOSIT = "/cosmos.gov.v1beta1.MsgDeposit"
 const MSG_DEPOSIT_CREATED = "MsgDepositCreated"
 const MSG_DEPOSIT_FAILED = "MsgDepositFailed"
 
@@ -28,6 +28,8 @@ func NewMsgDeposit(msgCommonParams MsgCommonParams, params model.MsgDepositParam
 	return &MsgDeposit{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_DEPOSIT,
+			MsgSuccess:      MSG_DEPOSIT_CREATED,
+			MsgFailed:       MSG_DEPOSIT_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

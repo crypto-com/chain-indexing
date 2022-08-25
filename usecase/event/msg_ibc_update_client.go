@@ -9,7 +9,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_UPDATE_CLIENT = "MsgUpdateClient"
+const MSG_IBC_UPDATE_CLIENT = "/ibc.core.client.v1.MsgUpdateClient"
 const MSG_IBC_UPDATE_CLIENT_CREATED = "MsgUpdateClientCreated"
 const MSG_IBC_UPDATE_CLIENT_FAILED = "MsgUpdateClientFailed"
 
@@ -27,6 +27,8 @@ func NewMsgIBCUpdateClient(
 	return &MsgIBCUpdateClient{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_UPDATE_CLIENT,
+			MsgSuccess:      MSG_NFT_BURN_NFT_CREATED,
+			MsgFailed:       MSG_NFT_BURN_NFT_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

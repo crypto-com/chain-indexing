@@ -9,7 +9,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_RECV_PACKET = "MsgRecvPacket"
+const MSG_IBC_RECV_PACKET = "/ibc.core.channel.v1.MsgRecvPacket"
 const MSG_IBC_RECV_PACKET_CREATED = "MsgRecvPacketCreated"
 const MSG_IBC_RECV_PACKET_FAILED = "MsgRecvPacketFailed"
 
@@ -26,6 +26,8 @@ func NewMsgIBCRecvPacket(
 	return &MsgIBCRecvPacket{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_RECV_PACKET,
+			MsgSuccess:      MSG_IBC_RECV_PACKET_CREATED,
+			MsgFailed:       MSG_IBC_RECV_PACKET_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
@@ -77,6 +79,8 @@ func NewMsgAlreadyRelayedIBCRecvPacket(
 	return &MsgAlreadyRelayedIBCRecvPacket{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_ALREADY_RELAYED_IBC_RECV_PACKET,
+			MsgSuccess:      MSG_ALREADY_RELAYED_IBC_RECV_PACKET_CREATED,
+			MsgFailed:       MSG_ALREADY_RELAYED_IBC_RECV_PACKET_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

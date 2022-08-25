@@ -9,7 +9,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_TRANSFER_TRANSFER = "MsgTransfer"
+const MSG_IBC_TRANSFER_TRANSFER = "/ibc.applications.transfer.v1.MsgTransfer"
 const MSG_IBC_TRANSFER_TRANSFER_CREATED = "MsgTransferCreated"
 const MSG_IBC_TRANSFER_TRANSFER_FAILED = "MsgTransferFailed"
 
@@ -26,6 +26,8 @@ func NewMsgIBCTransferTransfer(
 	return &MsgIBCTransferTransfer{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_TRANSFER_TRANSFER,
+			MsgSuccess:      MSG_IBC_TRANSFER_TRANSFER_CREATED,
+			MsgFailed:       MSG_IBC_TRANSFER_TRANSFER_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

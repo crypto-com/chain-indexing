@@ -2,6 +2,7 @@ package event
 
 import (
 	"bytes"
+
 	"github.com/crypto-com/chain-indexing/usecase/model"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
@@ -9,7 +10,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_REVOKE = "MsgRevoke"
+const MSG_REVOKE = "/cosmos.authz.v1beta1.MsgRevoke"
 const MSG_REVOKE_CREATED = "MsgRevokeCreated"
 const MSG_REVOKE_FAILED = "MsgRevokeFailed"
 
@@ -26,6 +27,8 @@ func NewMsgRevoke(
 	return &MsgRevoke{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_REVOKE,
+			MsgSuccess:      MSG_REVOKE_CREATED,
+			MsgFailed:       MSG_REVOKE_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

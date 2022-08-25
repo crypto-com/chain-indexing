@@ -9,7 +9,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_CREATE_CLIENT = "MsgCreateClient"
+const MSG_IBC_CREATE_CLIENT = "/ibc.core.client.v1.MsgCreateClient"
 const MSG_IBC_CREATE_CLIENT_CREATED = "MsgCreateClientCreated"
 const MSG_IBC_CREATE_CLIENT_FAILED = "MsgCreateClientFailed"
 
@@ -23,6 +23,8 @@ func NewMsgIBCCreateClient(msgCommonParams MsgCommonParams, params ibc_model.Msg
 	return &MsgIBCCreateClient{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_CREATE_CLIENT,
+			MsgSuccess:      MSG_IBC_CREATE_CLIENT_CREATED,
+			MsgFailed:       MSG_IBC_CREATE_CLIENT_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

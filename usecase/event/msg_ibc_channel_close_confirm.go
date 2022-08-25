@@ -9,7 +9,7 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_CHANNEL_CLOSE_CONFIRM = "MsgChannelCloseConfirm"
+const MSG_IBC_CHANNEL_CLOSE_CONFIRM = "/ibc.core.channel.v1.MsgChannelCloseConfirm"
 const MSG_IBC_CHANNEL_CLOSE_CONFIRM_CREATED = "MsgChannelCloseConfirmCreated"
 const MSG_IBC_CHANNEL_CLOSE_CONFIRM_FAILED = "MsgChannelCloseConfirmFailed"
 
@@ -26,6 +26,8 @@ func NewMsgIBCChannelCloseConfirm(
 	return &MsgIBCChannelCloseConfirm{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_CHANNEL_CLOSE_CONFIRM,
+			MsgSuccess:      MSG_IBC_CHANNEL_CLOSE_CONFIRM_CREATED,
+			MsgFailed:       MSG_IBC_CHANNEL_CLOSE_CONFIRM_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
