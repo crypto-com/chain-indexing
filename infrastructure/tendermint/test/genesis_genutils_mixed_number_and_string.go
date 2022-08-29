@@ -3,7 +3,7 @@ package infrastructure_tendermint_test
 // This genesis sample has two gentxs. The first one has number in its numeric fields (e.g.
 // timeout_height, sequence). The second one use string in its numeric fields. Both are valid
 // genesis file
-const GENESIS_MIXED_NUMBER_AND_STRING_JSON = `
+const GENESIS_MIXED_NUMBER_AND*string*JSON = `
 {
 	"jsonrpc": "2.0",
 	"id": -1,

@@ -13,38 +13,38 @@
 
 ## event::MSG_CREATE_VALIDATOR_CREATED
 
-_Name_ : /cosmos.staking.v1beta1.MsgCreateValidator.Created
+*Name* : /cosmos.staking.v1beta1.MsgCreateValidator.Created
 
-_Type_ : [MsgBase](../README.md#MsgBase)
+*Type* : [MsgBase](../README.md#MsgBase)
 
-_Structure_ :
+*Structure* :
 
 | Key                             | Type     | Description                                                                      |
 | ------------------------------- | -------- | -------------------------------------------------------------------------------- |
-| `amount`                        | _bigint_ | CRO amount in basic unit                                                         |
-| `pubkey`                        | _string_ | Consensus public key                                                             |
-| `validatorAddress`              | _string_ | Validator address                                                                |
-| `delegatorAddress`              | _string_ | Delegator address                                                                |
-| `minSelfDelegation`             | _string_ | Minimum Self Delegation amount                                                   |
-| `description`                   | _object_ | Validator description wrapper                                                    |
-| `description.moniker`           | _string_ | Validator node public moniker                                                    |
-| `description.identity`          | _string_ | _(Optional)_ Validator node identity                                             |
-| `description.website`           | _string_ | _(Optional)_ Website domain name                                                 |
-| `description.securityContact`   | _string_ | _(Optional)_ Validator node email contact                                        |
-| `description.details`           | _string_ | _(Optional)_ Validator node details                                              |
-| `commissionRates`               | _object_ | Validator node commission wrapper                                                |
-| `commissionRates.rate`          | _string_ | Validator commission rate                                                        |
-| `commissionRates.maxRate`       | _string_ | Validator commission maximum rate                                                |
-| `commissionRates.maxChangeRate` | _string_ | Validator commission maximum change rate                                         |
-| `msgName`                       | _string_ | Blockchain Message type . Value: `MsgCreateValidator`                            |
-| `txHash`                        | _string_ | TxID of the blockchain transaction containing the event                          |
-| `msgIndex`                      | _int_    | message index on the block                                                       |
-| `name`                          | _string_ | Specific Event Name. Value: `/cosmos.staking.v1beta1.MsgCreateValidator.Created` |
-| `version`                       | _int_    | Event Version. Value: `1`                                                        |
-| `height`                        | _int64_  | Height of the block containing the transaction                                   |
-| `uuid`                          | _string_ | Unique ID that is assigned on event creation                                     |
+| `amount`                        | *bigint* | CRO amount in basic unit                                                         |
+| `pubkey`                        | *string* | Consensus public key                                                             |
+| `validatorAddress`              | *string* | Validator address                                                                |
+| `delegatorAddress`              | *string* | Delegator address                                                                |
+| `minSelfDelegation`             | *string* | Minimum Self Delegation amount                                                   |
+| `description`                   | *object* | Validator description wrapper                                                    |
+| `description.moniker`           | *string* | Validator node public moniker                                                    |
+| `description.identity`          | *string* | _(Optional)_ Validator node identity                                             |
+| `description.website`           | *string* | _(Optional)_ Website domain name                                                 |
+| `description.securityContact`   | *string* | _(Optional)_ Validator node email contact                                        |
+| `description.details`           | *string* | _(Optional)_ Validator node details                                              |
+| `commissionRates`               | *object* | Validator node commission wrapper                                                |
+| `commissionRates.rate`          | *string* | Validator commission rate                                                        |
+| `commissionRates.maxRate`       | *string* | Validator commission maximum rate                                                |
+| `commissionRates.maxChangeRate` | *string* | Validator commission maximum change rate                                         |
+| `msgName`                       | *string* | Blockchain Message type . Value: `MsgCreateValidator`                            |
+| `txHash`                        | *string* | TxID of the blockchain transaction containing the event                          |
+| `msgIndex`                      | *int*    | message index on the block                                                       |
+| `name`                          | *string* | Specific Event Name. Value: `/cosmos.staking.v1beta1.MsgCreateValidator.Created` |
+| `version`                       | *int*    | Event Version. Value: `1`                                                        |
+| `height`                        | *int64*  | Height of the block containing the transaction                                   |
+| `uuid`                          | *string* | Unique ID that is assigned on event creation                                     |
 
-_Example_ :
+*Example* :
 
 ```json
 {
@@ -77,38 +77,38 @@ _Example_ :
 
 ## event::MSG_CREATE_VALIDATOR_FAILED
 
-_Name_ : /cosmos.staking.v1beta1.MsgCreateValidator.Failed
+*Name* : /cosmos.staking.v1beta1.MsgCreateValidator.Failed
 
-_Type_ : [MsgBase](../README.md#MsgBase)
+*Type* : [MsgBase](../README.md#MsgBase)
 
-_Structure_ :
+*Structure* :
 
 | Key                             | Type     | Description                                                                     |
 | ------------------------------- | -------- | ------------------------------------------------------------------------------- |
-| `amount`                        | _bigint_ | CRO amount in basic unit                                                        |
-| `pubkey`                        | _string_ | Consensus public key                                                            |
-| `validatorAddress`              | _string_ | Validator address                                                               |
-| `delegatorAddress`              | _string_ | Delegator address                                                               |
-| `minSelfDelegation`             | _string_ | Minimum Self Delegation amount                                                  |
-| `description`                   | _object_ | Validator description wrapper                                                   |
-| `description.moniker`           | _string_ | Validator node public moniker                                                   |
-| `description.identity`          | _string_ | _(Optional)_ Validator node identity                                            |
-| `description.website`           | _string_ | _(Optional)_ Website domain name                                                |
-| `description.securityContact`   | _string_ | _(Optional)_ Validator node email contact                                       |
-| `description.details`           | _string_ | _(Optional)_ Validator node details                                             |
-| `commissionRates`               | _object_ | Validator node commission wrapper                                               |
-| `commissionRates.rate`          | _string_ | Validator commission rate                                                       |
-| `commissionRates.maxRate`       | _string_ | Validator commission maximum rate                                               |
-| `commissionRates.maxChangeRate` | _string_ | Validator commission maximum change rate                                        |
-| `msgName`                       | _string_ | Blockchain Message type . Value: `MsgCreateValidator`                           |
-| `txHash`                        | _string_ | TxID of the blockchain transaction containing the event                         |
-| `msgIndex`                      | _int_    | message index on the block                                                      |
-| `name`                          | _string_ | Specific Event Name. Value: `/cosmos.staking.v1beta1.MsgCreateValidator.Failed` |
-| `version`                       | _int_    | Event Version. Value: `1`                                                       |
-| `height`                        | _int64_  | Height of the block containing the transaction                                  |
-| `uuid`                          | _string_ | Unique ID that is assigned on event creation                                    |
+| `amount`                        | *bigint* | CRO amount in basic unit                                                        |
+| `pubkey`                        | *string* | Consensus public key                                                            |
+| `validatorAddress`              | *string* | Validator address                                                               |
+| `delegatorAddress`              | *string* | Delegator address                                                               |
+| `minSelfDelegation`             | *string* | Minimum Self Delegation amount                                                  |
+| `description`                   | *object* | Validator description wrapper                                                   |
+| `description.moniker`           | *string* | Validator node public moniker                                                   |
+| `description.identity`          | *string* | _(Optional)_ Validator node identity                                            |
+| `description.website`           | *string* | _(Optional)_ Website domain name                                                |
+| `description.securityContact`   | *string* | _(Optional)_ Validator node email contact                                       |
+| `description.details`           | *string* | _(Optional)_ Validator node details                                             |
+| `commissionRates`               | *object* | Validator node commission wrapper                                               |
+| `commissionRates.rate`          | *string* | Validator commission rate                                                       |
+| `commissionRates.maxRate`       | *string* | Validator commission maximum rate                                               |
+| `commissionRates.maxChangeRate` | *string* | Validator commission maximum change rate                                        |
+| `msgName`                       | *string* | Blockchain Message type . Value: `MsgCreateValidator`                           |
+| `txHash`                        | *string* | TxID of the blockchain transaction containing the event                         |
+| `msgIndex`                      | *int*    | message index on the block                                                      |
+| `name`                          | *string* | Specific Event Name. Value: `/cosmos.staking.v1beta1.MsgCreateValidator.Failed` |
+| `version`                       | *int*    | Event Version. Value: `1`                                                       |
+| `height`                        | *int64*  | Height of the block containing the transaction                                  |
+| `uuid`                          | *string* | Unique ID that is assigned on event creation                                    |
 
-_Example_ :
+*Example* :
 
 ```json
 {
@@ -141,32 +141,32 @@ _Example_ :
 
 ## event::MSG_EDIT_VALIDATOR_CREATED
 
-_Name_ : /cosmos.staking.v1beta1.MsgEditValidator.Created
+*Name* : /cosmos.staking.v1beta1.MsgEditValidator.Created
 
-_Type_ : [MsgBase](../README.md#MsgBase)
+*Type* : [MsgBase](../README.md#MsgBase)
 
-_Structure_ :
+*Structure* :
 
 | Key                           | Type     | Description                                                                    |
 | ----------------------------- | -------- | ------------------------------------------------------------------------------ |
-| `validatorAddress`            | _string_ | Validator address                                                              |
-| `minSelfDelegation`           | _string_ | _(Optional)_ New minimum Self Delegation amount.                               |
-| `commissionRate`              | _string_ | _(Optional)_ New commission rate                                               |
-| `description`                 | _object_ | Validator description wrapper                                                  |
-| `description.moniker`         | _string_ | _(Optional)_ New validator node public moniker. Default: `[do-not-modify]`     |
-| `description.identity`        | _string_ | _(Optional)_ New validator node identity. Default: `[do-not-modify]`           |
-| `description.website`         | _string_ | _(Optional)_ New website domain name. Default: `[do-not-modify]`               |
-| `description.securityContact` | _string_ | _(Optional)_ New Validator node email contact. Default: `[do-not-modify]`      |
-| `description.details`         | _string_ | _(Optional)_ New Validator node details. Default: `[do-not-modify]`            |
-| `msgName`                     | _string_ | Blockchain Message type . Value: `MsgEditValidator`                            |
-| `txHash`                      | _string_ | TxID of the blockchain transaction containing the event                        |
-| `msgIndex`                    | _int_    | message index on the block                                                     |
-| `name`                        | _string_ | Specific Event Name. Value: `/cosmos.staking.v1beta1.MsgEditValidator.Created` |
-| `version`                     | _int_    | Event Version. Value: `1`                                                      |
-| `height`                      | _int64_  | Height of the block containing the transaction                                 |
-| `uuid`                        | _string_ | Unique ID that is assigned on event creation                                   |
+| `validatorAddress`            | *string* | Validator address                                                              |
+| `minSelfDelegation`           | *string* | _(Optional)_ New minimum Self Delegation amount.                               |
+| `commissionRate`              | *string* | _(Optional)_ New commission rate                                               |
+| `description`                 | *object* | Validator description wrapper                                                  |
+| `description.moniker`         | *string* | _(Optional)_ New validator node public moniker. Default: `[do-not-modify]`     |
+| `description.identity`        | *string* | _(Optional)_ New validator node identity. Default: `[do-not-modify]`           |
+| `description.website`         | *string* | _(Optional)_ New website domain name. Default: `[do-not-modify]`               |
+| `description.securityContact` | *string* | _(Optional)_ New Validator node email contact. Default: `[do-not-modify]`      |
+| `description.details`         | *string* | _(Optional)_ New Validator node details. Default: `[do-not-modify]`            |
+| `msgName`                     | *string* | Blockchain Message type . Value: `MsgEditValidator`                            |
+| `txHash`                      | *string* | TxID of the blockchain transaction containing the event                        |
+| `msgIndex`                    | *int*    | message index on the block                                                     |
+| `name`                        | *string* | Specific Event Name. Value: `/cosmos.staking.v1beta1.MsgEditValidator.Created` |
+| `version`                     | *int*    | Event Version. Value: `1`                                                      |
+| `height`                      | *int64*  | Height of the block containing the transaction                                 |
+| `uuid`                        | *string* | Unique ID that is assigned on event creation                                   |
 
-_Example_ :
+*Example* :
 
 ```json
 {
@@ -192,32 +192,32 @@ _Example_ :
 
 ## event::MSG_EDIT_VALIDATOR_FAILED
 
-_Name_ : /cosmos.staking.v1beta1.MsgEditValidator.Failed
+*Name* : /cosmos.staking.v1beta1.MsgEditValidator.Failed
 
-_Type_ : [MsgBase](../README.md#MsgBase)
+*Type* : [MsgBase](../README.md#MsgBase)
 
-_Structure_ :
+*Structure* :
 
 | Key                           | Type     | Description                                                                   |
 | ----------------------------- | -------- | ----------------------------------------------------------------------------- |
-| `validatorAddress`            | _string_ | Validator address                                                             |
-| `minSelfDelegation`           | _string_ | _(Optional)_ New minimum Self Delegation amount.                              |
-| `commissionRate`              | _string_ | _(Optional)_ New commission rate                                              |
-| `description`                 | _object_ | Validator description wrapper                                                 |
-| `description.moniker`         | _string_ | _(Optional)_ New validator node public moniker. Default: `[do-not-modify]`    |
-| `description.identity`        | _string_ | _(Optional)_ New validator node identity. Default: `[do-not-modify]`          |
-| `description.website`         | _string_ | _(Optional)_ New website domain name. Default: `[do-not-modify]`              |
-| `description.securityContact` | _string_ | _(Optional)_ New Validator node email contact. Default: `[do-not-modify]`     |
-| `description.details`         | _string_ | _(Optional)_ New Validator node details. Default: `[do-not-modify]`           |
-| `msgName`                     | _string_ | Blockchain Message type . Value: `MsgEditValidator`                           |
-| `txHash`                      | _string_ | TxID of the blockchain transaction containing the event                       |
-| `msgIndex`                    | _int_    | message index on the block                                                    |
-| `name`                        | _string_ | Specific Event Name. Value: `/cosmos.staking.v1beta1.MsgEditValidator.Failed` |
-| `version`                     | _int_    | Event Version. Value: `1`                                                     |
-| `height`                      | _int64_  | Height of the block containing the transaction                                |
-| `uuid`                        | _string_ | Unique ID that is assigned on event creation                                  |
+| `validatorAddress`            | *string* | Validator address                                                             |
+| `minSelfDelegation`           | *string* | _(Optional)_ New minimum Self Delegation amount.                              |
+| `commissionRate`              | *string* | _(Optional)_ New commission rate                                              |
+| `description`                 | *object* | Validator description wrapper                                                 |
+| `description.moniker`         | *string* | _(Optional)_ New validator node public moniker. Default: `[do-not-modify]`    |
+| `description.identity`        | *string* | _(Optional)_ New validator node identity. Default: `[do-not-modify]`          |
+| `description.website`         | *string* | _(Optional)_ New website domain name. Default: `[do-not-modify]`              |
+| `description.securityContact` | *string* | _(Optional)_ New Validator node email contact. Default: `[do-not-modify]`     |
+| `description.details`         | *string* | _(Optional)_ New Validator node details. Default: `[do-not-modify]`           |
+| `msgName`                     | *string* | Blockchain Message type . Value: `MsgEditValidator`                           |
+| `txHash`                      | *string* | TxID of the blockchain transaction containing the event                       |
+| `msgIndex`                    | *int*    | message index on the block                                                    |
+| `name`                        | *string* | Specific Event Name. Value: `/cosmos.staking.v1beta1.MsgEditValidator.Failed` |
+| `version`                     | *int*    | Event Version. Value: `1`                                                     |
+| `height`                      | *int64*  | Height of the block containing the transaction                                |
+| `uuid`                        | *string* | Unique ID that is assigned on event creation                                  |
 
-_Example_ :
+*Example* :
 
 ```json
 {
@@ -243,26 +243,26 @@ _Example_ :
 
 ## event::MSG_DELEGATE_CREATED
 
-_Name_ : /cosmos.staking.v1beta1.MsgDelegate.Created
+*Name* : /cosmos.staking.v1beta1.MsgDelegate.Created
 
-_Type_ : [MsgBase](../README.md#MsgBase)
+*Type* : [MsgBase](../README.md#MsgBase)
 
-_Structure_ :
+*Structure* :
 
 | Key                | Type     | Description                                                               |
 | ------------------ | -------- | ------------------------------------------------------------------------- |
-| `delegatorAddress` | _string_ | Delegator address                                                         |
-| `validatorAddress` | _string_ | Validator address                                                         |
-| `amount`           | _bigint_ | CRO Amount in base unit                                                   |
-| `msgName`          | _string_ | Blockchain Message type . Value: `MsgDelegate`                            |
-| `txHash`           | _string_ | TxID of the blockchain transaction containing the event                   |
-| `msgIndex`         | _int_    | message index on the block                                                |
-| `name`             | _string_ | Specific Event Name. Value: `/cosmos.staking.v1beta1.MsgDelegate.Created` |
-| `version`          | _int_    | Event Version. Value: `1`                                                 |
-| `height`           | _int64_  | Height of the block containing the transaction                            |
-| `uuid`             | _string_ | Unique ID that is assigned on event creation                              |
+| `delegatorAddress` | *string* | Delegator address                                                         |
+| `validatorAddress` | *string* | Validator address                                                         |
+| `amount`           | *bigint* | CRO Amount in base unit                                                   |
+| `msgName`          | *string* | Blockchain Message type . Value: `MsgDelegate`                            |
+| `txHash`           | *string* | TxID of the blockchain transaction containing the event                   |
+| `msgIndex`         | *int*    | message index on the block                                                |
+| `name`             | *string* | Specific Event Name. Value: `/cosmos.staking.v1beta1.MsgDelegate.Created` |
+| `version`          | *int*    | Event Version. Value: `1`                                                 |
+| `height`           | *int64*  | Height of the block containing the transaction                            |
+| `uuid`             | *string* | Unique ID that is assigned on event creation                              |
 
-_Example_ :
+*Example* :
 
 ```json
 {
@@ -281,26 +281,26 @@ _Example_ :
 
 ## event::MSG_DELEGATE_FAILED
 
-_Name_ : /cosmos.staking.v1beta1.MsgDelegate.Failed
+*Name* : /cosmos.staking.v1beta1.MsgDelegate.Failed
 
-_Type_ : [MsgBase](../README.md#MsgBase)
+*Type* : [MsgBase](../README.md#MsgBase)
 
-_Structure_ :
+*Structure* :
 
 | Key                | Type     | Description                                                              |
 | ------------------ | -------- | ------------------------------------------------------------------------ |
-| `delegatorAddress` | _string_ | Delegator address                                                        |
-| `validatorAddress` | _string_ | Validator address                                                        |
-| `amount`           | _bigint_ | CRO Amount in base unit                                                  |
-| `msgName`          | _string_ | Blockchain Message type . Value: `MsgDelegate`                           |
-| `txHash`           | _string_ | TxID of the blockchain transaction containing the event                  |
-| `msgIndex`         | _int_    | message index on the block                                               |
-| `name`             | _string_ | Specific Event Name. Value: `/cosmos.staking.v1beta1.MsgDelegate.Failed` |
-| `version`          | _int_    | Event Version. Value: `1`                                                |
-| `height`           | _int64_  | Height of the block containing the transaction                           |
-| `uuid`             | _string_ | Unique ID that is assigned on event creation                             |
+| `delegatorAddress` | *string* | Delegator address                                                        |
+| `validatorAddress` | *string* | Validator address                                                        |
+| `amount`           | *bigint* | CRO Amount in base unit                                                  |
+| `msgName`          | *string* | Blockchain Message type . Value: `MsgDelegate`                           |
+| `txHash`           | *string* | TxID of the blockchain transaction containing the event                  |
+| `msgIndex`         | *int*    | message index on the block                                               |
+| `name`             | *string* | Specific Event Name. Value: `/cosmos.staking.v1beta1.MsgDelegate.Failed` |
+| `version`          | *int*    | Event Version. Value: `1`                                                |
+| `height`           | *int64*  | Height of the block containing the transaction                           |
+| `uuid`             | *string* | Unique ID that is assigned on event creation                             |
 
-_Example_ :
+*Example* :
 
 ```json
 {
@@ -319,27 +319,27 @@ _Example_ :
 
 ## event::MSG_UNDELEGATE_CREATED
 
-_Name_ : /cosmos.staking.v1beta1.MsgUndelegate.Created
+*Name* : /cosmos.staking.v1beta1.MsgUndelegate.Created
 
-_Type_ : [MsgBase](../README.md#MsgBase)
+*Type* : [MsgBase](../README.md#MsgBase)
 
-_Structure_ :
+*Structure* :
 
 | Key                | Type     | Description                                                                  |
 | ------------------ | -------- | ---------------------------------------------------------------------------- |
-| `delegatorAddress` | _string_ | Delegator address                                                            |
-| `validatorAddress` | _string_ | Validator address                                                            |
-| `amount`           | _bigint_ | CRO Amount in base unit                                                      |
-| `unbondCompleteAt` | _string_ | _(Optional)_ Unbonding completion timestamp. Golang type: `*utctime.UTCTime` |
-| `msgName`          | _string_ | Blockchain Message type . Value: `MsgUndelegate`                             |
-| `txHash`           | _string_ | TxID of the blockchain transaction containing the event                      |
-| `msgIndex`         | _int_    | message index on the block                                                   |
-| `name`             | _string_ | Specific Event Name. Value: `/cosmos.staking.v1beta1.MsgUndelegate.Created`  |
-| `version`          | _int_    | Event Version. Value: `1`                                                    |
-| `height`           | _int64_  | Height of the block containing the transaction                               |
-| `uuid`             | _string_ | Unique ID that is assigned on event creation                                 |
+| `delegatorAddress` | *string* | Delegator address                                                            |
+| `validatorAddress` | *string* | Validator address                                                            |
+| `amount`           | *bigint* | CRO Amount in base unit                                                      |
+| `unbondCompleteAt` | *string* | _(Optional)_ Unbonding completion timestamp. Golang type: `*utctime.UTCTime` |
+| `msgName`          | *string* | Blockchain Message type . Value: `MsgUndelegate`                             |
+| `txHash`           | *string* | TxID of the blockchain transaction containing the event                      |
+| `msgIndex`         | *int*    | message index on the block                                                   |
+| `name`             | *string* | Specific Event Name. Value: `/cosmos.staking.v1beta1.MsgUndelegate.Created`  |
+| `version`          | *int*    | Event Version. Value: `1`                                                    |
+| `height`           | *int64*  | Height of the block containing the transaction                               |
+| `uuid`             | *string* | Unique ID that is assigned on event creation                                 |
 
-_Example_ :
+*Example* :
 
 ```json
 {
@@ -359,27 +359,27 @@ _Example_ :
 
 ## event::MSG_UNDELEGATE_FAILED
 
-_Name_ : /cosmos.staking.v1beta1.MsgUndelegate.Failed
+*Name* : /cosmos.staking.v1beta1.MsgUndelegate.Failed
 
-_Type_ : [MsgBase](../README.md#MsgBase)
+*Type* : [MsgBase](../README.md#MsgBase)
 
-_Structure_ :
+*Structure* :
 
 | Key                | Type     | Description                                                                  |
 | ------------------ | -------- | ---------------------------------------------------------------------------- |
-| `delegatorAddress` | _string_ | Delegator address                                                            |
-| `validatorAddress` | _string_ | Validator address                                                            |
-| `amount`           | _bigint_ | CRO Amount in base unit                                                      |
-| `unbondCompleteAt` | _string_ | _(Optional)_ Unbonding completion timestamp. Golang type: `*utctime.UTCTime` |
-| `msgName`          | _string_ | Blockchain Message type . Value: `MsgUndelegate`                             |
-| `txHash`           | _string_ | TxID of the blockchain transaction containing the event                      |
-| `msgIndex`         | _int_    | message index on the block                                                   |
-| `name`             | _string_ | Specific Event Name. Value: `/cosmos.staking.v1beta1.MsgUndelegate.Failed`   |
-| `version`          | _int_    | Event Version. Value: `1`                                                    |
-| `height`           | _int64_  | Height of the block containing the transaction                               |
-| `uuid`             | _string_ | Unique ID that is assigned on event creation                                 |
+| `delegatorAddress` | *string* | Delegator address                                                            |
+| `validatorAddress` | *string* | Validator address                                                            |
+| `amount`           | *bigint* | CRO Amount in base unit                                                      |
+| `unbondCompleteAt` | *string* | _(Optional)_ Unbonding completion timestamp. Golang type: `*utctime.UTCTime` |
+| `msgName`          | *string* | Blockchain Message type . Value: `MsgUndelegate`                             |
+| `txHash`           | *string* | TxID of the blockchain transaction containing the event                      |
+| `msgIndex`         | *int*    | message index on the block                                                   |
+| `name`             | *string* | Specific Event Name. Value: `/cosmos.staking.v1beta1.MsgUndelegate.Failed`   |
+| `version`          | *int*    | Event Version. Value: `1`                                                    |
+| `height`           | *int64*  | Height of the block containing the transaction                               |
+| `uuid`             | *string* | Unique ID that is assigned on event creation                                 |
 
-_Example_ :
+*Example* :
 
 ```json
 {
@@ -399,68 +399,68 @@ _Example_ :
 
 ## event::MSG_BEGIN_REDELEGATE_CREATED
 
-_Name_ : /cosmos.staking.v1beta1.MsgBeginRedelegate.Created
+*Name* : /cosmos.staking.v1beta1.MsgBeginRedelegate.Created
 
-_Type_ : [MsgBase](../README.md#MsgBase)
+*Type* : [MsgBase](../README.md#MsgBase)
 
-_Structure_ :
+*Structure* :
 
 | Key                   | Type     | Description                                                                      |
 | --------------------- | -------- | -------------------------------------------------------------------------------- |
-| `delegatorAddress`    | _string_ | Delegator address                                                                |
-| `validatorSrcAddress` | _string_ | Source Validator address                                                         |
-| `validatorDstAddress` | _string_ | Destination Validator address                                                    |
-| `amount`              | _bigint_ | CRO Amount in base unit                                                          |
-| `msgName`             | _string_ | Blockchain Message type . Value: `MsgBeginRedelegate`                            |
-| `txHash`              | _string_ | TxID of the blockchain transaction containing the event                          |
-| `msgIndex`            | _int_    | message index on the block                                                       |
-| `name`                | _string_ | Specific Event Name. Value: `/cosmos.staking.v1beta1.MsgBeginRedelegate.Created` |
-| `version`             | _int_    | Event Version. Value: `1`                                                        |
-| `height`              | _int64_  | Height of the block containing the transaction                                   |
-| `uuid`                | _string_ | Unique ID that is assigned on event creation                                     |
+| `delegatorAddress`    | *string* | Delegator address                                                                |
+| `validatorSrcAddress` | *string* | Source Validator address                                                         |
+| `validatorDstAddress` | *string* | Destination Validator address                                                    |
+| `amount`              | *bigint* | CRO Amount in base unit                                                          |
+| `msgName`             | *string* | Blockchain Message type . Value: `MsgBeginRedelegate`                            |
+| `txHash`              | *string* | TxID of the blockchain transaction containing the event                          |
+| `msgIndex`            | *int*    | message index on the block                                                       |
+| `name`                | *string* | Specific Event Name. Value: `/cosmos.staking.v1beta1.MsgBeginRedelegate.Created` |
+| `version`             | *int*    | Event Version. Value: `1`                                                        |
+| `height`              | *int64*  | Height of the block containing the transaction                                   |
+| `uuid`                | *string* | Unique ID that is assigned on event creation                                     |
 
-_Example_ : T.B.D
+*Example* : T.B.D
 
 ## event::MSG_BEGIN_REDELEGATE_FAILED
 
-_Name_ : /cosmos.staking.v1beta1.MsgBeginRedelegate.Failed
+*Name* : /cosmos.staking.v1beta1.MsgBeginRedelegate.Failed
 
-_Type_ : [MsgBase](../README.md#MsgBase)
+*Type* : [MsgBase](../README.md#MsgBase)
 
-_Structure_ :
+*Structure* :
 
 | Key                   | Type     | Description                                                                     |
 | --------------------- | -------- | ------------------------------------------------------------------------------- |
-| `delegatorAddress`    | _string_ | Delegator address                                                               |
-| `validatorSrcAddress` | _string_ | Source Validator address                                                        |
-| `validatorDstAddress` | _string_ | Destination Validator address                                                   |
-| `amount`              | _bigint_ | CRO Amount in base unit                                                         |
-| `msgName`             | _string_ | Blockchain Message type . Value: `MsgBeginRedelegate`                           |
-| `txHash`              | _string_ | TxID of the blockchain transaction containing the event                         |
-| `msgIndex`            | _int_    | message index on the block                                                      |
-| `name`                | _string_ | Specific Event Name. Value: `/cosmos.staking.v1beta1.MsgBeginRedelegate.Failed` |
-| `version`             | _int_    | Event Version. Value: `1`                                                       |
-| `height`              | _int64_  | Height of the block containing the transaction                                  |
-| `uuid`                | _string_ | Unique ID that is assigned on event creation                                    |
+| `delegatorAddress`    | *string* | Delegator address                                                               |
+| `validatorSrcAddress` | *string* | Source Validator address                                                        |
+| `validatorDstAddress` | *string* | Destination Validator address                                                   |
+| `amount`              | *bigint* | CRO Amount in base unit                                                         |
+| `msgName`             | *string* | Blockchain Message type . Value: `MsgBeginRedelegate`                           |
+| `txHash`              | *string* | TxID of the blockchain transaction containing the event                         |
+| `msgIndex`            | *int*    | message index on the block                                                      |
+| `name`                | *string* | Specific Event Name. Value: `/cosmos.staking.v1beta1.MsgBeginRedelegate.Failed` |
+| `version`             | *int*    | Event Version. Value: `1`                                                       |
+| `height`              | *int64*  | Height of the block containing the transaction                                  |
+| `uuid`                | *string* | Unique ID that is assigned on event creation                                    |
 
-_Example_ : T.B.D
+*Example* : T.B.D
 
 ## event::BONDING_COMPLETED
 
-_Name_ : BondingCompleted
+*Name* : BondingCompleted
 
-_Type_ : [MsgBase](../README.md#MsgBase)
+*Type* : [MsgBase](../README.md#MsgBase)
 
-_Structure_ :
+*Structure* :
 
 | Key         | Type     | Description                                    |
 | ----------- | -------- | ---------------------------------------------- |
-| `delegator` | _string_ | Delegator address                              |
-| `validator` | _string_ | Validator address                              |
-| `amount`    | _bigint_ | CRO Amount in base unit                        |
-| `name`      | _string_ | Specific Event Name. Value: `BondingCompleted` |
-| `version`   | _int_    | Event Version. Value: `1`                      |
-| `height`    | _int64_  | Height of the block containing the transaction |
-| `uuid`      | _string_ | Unique ID that is assigned on event creation   |
+| `delegator` | *string* | Delegator address                              |
+| `validator` | *string* | Validator address                              |
+| `amount`    | *bigint* | CRO Amount in base unit                        |
+| `name`      | *string* | Specific Event Name. Value: `BondingCompleted` |
+| `version`   | *int*    | Event Version. Value: `1`                      |
+| `height`    | *int64*  | Height of the block containing the transaction |
+| `uuid`      | *string* | Unique ID that is assigned on event creation   |
 
-_Example_ : T.B.D
+*Example* : T.B.D

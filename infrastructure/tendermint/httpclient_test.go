@@ -155,7 +155,7 @@ var _ = Describe("HTTPClient", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", "/genesis"),
-					ghttp.RespondWith(http.StatusOK, infrastructure_tendermint_test.GENESIS_MIXED_NUMBER_AND_STRING_JSON),
+					ghttp.RespondWith(http.StatusOK, infrastructure_tendermint_test.GENESIS_MIXED_NUMBER_AND*string*JSON),
 				),
 			)
 

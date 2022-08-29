@@ -5,24 +5,24 @@
 
 ## event::MSG_UNJAIL_CREATED
 
-_Name_ : /cosmos.slashing.v1beta1.MsgUnjail.Created
+*Name* : /cosmos.slashing.v1beta1.MsgUnjail.Created
 
-_Type_ : [MsgBase](../README.md#MsgBase)
+*Type* : [MsgBase](../README.md#MsgBase)
 
-_Structure_ :
+*Structure* :
 
 | Key                | Type     | Description                                                              |
 | ------------------ | -------- | ------------------------------------------------------------------------ |
-| `validatorAddress` | _string_ | Validator address                                                        |
-| `msgName`          | _string_ | Blockchain Message type . Value: `MsgUnjail`                             |
-| `txHash`           | _string_ | TxID of the blockchain transaction containing the event                  |
-| `msgIndex`         | _int_    | message index on the block                                               |
-| `name`             | _string_ | Specific Event Name. Value: `/cosmos.slashing.v1beta1.MsgUnjail.Created` |
-| `version`          | _int_    | Event Version. Value: `1`                                                |
-| `height`           | _int64_  | Height of the block containing the transaction                           |
-| `uuid`             | _string_ | Unique ID that is assigned on event creation                             |
+| `validatorAddress` | *string* | Validator address                                                        |
+| `msgName`          | *string* | Blockchain Message type . Value: `MsgUnjail`                             |
+| `txHash`           | *string* | TxID of the blockchain transaction containing the event                  |
+| `msgIndex`         | *int*    | message index on the block                                               |
+| `name`             | *string* | Specific Event Name. Value: `/cosmos.slashing.v1beta1.MsgUnjail.Created` |
+| `version`          | *int*    | Event Version. Value: `1`                                                |
+| `height`           | *int64*  | Height of the block containing the transaction                           |
+| `uuid`             | *string* | Unique ID that is assigned on event creation                             |
 
-_Example_ :
+*Example* :
 
 ```json
 {
@@ -39,24 +39,24 @@ _Example_ :
 
 ## event::MSG_UNJAIL_FAILED
 
-_Name_ : /cosmos.slashing.v1beta1.MsgUnjail.Failed
+*Name* : /cosmos.slashing.v1beta1.MsgUnjail.Failed
 
-_Type_ : [MsgBase](../README.md#MsgBase)
+*Type* : [MsgBase](../README.md#MsgBase)
 
-_Structure_ :
+*Structure* :
 
 | Key                | Type     | Description                                                             |
 | ------------------ | -------- | ----------------------------------------------------------------------- |
-| `validatorAddress` | _string_ | Validator address                                                       |
-| `msgName`          | _string_ | Blockchain Message type . Value: `MsgUnjail`                            |
-| `txHash`           | _string_ | TxID of the blockchain transaction containing the event                 |
-| `msgIndex`         | _int_    | message index on the block                                              |
-| `name`             | _string_ | Specific Event Name. Value: `/cosmos.slashing.v1beta1.MsgUnjail.Failed` |
-| `version`          | _int_    | Event Version. Value: `1`                                               |
-| `height`           | _int64_  | Height of the block containing the transaction                          |
-| `uuid`             | _string_ | Unique ID that is assigned on event creation                            |
+| `validatorAddress` | *string* | Validator address                                                       |
+| `msgName`          | *string* | Blockchain Message type . Value: `MsgUnjail`                            |
+| `txHash`           | *string* | TxID of the blockchain transaction containing the event                 |
+| `msgIndex`         | *int*    | message index on the block                                              |
+| `name`             | *string* | Specific Event Name. Value: `/cosmos.slashing.v1beta1.MsgUnjail.Failed` |
+| `version`          | *int*    | Event Version. Value: `1`                                               |
+| `height`           | *int64*  | Height of the block containing the transaction                          |
+| `uuid`             | *string* | Unique ID that is assigned on event creation                            |
 
-_Example_ :
+*Example* :
 
 ```json
 {

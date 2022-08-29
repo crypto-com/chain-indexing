@@ -1,6 +1,6 @@
 package usecase_parser_test
 
-const TX_MSG_TRANSFER_STRING_AMOUNT_BLOCK_RESP = `
+const TX_MSG_TRANSFER*string*AMOUNT_BLOCK_RESP = `
 {
   "jsonrpc": "2.0",
   "id": -1,
@@ -177,7 +177,7 @@ const TX_MSG_TRANSFER_STRING_AMOUNT_BLOCK_RESP = `
 }
 `
 
-const TX_MSG_TRANSFER_STRING_AMOUNT_BLOCK_RESULTS_RESP = `
+const TX_MSG_TRANSFER*string*AMOUNT_BLOCK_RESULTS_RESP = `
 {
   "jsonrpc": "2.0",
   "id": -1,
