@@ -139,10 +139,10 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
-				usecase_parser_test.TX_MSG_TRANSFER*string*AMOUNT_BLOCK_RESP,
+				usecase_parser_test.TX_MSG_TRANSFER_STRING_AMOUNT_BLOCK_RESP,
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
-				usecase_parser_test.TX_MSG_TRANSFER*string*AMOUNT_BLOCK_RESULTS_RESP,
+				usecase_parser_test.TX_MSG_TRANSFER_STRING_AMOUNT_BLOCK_RESULTS_RESP,
 			))
 
 			accountAddressPrefix := "cro"
