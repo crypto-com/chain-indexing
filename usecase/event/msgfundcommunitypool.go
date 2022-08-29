@@ -27,7 +27,7 @@ func NewMsgFundCommunityPool(msgCommonParams MsgCommonParams, params model.MsgFu
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_FUND_COMMUNITY_POOL,
 			Version:         1,
-			
+
 			MsgCommonParams: msgCommonParams,
 		}),
 
