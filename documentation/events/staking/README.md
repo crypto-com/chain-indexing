@@ -135,7 +135,7 @@
     "validatorAddress": "tcrocncl16p0um8f20sq77xqlpqqmx4t5qwyczgjmjt69n5",
     "minSelfDelegation": "1"
 }
-```
+```  
 
 ## event::MSG_EDIT_VALIDATOR_CREATED
 *Name* : /cosmos.staking.v1beta1.MsgEditValidator.Created
@@ -185,7 +185,7 @@
     "validatorAddress": "tcrocncl1pm27djcs5djxjsxw3unrkv3m3jtxdexktw5epu",
     "minSelfDelegation": null
 }
-```
+```  
 
 ## event::MSG_EDIT_VALIDATOR_FAILED
 *Name* : /cosmos.staking.v1beta1.MsgEditValidator.Failed
@@ -235,7 +235,7 @@
     "validatorAddress": "tcrocncl122w9fhc0pu3ey9r6hekznd2fkl5jswl5aqsvgy",
     "minSelfDelegation": null
 }
-```
+```  
 
 ## event::MSG_DELEGATE_CREATED
 *Name* : /cosmos.staking.v1beta1.MsgDelegate.Created
@@ -272,7 +272,7 @@
     "delegatorAddress": "tcro152ena75gh5nqnu2nlarwmpzxa2czxs8y9e3slh",
     "validatorAddress": "tcrocncl152ena75gh5nqnu2nlarwmpzxa2czxs8ysxjf85"
 }
-```
+```  
 
 ## event::MSG_DELEGATE_FAILED
 *Name* : /cosmos.staking.v1beta1.MsgDelegate.Failed
@@ -309,7 +309,7 @@
     "delegatorAddress": "tcro1urmrrmmt6gdf077dmgt95cmj6tc0z9045d5xmw",
     "validatorAddress": "tcrocncl1urmrrmmt6gdf077dmgt95cmj6tc0z904pjhlrd"
 }
-```
+```  
 
 ## event::MSG_UNDELEGATE_CREATED
 *Name* : /cosmos.staking.v1beta1.MsgUndelegate.Created
@@ -348,7 +348,7 @@
     "unbondCompleteAt": "2020-10-29T03:40:20Z",
     "validatorAddress": "tcrocncl15e69kdrtczajjdlzyt2qgs5q2anc5qpmk2c68z"
 }
-```
+```  
 
 ## event::MSG_UNDELEGATE_FAILED
 *Name* : /cosmos.staking.v1beta1.MsgUndelegate.Failed

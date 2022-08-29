@@ -13,7 +13,7 @@
   - [event::MSG_VOTE_FAILED](#event_msg_vote_failed)
   - [event::PROPOSAL_ENDED](#event_proposal_ended)
   - [event::PROPOSAL_INACTIVED](#event_proposal_inactived)
-
+  
 
 ## event::MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_CREATED
 *Name* : /cosmos.params.v1beta1.ParameterChangeProposal.Created
@@ -43,8 +43,7 @@
 | `height`                     | *int64*         | Height of the block containing the transaction                                       |
 | `uuid`                       | *string*        | Unique ID that is assigned on event creation                                         |
 
-*Example* :
-
+*Example* : 
 ```json
 {
     "name": "/cosmos.params.v1beta1.ParameterChangeProposal.Created",
@@ -70,7 +69,7 @@
     "initialDeposit": "0",
     "proposerAddress": "tcro1j7pej8kplem4wt50p4hfvndhuw5jprxxn5625q"
 }
-```
+```  
 
 ## event::MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_FAILED
 *Name* : /cosmos.params.v1beta1.ParameterChangeProposal.Failed
@@ -293,8 +292,7 @@
 | `height`     | *int64*  | Height of the block containing the transaction                       |
 | `uuid`       | *string* | Unique ID that is assigned on event creation                         |
 
-*Example* :
-
+*Example* : 
 ```json
 {
     "name": "/cosmos.gov.v1beta1.MsgDeposit.Created",
@@ -308,7 +306,7 @@
     "depositor": "tcro1j7pej8kplem4wt50p4hfvndhuw5jprxxn5625q",
     "proposalId": "1"
 }
-```
+```  
 
 ## event::MSG_DEPOSIT_FAILED
 *Name* : /cosmos.gov.v1beta1.MsgDeposit.Failed
@@ -330,8 +328,7 @@
 | `height`     | *int64*  | Height of the block containing the transaction                      |
 | `uuid`       | *string* | Unique ID that is assigned on event creation                        |
 
-*Example* :
-
+*Example* : 
 ```json
 {
     "name": "/cosmos.gov.v1beta1.MsgDeposit.Failed",
@@ -345,7 +342,7 @@
     "depositor": "tcro1j7pej8kplem4wt50p4hfvndhuw5jprxxn5625q",
     "proposalId": "1"
 }
-```
+```  
 
 ## event::MSG_VOTE_CREATED
 *Name* : /cosmos.gov.v1beta1.MsgVote.Created
@@ -367,8 +364,7 @@
 | `height`     | *int64*  | Height of the block containing the transaction                    |
 | `uuid`       | *string* | Unique ID that is assigned on event creation                      |
 
-*Example* :
-
+*Example* : 
 ```json
 {
     "name": "/cosmos.gov.v1beta1.MsgVote.Created",
@@ -404,8 +400,7 @@
 | `height`     | *int64*  | Height of the block containing the transaction                   |
 | `uuid`       | *string* | Unique ID that is assigned on event creation                     |
 
-*Example* :
-
+*Example* : 
 ```json
 {
     "name": "/cosmos.gov.v1beta1.MsgVote.Failed",
@@ -419,7 +414,7 @@
     "msgIndex": 0,
     "proposalId": "1"
 }
-```
+```  
 
 ## event::PROPOSAL_ENDED
 *Name* : ProposalEnded

@@ -71,7 +71,7 @@
 | `height`           | *int64*  | Height of the block containing the transaction                                                             |
 | `uuid`             | *string* | Unique ID that is assigned on event creation                                                               |
 
-*Example* :
+*Example* : 
 ```json
 {
     "name": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward.Created",
@@ -109,7 +109,7 @@
 | `height`           | *int64*  | Height of the block containing the transaction                                                             |
 | `uuid`             | *string* | Unique ID that is assigned on event creation                                                               |
 
-*Example* :
+*Example* : 
 ```json
 {
     "name": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward.Failed",
@@ -146,7 +146,7 @@
 | `height`           | *int64*  | Height of the block containing the transaction                                                    |
 | `uuid`             | *string* | Unique ID that is assigned on event creation                                                      |
 
-*Example* :
+*Example* : 
 ```json
 {
     "name": "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission.Created",
@@ -182,7 +182,7 @@
 | `height`           | *int64*  | Height of the block containing the transaction                                                   |
 | `uuid`             | *string* | Unique ID that is assigned on event creation                                                     |
 
-*Example* :
+*Example* : 
 ```json
 {
     "name": "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission.Failed",
@@ -217,7 +217,7 @@
 | `height`    | *int64*  | Height of the block containing the transaction                                          |
 | `uuid`      | *string* | Unique ID that is assigned on event creation                                            |
 
-*Example* :
+*Example* : 
 ```json
 {
     "name": "/cosmos.distribution.v1beta1.MsgFundCommunityPool.Created",
@@ -251,7 +251,7 @@
 | `height`    | *int64*  | Height of the block containing the transaction                                         |
 | `uuid`      | *string* | Unique ID that is assigned on event creation                                           |
 
-*Example* :
+*Example* : 
 ```json
 {
     "name": "/cosmos.distribution.v1beta1.MsgFundCommunityPool.Failed",
