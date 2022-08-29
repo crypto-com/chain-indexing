@@ -1,12 +1,12 @@
 # Distribution Module Event List
-- [event::MSG_SET_WITHDRAW_ADDRESS_CREATED](#event_msg_set_withdraw_address_created)
-- [event::MSG_SET_WITHDRAW_ADDRESS_FAILED](#event_msg_set_withdraw_address_failed)
-- [event::MSG_WITHDRAW_DELEGATOR_REWARD_CREATED](#event_msg_withdraw_delegator_reward_created)
-- [event::MSG_WITHDRAW_DELEGATOR_REWARD_FAILED](#event_msg_withdraw_delegator_reward_failed)
-- [event::MSG_WITHDRAW_VALIDATOR_COMMISSION_CREATED](#event_msg_withdraw_validator_commission_created)
-- [event::MSG_WITHDRAW_VALIDATOR_COMMISSION_FAILED](#event_msg_withdraw_validator_commission_failed)
-- [event::MSG_FUND_COMMUNITY_POOL_CREATED](#event_msg_fund_community_pool_created)
-- [event::MSG_FUND_COMMUNITY_POOL_FAILED](#event_msg_fund_community_pool_failed)
+ - [event::MSG_SET_WITHDRAW_ADDRESS_CREATED](#event_msg_set_withdraw_address_created)
+ - [event::MSG_SET_WITHDRAW_ADDRESS_FAILED](#event_msg_set_withdraw_address_failed)
+ - [event::MSG_WITHDRAW_DELEGATOR_REWARD_CREATED](#event_msg_withdraw_delegator_reward_created)
+ - [event::MSG_WITHDRAW_DELEGATOR_REWARD_FAILED](#event_msg_withdraw_delegator_reward_failed)
+ - [event::MSG_WITHDRAW_VALIDATOR_COMMISSION_CREATED](#event_msg_withdraw_validator_commission_created)
+ - [event::MSG_WITHDRAW_VALIDATOR_COMMISSION_FAILED](#event_msg_withdraw_validator_commission_failed)
+ - [event::MSG_FUND_COMMUNITY_POOL_CREATED](#event_msg_fund_community_pool_created)
+ - [event::MSG_FUND_COMMUNITY_POOL_FAILED](#event_msg_fund_community_pool_failed)
 
 ## event::MSG_SET_WITHDRAW_ADDRESS_CREATED
 *Name* : /cosmos.distribution.v1beta1.MsgSetWithdrawAddress.Created
@@ -200,7 +200,7 @@
     "recipientAddress": "tcro1xwd3k8xterdeft3nxqg92szhpz6vx43q97wcke",
     "validatorAddress": "tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6"
 }
-```
+```  
 
 ## event::MSG_FUND_COMMUNITY_POOL_CREATED
 *Name* : /cosmos.distribution.v1beta1.MsgFundCommunityPool.Created

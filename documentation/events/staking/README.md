@@ -1,14 +1,14 @@
 # Staking Module Event List
-- [event::MSG_CREATE_VALIDATOR_CREATED](#event_msg_create_validator_created)
-- [event::MSG_CREATE_VALIDATOR_FAILED](#event_msg_create_validator_failed)
-- [event::MSG_EDIT_VALIDATOR_CREATED](#event_msg_edit_validator_created)
-- [event::MSG_EDIT_VALIDATOR_FAILED](#event_msg_edit_validator_failed)
-- [event::MSG_DELEGATE_CREATED](#event_msg_delegate_created)
-- [event::MSG_DELEGATE_FAILED](#event_msg_delegate_failed)
-- [event::MSG_UNDELEGATE_CREATED](#event_msg_undelegate_created)
-- [event::MSG_UNDELEGATE_FAILED](#event_msg_undelegate_failed)
-- [event::MSG_BEGIN_REDELEGATE_CREATED](#event_msg_begin_redelegate_created)
-- [event::MSG_BEGIN_REDELEGATE_FAILED](#event_msg_begin_redelegate_failed)
+  - [event::MSG_CREATE_VALIDATOR_CREATED](#event_msg_create_validator_created)
+  - [event::MSG_CREATE_VALIDATOR_FAILED](#event_msg_create_validator_failed)
+  - [event::MSG_EDIT_VALIDATOR_CREATED](#event_msg_edit_validator_created)
+  - [event::MSG_EDIT_VALIDATOR_FAILED](#event_msg_edit_validator_failed)
+  - [event::MSG_DELEGATE_CREATED](#event_msg_delegate_created)
+  - [event::MSG_DELEGATE_FAILED](#event_msg_delegate_failed)
+  - [event::MSG_UNDELEGATE_CREATED](#event_msg_undelegate_created)
+  - [event::MSG_UNDELEGATE_FAILED](#event_msg_undelegate_failed)
+  - [event::MSG_BEGIN_REDELEGATE_CREATED](#event_msg_begin_redelegate_created)
+  - [event::MSG_BEGIN_REDELEGATE_FAILED](#event_msg_begin_redelegate_failed)
 
 ## event::MSG_CREATE_VALIDATOR_CREATED
 *Name* : /cosmos.staking.v1beta1.MsgCreateValidator.Created
