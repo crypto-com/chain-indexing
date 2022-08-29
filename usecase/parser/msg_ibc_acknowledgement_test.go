@@ -1,7 +1,6 @@
 package parser_test
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 
@@ -365,7 +364,6 @@ var _ = Describe("ParseMsgCommands", func() {
 				typedSecondMsgAckCmd.UUID(),
 				-1,
 			)
-			fmt.Println(possibleSignerAddresses)
 			Expect(json.MustMarshalToString(typedSecondMsgAckCmd)).To(Equal(expectedSecondMsgAckWithUUID))
 			Expect(possibleSignerAddresses[0]).To(Equal("crc1yzl6cnq3f66ew24d7u97vmp45nkckhwg4ak8hl"))
 			Expect(possibleSignerAddresses[2]).To(Equal("crc1aaxs058pksrq8cx3k0nrxv60p2a9c7nq527949"))
