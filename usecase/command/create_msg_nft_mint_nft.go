@@ -23,7 +23,7 @@ func NewCreateMsgNFTMintNFT(
 
 // Name returns name of command
 func (*CreateMsgNFTMintNFT) Name() string {
-	return "CreateMsgNFTMintNFT"
+	return "/chainmain.nft.v1.MsgMintNFT.Create"
 }
 
 // Version returns version of command

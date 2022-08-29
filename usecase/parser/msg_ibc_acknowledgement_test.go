@@ -92,7 +92,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))
 			cmd := cmds[1]
-			Expect(cmd.Name()).To(Equal("CreateMsgIBCAcknowledgement"))
+			Expect(cmd.Name()).To(Equal("/ibc.core.channel.v1.MsgAcknowledgement.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			typedEvent := untypedEvent.(*event.MsgIBCAcknowledgement)
@@ -182,7 +182,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))
 			cmd := cmds[1]
-			Expect(cmd.Name()).To(Equal("CreateMsgIBCAcknowledgement"))
+			Expect(cmd.Name()).To(Equal("/ibc.core.channel.v1.MsgAcknowledgement.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			typedEvent := untypedEvent.(*event.MsgIBCAcknowledgement)
@@ -331,9 +331,9 @@ var _ = Describe("ParseMsgCommands", func() {
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(11))
-			Expect(cmds[6].Name()).To(Equal("CreateMsgIBCUpdateClient"))
-			Expect(cmds[7].Name()).To(Equal("CreateMsgIBCAcknowledgement"))
-			Expect(cmds[8].Name()).To(Equal("CreateMsgIBCUpdateClient"))
+			Expect(cmds[6].Name()).To(Equal("/ibc.core.client.v1.MsgUpdateClient.Create"))
+			Expect(cmds[7].Name()).To(Equal("/ibc.core.channel.v1.MsgAcknowledgement.Create"))
+			Expect(cmds[8].Name()).To(Equal("/ibc.core.client.v1.MsgUpdateClient.Create"))
 			Expect(cmds[9].Name()).To(Equal("CreateMsgAlreadyRelayedIBCAcknowledgement"))
 
 			firstMsgAckCmd := cmds[7]

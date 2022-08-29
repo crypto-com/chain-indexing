@@ -42,7 +42,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("CreateMsgEthereumTx"))
+			Expect(cmd.Name()).To(Equal("/ethermint.evm.v1.MsgEthereumTx.Create"))
 
 			Expect(cmd).To(Equal(command_usecase.NewCreateMsgEthereumTx(
 				event.MsgCommonParams{

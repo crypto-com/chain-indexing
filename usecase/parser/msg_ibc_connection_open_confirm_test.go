@@ -66,7 +66,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))
 			cmd := cmds[1]
-			Expect(cmd.Name()).To(Equal("CreateMsgIBCConnectionOpenConfirm"))
+			Expect(cmd.Name()).To(Equal("/ibc.core.connection.v1.MsgConnectionOpenConfirm.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			typedEvent := untypedEvent.(*event.MsgIBCConnectionOpenConfirm)

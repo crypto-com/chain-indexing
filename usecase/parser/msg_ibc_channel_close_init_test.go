@@ -62,7 +62,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("CreateMsgIBCChannelCloseInit"))
+			Expect(cmd.Name()).To(Equal("/ibc.core.channel.v1.MsgChannelCloseInit.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			typedEvent := untypedEvent.(*event.MsgIBCChannelCloseInit)

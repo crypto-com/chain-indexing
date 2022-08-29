@@ -80,7 +80,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(cmds).To(HaveLen(2))
 
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("CreateMsgExec"))
+			Expect(cmd.Name()).To(Equal("/cosmos.authz.v1beta1.MsgExec.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			createMsgExecEvent := untypedEvent.(*event.MsgExec)
@@ -97,7 +97,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			))
 
 			innerCmd := cmds[1]
-			Expect(innerCmd.Name()).To(Equal("CreateMsgSend"))
+			Expect(innerCmd.Name()).To(Equal("/cosmos.bank.v1beta1.MsgSend.Create"))
 
 			untypedInnerEvent, _ := innerCmd.Exec()
 			createMsgSendEvent := untypedInnerEvent.(*event.MsgSend)
@@ -168,7 +168,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(cmds).To(HaveLen(2))
 
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("CreateMsgExec"))
+			Expect(cmd.Name()).To(Equal("/cosmos.authz.v1beta1.MsgExec.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			createMsgExecEvent := untypedEvent.(*event.MsgExec)

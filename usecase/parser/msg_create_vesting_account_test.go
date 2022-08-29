@@ -65,7 +65,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("CreateMsgCreateVestingAccount"))
+			Expect(cmd.Name()).To(Equal("/cosmos.vesting.v1beta1.MsgCreateVestingAccount.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			createMsgCreateVestingAccount := untypedEvent.(*event.MsgCreateVestingAccount)

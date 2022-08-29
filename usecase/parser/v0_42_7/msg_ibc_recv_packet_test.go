@@ -98,7 +98,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("CreateMsgIBCRecvPacket"))
+			Expect(cmd.Name()).To(Equal("/ibc.core.channel.v1.MsgRecvPacket.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			typedEvent := untypedEvent.(*event.MsgIBCRecvPacket)
@@ -185,7 +185,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))
 			cmd := cmds[1]
-			Expect(cmd.Name()).To(Equal("CreateMsgIBCRecvPacket"))
+			Expect(cmd.Name()).To(Equal("/ibc.core.channel.v1.MsgRecvPacket.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			typedEvent := untypedEvent.(*event.MsgIBCRecvPacket)
@@ -212,7 +212,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 		It("should parse Msg commands when there is MsgIBCRecvPacket in the transaction and missing fungible_token_packet event in TxsResult log", func() {
 			expected := `{
-	"name": "MsgAlreadyRelayedRecvPacketCreated",
+	"name": "MsgAlreadyRelayedRecvPacket.Created",
 	"version": 1,
 	"height": 317994,
 	"uuid": "{UUID}",

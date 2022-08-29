@@ -22,7 +22,7 @@ func NewCreateMsgIBCConnectionOpenTry(
 }
 
 func (*CreateMsgIBCConnectionOpenTry) Name() string {
-	return "CreateMsgIBCConnectionOpenTry"
+	return "/ibc.core.connection.v1.MsgConnectionOpenTry.Create"
 }
 
 func (*CreateMsgIBCConnectionOpenTry) Version() int {

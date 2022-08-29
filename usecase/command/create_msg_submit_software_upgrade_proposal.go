@@ -23,7 +23,7 @@ func NewCreateMsgSubmitSoftwareUpgradeProposal(
 
 // Name returns name of command
 func (*CreateMsgSubmitSoftwareUpgradeProposal) Name() string {
-	return "CreateMsgSubmitSoftwareUpgradeProposal"
+	return "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal.Create"
 }
 
 // Version returns version of command

@@ -24,7 +24,7 @@ func NewCreateMsgWithdrawDelegatorReward(
 }
 
 func (_ *CreateMsgWithdrawDelegatorReward) Name() string {
-	return "CreateMsgWithdrawDelegatorReward"
+	return "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward.Create"
 }
 
 func (_ *CreateMsgWithdrawDelegatorReward) Version() int {

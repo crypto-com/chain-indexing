@@ -22,7 +22,7 @@ func NewCreateMsgIBCConnectionOpenConfirm(
 }
 
 func (*CreateMsgIBCConnectionOpenConfirm) Name() string {
-	return "CreateMsgIBCConnectionOpenConfirm"
+	return "/ibc.core.connection.v1.MsgConnectionOpenConfirm.Create"
 }
 
 func (*CreateMsgIBCConnectionOpenConfirm) Version() int {

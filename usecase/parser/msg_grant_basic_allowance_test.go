@@ -66,7 +66,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("CreateMsgGrantAllowance"))
+			Expect(cmd.Name()).To(Equal("/cosmos.feegrant.v1beta1.MsgGrantAllowance.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			createMsgGrantAllowanceEvent := untypedEvent.(*event.MsgGrantAllowance)

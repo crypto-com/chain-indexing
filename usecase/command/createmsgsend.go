@@ -18,7 +18,7 @@ func NewCreateMsgSend(msgCommonParams event.MsgCommonParams, params event.MsgSen
 }
 
 func (_ *CreateMsgSend) Name() string {
-	return "CreateMsgSend"
+	return "/cosmos.bank.v1beta1.MsgSend.Create"
 }
 
 func (_ *CreateMsgSend) Version() int {

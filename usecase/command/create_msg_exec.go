@@ -22,7 +22,7 @@ func NewCreateMsgExec(
 }
 
 func (*CreateMsgExec) Name() string {
-	return "CreateMsgExec"
+	return "/cosmos.authz.v1beta1.MsgExec.Create"
 }
 
 func (*CreateMsgExec) Version() int {

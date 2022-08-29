@@ -22,7 +22,7 @@ func NewCreateMsgFundCommunityPool(
 }
 
 func (_ *CreateMsgFundCommunityPool) Name() string {
-	return "CreateMsgFundCommunityPool"
+	return "/cosmos.distribution.v1beta1.MsgFundCommunityPool.Create"
 }
 
 func (_ *CreateMsgFundCommunityPool) Version() int {

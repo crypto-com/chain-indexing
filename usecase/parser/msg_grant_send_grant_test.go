@@ -73,7 +73,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("CreateMsgGrant"))
+			Expect(cmd.Name()).To(Equal("/cosmos.authz.v1beta1.MsgGrant.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			createMsgGrantEvent := untypedEvent.(*event.MsgGrant)

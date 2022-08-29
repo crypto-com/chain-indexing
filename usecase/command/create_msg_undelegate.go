@@ -22,7 +22,7 @@ func NewCreateMsgUndelegate(msgCommonParams event.MsgCommonParams, params model.
 
 // Name returns name of command
 func (*CreateMsgUndelegate) Name() string {
-	return "CreateMsgUndelegate"
+	return "/cosmos.staking.v1beta1.MsgUndelegate.Create"
 }
 
 // Version returns version of command

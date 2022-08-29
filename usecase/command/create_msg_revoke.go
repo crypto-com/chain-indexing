@@ -22,7 +22,7 @@ func NewCreateMsgRevoke(
 }
 
 func (*CreateMsgRevoke) Name() string {
-	return "CreateMsgRevoke"
+	return "/cosmos.authz.v1beta1.MsgRevoke.Create"
 }
 
 func (*CreateMsgRevoke) Version() int {

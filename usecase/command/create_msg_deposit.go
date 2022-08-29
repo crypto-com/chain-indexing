@@ -23,7 +23,7 @@ func NewCreateMsgDeposit(
 
 // Name returns name of command
 func (*CreateMsgDeposit) Name() string {
-	return "CreateMsgDeposit"
+	return "/cosmos.gov.v1beta1.MsgDeposit.Create"
 }
 
 // Version returns version of command
