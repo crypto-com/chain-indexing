@@ -10,6 +10,7 @@
   - [event::MSG_BEGIN_REDELEGATE_CREATED](#event_msg_begin_redelegate_created)
   - [event::MSG_BEGIN_REDELEGATE_FAILED](#event_msg_begin_redelegate_failed)
 
+
 ## event::MSG_CREATE_VALIDATOR_CREATED
 *Name* : /cosmos.staking.v1beta1.MsgCreateValidator.Created
 
@@ -71,7 +72,7 @@
     "validatorAddress": "tcrocncl1f0q0k4yysavkxs75a83w70384dqu7vnxxkd828",
     "minSelfDelegation": "1"
 }
-```
+```  
 
 ## event::MSG_CREATE_VALIDATOR_FAILED
 *Name* : /cosmos.staking.v1beta1.MsgCreateValidator.Failed
@@ -386,7 +387,7 @@
     "unbondCompleteAt": null,
     "validatorAddress": "tcrocncl1llst0cguh5azl9t8wr6mz5yzjuwukz7f0pp83e"
 }
-```
+```  
 
 ## event::MSG_BEGIN_REDELEGATE_CREATED
 *Name* : /cosmos.staking.v1beta1.MsgBeginRedelegate.Created

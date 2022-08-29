@@ -14,6 +14,7 @@
   - [event::PROPOSAL_ENDED](#event_proposal_ended)
   - [event::PROPOSAL_INACTIVED](#event_proposal_inactived)
 
+
 ## event::MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_CREATED
 *Name* : /cosmos.params.v1beta1.ParameterChangeProposal.Created
 
