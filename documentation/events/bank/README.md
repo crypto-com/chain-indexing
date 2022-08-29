@@ -4,6 +4,7 @@
 - [event::MSG_MULTI_SEND_CREATED](#eventmsg_multi_send_created)
 - [event::MSG_MULTI_SEND_FAILED](#eventmsg_multi_send_failed)
 
+
 ## event::MSG_SEND_CREATED
 *Name* : /cosmos.bank.v1beta1.MsgSend.Created
 

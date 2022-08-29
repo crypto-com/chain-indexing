@@ -410,7 +410,7 @@
 | `height`              | *int64*  | Height of the block containing the transaction                                   |
 | `uuid`                | *string* | Unique ID that is assigned on event creation                                     |
 
-*Example* : T.B.D
+*Example* : T.B.D  
 
 ## event::MSG_BEGIN_REDELEGATE_FAILED
 *Name* : /cosmos.staking.v1beta1.MsgBeginRedelegate.Failed
@@ -433,7 +433,7 @@
 | `height`              | *int64*  | Height of the block containing the transaction                                  |
 | `uuid`                | *string* | Unique ID that is assigned on event creation                                    |
 
-*Example* : T.B.D
+*Example* : T.B.D  
 
 ## event::BONDING_COMPLETED
 *Name* : BondingCompleted
@@ -452,4 +452,4 @@
 | `height`    | *int64*  | Height of the block containing the transaction |
 | `uuid`      | *string* | Unique ID that is assigned on event creation   |
 
-*Example* : T.B.D
+*Example* : T.B.D  

@@ -230,7 +230,7 @@
     "msgIndex": 1,
     "depositor": "tcro1xwd3k8xterdeft3nxqg92szhpz6vx43q97wcke"
 }
-```  
+```
 
 ## event::MSG_FUND_COMMUNITY_POOL_FAILED
 *Name* : /cosmos.distribution.v1beta1.MsgFundCommunityPool.Failed
@@ -264,4 +264,4 @@
     "msgIndex": 1,
     "depositor": "tcro1xwd3k8xterdeft3nxqg92szhpz6vx43q97wcke"
 }
-```  
+```

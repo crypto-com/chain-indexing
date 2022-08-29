@@ -99,10 +99,9 @@
 | `height`                     | *int64*         | Height of the block containing the transaction                                      |
 | `uuid`                       | *string*        | Unique ID that is assigned on event creation                                        |
 
-*Example* : T.B.D
+*Example* : T.B.D  
 
 ## event::MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_CREATED
-
 *Name* : /cosmos.distribution.v1beta1.CommunityPoolSpendProposal.Created
 
 *Type* : [MsgBase](../README.md#MsgBase)
@@ -270,7 +269,7 @@
 | `height`              | *int64*  | Height of the block containing the transaction                                             |
 | `uuid`                | *string* | Unique ID that is assigned on event creation                                               |
 
-*Example* : T.B.D
+*Example* : T.B.D  
 
 ## event::MSG_DEPOSIT_CREATED
 *Name* : /cosmos.gov.v1beta1.MsgDeposit.Created
@@ -306,7 +305,7 @@
     "depositor": "tcro1j7pej8kplem4wt50p4hfvndhuw5jprxxn5625q",
     "proposalId": "1"
 }
-```  
+```
 
 ## event::MSG_DEPOSIT_FAILED
 *Name* : /cosmos.gov.v1beta1.MsgDeposit.Failed
@@ -328,7 +327,7 @@
 | `height`     | *int64*  | Height of the block containing the transaction                      |
 | `uuid`       | *string* | Unique ID that is assigned on event creation                        |
 
-*Example* : 
+*Example* :  
 ```json
 {
     "name": "/cosmos.gov.v1beta1.MsgDeposit.Failed",
@@ -342,7 +341,7 @@
     "depositor": "tcro1j7pej8kplem4wt50p4hfvndhuw5jprxxn5625q",
     "proposalId": "1"
 }
-```  
+```
 
 ## event::MSG_VOTE_CREATED
 *Name* : /cosmos.gov.v1beta1.MsgVote.Created
@@ -400,7 +399,7 @@
 | `height`     | *int64*  | Height of the block containing the transaction                   |
 | `uuid`       | *string* | Unique ID that is assigned on event creation                     |
 
-*Example* : 
+*Example* :  
 ```json
 {
     "name": "/cosmos.gov.v1beta1.MsgVote.Failed",
@@ -414,7 +413,7 @@
     "msgIndex": 0,
     "proposalId": "1"
 }
-```  
+```
 
 ## event::PROPOSAL_ENDED
 *Name* : ProposalEnded
@@ -432,7 +431,7 @@
 | `height`     | *int64*  | Height of the block containing the transaction |
 | `uuid`       | *string* | Unique ID that is assigned on event creation   |
 
-*Example* : T.B.D
+*Example* :  T.B.D  
 
 ## event::PROPOSAL_INACTIVED
 *Name* : ProposalInactived
