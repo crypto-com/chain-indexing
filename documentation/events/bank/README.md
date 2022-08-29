@@ -1,8 +1,8 @@
 # Bank Module Event List
-- [event::MSG_SEND_CREATED](#eventmsg_send_created)
-- [event::MSG_SEND_FAILED](#eventmsg_send_failed)
-- [event::MSG_MULTI_SEND_CREATED](#eventmsg_multi_send_created)
-- [event::MSG_MULTI_SEND_FAILED](#eventmsg_multi_send_failed)
+  - [event::MSG_SEND_CREATED](#eventmsg_send_created)
+  - [event::MSG_SEND_FAILED](#eventmsg_send_failed)
+  - [event::MSG_MULTI_SEND_CREATED](#eventmsg_multi_send_created)
+  - [event::MSG_MULTI_SEND_FAILED](#eventmsg_multi_send_failed)
 
 
 ## event::MSG_SEND_CREATED
@@ -102,9 +102,9 @@
 | `height`            | *int64*         | Height of the block containing the transaction                          |
 | `uuid`              | *string*        | Unique ID that is assigned on event creation                            |
 
-*Example* : T.B.D
+*Example* :  T.B.D  
 
-## event::MSG_MULTI_SEND_FAILED
+## event::MSG_MULTI_SEND_FAILED 
 *Name* : /cosmos.bank.v1beta1.MsgMultiSend.Failed
 
 *Type* : [MsgBase](../README.md#MsgBase)

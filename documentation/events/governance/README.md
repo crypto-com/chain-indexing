@@ -155,7 +155,7 @@
 | `height`                   | *int64*  | Height of the block containing the transaction                                               |
 | `uuid`                     | *string* | Unique ID that is assigned on event creation                                                 |
 
-*Example* : T.B.D
+*Example* : T.B.D  
 
 ## event::MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_CREATED
 *Name* : /cosmos.upgrade.v1beta1.SoftwareUpgradeProposal.Created
@@ -186,7 +186,7 @@
 | `height`              | *int64*  | Height of the block containing the transaction                                        |
 | `uuid`                | *string* | Unique ID that is assigned on event creation                                          |
 
-*Example* : T.B.D
+*Example* : T.B.D  
 
 ## event::MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_FAILED
 *Name* : /cosmos.upgrade.v1beta1.SoftwareUpgradeProposal.Failed
@@ -217,7 +217,7 @@
 | `height`              | *int64*  | Height of the block containing the transaction                                       |
 | `uuid`                | *string* | Unique ID that is assigned on event creation                                         |
 
-*Example* : T.B.D
+*Example* : T.B.D  
 
 ## event::MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_CREATED
 *Name* : /cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal.Created
@@ -243,7 +243,7 @@
 | `height`              | *int64*  | Height of the block containing the transaction                                              |
 | `uuid`                | *string* | Unique ID that is assigned on event creation                                                |
 
-*Example* : T.B.D
+*Example* : T.B.D  
 
 ## event::MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_FAILED
 *Name* : /cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal.Failed
@@ -291,7 +291,7 @@
 | `height`     | *int64*  | Height of the block containing the transaction                       |
 | `uuid`       | *string* | Unique ID that is assigned on event creation                         |
 
-*Example* : 
+*Example* :  
 ```json
 {
     "name": "/cosmos.gov.v1beta1.MsgDeposit.Created",
@@ -363,7 +363,7 @@
 | `height`     | *int64*  | Height of the block containing the transaction                    |
 | `uuid`       | *string* | Unique ID that is assigned on event creation                      |
 
-*Example* : 
+*Example* :  
 ```json
 {
     "name": "/cosmos.gov.v1beta1.MsgVote.Created",
