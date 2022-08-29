@@ -1,17 +1,15 @@
 # Bank Module Event List
-
 - [event::MSG_SEND_CREATED](#eventmsg_send_created)
 - [event::MSG_SEND_FAILED](#eventmsg_send_failed)
 - [event::MSG_MULTI_SEND_CREATED](#eventmsg_multi_send_created)
 - [event::MSG_MULTI_SEND_FAILED](#eventmsg_multi_send_failed)
 
 ## event::MSG_SEND_CREATED
-
 *Name* : /cosmos.bank.v1beta1.MsgSend.Created
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key           | Type     | Description                                                        |
 | ------------- | -------- | ------------------------------------------------------------------ |
@@ -44,12 +42,11 @@
 ```
 
 ## event::MSG_SEND_FAILED
-
 *Name* : /cosmos.bank.v1beta1.MsgSend.Failed
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key           | Type     | Description                                                       |
 | ------------- | -------- | ----------------------------------------------------------------- |
@@ -82,12 +79,11 @@
 ```
 
 ## event::MSG_MULTI_SEND_CREATED
-
 *Name* : /cosmos.bank.v1beta1.MsgMultiSend.Created
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                 | Type            | Description                                                             |
 | ------------------- | --------------- | ----------------------------------------------------------------------- |
@@ -108,7 +104,6 @@
 *Example* : T.B.D
 
 ## event::MSG_MULTI_SEND_FAILED
-
 *Name* : /cosmos.bank.v1beta1.MsgMultiSend.Failed
 
 *Type* : [MsgBase](../README.md#MsgBase)
