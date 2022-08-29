@@ -1,9 +1,9 @@
 # Bank Module Event List
 
--   [event::MSG_SEND_CREATED](#eventmsg_send_created)
--   [event::MSG_SEND_FAILED](#eventmsg_send_failed)
--   [event::MSG_MULTI_SEND_CREATED](#eventmsg_multi_send_created)
--   [event::MSG_MULTI_SEND_FAILED](#eventmsg_multi_send_failed)
+- [event::MSG_SEND_CREATED](#eventmsg_send_created)
+- [event::MSG_SEND_FAILED](#eventmsg_send_failed)
+- [event::MSG_MULTI_SEND_CREATED](#eventmsg_multi_send_created)
+- [event::MSG_MULTI_SEND_FAILED](#eventmsg_multi_send_failed)
 
 ## event::MSG_SEND_CREATED
 
@@ -91,10 +91,10 @@
 
 | Key                 | Type            | Description                                                             |
 | ------------------- | --------------- | ----------------------------------------------------------------------- |
-| `inputs`            | _array(object)_ | Inputs array for the multisig tx                                        |
+| `inputs`            | *array(object)* | Inputs array for the multisig tx                                        |
 | `inputs[].address`  | *string*        | Participating Input blockchain address                                  |
 | `inputs[].amount`   | *bigint*        | Participating Input amount                                              |
-| `outputs`           | _array(object)_ | Outputs array for the multisig tx                                       |
+| `outputs`           | *array(object)* | Outputs array for the multisig tx                                       |
 | `outputs[].address` | *string*        | Participating Input blockchain address                                  |
 | `outputs[].amount`  | *bigint*        | Participating Input amount                                              |
 | `msgName`           | *string*        | Blockchain Message type. Value: `MsgMultiSend`                          |
@@ -113,14 +113,14 @@
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                 | Type            | Description                                                            |
 | ------------------- | --------------- | ---------------------------------------------------------------------- |
-| `inputs`            | _array(object)_ | Inputs array for the multisig tx                                       |
+| `inputs`            | *array(object)* | Inputs array for the multisig tx                                       |
 | `inputs[].address`  | *string*        | Participating Input blockchain address                                 |
 | `inputs[].amount`   | *bigint*        | Participating Input amount                                             |
-| `outputs`           | _array(object)_ | Outputs array for the multisig tx                                      |
+| `outputs`           | *array(object)* | Outputs array for the multisig tx                                      |
 | `outputs[].address` | *string*        | Participating Input blockchain address                                 |
 | `outputs[].amount`  | *bigint*        | Participating Input amount                                             |
 | `msgName`           | *string*        | Blockchain Message type. Value: `MsgMultiSend`                         |

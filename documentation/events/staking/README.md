@@ -1,23 +1,21 @@
 # Staking Module Event List
-
--   [event::MSG_CREATE_VALIDATOR_CREATED](#event_msg_create_validator_created)
--   [event::MSG_CREATE_VALIDATOR_FAILED](#event_msg_create_validator_failed)
--   [event::MSG_EDIT_VALIDATOR_CREATED](#event_msg_edit_validator_created)
--   [event::MSG_EDIT_VALIDATOR_FAILED](#event_msg_edit_validator_failed)
--   [event::MSG_DELEGATE_CREATED](#event_msg_delegate_created)
--   [event::MSG_DELEGATE_FAILED](#event_msg_delegate_failed)
--   [event::MSG_UNDELEGATE_CREATED](#event_msg_undelegate_created)
--   [event::MSG_UNDELEGATE_FAILED](#event_msg_undelegate_failed)
--   [event::MSG_BEGIN_REDELEGATE_CREATED](#event_msg_begin_redelegate_created)
--   [event::MSG_BEGIN_REDELEGATE_FAILED](#event_msg_begin_redelegate_failed)
+- [event::MSG_CREATE_VALIDATOR_CREATED](#event_msg_create_validator_created)
+- [event::MSG_CREATE_VALIDATOR_FAILED](#event_msg_create_validator_failed)
+- [event::MSG_EDIT_VALIDATOR_CREATED](#event_msg_edit_validator_created)
+- [event::MSG_EDIT_VALIDATOR_FAILED](#event_msg_edit_validator_failed)
+- [event::MSG_DELEGATE_CREATED](#event_msg_delegate_created)
+- [event::MSG_DELEGATE_FAILED](#event_msg_delegate_failed)
+- [event::MSG_UNDELEGATE_CREATED](#event_msg_undelegate_created)
+- [event::MSG_UNDELEGATE_FAILED](#event_msg_undelegate_failed)
+- [event::MSG_BEGIN_REDELEGATE_CREATED](#event_msg_begin_redelegate_created)
+- [event::MSG_BEGIN_REDELEGATE_FAILED](#event_msg_begin_redelegate_failed)
 
 ## event::MSG_CREATE_VALIDATOR_CREATED
-
 *Name* : /cosmos.staking.v1beta1.MsgCreateValidator.Created
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                             | Type     | Description                                                                      |
 | ------------------------------- | -------- | -------------------------------------------------------------------------------- |
@@ -76,12 +74,11 @@
 ```
 
 ## event::MSG_CREATE_VALIDATOR_FAILED
-
 *Name* : /cosmos.staking.v1beta1.MsgCreateValidator.Failed
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                             | Type     | Description                                                                     |
 | ------------------------------- | -------- | ------------------------------------------------------------------------------- |
@@ -140,12 +137,11 @@
 ```
 
 ## event::MSG_EDIT_VALIDATOR_CREATED
-
 *Name* : /cosmos.staking.v1beta1.MsgEditValidator.Created
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                           | Type     | Description                                                                    |
 | ----------------------------- | -------- | ------------------------------------------------------------------------------ |
@@ -191,12 +187,11 @@
 ```
 
 ## event::MSG_EDIT_VALIDATOR_FAILED
-
 *Name* : /cosmos.staking.v1beta1.MsgEditValidator.Failed
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                           | Type     | Description                                                                   |
 | ----------------------------- | -------- | ----------------------------------------------------------------------------- |
@@ -242,12 +237,11 @@
 ```
 
 ## event::MSG_DELEGATE_CREATED
-
 *Name* : /cosmos.staking.v1beta1.MsgDelegate.Created
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                | Type     | Description                                                               |
 | ------------------ | -------- | ------------------------------------------------------------------------- |
@@ -280,12 +274,11 @@
 ```
 
 ## event::MSG_DELEGATE_FAILED
-
 *Name* : /cosmos.staking.v1beta1.MsgDelegate.Failed
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                | Type     | Description                                                              |
 | ------------------ | -------- | ------------------------------------------------------------------------ |
@@ -318,12 +311,11 @@
 ```
 
 ## event::MSG_UNDELEGATE_CREATED
-
 *Name* : /cosmos.staking.v1beta1.MsgUndelegate.Created
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                | Type     | Description                                                                  |
 | ------------------ | -------- | ---------------------------------------------------------------------------- |
@@ -358,12 +350,11 @@
 ```
 
 ## event::MSG_UNDELEGATE_FAILED
-
 *Name* : /cosmos.staking.v1beta1.MsgUndelegate.Failed
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                | Type     | Description                                                                  |
 | ------------------ | -------- | ---------------------------------------------------------------------------- |
@@ -398,12 +389,11 @@
 ```
 
 ## event::MSG_BEGIN_REDELEGATE_CREATED
-
 *Name* : /cosmos.staking.v1beta1.MsgBeginRedelegate.Created
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                   | Type     | Description                                                                      |
 | --------------------- | -------- | -------------------------------------------------------------------------------- |
@@ -422,12 +412,11 @@
 *Example* : T.B.D
 
 ## event::MSG_BEGIN_REDELEGATE_FAILED
-
 *Name* : /cosmos.staking.v1beta1.MsgBeginRedelegate.Failed
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                   | Type     | Description                                                                     |
 | --------------------- | -------- | ------------------------------------------------------------------------------- |
@@ -446,12 +435,11 @@
 *Example* : T.B.D
 
 ## event::BONDING_COMPLETED
-
 *Name* : BondingCompleted
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key         | Type     | Description                                    |
 | ----------- | -------- | ---------------------------------------------- |

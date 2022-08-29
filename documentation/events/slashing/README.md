@@ -1,15 +1,13 @@
 # Slashing Module Event List
-
--   [event::MSG_UNJAIL_CREATED](#event_MSG_UNJAIL_CREATED)
--   [event::MSG_UNJAIL_FAILED](#event_MSG_UNJAIL_FAILED)
+- [event::MSG_UNJAIL_CREATED](#event_MSG_UNJAIL_CREATED)
+- [event::MSG_UNJAIL_FAILED](#event_MSG_UNJAIL_FAILED)
 
 ## event::MSG_UNJAIL_CREATED
-
 *Name* : /cosmos.slashing.v1beta1.MsgUnjail.Created
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                | Type     | Description                                                              |
 | ------------------ | -------- | ------------------------------------------------------------------------ |
@@ -38,12 +36,11 @@
 ```
 
 ## event::MSG_UNJAIL_FAILED
-
 *Name* : /cosmos.slashing.v1beta1.MsgUnjail.Failed
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                | Type     | Description                                                             |
 | ------------------ | -------- | ----------------------------------------------------------------------- |

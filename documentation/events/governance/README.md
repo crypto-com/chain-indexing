@@ -1,27 +1,25 @@
 # Governance Module Event List
-
--   [event::MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_CREATED](#event_msg_submit_param_change_proposal_created)
--   [event::MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_FAILED](#event_msg_submit_param_change_proposal_failed)
--   [event::MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_CREATED](#event_msg_submit_community_pool_spend_proposal_created)
--   [event::MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_FAILED](#event_msg_submit_community_pool_spend_proposal_failed)
--   [event::MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_CREATED](#event_msg_submit_software_upgrade_proposal_created)
--   [event::MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_FAILED](#event_msg_submit_software_upgrade_proposal_failed)
--   [event::MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_CREATED](#event_msg_submit_cancel_software_upgrade_proposal_created)
--   [event::MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_FAILED](#event_msg_submit_cancel_software_upgrade_proposal_failed)
--   [event::MSG_DEPOSIT_CREATED](#event_msg_deposit_created)
--   [event::MSG_DEPOSIT_FAILED](#event_msg_deposit_failed)
--   [event::MSG_VOTE_CREATED](#event_msg_vote_created)
--   [event::MSG_VOTE_FAILED](#event_msg_vote_failed)
--   [event::PROPOSAL_ENDED](#event_proposal_ended)
--   [event::PROPOSAL_INACTIVED](#event_proposal_inactived)
+- [event::MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_CREATED](#event_msg_submit_param_change_proposal_created)
+- [event::MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_FAILED](#event_msg_submit_param_change_proposal_failed)
+- [event::MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_CREATED](#event_msg_submit_community_pool_spend_proposal_created)
+- [event::MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_FAILED](#event_msg_submit_community_pool_spend_proposal_failed)
+- [event::MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_CREATED](#event_msg_submit_software_upgrade_proposal_created)
+- [event::MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_FAILED](#event_msg_submit_software_upgrade_proposal_failed)
+- [event::MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_CREATED](#event_msg_submit_cancel_software_upgrade_proposal_created)
+- [event::MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_FAILED](#event_msg_submit_cancel_software_upgrade_proposal_failed)
+- [event::MSG_DEPOSIT_CREATED](#event_msg_deposit_created)
+- [event::MSG_DEPOSIT_FAILED](#event_msg_deposit_failed)
+- [event::MSG_VOTE_CREATED](#event_msg_vote_created)
+- [event::MSG_VOTE_FAILED](#event_msg_vote_failed)
+- [event::PROPOSAL_ENDED](#event_proposal_ended)
+- [event::PROPOSAL_INACTIVED](#event_proposal_inactived)
 
 ## event::MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_CREATED
-
 *Name* : /cosmos.params.v1beta1.ParameterChangeProposal.Created
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                          | Type            | Description                                                                          |
 | ---------------------------- | --------------- | ------------------------------------------------------------------------------------ |
@@ -32,7 +30,7 @@
 | `content.title`              | *string*        | Content title indicating the change                                                  |
 | `content.@type`              | *string*        | Cosmos SDK type URL                                                                  |
 | `content.description`        | *string*        | Action description                                                                   |
-| `content.changes`            | _array(object)_ | List of changes executed                                                             |
+| `content.changes`            | *array(object)* | List of changes executed                                                             |
 | `content.changes[].key`      | *string*        | change key                                                                           |
 | `content.changes[].value`    | *string*        | change value. (Golang type: `json.RawMessage`)                                       |
 | `content.changes[].subspace` | *string*        | change coding subspace                                                               |
@@ -74,12 +72,11 @@
 ```
 
 ## event::MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_FAILED
-
 *Name* : /cosmos.params.v1beta1.ParameterChangeProposal.Failed
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                          | Type            | Description                                                                         |
 | ---------------------------- | --------------- | ----------------------------------------------------------------------------------- |
@@ -90,7 +87,7 @@
 | `content.@title`             | *string*        | Content title indicating the change                                                 |
 | `content.type`               | *string*        | Cosmos SDK type URL                                                                 |
 | `content.description`        | *string*        | Action description                                                                  |
-| `content.changes`            | _array(object)_ | List of changes executed                                                            |
+| `content.changes`            | *array(object)* | List of changes executed                                                            |
 | `content.changes[].key`      | *string*        | change key                                                                          |
 | `content.changes[].value`    | *string*        | change value. (Golang type: `json.RawMessage`)                                      |
 | `content.changes[].subspace` | *string*        | change coding subspace                                                              |
@@ -134,12 +131,11 @@
 *Example* : T.B.D
 
 ## event::MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_FAILED
-
 *Name* : /cosmos.distribution.v1beta1.CommunityPoolSpendProposal.Failed
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                        | Type     | Description                                                                                  |
 | -------------------------- | -------- | -------------------------------------------------------------------------------------------- |
@@ -163,12 +159,11 @@
 *Example* : T.B.D
 
 ## event::MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_CREATED
-
 *Name* : /cosmos.upgrade.v1beta1.SoftwareUpgradeProposal.Created
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                   | Type     | Description                                                                           |
 | --------------------- | -------- | ------------------------------------------------------------------------------------- |
@@ -195,12 +190,11 @@
 *Example* : T.B.D
 
 ## event::MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_FAILED
-
 *Name* : /cosmos.upgrade.v1beta1.SoftwareUpgradeProposal.Failed
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                   | Type     | Description                                                                          |
 | --------------------- | -------- | ------------------------------------------------------------------------------------ |
@@ -227,12 +221,11 @@
 *Example* : T.B.D
 
 ## event::MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_CREATED
-
 *Name* : /cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal.Created
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                   | Type     | Description                                                                                 |
 | --------------------- | -------- | ------------------------------------------------------------------------------------------- |
@@ -254,12 +247,11 @@
 *Example* : T.B.D
 
 ## event::MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_FAILED
-
 *Name* : /cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal.Failed
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key                   | Type     | Description                                                                                |
 | --------------------- | -------- | ------------------------------------------------------------------------------------------ |
@@ -281,12 +273,11 @@
 *Example* : T.B.D
 
 ## event::MSG_DEPOSIT_CREATED
-
 *Name* : /cosmos.gov.v1beta1.MsgDeposit.Created
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key          | Type     | Description                                                          |
 | ------------ | -------- | -------------------------------------------------------------------- |
@@ -319,12 +310,11 @@
 ```
 
 ## event::MSG_DEPOSIT_FAILED
-
 *Name* : /cosmos.gov.v1beta1.MsgDeposit.Failed
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key          | Type     | Description                                                         |
 | ------------ | -------- | ------------------------------------------------------------------- |
@@ -357,12 +347,11 @@
 ```
 
 ## event::MSG_VOTE_CREATED
-
 *Name* : /cosmos.gov.v1beta1.MsgVote.Created
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key          | Type     | Description                                                       |
 | ------------ | -------- | ----------------------------------------------------------------- |
@@ -395,12 +384,11 @@
 ```
 
 ## event::MSG_VOTE_FAILED
-
 *Name* : /cosmos.gov.v1beta1.MsgVote.Failed
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
-*Structure* :
+*Structure* : 
 
 | Key          | Type     | Description                                                      |
 | ------------ | -------- | ---------------------------------------------------------------- |
@@ -433,12 +421,11 @@
 ```
 
 ## event::PROPOSAL_ENDED
-
 *Name* : ProposalEnded
 
 *Type* : [Base](../README.md#Understanding_an_EVENT)
 
-*Structure* :
+*Structure* : 
 
 | Key          | Type     | Description                                    |
 | ------------ | -------- | ---------------------------------------------- |
@@ -452,12 +439,11 @@
 *Example* : T.B.D
 
 ## event::PROPOSAL_INACTIVED
-
 *Name* : ProposalInactived
 
 *Type* : [Base](../README.md#Understanding_an_EVENT)
 
-*Structure* :
+*Structure* : 
 
 | Key          | Type     | Description                                     |
 | ------------ | -------- | ----------------------------------------------- |
