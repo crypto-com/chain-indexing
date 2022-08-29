@@ -14,8 +14,8 @@ import (
 )
 
 const MSG_UNDELEGATE = "/cosmos.staking.v1beta1.MsgUndelegate"
-const MSG_UNDELEGATE_CREATED = "MsgUndelegateCreated"
-const MSG_UNDELEGATE_FAILED = "MsgUndelegateFailed"
+const MSG_UNDELEGATE_CREATED = "/cosmos.staking.v1beta1.MsgUndelegate.Created"
+const MSG_UNDELEGATE_FAILED = "/cosmos.staking.v1beta1.MsgUndelegate.Failed"
 
 // MsgUndelegate defines a Cosmos SDK message for performing a undelegation of coins
 // from a validator to a delegator.
@@ -34,8 +34,6 @@ func NewMsgUndelegate(msgCommonParams MsgCommonParams, params model.MsgUndelegat
 	return &MsgUndelegate{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_UNDELEGATE,
-			MsgSuccess:      MSG_UNDELEGATE_CREATED,
-			MsgFailed:       MSG_UNDELEGATE_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

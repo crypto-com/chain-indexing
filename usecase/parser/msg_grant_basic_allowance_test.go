@@ -19,11 +19,11 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgGrantBasicAllowance", func() {
 		It("should parse Msg commands when there is MsgGrantAllowance in the transaction", func() {
 			expected := `{
-            "name": "MsgGrantAllowanceCreated",
+            "name": "/cosmos.feegrant.v1beta1.MsgGrantAllowance.Created",
             "version": 1,
             "height": 124056,
             "uuid": "{UUID}",
-            "msgName": "MsgGrantAllowance",
+            "msgName": "/cosmos.feegrant.v1beta1.MsgGrantAllowance",
             "txHash": "1798B9B2694B891BF275DC79DF0C79FDF426D41BA498685C82A284A88207E36C",
             "msgIndex": 0,
             "params": {

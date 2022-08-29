@@ -11,8 +11,8 @@ import (
 )
 
 const MSG_NFT_MINT_NFT = "/chainmain.nft.v1.MsgMintNFT"
-const MSG_NFT_MINT_NFT_CREATED = "MsgMintNFTCreated"
-const MSG_NFT_MINT_NFT_FAILED = "MsgMintNFTFailed"
+const MSG_NFT_MINT_NFT_CREATED = "/chainmain.nft.v1.MsgMintNFT.Created"
+const MSG_NFT_MINT_NFT_FAILED = "/chainmain.nft.v1.MsgMintNFT.Failed"
 
 type MsgNFTMintNFT struct {
 	MsgBase
@@ -33,8 +33,6 @@ func NewMsgNFTMintNFT(
 	return &MsgNFTMintNFT{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_NFT_MINT_NFT,
-			MsgSuccess:      MSG_NFT_MINT_NFT_CREATED,
-			MsgFailed:       MSG_NFT_MINT_NFT_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

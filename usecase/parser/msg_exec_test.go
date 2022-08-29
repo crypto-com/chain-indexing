@@ -19,11 +19,11 @@ var _ = Describe("ParseMsgCommands", func() {
 	XDescribe("MsgExec", func() {
 		It("should parse Msg commands when there is MsgExec (inner message MsgSend) in the transaction", func() {
 			expected := `{
-            "name": "MsgExecCreated",
+            "name": "/cosmos.authz.v1beta1.MsgExec.Created",
             "version": 1,
             "height": 113382,
             "uuid": "{UUID}",
-            "msgName": "MsgExec",
+            "msgName": "/cosmos.authz.v1beta1.MsgExec",
             "txHash": "0CE949FAB0CB8EFB6E80F8ED785A6313FE7C094C336D4A7E8630E7D81AECD946",
             "msgIndex": 0,
             "params": {
@@ -38,7 +38,7 @@ var _ = Describe("ParseMsgCommands", func() {
         }`
 
 			expectedInnerMsg := `{
-				"name": "MsgSendCreated",
+				"name": "/cosmos.bank.v1beta1.MsgSend.Created",
 				"version": 1,
 				"height": 113382,
 				"uuid": "{UUID}",
@@ -115,11 +115,11 @@ var _ = Describe("ParseMsgCommands", func() {
 
 		It("should parse Msg commands when there is MsgExec (inner message MsgDelegate) in the transaction", func() {
 			expected := `{
-				"name": "MsgExecCreated",
+				"name": "/cosmos.authz.v1beta1.MsgExec.Created",
 				"version": 1,
 				"height": 170493,
 				"uuid": "{UUID}",
-				"msgName": "MsgExec",
+				"msgName": "/cosmos.authz.v1beta1.MsgExec",
 				"txHash": "AB1D25567EF5FC054375442B0B01728BA333972E685047A5C204DA4DC4A7324A",
 				"msgIndex": 0,
 				"params": {
@@ -130,11 +130,11 @@ var _ = Describe("ParseMsgCommands", func() {
 			}`
 
 			expectedInnerMsg := `{
-				"name": "MsgDelegateCreated",
+				"name": "/cosmos.staking.v1beta1.MsgDelegate.Created",
 				"version": 1,
 				"height": 170493,
 				"uuid": "{UUID}",
-				"msgName": "MsgDelegate",
+				"msgName": "/cosmos.staking.v1beta1.MsgDelegate",
 				"txHash": "AB1D25567EF5FC054375442B0B01728BA333972E685047A5C204DA4DC4A7324A",
 				"msgIndex": 0,
 				"delegatorAddress": "tcro1vurfhqf0j2jgfpjahlja6g6uq2ts2r60swm2d9",

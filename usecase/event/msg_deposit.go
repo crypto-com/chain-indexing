@@ -13,8 +13,8 @@ import (
 )
 
 const MSG_DEPOSIT = "/cosmos.gov.v1beta1.MsgDeposit"
-const MSG_DEPOSIT_CREATED = "MsgDepositCreated"
-const MSG_DEPOSIT_FAILED = "MsgDepositFailed"
+const MSG_DEPOSIT_CREATED = "/cosmos.gov.v1beta1.MsgDeposit.Created"
+const MSG_DEPOSIT_FAILED = "/cosmos.gov.v1beta1.MsgDeposit.Failed"
 
 type MsgDeposit struct {
 	MsgBase
@@ -28,8 +28,6 @@ func NewMsgDeposit(msgCommonParams MsgCommonParams, params model.MsgDepositParam
 	return &MsgDeposit{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_DEPOSIT,
-			MsgSuccess:      MSG_DEPOSIT_CREATED,
-			MsgFailed:       MSG_DEPOSIT_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

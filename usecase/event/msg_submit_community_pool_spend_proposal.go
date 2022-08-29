@@ -11,8 +11,8 @@ import (
 )
 
 const MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL = "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal"
-const MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_CREATED = "MsgSubmitCommunityPoolSpendProposalCreated"
-const MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_FAILED = "MsgSubmitCommunityPoolSpendProposalFailed"
+const MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_CREATED = "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal.Created"
+const MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_FAILED = "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal.Failed"
 
 type MsgSubmitCommunityPoolSpendProposal struct {
 	MsgBase
@@ -27,8 +27,6 @@ func NewMsgSubmitCommunityPoolSpendProposal(
 	return &MsgSubmitCommunityPoolSpendProposal{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL,
-			MsgSuccess:      MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_CREATED,
-			MsgFailed:       MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

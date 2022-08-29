@@ -11,8 +11,8 @@ import (
 )
 
 const MSG_VOTE = "/cosmos.gov.v1beta1.MsgVote"
-const MSG_VOTE_CREATED = "MsgVoteCreated"
-const MSG_VOTE_FAILED = "MsgVoteFailed"
+const MSG_VOTE_CREATED = "/cosmos.gov.v1beta1.MsgVote.Created"
+const MSG_VOTE_FAILED = "/cosmos.gov.v1beta1.MsgVote.Failed"
 
 type MsgVote struct {
 	MsgBase
@@ -26,8 +26,6 @@ func NewMsgVote(msgCommonParams MsgCommonParams, params model.MsgVoteParams) *Ms
 	return &MsgVote{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_VOTE,
-			MsgSuccess:      MSG_VOTE_CREATED,
-			MsgFailed:       MSG_VOTE_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

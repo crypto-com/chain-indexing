@@ -10,8 +10,8 @@ import (
 )
 
 const MSG_IBC_CHANNEL_OPEN_TRY = "/ibc.core.channel.v1.MsgChannelOpenTry"
-const MSG_IBC_CHANNEL_OPEN_TRY_CREATED = "MsgChannelOpenTryCreated"
-const MSG_IBC_CHANNEL_OPEN_TRY_FAILED = "MsgChannelOpenTryFailed"
+const MSG_IBC_CHANNEL_OPEN_TRY_CREATED = "/ibc.core.channel.v1.MsgChannelOpenTry.Created"
+const MSG_IBC_CHANNEL_OPEN_TRY_FAILED = "/ibc.core.channel.v1.MsgChannelOpenTry.Failed"
 
 type MsgIBCChannelOpenTry struct {
 	MsgBase
@@ -26,8 +26,6 @@ func NewMsgIBCChannelOpenTry(
 	return &MsgIBCChannelOpenTry{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_CHANNEL_OPEN_TRY,
-			MsgSuccess:      MSG_IBC_CHANNEL_OPEN_TRY_CREATED,
-			MsgFailed:       MSG_IBC_CHANNEL_OPEN_TRY_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

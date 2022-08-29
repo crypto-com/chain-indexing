@@ -10,8 +10,8 @@ import (
 )
 
 const MSG_IBC_CONNECTION_OPEN_INIT = "/ibc.core.connection.v1.MsgConnectionOpenInit"
-const MSG_IBC_CONNECTION_OPEN_INIT_CREATED = "MsgConnectionOpenInitCreated"
-const MSG_IBC_CONNECTION_OPEN_INIT_FAILED = "MsgConnectionOpenInitFailed"
+const MSG_IBC_CONNECTION_OPEN_INIT_CREATED = "/ibc.core.connection.v1.MsgConnectionOpenInit.Created"
+const MSG_IBC_CONNECTION_OPEN_INIT_FAILED = "/ibc.core.connection.v1.MsgConnectionOpenInit.Failed"
 
 type MsgIBCConnectionOpenInit struct {
 	MsgBase
@@ -26,8 +26,6 @@ func NewMsgIBCConnectionOpenInit(
 	return &MsgIBCConnectionOpenInit{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_CONNECTION_OPEN_INIT,
-			MsgSuccess:      MSG_IBC_CONNECTION_OPEN_INIT_CREATED,
-			MsgFailed:       MSG_IBC_CONNECTION_OPEN_INIT_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

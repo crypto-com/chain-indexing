@@ -21,11 +21,11 @@ var _ = Describe("ParseMsgCommands", func() {
 		It("should parse Msg commands when there is MsgChannelCloseInit in the transaction", func() {
 			expected := `
 			{
-				"name": "MsgChannelCloseInitCreated",
+				"name": "/ibc.core.channel.v1.MsgChannelCloseInit.Created",
 				"version": 1,
 				"height": 23,
 				"uuid": "{UUID}",
-				"msgName": "MsgChannelCloseInit",
+				"msgName": "/ibc.core.channel.v1.MsgChannelCloseInit",
 				"txHash": "3E491C5B2404FC3C3C15A59630729355ED398BFB617DA7D61C1B548E98955F8D",
 				"msgIndex": 0,
 				"params": {

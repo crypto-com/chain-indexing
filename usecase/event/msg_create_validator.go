@@ -12,8 +12,8 @@ import (
 )
 
 const MSG_CREATE_VALIDATOR = "/cosmos.staking.v1beta1.MsgCreateValidator"
-const MSG_CREATE_VALIDATOR_CREATED = "MsgCreateValidatorCreated"
-const MSG_CREATE_VALIDATOR_FAILED = "MsgCreateValidatorFailed"
+const MSG_CREATE_VALIDATOR_CREATED = "/cosmos.staking.v1beta1.MsgCreateValidator.Created"
+const MSG_CREATE_VALIDATOR_FAILED = "/cosmos.staking.v1beta1.MsgCreateValidator.Failed"
 
 type MsgCreateValidator struct {
 	MsgBase
@@ -31,8 +31,6 @@ func NewMsgCreateValidator(msgCommonParams MsgCommonParams, params model.MsgCrea
 	return &MsgCreateValidator{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_CREATE_VALIDATOR,
-			MsgSuccess:      MSG_CREATE_VALIDATOR_CREATED,
-			MsgFailed:       MSG_CREATE_VALIDATOR_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

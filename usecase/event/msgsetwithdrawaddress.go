@@ -11,8 +11,8 @@ import (
 )
 
 const MSG_SET_WITHDRAW_ADDRESS = "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress"
-const MSG_SET_WITHDRAW_ADDRESS_CREATED = "MsgSetWithdrawAddressCreated"
-const MSG_SET_WITHDRAW_ADDRESS_FAILED = "MsgSetWithdrawAddressFailed"
+const MSG_SET_WITHDRAW_ADDRESS_CREATED = "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress.Created"
+const MSG_SET_WITHDRAW_ADDRESS_FAILED = "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress.Failed"
 
 type MsgSetWithdrawAddress struct {
 	MsgBase
@@ -27,8 +27,6 @@ func NewMsgSetWithdrawAddress(
 	return &MsgSetWithdrawAddress{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_SET_WITHDRAW_ADDRESS,
-			MsgSuccess:      MSG_SET_WITHDRAW_ADDRESS_CREATED,
-			MsgFailed:       MSG_SET_WITHDRAW_ADDRESS_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

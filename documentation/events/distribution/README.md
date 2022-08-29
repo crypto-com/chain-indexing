@@ -1,80 +1,85 @@
 # Distribution Module Event List
-  - [event::MSG_SET_WITHDRAW_ADDRESS_CREATED](#event_msg_set_withdraw_address_created)
-  - [event::MSG_SET_WITHDRAW_ADDRESS_FAILED](#event_msg_set_withdraw_address_failed)
-  - [event::MSG_WITHDRAW_DELEGATOR_REWARD_CREATED](#event_msg_withdraw_delegator_reward_created)
-  - [event::MSG_WITHDRAW_DELEGATOR_REWARD_FAILED](#event_msg_withdraw_delegator_reward_failed)
-  - [event::MSG_WITHDRAW_VALIDATOR_COMMISSION_CREATED](#event_msg_withdraw_validator_commission_created)
-  - [event::MSG_WITHDRAW_VALIDATOR_COMMISSION_FAILED](#event_msg_withdraw_validator_commission_failed)
-  - [event::MSG_FUND_COMMUNITY_POOL_CREATED](#event_msg_fund_community_pool_created)
-  - [event::MSG_FUND_COMMUNITY_POOL_FAILED](#event_msg_fund_community_pool_failed)
+
+-   [event::MSG_SET_WITHDRAW_ADDRESS_CREATED](#event_msg_set_withdraw_address_created)
+-   [event::MSG_SET_WITHDRAW_ADDRESS_FAILED](#event_msg_set_withdraw_address_failed)
+-   [event::MSG_WITHDRAW_DELEGATOR_REWARD_CREATED](#event_msg_withdraw_delegator_reward_created)
+-   [event::MSG_WITHDRAW_DELEGATOR_REWARD_FAILED](#event_msg_withdraw_delegator_reward_failed)
+-   [event::MSG_WITHDRAW_VALIDATOR_COMMISSION_CREATED](#event_msg_withdraw_validator_commission_created)
+-   [event::MSG_WITHDRAW_VALIDATOR_COMMISSION_FAILED](#event_msg_withdraw_validator_commission_failed)
+-   [event::MSG_FUND_COMMUNITY_POOL_CREATED](#event_msg_fund_community_pool_created)
+-   [event::MSG_FUND_COMMUNITY_POOL_FAILED](#event_msg_fund_community_pool_failed)
 
 ## event::MSG_SET_WITHDRAW_ADDRESS_CREATED
-*Name* : MsgSetWithdrawAddressCreated
 
-*Type* : [MsgBase](../README.md#MsgBase)
+_Name_ : /cosmos.distribution.v1beta1.MsgSetWithdrawAddress.Created
 
-*Structure* : 
+_Type_ : [MsgBase](../README.md#MsgBase)
+
+_Structure_ :
 
 | Key                | Type     | Description                                                                                                |
 | ------------------ | -------- | ---------------------------------------------------------------------------------------------------------- |
-| `delegatorAddress` | *string* | Delegator address. More [here](https://chain.crypto.com/docs/chain-details/module_overview.html#delegator) |
-| `withdrawAddress`  | *string* | Intended withdrawal address                                                                                |
-| `msgName`          | *string* | Blockchain Message type . Value: `MsgSetWithdrawAddress`                                                   |
-| `txHash`           | *string* | TxID of the blockchain transaction containing the event                                                    |
-| `msgIndex`         | *int*    | message index on the block                                                                                 |
-| `name`             | *string* | Specific Event Name. Value: `MsgSetWithdrawAddressCreated`                                                 |
-| `version`          | *int*    | Event Version. Value: `1`                                                                                  |
-| `height`           | *int64*  | Height of the block containing the transaction                                                             |
-| `uuid`             | *string* | Unique ID that is assigned on event creation                                                               |
+| `delegatorAddress` | _string_ | Delegator address. More [here](https://chain.crypto.com/docs/chain-details/module_overview.html#delegator) |
+| `withdrawAddress`  | _string_ | Intended withdrawal address                                                                                |
+| `msgName`          | _string_ | Blockchain Message type . Value: `MsgSetWithdrawAddress`                                                   |
+| `txHash`           | _string_ | TxID of the blockchain transaction containing the event                                                    |
+| `msgIndex`         | _int_    | message index on the block                                                                                 |
+| `name`             | _string_ | Specific Event Name. Value: `/cosmos.distribution.v1beta1.MsgSetWithdrawAddress.Created`                   |
+| `version`          | _int_    | Event Version. Value: `1`                                                                                  |
+| `height`           | _int64_  | Height of the block containing the transaction                                                             |
+| `uuid`             | _string_ | Unique ID that is assigned on event creation                                                               |
 
-*Example* : T.B.D  
+_Example_ : T.B.D
 
 ## event::MSG_SET_WITHDRAW_ADDRESS_FAILED
-*Name* : MsgSetWithdrawAddressFailed
 
-*Type* : [MsgBase](../README.md#MsgBase)
+_Name_ : /cosmos.distribution.v1beta1.MsgSetWithdrawAddress.Failed
 
-*Structure* : 
+_Type_ : [MsgBase](../README.md#MsgBase)
+
+_Structure_ :
 
 | Key                | Type     | Description                                                                                                |
 | ------------------ | -------- | ---------------------------------------------------------------------------------------------------------- |
-| `delegatorAddress` | *string* | Delegator address. More [here](https://chain.crypto.com/docs/chain-details/module_overview.html#delegator) |
-| `withdrawAddress`  | *string* | Intended withdrawal address                                                                                |
-| `msgName`          | *string* | Blockchain Message type . Value: `MsgSetWithdrawAddress`                                                   |
-| `txHash`           | *string* | TxID of the blockchain transaction containing the event                                                    |
-| `msgIndex`         | *int*    | message index on the block                                                                                 |
-| `name`             | *string* | Specific Event Name. Value: `MsgSetWithdrawAddressFailed`                                                  |
-| `version`          | *int*    | Event Version. Value: `1`                                                                                  |
-| `height`           | *int64*  | Height of the block containing the transaction                                                             |
-| `uuid`             | *string* | Unique ID that is assigned on event creation                                                               |
+| `delegatorAddress` | _string_ | Delegator address. More [here](https://chain.crypto.com/docs/chain-details/module_overview.html#delegator) |
+| `withdrawAddress`  | _string_ | Intended withdrawal address                                                                                |
+| `msgName`          | _string_ | Blockchain Message type . Value: `MsgSetWithdrawAddress`                                                   |
+| `txHash`           | _string_ | TxID of the blockchain transaction containing the event                                                    |
+| `msgIndex`         | _int_    | message index on the block                                                                                 |
+| `name`             | _string_ | Specific Event Name. Value: `/cosmos.distribution.v1beta1.MsgSetWithdrawAddress.Failed`                    |
+| `version`          | _int_    | Event Version. Value: `1`                                                                                  |
+| `height`           | _int64_  | Height of the block containing the transaction                                                             |
+| `uuid`             | _string_ | Unique ID that is assigned on event creation                                                               |
 
-*Example* : T.B.D  
+_Example_ : T.B.D
 
 ## event::MSG_WITHDRAW_DELEGATOR_REWARD_CREATED
-*Name* : MsgWithdrawDelegatorRewardCreated
 
-*Type* : [MsgBase](../README.md#MsgBase)
+_Name_ : /cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward.Created
 
-*Structure* : 
+_Type_ : [MsgBase](../README.md#MsgBase)
+
+_Structure_ :
 
 | Key                | Type     | Description                                                                                                |
 | ------------------ | -------- | ---------------------------------------------------------------------------------------------------------- |
-| `delegatorAddress` | *string* | Delegator address. More [here](https://chain.crypto.com/docs/chain-details/module_overview.html#delegator) |
-| `recipientAddress` | *string* | Recipient blockchain address                                                                               |
-| `validatorAddress` | *string* | Validator address                                                                                          |
-| `amount`           | *bigint* | CRO amount in base unit                                                                                    |
-| `msgName`          | *string* | Blockchain Message type . Value: `MsgWithdrawDelegatorReward`                                              |
-| `txHash`           | *string* | TxID of the blockchain transaction containing the event                                                    |
-| `msgIndex`         | *int*    | message index on the block                                                                                 |
-| `name`             | *string* | Specific Event Name. Value: `MsgWithdrawDelegatorRewardCreated`                                            |
-| `version`          | *int*    | Event Version. Value: `1`                                                                                  |
-| `height`           | *int64*  | Height of the block containing the transaction                                                             |
-| `uuid`             | *string* | Unique ID that is assigned on event creation                                                               |
+| `delegatorAddress` | _string_ | Delegator address. More [here](https://chain.crypto.com/docs/chain-details/module_overview.html#delegator) |
+| `recipientAddress` | _string_ | Recipient blockchain address                                                                               |
+| `validatorAddress` | _string_ | Validator address                                                                                          |
+| `amount`           | _bigint_ | CRO amount in base unit                                                                                    |
+| `msgName`          | _string_ | Blockchain Message type . Value: `MsgWithdrawDelegatorReward`                                              |
+| `txHash`           | _string_ | TxID of the blockchain transaction containing the event                                                    |
+| `msgIndex`         | _int_    | message index on the block                                                                                 |
+| `name`             | _string_ | Specific Event Name. Value: `/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward.Created`              |
+| `version`          | _int_    | Event Version. Value: `1`                                                                                  |
+| `height`           | _int64_  | Height of the block containing the transaction                                                             |
+| `uuid`             | _string_ | Unique ID that is assigned on event creation                                                               |
 
-*Example* : 
+_Example_ :
+
 ```json
 {
-    "name": "MsgWithdrawDelegatorRewardCreated",
+    "name": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward.Created",
     "uuid": "f092e7e8-aba4-4705-88ec-6692c407fa3c",
     "amount": "1460368",
     "height": 67598,
@@ -86,33 +91,35 @@
     "recipientAddress": "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
     "validatorAddress": "tcrocncl1923pz03mhjaztgcv3gey0hj0amwx02dyskau52"
 }
-```  
+```
 
 ## event::MSG_WITHDRAW_DELEGATOR_REWARD_FAILED
-*Name* : MsgWithdrawDelegatorRewardFailed
 
-*Type* : [MsgBase](../README.md#MsgBase)
+_Name_ : /cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward.Failed
 
-*Structure* : 
+_Type_ : [MsgBase](../README.md#MsgBase)
+
+_Structure_ :
 
 | Key                | Type     | Description                                                                                                |
 | ------------------ | -------- | ---------------------------------------------------------------------------------------------------------- |
-| `delegatorAddress` | *string* | Delegator address. More [here](https://chain.crypto.com/docs/chain-details/module_overview.html#delegator) |
-| `recipientAddress` | *string* | Recipient blockchain address                                                                               |
-| `validatorAddress` | *string* | Validator address                                                                                          |
-| `amount`           | *bigint* | CRO amount in base unit. Value : `0`                                                                       |
-| `msgName`          | *string* | Blockchain Message type . Value: `MsgWithdrawDelegatorReward`                                              |
-| `txHash`           | *string* | TxID of the blockchain transaction containing the event                                                    |
-| `msgIndex`         | *int*    | message index on the block                                                                                 |
-| `name`             | *string* | Specific Event Name. Value: `MsgWithdrawDelegatorRewardFailed`                                             |
-| `version`          | *int*    | Event Version. Value: `1`                                                                                  |
-| `height`           | *int64*  | Height of the block containing the transaction                                                             |
-| `uuid`             | *string* | Unique ID that is assigned on event creation                                                               |
+| `delegatorAddress` | _string_ | Delegator address. More [here](https://chain.crypto.com/docs/chain-details/module_overview.html#delegator) |
+| `recipientAddress` | _string_ | Recipient blockchain address                                                                               |
+| `validatorAddress` | _string_ | Validator address                                                                                          |
+| `amount`           | _bigint_ | CRO amount in base unit. Value : `0`                                                                       |
+| `msgName`          | _string_ | Blockchain Message type . Value: `MsgWithdrawDelegatorReward`                                              |
+| `txHash`           | _string_ | TxID of the blockchain transaction containing the event                                                    |
+| `msgIndex`         | _int_    | message index on the block                                                                                 |
+| `name`             | _string_ | Specific Event Name. Value: `/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward.Failed`               |
+| `version`          | _int_    | Event Version. Value: `1`                                                                                  |
+| `height`           | _int64_  | Height of the block containing the transaction                                                             |
+| `uuid`             | _string_ | Unique ID that is assigned on event creation                                                               |
 
-*Example* : 
+_Example_ :
+
 ```json
 {
-    "name": "MsgWithdrawDelegatorRewardFailed",
+    "name": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward.Failed",
     "uuid": "ea860f82-b819-4ec9-a270-856c8bb9b545",
     "amount": "0",
     "height": 73170,
@@ -123,33 +130,35 @@
     "delegatorAddress": "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
     "recipientAddress": "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
     "validatorAddress": "tcrocncl1923pz03mhjaztgcv3gey0hj0amwx02dyskau52"
-} 
+}
 ```
 
 ## event::MSG_WITHDRAW_VALIDATOR_COMMISSION_CREATED
-*Name* : MsgWithdrawValidatorCommissionCreated
 
-*Type* : [MsgBase](../README.md#MsgBase)
+_Name_ : /cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission.Created
 
-*Structure* : 
+_Type_ : [MsgBase](../README.md#MsgBase)
 
-| Key                | Type     | Description                                                         |
-| ------------------ | -------- | ------------------------------------------------------------------- |
-| `recipientAddress` | *string* | Recipient blockchain address                                        |
-| `validatorAddress` | *string* | Validator address                                                   |
-| `amount`           | *bigint* | CRO amount in base unit                                             |
-| `msgName`          | *string* | Blockchain Message type . Value: `MsgWithdrawValidatorCommission`   |
-| `txHash`           | *string* | TxID of the blockchain transaction containing the event             |
-| `msgIndex`         | *int*    | message index on the block                                          |
-| `name`             | *string* | Specific Event Name. Value: `MsgWithdrawValidatorCommissionCreated` |
-| `version`          | *int*    | Event Version. Value: `1`                                           |
-| `height`           | *int64*  | Height of the block containing the transaction                      |
-| `uuid`             | *string* | Unique ID that is assigned on event creation                        |
+_Structure_ :
 
-*Example* : 
+| Key                | Type     | Description                                                                                       |
+| ------------------ | -------- | ------------------------------------------------------------------------------------------------- |
+| `recipientAddress` | _string_ | Recipient blockchain address                                                                      |
+| `validatorAddress` | _string_ | Validator address                                                                                 |
+| `amount`           | _bigint_ | CRO amount in base unit                                                                           |
+| `msgName`          | _string_ | Blockchain Message type . Value: `MsgWithdrawValidatorCommission`                                 |
+| `txHash`           | _string_ | TxID of the blockchain transaction containing the event                                           |
+| `msgIndex`         | _int_    | message index on the block                                                                        |
+| `name`             | _string_ | Specific Event Name. Value: `/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission.Created` |
+| `version`          | _int_    | Event Version. Value: `1`                                                                         |
+| `height`           | _int64_  | Height of the block containing the transaction                                                    |
+| `uuid`             | _string_ | Unique ID that is assigned on event creation                                                      |
+
+_Example_ :
+
 ```json
 {
-    "name": "MsgWithdrawValidatorCommissionCreated",
+    "name": "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission.Created",
     "uuid": "4bbfe4dc-ec5e-48a7-bf74-1a7b0356e132",
     "amount": "25487036151",
     "height": 79845,
@@ -160,32 +169,34 @@
     "recipientAddress": "tcro1xwd3k8xterdeft3nxqg92szhpz6vx43q97wcke",
     "validatorAddress": "tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6"
 }
-```  
+```
 
 ## event::MSG_WITHDRAW_VALIDATOR_COMMISSION_FAILED
-*Name* : MsgWithdrawValidatorCommissionFailed
 
-*Type* : [MsgBase](../README.md#MsgBase)
+_Name_ : /cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission.Failed
 
-*Structure* : 
+_Type_ : [MsgBase](../README.md#MsgBase)
 
-| Key                | Type     | Description                                                        |
-| ------------------ | -------- | ------------------------------------------------------------------ |
-| `recipientAddress` | *string* | Recipient blockchain address                                       |
-| `validatorAddress` | *string* | Validator address                                                  |
-| `amount`           | *bigint* | CRO amount in base unit. Value : `0`                               |
-| `msgName`          | *string* | Blockchain Message type . Value: `MsgWithdrawValidatorCommission`  |
-| `txHash`           | *string* | TxID of the blockchain transaction containing the event            |
-| `msgIndex`         | *int*    | message index on the block                                         |
-| `name`             | *string* | Specific Event Name. Value: `MsgWithdrawValidatorCommissionFailed` |
-| `version`          | *int*    | Event Version. Value: `1`                                          |
-| `height`           | *int64*  | Height of the block containing the transaction                     |
-| `uuid`             | *string* | Unique ID that is assigned on event creation                       |
+_Structure_ :
 
-*Example* : 
+| Key                | Type     | Description                                                                                      |
+| ------------------ | -------- | ------------------------------------------------------------------------------------------------ |
+| `recipientAddress` | _string_ | Recipient blockchain address                                                                     |
+| `validatorAddress` | _string_ | Validator address                                                                                |
+| `amount`           | _bigint_ | CRO amount in base unit. Value : `0`                                                             |
+| `msgName`          | _string_ | Blockchain Message type . Value: `MsgWithdrawValidatorCommission`                                |
+| `txHash`           | _string_ | TxID of the blockchain transaction containing the event                                          |
+| `msgIndex`         | _int_    | message index on the block                                                                       |
+| `name`             | _string_ | Specific Event Name. Value: `/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission.Failed` |
+| `version`          | _int_    | Event Version. Value: `1`                                                                        |
+| `height`           | _int64_  | Height of the block containing the transaction                                                   |
+| `uuid`             | _string_ | Unique ID that is assigned on event creation                                                     |
+
+_Example_ :
+
 ```json
 {
-    "name": "MsgWithdrawValidatorCommissionFailed",
+    "name": "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission.Failed",
     "uuid": "4bbfe4dc-ec5e-48a7-bf74-1a7b0356e132",
     "amount": "0",
     "height": 79845,
@@ -196,31 +207,33 @@
     "recipientAddress": "tcro1xwd3k8xterdeft3nxqg92szhpz6vx43q97wcke",
     "validatorAddress": "tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6"
 }
-```  
+```
 
 ## event::MSG_FUND_COMMUNITY_POOL_CREATED
-*Name* : MsgFundCommunityPoolCreated
 
-*Type* : [MsgBase](../README.md#MsgBase)
+_Name_ : /cosmos.distribution.v1beta1.MsgFundCommunityPool.Created
 
-*Structure* : 
+_Type_ : [MsgBase](../README.md#MsgBase)
 
-| Key         | Type     | Description                                               |
-| ----------- | -------- | --------------------------------------------------------- |
-| `depositor` | *string* | Recipient blockchain address                              |
-| `amount`    | *bigint* | CRO amount in base unit                                   |
-| `msgName`   | *string* | Blockchain Message type. Value: `MsgFundCommunityPool`    |
-| `txHash`    | *string* | TxID of the blockchain transaction containing the event   |
-| `msgIndex`  | *int*    | message index on the block                                |
-| `name`      | *string* | Specific Event Name. Value: `MsgFundCommunityPoolCreated` |
-| `version`   | *int*    | Event Version. Value: `1`                                 |
-| `height`    | *int64*  | Height of the block containing the transaction            |
-| `uuid`      | *string* | Unique ID that is assigned on event creation              |
+_Structure_ :
 
-*Example* : 
+| Key         | Type     | Description                                                                             |
+| ----------- | -------- | --------------------------------------------------------------------------------------- |
+| `depositor` | _string_ | Recipient blockchain address                                                            |
+| `amount`    | _bigint_ | CRO amount in base unit                                                                 |
+| `msgName`   | _string_ | Blockchain Message type. Value: `MsgFundCommunityPool`                                  |
+| `txHash`    | _string_ | TxID of the blockchain transaction containing the event                                 |
+| `msgIndex`  | _int_    | message index on the block                                                              |
+| `name`      | _string_ | Specific Event Name. Value: `/cosmos.distribution.v1beta1.MsgFundCommunityPool.Created` |
+| `version`   | _int_    | Event Version. Value: `1`                                                               |
+| `height`    | _int64_  | Height of the block containing the transaction                                          |
+| `uuid`      | _string_ | Unique ID that is assigned on event creation                                            |
+
+_Example_ :
+
 ```json
 {
-    "name": "MsgFundCommunityPoolCreated",
+    "name": "/cosmos.distribution.v1beta1.MsgFundCommunityPool.Created",
     "uuid": "4bbfe4dc-ec5e-48a7-bf74-1a7b0356e132",
     "amount": "10000",
     "height": 79845,
@@ -233,28 +246,30 @@
 ```
 
 ## event::MSG_FUND_COMMUNITY_POOL_FAILED
-*Name* : MsgFundCommunityPoolFailed
 
-*Type* : [MsgBase](../README.md#MsgBase)
+_Name_ : /cosmos.distribution.v1beta1.MsgFundCommunityPool.Failed
 
-*Structure* : 
+_Type_ : [MsgBase](../README.md#MsgBase)
 
-| Key         | Type     | Description                                               |
-| ----------- | -------- | --------------------------------------------------------- |
-| `depositor` | *string* | Recipient blockchain address                              |
-| `amount`    | *bigint* | CRO amount in base unit                                   |
-| `msgName`   | *string* | Blockchain Message type. Value: `MsgFundCommunityPool`    |
-| `txHash`    | *string* | TxID of the blockchain transaction containing the event   |
-| `msgIndex`  | *int*    | message index on the block                                |
-| `name`      | *string* | Specific Event Name. Value: `MsgFundCommunityPoolFailed` |
-| `version`   | *int*    | Event Version. Value: `1`                                 |
-| `height`    | *int64*  | Height of the block containing the transaction            |
-| `uuid`      | *string* | Unique ID that is assigned on event creation              |
+_Structure_ :
 
-*Example* : 
+| Key         | Type     | Description                                                                            |
+| ----------- | -------- | -------------------------------------------------------------------------------------- |
+| `depositor` | _string_ | Recipient blockchain address                                                           |
+| `amount`    | _bigint_ | CRO amount in base unit                                                                |
+| `msgName`   | _string_ | Blockchain Message type. Value: `MsgFundCommunityPool`                                 |
+| `txHash`    | _string_ | TxID of the blockchain transaction containing the event                                |
+| `msgIndex`  | _int_    | message index on the block                                                             |
+| `name`      | _string_ | Specific Event Name. Value: `/cosmos.distribution.v1beta1.MsgFundCommunityPool.Failed` |
+| `version`   | _int_    | Event Version. Value: `1`                                                              |
+| `height`    | _int64_  | Height of the block containing the transaction                                         |
+| `uuid`      | _string_ | Unique ID that is assigned on event creation                                           |
+
+_Example_ :
+
 ```json
 {
-    "name": "MsgFundCommunityPoolFailed",
+    "name": "/cosmos.distribution.v1beta1.MsgFundCommunityPool.Failed",
     "uuid": "4bbfe4dc-ec5e-48a7-bf74-1a7b0356e132",
     "amount": "10000",
     "height": 79845,

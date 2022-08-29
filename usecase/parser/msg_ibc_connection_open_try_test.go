@@ -20,11 +20,11 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgIBCConnectionOpenTry", func() {
 		It("should parse Msg commands when there is MsgIBCConnectionOpenTry in the transaction", func() {
 			expected := `{
-  "name": "MsgConnectionOpenTryCreated",
+  "name": "/ibc.core.connection.v1.MsgConnectionOpenTry.Created",
   "version": 1,
   "height": 7,
   "uuid": "{UUID}",
-  "msgName": "MsgConnectionOpenTry",
+  "msgName": "/ibc.core.connection.v1.MsgConnectionOpenTry",
   "txHash": "B803E2AD7B78C667EC242CD73315E6BCADE4B4B63DE5B71BB7055D5B454E9E12",
   "msgIndex": 1,
   "params": {

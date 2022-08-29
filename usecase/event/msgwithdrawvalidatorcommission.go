@@ -11,8 +11,8 @@ import (
 )
 
 const MSG_WITHDRAW_VALIDATOR_COMMISSION = "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission"
-const MSG_WITHDRAW_VALIDATOR_COMMISSION_CREATED = "MsgWithdrawValidatorCommissionCreated"
-const MSG_WITHDRAW_VALIDATOR_COMMISSION_FAILED = "MsgWithdrawValidatorCommissionFailed"
+const MSG_WITHDRAW_VALIDATOR_COMMISSION_CREATED = "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission.Created"
+const MSG_WITHDRAW_VALIDATOR_COMMISSION_FAILED = "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission.Failed"
 
 type MsgWithdrawValidatorCommission struct {
 	MsgBase
@@ -27,8 +27,6 @@ func NewMsgWithdrawValidatorCommission(
 	return &MsgWithdrawValidatorCommission{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_WITHDRAW_VALIDATOR_COMMISSION,
-			MsgSuccess:      MSG_WITHDRAW_VALIDATOR_COMMISSION_CREATED,
-			MsgFailed:       MSG_WITHDRAW_VALIDATOR_COMMISSION_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

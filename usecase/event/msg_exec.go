@@ -11,8 +11,8 @@ import (
 )
 
 const MSG_EXEC = "/cosmos.authz.v1beta1.MsgExec"
-const MSG_EXEC_CREATED = "MsgExecCreated"
-const MSG_EXEC_FAILED = "MsgExecFailed"
+const MSG_EXEC_CREATED = "/cosmos.authz.v1beta1.MsgExec.Created"
+const MSG_EXEC_FAILED = "/cosmos.authz.v1beta1.MsgExec.Failed"
 
 type MsgExec struct {
 	MsgBase
@@ -27,8 +27,6 @@ func NewMsgExec(
 	return &MsgExec{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_EXEC,
-			MsgSuccess:      MSG_EXEC_CREATED,
-			MsgFailed:       MSG_EXEC_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

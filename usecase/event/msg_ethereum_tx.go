@@ -11,8 +11,8 @@ import (
 )
 
 const MSG_ETHEREUM_TX = "/ethermint.evm.v1.MsgEthereumTx"
-const MSG_ETHEREUM_TX_CREATED = "MsgEthereumTxCreated"
-const MSG_ETHEREUM_TX_FAILED = "MsgEthereumTxFailed"
+const MSG_ETHEREUM_TX_CREATED = "/ethermint.evm.v1.MsgEthereumTx.Created"
+const MSG_ETHEREUM_TX_FAILED = "/ethermint.evm.v1.MsgEthereumTx.Failed"
 
 type MsgEthereumTx struct {
 	MsgBase
@@ -27,8 +27,6 @@ func NewMsgEthereumTx(
 	return &MsgEthereumTx{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_ETHEREUM_TX,
-			MsgSuccess:      MSG_ETHEREUM_TX_CREATED,
-			MsgFailed:       MSG_ETHEREUM_TX_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

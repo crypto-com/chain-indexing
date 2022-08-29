@@ -11,8 +11,8 @@ import (
 )
 
 const MSG_CREATE_VESTING_ACCOUNT = "/cosmos.vesting.v1beta1.MsgCreateVestingAccount"
-const MSG_CREATE_VESTING_ACCOUNT_CREATED = "MsgCreateVestingAccountCreated"
-const MSG_CREATE_VESTING_ACCOUNT_FAILED = "MsgCreateVestingAccountFailed"
+const MSG_CREATE_VESTING_ACCOUNT_CREATED = "/cosmos.vesting.v1beta1.MsgCreateVestingAccount.Created"
+const MSG_CREATE_VESTING_ACCOUNT_FAILED = "/cosmos.vesting.v1beta1.MsgCreateVestingAccount.Failed"
 
 type MsgCreateVestingAccount struct {
 	MsgBase
@@ -27,8 +27,6 @@ func NewMsgCreateVestingAccount(
 	return &MsgCreateVestingAccount{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_CREATE_VESTING_ACCOUNT,
-			MsgSuccess:      MSG_CREATE_VESTING_ACCOUNT_CREATED,
-			MsgFailed:       MSG_CREATE_VESTING_ACCOUNT_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

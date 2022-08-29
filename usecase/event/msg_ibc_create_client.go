@@ -10,8 +10,8 @@ import (
 )
 
 const MSG_IBC_CREATE_CLIENT = "/ibc.core.client.v1.MsgCreateClient"
-const MSG_IBC_CREATE_CLIENT_CREATED = "MsgCreateClientCreated"
-const MSG_IBC_CREATE_CLIENT_FAILED = "MsgCreateClientFailed"
+const MSG_IBC_CREATE_CLIENT_CREATED = "/ibc.core.client.v1.MsgCreateClient.Created"
+const MSG_IBC_CREATE_CLIENT_FAILED = "/ibc.core.client.v1.MsgCreateClient.Failed"
 
 type MsgIBCCreateClient struct {
 	MsgBase
@@ -23,8 +23,6 @@ func NewMsgIBCCreateClient(msgCommonParams MsgCommonParams, params ibc_model.Msg
 	return &MsgIBCCreateClient{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_CREATE_CLIENT,
-			MsgSuccess:      MSG_IBC_CREATE_CLIENT_CREATED,
-			MsgFailed:       MSG_IBC_CREATE_CLIENT_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

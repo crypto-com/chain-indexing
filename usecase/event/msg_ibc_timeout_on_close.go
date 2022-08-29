@@ -10,8 +10,8 @@ import (
 )
 
 const MSG_IBC_TIMEOUT_ON_CLOSE = "/ibc.core.channel.v1.MsgTimeoutOnClose"
-const MSG_IBC_TIMEOUT_ON_CLOSE_CREATED = "MsgTimeoutOnCloseCreated"
-const MSG_IBC_TIMEOUT_ON_CLOSE_FAILED = "MsgTimeoutOnCloseFailed"
+const MSG_IBC_TIMEOUT_ON_CLOSE_CREATED = "/ibc.core.channel.v1.MsgTimeoutOnClose.Created"
+const MSG_IBC_TIMEOUT_ON_CLOSE_FAILED = "/ibc.core.channel.v1.MsgTimeoutOnClose.Failed"
 
 type MsgIBCTimeoutOnClose struct {
 	MsgBase
@@ -26,8 +26,6 @@ func NewMsgIBCTimeoutOnClose(
 	return &MsgIBCTimeoutOnClose{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_TIMEOUT_ON_CLOSE,
-			MsgSuccess:      MSG_IBC_TIMEOUT_ON_CLOSE_CREATED,
-			MsgFailed:       MSG_IBC_TIMEOUT_ON_CLOSE_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
@@ -79,8 +77,6 @@ func NewMsgAlreadyRelayedIBCTimeoutOnClose(
 	return &MsgAlreadyRelayedIBCTimeoutOnClose{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_ALREADY_RELAYED_IBC_TIMEOUT_ON_CLOSE,
-			MsgSuccess:      MSG_ALREADY_RELAYED_IBC_TIMEOUT_ON_CLOSE_CREATED,
-			MsgFailed:       MSG_ALREADY_RELAYED_IBC_TIMEOUT_ON_CLOSE_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

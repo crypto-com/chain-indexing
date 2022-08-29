@@ -11,8 +11,8 @@ import (
 )
 
 const MSG_SUBMIT_TEXT_PROPOSAL = "/cosmos.gov.v1beta1.TextProposal"
-const MSG_SUBMIT_TEXT_PROPOSAL_CREATED = "MsgSubmitTextProposalCreated"
-const MSG_SUBMIT_TEXT_PROPOSAL_FAILED = "MsgSubmitTextProposalFailed"
+const MSG_SUBMIT_TEXT_PROPOSAL_CREATED = "/cosmos.gov.v1beta1.TextProposal.Created"
+const MSG_SUBMIT_TEXT_PROPOSAL_FAILED = "/cosmos.gov.v1beta1.TextProposal.Failed"
 
 type MsgSubmitTextProposal struct {
 	MsgBase
@@ -27,8 +27,6 @@ func NewMsgSubmitTextProposal(
 	return &MsgSubmitTextProposal{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_SUBMIT_TEXT_PROPOSAL,
-			MsgSuccess:      MSG_SUBMIT_TEXT_PROPOSAL_CREATED,
-			MsgFailed:       MSG_SUBMIT_TEXT_PROPOSAL_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

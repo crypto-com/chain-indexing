@@ -19,11 +19,11 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgIBCRecvPacket", func() {
 		It("should parse Msg commands when there is MsgIBCRecvPacket in the transaction", func() {
 			expected := `{
-  "name": "MsgRecvPacketCreated",
+  "name": "/ibc.core.channel.v1.MsgRecvPacket.Created",
   "version": 1,
   "height": 26,
   "uuid": "{UUID}",
-  "msgName": "MsgRecvPacket",
+  "msgName": "/ibc.core.channel.v1.MsgRecvPacket",
   "txHash": "C94E6D87ACC4DD809CC05B9F9773B32B0ECEF9E11B8DFF85DD8ADF4566AF9ED1",
   "msgIndex": 1,
   "params": {
@@ -48,7 +48,7 @@ var _ = Describe("ParseMsgCommands", func() {
     "signer": "cro1dulwqgcdpemn8c34sjd92fxepz5p0sqpeevw7f",
 
     "application": "transfer",
-    "messageType": "MsgTransfer",
+    "messageType": "/ibc.applications.transfer.v1.MsgTransfer",
     "maybeMsgTransfer": {
       "sender": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv",
       "receiver": "cro1dulwqgcdpemn8c34sjd92fxepz5p0sqpeevw7f",
@@ -116,11 +116,11 @@ var _ = Describe("ParseMsgCommands", func() {
 
 		It("should parse Msg commands when there is MsgIBCRecvPacket in the transaction and MsgIBCRecvPacket.PacketAck.Error is NOT empty string", func() {
 			expected := `{
-	"name": "MsgRecvPacketCreated",
+	"name": "/ibc.core.channel.v1.MsgRecvPacket.Created",
 	"version": 1,
 	"height": 130418,
 	"uuid": "{UUID}",
-	"msgName": "MsgRecvPacket",
+	"msgName": "/ibc.core.channel.v1.MsgRecvPacket",
 	"txHash": "852566591D525E2F3DF54602091D33CEF2D87389E6D9AC260EC3267CF2C4CFCE",
 	"msgIndex": 1,
 	"params": {
@@ -138,7 +138,7 @@ var _ = Describe("ParseMsgCommands", func() {
 		"proofHeight": { "revisionNumber": "1", "revisionHeight": "17549" },
 		"signer": "tcro18mcwp6vtlvpgxy62eledk3chhjguw636x8n7h6",
 		"application": "transfer",
-		"messageType": "MsgTransfer",
+		"messageType": "/ibc.applications.transfer.v1.MsgTransfer",
 		"maybeMsgTransfer": {
 			"sender": "eth1sp3e58lfgnk9pjm2n7e7jjl0805s5ju09a2muz",
 			"receiver": "tcro1pdn2nsn9wesz6px3lcjsgmp8pefednzp3gmp3q",
@@ -209,7 +209,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 		It("should parse Msg commands when there is MsgIBCRecvPacket in the transaction and missing fungible_token_packet event in TxsResult log", func() {
 			expected := `{
-	"name": "MsgAlreadyRelayedRecvPacketCreated",
+	"name": "MsgAlreadyRelayedRecvPacket.Created",
 	"version": 1,
 	"height": 317994,
 	"uuid": "{UUID}",
@@ -231,7 +231,7 @@ var _ = Describe("ParseMsgCommands", func() {
 		"proofHeight": { "revisionNumber": "1", "revisionHeight": "136800" },
 		"signer": "tcro18mcwp6vtlvpgxy62eledk3chhjguw636x8n7h6",
 		"application": "transfer",
-		"messageType": "MsgTransfer",
+		"messageType": "/ibc.applications.transfer.v1.MsgTransfer",
 		"maybeMsgTransfer": {
 			"sender": "eth1mtcn2505k37mlztywf8eg8spv0kpnsqam2zs02",
 			"receiver": "tcro1f6qcvp33dc79xzpuwll7mln5lnepuqv8d7led9",
@@ -294,11 +294,11 @@ var _ = Describe("ParseMsgCommands", func() {
 
 		It("should parse Msg commands when there is SoloMachine MsgIBCRecvPacket in the transaction", func() {
 			expected := `{
-	"name": "MsgRecvPacketCreated",
+	"name": "/ibc.core.channel.v1.MsgRecvPacket.Created",
 	"version": 1,
 	"height": 14803,
 	"uuid": "{UUID}",
-	"msgName": "MsgRecvPacket",
+	"msgName": "/ibc.core.channel.v1.MsgRecvPacket",
 	"txHash": "0696B4561D093E0AF784D6CC5701C4FB0645E47BE425C47108737E23BB4FBDEA",
 	"msgIndex": 0,
 	"params": {
@@ -316,7 +316,7 @@ var _ = Describe("ParseMsgCommands", func() {
 		"proofHeight": { "revisionNumber": "0", "revisionHeight": "5" },
 		"signer": "tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy",
 		"application": "transfer",
-		"messageType": "MsgTransfer",
+		"messageType": "/ibc.applications.transfer.v1.MsgTransfer",
 		"maybeMsgTransfer": {
 			"sender": "tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy",
 			"receiver": "tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy",

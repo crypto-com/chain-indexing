@@ -10,8 +10,8 @@ import (
 )
 
 const MSG_IBC_UPDATE_CLIENT = "/ibc.core.client.v1.MsgUpdateClient"
-const MSG_IBC_UPDATE_CLIENT_CREATED = "MsgUpdateClientCreated"
-const MSG_IBC_UPDATE_CLIENT_FAILED = "MsgUpdateClientFailed"
+const MSG_IBC_UPDATE_CLIENT_CREATED = "/ibc.core.client.v1.MsgUpdateClient.Created"
+const MSG_IBC_UPDATE_CLIENT_FAILED = "/ibc.core.client.v1.MsgUpdateClient.Failed"
 
 type MsgIBCUpdateClient struct {
 	MsgBase
@@ -27,8 +27,6 @@ func NewMsgIBCUpdateClient(
 	return &MsgIBCUpdateClient{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_UPDATE_CLIENT,
-			MsgSuccess:      MSG_NFT_BURN_NFT_CREATED,
-			MsgFailed:       MSG_NFT_BURN_NFT_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

@@ -120,7 +120,6 @@ func TestTransaction_HandleEvents(t *testing.T) {
 				&event_usecase.MsgSend{
 					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
 						MsgName: event_usecase.MSG_SEND,
-						MsgType: event_usecase.MSG_SEND,
 						Version: 1,
 						MsgCommonParams: event_usecase.MsgCommonParams{
 							BlockHeight: 1,
@@ -273,7 +272,6 @@ func TestTransaction_HandleEvents(t *testing.T) {
 				&event_usecase.MsgSend{
 					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
 						MsgName: event_usecase.MSG_SEND,
-						MsgType: event_usecase.MSG_SEND,
 						Version: 1,
 						MsgCommonParams: event_usecase.MsgCommonParams{
 							BlockHeight: 1,

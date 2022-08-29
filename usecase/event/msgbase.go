@@ -26,7 +26,7 @@ func NewMsgBase(params MsgBaseParams) MsgBase {
 
 	return MsgBase{
 		event.NewBase(event.BaseParams{
-			Name:        eventName(params.MsgSuccess, params.MsgFailed, params.TxSuccess),
+			Name:        eventName(params.MsgName, params.TxSuccess),
 			Version:     params.Version,
 			BlockHeight: params.BlockHeight,
 		}),
@@ -49,22 +49,19 @@ func (base *MsgBase) TxSuccess() bool {
 	return strings.HasSuffix(base.Name(), MSG_SUCCESS_SUFFIX)
 }
 
-func eventName(msgSuccess string, msgFailed string, txSuccess bool) string {
-	var eventName string
+func eventName(msgName string, txSuccess bool) string {
+	var suffix string
 	if txSuccess {
-		eventName = msgSuccess
+		suffix = MSG_SUCCESS_SUFFIX
 	} else {
-		eventName = msgFailed
+		suffix = MSG_FAILED_SUFFIX
 	}
-	return fmt.Sprintf("%s", eventName)
+	return fmt.Sprintf("%s.%s", msgName, suffix)
 }
 
 type MsgBaseParams struct {
-	MsgName    string
-	MsgType    string
-	MsgSuccess string
-	MsgFailed  string
-	Version    int
+	MsgName string
+	Version int
 
 	MsgCommonParams
 }

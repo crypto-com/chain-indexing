@@ -20,11 +20,11 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgIBCTimeout", func() {
 		It("should parse Msg commands when there is MsgIBCTimeout in the transaction", func() {
 			expected := `{
-  "name": "MsgTimeoutCreated",
+  "name": "/ibc.core.channel.v1.MsgTimeout.Created",
   "version": 1,
   "height": 643189,
   "uuid": "{UUID}",
-  "msgName": "MsgTimeout",
+  "msgName": "/ibc.core.channel.v1.MsgTimeout",
   "txHash": "E86F52B60F3EC63EEAA9B77DB41BE90E99B7E1230BE94F3A7E4C06B7C7A20C2D",
   "msgIndex": 1,
   "params": {
@@ -50,7 +50,7 @@ var _ = Describe("ParseMsgCommands", func() {
     "signer": "cro1q040rm026jmpfmxdsj6q9phm9tdceepnsau6me",
 
     "application": "transfer",
-    "messageType": "MsgTransfer",
+    "messageType": "/ibc.applications.transfer.v1.MsgTransfer",
     "maybeMsgTransfer": {
       "refundReceiver": "cro1s7cu28403gzdvy5tttyskm3zxjejxcv63espre",
       "refundDenom": "basecro",
@@ -113,7 +113,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 	It("should parse MsgIBCTimeout commands from IBC module v1.0", func() {
 		expected := `{
-  "name": "MsgAlreadyRelayedTimeoutCreated",
+  "name": "MsgAlreadyRelayedTimeout.Created",
   "version": 1,
   "height": 116603,
   "uuid": "{UUID}",
@@ -143,7 +143,7 @@ var _ = Describe("ParseMsgCommands", func() {
     "signer": "tcro18mcwp6vtlvpgxy62eledk3chhjguw636x8n7h6",
 
     "application": "transfer",
-    "messageType": "MsgTransfer",
+    "messageType": "/ibc.applications.transfer.v1.MsgTransfer",
     "maybeMsgTransfer": {
       "refundReceiver": "tcro1pdn2nsn9wesz6px3lcjsgmp8pefednzp3gmp3q",
       "refundDenom": "basetcro",

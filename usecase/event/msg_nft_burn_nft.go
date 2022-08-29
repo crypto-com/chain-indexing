@@ -11,8 +11,8 @@ import (
 )
 
 const MSG_NFT_BURN_NFT = "/chainmain.nft.v1.MsgBurnNFT"
-const MSG_NFT_BURN_NFT_CREATED = "MsgBurnNFTCreated"
-const MSG_NFT_BURN_NFT_FAILED = "MsgBurnNFTFailed"
+const MSG_NFT_BURN_NFT_CREATED = "/chainmain.nft.v1.MsgBurnNFT.Created"
+const MSG_NFT_BURN_NFT_FAILED = "/chainmain.nft.v1.MsgBurnNFT.Failed"
 
 type MsgNFTBurnNFT struct {
 	MsgBase
@@ -29,8 +29,6 @@ func NewMsgNFTBurnNFT(
 	return &MsgNFTBurnNFT{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_NFT_BURN_NFT,
-			MsgSuccess:      MSG_NFT_BURN_NFT_CREATED,
-			MsgFailed:       MSG_NFT_BURN_NFT_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

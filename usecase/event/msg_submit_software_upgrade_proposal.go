@@ -11,8 +11,8 @@ import (
 )
 
 const MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL = "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal"
-const MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_CREATED = "MsgSubmitSoftwareUpgradeProposalCreated"
-const MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_FAILED = "MsgSubmitSoftwareUpgradeProposalFailed"
+const MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_CREATED = "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal.Created"
+const MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_FAILED = "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal.Failed"
 
 type MsgSubmitSoftwareUpgradeProposal struct {
 	MsgBase
@@ -27,8 +27,6 @@ func NewMsgSubmitSoftwareUpgradeProposal(
 	return &MsgSubmitSoftwareUpgradeProposal{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL,
-			MsgSuccess:      MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_CREATED,
-			MsgFailed:       MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

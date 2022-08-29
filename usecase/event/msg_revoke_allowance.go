@@ -11,8 +11,8 @@ import (
 )
 
 const MSG_REVOKE_ALLOWANCE = "/cosmos.feegrant.v1beta1.MsgRevokeAllowance"
-const MSG_REVOKE_ALLOWANCE_CREATED = "MsgRevokeAllowanceCreated"
-const MSG_REVOKE_ALLOWANCE_FAILED = "MsgRevokeAllowanceFailed"
+const MSG_REVOKE_ALLOWANCE_CREATED = "/cosmos.feegrant.v1beta1.MsgRevokeAllowance.Created"
+const MSG_REVOKE_ALLOWANCE_FAILED = "/cosmos.feegrant.v1beta1.MsgRevokeAllowance.Failed"
 
 type MsgRevokeAllowance struct {
 	MsgBase
@@ -27,8 +27,6 @@ func NewMsgRevokeAllowance(
 	return &MsgRevokeAllowance{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_REVOKE_ALLOWANCE,
-			MsgSuccess:      MSG_REVOKE_ALLOWANCE_CREATED,
-			MsgFailed:       MSG_REVOKE_ALLOWANCE_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

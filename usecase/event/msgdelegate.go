@@ -12,8 +12,8 @@ import (
 )
 
 const MSG_DELEGATE = "/cosmos.staking.v1beta1.MsgDelegate"
-const MSG_DELEGATE_CREATED = "MsgDelegateCreated"
-const MSG_DELEGATE_FAILED = "MsgDelegateFailed"
+const MSG_DELEGATE_CREATED = "/cosmos.staking.v1beta1.MsgDelegate.Created"
+const MSG_DELEGATE_FAILED = "/cosmos.staking.v1beta1.MsgDelegate.Failed"
 
 // MsgDelegate defines a Cosmos SDK message for performing a delegation of coins
 // from a delegator to a validator.
@@ -31,8 +31,6 @@ func NewMsgDelegate(msgCommonParams MsgCommonParams, params model.MsgDelegatePar
 	return &MsgDelegate{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_DELEGATE,
-			MsgSuccess:      MSG_DELEGATE_CREATED,
-			MsgFailed:       MSG_DELEGATE_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

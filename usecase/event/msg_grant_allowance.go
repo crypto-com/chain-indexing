@@ -11,8 +11,8 @@ import (
 )
 
 const MSG_GRANT_ALLOWANCE = "/cosmos.feegrant.v1beta1.MsgGrantAllowance"
-const MSG_GRANT_ALLOWANCE_CREATED = "MsgGrantAllowanceCreated"
-const MSG_GRANT_ALLOWANCE_FAILED = "MsgGrantAllowanceFailed"
+const MSG_GRANT_ALLOWANCE_CREATED = "/cosmos.feegrant.v1beta1.MsgGrantAllowance.Created"
+const MSG_GRANT_ALLOWANCE_FAILED = "/cosmos.feegrant.v1beta1.MsgGrantAllowance.Failed"
 
 type MsgGrantAllowance struct {
 	MsgBase
@@ -27,8 +27,6 @@ func NewMsgGrantAllowance(
 	return &MsgGrantAllowance{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_GRANT_ALLOWANCE,
-			MsgSuccess:      MSG_GRANT_ALLOWANCE_CREATED,
-			MsgFailed:       MSG_GRANT_ALLOWANCE_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

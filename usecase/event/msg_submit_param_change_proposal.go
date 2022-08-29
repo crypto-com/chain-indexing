@@ -11,8 +11,8 @@ import (
 )
 
 const MSG_SUBMIT_PARAM_CHANGE_PROPOSAL = "/cosmos.params.v1beta1.ParameterChangeProposal"
-const MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_CREATED = "MsgSubmitParamUpdateProposalCreated"
-const MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_FAILED = "MsgSubmitParamUpdateProposalFailed"
+const MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_CREATED = "/cosmos.params.v1beta1.ParameterChangeProposal.Created"
+const MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_FAILED = "/cosmos.params.v1beta1.ParameterChangeProposal.Failed"
 
 type MsgSubmitParamChangeProposal struct {
 	MsgBase
@@ -27,8 +27,6 @@ func NewMsgSubmitParamChangeProposal(
 	return &MsgSubmitParamChangeProposal{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_SUBMIT_PARAM_CHANGE_PROPOSAL,
-			MsgSuccess:      MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_CREATED,
-			MsgFailed:       MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

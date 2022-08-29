@@ -93,7 +93,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 						BlockTime:       utctime.UTCTime{},
 						TransactionHash: "TxHash",
 						MaybeRelayer:    primptr.String("Signer"),
-						MessageType:     "MsgChannelOpenInit",
+						MessageType:     "/ibc.core.channel.v1.MsgChannelOpenInit",
 						Message:         typedEvent,
 					}).
 					Return(nil)
@@ -108,7 +108,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					On("Increment", fmt.Sprintf("%s:-", "ChannelID"), int64(1)).
 					Return(nil)
 				mockIBCChannelMessageTotalView.
-					On("Increment", fmt.Sprintf("%s:%s", "ChannelID", "MsgChannelOpenInit"), int64(1)).
+					On("Increment", fmt.Sprintf("%s:%s", "ChannelID", "/ibc.core.channel.v1.MsgChannelOpenInit"), int64(1)).
 					Return(nil)
 
 				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
@@ -156,7 +156,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 						BlockTime:       utctime.UTCTime{},
 						TransactionHash: "TxHash",
 						MaybeRelayer:    primptr.String("Signer"),
-						MessageType:     "MsgChannelOpenTry",
+						MessageType:     "/ibc.core.channel.v1.MsgChannelOpenTry",
 						Message:         typedEvent,
 					}).
 					Return(nil)
@@ -171,7 +171,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					On("Increment", fmt.Sprintf("%s:-", "ChannelID"), int64(1)).
 					Return(nil)
 				mockIBCChannelMessageTotalView.
-					On("Increment", fmt.Sprintf("%s:%s", "ChannelID", "MsgChannelOpenTry"), int64(1)).
+					On("Increment", fmt.Sprintf("%s:%s", "ChannelID", "/ibc.core.channel.v1.MsgChannelOpenTry"), int64(1)).
 					Return(nil)
 
 				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
@@ -219,7 +219,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 						BlockTime:       utctime.UTCTime{},
 						TransactionHash: "TxHash",
 						MaybeRelayer:    primptr.String("Signer"),
-						MessageType:     "MsgChannelOpenAck",
+						MessageType:     "/ibc.core.channel.v1.MsgChannelOpenAck",
 						Message:         typedEvent,
 					}).
 					Return(nil)
@@ -234,7 +234,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					On("Increment", fmt.Sprintf("%s:-", "ChannelID"), int64(1)).
 					Return(nil)
 				mockIBCChannelMessageTotalView.
-					On("Increment", fmt.Sprintf("%s:%s", "ChannelID", "MsgChannelOpenAck"), int64(1)).
+					On("Increment", fmt.Sprintf("%s:%s", "ChannelID", "/ibc.core.channel.v1.MsgChannelOpenAck"), int64(1)).
 					Return(nil)
 
 				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
@@ -282,7 +282,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 						BlockTime:       utctime.UTCTime{},
 						TransactionHash: "TxHash",
 						MaybeRelayer:    primptr.String("Signer"),
-						MessageType:     "MsgChannelOpenConfirm",
+						MessageType:     "/ibc.core.channel.v1.MsgChannelOpenConfirm",
 						Message:         typedEvent,
 					}).
 					Return(nil)
@@ -297,7 +297,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					On("Increment", fmt.Sprintf("%s:-", "ChannelID"), int64(1)).
 					Return(nil)
 				mockIBCChannelMessageTotalView.
-					On("Increment", fmt.Sprintf("%s:%s", "ChannelID", "MsgChannelOpenConfirm"), int64(1)).
+					On("Increment", fmt.Sprintf("%s:%s", "ChannelID", "/ibc.core.channel.v1.MsgChannelOpenConfirm"), int64(1)).
 					Return(nil)
 
 				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
@@ -359,7 +359,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 						MaybeReceiver:   primptr.String("Receiver"),
 						MaybeDenom:      primptr.String("PacketDataDenom"),
 						MaybeAmount:     primptr.String("10000"),
-						MessageType:     "MsgTransfer",
+						MessageType:     "/ibc.applications.transfer.v1.MsgTransfer",
 						Message:         typedEvent,
 					}).
 					Return(nil)
@@ -374,7 +374,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					On("Increment", fmt.Sprintf("%s:-", "SourceChannel"), int64(1)).
 					Return(nil)
 				mockIBCChannelMessageTotalView.
-					On("Increment", fmt.Sprintf("%s:%s", "SourceChannel", "MsgTransfer"), int64(1)).
+					On("Increment", fmt.Sprintf("%s:%s", "SourceChannel", "/ibc.applications.transfer.v1.MsgTransfer"), int64(1)).
 					Return(nil)
 
 				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
@@ -444,7 +444,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 						MaybeReceiver:   primptr.String("Receiver"),
 						MaybeDenom:      primptr.String("Denom"),
 						MaybeAmount:     primptr.String("1000"),
-						MessageType:     "MsgRecvPacket",
+						MessageType:     "/ibc.core.channel.v1.MsgRecvPacket",
 						Message:         typedEvent,
 					}).
 					Return(nil)
@@ -459,7 +459,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					On("Increment", fmt.Sprintf("%s:-", "DestinationChannel"), int64(1)).
 					Return(nil)
 				mockIBCChannelMessageTotalView.
-					On("Increment", fmt.Sprintf("%s:%s", "DestinationChannel", "MsgRecvPacket"), int64(1)).
+					On("Increment", fmt.Sprintf("%s:%s", "DestinationChannel", "/ibc.core.channel.v1.MsgRecvPacket"), int64(1)).
 					Return(nil)
 
 				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
@@ -529,7 +529,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 						MaybeReceiver:   primptr.String("Receiver"),
 						MaybeDenom:      primptr.String("Denom"),
 						MaybeAmount:     primptr.String("1000"),
-						MessageType:     "MsgRecvPacket",
+						MessageType:     "/ibc.core.channel.v1.MsgRecvPacket",
 						Message:         typedEvent,
 					}).
 					Return(nil)
@@ -544,7 +544,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					On("Increment", fmt.Sprintf("%s:-", "DestinationChannel"), int64(1)).
 					Return(nil)
 				mockIBCChannelMessageTotalView.
-					On("Increment", fmt.Sprintf("%s:%s", "DestinationChannel", "MsgRecvPacket"), int64(1)).
+					On("Increment", fmt.Sprintf("%s:%s", "DestinationChannel", "/ibc.core.channel.v1.MsgRecvPacket"), int64(1)).
 					Return(nil)
 
 				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
@@ -611,7 +611,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 						MaybeReceiver:   primptr.String("Receiver"),
 						MaybeDenom:      primptr.String("Denom"),
 						MaybeAmount:     primptr.String("1000"),
-						MessageType:     "MsgAcknowledgement",
+						MessageType:     "/ibc.core.channel.v1.MsgAcknowledgement",
 						Message:         typedEvent,
 					}).
 					Return(nil)
@@ -626,7 +626,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					On("Increment", fmt.Sprintf("%s:-", "SourceChannel"), int64(1)).
 					Return(nil)
 				mockIBCChannelMessageTotalView.
-					On("Increment", fmt.Sprintf("%s:%s", "SourceChannel", "MsgAcknowledgement"), int64(1)).
+					On("Increment", fmt.Sprintf("%s:%s", "SourceChannel", "/ibc.core.channel.v1.MsgAcknowledgement"), int64(1)).
 					Return(nil)
 
 				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
@@ -693,7 +693,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 						MaybeReceiver:   primptr.String("Receiver"),
 						MaybeDenom:      primptr.String("Denom"),
 						MaybeAmount:     primptr.String("1000"),
-						MessageType:     "MsgAcknowledgement",
+						MessageType:     "/ibc.core.channel.v1.MsgAcknowledgement",
 						Message:         typedEvent,
 					}).
 					Return(nil)
@@ -708,7 +708,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					On("Increment", fmt.Sprintf("%s:-", "SourceChannel"), int64(1)).
 					Return(nil)
 				mockIBCChannelMessageTotalView.
-					On("Increment", fmt.Sprintf("%s:%s", "SourceChannel", "MsgAcknowledgement"), int64(1)).
+					On("Increment", fmt.Sprintf("%s:%s", "SourceChannel", "/ibc.core.channel.v1.MsgAcknowledgement"), int64(1)).
 					Return(nil)
 
 				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
@@ -767,7 +767,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 						MaybeReceiver:   primptr.String("RefundReceiver"),
 						MaybeDenom:      primptr.String("RefundDenom"),
 						MaybeAmount:     primptr.String("1000"),
-						MessageType:     "MsgTimeout",
+						MessageType:     "/ibc.core.channel.v1.MsgTimeout",
 						Message:         typedEvent,
 					}).
 					Return(nil)
@@ -782,7 +782,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					On("Increment", fmt.Sprintf("%s:-", "SourceChannel"), int64(1)).
 					Return(nil)
 				mockIBCChannelMessageTotalView.
-					On("Increment", fmt.Sprintf("%s:%s", "SourceChannel", "MsgTimeout"), int64(1)).
+					On("Increment", fmt.Sprintf("%s:%s", "SourceChannel", "/ibc.core.channel.v1.MsgTimeout"), int64(1)).
 					Return(nil)
 
 				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
@@ -841,7 +841,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 						MaybeReceiver:   primptr.String("RefundReceiver"),
 						MaybeDenom:      primptr.String("RefundDenom"),
 						MaybeAmount:     primptr.String("1000"),
-						MessageType:     "MsgTimeoutOnClose",
+						MessageType:     "/ibc.core.channel.v1.MsgTimeoutOnClose",
 						Message:         typedEvent,
 					}).
 					Return(nil)
@@ -856,7 +856,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					On("Increment", fmt.Sprintf("%s:-", "SourceChannel"), int64(1)).
 					Return(nil)
 				mockIBCChannelMessageTotalView.
-					On("Increment", fmt.Sprintf("%s:%s", "SourceChannel", "MsgTimeoutOnClose"), int64(1)).
+					On("Increment", fmt.Sprintf("%s:%s", "SourceChannel", "/ibc.core.channel.v1.MsgTimeoutOnClose"), int64(1)).
 					Return(nil)
 
 				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
@@ -904,7 +904,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 						BlockTime:       utctime.UTCTime{},
 						TransactionHash: "TxHash",
 						MaybeRelayer:    primptr.String("Signer"),
-						MessageType:     "MsgChannelCloseInit",
+						MessageType:     "/ibc.core.channel.v1.MsgChannelCloseInit",
 						Message:         typedEvent,
 					}).
 					Return(nil)
@@ -919,7 +919,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					On("Increment", fmt.Sprintf("%s:-", "ChannelID"), int64(1)).
 					Return(nil)
 				mockIBCChannelMessageTotalView.
-					On("Increment", fmt.Sprintf("%s:%s", "ChannelID", "MsgChannelCloseInit"), int64(1)).
+					On("Increment", fmt.Sprintf("%s:%s", "ChannelID", "/ibc.core.channel.v1.MsgChannelCloseInit"), int64(1)).
 					Return(nil)
 
 				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {
@@ -967,7 +967,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 						BlockTime:       utctime.UTCTime{},
 						TransactionHash: "TxHash",
 						MaybeRelayer:    primptr.String("Signer"),
-						MessageType:     "MsgChannelCloseConfirm",
+						MessageType:     "/ibc.core.channel.v1.MsgChannelCloseConfirm",
 						Message:         typedEvent,
 					}).
 					Return(nil)
@@ -982,7 +982,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 					On("Increment", fmt.Sprintf("%s:-", "ChannelID"), int64(1)).
 					Return(nil)
 				mockIBCChannelMessageTotalView.
-					On("Increment", fmt.Sprintf("%s:%s", "ChannelID", "MsgChannelCloseConfirm"), int64(1)).
+					On("Increment", fmt.Sprintf("%s:%s", "ChannelID", "/ibc.core.channel.v1.MsgChannelCloseConfirm"), int64(1)).
 					Return(nil)
 
 				ibc_channel_message.NewIBCChannelMessagesTotal = func(handle *rdb.Handle) view.IBCChannelMessagesTotal {

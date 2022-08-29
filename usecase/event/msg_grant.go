@@ -11,8 +11,8 @@ import (
 )
 
 const MSG_GRANT = "/cosmos.authz.v1beta1.MsgGrant"
-const MSG_GRANT_CREATED = "MsgGrantCreated"
-const MSG_GRANT_FAILED = "MsgGrantFailed"
+const MSG_GRANT_CREATED = "/cosmos.authz.v1beta1.MsgGrant.Created"
+const MSG_GRANT_FAILED = "/cosmos.authz.v1beta1.MsgGrant.Failed"
 
 type MsgGrant struct {
 	MsgBase
@@ -27,8 +27,6 @@ func NewMsgGrant(
 	return &MsgGrant{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_GRANT,
-			MsgSuccess:      MSG_GRANT_CREATED,
-			MsgFailed:       MSG_GRANT_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

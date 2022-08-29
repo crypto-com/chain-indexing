@@ -571,7 +571,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							Signer: "signer",
 						},
 						Application: "transfer",
-						MessageType: "MsgTransfer",
+						MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 						MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
 								Sender:   "from",
@@ -678,7 +678,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							Signer: "signer",
 						},
 						Application: "transfer",
-						MessageType: "MsgTransfer",
+						MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 						MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
 								Sender:   "from",
@@ -816,7 +816,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							Signer: "signer",
 						},
 						Application: "transfer",
-						MessageType: "MsgTransfer",
+						MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 						MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
 								Sender:   "from",
@@ -873,7 +873,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							Signer: "signer",
 						},
 						Application: "transfer",
-						MessageType: "MsgTransfer",
+						MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 						MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
 								Sender:   "from",
@@ -1025,7 +1025,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							Signer: "signer",
 						},
 						Application: "transfer",
-						MessageType: "MsgTransfer",
+						MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 						MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
 								Sender:   "from",
@@ -1157,7 +1157,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							Signer: "signer",
 						},
 						Application: "transfer",
-						MessageType: "MsgTransfer",
+						MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 						MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
 							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
 								Sender:   "from",
@@ -1261,7 +1261,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							Signer: "signer",
 						},
 						Application: "transfer",
-						MessageType: "MsgTransfer",
+						MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 						MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
 							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
 								Sender:   "from",
@@ -1387,7 +1387,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							Signer: "signer",
 						},
 						Application: "transfer",
-						MessageType: "MsgTransfer",
+						MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 						MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
 							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
 								Sender:   "from",
@@ -1520,7 +1520,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							Signer: "signer",
 						},
 						Application: "transfer",
-						MessageType: "MsgTransfer",
+						MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 						MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
 							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
 								Sender:   "from",
@@ -1572,7 +1572,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							Signer: "signer",
 						},
 						Application: "transfer",
-						MessageType: "MsgTransfer",
+						MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 						MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
 							FungibleTokenPacketData: ibc_model.FungibleTokenPacketData{
 								Sender:   "from",

@@ -20,11 +20,11 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgIBCChannelOpenInit", func() {
 		It("should parse Msg commands when there is MsgChannelOpenInit in the transaction", func() {
 			expected := `{
-  "name": "MsgChannelOpenInitCreated",
+  "name": "/ibc.core.channel.v1.MsgChannelOpenInit.Created",
   "version": 1,
   "height": 14,
   "uuid": "{UUID}",
-  "msgName": "MsgChannelOpenInit",
+  "msgName": "/ibc.core.channel.v1.MsgChannelOpenInit",
   "txHash": "310C7A5DE69CABB2175A2CBD417A2BFBA105C030941663F3F8809BBA2A6D810D",
   "msgIndex": 0,
   "params": {

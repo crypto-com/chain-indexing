@@ -10,8 +10,8 @@ import (
 )
 
 const MSG_IBC_CHANNEL_OPEN_CONFIRM = "/ibc.core.channel.v1.MsgChannelOpenConfirm"
-const MSG_IBC_CHANNEL_OPEN_CONFIRM_CREATED = "MsgChannelOpenConfirmCreated"
-const MSG_IBC_CHANNEL_OPEN_CONFIRM_FAILED = "MsgChannelOpenConfirmFailed"
+const MSG_IBC_CHANNEL_OPEN_CONFIRM_CREATED = "/ibc.core.channel.v1.MsgChannelOpenConfirm.Created"
+const MSG_IBC_CHANNEL_OPEN_CONFIRM_FAILED = "/ibc.core.channel.v1.MsgChannelOpenConfirm.Failed"
 
 type MsgIBCChannelOpenConfirm struct {
 	MsgBase
@@ -26,8 +26,6 @@ func NewMsgIBCChannelOpenConfirm(
 	return &MsgIBCChannelOpenConfirm{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_CHANNEL_OPEN_CONFIRM,
-			MsgSuccess:      MSG_IBC_CHANNEL_OPEN_CONFIRM_CREATED,
-			MsgFailed:       MSG_IBC_CHANNEL_OPEN_CONFIRM_FAILED,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

@@ -20,11 +20,11 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgIBCCreateSolomachineClient", func() {
 		It("should parse Msg commands when there is MsgCreateClient in the transaction", func() {
 			expected := `{
-            "name": "MsgCreateClientCreated",
+            "name": "/ibc.core.client.v1.MsgCreateClient.Created",
             "version": 1,
             "height": 14791,
             "uuid": "{UUID}",
-            "msgName": "MsgCreateClient",
+            "msgName": "/ibc.core.client.v1.MsgCreateClient",
             "txHash": "0DB632201805BC399035F0B0CD0E1DABC061E5209D8A709EC0A2B29B1A306BA5",
             "msgIndex": 0,
             "params": {

@@ -87,7 +87,6 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				&event_usecase.MsgSend{
 					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
 						MsgName: event_usecase.MSG_SEND,
-						MsgType: event_usecase.MSG_SEND,
 						Version: 1,
 						MsgCommonParams: event_usecase.MsgCommonParams{
 							BlockHeight: 1,
@@ -122,7 +121,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"FromAddress:MsgSend",
+					"FromAddress:/cosmos.bank.v1beta1.MsgSend",
 					int64(1),
 				).Return(nil)
 
@@ -134,7 +133,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"ToAddress:MsgSend",
+					"ToAddress:/cosmos.bank.v1beta1.MsgSend",
 					int64(1),
 				).Return(nil)
 
@@ -159,7 +158,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						Data: &event_usecase.MsgSend{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgSendCreated",
+									EventName:    "/cosmos.bank.v1beta1.MsgSend.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
@@ -259,7 +258,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"InputAddress:MsgMultiSend",
+					"InputAddress:/cosmos.bank.v1beta1.MsgMultiSend",
 					int64(1),
 				).Return(nil)
 
@@ -271,7 +270,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"OutputAddress:MsgMultiSend",
+					"OutputAddress:/cosmos.bank.v1beta1.MsgMultiSend",
 					int64(1),
 				).Return(nil)
 
@@ -292,16 +291,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgMultiSend",
+						MessageType:     "/cosmos.bank.v1beta1.MsgMultiSend",
 						Data: &event_usecase.MsgMultiSend{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgMultiSendCreated",
+									EventName:    "/cosmos.bank.v1beta1.MsgMultiSend.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgMultiSend",
+								MsgName:   "/cosmos.bank.v1beta1.MsgMultiSend",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -392,7 +391,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"DelegatorAddress:MsgSetWithdrawAddress",
+					"DelegatorAddress:/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
 					int64(1),
 				).Return(nil)
 
@@ -404,7 +403,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"WithdrawAddress:MsgSetWithdrawAddress",
+					"WithdrawAddress:/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
 					int64(1),
 				).Return(nil)
 
@@ -425,16 +424,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgSetWithdrawAddress",
+						MessageType:     "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
 						Data: &event_usecase.MsgSetWithdrawAddress{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgSetWithdrawAddressCreated",
+									EventName:    "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgSetWithdrawAddress",
+								MsgName:   "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -514,7 +513,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"DelegatorAddress:MsgWithdrawDelegatorReward",
+					"DelegatorAddress:/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
 					int64(1),
 				).Return(nil)
 
@@ -535,16 +534,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgWithdrawDelegatorReward",
+						MessageType:     "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
 						Data: &event_usecase.MsgWithdrawDelegatorReward{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgWithdrawDelegatorRewardCreated",
+									EventName:    "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgWithdrawDelegatorReward",
+								MsgName:   "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -630,7 +629,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"RecipientAddress:MsgWithdrawValidatorCommission",
+					"RecipientAddress:/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission",
 					int64(1),
 				).Return(nil)
 
@@ -651,16 +650,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgWithdrawValidatorCommission",
+						MessageType:     "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission",
 						Data: &event_usecase.MsgWithdrawValidatorCommission{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgWithdrawValidatorCommissionCreated",
+									EventName:    "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgWithdrawValidatorCommission",
+								MsgName:   "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -742,7 +741,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Depositor:MsgFundCommunityPool",
+					"Depositor:/cosmos.distribution.v1beta1.MsgFundCommunityPool",
 					int64(1),
 				).Return(nil)
 
@@ -763,16 +762,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgFundCommunityPool",
+						MessageType:     "/cosmos.distribution.v1beta1.MsgFundCommunityPool",
 						Data: &event_usecase.MsgFundCommunityPool{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgFundCommunityPoolCreated",
+									EventName:    "/cosmos.distribution.v1beta1.MsgFundCommunityPool.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgFundCommunityPool",
+								MsgName:   "/cosmos.distribution.v1beta1.MsgFundCommunityPool",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -866,7 +865,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"ProposerAddress:MsgSubmitParamUpdateProposal",
+					"ProposerAddress:/cosmos.params.v1beta1.ParameterChangeProposal",
 					int64(1),
 				).Return(nil)
 
@@ -887,16 +886,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgSubmitParamUpdateProposal",
+						MessageType:     "/cosmos.params.v1beta1.ParameterChangeProposal",
 						Data: &event_usecase.MsgSubmitParamChangeProposal{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgSubmitParamUpdateProposalCreated",
+									EventName:    "/cosmos.params.v1beta1.ParameterChangeProposal.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgSubmitParamUpdateProposal",
+								MsgName:   "/cosmos.params.v1beta1.ParameterChangeProposal",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -1005,7 +1004,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"ProposerAddress:MsgSubmitCommunityPoolSpendProposal",
+					"ProposerAddress:/cosmos.distribution.v1beta1.CommunityPoolSpendProposal",
 					int64(1),
 				).Return(nil)
 
@@ -1026,16 +1025,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgSubmitCommunityPoolSpendProposal",
+						MessageType:     "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal",
 						Data: &event_usecase.MsgSubmitCommunityPoolSpendProposal{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgSubmitCommunityPoolSpendProposalCreated",
+									EventName:    "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgSubmitCommunityPoolSpendProposal",
+								MsgName:   "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -1137,7 +1136,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"ProposerAddress:MsgSubmitCancelSoftwareUpgradeProposal",
+					"ProposerAddress:/cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal",
 					int64(1),
 				).Return(nil)
 
@@ -1158,16 +1157,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgSubmitCancelSoftwareUpgradeProposal",
+						MessageType:     "/cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal",
 						Data: &event_usecase.MsgSubmitCancelSoftwareUpgradeProposal{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgSubmitCancelSoftwareUpgradeProposalCreated",
+									EventName:    "/cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgSubmitCancelSoftwareUpgradeProposal",
+								MsgName:   "/cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -1255,7 +1254,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Depositor:MsgDeposit",
+					"Depositor:/cosmos.gov.v1beta1.MsgDeposit",
 					int64(1),
 				).Return(nil)
 
@@ -1276,16 +1275,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgDeposit",
+						MessageType:     "/cosmos.gov.v1beta1.MsgDeposit",
 						Data: &event_usecase.MsgDeposit{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgDepositCreated",
+									EventName:    "/cosmos.gov.v1beta1.MsgDeposit.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgDeposit",
+								MsgName:   "/cosmos.gov.v1beta1.MsgDeposit",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -1361,7 +1360,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Voter:MsgVote",
+					"Voter:/cosmos.gov.v1beta1.MsgVote",
 					int64(1),
 				).Return(nil)
 
@@ -1382,16 +1381,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgVote",
+						MessageType:     "/cosmos.gov.v1beta1.MsgVote",
 						Data: &event_usecase.MsgVote{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgVoteCreated",
+									EventName:    "/cosmos.gov.v1beta1.MsgVote.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgVote",
+								MsgName:   "/cosmos.gov.v1beta1.MsgVote",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -1479,7 +1478,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"DelegatorAddress:MsgCreateValidator",
+					"DelegatorAddress:/cosmos.staking.v1beta1.MsgCreateValidator",
 					int64(1),
 				).Return(nil)
 
@@ -1500,16 +1499,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgCreateValidator",
+						MessageType:     "/cosmos.staking.v1beta1.MsgCreateValidator",
 						Data: &event_usecase.MsgCreateValidator{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgCreateValidatorCreated",
+									EventName:    "/cosmos.staking.v1beta1.MsgCreateValidator.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgCreateValidator",
+								MsgName:   "/cosmos.staking.v1beta1.MsgCreateValidator",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -1604,7 +1603,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"accountaddressprefix1fmprm0sjy6lz9llv7rltn0v2azzwcwzvgd99ce:MsgEditValidator",
+					"accountaddressprefix1fmprm0sjy6lz9llv7rltn0v2azzwcwzvgd99ce:/cosmos.staking.v1beta1.MsgEditValidator",
 					int64(1),
 				).Return(nil)
 
@@ -1625,16 +1624,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgEditValidator",
+						MessageType:     "/cosmos.staking.v1beta1.MsgEditValidator",
 						Data: &event_usecase.MsgEditValidator{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgEditValidatorCreated",
+									EventName:    "/cosmos.staking.v1beta1.MsgEditValidator.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgEditValidator",
+								MsgName:   "/cosmos.staking.v1beta1.MsgEditValidator",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -1719,7 +1718,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"DelegatorAddress:MsgDelegate",
+					"DelegatorAddress:/cosmos.staking.v1beta1.MsgDelegate",
 					int64(1),
 				).Return(nil)
 
@@ -1740,16 +1739,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgDelegate",
+						MessageType:     "/cosmos.staking.v1beta1.MsgDelegate",
 						Data: &event_usecase.MsgDelegate{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgDelegateCreated",
+									EventName:    "/cosmos.staking.v1beta1.MsgDelegate.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgDelegate",
+								MsgName:   "/cosmos.staking.v1beta1.MsgDelegate",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -1835,7 +1834,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"DelegatorAddress:MsgUndelegate",
+					"DelegatorAddress:/cosmos.staking.v1beta1.MsgUndelegate",
 					int64(1),
 				).Return(nil)
 
@@ -1856,16 +1855,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgUndelegate",
+						MessageType:     "/cosmos.staking.v1beta1.MsgUndelegate",
 						Data: &event_usecase.MsgUndelegate{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgUndelegateCreated",
+									EventName:    "/cosmos.staking.v1beta1.MsgUndelegate.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgUndelegate",
+								MsgName:   "/cosmos.staking.v1beta1.MsgUndelegate",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -1952,7 +1951,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"DelegatorAddress:MsgBeginRedelegate",
+					"DelegatorAddress:/cosmos.staking.v1beta1.MsgBeginRedelegate",
 					int64(1),
 				).Return(nil)
 
@@ -1973,16 +1972,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgBeginRedelegate",
+						MessageType:     "/cosmos.staking.v1beta1.MsgBeginRedelegate",
 						Data: &event_usecase.MsgBeginRedelegate{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgBeginRedelegateCreated",
+									EventName:    "/cosmos.staking.v1beta1.MsgBeginRedelegate.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgBeginRedelegate",
+								MsgName:   "/cosmos.staking.v1beta1.MsgBeginRedelegate",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -2059,7 +2058,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"accountaddressprefix1fmprm0sjy6lz9llv7rltn0v2azzwcwzvgd99ce:MsgUnjail",
+					"accountaddressprefix1fmprm0sjy6lz9llv7rltn0v2azzwcwzvgd99ce:/cosmos.slashing.v1beta1.MsgUnjail",
 					int64(1),
 				).Return(nil)
 
@@ -2080,16 +2079,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgUnjail",
+						MessageType:     "/cosmos.slashing.v1beta1.MsgUnjail",
 						Data: &event_usecase.MsgUnjail{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgUnjailCreated",
+									EventName:    "/cosmos.slashing.v1beta1.MsgUnjail.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgUnjail",
+								MsgName:   "/cosmos.slashing.v1beta1.MsgUnjail",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -2159,7 +2158,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:MsgIssueDenom",
+					"Sender:/chainmain.nft.v1.MsgIssueDenom",
 					int64(1),
 				).Return(nil)
 
@@ -2180,16 +2179,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgIssueDenom",
+						MessageType:     "/chainmain.nft.v1.MsgIssueDenom",
 						Data: &event_usecase.MsgNFTIssueDenom{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgIssueDenomCreated",
+									EventName:    "/chainmain.nft.v1.MsgIssueDenom.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgIssueDenom",
+								MsgName:   "/chainmain.nft.v1.MsgIssueDenom",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -2265,7 +2264,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:MsgMintNFT",
+					"Sender:/chainmain.nft.v1.MsgMintNFT",
 					int64(1),
 				).Return(nil)
 
@@ -2277,7 +2276,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Recipient:MsgMintNFT",
+					"Recipient:/chainmain.nft.v1.MsgMintNFT",
 					int64(1),
 				).Return(nil)
 
@@ -2298,16 +2297,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgMintNFT",
+						MessageType:     "/chainmain.nft.v1.MsgMintNFT",
 						Data: &event_usecase.MsgNFTMintNFT{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgMintNFTCreated",
+									EventName:    "/chainmain.nft.v1.MsgMintNFT.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgMintNFT",
+								MsgName:   "/chainmain.nft.v1.MsgMintNFT",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -2383,7 +2382,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:MsgTransferNFT",
+					"Sender:/chainmain.nft.v1.MsgTransferNFT",
 					int64(1),
 				).Return(nil)
 
@@ -2395,7 +2394,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Recipient:MsgTransferNFT",
+					"Recipient:/chainmain.nft.v1.MsgTransferNFT",
 					int64(1),
 				).Return(nil)
 
@@ -2416,16 +2415,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgTransferNFT",
+						MessageType:     "/chainmain.nft.v1.MsgTransferNFT",
 						Data: &event_usecase.MsgNFTTransferNFT{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgTransferNFTCreated",
+									EventName:    "/chainmain.nft.v1.MsgTransferNFT.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgTransferNFT",
+								MsgName:   "/chainmain.nft.v1.MsgTransferNFT",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -2500,7 +2499,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:MsgEditNFT",
+					"Sender:/chainmain.nft.v1.MsgEditNFT",
 					int64(1),
 				).Return(nil)
 
@@ -2521,16 +2520,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgEditNFT",
+						MessageType:     "/chainmain.nft.v1.MsgEditNFT",
 						Data: &event_usecase.MsgNFTEditNFT{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgEditNFTCreated",
+									EventName:    "/chainmain.nft.v1.MsgEditNFT.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgEditNFT",
+								MsgName:   "/chainmain.nft.v1.MsgEditNFT",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -2604,7 +2603,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:MsgBurnNFT",
+					"Sender:/chainmain.nft.v1.MsgBurnNFT",
 					int64(1),
 				).Return(nil)
 
@@ -2625,16 +2624,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgBurnNFT",
+						MessageType:     "/chainmain.nft.v1.MsgBurnNFT",
 						Data: &event_usecase.MsgNFTBurnNFT{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgBurnNFTCreated",
+									EventName:    "/chainmain.nft.v1.MsgBurnNFT.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgBurnNFT",
+								MsgName:   "/chainmain.nft.v1.MsgBurnNFT",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -2708,7 +2707,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:MsgCreateClient",
+					"Signer:/ibc.core.client.v1.MsgCreateClient",
 					int64(1),
 				).Return(nil)
 
@@ -2729,16 +2728,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgCreateClient",
+						MessageType:     "/ibc.core.client.v1.MsgCreateClient",
 						Data: &event_usecase.MsgIBCCreateClient{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgCreateClientCreated",
+									EventName:    "/ibc.core.client.v1.MsgCreateClient.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgCreateClient",
+								MsgName:   "/ibc.core.client.v1.MsgCreateClient",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -2815,7 +2814,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:MsgUpdateClient",
+					"Signer:/ibc.core.client.v1.MsgUpdateClient",
 					int64(1),
 				).Return(nil)
 
@@ -2836,16 +2835,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgUpdateClient",
+						MessageType:     "/ibc.core.client.v1.MsgUpdateClient",
 						Data: &event_usecase.MsgIBCUpdateClient{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgUpdateClientCreated",
+									EventName:    "/ibc.core.client.v1.MsgUpdateClient.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgUpdateClient",
+								MsgName:   "/ibc.core.client.v1.MsgUpdateClient",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -2922,7 +2921,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:MsgConnectionOpenInit",
+					"Signer:/ibc.core.connection.v1.MsgConnectionOpenInit",
 					int64(1),
 				).Return(nil)
 
@@ -2943,16 +2942,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgConnectionOpenInit",
+						MessageType:     "/ibc.core.connection.v1.MsgConnectionOpenInit",
 						Data: &event_usecase.MsgIBCConnectionOpenInit{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgConnectionOpenInitCreated",
+									EventName:    "/ibc.core.connection.v1.MsgConnectionOpenInit.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgConnectionOpenInit",
+								MsgName:   "/ibc.core.connection.v1.MsgConnectionOpenInit",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -3028,7 +3027,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:MsgConnectionOpenAck",
+					"Signer:/ibc.core.connection.v1.MsgConnectionOpenAck",
 					int64(1),
 				).Return(nil)
 
@@ -3049,16 +3048,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgConnectionOpenAck",
+						MessageType:     "/ibc.core.connection.v1.MsgConnectionOpenAck",
 						Data: &event_usecase.MsgIBCConnectionOpenAck{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgConnectionOpenAckCreated",
+									EventName:    "/ibc.core.connection.v1.MsgConnectionOpenAck.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgConnectionOpenAck",
+								MsgName:   "/ibc.core.connection.v1.MsgConnectionOpenAck",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -3133,7 +3132,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:MsgConnectionOpenTry",
+					"Signer:/ibc.core.connection.v1.MsgConnectionOpenTry",
 					int64(1),
 				).Return(nil)
 
@@ -3154,16 +3153,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgConnectionOpenTry",
+						MessageType:     "/ibc.core.connection.v1.MsgConnectionOpenTry",
 						Data: &event_usecase.MsgIBCConnectionOpenTry{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgConnectionOpenTryCreated",
+									EventName:    "/ibc.core.connection.v1.MsgConnectionOpenTry.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgConnectionOpenTry",
+								MsgName:   "/ibc.core.connection.v1.MsgConnectionOpenTry",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -3238,7 +3237,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:MsgConnectionOpenConfirm",
+					"Signer:/ibc.core.connection.v1.MsgConnectionOpenConfirm",
 					int64(1),
 				).Return(nil)
 
@@ -3259,16 +3258,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgConnectionOpenConfirm",
+						MessageType:     "/ibc.core.connection.v1.MsgConnectionOpenConfirm",
 						Data: &event_usecase.MsgIBCConnectionOpenConfirm{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgConnectionOpenConfirmCreated",
+									EventName:    "/ibc.core.connection.v1.MsgConnectionOpenConfirm.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgConnectionOpenConfirm",
+								MsgName:   "/ibc.core.connection.v1.MsgConnectionOpenConfirm",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -3343,7 +3342,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:MsgChannelOpenInit",
+					"Signer:/ibc.core.channel.v1.MsgChannelOpenInit",
 					int64(1),
 				).Return(nil)
 
@@ -3364,16 +3363,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgChannelOpenInit",
+						MessageType:     "/ibc.core.channel.v1.MsgChannelOpenInit",
 						Data: &event_usecase.MsgIBCChannelOpenInit{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgChannelOpenInitCreated",
+									EventName:    "/ibc.core.channel.v1.MsgChannelOpenInit.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgChannelOpenInit",
+								MsgName:   "/ibc.core.channel.v1.MsgChannelOpenInit",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -3448,7 +3447,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:MsgChannelOpenAck",
+					"Signer:/ibc.core.channel.v1.MsgChannelOpenAck",
 					int64(1),
 				).Return(nil)
 
@@ -3469,16 +3468,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgChannelOpenAck",
+						MessageType:     "/ibc.core.channel.v1.MsgChannelOpenAck",
 						Data: &event_usecase.MsgIBCChannelOpenAck{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgChannelOpenAckCreated",
+									EventName:    "/ibc.core.channel.v1.MsgChannelOpenAck.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgChannelOpenAck",
+								MsgName:   "/ibc.core.channel.v1.MsgChannelOpenAck",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -3553,7 +3552,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:MsgChannelOpenTry",
+					"Signer:/ibc.core.channel.v1.MsgChannelOpenTry",
 					int64(1),
 				).Return(nil)
 
@@ -3574,16 +3573,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgChannelOpenTry",
+						MessageType:     "/ibc.core.channel.v1.MsgChannelOpenTry",
 						Data: &event_usecase.MsgIBCChannelOpenTry{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgChannelOpenTryCreated",
+									EventName:    "/ibc.core.channel.v1.MsgChannelOpenTry.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgChannelOpenTry",
+								MsgName:   "/ibc.core.channel.v1.MsgChannelOpenTry",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -3658,7 +3657,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:MsgChannelOpenConfirm",
+					"Signer:/ibc.core.channel.v1.MsgChannelOpenConfirm",
 					int64(1),
 				).Return(nil)
 
@@ -3679,16 +3678,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgChannelOpenConfirm",
+						MessageType:     "/ibc.core.channel.v1.MsgChannelOpenConfirm",
 						Data: &event_usecase.MsgIBCChannelOpenConfirm{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgChannelOpenConfirmCreated",
+									EventName:    "/ibc.core.channel.v1.MsgChannelOpenConfirm.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgChannelOpenConfirm",
+								MsgName:   "/ibc.core.channel.v1.MsgChannelOpenConfirm",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -3772,7 +3771,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:MsgAcknowledgement",
+					"Signer:/ibc.core.channel.v1.MsgAcknowledgement",
 					int64(1),
 				).Return(nil)
 
@@ -3784,7 +3783,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:MsgAcknowledgement",
+					"Sender:/ibc.core.channel.v1.MsgAcknowledgement",
 					int64(1),
 				).Return(nil)
 
@@ -3805,16 +3804,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgAcknowledgement",
+						MessageType:     "/ibc.core.channel.v1.MsgAcknowledgement",
 						Data: &event_usecase.MsgIBCAcknowledgement{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgAcknowledgementCreated",
+									EventName:    "/ibc.core.channel.v1.MsgAcknowledgement.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgAcknowledgement",
+								MsgName:   "/ibc.core.channel.v1.MsgAcknowledgement",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -3908,7 +3907,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:MsgRecvPacket",
+					"Signer:/ibc.core.channel.v1.MsgRecvPacket",
 					int64(1),
 				).Return(nil)
 
@@ -3920,7 +3919,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Receiver:MsgRecvPacket",
+					"Receiver:/ibc.core.channel.v1.MsgRecvPacket",
 					int64(1),
 				).Return(nil)
 
@@ -3941,16 +3940,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgRecvPacket",
+						MessageType:     "/ibc.core.channel.v1.MsgRecvPacket",
 						Data: &event_usecase.MsgIBCRecvPacket{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgRecvPacketCreated",
+									EventName:    "/ibc.core.channel.v1.MsgRecvPacket.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgRecvPacket",
+								MsgName:   "/ibc.core.channel.v1.MsgRecvPacket",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -4035,7 +4034,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:MsgTransfer",
+					"Sender:/ibc.applications.transfer.v1.MsgTransfer",
 					int64(1),
 				).Return(nil)
 
@@ -4056,16 +4055,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgTransfer",
+						MessageType:     "/ibc.applications.transfer.v1.MsgTransfer",
 						Data: &event_usecase.MsgIBCTransferTransfer{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgTransferCreated",
+									EventName:    "/ibc.applications.transfer.v1.MsgTransfer.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgTransfer",
+								MsgName:   "/ibc.applications.transfer.v1.MsgTransfer",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -4140,7 +4139,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:MsgTimeout",
+					"Signer:/ibc.core.channel.v1.MsgTimeout",
 					int64(1),
 				).Return(nil)
 
@@ -4161,16 +4160,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgTimeout",
+						MessageType:     "/ibc.core.channel.v1.MsgTimeout",
 						Data: &event_usecase.MsgIBCTimeout{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgTimeoutCreated",
+									EventName:    "/ibc.core.channel.v1.MsgTimeout.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgTimeout",
+								MsgName:   "/ibc.core.channel.v1.MsgTimeout",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -4245,7 +4244,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:MsgTimeoutOnClose",
+					"Signer:/ibc.core.channel.v1.MsgTimeoutOnClose",
 					int64(1),
 				).Return(nil)
 
@@ -4266,16 +4265,16 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgTimeoutOnClose",
+						MessageType:     "/ibc.core.channel.v1.MsgTimeoutOnClose",
 						Data: &event_usecase.MsgIBCTimeoutOnClose{
 							MsgBase: event_usecase.MsgBase{
 								Base: entity_event.Base{
-									EventName:    "MsgTimeoutOnCloseCreated",
+									EventName:    "/ibc.core.channel.v1.MsgTimeoutOnClose.Created",
 									EventVersion: 1,
 									BlockHeight:  1,
 									EventUUID:    "TESTUUID",
 								},
-								MsgName:   "MsgTimeoutOnClose",
+								MsgName:   "/ibc.core.channel.v1.MsgTimeoutOnClose",
 								MsgTxHash: "TxHash",
 								MsgIndex:  0,
 							},
@@ -4352,7 +4351,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:MsgChannelCloseInit",
+					"Signer:/ibc.core.channel.v1.MsgChannelCloseInit",
 					int64(1),
 				).Return(nil)
 
@@ -4373,7 +4372,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgChannelCloseInit",
+						MessageType:     "/ibc.core.channel.v1.MsgChannelCloseInit",
 						Data:            typedEvent,
 					},
 					[]string{"Signer"},
@@ -4443,7 +4442,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Granter:MsgGrant",
+					"Granter:/cosmos.authz.v1beta1.MsgGrant",
 					int64(1),
 				).Return(nil)
 
@@ -4455,7 +4454,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Grantee:MsgGrant",
+					"Grantee:/cosmos.authz.v1beta1.MsgGrant",
 					int64(1),
 				).Return(nil)
 
@@ -4476,7 +4475,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgGrant",
+						MessageType:     "/cosmos.authz.v1beta1.MsgGrant",
 						Data:            typedEvent,
 					},
 					[]string{"Granter", "Grantee"},
@@ -4546,7 +4545,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Granter:MsgRevoke",
+					"Granter:/cosmos.authz.v1beta1.MsgRevoke",
 					int64(1),
 				).Return(nil)
 
@@ -4558,7 +4557,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Grantee:MsgRevoke",
+					"Grantee:/cosmos.authz.v1beta1.MsgRevoke",
 					int64(1),
 				).Return(nil)
 
@@ -4579,7 +4578,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgRevoke",
+						MessageType:     "/cosmos.authz.v1beta1.MsgRevoke",
 						Data:            typedEvent,
 					},
 					[]string{"Granter", "Grantee"},
@@ -4648,7 +4647,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Grantee:MsgExec",
+					"Grantee:/cosmos.authz.v1beta1.MsgExec",
 					int64(1),
 				).Return(nil)
 
@@ -4669,7 +4668,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgExec",
+						MessageType:     "/cosmos.authz.v1beta1.MsgExec",
 						Data:            typedEvent,
 					},
 					[]string{"Grantee"},
@@ -4739,7 +4738,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Granter:MsgGrantAllowance",
+					"Granter:/cosmos.feegrant.v1beta1.MsgGrantAllowance",
 					int64(1),
 				).Return(nil)
 
@@ -4751,7 +4750,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Grantee:MsgGrantAllowance",
+					"Grantee:/cosmos.feegrant.v1beta1.MsgGrantAllowance",
 					int64(1),
 				).Return(nil)
 
@@ -4772,7 +4771,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgGrantAllowance",
+						MessageType:     "/cosmos.feegrant.v1beta1.MsgGrantAllowance",
 						Data:            typedEvent,
 					},
 					[]string{"Granter", "Grantee"},
@@ -4842,7 +4841,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Granter:MsgRevokeAllowance",
+					"Granter:/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
 					int64(1),
 				).Return(nil)
 
@@ -4854,7 +4853,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Grantee:MsgRevokeAllowance",
+					"Grantee:/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
 					int64(1),
 				).Return(nil)
 
@@ -4875,7 +4874,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgRevokeAllowance",
+						MessageType:     "/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
 						Data:            typedEvent,
 					},
 					[]string{"Granter", "Grantee"},
@@ -4945,7 +4944,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"FromAddress:MsgCreateVestingAccount",
+					"FromAddress:/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
 					int64(1),
 				).Return(nil)
 
@@ -4957,7 +4956,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"ToAddress:MsgCreateVestingAccount",
+					"ToAddress:/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
 					int64(1),
 				).Return(nil)
 
@@ -4978,7 +4977,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgCreateVestingAccount",
+						MessageType:     "/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
 						Data:            typedEvent,
 					},
 					[]string{"FromAddress", "ToAddress"},

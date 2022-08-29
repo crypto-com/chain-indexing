@@ -1,52 +1,54 @@
 # Governance Module Event List
-  - [event::MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_CREATED](#event_msg_submit_param_change_proposal_created)
-  - [event::MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_FAILED](#event_msg_submit_param_change_proposal_failed)
-  - [event::MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_CREATED](#event_msg_submit_community_pool_spend_proposal_created)
-  - [event::MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_FAILED](#event_msg_submit_community_pool_spend_proposal_failed)
-  - [event::MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_CREATED](#event_msg_submit_software_upgrade_proposal_created)
-  - [event::MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_FAILED](#event_msg_submit_software_upgrade_proposal_failed)
-  - [event::MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_CREATED](#event_msg_submit_cancel_software_upgrade_proposal_created)
-  - [event::MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_FAILED](#event_msg_submit_cancel_software_upgrade_proposal_failed)
-  - [event::MSG_DEPOSIT_CREATED](#event_msg_deposit_created)
-  - [event::MSG_DEPOSIT_FAILED](#event_msg_deposit_failed)
-  - [event::MSG_VOTE_CREATED](#event_msg_vote_created)
-  - [event::MSG_VOTE_FAILED](#event_msg_vote_failed)
-  - [event::PROPOSAL_ENDED](#event_proposal_ended)
-  - [event::PROPOSAL_INACTIVED](#event_proposal_inactived)
-  
+
+-   [event::MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_CREATED](#event_msg_submit_param_change_proposal_created)
+-   [event::MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_FAILED](#event_msg_submit_param_change_proposal_failed)
+-   [event::MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_CREATED](#event_msg_submit_community_pool_spend_proposal_created)
+-   [event::MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_FAILED](#event_msg_submit_community_pool_spend_proposal_failed)
+-   [event::MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_CREATED](#event_msg_submit_software_upgrade_proposal_created)
+-   [event::MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_FAILED](#event_msg_submit_software_upgrade_proposal_failed)
+-   [event::MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_CREATED](#event_msg_submit_cancel_software_upgrade_proposal_created)
+-   [event::MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_FAILED](#event_msg_submit_cancel_software_upgrade_proposal_failed)
+-   [event::MSG_DEPOSIT_CREATED](#event_msg_deposit_created)
+-   [event::MSG_DEPOSIT_FAILED](#event_msg_deposit_failed)
+-   [event::MSG_VOTE_CREATED](#event_msg_vote_created)
+-   [event::MSG_VOTE_FAILED](#event_msg_vote_failed)
+-   [event::PROPOSAL_ENDED](#event_proposal_ended)
+-   [event::PROPOSAL_INACTIVED](#event_proposal_inactived)
 
 ## event::MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_CREATED
-*Name* : MsgSubmitParamUpdateProposalCreated
 
-*Type* : [MsgBase](../README.md#MsgBase)
+_Name_ : /cosmos.params.v1beta1.ParameterChangeProposal.Created
 
-*Structure* : 
+_Type_ : [MsgBase](../README.md#MsgBase)
 
-| Key                          | Type            | Description                                                       |
-| ---------------------------- | --------------- | ----------------------------------------------------------------- |
-| `proposalId`                 | *string*        | *(Optional)* Proposal ID                                          |
-| `proposerAddress`            | *string*        | Proposer blockchain address                                       |
-| `initialDeposit`             | *string*        | Initially deposited CRO Amount in base unit                       |
-| `content`                    | *object*        | Content wrapper                                                   |
-| `content.title`              | *string*        | Content title indicating the change                               |
-| `content.@type`              | *string*        | Cosmos SDK type URL                                               |
-| `content.description`        | *string*        | Action description                                                |
-| `content.changes`            | *array(object)* | List of changes executed                                          |
-| `content.changes[].key`      | *string*        | change key                                                        |
-| `content.changes[].value`    | *string*        | change value. (Golang type: `json.RawMessage`)                    |
-| `content.changes[].subspace` | *string*        | change coding subspace                                            |
-| `msgName`                    | *string*        | Blockchain Message type . Value: `MsgSubmitParamUpdateProposal`   |
-| `txHash`                     | *string*        | TxID of the blockchain transaction containing the event           |
-| `msgIndex`                   | *int*           | message index on the block                                        |
-| `name`                       | *string*        | Specific Event Name. Value: `MsgSubmitParamUpdateProposalCreated` |
-| `version`                    | *int*           | Event Version. Value: `1`                                         |
-| `height`                     | *int64*         | Height of the block containing the transaction                    |
-| `uuid`                       | *string*        | Unique ID that is assigned on event creation                      |
+_Structure_ :
 
-*Example* :  
+| Key                          | Type            | Description                                                                          |
+| ---------------------------- | --------------- | ------------------------------------------------------------------------------------ |
+| `proposalId`                 | _string_        | _(Optional)_ Proposal ID                                                             |
+| `proposerAddress`            | _string_        | Proposer blockchain address                                                          |
+| `initialDeposit`             | _string_        | Initially deposited CRO Amount in base unit                                          |
+| `content`                    | _object_        | Content wrapper                                                                      |
+| `content.title`              | _string_        | Content title indicating the change                                                  |
+| `content.@type`              | _string_        | Cosmos SDK type URL                                                                  |
+| `content.description`        | _string_        | Action description                                                                   |
+| `content.changes`            | _array(object)_ | List of changes executed                                                             |
+| `content.changes[].key`      | _string_        | change key                                                                           |
+| `content.changes[].value`    | _string_        | change value. (Golang type: `json.RawMessage`)                                       |
+| `content.changes[].subspace` | _string_        | change coding subspace                                                               |
+| `msgName`                    | _string_        | Blockchain Message type . Value: `MsgSubmitParamUpdateProposal`                      |
+| `txHash`                     | _string_        | TxID of the blockchain transaction containing the event                              |
+| `msgIndex`                   | _int_           | message index on the block                                                           |
+| `name`                       | _string_        | Specific Event Name. Value: `/cosmos.params.v1beta1.ParameterChangeProposal.Created` |
+| `version`                    | _int_           | Event Version. Value: `1`                                                            |
+| `height`                     | _int64_         | Height of the block containing the transaction                                       |
+| `uuid`                       | _string_        | Unique ID that is assigned on event creation                                         |
+
+_Example_ :
+
 ```json
 {
-    "name": "MsgSubmitParamUpdateProposalCreated",
+    "name": "/cosmos.params.v1beta1.ParameterChangeProposal.Created",
     "uuid": "0f45f978-0478-4232-83bf-b3525c7b45e6",
     "height": 463,
     "txHash": "0DD5DE992A07F232F735FCA5E634347DE4EBAB7E2FFA75BFDBEC117DA42E2802",
@@ -69,232 +71,241 @@
     "initialDeposit": "0",
     "proposerAddress": "tcro1j7pej8kplem4wt50p4hfvndhuw5jprxxn5625q"
 }
-```  
+```
 
 ## event::MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_FAILED
-*Name* : MsgSubmitParamUpdateProposalFailed
 
-*Type* : [MsgBase](../README.md#MsgBase)
+_Name_ : /cosmos.params.v1beta1.ParameterChangeProposal.Failed
 
-*Structure* : 
+_Type_ : [MsgBase](../README.md#MsgBase)
 
-| Key                          | Type            | Description                                                      |
-| ---------------------------- | --------------- | ---------------------------------------------------------------- |
-| `proposalId`                 | *string*        | *(Optional)* Proposal ID                                         |
-| `proposerAddress`            | *string*        | Proposer blockchain address                                      |
-| `initialDeposit`             | *string*        | Initially deposited CRO Amount in base unit                      |
-| `content`                    | *object*        | Content wrapper                                                  |
-| `content.@title`             | *string*        | Content title indicating the change                              |
-| `content.type`               | *string*        | Cosmos SDK type URL                                              |
-| `content.description`        | *string*        | Action description                                               |
-| `content.changes`            | *array(object)* | List of changes executed                                         |
-| `content.changes[].key`      | *string*        | change key                                                       |
-| `content.changes[].value`    | *string*        | change value. (Golang type: `json.RawMessage`)                   |
-| `content.changes[].subspace` | *string*        | change coding subspace                                           |
-| `msgName`                    | *string*        | Blockchain Message type . Value: `MsgSubmitParamUpdateProposal`  |
-| `txHash`                     | *string*        | TxID of the blockchain transaction containing the event          |
-| `msgIndex`                   | *int*           | message index on the block                                       |
-| `name`                       | *string*        | Specific Event Name. Value: `MsgSubmitParamUpdateProposalFailed` |
-| `version`                    | *int*           | Event Version. Value: `1`                                        |
-| `height`                     | *int64*         | Height of the block containing the transaction                   |
-| `uuid`                       | *string*        | Unique ID that is assigned on event creation                     |
+_Structure_ :
 
-*Example* : T.B.D  
+| Key                          | Type            | Description                                                                         |
+| ---------------------------- | --------------- | ----------------------------------------------------------------------------------- |
+| `proposalId`                 | _string_        | _(Optional)_ Proposal ID                                                            |
+| `proposerAddress`            | _string_        | Proposer blockchain address                                                         |
+| `initialDeposit`             | _string_        | Initially deposited CRO Amount in base unit                                         |
+| `content`                    | _object_        | Content wrapper                                                                     |
+| `content.@title`             | _string_        | Content title indicating the change                                                 |
+| `content.type`               | _string_        | Cosmos SDK type URL                                                                 |
+| `content.description`        | _string_        | Action description                                                                  |
+| `content.changes`            | _array(object)_ | List of changes executed                                                            |
+| `content.changes[].key`      | _string_        | change key                                                                          |
+| `content.changes[].value`    | _string_        | change value. (Golang type: `json.RawMessage`)                                      |
+| `content.changes[].subspace` | _string_        | change coding subspace                                                              |
+| `msgName`                    | _string_        | Blockchain Message type . Value: `MsgSubmitParamUpdateProposal`                     |
+| `txHash`                     | _string_        | TxID of the blockchain transaction containing the event                             |
+| `msgIndex`                   | _int_           | message index on the block                                                          |
+| `name`                       | _string_        | Specific Event Name. Value: `/cosmos.params.v1beta1.ParameterChangeProposal.Failed` |
+| `version`                    | _int_           | Event Version. Value: `1`                                                           |
+| `height`                     | _int64_         | Height of the block containing the transaction                                      |
+| `uuid`                       | _string_        | Unique ID that is assigned on event creation                                        |
+
+_Example_ : T.B.D
 
 ## event::MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_CREATED
-*Name* : MsgSubmitCommunityPoolSpendProposalCreated
 
-*Type* : [MsgBase](../README.md#MsgBase)
+_Name_ : /cosmos.distribution.v1beta1.CommunityPoolSpendProposal.Created
 
-*Structure* : 
+_Type_ : [MsgBase](../README.md#MsgBase)
 
-| Key                        | Type     | Description                                                              |
-| -------------------------- | -------- | ------------------------------------------------------------------------ |
-| `proposalId`               | *string* | *(Optional)* Proposal ID                                                 |
-| `proposerAddress`          | *string* | Proposer blockchain address                                              |
-| `initialDeposit`           | *string* | Initially deposited CRO Amount in base unit                              |
-| `content`                  | *object* | Content wrapper                                                          |
-| `content.@type`            | *string* | Cosmos SDK type URL                                                      |
-| `content.title`            | *string* | Content title indicating the change                                      |
-| `content.description`      | *string* | Action description                                                       |
-| `content.recipientAddress` | *string* | Recipient blockchain address                                             |
-| `content.amount`           | *string* | Recipient CRO Amount in base unit                                        |
-| `msgName`                  | *string* | Blockchain Message type . Value: `MsgSubmitCommunityPoolSpendProposal`   |
-| `txHash`                   | *string* | TxID of the blockchain transaction containing the event                  |
-| `msgIndex`                 | *int*    | message index on the block                                               |
-| `name`                     | *string* | Specific Event Name. Value: `MsgSubmitCommunityPoolSpendProposalCreated` |
-| `version`                  | *int*    | Event Version. Value: `1`                                                |
-| `height`                   | *int64*  | Height of the block containing the transaction                           |
-| `uuid`                     | *string* | Unique ID that is assigned on event creation                             |
+_Structure_ :
 
-*Example* : T.B.D  
+| Key                        | Type     | Description                                                                                   |
+| -------------------------- | -------- | --------------------------------------------------------------------------------------------- |
+| `proposalId`               | _string_ | _(Optional)_ Proposal ID                                                                      |
+| `proposerAddress`          | _string_ | Proposer blockchain address                                                                   |
+| `initialDeposit`           | _string_ | Initially deposited CRO Amount in base unit                                                   |
+| `content`                  | _object_ | Content wrapper                                                                               |
+| `content.@type`            | _string_ | Cosmos SDK type URL                                                                           |
+| `content.title`            | _string_ | Content title indicating the change                                                           |
+| `content.description`      | _string_ | Action description                                                                            |
+| `content.recipientAddress` | _string_ | Recipient blockchain address                                                                  |
+| `content.amount`           | _string_ | Recipient CRO Amount in base unit                                                             |
+| `msgName`                  | _string_ | Blockchain Message type . Value: `MsgSubmitCommunityPoolSpendProposal`                        |
+| `txHash`                   | _string_ | TxID of the blockchain transaction containing the event                                       |
+| `msgIndex`                 | _int_    | message index on the block                                                                    |
+| `name`                     | _string_ | Specific Event Name. Value: `/cosmos.distribution.v1beta1.CommunityPoolSpendProposal.Created` |
+| `version`                  | _int_    | Event Version. Value: `1`                                                                     |
+| `height`                   | _int64_  | Height of the block containing the transaction                                                |
+| `uuid`                     | _string_ | Unique ID that is assigned on event creation                                                  |
+
+_Example_ : T.B.D
 
 ## event::MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_FAILED
-*Name* : MsgSubmitCommunityPoolSpendProposalFailed
 
-*Type* : [MsgBase](../README.md#MsgBase)
+_Name_ : /cosmos.distribution.v1beta1.CommunityPoolSpendProposal.Failed
 
-*Structure* : 
+_Type_ : [MsgBase](../README.md#MsgBase)
 
-| Key                        | Type     | Description                                                             |
-| -------------------------- | -------- | ----------------------------------------------------------------------- |
-| `proposalId`               | *string* | *(Optional)* Proposal ID                                                |
-| `proposerAddress`          | *string* | Proposer blockchain address                                             |
-| `initialDeposit`           | *string* | Initially deposited CRO Amount in base unit                             |
-| `content`                  | *object* | Content wrapper                                                         |
-| `content.@type`            | *string* | Cosmos SDK type URL                                                     |
-| `content.title`            | *string* | Content title indicating the change                                     |
-| `content.description`      | *string* | Action description                                                      |
-| `content.recipientAddress` | *string* | Recipient blockchain address                                            |
-| `content.amount`           | *string* | Recipient CRO Amount in base unit                                       |
-| `msgName`                  | *string* | Blockchain Message type . Value: `MsgSubmitCommunityPoolSpendProposal`  |
-| `txHash`                   | *string* | TxID of the blockchain transaction containing the event                 |
-| `msgIndex`                 | *int*    | message index on the block                                              |
-| `name`                     | *string* | Specific Event Name. Value: `MsgSubmitCommunityPoolSpendProposalFailed` |
-| `version`                  | *int*    | Event Version. Value: `1`                                               |
-| `height`                   | *int64*  | Height of the block containing the transaction                          |
-| `uuid`                     | *string* | Unique ID that is assigned on event creation                            |
+_Structure_ :
 
-*Example* : T.B.D  
+| Key                        | Type     | Description                                                                                  |
+| -------------------------- | -------- | -------------------------------------------------------------------------------------------- |
+| `proposalId`               | _string_ | _(Optional)_ Proposal ID                                                                     |
+| `proposerAddress`          | _string_ | Proposer blockchain address                                                                  |
+| `initialDeposit`           | _string_ | Initially deposited CRO Amount in base unit                                                  |
+| `content`                  | _object_ | Content wrapper                                                                              |
+| `content.@type`            | _string_ | Cosmos SDK type URL                                                                          |
+| `content.title`            | _string_ | Content title indicating the change                                                          |
+| `content.description`      | _string_ | Action description                                                                           |
+| `content.recipientAddress` | _string_ | Recipient blockchain address                                                                 |
+| `content.amount`           | _string_ | Recipient CRO Amount in base unit                                                            |
+| `msgName`                  | _string_ | Blockchain Message type . Value: `MsgSubmitCommunityPoolSpendProposal`                       |
+| `txHash`                   | _string_ | TxID of the blockchain transaction containing the event                                      |
+| `msgIndex`                 | _int_    | message index on the block                                                                   |
+| `name`                     | _string_ | Specific Event Name. Value: `/cosmos.distribution.v1beta1.CommunityPoolSpendProposal.Failed` |
+| `version`                  | _int_    | Event Version. Value: `1`                                                                    |
+| `height`                   | _int64_  | Height of the block containing the transaction                                               |
+| `uuid`                     | _string_ | Unique ID that is assigned on event creation                                                 |
+
+_Example_ : T.B.D
 
 ## event::MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_CREATED
-*Name* : MsgSubmitSoftwareUpgradeProposalCreated
 
-*Type* : [MsgBase](../README.md#MsgBase)
+_Name_ : /cosmos.upgrade.v1beta1.SoftwareUpgradeProposal.Created
 
-*Structure* : 
+_Type_ : [MsgBase](../README.md#MsgBase)
 
-| Key                   | Type     | Description                                                           |
-| --------------------- | -------- | --------------------------------------------------------------------- |
-| `proposalId`          | *string* | *(Optional)* Proposal ID                                              |
-| `proposerAddress`     | *string* | Proposer blockchain address                                           |
-| `initialDeposit`      | *bigint* | Initially deposited CRO Amount in base unit                           |
-| `content`             | *object* | Content wrapper                                                       |
-| `content.@type`       | *string* | Cosmos SDK type URL                                                   |
-| `content.title`       | *string* | Content title indicating the change                                   |
-| `content.description` | *string* | Action description                                                    |
-| `content.plan`        | *object* | Content plan details wrapper                                          |
-| `content.plan.name`   | *string* | Plan name                                                             |
-| `content.plan.title`  | *int64*  | Plan Title. Golang type: `utctime.UTCTime`                            |
-| `content.plan.height` | *int64*  | Plan proposal block height                                            |
-| `content.plan.info`   | *string* | Plan information                                                      |
-| `msgName`             | *string* | Blockchain Message type . Value: `MsgSubmitSoftwareUpgradeProposal`   |
-| `txHash`              | *string* | TxID of the blockchain transaction containing the event               |
-| `msgIndex`            | *int*    | message index on the block                                            |
-| `name`                | *string* | Specific Event Name. Value: `MsgSubmitSoftwareUpgradeProposalCreated` |
-| `version`             | *int*    | Event Version. Value: `1`                                             |
-| `height`              | *int64*  | Height of the block containing the transaction                        |
-| `uuid`                | *string* | Unique ID that is assigned on event creation                          |
+_Structure_ :
 
-*Example* : T.B.D  
+| Key                   | Type     | Description                                                                           |
+| --------------------- | -------- | ------------------------------------------------------------------------------------- |
+| `proposalId`          | _string_ | _(Optional)_ Proposal ID                                                              |
+| `proposerAddress`     | _string_ | Proposer blockchain address                                                           |
+| `initialDeposit`      | _bigint_ | Initially deposited CRO Amount in base unit                                           |
+| `content`             | _object_ | Content wrapper                                                                       |
+| `content.@type`       | _string_ | Cosmos SDK type URL                                                                   |
+| `content.title`       | _string_ | Content title indicating the change                                                   |
+| `content.description` | _string_ | Action description                                                                    |
+| `content.plan`        | _object_ | Content plan details wrapper                                                          |
+| `content.plan.name`   | _string_ | Plan name                                                                             |
+| `content.plan.title`  | _int64_  | Plan Title. Golang type: `utctime.UTCTime`                                            |
+| `content.plan.height` | _int64_  | Plan proposal block height                                                            |
+| `content.plan.info`   | _string_ | Plan information                                                                      |
+| `msgName`             | _string_ | Blockchain Message type . Value: `MsgSubmitSoftwareUpgradeProposal`                   |
+| `txHash`              | _string_ | TxID of the blockchain transaction containing the event                               |
+| `msgIndex`            | _int_    | message index on the block                                                            |
+| `name`                | _string_ | Specific Event Name. Value: `/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal.Created` |
+| `version`             | _int_    | Event Version. Value: `1`                                                             |
+| `height`              | _int64_  | Height of the block containing the transaction                                        |
+| `uuid`                | _string_ | Unique ID that is assigned on event creation                                          |
+
+_Example_ : T.B.D
 
 ## event::MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_FAILED
-*Name* : MsgSubmitSoftwareUpgradeProposalFailed
 
-*Type* : [MsgBase](../README.md#MsgBase)
+_Name_ : /cosmos.upgrade.v1beta1.SoftwareUpgradeProposal.Failed
 
-*Structure* : 
+_Type_ : [MsgBase](../README.md#MsgBase)
 
-| Key                   | Type     | Description                                                          |
-| --------------------- | -------- | -------------------------------------------------------------------- |
-| `proposalId`          | *string* | *(Optional)* Proposal ID                                             |
-| `proposerAddress`     | *string* | Proposer blockchain address                                          |
-| `initialDeposit`      | *bigint* | Initially deposited CRO Amount in base unit                          |
-| `content`             | *object* | Content wrapper                                                      |
-| `content.@type`       | *string* | Cosmos SDK type URL                                                  |
-| `content.title`       | *string* | Content title indicating the change                                  |
-| `content.description` | *string* | Action description                                                   |
-| `content.plan`        | *object* | Content plan details wrapper                                         |
-| `content.plan.name`   | *string* | Plan name                                                            |
-| `content.plan.title`  | *int64*  | Plan Title. Golang type: `utctime.UTCTime`                           |
-| `content.plan.height` | *int64*  | Plan proposal block height                                           |
-| `content.plan.info`   | *string* | Plan information                                                     |
-| `msgName`             | *string* | Blockchain Message type . Value: `MsgSubmitSoftwareUpgradeProposal`  |
-| `txHash`              | *string* | TxID of the blockchain transaction containing the event              |
-| `msgIndex`            | *int*    | message index on the block                                           |
-| `name`                | *string* | Specific Event Name. Value: `MsgSubmitSoftwareUpgradeProposalFailed` |
-| `version`             | *int*    | Event Version. Value: `1`                                            |
-| `height`              | *int64*  | Height of the block containing the transaction                       |
-| `uuid`                | *string* | Unique ID that is assigned on event creation                         |
+_Structure_ :
 
-*Example* : T.B.D  
+| Key                   | Type     | Description                                                                          |
+| --------------------- | -------- | ------------------------------------------------------------------------------------ |
+| `proposalId`          | _string_ | _(Optional)_ Proposal ID                                                             |
+| `proposerAddress`     | _string_ | Proposer blockchain address                                                          |
+| `initialDeposit`      | _bigint_ | Initially deposited CRO Amount in base unit                                          |
+| `content`             | _object_ | Content wrapper                                                                      |
+| `content.@type`       | _string_ | Cosmos SDK type URL                                                                  |
+| `content.title`       | _string_ | Content title indicating the change                                                  |
+| `content.description` | _string_ | Action description                                                                   |
+| `content.plan`        | _object_ | Content plan details wrapper                                                         |
+| `content.plan.name`   | _string_ | Plan name                                                                            |
+| `content.plan.title`  | _int64_  | Plan Title. Golang type: `utctime.UTCTime`                                           |
+| `content.plan.height` | _int64_  | Plan proposal block height                                                           |
+| `content.plan.info`   | _string_ | Plan information                                                                     |
+| `msgName`             | _string_ | Blockchain Message type . Value: `MsgSubmitSoftwareUpgradeProposal`                  |
+| `txHash`              | _string_ | TxID of the blockchain transaction containing the event                              |
+| `msgIndex`            | _int_    | message index on the block                                                           |
+| `name`                | _string_ | Specific Event Name. Value: `/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal.Failed` |
+| `version`             | _int_    | Event Version. Value: `1`                                                            |
+| `height`              | _int64_  | Height of the block containing the transaction                                       |
+| `uuid`                | _string_ | Unique ID that is assigned on event creation                                         |
+
+_Example_ : T.B.D
 
 ## event::MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_CREATED
-*Name* : MsgSubmitCancelSoftwareUpgradeProposalCreated
 
-*Type* : [MsgBase](../README.md#MsgBase)
+_Name_ : /cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal.Created
 
-*Structure* : 
+_Type_ : [MsgBase](../README.md#MsgBase)
 
-| Key                   | Type     | Description                                                                 |
-| --------------------- | -------- | --------------------------------------------------------------------------- |
-| `proposalId`          | *string* | *(Optional)* Proposal ID                                                    |
-| `proposerAddress`     | *string* | Proposer blockchain address                                                 |
-| `initialDeposit`      | *bigint* | Initially deposited CRO Amount in base unit                                 |
-| `content`             | *object* | Content wrapper                                                             |
-| `content.@type`       | *string* | Cosmos SDK type URL                                                         |
-| `content.title`       | *string* | Content title indicating the change                                         |
-| `content.description` | *string* | Action description                                                          |
-| `msgName`             | *string* | Blockchain Message type . Value: `MsgSubmitCancelSoftwareUpgradeProposal`   |
-| `txHash`              | *string* | TxID of the blockchain transaction containing the event                     |
-| `msgIndex`            | *int*    | message index on the block                                                  |
-| `name`                | *string* | Specific Event Name. Value: `MsgSubmitCancelSoftwareUpgradeProposalCreated` |
-| `version`             | *int*    | Event Version. Value: `1`                                                   |
-| `height`              | *int64*  | Height of the block containing the transaction                              |
-| `uuid`                | *string* | Unique ID that is assigned on event creation                                |
+_Structure_ :
 
-*Example* : T.B.D  
+| Key                   | Type     | Description                                                                                 |
+| --------------------- | -------- | ------------------------------------------------------------------------------------------- |
+| `proposalId`          | _string_ | _(Optional)_ Proposal ID                                                                    |
+| `proposerAddress`     | _string_ | Proposer blockchain address                                                                 |
+| `initialDeposit`      | _bigint_ | Initially deposited CRO Amount in base unit                                                 |
+| `content`             | _object_ | Content wrapper                                                                             |
+| `content.@type`       | _string_ | Cosmos SDK type URL                                                                         |
+| `content.title`       | _string_ | Content title indicating the change                                                         |
+| `content.description` | _string_ | Action description                                                                          |
+| `msgName`             | _string_ | Blockchain Message type . Value: `MsgSubmitCancelSoftwareUpgradeProposal`                   |
+| `txHash`              | _string_ | TxID of the blockchain transaction containing the event                                     |
+| `msgIndex`            | _int_    | message index on the block                                                                  |
+| `name`                | _string_ | Specific Event Name. Value: `/cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal.Created` |
+| `version`             | _int_    | Event Version. Value: `1`                                                                   |
+| `height`              | _int64_  | Height of the block containing the transaction                                              |
+| `uuid`                | _string_ | Unique ID that is assigned on event creation                                                |
+
+_Example_ : T.B.D
 
 ## event::MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_FAILED
-*Name* : MsgSubmitCancelSoftwareUpgradeProposalFailed
 
-*Type* : [MsgBase](../README.md#MsgBase)
+_Name_ : /cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal.Failed
 
-*Structure* : 
+_Type_ : [MsgBase](../README.md#MsgBase)
 
-| Key                   | Type     | Description                                                                |
-| --------------------- | -------- | -------------------------------------------------------------------------- |
-| `proposalId`          | *string* | *(Optional)* Proposal ID                                                   |
-| `proposerAddress`     | *string* | Proposer blockchain address                                                |
-| `initialDeposit`      | *bigint* | Initially deposited CRO Amount in base unit                                |
-| `content`             | *object* | Content wrapper                                                            |
-| `content.@type`       | *string* | Cosmos SDK type URL                                                        |
-| `content.title`       | *string* | Content title indicating the change                                        |
-| `content.description` | *string* | Action description                                                         |
-| `msgName`             | *string* | Blockchain Message type . Value: `MsgSubmitCancelSoftwareUpgradeProposal`  |
-| `txHash`              | *string* | TxID of the blockchain transaction containing the event                    |
-| `msgIndex`            | *int*    | message index on the block                                                 |
-| `name`                | *string* | Specific Event Name. Value: `MsgSubmitCancelSoftwareUpgradeProposalFailed` |
-| `version`             | *int*    | Event Version. Value: `1`                                                  |
-| `height`              | *int64*  | Height of the block containing the transaction                             |
-| `uuid`                | *string* | Unique ID that is assigned on event creation                               |
+_Structure_ :
 
-*Example* : T.B.D  
+| Key                   | Type     | Description                                                                                |
+| --------------------- | -------- | ------------------------------------------------------------------------------------------ |
+| `proposalId`          | _string_ | _(Optional)_ Proposal ID                                                                   |
+| `proposerAddress`     | _string_ | Proposer blockchain address                                                                |
+| `initialDeposit`      | _bigint_ | Initially deposited CRO Amount in base unit                                                |
+| `content`             | _object_ | Content wrapper                                                                            |
+| `content.@type`       | _string_ | Cosmos SDK type URL                                                                        |
+| `content.title`       | _string_ | Content title indicating the change                                                        |
+| `content.description` | _string_ | Action description                                                                         |
+| `msgName`             | _string_ | Blockchain Message type . Value: `MsgSubmitCancelSoftwareUpgradeProposal`                  |
+| `txHash`              | _string_ | TxID of the blockchain transaction containing the event                                    |
+| `msgIndex`            | _int_    | message index on the block                                                                 |
+| `name`                | _string_ | Specific Event Name. Value: `/cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal.Failed` |
+| `version`             | _int_    | Event Version. Value: `1`                                                                  |
+| `height`              | _int64_  | Height of the block containing the transaction                                             |
+| `uuid`                | _string_ | Unique ID that is assigned on event creation                                               |
+
+_Example_ : T.B.D
 
 ## event::MSG_DEPOSIT_CREATED
-*Name* : MsgDepositCreated
 
-*Type* : [MsgBase](../README.md#MsgBase)
+_Name_ : /cosmos.gov.v1beta1.MsgDeposit.Created
 
-*Structure* : 
+_Type_ : [MsgBase](../README.md#MsgBase)
 
-| Key          | Type     | Description                                             |
-| ------------ | -------- | ------------------------------------------------------- |
-| `proposalId` | *string* | *(Optional)* Proposal ID                                |
-| `depositor`  | *string* | Depositor blockchain address                            |
-| `amount`     | *bigint* | CRO Amount in base unit                                 |
-| `msgName`    | *string* | Blockchain Message type . Value: `MsgDeposit`           |
-| `txHash`     | *string* | TxID of the blockchain transaction containing the event |
-| `msgIndex`   | *int*    | message index on the block                              |
-| `name`       | *string* | Specific Event Name. Value: `MsgDepositCreated`         |
-| `version`    | *int*    | Event Version. Value: `1`                               |
-| `height`     | *int64*  | Height of the block containing the transaction          |
-| `uuid`       | *string* | Unique ID that is assigned on event creation            |
+_Structure_ :
 
-*Example* :  
+| Key          | Type     | Description                                                          |
+| ------------ | -------- | -------------------------------------------------------------------- |
+| `proposalId` | _string_ | _(Optional)_ Proposal ID                                             |
+| `depositor`  | _string_ | Depositor blockchain address                                         |
+| `amount`     | _bigint_ | CRO Amount in base unit                                              |
+| `msgName`    | _string_ | Blockchain Message type . Value: `MsgDeposit`                        |
+| `txHash`     | _string_ | TxID of the blockchain transaction containing the event              |
+| `msgIndex`   | _int_    | message index on the block                                           |
+| `name`       | _string_ | Specific Event Name. Value: `/cosmos.gov.v1beta1.MsgDeposit.Created` |
+| `version`    | _int_    | Event Version. Value: `1`                                            |
+| `height`     | _int64_  | Height of the block containing the transaction                       |
+| `uuid`       | _string_ | Unique ID that is assigned on event creation                         |
+
+_Example_ :
+
 ```json
 {
-    "name": "MsgDepositCreated",
+    "name": "/cosmos.gov.v1beta1.MsgDeposit.Created",
     "uuid": "404aa33b-7e0d-4700-a5e8-b9be6236e580",
     "amount": "100000000000",
     "height": 566,
@@ -308,29 +319,31 @@
 ```
 
 ## event::MSG_DEPOSIT_FAILED
-*Name* : MsgDepositFailed
 
-*Type* : [MsgBase](../README.md#MsgBase)
+_Name_ : /cosmos.gov.v1beta1.MsgDeposit.Failed
 
-*Structure* : 
+_Type_ : [MsgBase](../README.md#MsgBase)
 
-| Key          | Type     | Description                                             |
-| ------------ | -------- | ------------------------------------------------------- |
-| `proposalId` | *string* | *(Optional)* Proposal ID                                |
-| `depositor`  | *string* | Depositor blockchain address                            |
-| `amount`     | *bigint* | CRO Amount in base unit                                 |
-| `msgName`    | *string* | Blockchain Message type . Value: `MsgDeposit`           |
-| `txHash`     | *string* | TxID of the blockchain transaction containing the event |
-| `msgIndex`   | *int*    | message index on the block                              |
-| `name`       | *string* | Specific Event Name. Value: `MsgDepositFailed`          |
-| `version`    | *int*    | Event Version. Value: `1`                               |
-| `height`     | *int64*  | Height of the block containing the transaction          |
-| `uuid`       | *string* | Unique ID that is assigned on event creation            |
+_Structure_ :
 
-*Example* :  
+| Key          | Type     | Description                                                         |
+| ------------ | -------- | ------------------------------------------------------------------- |
+| `proposalId` | _string_ | _(Optional)_ Proposal ID                                            |
+| `depositor`  | _string_ | Depositor blockchain address                                        |
+| `amount`     | _bigint_ | CRO Amount in base unit                                             |
+| `msgName`    | _string_ | Blockchain Message type . Value: `MsgDeposit`                       |
+| `txHash`     | _string_ | TxID of the blockchain transaction containing the event             |
+| `msgIndex`   | _int_    | message index on the block                                          |
+| `name`       | _string_ | Specific Event Name. Value: `/cosmos.gov.v1beta1.MsgDeposit.Failed` |
+| `version`    | _int_    | Event Version. Value: `1`                                           |
+| `height`     | _int64_  | Height of the block containing the transaction                      |
+| `uuid`       | _string_ | Unique ID that is assigned on event creation                        |
+
+_Example_ :
+
 ```json
 {
-    "name": "MsgDepositFailed",
+    "name": "/cosmos.gov.v1beta1.MsgDeposit.Failed",
     "uuid": "404aa33b-7e0d-4700-a5e8-b9be6236e580",
     "amount": "100000000000",
     "height": 566,
@@ -344,29 +357,31 @@
 ```
 
 ## event::MSG_VOTE_CREATED
-*Name* : MsgVoteCreated
 
-*Type* : [MsgBase](../README.md#MsgBase)
+_Name_ : /cosmos.gov.v1beta1.MsgVote.Created
 
-*Structure* : 
+_Type_ : [MsgBase](../README.md#MsgBase)
 
-| Key          | Type     | Description                                             |
-| ------------ | -------- | ------------------------------------------------------- |
-| `proposalId` | *string* | Proposal ID                                             |
-| `voter`      | *string* | Voter blockchain address                                |
-| `option`     | *string* | Voter option selected                                   |
-| `msgName`    | *string* | Blockchain Message type . Value: `MsgVote`              |
-| `txHash`     | *string* | TxID of the blockchain transaction containing the event |
-| `msgIndex`   | *int*    | message index on the block                              |
-| `name`       | *string* | Specific Event Name. Value: `MsgVoteCreated`            |
-| `version`    | *int*    | Event Version. Value: `1`                               |
-| `height`     | *int64*  | Height of the block containing the transaction          |
-| `uuid`       | *string* | Unique ID that is assigned on event creation            |
+_Structure_ :
 
-*Example* :  
+| Key          | Type     | Description                                                       |
+| ------------ | -------- | ----------------------------------------------------------------- |
+| `proposalId` | _string_ | Proposal ID                                                       |
+| `voter`      | _string_ | Voter blockchain address                                          |
+| `option`     | _string_ | Voter option selected                                             |
+| `msgName`    | _string_ | Blockchain Message type . Value: `MsgVote`                        |
+| `txHash`     | _string_ | TxID of the blockchain transaction containing the event           |
+| `msgIndex`   | _int_    | message index on the block                                        |
+| `name`       | _string_ | Specific Event Name. Value: `/cosmos.gov.v1beta1.MsgVote.Created` |
+| `version`    | _int_    | Event Version. Value: `1`                                         |
+| `height`     | _int64_  | Height of the block containing the transaction                    |
+| `uuid`       | _string_ | Unique ID that is assigned on event creation                      |
+
+_Example_ :
+
 ```json
 {
-    "name": "MsgVoteCreated",
+    "name": "/cosmos.gov.v1beta1.MsgVote.Created",
     "uuid": "a160ce23-b8e2-4ccd-90a4-a6cf51d67687",
     "voter": "tcro16yzcz3ty94awr7nr2txek9dp2klp2av9egkgxn",
     "height": 673,
@@ -380,29 +395,31 @@
 ```
 
 ## event::MSG_VOTE_FAILED
-*Name* : MsgVoteFailed
 
-*Type* : [MsgBase](../README.md#MsgBase)
+_Name_ : /cosmos.gov.v1beta1.MsgVote.Failed
 
-*Structure* : 
+_Type_ : [MsgBase](../README.md#MsgBase)
 
-| Key          | Type     | Description                                             |
-| ------------ | -------- | ------------------------------------------------------- |
-| `proposalId` | *string* | Proposal ID                                             |
-| `voter`      | *string* | Voter blockchain address                                |
-| `option`     | *string* | Voter option selected                                   |
-| `msgName`    | *string* | Blockchain Message type . Value: `MsgVote`              |
-| `txHash`     | *string* | TxID of the blockchain transaction containing the event |
-| `msgIndex`   | *int*    | message index on the block                              |
-| `name`       | *string* | Specific Event Name. Value: `MsgVoteFailed`             |
-| `version`    | *int*    | Event Version. Value: `1`                               |
-| `height`     | *int64*  | Height of the block containing the transaction          |
-| `uuid`       | *string* | Unique ID that is assigned on event creation            |
+_Structure_ :
 
-*Example* :  
+| Key          | Type     | Description                                                      |
+| ------------ | -------- | ---------------------------------------------------------------- |
+| `proposalId` | _string_ | Proposal ID                                                      |
+| `voter`      | _string_ | Voter blockchain address                                         |
+| `option`     | _string_ | Voter option selected                                            |
+| `msgName`    | _string_ | Blockchain Message type . Value: `MsgVote`                       |
+| `txHash`     | _string_ | TxID of the blockchain transaction containing the event          |
+| `msgIndex`   | _int_    | message index on the block                                       |
+| `name`       | _string_ | Specific Event Name. Value: `/cosmos.gov.v1beta1.MsgVote.Failed` |
+| `version`    | _int_    | Event Version. Value: `1`                                        |
+| `height`     | _int64_  | Height of the block containing the transaction                   |
+| `uuid`       | _string_ | Unique ID that is assigned on event creation                     |
+
+_Example_ :
+
 ```json
 {
-    "name": "MsgVoteFailed",
+    "name": "/cosmos.gov.v1beta1.MsgVote.Failed",
     "uuid": "a160ce23-b8e2-4ccd-90a4-a6cf51d67687",
     "voter": "tcro16yzcz3ty94awr7nr2txek9dp2klp2av9egkgxn",
     "height": 673,
@@ -416,37 +433,39 @@
 ```
 
 ## event::PROPOSAL_ENDED
-*Name* : ProposalEnded
 
-*Type* : [Base](../README.md#Understanding_an_EVENT)
+_Name_ : ProposalEnded
 
-*Structure* : 
+_Type_ : [Base](../README.md#Understanding_an_EVENT)
+
+_Structure_ :
 
 | Key          | Type     | Description                                    |
 | ------------ | -------- | ---------------------------------------------- |
-| `proposalId` | *string* | Proposal ID                                    |
-| `result`     | *string* | Proposal end result                            |
-| `name`       | *string* | Specific Event Name. Value: `ProposalEnded`    |
-| `version`    | *int*    | Event Version. Value: `1`                      |
-| `height`     | *int64*  | Height of the block containing the transaction |
-| `uuid`       | *string* | Unique ID that is assigned on event creation   |
+| `proposalId` | _string_ | Proposal ID                                    |
+| `result`     | _string_ | Proposal end result                            |
+| `name`       | _string_ | Specific Event Name. Value: `ProposalEnded`    |
+| `version`    | _int_    | Event Version. Value: `1`                      |
+| `height`     | _int64_  | Height of the block containing the transaction |
+| `uuid`       | _string_ | Unique ID that is assigned on event creation   |
 
-*Example* :  T.B.D  
+_Example_ : T.B.D
 
 ## event::PROPOSAL_INACTIVED
-*Name* : ProposalInactived
 
-*Type* : [Base](../README.md#Understanding_an_EVENT)
+_Name_ : ProposalInactived
 
-*Structure* : 
+_Type_ : [Base](../README.md#Understanding_an_EVENT)
 
-| Key          | Type     | Description                                    |
-| ------------ | -------- | ---------------------------------------------- |
-| `proposalId` | *string* | Proposal ID                                    |
-| `result`     | *string* | Proposal end result                            |
-| `name`       | *string* | Specific Event Name. Value: `ProposalInactived`    |
-| `version`    | *int*    | Event Version. Value: `1`                      |
-| `height`     | *int64*  | Height of the block containing the transaction |
-| `uuid`       | *string* | Unique ID that is assigned on event creation   |
+_Structure_ :
 
-*Example* :  T.B.D  
+| Key          | Type     | Description                                     |
+| ------------ | -------- | ----------------------------------------------- |
+| `proposalId` | _string_ | Proposal ID                                     |
+| `result`     | _string_ | Proposal end result                             |
+| `name`       | _string_ | Specific Event Name. Value: `ProposalInactived` |
+| `version`    | _int_    | Event Version. Value: `1`                       |
+| `height`     | _int64_  | Height of the block containing the transaction  |
+| `uuid`       | _string_ | Unique ID that is assigned on event creation    |
+
+_Example_ : T.B.D

@@ -20,11 +20,11 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgIBCConnectionOpenAck", func() {
 		It("should parse Msg commands when there is MsgIBCConnectionOpenAck in the transaction", func() {
 			expected := `{
-  "name": "MsgConnectionOpenAckCreated",
+  "name": "/ibc.core.connection.v1.MsgConnectionOpenAck.Created",
   "version": 1,
   "height": 11,
   "uuid": "{UUID}",
-  "msgName": "MsgConnectionOpenAck",
+  "msgName": "/ibc.core.connection.v1.MsgConnectionOpenAck",
   "txHash": "831EDBD3F114BDA5F49276A9AD591F4A3B8B82073101B142CDFA02A2AA21889B",
   "msgIndex": 1,
   "params": {

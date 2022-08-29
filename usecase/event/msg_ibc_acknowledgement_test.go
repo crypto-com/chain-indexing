@@ -24,7 +24,7 @@ var _ = Describe("Event", func() {
 			anyChannelOrdering := "ORDER_UNORDERED"
 			anyConnectionId := "connection-0"
 			anyApplication := "transfer"
-			anyMessageType := "MsgTransfer"
+			anyMessageType := "/ibc.applications.transfer.v1.MsgTransfer"
 
 			var anyRawValue map[string]interface{}
 			var anyRawMsg ibc_model.RawMsgAcknowledgement
@@ -125,7 +125,7 @@ var _ = Describe("Event", func() {
 			anyChannelOrdering := "ORDER_UNORDERED"
 			anyConnectionId := "connection-0"
 			anyApplication := "transfer"
-			anyMessageType := "MsgTransfer"
+			anyMessageType := "/ibc.applications.transfer.v1.MsgTransfer"
 
 			var anyRawValue map[string]interface{}
 			var anyRawMsg ibc_model.RawMsgAcknowledgement
