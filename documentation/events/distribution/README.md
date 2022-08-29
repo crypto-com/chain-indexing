@@ -72,7 +72,6 @@
 | `uuid`             | *string* | Unique ID that is assigned on event creation                                                               |
 
 *Example* :
-
 ```json
 {
     "name": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward.Created",
@@ -87,7 +86,7 @@
     "recipientAddress": "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
     "validatorAddress": "tcrocncl1923pz03mhjaztgcv3gey0hj0amwx02dyskau52"
 }
-```
+```    
 
 ## event::MSG_WITHDRAW_DELEGATOR_REWARD_FAILED
 *Name* : /cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward.Failed
@@ -111,7 +110,6 @@
 | `uuid`             | *string* | Unique ID that is assigned on event creation                                                               |
 
 *Example* :
-
 ```json
 {
     "name": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward.Failed",
@@ -126,7 +124,7 @@
     "recipientAddress": "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
     "validatorAddress": "tcrocncl1923pz03mhjaztgcv3gey0hj0amwx02dyskau52"
 }
-```
+```  
 
 ## event::MSG_WITHDRAW_VALIDATOR_COMMISSION_CREATED
 *Name* : /cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission.Created
@@ -149,7 +147,6 @@
 | `uuid`             | *string* | Unique ID that is assigned on event creation                                                      |
 
 *Example* :
-
 ```json
 {
     "name": "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission.Created",
@@ -163,7 +160,7 @@
     "recipientAddress": "tcro1xwd3k8xterdeft3nxqg92szhpz6vx43q97wcke",
     "validatorAddress": "tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6"
 }
-```
+```  
 
 ## event::MSG_WITHDRAW_VALIDATOR_COMMISSION_FAILED
 *Name* : /cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission.Failed
@@ -186,7 +183,6 @@
 | `uuid`             | *string* | Unique ID that is assigned on event creation                                                     |
 
 *Example* :
-
 ```json
 {
     "name": "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission.Failed",
@@ -200,7 +196,7 @@
     "recipientAddress": "tcro1xwd3k8xterdeft3nxqg92szhpz6vx43q97wcke",
     "validatorAddress": "tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6"
 }
-```  
+```    
 
 ## event::MSG_FUND_COMMUNITY_POOL_CREATED
 *Name* : /cosmos.distribution.v1beta1.MsgFundCommunityPool.Created
@@ -222,7 +218,6 @@
 | `uuid`      | *string* | Unique ID that is assigned on event creation                                            |
 
 *Example* :
-
 ```json
 {
     "name": "/cosmos.distribution.v1beta1.MsgFundCommunityPool.Created",
@@ -235,7 +230,7 @@
     "msgIndex": 1,
     "depositor": "tcro1xwd3k8xterdeft3nxqg92szhpz6vx43q97wcke"
 }
-```
+```  
 
 ## event::MSG_FUND_COMMUNITY_POOL_FAILED
 *Name* : /cosmos.distribution.v1beta1.MsgFundCommunityPool.Failed
@@ -257,7 +252,6 @@
 | `uuid`      | *string* | Unique ID that is assigned on event creation                                           |
 
 *Example* :
-
 ```json
 {
     "name": "/cosmos.distribution.v1beta1.MsgFundCommunityPool.Failed",
@@ -270,4 +264,4 @@
     "msgIndex": 1,
     "depositor": "tcro1xwd3k8xterdeft3nxqg92szhpz6vx43q97wcke"
 }
-```
+```  
