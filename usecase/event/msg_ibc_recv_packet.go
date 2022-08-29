@@ -27,6 +27,7 @@ func NewMsgIBCRecvPacket(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_RECV_PACKET,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 
@@ -78,6 +79,7 @@ func NewMsgAlreadyRelayedIBCRecvPacket(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_ALREADY_RELAYED_IBC_RECV_PACKET,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

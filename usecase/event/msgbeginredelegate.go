@@ -33,6 +33,7 @@ func NewMsgBeginRedelegate(msgCommonParams MsgCommonParams, params model.MsgBegi
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_BEGIN_REDELEGATE,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

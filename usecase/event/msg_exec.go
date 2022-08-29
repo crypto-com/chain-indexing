@@ -28,6 +28,7 @@ func NewMsgExec(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_EXEC,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

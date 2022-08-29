@@ -28,6 +28,7 @@ func NewMsgSubmitCommunityPoolSpendProposal(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

@@ -27,6 +27,7 @@ func NewMsgIBCChannelOpenInit(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_CHANNEL_OPEN_INIT,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

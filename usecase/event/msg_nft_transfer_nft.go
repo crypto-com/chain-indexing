@@ -31,6 +31,7 @@ func NewMsgNFTTransferNFT(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_NFT_TRANSFER_NFT,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

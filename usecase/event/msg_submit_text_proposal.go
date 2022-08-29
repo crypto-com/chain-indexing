@@ -28,6 +28,7 @@ func NewMsgSubmitTextProposal(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_SUBMIT_TEXT_PROPOSAL,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

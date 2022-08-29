@@ -32,6 +32,7 @@ func NewMsgDelegate(msgCommonParams MsgCommonParams, params model.MsgDelegatePar
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_DELEGATE,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

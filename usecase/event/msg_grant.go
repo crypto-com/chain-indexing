@@ -28,6 +28,7 @@ func NewMsgGrant(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_GRANT,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

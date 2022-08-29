@@ -28,6 +28,7 @@ func NewMsgIBCUpdateClient(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_UPDATE_CLIENT,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

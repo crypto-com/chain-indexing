@@ -28,6 +28,7 @@ func NewMsgEditValidator(msgCommonParams MsgCommonParams, params model.MsgEditVa
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_EDIT_VALIDATOR,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

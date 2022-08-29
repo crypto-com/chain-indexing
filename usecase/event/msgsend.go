@@ -27,6 +27,7 @@ func NewMsgSend(msgCommonParams MsgCommonParams, params MsgSendCreatedParams) *M
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_SEND,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

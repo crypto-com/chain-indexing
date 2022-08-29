@@ -28,6 +28,7 @@ func NewMsgWithdrawDelegatorReward(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_WITHDRAW_DELEGATOR_REWARD,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

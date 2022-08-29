@@ -27,6 +27,7 @@ func NewMsgIBCChannelCloseConfirm(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_CHANNEL_CLOSE_CONFIRM,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

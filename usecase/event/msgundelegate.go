@@ -35,6 +35,7 @@ func NewMsgUndelegate(msgCommonParams MsgCommonParams, params model.MsgUndelegat
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_UNDELEGATE,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

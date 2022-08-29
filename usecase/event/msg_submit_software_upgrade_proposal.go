@@ -28,6 +28,7 @@ func NewMsgSubmitSoftwareUpgradeProposal(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

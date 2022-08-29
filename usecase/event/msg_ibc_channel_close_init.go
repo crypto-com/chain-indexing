@@ -27,6 +27,7 @@ func NewMsgIBCChannelCloseInit(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_CHANNEL_CLOSE_INIT,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

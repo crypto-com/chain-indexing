@@ -33,6 +33,7 @@ func NewMsgNFTEditNFT(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_NFT_EDIT_NFT,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

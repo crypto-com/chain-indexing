@@ -28,6 +28,7 @@ func NewMsgSubmitParamChangeProposal(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_SUBMIT_PARAM_CHANGE_PROPOSAL,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

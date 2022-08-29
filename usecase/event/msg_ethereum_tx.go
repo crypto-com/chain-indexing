@@ -28,6 +28,7 @@ func NewMsgEthereumTx(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_ETHEREUM_TX,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

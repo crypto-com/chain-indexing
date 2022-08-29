@@ -28,6 +28,7 @@ func NewMsgRevoke(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_REVOKE,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

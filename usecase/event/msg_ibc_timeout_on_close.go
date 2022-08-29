@@ -27,6 +27,7 @@ func NewMsgIBCTimeoutOnClose(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_TIMEOUT_ON_CLOSE,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 
@@ -78,6 +79,7 @@ func NewMsgAlreadyRelayedIBCTimeoutOnClose(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_ALREADY_RELAYED_IBC_TIMEOUT_ON_CLOSE,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

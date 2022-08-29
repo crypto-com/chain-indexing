@@ -27,6 +27,7 @@ func NewMsgIBCTimeout(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_TIMEOUT,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 
@@ -78,6 +79,7 @@ func NewMsgAlreadyRelayedIBCTimeout(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_ALREADY_RELAYED_IBC_TIMEOUT,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

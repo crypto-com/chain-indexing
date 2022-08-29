@@ -30,6 +30,7 @@ func NewMsgNFTBurnNFT(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_NFT_BURN_NFT,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 

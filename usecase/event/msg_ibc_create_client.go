@@ -24,6 +24,7 @@ func NewMsgIBCCreateClient(msgCommonParams MsgCommonParams, params ibc_model.Msg
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_CREATE_CLIENT,
 			Version:         1,
+
 			MsgCommonParams: msgCommonParams,
 		}),
 
