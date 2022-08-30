@@ -346,3 +346,5 @@ const TX_MSG_NFT_BURN_NFT_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+// TODO: Add Txs response

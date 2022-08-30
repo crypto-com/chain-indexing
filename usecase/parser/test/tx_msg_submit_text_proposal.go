@@ -2944,3 +2944,5 @@ const TX_MSG_SUBMIT_TEXT_PROPOSAL_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+// TODO: Add Txs response

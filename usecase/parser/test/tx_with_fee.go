@@ -2106,3 +2106,5 @@ const TX_WITH_FEE_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+// TODO: Add Txs response

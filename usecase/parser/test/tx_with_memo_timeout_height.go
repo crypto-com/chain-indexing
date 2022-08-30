@@ -2164,3 +2164,5 @@ const TX_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+// TODO: Add Txs response

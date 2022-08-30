@@ -351,3 +351,5 @@ const TX_MSG_NFT_MINT_NFT_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+// TODO: Add Txs response

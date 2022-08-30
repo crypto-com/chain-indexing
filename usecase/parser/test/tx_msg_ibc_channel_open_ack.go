@@ -395,3 +395,5 @@ const TX_MSG_CHANNEL_OPEN_ACK_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+// TODO: Add Txs response

@@ -308,3 +308,5 @@ const TX_MSG_SET_WITHDRAW_ADDRESS_BLOCK_RESULTS_RESP = `
     }
   }
 }`
+
+// TODO: Add Txs response

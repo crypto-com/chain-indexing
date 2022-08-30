@@ -2106,3 +2106,5 @@ const TX_MSG_SEND_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+// TODO: Add Txs response

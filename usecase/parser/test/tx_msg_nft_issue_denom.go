@@ -1868,3 +1868,5 @@ const TX_MSG_NFT_ISSUE_DENOM_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+// TODO: Add Txs response

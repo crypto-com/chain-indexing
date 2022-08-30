@@ -2499,3 +2499,5 @@ const TX_MSG_EDIT_VALIDATOR_BLOCK_RESULTS_RESP = `{
 	  }
 	}
   }`
+
+// TODO: Add Txs response

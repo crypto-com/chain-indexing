@@ -1,7 +1,9 @@
 package parser_test
 
 import (
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+	"strings"
+
+	"github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -17,9 +19,12 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgBeginRedelegate", func() {
 		It("should parse Msg commands when there is staking.MsgBeginRedelegate in the transaction", func() {
-			txDecoder := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_BEGIN_REDELEGATE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MSG_BEGIN_REDELEGATE_BLOCK_RESULTS_RESP)
+			tx1, _ := cosmosapp.ParseTxsResp(strings.NewReader(
+				usecase_parser_test.TX_MSG_BEGIN_REDELEGATE_TXS_RESP_1,
+			))
+			txs := []model.Tx{*tx1}
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"
 
@@ -27,9 +32,9 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
-				block,
+				block.Height,
 				blockResults,
+				txs,
 				accountAddressPrefix,
 				bondingDenom,
 			)

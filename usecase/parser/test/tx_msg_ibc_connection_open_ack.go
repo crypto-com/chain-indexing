@@ -391,3 +391,5 @@ const TX_MSG_CONNECTION_OPEN_ACK_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+// TODO: Add Txs response

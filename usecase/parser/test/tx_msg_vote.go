@@ -343,3 +343,5 @@ const TX_MSG_VOTE_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+// TODO: Add Txs response

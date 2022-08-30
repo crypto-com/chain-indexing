@@ -544,3 +544,5 @@ const TX_MSG_CHANNEL_CLOSE_CONFIRM_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+// TODO: Add Txs response

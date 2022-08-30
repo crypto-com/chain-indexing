@@ -456,3 +456,5 @@ const TX_MSG_ACKNOWLEDGEMENT_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+// TODO: Add Txs response

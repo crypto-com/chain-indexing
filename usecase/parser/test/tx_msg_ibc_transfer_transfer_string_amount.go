@@ -989,3 +989,139 @@ const TX_MSG_TRANSFER_STRING_AMOUNT_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+const TX_MSG_TRANSFER_STRING_AMOUNT_TXS_RESP = `{
+  "tx": {
+    "body": {
+      "messages": [
+        {
+          "@type": "/ibc.applications.transfer.v1.MsgTransfer",
+          "source_port": "transfer",
+          "source_channel": "channel-0",
+          "token": {
+            "denom": "basetcro",
+            "amount": "28836836236828398900"
+          },
+          "sender": "tcrc1v76r7u4uyr3ewdks8cqmuw7ca4lejvc89pxhev",
+          "receiver": "tcro1558rfl8pnpk90rmryvy3ep03yslq4ar0lkvdnn",
+          "timeout_height": {
+            "revision_number": "4",
+            "revision_height": "1042864"
+          },
+          "timeout_timestamp": "1634894674620940059"
+        }
+      ],
+      "memo": "",
+      "timeout_height": "0",
+      "extension_options": [
+      ],
+      "non_critical_extension_options": [
+      ]
+    },
+    "auth_info": {
+      "signer_infos": [
+        {
+          "public_key": {
+            "@type": "/ethermint.crypto.v1.ethsecp256k1.PubKey",
+            "key": "A1JFAyPdMBiu1CmQrqzehXoTz6PsfXhi+gNTW5+YZHpf"
+          },
+          "mode_info": {
+            "single": {
+              "mode": "SIGN_MODE_DIRECT"
+            }
+          },
+          "sequence": "5"
+        }
+      ],
+      "fee": {
+        "amount": [
+          {
+            "denom": "basetcro",
+            "amount": "1000000000000000000"
+          }
+        ],
+        "gas_limit": "200000",
+        "payer": "",
+        "granter": ""
+      }
+    },
+    "signatures": [
+      "NklKQjaG0q+uXNntQijkMwhVvb5yRyQLPnTEc0xUlXcdWkwQ+/tLWQQbTMR6syRtLlirwzl3m4LPREs0nn7o+gA="
+    ]
+  },
+  "tx_response": {
+    "height": "140108",
+    "txhash": "D924F6E1A16ACDFFBF0B5BFDECC8E010E8F8D746B379FFC63D477C472B4128B7",
+    "codespace": "undefined",
+    "code": 111222,
+    "data": "",
+    "raw_log": "panic message redacted to hide potentially sensitive system info: panic",
+    "logs": [
+    ],
+    "info": "",
+    "gas_wanted": "200000",
+    "gas_used": "100212",
+    "tx": {
+      "@type": "/cosmos.tx.v1beta1.Tx",
+      "body": {
+        "messages": [
+          {
+            "@type": "/ibc.applications.transfer.v1.MsgTransfer",
+            "source_port": "transfer",
+            "source_channel": "channel-0",
+            "token": {
+              "denom": "basetcro",
+              "amount": "28836836236828398900"
+            },
+            "sender": "tcrc1v76r7u4uyr3ewdks8cqmuw7ca4lejvc89pxhev",
+            "receiver": "tcro1558rfl8pnpk90rmryvy3ep03yslq4ar0lkvdnn",
+            "timeout_height": {
+              "revision_number": "4",
+              "revision_height": "1042864"
+            },
+            "timeout_timestamp": "1634894674620940059"
+          }
+        ],
+        "memo": "",
+        "timeout_height": "0",
+        "extension_options": [
+        ],
+        "non_critical_extension_options": [
+        ]
+      },
+      "auth_info": {
+        "signer_infos": [
+          {
+            "public_key": {
+              "@type": "/ethermint.crypto.v1.ethsecp256k1.PubKey",
+              "key": "A1JFAyPdMBiu1CmQrqzehXoTz6PsfXhi+gNTW5+YZHpf"
+            },
+            "mode_info": {
+              "single": {
+                "mode": "SIGN_MODE_DIRECT"
+              }
+            },
+            "sequence": "5"
+          }
+        ],
+        "fee": {
+          "amount": [
+            {
+              "denom": "basetcro",
+              "amount": "1000000000000000000"
+            }
+          ],
+          "gas_limit": "200000",
+          "payer": "",
+          "granter": ""
+        }
+      },
+      "signatures": [
+        "NklKQjaG0q+uXNntQijkMwhVvb5yRyQLPnTEc0xUlXcdWkwQ+/tLWQQbTMR6syRtLlirwzl3m4LPREs0nn7o+gA="
+      ]
+    },
+    "timestamp": "2021-10-22T09:52:49Z",
+    "events": [
+    ]
+  }
+}`

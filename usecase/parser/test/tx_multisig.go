@@ -4196,3 +4196,5 @@ const TX_MULTISIG_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+// TODO: Add Txs response

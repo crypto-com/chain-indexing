@@ -377,3 +377,5 @@ const TX_MSG_MULTI_SEND_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+// TODO: Add Txs response

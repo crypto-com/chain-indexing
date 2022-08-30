@@ -6334,3 +6334,5 @@ const TX_SIGNER_EMPTY_PUBKEY_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+// TODO: Add Txs response

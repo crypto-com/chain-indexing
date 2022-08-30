@@ -387,3 +387,5 @@ const TX_MSG_UPDATE_TENDERMINT_CLIENT_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+// TODO: Add Txs response

@@ -587,3 +587,195 @@ const TX_MSG_CREATE_SOLOMACHINE_CLIENT_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+const TX_MSG_CREATE_SOLOMACHINE_CLIENT_TXS_RESP = `{
+  "tx": {
+    "body": {
+      "messages": [
+        {
+          "@type": "/ibc.core.client.v1.MsgCreateClient",
+          "client_state": {
+            "@type": "/ibc.lightclients.solomachine.v2.ClientState",
+            "sequence": "1",
+            "is_frozen": false,
+            "consensus_state": {
+              "public_key": {
+                "@type": "/cosmos.crypto.secp256k1.PubKey",
+                "key": "Ausp3XCdeFAWXHNeTBb3JZY56fMncZ/tpRnGfSFVdESm"
+              },
+              "diversifier": "solo-machine-diversifier",
+              "timestamp": "1629427754"
+            },
+            "allow_update_after_proposal": true
+          },
+          "consensus_state": {
+            "@type": "/ibc.lightclients.solomachine.v2.ConsensusState",
+            "public_key": {
+              "@type": "/cosmos.crypto.secp256k1.PubKey",
+              "key": "Ausp3XCdeFAWXHNeTBb3JZY56fMncZ/tpRnGfSFVdESm"
+            },
+            "diversifier": "solo-machine-diversifier",
+            "timestamp": "1629427754"
+          },
+          "signer": "tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy"
+        }
+      ],
+      "memo": "solo-machine-memo",
+      "timeout_height": "0",
+      "extension_options": [
+      ],
+      "non_critical_extension_options": [
+      ]
+    },
+    "auth_info": {
+      "signer_infos": [
+        {
+          "public_key": {
+            "@type": "/cosmos.crypto.secp256k1.PubKey",
+            "key": "Ausp3XCdeFAWXHNeTBb3JZY56fMncZ/tpRnGfSFVdESm"
+          },
+          "mode_info": {
+            "single": {
+              "mode": "SIGN_MODE_DIRECT"
+            }
+          },
+          "sequence": "0"
+        }
+      ],
+      "fee": {
+        "amount": [
+          {
+            "denom": "basetcro",
+            "amount": "10000"
+          }
+        ],
+        "gas_limit": "300000",
+        "payer": "",
+        "granter": ""
+      }
+    },
+    "signatures": [
+      "pQWjxyhuNEB7e2+2+Pg6SQ2iIqB26o99vWS4wlABDzNTznz0DhMRdQEVUzo6fRfNLT9LjduiJjnaVRKnbQS9Xw=="
+    ]
+  },
+  "tx_response": {
+    "height": "14791",
+    "txhash": "0DB632201805BC399035F0B0CD0E1DABC061E5209D8A709EC0A2B29B1A306BA5",
+    "codespace": "",
+    "code": 0,
+    "data": "0A250A232F6962632E636F72652E636C69656E742E76312E4D7367437265617465436C69656E74",
+    "raw_log": "[{\"events\":[{\"type\":\"create_client\",\"attributes\":[{\"key\":\"client_id\",\"value\":\"06-solomachine-0\"},{\"key\":\"client_type\",\"value\":\"06-solomachine\"},{\"key\":\"consensus_height\",\"value\":\"0-1\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"/ibc.core.client.v1.MsgCreateClient\"},{\"key\":\"module\",\"value\":\"ibc_client\"}]}]}]",
+    "logs": [
+      {
+        "msg_index": 0,
+        "log": "",
+        "events": [
+          {
+            "type": "create_client",
+            "attributes": [
+              {
+                "key": "client_id",
+                "value": "06-solomachine-0"
+              },
+              {
+                "key": "client_type",
+                "value": "06-solomachine"
+              },
+              {
+                "key": "consensus_height",
+                "value": "0-1"
+              }
+            ]
+          },
+          {
+            "type": "message",
+            "attributes": [
+              {
+                "key": "action",
+                "value": "/ibc.core.client.v1.MsgCreateClient"
+              },
+              {
+                "key": "module",
+                "value": "ibc_client"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "info": "",
+    "gas_wanted": "300000",
+    "gas_used": "76405",
+    "tx": {
+      "@type": "/cosmos.tx.v1beta1.Tx",
+      "body": {
+        "messages": [
+          {
+            "@type": "/ibc.core.client.v1.MsgCreateClient",
+            "client_state": {
+              "@type": "/ibc.lightclients.solomachine.v2.ClientState",
+              "sequence": "1",
+              "is_frozen": false,
+              "consensus_state": {
+                "public_key": {
+                  "@type": "/cosmos.crypto.secp256k1.PubKey",
+                  "key": "Ausp3XCdeFAWXHNeTBb3JZY56fMncZ/tpRnGfSFVdESm"
+                },
+                "diversifier": "solo-machine-diversifier",
+                "timestamp": "1629427754"
+              },
+              "allow_update_after_proposal": true
+            },
+            "consensus_state": {
+              "@type": "/ibc.lightclients.solomachine.v2.ConsensusState",
+              "public_key": {
+                "@type": "/cosmos.crypto.secp256k1.PubKey",
+                "key": "Ausp3XCdeFAWXHNeTBb3JZY56fMncZ/tpRnGfSFVdESm"
+              },
+              "diversifier": "solo-machine-diversifier",
+              "timestamp": "1629427754"
+            },
+            "signer": "tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy"
+          }
+        ],
+        "memo": "solo-machine-memo",
+        "timeout_height": "0",
+        "extension_options": [
+        ],
+        "non_critical_extension_options": [
+        ]
+      },
+      "auth_info": {
+        "signer_infos": [
+          {
+            "public_key": {
+              "@type": "/cosmos.crypto.secp256k1.PubKey",
+              "key": "Ausp3XCdeFAWXHNeTBb3JZY56fMncZ/tpRnGfSFVdESm"
+            },
+            "mode_info": {
+              "single": {
+                "mode": "SIGN_MODE_DIRECT"
+              }
+            },
+            "sequence": "0"
+          }
+        ],
+        "fee": {
+          "amount": [
+            {
+              "denom": "basetcro",
+              "amount": "10000"
+            }
+          ],
+          "gas_limit": "300000",
+          "payer": "",
+          "granter": ""
+        }
+      },
+      "signatures": [
+        "pQWjxyhuNEB7e2+2+Pg6SQ2iIqB26o99vWS4wlABDzNTznz0DhMRdQEVUzo6fRfNLT9LjduiJjnaVRKnbQS9Xw=="
+      ]
+    },
+    "timestamp": "2021-08-20T02:49:21Z"
+  }
+}`

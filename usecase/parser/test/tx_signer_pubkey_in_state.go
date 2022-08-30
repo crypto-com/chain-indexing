@@ -546,3 +546,5 @@ const TX_SIGNER_PUBKEY_IN_STATE_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+// TODO: Add Txs response

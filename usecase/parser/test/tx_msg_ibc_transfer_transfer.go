@@ -431,3 +431,5 @@ const TX_MSG_TRANSFER_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+// TODO: Add Txs response
