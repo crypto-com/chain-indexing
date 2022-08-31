@@ -452,3 +452,5 @@ const TX_MSG_CREATE_VALIDATOR_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+// TODO: Add Txs response

@@ -429,3 +429,5 @@ const TX_FAILED_WITHOUT_FEE_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+// TODO: Add Txs response

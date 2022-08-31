@@ -2357,3 +2357,5 @@ const TX_FAILED_MSG_WITHDRAW_VALIDATOR_COMMISSION_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+// TODO: Add Txs response

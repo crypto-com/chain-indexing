@@ -2238,3 +2238,5 @@ const ONE_TX_TWO_MSG_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+// TODO: Add Txs response

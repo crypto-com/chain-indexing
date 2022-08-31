@@ -2285,3 +2285,5 @@ const TX_FAILED_MSG_UNDELEGATE_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+// TODO: Add Txs response

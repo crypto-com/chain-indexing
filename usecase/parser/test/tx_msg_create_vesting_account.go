@@ -591,3 +591,5 @@ const TX_MSG_CREATE_VESTING_ACCOUNT_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+// TODO: Add Txs response
