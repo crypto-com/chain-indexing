@@ -22,7 +22,7 @@ func NewCreateMsgIBCConnectionOpenAck(
 }
 
 func (*CreateMsgIBCConnectionOpenAck) Name() string {
-	return "CreateMsgIBCConnectionOpenAck"
+	return "/ibc.core.connection.v1.MsgConnectionOpenAck.Create"
 }
 
 func (*CreateMsgIBCConnectionOpenAck) Version() int {

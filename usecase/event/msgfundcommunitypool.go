@@ -11,9 +11,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_FUND_COMMUNITY_POOL = "MsgFundCommunityPool"
-const MSG_FUND_COMMUNITY_POOL_CREATED = "MsgFundCommunityPoolCreated"
-const MSG_FUND_COMMUNITY_POOL_FAILED = "MsgFundCommunityPoolFailed"
+const MSG_FUND_COMMUNITY_POOL = "/cosmos.distribution.v1beta1.MsgFundCommunityPool"
+const MSG_FUND_COMMUNITY_POOL_CREATED = "/cosmos.distribution.v1beta1.MsgFundCommunityPool.Created"
+const MSG_FUND_COMMUNITY_POOL_FAILED = "/cosmos.distribution.v1beta1.MsgFundCommunityPool.Failed"
 
 type MsgFundCommunityPool struct {
 	MsgBase

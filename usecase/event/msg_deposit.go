@@ -12,9 +12,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_DEPOSIT = "MsgDeposit"
-const MSG_DEPOSIT_CREATED = "MsgDepositCreated"
-const MSG_DEPOSIT_FAILED = "MsgDepositFailed"
+const MSG_DEPOSIT = "/cosmos.gov.v1beta1.MsgDeposit"
+const MSG_DEPOSIT_CREATED = "/cosmos.gov.v1beta1.MsgDeposit.Created"
+const MSG_DEPOSIT_FAILED = "/cosmos.gov.v1beta1.MsgDeposit.Failed"
 
 type MsgDeposit struct {
 	MsgBase

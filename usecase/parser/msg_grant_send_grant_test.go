@@ -20,11 +20,11 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgGrantSendGrant", func() {
 		It("should parse Msg commands when there is MsgGrant in the transaction", func() {
 			expected := `{
-            "name": "MsgGrantCreated",
+            "name": "/cosmos.authz.v1beta1.MsgGrant.Created",
             "version": 1,
             "height": 128465,
             "uuid": "{UUID}",
-            "msgName": "MsgGrant",
+            "msgName": "/cosmos.authz.v1beta1.MsgGrant",
             "txHash": "928E45A1D77FD01EA4EA8A3A20A19D0A69F5AA5A259D8AB5D956FF0BF6811034",
             "msgIndex": 0,
             "params": {
@@ -73,7 +73,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("CreateMsgGrant"))
+			Expect(cmd.Name()).To(Equal("/cosmos.authz.v1beta1.MsgGrant.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			createMsgGrantEvent := untypedEvent.(*event.MsgGrant)

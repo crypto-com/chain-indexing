@@ -10,9 +10,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_ETHEREUM_TX = "MsgEthereumTx"
-const MSG_ETHEREUM_TX_CREATED = "MsgEthereumTxCreated"
-const MSG_ETHEREUM_TX_FAILED = "MsgEthereumTxFailed"
+const MSG_ETHEREUM_TX = "/ethermint.evm.v1.MsgEthereumTx"
+const MSG_ETHEREUM_TX_CREATED = "/ethermint.evm.v1.MsgEthereumTx.Created"
+const MSG_ETHEREUM_TX_FAILED = "/ethermint.evm.v1.MsgEthereumTx.Failed"
 
 type MsgEthereumTx struct {
 	MsgBase

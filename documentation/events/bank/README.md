@@ -6,30 +6,30 @@
 
 
 ## event::MSG_SEND_CREATED
-*Name* : MsgSendCreated
+*Name* : /cosmos.bank.v1beta1.MsgSend.Created
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
 *Structure* : 
 
-| Key           | Type     | Description                                             |
-| ------------- | -------- | ------------------------------------------------------- |
-| `fromAddress` | *string* | The source or the origin address                        |
-| `toAddress`   | *string* | The destination or the recipient address                |
-| `amount`      | *object* | CRO amount in basic unit                                |
-| `msgName`     | *string* | Blockchain Message type . Value: `MsgSend`              |
-| `txHash`      | *string* | TxID of the blockchain transaction containing the event |
-| `msgIndex`    | *int*    | message index on the block                              |
-| `name`        | *string* | Specific Event Name. Value: `MsgSendCreated`            |
-| `version`     | *int*    | Event Version. Value: `1`                               |
-| `height`      | *int64*  | Height of the block containing the transaction          |
-| `uuid`        | *string* | Unique ID that is assigned on event creation            |
+| Key           | Type     | Description                                                        |
+| ------------- | -------- | ------------------------------------------------------------------ |
+| `fromAddress` | *string* | The source or the origin address                                   |
+| `toAddress`   | *string* | The destination or the recipient address                           |
+| `amount`      | *object* | CRO amount in basic unit                                           |
+| `msgName`     | *string* | Blockchain Message type . Value: `MsgSend`                         |
+| `txHash`      | *string* | TxID of the blockchain transaction containing the event            |
+| `msgIndex`    | *int*    | message index on the block                                         |
+| `name`        | *string* | Specific Event Name. Value: `/cosmos.bank.v1beta1.MsgSend.Created` |
+| `version`     | *int*    | Event Version. Value: `1`                                          |
+| `height`      | *int64*  | Height of the block containing the transaction                     |
+| `uuid`        | *string* | Unique ID that is assigned on event creation                       |
 
 *Example* :
 
 ```json
 {
-    "name": "MsgSendCreated",
+    "name": "/cosmos.bank.v1beta1.MsgSend.Created",
     "uuid": "d125ad50-14ce-4e58-b6d5-292db54534f4",
     "amount": "1000000000",
     "height": 29421,
@@ -43,30 +43,30 @@
 ```
 
 ## event::MSG_SEND_FAILED
-*Name* : MsgSendFailed
+*Name* : /cosmos.bank.v1beta1.MsgSend.Failed
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
 *Structure* : 
 
-| Key           | Type     | Description                                             |
-| ------------- | -------- | ------------------------------------------------------- |
-| `fromAddress` | *string* | The source or the origin address                        |
-| `toAddress`   | *string* | The destination or the recipient address                |
-| `amount`      | *object* | CRO amount in basic unit                                |
-| `msgName`     | *string* | Blockchain Message type . Value: `MsgSend`              |
-| `txHash`      | *string* | TxID of the blockchain transaction containing the event |
-| `msgIndex`    | *int*    | message index on the block                              |
-| `name`        | *string* | Specific Event Name. Value: `MsgSendFailed`             |
-| `version`     | *int*    | Event Version. Value: `1`                               |
-| `height`      | *int64*  | Height of the block containing the transaction          |
-| `uuid`        | *string* | Unique ID that is assigned on event creation            |
+| Key           | Type     | Description                                                       |
+| ------------- | -------- | ----------------------------------------------------------------- |
+| `fromAddress` | *string* | The source or the origin address                                  |
+| `toAddress`   | *string* | The destination or the recipient address                          |
+| `amount`      | *object* | CRO amount in basic unit                                          |
+| `msgName`     | *string* | Blockchain Message type . Value: `MsgSend`                        |
+| `txHash`      | *string* | TxID of the blockchain transaction containing the event           |
+| `msgIndex`    | *int*    | message index on the block                                        |
+| `name`        | *string* | Specific Event Name. Value: `/cosmos.bank.v1beta1.MsgSend.Failed` |
+| `version`     | *int*    | Event Version. Value: `1`                                         |
+| `height`      | *int64*  | Height of the block containing the transaction                    |
+| `uuid`        | *string* | Unique ID that is assigned on event creation                      |
 
 *Example* :
 
 ```json
 {
-    "name": "MsgSendFailed",
+    "name": "/cosmos.bank.v1beta1.MsgSend.Failed",
     "uuid": "f2f00a5b-0cef-4652-b12f-e31bac7cb927",
     "amount": "1000000000",
     "height": 115930,
@@ -80,52 +80,51 @@
 ```
 
 ## event::MSG_MULTI_SEND_CREATED
-*Name* : MsgMultiSendCreated
+*Name* : /cosmos.bank.v1beta1.MsgMultiSend.Created
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
 *Structure* : 
 
-| Key                 | Type            | Description                                             |
-| ------------------- | --------------- | ------------------------------------------------------- |
-| `inputs`            | *array(object)* | Inputs array for the multisig tx                        |
-| `inputs[].address`  | *string*        | Participating Input blockchain address                  |
-| `inputs[].amount`   | *bigint*        | Participating Input amount                              |
-| `outputs`           | *array(object)* | Outputs array for the multisig tx                       |
-| `outputs[].address` | *string*        | Participating Input blockchain address                  |
-| `outputs[].amount`  | *bigint*        | Participating Input amount                              |
-| `msgName`           | *string*        | Blockchain Message type. Value: `MsgMultiSend`         |
-| `txHash`            | *string*        | TxID of the blockchain transaction containing the event |
-| `msgIndex`          | *int*           | message index on the block                              |
-| `name`              | *string*        | Specific Event Name. Value: `MsgMultiSendCreated`       |
-| `version`           | *int*           | Event Version. Value: `1`                               |
-| `height`            | *int64*         | Height of the block containing the transaction          |
-| `uuid`              | *string*        | Unique ID that is assigned on event creation            |
+| Key                 | Type            | Description                                                             |
+| ------------------- | --------------- | ----------------------------------------------------------------------- |
+| `inputs`            | *array(object)* | Inputs array for the multisig tx                                        |
+| `inputs[].address`  | *string*        | Participating Input blockchain address                                  |
+| `inputs[].amount`   | *bigint*        | Participating Input amount                                              |
+| `outputs`           | *array(object)* | Outputs array for the multisig tx                                       |
+| `outputs[].address` | *string*        | Participating Input blockchain address                                  |
+| `outputs[].amount`  | *bigint*        | Participating Input amount                                              |
+| `msgName`           | *string*        | Blockchain Message type. Value: `MsgMultiSend`                          |
+| `txHash`            | *string*        | TxID of the blockchain transaction containing the event                 |
+| `msgIndex`          | *int*           | message index on the block                                              |
+| `name`              | *string*        | Specific Event Name. Value: `/cosmos.bank.v1beta1.MsgMultiSend.Created` |
+| `version`           | *int*           | Event Version. Value: `1`                                               |
+| `height`            | *int64*         | Height of the block containing the transaction                          |
+| `uuid`              | *string*        | Unique ID that is assigned on event creation                            |
 
 *Example* :  T.B.D  
 
 ## event::MSG_MULTI_SEND_FAILED 
-*Name* : MsgMultiSendFailed
+*Name* : /cosmos.bank.v1beta1.MsgMultiSend.Failed
 
 *Type* : [MsgBase](../README.md#MsgBase)
 
 *Structure* : 
 
-| Key                 | Type            | Description                                             |
-| ------------------- | --------------- | ------------------------------------------------------- |
-| `inputs`            | *array(object)* | Inputs array for the multisig tx                        |
-| `inputs[].address`  | *string*        | Participating Input blockchain address                  |
-| `inputs[].amount`   | *bigint*        | Participating Input amount                              |
-| `outputs`           | *array(object)* | Outputs array for the multisig tx                       |
-| `outputs[].address` | *string*        | Participating Input blockchain address                  |
-| `outputs[].amount`  | *bigint*        | Participating Input amount                              |
-| `msgName`           | *string*        | Blockchain Message type. Value: `MsgMultiSend`         |
-| `txHash`            | *string*        | TxID of the blockchain transaction containing the event |
-| `msgIndex`          | *int*           | message index on the block                              |
-| `name`              | *string*        | Specific Event Name. Value: `MsgMultiSendFailed`        |
-| `version`           | *int*           | Event Version. Value: `1`                               |
-| `height`            | *int64*         | Height of the block containing the transaction          |
-| `uuid`              | *string*        | Unique ID that is assigned on event creation            |
+| Key                 | Type            | Description                                                            |
+| ------------------- | --------------- | ---------------------------------------------------------------------- |
+| `inputs`            | *array(object)* | Inputs array for the multisig tx                                       |
+| `inputs[].address`  | *string*        | Participating Input blockchain address                                 |
+| `inputs[].amount`   | *bigint*        | Participating Input amount                                             |
+| `outputs`           | *array(object)* | Outputs array for the multisig tx                                      |
+| `outputs[].address` | *string*        | Participating Input blockchain address                                 |
+| `outputs[].amount`  | *bigint*        | Participating Input amount                                             |
+| `msgName`           | *string*        | Blockchain Message type. Value: `MsgMultiSend`                         |
+| `txHash`            | *string*        | TxID of the blockchain transaction containing the event                |
+| `msgIndex`          | *int*           | message index on the block                                             |
+| `name`              | *string*        | Specific Event Name. Value: `/cosmos.bank.v1beta1.MsgMultiSend.Failed` |
+| `version`           | *int*           | Event Version. Value: `1`                                              |
+| `height`            | *int64*         | Height of the block containing the transaction                         |
+| `uuid`              | *string*        | Unique ID that is assigned on event creation                           |
 
-
-*Example* : T.B.D  
+*Example* : T.B.D

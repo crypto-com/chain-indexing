@@ -43,7 +43,7 @@ var _ = Describe("Event", func() {
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))
 			typedEvent, _ := decodedEvent.(*event_usecase.MsgWithdrawValidatorCommission)
-			Expect(typedEvent.Name()).To(Equal("MsgWithdrawValidatorCommissionCreated"))
+			Expect(typedEvent.Name()).To(Equal("/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission.Created"))
 			Expect(typedEvent.Version()).To(Equal(1))
 
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
@@ -81,7 +81,7 @@ var _ = Describe("Event", func() {
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))
 			typedEvent, _ := decodedEvent.(*event_usecase.MsgWithdrawValidatorCommission)
-			Expect(typedEvent.Name()).To(Equal("MsgWithdrawValidatorCommissionFailed"))
+			Expect(typedEvent.Name()).To(Equal("/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission.Failed"))
 			Expect(typedEvent.Version()).To(Equal(1))
 
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))

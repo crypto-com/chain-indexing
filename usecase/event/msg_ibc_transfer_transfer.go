@@ -9,9 +9,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_TRANSFER_TRANSFER = "MsgTransfer"
-const MSG_IBC_TRANSFER_TRANSFER_CREATED = "MsgTransferCreated"
-const MSG_IBC_TRANSFER_TRANSFER_FAILED = "MsgTransferFailed"
+const MSG_IBC_TRANSFER_TRANSFER = "/ibc.applications.transfer.v1.MsgTransfer"
+const MSG_IBC_TRANSFER_TRANSFER_CREATED = "/ibc.applications.transfer.v1.MsgTransfer.Created"
+const MSG_IBC_TRANSFER_TRANSFER_FAILED = "/ibc.applications.transfer.v1.MsgTransfer.Failed"
 
 type MsgIBCTransferTransfer struct {
 	MsgBase

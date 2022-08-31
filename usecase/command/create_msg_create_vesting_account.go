@@ -22,7 +22,7 @@ func NewCreateMsgCreateVestingAccount(
 }
 
 func (*CreateMsgCreateVestingAccount) Name() string {
-	return "CreateMsgCreateVestingAccount"
+	return "/cosmos.vesting.v1beta1.MsgCreateVestingAccount.Create"
 }
 
 func (*CreateMsgCreateVestingAccount) Version() int {

@@ -40,7 +40,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			thiscmd := cmds[0]
-			Expect(thiscmd.Name()).To(Equal("CreateMsgCreateValidator"))
+			Expect(thiscmd.Name()).To(Equal("/cosmos.staking.v1beta1.MsgCreateValidator.Create"))
 
 			description := model.ValidatorDescription{
 				Moniker:         "leo-node",

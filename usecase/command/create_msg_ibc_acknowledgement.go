@@ -22,7 +22,7 @@ func NewCreateMsgIBCAcknowledgement(
 }
 
 func (*CreateMsgIBCAcknowledgement) Name() string {
-	return "CreateMsgIBCAcknowledgement"
+	return "/ibc.core.channel.v1.MsgAcknowledgement.Create"
 }
 
 func (*CreateMsgIBCAcknowledgement) Version() int {

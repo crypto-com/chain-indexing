@@ -20,11 +20,11 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgIBCChannelOpenConfirm", func() {
 		It("should parse Msg commands when there is MsgChannelOpenConfirm in the transaction", func() {
 			expected := `{
-  "name": "MsgChannelOpenConfirmCreated",
+  "name": "/ibc.core.channel.v1.MsgChannelOpenConfirm.Created",
   "version": 1,
   "height": 20,
   "uuid": "{UUID}",
-  "msgName": "MsgChannelOpenConfirm",
+  "msgName": "/ibc.core.channel.v1.MsgChannelOpenConfirm",
   "txHash": "B5A78071FCC88BC2C10B0BD273E494367F8AA02AAA81773CBCA1DE4AA5A300A2",
   "msgIndex": 1,
   "params": {
@@ -67,7 +67,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))
 			cmd := cmds[1]
-			Expect(cmd.Name()).To(Equal("CreateMsgIBCChannelOpenConfirm"))
+			Expect(cmd.Name()).To(Equal("/ibc.core.channel.v1.MsgChannelOpenConfirm.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			typedEvent := untypedEvent.(*event.MsgIBCChannelOpenConfirm)

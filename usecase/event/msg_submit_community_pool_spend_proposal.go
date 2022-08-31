@@ -10,9 +10,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL = "MsgSubmitCommunityPoolSpendProposal"
-const MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_CREATED = "MsgSubmitCommunityPoolSpendProposalCreated"
-const MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_FAILED = "MsgSubmitCommunityPoolSpendProposalFailed"
+const MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL = "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal"
+const MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_CREATED = "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal.Created"
+const MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_FAILED = "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal.Failed"
 
 type MsgSubmitCommunityPoolSpendProposal struct {
 	MsgBase
@@ -26,9 +26,8 @@ func NewMsgSubmitCommunityPoolSpendProposal(
 ) *MsgSubmitCommunityPoolSpendProposal {
 	return &MsgSubmitCommunityPoolSpendProposal{
 		NewMsgBase(MsgBaseParams{
-			MsgName: MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL,
-			Version: 1,
-
+			MsgName:         MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL,
+			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
 

@@ -9,9 +9,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_RECV_PACKET = "MsgRecvPacket"
-const MSG_IBC_RECV_PACKET_CREATED = "MsgRecvPacketCreated"
-const MSG_IBC_RECV_PACKET_FAILED = "MsgRecvPacketFailed"
+const MSG_IBC_RECV_PACKET = "/ibc.core.channel.v1.MsgRecvPacket"
+const MSG_IBC_RECV_PACKET_CREATED = "/ibc.core.channel.v1.MsgRecvPacket.Created"
+const MSG_IBC_RECV_PACKET_FAILED = "/ibc.core.channel.v1.MsgRecvPacket.Failed"
 
 type MsgIBCRecvPacket struct {
 	MsgBase

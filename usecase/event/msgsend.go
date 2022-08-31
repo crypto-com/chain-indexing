@@ -10,9 +10,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_SEND = "MsgSend"
-const MSG_SEND_CREATED = "MsgSendCreated"
-const MSG_SEND_FAILED = "MsgSendFailed"
+const MSG_SEND = "/cosmos.bank.v1beta1.MsgSend"
+const MSG_SEND_CREATED = "/cosmos.bank.v1beta1.MsgSend.Created"
+const MSG_SEND_FAILED = "/cosmos.bank.v1beta1.MsgSend.Failed"
 
 type MsgSend struct {
 	MsgBase

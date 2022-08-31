@@ -9,9 +9,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_CHANNEL_CLOSE_CONFIRM = "MsgChannelCloseConfirm"
-const MSG_IBC_CHANNEL_CLOSE_CONFIRM_CREATED = "MsgChannelCloseConfirmCreated"
-const MSG_IBC_CHANNEL_CLOSE_CONFIRM_FAILED = "MsgChannelCloseConfirmFailed"
+const MSG_IBC_CHANNEL_CLOSE_CONFIRM = "/ibc.core.channel.v1.MsgChannelCloseConfirm"
+const MSG_IBC_CHANNEL_CLOSE_CONFIRM_CREATED = "/ibc.core.channel.v1.MsgChannelCloseConfirm.Created"
+const MSG_IBC_CHANNEL_CLOSE_CONFIRM_FAILED = "/ibc.core.channel.v1.MsgChannelCloseConfirm.Failed"
 
 type MsgIBCChannelCloseConfirm struct {
 	MsgBase

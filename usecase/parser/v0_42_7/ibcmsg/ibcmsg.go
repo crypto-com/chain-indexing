@@ -60,7 +60,7 @@ func ParseMsgRecvPacket(
 			RawMsgRecvPacket: rawMsg,
 
 			Application: "transfer",
-			MessageType: "MsgTransfer",
+			MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 			MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 				FungibleTokenPacketData: rawFungibleTokenPacketData,
 				Success:                 false,
@@ -95,7 +95,7 @@ func ParseMsgRecvPacket(
 			RawMsgRecvPacket: rawMsg,
 
 			Application: "transfer",
-			MessageType: "MsgTransfer",
+			MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 			MaybeFungibleTokenPacketData: &ibc_model.MsgAlreadyRelayedRecvPacketFungibleTokenPacketData{
 				FungibleTokenPacketData: rawFungibleTokenPacketData,
 			},
@@ -134,7 +134,7 @@ func ParseMsgRecvPacket(
 		RawMsgRecvPacket: rawMsg,
 
 		Application: "transfer",
-		MessageType: "MsgTransfer",
+		MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 		MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 			FungibleTokenPacketData: rawFungibleTokenPacketData,
 			Success:                 fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "true",

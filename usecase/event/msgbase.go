@@ -56,7 +56,7 @@ func eventName(msgName string, txSuccess bool) string {
 	} else {
 		suffix = MSG_FAILED_SUFFIX
 	}
-	return fmt.Sprintf("%s%s", msgName, suffix)
+	return fmt.Sprintf("%s.%s", msgName, suffix)
 }
 
 type MsgBaseParams struct {

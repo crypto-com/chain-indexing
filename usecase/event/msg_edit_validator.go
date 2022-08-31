@@ -10,9 +10,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_EDIT_VALIDATOR = "MsgEditValidator"
-const MSG_EDIT_VALIDATOR_CREATED = "MsgEditValidatorCreated"
-const MSG_EDIT_VALIDATOR_FAILED = "MsgEditValidatorFailed"
+const MSG_EDIT_VALIDATOR = "/cosmos.staking.v1beta1.MsgEditValidator"
+const MSG_EDIT_VALIDATOR_CREATED = "/cosmos.staking.v1beta1.MsgEditValidator.Created"
+const MSG_EDIT_VALIDATOR_FAILED = "/cosmos.staking.v1beta1.MsgEditValidator.Failed"
 
 type MsgEditValidator struct {
 	MsgBase

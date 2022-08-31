@@ -19,11 +19,11 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgIBCChannelOpenConfirm", func() {
 		It("should parse Msg commands when there is MsgTransfer in the transaction", func() {
 			expected := `{
-  "name": "MsgTransferCreated",
+  "name": "/ibc.applications.transfer.v1.MsgTransfer.Created",
   "version": 1,
   "height": 24,
   "uuid": "{UUID}",
-  "msgName": "MsgTransfer",
+  "msgName": "/ibc.applications.transfer.v1.MsgTransfer",
   "txHash": "7A5D86E0B1A364106EE2F1B40431B15A8E1B6C4A2E09E831AB773A12F5F5A564",
   "msgIndex": 0,
   "params": {
@@ -80,7 +80,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("CreateMsgIBCTransferTransfer"))
+			Expect(cmd.Name()).To(Equal("/ibc.applications.transfer.v1.MsgTransfer.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			typedEvent := untypedEvent.(*event.MsgIBCTransferTransfer)
@@ -100,11 +100,11 @@ var _ = Describe("ParseMsgCommands", func() {
 
 		It("should parse Msg commands when there is MsgTransfer with exceed uint64 amount in the transaction", func() {
 			expected := `{
-  "name": "MsgTransferFailed",
+  "name": "/ibc.applications.transfer.v1.MsgTransfer.Failed",
   "version": 1,
   "height": 140108,
   "uuid": "{UUID}",
-  "msgName": "MsgTransfer",
+  "msgName": "/ibc.applications.transfer.v1.MsgTransfer",
   "txHash": "D924F6E1A16ACDFFBF0B5BFDECC8E010E8F8D746B379FFC63D477C472B4128B7",
   "msgIndex": 0,
   "params": {
@@ -161,7 +161,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("CreateMsgIBCTransferTransfer"))
+			Expect(cmd.Name()).To(Equal("/ibc.applications.transfer.v1.MsgTransfer.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			typedEvent := untypedEvent.(*event.MsgIBCTransferTransfer)

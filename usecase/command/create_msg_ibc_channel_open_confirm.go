@@ -22,7 +22,7 @@ func NewCreateMsgIBCChannelOpenConfirm(
 }
 
 func (*CreateMsgIBCChannelOpenConfirm) Name() string {
-	return "CreateMsgIBCChannelOpenConfirm"
+	return "/ibc.core.channel.v1.MsgChannelOpenConfirm.Create"
 }
 
 func (*CreateMsgIBCChannelOpenConfirm) Version() int {

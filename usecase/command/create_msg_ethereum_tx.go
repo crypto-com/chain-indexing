@@ -22,7 +22,7 @@ func NewCreateMsgEthereumTx(
 }
 
 func (*CreateMsgEthereumTx) Name() string {
-	return "CreateMsgEthereumTx"
+	return "/ethermint.evm.v1.MsgEthereumTx.Create"
 }
 
 func (*CreateMsgEthereumTx) Version() int {

@@ -22,7 +22,7 @@ func NewCreateMsgIBCTimeout(
 }
 
 func (*CreateMsgIBCTimeout) Name() string {
-	return "CreateMsgIBCTimeout"
+	return "/ibc.core.channel.v1.MsgTimeout.Create"
 }
 
 func (*CreateMsgIBCTimeout) Version() int {

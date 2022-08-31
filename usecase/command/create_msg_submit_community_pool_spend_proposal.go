@@ -23,7 +23,7 @@ func NewCreateMsgSubmitCommunityPoolSpendProposal(
 
 // Name returns name of command
 func (*CreateMsgSubmitCommunityPoolSpendProposal) Name() string {
-	return "CreateMsgSubmitCommunityPoolSpendProposal"
+	return "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal.Create"
 }
 
 // Version returns version of command

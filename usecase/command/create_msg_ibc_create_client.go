@@ -22,7 +22,7 @@ func NewCreateMsgIBCCreateClient(
 }
 
 func (*CreateMsgIBCCreateClient) Name() string {
-	return "CreateMsgIBCCreateClient"
+	return "/ibc.core.client.v1.MsgCreateClient.Create"
 }
 
 func (*CreateMsgIBCCreateClient) Version() int {

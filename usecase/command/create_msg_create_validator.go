@@ -19,7 +19,7 @@ func NewCreateMsgCreateValidator(msgCommonParams event.MsgCommonParams, params m
 }
 
 func (*CreateMsgCreateValidator) Name() string {
-	return "CreateMsgCreateValidator"
+	return "/cosmos.staking.v1beta1.MsgCreateValidator.Create"
 }
 
 func (*CreateMsgCreateValidator) Version() int {

@@ -9,9 +9,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_UPDATE_CLIENT = "MsgUpdateClient"
-const MSG_IBC_UPDATE_CLIENT_CREATED = "MsgUpdateClientCreated"
-const MSG_IBC_UPDATE_CLIENT_FAILED = "MsgUpdateClientFailed"
+const MSG_IBC_UPDATE_CLIENT = "/ibc.core.client.v1.MsgUpdateClient"
+const MSG_IBC_UPDATE_CLIENT_CREATED = "/ibc.core.client.v1.MsgUpdateClient.Created"
+const MSG_IBC_UPDATE_CLIENT_FAILED = "/ibc.core.client.v1.MsgUpdateClient.Failed"
 
 type MsgIBCUpdateClient struct {
 	MsgBase

@@ -184,7 +184,7 @@ func TestTransaction_HandleEvents(t *testing.T) {
 							},
 							Messages: []transaction_view.TransactionRowMessage{
 								{
-									Type:    "MsgSend",
+									Type:    "/cosmos.bank.v1beta1.MsgSend",
 									Content: msgEvent,
 								},
 							},
@@ -336,7 +336,7 @@ func TestTransaction_HandleEvents(t *testing.T) {
 							},
 							Messages: []transaction_view.TransactionRowMessage{
 								{
-									Type:    "MsgSend",
+									Type:    "/cosmos.bank.v1beta1.MsgSend",
 									Content: msgEvent,
 								},
 							},

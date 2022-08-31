@@ -1,7 +1,6 @@
 package parser_test
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 
@@ -20,11 +19,11 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgIBCAcknowledgement", func() {
 		It("should parse Msg commands when there is MsgIBCAcknowledgement in the transaction", func() {
 			expected := `{
-  "name": "MsgAcknowledgementCreated",
+  "name": "/ibc.core.channel.v1.MsgAcknowledgement.Created",
   "version": 1,
   "height": 28,
   "uuid": "{UUID}",
-  "msgName": "MsgAcknowledgement",
+  "msgName": "/ibc.core.channel.v1.MsgAcknowledgement",
   "txHash": "06B6CEE9FB786050A41BA57026B3FF629188C06FCDD97F59AF55D2CD40938CD3",
   "msgIndex": 1,
   "params": {
@@ -50,7 +49,7 @@ var _ = Describe("ParseMsgCommands", func() {
     "signer": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv",
 
     "application": "transfer",
-    "messageType": "MsgTransfer",
+    "messageType": "/ibc.applications.transfer.v1.MsgTransfer",
     "maybeMsgTransfer": {
       "sender": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv",
       "receiver": "cro1dulwqgcdpemn8c34sjd92fxepz5p0sqpeevw7f",
@@ -92,7 +91,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))
 			cmd := cmds[1]
-			Expect(cmd.Name()).To(Equal("CreateMsgIBCAcknowledgement"))
+			Expect(cmd.Name()).To(Equal("/ibc.core.channel.v1.MsgAcknowledgement.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			typedEvent := untypedEvent.(*event.MsgIBCAcknowledgement)
@@ -112,11 +111,11 @@ var _ = Describe("ParseMsgCommands", func() {
 
 		It("should parse Msg commands when there is MsgIBCAcknowledgement in the transaction, and MsgIBCAcknowledgement.maybeMsgTransfer.Error is NOT empty string", func() {
 			expected := `{
-	"name": "MsgAcknowledgementCreated",
+	"name": "/ibc.core.channel.v1.MsgAcknowledgement.Created",
 	"version": 1,
 	"height": 127749,
 	"uuid": "{UUID}",
-	"msgName": "MsgAcknowledgement",
+	"msgName": "/ibc.core.channel.v1.MsgAcknowledgement",
 	"txHash": "AA4C3C2A27587AA769D9198BEBB42218419D61C46F1A2C9CE7BC10FE45F81A39",
 	"msgIndex": 1,
 	"params": {
@@ -141,7 +140,7 @@ var _ = Describe("ParseMsgCommands", func() {
 		},
 		"signer": "tcro18mcwp6vtlvpgxy62eledk3chhjguw636x8n7h6",
 		"application": "transfer",
-		"messageType": "MsgTransfer",
+		"messageType": "/ibc.applications.transfer.v1.MsgTransfer",
 		"maybeMsgTransfer": {
 			"sender": "tcro1pdn2nsn9wesz6px3lcjsgmp8pefednzp3gmp3q",
 			"receiver": "0x80639A1FE944EC50CB6A9FB3E94BEF3BE90A4B8F",
@@ -182,7 +181,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))
 			cmd := cmds[1]
-			Expect(cmd.Name()).To(Equal("CreateMsgIBCAcknowledgement"))
+			Expect(cmd.Name()).To(Equal("/ibc.core.channel.v1.MsgAcknowledgement.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			typedEvent := untypedEvent.(*event.MsgIBCAcknowledgement)
@@ -216,11 +215,11 @@ var _ = Describe("ParseMsgCommands", func() {
 
 		It("should return two MsgIBCAcknowledgement with different success values when there are two MsgAcknowledgement of same packet sequence in the block, and in the second messages the fungible_token_packet event is missing", func() {
 			expectedFirstMsgAck := `{
-	"name": "MsgAcknowledgementCreated",
+	"name": "/ibc.core.channel.v1.MsgAcknowledgement.Created",
 	"version": 1,
 	"height": 68821,
 	"uuid": "{UUID}",
-	"msgName": "MsgAcknowledgement",
+	"msgName": "/ibc.core.channel.v1.MsgAcknowledgement",
 	"txHash": "0F1205B05DDDC0B848AD50FE35335C993FEDE7EAD161F2099818B0A03321B97F",
 	"msgIndex": 0,
 	"params": {
@@ -245,7 +244,7 @@ var _ = Describe("ParseMsgCommands", func() {
 		},
 		"signer": "crc1yzl6cnq3f66ew24d7u97vmp45nkckhwg4ak8hl",
 		"application": "transfer",
-		"messageType": "MsgTransfer",
+		"messageType": "/ibc.applications.transfer.v1.MsgTransfer",
 		"maybeMsgTransfer": {
 			"sender": "crc1zdaepq9wskhf5l5v0j2wm0hr4kucjuw5yel25u",
 			"receiver": "cro1d9j38wdkdpwf623uzl7s9nqw08up30cwkv2cml",
@@ -263,7 +262,7 @@ var _ = Describe("ParseMsgCommands", func() {
 `
 
 			expectedSecondMsgAck := `{
-	"name": "MsgAlreadyRelayedAcknowledgementCreated",
+	"name": "MsgAlreadyRelayedAcknowledgement.Created",
 	"version": 1,
 	"height": 68821,
 	"uuid": "{UUID}",
@@ -292,7 +291,7 @@ var _ = Describe("ParseMsgCommands", func() {
 		},
 		"signer": "crc1aaxs058pksrq8cx3k0nrxv60p2a9c7nq527949",
 		"application": "transfer",
-		"messageType": "MsgTransfer",
+		"messageType": "/ibc.applications.transfer.v1.MsgTransfer",
    		"maybeMsgTransfer": {
 			"sender": "crc1zdaepq9wskhf5l5v0j2wm0hr4kucjuw5yel25u",
 			"receiver": "cro1d9j38wdkdpwf623uzl7s9nqw08up30cwkv2cml",
@@ -331,9 +330,9 @@ var _ = Describe("ParseMsgCommands", func() {
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(11))
-			Expect(cmds[6].Name()).To(Equal("CreateMsgIBCUpdateClient"))
-			Expect(cmds[7].Name()).To(Equal("CreateMsgIBCAcknowledgement"))
-			Expect(cmds[8].Name()).To(Equal("CreateMsgIBCUpdateClient"))
+			Expect(cmds[6].Name()).To(Equal("/ibc.core.client.v1.MsgUpdateClient.Create"))
+			Expect(cmds[7].Name()).To(Equal("/ibc.core.channel.v1.MsgAcknowledgement.Create"))
+			Expect(cmds[8].Name()).To(Equal("/ibc.core.client.v1.MsgUpdateClient.Create"))
 			Expect(cmds[9].Name()).To(Equal("CreateMsgAlreadyRelayedIBCAcknowledgement"))
 
 			firstMsgAckCmd := cmds[7]
@@ -365,7 +364,6 @@ var _ = Describe("ParseMsgCommands", func() {
 				typedSecondMsgAckCmd.UUID(),
 				-1,
 			)
-			fmt.Println(possibleSignerAddresses)
 			Expect(json.MustMarshalToString(typedSecondMsgAckCmd)).To(Equal(expectedSecondMsgAckWithUUID))
 			Expect(possibleSignerAddresses[0]).To(Equal("crc1yzl6cnq3f66ew24d7u97vmp45nkckhwg4ak8hl"))
 			Expect(possibleSignerAddresses[2]).To(Equal("crc1aaxs058pksrq8cx3k0nrxv60p2a9c7nq527949"))

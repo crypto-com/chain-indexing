@@ -20,11 +20,11 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgIBCConnectionOpenInit", func() {
 		It("should parse Msg commands when there is MsgIBCConnectionOpenInit in the transaction", func() {
 			expected := `{
-  "name": "MsgConnectionOpenInitCreated",
+  "name": "/ibc.core.connection.v1.MsgConnectionOpenInit.Created",
   "version": 1,
   "height": 6,
   "uuid": "{UUID}",
-  "msgName": "MsgConnectionOpenInit",
+  "msgName": "/ibc.core.connection.v1.MsgConnectionOpenInit",
   "txHash": "F2B7D61BA783E6CDD9FE5825EBF7770688F6F45C482CB78ACB51E84B06FC643E",
   "msgIndex": 0,
   "params": {
@@ -68,7 +68,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("CreateMsgIBCConnectionOpenInit"))
+			Expect(cmd.Name()).To(Equal("/ibc.core.connection.v1.MsgConnectionOpenInit.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			createMsgCreateClientEvent := untypedEvent.(*event.MsgIBCConnectionOpenInit)

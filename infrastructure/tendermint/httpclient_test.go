@@ -158,7 +158,6 @@ var _ = Describe("HTTPClient", func() {
 					ghttp.RespondWith(http.StatusOK, infrastructure_tendermint_test.GENESIS_MIXED_NUMBER_AND_STRING_JSON),
 				),
 			)
-
 			client := NewHTTPClient(server.URL(), true)
 			_, err := client.Genesis()
 			Expect(err).To(BeNil())

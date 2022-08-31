@@ -9,9 +9,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_CONNECTION_OPEN_CONFIRM = "MsgConnectionOpenConfirm"
-const MSG_IBC_CONNECTION_OPEN_CONFIRM_CREATED = "MsgConnectionOpenConfirmCreated"
-const MSG_IBC_CONNECTION_OPEN_CONFIRM_FAILED = "MsgConnectionOpenConfirmFailed"
+const MSG_IBC_CONNECTION_OPEN_CONFIRM = "/ibc.core.connection.v1.MsgConnectionOpenConfirm"
+const MSG_IBC_CONNECTION_OPEN_CONFIRM_CREATED = "/ibc.core.connection.v1.MsgConnectionOpenConfirm.Created"
+const MSG_IBC_CONNECTION_OPEN_CONFIRM_FAILED = "/ibc.core.connection.v1.MsgConnectionOpenConfirm.Failed"
 
 type MsgIBCConnectionOpenConfirm struct {
 	MsgBase

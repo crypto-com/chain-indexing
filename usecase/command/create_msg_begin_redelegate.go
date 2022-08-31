@@ -22,7 +22,7 @@ func NewCreateMsgBeginRedelegate(msgCommonParams event.MsgCommonParams, params m
 
 // Name returns name of command
 func (*CreateMsgBeginRedelegate) Name() string {
-	return "CreateMsgBeginRedelegate"
+	return "/cosmos.staking.v1beta1.MsgBeginRedelegate.Create"
 }
 
 // Version returns version of command
