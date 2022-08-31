@@ -164,13 +164,22 @@ func ParseMsgSend(
 		}
 	}
 
+	amountInterface := parserParams.Msg["amount"].([]interface{})
+	amount, err := tmcosmosutils.NewCoinsFromAmountInterface(amountInterface)
+	if err != nil {
+		amount = make([]coin.Coin, 0)
+		for i := 0; i < len(amountInterface); i++ {
+			amount = append(amount, coin.Coin{})
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgSend(
 		parserParams.MsgCommonParams,
 
 		event.MsgSendCreatedParams{
 			FromAddress: parserParams.Msg["from_address"].(string),
 			ToAddress:   parserParams.Msg["to_address"].(string),
-			Amount:      tmcosmosutils.MustNewCoinsFromAmountInterface(parserParams.Msg["amount"].([]interface{})),
+			Amount:      amount,
 		},
 	)}, possibleSignerAddresses
 }
@@ -188,9 +197,18 @@ func ParseMsgMultiSend(
 			possibleSignerAddresses = append(possibleSignerAddresses, fromAddress.(string))
 		}
 
+		amountInterface := input["coins"].([]interface{})
+		amount, err := tmcosmosutils.NewCoinsFromAmountInterface(amountInterface)
+		if err != nil {
+			amount = make([]coin.Coin, 0)
+			for i := 0; i < len(amountInterface); i++ {
+				amount = append(amount, coin.Coin{})
+			}
+		}
+
 		inputs = append(inputs, model.MsgMultiSendInput{
 			Address: input["address"].(string),
-			Amount:  tmcosmosutils.MustNewCoinsFromAmountInterface(input["coins"].([]interface{})),
+			Amount:  amount,
 		})
 	}
 
@@ -198,9 +216,19 @@ func ParseMsgMultiSend(
 	outputs := make([]model.MsgMultiSendOutput, 0, len(rawOutputs))
 	for _, rawOutput := range rawOutputs {
 		output, _ := rawOutput.(map[string]interface{})
+
+		amountInterface := output["coins"].([]interface{})
+		amount, err := tmcosmosutils.NewCoinsFromAmountInterface(amountInterface)
+		if err != nil {
+			amount = make([]coin.Coin, 0)
+			for i := 0; i < len(amountInterface); i++ {
+				amount = append(amount, coin.Coin{})
+			}
+		}
+
 		outputs = append(outputs, model.MsgMultiSendOutput{
 			Address: output["address"].(string),
-			Amount:  tmcosmosutils.MustNewCoinsFromAmountInterface(output["coins"].([]interface{})),
+			Amount:  amount,
 		})
 	}
 
@@ -341,12 +369,21 @@ func ParseMsgFundCommunityPool(
 		}
 	}
 
+	amountInterface := parserParams.Msg["amount"].([]interface{})
+	amount, err := tmcosmosutils.NewCoinsFromAmountInterface(amountInterface)
+	if err != nil {
+		amount = make([]coin.Coin, 0)
+		for i := 0; i < len(amountInterface); i++ {
+			amount = append(amount, coin.Coin{})
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgFundCommunityPool(
 		parserParams.MsgCommonParams,
 
 		model.MsgFundCommunityPoolParams{
 			Depositor: parserParams.Msg["depositor"].(string),
-			Amount:    tmcosmosutils.MustNewCoinsFromAmountInterface(parserParams.Msg["amount"].([]interface{})),
+			Amount:    amount,
 		},
 	)}, possibleSignerAddresses
 }
@@ -380,18 +417,20 @@ func ParseMsgSubmitProposal(
 		cmds, possibleSignerAddresses = parseMsgSubmitUnknownProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	}
 
-	if parserParams.MsgCommonParams.TxSuccess {
-		log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
-		logEvent := log.GetEventByType("submit_proposal")
-		if logEvent == nil {
-			panic("missing `submit_proposal` event in TxsResult log")
-		}
+	if !parserParams.MsgCommonParams.TxSuccess {
+		return cmds, possibleSignerAddresses
+	}
 
-		if logEvent.HasAttribute("voting_period_start") {
-			cmds = append(cmds, command_usecase.NewStartProposalVotingPeriod(
-				parserParams.MsgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"),
-			))
-		}
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
+	logEvent := log.GetEventByType("submit_proposal")
+	if logEvent == nil {
+		panic("missing `submit_proposal` event in TxsResult log")
+	}
+
+	if logEvent.HasAttribute("voting_period_start") {
+		cmds = append(cmds, command_usecase.NewStartProposalVotingPeriod(
+			parserParams.MsgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"),
+		))
 	}
 
 	return cmds, possibleSignerAddresses
@@ -418,6 +457,15 @@ func parseMsgSubmitParamChangeProposal(
 		}
 	}
 
+	initialDepositAmountInterface := msg["initial_deposit"].([]interface{})
+	initialDepositAmount, err := tmcosmosutils.NewCoinsFromAmountInterface(initialDepositAmountInterface)
+	if err != nil {
+		initialDepositAmount = make([]coin.Coin, 0)
+		for i := 0; i < len(initialDepositAmountInterface); i++ {
+			initialDepositAmount = append(initialDepositAmount, coin.Coin{})
+		}
+	}
+
 	if !txSuccess {
 		return []command.Command{command_usecase.NewCreateMsgSubmitParamChangeProposal(
 			msgCommonParams,
@@ -426,9 +474,7 @@ func parseMsgSubmitParamChangeProposal(
 				MaybeProposalId: nil,
 				Content:         proposalContent,
 				ProposerAddress: msg["proposer"].(string),
-				InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
-					msg["initial_deposit"].([]interface{}),
-				),
+				InitialDeposit:  initialDepositAmount,
 			},
 		)}, possibleSignerAddresses
 	}
@@ -449,9 +495,7 @@ func parseMsgSubmitParamChangeProposal(
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
 			ProposerAddress: msg["proposer"].(string),
-			InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
-				msg["initial_deposit"].([]interface{}),
-			),
+			InitialDeposit:  initialDepositAmount,
 		},
 	)}, possibleSignerAddresses
 }
@@ -468,12 +512,19 @@ func parseMsgSubmitCommunityFundSpendProposal(
 	if err := jsoniter.Unmarshal(rawContent, &rawProposalContent); err != nil {
 		panic("error decoding community pool spend proposal content")
 	}
+	amount, err := tmcosmosutils.NewCoinsFromAmountInterface(rawProposalContent.Amount)
+	if err != nil {
+		amount = make([]coin.Coin, 0)
+		for i := 0; i < len(rawProposalContent.Amount); i++ {
+			amount = append(amount, coin.Coin{})
+		}
+	}
 	proposalContent := model.MsgSubmitCommunityPoolSpendProposalContent{
 		Type:             rawProposalContent.Type,
 		Title:            rawProposalContent.Title,
 		Description:      rawProposalContent.Description,
 		RecipientAddress: rawProposalContent.RecipientAddress,
-		Amount:           tmcosmosutils.MustNewCoinsFromAmountInterface(rawProposalContent.Amount),
+		Amount:           amount,
 	}
 
 	// Getting possible signer address from Msg
@@ -481,6 +532,15 @@ func parseMsgSubmitCommunityFundSpendProposal(
 	if msg != nil {
 		if proposer, ok := msg["proposer"]; ok {
 			possibleSignerAddresses = append(possibleSignerAddresses, proposer.(string))
+		}
+	}
+
+	initialDepositAmountInterface := msg["initial_deposit"].([]interface{})
+	initialDepositAmount, err := tmcosmosutils.NewCoinsFromAmountInterface(initialDepositAmountInterface)
+	if err != nil {
+		initialDepositAmount = make([]coin.Coin, 0)
+		for i := 0; i < len(initialDepositAmountInterface); i++ {
+			initialDepositAmount = append(initialDepositAmount, coin.Coin{})
 		}
 	}
 
@@ -492,9 +552,7 @@ func parseMsgSubmitCommunityFundSpendProposal(
 				MaybeProposalId: nil,
 				Content:         proposalContent,
 				ProposerAddress: msg["proposer"].(string),
-				InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
-					msg["initial_deposit"].([]interface{}),
-				),
+				InitialDeposit:  initialDepositAmount,
 			},
 		)}, possibleSignerAddresses
 	}
@@ -516,9 +574,7 @@ func parseMsgSubmitCommunityFundSpendProposal(
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
 			ProposerAddress: msg["proposer"].(string),
-			InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
-				msg["initial_deposit"].([]interface{}),
-			),
+			InitialDeposit:  initialDepositAmount,
 		},
 	)}, possibleSignerAddresses
 }
@@ -560,6 +616,15 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 		}
 	}
 
+	initialDepositAmountInterface := msg["initial_deposit"].([]interface{})
+	initialDepositAmount, err := tmcosmosutils.NewCoinsFromAmountInterface(initialDepositAmountInterface)
+	if err != nil {
+		initialDepositAmount = make([]coin.Coin, 0)
+		for i := 0; i < len(initialDepositAmountInterface); i++ {
+			initialDepositAmount = append(initialDepositAmount, coin.Coin{})
+		}
+	}
+
 	if !txSuccess {
 		return []command.Command{command_usecase.NewCreateMsgSubmitSoftwareUpgradeProposal(
 			msgCommonParams,
@@ -568,9 +633,7 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 				MaybeProposalId: nil,
 				Content:         proposalContent,
 				ProposerAddress: msg["proposer"].(string),
-				InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
-					msg["initial_deposit"].([]interface{}),
-				),
+				InitialDeposit:  initialDepositAmount,
 			},
 		)}, possibleSignerAddresses
 	}
@@ -592,9 +655,7 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
 			ProposerAddress: msg["proposer"].(string),
-			InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
-				msg["initial_deposit"].([]interface{}),
-			),
+			InitialDeposit:  initialDepositAmount,
 		},
 	)}, possibleSignerAddresses
 }
@@ -620,6 +681,15 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 		}
 	}
 
+	initialDepositAmountInterface := msg["initial_deposit"].([]interface{})
+	initialDepositAmount, err := tmcosmosutils.NewCoinsFromAmountInterface(initialDepositAmountInterface)
+	if err != nil {
+		initialDepositAmount = make([]coin.Coin, 0)
+		for i := 0; i < len(initialDepositAmountInterface); i++ {
+			initialDepositAmount = append(initialDepositAmount, coin.Coin{})
+		}
+	}
+
 	if !txSuccess {
 		return []command.Command{command_usecase.NewCreateMsgSubmitCancelSoftwareUpgradeProposal(
 			msgCommonParams,
@@ -628,9 +698,7 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 				MaybeProposalId: nil,
 				Content:         proposalContent,
 				ProposerAddress: msg["proposer"].(string),
-				InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
-					msg["initial_deposit"].([]interface{}),
-				),
+				InitialDeposit:  initialDepositAmount,
 			},
 		)}, possibleSignerAddresses
 	}
@@ -652,9 +720,7 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
 			ProposerAddress: msg["proposer"].(string),
-			InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
-				msg["initial_deposit"].([]interface{}),
-			),
+			InitialDeposit:  initialDepositAmount,
 		},
 	)}, possibleSignerAddresses
 }
@@ -680,6 +746,15 @@ func parseMsgSubmitTextProposal(
 		}
 	}
 
+	initialDepositAmountInterface := msg["initial_deposit"].([]interface{})
+	initialDepositAmount, err := tmcosmosutils.NewCoinsFromAmountInterface(initialDepositAmountInterface)
+	if err != nil {
+		initialDepositAmount = make([]coin.Coin, 0)
+		for i := 0; i < len(initialDepositAmountInterface); i++ {
+			initialDepositAmount = append(initialDepositAmount, coin.Coin{})
+		}
+	}
+
 	if !txSuccess {
 		return []command.Command{command_usecase.NewCreateMsgSubmitTextProposal(
 			msgCommonParams,
@@ -688,9 +763,7 @@ func parseMsgSubmitTextProposal(
 				MaybeProposalId: nil,
 				Content:         proposalContent,
 				ProposerAddress: msg["proposer"].(string),
-				InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
-					msg["initial_deposit"].([]interface{}),
-				),
+				InitialDeposit:  initialDepositAmount,
 			},
 		)}, possibleSignerAddresses
 	}
@@ -712,9 +785,7 @@ func parseMsgSubmitTextProposal(
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
 			ProposerAddress: msg["proposer"].(string),
-			InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
-				msg["initial_deposit"].([]interface{}),
-			),
+			InitialDeposit:  initialDepositAmount,
 		},
 	)}, possibleSignerAddresses
 }
@@ -744,6 +815,28 @@ func parseMsgSubmitUnknownProposal(
 		}
 	}
 
+	initialDepositAmountInterface := msg["initial_deposit"].([]interface{})
+	initialDepositAmount, err := tmcosmosutils.NewCoinsFromAmountInterface(initialDepositAmountInterface)
+	if err != nil {
+		initialDepositAmount = make([]coin.Coin, 0)
+		for i := 0; i < len(initialDepositAmountInterface); i++ {
+			initialDepositAmount = append(initialDepositAmount, coin.Coin{})
+		}
+	}
+
+	if !txSuccess {
+		return []command.Command{command_usecase.NewCreateMsgSubmitUnknownProposal(
+			msgCommonParams,
+
+			model.MsgSubmitUnknownProposalParams{
+				MaybeProposalId: nil,
+				Content:         proposalContent,
+				ProposerAddress: msg["proposer"].(string),
+				InitialDeposit:  initialDepositAmount,
+			},
+		)}, possibleSignerAddresses
+	}
+
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
 	event := log.GetEventByType("submit_proposal")
@@ -755,21 +848,6 @@ func parseMsgSubmitUnknownProposal(
 		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
 	}
 
-	if !txSuccess {
-		return []command.Command{command_usecase.NewCreateMsgSubmitUnknownProposal(
-			msgCommonParams,
-
-			model.MsgSubmitUnknownProposalParams{
-				MaybeProposalId: proposalId,
-				Content:         proposalContent,
-				ProposerAddress: msg["proposer"].(string),
-				InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
-					msg["initial_deposit"].([]interface{}),
-				),
-			},
-		)}, possibleSignerAddresses
-	}
-
 	return []command.Command{command_usecase.NewCreateMsgSubmitUnknownProposal(
 		msgCommonParams,
 
@@ -777,9 +855,7 @@ func parseMsgSubmitUnknownProposal(
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
 			ProposerAddress: msg["proposer"].(string),
-			InitialDeposit: tmcosmosutils.MustNewCoinsFromAmountInterface(
-				msg["initial_deposit"].([]interface{}),
-			),
+			InitialDeposit:  initialDepositAmount,
 		},
 	)}, possibleSignerAddresses
 }
@@ -810,16 +886,6 @@ func ParseMsgVote(
 func ParseMsgDeposit(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
-	cmds := []command.Command{command_usecase.NewCreateMsgDeposit(
-		parserParams.MsgCommonParams,
-
-		model.MsgDepositParams{
-			ProposalId: parserParams.Msg["proposal_id"].(string),
-			Depositor:  parserParams.Msg["depositor"].(string),
-			Amount:     tmcosmosutils.MustNewCoinsFromAmountInterface(parserParams.Msg["amount"].([]interface{})),
-		},
-	)}
-
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
@@ -828,20 +894,41 @@ func ParseMsgDeposit(
 		}
 	}
 
-	if parserParams.MsgCommonParams.TxSuccess {
-		log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
-		logEvents := log.GetEventsByType("proposal_deposit")
-		if logEvents == nil {
-			panic("missing `proposal_deposit` event in TxsResult log")
+	amountInterface := parserParams.Msg["amount"].([]interface{})
+	amount, err := tmcosmosutils.NewCoinsFromAmountInterface(amountInterface)
+	if err != nil {
+		amount = make([]coin.Coin, 0)
+		for i := 0; i < len(amountInterface); i++ {
+			amount = append(amount, coin.Coin{})
 		}
+	}
 
-		for _, logEvent := range logEvents {
-			if logEvent.HasAttribute("voting_period_start") {
-				cmds = append(cmds, command_usecase.NewStartProposalVotingPeriod(
-					parserParams.MsgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"),
-				))
-				break
-			}
+	cmds := []command.Command{command_usecase.NewCreateMsgDeposit(
+		parserParams.MsgCommonParams,
+
+		model.MsgDepositParams{
+			ProposalId: parserParams.Msg["proposal_id"].(string),
+			Depositor:  parserParams.Msg["depositor"].(string),
+			Amount:     amount,
+		},
+	)}
+
+	if !parserParams.MsgCommonParams.TxSuccess {
+		return cmds, possibleSignerAddresses
+	}
+
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
+	logEvents := log.GetEventsByType("proposal_deposit")
+	if logEvents == nil {
+		panic("missing `proposal_deposit` event in TxsResult log")
+	}
+
+	for _, logEvent := range logEvents {
+		if logEvent.HasAttribute("voting_period_start") {
+			cmds = append(cmds, command_usecase.NewStartProposalVotingPeriod(
+				parserParams.MsgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"),
+			))
+			break
 		}
 	}
 

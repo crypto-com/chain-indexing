@@ -781,8 +781,14 @@ func ParseMsgRecvPacket(
 
 	// Transfer application, MsgTransfer
 	var rawFungibleTokenPacketData ibc_model.FungibleTokenPacketData
-	rawPacketData := base64_internal.MustDecodeString(rawMsg.Packet.Data)
-	json.MustUnmarshal(rawPacketData, &rawFungibleTokenPacketData)
+	rawPacketData, err := base64_internal.DecodeString(rawMsg.Packet.Data)
+	if err != nil {
+		rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
+	} else  {
+		if err := json.Unmarshal(rawPacketData, &rawFungibleTokenPacketData); err != nil {
+			rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
+		}
+	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
 		msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
@@ -898,8 +904,14 @@ func ParseMsgAcknowledgement(
 
 	// Transfer application, MsgTransfer
 	var rawFungibleTokenPacketData ibc_model.FungibleTokenPacketData
-	rawPacketData := base64_internal.MustDecodeString(rawMsg.Packet.Data)
-	json.MustUnmarshal(rawPacketData, &rawFungibleTokenPacketData)
+	rawPacketData, err := base64_internal.DecodeString(rawMsg.Packet.Data)
+	if err != nil {
+		rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
+	} else  {
+		if err := json.Unmarshal(rawPacketData, &rawFungibleTokenPacketData); err != nil {
+			rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
+		}
+	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
 		msgAcknowledgementParams := ibc_model.MsgAcknowledgementParams{
