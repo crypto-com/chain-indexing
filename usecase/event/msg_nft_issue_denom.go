@@ -31,7 +31,6 @@ func NewMsgNFTIssueDenom(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_NFT_ISSUE_DENOM,
 			Version:         1,
-
 			MsgCommonParams: msgCommonParams,
 		}),
 

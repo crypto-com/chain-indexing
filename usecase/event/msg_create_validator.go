@@ -32,7 +32,6 @@ func NewMsgCreateValidator(msgCommonParams MsgCommonParams, params model.MsgCrea
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_CREATE_VALIDATOR,
 			Version:         1,
-
 			MsgCommonParams: msgCommonParams,
 		}),
 		params.Description,

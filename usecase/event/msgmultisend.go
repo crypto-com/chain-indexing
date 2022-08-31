@@ -26,7 +26,6 @@ func NewMsgMultiSend(msgCommonParams MsgCommonParams, params model.MsgMultiSendP
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_MULTI_SEND,
 			Version:         1,
-
 			MsgCommonParams: msgCommonParams,
 		}),
 

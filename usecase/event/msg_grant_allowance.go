@@ -28,7 +28,6 @@ func NewMsgGrantAllowance(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_GRANT_ALLOWANCE,
 			Version:         1,
-
 			MsgCommonParams: msgCommonParams,
 		}),
 

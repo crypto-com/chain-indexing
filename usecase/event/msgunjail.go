@@ -29,7 +29,6 @@ func NewMsgUnjail(msgCommonParams MsgCommonParams, params model.MsgUnjailParams)
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_UNJAIL,
 			Version:         1,
-
 			MsgCommonParams: msgCommonParams,
 		}),
 

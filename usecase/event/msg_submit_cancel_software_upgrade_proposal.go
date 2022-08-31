@@ -28,7 +28,6 @@ func NewMsgSubmitCancelSoftwareUpgradeProposal(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL,
 			Version:         1,
-
 			MsgCommonParams: msgCommonParams,
 		}),
 

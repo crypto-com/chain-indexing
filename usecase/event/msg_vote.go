@@ -27,7 +27,6 @@ func NewMsgVote(msgCommonParams MsgCommonParams, params model.MsgVoteParams) *Ms
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_VOTE,
 			Version:         1,
-
 			MsgCommonParams: msgCommonParams,
 		}),
 

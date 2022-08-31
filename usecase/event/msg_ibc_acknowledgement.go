@@ -27,7 +27,6 @@ func NewMsgIBCAcknowledgement(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_ACKNOWLEDGEMENT,
 			Version:         1,
-
 			MsgCommonParams: msgCommonParams,
 		}),
 
@@ -79,7 +78,6 @@ func NewMsgAlreadyRelayedIBCAcknowledgement(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_ALREADY_RELAYED_IBC_ACKNOWLEDGEMENT,
 			Version:         1,
-
 			MsgCommonParams: msgCommonParams,
 		}),
 

@@ -28,7 +28,6 @@ func NewMsgCreateVestingAccount(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_CREATE_VESTING_ACCOUNT,
 			Version:         1,
-
 			MsgCommonParams: msgCommonParams,
 		}),
 

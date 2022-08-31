@@ -28,7 +28,6 @@ func NewMsgRevokeAllowance(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_REVOKE_ALLOWANCE,
 			Version:         1,
-
 			MsgCommonParams: msgCommonParams,
 		}),
 

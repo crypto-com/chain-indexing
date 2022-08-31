@@ -27,7 +27,6 @@ func NewMsgIBCConnectionOpenConfirm(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_CONNECTION_OPEN_CONFIRM,
 			Version:         1,
-
 			MsgCommonParams: msgCommonParams,
 		}),
 

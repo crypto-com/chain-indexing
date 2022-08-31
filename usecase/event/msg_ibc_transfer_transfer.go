@@ -27,7 +27,6 @@ func NewMsgIBCTransferTransfer(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_IBC_TRANSFER_TRANSFER,
 			Version:         1,
-
 			MsgCommonParams: msgCommonParams,
 		}),
 

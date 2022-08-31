@@ -29,7 +29,6 @@ func NewMsgDeposit(msgCommonParams MsgCommonParams, params model.MsgDepositParam
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_DEPOSIT,
 			Version:         1,
-
 			MsgCommonParams: msgCommonParams,
 		}),
 

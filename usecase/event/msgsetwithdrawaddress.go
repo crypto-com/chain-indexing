@@ -28,7 +28,6 @@ func NewMsgSetWithdrawAddress(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_SET_WITHDRAW_ADDRESS,
 			Version:         1,
-
 			MsgCommonParams: msgCommonParams,
 		}),
 

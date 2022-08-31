@@ -34,7 +34,6 @@ func NewMsgNFTMintNFT(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_NFT_MINT_NFT,
 			Version:         1,
-
 			MsgCommonParams: msgCommonParams,
 		}),
 

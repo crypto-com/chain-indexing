@@ -28,7 +28,6 @@ func NewMsgWithdrawValidatorCommission(
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_WITHDRAW_VALIDATOR_COMMISSION,
 			Version:         1,
-
 			MsgCommonParams: msgCommonParams,
 		}),
 
