@@ -61,3 +61,14 @@ func (log *ParsedTxsResultsEvents) GetEventsByType(t string) []*ParsedTxsResultL
 
 	return logEvents
 }
+
+func (log *ParsedTxsResultsEvents) GetRawEvents() []model.BlockResultsEvent {
+	return log.rawEvents
+}
+
+func (log *ParsedTxsResultsEvents) GetTypeIndex(key string) []int {
+	return log.typeIndex[key]
+}
+func (log *ParsedTxsResultsEvents) RemoveIndexType(key string, index int) {
+	log.typeIndex[key] = append(log.typeIndex[key][:index], log.typeIndex[key][index+1:]...)
+}
