@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
@@ -37,4 +38,14 @@ func mustParseGenesisResp(rawResp string, strictParsing bool) *genesis.Genesis {
 	}
 
 	return genesis
+}
+
+func mustParseTxsResp(rawResp string) *model.Tx {
+	tx, err := cosmosapp.ParseTxsResp(strings.NewReader(rawResp))
+
+	if err != nil {
+		panic(fmt.Sprintf("error parsing block results response: %v", err))
+	}
+
+	return tx
 }

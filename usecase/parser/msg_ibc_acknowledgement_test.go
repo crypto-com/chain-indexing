@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -13,7 +14,6 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
 	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
 var _ = Describe("ParseMsgCommands", func() {
@@ -68,13 +68,15 @@ var _ = Describe("ParseMsgCommands", func() {
 }
 `
 
-			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_BLOCK_RESP,
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_BLOCK_RESULTS_RESP,
 			))
+
+			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_TXS_RESP)
+			txs := []model.Tx{*tx}
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
@@ -83,9 +85,9 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
-				block,
+				block.Height,
 				blockResults,
+				txs,
 				accountAddressPrefix,
 				stakingDenom,
 			)
@@ -158,13 +160,15 @@ var _ = Describe("ParseMsgCommands", func() {
 }
 `
 
-			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_ERROR_BLOCK_RESP,
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_ERROR_BLOCK_RESULTS_RESP,
 			))
+
+			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_ERROR_TXS_RESP)
+			txs := []model.Tx{*tx}
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
@@ -173,9 +177,9 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
-				block,
+				block.Height,
 				blockResults,
+				txs,
 				accountAddressPrefix,
 				stakingDenom,
 			)
@@ -308,13 +312,24 @@ var _ = Describe("ParseMsgCommands", func() {
 }
 `
 
-			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_BLOCK_RESP,
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_BLOCK_RESULTS_RESP,
 			))
+
+			tx1 := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_1)
+			tx2 := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_2)
+			tx3 := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_3)
+			tx4 := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_4)
+			tx5 := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_5)
+			tx6 := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_6)
+			tx7 := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_7)
+			tx8 := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_8)
+			tx9 := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_9)
+			tx10 := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_10)
+			txs := []model.Tx{*tx1, *tx2, *tx3, *tx4, *tx5, *tx6, *tx7, *tx8, *tx9, *tx10}
 
 			accountAddressPrefix := "crc"
 			stakingDenom := "basecro"
@@ -323,9 +338,9 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
-				block,
+				block.Height,
 				blockResults,
+				txs,
 				accountAddressPrefix,
 				stakingDenom,
 			)

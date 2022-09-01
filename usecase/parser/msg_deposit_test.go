@@ -2,7 +2,6 @@ package parser_test
 
 import (
 	"github.com/crypto-com/chain-indexing/usecase/coin"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -17,11 +16,14 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgDeposit", func() {
 		It("should parse gov.MsgDeposit command with effective height in the transaction", func() {
-			txDecoder := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_DEPOSIT_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_DEPOSIT_BLOCK_RESULTS_RESP,
 			)
+
+			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_DEPOSIT_TXS_RESP)
+			txs := []model.Tx{*tx}
+
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"
 
@@ -29,9 +31,9 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
-				block,
+				block.Height,
 				blockResults,
+				txs,
 				accountAddressPrefix,
 				bondingDenom,
 			)
