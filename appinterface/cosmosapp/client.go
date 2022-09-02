@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/crypto-com/chain-indexing/usecase/coin"
-	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 type Client interface {
@@ -27,7 +27,7 @@ type Client interface {
 	ProposalById(id string) (Proposal, error)
 	ProposalTally(id string) (Tally, error)
 
-	Txs(txHash string) (*usecase_model.Tx, error)
+	Txs(txHash string) (*model.Tx, error)
 }
 
 var ErrAccountNotFound = errors.New("account not found")
