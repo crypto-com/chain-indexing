@@ -388,7 +388,7 @@ const TX_MSG_VOTE_TXS_RESP = `{
     },
     "tx_response": {
         "height": "100",
-        "txhash": "C94E6D87ACC4DD809CC05B9F9773B32B0ECEF9E11B8DFF85DD8ADF4566AF9ED1",
+        "txhash": "6E6910024B74B16F3B9B14309D7F8CD89AF25E561F0FB3F56380F086218F1759",
         "codespace": "",
         "code": 0,
         "data": "CgYKBHZvdGU=",

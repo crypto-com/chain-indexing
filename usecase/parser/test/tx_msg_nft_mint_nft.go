@@ -352,7 +352,7 @@ const TX_MSG_NFT_MINT_NFT_BLOCK_RESULTS_RESP = `
 }
 `
 
-const TX_MSG_NFT_MINT_NFT_TXSRESP = `{
+const TX_MSG_NFT_MINT_NFT_TXS_RESP = `{
     "tx": {
         "body": {
             "messages": [

@@ -4,8 +4,6 @@ import (
 	"strings"
 
 	"github.com/crypto-com/chain-indexing/external/primptr"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/event"
@@ -21,9 +19,14 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgEditValidator", func() {
 
 		It("should parse Msg commands when there is staking.MsgEditValidator in the transaction", func() {
-			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_BLOCK_RESULTS_RESP))
+
+			tx1 := mustParseTxsResp(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_TXS_RESP_1)
+			tx2 := mustParseTxsResp(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_TXS_RESP_2)
+			tx3 := mustParseTxsResp(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_TXS_RESP_3)
+			txs := []model.Tx{*tx1, *tx2, *tx3}
+
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"
 
@@ -31,9 +34,9 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
-				block,
+				block.Height,
 				blockResults,
+				txs,
 				accountAddressPrefix,
 				bondingDenom,
 			)

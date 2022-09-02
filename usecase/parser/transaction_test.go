@@ -4,8 +4,6 @@ import (
 	"strings"
 
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -31,18 +29,19 @@ var _ = Describe("TransactionParser", func() {
 
 	Describe("ParseTransactionCommands", func() {
 		It("should parse Transaction commands when there is two Msg in one transaction", func() {
-			txFeeParser := utils.NewTxDecoder()
 			mockClient := cosmosapp.NewMockClient()
 			fakeLogger := FakeLogger.NewFakeLogger()
-			block, _ := mustParseBlockResp(usecase_parser_test.ONE_TX_TWO_MSG_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.ONE_TX_TWO_MSG_BLOCK_RESULTS_RESP)
+
+			tx := mustParseTxsResp(usecase_parser_test.ONE_TX_TWO_MSG_TXS_RESP)
+			txs := []model.Tx{*tx}
+
 			anyAccountAddressPrefix := "tcro"
 
 			cmds, err := parser.ParseTransactionCommands(
 				fakeLogger,
-				txFeeParser,
+				txs,
 				mockClient,
-				block,
 				blockResults,
 				anyAccountAddressPrefix,
 				[]string{},
@@ -95,18 +94,19 @@ var _ = Describe("TransactionParser", func() {
 		})
 
 		It("should parse Transaction commands when there is transaction fee", func() {
-			txFeeParser := utils.NewTxDecoder()
 			mockClient := cosmosapp.NewMockClient()
 			fakeLogger := FakeLogger.NewFakeLogger()
-			block, _ := mustParseBlockResp(usecase_parser_test.TX_WITH_FEE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_WITH_FEE_BLOCK_RESULTS_RESP)
+
+			tx := mustParseTxsResp(usecase_parser_test.TX_WITH_FEE_TXS_RESP)
+			txs := []model.Tx{*tx}
+
 			anyAccountAddressPrefix := "tcro"
 
 			cmds, err := parser.ParseTransactionCommands(
 				fakeLogger,
-				txFeeParser,
+				txs,
 				mockClient,
-				block,
 				blockResults,
 				anyAccountAddressPrefix,
 				[]string{},
@@ -148,18 +148,19 @@ var _ = Describe("TransactionParser", func() {
 		})
 
 		It("should parse Transaction commands when transaction failed with fee", func() {
-			txFeeParser := utils.NewTxDecoder()
 			mockClient := cosmosapp.NewMockClient()
 			fakeLogger := FakeLogger.NewFakeLogger()
-			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESULTS_RESP)
+
+			tx := mustParseTxsResp(usecase_parser_test.TX_FAILED_WITH_FEE_TXS_RESP)
+			txs := []model.Tx{*tx}
+
 			anyAccountAddressPrefix := "tcro"
 
 			cmds, err := parser.ParseTransactionCommands(
 				fakeLogger,
-				txFeeParser,
+				txs,
 				mockClient,
-				block,
 				blockResults,
 				anyAccountAddressPrefix,
 				[]string{},
@@ -200,18 +201,19 @@ var _ = Describe("TransactionParser", func() {
 		})
 
 		It("should parse Transaction commands when transaction failed without fee", func() {
-			txFeeParser := utils.NewTxDecoder()
 			mockClient := cosmosapp.NewMockClient()
 			fakeLogger := FakeLogger.NewFakeLogger()
-			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_FAILED_WITHOUT_FEE_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_FAILED_WITHOUT_FEE_BLOCK_RESULTS_RESP))
+
+			tx := mustParseTxsResp(usecase_parser_test.TX_FAILED_WITHOUT_FEE_TXS_RESP)
+			txs := []model.Tx{*tx}
+
 			anyAccountAddressPrefix := "tcro"
 
 			cmds, err := parser.ParseTransactionCommands(
 				fakeLogger,
-				txFeeParser,
+				txs,
 				mockClient,
-				block,
 				blockResults,
 				anyAccountAddressPrefix,
 				[]string{},
@@ -252,18 +254,19 @@ var _ = Describe("TransactionParser", func() {
 		})
 
 		It("should parse Transaction commands when there is transaction memo and timeout_height", func() {
-			txFeeParser := utils.NewTxDecoder()
 			mockClient := cosmosapp.NewMockClient()
 			fakeLogger := FakeLogger.NewFakeLogger()
-			block, _ := mustParseBlockResp(usecase_parser_test.TX_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESULTS_RESP)
+
+			tx := mustParseTxsResp(usecase_parser_test.TX_WITH_MEMO_TIMEOUT_HEIGHT_TXS_RESP)
+			txs := []model.Tx{*tx}
+
 			anyAccountAddressPrefix := "tcro"
 
 			cmds, err := parser.ParseTransactionCommands(
 				fakeLogger,
-				txFeeParser,
+				txs,
 				mockClient,
-				block,
 				blockResults,
 				anyAccountAddressPrefix,
 				[]string{},
@@ -304,18 +307,19 @@ var _ = Describe("TransactionParser", func() {
 		})
 
 		It("should parse failed Transaction commands when there is transaction memo and timeout_height", func() {
-			txFeeParser := utils.NewTxDecoder()
 			mockClient := cosmosapp.NewMockClient()
 			fakeLogger := FakeLogger.NewFakeLogger()
-			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESULTS_RESP)
+
+			tx := mustParseTxsResp(usecase_parser_test.TX_FAILED_WITH_MEMO_TIMEOUT_HEIGHT_TXS_RESP)
+			txs := []model.Tx{*tx}
+
 			anyAccountAddressPrefix := "tcro"
 
 			cmds, err := parser.ParseTransactionCommands(
 				fakeLogger,
-				txFeeParser,
+				txs,
 				mockClient,
-				block,
 				blockResults,
 				anyAccountAddressPrefix,
 				[]string{},
@@ -356,18 +360,21 @@ var _ = Describe("TransactionParser", func() {
 		})
 
 		It("should parse Transaction commands when the signer public key is empty", func() {
-			txFeeParser := utils.NewTxDecoder()
 			mockClient := cosmosapp.NewMockClient()
 			fakeLogger := FakeLogger.NewFakeLogger()
-			block, _ := mustParseBlockResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_BLOCK_RESULTS_RESP)
+
+			tx1 := mustParseTxsResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_TXS_RESP_1)
+			tx2 := mustParseTxsResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_TXS_RESP_2)
+			tx3 := mustParseTxsResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_TXS_RESP_3)
+			txs := []model.Tx{*tx1, *tx2, *tx3}
+
 			anyAccountAddressPrefix := "cosmos"
 
 			cmds, err := parser.ParseTransactionCommands(
 				fakeLogger,
-				txFeeParser,
+				txs,
 				mockClient,
-				block,
 				blockResults,
 				anyAccountAddressPrefix,
 				[]string{},
@@ -401,11 +408,13 @@ var _ = Describe("TransactionParser", func() {
 			)))
 		})
 		It("should parse Transaction commands when the signer public key is in state", func() {
-			txFeeParser := utils.NewTxDecoder()
 			mockClient := cosmosapp.MockClient{}
 			fakeLogger := FakeLogger.NewFakeLogger()
-			block, _ := mustParseBlockResp(usecase_parser_test.TX_SIGNER_PUBKEY_IN_STATE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_SIGNER_PUBKEY_IN_STATE_BLOCK_RESULTS_RESP)
+
+			tx := mustParseTxsResp(usecase_parser_test.TX_SIGNER_PUBKEY_IN_STATE_TXS_RESP)
+			txs := []model.Tx{*tx}
+
 			anyAccountAddressPrefix := "basecro"
 
 			mockClient.On("Account", "cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7").Return(
@@ -487,9 +496,8 @@ var _ = Describe("TransactionParser", func() {
 
 			cmds, err := parser.ParseTransactionCommands(
 				fakeLogger,
-				txFeeParser,
+				txs,
 				&mockClient,
-				block,
 				blockResults,
 				anyAccountAddressPrefix,
 				[]string{"cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7", "cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc"},

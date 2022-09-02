@@ -28,7 +28,7 @@ var _ = Describe("Parse Genesis", func() {
 	})
 
 	It("should throw when parsing unknown fields with strict mode on", func() {
-		genesisReader := strings.NewReader(usecase_parser_test.GENESIS_TESTNET_CROESEID_3_RESP)
+		genesisReader := strings.NewReader(usecase_parser_test.GENESIS_RESP)
 		strict := true
 
 		_, err := tendermint.ParseGenesisResp(genesisReader, strict)
