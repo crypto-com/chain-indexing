@@ -742,7 +742,7 @@ func (client *HTTPClient) getUrl(module string, method string) string {
 }
 
 // request construct tendermint getUrl and issues an HTTP request
-// returns the success http Body
+// returns the success http CosmosTxBody
 func (client *HTTPClient) request(method string, queryString ...string) (io.ReadCloser, error) {
 	var err error
 
@@ -769,7 +769,7 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 }
 
 // rawRequest construct tendermint getUrl and issues an HTTP request
-// returns the http Body with any status code
+// returns the http CosmosTxBody with any status code
 func (client *HTTPClient) rawRequest(method string, queryString ...string) (io.ReadCloser, int, error) {
 	var err error
 

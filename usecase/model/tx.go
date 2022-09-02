@@ -6,12 +6,12 @@ type Tx struct {
 }
 
 type CosmosTx struct {
-	Body       Body     `json:"body"`
-	AuthInfo   AuthInfo `json:"auth_info"`
-	Signatures []string `json:"signatures"`
+	Body       CosmosTxBody     `json:"body"`
+	AuthInfo   CosmosTxAuthInfo `json:"auth_info"`
+	Signatures []string         `json:"signatures"`
 }
 
-type Body struct {
+type CosmosTxBody struct {
 	Messages                    []map[string]interface{} `json:"messages"`
 	Memo                        string                   `json:"memo"`
 	TimeoutHeight               string                   `json:"timeout_height"`
@@ -19,60 +19,60 @@ type Body struct {
 	NonCriticalExtensionOptions []interface{}            `json:"non_critical_extension_options"`
 }
 
-type AuthInfo struct {
-	SignerInfos []SignerInfo `json:"signer_infos"`
-	Fee         Fee          `json:"fee"`
+type CosmosTxAuthInfo struct {
+	SignerInfos []CosmosTxSignerInfo `json:"signer_infos"`
+	Fee         CosmosTxAuthInfoFee  `json:"fee"`
 }
 
-type Fee struct {
-	Amount   []Amount `json:"amount"`
-	GasLimit string   `json:"gas_limit"`
-	Payer    string   `json:"payer"`
-	Granter  string   `json:"granter"`
+type CosmosTxAuthInfoFee struct {
+	Amount   []CosmosTxAuthInfoFeeAmount `json:"amount"`
+	GasLimit string                      `json:"gas_limit"`
+	Payer    string                      `json:"payer"`
+	Granter  string                      `json:"granter"`
 }
 
-type Amount struct {
+type CosmosTxAuthInfoFeeAmount struct {
 	Denom  string `json:"denom"`
 	Amount string `json:"amount"`
 }
 
-type SignerInfo struct {
-	MaybePublicKey *SignerInfoPublicKey `json:"public_key"`
-	ModeInfo       ModeInfo             `json:"mode_info"`
-	Sequence       string               `json:"sequence"`
+type CosmosTxSignerInfo struct {
+	MaybePublicKey *CosmosTxSignerInfoPublicKey `json:"public_key"`
+	ModeInfo       CosmosTxSignerInfoModeInfo   `json:"mode_info"`
+	Sequence       string                       `json:"sequence"`
 }
 
-type SignerInfoPublicKey struct {
-	Type            string      `json:"@type"`
-	MaybeThreshold  *int        `json:"threshold,omitempty"`
-	MaybePublicKeys []PublicKey `json:"public_keys,omitempty"`
-	MaybeKey        *string     `json:"key,omitempty"`
+type CosmosTxSignerInfoPublicKey struct {
+	Type            string                                 `json:"@type"`
+	MaybeThreshold  *int                                   `json:"threshold,omitempty"`
+	MaybePublicKeys []CosmosTxSignerInfoPublicKeyPublicKey `json:"public_keys,omitempty"`
+	MaybeKey        *string                                `json:"key,omitempty"`
 }
 
-type PublicKey struct {
+type CosmosTxSignerInfoPublicKeyPublicKey struct {
 	Type string `json:"@type"`
 	Key  string `json:"key"`
 }
 
-type ModeInfo struct {
-	MaybeSingle *Single `json:"single,omitempty"`
-	MaybeMulti  *Multi  `json:"multi,omitempty"`
+type CosmosTxSignerInfoModeInfo struct {
+	MaybeSingle *CosmosTxSignerInfoModeInfoSingle `json:"single,omitempty"`
+	MaybeMulti  *CosmosTxSignerInfoModeInfoMulti  `json:"multi,omitempty"`
 }
 
-type Single struct {
+type CosmosTxSignerInfoModeInfoSingle struct {
 	Mode string `json:"mode"`
 }
 
-type Multi struct {
-	Bitarray  Bitarray         `json:"bitarray"`
-	ModeInfos []SingleModeInfo `json:"mode_infos"`
+type CosmosTxSignerInfoModeInfoMulti struct {
+	Bitarray  CosmosTxSignerInfoModeInfoMultiBitarray         `json:"bitarray"`
+	ModeInfos []CosmosTxSignerInfoModeInfoMultiSingleModeInfo `json:"mode_infos"`
 }
 
-type SingleModeInfo struct {
-	Single Single `json:"single"`
+type CosmosTxSignerInfoModeInfoMultiSingleModeInfo struct {
+	Single CosmosTxSignerInfoModeInfoSingle `json:"single"`
 }
 
-type Bitarray struct {
+type CosmosTxSignerInfoModeInfoMultiBitarray struct {
 	ExtraBitsStored int64  `json:"extra_bits_stored"`
 	Elems           string `json:"elems"`
 }

@@ -202,7 +202,7 @@ type Bitarray struct {
 	Elems           string `json:"elems"`
 }
 
-func SumAmount(amounts []model.Amount) (coin.Coins, error) {
+func SumAmount(amounts []model.CosmosTxAuthInfoFeeAmount) (coin.Coins, error) {
 	var err error
 
 	coins := coin.NewEmptyCoins()

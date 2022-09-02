@@ -128,7 +128,7 @@ func (client *HTTPClient) LatestBlockHeight() (int64, error) {
 }
 
 // request construct tendermint url and issues an HTTP request
-// returns the success http Body
+// returns the success http CosmosTxBody
 func (client *HTTPClient) request(method string, queryString ...string) (io.ReadCloser, error) {
 	var err error
 

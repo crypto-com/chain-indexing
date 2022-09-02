@@ -14,7 +14,7 @@ import (
 func ParseSignerInfosToTransactionSigners(
 	logger applogger.Logger,
 	cosmosClient cosmosapp_interface.Client,
-	signerInfos []model.SignerInfo,
+	signerInfos []model.CosmosTxSignerInfo,
 	accountAddressPrefix string,
 	possibleSignerAddresses []string,
 	txHash string,
