@@ -2,6 +2,7 @@ package event
 
 import (
 	"bytes"
+
 	"github.com/crypto-com/chain-indexing/usecase/model"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
@@ -9,9 +10,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_GRANT_ALLOWANCE = "MsgGrantAllowance"
-const MSG_GRANT_ALLOWANCE_CREATED = "MsgGrantAllowanceCreated"
-const MSG_GRANT_ALLOWANCE_FAILED = "MsgGrantAllowanceFailed"
+const MSG_GRANT_ALLOWANCE = "/cosmos.feegrant.v1beta1.MsgGrantAllowance"
+const MSG_GRANT_ALLOWANCE_CREATED = "/cosmos.feegrant.v1beta1.MsgGrantAllowance.Created"
+const MSG_GRANT_ALLOWANCE_FAILED = "/cosmos.feegrant.v1beta1.MsgGrantAllowance.Failed"
 
 type MsgGrantAllowance struct {
 	MsgBase

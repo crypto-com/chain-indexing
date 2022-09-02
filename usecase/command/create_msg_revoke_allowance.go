@@ -22,7 +22,7 @@ func NewCreateMsgRevokeAllowance(
 }
 
 func (*CreateMsgRevokeAllowance) Name() string {
-	return "CreateMsgRevokeAllowance"
+	return "/cosmos.feegrant.v1beta1.MsgRevokeAllowance.Create"
 }
 
 func (*CreateMsgRevokeAllowance) Version() int {

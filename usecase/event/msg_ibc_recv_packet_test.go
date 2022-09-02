@@ -30,7 +30,7 @@ var _ = Describe("Event", func() {
 			anyConnectionId := "connection-0"
 			anyPacketAck := ibc_model.MsgRecvPacketPacketAck{MaybeResult: base64.MustDecodeString("AQ==")}
 			anyApplication := "transfer"
-			anyMessageType := "MsgTransfer"
+			anyMessageType := "/ibc.applications.transfer.v1.MsgTransfer"
 
 			var anyRawValue map[string]interface{}
 			var anyRawMsgRecvPacket ibc_model.RawMsgRecvPacket
@@ -138,7 +138,7 @@ var _ = Describe("Event", func() {
 			anyConnectionId := "connection-0"
 			anyPacketAck := ibc_model.MsgRecvPacketPacketAck{MaybeResult: base64.MustDecodeString("AQ==")}
 			anyApplication := "transfer"
-			anyMessageType := "MsgTransfer"
+			anyMessageType := "/ibc.applications.transfer.v1.MsgTransfer"
 
 			var anyRawValue map[string]interface{}
 			var anyRawMsgRecvPacket ibc_model.RawMsgRecvPacket

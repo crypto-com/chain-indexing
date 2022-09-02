@@ -22,7 +22,7 @@ func NewCreateMsgGrantAllowance(
 }
 
 func (*CreateMsgGrantAllowance) Name() string {
-	return "CreateMsgGrantAllowance"
+	return "/cosmos.feegrant.v1beta1.MsgGrantAllowance.Create"
 }
 
 func (*CreateMsgGrantAllowance) Version() int {

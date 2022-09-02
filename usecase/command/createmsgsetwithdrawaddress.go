@@ -24,7 +24,7 @@ func NewCreateMsgSetWithdrawAddress(
 }
 
 func (_ *CreateMsgSetWithdrawAddress) Name() string {
-	return "CreateMsgSetWithdrawAddress"
+	return "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress.Create"
 }
 
 func (_ *CreateMsgSetWithdrawAddress) Version() int {

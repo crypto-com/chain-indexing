@@ -121,18 +121,18 @@ func TestNFT_HandleEvents(t *testing.T) {
 						fmt.Sprintf("%s:-:-:-", ""),
 						fmt.Sprintf("-:%s:-:-", "DenomId"),
 						fmt.Sprintf("-:-:%s:-", ""),
-						fmt.Sprintf("-:-:-:%s", "MsgIssueDenom"),
+						fmt.Sprintf("-:-:-:%s", "/chainmain.nft.v1.MsgIssueDenom"),
 						fmt.Sprintf("%s:%s:-:-", "", "DenomId"),
 						fmt.Sprintf("%s:-:%s:-", "", ""),
-						fmt.Sprintf("%s:-:-:%s", "", "MsgIssueDenom"),
+						fmt.Sprintf("%s:-:-:%s", "", "/chainmain.nft.v1.MsgIssueDenom"),
 						fmt.Sprintf("-:%s:%s:-", "DenomId", ""),
-						fmt.Sprintf("-:%s:-:%s", "DenomId", "MsgIssueDenom"),
-						fmt.Sprintf("-:-:%s:%s", "", "MsgIssueDenom"),
+						fmt.Sprintf("-:%s:-:%s", "DenomId", "/chainmain.nft.v1.MsgIssueDenom"),
+						fmt.Sprintf("-:-:%s:%s", "", "/chainmain.nft.v1.MsgIssueDenom"),
 						fmt.Sprintf("%s:%s:%s:-", "", "DenomId", ""),
-						fmt.Sprintf("%s:%s:-:%s", "", "DenomId", "MsgIssueDenom"),
-						fmt.Sprintf("%s:-:%s:%s", "", "", "MsgIssueDenom"),
-						fmt.Sprintf("-:%s:%s:%s", "DenomId", "", "MsgIssueDenom"),
-						fmt.Sprintf("%s:%s:%s:%s", "", "DenomId", "", "MsgIssueDenom"),
+						fmt.Sprintf("%s:%s:-:%s", "", "DenomId", "/chainmain.nft.v1.MsgIssueDenom"),
+						fmt.Sprintf("%s:-:%s:%s", "", "", "/chainmain.nft.v1.MsgIssueDenom"),
+						fmt.Sprintf("-:%s:%s:%s", "DenomId", "", "/chainmain.nft.v1.MsgIssueDenom"),
+						fmt.Sprintf("%s:%s:%s:%s", "", "DenomId", "", "/chainmain.nft.v1.MsgIssueDenom"),
 					}, int64(1)).
 					Return(nil)
 
@@ -153,7 +153,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgIssueDenom",
+						MessageType:     "/chainmain.nft.v1.MsgIssueDenom",
 						Data:            typedEvent,
 					}).
 					Return(nil)
@@ -256,18 +256,18 @@ func TestNFT_HandleEvents(t *testing.T) {
 						fmt.Sprintf("%s:-:-:-", ""),
 						fmt.Sprintf("-:%s:-:-", "DenomId"),
 						fmt.Sprintf("-:-:%s:-", "TokenId"),
-						fmt.Sprintf("-:-:-:%s", "MsgMintNFT"),
+						fmt.Sprintf("-:-:-:%s", "/chainmain.nft.v1.MsgMintNFT"),
 						fmt.Sprintf("%s:%s:-:-", "", "DenomId"),
 						fmt.Sprintf("%s:-:%s:-", "", "TokenId"),
-						fmt.Sprintf("%s:-:-:%s", "", "MsgMintNFT"),
+						fmt.Sprintf("%s:-:-:%s", "", "/chainmain.nft.v1.MsgMintNFT"),
 						fmt.Sprintf("-:%s:%s:-", "DenomId", "TokenId"),
-						fmt.Sprintf("-:%s:-:%s", "DenomId", "MsgMintNFT"),
-						fmt.Sprintf("-:-:%s:%s", "TokenId", "MsgMintNFT"),
+						fmt.Sprintf("-:%s:-:%s", "DenomId", "/chainmain.nft.v1.MsgMintNFT"),
+						fmt.Sprintf("-:-:%s:%s", "TokenId", "/chainmain.nft.v1.MsgMintNFT"),
 						fmt.Sprintf("%s:%s:%s:-", "", "DenomId", "TokenId"),
-						fmt.Sprintf("%s:%s:-:%s", "", "DenomId", "MsgMintNFT"),
-						fmt.Sprintf("%s:-:%s:%s", "", "TokenId", "MsgMintNFT"),
-						fmt.Sprintf("-:%s:%s:%s", "DenomId", "TokenId", "MsgMintNFT"),
-						fmt.Sprintf("%s:%s:%s:%s", "", "DenomId", "TokenId", "MsgMintNFT"),
+						fmt.Sprintf("%s:%s:-:%s", "", "DenomId", "/chainmain.nft.v1.MsgMintNFT"),
+						fmt.Sprintf("%s:-:%s:%s", "", "TokenId", "/chainmain.nft.v1.MsgMintNFT"),
+						fmt.Sprintf("-:%s:%s:%s", "DenomId", "TokenId", "/chainmain.nft.v1.MsgMintNFT"),
+						fmt.Sprintf("%s:%s:%s:%s", "", "DenomId", "TokenId", "/chainmain.nft.v1.MsgMintNFT"),
 					}, int64(1)).
 					Return(nil)
 
@@ -288,7 +288,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgMintNFT",
+						MessageType:     "/chainmain.nft.v1.MsgMintNFT",
 						Data:            typedEvent,
 					}).
 					Return(nil)
@@ -419,18 +419,18 @@ func TestNFT_HandleEvents(t *testing.T) {
 						fmt.Sprintf("%s:-:-:-", ""),
 						fmt.Sprintf("-:%s:-:-", "DenomId"),
 						fmt.Sprintf("-:-:%s:-", "TokenId"),
-						fmt.Sprintf("-:-:-:%s", "MsgEditNFT"),
+						fmt.Sprintf("-:-:-:%s", "/chainmain.nft.v1.MsgEditNFT"),
 						fmt.Sprintf("%s:%s:-:-", "", "DenomId"),
 						fmt.Sprintf("%s:-:%s:-", "", "TokenId"),
-						fmt.Sprintf("%s:-:-:%s", "", "MsgEditNFT"),
+						fmt.Sprintf("%s:-:-:%s", "", "/chainmain.nft.v1.MsgEditNFT"),
 						fmt.Sprintf("-:%s:%s:-", "DenomId", "TokenId"),
-						fmt.Sprintf("-:%s:-:%s", "DenomId", "MsgEditNFT"),
-						fmt.Sprintf("-:-:%s:%s", "TokenId", "MsgEditNFT"),
+						fmt.Sprintf("-:%s:-:%s", "DenomId", "/chainmain.nft.v1.MsgEditNFT"),
+						fmt.Sprintf("-:-:%s:%s", "TokenId", "/chainmain.nft.v1.MsgEditNFT"),
 						fmt.Sprintf("%s:%s:%s:-", "", "DenomId", "TokenId"),
-						fmt.Sprintf("%s:%s:-:%s", "", "DenomId", "MsgEditNFT"),
-						fmt.Sprintf("%s:-:%s:%s", "", "TokenId", "MsgEditNFT"),
-						fmt.Sprintf("-:%s:%s:%s", "DenomId", "TokenId", "MsgEditNFT"),
-						fmt.Sprintf("%s:%s:%s:%s", "", "DenomId", "TokenId", "MsgEditNFT"),
+						fmt.Sprintf("%s:%s:-:%s", "", "DenomId", "/chainmain.nft.v1.MsgEditNFT"),
+						fmt.Sprintf("%s:-:%s:%s", "", "TokenId", "/chainmain.nft.v1.MsgEditNFT"),
+						fmt.Sprintf("-:%s:%s:%s", "DenomId", "TokenId", "/chainmain.nft.v1.MsgEditNFT"),
+						fmt.Sprintf("%s:%s:%s:%s", "", "DenomId", "TokenId", "/chainmain.nft.v1.MsgEditNFT"),
 					}, int64(1)).
 					Return(nil)
 
@@ -451,7 +451,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgEditNFT",
+						MessageType:     "/chainmain.nft.v1.MsgEditNFT",
 						Data:            typedEvent,
 					}).
 					Return(nil)
@@ -680,18 +680,18 @@ func TestNFT_HandleEvents(t *testing.T) {
 						fmt.Sprintf("%s:-:-:-", ""),
 						fmt.Sprintf("-:%s:-:-", "DenomId"),
 						fmt.Sprintf("-:-:%s:-", "TokenId"),
-						fmt.Sprintf("-:-:-:%s", "MsgTransferNFT"),
+						fmt.Sprintf("-:-:-:%s", "/chainmain.nft.v1.MsgTransferNFT"),
 						fmt.Sprintf("%s:%s:-:-", "", "DenomId"),
 						fmt.Sprintf("%s:-:%s:-", "", "TokenId"),
-						fmt.Sprintf("%s:-:-:%s", "", "MsgTransferNFT"),
+						fmt.Sprintf("%s:-:-:%s", "", "/chainmain.nft.v1.MsgTransferNFT"),
 						fmt.Sprintf("-:%s:%s:-", "DenomId", "TokenId"),
-						fmt.Sprintf("-:%s:-:%s", "DenomId", "MsgTransferNFT"),
-						fmt.Sprintf("-:-:%s:%s", "TokenId", "MsgTransferNFT"),
+						fmt.Sprintf("-:%s:-:%s", "DenomId", "/chainmain.nft.v1.MsgTransferNFT"),
+						fmt.Sprintf("-:-:%s:%s", "TokenId", "/chainmain.nft.v1.MsgTransferNFT"),
 						fmt.Sprintf("%s:%s:%s:-", "", "DenomId", "TokenId"),
-						fmt.Sprintf("%s:%s:-:%s", "", "DenomId", "MsgTransferNFT"),
-						fmt.Sprintf("%s:-:%s:%s", "", "TokenId", "MsgTransferNFT"),
-						fmt.Sprintf("-:%s:%s:%s", "DenomId", "TokenId", "MsgTransferNFT"),
-						fmt.Sprintf("%s:%s:%s:%s", "", "DenomId", "TokenId", "MsgTransferNFT"),
+						fmt.Sprintf("%s:%s:-:%s", "", "DenomId", "/chainmain.nft.v1.MsgTransferNFT"),
+						fmt.Sprintf("%s:-:%s:%s", "", "TokenId", "/chainmain.nft.v1.MsgTransferNFT"),
+						fmt.Sprintf("-:%s:%s:%s", "DenomId", "TokenId", "/chainmain.nft.v1.MsgTransferNFT"),
+						fmt.Sprintf("%s:%s:%s:%s", "", "DenomId", "TokenId", "/chainmain.nft.v1.MsgTransferNFT"),
 					}, int64(1)).
 					Return(nil)
 
@@ -712,7 +712,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 						TransactionHash: "TxHash",
 						Success:         true,
 						MessageIndex:    0,
-						MessageType:     "MsgTransferNFT",
+						MessageType:     "/chainmain.nft.v1.MsgTransferNFT",
 						Data:            typedEvent,
 					}).
 					Return(nil)

@@ -9,9 +9,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_CONNECTION_OPEN_ACK = "MsgConnectionOpenAck"
-const MSG_IBC_CONNECTION_OPEN_ACK_CREATED = "MsgConnectionOpenAckCreated"
-const MSG_IBC_CONNECTION_OPEN_ACK_FAILED = "MsgConnectionOpenAckFailed"
+const MSG_IBC_CONNECTION_OPEN_ACK = "/ibc.core.connection.v1.MsgConnectionOpenAck"
+const MSG_IBC_CONNECTION_OPEN_ACK_CREATED = "/ibc.core.connection.v1.MsgConnectionOpenAck.Created"
+const MSG_IBC_CONNECTION_OPEN_ACK_FAILED = "/ibc.core.connection.v1.MsgConnectionOpenAck.Failed"
 
 type MsgIBCConnectionOpenAck struct {
 	MsgBase

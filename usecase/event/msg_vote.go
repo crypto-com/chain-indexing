@@ -10,9 +10,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_VOTE = "MsgVote"
-const MSG_VOTE_CREATED = "MsgVoteCreated"
-const MSG_VOTE_FAILED = "MsgVoteFailed"
+const MSG_VOTE = "/cosmos.gov.v1beta1.MsgVote"
+const MSG_VOTE_CREATED = "/cosmos.gov.v1beta1.MsgVote.Created"
+const MSG_VOTE_FAILED = "/cosmos.gov.v1beta1.MsgVote.Failed"
 
 type MsgVote struct {
 	MsgBase

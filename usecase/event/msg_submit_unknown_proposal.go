@@ -11,8 +11,8 @@ import (
 )
 
 const MSG_SUBMIT_UNKNOWN_PROPOSAL = "MsgSubmitUnknownProposal"
-const MSG_SUBMIT_UNKNOWN_PROPOSAL_CREATED = "MsgSubmitUnknownProposalCreated"
-const MSG_SUBMIT_UNKNOWN_PROPOSAL_FAILED = "MsgSubmitUnknownProposalFailed"
+const MSG_SUBMIT_UNKNOWN_PROPOSAL_CREATED = "MsgSubmitUnknownProposal.Created"
+const MSG_SUBMIT_UNKNOWN_PROPOSAL_FAILED = "MsgSubmitUnknownProposal.Failed"
 
 type MsgSubmitUnknownProposal struct {
 	MsgBase

@@ -23,7 +23,7 @@ func NewCreateMsgSubmitTextProposal(
 
 // Name returns name of command
 func (*CreateMsgSubmitTextProposal) Name() string {
-	return "CreateMsgSubmitTextProposal"
+	return "/cosmos.gov.v1beta1.TextProposal.Create"
 }
 
 // Version returns version of command

@@ -22,7 +22,7 @@ func NewCreateMsgGrant(
 }
 
 func (*CreateMsgGrant) Name() string {
-	return "CreateMsgGrant"
+	return "/cosmos.authz.v1beta1.MsgGrant.Create"
 }
 
 func (*CreateMsgGrant) Version() int {

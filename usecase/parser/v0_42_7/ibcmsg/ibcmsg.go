@@ -46,15 +46,21 @@ func ParseMsgRecvPacket(
 
 	// Transfer application, MsgTransfer
 	var rawFungibleTokenPacketData ibc_model.FungibleTokenPacketData
-	rawPacketData := base64_internal.MustDecodeString(rawMsg.Packet.Data)
-	json.MustUnmarshal(rawPacketData, &rawFungibleTokenPacketData)
+	rawPacketData, err := base64_internal.DecodeString(rawMsg.Packet.Data)
+	if err != nil {
+		rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
+	} else  {
+		if err := json.Unmarshal(rawPacketData, &rawFungibleTokenPacketData); err != nil {
+			rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
+		}
+	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
 		msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
 			RawMsgRecvPacket: rawMsg,
 
 			Application: "transfer",
-			MessageType: "MsgTransfer",
+			MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 			MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 				FungibleTokenPacketData: rawFungibleTokenPacketData,
 				Success:                 false,
@@ -89,7 +95,7 @@ func ParseMsgRecvPacket(
 			RawMsgRecvPacket: rawMsg,
 
 			Application: "transfer",
-			MessageType: "MsgTransfer",
+			MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 			MaybeFungibleTokenPacketData: &ibc_model.MsgAlreadyRelayedRecvPacketFungibleTokenPacketData{
 				FungibleTokenPacketData: rawFungibleTokenPacketData,
 			},
@@ -128,7 +134,7 @@ func ParseMsgRecvPacket(
 		RawMsgRecvPacket: rawMsg,
 
 		Application: "transfer",
-		MessageType: "MsgTransfer",
+		MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 		MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 			FungibleTokenPacketData: rawFungibleTokenPacketData,
 			Success:                 fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "true",

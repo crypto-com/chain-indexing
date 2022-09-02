@@ -10,9 +10,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_SUBMIT_PARAM_CHANGE_PROPOSAL = "MsgSubmitParamUpdateProposal"
-const MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_CREATED = "MsgSubmitParamUpdateProposalCreated"
-const MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_FAILED = "MsgSubmitParamUpdateProposalFailed"
+const MSG_SUBMIT_PARAM_CHANGE_PROPOSAL = "/cosmos.params.v1beta1.ParameterChangeProposal"
+const MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_CREATED = "/cosmos.params.v1beta1.ParameterChangeProposal.Created"
+const MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_FAILED = "/cosmos.params.v1beta1.ParameterChangeProposal.Failed"
 
 type MsgSubmitParamChangeProposal struct {
 	MsgBase
@@ -26,9 +26,8 @@ func NewMsgSubmitParamChangeProposal(
 ) *MsgSubmitParamChangeProposal {
 	return &MsgSubmitParamChangeProposal{
 		NewMsgBase(MsgBaseParams{
-			MsgName: MSG_SUBMIT_PARAM_CHANGE_PROPOSAL,
-			Version: 1,
-
+			MsgName:         MSG_SUBMIT_PARAM_CHANGE_PROPOSAL,
+			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
 

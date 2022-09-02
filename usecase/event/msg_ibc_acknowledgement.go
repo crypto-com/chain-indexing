@@ -9,9 +9,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_ACKNOWLEDGEMENT = "MsgAcknowledgement"
-const MSG_IBC_ACKNOWLEDGEMENT_CREATED = "MsgAcknowledgementCreated"
-const MSG_IBC_ACKNOWLEDGEMENT_FAILED = "MsgAcknowledgementFailed"
+const MSG_IBC_ACKNOWLEDGEMENT = "/ibc.core.channel.v1.MsgAcknowledgement"
+const MSG_IBC_ACKNOWLEDGEMENT_CREATED = "/ibc.core.channel.v1.MsgAcknowledgement.Created"
+const MSG_IBC_ACKNOWLEDGEMENT_FAILED = "/ibc.core.channel.v1.MsgAcknowledgement.Failed"
 
 type MsgIBCAcknowledgement struct {
 	MsgBase

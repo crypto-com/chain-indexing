@@ -19,11 +19,11 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgRevokeAllowance", func() {
 		It("should parse Msg commands when there is MsgRevokeAllowance in the transaction", func() {
 			expected := `{
-            "name": "MsgRevokeAllowanceCreated",
+            "name": "/cosmos.feegrant.v1beta1.MsgRevokeAllowance.Created",
             "version": 1,
             "height": 128553,
             "uuid": "{UUID}",
-            "msgName": "MsgRevokeAllowance",
+            "msgName": "/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
             "txHash": "002579A793A5ABD82FAF819FC77CC4FF765C550332151B4BA9A811D662ABD027",
             "msgIndex": 0,
             "params": {
@@ -59,7 +59,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("CreateMsgRevokeAllowance"))
+			Expect(cmd.Name()).To(Equal("/cosmos.feegrant.v1beta1.MsgRevokeAllowance.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			createMsgRevokeAllowanceEvent := untypedEvent.(*event.MsgRevokeAllowance)

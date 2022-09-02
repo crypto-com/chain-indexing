@@ -10,9 +10,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_WITHDRAW_VALIDATOR_COMMISSION = "MsgWithdrawValidatorCommission"
-const MSG_WITHDRAW_VALIDATOR_COMMISSION_CREATED = "MsgWithdrawValidatorCommissionCreated"
-const MSG_WITHDRAW_VALIDATOR_COMMISSION_FAILED = "MsgWithdrawValidatorCommissionFailed"
+const MSG_WITHDRAW_VALIDATOR_COMMISSION = "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission"
+const MSG_WITHDRAW_VALIDATOR_COMMISSION_CREATED = "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission.Created"
+const MSG_WITHDRAW_VALIDATOR_COMMISSION_FAILED = "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission.Failed"
 
 type MsgWithdrawValidatorCommission struct {
 	MsgBase
@@ -26,9 +26,8 @@ func NewMsgWithdrawValidatorCommission(
 ) *MsgWithdrawValidatorCommission {
 	return &MsgWithdrawValidatorCommission{
 		NewMsgBase(MsgBaseParams{
-			MsgName: MSG_WITHDRAW_VALIDATOR_COMMISSION,
-			Version: 1,
-
+			MsgName:         MSG_WITHDRAW_VALIDATOR_COMMISSION,
+			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
 

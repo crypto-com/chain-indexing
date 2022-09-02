@@ -23,7 +23,7 @@ func NewCreateMsgVote(
 
 // Name returns name of command
 func (*CreateMsgVote) Name() string {
-	return "CreateMsgVote"
+	return "/cosmos.gov.v1beta1.MsgVote.Create"
 }
 
 // Version returns version of command

@@ -24,7 +24,7 @@ func NewCreateMsgWithdrawValidatorCommission(
 }
 
 func (_ *CreateMsgWithdrawValidatorCommission) Name() string {
-	return "CreateMsgWithdrawValidatorCommission"
+	return "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission.Create"
 }
 
 func (_ *CreateMsgWithdrawValidatorCommission) Version() int {

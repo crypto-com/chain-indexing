@@ -44,7 +44,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(cmds).To(HaveLen(4))
 
 			thiscmd := cmds[0]
-			Expect(thiscmd.Name()).To(Equal("CreateMsgEditValidator"))
+			Expect(thiscmd.Name()).To(Equal("/cosmos.staking.v1beta1.MsgEditValidator.Create"))
 			Expect(thiscmd).To(Equal(
 				command_usecase.NewCreateMsgEditValidator(
 					event.MsgCommonParams{

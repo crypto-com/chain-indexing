@@ -23,7 +23,7 @@ func NewCreateMsgSubmitParamChangeProposal(
 
 // Name returns name of command
 func (*CreateMsgSubmitParamChangeProposal) Name() string {
-	return "CreateSubmitMsgParamChangeProposal"
+	return "/cosmos.params.v1beta1.ParameterChangeProposal.Create"
 }
 
 // Version returns version of command

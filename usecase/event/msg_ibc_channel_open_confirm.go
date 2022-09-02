@@ -9,9 +9,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_CHANNEL_OPEN_CONFIRM = "MsgChannelOpenConfirm"
-const MSG_IBC_CHANNEL_OPEN_CONFIRM_CREATED = "MsgChannelOpenConfirmCreated"
-const MSG_IBC_CHANNEL_OPEN_CONFIRM_FAILED = "MsgChannelOpenConfirmFailed"
+const MSG_IBC_CHANNEL_OPEN_CONFIRM = "/ibc.core.channel.v1.MsgChannelOpenConfirm"
+const MSG_IBC_CHANNEL_OPEN_CONFIRM_CREATED = "/ibc.core.channel.v1.MsgChannelOpenConfirm.Created"
+const MSG_IBC_CHANNEL_OPEN_CONFIRM_FAILED = "/ibc.core.channel.v1.MsgChannelOpenConfirm.Failed"
 
 type MsgIBCChannelOpenConfirm struct {
 	MsgBase

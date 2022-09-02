@@ -10,9 +10,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_UNJAIL = "MsgUnjail"
-const MSG_UNJAIL_CREATED = "MsgUnjailCreated"
-const MSG_UNJAIL_FAILED = "MsgUnjailFailed"
+const MSG_UNJAIL = "/cosmos.slashing.v1beta1.MsgUnjail"
+const MSG_UNJAIL_CREATED = "/cosmos.slashing.v1beta1.MsgUnjail.Created"
+const MSG_UNJAIL_FAILED = "/cosmos.slashing.v1beta1.MsgUnjail.Failed"
 
 // MsgUnjail defines a Cosmos SDK message for unjailing a jailed validator, thus returning
 // them into the bonded validator set, so they can begin receiving provisions

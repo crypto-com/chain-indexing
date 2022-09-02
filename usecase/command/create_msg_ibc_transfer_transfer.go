@@ -22,7 +22,7 @@ func NewCreateMsgIBCTransferTransfer(
 }
 
 func (*CreateMsgIBCTransferTransfer) Name() string {
-	return "CreateMsgIBCTransferTransfer"
+	return "/ibc.applications.transfer.v1.MsgTransfer.Create"
 }
 
 func (*CreateMsgIBCTransferTransfer) Version() int {

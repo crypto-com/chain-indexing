@@ -22,7 +22,7 @@ func NewCreateMsgIBCRecvPacket(
 }
 
 func (*CreateMsgIBCRecvPacket) Name() string {
-	return "CreateMsgIBCRecvPacket"
+	return "/ibc.core.channel.v1.MsgRecvPacket.Create"
 }
 
 func (*CreateMsgIBCRecvPacket) Version() int {

@@ -19,7 +19,7 @@ func NewCreateMsgMultiSend(msgCommonParams event.MsgCommonParams, params model.M
 }
 
 func (_ *CreateMsgMultiSend) Name() string {
-	return "CreateMsgMultiSend"
+	return "/cosmos.bank.v1beta1.MsgMultiSend.Create"
 }
 
 func (_ *CreateMsgMultiSend) Version() int {

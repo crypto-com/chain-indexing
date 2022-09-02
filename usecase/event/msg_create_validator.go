@@ -11,9 +11,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_CREATE_VALIDATOR = "MsgCreateValidator"
-const MSG_CREATE_VALIDATOR_CREATED = "MsgCreateValidatorCreated"
-const MSG_CREATE_VALIDATOR_FAILED = "MsgCreateValidatorFailed"
+const MSG_CREATE_VALIDATOR = "/cosmos.staking.v1beta1.MsgCreateValidator"
+const MSG_CREATE_VALIDATOR_CREATED = "/cosmos.staking.v1beta1.MsgCreateValidator.Created"
+const MSG_CREATE_VALIDATOR_FAILED = "/cosmos.staking.v1beta1.MsgCreateValidator.Failed"
 
 type MsgCreateValidator struct {
 	MsgBase

@@ -10,9 +10,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_SET_WITHDRAW_ADDRESS = "MsgSetWithdrawAddress"
-const MSG_SET_WITHDRAW_ADDRESS_CREATED = "MsgSetWithdrawAddressCreated"
-const MSG_SET_WITHDRAW_ADDRESS_FAILED = "MsgSetWithdrawAddressFailed"
+const MSG_SET_WITHDRAW_ADDRESS = "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress"
+const MSG_SET_WITHDRAW_ADDRESS_CREATED = "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress.Created"
+const MSG_SET_WITHDRAW_ADDRESS_FAILED = "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress.Failed"
 
 type MsgSetWithdrawAddress struct {
 	MsgBase
@@ -26,9 +26,8 @@ func NewMsgSetWithdrawAddress(
 ) *MsgSetWithdrawAddress {
 	return &MsgSetWithdrawAddress{
 		NewMsgBase(MsgBaseParams{
-			MsgName: MSG_SET_WITHDRAW_ADDRESS,
-			Version: 1,
-
+			MsgName:         MSG_SET_WITHDRAW_ADDRESS,
+			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
 

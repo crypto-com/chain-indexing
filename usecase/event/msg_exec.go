@@ -2,6 +2,7 @@ package event
 
 import (
 	"bytes"
+
 	"github.com/crypto-com/chain-indexing/usecase/model"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
@@ -9,9 +10,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_EXEC = "MsgExec"
-const MSG_EXEC_CREATED = "MsgExecCreated"
-const MSG_EXEC_FAILED = "MsgExecFailed"
+const MSG_EXEC = "/cosmos.authz.v1beta1.MsgExec"
+const MSG_EXEC_CREATED = "/cosmos.authz.v1beta1.MsgExec.Created"
+const MSG_EXEC_FAILED = "/cosmos.authz.v1beta1.MsgExec.Failed"
 
 type MsgExec struct {
 	MsgBase

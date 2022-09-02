@@ -11,9 +11,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_BEGIN_REDELEGATE = "MsgBeginRedelegate"
-const MSG_BEGIN_REDELEGATE_CREATED = "MsgBeginRedelegateCreated"
-const MSG_BEGIN_REDELEGATE_FAILED = "MsgBeginRedelegateFailed"
+const MSG_BEGIN_REDELEGATE = "/cosmos.staking.v1beta1.MsgBeginRedelegate"
+const MSG_BEGIN_REDELEGATE_CREATED = "/cosmos.staking.v1beta1.MsgBeginRedelegate.Created"
+const MSG_BEGIN_REDELEGATE_FAILED = "/cosmos.staking.v1beta1.MsgBeginRedelegate.Failed"
 
 // MsgBeginRedelegate defines a Cosmos SDK message for performing a redelegation
 // of coins from a delegator and source validator to a destination validator.

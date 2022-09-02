@@ -23,7 +23,7 @@ func NewCreateMsgNFTIssueDenom(
 
 // Name returns name of command
 func (*CreateMsgNFTIssueDenom) Name() string {
-	return "CreateMsgNFTIssueDenom"
+	return "/chainmain.nft.v1.MsgIssueDenom.Create"
 }
 
 // Version returns version of command

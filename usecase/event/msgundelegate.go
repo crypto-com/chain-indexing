@@ -13,9 +13,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_UNDELEGATE = "MsgUndelegate"
-const MSG_UNDELEGATE_CREATED = "MsgUndelegateCreated"
-const MSG_UNDELEGATE_FAILED = "MsgUndelegateFailed"
+const MSG_UNDELEGATE = "/cosmos.staking.v1beta1.MsgUndelegate"
+const MSG_UNDELEGATE_CREATED = "/cosmos.staking.v1beta1.MsgUndelegate.Created"
+const MSG_UNDELEGATE_FAILED = "/cosmos.staking.v1beta1.MsgUndelegate.Failed"
 
 // MsgUndelegate defines a Cosmos SDK message for performing a undelegation of coins
 // from a validator to a delegator.

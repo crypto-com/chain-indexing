@@ -19,11 +19,11 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgRevoke", func() {
 		It("should parse Msg commands when there is MsgRevoke in the transaction", func() {
 			expected := `{
-            "name": "MsgRevokeCreated",
+            "name": "/cosmos.authz.v1beta1.MsgRevoke.Created",
             "version": 1,
             "height": 123731,
             "uuid": "{UUID}",
-            "msgName": "MsgRevoke",
+            "msgName": "/cosmos.authz.v1beta1.MsgRevoke",
             "txHash": "9921D7DDC530DB81B0A5FD1163678757A7B7B7D8ED78C2B4BE433BFFD30C1228",
             "msgIndex": 0,
             "params": {
@@ -60,7 +60,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("CreateMsgRevoke"))
+			Expect(cmd.Name()).To(Equal("/cosmos.authz.v1beta1.MsgRevoke.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			createMsgRevokeEvent := untypedEvent.(*event.MsgRevoke)

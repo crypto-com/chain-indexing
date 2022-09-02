@@ -9,9 +9,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_CHANNEL_CLOSE_INIT = "MsgChannelCloseInit"
-const MSG_IBC_CHANNEL_CLOSE_INIT_CREATED = "MsgChannelCloseInitCreated"
-const MSG_IBC_CHANNEL_CLOSE_INIT_FAILED = "MsgChannelCloseInitFailed"
+const MSG_IBC_CHANNEL_CLOSE_INIT = "/ibc.core.channel.v1.MsgChannelCloseInit"
+const MSG_IBC_CHANNEL_CLOSE_INIT_CREATED = "/ibc.core.channel.v1.MsgChannelCloseInit.Created"
+const MSG_IBC_CHANNEL_CLOSE_INIT_FAILED = "/ibc.core.channel.v1.MsgChannelCloseInit.Failed"
 
 type MsgIBCChannelCloseInit struct {
 	MsgBase

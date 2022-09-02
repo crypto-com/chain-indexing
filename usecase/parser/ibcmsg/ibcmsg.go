@@ -781,15 +781,21 @@ func ParseMsgRecvPacket(
 
 	// Transfer application, MsgTransfer
 	var rawFungibleTokenPacketData ibc_model.FungibleTokenPacketData
-	rawPacketData := base64_internal.MustDecodeString(rawMsg.Packet.Data)
-	json.MustUnmarshal(rawPacketData, &rawFungibleTokenPacketData)
+	rawPacketData, err := base64_internal.DecodeString(rawMsg.Packet.Data)
+	if err != nil {
+		rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
+	} else  {
+		if err := json.Unmarshal(rawPacketData, &rawFungibleTokenPacketData); err != nil {
+			rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
+		}
+	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
 		msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
 			RawMsgRecvPacket: rawMsg,
 
 			Application: "transfer",
-			MessageType: "MsgTransfer",
+			MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 			MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 				FungibleTokenPacketData: rawFungibleTokenPacketData,
 				Success:                 false,
@@ -820,7 +826,7 @@ func ParseMsgRecvPacket(
 			RawMsgRecvPacket: rawMsg,
 
 			Application: "transfer",
-			MessageType: "MsgTransfer",
+			MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 			MaybeFungibleTokenPacketData: &ibc_model.MsgAlreadyRelayedRecvPacketFungibleTokenPacketData{
 				FungibleTokenPacketData: rawFungibleTokenPacketData,
 			},
@@ -859,7 +865,7 @@ func ParseMsgRecvPacket(
 		RawMsgRecvPacket: rawMsg,
 
 		Application: "transfer",
-		MessageType: "MsgTransfer",
+		MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 		MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 			FungibleTokenPacketData: rawFungibleTokenPacketData,
 			Success:                 fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "false",
@@ -898,15 +904,21 @@ func ParseMsgAcknowledgement(
 
 	// Transfer application, MsgTransfer
 	var rawFungibleTokenPacketData ibc_model.FungibleTokenPacketData
-	rawPacketData := base64_internal.MustDecodeString(rawMsg.Packet.Data)
-	json.MustUnmarshal(rawPacketData, &rawFungibleTokenPacketData)
+	rawPacketData, err := base64_internal.DecodeString(rawMsg.Packet.Data)
+	if err != nil {
+		rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
+	} else  {
+		if err := json.Unmarshal(rawPacketData, &rawFungibleTokenPacketData); err != nil {
+			rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
+		}
+	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
 		msgAcknowledgementParams := ibc_model.MsgAcknowledgementParams{
 			RawMsgAcknowledgement: rawMsg,
 
 			Application: "transfer",
-			MessageType: "MsgTransfer",
+			MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 			MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
 				FungibleTokenPacketData: rawFungibleTokenPacketData,
 				Success:                 false,
@@ -937,7 +949,7 @@ func ParseMsgAcknowledgement(
 			RawMsgAcknowledgement: rawMsg,
 
 			Application: "transfer",
-			MessageType: "MsgTransfer",
+			MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 			MaybeFungibleTokenPacketData: &ibc_model.MsgAlreadyRelayedAcknowledgementFungibleTokenPacketData{
 				FungibleTokenPacketData: rawFungibleTokenPacketData,
 			},
@@ -980,7 +992,7 @@ func ParseMsgAcknowledgement(
 		RawMsgAcknowledgement: rawMsg,
 
 		Application: "transfer",
-		MessageType: "MsgTransfer",
+		MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 		MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
 			FungibleTokenPacketData: rawFungibleTokenPacketData,
 			// https://github.com/cosmos/ibc-go/blob/e98838612a4fa5d240e392aad3409db5ec428f50/modules/apps/transfer/module.go#L327
@@ -1043,7 +1055,7 @@ func ParseMsgTimeout(
 			RawMsgTimeout: rawMsg,
 
 			Application: "transfer",
-			MessageType: "MsgTransfer",
+			MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 		}
 
 		// Getting possible signer address from Msg
@@ -1073,7 +1085,7 @@ func ParseMsgTimeout(
 		RawMsgTimeout: rawMsg,
 
 		Application: "transfer",
-		MessageType: "MsgTransfer",
+		MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 		MaybeMsgTransfer: &ibc_model.MsgTimeoutMsgTransfer{
 			RefundReceiver: rawFungibleTokenPacketData.Sender,
 			RefundDenom:    rawFungibleTokenPacketData.Denom,
@@ -1130,7 +1142,7 @@ func ParseMsgTimeoutOnClose(
 			RawMsgTimeoutOnClose: rawMsg,
 
 			Application: "transfer",
-			MessageType: "MsgTransfer",
+			MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 		}
 
 		// Getting possible signer address from Msg
@@ -1160,7 +1172,7 @@ func ParseMsgTimeoutOnClose(
 		RawMsgTimeoutOnClose: rawMsg,
 
 		Application: "transfer",
-		MessageType: "MsgTransfer",
+		MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 		MaybeMsgTransfer: &ibc_model.MsgTimeoutMsgTransfer{
 			RefundReceiver: rawFungibleTokenPacketData.Sender,
 			RefundDenom:    rawFungibleTokenPacketData.Denom,

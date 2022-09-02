@@ -9,9 +9,9 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_IBC_TIMEOUT = "MsgTimeout"
-const MSG_IBC_TIMEOUT_CREATED = "MsgTimeoutCreated"
-const MSG_IBC_TIMEOUT_FAILED = "MsgTimeoutFailed"
+const MSG_IBC_TIMEOUT = "/ibc.core.channel.v1.MsgTimeout"
+const MSG_IBC_TIMEOUT_CREATED = "/ibc.core.channel.v1.MsgTimeout.Created"
+const MSG_IBC_TIMEOUT_FAILED = "/ibc.core.channel.v1.MsgTimeout.Failed"
 
 type MsgIBCTimeout struct {
 	MsgBase

@@ -126,7 +126,7 @@ func (handler *Validators) FindBy(ctx *fasthttp.RequestCtx) {
 	delegation, err := handler.cosmosAppClient.Delegation(validator.InitialDelegatorAddress, validator.OperatorAddress)
 	if err != nil {
 		handler.logger.Errorf("error getting self delegation record: %v", err)
-	} else {
+	} else if delegation != nil {
 		validator.SelfDelegation = delegation.Balance.Amount
 	}
 

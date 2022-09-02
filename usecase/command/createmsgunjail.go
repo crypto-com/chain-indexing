@@ -22,7 +22,7 @@ func NewCreateMsgUnjail(msgCommonParams event.MsgCommonParams, params model.MsgU
 
 // Name returns name of command
 func (*CreateMsgUnjail) Name() string {
-	return "CreateMsgUnjail"
+	return "/cosmos.slashing.v1beta1.MsgUnjail.Create"
 }
 
 // Version returns version of command
