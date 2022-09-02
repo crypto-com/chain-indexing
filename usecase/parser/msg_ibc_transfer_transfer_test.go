@@ -24,7 +24,7 @@ var _ = Describe("ParseMsgCommands", func() {
   "height": 24,
   "uuid": "{UUID}",
   "msgName": "/ibc.applications.transfer.v1.MsgTransfer",
-  "txHash": "7A5D86E0B1A364106EE2F1B40431B15A8E1B6C4A2E09E831AB773A12F5F5A564",
+  "txHash": "579B97CD5B947C2FA0EC87EDD4DAA8BECF422B96A82E2C9DBFE15F9F6DB4109B",
   "msgIndex": 0,
   "params": {
     "sourcePort": "transfer",

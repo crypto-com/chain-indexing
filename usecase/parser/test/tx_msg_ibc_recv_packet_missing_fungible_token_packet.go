@@ -864,6 +864,8 @@ const TX_MSG_RECV_PACKET_MISSING_FUNGIBLE_TOKEN_PACKET_BLOCK_RESULTS_RESP = `
   }
 }  
 `
+
+// nolint:gosec
 const TX_MSG_RECV_PACKET_MISSING_FUNGIBLE_TOKEN_PACKET_TXS_RESP = `{
   "tx": {
     "body": {

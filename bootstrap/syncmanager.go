@@ -40,7 +40,6 @@ type SyncManager struct {
 	accountAddressPrefix string
 	stakingDenom         string
 
-	txDecoder          *utils.TxDecoder
 	windowSyncStrategy *syncstrategy.Window
 
 	eventHandler eventhandler_interface.Handler
@@ -121,7 +120,6 @@ func NewSyncManager(
 
 		shouldSyncCh: make(chan bool, 1),
 
-		txDecoder:          params.TxDecoder,
 		windowSyncStrategy: syncstrategy.NewWindow(params.Logger, params.Config.WindowSize),
 
 		eventHandler: eventHandler,
@@ -244,7 +242,8 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 
 	txs := make([]usecase_model.Tx, 0)
 	for _, txHex := range block.Txs {
-		tx, err := manager.cosmosClient.Txs(parser.TxHash(txHex))
+		var tx *usecase_model.Tx
+		tx, err = manager.cosmosClient.Txs(parser.TxHash(txHex))
 		if err != nil {
 			return nil, fmt.Errorf("error requesting chain txs (%s) at height %d: %v", txHex, blockHeight, err)
 		}

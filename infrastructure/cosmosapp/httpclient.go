@@ -717,7 +717,7 @@ func ParseTxsResp(rawRespReader io.Reader) (*model.Tx, error) {
 	}
 
 	if txsResp.TxResponse.Logs != nil {
-		logs := make([]model.TxResponseLog, len(txsResp.TxResponse.Logs))
+		logs := make([]model.TxResponseLog, 0)
 		for _, log := range txsResp.TxResponse.Logs {
 			parsedLog := model.TxResponseLog{
 				MsgIndex: log.MsgIndex,

@@ -22,7 +22,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_MSG_CREATE_VALIDATOR_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_MSG_CREATE_VALIDATOR_BLOCK_RESULTS_RESP))
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_VOTE_TXS_RESP)
+			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_CREATE_VALIDATOR_TXS_RESP)
 			txs := []model.Tx{*tx}
 
 			accountAddressPrefix := "tcro"
