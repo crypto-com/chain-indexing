@@ -95,7 +95,7 @@ func (conn *MockClient) ProposalTally(id string) (Tally, error) {
 	return result, mockArgs.Error(1)
 }
 
-func (conn *MockClient) Txs(txHash string) (*model.Tx, error) {
+func (conn *MockClient) Tx(txHash string) (*model.Tx, error) {
 	mockArgs := conn.Called(txHash)
 	result, _ := mockArgs.Get(0).(*model.Tx)
 	return result, mockArgs.Error(1)

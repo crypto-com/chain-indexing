@@ -657,7 +657,7 @@ func (client *HTTPClient) ProposalTally(id string) (cosmosapp_interface.Tally, e
 	return tallyResp.Tally, nil
 }
 
-func (client *HTTPClient) Txs(hash string) (*model.Tx, error) {
+func (client *HTTPClient) Tx(hash string) (*model.Tx, error) {
 	rawRespBody, err := client.request(
 		fmt.Sprintf(
 			"%s/%s",
@@ -672,7 +672,7 @@ func (client *HTTPClient) Txs(hash string) (*model.Tx, error) {
 
 	tx, err := ParseTxsResp(rawRespBody)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing Txs(%s): %v", hash, err)
+		return nil, fmt.Errorf("error parsing Tx(%s): %v", hash, err)
 	}
 
 	return tx, nil

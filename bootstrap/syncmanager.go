@@ -243,7 +243,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 	txs := make([]model.Tx, 0)
 	for _, txHex := range block.Txs {
 		var tx *model.Tx
-		tx, err = manager.cosmosClient.Txs(parser.TxHash(txHex))
+		tx, err = manager.cosmosClient.Tx(parser.TxHash(txHex))
 		if err != nil {
 			return nil, fmt.Errorf("error requesting chain txs (%s) at height %d: %v", txHex, blockHeight, err)
 		}

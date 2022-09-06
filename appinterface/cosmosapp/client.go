@@ -27,7 +27,7 @@ type Client interface {
 	ProposalById(id string) (Proposal, error)
 	ProposalTally(id string) (Tally, error)
 
-	Txs(txHash string) (*model.Tx, error)
+	Tx(txHash string) (*model.Tx, error)
 }
 
 var ErrAccountNotFound = errors.New("account not found")
