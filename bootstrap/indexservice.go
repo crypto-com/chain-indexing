@@ -133,12 +133,10 @@ func (service *IndexService) RunEventStoreMode() error {
 		service.rdbConn,
 		eventRegistry,
 	)
-	txDecoder := utils.NewTxDecoder()
 	syncManager := NewSyncManager(
 		SyncManagerParams{
-			Logger:    service.logger,
-			RDbConn:   service.rdbConn,
-			TxDecoder: txDecoder,
+			Logger:  service.logger,
+			RDbConn: service.rdbConn,
 			Config: SyncManagerConfig{
 				WindowSize:               service.windowSize,
 				TendermintRPCUrl:         service.tendermintHTTPRPCURL,
@@ -169,7 +167,6 @@ func (service *IndexService) RunEventStoreMode() error {
 }
 
 func (service *IndexService) RunTendermintDirectMode() error {
-	txDecoder := utils.NewTxDecoder()
 
 	for i := range service.projections {
 		go func(projection projection_entity.Projection) {
@@ -178,8 +175,7 @@ func (service *IndexService) RunTendermintDirectMode() error {
 					Logger: service.logger.WithFields(applogger.LogFields{
 						"projection": projection.Id(),
 					}),
-					RDbConn:   service.rdbConn,
-					TxDecoder: txDecoder,
+					RDbConn: service.rdbConn,
 					Config: SyncManagerConfig{
 						WindowSize:               service.windowSize,
 						TendermintRPCUrl:         service.tendermintHTTPRPCURL,

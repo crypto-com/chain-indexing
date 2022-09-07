@@ -339,3 +339,343 @@ const TX_MSG_CREATE_TENDERMINT_CLIENT_BLOCK_RESULTS_RESP = `
     }
   }
 `
+
+const TX_MSG_CREATE_TENDERMINT_CLIENT_TXS_RESP = `{
+    "tx": {
+        "body": {
+            "messages": [
+                {
+                    "@type": "/ibc.core.client.v1.MsgCreateClient",
+                    "client_state": {
+                        "@type": "/ibc.lightclients.tendermint.v1.ClientState",
+                        "chain_id": "devnet-2",
+                        "trust_level": {
+                            "numerator": "1",
+                            "denominator": "3"
+                        },
+                        "trusting_period": "1209600s",
+                        "unbonding_period": "1814400s",
+                        "max_clock_drift": "5s",
+                        "frozen_height": {
+                            "revision_number": "0",
+                            "revision_height": "0"
+                        },
+                        "latest_height": {
+                            "revision_number": "2",
+                            "revision_height": "2"
+                        },
+                        "proof_specs": [
+                            {
+                                "leaf_spec": {
+                                    "hash": "SHA256",
+                                    "prehash_key": "NO_HASH",
+                                    "prehash_value": "SHA256",
+                                    "length": "VAR_PROTO",
+                                    "prefix": "AA=="
+                                },
+                                "inner_spec": {
+                                    "child_order": [
+                                        0,
+                                        1
+                                    ],
+                                    "child_size": 33,
+                                    "min_prefix_length": 4,
+                                    "max_prefix_length": 12,
+                                    "empty_child": null,
+                                    "hash": "SHA256"
+                                },
+                                "max_depth": 0,
+                                "min_depth": 0
+                            },
+                            {
+                                "leaf_spec": {
+                                    "hash": "SHA256",
+                                    "prehash_key": "NO_HASH",
+                                    "prehash_value": "SHA256",
+                                    "length": "VAR_PROTO",
+                                    "prefix": "AA=="
+                                },
+                                "inner_spec": {
+                                    "child_order": [
+                                        0,
+                                        1
+                                    ],
+                                    "child_size": 32,
+                                    "min_prefix_length": 1,
+                                    "max_prefix_length": 1,
+                                    "empty_child": null,
+                                    "hash": "SHA256"
+                                },
+                                "max_depth": 0,
+                                "min_depth": 0
+                            }
+                        ],
+                        "upgrade_path": [
+                            "upgrade",
+                            "upgradedIBCState"
+                        ],
+                        "allow_update_after_expiry": false,
+                        "allow_update_after_misbehaviour": false
+                    },
+                    "consensus_state": {
+                        "@type": "/ibc.lightclients.tendermint.v1.ConsensusState",
+                        "timestamp": "2021-05-04T18:02:36.089446Z",
+                        "root": {
+                            "hash": "bVjiQ29+V522NVFdx1BiVJnIBJV8Y1pYe9psvxZFAWg="
+                        },
+                        "next_validators_hash": "E3DE0D2B3237A02E9C20C34F9EE04F69F5861FBC2E2722A011CA9037FC67A7EC"
+                    },
+                    "signer": "cro1gdswrmwtzgv3kvf28lvtt7qv7q7myzmn466r3f"
+                }
+            ],
+            "memo": "",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+        },
+        "auth_info": {
+            "signer_infos": [
+                {
+                    "public_key": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "Ay3F5FOQif8MrhCypdaMnizCw4zKh3WZMB6OYdD04+eI"
+                    },
+                    "mode_info": {
+                        "single": {
+                            "mode": "SIGN_MODE_DIRECT"
+                        }
+                    },
+                    "sequence": "0"
+                }
+            ],
+            "fee": {
+                "amount": [
+                    {
+                        "denom": "basecro",
+                        "amount": "1000"
+                    }
+                ],
+                "gas_limit": "3000000",
+                "payer": "",
+                "granter": ""
+            }
+        },
+        "signatures": [
+            "+xBk0QkWHg6sJo30EMSDDpm+2c2W4Pr565ksBbQ8JAt+VwbYdIICI0mQUXkRu9veCMorfSNLPcsuRH0s+1Tn6Q=="
+        ]
+    },
+    "tx_response": {
+        "height": "5",
+        "txhash": "7E34A75D8063BADF7B93538C23C88DEEF1FF14E7BE7F13AD6AD34E228C64538D",
+        "codespace": "",
+        "code": 0,
+        "data": "Cg8KDWNyZWF0ZV9jbGllbnQ=",
+        "raw_log": "[{\"events\":[{\"type\":\"create_client\",\"attributes\":[{\"key\":\"client_id\",\"value\":\"07-tendermint-0\"},{\"key\":\"client_type\",\"value\":\"07-tendermint\"},{\"key\":\"consensus_height\",\"value\":\"2-2\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"create_client\"},{\"key\":\"module\",\"value\":\"ibc_client\"}]}]}]",
+        "logs": [
+            {
+                "msg_index": 0,
+                "log": "",
+                "events": [
+                    {
+                        "type": "transfer",
+                        "attributes": [
+                            {
+                                "key": "cmVjaXBpZW50",
+                                "value": "Y3JvMTd4cGZ2YWttMmFtZzk2MnlsczZmODR6M2tlbGw4YzVsZ3p0ZWh2",
+                                "index": true
+                            },
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "Y3JvMWdkc3dybXd0emd2M2t2ZjI4bHZ0dDdxdjdxN215em1uNDY2cjNm",
+                                "index": true
+                            },
+                            {
+                                "key": "YW1vdW50",
+                                "value": "MTAwMGJhc2Vjcm8=",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "Y3JvMWdkc3dybXd0emd2M2t2ZjI4bHZ0dDdxdjdxN215em1uNDY2cjNm",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "YWN0aW9u",
+                                "value": "Y3JlYXRlX2NsaWVudA==",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "create_client",
+                        "attributes": [
+                            {
+                                "key": "Y2xpZW50X2lk",
+                                "value": "MDctdGVuZGVybWludC0w",
+                                "index": true
+                            },
+                            {
+                                "key": "Y2xpZW50X3R5cGU=",
+                                "value": "MDctdGVuZGVybWludA==",
+                                "index": true
+                            },
+                            {
+                                "key": "Y29uc2Vuc3VzX2hlaWdodA==",
+                                "value": "Mi0y",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "bW9kdWxl",
+                                "value": "aWJjX2NsaWVudA==",
+                                "index": true
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "info": "",
+        "gas_wanted": "200000",
+        "gas_used": "78510",
+        "tx": {
+            "@type": "/cosmos.tx.v1beta1.Tx",
+            "body": {
+                "messages": [
+                    {
+                        "@type": "/ibc.core.client.v1.MsgCreateClient",
+                        "client_state": {
+                            "@type": "/ibc.lightclients.tendermint.v1.ClientState",
+                            "chain_id": "devnet-2",
+                            "trust_level": {
+                                "numerator": "1",
+                                "denominator": "3"
+                            },
+                            "trusting_period": "1209600s",
+                            "unbonding_period": "1814400s",
+                            "max_clock_drift": "5s",
+                            "frozen_height": {
+                                "revision_number": "0",
+                                "revision_height": "0"
+                            },
+                            "latest_height": {
+                                "revision_number": "2",
+                                "revision_height": "2"
+                            },
+                            "proof_specs": [
+                                {
+                                    "leaf_spec": {
+                                        "hash": "SHA256",
+                                        "prehash_key": "NO_HASH",
+                                        "prehash_value": "SHA256",
+                                        "length": "VAR_PROTO",
+                                        "prefix": "AA=="
+                                    },
+                                    "inner_spec": {
+                                        "child_order": [
+                                            0,
+                                            1
+                                        ],
+                                        "child_size": 33,
+                                        "min_prefix_length": 4,
+                                        "max_prefix_length": 12,
+                                        "empty_child": null,
+                                        "hash": "SHA256"
+                                    },
+                                    "max_depth": 0,
+                                    "min_depth": 0
+                                },
+                                {
+                                    "leaf_spec": {
+                                        "hash": "SHA256",
+                                        "prehash_key": "NO_HASH",
+                                        "prehash_value": "SHA256",
+                                        "length": "VAR_PROTO",
+                                        "prefix": "AA=="
+                                    },
+                                    "inner_spec": {
+                                        "child_order": [
+                                            0,
+                                            1
+                                        ],
+                                        "child_size": 32,
+                                        "min_prefix_length": 1,
+                                        "max_prefix_length": 1,
+                                        "empty_child": null,
+                                        "hash": "SHA256"
+                                    },
+                                    "max_depth": 0,
+                                    "min_depth": 0
+                                }
+                            ],
+                            "upgrade_path": [
+                                "upgrade",
+                                "upgradedIBCState"
+                            ],
+                            "allow_update_after_expiry": false,
+                            "allow_update_after_misbehaviour": false
+                        },
+                        "consensus_state": {
+                            "@type": "/ibc.lightclients.tendermint.v1.ConsensusState",
+                            "timestamp": "2021-05-04T18:02:36.089446Z",
+                            "root": {
+                                "hash": "bVjiQ29+V522NVFdx1BiVJnIBJV8Y1pYe9psvxZFAWg="
+                            },
+                            "next_validators_hash": "E3DE0D2B3237A02E9C20C34F9EE04F69F5861FBC2E2722A011CA9037FC67A7EC"
+                        },
+                        "signer": "cro1gdswrmwtzgv3kvf28lvtt7qv7q7myzmn466r3f"
+                    }
+                ],
+                "memo": "",
+                "timeout_height": "0",
+                "extension_options": [],
+                "non_critical_extension_options": []
+            },
+            "auth_info": {
+                "signer_infos": [
+                    {
+                        "public_key": {
+                            "@type": "/cosmos.crypto.secp256k1.PubKey",
+                            "key": "Ay3F5FOQif8MrhCypdaMnizCw4zKh3WZMB6OYdD04+eI"
+                        },
+                        "mode_info": {
+                            "single": {
+                                "mode": "SIGN_MODE_DIRECT"
+                            }
+                        },
+                        "sequence": "0"
+                    }
+                ],
+                "fee": {
+                    "amount": [
+                        {
+                            "denom": "basecro",
+                            "amount": "1000"
+                        }
+                    ],
+                    "gas_limit": "3000000",
+                    "payer": "",
+                    "granter": ""
+                }
+            },
+            "signatures": [
+                "+xBk0QkWHg6sJo30EMSDDpm+2c2W4Pr565ksBbQ8JAt+VwbYdIICI0mQUXkRu9veCMorfSNLPcsuRH0s+1Tn6Q=="
+            ]
+        },
+        "timestamp": "2021-08-29T17:15:46Z"
+    }
+}`

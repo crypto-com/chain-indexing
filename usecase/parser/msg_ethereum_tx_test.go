@@ -12,19 +12,20 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
 	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgExec", func() {
 		It("should parse Msg commands when there is MsgEthereumTx in the transaction", func() {
-			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_ETHEREUM_TX_BLOCK_RESP,
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_ETHEREUM_TX_BLOCK_RESULTS_RESP,
 			))
+
+			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_ETHEREUM_TX_TXS_RESP)
+			txs := []model.Tx{*tx}
 
 			accountAddressPrefix := "tcro"
 			stakingDenom := "basetcro"
@@ -33,9 +34,9 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
-				block,
+				block.Height,
 				blockResults,
+				txs,
 				accountAddressPrefix,
 				stakingDenom,
 			)

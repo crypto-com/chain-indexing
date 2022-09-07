@@ -2204,3 +2204,221 @@ const TX_MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_TIME_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+const TX_MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_TIME_TXS_RESP = `{
+    "tx": {
+        "body": {
+            "messages": [
+                {
+                    "@type": "/cosmos.gov.v1beta1.MsgSubmitProposal",
+                    "content": {
+                        "@type": "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal",
+                        "title": "Upgrade Title",
+                        "description": "Upgrade Description",
+                        "plan": {
+                            "name": "Upgrade Name",
+                            "time": "2100-01-02T15:04:05Z",
+                            "height": "0",
+                            "info": "Upgrade Info",
+                            "upgraded_client_state": null
+                        }
+                    },
+                    "initial_deposit": [],
+                    "proposer": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"
+                }
+            ],
+            "memo": "",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+        },
+        "auth_info": {
+            "signer_infos": [
+                {
+                    "public_key": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "A1mhVLohDEidpGYmpNYxxvikcaL72jQhZN1fxKFYkB8m"
+                    },
+                    "mode_info": {
+                        "single": {
+                            "mode": "SIGN_MODE_DIRECT"
+                        }
+                    },
+                    "sequence": "23"
+                }
+            ],
+            "fee": {
+                "amount": [],
+                "gas_limit": "200000",
+                "payer": "",
+                "granter": ""
+            }
+        },
+        "signatures": [
+            "HzoFNPuilzeyEekZ7ZuTi6fKboUnYSGH8V4qXZM0ilcTStOtIcq5D7JwINBBCzeiwvLnUcQ1+pQUAB9e2FlWLw=="
+        ]
+    },
+    "tx_response": {
+        "height": "490333",
+        "txhash": "7422843783CADA0321F517CAD2F38CB63E3C2CBD126150272BC5D678C8869E92",
+        "codespace": "",
+        "code": 0,
+        "data": "ChsKD3N1Ym1pdF9wcm9wb3NhbBIIAAAAAAAAAAg=",
+        "raw_log": "[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"submit_proposal\"},{\"key\":\"sender\",\"value\":\"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn\"},{\"key\":\"module\",\"value\":\"governance\"},{\"key\":\"sender\",\"value\":\"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn\"}]},{\"type\":\"proposal_deposit\",\"attributes\":[{\"key\":\"amount\"},{\"key\":\"proposal_id\",\"value\":\"8\"}]},{\"type\":\"submit_proposal\",\"attributes\":[{\"key\":\"proposal_id\",\"value\":\"8\"},{\"key\":\"proposal_type\",\"value\":\"SoftwareUpgrade\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro10d07y265gmmuvt4z0w9aw880jnsr700jvvjc2n\"},{\"key\":\"sender\",\"value\":\"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn\"},{\"key\":\"amount\"}]}]}]",
+        "logs": [
+            {
+                "msg_index": 0,
+                "log": "",
+                "events": [
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "YWN0aW9u",
+                                "value": "c3VibWl0X3Byb3Bvc2Fs",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "submit_proposal",
+                        "attributes": [
+                            {
+                                "key": "cHJvcG9zYWxfaWQ=",
+                                "value": "OA==",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "transfer",
+                        "attributes": [
+                            {
+                                "key": "cmVjaXBpZW50",
+                                "value": "dGNybzEwZDA3eTI2NWdtbXV2dDR6MHc5YXc4ODBqbnNyNzAwanZ2amMybg==",
+                                "index": true
+                            },
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "dGNybzFmbXBybTBzank2bHo5bGx2N3JsdG4wdjJhenp3Y3d6dmsybHN5bg==",
+                                "index": true
+                            },
+                            {
+                                "key": "YW1vdW50",
+                                "value": null,
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "dGNybzFmbXBybTBzank2bHo5bGx2N3JsdG4wdjJhenp3Y3d6dmsybHN5bg==",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "proposal_deposit",
+                        "attributes": [
+                            {
+                                "key": "YW1vdW50",
+                                "value": null,
+                                "index": true
+                            },
+                            {
+                                "key": "cHJvcG9zYWxfaWQ=",
+                                "value": "OA==",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "bW9kdWxl",
+                                "value": "Z292ZXJuYW5jZQ==",
+                                "index": true
+                            },
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "dGNybzFmbXBybTBzank2bHo5bGx2N3JsdG4wdjJhenp3Y3d6dmsybHN5bg==",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "submit_proposal",
+                        "attributes": [
+                            {
+                                "key": "cHJvcG9zYWxfdHlwZQ==",
+                                "value": "U29mdHdhcmVVcGdyYWRl",
+                                "index": true
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "info": "",
+        "gas_wanted": "200000",
+        "gas_used": "77153",
+        "tx": {
+            "@type": "/cosmos.tx.v1beta1.Tx",
+            "body": {
+                "messages": [
+                    {
+                        "@type": "/cosmos.gov.v1beta1.MsgSubmitProposal",
+                        "content": {
+                            "@type": "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal",
+                            "title": "Upgrade Title",
+                            "description": "Upgrade Description",
+                            "plan": {
+                                "name": "Upgrade Name",
+                                "time": "2100-01-02T15:04:05Z",
+                                "height": "0",
+                                "info": "Upgrade Info",
+                                "upgraded_client_state": null
+                            }
+                        },
+                        "initial_deposit": [],
+                        "proposer": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"
+                    }
+                ],
+                "memo": "",
+                "timeout_height": "0",
+                "extension_options": [],
+                "non_critical_extension_options": []
+            },
+            "auth_info": {
+                "signer_infos": [
+                    {
+                        "public_key": {
+                            "@type": "/cosmos.crypto.secp256k1.PubKey",
+                            "key": "A1mhVLohDEidpGYmpNYxxvikcaL72jQhZN1fxKFYkB8m"
+                        },
+                        "mode_info": {
+                            "single": {
+                                "mode": "SIGN_MODE_DIRECT"
+                            }
+                        },
+                        "sequence": "23"
+                    }
+                ],
+                "fee": {
+                    "amount": [],
+                    "gas_limit": "200000",
+                    "payer": "",
+                    "granter": ""
+                }
+            },
+            "signatures": [
+                "HzoFNPuilzeyEekZ7ZuTi6fKboUnYSGH8V4qXZM0ilcTStOtIcq5D7JwINBBCzeiwvLnUcQ1+pQUAB9e2FlWLw=="
+            ]
+        },
+        "timestamp": "2021-08-29T17:15:46Z"
+    }
+}`

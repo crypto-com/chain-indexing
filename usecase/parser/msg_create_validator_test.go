@@ -3,8 +3,6 @@ package parser_test
 import (
 	"strings"
 
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -21,9 +19,12 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgCreateValidator", func() {
 
 		It("should parse Msg commands when there is staking.MsgCreateValidator in the transaction", func() {
-			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_MSG_CREATE_VALIDATOR_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_MSG_CREATE_VALIDATOR_BLOCK_RESULTS_RESP))
+
+			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_CREATE_VALIDATOR_TXS_RESP)
+			txs := []model.Tx{*tx}
+
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"
 
@@ -31,9 +32,9 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
-				block,
+				block.Height,
 				blockResults,
+				txs,
 				accountAddressPrefix,
 				bondingDenom,
 			)

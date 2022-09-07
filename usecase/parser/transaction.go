@@ -20,21 +20,17 @@ import (
 
 func ParseTransactionCommands(
 	logger applogger.Logger,
-	txDecoder *utils.TxDecoder,
+	txs []model.Tx,
 	cosmosClient cosmosapp_interface.Client,
-	block *model.Block,
 	blockResults *model.BlockResults,
 	accountAddressPrefix string,
 	possibleSignerAddresses []string,
 ) ([]command.Command, error) {
 	blockHeight := blockResults.Height
 	cmds := make([]command.Command, 0, len(blockResults.TxsResults))
-	for i, txHex := range block.Txs {
+	for i, tx := range txs {
+		txHash := tx.TxResponse.TxHash
 		txsResult := blockResults.TxsResults[i]
-		tx, err := txDecoder.Decode(txHex)
-		if err != nil {
-			panic(fmt.Sprintf("error decoding transaction: %v", err))
-		}
 
 		var log string
 		if len(txsResult.Log) == 0 {
@@ -43,11 +39,11 @@ func ParseTransactionCommands(
 		} else {
 			var logMarshalErr error
 			if log, logMarshalErr = jsoniter.MarshalToString(txsResult.Log); logMarshalErr != nil {
-				return nil, fmt.Errorf("error encoding transaction result rawLog to JSON: %v", err)
+				return nil, fmt.Errorf("error encoding transaction result rawLog to JSON: %v", logMarshalErr)
 			}
 		}
 
-		fee, err := txDecoder.GetFee(txHex)
+		fee, err := utils.SumAmount(tx.Tx.AuthInfo.Fee.Amount)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing transaction fee: %v", err)
 		}
@@ -60,7 +56,7 @@ func ParseTransactionCommands(
 		if err != nil {
 			return nil, fmt.Errorf("error parsing gas wanted: %v", err)
 		}
-		timeoutHeight, err := strconv.ParseInt(tx.Body.TimeoutHeight, 10, 64)
+		timeoutHeight, err := strconv.ParseInt(tx.Tx.Body.TimeoutHeight, 10, 64)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing timeout height: %v", err)
 		}
@@ -69,7 +65,7 @@ func ParseTransactionCommands(
 			"submodule": "ParseSignerInfosToTransactionSigners",
 		})
 		signers, parseSignerInfosErr := ParseSignerInfosToTransactionSigners(
-			parseSignerInfosToTransactionSignersLogger, cosmosClient, tx.AuthInfo.SignerInfos, accountAddressPrefix, possibleSignerAddresses, TxHash(txHex),
+			parseSignerInfosToTransactionSignersLogger, cosmosClient, tx.Tx.AuthInfo.SignerInfos, accountAddressPrefix, possibleSignerAddresses, txHash,
 		)
 
 		if parseSignerInfosErr != nil {
@@ -77,18 +73,18 @@ func ParseTransactionCommands(
 		}
 
 		cmds = append(cmds, command_usecase.NewCreateTransaction(blockHeight, model.CreateTransactionParams{
-			TxHash:        TxHash(txHex),
+			TxHash:        txHash,
 			Index:         i,
 			Code:          txsResult.Code,
 			Log:           log,
-			MsgCount:      len(tx.Body.Messages),
+			MsgCount:      len(tx.Tx.Body.Messages),
 			Signers:       signers,
 			Fee:           fee,
-			FeePayer:      tx.AuthInfo.Fee.Payer,
-			FeeGranter:    tx.AuthInfo.Fee.Granter,
+			FeePayer:      tx.Tx.AuthInfo.Fee.Payer,
+			FeeGranter:    tx.Tx.AuthInfo.Fee.Granter,
 			GasWanted:     gasWanted,
 			GasUsed:       gasUsed,
-			Memo:          tx.Body.Memo,
+			Memo:          tx.Tx.Body.Memo,
 			TimeoutHeight: timeoutHeight,
 		}))
 	}

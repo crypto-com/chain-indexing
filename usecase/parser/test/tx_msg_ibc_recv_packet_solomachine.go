@@ -838,3 +838,380 @@ const TX_MSG_RECV_PACKET_SOLO_MACHINE_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+const TX_MSG_RECV_PACKET_SOLO_MACHINE_TXS_RESP = `{
+  "tx": {
+    "body": {
+      "messages": [
+        {
+          "@type": "/ibc.core.channel.v1.MsgRecvPacket",
+          "packet": {
+            "sequence": "1",
+            "source_port": "transfer",
+            "source_channel": "channel-VSAv",
+            "destination_port": "transfer",
+            "destination_channel": "channel-0",
+            "data": "eyJkZW5vbSI6InNvbG90b2tlbiIsImFtb3VudCI6MjAsInNlbmRlciI6InRjcm8xNHdrdTRocjc0bTBtNHR2ZXhzNGY2anZ1eTZ2bnUyeDJkZzdoc3kiLCJyZWNlaXZlciI6InRjcm8xNHdrdTRocjc0bTBtNHR2ZXhzNGY2anZ1eTZ2bnUyeDJkZzdoc3kifQ==",
+            "timeout_height": {
+              "revision_number": "4",
+              "revision_height": "14812"
+            },
+            "timeout_timestamp": "0"
+          },
+          "proof_commitment": "CkQKQhJAqfGjUQ5IBMpw/u/sAm+xxKztwsL9zJHGs/GObfCQPyd2Yi489Y8BbB0I9nQiOXymYa5Tu/lTuo+tJMQSLzCr+BCqsPyIBg==",
+          "proof_height": {
+            "revision_number": "0",
+            "revision_height": "5"
+          },
+          "signer": "tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy"
+        }
+      ],
+      "memo": "solo-machine-memo",
+      "timeout_height": "0",
+      "extension_options": [
+      ],
+      "non_critical_extension_options": [
+      ]
+    },
+    "auth_info": {
+      "signer_infos": [
+        {
+          "public_key": {
+            "@type": "/cosmos.crypto.secp256k1.PubKey",
+            "key": "Ausp3XCdeFAWXHNeTBb3JZY56fMncZ/tpRnGfSFVdESm"
+          },
+          "mode_info": {
+            "single": {
+              "mode": "SIGN_MODE_DIRECT"
+            }
+          },
+          "sequence": "5"
+        }
+      ],
+      "fee": {
+        "amount": [
+          {
+            "denom": "basetcro",
+            "amount": "10000"
+          }
+        ],
+        "gas_limit": "300000",
+        "payer": "",
+        "granter": ""
+      }
+    },
+    "signatures": [
+      "qAwruMndXoC1gdQ9JDtdba5qPZV4qxrLkxVqjn8vA9ElcadQvEuQiwrgksTmAiTOKrYVW/Toxbhv+JS+59eGtQ=="
+    ]
+  },
+  "tx_response": {
+    "height": "14803",
+    "txhash": "0696B4561D093E0AF784D6CC5701C4FB0645E47BE425C47108737E23BB4FBDEA",
+    "codespace": "",
+    "code": 0,
+    "data": "0A240A222F6962632E636F72652E6368616E6E656C2E76312E4D7367526563765061636B6574",
+    "raw_log": "[{\"events\":[{\"type\":\"coin_received\",\"attributes\":[{\"key\":\"receiver\",\"value\":\"tcro1yl6hdjhmkf37639730gffanpzndzdpmhc3h5tr\"},{\"key\":\"amount\",\"value\":\"20ibc/1A35E932DCE61466ED9F72D0B436628C388FB1BC60CB23A055039B7DE54883CC\"},{\"key\":\"receiver\",\"value\":\"tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy\"},{\"key\":\"amount\",\"value\":\"20ibc/1A35E932DCE61466ED9F72D0B436628C388FB1BC60CB23A055039B7DE54883CC\"}]},{\"type\":\"coin_spent\",\"attributes\":[{\"key\":\"spender\",\"value\":\"tcro1yl6hdjhmkf37639730gffanpzndzdpmhc3h5tr\"},{\"key\":\"amount\",\"value\":\"20ibc/1A35E932DCE61466ED9F72D0B436628C388FB1BC60CB23A055039B7DE54883CC\"}]},{\"type\":\"coinbase\",\"attributes\":[{\"key\":\"minter\",\"value\":\"tcro1yl6hdjhmkf37639730gffanpzndzdpmhc3h5tr\"},{\"key\":\"amount\",\"value\":\"20ibc/1A35E932DCE61466ED9F72D0B436628C388FB1BC60CB23A055039B7DE54883CC\"}]},{\"type\":\"denomination_trace\",\"attributes\":[{\"key\":\"trace_hash\",\"value\":\"1A35E932DCE61466ED9F72D0B436628C388FB1BC60CB23A055039B7DE54883CC\"},{\"key\":\"denom\",\"value\":\"ibc/1A35E932DCE61466ED9F72D0B436628C388FB1BC60CB23A055039B7DE54883CC\"}]},{\"type\":\"fungible_token_packet\",\"attributes\":[{\"key\":\"module\",\"value\":\"transfer\"},{\"key\":\"receiver\",\"value\":\"tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy\"},{\"key\":\"denom\",\"value\":\"solotoken\"},{\"key\":\"amount\",\"value\":\"20\"},{\"key\":\"success\",\"value\":\"true\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"/ibc.core.channel.v1.MsgRecvPacket\"},{\"key\":\"module\",\"value\":\"ibc_channel\"},{\"key\":\"sender\",\"value\":\"tcro1yl6hdjhmkf37639730gffanpzndzdpmhc3h5tr\"},{\"key\":\"module\",\"value\":\"ibc_channel\"}]},{\"type\":\"recv_packet\",\"attributes\":[{\"key\":\"packet_data\",\"value\":\"{\\\"denom\\\":\\\"solotoken\\\",\\\"amount\\\":20,\\\"sender\\\":\\\"tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy\\\",\\\"receiver\\\":\\\"tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy\\\"}\"},{\"key\":\"packet_data_hex\",\"value\":\"7b2264656e6f6d223a22736f6c6f746f6b656e222c22616d6f756e74223a32302c2273656e646572223a227463726f3134776b7534687237346d306d3474766578733466366a76757936766e75327832646737687379222c227265636569766572223a227463726f3134776b7534687237346d306d3474766578733466366a76757936766e75327832646737687379227d\"},{\"key\":\"packet_timeout_height\",\"value\":\"4-14812\"},{\"key\":\"packet_timeout_timestamp\",\"value\":\"0\"},{\"key\":\"packet_sequence\",\"value\":\"1\"},{\"key\":\"packet_src_port\",\"value\":\"transfer\"},{\"key\":\"packet_src_channel\",\"value\":\"channel-VSAv\"},{\"key\":\"packet_dst_port\",\"value\":\"transfer\"},{\"key\":\"packet_dst_channel\",\"value\":\"channel-0\"},{\"key\":\"packet_channel_ordering\",\"value\":\"ORDER_UNORDERED\"},{\"key\":\"packet_connection\",\"value\":\"connection-0\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy\"},{\"key\":\"sender\",\"value\":\"tcro1yl6hdjhmkf37639730gffanpzndzdpmhc3h5tr\"},{\"key\":\"amount\",\"value\":\"20ibc/1A35E932DCE61466ED9F72D0B436628C388FB1BC60CB23A055039B7DE54883CC\"}]},{\"type\":\"write_acknowledgement\",\"attributes\":[{\"key\":\"packet_data\",\"value\":\"{\\\"denom\\\":\\\"solotoken\\\",\\\"amount\\\":20,\\\"sender\\\":\\\"tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy\\\",\\\"receiver\\\":\\\"tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy\\\"}\"},{\"key\":\"packet_data_hex\",\"value\":\"7b2264656e6f6d223a22736f6c6f746f6b656e222c22616d6f756e74223a32302c2273656e646572223a227463726f3134776b7534687237346d306d3474766578733466366a76757936766e75327832646737687379222c227265636569766572223a227463726f3134776b7534687237346d306d3474766578733466366a76757936766e75327832646737687379227d\"},{\"key\":\"packet_timeout_height\",\"value\":\"4-14812\"},{\"key\":\"packet_timeout_timestamp\",\"value\":\"0\"},{\"key\":\"packet_sequence\",\"value\":\"1\"},{\"key\":\"packet_src_port\",\"value\":\"transfer\"},{\"key\":\"packet_src_channel\",\"value\":\"channel-VSAv\"},{\"key\":\"packet_dst_port\",\"value\":\"transfer\"},{\"key\":\"packet_dst_channel\",\"value\":\"channel-0\"},{\"key\":\"packet_ack\",\"value\":\"{\\\"result\\\":\\\"AQ==\\\"}\"},{\"key\":\"packet_ack_hex\",\"value\":\"7b22726573756c74223a2241513d3d227d\"},{\"key\":\"packet_connection\",\"value\":\"connection-0\"}]}]}]",
+    "logs": [
+      {
+        "msg_index": 0,
+        "log": "",
+        "events": [
+          {
+            "type": "coin_received",
+            "attributes": [
+              {
+                "key": "receiver",
+                "value": "tcro1yl6hdjhmkf37639730gffanpzndzdpmhc3h5tr"
+              },
+              {
+                "key": "amount",
+                "value": "20ibc/1A35E932DCE61466ED9F72D0B436628C388FB1BC60CB23A055039B7DE54883CC"
+              },
+              {
+                "key": "receiver",
+                "value": "tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy"
+              },
+              {
+                "key": "amount",
+                "value": "20ibc/1A35E932DCE61466ED9F72D0B436628C388FB1BC60CB23A055039B7DE54883CC"
+              }
+            ]
+          },
+          {
+            "type": "coin_spent",
+            "attributes": [
+              {
+                "key": "spender",
+                "value": "tcro1yl6hdjhmkf37639730gffanpzndzdpmhc3h5tr"
+              },
+              {
+                "key": "amount",
+                "value": "20ibc/1A35E932DCE61466ED9F72D0B436628C388FB1BC60CB23A055039B7DE54883CC"
+              }
+            ]
+          },
+          {
+            "type": "coinbase",
+            "attributes": [
+              {
+                "key": "minter",
+                "value": "tcro1yl6hdjhmkf37639730gffanpzndzdpmhc3h5tr"
+              },
+              {
+                "key": "amount",
+                "value": "20ibc/1A35E932DCE61466ED9F72D0B436628C388FB1BC60CB23A055039B7DE54883CC"
+              }
+            ]
+          },
+          {
+            "type": "denomination_trace",
+            "attributes": [
+              {
+                "key": "trace_hash",
+                "value": "1A35E932DCE61466ED9F72D0B436628C388FB1BC60CB23A055039B7DE54883CC"
+              },
+              {
+                "key": "denom",
+                "value": "ibc/1A35E932DCE61466ED9F72D0B436628C388FB1BC60CB23A055039B7DE54883CC"
+              }
+            ]
+          },
+          {
+            "type": "fungible_token_packet",
+            "attributes": [
+              {
+                "key": "module",
+                "value": "transfer"
+              },
+              {
+                "key": "receiver",
+                "value": "tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy"
+              },
+              {
+                "key": "denom",
+                "value": "solotoken"
+              },
+              {
+                "key": "amount",
+                "value": "20"
+              },
+              {
+                "key": "success",
+                "value": "true"
+              }
+            ]
+          },
+          {
+            "type": "message",
+            "attributes": [
+              {
+                "key": "action",
+                "value": "/ibc.core.channel.v1.MsgRecvPacket"
+              },
+              {
+                "key": "module",
+                "value": "ibc_channel"
+              },
+              {
+                "key": "sender",
+                "value": "tcro1yl6hdjhmkf37639730gffanpzndzdpmhc3h5tr"
+              },
+              {
+                "key": "module",
+                "value": "ibc_channel"
+              }
+            ]
+          },
+          {
+            "type": "recv_packet",
+            "attributes": [
+              {
+                "key": "packet_data",
+                "value": "{\"denom\":\"solotoken\",\"amount\":20,\"sender\":\"tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy\",\"receiver\":\"tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy\"}"
+              },
+              {
+                "key": "packet_data_hex",
+                "value": "7b2264656e6f6d223a22736f6c6f746f6b656e222c22616d6f756e74223a32302c2273656e646572223a227463726f3134776b7534687237346d306d3474766578733466366a76757936766e75327832646737687379222c227265636569766572223a227463726f3134776b7534687237346d306d3474766578733466366a76757936766e75327832646737687379227d"
+              },
+              {
+                "key": "packet_timeout_height",
+                "value": "4-14812"
+              },
+              {
+                "key": "packet_timeout_timestamp",
+                "value": "0"
+              },
+              {
+                "key": "packet_sequence",
+                "value": "1"
+              },
+              {
+                "key": "packet_src_port",
+                "value": "transfer"
+              },
+              {
+                "key": "packet_src_channel",
+                "value": "channel-VSAv"
+              },
+              {
+                "key": "packet_dst_port",
+                "value": "transfer"
+              },
+              {
+                "key": "packet_dst_channel",
+                "value": "channel-0"
+              },
+              {
+                "key": "packet_channel_ordering",
+                "value": "ORDER_UNORDERED"
+              },
+              {
+                "key": "packet_connection",
+                "value": "connection-0"
+              }
+            ]
+          },
+          {
+            "type": "transfer",
+            "attributes": [
+              {
+                "key": "recipient",
+                "value": "tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy"
+              },
+              {
+                "key": "sender",
+                "value": "tcro1yl6hdjhmkf37639730gffanpzndzdpmhc3h5tr"
+              },
+              {
+                "key": "amount",
+                "value": "20ibc/1A35E932DCE61466ED9F72D0B436628C388FB1BC60CB23A055039B7DE54883CC"
+              }
+            ]
+          },
+          {
+            "type": "write_acknowledgement",
+            "attributes": [
+              {
+                "key": "packet_data",
+                "value": "{\"denom\":\"solotoken\",\"amount\":20,\"sender\":\"tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy\",\"receiver\":\"tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy\"}"
+              },
+              {
+                "key": "packet_data_hex",
+                "value": "7b2264656e6f6d223a22736f6c6f746f6b656e222c22616d6f756e74223a32302c2273656e646572223a227463726f3134776b7534687237346d306d3474766578733466366a76757936766e75327832646737687379222c227265636569766572223a227463726f3134776b7534687237346d306d3474766578733466366a76757936766e75327832646737687379227d"
+              },
+              {
+                "key": "packet_timeout_height",
+                "value": "4-14812"
+              },
+              {
+                "key": "packet_timeout_timestamp",
+                "value": "0"
+              },
+              {
+                "key": "packet_sequence",
+                "value": "1"
+              },
+              {
+                "key": "packet_src_port",
+                "value": "transfer"
+              },
+              {
+                "key": "packet_src_channel",
+                "value": "channel-VSAv"
+              },
+              {
+                "key": "packet_dst_port",
+                "value": "transfer"
+              },
+              {
+                "key": "packet_dst_channel",
+                "value": "channel-0"
+              },
+              {
+                "key": "packet_ack",
+                "value": "{\"result\":\"AQ==\"}"
+              },
+              {
+                "key": "packet_ack_hex",
+                "value": "7b22726573756c74223a2241513d3d227d"
+              },
+              {
+                "key": "packet_connection",
+                "value": "connection-0"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "info": "",
+    "gas_wanted": "300000",
+    "gas_used": "102722",
+    "tx": {
+      "@type": "/cosmos.tx.v1beta1.Tx",
+      "body": {
+        "messages": [
+          {
+            "@type": "/ibc.core.channel.v1.MsgRecvPacket",
+            "packet": {
+              "sequence": "1",
+              "source_port": "transfer",
+              "source_channel": "channel-VSAv",
+              "destination_port": "transfer",
+              "destination_channel": "channel-0",
+              "data": "eyJkZW5vbSI6InNvbG90b2tlbiIsImFtb3VudCI6MjAsInNlbmRlciI6InRjcm8xNHdrdTRocjc0bTBtNHR2ZXhzNGY2anZ1eTZ2bnUyeDJkZzdoc3kiLCJyZWNlaXZlciI6InRjcm8xNHdrdTRocjc0bTBtNHR2ZXhzNGY2anZ1eTZ2bnUyeDJkZzdoc3kifQ==",
+              "timeout_height": {
+                "revision_number": "4",
+                "revision_height": "14812"
+              },
+              "timeout_timestamp": "0"
+            },
+            "proof_commitment": "CkQKQhJAqfGjUQ5IBMpw/u/sAm+xxKztwsL9zJHGs/GObfCQPyd2Yi489Y8BbB0I9nQiOXymYa5Tu/lTuo+tJMQSLzCr+BCqsPyIBg==",
+            "proof_height": {
+              "revision_number": "0",
+              "revision_height": "5"
+            },
+            "signer": "tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy"
+          }
+        ],
+        "memo": "solo-machine-memo",
+        "timeout_height": "0",
+        "extension_options": [
+        ],
+        "non_critical_extension_options": [
+        ]
+      },
+      "auth_info": {
+        "signer_infos": [
+          {
+            "public_key": {
+              "@type": "/cosmos.crypto.secp256k1.PubKey",
+              "key": "Ausp3XCdeFAWXHNeTBb3JZY56fMncZ/tpRnGfSFVdESm"
+            },
+            "mode_info": {
+              "single": {
+                "mode": "SIGN_MODE_DIRECT"
+              }
+            },
+            "sequence": "5"
+          }
+        ],
+        "fee": {
+          "amount": [
+            {
+              "denom": "basetcro",
+              "amount": "10000"
+            }
+          ],
+          "gas_limit": "300000",
+          "payer": "",
+          "granter": ""
+        }
+      },
+      "signatures": [
+        "qAwruMndXoC1gdQ9JDtdba5qPZV4qxrLkxVqjn8vA9ElcadQvEuQiwrgksTmAiTOKrYVW/Toxbhv+JS+59eGtQ=="
+      ]
+    },
+    "timestamp": "2021-08-20T02:50:25Z"
+  }
+}`

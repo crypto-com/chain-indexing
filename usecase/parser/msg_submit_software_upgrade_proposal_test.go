@@ -4,8 +4,6 @@ import (
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -20,11 +18,14 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgSubmitSoftwareUpgradeProposal", func() {
 		It("should parse gov.MsgSubmitCommunityPoolSpendProposal command with effective height in the transaction", func() {
-			txDecoder := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_HEIGHT_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_HEIGHT_BLOCK_RESULTS_RESP,
 			)
+
+			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_HEIGHT_TXS_RESP)
+			txs := []model.Tx{*tx}
+
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"
 
@@ -32,9 +33,9 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
-				block,
+				block.Height,
 				blockResults,
+				txs,
 				accountAddressPrefix,
 				bondingDenom,
 			)
@@ -71,11 +72,14 @@ var _ = Describe("ParseMsgCommands", func() {
 		})
 
 		It("should parse gov.MsgSubmitCommunityPoolSpendProposal command with effective time in the transaction", func() {
-			txDecoder := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_TIME_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_TIME_BLOCK_RESULTS_RESP,
 			)
+
+			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_TIME_TXS_RESP)
+			txs := []model.Tx{*tx}
+
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"
 
@@ -83,9 +87,9 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
-				block,
+				block.Height,
 				blockResults,
+				txs,
 				accountAddressPrefix,
 				bondingDenom,
 			)

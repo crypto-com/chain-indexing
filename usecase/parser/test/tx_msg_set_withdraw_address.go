@@ -308,3 +308,142 @@ const TX_MSG_SET_WITHDRAW_ADDRESS_BLOCK_RESULTS_RESP = `
     }
   }
 }`
+
+const TX_MSG_SET_WITHDRAW_ADDRESS_TXS_RESP = `{
+    "tx": {
+        "body": {
+            "messages": [
+                {
+                    "@type": "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
+                    "delegator_address": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+                    "withdraw_address": "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh"
+                }
+            ],
+            "memo": "",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+        },
+        "auth_info": {
+            "signer_infos": [
+                {
+                    "public_key": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "A1mhVLohDEidpGYmpNYxxvikcaL72jQhZN1fxKFYkB8m"
+                    },
+                    "mode_info": {
+                        "single": {
+                            "mode": "SIGN_MODE_DIRECT"
+                        }
+                    },
+                    "sequence": "8"
+                }
+            ],
+            "fee": {
+                "amount": [],
+                "gas_limit": "200000",
+                "payer": "",
+                "granter": ""
+            }
+        },
+        "signatures": [
+            "ZHG4Hwo8GXkTqlp47kKLg6s0PoV5OG0wjaJJG/2iAVFM4SFmeTnqlwIE+06Y3UKQibF3UrMo8zY1v5/RweWhew=="
+        ]
+    },
+    "tx_response": {
+        "height": "460060",
+        "txhash": "9C2501310E18EE69A7FE5CA1A684A0701C43BEB1A8D91EDA80CC598C924F9CBE",
+        "codespace": "",
+        "code": 0,
+        "data": "ChYKFHNldF93aXRoZHJhd19hZGRyZXNz",
+        "raw_log": "[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"set_withdraw_address\"},{\"key\":\"module\",\"value\":\"distribution\"},{\"key\":\"sender\",\"value\":\"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn\"}]},{\"type\":\"set_withdraw_address\",\"attributes\":[{\"key\":\"withdraw_address\",\"value\":\"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn\"}]}]}]",
+        "logs": [
+            {
+                "msg_index": 0,
+                "log": "",
+                "events": [
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "YWN0aW9u",
+                                "value": "c2V0X3dpdGhkcmF3X2FkZHJlc3M=",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "set_withdraw_address",
+                        "attributes": [
+                            {
+                                "key": "d2l0aGRyYXdfYWRkcmVzcw==",
+                                "value": "dGNybzFmbXBybTBzank2bHo5bGx2N3JsdG4wdjJhenp3Y3d6dmsybHN5bg==",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "bW9kdWxl",
+                                "value": "ZGlzdHJpYnV0aW9u",
+                                "index": true
+                            },
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "dGNybzFmbXBybTBzank2bHo5bGx2N3JsdG4wdjJhenp3Y3d6dmsybHN5bg==",
+                                "index": true
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "info": "",
+        "gas_wanted": "200000",
+        "gas_used": "42013",
+        "tx": {
+            "@type": "/cosmos.tx.v1beta1.Tx",
+            "body": {
+                "messages": [
+                    {
+                        "@type": "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
+                        "delegator_address": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+                        "withdraw_address": "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh"
+                    }
+                ],
+                "memo": "",
+                "timeout_height": "0",
+                "extension_options": [],
+                "non_critical_extension_options": []
+            },
+            "auth_info": {
+                "signer_infos": [
+                    {
+                        "public_key": {
+                            "@type": "/cosmos.crypto.secp256k1.PubKey",
+                            "key": "A1mhVLohDEidpGYmpNYxxvikcaL72jQhZN1fxKFYkB8m"
+                        },
+                        "mode_info": {
+                            "single": {
+                                "mode": "SIGN_MODE_DIRECT"
+                            }
+                        },
+                        "sequence": "8"
+                    }
+                ],
+                "fee": {
+                    "amount": [],
+                    "gas_limit": "200000",
+                    "payer": "",
+                    "granter": ""
+                }
+            },
+            "signatures": [
+                "ZHG4Hwo8GXkTqlp47kKLg6s0PoV5OG0wjaJJG/2iAVFM4SFmeTnqlwIE+06Y3UKQibF3UrMo8zY1v5/RweWhew=="
+            ]
+        },
+        "timestamp": "2021-08-29T17:15:46Z"
+    }
+}`

@@ -2944,3 +2944,257 @@ const TX_MSG_SUBMIT_TEXT_PROPOSAL_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+const TX_MSG_SUBMIT_TEXT_PROPOSAL_TXS_RESP = `{
+    "tx": {
+        "body": {
+            "messages": [
+                {
+                    "@type": "/cosmos.gov.v1beta1.MsgSubmitProposal",
+                    "content": {
+                        "@type": "/cosmos.gov.v1beta1.TextProposal",
+                        "title": "A proposal test from crypto.bzh",
+                        "description": "This a description for the proposal"
+                    },
+                    "initial_deposit": [
+                        {
+                            "denom": "basetcro",
+                            "amount": "1000000"
+                        }
+                    ],
+                    "proposer": "tcro14fnzv5g92s6f8dg534lccp4x5tylkvth7zcq0u"
+                }
+            ],
+            "memo": "",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+        },
+        "auth_info": {
+            "signer_infos": [
+                {
+                    "public_key": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "A+TPvYAt4YQ7+KAh7IY63x3q+srlfWCn9GyhTBShz47C"
+                    },
+                    "mode_info": {
+                        "single": {
+                            "mode": "SIGN_MODE_DIRECT"
+                        }
+                    },
+                    "sequence": "19220"
+                }
+            ],
+            "fee": {
+                "amount": [
+                    {
+                        "denom": "basetcro",
+                        "amount": "20000"
+                    }
+                ],
+                "gas_limit": "200000",
+                "payer": "",
+                "granter": ""
+            }
+        },
+        "signatures": [
+            "yaTMtoq9PWIyACZ9lfLL+2OF4MaYAfOSNvreuD5UEsosSJnroRb1NSpK+blQYWfh0A+lzuFmYNgF9ciDNQaoZQ=="
+        ]
+    },
+    "tx_response": {
+        "height": "874207",
+        "txhash": "579B97CD5B947C2FA0EC87EDD4DAA8BECF422B96A82E2C9DBFE15F9F6DB4109B",
+        "codespace": "",
+        "code": 0,
+        "data": "ChsKD3N1Ym1pdF9wcm9wb3NhbBIIAAAAAAAAAAo=",
+        "raw_log": "[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"submit_proposal\"},{\"key\":\"sender\",\"value\":\"tcro14fnzv5g92s6f8dg534lccp4x5tylkvth7zcq0u\"},{\"key\":\"module\",\"value\":\"governance\"},{\"key\":\"sender\",\"value\":\"tcro14fnzv5g92s6f8dg534lccp4x5tylkvth7zcq0u\"}]},{\"type\":\"proposal_deposit\",\"attributes\":[{\"key\":\"amount\",\"value\":\"1000000basetcro\"},{\"key\":\"proposal_id\",\"value\":\"10\"}]},{\"type\":\"submit_proposal\",\"attributes\":[{\"key\":\"proposal_id\",\"value\":\"10\"},{\"key\":\"proposal_type\",\"value\":\"Text\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro10d07y265gmmuvt4z0w9aw880jnsr700jvvjc2n\"},{\"key\":\"sender\",\"value\":\"tcro14fnzv5g92s6f8dg534lccp4x5tylkvth7zcq0u\"},{\"key\":\"amount\",\"value\":\"1000000basetcro\"}]}]}]",
+        "logs": [
+            {
+                "msg_index": 0,
+                "log": "",
+                "events": [
+                    {
+                        "type": "transfer",
+                        "attributes": [
+                            {
+                                "key": "cmVjaXBpZW50",
+                                "value": "dGNybzE3eHBmdmFrbTJhbWc5NjJ5bHM2Zjg0ejNrZWxsOGM1bHhoemFoYQ==",
+                                "index": true
+                            },
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "dGNybzE0Zm56djVnOTJzNmY4ZGc1MzRsY2NwNHg1dHlsa3Z0aDd6Y3EwdQ==",
+                                "index": true
+                            },
+                            {
+                                "key": "YW1vdW50",
+                                "value": "MjAwMDBiYXNldGNybw==",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "dGNybzE0Zm56djVnOTJzNmY4ZGc1MzRsY2NwNHg1dHlsa3Z0aDd6Y3EwdQ==",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "YWN0aW9u",
+                                "value": "c3VibWl0X3Byb3Bvc2Fs",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "submit_proposal",
+                        "attributes": [
+                            {
+                                "key": "cHJvcG9zYWxfaWQ=",
+                                "value": "MTA=",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "transfer",
+                        "attributes": [
+                            {
+                                "key": "cmVjaXBpZW50",
+                                "value": "dGNybzEwZDA3eTI2NWdtbXV2dDR6MHc5YXc4ODBqbnNyNzAwanZ2amMybg==",
+                                "index": true
+                            },
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "dGNybzE0Zm56djVnOTJzNmY4ZGc1MzRsY2NwNHg1dHlsa3Z0aDd6Y3EwdQ==",
+                                "index": true
+                            },
+                            {
+                                "key": "YW1vdW50",
+                                "value": "MTAwMDAwMGJhc2V0Y3Jv",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "dGNybzE0Zm56djVnOTJzNmY4ZGc1MzRsY2NwNHg1dHlsa3Z0aDd6Y3EwdQ==",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "proposal_deposit",
+                        "attributes": [
+                            {
+                                "key": "YW1vdW50",
+                                "value": "MTAwMDAwMGJhc2V0Y3Jv",
+                                "index": true
+                            },
+                            {
+                                "key": "cHJvcG9zYWxfaWQ=",
+                                "value": "MTA=",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "bW9kdWxl",
+                                "value": "Z292ZXJuYW5jZQ==",
+                                "index": true
+                            },
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "dGNybzE0Zm56djVnOTJzNmY4ZGc1MzRsY2NwNHg1dHlsa3Z0aDd6Y3EwdQ==",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "submit_proposal",
+                        "attributes": [
+                            {
+                                "key": "cHJvcG9zYWxfdHlwZQ==",
+                                "value": "VGV4dA==",
+                                "index": true
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "info": "",
+        "gas_wanted": "200000",
+        "gas_used": "92386",
+        "tx": {
+            "@type": "/cosmos.tx.v1beta1.Tx",
+            "body": {
+                "messages": [
+                    {
+                        "@type": "/cosmos.gov.v1beta1.MsgSubmitProposal",
+                        "content": {
+                            "@type": "/cosmos.gov.v1beta1.TextProposal",
+                            "title": "A proposal test from crypto.bzh",
+                            "description": "This a description for the proposal"
+                        },
+                        "initial_deposit": [
+                            {
+                                "denom": "basetcro",
+                                "amount": "1000000"
+                            }
+                        ],
+                        "proposer": "tcro14fnzv5g92s6f8dg534lccp4x5tylkvth7zcq0u"
+                    }
+                ],
+                "memo": "",
+                "timeout_height": "0",
+                "extension_options": [],
+                "non_critical_extension_options": []
+            },
+            "auth_info": {
+                "signer_infos": [
+                    {
+                        "public_key": {
+                            "@type": "/cosmos.crypto.secp256k1.PubKey",
+                            "key": "A+TPvYAt4YQ7+KAh7IY63x3q+srlfWCn9GyhTBShz47C"
+                        },
+                        "mode_info": {
+                            "single": {
+                                "mode": "SIGN_MODE_DIRECT"
+                            }
+                        },
+                        "sequence": "19220"
+                    }
+                ],
+                "fee": {
+                    "amount": [
+                        {
+                            "denom": "basetcro",
+                            "amount": "20000"
+                        }
+                    ],
+                    "gas_limit": "200000",
+                    "payer": "",
+                    "granter": ""
+                }
+            },
+            "signatures": [
+                "yaTMtoq9PWIyACZ9lfLL+2OF4MaYAfOSNvreuD5UEsosSJnroRb1NSpK+blQYWfh0A+lzuFmYNgF9ciDNQaoZQ=="
+            ]
+        },
+        "timestamp": "2021-08-29T17:15:46Z"
+    }
+}`

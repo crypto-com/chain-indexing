@@ -2004,3 +2004,170 @@ const TX_MSG_UNJAIL_BLOCK_RESULTS_RESP = `{
         }
     }
 }`
+
+const TX_MSG_UNJAIL_TXS_RESP = `{
+    "tx": {
+        "body": {
+            "messages": [
+                {
+                    "@type": "/cosmos.slashing.v1beta1.MsgUnjail",
+                    "validator_addr": "tcrocncl1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5m4uxzk"
+                }
+            ],
+            "memo": "",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+        },
+        "auth_info": {
+            "signer_infos": [
+                {
+                    "public_key": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "A7F12Y4ym+GgmuM6Kvzwjr5Y3b/zXzEjQMNliYkE4rB9"
+                    },
+                    "mode_info": {
+                        "single": {
+                            "mode": "SIGN_MODE_DIRECT"
+                        }
+                    },
+                    "sequence": "54"
+                }
+            ],
+            "fee": {
+                "amount": [
+                    {
+                        "denom": "basetcro",
+                        "amount": "80000"
+                    }
+                ],
+                "gas_limit": "800000",
+                "payer": "",
+                "granter": ""
+            }
+        },
+        "signatures": [
+            "WQTJPjyqm9MW82FQD2anOtvqPpEc9qI8WY0nTlBzn015m+j5S7P8QiFSn0bUqRmDZMEnxMrSAE+7fF9yQBOK7A=="
+        ]
+    },
+    "tx_response": {
+        "height": "381001",
+        "txhash": "2D2075ECAF45DB84052B6A98E84C5E7FE158AB5157364FD5A934FAC96B77C6B1",
+        "codespace": "",
+        "code": 0,
+        "data": "CggKBnVuamFpbA==",
+        "raw_log": "[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"unjail\"},{\"key\":\"module\",\"value\":\"slashing\"},{\"key\":\"sender\",\"value\":\"tcrocncl1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5m4uxzk\"}]}]}]",
+        "logs": [
+            {
+                "msg_index": 0,
+                "log": "",
+                "events": [
+                    {
+                        "type": "transfer",
+                        "attributes": [
+                            {
+                                "key": "cmVjaXBpZW50",
+                                "value": "dGNybzE3eHBmdmFrbTJhbWc5NjJ5bHM2Zjg0ejNrZWxsOGM1bHhoemFoYQ==",
+                                "index": true
+                            },
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "dGNybzFnczgwbjhmcGM1bWMzeXdrZ2Z5OTNsMjN0ZzBnZHFqNXcybGw2NA==",
+                                "index": true
+                            },
+                            {
+                                "key": "YW1vdW50",
+                                "value": "ODAwMDBiYXNldGNybw==",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "dGNybzFnczgwbjhmcGM1bWMzeXdrZ2Z5OTNsMjN0ZzBnZHFqNXcybGw2NA==",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "YWN0aW9u",
+                                "value": "dW5qYWls",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "bW9kdWxl",
+                                "value": "c2xhc2hpbmc=",
+                                "index": true
+                            },
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "dGNyb2NuY2wxZ3M4MG44ZnBjNW1jM3l3a2dmeTkzbDIzdGcwZ2RxajVtNHV4ems=",
+                                "index": true
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "info": "",
+        "gas_wanted": "200000",
+        "gas_used": "70428",
+        "tx": {
+            "@type": "/cosmos.tx.v1beta1.Tx",
+            "body": {
+                "messages": [
+                    {
+                        "@type": "/cosmos.slashing.v1beta1.MsgUnjail",
+                        "validator_addr": "tcrocncl1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5m4uxzk"
+                    }
+                ],
+                "memo": "",
+                "timeout_height": "0",
+                "extension_options": [],
+                "non_critical_extension_options": []
+            },
+            "auth_info": {
+                "signer_infos": [
+                    {
+                        "public_key": {
+                            "@type": "/cosmos.crypto.secp256k1.PubKey",
+                            "key": "A7F12Y4ym+GgmuM6Kvzwjr5Y3b/zXzEjQMNliYkE4rB9"
+                        },
+                        "mode_info": {
+                            "single": {
+                                "mode": "SIGN_MODE_DIRECT"
+                            }
+                        },
+                        "sequence": "54"
+                    }
+                ],
+                "fee": {
+                    "amount": [
+                        {
+                            "denom": "basetcro",
+                            "amount": "80000"
+                        }
+                    ],
+                    "gas_limit": "800000",
+                    "payer": "",
+                    "granter": ""
+                }
+            },
+            "signatures": [
+                "WQTJPjyqm9MW82FQD2anOtvqPpEc9qI8WY0nTlBzn015m+j5S7P8QiFSn0bUqRmDZMEnxMrSAE+7fF9yQBOK7A=="
+            ]
+        },
+        "timestamp": "2021-08-29T17:15:46Z"
+    }
+}`

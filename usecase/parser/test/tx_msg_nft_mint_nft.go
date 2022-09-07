@@ -351,3 +351,207 @@ const TX_MSG_NFT_MINT_NFT_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+const TX_MSG_NFT_MINT_NFT_TXS_RESP = `{
+    "tx": {
+        "body": {
+            "messages": [
+                {
+                    "@type": "/chainmain.nft.v1.MsgMintNFT",
+                    "id": "tokenid123",
+                    "denom_id": "denomid",
+                    "name": "tokenName",
+                    "uri": "tokenUri",
+                    "data": "{\"title\":\"Vettel First Run\",\"type\":\"object\",\"properties\":{\"name\":\"Vettel First Run\",\"description\":\"Four-time Formula 1 world champion Sebastian Vettel made his name as one of the sport’s fastest and most fearless drivers. Vettel’s inaugural run in the AMR21 was also his first time out for Aston Martin Cognizant Formula One™ Team – his fifth Formula 1 outfit following stints at BMW Sauber, Scuderia Toro Rosso, Red Bull Racing and Scuderia Ferrari.\",\"image\":\"https://d2vi0z68k5oxnr.cloudfront.net/ac155986-d54c-4e23-957a-628325e051a4/original.mp4\",\"attributes\":[{\"trait_type\":\"Type\",\"value\":\"Human\"},{\"trait_type\":\"Hair Style\",\"value\":\"Bald\"},{\"trait_type\":\"Hat\",\"value\":\"Backwards Cap\"},{\"trait_type\":\"Hat Color\",\"value\":\"Gray\"},{\"trait_type\":\"Shirt\",\"value\":\"Skull Tee\"},{\"trait_type\":\"Overshirt\",\"value\":\"Athletic Jacket\"},{\"trait_type\":\"Overshirt Color\",\"value\":\"Red\"},{\"trait_type\":\"Pants\",\"value\":\"Cargo Pants\"},{\"trait_type\":\"Pants Color\",\"value\":\"Camo\"},{\"trait_type\":\"Shoes\",\"value\":\"Workboots\"}]}}",
+                    "sender": "cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd",
+                    "recipient": "cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd"
+                }
+            ],
+            "memo": "",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+        },
+        "auth_info": {
+            "signer_infos": [
+                {
+                    "public_key": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "AiLBhn2Jb4CLU5dYpKB3LHDpjIFldrsQWD6LWDHyjpWM"
+                    },
+                    "mode_info": {
+                        "single": {
+                            "mode": "SIGN_MODE_DIRECT"
+                        }
+                    },
+                    "sequence": "16"
+                }
+            ],
+            "fee": {
+                "amount": [
+                    {
+                        "denom": "basecro",
+                        "amount": "5000"
+                    }
+                ],
+                "gas_limit": "200000",
+                "payer": "",
+                "granter": ""
+            }
+        },
+        "signatures": [
+            "jAr804vNBRJ9BPC+Zzw+c97FiyMgKos3Wrfx7jYMc5Ev1Ayheb1ccEzdzawG/DmNfSDZIsCFbY8husOK4h/L1g=="
+        ]
+    },
+    "tx_response": {
+        "height": "11090",
+        "txhash": "5CC860DC00862A729C463BA414F13F2AB84908304DCA906C64365D26E40063C0",
+        "codespace": "",
+        "code": 0,
+        "data": "CgoKCG1pbnRfbmZ0",
+        "raw_log": "[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"mint_nft\"},{\"key\":\"module\",\"value\":\"nft\"},{\"key\":\"sender\",\"value\":\"cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd\"}]},{\"type\":\"mint_nft\",\"attributes\":[{\"key\":\"token_id\",\"value\":\"tokenid123\"},{\"key\":\"denom_id\",\"value\":\"denomid\"},{\"key\":\"token_uri\",\"value\":\"tokenUri\"},{\"key\":\"recipient\",\"value\":\"cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd\"}]}]}]",
+        "logs": [
+            {
+                "msg_index": 0,
+                "log": "",
+                "events": [
+                    {
+                        "type": "transfer",
+                        "attributes": [
+                            {
+                                "key": "cmVjaXBpZW50",
+                                "value": "Y3JvMTd4cGZ2YWttMmFtZzk2MnlsczZmODR6M2tlbGw4YzVsZ3p0ZWh2",
+                                "index": true
+                            },
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "Y3JvMW5rNHJxM3E0Nmx0Z2pnaHh6ODBoeTM4NXA5dWowdGY1OGFwa2Nk",
+                                "index": true
+                            },
+                            {
+                                "key": "YW1vdW50",
+                                "value": "NTAwMGJhc2Vjcm8=",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "Y3JvMW5rNHJxM3E0Nmx0Z2pnaHh6ODBoeTM4NXA5dWowdGY1OGFwa2Nk",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "YWN0aW9u",
+                                "value": "bWludF9uZnQ=",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "mint_nft",
+                        "attributes": [
+                            {
+                                "key": "dG9rZW5faWQ=",
+                                "value": "dG9rZW5pZDEyMw==",
+                                "index": true
+                            },
+                            {
+                                "key": "ZGVub21faWQ=",
+                                "value": "ZGVub21pZA==",
+                                "index": true
+                            },
+                            {
+                                "key": "dG9rZW5fdXJp",
+                                "value": "dG9rZW5Vcmk=",
+                                "index": true
+                            },
+                            {
+                                "key": "cmVjaXBpZW50",
+                                "value": "Y3JvMW5rNHJxM3E0Nmx0Z2pnaHh6ODBoeTM4NXA5dWowdGY1OGFwa2Nk",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "bW9kdWxl",
+                                "value": "bmZ0",
+                                "index": true
+                            },
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "Y3JvMW5rNHJxM3E0Nmx0Z2pnaHh6ODBoeTM4NXA5dWowdGY1OGFwa2Nk",
+                                "index": true
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "info": "",
+        "gas_wanted": "200000",
+        "gas_used": "102577",
+        "tx": {
+            "@type": "/cosmos.tx.v1beta1.Tx",
+            "body": {
+                "messages": [
+                    {
+                        "@type": "/chainmain.nft.v1.MsgMintNFT",
+                        "id": "tokenid123",
+                        "denom_id": "denomid",
+                        "name": "tokenName",
+                        "uri": "tokenUri",
+                        "data": "{\"title\":\"Vettel First Run\",\"type\":\"object\",\"properties\":{\"name\":\"Vettel First Run\",\"description\":\"Four-time Formula 1 world champion Sebastian Vettel made his name as one of the sport’s fastest and most fearless drivers. Vettel’s inaugural run in the AMR21 was also his first time out for Aston Martin Cognizant Formula One™ Team – his fifth Formula 1 outfit following stints at BMW Sauber, Scuderia Toro Rosso, Red Bull Racing and Scuderia Ferrari.\",\"image\":\"https://d2vi0z68k5oxnr.cloudfront.net/ac155986-d54c-4e23-957a-628325e051a4/original.mp4\",\"attributes\":[{\"trait_type\":\"Type\",\"value\":\"Human\"},{\"trait_type\":\"Hair Style\",\"value\":\"Bald\"},{\"trait_type\":\"Hat\",\"value\":\"Backwards Cap\"},{\"trait_type\":\"Hat Color\",\"value\":\"Gray\"},{\"trait_type\":\"Shirt\",\"value\":\"Skull Tee\"},{\"trait_type\":\"Overshirt\",\"value\":\"Athletic Jacket\"},{\"trait_type\":\"Overshirt Color\",\"value\":\"Red\"},{\"trait_type\":\"Pants\",\"value\":\"Cargo Pants\"},{\"trait_type\":\"Pants Color\",\"value\":\"Camo\"},{\"trait_type\":\"Shoes\",\"value\":\"Workboots\"}]}}",
+                        "sender": "cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd",
+                        "recipient": "cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd"
+                    }
+                ],
+                "memo": "",
+                "timeout_height": "0",
+                "extension_options": [],
+                "non_critical_extension_options": []
+            },
+            "auth_info": {
+                "signer_infos": [
+                    {
+                        "public_key": {
+                            "@type": "/cosmos.crypto.secp256k1.PubKey",
+                            "key": "AiLBhn2Jb4CLU5dYpKB3LHDpjIFldrsQWD6LWDHyjpWM"
+                        },
+                        "mode_info": {
+                            "single": {
+                                "mode": "SIGN_MODE_DIRECT"
+                            }
+                        },
+                        "sequence": "16"
+                    }
+                ],
+                "fee": {
+                    "amount": [
+                        {
+                            "denom": "basecro",
+                            "amount": "5000"
+                        }
+                    ],
+                    "gas_limit": "200000",
+                    "payer": "",
+                    "granter": ""
+                }
+            },
+            "signatures": [
+                "jAr804vNBRJ9BPC+Zzw+c97FiyMgKos3Wrfx7jYMc5Ev1Ayheb1ccEzdzawG/DmNfSDZIsCFbY8husOK4h/L1g=="
+            ]
+        },
+        "timestamp": "2021-08-29T17:15:46Z"
+    }
+}`
