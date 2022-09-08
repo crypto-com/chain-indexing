@@ -20,6 +20,16 @@ func ParseBlockResultsTxsResults(
 
 	for i := range blockResults.TxsResults {
 		txHex := block.Txs[i]
+		for j := range blockResults.TxsResults[i].Events {
+			parseRawBlockEventCmd := command.NewCreateRawBlockEvent(block.Height, model.CreateRawBlockEventParams{
+				BlockHash:  block.Hash,
+				BlockTime:  block.Time,
+				FromResult: "TxsResult",
+				RawData:    blockResults.TxsResults[i].Events[j],
+			})
+
+			cmds = append(cmds, parseRawBlockEventCmd)
+		}
 
 		parsedCmds := parseCronosSendToIBC(block.Height, txHex, &blockResults.TxsResults[i])
 		cmds = append(cmds, parsedCmds...)
