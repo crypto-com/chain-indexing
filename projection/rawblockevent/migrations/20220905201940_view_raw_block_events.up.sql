@@ -8,7 +8,7 @@ CREATE TABLE view_raw_block_events (
    PRIMARY KEY(id)
 );
 create index view_raw_block_events_block_height_btree_index
-    on view_raw_transactions (block_height);
+    on view_raw_block_events (block_height);
     
 create index view_raw_block_events_block_hash_btree_index
-    on view_raw_transactions (block_hash);
+    on view_raw_block_events (block_hash);
