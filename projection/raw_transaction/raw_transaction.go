@@ -50,11 +50,11 @@ func NewRawTransaction(
 }
 
 func (_ *RawTransaction) GetEventsToListen() []string {
-	return append([]string{
+	return []string{
 		event_usecase.BLOCK_CREATED,
 		event_usecase.RAW_TRANSACTION_CREATED,
 		event_usecase.RAW_TRANSACTION_FAILED,
-	})
+	}
 }
 
 func (projection *RawTransaction) OnInit() error {
