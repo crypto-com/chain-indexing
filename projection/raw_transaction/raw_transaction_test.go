@@ -6,6 +6,8 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/crypto-com/chain-indexing/external/primptr"
+	"github.com/crypto-com/chain-indexing/projection/raw_transaction"
+	raw_transaction_view "github.com/crypto-com/chain-indexing/projection/raw_transaction/view"
 	"github.com/stretchr/testify/assert"
 	testify_mock "github.com/stretchr/testify/mock"
 
@@ -14,15 +16,13 @@ import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	"github.com/crypto-com/chain-indexing/projection/transaction"
-	transaction_view "github.com/crypto-com/chain-indexing/projection/transaction/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	model_usecase "github.com/crypto-com/chain-indexing/usecase/model"
 )
 
-func NewTransactionProjection(rdbConn rdb.Conn) *transaction.Transaction {
-	return transaction.NewTransaction(
+func NewRawTransactionProjection(rdbConn rdb.Conn) *raw_transaction.RawTransaction {
+	return raw_transaction.NewRawTransaction(
 		nil,
 		rdbConn,
 		nil,
@@ -56,14 +56,14 @@ func NewMockRDbTx() *test.MockRDbTx {
 	return mockTx
 }
 
-func TestTransaction_HandleEvents(t *testing.T) {
+func TestRawTransaction_HandleEvents(t *testing.T) {
 	testCases := []struct {
 		Name     string
 		Events   []event_entity.Event
 		MockFunc func(events []event_entity.Event) []*testify_mock.Mock
 	}{
 		{
-			Name: "Handle TransactionCreated",
+			Name: "Handle RawTransactionCreated",
 			Events: []event_entity.Event{
 				&event_usecase.BlockCreated{
 					Base: event_entity.NewBase(event_entity.BaseParams{
@@ -82,18 +82,17 @@ func TestTransaction_HandleEvents(t *testing.T) {
 						Evidences:       nil,
 					},
 				},
-				&event_usecase.TransactionCreated{
+				&event_usecase.RawTransactionCreated{
 					Base: event_entity.Base{
 						EventName:    "EventName",
 						EventVersion: 0,
 						BlockHeight:  1,
 						EventUUID:    "EventUUID",
 					},
-					TxHash:   "TxHash",
-					Index:    0,
-					Code:     0,
-					Log:      "Log",
-					MsgCount: 1,
+					TxHash: "TxHash",
+					Index:  0,
+					Code:   0,
+					Log:    "Log",
 					Signers: []model_usecase.TransactionSigner{
 						{
 							MaybeKeyInfo: &model_usecase.TransactionSignerKeyInfo{
@@ -108,7 +107,6 @@ func TestTransaction_HandleEvents(t *testing.T) {
 							AccountSequence: 0,
 						},
 					},
-					Senders:       []model_usecase.TransactionSigner{},
 					Fee:           coin.Coins{coin.MustNewCoinFromString("basetcro", "1")},
 					FeePayer:      "FeePayer",
 					FeeGranter:    "FeeGranter",
@@ -116,42 +114,30 @@ func TestTransaction_HandleEvents(t *testing.T) {
 					GasUsed:       100,
 					Memo:          "Memo",
 					TimeoutHeight: 10,
-				},
-				&event_usecase.MsgSend{
-					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
-						MsgName: event_usecase.MSG_SEND,
-						Version: 1,
-						MsgCommonParams: event_usecase.MsgCommonParams{
-							BlockHeight: 1,
-							TxHash:      "TxHash",
-							TxSuccess:   true,
-							MsgIndex:    0,
-						},
-					}),
-					FromAddress: "FromAddress",
-					ToAddress:   "ToAddress",
-					Amount: coin.Coins{
-						coin.Coin{
-							Denom:  "Denom",
-							Amount: coin.NewInt(100),
+					Messages: []map[string]interface{}{
+						{
+							"@type": "/cosmos.bank.v1beta1.MsgSend",
+							"amount": []map[string]interface{}{
+								{"denom": "basetcro", "amount": "1000000000000"},
+							},
+							"to_address":   "tcro1k4nz2yalsuzuzxexcxuughp33cfqls7e6utarx",
+							"from_address": "tcro1s4ggq2zuzvwg5k8vnx2xfwtdm4cz6wtnfl4xx7",
 						},
 					},
 				},
 			},
 			MockFunc: func(events []event_entity.Event) (mocks []*testify_mock.Mock) {
 
-				msgEvent, _ := events[2].(event_usecase.MsgEvent)
+				mockRawTransactionsView := raw_transaction_view.NewMockRawTransactionsView(nil).(*raw_transaction_view.MockRawTransactionsView)
+				mocks = append(mocks, &mockRawTransactionsView.Mock)
 
-				mockTransactionsView := transaction_view.NewMockTransactionsView(nil).(*transaction_view.MockTransactionsView)
-				mocks = append(mocks, &mockTransactionsView.Mock)
-
-				transaction.NewTransactions = func(_ *rdb.Handle) transaction_view.BlockTransactions {
-					return mockTransactionsView
+				raw_transaction.NewRawTransactions = func(_ *rdb.Handle) raw_transaction_view.BlockRawTransactions {
+					return mockRawTransactionsView
 				}
 
-				mockTransactionsView.On(
+				mockRawTransactionsView.On(
 					"InsertAll",
-					[]transaction_view.TransactionRow{
+					[]raw_transaction_view.RawTransactionRow{
 						{
 							BlockHeight:   1,
 							BlockTime:     utctime.UTCTime{},
@@ -168,9 +154,9 @@ func TestTransaction_HandleEvents(t *testing.T) {
 							GasUsed:       100,
 							Memo:          "Memo",
 							TimeoutHeight: 10,
-							Signers: []transaction_view.TransactionRowSigner{
+							Signers: []raw_transaction_view.RawTransactionRowSigner{
 								{
-									MaybeKeyInfo: &transaction_view.TransactionRowSignerKeyInfo{
+									MaybeKeyInfo: &raw_transaction_view.RawTransactionRowSignerKeyInfo{
 										Type:       "SignerType",
 										IsMultiSig: true,
 										Pubkeys: []string{
@@ -182,30 +168,34 @@ func TestTransaction_HandleEvents(t *testing.T) {
 									Address:         "SignerAddress",
 								},
 							},
-							Messages: []transaction_view.TransactionRowMessage{
+							Messages: []map[string]interface{}{
 								{
-									Type:    "/cosmos.bank.v1beta1.MsgSend",
-									Content: msgEvent,
+									"@type": "/cosmos.bank.v1beta1.MsgSend",
+									"amount": []map[string]interface{}{
+										{"denom": "basetcro", "amount": "1000000000000"},
+									},
+									"to_address":   "tcro1k4nz2yalsuzuzxexcxuughp33cfqls7e6utarx",
+									"from_address": "tcro1s4ggq2zuzvwg5k8vnx2xfwtdm4cz6wtnfl4xx7",
 								},
 							},
 						},
 					},
 				).Return(nil)
 
-				mockTransactionsTotalView := transaction_view.NewMockTransactionsTotalView(nil).(*transaction_view.MockTransactionsTotalView)
-				mocks = append(mocks, &mockTransactionsTotalView.Mock)
+				mockRawTransactionsTotalView := raw_transaction_view.NewMockRawTransactionsTotalView(nil).(*raw_transaction_view.MockRawTransactionsTotalView)
+				mocks = append(mocks, &mockRawTransactionsTotalView.Mock)
 
-				transaction.NewTransactionsTotal = func(_ *rdb.Handle) transaction_view.TransactionsTotal {
-					return mockTransactionsTotalView
+				raw_transaction.NewRawTransactionsTotal = func(_ *rdb.Handle) raw_transaction_view.RawTransactionsTotal {
+					return mockRawTransactionsTotalView
 				}
 
-				mockTransactionsTotalView.On(
+				mockRawTransactionsTotalView.On(
 					"Increment",
 					"-",
 					int64(1),
 				).Return(nil)
 
-				mockTransactionsTotalView.On(
+				mockRawTransactionsTotalView.On(
 					"Set",
 					"1",
 					int64(1),
@@ -215,7 +205,7 @@ func TestTransaction_HandleEvents(t *testing.T) {
 			},
 		},
 		{
-			Name: "Handle TransactionFailed",
+			Name: "Handle RawTransactionFailed",
 			Events: []event_entity.Event{
 				&event_usecase.BlockCreated{
 					Base: event_entity.NewBase(event_entity.BaseParams{
@@ -234,18 +224,17 @@ func TestTransaction_HandleEvents(t *testing.T) {
 						Evidences:       nil,
 					},
 				},
-				&event_usecase.TransactionFailed{
+				&event_usecase.RawTransactionFailed{
 					Base: event_entity.Base{
 						EventName:    "EventName",
 						EventVersion: 0,
 						BlockHeight:  1,
 						EventUUID:    "EventUUID",
 					},
-					TxHash:   "TxHash",
-					Index:    0,
-					Code:     0,
-					Log:      "Log",
-					MsgCount: 1,
+					TxHash: "TxHash",
+					Index:  0,
+					Code:   0,
+					Log:    "Log",
 					Signers: []model_usecase.TransactionSigner{
 						{
 							MaybeKeyInfo: &model_usecase.TransactionSignerKeyInfo{
@@ -260,7 +249,6 @@ func TestTransaction_HandleEvents(t *testing.T) {
 							AccountSequence: 0,
 						},
 					},
-					Senders:       []model_usecase.TransactionSigner{},
 					Fee:           coin.Coins{coin.MustNewCoinFromString("basetcro", "1")},
 					FeePayer:      "FeePayer",
 					FeeGranter:    "FeeGranter",
@@ -268,42 +256,30 @@ func TestTransaction_HandleEvents(t *testing.T) {
 					GasUsed:       100,
 					Memo:          "Memo",
 					TimeoutHeight: 10,
-				},
-				&event_usecase.MsgSend{
-					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
-						MsgName: event_usecase.MSG_SEND,
-						Version: 1,
-						MsgCommonParams: event_usecase.MsgCommonParams{
-							BlockHeight: 1,
-							TxHash:      "TxHash",
-							TxSuccess:   true,
-							MsgIndex:    0,
-						},
-					}),
-					FromAddress: "FromAddress",
-					ToAddress:   "ToAddress",
-					Amount: coin.Coins{
-						coin.Coin{
-							Denom:  "Denom",
-							Amount: coin.NewInt(100),
+					Messages: []map[string]interface{}{
+						{
+							"@type": "/cosmos.bank.v1beta1.MsgSend",
+							"amount": []map[string]interface{}{
+								{"denom": "basetcro", "amount": "1000000000000"},
+							},
+							"to_address":   "tcro1k4nz2yalsuzuzxexcxuughp33cfqls7e6utarx",
+							"from_address": "tcro1s4ggq2zuzvwg5k8vnx2xfwtdm4cz6wtnfl4xx7",
 						},
 					},
 				},
 			},
 			MockFunc: func(events []event_entity.Event) (mocks []*testify_mock.Mock) {
 
-				msgEvent, _ := events[2].(event_usecase.MsgEvent)
+				mockRawTransactionsView := raw_transaction_view.NewMockRawTransactionsView(nil).(*raw_transaction_view.MockRawTransactionsView)
+				mocks = append(mocks, &mockRawTransactionsView.Mock)
 
-				mockTransactionsView := transaction_view.NewMockTransactionsView(nil).(*transaction_view.MockTransactionsView)
-				mocks = append(mocks, &mockTransactionsView.Mock)
-
-				transaction.NewTransactions = func(_ *rdb.Handle) transaction_view.BlockTransactions {
-					return mockTransactionsView
+				raw_transaction.NewRawTransactions = func(_ *rdb.Handle) raw_transaction_view.BlockRawTransactions {
+					return mockRawTransactionsView
 				}
 
-				mockTransactionsView.On(
+				mockRawTransactionsView.On(
 					"InsertAll",
-					[]transaction_view.TransactionRow{
+					[]raw_transaction_view.RawTransactionRow{
 						{
 							BlockHeight:   1,
 							BlockTime:     utctime.UTCTime{},
@@ -320,9 +296,9 @@ func TestTransaction_HandleEvents(t *testing.T) {
 							GasUsed:       100,
 							Memo:          "Memo",
 							TimeoutHeight: 10,
-							Signers: []transaction_view.TransactionRowSigner{
+							Signers: []raw_transaction_view.RawTransactionRowSigner{
 								{
-									MaybeKeyInfo: &transaction_view.TransactionRowSignerKeyInfo{
+									MaybeKeyInfo: &raw_transaction_view.RawTransactionRowSignerKeyInfo{
 										Type:       "SignerType",
 										IsMultiSig: true,
 										Pubkeys: []string{
@@ -334,30 +310,34 @@ func TestTransaction_HandleEvents(t *testing.T) {
 									Address:         "SignerAddress",
 								},
 							},
-							Messages: []transaction_view.TransactionRowMessage{
+							Messages: []map[string]interface{}{
 								{
-									Type:    "/cosmos.bank.v1beta1.MsgSend",
-									Content: msgEvent,
+									"@type": "/cosmos.bank.v1beta1.MsgSend",
+									"amount": []map[string]interface{}{
+										{"denom": "basetcro", "amount": "1000000000000"},
+									},
+									"to_address":   "tcro1k4nz2yalsuzuzxexcxuughp33cfqls7e6utarx",
+									"from_address": "tcro1s4ggq2zuzvwg5k8vnx2xfwtdm4cz6wtnfl4xx7",
 								},
 							},
 						},
 					},
 				).Return(nil)
 
-				mockTransactionsTotalView := transaction_view.NewMockTransactionsTotalView(nil).(*transaction_view.MockTransactionsTotalView)
-				mocks = append(mocks, &mockTransactionsTotalView.Mock)
+				mockRawTransactionsTotalView := raw_transaction_view.NewMockRawTransactionsTotalView(nil).(*raw_transaction_view.MockRawTransactionsTotalView)
+				mocks = append(mocks, &mockRawTransactionsTotalView.Mock)
 
-				transaction.NewTransactionsTotal = func(_ *rdb.Handle) transaction_view.TransactionsTotal {
-					return mockTransactionsTotalView
+				raw_transaction.NewRawTransactionsTotal = func(_ *rdb.Handle) raw_transaction_view.RawTransactionsTotal {
+					return mockRawTransactionsTotalView
 				}
 
-				mockTransactionsTotalView.On(
+				mockRawTransactionsTotalView.On(
 					"Increment",
 					"-",
 					int64(1),
 				).Return(nil)
 
-				mockTransactionsTotalView.On(
+				mockRawTransactionsTotalView.On(
 					"Set",
 					"1",
 					int64(1),
@@ -375,11 +355,11 @@ func TestTransaction_HandleEvents(t *testing.T) {
 		mocks := tc.MockFunc(tc.Events)
 
 		// We are not interested in testing the below function in unit test
-		transaction.UpdateLastHandledEventHeight = func(_ *transaction.Transaction, _ *rdb.Handle, _ int64) error {
+		raw_transaction.UpdateLastHandledEventHeight = func(_ *raw_transaction.RawTransaction, _ *rdb.Handle, _ int64) error {
 			return nil
 		}
 
-		projection := NewTransactionProjection(mockRDbConn)
+		projection := NewRawTransactionProjection(mockRDbConn)
 		err := projection.HandleEvents(1, tc.Events)
 		assert.NoError(t, err)
 
