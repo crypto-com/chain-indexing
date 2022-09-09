@@ -13,7 +13,6 @@ import (
 	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
 	"github.com/crypto-com/chain-indexing/projection/rawblockevent/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
-	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 var _ projection.Projection = &RawBlockEvent{}
@@ -47,16 +46,7 @@ func NewRawBlockEvent(
 
 func (_ *RawBlockEvent) GetEventsToListen() []string {
 	return []string{
-		event_usecase.BLOCK_CREATED,
-
-		event_usecase.BLOCK_PROPOSER_REWARDED,
-		event_usecase.BLOCK_REWARDED,
-		event_usecase.BLOCK_COMMISSIONED,
-		event_usecase.MINTED,
-		event_usecase.PROPOSAL_ENDED,
-		event_usecase.PROPOSAL_INACTIVED,
-		event_usecase.VALIDATOR_SLASHED,
-		event_usecase.VALIDATOR_JAILED,
+		event_usecase.RAW_BLOCK_EVENT_CREATED,
 	}
 }
 
@@ -94,8 +84,6 @@ func (projection *RawBlockEvent) HandleEvents(height int64, events []event_entit
 
 	totalMap := make(map[string]int64)
 
-	var blockTime utctime.UTCTime
-	var blockHash string
 	eventRows := make([]view.RawBlockEventRow, 0)
 	for _, event := range events {
 		if rawBlockCreatedEvent, ok := event.(*event_usecase.RawBlockEventCreated); ok {
@@ -106,8 +94,8 @@ func (projection *RawBlockEvent) HandleEvents(height int64, events []event_entit
 				BlockTime:   rawBlockCreatedEvent.BlockTime,
 				FromResult:  rawBlockCreatedEvent.FromResult,
 				RawData: view.RawBlockEventRowData{
-					Type:       event.Name(),
-					Attributes: []model.BlockResultsEventAttribute{},
+					Type:       rawBlockCreatedEvent.RawData.Type,
+					Attributes: rawBlockCreatedEvent.RawData.Attributes,
 				}})
 
 		} else {
@@ -139,12 +127,6 @@ func (projection *RawBlockEvent) HandleEvents(height int64, events []event_entit
 		if err = totalView.Increment(key, value); err != nil {
 			return fmt.Errorf("error incrementing raw block event type total")
 		}
-	}
-
-	for i := range eventRows {
-		mutEventRow := &eventRows[i]
-		mutEventRow.BlockTime = blockTime
-		mutEventRow.BlockHash = blockHash
 	}
 	if err = eventsView.InsertAll(eventRows); err != nil {
 		return fmt.Errorf("error batch inserting events into view: %v", err)

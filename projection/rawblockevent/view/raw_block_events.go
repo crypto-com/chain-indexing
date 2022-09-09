@@ -75,7 +75,6 @@ func (eventsView *RawBlockEvents) InsertAll(rawBlockEvents []RawBlockEventRow) e
 
 	rawBlockEventCount := len(rawBlockEvents)
 	for i, rawBlockEvent := range rawBlockEvents {
-		fmt.Println("===> rawBlockEvent:", rawBlockEvent.RawData, rawBlockEvent.FromResult)
 
 		if pendingRowCount == 0 {
 			stmtBuilder = eventsView.rdb.StmtBuilder.Insert(

@@ -2,6 +2,7 @@ package parser
 
 import (
 	"github.com/crypto-com/chain-indexing/entity/command"
+	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/internal/typeconv"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
@@ -9,7 +10,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
-func ParseEndBlockEventsCommands(blockHeight int64, endBlockEvents []model.BlockResultsEvent) ([]command.Command, error) {
+func ParseEndBlockEventsCommands(blockHeight int64, blockHash string, blockTime utctime.UTCTime, endBlockEvents []model.BlockResultsEvent) ([]command.Command, error) {
 	commands := make([]command.Command, 0)
 
 	for i, event := range endBlockEvents {
@@ -76,6 +77,14 @@ func ParseEndBlockEventsCommands(blockHeight int64, endBlockEvents []model.Block
 				},
 			))
 		}
+		parseRawBlockEventCmd := command_usecase.NewCreateRawBlockEvent(blockHeight, model.CreateRawBlockEventParams{
+			BlockHash:  blockHash,
+			BlockTime:  blockTime,
+			FromResult: "EndBlockEvent",
+			RawData:    event,
+		})
+
+		commands = append(commands, parseRawBlockEventCmd)
 	}
 
 	return commands, nil

@@ -1,8 +1,6 @@
 package command
 
 import (
-	"fmt"
-
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
@@ -36,6 +34,5 @@ func (cmd *CreateRawBlockEvent) Exec() (entity_event.Event, error) {
 		RawData:    cmd.params.RawData,
 	}
 	event := event.NewRawBlockEvent(cmd.blockHeight, &params)
-	fmt.Println("===> exec:", event)
 	return event, nil
 }
