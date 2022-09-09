@@ -20,6 +20,7 @@ func ParseBlockResultsTxsResults(
 
 	for i := range blockResults.TxsResults {
 		txHex := block.Txs[i]
+
 		for j := range blockResults.TxsResults[i].Events {
 			parseRawBlockEventCmd := command.NewCreateRawBlockEvent(block.Height, model.CreateRawBlockEventParams{
 				BlockHash:  block.Hash,

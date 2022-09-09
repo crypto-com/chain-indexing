@@ -23,7 +23,7 @@ type RawBlockEventCreated struct {
 	RawData    usecase_model.BlockResultsEvent `json:"rawData"`
 }
 
-func NewRawBlockEventCreated(blockHeight int64, params *usecase_model.CreateRawBlockEventParams) *RawBlockEventCreated {
+func NewRawBlockEvent(blockHeight int64, params *usecase_model.CreateRawBlockEventParams) *RawBlockEventCreated {
 	return &RawBlockEventCreated{
 		entity_event.NewBase(entity_event.BaseParams{
 			Name:        RAW_BLOCK_EVENT_CREATED,
@@ -58,6 +58,5 @@ func DecodeRawBlockEventCreated(encoded []byte) (entity_event.Event, error) {
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}
-
 	return event, nil
 }

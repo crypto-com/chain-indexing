@@ -11,6 +11,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -74,6 +75,8 @@ func (eventsView *RawBlockEvents) InsertAll(rawBlockEvents []RawBlockEventRow) e
 
 	rawBlockEventCount := len(rawBlockEvents)
 	for i, rawBlockEvent := range rawBlockEvents {
+		fmt.Println("===> rawBlockEvent:", rawBlockEvent.RawData, rawBlockEvent.FromResult)
+
 		if pendingRowCount == 0 {
 			stmtBuilder = eventsView.rdb.StmtBuilder.Insert(
 				"view_raw_block_events",
@@ -295,6 +298,6 @@ type RawBlockEventRow struct {
 }
 
 type RawBlockEventRowData struct {
-	Type    string      `json:"type"`
-	Content interface{} `json:"content"`
+	Type       string                             `json:"type"`
+	Attributes []model.BlockResultsEventAttribute `json:"attributes"`
 }

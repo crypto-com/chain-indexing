@@ -13,6 +13,7 @@ import (
 	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
 	"github.com/crypto-com/chain-indexing/projection/rawblockevent/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 var _ projection.Projection = &RawBlockEvent{}
@@ -26,7 +27,7 @@ type RawBlockEvent struct {
 	migrationHelper migrationhelper.MigrationHelper
 }
 
-func NewBlockEvent(
+func NewRawBlockEvent(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	migrationHelper migrationhelper.MigrationHelper,
@@ -97,20 +98,25 @@ func (projection *RawBlockEvent) HandleEvents(height int64, events []event_entit
 	var blockHash string
 	eventRows := make([]view.RawBlockEventRow, 0)
 	for _, event := range events {
-		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
-			blockTime = blockCreatedEvent.Block.Time
-			blockHash = blockCreatedEvent.Block.Hash
+		if rawBlockCreatedEvent, ok := event.(*event_usecase.RawBlockEventCreated); ok {
+			fmt.Println("===> final rawBlockCreatedEvent: ", rawBlockCreatedEvent)
+			eventRows = append(eventRows, view.RawBlockEventRow{
+				BlockHeight: rawBlockCreatedEvent.BlockHeight,
+				BlockHash:   rawBlockCreatedEvent.BlockHash,
+				BlockTime:   rawBlockCreatedEvent.BlockTime,
+				FromResult:  rawBlockCreatedEvent.FromResult,
+				RawData: view.RawBlockEventRowData{
+					Type:       event.Name(),
+					Attributes: []model.BlockResultsEventAttribute{},
+				}})
+
 		} else {
 			eventRows = append(eventRows, view.RawBlockEventRow{
 				BlockHeight: height,
 				BlockHash:   "",
 				BlockTime:   utctime.UTCTime{},
 				FromResult:  "",
-				RawData: view.RawBlockEventRowData{
-					Type:    event.Name(),
-					Content: event,
-				},
-			})
+				RawData:     view.RawBlockEventRowData{}})
 
 			heightEventTypeKey := fmt.Sprintf("%d:%s", height, event.Name())
 			if _, ok := totalMap[heightEventTypeKey]; !ok {

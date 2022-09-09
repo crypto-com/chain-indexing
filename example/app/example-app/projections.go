@@ -26,6 +26,7 @@ import (
 	"github.com/crypto-com/chain-indexing/projection/ibc_channel_message"
 	"github.com/crypto-com/chain-indexing/projection/nft"
 	"github.com/crypto-com/chain-indexing/projection/proposal"
+	rawblockevent "github.com/crypto-com/chain-indexing/projection/rawblockevent"
 	"github.com/crypto-com/chain-indexing/projection/transaction"
 	"github.com/crypto-com/chain-indexing/projection/validator"
 	"github.com/crypto-com/chain-indexing/projection/validatorstats"
@@ -181,6 +182,18 @@ func InitProjection(name string, params InitProjectionParams) projection_entity.
 		migrationHelper := github_migrationhelper.NewGithubMigrationHelper(sourceURL, databaseURL)
 
 		return blockevent.NewBlockEvent(params.Logger, params.RdbConn, migrationHelper)
+	case "RawBlockEvent":
+		sourceURL := github_migrationhelper.GenerateSourceURL(
+			github_migrationhelper.MIGRATION_GITHUB_URL_FORMAT,
+			params.GithubAPIUser,
+			params.GithubAPIToken,
+			rawblockevent.MIGRATION_DIRECOTRY,
+			params.MigrationRepoRef,
+		)
+		databaseURL := migrationhelper.GenerateDefaultDatabaseURL(name, connString)
+		migrationHelper := github_migrationhelper.NewGithubMigrationHelper(sourceURL, databaseURL)
+
+		return rawblockevent.NewRawBlockEvent(params.Logger, params.RdbConn, migrationHelper)
 	case "ChainStats":
 		sourceURL := github_migrationhelper.GenerateSourceURL(
 			github_migrationhelper.MIGRATION_GITHUB_URL_FORMAT,

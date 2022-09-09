@@ -195,7 +195,6 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64, isRetry bool) error {
 				}
 				events = append(events, event)
 			}
-
 			err := manager.eventHandler.HandleEvents(blockHeight, events)
 			if err != nil {
 				return fmt.Errorf("error handling events: %v", err)

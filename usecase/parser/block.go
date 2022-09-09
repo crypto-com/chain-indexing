@@ -128,7 +128,3 @@ func ParseCreateBlockCommand(block *usecase_model.Block) *command.CreateBlock {
 
 	return command.NewCreateBLock(modelBlock)
 }
-
-func ParseCreateRawBlockEventCommand(blockHeight int64, params usecase_model.CreateRawBlockEventParams) *command.CreateRawBlockEvent {
-	return command.NewCreateRawBlockEvent(blockHeight, params)
-}
