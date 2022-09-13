@@ -2,8 +2,6 @@ package parser_test
 
 import (
 	"github.com/crypto-com/chain-indexing/usecase/model"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -17,11 +15,14 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgSetWithdrawAddress", func() {
 		It("should parse Msg commands when there is distribution.MsgSetWithdrawAddress in the transaction", func() {
-			txDecoder := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_SET_WITHDRAW_ADDRESS_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_SET_WITHDRAW_ADDRESS_BLOCK_RESULTS_RESP,
 			)
+
+			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_SET_WITHDRAW_ADDRESS_TXS_RESP)
+			txs := []model.Tx{*tx}
+
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"
 
@@ -29,9 +30,9 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
-				block,
+				block.Height,
 				blockResults,
+				txs,
 				accountAddressPrefix,
 				bondingDenom,
 			)

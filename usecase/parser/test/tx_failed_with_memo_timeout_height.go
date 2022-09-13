@@ -2101,3 +2101,118 @@ const TX_FAILED_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+const TX_FAILED_WITH_MEMO_TIMEOUT_HEIGHT_TXS_RESP = `{
+    "tx": {
+        "body": {
+            "messages": [
+                {
+                    "@type": "/cosmos.bank.v1beta1.MsgSend",
+                    "from_address": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+                    "to_address": "tcro1782gn9hzqavecukdaqqclvsnpck4mtz3vwzpxl",
+                    "amount": [
+                        {
+                            "denom": "basetcro",
+                            "amount": "100000000"
+                        }
+                    ]
+                }
+            ],
+            "memo": "Test memo",
+            "timeout_height": "500000",
+            "extension_options": [],
+            "non_critical_extension_options": []
+        },
+        "auth_info": {
+            "signer_infos": [
+                {
+                    "public_key": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "A1mhVLohDEidpGYmpNYxxvikcaL72jQhZN1fxKFYkB8m"
+                    },
+                    "mode_info": {
+                        "single": {
+                            "mode": "SIGN_MODE_DIRECT"
+                        }
+                    },
+                    "sequence": "26"
+                }
+            ],
+            "fee": {
+                "amount": [],
+                "gas_limit": "50000",
+                "payer": "",
+                "granter": ""
+            }
+        },
+        "signatures": [
+            "y2XVgD4kO3iSxXK1lkBf+fo4bzoavJ3FmFFtyDHbj903A4tuuIC8mCqyp5jCs1cr6Hl+4oQwScQ5bIbestVlAQ=="
+        ]
+    },
+    "tx_response": {
+        "height": "492759",
+        "txhash": "7CCAB9771B76F25E81C26E50265243014798172F9E8C06F8AD17442C61E592EC",
+        "codespace": "sdk",
+        "code": 11,
+        "data": "",
+        "raw_log": "out of gas in location: ReadFlat; gasWanted: 50000, gasUsed: 50436: out of gas",
+        "logs": [
+            {
+                "msg_index": 0,
+                "log": "",
+                "events": []
+            }
+        ],
+        "info": "",
+        "gas_wanted": "123481",
+        "gas_used": "50436",
+        "tx": {
+            "@type": "/cosmos.tx.v1beta1.Tx",
+            "body": {
+            "messages": [
+                {
+                    "@type": "/cosmos.bank.v1beta1.MsgSend",
+                    "from_address": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+                    "to_address": "tcro1782gn9hzqavecukdaqqclvsnpck4mtz3vwzpxl",
+                    "amount": [
+                        {
+                            "denom": "basetcro",
+                            "amount": "100000000"
+                        }
+                    ]
+                }
+            ],
+            "memo": "Test memo",
+            "timeout_height": "500000",
+            "extension_options": [],
+            "non_critical_extension_options": []
+        },
+        "auth_info": {
+            "signer_infos": [
+                {
+                    "public_key": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "A1mhVLohDEidpGYmpNYxxvikcaL72jQhZN1fxKFYkB8m"
+                    },
+                    "mode_info": {
+                        "single": {
+                            "mode": "SIGN_MODE_DIRECT"
+                        }
+                    },
+                    "sequence": "26"
+                }
+            ],
+            "fee": {
+                "amount": [],
+                "gas_limit": "50000",
+                "payer": "",
+                "granter": ""
+            }
+        },
+        "signatures": [
+            "y2XVgD4kO3iSxXK1lkBf+fo4bzoavJ3FmFFtyDHbj903A4tuuIC8mCqyp5jCs1cr6Hl+4oQwScQ5bIbestVlAQ=="
+        ]
+        },
+        "timestamp": "2021-08-29T17:15:46Z"
+    }
+}`

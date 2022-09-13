@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/crypto-com/chain-indexing/external/primptr"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 
 	. "github.com/onsi/ginkgo"
@@ -22,11 +20,14 @@ import (
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgSubmitParamChangeProposal", func() {
 		It("should parse Msg commands when there is gov.MsgSubmitParamChangeProposal in the transaction", func() {
-			txDecoder := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_BLOCK_RESULTS_RESP,
 			)
+
+			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_TXS_RESP)
+			txs := []model.Tx{*tx}
+
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"
 
@@ -34,9 +35,9 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
-				block,
+				block.Height,
 				blockResults,
+				txs,
 				accountAddressPrefix,
 				bondingDenom,
 			)
@@ -73,11 +74,14 @@ var _ = Describe("ParseMsgCommands", func() {
 		})
 
 		It("should return a command with nil proposal id when the gov.MsgSubmitParamChangeProposal transaction failed", func() {
-			txDecoder := utils.NewTxDecoder()
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_FAILED_MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_BLOCK_RESULTS_RESP,
 			)
+
+			tx := mustParseTxsResp(usecase_parser_test.TX_FAILED_MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_TXS_RESP)
+			txs := []model.Tx{*tx}
+
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"
 
@@ -85,9 +89,9 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
-				block,
+				block.Height,
 				blockResults,
+				txs,
 				accountAddressPrefix,
 				bondingDenom,
 			)

@@ -541,3 +541,179 @@ const TX_MSG_GRANT_STAKE_GRANT_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+const TX_MSG_GRANT_STAKE_GRANT_TXS_RESP = `{
+  "tx": {
+    "body": {
+      "messages": [
+        {
+          "@type": "/cosmos.authz.v1beta1.MsgGrant",
+          "granter": "tcro1vurfhqf0j2jgfpjahlja6g6uq2ts2r60swm2d9",
+          "grantee": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2",
+          "grant": {
+            "authorization": {
+              "@type": "/cosmos.staking.v1beta1.StakeAuthorization",
+              "max_tokens": {
+                "denom": "basetcro",
+                "amount": "400000000"
+              },
+              "allow_list": {
+                "address": [
+                  "tcrocncl163tv59yzgeqcap8lrsa2r4zk580h8ddr5a0sdd"
+                ]
+              },
+              "authorization_type": "AUTHORIZATION_TYPE_DELEGATE"
+            },
+            "expiration": "2022-08-29T16:41:37Z"
+          }
+        }
+      ],
+      "memo": "",
+      "timeout_height": "0",
+      "extension_options": [
+      ],
+      "non_critical_extension_options": [
+      ]
+    },
+    "auth_info": {
+      "signer_infos": [
+        {
+          "public_key": {
+            "@type": "/cosmos.crypto.secp256k1.PubKey",
+            "key": "AxcZ9W91aKz8X9eZOQTjv4JiFcLP3JjDIc/+go8FR13m"
+          },
+          "mode_info": {
+            "single": {
+              "mode": "SIGN_MODE_DIRECT"
+            }
+          },
+          "sequence": "6"
+        }
+      ],
+      "fee": {
+        "amount": [
+          {
+            "denom": "basetcro",
+            "amount": "50000"
+          }
+        ],
+        "gas_limit": "200000",
+        "payer": "",
+        "granter": ""
+      }
+    },
+    "signatures": [
+      "1zqwrPDAwtJkZ61cZK2GrMpMaY2KaTXcV3l6J1sqBctzfWo5uAYluvlvkRXDyhgQ92+2Tia/S5fSU4lhwr2+1Q=="
+    ]
+  },
+  "tx_response": {
+    "height": "170108",
+    "txhash": "D8AE71B4C05B7A220114F17347D6A66ADBFE75C51279E4541E911284A2BE7E04",
+    "codespace": "",
+    "code": 0,
+    "data": "0A200A1E2F636F736D6F732E617574687A2E763162657461312E4D73674772616E74",
+    "raw_log": "[{\"events\":[{\"type\":\"cosmos.authz.v1beta1.EventGrant\",\"attributes\":[{\"key\":\"msg_type_url\",\"value\":\"\\\"/cosmos.staking.v1beta1.MsgDelegate\\\"\"},{\"key\":\"granter\",\"value\":\"\\\"tcro1vurfhqf0j2jgfpjahlja6g6uq2ts2r60swm2d9\\\"\"},{\"key\":\"grantee\",\"value\":\"\\\"tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2\\\"\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"/cosmos.authz.v1beta1.MsgGrant\"}]}]}]",
+    "logs": [
+      {
+        "msg_index": 0,
+        "log": "",
+        "events": [
+          {
+            "type": "cosmos.authz.v1beta1.EventGrant",
+            "attributes": [
+              {
+                "key": "msg_type_url",
+                "value": "\"/cosmos.staking.v1beta1.MsgDelegate\""
+              },
+              {
+                "key": "granter",
+                "value": "\"tcro1vurfhqf0j2jgfpjahlja6g6uq2ts2r60swm2d9\""
+              },
+              {
+                "key": "grantee",
+                "value": "\"tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2\""
+              }
+            ]
+          },
+          {
+            "type": "message",
+            "attributes": [
+              {
+                "key": "action",
+                "value": "/cosmos.authz.v1beta1.MsgGrant"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "info": "",
+    "gas_wanted": "200000",
+    "gas_used": "56997",
+    "tx": {
+      "@type": "/cosmos.tx.v1beta1.Tx",
+      "body": {
+        "messages": [
+          {
+            "@type": "/cosmos.authz.v1beta1.MsgGrant",
+            "granter": "tcro1vurfhqf0j2jgfpjahlja6g6uq2ts2r60swm2d9",
+            "grantee": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2",
+            "grant": {
+              "authorization": {
+                "@type": "/cosmos.staking.v1beta1.StakeAuthorization",
+                "max_tokens": {
+                  "denom": "basetcro",
+                  "amount": "400000000"
+                },
+                "allow_list": {
+                  "address": [
+                    "tcrocncl163tv59yzgeqcap8lrsa2r4zk580h8ddr5a0sdd"
+                  ]
+                },
+                "authorization_type": "AUTHORIZATION_TYPE_DELEGATE"
+              },
+              "expiration": "2022-08-29T16:41:37Z"
+            }
+          }
+        ],
+        "memo": "",
+        "timeout_height": "0",
+        "extension_options": [
+        ],
+        "non_critical_extension_options": [
+        ]
+      },
+      "auth_info": {
+        "signer_infos": [
+          {
+            "public_key": {
+              "@type": "/cosmos.crypto.secp256k1.PubKey",
+              "key": "AxcZ9W91aKz8X9eZOQTjv4JiFcLP3JjDIc/+go8FR13m"
+            },
+            "mode_info": {
+              "single": {
+                "mode": "SIGN_MODE_DIRECT"
+              }
+            },
+            "sequence": "6"
+          }
+        ],
+        "fee": {
+          "amount": [
+            {
+              "denom": "basetcro",
+              "amount": "50000"
+            }
+          ],
+          "gas_limit": "200000",
+          "payer": "",
+          "granter": ""
+        }
+      },
+      "signatures": [
+        "1zqwrPDAwtJkZ61cZK2GrMpMaY2KaTXcV3l6J1sqBctzfWo5uAYluvlvkRXDyhgQ92+2Tia/S5fSU4lhwr2+1Q=="
+      ]
+    },
+    "timestamp": "2021-08-29T16:41:49Z"
+  }
+}`

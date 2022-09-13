@@ -8,6 +8,7 @@ import (
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
 	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	command_entity "github.com/crypto-com/chain-indexing/entity/command"
@@ -39,7 +40,6 @@ type SyncManager struct {
 	accountAddressPrefix string
 	stakingDenom         string
 
-	txDecoder          *utils.TxDecoder
 	windowSyncStrategy *syncstrategy.Window
 
 	eventHandler eventhandler_interface.Handler
@@ -120,7 +120,6 @@ func NewSyncManager(
 
 		shouldSyncCh: make(chan bool, 1),
 
-		txDecoder:          params.TxDecoder,
 		windowSyncStrategy: syncstrategy.NewWindow(params.Logger, params.Config.WindowSize),
 
 		eventHandler: eventHandler,
@@ -195,6 +194,7 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64, isRetry bool) error {
 				}
 				events = append(events, event)
 			}
+
 			err := manager.eventHandler.HandleEvents(blockHeight, events)
 			if err != nil {
 				return fmt.Errorf("error handling events: %v", err)
@@ -240,6 +240,16 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		return nil, fmt.Errorf("error requesting chain block_results at height %d: %v", blockHeight, err)
 	}
 
+	txs := make([]model.Tx, 0)
+	for _, txHex := range block.Txs {
+		var tx *model.Tx
+		tx, err = manager.cosmosClient.Tx(parser.TxHash(txHex))
+		if err != nil {
+			return nil, fmt.Errorf("error requesting chain txs (%s) at height %d: %v", txHex, blockHeight, err)
+		}
+		txs = append(txs, *tx)
+	}
+
 	parseBlockToCommandsLogger := manager.logger.WithFields(applogger.LogFields{
 		"submodule":   "ParseBlockToCommands",
 		"blockHeight": blockHeight,
@@ -249,10 +259,10 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		parseBlockToCommandsLogger,
 		manager.parserManager,
 		manager.cosmosClient,
-		manager.txDecoder,
 		block,
 		rawBlock,
 		blockResults,
+		txs,
 		manager.accountAddressPrefix,
 		manager.stakingDenom,
 	)

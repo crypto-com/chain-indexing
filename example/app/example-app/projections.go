@@ -183,13 +183,7 @@ func InitProjection(name string, params InitProjectionParams) projection_entity.
 
 		return blockevent.NewBlockEvent(params.Logger, params.RdbConn, migrationHelper)
 	case "RawBlockEvent":
-		sourceURL := github_migrationhelper.GenerateSourceURL(
-			github_migrationhelper.MIGRATION_GITHUB_URL_FORMAT,
-			params.GithubAPIUser,
-			params.GithubAPIToken,
-			rawblockevent.MIGRATION_DIRECOTRY,
-			params.MigrationRepoRef,
-		)
+		sourceURL := github_migrationhelper.GenerateDefaultSourceURL(name, githubMigrationHelperConfig)
 		databaseURL := migrationhelper.GenerateDefaultDatabaseURL(name, connString)
 		migrationHelper := github_migrationhelper.NewGithubMigrationHelper(sourceURL, databaseURL)
 

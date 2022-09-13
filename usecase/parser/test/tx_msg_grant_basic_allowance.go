@@ -572,3 +572,155 @@ const TX_MSG_GRANT_BASIC_ALLOWANCE_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+const TX_MSG_GRANT_BASIC_ALLOWANCE_TXS_RESP = `{
+  "tx": {
+    "body": {
+      "messages": [
+        {
+          "@type": "/cosmos.feegrant.v1beta1.MsgGrantAllowance",
+          "granter": "tcro16u0wuyhc73tdw0m7qt3cmfeg68ug8g4hc4verc",
+          "grantee": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2",
+          "allowance": {
+            "@type": "/cosmos.feegrant.v1beta1.BasicAllowance",
+            "spend_limit": [
+            ],
+            "expiration": null
+          }
+        }
+      ],
+      "memo": "",
+      "timeout_height": "0",
+      "extension_options": [
+      ],
+      "non_critical_extension_options": [
+      ]
+    },
+    "auth_info": {
+      "signer_infos": [
+        {
+          "public_key": {
+            "@type": "/cosmos.crypto.secp256k1.PubKey",
+            "key": "Ag//3BCjhPHChsAXgC0NMXxZwWiNKYFTFDvh4+mMUQl/"
+          },
+          "mode_info": {
+            "single": {
+              "mode": "SIGN_MODE_DIRECT"
+            }
+          },
+          "sequence": "0"
+        }
+      ],
+      "fee": {
+        "amount": [
+          {
+            "denom": "basetcro",
+            "amount": "50000"
+          }
+        ],
+        "gas_limit": "200000",
+        "payer": "",
+        "granter": ""
+      }
+    },
+    "signatures": [
+      "3O3I2A1DmuK9+OqdCD54aQfEtZRUXmzydeOuJOFbdOgMTInx1PDgi3F9+2a69x3M6J/5hZMpqF4aKiIdqcwCBA=="
+    ]
+  },
+  "tx_response": {
+    "height": "124056",
+    "txhash": "1798B9B2694B891BF275DC79DF0C79FDF426D41BA498685C82A284A88207E36C",
+    "codespace": "",
+    "code": 0,
+    "data": "0A2C0A2A2F636F736D6F732E6665656772616E742E763162657461312E4D73674772616E74416C6C6F77616E6365",
+    "raw_log": "[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"/cosmos.feegrant.v1beta1.MsgGrantAllowance\"}]},{\"type\":\"set_feegrant\",\"attributes\":[{\"key\":\"granter\",\"value\":\"tcro16u0wuyhc73tdw0m7qt3cmfeg68ug8g4hc4verc\"},{\"key\":\"grantee\",\"value\":\"tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2\"}]}]}]",
+    "logs": [
+      {
+        "msg_index": 0,
+        "log": "",
+        "events": [
+          {
+            "type": "message",
+            "attributes": [
+              {
+                "key": "action",
+                "value": "/cosmos.feegrant.v1beta1.MsgGrantAllowance"
+              }
+            ]
+          },
+          {
+            "type": "set_feegrant",
+            "attributes": [
+              {
+                "key": "granter",
+                "value": "tcro16u0wuyhc73tdw0m7qt3cmfeg68ug8g4hc4verc"
+              },
+              {
+                "key": "grantee",
+                "value": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "info": "",
+    "gas_wanted": "200000",
+    "gas_used": "64614",
+    "tx": {
+      "@type": "/cosmos.tx.v1beta1.Tx",
+      "body": {
+        "messages": [
+          {
+            "@type": "/cosmos.feegrant.v1beta1.MsgGrantAllowance",
+            "granter": "tcro16u0wuyhc73tdw0m7qt3cmfeg68ug8g4hc4verc",
+            "grantee": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2",
+            "allowance": {
+              "@type": "/cosmos.feegrant.v1beta1.BasicAllowance",
+              "spend_limit": [
+              ],
+              "expiration": null
+            }
+          }
+        ],
+        "memo": "",
+        "timeout_height": "0",
+        "extension_options": [
+        ],
+        "non_critical_extension_options": [
+        ]
+      },
+      "auth_info": {
+        "signer_infos": [
+          {
+            "public_key": {
+              "@type": "/cosmos.crypto.secp256k1.PubKey",
+              "key": "Ag//3BCjhPHChsAXgC0NMXxZwWiNKYFTFDvh4+mMUQl/"
+            },
+            "mode_info": {
+              "single": {
+                "mode": "SIGN_MODE_DIRECT"
+              }
+            },
+            "sequence": "0"
+          }
+        ],
+        "fee": {
+          "amount": [
+            {
+              "denom": "basetcro",
+              "amount": "50000"
+            }
+          ],
+          "gas_limit": "200000",
+          "payer": "",
+          "granter": ""
+        }
+      },
+      "signatures": [
+        "3O3I2A1DmuK9+OqdCD54aQfEtZRUXmzydeOuJOFbdOgMTInx1PDgi3F9+2a69x3M6J/5hZMpqF4aKiIdqcwCBA=="
+      ]
+    },
+    "timestamp": "2021-08-26T20:42:39Z"
+  }
+}`

@@ -429,3 +429,146 @@ const TX_FAILED_WITHOUT_FEE_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+const TX_FAILED_WITHOUT_FEE_TXS_RESP = `{
+    "tx": {
+        "body": {
+            "messages": [
+                {
+                    "@type": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+                    "delegator_address": "tcro1l38ze5fmgrgzw6rn3afx3gtpare3jgs8ke4n69",
+                    "validator_address": "tcrocncl1fja5nsxz7gsqw4zccuuy8r7pjnjmc7dscdl2vz"
+                },
+                {
+                    "@type": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+                    "delegator_address": "tcro1l38ze5fmgrgzw6rn3afx3gtpare3jgs8ke4n69",
+                    "validator_address": "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr"
+                },
+                {
+                    "@type": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+                    "delegator_address": "tcro1l38ze5fmgrgzw6rn3afx3gtpare3jgs8ke4n69",
+                    "validator_address": "tcrocncl16yzcz3ty94awr7nr2txek9dp2klp2av9vh437s"
+                },
+                {
+                    "@type": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+                    "delegator_address": "tcro1l38ze5fmgrgzw6rn3afx3gtpare3jgs8ke4n69",
+                    "validator_address": "tcrocncl16kqr009ptgken6qsxnzfnyjfsq6q97g3uedcer"
+                },
+                {
+                    "@type": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+                    "delegator_address": "tcro1l38ze5fmgrgzw6rn3afx3gtpare3jgs8ke4n69",
+                    "validator_address": "tcrocncl1l38ze5fmgrgzw6rn3afx3gtpare3jgs8rxk2zx"
+                }
+            ],
+            "memo": "",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+        },
+        "auth_info": {
+            "signer_infos": [
+                {
+                    "public_key": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "AhLYCDVbpM12Jafqp0poKEdIEpeTn03mJ5+mIgRz4PWa"
+                    },
+                    "mode_info": {
+                        "single": {
+                            "mode": "SIGN_MODE_DIRECT"
+                        }
+                    },
+                    "sequence": "5"
+                }
+            ],
+            "fee": {
+                "amount": [],
+                "gas_limit": "200000",
+                "payer": "",
+                "granter": ""
+            }
+        },
+        "signatures": [
+            "aYH6sWakJLeyvVE8g3VKx7IiqJMwwiFQEcmn8Nvg2mJkjrYAa0ogXVPo7oaF9iEo1hHBVC8DkVhIHOSuI4VP4w=="
+        ]
+    },
+    "tx_response": {
+        "height": "3245",
+        "txhash": "CDBA166168176BF7ECA2EAC9E9B49054F1BF4C8799B8C26CC0B9EE85CB93AF27",
+        "codespace": "sdk",
+        "code": 11,
+        "data": "",
+        "raw_log": "out of gas in location: WriteFlat; gasWanted: 200000, gasUsed: 201420: out of gas",
+        "logs": [
+            {
+                "msg_index": 0,
+                "log": "",
+                "events": []
+            }
+        ],
+        "info": "",
+        "gas_wanted": "200000",
+        "gas_used": "201420",
+        "tx": {
+            "@type": "/cosmos.tx.v1beta1.Tx",
+            "body": {
+                "messages": [
+                    {
+                        "@type": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+                        "delegator_address": "tcro1l38ze5fmgrgzw6rn3afx3gtpare3jgs8ke4n69",
+                        "validator_address": "tcrocncl1fja5nsxz7gsqw4zccuuy8r7pjnjmc7dscdl2vz"
+                    },
+                    {
+                        "@type": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+                        "delegator_address": "tcro1l38ze5fmgrgzw6rn3afx3gtpare3jgs8ke4n69",
+                        "validator_address": "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr"
+                    },
+                    {
+                        "@type": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+                        "delegator_address": "tcro1l38ze5fmgrgzw6rn3afx3gtpare3jgs8ke4n69",
+                        "validator_address": "tcrocncl16yzcz3ty94awr7nr2txek9dp2klp2av9vh437s"
+                    },
+                    {
+                        "@type": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+                        "delegator_address": "tcro1l38ze5fmgrgzw6rn3afx3gtpare3jgs8ke4n69",
+                        "validator_address": "tcrocncl16kqr009ptgken6qsxnzfnyjfsq6q97g3uedcer"
+                    },
+                    {
+                        "@type": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+                        "delegator_address": "tcro1l38ze5fmgrgzw6rn3afx3gtpare3jgs8ke4n69",
+                        "validator_address": "tcrocncl1l38ze5fmgrgzw6rn3afx3gtpare3jgs8rxk2zx"
+                    }
+                ],
+                "memo": "",
+                "timeout_height": "0",
+                "extension_options": [],
+                "non_critical_extension_options": []
+            },
+            "auth_info": {
+                "signer_infos": [
+                    {
+                        "public_key": {
+                            "@type": "/cosmos.crypto.secp256k1.PubKey",
+                            "key": "AhLYCDVbpM12Jafqp0poKEdIEpeTn03mJ5+mIgRz4PWa"
+                        },
+                        "mode_info": {
+                            "single": {
+                                "mode": "SIGN_MODE_DIRECT"
+                            }
+                        },
+                        "sequence": "5"
+                    }
+                ],
+                "fee": {
+                    "amount": [],
+                    "gas_limit": "200000",
+                    "payer": "",
+                    "granter": ""
+                }
+            },
+            "signatures": [
+                "aYH6sWakJLeyvVE8g3VKx7IiqJMwwiFQEcmn8Nvg2mJkjrYAa0ogXVPo7oaF9iEo1hHBVC8DkVhIHOSuI4VP4w=="
+            ]
+        },
+        "timestamp": "2021-08-29T17:15:46Z"
+    }
+}`

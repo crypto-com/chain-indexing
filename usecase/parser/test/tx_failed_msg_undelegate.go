@@ -2285,3 +2285,124 @@ const TX_FAILED_MSG_UNDELEGATE_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+const TX_FAILED_MSG_UNDELEGATE_TXS_RESP = `{
+    "tx": {
+        "body": {
+            "messages": [
+                {
+                    "@type": "/cosmos.staking.v1beta1.MsgUndelegate",
+                    "delegator_address": "tcro1llst0cguh5azl9t8wr6mz5yzjuwukz7f67z7f6",
+                    "validator_address": "tcrocncl15e69kdrtczajjdlzyt2qgs5q2anc5qpmk2c68z",
+                    "amount": {
+                        "denom": "basetcro",
+                        "amount": "50000000000000"
+                    }
+                }
+            ],
+            "memo": "",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+        },
+        "auth_info": {
+            "signer_infos": [
+                {
+                    "public_key": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "A8YD+h8qnYctS4oyIOjZy3919pvXEZ+eWgPw1rjZgkrr"
+                    },
+                    "mode_info": {
+                        "single": {
+                            "mode": "SIGN_MODE_DIRECT"
+                        }
+                    },
+                    "sequence": "2"
+                }
+            ],
+            "fee": {
+                "amount": [
+                    {
+                        "denom": "basetcro",
+                        "amount": "5000"
+                    }
+                ],
+                "gas_limit": "200000",
+                "payer": "",
+                "granter": ""
+            }
+        },
+        "signatures": [
+            "0aXlcyCxEWPiHMA0aTBa2bBDZ76M1oHeIPoIO5wzoDItcENuhe/WSJmWa1NLcLOIggz9I12XmGCnXND8G/Kolw=="
+        ]
+    },
+    "tx_response": {
+        "height": "184399",
+        "txhash": "5285A9B475157E01540536299A2B5F505AC900159C268B3D90652557F9ACDE1E",
+        "codespace": "staking",
+        "code": 24,
+        "data": "",
+        "raw_log": "failed to execute message; message index: 0: no delegation for (address, validator) tuple",
+        "logs": [
+            {
+                "msg_index": 0,
+                "log": "",
+                "events": []
+            }
+        ],
+        "info": "",
+        "gas_wanted": "200000",
+        "gas_used": "52906",
+        "tx": {
+            "@type": "/cosmos.tx.v1beta1.Tx",
+            "body": {
+                "messages": [
+                    {
+                        "@type": "/cosmos.staking.v1beta1.MsgUndelegate",
+                        "delegator_address": "tcro1llst0cguh5azl9t8wr6mz5yzjuwukz7f67z7f6",
+                        "validator_address": "tcrocncl15e69kdrtczajjdlzyt2qgs5q2anc5qpmk2c68z",
+                        "amount": {
+                            "denom": "basetcro",
+                            "amount": "50000000000000"
+                        }
+                    }
+                ],
+                "memo": "",
+                "timeout_height": "0",
+                "extension_options": [],
+                "non_critical_extension_options": []
+            },
+            "auth_info": {
+                "signer_infos": [
+                    {
+                        "public_key": {
+                            "@type": "/cosmos.crypto.secp256k1.PubKey",
+                            "key": "A8YD+h8qnYctS4oyIOjZy3919pvXEZ+eWgPw1rjZgkrr"
+                        },
+                        "mode_info": {
+                            "single": {
+                                "mode": "SIGN_MODE_DIRECT"
+                            }
+                        },
+                        "sequence": "2"
+                    }
+                ],
+                "fee": {
+                    "amount": [
+                        {
+                            "denom": "basetcro",
+                            "amount": "5000"
+                        }
+                    ],
+                    "gas_limit": "200000",
+                    "payer": "",
+                    "granter": ""
+                }
+            },
+            "signatures": [
+                "0aXlcyCxEWPiHMA0aTBa2bBDZ76M1oHeIPoIO5wzoDItcENuhe/WSJmWa1NLcLOIggz9I12XmGCnXND8G/Kolw=="
+            ]
+        },
+        "timestamp": "2021-08-29T17:15:46Z"
+    }
+}`

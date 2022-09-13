@@ -572,3 +572,143 @@ const TX_MSG_REVOKE_ALLOWANCE_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+const TX_MSG_REVOKE_ALLOWANCE_TXS_RESP = `{
+  "tx": {
+    "body": {
+      "messages": [
+        {
+          "@type": "/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
+          "granter": "tcro16u0wuyhc73tdw0m7qt3cmfeg68ug8g4hc4verc",
+          "grantee": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2"
+        }
+      ],
+      "memo": "",
+      "timeout_height": "0",
+      "extension_options": [
+      ],
+      "non_critical_extension_options": [
+      ]
+    },
+    "auth_info": {
+      "signer_infos": [
+        {
+          "public_key": {
+            "@type": "/cosmos.crypto.secp256k1.PubKey",
+            "key": "Ag//3BCjhPHChsAXgC0NMXxZwWiNKYFTFDvh4+mMUQl/"
+          },
+          "mode_info": {
+            "single": {
+              "mode": "SIGN_MODE_DIRECT"
+            }
+          },
+          "sequence": "2"
+        }
+      ],
+      "fee": {
+        "amount": [
+          {
+            "denom": "basetcro",
+            "amount": "50000"
+          }
+        ],
+        "gas_limit": "200000",
+        "payer": "",
+        "granter": ""
+      }
+    },
+    "signatures": [
+      "PuUDYL8q6pWPeayg/NU8o3ozSLl8EnNdCtmNcY5T4QAVHhVN9NWdJd8+3vDKLMDKEabHJtjtFdUVVfM8srDN+Q=="
+    ]
+  },
+  "tx_response": {
+    "height": "128553",
+    "txhash": "002579A793A5ABD82FAF819FC77CC4FF765C550332151B4BA9A811D662ABD027",
+    "codespace": "",
+    "code": 0,
+    "data": "0A2D0A2B2F636F736D6F732E6665656772616E742E763162657461312E4D73675265766F6B65416C6C6F77616E6365",
+    "raw_log": "[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"/cosmos.feegrant.v1beta1.MsgRevokeAllowance\"}]},{\"type\":\"revoke_feegrant\",\"attributes\":[{\"key\":\"granter\",\"value\":\"tcro16u0wuyhc73tdw0m7qt3cmfeg68ug8g4hc4verc\"},{\"key\":\"grantee\",\"value\":\"tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2\"}]}]}]",
+    "logs": [
+      {
+        "msg_index": 0,
+        "log": "",
+        "events": [
+          {
+            "type": "message",
+            "attributes": [
+              {
+                "key": "action",
+                "value": "/cosmos.feegrant.v1beta1.MsgRevokeAllowance"
+              }
+            ]
+          },
+          {
+            "type": "revoke_feegrant",
+            "attributes": [
+              {
+                "key": "granter",
+                "value": "tcro16u0wuyhc73tdw0m7qt3cmfeg68ug8g4hc4verc"
+              },
+              {
+                "key": "grantee",
+                "value": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "info": "",
+    "gas_wanted": "200000",
+    "gas_used": "52176",
+    "tx": {
+      "@type": "/cosmos.tx.v1beta1.Tx",
+      "body": {
+        "messages": [
+          {
+            "@type": "/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
+            "granter": "tcro16u0wuyhc73tdw0m7qt3cmfeg68ug8g4hc4verc",
+            "grantee": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2"
+          }
+        ],
+        "memo": "",
+        "timeout_height": "0",
+        "extension_options": [
+        ],
+        "non_critical_extension_options": [
+        ]
+      },
+      "auth_info": {
+        "signer_infos": [
+          {
+            "public_key": {
+              "@type": "/cosmos.crypto.secp256k1.PubKey",
+              "key": "Ag//3BCjhPHChsAXgC0NMXxZwWiNKYFTFDvh4+mMUQl/"
+            },
+            "mode_info": {
+              "single": {
+                "mode": "SIGN_MODE_DIRECT"
+              }
+            },
+            "sequence": "2"
+          }
+        ],
+        "fee": {
+          "amount": [
+            {
+              "denom": "basetcro",
+              "amount": "50000"
+            }
+          ],
+          "gas_limit": "200000",
+          "payer": "",
+          "granter": ""
+        }
+      },
+      "signatures": [
+        "PuUDYL8q6pWPeayg/NU8o3ozSLl8EnNdCtmNcY5T4QAVHhVN9NWdJd8+3vDKLMDKEabHJtjtFdUVVfM8srDN+Q=="
+      ]
+    },
+    "timestamp": "2021-08-27T03:22:28Z"
+  }
+}`

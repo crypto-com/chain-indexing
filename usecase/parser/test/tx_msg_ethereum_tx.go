@@ -1085,3 +1085,315 @@ const TX_MSG_ETHEREUM_TX_BLOCK_RESULTS_RESP = `{
         }
     }
 }`
+
+const TX_MSG_ETHEREUM_TX_TXS_RESP = `{
+  "tx": {
+    "body": {
+      "messages": [
+        {
+          "@type": "/ethermint.evm.v1.MsgEthereumTx",
+          "data": {
+            "@type": "/ethermint.evm.v1.LegacyTx",
+            "nonce": "130",
+            "gas_price": "5000000000000",
+            "gas": "77595",
+            "to": "0xAa53Dd6D234A0c431b39B9E90454666432869dc9",
+            "value": "0",
+            "data": "k4YIwgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABphbdB3AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGFt0HcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABXPXkUYA==",
+            "v": "Asc=",
+            "r": "GWDX+kHcVNVKp5K2lG+/zHAOJI8yR6lYZ2GW4kYgEhE=",
+            "s": "PqawF/sgoCKiOnqN9al9x9AAWOS2uKaW5Dq+cg74Lgg="
+          },
+          "size": 208,
+          "hash": "0x3118583b6f71ebed92410afbdc069facb9e94169bd764711d58ca1f131d63fff",
+          "from": ""
+        }
+      ],
+      "memo": "",
+      "timeout_height": "0",
+      "extension_options": [
+        {
+          "@type": "/ethermint.evm.v1.ExtensionOptionsEthereumTx"
+        }
+      ],
+      "non_critical_extension_options": [
+      ]
+    },
+    "auth_info": {
+      "signer_infos": [
+      ],
+      "fee": {
+        "amount": [
+          {
+            "denom": "basetcro",
+            "amount": "387975000000000000"
+          }
+        ],
+        "gas_limit": "77595",
+        "payer": "",
+        "granter": ""
+      }
+    },
+    "signatures": [
+    ]
+  },
+  "tx_response": {
+    "height": "83178",
+    "txhash": "2678437368AFC7E0E6D891D858F17B9C05CFEE850A786592A11992813D6A89FD",
+    "codespace": "",
+    "code": 0,
+    "data": "0AB7040A1F2F65746865726D696E742E65766D2E76312E4D7367457468657265756D54781293040A4230783331313835383362366637316562656439323431306166626463303639666163623965393431363962643736343731316435386361316631333164363366666612C8030A2A307841613533446436443233344130633433316233394239453930343534363636343332383639646339124230786439386262346665636532346331656233303666383164386666666432313234646539383639346535353265633162316231303662336663363964356535316112423078303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030316136313664643037371242307830303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303631366464303737124230783030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303537336437393134363020EA89052A423078333131383538336236663731656265643932343130616662646330363966616362396539343136396264373634373131643538636131663133316436336666663A42307839373064333335656433363962326135336135386363303336343737323331333362326263303064336363383462373961383364393636636362316637633335289BDE04",
+    "raw_log": "[{\"events\":[{\"type\":\"ethereum_tx\",\"attributes\":[{\"key\":\"amount\",\"value\":\"0\"},{\"key\":\"ethereumTxHash\",\"value\":\"0x3118583b6f71ebed92410afbdc069facb9e94169bd764711d58ca1f131d63fff\"},{\"key\":\"txHash\",\"value\":\"2678437368AFC7E0E6D891D858F17B9C05CFEE850A786592A11992813D6A89FD\"},{\"key\":\"recipient\",\"value\":\"0xAa53Dd6D234A0c431b39B9E90454666432869dc9\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"ethereum_tx\"},{\"key\":\"module\",\"value\":\"evm\"},{\"key\":\"sender\",\"value\":\"0x6F966DA8f83ac4b4ae3DFbD2da1aDa7f333967b1\"},{\"key\":\"txType\",\"value\":\"0\"}]},{\"type\":\"tx_log\",\"attributes\":[{\"key\":\"txLog\",\"value\":\"{\\\"address\\\":\\\"0xAa53Dd6D234A0c431b39B9E90454666432869dc9\\\",\\\"topics\\\":[\\\"0xd98bb4fece24c1eb306f81d8fffd2124de98694e552ec1b1b106b3fc69d5e51a\\\",\\\"0x0000000000000000000000000000000000000000000000000000001a616dd077\\\",\\\"0x00000000000000000000000000000000000000000000000000000000616dd077\\\",\\\"0x000000000000000000000000000000000000000000000000000000573d791460\\\"],\\\"blockNumber\\\":83178,\\\"transactionHash\\\":\\\"0x3118583b6f71ebed92410afbdc069facb9e94169bd764711d58ca1f131d63fff\\\",\\\"transactionIndex\\\":0,\\\"blockHash\\\":\\\"0x970d335ed369b2a53a58cc03647723133b2bc00d3cc84b79a83d966ccb1f7c35\\\",\\\"logIndex\\\":0}\"}]}]}]",
+    "logs": [
+      {
+        "msg_index": 0,
+        "log": "",
+        "events": [
+          {
+            "type": "ethereum_tx",
+            "attributes": [
+              {
+                "key": "amount",
+                "value": "0"
+              },
+              {
+                "key": "ethereumTxHash",
+                "value": "0x3118583b6f71ebed92410afbdc069facb9e94169bd764711d58ca1f131d63fff"
+              },
+              {
+                "key": "txHash",
+                "value": "2678437368AFC7E0E6D891D858F17B9C05CFEE850A786592A11992813D6A89FD"
+              },
+              {
+                "key": "recipient",
+                "value": "0xAa53Dd6D234A0c431b39B9E90454666432869dc9"
+              }
+            ]
+          },
+          {
+            "type": "message",
+            "attributes": [
+              {
+                "key": "action",
+                "value": "ethereum_tx"
+              },
+              {
+                "key": "module",
+                "value": "evm"
+              },
+              {
+                "key": "sender",
+                "value": "0x6F966DA8f83ac4b4ae3DFbD2da1aDa7f333967b1"
+              },
+              {
+                "key": "txType",
+                "value": "0"
+              }
+            ]
+          },
+          {
+            "type": "tx_log",
+            "attributes": [
+              {
+                "key": "txLog",
+                "value": "{\"address\":\"0xAa53Dd6D234A0c431b39B9E90454666432869dc9\",\"topics\":[\"0xd98bb4fece24c1eb306f81d8fffd2124de98694e552ec1b1b106b3fc69d5e51a\",\"0x0000000000000000000000000000000000000000000000000000001a616dd077\",\"0x00000000000000000000000000000000000000000000000000000000616dd077\",\"0x000000000000000000000000000000000000000000000000000000573d791460\"],\"blockNumber\":83178,\"transactionHash\":\"0x3118583b6f71ebed92410afbdc069facb9e94169bd764711d58ca1f131d63fff\",\"transactionIndex\":0,\"blockHash\":\"0x970d335ed369b2a53a58cc03647723133b2bc00d3cc84b79a83d966ccb1f7c35\",\"logIndex\":0}"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "info": "",
+    "gas_wanted": "0",
+    "gas_used": "77595",
+    "tx": {
+      "@type": "/cosmos.tx.v1beta1.Tx",
+      "body": {
+        "messages": [
+          {
+            "@type": "/ethermint.evm.v1.MsgEthereumTx",
+            "data": {
+              "@type": "/ethermint.evm.v1.LegacyTx",
+              "nonce": "130",
+              "gas_price": "5000000000000",
+              "gas": "77595",
+              "to": "0xAa53Dd6D234A0c431b39B9E90454666432869dc9",
+              "value": "0",
+              "data": "k4YIwgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABphbdB3AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGFt0HcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABXPXkUYA==",
+              "v": "Asc=",
+              "r": "GWDX+kHcVNVKp5K2lG+/zHAOJI8yR6lYZ2GW4kYgEhE=",
+              "s": "PqawF/sgoCKiOnqN9al9x9AAWOS2uKaW5Dq+cg74Lgg="
+            },
+            "size": 208,
+            "hash": "0x3118583b6f71ebed92410afbdc069facb9e94169bd764711d58ca1f131d63fff",
+            "from": ""
+          }
+        ],
+        "memo": "",
+        "timeout_height": "0",
+        "extension_options": [
+          {
+            "@type": "/ethermint.evm.v1.ExtensionOptionsEthereumTx"
+          }
+        ],
+        "non_critical_extension_options": [
+        ]
+      },
+      "auth_info": {
+        "signer_infos": [
+        ],
+        "fee": {
+          "amount": [
+            {
+              "denom": "basetcro",
+              "amount": "387975000000000000"
+            }
+          ],
+          "gas_limit": "77595",
+          "payer": "",
+          "granter": ""
+        }
+      },
+      "signatures": [
+      ]
+    },
+    "timestamp": "2021-10-18T19:52:20Z",
+    "events": [
+      {
+        "type": "coin_spent",
+        "attributes": [
+          {
+            "key": "c3BlbmRlcg==",
+            "value": "dGNyYzFkN3R4bTI4Yzh0enRmdDNhbDBmZDV4azYwdWVuamVhMzBrMnA1Zw==",
+            "index": true
+          },
+          {
+            "key": "YW1vdW50",
+            "value": "Mzg3OTc1MDAwMDAwMDAwMDAwYmFzZXRjcm8=",
+            "index": true
+          }
+        ]
+      },
+      {
+        "type": "coin_received",
+        "attributes": [
+          {
+            "key": "cmVjZWl2ZXI=",
+            "value": "dGNyYzE3eHBmdmFrbTJhbWc5NjJ5bHM2Zjg0ejNrZWxsOGM1bGZqc2plag==",
+            "index": true
+          },
+          {
+            "key": "YW1vdW50",
+            "value": "Mzg3OTc1MDAwMDAwMDAwMDAwYmFzZXRjcm8=",
+            "index": true
+          }
+        ]
+      },
+      {
+        "type": "transfer",
+        "attributes": [
+          {
+            "key": "cmVjaXBpZW50",
+            "value": "dGNyYzE3eHBmdmFrbTJhbWc5NjJ5bHM2Zjg0ejNrZWxsOGM1bGZqc2plag==",
+            "index": true
+          },
+          {
+            "key": "c2VuZGVy",
+            "value": "dGNyYzFkN3R4bTI4Yzh0enRmdDNhbDBmZDV4azYwdWVuamVhMzBrMnA1Zw==",
+            "index": true
+          },
+          {
+            "key": "YW1vdW50",
+            "value": "Mzg3OTc1MDAwMDAwMDAwMDAwYmFzZXRjcm8=",
+            "index": true
+          }
+        ]
+      },
+      {
+        "type": "message",
+        "attributes": [
+          {
+            "key": "c2VuZGVy",
+            "value": "dGNyYzFkN3R4bTI4Yzh0enRmdDNhbDBmZDV4azYwdWVuamVhMzBrMnA1Zw==",
+            "index": true
+          }
+        ]
+      },
+      {
+        "type": "tx",
+        "attributes": [
+          {
+            "key": "ZmVl",
+            "value": "Mzg3OTc1MDAwMDAwMDAwMDAwYmFzZXRjcm8=",
+            "index": true
+          }
+        ]
+      },
+      {
+        "type": "message",
+        "attributes": [
+          {
+            "key": "YWN0aW9u",
+            "value": "ZXRoZXJldW1fdHg=",
+            "index": true
+          }
+        ]
+      },
+      {
+        "type": "ethereum_tx",
+        "attributes": [
+          {
+            "key": "YW1vdW50",
+            "value": "MA==",
+            "index": true
+          },
+          {
+            "key": "ZXRoZXJldW1UeEhhc2g=",
+            "value": "MHgzMTE4NTgzYjZmNzFlYmVkOTI0MTBhZmJkYzA2OWZhY2I5ZTk0MTY5YmQ3NjQ3MTFkNThjYTFmMTMxZDYzZmZm",
+            "index": true
+          },
+          {
+            "key": "dHhIYXNo",
+            "value": "MjY3ODQzNzM2OEFGQzdFMEU2RDg5MUQ4NThGMTdCOUMwNUNGRUU4NTBBNzg2NTkyQTExOTkyODEzRDZBODlGRA==",
+            "index": true
+          },
+          {
+            "key": "cmVjaXBpZW50",
+            "value": "MHhBYTUzRGQ2RDIzNEEwYzQzMWIzOUI5RTkwNDU0NjY2NDMyODY5ZGM5",
+            "index": true
+          }
+        ]
+      },
+      {
+        "type": "tx_log",
+        "attributes": [
+          {
+            "key": "dHhMb2c=",
+            "value": "eyJhZGRyZXNzIjoiMHhBYTUzRGQ2RDIzNEEwYzQzMWIzOUI5RTkwNDU0NjY2NDMyODY5ZGM5IiwidG9waWNzIjpbIjB4ZDk4YmI0ZmVjZTI0YzFlYjMwNmY4MWQ4ZmZmZDIxMjRkZTk4Njk0ZTU1MmVjMWIxYjEwNmIzZmM2OWQ1ZTUxYSIsIjB4MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMWE2MTZkZDA3NyIsIjB4MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA2MTZkZDA3NyIsIjB4MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwNTczZDc5MTQ2MCJdLCJibG9ja051bWJlciI6ODMxNzgsInRyYW5zYWN0aW9uSGFzaCI6IjB4MzExODU4M2I2ZjcxZWJlZDkyNDEwYWZiZGMwNjlmYWNiOWU5NDE2OWJkNzY0NzExZDU4Y2ExZjEzMWQ2M2ZmZiIsInRyYW5zYWN0aW9uSW5kZXgiOjAsImJsb2NrSGFzaCI6IjB4OTcwZDMzNWVkMzY5YjJhNTNhNThjYzAzNjQ3NzIzMTMzYjJiYzAwZDNjYzg0Yjc5YTgzZDk2NmNjYjFmN2MzNSIsImxvZ0luZGV4IjowfQ==",
+            "index": true
+          }
+        ]
+      },
+      {
+        "type": "message",
+        "attributes": [
+          {
+            "key": "bW9kdWxl",
+            "value": "ZXZt",
+            "index": true
+          },
+          {
+            "key": "c2VuZGVy",
+            "value": "MHg2Rjk2NkRBOGY4M2FjNGI0YWUzREZiRDJkYTFhRGE3ZjMzMzk2N2Ix",
+            "index": true
+          },
+          {
+            "key": "dHhUeXBl",
+            "value": "MA==",
+            "index": true
+          }
+        ]
+      }
+    ]
+  }
+}`

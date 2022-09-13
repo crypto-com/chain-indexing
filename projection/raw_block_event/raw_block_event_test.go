@@ -19,7 +19,7 @@ import (
 	model_usecase "github.com/crypto-com/chain-indexing/usecase/model"
 )
 
-var BLOCK_MIGRATIONS_PATH = func() string {
+var RAW_BLOCK_EVENT_MIGRATIONS_PATH = func() string {
 	_, filename, _, ok := runtime.Caller(0)
 	if !ok {
 		panic("error retrieving file directory")
@@ -43,7 +43,7 @@ var _ = Describe("Raw Block Events", func() {
 			testEnv.RootMigrate.MustUp()
 			projectionMigrate := testEnv.MigrateCreator(
 				"rawblockevent_schema_migrations",
-				BLOCK_MIGRATIONS_PATH,
+				RAW_BLOCK_EVENT_MIGRATIONS_PATH,
 			)
 			projectionMigrate.MustUp()
 		})

@@ -2,6 +2,7 @@ package cosmosapp
 
 import (
 	"github.com/crypto-com/chain-indexing/usecase/coin"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -91,5 +92,11 @@ func (conn *MockClient) ProposalById(id string) (Proposal, error) {
 func (conn *MockClient) ProposalTally(id string) (Tally, error) {
 	mockArgs := conn.Called(id)
 	result, _ := mockArgs.Get(0).(Tally)
+	return result, mockArgs.Error(1)
+}
+
+func (conn *MockClient) Tx(txHash string) (*model.Tx, error) {
+	mockArgs := conn.Called(txHash)
+	result, _ := mockArgs.Get(0).(*model.Tx)
 	return result, mockArgs.Error(1)
 }
