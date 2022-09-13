@@ -351,3 +351,205 @@ const TX_MSG_NFT_EDIT_NFT_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+const TX_MSG_NFT_EDIT_NFT_TXS_RESP = `{
+    "tx": {
+        "body": {
+            "messages": [
+                {
+                    "@type": "/chainmain.nft.v1.MsgEditNFT",
+                    "id": "tokenid8",
+                    "denom_id": "denomid",
+                    "name": "newName",
+                    "uri": "newUri",
+                    "data": "newData",
+                    "sender": "cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd"
+                }
+            ],
+            "memo": "",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+        },
+        "auth_info": {
+            "signer_infos": [
+                {
+                    "public_key": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "AiLBhn2Jb4CLU5dYpKB3LHDpjIFldrsQWD6LWDHyjpWM"
+                    },
+                    "mode_info": {
+                        "single": {
+                            "mode": "SIGN_MODE_DIRECT"
+                        }
+                    },
+                    "sequence": "21"
+                }
+            ],
+            "fee": {
+                "amount": [
+                    {
+                        "denom": "basecro",
+                        "amount": "5000"
+                    }
+                ],
+                "gas_limit": "200000",
+                "payer": "",
+                "granter": ""
+            }
+        },
+        "signatures": [
+            "vW3ZCLb++VSnkojQIRyAds0+tk5glGRpapMfOyXkoGg/9+hK2OoOf1q5mcPsA0l8dodG1UHWpmLOf0G6YdcPyQ=="
+        ]
+    },
+    "tx_response": {
+        "height": "16754",
+        "txhash": "652358F0C39307A88C347013DF65317498DB81FE847821066559E401AFF8F632",
+        "codespace": "",
+        "code": 0,
+        "data": "CgoKCGVkaXRfbmZ0",
+        "raw_log": "[{\"events\":[{\"type\":\"edit_nft\",\"attributes\":[{\"key\":\"token_id\",\"value\":\"tokenid8\"},{\"key\":\"denom_id\",\"value\":\"denomid\"},{\"key\":\"token_uri\",\"value\":\"newUri\"},{\"key\":\"owner\",\"value\":\"cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"edit_nft\"},{\"key\":\"module\",\"value\":\"nft\"},{\"key\":\"sender\",\"value\":\"cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd\"}]}]}]",
+        "logs": [
+            {
+                "msg_index": 0,
+                "log": "",
+                "events": [
+                    {
+                        "type": "transfer",
+                        "attributes": [
+                            {
+                                "key": "cmVjaXBpZW50",
+                                "value": "Y3JvMTd4cGZ2YWttMmFtZzk2MnlsczZmODR6M2tlbGw4YzVsZ3p0ZWh2",
+                                "index": true
+                            },
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "Y3JvMW5rNHJxM3E0Nmx0Z2pnaHh6ODBoeTM4NXA5dWowdGY1OGFwa2Nk",
+                                "index": true
+                            },
+                            {
+                                "key": "YW1vdW50",
+                                "value": "NTAwMGJhc2Vjcm8=",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "Y3JvMW5rNHJxM3E0Nmx0Z2pnaHh6ODBoeTM4NXA5dWowdGY1OGFwa2Nk",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "YWN0aW9u",
+                                "value": "ZWRpdF9uZnQ=",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "edit_nft",
+                        "attributes": [
+                            {
+                                "key": "dG9rZW5faWQ=",
+                                "value": "dG9rZW5pZDg=",
+                                "index": true
+                            },
+                            {
+                                "key": "ZGVub21faWQ=",
+                                "value": "ZGVub21pZA==",
+                                "index": true
+                            },
+                            {
+                                "key": "dG9rZW5fdXJp",
+                                "value": "bmV3VXJp",
+                                "index": true
+                            },
+                            {
+                                "key": "b3duZXI=",
+                                "value": "Y3JvMW5rNHJxM3E0Nmx0Z2pnaHh6ODBoeTM4NXA5dWowdGY1OGFwa2Nk",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "bW9kdWxl",
+                                "value": "bmZ0",
+                                "index": true
+                            },
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "Y3JvMW5rNHJxM3E0Nmx0Z2pnaHh6ODBoeTM4NXA5dWowdGY1OGFwa2Nk",
+                                "index": true
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "info": "",
+        "gas_wanted": "200000",
+        "gas_used": "60439",
+        "tx": {
+            "@type": "/cosmos.tx.v1beta1.Tx",
+            "body": {
+                "messages": [
+                    {
+                        "@type": "/chainmain.nft.v1.MsgEditNFT",
+                        "id": "tokenid8",
+                        "denom_id": "denomid",
+                        "name": "newName",
+                        "uri": "newUri",
+                        "data": "newData",
+                        "sender": "cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd"
+                    }
+                ],
+                "memo": "",
+                "timeout_height": "0",
+                "extension_options": [],
+                "non_critical_extension_options": []
+            },
+            "auth_info": {
+                "signer_infos": [
+                    {
+                        "public_key": {
+                            "@type": "/cosmos.crypto.secp256k1.PubKey",
+                            "key": "AiLBhn2Jb4CLU5dYpKB3LHDpjIFldrsQWD6LWDHyjpWM"
+                        },
+                        "mode_info": {
+                            "single": {
+                                "mode": "SIGN_MODE_DIRECT"
+                            }
+                        },
+                        "sequence": "21"
+                    }
+                ],
+                "fee": {
+                    "amount": [
+                        {
+                            "denom": "basecro",
+                            "amount": "5000"
+                        }
+                    ],
+                    "gas_limit": "200000",
+                    "payer": "",
+                    "granter": ""
+                }
+            },
+            "signatures": [
+                "vW3ZCLb++VSnkojQIRyAds0+tk5glGRpapMfOyXkoGg/9+hK2OoOf1q5mcPsA0l8dodG1UHWpmLOf0G6YdcPyQ=="
+            ]
+        },
+        "timestamp": "2021-08-29T17:15:46Z"
+    }
+}`

@@ -2209,3 +2209,140 @@ const TX_FAILED_MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+const TX_FAILED_MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_TXS_RESP = `{
+    "tx": {
+        "body": {
+            "messages": [
+                {
+                    "@type": "/cosmos.gov.v1beta1.MsgSubmitProposal",
+                    "content": {
+                        "@type": "/cosmos.params.v1beta1.ParameterChangeProposal",
+                        "title": "Param-Change Voting Period",
+                        "description": "This is to change the voting time on Testnet to be 8 hours.",
+                        "changes": [
+                            {
+                                "subspace": "gov",
+                                "key": "votingparams",
+                                "value": "{ \"voting_period\": \"28800000000000\" }"
+                            }
+                        ]
+                    },
+                    "initial_deposit": [
+                        {
+                            "denom": "basetcro",
+                            "amount": "10"
+                        }
+                    ],
+                    "proposer": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"
+                }
+            ],
+            "memo": "",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+        },
+        "auth_info": {
+            "signer_infos": [
+                {
+                    "public_key": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "A1mhVLohDEidpGYmpNYxxvikcaL72jQhZN1fxKFYkB8m"
+                    },
+                    "mode_info": {
+                        "single": {
+                            "mode": "SIGN_MODE_DIRECT"
+                        }
+                    },
+                    "sequence": "15"
+                }
+            ],
+            "fee": {
+                "amount": [],
+                "gas_limit": "90000",
+                "payer": "",
+                "granter": ""
+            }
+        },
+        "signatures": [
+            "xxXgJBSFRaie92NHle8CBks6T28JHna3fC+nw/F2Xxl5BFmMLs6lU8bpRzrzZ2tZLr5MIDuP1SYtP/nY5/4BiA=="
+        ]
+    },
+    "tx_response": {
+        "height": "475232",
+        "txhash": "1682BBF647E8E326F4581986D7334883EC9783F41D892E6E425F6E962E50296C",
+        "codespace": "sdk",
+        "code": 11,
+        "data": "CgsKCW11bHRpc2VuZA==",
+        "raw_log": "out of gas in location: WriteFlat; gasWanted: 90000, gasUsed: 91128: out of gas",
+        "logs": [
+            {
+                "msg_index": 0,
+                "log": "",
+                "events": []
+            }
+        ],
+        "info": "",
+        "gas_wanted": "200000",
+        "gas_used": "91128",
+        "tx": {
+            "@type": "/cosmos.tx.v1beta1.Tx",
+            "body": {
+            "messages": [
+                {
+                    "@type": "/cosmos.gov.v1beta1.MsgSubmitProposal",
+                    "content": {
+                        "@type": "/cosmos.params.v1beta1.ParameterChangeProposal",
+                        "title": "Param-Change Voting Period",
+                        "description": "This is to change the voting time on Testnet to be 8 hours.",
+                        "changes": [
+                            {
+                                "subspace": "gov",
+                                "key": "votingparams",
+                                "value": "{ \"voting_period\": \"28800000000000\" }"
+                            }
+                        ]
+                    },
+                    "initial_deposit": [
+                        {
+                            "denom": "basetcro",
+                            "amount": "10"
+                        }
+                    ],
+                    "proposer": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"
+                }
+            ],
+            "memo": "",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+        },
+        "auth_info": {
+            "signer_infos": [
+                {
+                    "public_key": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "A1mhVLohDEidpGYmpNYxxvikcaL72jQhZN1fxKFYkB8m"
+                    },
+                    "mode_info": {
+                        "single": {
+                            "mode": "SIGN_MODE_DIRECT"
+                        }
+                    },
+                    "sequence": "15"
+                }
+            ],
+            "fee": {
+                "amount": [],
+                "gas_limit": "90000",
+                "payer": "",
+                "granter": ""
+            }
+        },
+        "signatures": [
+            "xxXgJBSFRaie92NHle8CBks6T28JHna3fC+nw/F2Xxl5BFmMLs6lU8bpRzrzZ2tZLr5MIDuP1SYtP/nY5/4BiA=="
+        ]
+        },
+        "timestamp": "2021-08-29T17:15:46Z"
+    }
+}`

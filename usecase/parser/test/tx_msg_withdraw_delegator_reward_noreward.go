@@ -314,3 +314,147 @@ const TX_MSG_WITHDRAW_DELEGATOR_REWARD_NO_REWARD_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+const TX_MSG_WITHDRAW_DELEGATOR_REWARD_NO_REWARD_TXS_RESP = `{
+    "tx": {
+        "body": {
+            "messages": [
+                {
+                    "@type": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+                    "delegator_address": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+                    "validator_address": "tcrocncl15grftg88l0gdw4mg9t9pwnl0pde2asjzekz0ek"
+                }
+            ],
+            "memo": "",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+        },
+        "auth_info": {
+            "signer_infos": [
+                {
+                    "public_key": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "A1mhVLohDEidpGYmpNYxxvikcaL72jQhZN1fxKFYkB8m"
+                    },
+                    "mode_info": {
+                        "single": {
+                            "mode": "SIGN_MODE_DIRECT"
+                        }
+                    },
+                    "sequence": "5"
+                }
+            ],
+            "fee": {
+                "amount": [],
+                "gas_limit": "200000",
+                "payer": "",
+                "granter": ""
+            }
+        },
+        "signatures": [
+            "doHpcQIGsaQoRUL297ipp2WsHFLk36MI2/9zWyr36K5pC53Kgaxocf4zc434XHCNwPm7GVzfxaDQNM6+jq5FUA=="
+        ]
+    },
+    "tx_response": {
+        "height": "435599",
+        "txhash": "3643A4CA41EC52BCB5B10DB32EC9867B2FA6B6A7C48B4DE9D45E6EDBC39B31B5",
+        "codespace": "",
+        "code": 0,
+        "data": "ChsKGXdpdGhkcmF3X2RlbGVnYXRvcl9yZXdhcmQ=",
+        "raw_log": "[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"withdraw_delegator_reward\"},{\"key\":\"module\",\"value\":\"distribution\"},{\"key\":\"sender\",\"value\":\"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn\"}]},{\"type\":\"withdraw_rewards\",\"attributes\":[{\"key\":\"amount\"},{\"key\":\"validator\",\"value\":\"tcrocncl15grftg88l0gdw4mg9t9pwnl0pde2asjzekz0ek\"}]}]}]",
+        "logs": [
+            {
+                "msg_index": 0,
+                "log": "",
+                "events": [
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "YWN0aW9u",
+                                "value": "d2l0aGRyYXdfZGVsZWdhdG9yX3Jld2FyZA==",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "withdraw_rewards",
+                        "attributes": [
+                            {
+                                "key": "YW1vdW50",
+                                "value": null,
+                                "index": true
+                            },
+                            {
+                                "key": "dmFsaWRhdG9y",
+                                "value": "dGNyb2NuY2wxNWdyZnRnODhsMGdkdzRtZzl0OXB3bmwwcGRlMmFzanpla3owZWs=",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "bW9kdWxl",
+                                "value": "ZGlzdHJpYnV0aW9u",
+                                "index": true
+                            },
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "dGNybzFmbXBybTBzank2bHo5bGx2N3JsdG4wdjJhenp3Y3d6dmsybHN5bg==",
+                                "index": true
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "info": "",
+        "gas_wanted": "200000",
+        "gas_used": "81466",
+        "tx": {
+            "@type": "/cosmos.tx.v1beta1.Tx",
+            "body": {
+                "messages": [
+                    {
+                        "@type": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+                        "delegator_address": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+                        "validator_address": "tcrocncl15grftg88l0gdw4mg9t9pwnl0pde2asjzekz0ek"
+                    }
+                ],
+                "memo": "",
+                "timeout_height": "0",
+                "extension_options": [],
+                "non_critical_extension_options": []
+            },
+            "auth_info": {
+                "signer_infos": [
+                    {
+                        "public_key": {
+                            "@type": "/cosmos.crypto.secp256k1.PubKey",
+                            "key": "A1mhVLohDEidpGYmpNYxxvikcaL72jQhZN1fxKFYkB8m"
+                        },
+                        "mode_info": {
+                            "single": {
+                                "mode": "SIGN_MODE_DIRECT"
+                            }
+                        },
+                        "sequence": "5"
+                    }
+                ],
+                "fee": {
+                    "amount": [],
+                    "gas_limit": "200000",
+                    "payer": "",
+                    "granter": ""
+                }
+            },
+            "signatures": [
+                "doHpcQIGsaQoRUL297ipp2WsHFLk36MI2/9zWyr36K5pC53Kgaxocf4zc434XHCNwPm7GVzfxaDQNM6+jq5FUA=="
+            ]
+        },
+        "timestamp": "2021-08-29T17:15:46Z"
+    }
+}`

@@ -26,6 +26,7 @@ import (
 	ibcchanneltypes "github.com/cosmos/ibc-go/modules/core/04-channel/types"
 	ibccommitmenttypes "github.com/cosmos/ibc-go/modules/core/23-commitment/types"
 	ibctypes "github.com/cosmos/ibc-go/modules/core/types"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	nfttypes "github.com/crypto-org-chain/chain-main/v3/x/nft/types"
 	cronostypes "github.com/crypto-org-chain/cronos/x/cronos/types"
 	liquiditytypes "github.com/gravity-devs/liquidity/x/liquidity/types"
@@ -199,4 +200,20 @@ type SingleModeInfo struct {
 type Bitarray struct {
 	ExtraBitsStored int64  `json:"extra_bits_stored"`
 	Elems           string `json:"elems"`
+}
+
+func SumAmount(amounts []model.CosmosTxAuthInfoFeeAmount) (coin.Coins, error) {
+	var err error
+
+	coins := coin.NewEmptyCoins()
+	for _, amount := range amounts {
+		var amountCoin coin.Coin
+		amountCoin, err = coin.NewCoinFromString(amount.Denom, amount.Amount)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing amount %s to Coin: %v", amount.Amount, err)
+		}
+		coins = coins.Add(amountCoin)
+	}
+
+	return coins, nil
 }

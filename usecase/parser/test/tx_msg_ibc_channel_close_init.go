@@ -499,3 +499,259 @@ const TX_MSG_CHANNEL_CLOSE_INIT_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+const TX_MSG_CHANNEL_CLOSE_INIT_TXS_RESP = `{
+    "tx": {
+        "body": {
+            "messages": [
+                {
+                    "@type": "/ibc.core.channel.v1.MsgChannelCloseInit",
+                    "port_id": "transfer",
+                    "channel_id": "channel-1",
+                    "signer": "cro1t7yk3d4meeaqf5zfegv8p94wlfhpcnsftz55f7"
+                }
+            ],
+            "memo": "",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+        },
+        "auth_info": {
+            "signer_infos": [
+                {
+                    "public_key": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "A21jVocfixpkt0btHUSMNYeU7z07Lv7BxLQlIprpnHTC"
+                    },
+                    "mode_info": {
+                        "single": {
+                            "mode": "SIGN_MODE_DIRECT"
+                        }
+                    },
+                    "sequence": "9"
+                }
+            ],
+            "fee": {
+                "amount": [
+                    {
+                        "denom": "basecro",
+                        "amount": "66392000"
+                    }
+                ],
+                "gas_limit": "66392",
+                "payer": "",
+                "granter": ""
+            }
+        },
+        "signatures": [
+            "u/8O0+Gh4uVFkqraqgIbZNO77QvcACrg7gfVHmpvUwsK+gGmnMDRKnjh82XcYMCTdD65YdbFdN4JsTJtLjV05w=="
+        ]
+    },
+    "tx_response": {
+        "height": "23",
+        "txhash": "3E491C5B2404FC3C3C15A59630729355ED398BFB617DA7D61C1B548E98955F8D",
+        "codespace": "",
+        "code": 0,
+        "data": "CioKKC9pYmMuY29yZS5jaGFubmVsLnYxLk1zZ0NoYW5uZWxDbG9zZUluaXQ=",
+        "raw_log": "[{\"events\":[{\"type\":\"channel_close_init\",\"attributes\":[{\"key\":\"port_id\",\"value\":\"transfer\"},{\"key\":\"channel_id\",\"value\":\"channel-1\"},{\"key\":\"counterparty_port_id\",\"value\":\"transfer\"},{\"key\":\"counterparty_channel_id\",\"value\":\"channel-0\"},{\"key\":\"connection_id\",\"value\":\"connection-1\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"/ibc.core.channel.v1.MsgChannelCloseInit\"},{\"key\":\"module\",\"value\":\"ibc_channel\"}]}]}]",
+        "logs": [
+            {
+                "msg_index": 0,
+                "log": "",
+                "events": [
+                    {
+                        "type": "coin_spent",
+                        "attributes": [
+                            {
+                                "key": "c3BlbmRlcg==",
+                                "value": "Y3JvMXQ3eWszZDRtZWVhcWY1emZlZ3Y4cDk0d2xmaHBjbnNmdHo1NWY3",
+                                "index": true
+                            },
+                            {
+                                "key": "YW1vdW50",
+                                "value": "NjYzOTIwMDBiYXNlY3Jv",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "coin_received",
+                        "attributes": [
+                            {
+                                "key": "cmVjZWl2ZXI=",
+                                "value": "Y3JvMTd4cGZ2YWttMmFtZzk2MnlsczZmODR6M2tlbGw4YzVsZ3p0ZWh2",
+                                "index": true
+                            },
+                            {
+                                "key": "YW1vdW50",
+                                "value": "NjYzOTIwMDBiYXNlY3Jv",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "transfer",
+                        "attributes": [
+                            {
+                                "key": "cmVjaXBpZW50",
+                                "value": "Y3JvMTd4cGZ2YWttMmFtZzk2MnlsczZmODR6M2tlbGw4YzVsZ3p0ZWh2",
+                                "index": true
+                            },
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "Y3JvMXQ3eWszZDRtZWVhcWY1emZlZ3Y4cDk0d2xmaHBjbnNmdHo1NWY3",
+                                "index": true
+                            },
+                            {
+                                "key": "YW1vdW50",
+                                "value": "NjYzOTIwMDBiYXNlY3Jv",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "Y3JvMXQ3eWszZDRtZWVhcWY1emZlZ3Y4cDk0d2xmaHBjbnNmdHo1NWY3",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "tx",
+                        "attributes": [
+                            {
+                                "key": "ZmVl",
+                                "value": "NjYzOTIwMDBiYXNlY3Jv",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "tx",
+                        "attributes": [
+                            {
+                                "key": "YWNjX3NlcQ==",
+                                "value": "Y3JvMXQ3eWszZDRtZWVhcWY1emZlZ3Y4cDk0d2xmaHBjbnNmdHo1NWY3Lzk=",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "tx",
+                        "attributes": [
+                            {
+                                "key": "c2lnbmF0dXJl",
+                                "value": "dS84TzArR2g0dVZGa3FyYXFnSWJaTk83N1F2Y0FDcmc3Z2ZWSG1wdlV3c0srZ0dtbk1EUktuamg4MlhjWU1DVGRENjVZZGJGZE40SnNUSnRMalYwNXc9PQ==",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "YWN0aW9u",
+                                "value": "L2liYy5jb3JlLmNoYW5uZWwudjEuTXNnQ2hhbm5lbENsb3NlSW5pdA==",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "channel_close_init",
+                        "attributes": [
+                            {
+                                "key": "cG9ydF9pZA==",
+                                "value": "dHJhbnNmZXI=",
+                                "index": true
+                            },
+                            {
+                                "key": "Y2hhbm5lbF9pZA==",
+                                "value": "Y2hhbm5lbC0x",
+                                "index": true
+                            },
+                            {
+                                "key": "Y291bnRlcnBhcnR5X3BvcnRfaWQ=",
+                                "value": "dHJhbnNmZXI=",
+                                "index": true
+                            },
+                            {
+                                "key": "Y291bnRlcnBhcnR5X2NoYW5uZWxfaWQ=",
+                                "value": "Y2hhbm5lbC0w",
+                                "index": true
+                            },
+                            {
+                                "key": "Y29ubmVjdGlvbl9pZA==",
+                                "value": "Y29ubmVjdGlvbi0x",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "bW9kdWxl",
+                                "value": "aWJjX2NoYW5uZWw=",
+                                "index": true
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "info": "",
+        "gas_wanted": "200000",
+        "gas_used": "60266",
+        "tx": {
+            "@type": "/cosmos.tx.v1beta1.Tx",
+            "body": {
+                "messages": [
+                    {
+                        "@type": "/ibc.core.channel.v1.MsgChannelCloseInit",
+                        "port_id": "transfer",
+                        "channel_id": "channel-1",
+                        "signer": "cro1t7yk3d4meeaqf5zfegv8p94wlfhpcnsftz55f7"
+                    }
+                ],
+                "memo": "",
+                "timeout_height": "0",
+                "extension_options": [],
+                "non_critical_extension_options": []
+            },
+            "auth_info": {
+                "signer_infos": [
+                    {
+                        "public_key": {
+                            "@type": "/cosmos.crypto.secp256k1.PubKey",
+                            "key": "A21jVocfixpkt0btHUSMNYeU7z07Lv7BxLQlIprpnHTC"
+                        },
+                        "mode_info": {
+                            "single": {
+                                "mode": "SIGN_MODE_DIRECT"
+                            }
+                        },
+                        "sequence": "9"
+                    }
+                ],
+                "fee": {
+                    "amount": [
+                        {
+                            "denom": "basecro",
+                            "amount": "66392000"
+                        }
+                    ],
+                    "gas_limit": "66392",
+                    "payer": "",
+                    "granter": ""
+                }
+            },
+            "signatures": [
+                "u/8O0+Gh4uVFkqraqgIbZNO77QvcACrg7gfVHmpvUwsK+gGmnMDRKnjh82XcYMCTdD65YdbFdN4JsTJtLjV05w=="
+            ]
+        },
+        "timestamp": "2021-08-29T17:15:46Z"
+    }
+}`

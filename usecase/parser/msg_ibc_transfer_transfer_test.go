@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/crypto-com/chain-indexing/external/json"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -12,7 +13,6 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
 	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
 var _ = Describe("ParseMsgCommands", func() {
@@ -24,7 +24,7 @@ var _ = Describe("ParseMsgCommands", func() {
   "height": 24,
   "uuid": "{UUID}",
   "msgName": "/ibc.applications.transfer.v1.MsgTransfer",
-  "txHash": "7A5D86E0B1A364106EE2F1B40431B15A8E1B6C4A2E09E831AB773A12F5F5A564",
+  "txHash": "579B97CD5B947C2FA0EC87EDD4DAA8BECF422B96A82E2C9DBFE15F9F6DB4109B",
   "msgIndex": 0,
   "params": {
     "sourcePort": "transfer",
@@ -56,13 +56,15 @@ var _ = Describe("ParseMsgCommands", func() {
 }
 `
 
-			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_TRANSFER_BLOCK_RESP,
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_TRANSFER_BLOCK_RESULTS_RESP,
 			))
+
+			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_TRANSFER_TXS_RESP)
+			txs := []model.Tx{*tx}
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
@@ -71,9 +73,9 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
-				block,
+				block.Height,
 				blockResults,
+				txs,
 				accountAddressPrefix,
 				stakingDenom,
 			)
@@ -137,13 +139,15 @@ var _ = Describe("ParseMsgCommands", func() {
 }
 `
 
-			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_TRANSFER_STRING_AMOUNT_BLOCK_RESP,
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_TRANSFER_STRING_AMOUNT_BLOCK_RESULTS_RESP,
 			))
+
+			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_TRANSFER_STRING_AMOUNT_TXS_RESP)
+			txs := []model.Tx{*tx}
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
@@ -152,9 +156,9 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
-				block,
+				block.Height,
 				blockResults,
+				txs,
 				accountAddressPrefix,
 				stakingDenom,
 			)

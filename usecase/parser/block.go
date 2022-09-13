@@ -16,10 +16,10 @@ func ParseBlockToCommands(
 	logger applogger.Logger,
 	parserManager *utils.CosmosParserManager,
 	cosmosClient cosmosapp_interface.Client,
-	txDecoder *utils.TxDecoder,
 	block *usecase_model.Block,
 	rawBlock *usecase_model.RawBlock,
 	blockResults *usecase_model.BlockResults,
+	txs []usecase_model.Tx,
 	accountAddressPrefix string,
 	bondingDenom string,
 ) ([]entity_command.Command, error) {
@@ -41,9 +41,9 @@ func ParseBlockToCommands(
 	if len(blockResults.TxsResults) > 0 {
 		msgCommands, possibleSignerAddresses, parseErr := ParseBlockTxsMsgToCommands(
 			parserManager,
-			txDecoder,
-			block,
+			block.Height,
 			blockResults,
+			txs,
 			accountAddressPrefix,
 			bondingDenom,
 		)
@@ -53,7 +53,7 @@ func ParseBlockToCommands(
 		parseTransactionCommandLogger := logger.WithFields(applogger.LogFields{
 			"submodule": "ParseTransactionCommands",
 		})
-		transactionCommands, parseErr := ParseTransactionCommands(parseTransactionCommandLogger, txDecoder, cosmosClient, block, blockResults, accountAddressPrefix, possibleSignerAddresses)
+		transactionCommands, parseErr := ParseTransactionCommands(parseTransactionCommandLogger, txs, cosmosClient, blockResults, accountAddressPrefix, possibleSignerAddresses)
 		if parseErr != nil {
 			return nil, fmt.Errorf("error parsing transaction commands: %v", parseErr)
 		}

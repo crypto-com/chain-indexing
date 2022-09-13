@@ -546,3 +546,329 @@ const TX_SIGNER_PUBKEY_IN_STATE_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+const TX_SIGNER_PUBKEY_IN_STATE_TXS_RESP = `{
+    "tx": {
+        "body": {
+            "messages": [
+                {
+                    "@type": "/cosmos.bank.v1beta1.MsgMultiSend",
+                    "inputs": [
+                        {
+                            "address": "cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7",
+                            "coins": [
+                                {
+                                    "denom": "basecro",
+                                    "amount": "1"
+                                }
+                            ]
+                        },
+                        {
+                            "address": "cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc",
+                            "coins": [
+                                {
+                                    "denom": "basecro",
+                                    "amount": "1"
+                                }
+                            ]
+                        }
+                    ],
+                    "outputs": [
+                        {
+                            "address": "cro1mzh0ps49m7ur7y8fwhy5xtt06mq7fnk3xuqset",
+                            "coins": [
+                                {
+                                    "denom": "basecro",
+                                    "amount": "2"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "memo": "",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+        },
+        "auth_info": {
+            "signer_infos": [
+                {
+                    "public_key": null,
+                    "mode_info": {
+                        "single": {
+                            "mode": "SIGN_MODE_LEGACY_AMINO_JSON"
+                        }
+                    },
+                    "sequence": "1"
+                },
+                {
+                    "public_key": null,
+                    "mode_info": {
+                        "single": {
+                            "mode": "SIGN_MODE_LEGACY_AMINO_JSON"
+                        }
+                    },
+                    "sequence": "1"
+                }
+            ],
+            "fee": {
+                "amount": [],
+                "gas_limit": "200000",
+                "payer": "",
+                "granter": ""
+            }
+        },
+        "signatures": [
+            "0g01KqQ7FTaZ/tbYLdnM+TvdoRSekR1kNbbWDRJAlMJZyTfs/IYTyi5dMRZ5JvfyfLBmEr5op9CyyHLxZMh80A==",
+            "u3tLeyDfZd8aMM94w+mHzGwUD2onc/hFkALMavZB+2AD9/Byn76sNvWe8aicXlmH7eFfMKmvloSDsUDsGpympA=="
+        ]
+    },
+    "tx_response": {
+        "height": "324",
+        "txhash": "C98FF5B5B95DC21F6D614D914FDA0A546DAE65E826ABFFE5C89BCF56A6F4112C",
+        "codespace": "",
+        "code": 0,
+        "data": "CiMKIS9jb3Ntb3MuYmFuay52MWJldGExLk1zZ011bHRpU2VuZA==",
+        "raw_log": "[{\"events\":[{\"type\":\"coin_received\",\"attributes\":[{\"key\":\"receiver\",\"value\":\"cro1mzh0ps49m7ur7y8fwhy5xtt06mq7fnk3xuqset\"},{\"key\":\"amount\",\"value\":\"2basecro\"}]},{\"type\":\"coin_spent\",\"attributes\":[{\"key\":\"spender\",\"value\":\"cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7\"},{\"key\":\"amount\",\"value\":\"1basecro\"},{\"key\":\"spender\",\"value\":\"cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc\"},{\"key\":\"amount\",\"value\":\"1basecro\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"/cosmos.bank.v1beta1.MsgMultiSend\"},{\"key\":\"sender\",\"value\":\"cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7\"},{\"key\":\"sender\",\"value\":\"cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"cro1mzh0ps49m7ur7y8fwhy5xtt06mq7fnk3xuqset\"},{\"key\":\"amount\",\"value\":\"2basecro\"}]}]}]",
+        "logs": [
+            {
+                "msg_index": 0,
+                "log": "",
+                "events": [
+                    {
+                        "type": "tx",
+                        "attributes": [
+                            {
+                                "key": "ZmVl",
+                                "value": null,
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "tx",
+                        "attributes": [
+                            {
+                                "key": "YWNjX3NlcQ==",
+                                "value": "Y3JvMXJybm0ycmtocmtnZWxqN2o5cHhldTdzZ2d2OGZkZTN0a3lteW03LzE=",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "tx",
+                        "attributes": [
+                            {
+                                "key": "c2lnbmF0dXJl",
+                                "value": "MGcwMUtxUTdGVGFaL3RiWUxkbk0rVHZkb1JTZWtSMWtOYmJXRFJKQWxNSlp5VGZzL0lZVHlpNWRNUlo1SnZmeWZMQm1FcjVvcDlDeXlITHhaTWg4MEE9PQ==",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "tx",
+                        "attributes": [
+                            {
+                                "key": "YWNjX3NlcQ==",
+                                "value": "Y3JvMTQ0MmZkcTJ0NjJ2cWNocmFqNnVqeG5ocTNna3pxM3JhOW50NGxjLzE=",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "tx",
+                        "attributes": [
+                            {
+                                "key": "c2lnbmF0dXJl",
+                                "value": "dTN0TGV5RGZaZDhhTU05NHcrbUh6R3dVRDJvbmMvaEZrQUxNYXZaQisyQUQ5L0J5bjc2c052V2U4YWljWGxtSDdlRmZNS212bG9TRHNVRHNHcHltcEE9PQ==",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "YWN0aW9u",
+                                "value": "L2Nvc21vcy5iYW5rLnYxYmV0YTEuTXNnTXVsdGlTZW5k",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "coin_spent",
+                        "attributes": [
+                            {
+                                "key": "c3BlbmRlcg==",
+                                "value": "Y3JvMXJybm0ycmtocmtnZWxqN2o5cHhldTdzZ2d2OGZkZTN0a3lteW03",
+                                "index": true
+                            },
+                            {
+                                "key": "YW1vdW50",
+                                "value": "MWJhc2Vjcm8=",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "Y3JvMXJybm0ycmtocmtnZWxqN2o5cHhldTdzZ2d2OGZkZTN0a3lteW03",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "coin_spent",
+                        "attributes": [
+                            {
+                                "key": "c3BlbmRlcg==",
+                                "value": "Y3JvMTQ0MmZkcTJ0NjJ2cWNocmFqNnVqeG5ocTNna3pxM3JhOW50NGxj",
+                                "index": true
+                            },
+                            {
+                                "key": "YW1vdW50",
+                                "value": "MWJhc2Vjcm8=",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "Y3JvMTQ0MmZkcTJ0NjJ2cWNocmFqNnVqeG5ocTNna3pxM3JhOW50NGxj",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "coin_received",
+                        "attributes": [
+                            {
+                                "key": "cmVjZWl2ZXI=",
+                                "value": "Y3JvMW16aDBwczQ5bTd1cjd5OGZ3aHk1eHR0MDZtcTdmbmszeHVxc2V0",
+                                "index": true
+                            },
+                            {
+                                "key": "YW1vdW50",
+                                "value": "MmJhc2Vjcm8=",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "transfer",
+                        "attributes": [
+                            {
+                                "key": "cmVjaXBpZW50",
+                                "value": "Y3JvMW16aDBwczQ5bTd1cjd5OGZ3aHk1eHR0MDZtcTdmbmszeHVxc2V0",
+                                "index": true
+                            },
+                            {
+                                "key": "YW1vdW50",
+                                "value": "MmJhc2Vjcm8=",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "bW9kdWxl",
+                                "value": "YmFuaw==",
+                                "index": true
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "info": "",
+        "gas_wanted": "200000",
+        "gas_used": "77224",
+        "tx": {
+            "@type": "/cosmos.tx.v1beta1.Tx",
+            "body": {
+                "messages": [
+                    {
+                        "@type": "/cosmos.bank.v1beta1.MsgMultiSend",
+                        "inputs": [
+                            {
+                                "address": "cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7",
+                                "coins": [
+                                    {
+                                        "denom": "basecro",
+                                        "amount": "1"
+                                    }
+                                ]
+                            },
+                            {
+                                "address": "cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc",
+                                "coins": [
+                                    {
+                                        "denom": "basecro",
+                                        "amount": "1"
+                                    }
+                                ]
+                            }
+                        ],
+                        "outputs": [
+                            {
+                                "address": "cro1mzh0ps49m7ur7y8fwhy5xtt06mq7fnk3xuqset",
+                                "coins": [
+                                    {
+                                        "denom": "basecro",
+                                        "amount": "2"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "memo": "",
+                "timeout_height": "0",
+                "extension_options": [],
+                "non_critical_extension_options": []
+            },
+            "auth_info": {
+                "signer_infos": [
+                    {
+                        "public_key": null,
+                        "mode_info": {
+                            "single": {
+                                "mode": "SIGN_MODE_LEGACY_AMINO_JSON"
+                            }
+                        },
+                        "sequence": "1"
+                    },
+                    {
+                        "public_key": null,
+                        "mode_info": {
+                            "single": {
+                                "mode": "SIGN_MODE_LEGACY_AMINO_JSON"
+                            }
+                        },
+                        "sequence": "1"
+                    }
+                ],
+                "fee": {
+                    "amount": [],
+                    "gas_limit": "200000",
+                    "payer": "",
+                    "granter": ""
+                }
+            },
+            "signatures": [
+                "0g01KqQ7FTaZ/tbYLdnM+TvdoRSekR1kNbbWDRJAlMJZyTfs/IYTyi5dMRZ5JvfyfLBmEr5op9CyyHLxZMh80A==",
+                "u3tLeyDfZd8aMM94w+mHzGwUD2onc/hFkALMavZB+2AD9/Byn76sNvWe8aicXlmH7eFfMKmvloSDsUDsGpympA=="
+            ]
+        },
+        "timestamp": "2021-08-29T17:15:46Z"
+    }
+}`

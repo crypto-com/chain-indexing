@@ -289,3 +289,128 @@ const TX_FAILED_WITH_FEE_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+const TX_FAILED_WITH_FEE_TXS_RESP = `{
+    "tx": {
+        "body": {
+            "messages": [
+                {
+                    "@type": "/cosmos.bank.v1beta1.MsgSend",
+                    "from_address": "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
+                    "to_address": "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
+                    "amount": [
+                        {
+                            "denom": "basetcro",
+                            "amount": "1000000000"
+                        }
+                    ]
+                }
+            ],
+            "memo": "",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+        },
+        "auth_info": {
+            "signer_infos": [
+                {
+                    "public_key": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "Ax+Rgmd2ta8FxUOoFJ9Dvo3782nMWJzdYP0Jcyrk5XwO"
+                    },
+                    "mode_info": {
+                        "single": {
+                            "mode": "SIGN_MODE_DIRECT"
+                        }
+                    },
+                    "sequence": "59"
+                }
+            ],
+            "fee": {
+                "amount": [
+                    {
+                        "denom": "basetcro",
+                        "amount": "8000000"
+                    }
+                ],
+                "gas_limit": "80000000",
+                "payer": "",
+                "granter": ""
+            }
+        },
+        "signatures": [
+            "pXF78nzs3lhSlTreiTXrMoqjxF04kidrROyj8bJ8vrxPv2rfecUsx3IHg+P4AVHOstaxarHiP75fWQSB9BBsRw=="
+        ]
+    },
+    "tx_response": {
+        "height": "420301",
+        "txhash": "2A2A64A310B3D0E84C9831F4353E188A6E63BF451975C859DF40C54047AC6324",
+        "codespace": "sdk",
+        "code": 11,
+        "data": "",
+        "raw_log": "out of gas in location: WriteFlat; gasWanted: 80000000, gasUsed: 80150021: out of gas",
+        "logs": [
+            {
+                "msg_index": 0,
+                "log": "",
+                "events": []
+            }
+        ],
+        "info": "",
+        "gas_wanted": "80000000",
+        "gas_used": "80150021",
+        "tx": {
+            "@type": "/cosmos.tx.v1beta1.Tx",
+            "body": {
+                "messages": [
+                    {
+                        "@type": "/cosmos.bank.v1beta1.MsgSend",
+                        "from_address": "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
+                        "to_address": "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
+                        "amount": [
+                            {
+                                "denom": "basetcro",
+                                "amount": "1000000000"
+                            }
+                        ]
+                    }
+                ],
+                "memo": "",
+                "timeout_height": "0",
+                "extension_options": [],
+                "non_critical_extension_options": []
+            },
+            "auth_info": {
+                "signer_infos": [
+                    {
+                        "public_key": {
+                            "@type": "/cosmos.crypto.secp256k1.PubKey",
+                            "key": "Ax+Rgmd2ta8FxUOoFJ9Dvo3782nMWJzdYP0Jcyrk5XwO"
+                        },
+                        "mode_info": {
+                            "single": {
+                                "mode": "SIGN_MODE_DIRECT"
+                            }
+                        },
+                        "sequence": "59"
+                    }
+                ],
+                "fee": {
+                    "amount": [
+                        {
+                            "denom": "basetcro",
+                            "amount": "8000000"
+                        }
+                    ],
+                    "gas_limit": "80000000",
+                    "payer": "",
+                    "granter": ""
+                }
+            },
+            "signatures": [
+                "pXF78nzs3lhSlTreiTXrMoqjxF04kidrROyj8bJ8vrxPv2rfecUsx3IHg+P4AVHOstaxarHiP75fWQSB9BBsRw=="
+            ]
+        },
+        "timestamp": "2021-08-29T17:15:46Z"
+    }
+}`

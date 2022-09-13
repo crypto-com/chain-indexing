@@ -2357,3 +2357,124 @@ const TX_FAILED_MSG_WITHDRAW_VALIDATOR_COMMISSION_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+const TX_FAILED_MSG_WITHDRAW_VALIDATOR_COMMISSION_TXS_RESP = `{
+    "tx": {
+        "body": {
+            "messages": [
+                {
+                    "@type": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+                    "delegator_address": "tcro1pm27djcs5djxjsxw3unrkv3m3jtxdexk73hqel",
+                    "validator_address": "tcrocncl1pm27djcs5djxjsxw3unrkv3m3jtxdexktw5epu"
+                },
+                {
+                    "@type": "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission",
+                    "validator_address": "tcrocncl1pm27djcs5djxjsxw3unrkv3m3jtxdexktw5epu"
+                }
+            ],
+            "memo": "",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+        },
+        "auth_info": {
+            "signer_infos": [
+                {
+                    "public_key": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "A+luONaIBZYzAifIIUYKemI71jXGB3KuQWPBdcv4TPQ0"
+                    },
+                    "mode_info": {
+                        "single": {
+                            "mode": "SIGN_MODE_DIRECT"
+                        }
+                    },
+                    "sequence": "24101"
+                }
+            ],
+            "fee": {
+                "amount": [
+                    {
+                        "denom": "basetcro",
+                        "amount": "20000"
+                    }
+                ],
+                "gas_limit": "200000",
+                "payer": "",
+                "granter": ""
+            }
+        },
+        "signatures": [
+            "dLDqJXBxnfJdvzhwHvWCaJq8bM1AqwqqntJIznPrvbRwExIXRG1OQ83QTQEJWCKOvYD1IyTW1dMOypIXHA0j5w=="
+        ]
+    },
+    "tx_response": {
+        "height": "804969",
+        "txhash": "CC5EE77B6CBCEA4DF26F5AC8FA06BA893D018602F03A09E9E02B8417B12C46ED",
+        "codespace": "sdk",
+        "code": 32,
+        "data": "",
+        "raw_log": "account sequence mismatch, expected 24104, got 24101: incorrect account sequence",
+        "logs": [
+            {
+                "msg_index": 0,
+                "log": "",
+                "events": []
+            }
+        ],
+        "info": "",
+        "gas_wanted": "200000",
+        "gas_used": "43114",
+        "tx": {
+            "@type": "/cosmos.tx.v1beta1.Tx",
+            "body": {
+                "messages": [
+                    {
+                        "@type": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+                        "delegator_address": "tcro1pm27djcs5djxjsxw3unrkv3m3jtxdexk73hqel",
+                        "validator_address": "tcrocncl1pm27djcs5djxjsxw3unrkv3m3jtxdexktw5epu"
+                    },
+                    {
+                        "@type": "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission",
+                        "validator_address": "tcrocncl1pm27djcs5djxjsxw3unrkv3m3jtxdexktw5epu"
+                    }
+                ],
+                "memo": "",
+                "timeout_height": "0",
+                "extension_options": [],
+                "non_critical_extension_options": []
+            },
+            "auth_info": {
+                "signer_infos": [
+                    {
+                        "public_key": {
+                            "@type": "/cosmos.crypto.secp256k1.PubKey",
+                            "key": "A+luONaIBZYzAifIIUYKemI71jXGB3KuQWPBdcv4TPQ0"
+                        },
+                        "mode_info": {
+                            "single": {
+                                "mode": "SIGN_MODE_DIRECT"
+                            }
+                        },
+                        "sequence": "24101"
+                    }
+                ],
+                "fee": {
+                    "amount": [
+                        {
+                            "denom": "basetcro",
+                            "amount": "20000"
+                        }
+                    ],
+                    "gas_limit": "200000",
+                    "payer": "",
+                    "granter": ""
+                }
+            },
+            "signatures": [
+                "dLDqJXBxnfJdvzhwHvWCaJq8bM1AqwqqntJIznPrvbRwExIXRG1OQ83QTQEJWCKOvYD1IyTW1dMOypIXHA0j5w=="
+            ]
+        },
+        "timestamp": "2021-08-29T17:15:46Z"
+    }
+}`

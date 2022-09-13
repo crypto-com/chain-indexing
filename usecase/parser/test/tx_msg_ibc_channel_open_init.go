@@ -351,3 +351,221 @@ const TX_MSG_CHANNEL_OPEN_INIT_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+const TX_MSG_CHANNEL_OPEN_INIT_TXS_RESP = `{
+    "tx": {
+        "body": {
+            "messages": [
+                {
+                    "@type": "/ibc.core.channel.v1.MsgChannelOpenInit",
+                    "port_id": "transfer",
+                    "channel": {
+                        "state": "STATE_INIT",
+                        "ordering": "ORDER_UNORDERED",
+                        "counterparty": {
+                            "port_id": "transfer",
+                            "channel_id": ""
+                        },
+                        "connection_hops": [
+                            "connection-0"
+                        ],
+                        "version": "ics20-1"
+                    },
+                    "signer": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"
+                }
+            ],
+            "memo": "",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+        },
+        "auth_info": {
+            "signer_infos": [
+                {
+                    "public_key": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "A2jcjr5156UkSGQAiTIwbqpaZem3RbuyH2UVyOoKzLbr"
+                    },
+                    "mode_info": {
+                        "single": {
+                            "mode": "SIGN_MODE_DIRECT"
+                        }
+                    },
+                    "sequence": "4"
+                }
+            ],
+            "fee": {
+                "amount": [
+                    {
+                        "denom": "basecro",
+                        "amount": "1000"
+                    }
+                ],
+                "gas_limit": "3000000",
+                "payer": "",
+                "granter": ""
+            }
+        },
+        "signatures": [
+            "81JcZUrLB1wefloHhLgP8Gn5K/TV7RslILiD1EU3IHxtxWCRq8R0dch+2/uq8JUhXTIfx+IQ6Bqqjsdz6g582w=="
+        ]
+    },
+    "tx_response": {
+        "height": "14",
+        "txhash": "310C7A5DE69CABB2175A2CBD417A2BFBA105C030941663F3F8809BBA2A6D810D",
+        "codespace": "",
+        "code": 0,
+        "data": "ChMKEWNoYW5uZWxfb3Blbl9pbml0",
+        "raw_log": "[{\"events\":[{\"type\":\"channel_open_init\",\"attributes\":[{\"key\":\"port_id\",\"value\":\"transfer\"},{\"key\":\"channel_id\",\"value\":\"channel-0\"},{\"key\":\"counterparty_port_id\",\"value\":\"transfer\"},{\"key\":\"counterparty_channel_id\"},{\"key\":\"connection_id\",\"value\":\"connection-0\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"channel_open_init\"},{\"key\":\"module\",\"value\":\"ibc_channel\"}]}]}]",
+        "logs": [
+            {
+                "msg_index": 0,
+                "log": "",
+                "events": [
+                    {
+                        "type": "transfer",
+                        "attributes": [
+                            {
+                                "key": "cmVjaXBpZW50",
+                                "value": "Y3JvMTd4cGZ2YWttMmFtZzk2MnlsczZmODR6M2tlbGw4YzVsZ3p0ZWh2",
+                                "index": true
+                            },
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "Y3JvMTBzbmhsdmtwdWM0eGhxODJ1eWc1ZXgyZWV6bW1mNWVkNXRtcXN2",
+                                "index": true
+                            },
+                            {
+                                "key": "YW1vdW50",
+                                "value": "MTAwMGJhc2Vjcm8=",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "c2VuZGVy",
+                                "value": "Y3JvMTBzbmhsdmtwdWM0eGhxODJ1eWc1ZXgyZWV6bW1mNWVkNXRtcXN2",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "YWN0aW9u",
+                                "value": "Y2hhbm5lbF9vcGVuX2luaXQ=",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "channel_open_init",
+                        "attributes": [
+                            {
+                                "key": "cG9ydF9pZA==",
+                                "value": "dHJhbnNmZXI=",
+                                "index": true
+                            },
+                            {
+                                "key": "Y2hhbm5lbF9pZA==",
+                                "value": "Y2hhbm5lbC0w",
+                                "index": true
+                            },
+                            {
+                                "key": "Y291bnRlcnBhcnR5X3BvcnRfaWQ=",
+                                "value": "dHJhbnNmZXI=",
+                                "index": true
+                            },
+                            {
+                                "key": "Y291bnRlcnBhcnR5X2NoYW5uZWxfaWQ=",
+                                "value": null,
+                                "index": true
+                            },
+                            {
+                                "key": "Y29ubmVjdGlvbl9pZA==",
+                                "value": "Y29ubmVjdGlvbi0w",
+                                "index": true
+                            }
+                        ]
+                    },
+                    {
+                        "type": "message",
+                        "attributes": [
+                            {
+                                "key": "bW9kdWxl",
+                                "value": "aWJjX2NoYW5uZWw=",
+                                "index": true
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "info": "",
+        "gas_wanted": "3000000",
+        "gas_used": "59471",
+        "tx": {
+            "@type": "/cosmos.tx.v1beta1.Tx",
+            "body": {
+                "messages": [
+                    {
+                        "@type": "/ibc.core.channel.v1.MsgChannelOpenInit",
+                        "port_id": "transfer",
+                        "channel": {
+                            "state": "STATE_INIT",
+                            "ordering": "ORDER_UNORDERED",
+                            "counterparty": {
+                                "port_id": "transfer",
+                                "channel_id": ""
+                            },
+                            "connection_hops": [
+                                "connection-0"
+                            ],
+                            "version": "ics20-1"
+                        },
+                        "signer": "cro10snhlvkpuc4xhq82uyg5ex2eezmmf5ed5tmqsv"
+                    }
+                ],
+                "memo": "",
+                "timeout_height": "0",
+                "extension_options": [],
+                "non_critical_extension_options": []
+            },
+            "auth_info": {
+                "signer_infos": [
+                    {
+                        "public_key": {
+                            "@type": "/cosmos.crypto.secp256k1.PubKey",
+                            "key": "A2jcjr5156UkSGQAiTIwbqpaZem3RbuyH2UVyOoKzLbr"
+                        },
+                        "mode_info": {
+                            "single": {
+                                "mode": "SIGN_MODE_DIRECT"
+                            }
+                        },
+                        "sequence": "4"
+                    }
+                ],
+                "fee": {
+                    "amount": [
+                        {
+                            "denom": "basecro",
+                            "amount": "1000"
+                        }
+                    ],
+                    "gas_limit": "3000000",
+                    "payer": "",
+                    "granter": ""
+                }
+            },
+            "signatures": [
+                "81JcZUrLB1wefloHhLgP8Gn5K/TV7RslILiD1EU3IHxtxWCRq8R0dch+2/uq8JUhXTIfx+IQ6Bqqjsdz6g582w=="
+            ]
+        },
+        "timestamp": "2021-08-29T17:15:46Z"
+    }
+}`

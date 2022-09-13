@@ -5,8 +5,7 @@ import (
 	"strings"
 
 	"github.com/crypto-com/chain-indexing/external/json"
-	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -34,13 +33,15 @@ var _ = Describe("ParseMsgCommands", func() {
             }
         }`
 
-			txDecoder := utils.NewTxDecoder()
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_REVOKE_ALLOWANCE_BLOCK_RESP,
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_REVOKE_ALLOWANCE_BLOCK_RESULTS_RESP,
 			))
+
+			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_REVOKE_ALLOWANCE_TXS_RESP)
+			txs := []model.Tx{*tx}
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
@@ -49,9 +50,9 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
-				block,
+				block.Height,
 				blockResults,
+				txs,
 				accountAddressPrefix,
 				stakingDenom,
 			)

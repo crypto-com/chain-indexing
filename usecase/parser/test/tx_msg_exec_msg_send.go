@@ -591,3 +591,205 @@ const TX_MSG_EXEC_MSG_SEND_BLOCK_RESULTS_RESP = `
   }
 }
 `
+
+const TX_MSG_EXEC_MSG_SEND_TXS_RESP = `{
+  "tx": {
+    "body": {
+      "messages": [
+        {
+          "@type": "/cosmos.authz.v1beta1.MsgExec",
+          "grantee": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2",
+          "msgs": [
+            {
+              "@type": "/cosmos.bank.v1beta1.MsgSend",
+              "from_address": "tcro1vurfhqf0j2jgfpjahlja6g6uq2ts2r60swm2d9",
+              "to_address": "tcro1a93yfnsc3x7m0m445cjsvee2n7qz9c0purlzwq",
+              "amount": [
+                {
+                  "denom": "basetcro",
+                  "amount": "100000000"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "memo": "",
+      "timeout_height": "0",
+      "extension_options": [
+      ],
+      "non_critical_extension_options": [
+      ]
+    },
+    "auth_info": {
+      "signer_infos": [
+        {
+          "public_key": {
+            "@type": "/cosmos.crypto.secp256k1.PubKey",
+            "key": "A/ZmZrKTHzpFHfml++KJ3lO8qQysug3ls0/McPi6TY3o"
+          },
+          "mode_info": {
+            "single": {
+              "mode": "SIGN_MODE_DIRECT"
+            }
+          },
+          "sequence": "3"
+        }
+      ],
+      "fee": {
+        "amount": [
+          {
+            "denom": "basetcro",
+            "amount": "50000"
+          }
+        ],
+        "gas_limit": "200000",
+        "payer": "",
+        "granter": ""
+      }
+    },
+    "signatures": [
+      "1LLYbXku5U6vi3adSa4jqG2p9RxKYqOExnLA79XXMnou4lcaNhBoi3sFhVWfEaoDTOEsLpAKDZjXGueXoo8dMw=="
+    ]
+  },
+  "tx_response": {
+    "height": "113382",
+    "txhash": "0CE949FAB0CB8EFB6E80F8ED785A6313FE7C094C336D4A7E8630E7D81AECD946",
+    "codespace": "",
+    "code": 0,
+    "data": "0A230A1D2F636F736D6F732E617574687A2E763162657461312E4D73674578656312020A00",
+    "raw_log": "[{\"events\":[{\"type\":\"coin_received\",\"attributes\":[{\"key\":\"receiver\",\"value\":\"tcro1a93yfnsc3x7m0m445cjsvee2n7qz9c0purlzwq\"},{\"key\":\"amount\",\"value\":\"100000000basetcro\"}]},{\"type\":\"coin_spent\",\"attributes\":[{\"key\":\"spender\",\"value\":\"tcro1vurfhqf0j2jgfpjahlja6g6uq2ts2r60swm2d9\"},{\"key\":\"amount\",\"value\":\"100000000basetcro\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"/cosmos.authz.v1beta1.MsgExec\"},{\"key\":\"sender\",\"value\":\"tcro1vurfhqf0j2jgfpjahlja6g6uq2ts2r60swm2d9\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro1a93yfnsc3x7m0m445cjsvee2n7qz9c0purlzwq\"},{\"key\":\"sender\",\"value\":\"tcro1vurfhqf0j2jgfpjahlja6g6uq2ts2r60swm2d9\"},{\"key\":\"amount\",\"value\":\"100000000basetcro\"}]}]}]",
+    "logs": [
+      {
+        "msg_index": 0,
+        "log": "",
+        "events": [
+          {
+            "type": "coin_received",
+            "attributes": [
+              {
+                "key": "receiver",
+                "value": "tcro1a93yfnsc3x7m0m445cjsvee2n7qz9c0purlzwq"
+              },
+              {
+                "key": "amount",
+                "value": "100000000basetcro"
+              }
+            ]
+          },
+          {
+            "type": "coin_spent",
+            "attributes": [
+              {
+                "key": "spender",
+                "value": "tcro1vurfhqf0j2jgfpjahlja6g6uq2ts2r60swm2d9"
+              },
+              {
+                "key": "amount",
+                "value": "100000000basetcro"
+              }
+            ]
+          },
+          {
+            "type": "message",
+            "attributes": [
+              {
+                "key": "action",
+                "value": "/cosmos.authz.v1beta1.MsgExec"
+              },
+              {
+                "key": "sender",
+                "value": "tcro1vurfhqf0j2jgfpjahlja6g6uq2ts2r60swm2d9"
+              },
+              {
+                "key": "module",
+                "value": "bank"
+              }
+            ]
+          },
+          {
+            "type": "transfer",
+            "attributes": [
+              {
+                "key": "recipient",
+                "value": "tcro1a93yfnsc3x7m0m445cjsvee2n7qz9c0purlzwq"
+              },
+              {
+                "key": "sender",
+                "value": "tcro1vurfhqf0j2jgfpjahlja6g6uq2ts2r60swm2d9"
+              },
+              {
+                "key": "amount",
+                "value": "100000000basetcro"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "info": "",
+    "gas_wanted": "200000",
+    "gas_used": "76874",
+    "tx": {
+      "@type": "/cosmos.tx.v1beta1.Tx",
+      "body": {
+        "messages": [
+          {
+            "@type": "/cosmos.authz.v1beta1.MsgExec",
+            "grantee": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2",
+            "msgs": [
+              {
+                "@type": "/cosmos.bank.v1beta1.MsgSend",
+                "from_address": "tcro1vurfhqf0j2jgfpjahlja6g6uq2ts2r60swm2d9",
+                "to_address": "tcro1a93yfnsc3x7m0m445cjsvee2n7qz9c0purlzwq",
+                "amount": [
+                  {
+                    "denom": "basetcro",
+                    "amount": "100000000"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "memo": "",
+        "timeout_height": "0",
+        "extension_options": [
+        ],
+        "non_critical_extension_options": [
+        ]
+      },
+      "auth_info": {
+        "signer_infos": [
+          {
+            "public_key": {
+              "@type": "/cosmos.crypto.secp256k1.PubKey",
+              "key": "A/ZmZrKTHzpFHfml++KJ3lO8qQysug3ls0/McPi6TY3o"
+            },
+            "mode_info": {
+              "single": {
+                "mode": "SIGN_MODE_DIRECT"
+              }
+            },
+            "sequence": "3"
+          }
+        ],
+        "fee": {
+          "amount": [
+            {
+              "denom": "basetcro",
+              "amount": "50000"
+            }
+          ],
+          "gas_limit": "200000",
+          "payer": "",
+          "granter": ""
+        }
+      },
+      "signatures": [
+        "1LLYbXku5U6vi3adSa4jqG2p9RxKYqOExnLA79XXMnou4lcaNhBoi3sFhVWfEaoDTOEsLpAKDZjXGueXoo8dMw=="
+      ]
+    },
+    "timestamp": "2021-08-26T04:56:23Z"
+  }
+}`

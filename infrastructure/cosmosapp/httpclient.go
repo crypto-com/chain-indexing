@@ -7,11 +7,12 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/crypto-com/chain-indexing/usecase/coin"
-
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	jsoniter "github.com/json-iterator/go"
 
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
@@ -654,6 +655,86 @@ func (client *HTTPClient) ProposalTally(id string) (cosmosapp_interface.Tally, e
 	}
 
 	return tallyResp.Tally, nil
+}
+
+func (client *HTTPClient) Tx(hash string) (*model.Tx, error) {
+	rawRespBody, err := client.request(
+		fmt.Sprintf(
+			"%s/%s",
+			client.getUrl("tx", "txs"),
+			hash,
+		), "",
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rawRespBody.Close()
+
+	tx, err := ParseTxsResp(rawRespBody)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing Tx(%s): %v", hash, err)
+	}
+
+	return tx, nil
+}
+
+func ParseTxsResp(rawRespReader io.Reader) (*model.Tx, error) {
+	var txsResp TxsResp
+	if err := jsoniter.NewDecoder(rawRespReader).Decode(&txsResp); err != nil {
+		return nil, err
+	}
+
+	height, err := strconv.ParseInt(txsResp.TxResponse.Height, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing txsResp.TxResponse.Height to int64 param: %v", err)
+	}
+
+	gasWanted, err := strconv.ParseInt(txsResp.TxResponse.GasWanted, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing txsResp.TxResponse.GasWanted to int64 param: %v", err)
+	}
+
+	gasUsed, err := strconv.ParseInt(txsResp.TxResponse.GasUsed, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing txsResp.TxResponse.GasUsed to int64 param: %v", err)
+	}
+
+	var tx = &model.Tx{
+		Tx: txsResp.Tx,
+		TxResponse: model.TxResponse{
+			Height:    height,
+			TxHash:    txsResp.TxResponse.TxHash,
+			Codespace: txsResp.TxResponse.Codespace,
+			Code:      txsResp.TxResponse.Code,
+			Data:      txsResp.TxResponse.Data,
+			RawLog:    txsResp.TxResponse.RawLog,
+			Info:      txsResp.TxResponse.Info,
+			GasWanted: gasWanted,
+			GasUsed:   gasUsed,
+			Timestamp: txsResp.TxResponse.Timestamp,
+			Events:    txsResp.TxResponse.Events,
+		},
+	}
+
+	if txsResp.TxResponse.Logs != nil {
+		logs := make([]model.TxResponseLog, 0)
+		for _, log := range txsResp.TxResponse.Logs {
+			parsedLog := model.TxResponseLog{
+				MsgIndex: log.MsgIndex,
+				Log:      log.Log,
+				Events:   log.Events,
+			}
+			logs = append(logs, parsedLog)
+		}
+		tx.TxResponse.Logs = logs
+	}
+
+	tx.TxResponse.Tx = model.TxResponseTx{
+		Type:     txsResp.TxResponse.Tx.Type,
+		CosmosTx: txsResp.TxResponse.Tx.CosmosTx,
+	}
+
+	return tx, nil
 }
 
 func (client *HTTPClient) getUrl(module string, method string) string {

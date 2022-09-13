@@ -24,30 +24,25 @@ import (
 
 func ParseBlockTxsMsgToCommands(
 	parserManager *utils.CosmosParserManager,
-	txDecoder *utils.TxDecoder,
-	block *model.Block,
+	blockHeight int64,
 	blockResults *model.BlockResults,
+	txs []model.Tx,
 	accountAddressPrefix string,
 	stakingDenom string,
 ) ([]command.Command, []string, error) {
 	commands := make([]command.Command, 0)
 	var addresses []string
 
-	blockHeight := block.Height
-	for i, txHex := range block.Txs {
-		txHash := TxHash(txHex)
+	for i, tx := range txs {
+		txHash := tx.TxResponse.TxHash
 		txSuccess := true
 		txsResult := blockResults.TxsResults[i]
 
 		if txsResult.Code != 0 {
 			txSuccess = false
 		}
-		tx, err := txDecoder.Decode(txHex)
-		if err != nil {
-			panic(fmt.Sprintf("error decoding transaction: %v", err))
-		}
 
-		for msgIndex, msg := range tx.Body.Messages {
+		for msgIndex, msg := range tx.Tx.Body.Messages {
 			msgCommonParams := event.MsgCommonParams{
 				BlockHeight: blockHeight,
 				TxHash:      txHash,
