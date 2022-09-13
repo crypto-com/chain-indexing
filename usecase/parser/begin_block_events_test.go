@@ -1,6 +1,7 @@
 package parser_test
 
 import (
+	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -151,6 +152,361 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 					"double_sign",
 				),
 			}))
+		})
+
+		It("should return RawBlockEvent command", func() {
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.BEGIN_BLOCK_COMMON_EVENTS_BLOCK_RESULTS_RESP)
+			block, _ := mustParseBlockResp(usecase_parser_test.BEGIN_BLOCK_COMMON_EVENTS_BLOCK_RESP)
+
+			cmds, err := parser.ParseBeginBlockRawEventsCommands(
+				blockResults.Height,
+				block.Hash,
+				block.Time,
+				blockResults.BeginBlockEvents,
+			)
+			Expect(err).To(BeNil())
+			expectedBlockHeight := int64(377673)
+
+			Expect(cmds).To(Equal(
+				[]command.Command{
+					command_usecase.NewCreateRawBlockEvent(
+						expectedBlockHeight,
+						model.CreateRawBlockEventParams{
+							BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
+							BlockTime:  utctime.FromUnixNano(1619083382248690731),
+							FromResult: "BeginBlockEvent",
+							RawData: model.RawDataParams{
+								Type: "transfer",
+								Content: model.BlockResultsEvent{
+									Type: "transfer",
+									Attributes: []model.BlockResultsEventAttribute{
+
+										{
+											Key:   "recipient",
+											Value: "tcro17xpfvakm2amg962yls6f84z3kell8c5lxhzaha",
+										},
+										{
+											Key:   "sender",
+											Value: "tcro1m3h30wlvsf8llruxtpukdvsy0km2kum87lx9mq",
+										},
+										{
+											Key:   "amount",
+											Value: "17477215277basetcro",
+										},
+									},
+								},
+							},
+						},
+					),
+
+					command_usecase.NewCreateRawBlockEvent(
+						expectedBlockHeight,
+						model.CreateRawBlockEventParams{
+							BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
+							BlockTime:  utctime.FromUnixNano(1619083382248690731),
+							FromResult: "BeginBlockEvent",
+							RawData: model.RawDataParams{
+								Type: "message",
+								Content: model.BlockResultsEvent{
+									Type: "message",
+									Attributes: []model.BlockResultsEventAttribute{
+										{
+											Key:   "sender",
+											Value: "tcro1m3h30wlvsf8llruxtpukdvsy0km2kum87lx9mq",
+										},
+									},
+								},
+							},
+						},
+					),
+					command_usecase.NewCreateRawBlockEvent(
+						expectedBlockHeight,
+						model.CreateRawBlockEventParams{
+							BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
+							BlockTime:  utctime.FromUnixNano(1619083382248690731),
+							FromResult: "BeginBlockEvent",
+							RawData: model.RawDataParams{
+								Type: "mint",
+								Content: model.BlockResultsEvent{
+									Type: "mint",
+									Attributes: []model.BlockResultsEventAttribute{
+										{
+											Key:   "bonded_ratio",
+											Value: "0.000821761419299675",
+										},
+										{
+											Key:   "inflation",
+											Value: "0.013777334128586270",
+										},
+										{
+											Key:   "annual_provisions",
+											Value: "110307793770097823.255979052891494880",
+										},
+										{
+											Key:   "amount",
+											Value: "17477215277",
+										},
+									},
+								},
+							},
+						},
+					),
+
+					command_usecase.NewCreateRawBlockEvent(
+						expectedBlockHeight,
+						model.CreateRawBlockEventParams{
+							BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
+							BlockTime:  utctime.FromUnixNano(1619083382248690731),
+							FromResult: "BeginBlockEvent",
+							RawData: model.RawDataParams{
+								Type: "transfer",
+								Content: model.BlockResultsEvent{
+									Type: "transfer",
+									Attributes: []model.BlockResultsEventAttribute{
+										{
+											Key:   "recipient",
+											Value: "tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l",
+										},
+										{
+											Key:   "sender",
+											Value: "tcro17xpfvakm2amg962yls6f84z3kell8c5lxhzaha",
+										},
+										{
+											Key:   "amount",
+											Value: "17477255277basetcro",
+										},
+									},
+								},
+							},
+						},
+					),
+
+					command_usecase.NewCreateRawBlockEvent(
+						expectedBlockHeight,
+						model.CreateRawBlockEventParams{
+							BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
+							BlockTime:  utctime.FromUnixNano(1619083382248690731),
+							FromResult: "BeginBlockEvent",
+							RawData: model.RawDataParams{
+								Type: "message",
+								Content: model.BlockResultsEvent{
+									Type: "message",
+									Attributes: []model.BlockResultsEventAttribute{
+										{
+											Key:   "sender",
+											Value: "tcro17xpfvakm2amg962yls6f84z3kell8c5lxhzaha",
+										},
+									},
+								},
+							},
+						},
+					),
+
+					command_usecase.NewCreateRawBlockEvent(
+						expectedBlockHeight,
+						model.CreateRawBlockEventParams{
+							BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
+							BlockTime:  utctime.FromUnixNano(1619083382248690731),
+							FromResult: "BeginBlockEvent",
+							RawData: model.RawDataParams{
+								Type: "proposer_reward",
+								Content: model.BlockResultsEvent{
+									Type: "proposer_reward",
+									Attributes: []model.BlockResultsEventAttribute{
+										{
+											Key:   "amount",
+											Value: "868550031.392766344419273056basetcro",
+										},
+										{
+											Key:   "validator",
+											Value: "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
+										},
+									},
+								},
+							},
+						},
+					),
+
+					command_usecase.NewCreateRawBlockEvent(
+						expectedBlockHeight,
+						model.CreateRawBlockEventParams{
+							BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
+							BlockTime:  utctime.FromUnixNano(1619083382248690731),
+							FromResult: "BeginBlockEvent",
+							RawData: model.RawDataParams{
+								Type: "commission",
+								Content: model.BlockResultsEvent{
+									Type: "commission",
+									Attributes: []model.BlockResultsEventAttribute{
+										{
+											Key:   "amount",
+											Value: "86855003.139276634441927306basetcro",
+										},
+										{
+											Key:   "validator",
+											Value: "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
+										},
+									},
+								},
+							},
+						},
+					),
+
+					command_usecase.NewCreateRawBlockEvent(
+						expectedBlockHeight,
+						model.CreateRawBlockEventParams{
+							BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
+							BlockTime:  utctime.FromUnixNano(1619083382248690731),
+							FromResult: "BeginBlockEvent",
+							RawData: model.RawDataParams{
+								Type: "rewards",
+								Content: model.BlockResultsEvent{
+									Type: "rewards",
+									Attributes: []model.BlockResultsEventAttribute{
+										{
+											Key:   "amount",
+											Value: "868550031.392766344419273056basetcro",
+										},
+										{
+											Key:   "validator",
+											Value: "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
+										},
+									},
+								},
+							},
+						},
+					),
+
+					command_usecase.NewCreateRawBlockEvent(
+						expectedBlockHeight,
+						model.CreateRawBlockEventParams{
+							BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
+							BlockTime:  utctime.FromUnixNano(1619083382248690731),
+							FromResult: "BeginBlockEvent",
+							RawData: model.RawDataParams{
+								Type: "commission",
+								Content: model.BlockResultsEvent{
+									Type: "commission",
+									Attributes: []model.BlockResultsEventAttribute{
+										{
+											Key:   "amount",
+											Value: "459938524.284156813832125321basetcro",
+										},
+										{
+											Key:   "validator",
+											Value: "tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6",
+										},
+									},
+								},
+							},
+						},
+					),
+
+					command_usecase.NewCreateRawBlockEvent(
+						expectedBlockHeight,
+						model.CreateRawBlockEventParams{
+							BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
+							BlockTime:  utctime.FromUnixNano(1619083382248690731),
+							FromResult: "BeginBlockEvent",
+							RawData: model.RawDataParams{
+								Type: "rewards",
+								Content: model.BlockResultsEvent{
+									Type: "rewards",
+									Attributes: []model.BlockResultsEventAttribute{
+										{
+											Key:   "amount",
+											Value: "919877048.568313627664250642basetcro",
+										},
+										{
+											Key:   "validator",
+											Value: "tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6",
+										},
+									},
+								},
+							},
+						},
+					),
+
+					command_usecase.NewCreateRawBlockEvent(
+						expectedBlockHeight,
+						model.CreateRawBlockEventParams{
+							BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
+							BlockTime:  utctime.FromUnixNano(1619083382248690731),
+							FromResult: "BeginBlockEvent",
+							RawData: model.RawDataParams{
+								Type: "commission",
+								Content: model.BlockResultsEvent{
+									Type: "commission",
+									Attributes: []model.BlockResultsEventAttribute{
+										{
+											Key:   "amount",
+											Value: "59324118.921629850151833479basetcro",
+										},
+										{
+											Key:   "validator",
+											Value: "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
+										},
+									},
+								},
+							},
+						},
+					),
+
+					command_usecase.NewCreateRawBlockEvent(
+						expectedBlockHeight,
+						model.CreateRawBlockEventParams{
+							BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
+							BlockTime:  utctime.FromUnixNano(1619083382248690731),
+							FromResult: "BeginBlockEvent",
+							RawData: model.RawDataParams{
+								Type: "rewards",
+								Content: model.BlockResultsEvent{
+									Type: "rewards",
+									Attributes: []model.BlockResultsEventAttribute{
+										{
+											Key:   "amount",
+											Value: "593241189.216298501518334791basetcro",
+										},
+										{
+											Key:   "validator",
+											Value: "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
+										},
+									},
+								},
+							},
+						},
+					),
+
+					command_usecase.NewCreateRawBlockEvent(
+						expectedBlockHeight,
+						model.CreateRawBlockEventParams{
+							BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
+							BlockTime:  utctime.FromUnixNano(1619083382248690731),
+							FromResult: "BeginBlockEvent",
+							RawData: model.RawDataParams{
+								Type: "liveness",
+								Content: model.BlockResultsEvent{
+									Type: "liveness",
+									Attributes: []model.BlockResultsEventAttribute{
+										{
+											Key:   "address",
+											Value: "tcrocnclcons14njdlht8ch4y4pw58jv05uttw24nsrvwazsrwr",
+										},
+										{
+											Key:   "missed_blocks",
+											Value: "43",
+										},
+										{
+											Key:   "height",
+											Value: "377673",
+										},
+									},
+								},
+							},
+						},
+					),
+				},
+			))
 		})
 	})
 })
