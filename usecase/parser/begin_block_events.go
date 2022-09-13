@@ -13,8 +13,6 @@ import (
 
 func ParseBeginBlockEventsCommands(
 	blockHeight int64,
-	blockHash string,
-	blockTime utctime.UTCTime,
 	beginBlockEvents []model.BlockResultsEvent,
 	bondingDenom string,
 ) ([]command.Command, error) {
@@ -130,11 +128,28 @@ func ParseBeginBlockEventsCommands(
 				))
 			}
 		}
+	}
+
+	return commands, nil
+}
+
+func ParseBeginBlockRawEventsCommands(
+	blockHeight int64,
+	blockHash string,
+	blockTime utctime.UTCTime,
+	beginBlockEvents []model.BlockResultsEvent,
+) ([]command.Command, error) {
+	commands := make([]command.Command, 0)
+
+	for _, event := range beginBlockEvents {
 		parseRawBlockEventCmd := command_usecase.NewCreateRawBlockEvent(blockHeight, model.CreateRawBlockEventParams{
 			BlockHash:  blockHash,
 			BlockTime:  blockTime,
 			FromResult: "BeginBlockEvent",
-			RawData:    event,
+			RawData: model.RawDataParams{
+				Type:    event.Type,
+				Content: event,
+			},
 		})
 
 		commands = append(commands, parseRawBlockEventCmd)

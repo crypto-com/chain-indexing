@@ -17,13 +17,13 @@ const RAW_BLOCK_EVENT_CREATED = "RawBlockEventCreated"
 type RawBlockEventCreated struct {
 	entity_event.Base
 
-	BlockHash  string                          `json:"blockHash"`
-	BlockTime  utctime.UTCTime                 `json:"blockTime"`
-	FromResult string                          `json:"fromResult"`
-	RawData    usecase_model.BlockResultsEvent `json:"rawData"`
+	BlockHash  string                      `json:"blockHash"`
+	BlockTime  utctime.UTCTime             `json:"blockTime"`
+	FromResult string                      `json:"fromResult"`
+	RawData    usecase_model.RawDataParams `json:"rawData"`
 }
 
-func NewRawBlockEvent(blockHeight int64, params *usecase_model.CreateRawBlockEventParams) *RawBlockEventCreated {
+func NewRawBlockEventCreated(blockHeight int64, params *usecase_model.CreateRawBlockEventParams) *RawBlockEventCreated {
 	return &RawBlockEventCreated{
 		entity_event.NewBase(entity_event.BaseParams{
 			Name:        RAW_BLOCK_EVENT_CREATED,

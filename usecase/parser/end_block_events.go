@@ -10,7 +10,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
-func ParseEndBlockEventsCommands(blockHeight int64, blockHash string, blockTime utctime.UTCTime, endBlockEvents []model.BlockResultsEvent) ([]command.Command, error) {
+func ParseEndBlockEventsCommands(blockHeight int64, endBlockEvents []model.BlockResultsEvent) ([]command.Command, error) {
 	commands := make([]command.Command, 0)
 
 	for i, event := range endBlockEvents {
@@ -77,11 +77,23 @@ func ParseEndBlockEventsCommands(blockHeight int64, blockHash string, blockTime 
 				},
 			))
 		}
+	}
+
+	return commands, nil
+}
+
+func ParseEndBlockRawEventsCommands(blockHeight int64, blockHash string, blockTime utctime.UTCTime, endBlockEvents []model.BlockResultsEvent) ([]command.Command, error) {
+	commands := make([]command.Command, 0)
+
+	for _, event := range endBlockEvents {
 		parseRawBlockEventCmd := command_usecase.NewCreateRawBlockEvent(blockHeight, model.CreateRawBlockEventParams{
 			BlockHash:  blockHash,
 			BlockTime:  blockTime,
 			FromResult: "EndBlockEvent",
-			RawData:    event,
+			RawData: model.RawDataParams{
+				Type:    event.Type,
+				Content: event,
+			},
 		})
 
 		commands = append(commands, parseRawBlockEventCmd)

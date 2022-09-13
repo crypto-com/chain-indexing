@@ -297,6 +297,6 @@ type RawBlockEventRow struct {
 }
 
 type RawBlockEventRowData struct {
-	Type       string                             `json:"type"`
-	Attributes []model.BlockResultsEventAttribute `json:"attributes"`
+	Type    string                  `json:"type"`
+	Content model.BlockResultsEvent `json:"content"`
 }

@@ -11,7 +11,7 @@ import (
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
-	"github.com/crypto-com/chain-indexing/projection/rawblockevent/view"
+	"github.com/crypto-com/chain-indexing/projection/raw_block_event/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
@@ -50,11 +50,6 @@ func (_ *RawBlockEvent) GetEventsToListen() []string {
 	}
 }
 
-// TODO: should change it to projection folder name to `block_event`, then we can remove it
-const (
-	MIGRATION_DIRECOTRY = "projection/rawblockevent/migrations"
-)
-
 func (projection *RawBlockEvent) OnInit() error {
 	if projection.migrationHelper != nil {
 		projection.migrationHelper.Migrate()
@@ -87,15 +82,14 @@ func (projection *RawBlockEvent) HandleEvents(height int64, events []event_entit
 	eventRows := make([]view.RawBlockEventRow, 0)
 	for _, event := range events {
 		if rawBlockCreatedEvent, ok := event.(*event_usecase.RawBlockEventCreated); ok {
-			fmt.Println("===> final rawBlockCreatedEvent: ", rawBlockCreatedEvent)
 			eventRows = append(eventRows, view.RawBlockEventRow{
 				BlockHeight: rawBlockCreatedEvent.BlockHeight,
 				BlockHash:   rawBlockCreatedEvent.BlockHash,
 				BlockTime:   rawBlockCreatedEvent.BlockTime,
 				FromResult:  rawBlockCreatedEvent.FromResult,
 				RawData: view.RawBlockEventRowData{
-					Type:       rawBlockCreatedEvent.RawData.Type,
-					Attributes: rawBlockCreatedEvent.RawData.Attributes,
+					Type:    rawBlockCreatedEvent.RawData.Type,
+					Content: rawBlockCreatedEvent.RawData.Content,
 				}})
 
 		} else {

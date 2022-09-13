@@ -21,19 +21,32 @@ func ParseBlockResultsTxsResults(
 	for i := range blockResults.TxsResults {
 		txHex := block.Txs[i]
 
+		parsedCmds := parseCronosSendToIBC(block.Height, txHex, &blockResults.TxsResults[i])
+		cmds = append(cmds, parsedCmds...)
+	}
+
+	return cmds, nil
+}
+func ParseBlockResultsTxsResultsRawEvents(
+	block *model.Block,
+	blockResults *model.BlockResults,
+) ([]commandentity.Command, error) {
+	cmds := make([]commandentity.Command, 0)
+
+	for i := range blockResults.TxsResults {
 		for j := range blockResults.TxsResults[i].Events {
 			parseRawBlockEventCmd := command.NewCreateRawBlockEvent(block.Height, model.CreateRawBlockEventParams{
 				BlockHash:  block.Hash,
 				BlockTime:  block.Time,
 				FromResult: "TxsResult",
-				RawData:    blockResults.TxsResults[i].Events[j],
+				RawData: model.RawDataParams{
+					Type:    blockResults.TxsResults[i].Events[j].Type,
+					Content: blockResults.TxsResults[i].Events[j],
+				},
 			})
 
 			cmds = append(cmds, parseRawBlockEventCmd)
 		}
-
-		parsedCmds := parseCronosSendToIBC(block.Height, txHex, &blockResults.TxsResults[i])
-		cmds = append(cmds, parsedCmds...)
 	}
 
 	return cmds, nil

@@ -31,8 +31,11 @@ func (cmd *CreateRawBlockEvent) Exec() (entity_event.Event, error) {
 		BlockHash:  cmd.params.BlockHash,
 		BlockTime:  cmd.params.BlockTime,
 		FromResult: cmd.params.FromResult,
-		RawData:    cmd.params.RawData,
+		RawData: usecase_model.RawDataParams{
+			Type:    cmd.params.RawData.Type,
+			Content: cmd.params.RawData.Content,
+		},
 	}
-	event := event.NewRawBlockEvent(cmd.blockHeight, &params)
+	event := event.NewRawBlockEventCreated(cmd.blockHeight, &params)
 	return event, nil
 }

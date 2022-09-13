@@ -15,7 +15,6 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 	It("should return GravityEthereumSendToCosmosHandled commands when end_block_events has ethereum_send_to_cosmos_handled event", func() {
 		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_ETHEREUM_SEND_TO_COSMOS_HANDLED_BLOCK_RESULTS_RESP)
 
-		// TODO
 		cmds, err := parser.ParseEndBlockEventsCommands(
 			blockResults.Height,
 			blockResults.EndBlockEvents,

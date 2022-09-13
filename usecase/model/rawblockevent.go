@@ -6,5 +6,10 @@ type CreateRawBlockEventParams struct {
 	BlockHash  string
 	BlockTime  utctime.UTCTime
 	FromResult string
-	RawData    BlockResultsEvent
+	RawData    RawDataParams
+}
+
+type RawDataParams struct {
+	Type    string            `json:"type"`
+	Content BlockResultsEvent `json:"content"`
 }
