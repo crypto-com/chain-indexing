@@ -116,8 +116,6 @@ var _ = Describe("Raw Block Events", func() {
 				},
 			)
 
-			// anyAmount := coin.MustParseDecCoins("1000basetcro")
-			// eventBlockEvent := event_usecase.NewBlockRewarded(anyHeight, "validator", anyAmount)
 			rawBlockEventListFilter := view.RawBlockEventsListFilter{
 				MaybeBlockHeight: primptr.Int64(anyHeight),
 			}

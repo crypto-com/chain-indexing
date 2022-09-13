@@ -38,7 +38,7 @@ func ParseBlockResultsTxsResultsRawEvents(
 			parseRawBlockEventCmd := command.NewCreateRawBlockEvent(block.Height, model.CreateRawBlockEventParams{
 				BlockHash:  block.Hash,
 				BlockTime:  block.Time,
-				FromResult: "TxsResult",
+				FromResult: "TxsResults",
 				RawData: model.RawDataParams{
 					Type:    blockResults.TxsResults[i].Events[j].Type,
 					Content: blockResults.TxsResults[i].Events[j],
