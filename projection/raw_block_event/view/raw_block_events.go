@@ -37,7 +37,7 @@ func (eventsView *RawBlockEvents) Insert(rawBlockEvent *RawBlockEventRow) error 
 		"block_hash",
 		"block_time",
 		"from_result",
-		"raw_data",
+		"data",
 	).Values("?", "?", "?", "?", "?").ToSql()
 	if err != nil {
 		return fmt.Errorf("error building events insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -84,7 +84,7 @@ func (eventsView *RawBlockEvents) InsertAll(rawBlockEvents []RawBlockEventRow) e
 				"block_hash",
 				"block_time",
 				"from_result",
-				"raw_data",
+				"data",
 			)
 		}
 
@@ -139,7 +139,7 @@ func (eventsView *RawBlockEvents) FindById(id int64) (*RawBlockEventRow, error) 
 		"block_hash",
 		"block_time",
 		"from_result",
-		"raw_data",
+		"data",
 	).From(
 		"view_raw_block_events",
 	).Where(
@@ -194,7 +194,7 @@ func (eventsView *RawBlockEvents) List(
 		"block_hash",
 		"block_time",
 		"from_result",
-		"raw_data",
+		"data",
 	).From(
 		"view_raw_block_events",
 	)
@@ -293,7 +293,7 @@ type RawBlockEventRow struct {
 	BlockHash   string               `json:"blockHash"`
 	BlockTime   utctime.UTCTime      `json:"blockTime"`
 	FromResult  string               `json:"fromResult"`
-	Data        RawBlockEventRowData `json:"ata"`
+	Data        RawBlockEventRowData `json:"data"`
 }
 
 type RawBlockEventRowData struct {
