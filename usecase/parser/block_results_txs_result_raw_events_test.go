@@ -33,7 +33,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 						BlockHash:  "C60E4496E326D24AABA166ACE7E86DC17AEDDC77106084B99D632030C65206EF",
 						BlockTime:  utctime.FromUnixNano(1616702718680872778),
 						FromResult: "TxsResults",
-						RawData: model.RawDataParams{
+						Data: model.DataParams{
 							Type: "tx",
 							Content: model.BlockResultsEvent{
 								Type: "tx",
@@ -53,7 +53,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 						BlockHash:  "C60E4496E326D24AABA166ACE7E86DC17AEDDC77106084B99D632030C65206EF",
 						BlockTime:  utctime.FromUnixNano(1616702718680872778),
 						FromResult: "TxsResults",
-						RawData: model.RawDataParams{
+						Data: model.DataParams{
 							Type: "tx",
 							Content: model.BlockResultsEvent{
 								Type: "tx",
@@ -73,7 +73,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 						BlockHash:  "C60E4496E326D24AABA166ACE7E86DC17AEDDC77106084B99D632030C65206EF",
 						BlockTime:  utctime.FromUnixNano(1616702718680872778),
 						FromResult: "TxsResults",
-						RawData: model.RawDataParams{
+						Data: model.DataParams{
 							Type: "transfer",
 							Content: model.BlockResultsEvent{
 								Type: "transfer",
@@ -101,7 +101,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 						BlockHash:  "C60E4496E326D24AABA166ACE7E86DC17AEDDC77106084B99D632030C65206EF",
 						BlockTime:  utctime.FromUnixNano(1616702718680872778),
 						FromResult: "TxsResults",
-						RawData: model.RawDataParams{
+						Data: model.DataParams{
 							Type: "message",
 							Content: model.BlockResultsEvent{
 								Type: "message",
@@ -121,7 +121,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 						BlockHash:  "C60E4496E326D24AABA166ACE7E86DC17AEDDC77106084B99D632030C65206EF",
 						BlockTime:  utctime.FromUnixNano(1616702718680872778),
 						FromResult: "TxsResults",
-						RawData: model.RawDataParams{
+						Data: model.DataParams{
 							Type: "message",
 							Content: model.BlockResultsEvent{
 								Type: "message",
@@ -141,7 +141,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 						BlockHash:  "C60E4496E326D24AABA166ACE7E86DC17AEDDC77106084B99D632030C65206EF",
 						BlockTime:  utctime.FromUnixNano(1616702718680872778),
 						FromResult: "TxsResults",
-						RawData: model.RawDataParams{
+						Data: model.DataParams{
 							Type: "transfer",
 							Content: model.BlockResultsEvent{
 								Type: "transfer",
@@ -169,7 +169,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 						BlockHash:  "C60E4496E326D24AABA166ACE7E86DC17AEDDC77106084B99D632030C65206EF",
 						BlockTime:  utctime.FromUnixNano(1616702718680872778),
 						FromResult: "TxsResults",
-						RawData: model.RawDataParams{
+						Data: model.DataParams{
 							Type: "message",
 							Content: model.BlockResultsEvent{
 								Type: "message",
@@ -189,7 +189,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 						BlockHash:  "C60E4496E326D24AABA166ACE7E86DC17AEDDC77106084B99D632030C65206EF",
 						BlockTime:  utctime.FromUnixNano(1616702718680872778),
 						FromResult: "TxsResults",
-						RawData: model.RawDataParams{
+						Data: model.DataParams{
 							Type: "message",
 							Content: model.BlockResultsEvent{
 								Type: "message",

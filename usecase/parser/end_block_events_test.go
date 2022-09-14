@@ -119,7 +119,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 					BlockHash:  "8703C54C9FE1C2D6D05DAC79D795E120F385F5F43E5CDC17B73090E9DA40CEA9",
 					BlockTime:  utctime.FromUnixNano(1631893335936780880),
 					FromResult: "EndBlockEvent",
-					RawData: model.RawDataParams{
+					Data: model.DataParams{
 						Type: "complete_unbonding",
 						Content: model.BlockResultsEvent{
 							Type: "complete_unbonding",

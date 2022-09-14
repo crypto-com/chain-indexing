@@ -90,7 +90,7 @@ func ParseEndBlockRawEventsCommands(blockHeight int64, blockHash string, blockTi
 			BlockHash:  blockHash,
 			BlockTime:  blockTime,
 			FromResult: "EndBlockEvent",
-			RawData: model.RawDataParams{
+			Data: model.DataParams{
 				Type:    event.Type,
 				Content: event,
 			},

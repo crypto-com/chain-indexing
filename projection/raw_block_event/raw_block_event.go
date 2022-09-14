@@ -87,9 +87,9 @@ func (projection *RawBlockEvent) HandleEvents(height int64, events []event_entit
 				BlockHash:   rawBlockCreatedEvent.BlockHash,
 				BlockTime:   rawBlockCreatedEvent.BlockTime,
 				FromResult:  rawBlockCreatedEvent.FromResult,
-				RawData: view.RawBlockEventRowData{
-					Type:    rawBlockCreatedEvent.RawData.Type,
-					Content: rawBlockCreatedEvent.RawData.Content,
+				Data: view.RawBlockEventRowData{
+					Type:    rawBlockCreatedEvent.Data.Type,
+					Content: rawBlockCreatedEvent.Data.Content,
 				}})
 
 		} else {
@@ -98,7 +98,7 @@ func (projection *RawBlockEvent) HandleEvents(height int64, events []event_entit
 				BlockHash:   "",
 				BlockTime:   utctime.UTCTime{},
 				FromResult:  "",
-				RawData:     view.RawBlockEventRowData{}})
+				Data:        view.RawBlockEventRowData{}})
 
 			heightEventTypeKey := fmt.Sprintf("%d:%s", height, event.Name())
 			if _, ok := totalMap[heightEventTypeKey]; !ok {

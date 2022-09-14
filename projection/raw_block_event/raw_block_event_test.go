@@ -60,7 +60,7 @@ var _ = Describe("Raw Block Events", func() {
 					BlockHash:  "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
 					BlockTime:  utctime.FromUnixNano(int64(1000000)),
 					FromResult: "TxsResult",
-					RawData: model_usecase.RawDataParams{
+					Data: model_usecase.DataParams{
 						Type: "message",
 						Content: model_usecase.BlockResultsEvent{
 							Type: "message",
@@ -97,7 +97,7 @@ var _ = Describe("Raw Block Events", func() {
 					BlockHash:  "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
 					BlockTime:  utctime.FromUnixNano(int64(1000000)),
 					FromResult: "TxsResult",
-					RawData: model_usecase.RawDataParams{
+					Data: model_usecase.DataParams{
 						Type: "message",
 						Content: model_usecase.BlockResultsEvent{
 							Type: "message",

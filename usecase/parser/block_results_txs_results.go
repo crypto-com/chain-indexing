@@ -39,7 +39,7 @@ func ParseBlockResultsTxsResultsRawEvents(
 				BlockHash:  block.Hash,
 				BlockTime:  block.Time,
 				FromResult: "TxsResults",
-				RawData: model.RawDataParams{
+				Data: model.DataParams{
 					Type:    blockResults.TxsResults[i].Events[j].Type,
 					Content: blockResults.TxsResults[i].Events[j],
 				},

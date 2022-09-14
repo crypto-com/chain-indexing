@@ -44,7 +44,7 @@ func (eventsView *RawBlockEvents) Insert(rawBlockEvent *RawBlockEventRow) error 
 	}
 
 	var rawBlockEventDataJSON string
-	if rawBlockEventDataJSON, err = jsoniter.MarshalToString(rawBlockEvent.RawData); err != nil {
+	if rawBlockEventDataJSON, err = jsoniter.MarshalToString(rawBlockEvent.Data); err != nil {
 		return fmt.Errorf("error JSON marshalling raw block event data for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
@@ -88,7 +88,7 @@ func (eventsView *RawBlockEvents) InsertAll(rawBlockEvents []RawBlockEventRow) e
 			)
 		}
 
-		rawBlockEventDataJSON, marshalErr := jsoniter.MarshalToString(rawBlockEvent.RawData)
+		rawBlockEventDataJSON, marshalErr := jsoniter.MarshalToString(rawBlockEvent.Data)
 		if marshalErr != nil {
 			return fmt.Errorf(
 				"error JSON marshalling raw block event data for insertion: %v: %w",
@@ -178,7 +178,7 @@ func (eventsView *RawBlockEvents) FindById(id int64) (*RawBlockEventRow, error) 
 	if unmarshalErr := jsoniter.Unmarshal([]byte(*rawBlockEventDataJSON), &rawBlockEventData); unmarshalErr != nil {
 		return nil, fmt.Errorf("error unmarshalling raw block event data JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 	}
-	rawBlockEvent.RawData = rawBlockEventData
+	rawBlockEvent.Data = rawBlockEventData
 
 	return &rawBlockEvent, nil
 }
@@ -266,7 +266,7 @@ func (eventsView *RawBlockEvents) List(
 		if unmarshalErr := jsoniter.Unmarshal([]byte(*rawBlockEventDataJSON), &rawBlockEventData); unmarshalErr != nil {
 			return nil, nil, fmt.Errorf("error unmarshalling raw block event data JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 		}
-		rawBlockEvent.RawData = rawBlockEventData
+		rawBlockEvent.Data = rawBlockEventData
 
 		rawBlockEvents = append(rawBlockEvents, rawBlockEvent)
 	}
@@ -293,7 +293,7 @@ type RawBlockEventRow struct {
 	BlockHash   string               `json:"blockHash"`
 	BlockTime   utctime.UTCTime      `json:"blockTime"`
 	FromResult  string               `json:"fromResult"`
-	RawData     RawBlockEventRowData `json:"rawData"`
+	Data        RawBlockEventRowData `json:"ata"`
 }
 
 type RawBlockEventRowData struct {

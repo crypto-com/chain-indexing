@@ -146,7 +146,7 @@ func ParseBeginBlockRawEventsCommands(
 			BlockHash:  blockHash,
 			BlockTime:  blockTime,
 			FromResult: "BeginBlockEvent",
-			RawData: model.RawDataParams{
+			Data: model.DataParams{
 				Type:    event.Type,
 				Content: event,
 			},
