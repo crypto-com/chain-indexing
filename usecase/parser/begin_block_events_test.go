@@ -184,14 +184,17 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 										{
 											Key:   "recipient",
 											Value: "tcro17xpfvakm2amg962yls6f84z3kell8c5lxhzaha",
+											Index: true,
 										},
 										{
 											Key:   "sender",
 											Value: "tcro1m3h30wlvsf8llruxtpukdvsy0km2kum87lx9mq",
+											Index: true,
 										},
 										{
 											Key:   "amount",
 											Value: "17477215277basetcro",
+											Index: true,
 										},
 									},
 								},
@@ -213,6 +216,7 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 										{
 											Key:   "sender",
 											Value: "tcro1m3h30wlvsf8llruxtpukdvsy0km2kum87lx9mq",
+											Index: true,
 										},
 									},
 								},
@@ -233,18 +237,22 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 										{
 											Key:   "bonded_ratio",
 											Value: "0.000821761419299675",
+											Index: true,
 										},
 										{
 											Key:   "inflation",
 											Value: "0.013777334128586270",
+											Index: true,
 										},
 										{
 											Key:   "annual_provisions",
 											Value: "110307793770097823.255979052891494880",
+											Index: true,
 										},
 										{
 											Key:   "amount",
 											Value: "17477215277",
+											Index: true,
 										},
 									},
 								},
@@ -266,14 +274,17 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 										{
 											Key:   "recipient",
 											Value: "tcro1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8339p4l",
+											Index: true,
 										},
 										{
 											Key:   "sender",
 											Value: "tcro17xpfvakm2amg962yls6f84z3kell8c5lxhzaha",
+											Index: true,
 										},
 										{
 											Key:   "amount",
 											Value: "17477255277basetcro",
+											Index: true,
 										},
 									},
 								},
@@ -295,6 +306,7 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 										{
 											Key:   "sender",
 											Value: "tcro17xpfvakm2amg962yls6f84z3kell8c5lxhzaha",
+											Index: true,
 										},
 									},
 								},
@@ -316,10 +328,12 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 										{
 											Key:   "amount",
 											Value: "868550031.392766344419273056basetcro",
+											Index: true,
 										},
 										{
 											Key:   "validator",
 											Value: "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
+											Index: true,
 										},
 									},
 								},
@@ -341,10 +355,12 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 										{
 											Key:   "amount",
 											Value: "86855003.139276634441927306basetcro",
+											Index: true,
 										},
 										{
 											Key:   "validator",
 											Value: "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
+											Index: true,
 										},
 									},
 								},
@@ -366,10 +382,12 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 										{
 											Key:   "amount",
 											Value: "868550031.392766344419273056basetcro",
+											Index: true,
 										},
 										{
 											Key:   "validator",
 											Value: "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
+											Index: true,
 										},
 									},
 								},
@@ -391,10 +409,12 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 										{
 											Key:   "amount",
 											Value: "459938524.284156813832125321basetcro",
+											Index: true,
 										},
 										{
 											Key:   "validator",
 											Value: "tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6",
+											Index: true,
 										},
 									},
 								},
@@ -416,10 +436,12 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 										{
 											Key:   "amount",
 											Value: "919877048.568313627664250642basetcro",
+											Index: true,
 										},
 										{
 											Key:   "validator",
 											Value: "tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6",
+											Index: true,
 										},
 									},
 								},
@@ -441,10 +463,12 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 										{
 											Key:   "amount",
 											Value: "59324118.921629850151833479basetcro",
+											Index: true,
 										},
 										{
 											Key:   "validator",
 											Value: "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
+											Index: true,
 										},
 									},
 								},
@@ -466,10 +490,12 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 										{
 											Key:   "amount",
 											Value: "593241189.216298501518334791basetcro",
+											Index: true,
 										},
 										{
 											Key:   "validator",
 											Value: "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
+											Index: true,
 										},
 									},
 								},
@@ -491,14 +517,17 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 										{
 											Key:   "address",
 											Value: "tcrocnclcons14njdlht8ch4y4pw58jv05uttw24nsrvwazsrwr",
+											Index: true,
 										},
 										{
 											Key:   "missed_blocks",
 											Value: "43",
+											Index: true,
 										},
 										{
 											Key:   "height",
 											Value: "377673",
+											Index: true,
 										},
 									},
 								},

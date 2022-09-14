@@ -127,14 +127,17 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 								{
 									Key:   "amount",
 									Value: "5basetcro",
+									Index: true,
 								},
 								{
 									Key:   "validator",
 									Value: "tcrocncl1sruzd529lhjju6hfcwd2fxp3v0e7p0vqqtme76",
+									Index: true,
 								},
 								{
 									Key:   "delegator",
 									Value: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+									Index: true,
 								},
 							},
 						},

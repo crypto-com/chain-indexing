@@ -41,6 +41,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 									{
 										Key:   "acc_seq",
 										Value: "cro1yjjlx5qsrj5rxn5xtd5rkm6dcqzlchxkrvsmg6/4118",
+										Index: true,
 									},
 								},
 							},
@@ -61,6 +62,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 									{
 										Key:   "signature",
 										Value: "KfdBpc80DTs2LrWctzr1CX9f7vApKVfUbGKA3Y7hULkbXuKlw+BpArTgG6CCe4hZeEyr+3SX/3GUdfTbXk66yw==",
+										Index: true,
 									},
 								},
 							},
@@ -81,14 +83,17 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 									{
 										Key:   "recipient",
 										Value: "cro17xpfvakm2amg962yls6f84z3kell8c5lgztehv",
+										Index: true,
 									},
 									{
 										Key:   "sender",
 										Value: "cro1yjjlx5qsrj5rxn5xtd5rkm6dcqzlchxkrvsmg6",
+										Index: true,
 									},
 									{
 										Key:   "amount",
 										Value: "10000basecro",
+										Index: true,
 									},
 								},
 							},
@@ -109,6 +114,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 									{
 										Key:   "sender",
 										Value: "cro1yjjlx5qsrj5rxn5xtd5rkm6dcqzlchxkrvsmg6",
+										Index: true,
 									},
 								},
 							},
@@ -129,6 +135,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 									{
 										Key:   "action",
 										Value: "send",
+										Index: true,
 									},
 								},
 							},
@@ -149,14 +156,17 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 									{
 										Key:   "recipient",
 										Value: "cro1valk6lj0k5lhw3qpk0qcw3gusqynlserl9rlme",
+										Index: true,
 									},
 									{
 										Key:   "sender",
 										Value: "cro1yjjlx5qsrj5rxn5xtd5rkm6dcqzlchxkrvsmg6",
+										Index: true,
 									},
 									{
 										Key:   "amount",
 										Value: "67786900000basecro",
+										Index: true,
 									},
 								},
 							},
@@ -177,6 +187,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 									{
 										Key:   "sender",
 										Value: "cro1yjjlx5qsrj5rxn5xtd5rkm6dcqzlchxkrvsmg6",
+										Index: true,
 									},
 								},
 							},
@@ -197,6 +208,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 									{
 										Key:   "module",
 										Value: "bank",
+										Index: true,
 									},
 								},
 							},
