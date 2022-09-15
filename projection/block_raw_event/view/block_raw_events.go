@@ -15,23 +15,23 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-// RawBlockEvents projection view implemented by relational database
-type RawBlockEvents struct {
+// BlockRawEvents projection view implemented by relational database
+type BlockRawEvents struct {
 	rdb *rdb.Handle
 }
 
-func NewRawBlockEvents(handle *rdb.Handle) *RawBlockEvents {
-	return &RawBlockEvents{
+func NewBlockRawEvents(handle *rdb.Handle) *BlockRawEvents {
+	return &BlockRawEvents{
 		handle,
 	}
 }
 
-func (eventsView *RawBlockEvents) Insert(rawBlockEvent *RawBlockEventRow) error {
+func (eventsView *BlockRawEvents) Insert(blockRawEvent *BlockRawEventRow) error {
 	var err error
 
 	var sql string
 	sql, _, err = eventsView.rdb.StmtBuilder.Insert(
-		"view_raw_block_events",
+		"view_block_raw_events",
 	).Columns(
 		"block_height",
 		"block_hash",
@@ -43,42 +43,42 @@ func (eventsView *RawBlockEvents) Insert(rawBlockEvent *RawBlockEventRow) error 
 		return fmt.Errorf("error building events insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	var rawBlockEventDataJSON string
-	if rawBlockEventDataJSON, err = jsoniter.MarshalToString(rawBlockEvent.Data); err != nil {
-		return fmt.Errorf("error JSON marshalling raw block event data for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
+	var blockRawEventDataJSON string
+	if blockRawEventDataJSON, err = jsoniter.MarshalToString(blockRawEvent.Data); err != nil {
+		return fmt.Errorf("error JSON marshalling block raw event data for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
 	result, err := eventsView.rdb.Exec(sql,
-		rawBlockEvent.BlockHeight,
-		rawBlockEvent.BlockHash,
-		eventsView.rdb.Tton(&rawBlockEvent.BlockTime),
-		rawBlockEvent.FromResult,
-		rawBlockEventDataJSON,
+		blockRawEvent.BlockHeight,
+		blockRawEvent.BlockHash,
+		eventsView.rdb.Tton(&blockRawEvent.BlockTime),
+		blockRawEvent.FromResult,
+		blockRawEventDataJSON,
 	)
 	if err != nil {
-		return fmt.Errorf("error inserting raw block event data into the table: %v: %w", err, rdb.ErrWrite)
+		return fmt.Errorf("error inserting block raw event data into the table: %v: %w", err, rdb.ErrWrite)
 	}
 	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error inserting raw block event data into the table: no rows inserted: %w", rdb.ErrWrite)
+		return fmt.Errorf("error inserting block raw event data into the table: no rows inserted: %w", rdb.ErrWrite)
 	}
 
 	return nil
 }
 
-func (eventsView *RawBlockEvents) InsertAll(rawBlockEvents []RawBlockEventRow) error {
-	if len(rawBlockEvents) == 0 {
+func (eventsView *BlockRawEvents) InsertAll(blockRawEvents []BlockRawEventRow) error {
+	if len(blockRawEvents) == 0 {
 		return nil
 	}
 
 	pendingRowCount := 0
 	var stmtBuilder sq.InsertBuilder
 
-	rawBlockEventCount := len(rawBlockEvents)
-	for i, rawBlockEvent := range rawBlockEvents {
+	blockRawEventCount := len(blockRawEvents)
+	for i, blockRawEvent := range blockRawEvents {
 
 		if pendingRowCount == 0 {
 			stmtBuilder = eventsView.rdb.StmtBuilder.Insert(
-				"view_raw_block_events",
+				"view_block_raw_events",
 			).Columns(
 				"block_height",
 				"block_hash",
@@ -88,25 +88,25 @@ func (eventsView *RawBlockEvents) InsertAll(rawBlockEvents []RawBlockEventRow) e
 			)
 		}
 
-		rawBlockEventDataJSON, marshalErr := jsoniter.MarshalToString(rawBlockEvent.Data)
+		blockRawEventDataJSON, marshalErr := jsoniter.MarshalToString(blockRawEvent.Data)
 		if marshalErr != nil {
 			return fmt.Errorf(
-				"error JSON marshalling raw block event data for insertion: %v: %w",
+				"error JSON marshalling block raw event data for insertion: %v: %w",
 				marshalErr, rdb.ErrBuildSQLStmt,
 			)
 		}
 
 		stmtBuilder = stmtBuilder.Values(
-			rawBlockEvent.BlockHeight,
-			rawBlockEvent.BlockHash,
-			eventsView.rdb.Tton(&rawBlockEvent.BlockTime),
-			rawBlockEvent.FromResult,
-			rawBlockEventDataJSON,
+			blockRawEvent.BlockHeight,
+			blockRawEvent.BlockHash,
+			eventsView.rdb.Tton(&blockRawEvent.BlockTime),
+			blockRawEvent.FromResult,
+			blockRawEventDataJSON,
 		)
 		pendingRowCount += 1
 
 		// Postgres has a limit of 65536 parameters.
-		if pendingRowCount == 500 || i+1 == rawBlockEventCount {
+		if pendingRowCount == 500 || i+1 == blockRawEventCount {
 			sql, sqlArgs, err := stmtBuilder.ToSql()
 			if err != nil {
 				return fmt.Errorf("error building raw block events batch insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -130,7 +130,7 @@ func (eventsView *RawBlockEvents) InsertAll(rawBlockEvents []RawBlockEventRow) e
 	return nil
 }
 
-func (eventsView *RawBlockEvents) FindById(id int64) (*RawBlockEventRow, error) {
+func (eventsView *BlockRawEvents) FindById(id int64) (*BlockRawEventRow, error) {
 	var err error
 
 	selectStmtBuilder := eventsView.rdb.StmtBuilder.Select(
@@ -141,7 +141,7 @@ func (eventsView *RawBlockEvents) FindById(id int64) (*RawBlockEventRow, error) 
 		"from_result",
 		"data",
 	).From(
-		"view_raw_block_events",
+		"view_block_raw_events",
 	).Where(
 		"id = ?", id,
 	)
@@ -151,43 +151,43 @@ func (eventsView *RawBlockEvents) FindById(id int64) (*RawBlockEventRow, error) 
 		return nil, fmt.Errorf("error building raw block events selection sql: %v: %w", err, rdb.ErrPrepare)
 	}
 
-	var rawBlockEvent RawBlockEventRow
-	var rawBlockEventDataJSON *string
+	var blockRawEvent BlockRawEventRow
+	var blockRawEventDataJSON *string
 	blockTimeReader := eventsView.rdb.NtotReader()
 
 	if err = eventsView.rdb.QueryRow(sql, sqlArgs...).Scan(
-		&rawBlockEvent.MaybeId,
-		&rawBlockEvent.BlockHeight,
-		&rawBlockEvent.BlockHash,
+		&blockRawEvent.MaybeId,
+		&blockRawEvent.BlockHeight,
+		&blockRawEvent.BlockHash,
 		blockTimeReader.ScannableArg(),
-		&rawBlockEvent.FromResult,
-		&rawBlockEventDataJSON,
+		&blockRawEvent.FromResult,
+		&blockRawEventDataJSON,
 	); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
 		}
-		return nil, fmt.Errorf("error scanning raw block event row: %v: %w", err, rdb.ErrQuery)
+		return nil, fmt.Errorf("error scanning block raw event row: %v: %w", err, rdb.ErrQuery)
 	}
 	blockTime, parseErr := blockTimeReader.Parse()
 	if parseErr != nil {
-		return nil, fmt.Errorf("error parsing raw block event time: %v: %w", parseErr, rdb.ErrQuery)
+		return nil, fmt.Errorf("error parsing block raw event time: %v: %w", parseErr, rdb.ErrQuery)
 	}
-	rawBlockEvent.BlockTime = *blockTime
+	blockRawEvent.BlockTime = *blockTime
 
-	var rawBlockEventData RawBlockEventRowData
-	if unmarshalErr := jsoniter.Unmarshal([]byte(*rawBlockEventDataJSON), &rawBlockEventData); unmarshalErr != nil {
-		return nil, fmt.Errorf("error unmarshalling raw block event data JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
+	var blockRawEventData BlockRawEventRowData
+	if unmarshalErr := jsoniter.Unmarshal([]byte(*blockRawEventDataJSON), &blockRawEventData); unmarshalErr != nil {
+		return nil, fmt.Errorf("error unmarshalling block raw event data JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 	}
-	rawBlockEvent.Data = rawBlockEventData
+	blockRawEvent.Data = blockRawEventData
 
-	return &rawBlockEvent, nil
+	return &blockRawEvent, nil
 }
 
-func (eventsView *RawBlockEvents) List(
-	filter RawBlockEventsListFilter,
-	order RawBlockEventsListOrder,
+func (eventsView *BlockRawEvents) List(
+	filter BlockRawEventsListFilter,
+	order BlockRawEventsListOrder,
 	pagination *pagination_interface.Pagination,
-) ([]RawBlockEventRow, *pagination_interface.PaginationResult, error) {
+) ([]BlockRawEventRow, *pagination_interface.PaginationResult, error) {
 	stmtBuilder := eventsView.rdb.StmtBuilder.Select(
 		"id",
 		"block_height",
@@ -196,7 +196,7 @@ func (eventsView *RawBlockEvents) List(
 		"from_result",
 		"data",
 	).From(
-		"view_raw_block_events",
+		"view_block_raw_events",
 	)
 
 	if order.Height == view.ORDER_DESC {
@@ -218,7 +218,7 @@ func (eventsView *RawBlockEvents) List(
 			if filter.MaybeBlockHeight != nil {
 				identity = strconv.FormatInt(*filter.MaybeBlockHeight, 10)
 			}
-			totalView := NewRawBlockEventsTotal(rdbHandle)
+			totalView := NewBlockRawEventsTotal(rdbHandle)
 			total, err := totalView.FindBy(identity)
 			if err != nil {
 				return int64(0), err
@@ -237,19 +237,19 @@ func (eventsView *RawBlockEvents) List(
 	}
 	defer rowsResult.Close()
 
-	rawBlockEvents := make([]RawBlockEventRow, 0)
+	blockRawEvents := make([]BlockRawEventRow, 0)
 	for rowsResult.Next() {
-		var rawBlockEvent RawBlockEventRow
-		var rawBlockEventDataJSON *string
+		var blockRawEvent BlockRawEventRow
+		var blockRawEventDataJSON *string
 		blockTimeReader := eventsView.rdb.NtotReader()
 
 		if err = rowsResult.Scan(
-			&rawBlockEvent.MaybeId,
-			&rawBlockEvent.BlockHeight,
-			&rawBlockEvent.BlockHash,
+			&blockRawEvent.MaybeId,
+			&blockRawEvent.BlockHeight,
+			&blockRawEvent.BlockHash,
 			blockTimeReader.ScannableArg(),
-			&rawBlockEvent.FromResult,
-			&rawBlockEventDataJSON,
+			&blockRawEvent.FromResult,
+			&blockRawEventDataJSON,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
@@ -260,15 +260,15 @@ func (eventsView *RawBlockEvents) List(
 		if parseErr != nil {
 			return nil, nil, fmt.Errorf("error parsing block event time: %v: %w", parseErr, rdb.ErrQuery)
 		}
-		rawBlockEvent.BlockTime = *blockTime
+		blockRawEvent.BlockTime = *blockTime
 
-		var rawBlockEventData RawBlockEventRowData
-		if unmarshalErr := jsoniter.Unmarshal([]byte(*rawBlockEventDataJSON), &rawBlockEventData); unmarshalErr != nil {
-			return nil, nil, fmt.Errorf("error unmarshalling raw block event data JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
+		var blockRawEventData BlockRawEventRowData
+		if unmarshalErr := jsoniter.Unmarshal([]byte(*blockRawEventDataJSON), &blockRawEventData); unmarshalErr != nil {
+			return nil, nil, fmt.Errorf("error unmarshalling block raw event data JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 		}
-		rawBlockEvent.Data = rawBlockEventData
+		blockRawEvent.Data = blockRawEventData
 
-		rawBlockEvents = append(rawBlockEvents, rawBlockEvent)
+		blockRawEvents = append(blockRawEvents, blockRawEvent)
 	}
 
 	paginationResult, err := rDbPagination.Result()
@@ -276,27 +276,27 @@ func (eventsView *RawBlockEvents) List(
 		return nil, nil, fmt.Errorf("error preparing pagination result: %v", err)
 	}
 
-	return rawBlockEvents, paginationResult, nil
+	return blockRawEvents, paginationResult, nil
 }
 
-type RawBlockEventsListFilter struct {
+type BlockRawEventsListFilter struct {
 	MaybeBlockHeight *int64
 }
 
-type RawBlockEventsListOrder struct {
+type BlockRawEventsListOrder struct {
 	Height view.ORDER
 }
 
-type RawBlockEventRow struct {
+type BlockRawEventRow struct {
 	MaybeId     *int64               `json:"id"`
 	BlockHeight int64                `json:"blockHeight"`
 	BlockHash   string               `json:"blockHash"`
 	BlockTime   utctime.UTCTime      `json:"blockTime"`
 	FromResult  string               `json:"fromResult"`
-	Data        RawBlockEventRowData `json:"data"`
+	Data        BlockRawEventRowData `json:"data"`
 }
 
-type RawBlockEventRowData struct {
+type BlockRawEventRowData struct {
 	Type    string                  `json:"type"`
 	Content model.BlockResultsEvent `json:"content"`
 }

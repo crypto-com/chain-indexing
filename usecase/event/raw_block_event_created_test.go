@@ -13,16 +13,16 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
-var _ = Describe("RawBlockEventCreated", func() {
+var _ = Describe("BlockRawEventCreated", func() {
 	registry := event_entity.NewRegistry()
 	event_usecase.RegisterEvents(registry)
 
-	Describe("En/DecodeRawBlockEventCreated", func() {
+	Describe("En/DecodeBlockRawEventCreated", func() {
 		It("should able to encode and decode to the same Event", func() {
-			var rawBlockEvent model.CreateRawBlockEventParams
+			var blockRawEvent model.CreateBlockRawEventParams
 			var blockheight = random.Int64()
-			random.Struct(&rawBlockEvent)
-			event := event_usecase.NewRawBlockEventCreated(blockheight, &rawBlockEvent)
+			random.Struct(&blockRawEvent)
+			event := event_usecase.NewBlockRawEventCreated(blockheight, &blockRawEvent)
 			encoded, _ := json.Marshal(event)
 
 			decodedEvent, err := registry.DecodeByType(

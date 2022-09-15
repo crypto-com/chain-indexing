@@ -35,7 +35,7 @@ func ParseBlockResultsTxsResultsRawEvents(
 
 	for i := range blockResults.TxsResults {
 		for j := range blockResults.TxsResults[i].Events {
-			parseRawBlockEventCmd := command.NewCreateRawBlockEvent(block.Height, model.CreateRawBlockEventParams{
+			parseBlockRawEventCmd := command.NewCreateBlockRawEvent(block.Height, model.CreateBlockRawEventParams{
 				BlockHash:  block.Hash,
 				BlockTime:  block.Time,
 				FromResult: "TxsResults",
@@ -45,7 +45,7 @@ func ParseBlockResultsTxsResultsRawEvents(
 				},
 			})
 
-			cmds = append(cmds, parseRawBlockEventCmd)
+			cmds = append(cmds, parseBlockRawEventCmd)
 		}
 	}
 

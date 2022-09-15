@@ -12,8 +12,8 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 	block_view "github.com/crypto-com/chain-indexing/projection/block/view"
+	blockrawevent_view "github.com/crypto-com/chain-indexing/projection/block_raw_event/view"
 	blockevent_view "github.com/crypto-com/chain-indexing/projection/blockevent/view"
-	rawblockevent_view "github.com/crypto-com/chain-indexing/projection/raw_block_event/view"
 	transaction_view "github.com/crypto-com/chain-indexing/projection/transaction/view"
 )
 
@@ -24,7 +24,7 @@ type Blocks struct {
 	transactionsView              transaction_view.BlockTransactions
 	blockEventsView               *blockevent_view.BlockEvents
 	validatorBlockCommitmentsView *validator_view.ValidatorBlockCommitments
-	rawBlockEventView             *rawblockevent_view.RawBlockEvents
+	blockRawEventView             *blockrawevent_view.BlockRawEvents
 }
 
 func NewBlocks(logger applogger.Logger, rdbHandle *rdb.Handle) *Blocks {
@@ -37,7 +37,7 @@ func NewBlocks(logger applogger.Logger, rdbHandle *rdb.Handle) *Blocks {
 		transaction_view.NewTransactionsView(rdbHandle),
 		blockevent_view.NewBlockEvents(rdbHandle),
 		validator_view.NewValidatorBlockCommitments(rdbHandle),
-		rawblockevent_view.NewRawBlockEvents(rdbHandle),
+		blockrawevent_view.NewBlockRawEvents(rdbHandle),
 	}
 }
 
@@ -230,7 +230,7 @@ func (handler *Blocks) ListCommitmentsByConsensusNodeAddress(ctx *fasthttp.Reque
 	httpapi.SuccessWithPagination(ctx, blocks, paginationResult)
 }
 
-func (handler *Blocks) ListRawBlockEventsByHeight(ctx *fasthttp.RequestCtx) {
+func (handler *Blocks) ListBlockRawEventsByHeight(ctx *fasthttp.RequestCtx) {
 	pagination, err := httpapi.ParsePagination(ctx)
 	if err != nil {
 		httpapi.BadRequest(ctx, err)
@@ -255,9 +255,9 @@ func (handler *Blocks) ListRawBlockEventsByHeight(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
-	blocks, paginationResult, err := handler.rawBlockEventView.List(rawblockevent_view.RawBlockEventsListFilter{
+	blocks, paginationResult, err := handler.blockRawEventView.List(blockrawevent_view.BlockRawEventsListFilter{
 		MaybeBlockHeight: &blockHeight,
-	}, rawblockevent_view.RawBlockEventsListOrder{
+	}, blockrawevent_view.BlockRawEventsListOrder{
 		Height: heightOrder,
 	}, pagination)
 	if err != nil {

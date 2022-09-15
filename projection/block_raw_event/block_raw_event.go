@@ -11,13 +11,13 @@ import (
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
-	"github.com/crypto-com/chain-indexing/projection/raw_block_event/view"
+	"github.com/crypto-com/chain-indexing/projection/block_raw_event/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
-var _ projection.Projection = &RawBlockEvent{}
+var _ projection.Projection = &BlockRawEvent{}
 
-type RawBlockEvent struct {
+type BlockRawEvent struct {
 	*rdbprojectionbase.Base
 
 	rdbConn rdb.Conn
@@ -26,15 +26,15 @@ type RawBlockEvent struct {
 	migrationHelper migrationhelper.MigrationHelper
 }
 
-func NewRawBlockEvent(
+func NewBlockRawEvent(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	migrationHelper migrationhelper.MigrationHelper,
-) *RawBlockEvent {
-	return &RawBlockEvent{
+) *BlockRawEvent {
+	return &BlockRawEvent{
 		rdbprojectionbase.NewRDbBase(
 			rdbConn.ToHandle(),
-			"RawBlockEvent",
+			"BlockRawEvent",
 		),
 
 		rdbConn,
@@ -44,20 +44,20 @@ func NewRawBlockEvent(
 	}
 }
 
-func (_ *RawBlockEvent) GetEventsToListen() []string {
+func (_ *BlockRawEvent) GetEventsToListen() []string {
 	return []string{
 		event_usecase.RAW_BLOCK_EVENT_CREATED,
 	}
 }
 
-func (projection *RawBlockEvent) OnInit() error {
+func (projection *BlockRawEvent) OnInit() error {
 	if projection.migrationHelper != nil {
 		projection.migrationHelper.Migrate()
 	}
 	return nil
 }
 
-func (projection *RawBlockEvent) HandleEvents(height int64, events []event_entity.Event) error {
+func (projection *BlockRawEvent) HandleEvents(height int64, events []event_entity.Event) error {
 	var err error
 
 	var rdbTx rdb.Tx
@@ -74,31 +74,31 @@ func (projection *RawBlockEvent) HandleEvents(height int64, events []event_entit
 	}()
 
 	rdbTxHandle := rdbTx.ToHandle()
-	eventsView := view.NewRawBlockEvents(rdbTxHandle)
-	totalView := view.NewRawBlockEventsTotal(rdbTxHandle)
+	eventsView := view.NewBlockRawEvents(rdbTxHandle)
+	totalView := view.NewBlockRawEventsTotal(rdbTxHandle)
 
 	totalMap := make(map[string]int64)
 
-	eventRows := make([]view.RawBlockEventRow, 0)
+	eventRows := make([]view.BlockRawEventRow, 0)
 	for _, event := range events {
-		if rawBlockCreatedEvent, ok := event.(*event_usecase.RawBlockEventCreated); ok {
-			eventRows = append(eventRows, view.RawBlockEventRow{
+		if rawBlockCreatedEvent, ok := event.(*event_usecase.BlockRawEventCreated); ok {
+			eventRows = append(eventRows, view.BlockRawEventRow{
 				BlockHeight: rawBlockCreatedEvent.BlockHeight,
 				BlockHash:   rawBlockCreatedEvent.BlockHash,
 				BlockTime:   rawBlockCreatedEvent.BlockTime,
 				FromResult:  rawBlockCreatedEvent.FromResult,
-				Data: view.RawBlockEventRowData{
+				Data: view.BlockRawEventRowData{
 					Type:    rawBlockCreatedEvent.Data.Type,
 					Content: rawBlockCreatedEvent.Data.Content,
 				}})
 
 		} else {
-			eventRows = append(eventRows, view.RawBlockEventRow{
+			eventRows = append(eventRows, view.BlockRawEventRow{
 				BlockHeight: height,
 				BlockHash:   "",
 				BlockTime:   utctime.UTCTime{},
 				FromResult:  "",
-				Data:        view.RawBlockEventRowData{}})
+				Data:        view.BlockRawEventRowData{}})
 
 			heightEventTypeKey := fmt.Sprintf("%d:%s", height, event.Name())
 			if _, ok := totalMap[heightEventTypeKey]; !ok {
@@ -114,12 +114,12 @@ func (projection *RawBlockEvent) HandleEvents(height int64, events []event_entit
 		}
 	}
 	if err = totalView.Set(strconv.FormatInt(height, 10), int64(len(eventRows))); err != nil {
-		return fmt.Errorf("error incrementing raw block event type total")
+		return fmt.Errorf("error incrementing block raw event type total")
 	}
 	totalMap["-"] = int64(len(eventRows))
 	for key, value := range totalMap {
 		if err = totalView.Increment(key, value); err != nil {
-			return fmt.Errorf("error incrementing raw block event type total")
+			return fmt.Errorf("error incrementing block raw event type total")
 		}
 	}
 	if err = eventsView.InsertAll(eventRows); err != nil {

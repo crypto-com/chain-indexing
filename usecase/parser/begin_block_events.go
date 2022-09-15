@@ -142,7 +142,7 @@ func ParseBeginBlockRawEventsCommands(
 	commands := make([]command.Command, 0)
 
 	for _, event := range beginBlockEvents {
-		parseRawBlockEventCmd := command_usecase.NewCreateRawBlockEvent(blockHeight, model.CreateRawBlockEventParams{
+		parseBlockRawEventCmd := command_usecase.NewCreateBlockRawEvent(blockHeight, model.CreateBlockRawEventParams{
 			BlockHash:  blockHash,
 			BlockTime:  blockTime,
 			FromResult: "BeginBlockEvent",
@@ -152,7 +152,7 @@ func ParseBeginBlockRawEventsCommands(
 			},
 		})
 
-		commands = append(commands, parseRawBlockEventCmd)
+		commands = append(commands, parseBlockRawEventCmd)
 	}
 
 	return commands, nil

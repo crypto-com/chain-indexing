@@ -9,7 +9,7 @@ func RegisterEvents(registry *event.Registry) {
 
 	registry.Register(BLOCK_CREATED, 1, DecodeBlockCreated)
 	registry.Register(RAW_BLOCK_CREATED, 1, DecodeRawBlockCreated)
-	registry.Register(RAW_BLOCK_EVENT_CREATED, 1, DecodeRawBlockEventCreated)
+	registry.Register(RAW_BLOCK_EVENT_CREATED, 1, DecodeBlockRawEventCreated)
 	registry.Register(TRANSACTION_CREATED, 1, DecodeTransactionCreated)
 	registry.Register(TRANSACTION_FAILED, 1, DecodeTransactionFailed)
 

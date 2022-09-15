@@ -99,7 +99,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 		}))
 	})
 
-	It("should return RawBlockEvent commands", func() {
+	It("should return BlockRawEvent commands", func() {
 		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_COMPLETE_UNBONDING_BLOCK_RESULTS_RESP)
 		block, _ := mustParseBlockResp(usecase_parser_test.END_BLOCK_COMPLETE_UNBONDING_BLOCK_RESP)
 
@@ -113,9 +113,9 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 		Expect(cmds).To(HaveLen(1))
 		expectedBlockHeight := int64(477415)
 		Expect(cmds).To(Equal([]command.Command{
-			command_usecase.NewCreateRawBlockEvent(
+			command_usecase.NewCreateBlockRawEvent(
 				expectedBlockHeight,
-				model.CreateRawBlockEventParams{
+				model.CreateBlockRawEventParams{
 					BlockHash:  "8703C54C9FE1C2D6D05DAC79D795E120F385F5F43E5CDC17B73090E9DA40CEA9",
 					BlockTime:  utctime.FromUnixNano(1631893335936780880),
 					FromResult: "EndBlockEvent",

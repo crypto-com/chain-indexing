@@ -1,1 +1,0 @@
-DROP TABLE IF EXISTS view_raw_block_events;

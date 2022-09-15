@@ -13,7 +13,7 @@ import (
 )
 
 var _ = Describe("ParseEndBlockEventsCommands", func() {
-	It("should return CreateRawBlockEvent commands when txs_results has events emitted", func() {
+	It("should return CreateBlockRawEvent commands when txs_results has events emitted", func() {
 		block, _ := mustParseBlockResp(usecase_parser_test.BLOCK_RESULTS_TXS_RESULTS_RAW_EVENTS_BLOCK_RESP)
 		blockResults := mustParseBlockResultsResp(usecase_parser_test.BLOCK_RESULTS_TXS_RESULTS_RAW_EVENTS_BLOCK_RESULTS_RESP)
 
@@ -27,9 +27,9 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 		expectedBlockHeight := int64(11015)
 		Expect(cmds).To(Equal(
 			[]command.Command{
-				command_usecase.NewCreateRawBlockEvent(
+				command_usecase.NewCreateBlockRawEvent(
 					expectedBlockHeight,
-					model.CreateRawBlockEventParams{
+					model.CreateBlockRawEventParams{
 						BlockHash:  "C60E4496E326D24AABA166ACE7E86DC17AEDDC77106084B99D632030C65206EF",
 						BlockTime:  utctime.FromUnixNano(1616702718680872778),
 						FromResult: "TxsResults",
@@ -48,9 +48,9 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 						},
 					},
 				),
-				command_usecase.NewCreateRawBlockEvent(
+				command_usecase.NewCreateBlockRawEvent(
 					expectedBlockHeight,
-					model.CreateRawBlockEventParams{
+					model.CreateBlockRawEventParams{
 						BlockHash:  "C60E4496E326D24AABA166ACE7E86DC17AEDDC77106084B99D632030C65206EF",
 						BlockTime:  utctime.FromUnixNano(1616702718680872778),
 						FromResult: "TxsResults",
@@ -69,9 +69,9 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 						},
 					},
 				),
-				command_usecase.NewCreateRawBlockEvent(
+				command_usecase.NewCreateBlockRawEvent(
 					expectedBlockHeight,
-					model.CreateRawBlockEventParams{
+					model.CreateBlockRawEventParams{
 						BlockHash:  "C60E4496E326D24AABA166ACE7E86DC17AEDDC77106084B99D632030C65206EF",
 						BlockTime:  utctime.FromUnixNano(1616702718680872778),
 						FromResult: "TxsResults",
@@ -100,9 +100,9 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 						},
 					},
 				),
-				command_usecase.NewCreateRawBlockEvent(
+				command_usecase.NewCreateBlockRawEvent(
 					expectedBlockHeight,
-					model.CreateRawBlockEventParams{
+					model.CreateBlockRawEventParams{
 						BlockHash:  "C60E4496E326D24AABA166ACE7E86DC17AEDDC77106084B99D632030C65206EF",
 						BlockTime:  utctime.FromUnixNano(1616702718680872778),
 						FromResult: "TxsResults",
@@ -121,9 +121,9 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 						},
 					},
 				),
-				command_usecase.NewCreateRawBlockEvent(
+				command_usecase.NewCreateBlockRawEvent(
 					expectedBlockHeight,
-					model.CreateRawBlockEventParams{
+					model.CreateBlockRawEventParams{
 						BlockHash:  "C60E4496E326D24AABA166ACE7E86DC17AEDDC77106084B99D632030C65206EF",
 						BlockTime:  utctime.FromUnixNano(1616702718680872778),
 						FromResult: "TxsResults",
@@ -142,9 +142,9 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 						},
 					},
 				),
-				command_usecase.NewCreateRawBlockEvent(
+				command_usecase.NewCreateBlockRawEvent(
 					expectedBlockHeight,
-					model.CreateRawBlockEventParams{
+					model.CreateBlockRawEventParams{
 						BlockHash:  "C60E4496E326D24AABA166ACE7E86DC17AEDDC77106084B99D632030C65206EF",
 						BlockTime:  utctime.FromUnixNano(1616702718680872778),
 						FromResult: "TxsResults",
@@ -173,9 +173,9 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 						},
 					},
 				),
-				command_usecase.NewCreateRawBlockEvent(
+				command_usecase.NewCreateBlockRawEvent(
 					expectedBlockHeight,
-					model.CreateRawBlockEventParams{
+					model.CreateBlockRawEventParams{
 						BlockHash:  "C60E4496E326D24AABA166ACE7E86DC17AEDDC77106084B99D632030C65206EF",
 						BlockTime:  utctime.FromUnixNano(1616702718680872778),
 						FromResult: "TxsResults",
@@ -194,9 +194,9 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 						},
 					},
 				),
-				command_usecase.NewCreateRawBlockEvent(
+				command_usecase.NewCreateBlockRawEvent(
 					expectedBlockHeight,
-					model.CreateRawBlockEventParams{
+					model.CreateBlockRawEventParams{
 						BlockHash:  "C60E4496E326D24AABA166ACE7E86DC17AEDDC77106084B99D632030C65206EF",
 						BlockTime:  utctime.FromUnixNano(1616702718680872778),
 						FromResult: "TxsResults",

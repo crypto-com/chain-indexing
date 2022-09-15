@@ -12,8 +12,8 @@ import (
 	. "github.com/crypto-com/chain-indexing/external/logger/test"
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/external/utctime"
-	raw_block_event "github.com/crypto-com/chain-indexing/projection/raw_block_event"
-	"github.com/crypto-com/chain-indexing/projection/raw_block_event/view"
+	block_raw_event "github.com/crypto-com/chain-indexing/projection/block_raw_event"
+	"github.com/crypto-com/chain-indexing/projection/block_raw_event/view"
 	. "github.com/crypto-com/chain-indexing/test"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	model_usecase "github.com/crypto-com/chain-indexing/usecase/model"
@@ -42,7 +42,7 @@ var _ = Describe("Raw Block Events", func() {
 
 			testEnv.RootMigrate.MustUp()
 			projectionMigrate := testEnv.MigrateCreator(
-				"rawblockevent_schema_migrations",
+				"blockrawevent_schema_migrations",
 				RAW_BLOCK_EVENT_MIGRATIONS_PATH,
 			)
 			projectionMigrate.MustUp()
@@ -54,9 +54,9 @@ var _ = Describe("Raw Block Events", func() {
 
 		It("should update the last projection handled block height with the fired event block height", func() {
 			anyHeight := int64(1)
-			event := event_usecase.NewRawBlockEventCreated(
+			event := event_usecase.NewBlockRawEventCreated(
 				anyHeight,
-				&model_usecase.CreateRawBlockEventParams{
+				&model_usecase.CreateBlockRawEventParams{
 					BlockHash:  "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
 					BlockTime:  utctime.FromUnixNano(int64(1000000)),
 					FromResult: "TxsResult",
@@ -80,7 +80,7 @@ var _ = Describe("Raw Block Events", func() {
 			)
 
 			fakeLogger := NewFakeLogger()
-			projection := raw_block_event.NewRawBlockEvent(fakeLogger, pgxConn, nil)
+			projection := block_raw_event.NewBlockRawEvent(fakeLogger, pgxConn, nil)
 			err := projection.HandleEvents(anyHeight, []event_entity.Event{event})
 			Expect(err).To(BeNil())
 
@@ -88,12 +88,12 @@ var _ = Describe("Raw Block Events", func() {
 		})
 
 		It("should insert the block event record after handling event", func() {
-			rawBlockEventsView := view.NewRawBlockEvents(pgxConn.ToHandle())
+			blockRawEventsView := view.NewBlockRawEvents(pgxConn.ToHandle())
 
 			anyHeight := int64(1)
-			event := event_usecase.NewRawBlockEventCreated(
+			event := event_usecase.NewBlockRawEventCreated(
 				anyHeight,
-				&model_usecase.CreateRawBlockEventParams{
+				&model_usecase.CreateBlockRawEventParams{
 					BlockHash:  "B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48",
 					BlockTime:  utctime.FromUnixNano(int64(1000000)),
 					FromResult: "TxsResult",
@@ -116,38 +116,38 @@ var _ = Describe("Raw Block Events", func() {
 				},
 			)
 
-			rawBlockEventListFilter := view.RawBlockEventsListFilter{
+			blockRawEventListFilter := view.BlockRawEventsListFilter{
 				MaybeBlockHeight: primptr.Int64(anyHeight),
 			}
-			rawBlockEventListOrder := view.RawBlockEventsListOrder{
+			blockRawEventListOrder := view.BlockRawEventsListOrder{
 				Height: "ASC",
 			}
 			paginationPtr := &pagination_interface.Pagination{}
 
 			fakeLogger := NewFakeLogger()
 
-			rawBlockEventProjection := raw_block_event.NewRawBlockEvent(fakeLogger, pgxConn, nil)
+			blockRawEventProjection := block_raw_event.NewBlockRawEvent(fakeLogger, pgxConn, nil)
 
-			rawBlockEventRow, mayBePaginationResult, listErr := rawBlockEventsView.
-				List(rawBlockEventListFilter, rawBlockEventListOrder, paginationPtr)
+			blockRawEventRow, mayBePaginationResult, listErr := blockRawEventsView.
+				List(blockRawEventListFilter, blockRawEventListOrder, paginationPtr)
 
-			Expect(rawBlockEventRow).To(HaveLen(0))
+			Expect(blockRawEventRow).To(HaveLen(0))
 			Expect(mayBePaginationResult).To(BeNil())
 			Expect(listErr).To(BeNil())
 
-			handleEventsErr := rawBlockEventProjection.HandleEvents(anyHeight, []event_entity.Event{event})
+			handleEventsErr := blockRawEventProjection.HandleEvents(anyHeight, []event_entity.Event{event})
 			Expect(handleEventsErr).To(BeNil())
 
-			rawBlockEventRowAfterHandling, maybePaginationResultAfterHandling, errAfterHandling := rawBlockEventsView.
-				List(rawBlockEventListFilter, rawBlockEventListOrder, paginationPtr)
+			blockRawEventRowAfterHandling, maybePaginationResultAfterHandling, errAfterHandling := blockRawEventsView.
+				List(blockRawEventListFilter, blockRawEventListOrder, paginationPtr)
 
-			Expect(rawBlockEventProjection.GetLastHandledEventHeight()).To(Equal(primptr.Int64(anyHeight)))
-			Expect(rawBlockEventRowAfterHandling).To(HaveLen(1))
-			Expect(rawBlockEventRowAfterHandling[0].BlockHeight).To(Equal(anyHeight))
-			Expect(rawBlockEventRowAfterHandling[0].BlockHash).To(Equal("B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48"))
-			Expect(rawBlockEventRowAfterHandling[0].BlockTime).To(Equal(utctime.FromUnixNano(int64(1000000))))
-			Expect(rawBlockEventRowAfterHandling[0].MaybeId).To(Equal(primptr.Int64(1)))
-			Expect(rawBlockEventRowAfterHandling[0].FromResult).To(Equal("TxsResult"))
+			Expect(blockRawEventProjection.GetLastHandledEventHeight()).To(Equal(primptr.Int64(anyHeight)))
+			Expect(blockRawEventRowAfterHandling).To(HaveLen(1))
+			Expect(blockRawEventRowAfterHandling[0].BlockHeight).To(Equal(anyHeight))
+			Expect(blockRawEventRowAfterHandling[0].BlockHash).To(Equal("B69554A020537DA8E7C7610A318180C09BFEB91229BB85D4A78DDA2FACF68A48"))
+			Expect(blockRawEventRowAfterHandling[0].BlockTime).To(Equal(utctime.FromUnixNano(int64(1000000))))
+			Expect(blockRawEventRowAfterHandling[0].MaybeId).To(Equal(primptr.Int64(1)))
+			Expect(blockRawEventRowAfterHandling[0].FromResult).To(Equal("TxsResult"))
 			Expect(maybePaginationResultAfterHandling).To(BeNil())
 			Expect(errAfterHandling).To(BeNil())
 		})
@@ -156,7 +156,7 @@ var _ = Describe("Raw Block Events", func() {
 			anyHeight := int64(1)
 
 			fakeLogger := NewFakeLogger()
-			projection := raw_block_event.NewRawBlockEvent(fakeLogger, pgxConn, nil)
+			projection := block_raw_event.NewBlockRawEvent(fakeLogger, pgxConn, nil)
 
 			Expect(projection.GetLastHandledEventHeight()).To(BeNil())
 

@@ -6,28 +6,28 @@ import (
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 )
 
-type CreateRawBlockEvent struct {
+type CreateBlockRawEvent struct {
 	blockHeight int64
-	params      usecase_model.CreateRawBlockEventParams
+	params      usecase_model.CreateBlockRawEventParams
 }
 
-func NewCreateRawBlockEvent(blockHeight int64, params usecase_model.CreateRawBlockEventParams) *CreateRawBlockEvent {
-	return &CreateRawBlockEvent{
+func NewCreateBlockRawEvent(blockHeight int64, params usecase_model.CreateBlockRawEventParams) *CreateBlockRawEvent {
+	return &CreateBlockRawEvent{
 		blockHeight,
 		params,
 	}
 }
 
-func (_ *CreateRawBlockEvent) Name() string {
-	return "CreateRawBlockEvent"
+func (_ *CreateBlockRawEvent) Name() string {
+	return "CreateBlockRawEvent"
 }
 
-func (_ *CreateRawBlockEvent) Version() int {
+func (_ *CreateBlockRawEvent) Version() int {
 	return 1
 }
 
-func (cmd *CreateRawBlockEvent) Exec() (entity_event.Event, error) {
-	params := usecase_model.CreateRawBlockEventParams{
+func (cmd *CreateBlockRawEvent) Exec() (entity_event.Event, error) {
+	params := usecase_model.CreateBlockRawEventParams{
 		BlockHash:  cmd.params.BlockHash,
 		BlockTime:  cmd.params.BlockTime,
 		FromResult: cmd.params.FromResult,
@@ -36,6 +36,6 @@ func (cmd *CreateRawBlockEvent) Exec() (entity_event.Event, error) {
 			Content: cmd.params.Data.Content,
 		},
 	}
-	event := event.NewRawBlockEventCreated(cmd.blockHeight, &params)
+	event := event.NewBlockRawEventCreated(cmd.blockHeight, &params)
 	return event, nil
 }

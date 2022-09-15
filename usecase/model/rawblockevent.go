@@ -2,7 +2,7 @@ package model
 
 import "github.com/crypto-com/chain-indexing/external/utctime"
 
-type CreateRawBlockEventParams struct {
+type CreateBlockRawEventParams struct {
 	BlockHash  string
 	BlockTime  utctime.UTCTime
 	FromResult string
