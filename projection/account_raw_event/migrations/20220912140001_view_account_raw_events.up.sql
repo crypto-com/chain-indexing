@@ -4,7 +4,6 @@ CREATE TABLE view_account_raw_events (
    block_height BIGINT,
    block_hash VARCHAR NOT NULL,
    block_time BIGINT NOT NULL,
-   from_result VARCHAR NOT NULL,
    data JSONB NOT NULL,
    PRIMARY KEY(id)
 );

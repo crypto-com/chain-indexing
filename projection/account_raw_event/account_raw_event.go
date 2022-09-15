@@ -47,8 +47,6 @@ func NewAccountRawEvent(
 func (_ *AccountRawEvent) GetEventsToListen() []string {
 	return append([]string{
 		event_usecase.BLOCK_CREATED,
-		event_usecase.TRANSACTION_CREATED,
-		event_usecase.TRANSACTION_FAILED,
 	}, event_usecase.MSG_EVENTS...)
 }
 
@@ -85,11 +83,11 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 	var blockHash string
 	eventRows := make([]view.AccountRawEventRow, 0)
 	for _, event := range events {
-		// TODO
 		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
 			blockTime = blockCreatedEvent.Block.Time
 			blockHash = blockCreatedEvent.Block.Hash
 		} else {
+			fmt.Println("===> fevents: ", event)
 			eventRows = append(eventRows, view.AccountRawEventRow{
 				BlockHeight: height,
 				BlockHash:   "",
