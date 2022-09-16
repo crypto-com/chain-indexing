@@ -54,7 +54,6 @@ var _ = Describe("ParseMsgCommands", func() {
 				},
 				model.MsgEthereumTxParams{
 					RawMsgEthereumTx: model.RawMsgEthereumTx{
-
 						Type: "/ethermint.evm.v1.MsgEthereumTx",
 						Size: 208,
 						Data: model.LegacyTx{

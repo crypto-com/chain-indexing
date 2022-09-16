@@ -128,7 +128,7 @@ func ParseBlockTxsMsgToCommands(
 
 				// ethermint evm
 				"/ethermint.evm.v1.MsgEthereumTx",
-				"/ethermint.types.v1.ExtensionOptionDynamicFeeTx":
+				"/ethermint.types.v1.DynamicFeeTx":
 				parser := parserManager.GetParser(utils.CosmosParserKey(msgType.(string)), utils.ParserBlockHeight(blockHeight))
 
 				msgCommands, possibleSignerAddresses = parser(utils.CosmosParserParams{
@@ -2172,7 +2172,7 @@ func ParseMsgEthereumTx(
 func ParseExtensionOptionDynamicFeeTx(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
-	var rawMsg model.RawMsgEthereumTx
+	var rawMsg model.RawDynamicFeeTx
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -2191,39 +2191,38 @@ func ParseExtensionOptionDynamicFeeTx(
 	if err := decoder.Decode(parserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgEthereumTx: %v", err))
 	}
+	fmt.Println("===> ", parserParams, rawMsg)
+	if !parserParams.MsgCommonParams.TxSuccess {
+		// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
+		msgEthereumTxParams := model.DynamicFeeTxParams{
+			RawDynamicFeeTx: rawMsg,
+		}
 
-	// if !parserParams.MsgCommonParams.TxSuccess {
-	// 	// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
-	// 	msgEthereumTxParams := model.MsgEthereumTxParams{
-	// 		RawMsgEthereumTx: rawMsg,
-	// 	}
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		// FIXME: https://github.com/crypto-com/chain-indexing/issues/729
+		// possibleSignerAddresses = append(possibleSignerAddresses, msgEthereumTxParams.From)
 
-	// 	// Getting possible signer address from Msg
-	// 	var possibleSignerAddresses []string
-	// 	// FIXME: https://github.com/crypto-com/chain-indexing/issues/729
-	// 	// possibleSignerAddresses = append(possibleSignerAddresses, msgEthereumTxParams.From)
+		return []command.Command{command_usecase.NewCreateMsgEthereumTx(
+			parserParams.MsgCommonParams,
 
-	// 	return []command.Command{command_usecase.NewCreateMsgEthereumTx(
-	// 		parserParams.MsgCommonParams,
+			msgEthereumTxParams,
+		)}, possibleSignerAddresses
+	}
 
-	// 		msgEthereumTxParams,
-	// 	)}, possibleSignerAddresses
-	// }
+	// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
+	msgEthereumTxParams := model.DynamicFeeTxParams{
+		RawDynamicFeeTx: rawMsg,
+	}
 
-	// // FIXME: https://github.com/crypto-com/chain-indexing/issues/730
-	// msgEthereumTxParams := model.MsgEthereumTxParams{
-	// 	RawMsgEthereumTx: rawMsg,
-	// }
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	// FIXME: https://github.com/crypto-com/chain-indexing/issues/729
+	// possibleSignerAddresses = append(possibleSignerAddresses, msgEthereumTxParams.From)
 
-	// // Getting possible signer address from Msg
-	// var possibleSignerAddresses []string
-	// // FIXME: https://github.com/crypto-com/chain-indexing/issues/729
-	// // possibleSignerAddresses = append(possibleSignerAddresses, msgEthereumTxParams.From)
+	return []command.Command{command_usecase.NewCreateMsgEthereumTx(
+		parserParams.MsgCommonParams,
 
-	// return []command.Command{command_usecase.NewCreateMsgEthereumTx(
-	// 	parserParams.MsgCommonParams,
-
-	// 	msgEthereumTxParams,
-	// )}, possibleSignerAddresses
-	return nil, nil
+		msgEthereumTxParams,
+	)}, possibleSignerAddresses
 }

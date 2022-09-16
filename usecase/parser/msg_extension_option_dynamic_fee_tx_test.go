@@ -6,7 +6,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
-	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
@@ -21,7 +20,7 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_EXTENSION_OPTION_DYNAMIC_FEE_TX_BLOCK_RESULTS_RESP,
 			)
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_FUND_COMMUNITY_POOL_TXS_RESP)
+			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_EXTENSION_OPTION_DYNAMIC_FEE_TXS_RESP)
 			txs := []model.Tx{*tx}
 
 			accountAddressPrefix := "tcro"
@@ -39,19 +38,38 @@ var _ = Describe("ParseMsgCommands", func() {
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
-			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateMsgFundCommunityPool(
+			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateMsgEthereumTx(
 				event.MsgCommonParams{
-					BlockHeight: int64(460662),
-					TxHash:      "933052FD68B10549312F3CBA9AF4F4CC77536BE5ECD335638DD36ECCE681201E",
+					BlockHeight: int64(5168311),
+					TxHash:      "3F1B98E6A43A3666699CA28DA2A0872E1478E092F7EC3FCF8A94202BB8B330D2",
 					TxSuccess:   true,
 					MsgIndex:    0,
 				},
-				model.MsgFundCommunityPoolParams{
-					Depositor: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-					Amount:    coin.MustParseCoinsNormalized("1basetcro"),
+				model.DynamicFeeTxParams{
+					RawDynamicFeeTx: model.RawDynamicFeeTx{
+						Type: "/ethermint.evm.v1.MsgEthereumTx",
+						Size: 0,
+						Data: model.DynamicFeeTx{
+							Type:      "/ethermint.evm.v1.DynamicFeeTx",
+							ChainId:   "338",
+							Nonce:     "115",
+							GasTipCap: "5000000000000",
+							GasFeeCap: "5000000000000",
+							Gas:       "48834",
+							To:        "0x904Bd5a5AAC0B9d88A0D47864724218986Ad4a3a",
+							Value:     "0",
+							Data:      "CV6nswAAAAAAAAAAAAAAAPVk7wA0u3182EQSJ14eUTZNTXc0//////////////////////////////////////////8=",
+							V:         "",
+							R:         "HHigR02IN48gvEM991C/MOCmbVfOw9Sj804IhtI5z2Q=",
+							S:         "SspHmiOAoM4bQdvAig9I8PQzLv5GTzElhcROppO0WpU=",
+						},
+						From: "",
+						Hash: "0xd56db65672a48daaf14f743f53c316a3eba130d72beb7034296f4ea3f7e49b53",
+					},
 				},
 			)}))
-			Expect(possibleSignerAddresses).To(Equal([]string{"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"}))
+			var emptyAddress []string
+			Expect(possibleSignerAddresses).To(Equal(emptyAddress))
 		})
 	})
 })
