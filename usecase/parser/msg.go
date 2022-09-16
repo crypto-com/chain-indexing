@@ -43,11 +43,17 @@ func ParseBlockTxsMsgToCommands(
 		}
 
 		for msgIndex, msg := range tx.Tx.Body.Messages {
+			events := []model.BlockEvent{}
+			if len(tx.TxResponse.Logs)-1 >= msgIndex {
+				events = tx.TxResponse.Logs[msgIndex].Events
+			}
+
 			msgCommonParams := event.MsgCommonParams{
 				BlockHeight: blockHeight,
 				TxHash:      txHash,
 				TxSuccess:   txSuccess,
 				MsgIndex:    msgIndex,
+				Events:      events,
 			}
 
 			var msgCommands []command.Command
@@ -167,8 +173,13 @@ func ParseMsgSend(
 			amount = append(amount, coin.Coin{})
 		}
 	}
+	commands := []command.Command{}
+	for _, event := range parserParams.MsgCommonParams.Events {
+		commands = append(commands, command_usecase.NewCreateAccountRawEvent(parserParams.MsgCommonParams.BlockHeight, event))
+		fmt.Println("===> ParseMsgSend", event)
+	}
 
-	return []command.Command{command_usecase.NewCreateMsgSend(
+	commands = append(commands, command_usecase.NewCreateMsgSend(
 		parserParams.MsgCommonParams,
 
 		event.MsgSendCreatedParams{
@@ -176,7 +187,9 @@ func ParseMsgSend(
 			ToAddress:   parserParams.Msg["to_address"].(string),
 			Amount:      amount,
 		},
-	)}, possibleSignerAddresses
+	))
+
+	return commands, possibleSignerAddresses
 }
 
 func ParseMsgMultiSend(

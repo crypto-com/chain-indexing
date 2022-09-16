@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 const MSG_SUCCESS_SUFFIX = "Created"
@@ -14,9 +15,10 @@ const MSG_FAILED_SUFFIX = "Failed"
 type MsgBase struct {
 	event.Base
 
-	MsgName   string `json:"msgName"`
-	MsgTxHash string `json:"txHash"`
-	MsgIndex  int    `json:"msgIndex"`
+	MsgName   string             `json:"msgName"`
+	MsgTxHash string             `json:"txHash"`
+	MsgIndex  int                `json:"msgIndex"`
+	Events    []model.BlockEvent `json:"event"`
 }
 
 func NewMsgBase(params MsgBaseParams) MsgBase {
@@ -34,6 +36,7 @@ func NewMsgBase(params MsgBaseParams) MsgBase {
 		params.MsgName,
 		params.TxHash,
 		params.MsgIndex,
+		params.Events,
 	}
 }
 
@@ -71,4 +74,5 @@ type MsgCommonParams struct {
 	TxHash      string
 	TxSuccess   bool
 	MsgIndex    int
+	Events      []model.BlockEvent
 }

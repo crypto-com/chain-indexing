@@ -47,6 +47,7 @@ func NewAccountRawEvent(
 func (_ *AccountRawEvent) GetEventsToListen() []string {
 	return append([]string{
 		event_usecase.BLOCK_CREATED,
+		event_usecase.ACCOUNT_RAW_EVENT_CREATED,
 	}, event_usecase.MSG_EVENTS...)
 }
 
@@ -86,15 +87,16 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 		if blockCreatedEvent, ok := event.(*event_usecase.BlockCreated); ok {
 			blockTime = blockCreatedEvent.Block.Time
 			blockHash = blockCreatedEvent.Block.Hash
-		} else {
-			fmt.Println("===> fevents: ", event)
+		} else if accountRawEventCreatedEvent, ok := event.(*event_usecase.AccountRawEventCreated); ok {
+			fmt.Println("===> bevents: ", accountRawEventCreatedEvent)
+
 			eventRows = append(eventRows, view.AccountRawEventRow{
 				BlockHeight: height,
 				BlockHash:   "",
 				BlockTime:   utctime.UTCTime{},
 				Data: view.AccountRawEventRowData{
-					Type:    event.Name(),
-					Content: event,
+					Type:    accountRawEventCreatedEvent.Event.Type,
+					Content: accountRawEventCreatedEvent.Event,
 				},
 			})
 
@@ -109,6 +111,7 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 				totalMap[eventTypeKey] = 0
 			}
 			totalMap[eventTypeKey] += 1
+
 		}
 	}
 	if err = totalView.Set(strconv.FormatInt(height, 10), int64(len(eventRows))); err != nil {
