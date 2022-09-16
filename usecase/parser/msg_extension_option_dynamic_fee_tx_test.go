@@ -14,10 +14,12 @@ import (
 )
 
 var _ = Describe("ParseMsgCommands", func() {
-	Describe("MsgFundCommunityPool", func() {
-		It("should parse Msg commands when there is distribution.MsgFundCommunityPool in the transaction", func() {
-			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_FUND_COMMUNITY_POOL_BLOCK_RESP)
-			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MSG_FUND_COMMUNITY_POOL_BLOCK_RESULTS_RESP)
+	Describe("ExtensionOptionDynamicFeeTx", func() {
+		It("should parse Msg commands when there is ethermint.ExtensionOptionDynamicFeeTx in the transaction", func() {
+			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_EXTENSION_OPTION_DYNAMIC_FEE_TX_BLOCK_RESP)
+			blockResults := mustParseBlockResultsResp(
+				usecase_parser_test.TX_MSG_EXTENSION_OPTION_DYNAMIC_FEE_TX_BLOCK_RESULTS_RESP,
+			)
 
 			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_FUND_COMMUNITY_POOL_TXS_RESP)
 			txs := []model.Tx{*tx}
