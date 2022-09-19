@@ -2134,6 +2134,9 @@ func ParseMsgEthereumTx(
 		panic(fmt.Errorf("error decoding RawMsgEthereumTx: %v", err))
 	}
 
+	data := parserParams.Msg["data"].(map[string]interface{})
+	fmt.Println("===> ", data["@type"])
+
 	if !parserParams.MsgCommonParams.TxSuccess {
 		// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
 		msgEthereumTxParams := model.MsgEthereumTxParams{
@@ -2191,38 +2194,41 @@ func ParseExtensionOptionDynamicFeeTx(
 	if err := decoder.Decode(parserParams.Msg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgEthereumTx: %v", err))
 	}
-	fmt.Println("===> ", parserParams, rawMsg)
+	// fmt.Println("===> ", parserParams.Msg["data"])
+	data := parserParams.Msg["data"].(map[string]interface{})
+	fmt.Println("===> ", data["@type"])
+
 	if !parserParams.MsgCommonParams.TxSuccess {
 		// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
-		msgEthereumTxParams := model.DynamicFeeTxParams{
+		msgDynamicFeeTxParams := model.MsgDynamicFeeTxParams{
 			RawDynamicFeeTx: rawMsg,
 		}
 
 		// Getting possible signer address from Msg
 		var possibleSignerAddresses []string
 		// FIXME: https://github.com/crypto-com/chain-indexing/issues/729
-		// possibleSignerAddresses = append(possibleSignerAddresses, msgEthereumTxParams.From)
+		// possibleSignerAddresses = append(possibleSignerAddresses, msgDynamicFeeTxParams.From)
 
-		return []command.Command{command_usecase.NewCreateMsgEthereumTx(
+		return []command.Command{command_usecase.NewCreateMsgExtensionOptionDynamicFeeTxTx(
 			parserParams.MsgCommonParams,
 
-			msgEthereumTxParams,
+			msgDynamicFeeTxParams,
 		)}, possibleSignerAddresses
 	}
 
 	// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
-	msgEthereumTxParams := model.DynamicFeeTxParams{
+	msgDynamicFeeTxParams := model.MsgDynamicFeeTxParams{
 		RawDynamicFeeTx: rawMsg,
 	}
 
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
 	// FIXME: https://github.com/crypto-com/chain-indexing/issues/729
-	// possibleSignerAddresses = append(possibleSignerAddresses, msgEthereumTxParams.From)
+	// possibleSignerAddresses = append(possibleSignerAddresses, msgDynamicFeeTxParams.From)
 
-	return []command.Command{command_usecase.NewCreateMsgEthereumTx(
+	return []command.Command{command_usecase.NewCreateMsgExtensionOptionDynamicFeeTxTx(
 		parserParams.MsgCommonParams,
 
-		msgEthereumTxParams,
+		msgDynamicFeeTxParams,
 	)}, possibleSignerAddresses
 }

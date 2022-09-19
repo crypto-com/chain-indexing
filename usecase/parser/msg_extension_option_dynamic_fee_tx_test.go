@@ -38,14 +38,14 @@ var _ = Describe("ParseMsgCommands", func() {
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
-			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateMsgEthereumTx(
+			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateMsgExtensionOptionDynamicFeeTxTx(
 				event.MsgCommonParams{
 					BlockHeight: int64(5168311),
 					TxHash:      "3F1B98E6A43A3666699CA28DA2A0872E1478E092F7EC3FCF8A94202BB8B330D2",
 					TxSuccess:   true,
 					MsgIndex:    0,
 				},
-				model.DynamicFeeTxParams{
+				model.MsgDynamicFeeTxParams{
 					RawDynamicFeeTx: model.RawDynamicFeeTx{
 						Type: "/ethermint.evm.v1.MsgEthereumTx",
 						Size: 0,

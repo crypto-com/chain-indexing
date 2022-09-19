@@ -32,7 +32,7 @@ type LegacyTx struct {
 	S        string `mapstructure:"s" json:"s"`
 }
 
-type DynamicFeeTxParams struct {
+type MsgDynamicFeeTxParams struct {
 	RawDynamicFeeTx
 }
 type RawDynamicFeeTx struct {
