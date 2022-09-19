@@ -10,10 +10,6 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_EXTENSION_OPTION_DYNAMIC_FEE_TX = "/ethermint.types.v1.DynamicFeeTx"
-const MSG_EXTENSION_OPTION_DYNAMIC_FEE_TX_CREATED = "/ethermint.types.v1.DynamicFeeTx.Created"
-const MSG_EXTENSION_OPTION_DYNAMIC_FEE_TX_FAILED = "/ethermint.types.v1.DynamicFeeTx.Failed"
-
 type MsgExtensionOptionDynamicFeeTx struct {
 	MsgBase
 

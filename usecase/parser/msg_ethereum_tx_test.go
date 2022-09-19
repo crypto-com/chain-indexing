@@ -102,6 +102,8 @@ var _ = Describe("ParseMsgCommands", func() {
 			)
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
+			cmd := cmds[0]
+			Expect(cmd.Name()).To(Equal("/ethermint.evm.v1.MsgEthereumTx.Create"))
 			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateMsgExtensionOptionDynamicFeeTxTx(
 				event.MsgCommonParams{
 					BlockHeight: int64(5168311),
