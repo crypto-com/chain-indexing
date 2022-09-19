@@ -1,9 +1,7 @@
 package parser_test
 
 import (
-	"github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/external/utctime"
-	"github.com/crypto-com/chain-indexing/projection/block_raw_event/constants"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	. "github.com/onsi/ginkgo"
@@ -17,8 +15,8 @@ import (
 var _ = Describe("ParseEndBlockEventsCommands", func() {
 	It("should return GravityEthereumSendToCosmosHandled commands when end_block_events has ethereum_send_to_cosmos_handled event", func() {
 		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_ETHEREUM_SEND_TO_COSMOS_HANDLED_BLOCK_RESULTS_RESP)
-		expectedBlockHash := "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A"
-		expectedBlockTime := utctime.FromUnixNano(1619083382248690731)
+		// expectedBlockHash := "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A"
+		// expectedBlockTime := utctime.FromUnixNano(1619083382248690731)
 
 		cmds, err := parser.ParseEndBlockEventsCommands(
 			blockResults.Height,
@@ -29,78 +27,79 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 		Expect(err).To(BeNil())
 		Expect(cmds).To(HaveLen(16))
 		expectedBlockHeight := int64(630)
-		Expect(cmds).To(Equal(
-			[]command.Command{
-				command_usecase.NewGravityHandleEthereumSendToCosmos(
-					expectedBlockHeight,
-					model.GravityEthereumSendToCosmosHandledEventParams{
-						Module:   "gravity",
-						Sender:   "0x5E44D43F4Aa0B3ED004eaaD4eF21a83DFF2ef6E5",
-						Receiver: "tcrc13yux6z8mh6w5t3v4uq7clewnh35znrgdgye0k2",
-						Amount: coin.MustNewCoins(
-							coin.MustNewCoin("gravity0x564A1c3AF089D02D0B6C311C650eA3768424cbfa", coin.NewInt(250)),
-						),
-						BridgeChainId:         42,
-						EthereumTokenContract: "0x564A1c3AF089D02D0B6C311C650eA3768424cbfa",
-						Nonce:                 6,
-						EthereumEventVoteRecordId: []byte{
-							5, 0, 0, 0, 0, 0, 0, 0, 6, 192, 153, 206, 71, 79, 238, 213, 132, 157, 104, 158, 56, 54, 255, 37, 161, 144, 49, 44, 59, 103, 183, 62, 196, 85, 136, 16, 73, 135, 49, 242, 167,
-						},
+
+		Expect(cmds[7]).To(Equal(
+			// []command.Command{
+			command_usecase.NewGravityHandleEthereumSendToCosmos(
+				expectedBlockHeight,
+				model.GravityEthereumSendToCosmosHandledEventParams{
+					Module:   "gravity",
+					Sender:   "0x5E44D43F4Aa0B3ED004eaaD4eF21a83DFF2ef6E5",
+					Receiver: "tcrc13yux6z8mh6w5t3v4uq7clewnh35znrgdgye0k2",
+					Amount: coin.MustNewCoins(
+						coin.MustNewCoin("gravity0x564A1c3AF089D02D0B6C311C650eA3768424cbfa", coin.NewInt(250)),
+					),
+					BridgeChainId:         42,
+					EthereumTokenContract: "0x564A1c3AF089D02D0B6C311C650eA3768424cbfa",
+					Nonce:                 6,
+					EthereumEventVoteRecordId: []byte{
+						5, 0, 0, 0, 0, 0, 0, 0, 6, 192, 153, 206, 71, 79, 238, 213, 132, 157, 104, 158, 56, 54, 255, 37, 161, 144, 49, 44, 59, 103, 183, 62, 196, 85, 136, 16, 73, 135, 49, 242, 167,
 					},
-				),
-				command_usecase.NewCreateBlockRawEvent(
-					expectedBlockHeight,
-					model.CreateBlockRawEventParams{
-						BlockHash:  expectedBlockHash,
-						BlockTime:  expectedBlockTime,
-						FromResult: constants.END_BLOCK_EVENT,
-						Data: model.DataParams{
-							Type: "coin_received",
-							Content: model.BlockResultsEvent{
-								Type: "coin_received",
-								Attributes: []model.BlockResultsEventAttribute{
-									{
-										Key:   "receiver",
-										Value: "tcrc16n3lc7cywa68mg50qhp847034w88pntqlasu8u",
-										Index: true,
-									},
-									{
-										Key:   "amount",
-										Value: "250gravity0x564A1c3AF089D02D0B6C311C650eA3768424cbfa",
-										Index: true,
-									},
-								},
-							},
-						},
-					},
-				),
-				command_usecase.NewCreateBlockRawEvent(
-					expectedBlockHeight,
-					model.CreateBlockRawEventParams{
-						BlockHash:  expectedBlockHash,
-						BlockTime:  expectedBlockTime,
-						FromResult: constants.END_BLOCK_EVENT,
-						Data: model.DataParams{
-							Type: "coinbase",
-							Content: model.BlockResultsEvent{
-								Type: "coinbase",
-								Attributes: []model.BlockResultsEventAttribute{
-									{
-										Key:   "minter",
-										Value: "tcrc16n3lc7cywa68mg50qhp847034w88pntqlasu8u",
-										Index: true,
-									},
-									{
-										Key:   "amount",
-										Value: "250gravity0x564A1c3AF089D02D0B6C311C650eA3768424cbfa",
-										Index: true,
-									},
-								},
-							},
-						},
-					},
-				),
-			},
+				},
+			),
+			// command_usecase.NewCreateBlockRawEvent(
+			// 	expectedBlockHeight,
+			// 	model.CreateBlockRawEventParams{
+			// 		BlockHash:  expectedBlockHash,
+			// 		BlockTime:  expectedBlockTime,
+			// 		FromResult: constants.END_BLOCK_EVENT,
+			// 		Data: model.DataParams{
+			// 			Type: "coin_received",
+			// 			Content: model.BlockResultsEvent{
+			// 				Type: "coin_received",
+			// 				Attributes: []model.BlockResultsEventAttribute{
+			// 					{
+			// 						Key:   "receiver",
+			// 						Value: "tcrc16n3lc7cywa68mg50qhp847034w88pntqlasu8u",
+			// 						Index: true,
+			// 					},
+			// 					{
+			// 						Key:   "amount",
+			// 						Value: "250gravity0x564A1c3AF089D02D0B6C311C650eA3768424cbfa",
+			// 						Index: true,
+			// 					},
+			// 				},
+			// 			},
+			// 		},
+			// 	},
+			// ),
+			// command_usecase.NewCreateBlockRawEvent(
+			// 	expectedBlockHeight,
+			// 	model.CreateBlockRawEventParams{
+			// 		BlockHash:  expectedBlockHash,
+			// 		BlockTime:  expectedBlockTime,
+			// 		FromResult: constants.END_BLOCK_EVENT,
+			// 		Data: model.DataParams{
+			// 			Type: "coinbase",
+			// 			Content: model.BlockResultsEvent{
+			// 				Type: "coinbase",
+			// 				Attributes: []model.BlockResultsEventAttribute{
+			// 					{
+			// 						Key:   "minter",
+			// 						Value: "tcrc16n3lc7cywa68mg50qhp847034w88pntqlasu8u",
+			// 						Index: true,
+			// 					},
+			// 					{
+			// 						Key:   "amount",
+			// 						Value: "250gravity0x564A1c3AF089D02D0B6C311C650eA3768424cbfa",
+			// 						Index: true,
+			// 					},
+			// 				},
+			// 			},
+			// 		},
+			// 	},
+			// ),
+			// },
 		))
 	})
 })

@@ -26,7 +26,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 			blockResults.EndBlockEvents,
 		)
 		Expect(err).To(BeNil())
-		Expect(cmds).To(HaveLen(1))
+		Expect(cmds).To(HaveLen(2))
 		expectedBlockHeight := int64(21575)
 		expectedProposalId := "1"
 		expectedResult := "proposal_rejected"
@@ -35,6 +35,32 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 				expectedBlockHeight,
 				expectedProposalId,
 				expectedResult,
+			),
+			command_usecase.NewCreateBlockRawEvent(
+				expectedBlockHeight,
+				model.CreateBlockRawEventParams{
+					BlockHash:  "8703C54C9FE1C2D6D05DAC79D795E120F385F5F43E5CDC17B73090E9DA40CEA9",
+					BlockTime:  utctime.FromUnixNano(1631893335936780880),
+					FromResult: constants.END_BLOCK_EVENT,
+					Data: model.DataParams{
+						Type: "active_proposal",
+						Content: model.BlockResultsEvent{
+							Type: "active_proposal",
+							Attributes: []model.BlockResultsEventAttribute{
+								{
+									Key:   "proposal_id",
+									Value: "1",
+									Index: true,
+								},
+								{
+									Key:   "proposal_result",
+									Value: "proposal_rejected",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
 			),
 		}))
 	})
@@ -50,7 +76,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 			blockResults.EndBlockEvents,
 		)
 		Expect(err).To(BeNil())
-		Expect(cmds).To(HaveLen(1))
+		Expect(cmds).To(HaveLen(2))
 		expectedBlockHeight := int64(520186)
 		expectedProposalId := "7"
 		expectedResult := "proposal_passed"
@@ -59,6 +85,32 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 				expectedBlockHeight,
 				expectedProposalId,
 				expectedResult,
+			),
+			command_usecase.NewCreateBlockRawEvent(
+				expectedBlockHeight,
+				model.CreateBlockRawEventParams{
+					BlockHash:  "8703C54C9FE1C2D6D05DAC79D795E120F385F5F43E5CDC17B73090E9DA40CEA9",
+					BlockTime:  utctime.FromUnixNano(1631893335936780880),
+					FromResult: constants.END_BLOCK_EVENT,
+					Data: model.DataParams{
+						Type: "active_proposal",
+						Content: model.BlockResultsEvent{
+							Type: "active_proposal",
+							Attributes: []model.BlockResultsEventAttribute{
+								{
+									Key:   "proposal_id",
+									Value: "7",
+									Index: true,
+								},
+								{
+									Key:   "proposal_result",
+									Value: "proposal_passed",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
 			),
 		}))
 	})
@@ -74,7 +126,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 			blockResults.EndBlockEvents,
 		)
 		Expect(err).To(BeNil())
-		Expect(cmds).To(HaveLen(1))
+		Expect(cmds).To(HaveLen(2))
 		expectedBlockHeight := int64(21541)
 		expectedProposalId := "2"
 		expectedResult := "proposal_dropped"
@@ -83,6 +135,32 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 				expectedBlockHeight,
 				expectedProposalId,
 				expectedResult,
+			),
+			command_usecase.NewCreateBlockRawEvent(
+				expectedBlockHeight,
+				model.CreateBlockRawEventParams{
+					BlockHash:  "8703C54C9FE1C2D6D05DAC79D795E120F385F5F43E5CDC17B73090E9DA40CEA9",
+					BlockTime:  utctime.FromUnixNano(1631893335936780880),
+					FromResult: constants.END_BLOCK_EVENT,
+					Data: model.DataParams{
+						Type: "inactive_proposal",
+						Content: model.BlockResultsEvent{
+							Type: "inactive_proposal",
+							Attributes: []model.BlockResultsEventAttribute{
+								{
+									Key:   "proposal_id",
+									Value: "2",
+									Index: true,
+								},
+								{
+									Key:   "proposal_result",
+									Value: "proposal_dropped",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
 			),
 		}))
 	})
@@ -98,7 +176,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 			blockResults.EndBlockEvents,
 		)
 		Expect(err).To(BeNil())
-		Expect(cmds).To(HaveLen(1))
+		Expect(cmds).To(HaveLen(2))
 		expectedBlockHeight := int64(477415)
 		Expect(cmds).To(Equal([]command.Command{
 			command_usecase.NewCreateCompleteBonding(
@@ -109,23 +187,6 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 					Amount:    coin.MustParseCoinsNormalized("5basetcro"),
 				},
 			),
-		}))
-	})
-
-	It("should return BlockRawEvent commands", func() {
-		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_COMPLETE_UNBONDING_BLOCK_RESULTS_RESP)
-		block, _ := mustParseBlockResp(usecase_parser_test.END_BLOCK_COMPLETE_UNBONDING_BLOCK_RESP)
-
-		cmds, err := parser.ParseEndBlockEventsCommands(
-			blockResults.Height,
-			block.Hash,
-			block.Time,
-			blockResults.EndBlockEvents,
-		)
-		Expect(err).To(BeNil())
-		Expect(cmds).To(HaveLen(1))
-		expectedBlockHeight := int64(477415)
-		Expect(cmds).To(Equal([]command.Command{
 			command_usecase.NewCreateBlockRawEvent(
 				expectedBlockHeight,
 				model.CreateBlockRawEventParams{
