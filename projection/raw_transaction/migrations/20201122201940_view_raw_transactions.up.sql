@@ -1,7 +1,7 @@
 create table view_raw_transactions
 (
     id             BIGSERIAL,
-    block_height   BIGINT,
+    block_height   BIGINT                    NOT NULL,
     block_hash     VARCHAR                   NOT NULL,
     block_time     BIGINT                    NOT NULL,
     hash           VARCHAR                   NOT NULL,
