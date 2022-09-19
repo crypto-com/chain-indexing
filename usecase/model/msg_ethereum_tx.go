@@ -1,6 +1,6 @@
 package model
 
-type MsgEthereumTxParams struct {
+type MsgLegacyTxParams struct {
 	RawMsgEthereumTx
 }
 

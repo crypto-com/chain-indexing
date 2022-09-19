@@ -19,7 +19,7 @@ var _ = Describe("Event", func() {
 			anyTxHash := "2678437368AFC7E0E6D891D858F17B9C05CFEE850A786592A11992813D6A89FD"
 			anyMsgIndex := 2
 
-			anyParams := model.MsgEthereumTxParams{}
+			anyParams := model.MsgLegacyTxParams{}
 
 			event := event_usecase.NewMsgEthereumTx(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
@@ -51,7 +51,7 @@ var _ = Describe("Event", func() {
 			anyTxHash := "2678437368AFC7E0E6D891D858F17B9C05CFEE850A786592A11992813D6A89FD"
 			anyMsgIndex := 2
 
-			anyParams := model.MsgEthereumTxParams{}
+			anyParams := model.MsgLegacyTxParams{}
 
 			event := event_usecase.NewMsgEthereumTx(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,

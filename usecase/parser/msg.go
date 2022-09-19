@@ -128,6 +128,7 @@ func ParseBlockTxsMsgToCommands(
 
 				// ethermint evm
 				"/ethermint.evm.v1.MsgEthereumTx",
+				"/ethermint.types.v1.LegacyTx",
 				"/ethermint.types.v1.DynamicFeeTx":
 				parser := parserManager.GetParser(utils.CosmosParserKey(msgType.(string)), utils.ParserBlockHeight(blockHeight))
 
@@ -2115,6 +2116,28 @@ func ParseMsgCreateVestingAccount(
 func ParseMsgEthereumTx(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
+	var cmds []command.Command
+	var possibleSignerAddresses []string
+
+	data := parserParams.Msg["data"].(map[string]interface{})
+	if data["@type"] == "/ethermint.evm.v1.LegacyTx" {
+		cmds, possibleSignerAddresses = ParseLegacyTx(parserParams.MsgCommonParams.TxSuccess, parserParams.MsgCommonParams, parserParams.Msg)
+	} else if data["@type"] == "/ethermint.evm.v1.DynamicFeeTx" {
+		cmds, possibleSignerAddresses = ParseExtensionOptionDynamicFeeTx(parserParams.MsgCommonParams.TxSuccess, parserParams.MsgCommonParams, parserParams.Msg)
+	}
+
+	if !parserParams.MsgCommonParams.TxSuccess {
+		return cmds, possibleSignerAddresses
+	}
+
+	return cmds, possibleSignerAddresses
+}
+
+func ParseLegacyTx(
+	txSuccess bool,
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) ([]command.Command, []string) {
 	var rawMsg model.RawMsgEthereumTx
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
@@ -2130,16 +2153,13 @@ func ParseMsgEthereumTx(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating RawMsgEthereumTx decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(parserParams.Msg); err != nil {
+	if err := decoder.Decode(msg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgEthereumTx: %v", err))
 	}
 
-	data := parserParams.Msg["data"].(map[string]interface{})
-	fmt.Println("===> ", data["@type"])
-
-	if !parserParams.MsgCommonParams.TxSuccess {
+	if !txSuccess {
 		// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
-		msgEthereumTxParams := model.MsgEthereumTxParams{
+		msgEthereumTxParams := model.MsgLegacyTxParams{
 			RawMsgEthereumTx: rawMsg,
 		}
 
@@ -2149,14 +2169,14 @@ func ParseMsgEthereumTx(
 		// possibleSignerAddresses = append(possibleSignerAddresses, msgEthereumTxParams.From)
 
 		return []command.Command{command_usecase.NewCreateMsgEthereumTx(
-			parserParams.MsgCommonParams,
+			msgCommonParams,
 
 			msgEthereumTxParams,
 		)}, possibleSignerAddresses
 	}
 
 	// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
-	msgEthereumTxParams := model.MsgEthereumTxParams{
+	msgEthereumTxParams := model.MsgLegacyTxParams{
 		RawMsgEthereumTx: rawMsg,
 	}
 
@@ -2166,14 +2186,16 @@ func ParseMsgEthereumTx(
 	// possibleSignerAddresses = append(possibleSignerAddresses, msgEthereumTxParams.From)
 
 	return []command.Command{command_usecase.NewCreateMsgEthereumTx(
-		parserParams.MsgCommonParams,
+		msgCommonParams,
 
 		msgEthereumTxParams,
 	)}, possibleSignerAddresses
 }
 
 func ParseExtensionOptionDynamicFeeTx(
-	parserParams utils.CosmosParserParams,
+	txSuccess bool,
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
 ) ([]command.Command, []string) {
 	var rawMsg model.RawDynamicFeeTx
 	decoderConfig := &mapstructure.DecoderConfig{
@@ -2191,14 +2213,11 @@ func ParseExtensionOptionDynamicFeeTx(
 	if decoderErr != nil {
 		panic(fmt.Errorf("error creating RawMsgEthereumTx decoder: %v", decoderErr))
 	}
-	if err := decoder.Decode(parserParams.Msg); err != nil {
+	if err := decoder.Decode(msg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgEthereumTx: %v", err))
 	}
-	// fmt.Println("===> ", parserParams.Msg["data"])
-	data := parserParams.Msg["data"].(map[string]interface{})
-	fmt.Println("===> ", data["@type"])
 
-	if !parserParams.MsgCommonParams.TxSuccess {
+	if !txSuccess {
 		// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
 		msgDynamicFeeTxParams := model.MsgDynamicFeeTxParams{
 			RawDynamicFeeTx: rawMsg,
@@ -2210,7 +2229,7 @@ func ParseExtensionOptionDynamicFeeTx(
 		// possibleSignerAddresses = append(possibleSignerAddresses, msgDynamicFeeTxParams.From)
 
 		return []command.Command{command_usecase.NewCreateMsgExtensionOptionDynamicFeeTxTx(
-			parserParams.MsgCommonParams,
+			msgCommonParams,
 
 			msgDynamicFeeTxParams,
 		)}, possibleSignerAddresses
@@ -2227,7 +2246,7 @@ func ParseExtensionOptionDynamicFeeTx(
 	// possibleSignerAddresses = append(possibleSignerAddresses, msgDynamicFeeTxParams.From)
 
 	return []command.Command{command_usecase.NewCreateMsgExtensionOptionDynamicFeeTxTx(
-		parserParams.MsgCommonParams,
+		msgCommonParams,
 
 		msgDynamicFeeTxParams,
 	)}, possibleSignerAddresses

@@ -8,12 +8,12 @@ import (
 
 type CreateMsgEthereumTx struct {
 	msgCommonParams event.MsgCommonParams
-	params          model.MsgEthereumTxParams
+	params          model.MsgLegacyTxParams
 }
 
 func NewCreateMsgEthereumTx(
 	msgCommonParams event.MsgCommonParams,
-	params model.MsgEthereumTxParams,
+	params model.MsgLegacyTxParams,
 ) *CreateMsgEthereumTx {
 	return &CreateMsgEthereumTx{
 		msgCommonParams,

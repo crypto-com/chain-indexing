@@ -81,7 +81,6 @@ func InitParsers(manager *utils.CosmosParserManager) {
 
 	// ethermint evm
 	manager.RegisterParser("/ethermint.evm.v1.MsgEthereumTx", BEGIN_BLOCK_HEIGHT, ParseMsgEthereumTx)
-	manager.RegisterParser("/ethermint.types.v1.DynamicFeeTx", BEGIN_BLOCK_HEIGHT, ParseExtensionOptionDynamicFeeTx)
 }
 
 func RegisterBreakingVersionParsers(manager *utils.CosmosParserManager) {

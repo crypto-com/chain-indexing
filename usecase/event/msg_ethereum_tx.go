@@ -17,12 +17,12 @@ const MSG_ETHEREUM_TX_FAILED = "/ethermint.evm.v1.MsgEthereumTx.Failed"
 type MsgEthereumTx struct {
 	MsgBase
 
-	Params model.MsgEthereumTxParams `json:"params"`
+	Params model.MsgLegacyTxParams `json:"params"`
 }
 
 func NewMsgEthereumTx(
 	msgCommonParams MsgCommonParams,
-	params model.MsgEthereumTxParams,
+	params model.MsgLegacyTxParams,
 ) *MsgEthereumTx {
 	return &MsgEthereumTx{
 		NewMsgBase(MsgBaseParams{
