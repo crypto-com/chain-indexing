@@ -4,13 +4,14 @@ import (
 	"github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/internal/typeconv"
+	"github.com/crypto-com/chain-indexing/projection/block_raw_event/constants"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
-func ParseEndBlockEventsCommands(blockHeight int64, endBlockEvents []model.BlockResultsEvent) ([]command.Command, error) {
+func ParseEndBlockEventsCommands(blockHeight int64, blockHash string, blockTime utctime.UTCTime, endBlockEvents []model.BlockResultsEvent) ([]command.Command, error) {
 	commands := make([]command.Command, 0)
 
 	for i, event := range endBlockEvents {
@@ -77,19 +78,11 @@ func ParseEndBlockEventsCommands(blockHeight int64, endBlockEvents []model.Block
 				},
 			))
 		}
-	}
 
-	return commands, nil
-}
-
-func ParseEndBlockRawEventsCommands(blockHeight int64, blockHash string, blockTime utctime.UTCTime, endBlockEvents []model.BlockResultsEvent) ([]command.Command, error) {
-	commands := make([]command.Command, 0)
-
-	for _, event := range endBlockEvents {
 		parseBlockRawEventCmd := command_usecase.NewCreateBlockRawEvent(blockHeight, model.CreateBlockRawEventParams{
 			BlockHash:  blockHash,
 			BlockTime:  blockTime,
-			FromResult: "EndBlockEvent",
+			FromResult: constants.END_BLOCK_EVENT,
 			Data: model.DataParams{
 				Type:    event.Type,
 				Content: event,

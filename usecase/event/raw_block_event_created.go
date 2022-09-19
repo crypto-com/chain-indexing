@@ -12,7 +12,7 @@ import (
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 )
 
-const RAW_BLOCK_EVENT_CREATED = "BlockRawEventCreated"
+const BLOCK_RAW_EVENT_CREATED = "BlockRawEventCreated"
 
 type BlockRawEventCreated struct {
 	entity_event.Base
@@ -26,7 +26,7 @@ type BlockRawEventCreated struct {
 func NewBlockRawEventCreated(blockHeight int64, params *usecase_model.CreateBlockRawEventParams) *BlockRawEventCreated {
 	return &BlockRawEventCreated{
 		entity_event.NewBase(entity_event.BaseParams{
-			Name:        RAW_BLOCK_EVENT_CREATED,
+			Name:        BLOCK_RAW_EVENT_CREATED,
 			Version:     1,
 			BlockHeight: blockHeight,
 		}),

@@ -9,7 +9,6 @@ import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
-	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
 	"github.com/crypto-com/chain-indexing/projection/block_raw_event/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
@@ -46,7 +45,7 @@ func NewBlockRawEvent(
 
 func (_ *BlockRawEvent) GetEventsToListen() []string {
 	return []string{
-		event_usecase.RAW_BLOCK_EVENT_CREATED,
+		event_usecase.BLOCK_RAW_EVENT_CREATED,
 	}
 }
 
@@ -92,25 +91,6 @@ func (projection *BlockRawEvent) HandleEvents(height int64, events []event_entit
 					Content: rawBlockCreatedEvent.Data.Content,
 				}})
 
-		} else {
-			eventRows = append(eventRows, view.BlockRawEventRow{
-				BlockHeight: height,
-				BlockHash:   "",
-				BlockTime:   utctime.UTCTime{},
-				FromResult:  "",
-				Data:        view.BlockRawEventRowData{}})
-
-			heightEventTypeKey := fmt.Sprintf("%d:%s", height, event.Name())
-			if _, ok := totalMap[heightEventTypeKey]; !ok {
-				totalMap[heightEventTypeKey] = 0
-			}
-			totalMap[heightEventTypeKey] += 1
-
-			eventTypeKey := fmt.Sprintf("-:%s", event.Name())
-			if _, ok := totalMap[eventTypeKey]; !ok {
-				totalMap[eventTypeKey] = 0
-			}
-			totalMap[eventTypeKey] += 1
 		}
 	}
 	if err = totalView.Set(strconv.FormatInt(height, 10), int64(len(eventRows))); err != nil {

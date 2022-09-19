@@ -74,16 +74,12 @@ func ParseBlockToCommands(
 			return nil, fmt.Errorf("error parsing block_results txs_results commands: %v", parseErr)
 		}
 		commands = append(commands, txsResultsCommand...)
-
-		txsResultsEventsCommand, parseTxsResultEventsCommandErr := ParseBlockResultsTxsResultsRawEvents(block, blockResults)
-		if parseTxsResultEventsCommandErr != nil {
-			return nil, fmt.Errorf("error parsing block_results txs_results events commands: %v", parseErr)
-		}
-		commands = append(commands, txsResultsEventsCommand...)
 	}
 
 	beginBlockEventsCommands, parseErr := ParseBeginBlockEventsCommands(
 		block.Height,
+		block.Hash,
+		block.Time,
 		blockResults.BeginBlockEvents,
 		bondingDenom,
 	)
@@ -92,29 +88,11 @@ func ParseBlockToCommands(
 	}
 	commands = append(commands, beginBlockEventsCommands...)
 
-	beginBlockRawEventsCommands, parseBeginBlockRawEventsErr := ParseBeginBlockRawEventsCommands(
-		block.Height,
-		block.Hash,
-		block.Time,
-		blockResults.BeginBlockEvents,
-	)
-	if parseBeginBlockRawEventsErr != nil {
-		return nil, fmt.Errorf("error parsing begin_block_raw_events commands: %v", parseErr)
-	}
-	commands = append(commands, beginBlockRawEventsCommands...)
-
-	endBlockEventsCommands, parseErr := ParseEndBlockEventsCommands(block.Height, blockResults.EndBlockEvents)
+	endBlockEventsCommands, parseErr := ParseEndBlockEventsCommands(block.Height, block.Hash, block.Time, blockResults.EndBlockEvents)
 	if parseErr != nil {
 		return nil, fmt.Errorf("error parsing end_block_events commands: %v", parseErr)
 	}
 	commands = append(commands, endBlockEventsCommands...)
-
-	endBlockRawEventsCommands, parseEndBlockRawEventsErr := ParseEndBlockRawEventsCommands(block.Height, block.Hash,
-		block.Time, blockResults.EndBlockEvents)
-	if parseEndBlockRawEventsErr != nil {
-		return nil, fmt.Errorf("error parsing end_block_raW_events commands: %v", parseErr)
-	}
-	commands = append(commands, endBlockRawEventsCommands...)
 
 	validatorUpdatesCommands, parseErr := ParseValidatorUpdatesCommands(block.Height, blockResults.ValidatorUpdates)
 	commands = append(commands, validatorUpdatesCommands...)

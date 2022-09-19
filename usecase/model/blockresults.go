@@ -8,7 +8,7 @@ import (
 
 type BlockResults struct {
 	Height                int64                             `json:"height"`
-	TxsResults            []BlockResultsTxsResult           `json:"txsResults"`
+	TxsResults            []BlockResultsTxsResult           `json:constants.TXS_RESULTS`
 	BeginBlockEvents      []BlockResultsEvent               `json:"beginBlockEvents"`
 	EndBlockEvents        []BlockResultsEvent               `json:"endBlockEvents"`
 	ValidatorUpdates      []BlockResultsValidatorUpdate     `json:"validatorUpdates"`

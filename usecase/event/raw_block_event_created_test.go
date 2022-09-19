@@ -26,7 +26,7 @@ var _ = Describe("BlockRawEventCreated", func() {
 			encoded, _ := json.Marshal(event)
 
 			decodedEvent, err := registry.DecodeByType(
-				event_usecase.RAW_BLOCK_EVENT_CREATED, 1, []byte(encoded),
+				event_usecase.BLOCK_RAW_EVENT_CREATED, 1, []byte(encoded),
 			)
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))

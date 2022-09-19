@@ -7,6 +7,7 @@ import (
 	commandentity "github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/internal/typeconv"
+	"github.com/crypto-com/chain-indexing/projection/block_raw_event/constants"
 	"github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
@@ -23,22 +24,12 @@ func ParseBlockResultsTxsResults(
 
 		parsedCmds := parseCronosSendToIBC(block.Height, txHex, &blockResults.TxsResults[i])
 		cmds = append(cmds, parsedCmds...)
-	}
 
-	return cmds, nil
-}
-func ParseBlockResultsTxsResultsRawEvents(
-	block *model.Block,
-	blockResults *model.BlockResults,
-) ([]commandentity.Command, error) {
-	cmds := make([]commandentity.Command, 0)
-
-	for i := range blockResults.TxsResults {
 		for j := range blockResults.TxsResults[i].Events {
 			parseBlockRawEventCmd := command.NewCreateBlockRawEvent(block.Height, model.CreateBlockRawEventParams{
 				BlockHash:  block.Hash,
 				BlockTime:  block.Time,
-				FromResult: "TxsResults",
+				FromResult: constants.TXS_RESULTS,
 				Data: model.DataParams{
 					Type:    blockResults.TxsResults[i].Events[j].Type,
 					Content: blockResults.TxsResults[i].Events[j],

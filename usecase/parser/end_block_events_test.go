@@ -2,6 +2,7 @@ package parser_test
 
 import (
 	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/projection/block_raw_event/constants"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	. "github.com/onsi/ginkgo"
@@ -16,9 +17,12 @@ import (
 var _ = Describe("ParseEndBlockEventsCommands", func() {
 	It("should return EndProposal commands when end_block_events has proposal_active event", func() {
 		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_PROPOSAL_REJECTED_BLOCK_RESULTS_RESP)
+		block, _ := mustParseBlockResp(usecase_parser_test.END_BLOCK_COMPLETE_UNBONDING_BLOCK_RESP)
 
 		cmds, err := parser.ParseEndBlockEventsCommands(
 			blockResults.Height,
+			block.Hash,
+			block.Time,
 			blockResults.EndBlockEvents,
 		)
 		Expect(err).To(BeNil())
@@ -37,9 +41,12 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 
 	It("should return EndProposal commands when end_blocks_events has proposal_active passed event", func() {
 		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_PROPOSAL_PASSED_BLOCK_RESULTS_RESP)
+		block, _ := mustParseBlockResp(usecase_parser_test.END_BLOCK_COMPLETE_UNBONDING_BLOCK_RESP)
 
 		cmds, err := parser.ParseEndBlockEventsCommands(
 			blockResults.Height,
+			block.Hash,
+			block.Time,
 			blockResults.EndBlockEvents,
 		)
 		Expect(err).To(BeNil())
@@ -58,9 +65,12 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 
 	It("should return InactiveProposal commands when end_blocks_events has proposal_inactive event", func() {
 		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_PROPOSAL_INACTIVED_BLOCK_RESULTS_RESP)
+		block, _ := mustParseBlockResp(usecase_parser_test.END_BLOCK_COMPLETE_UNBONDING_BLOCK_RESP)
 
 		cmds, err := parser.ParseEndBlockEventsCommands(
 			blockResults.Height,
+			block.Hash,
+			block.Time,
 			blockResults.EndBlockEvents,
 		)
 		Expect(err).To(BeNil())
@@ -79,9 +89,12 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 
 	It("should return CompleteBonding commands when end_blocks_events has complete_unbonding event", func() {
 		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_COMPLETE_UNBONDING_BLOCK_RESULTS_RESP)
+		block, _ := mustParseBlockResp(usecase_parser_test.END_BLOCK_COMPLETE_UNBONDING_BLOCK_RESP)
 
 		cmds, err := parser.ParseEndBlockEventsCommands(
 			blockResults.Height,
+			block.Hash,
+			block.Time,
 			blockResults.EndBlockEvents,
 		)
 		Expect(err).To(BeNil())
@@ -103,7 +116,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_COMPLETE_UNBONDING_BLOCK_RESULTS_RESP)
 		block, _ := mustParseBlockResp(usecase_parser_test.END_BLOCK_COMPLETE_UNBONDING_BLOCK_RESP)
 
-		cmds, err := parser.ParseEndBlockRawEventsCommands(
+		cmds, err := parser.ParseEndBlockEventsCommands(
 			blockResults.Height,
 			block.Hash,
 			block.Time,
@@ -118,7 +131,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 				model.CreateBlockRawEventParams{
 					BlockHash:  "8703C54C9FE1C2D6D05DAC79D795E120F385F5F43E5CDC17B73090E9DA40CEA9",
 					BlockTime:  utctime.FromUnixNano(1631893335936780880),
-					FromResult: "EndBlockEvent",
+					FromResult: constants.END_BLOCK_EVENT,
 					Data: model.DataParams{
 						Type: "complete_unbonding",
 						Content: model.BlockResultsEvent{
