@@ -2,7 +2,7 @@ package parser_test
 
 import (
 	"github.com/crypto-com/chain-indexing/external/utctime"
-	"github.com/crypto-com/chain-indexing/projection/block_raw_event/constants"
+	types "github.com/crypto-com/chain-indexing/projection/block_raw_event/constants"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -44,7 +44,7 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 					model.CreateBlockRawEventParams{
 						BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
 						BlockTime:  utctime.FromUnixNano(1619083382248690731),
-						FromResult: constants.BEGIN_BLOCK_EVENT,
+						FromResult: types.BEGIN_BLOCK_EVENT,
 						Data: model.DataParams{
 							Type: "transfer",
 							Content: model.BlockResultsEvent{
@@ -76,7 +76,7 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 					model.CreateBlockRawEventParams{
 						BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
 						BlockTime:  utctime.FromUnixNano(1619083382248690731),
-						FromResult: constants.BEGIN_BLOCK_EVENT,
+						FromResult: types.BEGIN_BLOCK_EVENT,
 						Data: model.DataParams{
 							Type: "message",
 							Content: model.BlockResultsEvent{
@@ -106,7 +106,7 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 					model.CreateBlockRawEventParams{
 						BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
 						BlockTime:  utctime.FromUnixNano(1619083382248690731),
-						FromResult: constants.BEGIN_BLOCK_EVENT,
+						FromResult: types.BEGIN_BLOCK_EVENT,
 						Data: model.DataParams{
 							Type: "mint",
 							Content: model.BlockResultsEvent{
@@ -152,7 +152,7 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 					model.CreateBlockRawEventParams{
 						BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
 						BlockTime:  utctime.FromUnixNano(1619083382248690731),
-						FromResult: constants.BEGIN_BLOCK_EVENT,
+						FromResult: types.BEGIN_BLOCK_EVENT,
 						Data: model.DataParams{
 							Type: "transfer",
 							Content: model.BlockResultsEvent{
@@ -184,7 +184,7 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 					model.CreateBlockRawEventParams{
 						BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
 						BlockTime:  utctime.FromUnixNano(1619083382248690731),
-						FromResult: constants.BEGIN_BLOCK_EVENT,
+						FromResult: types.BEGIN_BLOCK_EVENT,
 						Data: model.DataParams{
 							Type: "message",
 							Content: model.BlockResultsEvent{
@@ -211,7 +211,7 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 					model.CreateBlockRawEventParams{
 						BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
 						BlockTime:  utctime.FromUnixNano(1619083382248690731),
-						FromResult: constants.BEGIN_BLOCK_EVENT,
+						FromResult: types.BEGIN_BLOCK_EVENT,
 						Data: model.DataParams{
 							Type: "proposer_reward",
 							Content: model.BlockResultsEvent{
@@ -242,7 +242,7 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 					model.CreateBlockRawEventParams{
 						BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
 						BlockTime:  utctime.FromUnixNano(1619083382248690731),
-						FromResult: constants.BEGIN_BLOCK_EVENT,
+						FromResult: types.BEGIN_BLOCK_EVENT,
 						Data: model.DataParams{
 							Type: "commission",
 							Content: model.BlockResultsEvent{
@@ -273,7 +273,7 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 					model.CreateBlockRawEventParams{
 						BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
 						BlockTime:  utctime.FromUnixNano(1619083382248690731),
-						FromResult: constants.BEGIN_BLOCK_EVENT,
+						FromResult: types.BEGIN_BLOCK_EVENT,
 						Data: model.DataParams{
 							Type: "commission",
 							Content: model.BlockResultsEvent{
@@ -304,7 +304,7 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 					model.CreateBlockRawEventParams{
 						BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
 						BlockTime:  utctime.FromUnixNano(1619083382248690731),
-						FromResult: constants.BEGIN_BLOCK_EVENT,
+						FromResult: types.BEGIN_BLOCK_EVENT,
 						Data: model.DataParams{
 							Type: "rewards",
 							Content: model.BlockResultsEvent{
@@ -336,7 +336,7 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 					model.CreateBlockRawEventParams{
 						BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
 						BlockTime:  utctime.FromUnixNano(1619083382248690731),
-						FromResult: constants.BEGIN_BLOCK_EVENT,
+						FromResult: types.BEGIN_BLOCK_EVENT,
 						Data: model.DataParams{
 							Type: "commission",
 							Content: model.BlockResultsEvent{
@@ -367,7 +367,7 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 					model.CreateBlockRawEventParams{
 						BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
 						BlockTime:  utctime.FromUnixNano(1619083382248690731),
-						FromResult: constants.BEGIN_BLOCK_EVENT,
+						FromResult: types.BEGIN_BLOCK_EVENT,
 						Data: model.DataParams{
 							Type: "rewards",
 							Content: model.BlockResultsEvent{
@@ -394,7 +394,7 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 					model.CreateBlockRawEventParams{
 						BlockHash:  "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A",
 						BlockTime:  utctime.FromUnixNano(1619083382248690731),
-						FromResult: constants.BEGIN_BLOCK_EVENT,
+						FromResult: types.BEGIN_BLOCK_EVENT,
 						Data: model.DataParams{
 							Type: "liveness",
 							Content: model.BlockResultsEvent{

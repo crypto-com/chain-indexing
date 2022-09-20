@@ -3,7 +3,7 @@ package parser_test
 import (
 	"github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/external/utctime"
-	"github.com/crypto-com/chain-indexing/projection/block_raw_event/constants"
+	types "github.com/crypto-com/chain-indexing/projection/block_raw_event/constants"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -32,7 +32,7 @@ var _ = Describe("ParseTxsResultsBlockEventsCommands", func() {
 				model.CreateBlockRawEventParams{
 					BlockHash:  "BBC28EC0167AC0D8CCD5D7D0ECE6F2A6485751F0E68B9BF80E0FC112C64C0AF8",
 					BlockTime:  utctime.FromUnixNano(1605173821926253966),
-					FromResult: constants.TXS_RESULTS,
+					FromResult: types.TXS_RESULTS,
 					Data: model.DataParams{
 						Type: "transfer",
 						Content: model.BlockResultsEvent{
@@ -63,7 +63,7 @@ var _ = Describe("ParseTxsResultsBlockEventsCommands", func() {
 				model.CreateBlockRawEventParams{
 					BlockHash:  "BBC28EC0167AC0D8CCD5D7D0ECE6F2A6485751F0E68B9BF80E0FC112C64C0AF8",
 					BlockTime:  utctime.FromUnixNano(1605173821926253966),
-					FromResult: constants.TXS_RESULTS,
+					FromResult: types.TXS_RESULTS,
 					Data: model.DataParams{
 						Type: "message",
 						Content: model.BlockResultsEvent{
@@ -84,7 +84,7 @@ var _ = Describe("ParseTxsResultsBlockEventsCommands", func() {
 				model.CreateBlockRawEventParams{
 					BlockHash:  "BBC28EC0167AC0D8CCD5D7D0ECE6F2A6485751F0E68B9BF80E0FC112C64C0AF8",
 					BlockTime:  utctime.FromUnixNano(1605173821926253966),
-					FromResult: constants.TXS_RESULTS,
+					FromResult: types.TXS_RESULTS,
 					Data: model.DataParams{
 						Type: "message",
 						Content: model.BlockResultsEvent{
@@ -105,7 +105,7 @@ var _ = Describe("ParseTxsResultsBlockEventsCommands", func() {
 				model.CreateBlockRawEventParams{
 					BlockHash:  "BBC28EC0167AC0D8CCD5D7D0ECE6F2A6485751F0E68B9BF80E0FC112C64C0AF8",
 					BlockTime:  utctime.FromUnixNano(1605173821926253966),
-					FromResult: constants.TXS_RESULTS,
+					FromResult: types.TXS_RESULTS,
 					Data: model.DataParams{
 						Type: "transfer",
 						Content: model.BlockResultsEvent{
@@ -136,7 +136,7 @@ var _ = Describe("ParseTxsResultsBlockEventsCommands", func() {
 				model.CreateBlockRawEventParams{
 					BlockHash:  "BBC28EC0167AC0D8CCD5D7D0ECE6F2A6485751F0E68B9BF80E0FC112C64C0AF8",
 					BlockTime:  utctime.FromUnixNano(1605173821926253966),
-					FromResult: constants.TXS_RESULTS,
+					FromResult: types.TXS_RESULTS,
 					Data: model.DataParams{
 						Type: "message",
 						Content: model.BlockResultsEvent{
@@ -157,7 +157,7 @@ var _ = Describe("ParseTxsResultsBlockEventsCommands", func() {
 				model.CreateBlockRawEventParams{
 					BlockHash:  "BBC28EC0167AC0D8CCD5D7D0ECE6F2A6485751F0E68B9BF80E0FC112C64C0AF8",
 					BlockTime:  utctime.FromUnixNano(1605173821926253966),
-					FromResult: constants.TXS_RESULTS,
+					FromResult: types.TXS_RESULTS,
 					Data: model.DataParams{
 						Type: "message",
 						Content: model.BlockResultsEvent{

@@ -5,7 +5,7 @@ import (
 
 	"github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/external/utctime"
-	"github.com/crypto-com/chain-indexing/projection/block_raw_event/constants"
+	types "github.com/crypto-com/chain-indexing/projection/block_raw_event/constants"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -134,7 +134,7 @@ func ParseBeginBlockEventsCommands(
 		parseBlockRawEventCmd := command_usecase.NewCreateBlockRawEvent(blockHeight, model.CreateBlockRawEventParams{
 			BlockHash:  blockHash,
 			BlockTime:  blockTime,
-			FromResult: constants.BEGIN_BLOCK_EVENT,
+			FromResult: types.BEGIN_BLOCK_EVENT,
 			Data: model.DataParams{
 				Type:    event.Type,
 				Content: event,

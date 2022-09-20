@@ -7,7 +7,7 @@ import (
 	commandentity "github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/internal/typeconv"
-	"github.com/crypto-com/chain-indexing/projection/block_raw_event/constants"
+	types "github.com/crypto-com/chain-indexing/projection/block_raw_event/constants"
 	"github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
@@ -29,7 +29,7 @@ func ParseBlockResultsTxsResults(
 			parseBlockRawEventCmd := command.NewCreateBlockRawEvent(block.Height, model.CreateBlockRawEventParams{
 				BlockHash:  block.Hash,
 				BlockTime:  block.Time,
-				FromResult: constants.TXS_RESULTS,
+				FromResult: types.TXS_RESULTS,
 				Data: model.DataParams{
 					Type:    blockResults.TxsResults[i].Events[j].Type,
 					Content: blockResults.TxsResults[i].Events[j],

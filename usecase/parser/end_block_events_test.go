@@ -2,7 +2,7 @@ package parser_test
 
 import (
 	"github.com/crypto-com/chain-indexing/external/utctime"
-	"github.com/crypto-com/chain-indexing/projection/block_raw_event/constants"
+	types "github.com/crypto-com/chain-indexing/projection/block_raw_event/constants"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	. "github.com/onsi/ginkgo"
@@ -41,7 +41,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 				model.CreateBlockRawEventParams{
 					BlockHash:  "8703C54C9FE1C2D6D05DAC79D795E120F385F5F43E5CDC17B73090E9DA40CEA9",
 					BlockTime:  utctime.FromUnixNano(1631893335936780880),
-					FromResult: constants.END_BLOCK_EVENT,
+					FromResult: types.END_BLOCK_EVENT,
 					Data: model.DataParams{
 						Type: "active_proposal",
 						Content: model.BlockResultsEvent{
@@ -91,7 +91,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 				model.CreateBlockRawEventParams{
 					BlockHash:  "8703C54C9FE1C2D6D05DAC79D795E120F385F5F43E5CDC17B73090E9DA40CEA9",
 					BlockTime:  utctime.FromUnixNano(1631893335936780880),
-					FromResult: constants.END_BLOCK_EVENT,
+					FromResult: types.END_BLOCK_EVENT,
 					Data: model.DataParams{
 						Type: "active_proposal",
 						Content: model.BlockResultsEvent{
@@ -141,7 +141,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 				model.CreateBlockRawEventParams{
 					BlockHash:  "8703C54C9FE1C2D6D05DAC79D795E120F385F5F43E5CDC17B73090E9DA40CEA9",
 					BlockTime:  utctime.FromUnixNano(1631893335936780880),
-					FromResult: constants.END_BLOCK_EVENT,
+					FromResult: types.END_BLOCK_EVENT,
 					Data: model.DataParams{
 						Type: "inactive_proposal",
 						Content: model.BlockResultsEvent{
@@ -192,7 +192,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 				model.CreateBlockRawEventParams{
 					BlockHash:  "8703C54C9FE1C2D6D05DAC79D795E120F385F5F43E5CDC17B73090E9DA40CEA9",
 					BlockTime:  utctime.FromUnixNano(1631893335936780880),
-					FromResult: constants.END_BLOCK_EVENT,
+					FromResult: types.END_BLOCK_EVENT,
 					Data: model.DataParams{
 						Type: "complete_unbonding",
 						Content: model.BlockResultsEvent{
