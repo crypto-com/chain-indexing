@@ -1,6 +1,7 @@
 package parser_test
 
 import (
+	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	. "github.com/onsi/ginkgo"
@@ -15,15 +16,17 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 	It("should return GravityEthereumSendToCosmosHandled commands when end_block_events has ethereum_send_to_cosmos_handled event", func() {
 		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_ETHEREUM_SEND_TO_COSMOS_HANDLED_BLOCK_RESULTS_RESP)
 
-		// TODO
 		cmds, err := parser.ParseEndBlockEventsCommands(
 			blockResults.Height,
+			"",
+			utctime.UTCTime{},
 			blockResults.EndBlockEvents,
 		)
 		Expect(err).To(BeNil())
-		Expect(cmds).To(HaveLen(3))
+		Expect(cmds).To(HaveLen(16))
 		expectedBlockHeight := int64(630)
-		Expect(cmds[1]).To(Equal(
+
+		Expect(cmds[8]).To(Equal(
 			command_usecase.NewGravityHandleEthereumSendToCosmos(
 				expectedBlockHeight,
 				model.GravityEthereumSendToCosmosHandledEventParams{

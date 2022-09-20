@@ -16,14 +16,14 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 		block, _ := mustParseBlockResp(usecase_parser_test.BLOCK_RESULTS_TXS_RESULTS_CREATE_SEND_TO_IBC_BLOCK_RESP)
 		blockResults := mustParseBlockResultsResp(usecase_parser_test.BLOCK_RESULTS_TXS_RESULTS_CREATE_SEND_TO_IBC_BLOCK_RESULTS_RESP)
 
-		// TODO
 		cmds, err := parser.ParseBlockResultsTxsResults(
 			block,
 			blockResults,
 		)
 		Expect(err).To(BeNil())
-		Expect(cmds).To(HaveLen(1))
+		Expect(cmds).To(HaveLen(65))
 		expectedBlockHeight := int64(50813)
+
 		Expect(cmds[0]).To(Equal(
 			command_usecase.NewCreateCronosSendToIBC(
 				expectedBlockHeight,

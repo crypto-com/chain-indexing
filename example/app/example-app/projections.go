@@ -19,6 +19,7 @@ import (
 	"github.com/crypto-com/chain-indexing/projection/account_message"
 	"github.com/crypto-com/chain-indexing/projection/account_transaction"
 	"github.com/crypto-com/chain-indexing/projection/block"
+	blockrawevent "github.com/crypto-com/chain-indexing/projection/block_raw_event"
 	"github.com/crypto-com/chain-indexing/projection/blockevent"
 	"github.com/crypto-com/chain-indexing/projection/bridge_activity/bridge_pending_activity"
 	"github.com/crypto-com/chain-indexing/projection/chainstats"
@@ -181,6 +182,12 @@ func InitProjection(name string, params InitProjectionParams) projection_entity.
 		migrationHelper := github_migrationhelper.NewGithubMigrationHelper(sourceURL, databaseURL)
 
 		return blockevent.NewBlockEvent(params.Logger, params.RdbConn, migrationHelper)
+	case "BlockRawEvent":
+		sourceURL := github_migrationhelper.GenerateDefaultSourceURL(name, githubMigrationHelperConfig)
+		databaseURL := migrationhelper.GenerateDefaultDatabaseURL(name, connString)
+		migrationHelper := github_migrationhelper.NewGithubMigrationHelper(sourceURL, databaseURL)
+
+		return blockrawevent.NewBlockRawEvent(params.Logger, params.RdbConn, migrationHelper)
 	case "ChainStats":
 		sourceURL := github_migrationhelper.GenerateSourceURL(
 			github_migrationhelper.MIGRATION_GITHUB_URL_FORMAT,

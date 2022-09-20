@@ -44,6 +44,7 @@ type BlockResultsEvent struct {
 type BlockResultsEventAttribute struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
+	Index bool   `json:"index"`
 }
 
 type BlockResultsValidatorUpdate struct {
