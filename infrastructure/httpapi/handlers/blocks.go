@@ -12,6 +12,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
 	block_view "github.com/crypto-com/chain-indexing/projection/block/view"
+	blockrawevent_view "github.com/crypto-com/chain-indexing/projection/block_raw_event/view"
 	blockevent_view "github.com/crypto-com/chain-indexing/projection/blockevent/view"
 	raw_transaction_view "github.com/crypto-com/chain-indexing/projection/raw_transaction/view"
 	transaction_view "github.com/crypto-com/chain-indexing/projection/transaction/view"
@@ -25,6 +26,7 @@ type Blocks struct {
 	blockEventsView               *blockevent_view.BlockEvents
 	validatorBlockCommitmentsView *validator_view.ValidatorBlockCommitments
 	rawTransactionsView           raw_transaction_view.BlockRawTransactions
+	blockRawEventView             *blockrawevent_view.BlockRawEvents
 }
 
 func NewBlocks(logger applogger.Logger, rdbHandle *rdb.Handle) *Blocks {
@@ -38,6 +40,7 @@ func NewBlocks(logger applogger.Logger, rdbHandle *rdb.Handle) *Blocks {
 		blockevent_view.NewBlockEvents(rdbHandle),
 		validator_view.NewValidatorBlockCommitments(rdbHandle),
 		raw_transaction_view.NewRawTransactionsView(rdbHandle),
+		blockrawevent_view.NewBlockRawEvents(rdbHandle),
 	}
 }
 
@@ -258,6 +261,45 @@ func (handler *Blocks) ListRawTransactionsByHeight(ctx *fasthttp.RequestCtx) {
 	blocks, paginationResult, err := handler.rawTransactionsView.List(raw_transaction_view.RawTransactionsListFilter{
 		MaybeBlockHeight: &blockHeight,
 	}, raw_transaction_view.RawTransactionsListOrder{
+		Height: heightOrder,
+	}, pagination)
+	if err != nil {
+		handler.logger.Errorf("error listing transactions: %v", err)
+		httpapi.InternalServerError(ctx)
+		return
+	}
+
+	httpapi.SuccessWithPagination(ctx, blocks, paginationResult)
+}
+
+func (handler *Blocks) ListBlockRawEventsByHeight(ctx *fasthttp.RequestCtx) {
+	pagination, err := httpapi.ParsePagination(ctx)
+	if err != nil {
+		httpapi.BadRequest(ctx, err)
+		return
+	}
+
+	blockHeightParam, blockHeightParamOk := URLValueGuard(ctx, handler.logger, "height")
+	if !blockHeightParamOk {
+		return
+	}
+	blockHeight, err := strconv.ParseInt(blockHeightParam, 10, 64)
+	if err != nil {
+		httpapi.BadRequest(ctx, errors.New("invalid block height"))
+		return
+	}
+
+	heightOrder := view.ORDER_ASC
+	queryArgs := ctx.QueryArgs()
+	if queryArgs.Has("order") {
+		if string(queryArgs.Peek("order")) == "height.desc" {
+			heightOrder = view.ORDER_DESC
+		}
+	}
+
+	blocks, paginationResult, err := handler.blockRawEventView.List(blockrawevent_view.BlockRawEventsListFilter{
+		MaybeBlockHeight: &blockHeight,
+	}, blockrawevent_view.BlockRawEventsListOrder{
 		Height: heightOrder,
 	}, pagination)
 	if err != nil {
