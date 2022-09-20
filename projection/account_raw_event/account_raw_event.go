@@ -923,33 +923,18 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 	// 	}
 	}
 
-	for i, eventRow := range eventRows {
-		eventRows[i].Row.BlockHash = blockHash
-		eventRows[i].Row.BlockTime = blockTime
-
-		insertedAccounts := make(map[string]bool)
-		deduplicatedAccounts := make([]string, 0)
-		for _, involvedAccount := range accountMessage.Accounts {
-			// Deduplication
-			if _, exist := insertedAccounts[involvedAccount]; exist {
-				continue
-			}
-
-			if err := totalView.Increment(fmt.Sprintf("%s:-", involvedAccount), 1); err != nil {
-				return fmt.Errorf("error incremnting total account message of account: %w", err)
-			}
-			if err := totalView.Increment(
-				fmt.Sprintf("%s:%s", involvedAccount, accountMessage.Row.MessageType), 1,
-			); err != nil {
-				return fmt.Errorf("error incremnting total account message of account: %w", err)
-			}
-			deduplicatedAccounts = append(deduplicatedAccounts, involvedAccount)
-			insertedAccounts[involvedAccount] = true
+	for _, eventRow := range eventRows {
+		eventRow.BlockHash = blockHash
+		eventRow.BlockTime = blockTime
+		
+		// Calculate account raw event total
+		if err := totalView.Increment(fmt.Sprintf("%s:-", eventRow.Account), 1); err != nil {
+			return fmt.Errorf("error incrementing total account transaction of account: %w", err)
 		}
+	}
 
-		if err := eventsView.Insert(&accountMessages[i].Row, deduplicatedAccounts); err != nil {
-			return fmt.Errorf("error inserting account message: %w", err)
-		}
+	if err := eventsView.InsertAll(eventRows); err != nil {
+		return fmt.Errorf("error inserting account message: %w", err)
 	}
 	
 	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
