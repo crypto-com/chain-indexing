@@ -7,7 +7,7 @@ import (
 	commandentity "github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/internal/typeconv"
-	types "github.com/crypto-com/chain-indexing/projection/block_raw_event/constants"
+	"github.com/crypto-com/chain-indexing/projection/block_raw_event/types"
 	"github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"

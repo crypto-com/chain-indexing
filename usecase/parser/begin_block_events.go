@@ -5,7 +5,7 @@ import (
 
 	"github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/external/utctime"
-	types "github.com/crypto-com/chain-indexing/projection/block_raw_event/constants"
+	"github.com/crypto-com/chain-indexing/projection/block_raw_event/types"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/model"

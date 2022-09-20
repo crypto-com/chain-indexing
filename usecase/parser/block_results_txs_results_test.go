@@ -3,7 +3,7 @@ package parser_test
 import (
 	"github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/external/utctime"
-	types "github.com/crypto-com/chain-indexing/projection/block_raw_event/constants"
+	"github.com/crypto-com/chain-indexing/projection/block_raw_event/types"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
