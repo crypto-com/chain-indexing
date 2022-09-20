@@ -47,50 +47,114 @@ var _ = Describe("TransactionParser", func() {
 				[]string{},
 			)
 			Expect(err).To(BeNil())
-			Expect(cmds).To(HaveLen(1))
+			Expect(cmds).To(HaveLen(2))
 			expectedBlockHeight := int64(343358)
-			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateTransaction(
-				expectedBlockHeight,
-				model.CreateTransactionParams{
-					TxHash:   "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416",
-					Code:     0,
-					Log:      "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"sender\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"amount\",\"value\":\"1000basetcro\"}]}]},{\"msgIndex\":1,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"sender\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"amount\",\"value\":\"2000basetcro\"}]}]}]",
-					MsgCount: 2,
-					Signers: []model.TransactionSigner{
-						{
-							MaybeKeyInfo: &model.TransactionSignerKeyInfo{
-								Type:       "/cosmos.crypto.secp256k1.PubKey",
-								IsMultiSig: false,
-								Pubkeys: []string{
-									"AgiLen9uwpvsreYibwgnQtzupil7kyNJl4oTG3Wl6oIE",
+			Expect(cmds).To(Equal(
+				[]command.Command{
+					command_usecase.NewCreateTransaction(
+						expectedBlockHeight,
+						model.CreateTransactionParams{
+							TxHash:   "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416",
+							Code:     0,
+							Log:      "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"sender\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"amount\",\"value\":\"1000basetcro\"}]}]},{\"msgIndex\":1,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"sender\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"amount\",\"value\":\"2000basetcro\"}]}]}]",
+							MsgCount: 2,
+							Signers: []model.TransactionSigner{
+								{
+									MaybeKeyInfo: &model.TransactionSignerKeyInfo{
+										Type:       "/cosmos.crypto.secp256k1.PubKey",
+										IsMultiSig: false,
+										Pubkeys: []string{
+											"AgiLen9uwpvsreYibwgnQtzupil7kyNJl4oTG3Wl6oIE",
+										},
+										MaybeThreshold: nil,
+									},
+									Address:         "tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3",
+									AccountSequence: 10167,
 								},
-								MaybeThreshold: nil,
-							},
-							Address:         "tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3",
-							AccountSequence: 10167,
-						},
-						{
-							MaybeKeyInfo: &model.TransactionSignerKeyInfo{
-								Type:       "/cosmos.crypto.secp256k1.PubKey",
-								IsMultiSig: false,
-								Pubkeys: []string{
-									"A8PSgaKFkq3Ogb7jCU8A6uJpMsvGgvuiObkPR9rJ/nA2",
+								{
+									MaybeKeyInfo: &model.TransactionSignerKeyInfo{
+										Type:       "/cosmos.crypto.secp256k1.PubKey",
+										IsMultiSig: false,
+										Pubkeys: []string{
+											"A8PSgaKFkq3Ogb7jCU8A6uJpMsvGgvuiObkPR9rJ/nA2",
+										},
+										MaybeThreshold: nil,
+									},
+									Address:         "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3",
+									AccountSequence: 10186,
 								},
-								MaybeThreshold: nil,
 							},
-							Address:         "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3",
-							AccountSequence: 10186,
+							Fee:           coin.NewEmptyCoins(),
+							FeePayer:      "",
+							FeeGranter:    "",
+							GasWanted:     200000,
+							GasUsed:       80148,
+							Memo:          "",
+							TimeoutHeight: 0,
 						},
-					},
-					Fee:           coin.NewEmptyCoins(),
-					FeePayer:      "",
-					FeeGranter:    "",
-					GasWanted:     200000,
-					GasUsed:       80148,
-					Memo:          "",
-					TimeoutHeight: 0,
+					),
+					command_usecase.NewCreateRawTransaction(
+						expectedBlockHeight,
+						model.CreateRawTransactionParams{
+							TxHash: "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416",
+							Index:  0,
+							Code:   0,
+							Log:    "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"sender\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"amount\",\"value\":\"1000basetcro\"}]}]},{\"msgIndex\":1,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3\"},{\"key\":\"sender\",\"value\":\"tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3\"},{\"key\":\"amount\",\"value\":\"2000basetcro\"}]}]}]",
+							Signers: []model.TransactionSigner{
+								{
+									MaybeKeyInfo: &model.TransactionSignerKeyInfo{
+										Type:       "/cosmos.crypto.secp256k1.PubKey",
+										IsMultiSig: false,
+										Pubkeys: []string{
+											"AgiLen9uwpvsreYibwgnQtzupil7kyNJl4oTG3Wl6oIE",
+										},
+										MaybeThreshold: nil,
+									},
+									Address:         "tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3",
+									AccountSequence: 10167,
+								},
+								{
+									MaybeKeyInfo: &model.TransactionSignerKeyInfo{
+										Type:       "/cosmos.crypto.secp256k1.PubKey",
+										IsMultiSig: false,
+										Pubkeys: []string{
+											"A8PSgaKFkq3Ogb7jCU8A6uJpMsvGgvuiObkPR9rJ/nA2",
+										},
+										MaybeThreshold: nil,
+									},
+									Address:         "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3",
+									AccountSequence: 10186,
+								},
+							},
+							Fee:           coin.NewEmptyCoins(),
+							FeePayer:      "",
+							FeeGranter:    "",
+							GasWanted:     200000,
+							GasUsed:       80148,
+							Memo:          "",
+							TimeoutHeight: 0,
+							Messages: []map[string]interface{}{
+								{
+									"@type":        "/cosmos.bank.v1beta1.MsgSend",
+									"from_address": "tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3",
+									"to_address":   "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3",
+									"amount": []interface{}{
+										map[string]interface{}{"denom": "basetcro", "amount": "1000"},
+									},
+								},
+								{
+									"@type":        "/cosmos.bank.v1beta1.MsgSend",
+									"from_address": "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3",
+									"to_address":   "tcro165tzcrh2yl83g8qeqxueg2g5gzgu57y3fe3kc3",
+									"amount": []interface{}{
+										map[string]interface{}{"denom": "basetcro", "amount": "2000"},
+									},
+								},
+							},
+						},
+					),
 				},
-			)}))
+			))
 		})
 
 		It("should parse Transaction commands when there is transaction fee", func() {
@@ -112,39 +176,83 @@ var _ = Describe("TransactionParser", func() {
 				[]string{},
 			)
 			Expect(err).To(BeNil())
-			Expect(cmds).To(HaveLen(1))
+			Expect(cmds).To(HaveLen(2))
 			expectedBlockHeight := int64(377673)
-			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateTransaction(
-				expectedBlockHeight,
-				model.CreateTransactionParams{
-					TxHash:   "2A2A64A310B3D0E84C9831F4353E188A6E63BF451975C859DF40C54047AC6324",
-					Code:     0,
-					Log:      "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"sender\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"amount\",\"value\":\"1000000000basetcro\"}]}]}]",
-					MsgCount: 1,
-					Signers: []model.TransactionSigner{
-						{
-							MaybeKeyInfo: &model.TransactionSignerKeyInfo{
-								Type:       "/cosmos.crypto.secp256k1.PubKey",
-								IsMultiSig: false,
-								Pubkeys: []string{
-									"Ax+Rgmd2ta8FxUOoFJ9Dvo3782nMWJzdYP0Jcyrk5XwO",
+			Expect(cmds).To(Equal(
+				[]command.Command{
+					command_usecase.NewCreateTransaction(
+						expectedBlockHeight,
+						model.CreateTransactionParams{
+							TxHash:   "2A2A64A310B3D0E84C9831F4353E188A6E63BF451975C859DF40C54047AC6324",
+							Code:     0,
+							Log:      "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"sender\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"amount\",\"value\":\"1000000000basetcro\"}]}]}]",
+							MsgCount: 1,
+							Signers: []model.TransactionSigner{
+								{
+									MaybeKeyInfo: &model.TransactionSignerKeyInfo{
+										Type:       "/cosmos.crypto.secp256k1.PubKey",
+										IsMultiSig: false,
+										Pubkeys: []string{
+											"Ax+Rgmd2ta8FxUOoFJ9Dvo3782nMWJzdYP0Jcyrk5XwO",
+										},
+										MaybeThreshold: nil,
+									},
+									Address:         "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
+									AccountSequence: 59,
 								},
-								MaybeThreshold: nil,
 							},
-							Address:         "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
-							AccountSequence: 59,
-						},
-					},
 
-					Fee:           coin.MustParseCoinsNormalized("8000000basetcro"),
-					FeePayer:      "",
-					FeeGranter:    "",
-					GasWanted:     80000000,
-					GasUsed:       62582,
-					Memo:          "",
-					TimeoutHeight: 0,
+							Fee:           coin.MustParseCoinsNormalized("8000000basetcro"),
+							FeePayer:      "",
+							FeeGranter:    "",
+							GasWanted:     80000000,
+							GasUsed:       62582,
+							Memo:          "",
+							TimeoutHeight: 0,
+						},
+					),
+					command_usecase.NewCreateRawTransaction(
+						expectedBlockHeight,
+						model.CreateRawTransactionParams{
+							TxHash: "2A2A64A310B3D0E84C9831F4353E188A6E63BF451975C859DF40C54047AC6324",
+							Code:   0,
+							Log:    "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"sender\",\"value\":\"tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv\"},{\"key\":\"amount\",\"value\":\"1000000000basetcro\"}]}]}]",
+							Signers: []model.TransactionSigner{
+								{
+									MaybeKeyInfo: &model.TransactionSignerKeyInfo{
+										Type:       "/cosmos.crypto.secp256k1.PubKey",
+										IsMultiSig: false,
+										Pubkeys: []string{
+											"Ax+Rgmd2ta8FxUOoFJ9Dvo3782nMWJzdYP0Jcyrk5XwO",
+										},
+										MaybeThreshold: nil,
+									},
+									Address:         "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
+									AccountSequence: 59,
+								},
+							},
+
+							Fee:           coin.MustParseCoinsNormalized("8000000basetcro"),
+							FeePayer:      "",
+							FeeGranter:    "",
+							GasWanted:     80000000,
+							GasUsed:       62582,
+							Memo:          "",
+							TimeoutHeight: 0,
+							Messages: []map[string]interface{}{
+								{
+									"@type":        "/cosmos.bank.v1beta1.MsgSend",
+									"from_address": "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
+									"to_address":   "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
+									"amount": []interface{}{
+										map[string]interface{}{"denom": "basetcro", "amount": "1000000000"},
+									},
+								},
+							},
+						},
+					),
 				},
-			)}))
+			))
 		})
 
 		It("should parse Transaction commands when transaction failed with fee", func() {
@@ -166,38 +274,81 @@ var _ = Describe("TransactionParser", func() {
 				[]string{},
 			)
 			Expect(err).To(BeNil())
-			Expect(cmds).To(HaveLen(1))
+			Expect(cmds).To(HaveLen(2))
 			expectedBlockHeight := int64(420301)
-			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateTransaction(
-				expectedBlockHeight,
-				model.CreateTransactionParams{
-					TxHash:   "2A2A64A310B3D0E84C9831F4353E188A6E63BF451975C859DF40C54047AC6324",
-					Code:     11,
-					Log:      "out of gas in location: WriteFlat; gasWanted: 80000000, gasUsed: 80150021: out of gas",
-					MsgCount: 1,
-					Signers: []model.TransactionSigner{
-						{
-							MaybeKeyInfo: &model.TransactionSignerKeyInfo{
-								Type:       "/cosmos.crypto.secp256k1.PubKey",
-								IsMultiSig: false,
-								Pubkeys: []string{
-									"Ax+Rgmd2ta8FxUOoFJ9Dvo3782nMWJzdYP0Jcyrk5XwO",
+			Expect(cmds).To(Equal(
+				[]command.Command{
+					command_usecase.NewCreateTransaction(
+						expectedBlockHeight,
+						model.CreateTransactionParams{
+							TxHash:   "2A2A64A310B3D0E84C9831F4353E188A6E63BF451975C859DF40C54047AC6324",
+							Code:     11,
+							Log:      "out of gas in location: WriteFlat; gasWanted: 80000000, gasUsed: 80150021: out of gas",
+							MsgCount: 1,
+							Signers: []model.TransactionSigner{
+								{
+									MaybeKeyInfo: &model.TransactionSignerKeyInfo{
+										Type:       "/cosmos.crypto.secp256k1.PubKey",
+										IsMultiSig: false,
+										Pubkeys: []string{
+											"Ax+Rgmd2ta8FxUOoFJ9Dvo3782nMWJzdYP0Jcyrk5XwO",
+										},
+										MaybeThreshold: nil,
+									},
+									Address:         "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
+									AccountSequence: 59,
 								},
-								MaybeThreshold: nil,
 							},
-							Address:         "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
-							AccountSequence: 59,
+							Fee:           coin.MustParseCoinsNormalized("8000000basetcro"),
+							FeePayer:      "",
+							FeeGranter:    "",
+							GasWanted:     80000000,
+							GasUsed:       80150021,
+							Memo:          "",
+							TimeoutHeight: 0,
 						},
-					},
-					Fee:           coin.MustParseCoinsNormalized("8000000basetcro"),
-					FeePayer:      "",
-					FeeGranter:    "",
-					GasWanted:     80000000,
-					GasUsed:       80150021,
-					Memo:          "",
-					TimeoutHeight: 0,
+					),
+					command_usecase.NewCreateRawTransaction(
+						expectedBlockHeight,
+						model.CreateRawTransactionParams{
+							TxHash: "2A2A64A310B3D0E84C9831F4353E188A6E63BF451975C859DF40C54047AC6324",
+							Code:   11,
+							Log:    "out of gas in location: WriteFlat; gasWanted: 80000000, gasUsed: 80150021: out of gas",
+							Signers: []model.TransactionSigner{
+								{
+									MaybeKeyInfo: &model.TransactionSignerKeyInfo{
+										Type:       "/cosmos.crypto.secp256k1.PubKey",
+										IsMultiSig: false,
+										Pubkeys: []string{
+											"Ax+Rgmd2ta8FxUOoFJ9Dvo3782nMWJzdYP0Jcyrk5XwO",
+										},
+										MaybeThreshold: nil,
+									},
+									Address:         "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
+									AccountSequence: 59,
+								},
+							},
+							Fee:           coin.MustParseCoinsNormalized("8000000basetcro"),
+							FeePayer:      "",
+							FeeGranter:    "",
+							GasWanted:     80000000,
+							GasUsed:       80150021,
+							Memo:          "",
+							TimeoutHeight: 0,
+							Messages: []map[string]interface{}{
+								{
+									"@type":        "/cosmos.bank.v1beta1.MsgSend",
+									"from_address": "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
+									"to_address":   "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
+									"amount": []interface{}{
+										map[string]interface{}{"denom": "basetcro", "amount": "1000000000"},
+									},
+								},
+							},
+						},
+					),
 				},
-			)}))
+			))
 		})
 
 		It("should parse Transaction commands when transaction failed without fee", func() {
@@ -219,38 +370,98 @@ var _ = Describe("TransactionParser", func() {
 				[]string{},
 			)
 			Expect(err).To(BeNil())
-			Expect(cmds).To(HaveLen(1))
+			Expect(cmds).To(HaveLen(2))
 			expectedBlockHeight := int64(3245)
-			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateTransaction(
-				expectedBlockHeight,
-				model.CreateTransactionParams{
-					TxHash:   "CDBA166168176BF7ECA2EAC9E9B49054F1BF4C8799B8C26CC0B9EE85CB93AF27",
-					Code:     11,
-					Log:      "out of gas in location: WriteFlat; gasWanted: 200000, gasUsed: 201420: out of gas",
-					MsgCount: 5,
-					Signers: []model.TransactionSigner{
-						{
-							MaybeKeyInfo: &model.TransactionSignerKeyInfo{
-								Type:       "/cosmos.crypto.secp256k1.PubKey",
-								IsMultiSig: false,
-								Pubkeys: []string{
-									"AhLYCDVbpM12Jafqp0poKEdIEpeTn03mJ5+mIgRz4PWa",
+			Expect(cmds).To(Equal(
+				[]command.Command{
+					command_usecase.NewCreateTransaction(
+						expectedBlockHeight,
+						model.CreateTransactionParams{
+							TxHash:   "CDBA166168176BF7ECA2EAC9E9B49054F1BF4C8799B8C26CC0B9EE85CB93AF27",
+							Code:     11,
+							Log:      "out of gas in location: WriteFlat; gasWanted: 200000, gasUsed: 201420: out of gas",
+							MsgCount: 5,
+							Signers: []model.TransactionSigner{
+								{
+									MaybeKeyInfo: &model.TransactionSignerKeyInfo{
+										Type:       "/cosmos.crypto.secp256k1.PubKey",
+										IsMultiSig: false,
+										Pubkeys: []string{
+											"AhLYCDVbpM12Jafqp0poKEdIEpeTn03mJ5+mIgRz4PWa",
+										},
+										MaybeThreshold: nil,
+									},
+									Address:         "tcro1l38ze5fmgrgzw6rn3afx3gtpare3jgs8ke4n69",
+									AccountSequence: 5,
 								},
-								MaybeThreshold: nil,
 							},
-							Address:         "tcro1l38ze5fmgrgzw6rn3afx3gtpare3jgs8ke4n69",
-							AccountSequence: 5,
+							Fee:           coin.NewEmptyCoins(),
+							FeePayer:      "",
+							FeeGranter:    "",
+							GasWanted:     200000,
+							GasUsed:       201420,
+							Memo:          "",
+							TimeoutHeight: 0,
 						},
-					},
-					Fee:           coin.NewEmptyCoins(),
-					FeePayer:      "",
-					FeeGranter:    "",
-					GasWanted:     200000,
-					GasUsed:       201420,
-					Memo:          "",
-					TimeoutHeight: 0,
+					),
+					command_usecase.NewCreateRawTransaction(
+						expectedBlockHeight,
+						model.CreateRawTransactionParams{
+							TxHash: "CDBA166168176BF7ECA2EAC9E9B49054F1BF4C8799B8C26CC0B9EE85CB93AF27",
+							Code:   11,
+							Log:    "out of gas in location: WriteFlat; gasWanted: 200000, gasUsed: 201420: out of gas",
+							Signers: []model.TransactionSigner{
+								{
+									MaybeKeyInfo: &model.TransactionSignerKeyInfo{
+										Type:       "/cosmos.crypto.secp256k1.PubKey",
+										IsMultiSig: false,
+										Pubkeys: []string{
+											"AhLYCDVbpM12Jafqp0poKEdIEpeTn03mJ5+mIgRz4PWa",
+										},
+										MaybeThreshold: nil,
+									},
+									Address:         "tcro1l38ze5fmgrgzw6rn3afx3gtpare3jgs8ke4n69",
+									AccountSequence: 5,
+								},
+							},
+							Fee:           coin.NewEmptyCoins(),
+							FeePayer:      "",
+							FeeGranter:    "",
+							GasWanted:     200000,
+							GasUsed:       201420,
+							Memo:          "",
+							TimeoutHeight: 0,
+							Messages: []map[string]interface{}{
+								{
+									"@type":             "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+									"delegator_address": "tcro1l38ze5fmgrgzw6rn3afx3gtpare3jgs8ke4n69",
+									"validator_address": "tcrocncl1fja5nsxz7gsqw4zccuuy8r7pjnjmc7dscdl2vz",
+								},
+								{
+									"@type":             "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+									"delegator_address": "tcro1l38ze5fmgrgzw6rn3afx3gtpare3jgs8ke4n69",
+									"validator_address": "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
+								},
+								{
+									"@type":             "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+									"delegator_address": "tcro1l38ze5fmgrgzw6rn3afx3gtpare3jgs8ke4n69",
+									"validator_address": "tcrocncl16yzcz3ty94awr7nr2txek9dp2klp2av9vh437s",
+								},
+								{
+									"@type":             "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+									"delegator_address": "tcro1l38ze5fmgrgzw6rn3afx3gtpare3jgs8ke4n69",
+									"validator_address": "tcrocncl16kqr009ptgken6qsxnzfnyjfsq6q97g3uedcer",
+								},
+								{
+									"@type":             "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+									"delegator_address": "tcro1l38ze5fmgrgzw6rn3afx3gtpare3jgs8ke4n69",
+									"validator_address": "tcrocncl1l38ze5fmgrgzw6rn3afx3gtpare3jgs8rxk2zx",
+								},
+							},
+						},
+					),
 				},
-			)}))
+			))
 		})
 
 		It("should parse Transaction commands when there is transaction memo and timeout_height", func() {
@@ -272,38 +483,81 @@ var _ = Describe("TransactionParser", func() {
 				[]string{},
 			)
 			Expect(err).To(BeNil())
-			Expect(cmds).To(HaveLen(1))
+			Expect(cmds).To(HaveLen(2))
 			expectedBlockHeight := int64(492481)
-			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateTransaction(
-				expectedBlockHeight,
-				model.CreateTransactionParams{
-					TxHash:   "314FB925A570DB56F69A9E58C05EB7CCBCBA444949FF14E5874D8B581322A952",
-					Code:     0,
-					Log:      "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro1782gn9hzqavecukdaqqclvsnpck4mtz3vwzpxl\"},{\"key\":\"sender\",\"value\":\"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn\"},{\"key\":\"amount\",\"value\":\"100000000basetcro\"}]}]}]",
-					MsgCount: 1,
-					Signers: []model.TransactionSigner{
-						{
-							MaybeKeyInfo: &model.TransactionSignerKeyInfo{
-								Type:       "/cosmos.crypto.secp256k1.PubKey",
-								IsMultiSig: false,
-								Pubkeys: []string{
-									"A1mhVLohDEidpGYmpNYxxvikcaL72jQhZN1fxKFYkB8m",
+			Expect(cmds).To(Equal(
+				[]command.Command{
+					command_usecase.NewCreateTransaction(
+						expectedBlockHeight,
+						model.CreateTransactionParams{
+							TxHash:   "314FB925A570DB56F69A9E58C05EB7CCBCBA444949FF14E5874D8B581322A952",
+							Code:     0,
+							Log:      "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro1782gn9hzqavecukdaqqclvsnpck4mtz3vwzpxl\"},{\"key\":\"sender\",\"value\":\"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn\"},{\"key\":\"amount\",\"value\":\"100000000basetcro\"}]}]}]",
+							MsgCount: 1,
+							Signers: []model.TransactionSigner{
+								{
+									MaybeKeyInfo: &model.TransactionSignerKeyInfo{
+										Type:       "/cosmos.crypto.secp256k1.PubKey",
+										IsMultiSig: false,
+										Pubkeys: []string{
+											"A1mhVLohDEidpGYmpNYxxvikcaL72jQhZN1fxKFYkB8m",
+										},
+										MaybeThreshold: nil,
+									},
+									Address:         "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+									AccountSequence: 25,
 								},
-								MaybeThreshold: nil,
 							},
-							Address:         "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-							AccountSequence: 25,
+							Fee:           coin.NewEmptyCoins(),
+							FeePayer:      "",
+							FeeGranter:    "",
+							GasWanted:     200000,
+							GasUsed:       50685,
+							Memo:          "Test memo",
+							TimeoutHeight: int64(500000),
 						},
-					},
-					Fee:           coin.NewEmptyCoins(),
-					FeePayer:      "",
-					FeeGranter:    "",
-					GasWanted:     200000,
-					GasUsed:       50685,
-					Memo:          "Test memo",
-					TimeoutHeight: int64(500000),
+					),
+					command_usecase.NewCreateRawTransaction(
+						expectedBlockHeight,
+						model.CreateRawTransactionParams{
+							TxHash: "314FB925A570DB56F69A9E58C05EB7CCBCBA444949FF14E5874D8B581322A952",
+							Code:   0,
+							Log:    "[{\"msgIndex\":0,\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"send\"},{\"key\":\"sender\",\"value\":\"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"tcro1782gn9hzqavecukdaqqclvsnpck4mtz3vwzpxl\"},{\"key\":\"sender\",\"value\":\"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn\"},{\"key\":\"amount\",\"value\":\"100000000basetcro\"}]}]}]",
+							Signers: []model.TransactionSigner{
+								{
+									MaybeKeyInfo: &model.TransactionSignerKeyInfo{
+										Type:       "/cosmos.crypto.secp256k1.PubKey",
+										IsMultiSig: false,
+										Pubkeys: []string{
+											"A1mhVLohDEidpGYmpNYxxvikcaL72jQhZN1fxKFYkB8m",
+										},
+										MaybeThreshold: nil,
+									},
+									Address:         "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+									AccountSequence: 25,
+								},
+							},
+							Fee:           coin.NewEmptyCoins(),
+							FeePayer:      "",
+							FeeGranter:    "",
+							GasWanted:     200000,
+							GasUsed:       50685,
+							Memo:          "Test memo",
+							TimeoutHeight: int64(500000),
+							Messages: []map[string]interface{}{
+								{
+									"@type":        "/cosmos.bank.v1beta1.MsgSend",
+									"from_address": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+									"to_address":   "tcro1782gn9hzqavecukdaqqclvsnpck4mtz3vwzpxl",
+									"amount": []interface{}{
+										map[string]interface{}{"denom": "basetcro", "amount": "100000000"},
+									},
+								},
+							},
+						},
+					),
 				},
-			)}))
+			))
 		})
 
 		It("should parse failed Transaction commands when there is transaction memo and timeout_height", func() {
@@ -325,38 +579,81 @@ var _ = Describe("TransactionParser", func() {
 				[]string{},
 			)
 			Expect(err).To(BeNil())
-			Expect(cmds).To(HaveLen(1))
+			Expect(cmds).To(HaveLen(2))
 			expectedBlockHeight := int64(492759)
-			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateTransaction(
-				expectedBlockHeight,
-				model.CreateTransactionParams{
-					TxHash:   "7CCAB9771B76F25E81C26E50265243014798172F9E8C06F8AD17442C61E592EC",
-					Code:     11,
-					Log:      "out of gas in location: ReadFlat; gasWanted: 50000, gasUsed: 50436: out of gas",
-					MsgCount: 1,
-					Signers: []model.TransactionSigner{
-						{
-							MaybeKeyInfo: &model.TransactionSignerKeyInfo{
-								Type:       "/cosmos.crypto.secp256k1.PubKey",
-								IsMultiSig: false,
-								Pubkeys: []string{
-									"A1mhVLohDEidpGYmpNYxxvikcaL72jQhZN1fxKFYkB8m",
+			Expect(cmds).To(Equal(
+				[]command.Command{
+					command_usecase.NewCreateTransaction(
+						expectedBlockHeight,
+						model.CreateTransactionParams{
+							TxHash:   "7CCAB9771B76F25E81C26E50265243014798172F9E8C06F8AD17442C61E592EC",
+							Code:     11,
+							Log:      "out of gas in location: ReadFlat; gasWanted: 50000, gasUsed: 50436: out of gas",
+							MsgCount: 1,
+							Signers: []model.TransactionSigner{
+								{
+									MaybeKeyInfo: &model.TransactionSignerKeyInfo{
+										Type:       "/cosmos.crypto.secp256k1.PubKey",
+										IsMultiSig: false,
+										Pubkeys: []string{
+											"A1mhVLohDEidpGYmpNYxxvikcaL72jQhZN1fxKFYkB8m",
+										},
+										MaybeThreshold: nil,
+									},
+									Address:         "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+									AccountSequence: 26,
 								},
-								MaybeThreshold: nil,
 							},
-							Address:         "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-							AccountSequence: 26,
+							Fee:           coin.NewEmptyCoins(),
+							FeePayer:      "",
+							FeeGranter:    "",
+							GasWanted:     50000,
+							GasUsed:       50436,
+							Memo:          "Test memo",
+							TimeoutHeight: int64(500000),
 						},
-					},
-					Fee:           coin.NewEmptyCoins(),
-					FeePayer:      "",
-					FeeGranter:    "",
-					GasWanted:     50000,
-					GasUsed:       50436,
-					Memo:          "Test memo",
-					TimeoutHeight: int64(500000),
+					),
+					command_usecase.NewCreateRawTransaction(
+						expectedBlockHeight,
+						model.CreateRawTransactionParams{
+							TxHash: "7CCAB9771B76F25E81C26E50265243014798172F9E8C06F8AD17442C61E592EC",
+							Code:   11,
+							Log:    "out of gas in location: ReadFlat; gasWanted: 50000, gasUsed: 50436: out of gas",
+							Signers: []model.TransactionSigner{
+								{
+									MaybeKeyInfo: &model.TransactionSignerKeyInfo{
+										Type:       "/cosmos.crypto.secp256k1.PubKey",
+										IsMultiSig: false,
+										Pubkeys: []string{
+											"A1mhVLohDEidpGYmpNYxxvikcaL72jQhZN1fxKFYkB8m",
+										},
+										MaybeThreshold: nil,
+									},
+									Address:         "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+									AccountSequence: 26,
+								},
+							},
+							Fee:           coin.NewEmptyCoins(),
+							FeePayer:      "",
+							FeeGranter:    "",
+							GasWanted:     50000,
+							GasUsed:       50436,
+							Memo:          "Test memo",
+							TimeoutHeight: int64(500000),
+							Messages: []map[string]interface{}{
+								{
+									"@type":        "/cosmos.bank.v1beta1.MsgSend",
+									"from_address": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+									"to_address":   "tcro1782gn9hzqavecukdaqqclvsnpck4mtz3vwzpxl",
+									"amount": []interface{}{
+										map[string]interface{}{"denom": "basetcro", "amount": "100000000"},
+									},
+								},
+							},
+						},
+					),
 				},
-			)}))
+			))
 		})
 
 		It("should parse Transaction commands when the signer public key is empty", func() {
@@ -380,9 +677,9 @@ var _ = Describe("TransactionParser", func() {
 				[]string{},
 			)
 			Expect(err).To(BeNil())
-			Expect(cmds).To(HaveLen(3))
+			Expect(cmds).To(HaveLen(6))
 			expectedBlockHeight := int64(9399574)
-			Expect(cmds[2]).To(Equal(command_usecase.NewCreateTransaction(
+			Expect(cmds[4]).To(Equal(command_usecase.NewCreateTransaction(
 				expectedBlockHeight,
 				model.CreateTransactionParams{
 					TxHash:   "AC2BD4EF48A13B81641AC1CD3A60894718A66FC597A1353B8ACC4E5B6311DB1D",
@@ -404,6 +701,39 @@ var _ = Describe("TransactionParser", func() {
 					GasUsed:       66595,
 					Memo:          "",
 					TimeoutHeight: 0,
+				},
+			)))
+			Expect(cmds[5]).To(Equal(command_usecase.NewCreateRawTransaction(
+				expectedBlockHeight,
+				model.CreateRawTransactionParams{
+					TxHash: "AC2BD4EF48A13B81641AC1CD3A60894718A66FC597A1353B8ACC4E5B6311DB1D",
+					Index:  2,
+					Code:   0,
+					Log:    "[{\"msgIndex\":0,\"events\":[{\"type\":\"coin_received\",\"attributes\":[{\"key\":\"receiver\",\"value\":\"cosmos1k4r9xelttshp5jq7c9a2khwpyj0r69j7lzhu77\"},{\"key\":\"amount\",\"value\":\"900uatom\"}]},{\"type\":\"coin_spent\",\"attributes\":[{\"key\":\"spender\",\"value\":\"cosmos10v888l3d44rh65mjku0m96dgkegnwcxwpm3har\"},{\"key\":\"amount\",\"value\":\"900uatom\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"/cosmos.bank.v1beta1.MsgSend\"},{\"key\":\"sender\",\"value\":\"cosmos10v888l3d44rh65mjku0m96dgkegnwcxwpm3har\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"cosmos1k4r9xelttshp5jq7c9a2khwpyj0r69j7lzhu77\"},{\"key\":\"sender\",\"value\":\"cosmos10v888l3d44rh65mjku0m96dgkegnwcxwpm3har\"},{\"key\":\"amount\",\"value\":\"900uatom\"}]}]}]",
+					Signers: []model.TransactionSigner{
+						{
+							MaybeKeyInfo:    nil,
+							Address:         "",
+							AccountSequence: 35,
+						},
+					},
+					Fee:           coin.MustParseCoinsNormalized("500uatom"),
+					FeePayer:      "",
+					FeeGranter:    "",
+					GasWanted:     200000,
+					GasUsed:       66595,
+					Memo:          "",
+					TimeoutHeight: 0,
+					Messages: []map[string]interface{}{
+						{
+							"@type":        "/cosmos.bank.v1beta1.MsgSend",
+							"from_address": "cosmos10v888l3d44rh65mjku0m96dgkegnwcxwpm3har",
+							"to_address":   "cosmos1k4r9xelttshp5jq7c9a2khwpyj0r69j7lzhu77",
+							"amount": []interface{}{
+								map[string]interface{}{"denom": "uatom", "amount": "900"},
+							},
+						},
+					},
 				},
 			)))
 		})
@@ -504,7 +834,7 @@ var _ = Describe("TransactionParser", func() {
 			)
 
 			Expect(err).To(BeNil())
-			Expect(cmds).To(HaveLen(1))
+			Expect(cmds).To(HaveLen(2))
 			expectedBlockHeight := int64(324)
 			Expect(cmds[0]).To(Equal(command_usecase.NewCreateTransaction(
 				expectedBlockHeight,
@@ -547,6 +877,84 @@ var _ = Describe("TransactionParser", func() {
 					GasUsed:       77224,
 					Memo:          "",
 					TimeoutHeight: 0,
+				},
+			)))
+			Expect(cmds[1]).To(Equal(command_usecase.NewCreateRawTransaction(
+				expectedBlockHeight,
+				model.CreateRawTransactionParams{
+					TxHash: "C98FF5B5B95DC21F6D614D914FDA0A546DAE65E826ABFFE5C89BCF56A6F4112C",
+					Index:  0,
+					Code:   0,
+					Log:    "[{\"msgIndex\":0,\"events\":[{\"type\":\"coin_received\",\"attributes\":[{\"key\":\"receiver\",\"value\":\"cro1mzh0ps49m7ur7y8fwhy5xtt06mq7fnk3xuqset\"},{\"key\":\"amount\",\"value\":\"2basecro\"}]},{\"type\":\"coin_spent\",\"attributes\":[{\"key\":\"spender\",\"value\":\"cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7\"},{\"key\":\"amount\",\"value\":\"1basecro\"},{\"key\":\"spender\",\"value\":\"cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc\"},{\"key\":\"amount\",\"value\":\"1basecro\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"/cosmos.bank.v1beta1.MsgMultiSend\"},{\"key\":\"sender\",\"value\":\"cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7\"},{\"key\":\"sender\",\"value\":\"cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"cro1mzh0ps49m7ur7y8fwhy5xtt06mq7fnk3xuqset\"},{\"key\":\"amount\",\"value\":\"2basecro\"}]}]}]",
+					Signers: []model.TransactionSigner{
+						{
+							MaybeKeyInfo: &model.TransactionSignerKeyInfo{
+								Type:       "/cosmos.crypto.secp256k1.PubKey",
+								IsMultiSig: false,
+								Pubkeys: []string{
+									"AomWNLM+dBB76InhfghTzlUDOPevNG2AClk286KuSODS",
+								},
+								MaybeThreshold: nil,
+							},
+							Address:         "cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7",
+							AccountSequence: 1,
+						},
+						{
+							MaybeKeyInfo: &model.TransactionSignerKeyInfo{
+								Type:       "/cosmos.crypto.secp256k1.PubKey",
+								IsMultiSig: false,
+								Pubkeys: []string{
+									"ApTiQlAs/mTr9a1RQwmm5G+bXe2MvGRypncY9pAHcWKO",
+								},
+								MaybeThreshold: nil,
+							},
+							Address:         "cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc",
+							AccountSequence: 1,
+						},
+					},
+					Fee:           coin.MustParseCoinsNormalized("0basecro"),
+					FeePayer:      "",
+					FeeGranter:    "",
+					GasWanted:     200000,
+					GasUsed:       77224,
+					Memo:          "",
+					TimeoutHeight: 0,
+					Messages: []map[string]interface{}{
+						{
+							"@type": "/cosmos.bank.v1beta1.MsgMultiSend",
+							"inputs": []interface{}{
+								map[string]interface{}{
+									"address": "cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7",
+									"coins": []interface{}{
+										map[string]interface{}{
+											"denom":  "basecro",
+											"amount": "1",
+										},
+									},
+								},
+								map[string]interface{}{
+									"address": "cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc",
+									"coins": []interface{}{
+										map[string]interface{}{
+											"denom":  "basecro",
+											"amount": "1",
+										},
+									},
+								},
+							},
+							"outputs": []interface{}{
+								map[string]interface{}{
+									"address": "cro1mzh0ps49m7ur7y8fwhy5xtt06mq7fnk3xuqset",
+									"coins": []interface{}{
+										map[string]interface{}{
+											"denom":  "basecro",
+											"amount": "2",
+										},
+									},
+								},
+							},
+						},
+					},
 				},
 			)))
 		})
