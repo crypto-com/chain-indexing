@@ -8,15 +8,18 @@ import (
 
 type CreateAccountRawEvent struct {
 	blockHeight int64
+	account string
 	event       model.BlockEvent
 }
 
 func NewCreateAccountRawEvent(
 	blockHeight int64,
+	account string,
 	event model.BlockEvent,
 ) *CreateAccountRawEvent {
 	return &CreateAccountRawEvent{
 		blockHeight,
+		account,
 		event,
 	}
 }
@@ -33,6 +36,6 @@ func (*CreateAccountRawEvent) Version() int {
 
 // Exec process the command data and return the event accordingly
 func (cmd *CreateAccountRawEvent) Exec() (entity_event.Event, error) {
-	event := event.NewAccountRawEventCreated(cmd.blockHeight, cmd.event)
+	event := event.NewAccountRawEventCreated(cmd.blockHeight, cmd.account, cmd.event)
 	return event, nil
 }

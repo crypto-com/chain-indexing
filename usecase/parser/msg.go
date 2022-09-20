@@ -173,13 +173,8 @@ func ParseMsgSend(
 			amount = append(amount, coin.Coin{})
 		}
 	}
-	commands := []command.Command{}
-	for _, event := range parserParams.MsgCommonParams.Events {
-		commands = append(commands, command_usecase.NewCreateAccountRawEvent(parserParams.MsgCommonParams.BlockHeight, event))
-		fmt.Println("===> ParseMsgSend", event)
-	}
 
-	commands = append(commands, command_usecase.NewCreateMsgSend(
+	return []command.Command{command_usecase.NewCreateMsgSend(
 		parserParams.MsgCommonParams,
 
 		event.MsgSendCreatedParams{
@@ -187,9 +182,7 @@ func ParseMsgSend(
 			ToAddress:   parserParams.Msg["to_address"].(string),
 			Amount:      amount,
 		},
-	))
-
-	return commands, possibleSignerAddresses
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgMultiSend(

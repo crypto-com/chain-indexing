@@ -10,6 +10,7 @@ import (
 	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -25,11 +26,12 @@ func NewAccountRawEvents(handle *rdb.Handle) *AccountRawEvents {
 	}
 }
 
-func (eventsView *AccountRawEvents) Insert(accountRawEvent *AccountRawEventRow) error {
-	var err error
-
-	var sql string
-	sql, _, err = eventsView.rdb.StmtBuilder.Insert(
+func (eventsView *AccountRawEvents) Insert(accountRawEvent *AccountRawEventRow, accounts []string) error {
+	accountRawEventDataJSON, err := json.MarshalToString(accountRawEvent.Data)
+	if err != nil {
+		return fmt.Errorf("error JSON marshalling account raw event for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+	stmtBuilder := eventsView.rdb.StmtBuilder.Insert(
 		"view_account_raw_events",
 	).Columns(
 		"account",
@@ -37,28 +39,31 @@ func (eventsView *AccountRawEvents) Insert(accountRawEvent *AccountRawEventRow) 
 		"block_hash",
 		"block_time",
 		"data",
-	).Values("?", "?", "?", "?", "?").ToSql()
-	if err != nil {
-		return fmt.Errorf("error building events insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
-
-	var accountRawEventDataJSON string
-	if accountRawEventDataJSON, err = jsoniter.MarshalToString(accountRawEvent.Data); err != nil {
-		return fmt.Errorf("error JSON marshalling account raw event data for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
-
-	result, err := eventsView.rdb.Exec(sql,
-		accountRawEvent.Account,
-		accountRawEvent.BlockHeight,
-		accountRawEvent.BlockHash,
-		eventsView.rdb.Tton(&accountRawEvent.BlockTime),
-		accountRawEventDataJSON,
 	)
-	if err != nil {
-		return fmt.Errorf("error inserting account raw event data into the table: %v: %w", err, rdb.ErrWrite)
+
+
+	blockTime := eventsView.rdb.Tton(&accountRawEvent.BlockTime)
+	for _, account := range accounts {
+		stmtBuilder = stmtBuilder.Values(
+			account,
+			accountRawEvent.BlockHeight,
+			accountRawEvent.BlockHash,
+			blockTime,
+			accountRawEventDataJSON,
+		)
 	}
-	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error inserting account raw event data into the table: no rows inserted: %w", rdb.ErrWrite)
+	sql, sqlArgs, err := stmtBuilder.ToSql()
+	if err != nil {
+		return fmt.Errorf("error building account raw event id insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+	result, err := eventsView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error inserting ccount raw event into the table: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() != int64(len(accounts)) {
+		return fmt.Errorf(
+			"error inserting ccount raw event into the table: mismatched rows inserted: %w", rdb.ErrWrite,
+		)
 	}
 
 	return nil

@@ -16,18 +16,18 @@ const ACCOUNT_RAW_EVENT_CREATED = "AccountRawEventCreated"
 
 type AccountRawEventCreated struct {
 	entity_event.Base
-
+	Account string `json:"account"`
 	Event model.BlockEvent `json:"event"`
 }
 
-func NewAccountRawEventCreated(blockHeight int64, event usecase_model.BlockEvent) *AccountRawEventCreated {
+func NewAccountRawEventCreated(blockHeight int64, account string, event usecase_model.BlockEvent) *AccountRawEventCreated {
 	return &AccountRawEventCreated{
 		entity_event.NewBase(entity_event.BaseParams{
 			Name:        ACCOUNT_RAW_EVENT_CREATED,
 			Version:     1,
 			BlockHeight: blockHeight,
 		}),
-
+		account,
 		event,
 	}
 }
