@@ -843,7 +843,7 @@ const TX_MSG_EXTENSION_OPTION_DYNAMIC_FEE_TXS_RESP = `
         "body": {
             "messages": [
                 {
-                    "@type": "/ethermint.evm.v1.EthermintLegacyTx",
+                    "@type": "/ethermint.evm.v1.MsgEthereumTx",
                     "data": {
                         "@type": "/ethermint.evm.v1.DynamicFeeTx",
                         "chain_id": "338",

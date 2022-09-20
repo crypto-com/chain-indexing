@@ -20,7 +20,7 @@ type EthermintLegacyTx struct {
 	Params model.EthermintLegacyTxParams `json:"params"`
 }
 
-func NewEthermintLegacyx(
+func NewEthermintLegacyTx(
 	msgCommonParams MsgCommonParams,
 	params model.EthermintLegacyTxParams,
 ) *EthermintLegacyTx {

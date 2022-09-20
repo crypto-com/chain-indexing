@@ -21,7 +21,7 @@ var _ = Describe("Event", func() {
 
 			anyParams := model.EthermintLegacyTxParams{}
 
-			event := event_usecase.NewEthermintLegacyx(event_usecase.MsgCommonParams{
+			event := event_usecase.NewEthermintLegacyTx(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
 				TxHash:      anyTxHash,
 				TxSuccess:   true,
@@ -53,7 +53,7 @@ var _ = Describe("Event", func() {
 
 			anyParams := model.EthermintLegacyTxParams{}
 
-			event := event_usecase.NewEthermintLegacyx(event_usecase.MsgCommonParams{
+			event := event_usecase.NewEthermintLegacyTx(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
 				TxHash:      anyTxHash,
 				TxSuccess:   false,

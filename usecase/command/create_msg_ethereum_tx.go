@@ -30,6 +30,6 @@ func (*CreateLegacyTx) Version() int {
 }
 
 func (cmd *CreateLegacyTx) Exec() (entity_event.Event, error) {
-	event := event.NewEthermintLegacyx(cmd.msgCommonParams, cmd.params)
+	event := event.NewEthermintLegacyTx(cmd.msgCommonParams, cmd.params)
 	return event, nil
 }

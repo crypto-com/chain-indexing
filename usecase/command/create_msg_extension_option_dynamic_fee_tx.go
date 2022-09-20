@@ -11,7 +11,7 @@ type CreateMsgExtensionOptionDynamicFeeTx struct {
 	params          model.EthermintDynamicFeeTxParams
 }
 
-func NewCreateMsgExtensionOptionDynamicFeeTxTx(
+func NewCreateMsgExtensionOptionDynamicFeeTx(
 	msgCommonParams event.MsgCommonParams,
 	params model.EthermintDynamicFeeTxParams,
 ) *CreateMsgExtensionOptionDynamicFeeTx {
@@ -30,6 +30,6 @@ func (*CreateMsgExtensionOptionDynamicFeeTx) Version() int {
 }
 
 func (cmd *CreateMsgExtensionOptionDynamicFeeTx) Exec() (entity_event.Event, error) {
-	event := event.NewMsgExtensionOptionDynamicFeeTx(cmd.msgCommonParams, cmd.params)
+	event := event.NewEthermintExtensionOptionDynamicFeeTx(cmd.msgCommonParams, cmd.params)
 	return event, nil
 }

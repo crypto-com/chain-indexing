@@ -127,7 +127,7 @@ func ParseBlockTxsMsgToCommands(
 				"/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
 
 				// ethermint evm
-				"/ethermint.evm.v1.EthermintLegacyTx":
+				"/ethermint.evm.v1.MsgEthereumTx":
 				parser := parserManager.GetParser(utils.CosmosParserKey(msgType.(string)), utils.ParserBlockHeight(blockHeight))
 
 				msgCommands, possibleSignerAddresses = parser(utils.CosmosParserParams{
@@ -2226,7 +2226,7 @@ func ParseExtensionOptionDynamicFeeTx(
 		// FIXME: https://github.com/crypto-com/chain-indexing/issues/729
 		// possibleSignerAddresses = append(possibleSignerAddresses, msgDynamicFeeTxParams.From)
 
-		return []command.Command{command_usecase.NewCreateMsgExtensionOptionDynamicFeeTxTx(
+		return []command.Command{command_usecase.NewCreateMsgExtensionOptionDynamicFeeTx(
 			msgCommonParams,
 
 			msgDynamicFeeTxParams,
@@ -2243,7 +2243,7 @@ func ParseExtensionOptionDynamicFeeTx(
 	// FIXME: https://github.com/crypto-com/chain-indexing/issues/729
 	// possibleSignerAddresses = append(possibleSignerAddresses, msgDynamicFeeTxParams.From)
 
-	return []command.Command{command_usecase.NewCreateMsgExtensionOptionDynamicFeeTxTx(
+	return []command.Command{command_usecase.NewCreateMsgExtensionOptionDynamicFeeTx(
 		msgCommonParams,
 
 		msgDynamicFeeTxParams,

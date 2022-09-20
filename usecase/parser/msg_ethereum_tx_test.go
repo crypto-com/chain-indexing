@@ -16,7 +16,7 @@ import (
 )
 
 var _ = Describe("ParseMsgCommands", func() {
-	Describe("MsgExec", func() {
+	Describe("MsgEthereumTx", func() {
 		It("should parse Msg commands when there is EthermintLegacyTx in the transaction", func() {
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_ETHEREUM_TX_BLOCK_RESP,
@@ -44,7 +44,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("/ethermint.evm.v1.EthermintLegacyTx.Create"))
+			Expect(cmd.Name()).To(Equal("/ethermint.evm.v1.LegacyTx.Create"))
 
 			Expect(cmd).To(Equal(command_usecase.NewCreateLegacyTx(
 				event.MsgCommonParams{
@@ -55,7 +55,7 @@ var _ = Describe("ParseMsgCommands", func() {
 				},
 				model.EthermintLegacyTxParams{
 					RawLegacyTx: model.RawLegacyTx{
-						Type: "/ethermint.evm.v1.EthermintLegacyTx",
+						Type: "/ethermint.evm.v1.MsgEthereumTx",
 						Size: 208,
 						Data: model.LegacyTx{
 							Type:     "/ethermint.evm.v1.LegacyTx",
@@ -103,8 +103,8 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("/ethermint.evm.v1.EthermintLegacyTx.Create"))
-			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateMsgExtensionOptionDynamicFeeTxTx(
+			Expect(cmd.Name()).To(Equal("/ethermint.evm.v1.DynamicFeeTx.Create"))
+			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateMsgExtensionOptionDynamicFeeTx(
 				event.MsgCommonParams{
 					BlockHeight: int64(5168311),
 					TxHash:      "3F1B98E6A43A3666699CA28DA2A0872E1478E092F7EC3FCF8A94202BB8B330D2",
@@ -113,7 +113,7 @@ var _ = Describe("ParseMsgCommands", func() {
 				},
 				model.EthermintDynamicFeeTxParams{
 					RawDynamicFeeTx: model.RawDynamicFeeTx{
-						Type: "/ethermint.evm.v1.EthermintLegacyTx",
+						Type: "/ethermint.evm.v1.MsgEthereumTx",
 						Size: 0,
 						Data: model.DynamicFeeTx{
 							Type:      "/ethermint.evm.v1.DynamicFeeTx",
