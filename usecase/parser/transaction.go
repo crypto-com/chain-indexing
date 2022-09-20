@@ -87,6 +87,22 @@ func ParseTransactionCommands(
 			Memo:          tx.Tx.Body.Memo,
 			TimeoutHeight: timeoutHeight,
 		}))
+
+		cmds = append(cmds, command_usecase.NewCreateRawTransaction(blockHeight, model.CreateRawTransactionParams{
+			TxHash:        txHash,
+			Index:         i,
+			Code:          txsResult.Code,
+			Log:           log,
+			Signers:       signers,
+			Fee:           fee,
+			FeePayer:      tx.Tx.AuthInfo.Fee.Payer,
+			FeeGranter:    tx.Tx.AuthInfo.Fee.Granter,
+			GasWanted:     gasWanted,
+			GasUsed:       gasUsed,
+			Memo:          tx.Tx.Body.Memo,
+			TimeoutHeight: timeoutHeight,
+			Messages:      tx.Tx.Body.Messages,
+		}))
 	}
 
 	return cmds, nil
