@@ -1091,7 +1091,7 @@ const TX_MSG_ETHEREUM_TX_TXS_RESP = `{
     "body": {
       "messages": [
         {
-          "@type": "/ethermint.evm.v1.MsgEthereumTx",
+          "@type": "/ethermint.evm.v1.EthermintLegacyTx",
           "data": {
             "@type": "/ethermint.evm.v1.LegacyTx",
             "nonce": "130",
@@ -1211,7 +1211,7 @@ const TX_MSG_ETHEREUM_TX_TXS_RESP = `{
       "body": {
         "messages": [
           {
-            "@type": "/ethermint.evm.v1.MsgEthereumTx",
+            "@type": "/ethermint.evm.v1.EthermintLegacyTx",
             "data": {
               "@type": "/ethermint.evm.v1.LegacyTx",
               "nonce": "130",

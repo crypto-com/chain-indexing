@@ -22,7 +22,7 @@ func NewCreateMsgExtensionOptionDynamicFeeTxTx(
 }
 
 func (*CreateMsgExtensionOptionDynamicFeeTx) Name() string {
-	return "/ethermint.evm.v1.MsgEthereumTx.Create"
+	return "/ethermint.evm.v1.DynamicFeeTx.Create"
 }
 
 func (*CreateMsgExtensionOptionDynamicFeeTx) Version() int {

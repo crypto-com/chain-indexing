@@ -17,7 +17,7 @@ import (
 
 var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgExec", func() {
-		It("should parse Msg commands when there is MsgEthereumTx in the transaction", func() {
+		It("should parse Msg commands when there is EthermintLegacyTx in the transaction", func() {
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_ETHEREUM_TX_BLOCK_RESP,
 			))
@@ -44,18 +44,18 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("/ethermint.evm.v1.MsgEthereumTx.Create"))
+			Expect(cmd.Name()).To(Equal("/ethermint.evm.v1.EthermintLegacyTx.Create"))
 
-			Expect(cmd).To(Equal(command_usecase.NewCreateMsgEthereumTx(
+			Expect(cmd).To(Equal(command_usecase.NewCreateLegacyTx(
 				event.MsgCommonParams{
 					BlockHeight: int64(83178),
 					TxHash:      "2678437368AFC7E0E6D891D858F17B9C05CFEE850A786592A11992813D6A89FD",
 					TxSuccess:   true,
 					MsgIndex:    0,
 				},
-				model.MsgLegacyTxParams{
+				model.EthermintLegacyTxParams{
 					RawMsgEthereumTx: model.RawMsgEthereumTx{
-						Type: "/ethermint.evm.v1.MsgEthereumTx",
+						Type: "/ethermint.evm.v1.EthermintLegacyTx",
 						Size: 208,
 						Data: model.LegacyTx{
 							Type:     "/ethermint.evm.v1.LegacyTx",
@@ -103,7 +103,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("/ethermint.evm.v1.MsgEthereumTx.Create"))
+			Expect(cmd.Name()).To(Equal("/ethermint.evm.v1.EthermintLegacyTx.Create"))
 			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateMsgExtensionOptionDynamicFeeTxTx(
 				event.MsgCommonParams{
 					BlockHeight: int64(5168311),
@@ -113,7 +113,7 @@ var _ = Describe("ParseMsgCommands", func() {
 				},
 				model.MsgDynamicFeeTxParams{
 					RawDynamicFeeTx: model.RawDynamicFeeTx{
-						Type: "/ethermint.evm.v1.MsgEthereumTx",
+						Type: "/ethermint.evm.v1.EthermintLegacyTx",
 						Size: 0,
 						Data: model.DynamicFeeTx{
 							Type:      "/ethermint.evm.v1.DynamicFeeTx",

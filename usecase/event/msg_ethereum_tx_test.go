@@ -19,9 +19,9 @@ var _ = Describe("Event", func() {
 			anyTxHash := "2678437368AFC7E0E6D891D858F17B9C05CFEE850A786592A11992813D6A89FD"
 			anyMsgIndex := 2
 
-			anyParams := model.MsgLegacyTxParams{}
+			anyParams := model.EthermintLegacyTxParams{}
 
-			event := event_usecase.NewMsgEthereumTx(event_usecase.MsgCommonParams{
+			event := event_usecase.NewEthermintLegacyx(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
 				TxHash:      anyTxHash,
 				TxSuccess:   true,
@@ -32,12 +32,12 @@ var _ = Describe("Event", func() {
 			Expect(err).To(BeNil())
 
 			decodedEvent, err := registry.DecodeByType(
-				event_usecase.MSG_ETHEREUM_TX_CREATED, 1, []byte(encoded),
+				event_usecase.LEGACY_TX_CREATED, 1, []byte(encoded),
 			)
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))
-			typedEvent, _ := decodedEvent.(*event_usecase.MsgEthereumTx)
-			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_ETHEREUM_TX_CREATED))
+			typedEvent, _ := decodedEvent.(*event_usecase.EthermintLegacyTx)
+			Expect(typedEvent.Name()).To(Equal(event_usecase.LEGACY_TX_CREATED))
 			Expect(typedEvent.Version()).To(Equal(1))
 			Expect(typedEvent.TxSuccess()).To(BeTrue())
 			Expect(typedEvent.TxHash()).To(Equal(anyTxHash))
@@ -51,9 +51,9 @@ var _ = Describe("Event", func() {
 			anyTxHash := "2678437368AFC7E0E6D891D858F17B9C05CFEE850A786592A11992813D6A89FD"
 			anyMsgIndex := 2
 
-			anyParams := model.MsgLegacyTxParams{}
+			anyParams := model.EthermintLegacyTxParams{}
 
-			event := event_usecase.NewMsgEthereumTx(event_usecase.MsgCommonParams{
+			event := event_usecase.NewEthermintLegacyx(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
 				TxHash:      anyTxHash,
 				TxSuccess:   false,
@@ -64,12 +64,12 @@ var _ = Describe("Event", func() {
 			Expect(err).To(BeNil())
 
 			decodedEvent, err := registry.DecodeByType(
-				event_usecase.MSG_ETHEREUM_TX_FAILED, 1, []byte(encoded),
+				event_usecase.LEGACY_TX_FAILED, 1, []byte(encoded),
 			)
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))
-			typedEvent, _ := decodedEvent.(*event_usecase.MsgEthereumTx)
-			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_ETHEREUM_TX_FAILED))
+			typedEvent, _ := decodedEvent.(*event_usecase.EthermintLegacyTx)
+			Expect(typedEvent.Name()).To(Equal(event_usecase.LEGACY_TX_FAILED))
 			Expect(typedEvent.Version()).To(Equal(1))
 			Expect(typedEvent.TxSuccess()).To(BeFalse())
 			Expect(typedEvent.TxHash()).To(Equal(anyTxHash))

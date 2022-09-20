@@ -1,6 +1,6 @@
 package model
 
-type MsgLegacyTxParams struct {
+type EthermintLegacyTxParams struct {
 	RawMsgEthereumTx
 }
 
@@ -13,7 +13,7 @@ type RawMsgEthereumTx struct {
 	Hash string   `mapstructure:"hash" json:"hash"`
 }
 
-type MsgEthereumTx struct {
+type EthermintLegacyTx struct {
 	Denom  string `mapstructure:"denom" json:"denom,omitempty"`
 	Amount string `mapstructure:"amount" json:"amount"`
 }

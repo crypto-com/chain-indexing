@@ -127,9 +127,7 @@ func ParseBlockTxsMsgToCommands(
 				"/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
 
 				// ethermint evm
-				"/ethermint.evm.v1.MsgEthereumTx",
-				"/ethermint.types.v1.LegacyTx",
-				"/ethermint.types.v1.DynamicFeeTx":
+				"/ethermint.evm.v1.EthermintLegacyTx":
 				parser := parserManager.GetParser(utils.CosmosParserKey(msgType.(string)), utils.ParserBlockHeight(blockHeight))
 
 				msgCommands, possibleSignerAddresses = parser(utils.CosmosParserParams{
@@ -2159,7 +2157,7 @@ func ParseLegacyTx(
 
 	if !txSuccess {
 		// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
-		msgEthereumTxParams := model.MsgLegacyTxParams{
+		msgEthereumTxParams := model.EthermintLegacyTxParams{
 			RawMsgEthereumTx: rawMsg,
 		}
 
@@ -2168,7 +2166,7 @@ func ParseLegacyTx(
 		// FIXME: https://github.com/crypto-com/chain-indexing/issues/729
 		// possibleSignerAddresses = append(possibleSignerAddresses, msgEthereumTxParams.From)
 
-		return []command.Command{command_usecase.NewCreateMsgEthereumTx(
+		return []command.Command{command_usecase.NewCreateLegacyTx(
 			msgCommonParams,
 
 			msgEthereumTxParams,
@@ -2176,7 +2174,7 @@ func ParseLegacyTx(
 	}
 
 	// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
-	msgEthereumTxParams := model.MsgLegacyTxParams{
+	msgEthereumTxParams := model.EthermintLegacyTxParams{
 		RawMsgEthereumTx: rawMsg,
 	}
 
@@ -2185,7 +2183,7 @@ func ParseLegacyTx(
 	// FIXME: https://github.com/crypto-com/chain-indexing/issues/729
 	// possibleSignerAddresses = append(possibleSignerAddresses, msgEthereumTxParams.From)
 
-	return []command.Command{command_usecase.NewCreateMsgEthereumTx(
+	return []command.Command{command_usecase.NewCreateLegacyTx(
 		msgCommonParams,
 
 		msgEthereumTxParams,

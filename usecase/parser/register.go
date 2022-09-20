@@ -80,7 +80,7 @@ func InitParsers(manager *utils.CosmosParserManager) {
 	manager.RegisterParser("/cosmos.vesting.v1beta1.MsgCreateVestingAccount", BEGIN_BLOCK_HEIGHT, ParseMsgCreateVestingAccount)
 
 	// ethermint evm
-	manager.RegisterParser("/ethermint.evm.v1.MsgEthereumTx", BEGIN_BLOCK_HEIGHT, ParseMsgEthereumTx)
+	manager.RegisterParser("/ethermint.evm.v1.EthermintLegacyTx", BEGIN_BLOCK_HEIGHT, ParseMsgEthereumTx)
 }
 
 func RegisterBreakingVersionParsers(manager *utils.CosmosParserManager) {

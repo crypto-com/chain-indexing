@@ -3702,7 +3702,7 @@ const TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_1 = `{
     "body": {
       "messages": [
         {
-          "@type": "/ethermint.evm.v1.MsgEthereumTx",
+          "@type": "/ethermint.evm.v1.EthermintLegacyTx",
           "data": {
             "@type": "/ethermint.evm.v1.LegacyTx",
             "nonce": "14",
@@ -3877,7 +3877,7 @@ const TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_1 = `{
       "body": {
         "messages": [
           {
-            "@type": "/ethermint.evm.v1.MsgEthereumTx",
+            "@type": "/ethermint.evm.v1.EthermintLegacyTx",
             "data": {
               "@type": "/ethermint.evm.v1.LegacyTx",
               "nonce": "14",
@@ -4139,7 +4139,7 @@ const TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_2 = `{
     "body": {
       "messages": [
         {
-          "@type": "/ethermint.evm.v1.MsgEthereumTx",
+          "@type": "/ethermint.evm.v1.EthermintLegacyTx",
           "data": {
             "@type": "/ethermint.evm.v1.LegacyTx",
             "nonce": "55",
@@ -4314,7 +4314,7 @@ const TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_2 = `{
       "body": {
         "messages": [
           {
-            "@type": "/ethermint.evm.v1.MsgEthereumTx",
+            "@type": "/ethermint.evm.v1.EthermintLegacyTx",
             "data": {
               "@type": "/ethermint.evm.v1.LegacyTx",
               "nonce": "55",
@@ -4576,7 +4576,7 @@ const TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_3 = `{
     "body": {
       "messages": [
         {
-          "@type": "/ethermint.evm.v1.MsgEthereumTx",
+          "@type": "/ethermint.evm.v1.EthermintLegacyTx",
           "data": {
             "@type": "/ethermint.evm.v1.LegacyTx",
             "nonce": "71",
@@ -4755,7 +4755,7 @@ const TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_3 = `{
       "body": {
         "messages": [
           {
-            "@type": "/ethermint.evm.v1.MsgEthereumTx",
+            "@type": "/ethermint.evm.v1.EthermintLegacyTx",
             "data": {
               "@type": "/ethermint.evm.v1.LegacyTx",
               "nonce": "71",
@@ -5022,7 +5022,7 @@ const TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_4 = `{
     "body": {
       "messages": [
         {
-          "@type": "/ethermint.evm.v1.MsgEthereumTx",
+          "@type": "/ethermint.evm.v1.EthermintLegacyTx",
           "data": {
             "@type": "/ethermint.evm.v1.LegacyTx",
             "nonce": "33",
@@ -5225,7 +5225,7 @@ const TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_4 = `{
       "body": {
         "messages": [
           {
-            "@type": "/ethermint.evm.v1.MsgEthereumTx",
+            "@type": "/ethermint.evm.v1.EthermintLegacyTx",
             "data": {
               "@type": "/ethermint.evm.v1.LegacyTx",
               "nonce": "33",
@@ -5522,7 +5522,7 @@ const TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_5 = `{
     "body": {
       "messages": [
         {
-          "@type": "/ethermint.evm.v1.MsgEthereumTx",
+          "@type": "/ethermint.evm.v1.EthermintLegacyTx",
           "data": {
             "@type": "/ethermint.evm.v1.LegacyTx",
             "nonce": "97",
@@ -5701,7 +5701,7 @@ const TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_5 = `{
       "body": {
         "messages": [
           {
-            "@type": "/ethermint.evm.v1.MsgEthereumTx",
+            "@type": "/ethermint.evm.v1.EthermintLegacyTx",
             "data": {
               "@type": "/ethermint.evm.v1.LegacyTx",
               "nonce": "97",
@@ -5968,7 +5968,7 @@ const TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_6 = `{
     "body": {
       "messages": [
         {
-          "@type": "/ethermint.evm.v1.MsgEthereumTx",
+          "@type": "/ethermint.evm.v1.EthermintLegacyTx",
           "data": {
             "@type": "/ethermint.evm.v1.LegacyTx",
             "nonce": "0",
@@ -6353,7 +6353,7 @@ const TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_6 = `{
       "body": {
         "messages": [
           {
-            "@type": "/ethermint.evm.v1.MsgEthereumTx",
+            "@type": "/ethermint.evm.v1.EthermintLegacyTx",
             "data": {
               "@type": "/ethermint.evm.v1.LegacyTx",
               "nonce": "0",
@@ -17270,7 +17270,7 @@ const TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_10 = `{
     "body": {
       "messages": [
         {
-          "@type": "/ethermint.evm.v1.MsgEthereumTx",
+          "@type": "/ethermint.evm.v1.EthermintLegacyTx",
           "data": {
             "@type": "/ethermint.evm.v1.LegacyTx",
             "nonce": "12",
@@ -17437,7 +17437,7 @@ const TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_10 = `{
       "body": {
         "messages": [
           {
-            "@type": "/ethermint.evm.v1.MsgEthereumTx",
+            "@type": "/ethermint.evm.v1.EthermintLegacyTx",
             "data": {
               "@type": "/ethermint.evm.v1.LegacyTx",
               "nonce": "12",
