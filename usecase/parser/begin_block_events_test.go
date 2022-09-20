@@ -437,7 +437,8 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 			)
 			Expect(err).To(BeNil())
 			expectedBlockHeight := int64(168481)
-			Expect(cmds).To(Equal([]command.Command{
+
+			Expect(cmds[2]).To(Equal(
 				command_usecase.NewSlashValidator(
 					expectedBlockHeight,
 					model.SlashValidatorParams{
@@ -446,11 +447,15 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 						Reason:               "missing_signature",
 					},
 				),
+			))
+			Expect(cmds[3]).To(Equal(
 				command_usecase.NewJailValidator(
 					expectedBlockHeight,
 					"crocnclcons18vyrj3se6cvdryk3vp09x88n46894ukjywnfmy",
 					"missing_signature",
 				),
+			))
+			Expect(cmds[42]).To(Equal(
 				command_usecase.NewSlashValidator(
 					expectedBlockHeight,
 					model.SlashValidatorParams{
@@ -459,12 +464,14 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 						Reason:               "missing_signature",
 					},
 				),
+			))
+			Expect(cmds[43]).To(Equal(
 				command_usecase.NewJailValidator(
 					expectedBlockHeight,
 					"crocnclcons10wy4k3dkjd3htgleaxlzmakh0k4h8ql23cpusx",
 					"missing_signature",
 				),
-			}))
+			))
 		})
 
 		It("should return ValidatorSlashed and ValidatorJailed command base on double sign events", func() {
@@ -481,7 +488,8 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 			)
 			Expect(err).To(BeNil())
 			expectedBlockHeight := int64(165487)
-			Expect(cmds).To(Equal([]command.Command{
+
+			Expect(cmds[29]).To(Equal(
 				command_usecase.NewSlashValidator(
 					expectedBlockHeight,
 					model.SlashValidatorParams{
@@ -490,12 +498,14 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 						Reason:               "double_sign",
 					},
 				),
+			))
+			Expect(cmds[30]).To(Equal(
 				command_usecase.NewJailValidator(
 					expectedBlockHeight,
 					"crocnclcons1fnht46350sxm2e6w8ma3as2l6wdl78rfym8gku",
 					"double_sign",
 				),
-			}))
+			))
 		})
 	})
 })

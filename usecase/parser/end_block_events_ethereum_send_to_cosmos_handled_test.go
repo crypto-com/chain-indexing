@@ -15,8 +15,6 @@ import (
 var _ = Describe("ParseEndBlockEventsCommands", func() {
 	It("should return GravityEthereumSendToCosmosHandled commands when end_block_events has ethereum_send_to_cosmos_handled event", func() {
 		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_ETHEREUM_SEND_TO_COSMOS_HANDLED_BLOCK_RESULTS_RESP)
-		// expectedBlockHash := "68528002426433D2CF9BA8F8909D993D20396382DECCABFC32DC3A63DFE5444A"
-		// expectedBlockTime := utctime.FromUnixNano(1619083382248690731)
 
 		cmds, err := parser.ParseEndBlockEventsCommands(
 			blockResults.Height,
@@ -28,8 +26,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 		Expect(cmds).To(HaveLen(16))
 		expectedBlockHeight := int64(630)
 
-		Expect(cmds[7]).To(Equal(
-			// []command.Command{
+		Expect(cmds[8]).To(Equal(
 			command_usecase.NewGravityHandleEthereumSendToCosmos(
 				expectedBlockHeight,
 				model.GravityEthereumSendToCosmosHandledEventParams{
@@ -47,59 +44,6 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 					},
 				},
 			),
-			// command_usecase.NewCreateBlockRawEvent(
-			// 	expectedBlockHeight,
-			// 	model.CreateBlockRawEventParams{
-			// 		BlockHash:  expectedBlockHash,
-			// 		BlockTime:  expectedBlockTime,
-			// 		FromResult: constants.END_BLOCK_EVENT,
-			// 		Data: model.DataParams{
-			// 			Type: "coin_received",
-			// 			Content: model.BlockResultsEvent{
-			// 				Type: "coin_received",
-			// 				Attributes: []model.BlockResultsEventAttribute{
-			// 					{
-			// 						Key:   "receiver",
-			// 						Value: "tcrc16n3lc7cywa68mg50qhp847034w88pntqlasu8u",
-			// 						Index: true,
-			// 					},
-			// 					{
-			// 						Key:   "amount",
-			// 						Value: "250gravity0x564A1c3AF089D02D0B6C311C650eA3768424cbfa",
-			// 						Index: true,
-			// 					},
-			// 				},
-			// 			},
-			// 		},
-			// 	},
-			// ),
-			// command_usecase.NewCreateBlockRawEvent(
-			// 	expectedBlockHeight,
-			// 	model.CreateBlockRawEventParams{
-			// 		BlockHash:  expectedBlockHash,
-			// 		BlockTime:  expectedBlockTime,
-			// 		FromResult: constants.END_BLOCK_EVENT,
-			// 		Data: model.DataParams{
-			// 			Type: "coinbase",
-			// 			Content: model.BlockResultsEvent{
-			// 				Type: "coinbase",
-			// 				Attributes: []model.BlockResultsEventAttribute{
-			// 					{
-			// 						Key:   "minter",
-			// 						Value: "tcrc16n3lc7cywa68mg50qhp847034w88pntqlasu8u",
-			// 						Index: true,
-			// 					},
-			// 					{
-			// 						Key:   "amount",
-			// 						Value: "250gravity0x564A1c3AF089D02D0B6C311C650eA3768424cbfa",
-			// 						Index: true,
-			// 					},
-			// 				},
-			// 			},
-			// 		},
-			// 	},
-			// ),
-			// },
 		))
 	})
 })

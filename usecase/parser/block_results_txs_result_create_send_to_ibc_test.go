@@ -23,7 +23,8 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 		Expect(err).To(BeNil())
 		Expect(cmds).To(HaveLen(65))
 		expectedBlockHeight := int64(50813)
-		Expect(cmds[64]).To(Equal(
+
+		Expect(cmds[0]).To(Equal(
 			command_usecase.NewCreateCronosSendToIBC(
 				expectedBlockHeight,
 				model.CronosSendToIBCParams{
