@@ -15,8 +15,6 @@ import (
 
 var _ = Describe("ParseTxsResultsBlockEventsCommands", func() {
 	It("should return CreateSend commands when txs_results has simple send transaction", func() {
-		// block, _ := mustParseBlockResp(usecase_parser_test.BLOCK_RESULTS_TXS_RESULTS_CREATE_SEND_TO_IBC_BLOCK_RESP)
-		// blockResults := mustParseBlockResultsResp(usecase_parser_test.BLOCK_RESULTS_TXS_RESULTS_CREATE_SEND_TO_IBC_BLOCK_RESULTS_RESP)
 		block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_SEND_BLOCK_RESP)
 		blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MSG_SEND_BLOCK_RESULTS_RESP)
 
