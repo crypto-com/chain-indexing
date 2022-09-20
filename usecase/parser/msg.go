@@ -2136,7 +2136,7 @@ func ParseLegacyTx(
 	msgCommonParams event.MsgCommonParams,
 	msg map[string]interface{},
 ) ([]command.Command, []string) {
-	var rawMsg model.RawMsgEthereumTx
+	var rawMsg model.RawLegacyTx
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -2149,16 +2149,16 @@ func ParseLegacyTx(
 	}
 	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
 	if decoderErr != nil {
-		panic(fmt.Errorf("error creating RawMsgEthereumTx decoder: %v", decoderErr))
+		panic(fmt.Errorf("error creating RawLegacyTx decoder: %v", decoderErr))
 	}
 	if err := decoder.Decode(msg); err != nil {
-		panic(fmt.Errorf("error decoding RawMsgEthereumTx: %v", err))
+		panic(fmt.Errorf("error decoding RawLegacyTx: %v", err))
 	}
 
 	if !txSuccess {
 		// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
 		msgEthereumTxParams := model.EthermintLegacyTxParams{
-			RawMsgEthereumTx: rawMsg,
+			RawLegacyTx: rawMsg,
 		}
 
 		// Getting possible signer address from Msg
@@ -2175,7 +2175,7 @@ func ParseLegacyTx(
 
 	// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
 	msgEthereumTxParams := model.EthermintLegacyTxParams{
-		RawMsgEthereumTx: rawMsg,
+		RawLegacyTx: rawMsg,
 	}
 
 	// Getting possible signer address from Msg
@@ -2209,15 +2209,15 @@ func ParseExtensionOptionDynamicFeeTx(
 	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
 
 	if decoderErr != nil {
-		panic(fmt.Errorf("error creating RawMsgEthereumTx decoder: %v", decoderErr))
+		panic(fmt.Errorf("error creating RawLegacyTx decoder: %v", decoderErr))
 	}
 	if err := decoder.Decode(msg); err != nil {
-		panic(fmt.Errorf("error decoding RawMsgEthereumTx: %v", err))
+		panic(fmt.Errorf("error decoding RawLegacyTx: %v", err))
 	}
 
 	if !txSuccess {
 		// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
-		msgDynamicFeeTxParams := model.MsgDynamicFeeTxParams{
+		msgDynamicFeeTxParams := model.EthermintDynamicFeeTxParams{
 			RawDynamicFeeTx: rawMsg,
 		}
 
@@ -2234,7 +2234,7 @@ func ParseExtensionOptionDynamicFeeTx(
 	}
 
 	// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
-	msgDynamicFeeTxParams := model.MsgDynamicFeeTxParams{
+	msgDynamicFeeTxParams := model.EthermintDynamicFeeTxParams{
 		RawDynamicFeeTx: rawMsg,
 	}
 

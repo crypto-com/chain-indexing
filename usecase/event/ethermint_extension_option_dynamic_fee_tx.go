@@ -17,12 +17,12 @@ const DYNAMIC_FEE_TX_FAILED = "/ethermint.evm.v1.DynamicFeeTx.Failed"
 type EthermintExtensionOptionDynamicFeeTx struct {
 	MsgBase
 
-	Params model.MsgDynamicFeeTxParams `json:"params"`
+	Params model.EthermintDynamicFeeTxParams `json:"params"`
 }
 
 func NewEthermintExtensionOptionDynamicFeeTx(
 	msgCommonParams MsgCommonParams,
-	params model.MsgDynamicFeeTxParams,
+	params model.EthermintDynamicFeeTxParams,
 ) *EthermintExtensionOptionDynamicFeeTx {
 	return &EthermintExtensionOptionDynamicFeeTx{
 		NewMsgBase(MsgBaseParams{

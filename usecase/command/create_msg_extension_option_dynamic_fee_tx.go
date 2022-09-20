@@ -8,12 +8,12 @@ import (
 
 type CreateMsgExtensionOptionDynamicFeeTx struct {
 	msgCommonParams event.MsgCommonParams
-	params          model.MsgDynamicFeeTxParams
+	params          model.EthermintDynamicFeeTxParams
 }
 
 func NewCreateMsgExtensionOptionDynamicFeeTxTx(
 	msgCommonParams event.MsgCommonParams,
-	params model.MsgDynamicFeeTxParams,
+	params model.EthermintDynamicFeeTxParams,
 ) *CreateMsgExtensionOptionDynamicFeeTx {
 	return &CreateMsgExtensionOptionDynamicFeeTx{
 		msgCommonParams,

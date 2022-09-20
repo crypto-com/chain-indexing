@@ -1,10 +1,10 @@
 package model
 
 type EthermintLegacyTxParams struct {
-	RawMsgEthereumTx
+	RawLegacyTx
 }
 
-type RawMsgEthereumTx struct {
+type RawLegacyTx struct {
 	Type string `mapstructure:"@type" json:"@type"`
 	Size int    `mapstructure:"size" json:"size"`
 	// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
@@ -32,7 +32,7 @@ type LegacyTx struct {
 	S        string `mapstructure:"s" json:"s"`
 }
 
-type MsgDynamicFeeTxParams struct {
+type EthermintDynamicFeeTxParams struct {
 	RawDynamicFeeTx
 }
 type RawDynamicFeeTx struct {

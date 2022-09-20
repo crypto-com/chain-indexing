@@ -54,7 +54,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					MsgIndex:    0,
 				},
 				model.EthermintLegacyTxParams{
-					RawMsgEthereumTx: model.RawMsgEthereumTx{
+					RawLegacyTx: model.RawLegacyTx{
 						Type: "/ethermint.evm.v1.EthermintLegacyTx",
 						Size: 208,
 						Data: model.LegacyTx{
@@ -111,7 +111,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					TxSuccess:   true,
 					MsgIndex:    0,
 				},
-				model.MsgDynamicFeeTxParams{
+				model.EthermintDynamicFeeTxParams{
 					RawDynamicFeeTx: model.RawDynamicFeeTx{
 						Type: "/ethermint.evm.v1.EthermintLegacyTx",
 						Size: 0,
