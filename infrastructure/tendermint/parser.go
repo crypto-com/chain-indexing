@@ -188,6 +188,7 @@ func parseBlockResultsEvents(rawEvents []RawBlockResultsEvent) []model.BlockResu
 			attributes = append(attributes, model.BlockResultsEventAttribute{
 				Key:   mustBase64Decode(rawAttribute.Key),
 				Value: mustBase64Decode(rawAttribute.Value),
+				Index: rawAttribute.Index,
 			})
 		}
 		events = append(events, model.BlockResultsEvent{
