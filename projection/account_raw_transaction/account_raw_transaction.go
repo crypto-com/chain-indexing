@@ -13,10 +13,17 @@ import (
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
 	"github.com/crypto-com/chain-indexing/projection/account_raw_transaction/view"
+	account_raw_transaction_view "github.com/crypto-com/chain-indexing/projection/account_raw_transaction/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
 var _ projection_entity.Projection = &AccountRawTransaction{}
+
+var (
+	NewAccountRawTransactions      = account_raw_transaction_view.NewAccountRawTransactionsView
+	NewAccountRawTransactionsTotal = account_raw_transaction_view.NewAccountRawTransactionsTotalView
+	UpdateLastHandledEventHeight   = (*AccountRawTransaction).UpdateLastHandledEventHeight
+)
 
 type AccountRawTransaction struct {
 	*rdbprojectionbase.Base
@@ -80,7 +87,6 @@ func (projection *AccountRawTransaction) HandleEvents(height int64, events []eve
 
 	rdbTxHandle := rdbTx.ToHandle()
 
-	// TODO: Handle genesis transaction
 	if height == int64(0) {
 		if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
 			return fmt.Errorf("error updating last handled event height: %v", err)
@@ -93,8 +99,8 @@ func (projection *AccountRawTransaction) HandleEvents(height int64, events []eve
 		return nil
 	}
 
-	accountTransactionsView := view.NewAccountRawTransactions(rdbTxHandle)
-	accountTransactionsTotalView := view.NewAccountRawTransactionsTotal(rdbTxHandle)
+	accountTransactionsView := NewAccountRawTransactions(rdbTxHandle)
+	accountTransactionsTotalView := NewAccountRawTransactionsTotal(rdbTxHandle)
 
 	var blockTime utctime.UTCTime
 	var blockHash string
@@ -203,7 +209,7 @@ func (projection *AccountRawTransaction) HandleEvents(height int64, events []eve
 	}
 
 	if len(txs) == 0 {
-		if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
+		if err := UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
 			return fmt.Errorf("error updating last handled event height: %v", err)
 		}
 
@@ -218,7 +224,7 @@ func (projection *AccountRawTransaction) HandleEvents(height int64, events []eve
 		txs[i].BlockTime = blockTime
 		txs[i].BlockHash = blockHash
 
-		if err := accountTransactionsTotalView.Increment(fmt.Sprintf("%s:-", tx.Account), 1); err != nil {
+		if err := accountTransactionsTotalView.Increment(fmt.Sprintf("%s", tx.Account), 1); err != nil {
 			return fmt.Errorf("error incrementing total account raw transaction of account: %w", err)
 		}
 	}
@@ -227,7 +233,7 @@ func (projection *AccountRawTransaction) HandleEvents(height int64, events []eve
 		return fmt.Errorf("error inserting account message: %w", err)
 	}
 
-	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
+	if err := UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
 		return fmt.Errorf("error updating last handled event height: %v", err)
 	}
 

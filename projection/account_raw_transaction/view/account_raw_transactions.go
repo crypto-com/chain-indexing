@@ -18,18 +18,27 @@ import (
 	"github.com/crypto-com/chain-indexing/external/utctime"
 )
 
-// AccountRawTransactions projection view implemented by relational database
-type AccountRawTransactions struct {
+type AccountRawTransactions interface {
+	InsertAll(rows []AccountRawTransactionRow) error
+	List(
+		filter AccountRawTransactionsListFilter,
+		order AccountRawTransactionsListOrder,
+		pagination *pagination_interface.Pagination,
+	) ([]AccountRawTransactionRow, *pagination_interface.PaginationResult, error)
+}
+
+// AccountRawTransactionsView projection view implemented by relational database
+type AccountRawTransactionsView struct {
 	rdb *rdb.Handle
 }
 
-func NewAccountRawTransactions(handle *rdb.Handle) *AccountRawTransactions {
-	return &AccountRawTransactions{
+func NewAccountRawTransactionsView(handle *rdb.Handle) AccountRawTransactions {
+	return &AccountRawTransactionsView{
 		handle,
 	}
 }
 
-func (accountMessagesView *AccountRawTransactions) InsertAll(
+func (accountMessagesView *AccountRawTransactionsView) InsertAll(
 	rows []AccountRawTransactionRow,
 ) error {
 	pendingRowCount := 0
@@ -125,7 +134,7 @@ func (accountMessagesView *AccountRawTransactions) InsertAll(
 	return nil
 }
 
-func (accountMessagesView *AccountRawTransactions) List(
+func (accountMessagesView *AccountRawTransactionsView) List(
 	filter AccountRawTransactionsListFilter,
 	order AccountRawTransactionsListOrder,
 	pagination *pagination_interface.Pagination,
@@ -173,7 +182,7 @@ func (accountMessagesView *AccountRawTransactions) List(
 		accountMessagesView.rdb,
 	).WithCustomTotalQueryFn(
 		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
-			totalView := NewAccountRawTransactionsTotal(rdbHandle)
+			totalView := NewAccountRawTransactionsTotalView(rdbHandle)
 
 			identity := ""
 			if filter.Memo != "" {
