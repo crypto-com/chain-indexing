@@ -3,6 +3,7 @@ package view
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
@@ -206,7 +207,7 @@ func (blocksView *Blocks) Search(
 	keyword string,
 ) ([]Block, error) {
 	keyword = strings.ToUpper(keyword)
-	sql, sqlArgs, err := blocksView.rdb.StmtBuilder.Select(
+	search := blocksView.rdb.StmtBuilder.Select(
 		"height",
 		"hash",
 		"time",
@@ -215,9 +216,15 @@ func (blocksView *Blocks) Search(
 		"transaction_count",
 	).From(
 		"view_blocks",
-	).Where(
-		"height = ? OR hash = ?", keyword, keyword,
-	).OrderBy(
+	)
+
+	if _, err := strconv.Atoi(keyword); err != nil {
+		search = search.Where("hash = ?", keyword)
+	} else {
+		search = search.Where("height = ? OR hash = ?", keyword, keyword)
+	}
+
+	sql, sqlArgs, err := search.OrderBy(
 		"height",
 	).Limit(5).ToSql()
 	if err != nil {

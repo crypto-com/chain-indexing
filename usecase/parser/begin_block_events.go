@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
+	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/projection/block_raw_event/types"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -12,6 +14,8 @@ import (
 
 func ParseBeginBlockEventsCommands(
 	blockHeight int64,
+	blockHash string,
+	blockTime utctime.UTCTime,
 	beginBlockEvents []model.BlockResultsEvent,
 	bondingDenom string,
 ) ([]command.Command, error) {
@@ -127,6 +131,17 @@ func ParseBeginBlockEventsCommands(
 				))
 			}
 		}
+		parseBlockRawEventCmd := command_usecase.NewCreateBlockRawEvent(blockHeight, model.CreateBlockRawEventParams{
+			BlockHash:  blockHash,
+			BlockTime:  blockTime,
+			FromResult: types.BEGIN_BLOCK_EVENT,
+			Data: model.DataParams{
+				Type:    event.Type,
+				Content: event,
+			},
+		})
+
+		commands = append(commands, parseBlockRawEventCmd)
 	}
 
 	return commands, nil
