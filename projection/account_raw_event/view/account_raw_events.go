@@ -11,7 +11,6 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/external/utctime"
-	"github.com/crypto-com/chain-indexing/usecase/model"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -290,12 +289,6 @@ type AccountRawEventsListFilter struct {
 
 type AccountRawEventsListOrder struct {
 	Id view.ORDER
-}
-
-type AccountRawEventRecord struct {
-	Row      AccountRawEventRow
-	Accounts []string
-	Events   []model.BlockEvent
 }
 
 type AccountRawEventRow struct {

@@ -43,17 +43,11 @@ func ParseBlockTxsMsgToCommands(
 		}
 
 		for msgIndex, msg := range tx.Tx.Body.Messages {
-			events := []model.BlockEvent{}
-			if len(tx.TxResponse.Logs)-1 >= msgIndex {
-				events = tx.TxResponse.Logs[msgIndex].Events
-			}
-
 			msgCommonParams := event.MsgCommonParams{
 				BlockHeight: blockHeight,
 				TxHash:      txHash,
 				TxSuccess:   txSuccess,
 				MsgIndex:    msgIndex,
-				Events:      events,
 			}
 
 			var msgCommands []command.Command
