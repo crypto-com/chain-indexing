@@ -244,6 +244,7 @@ func (projection *AccountRawTransaction) HandleEvents(height int64, events []eve
 	return nil
 }
 
+// extractAddressesFromMessageJSON return all and unique possible addresses exist in a message json string, according to a given address prefix
 func extractAddressesFromMessageJSON(message string, accountAddressPrefix string) []string {
 	splits := strings.Split(message, "\""+accountAddressPrefix)
 	addresses := make([]string, 0)
@@ -261,6 +262,7 @@ func extractAddressesFromMessageJSON(message string, accountAddressPrefix string
 	return unique(addresses)
 }
 
+// unique return a unique slice of string
 func unique(stringSlice []string) []string {
 	keys := make(map[string]bool)
 	var list []string
