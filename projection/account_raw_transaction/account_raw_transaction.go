@@ -1,6 +1,7 @@
 package account_raw_transaction
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -105,8 +106,12 @@ func (projection *AccountRawTransaction) HandleEvents(height int64, events []eve
 			blockTime = blockCreatedEvent.Block.Time
 			blockHash = blockCreatedEvent.Block.Hash
 		} else if transactionCreatedEvent, ok := event.(*event_usecase.RawTransactionCreated); ok {
+			MessageBytes, err := json.Marshal(transactionCreatedEvent.Messages)
+			if err != nil {
+				return fmt.Errorf("error marshal messages: %v", err)
+			}
 			addresses := extractAddressesFromMessageJSON(
-				fmt.Sprintf("%v", transactionCreatedEvent.Messages),
+				string(MessageBytes),
 				projection.accountAddressPrefix,
 			)
 			for i := range addresses {
@@ -148,8 +153,12 @@ func (projection *AccountRawTransaction) HandleEvents(height int64, events []eve
 				txs = append(txs, tx)
 			}
 		} else if transactionFailedEvent, ok := event.(*event_usecase.RawTransactionFailed); ok {
+			MessageBytes, err := json.Marshal(transactionFailedEvent.Messages)
+			if err != nil {
+				return fmt.Errorf("error marshal messages: %v", err)
+			}
 			addresses := extractAddressesFromMessageJSON(
-				fmt.Sprintf("%v", transactionCreatedEvent.Messages),
+				string(MessageBytes),
 				projection.accountAddressPrefix,
 			)
 			for i := range addresses {

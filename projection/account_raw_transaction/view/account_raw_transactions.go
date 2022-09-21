@@ -87,6 +87,7 @@ func (accountMessagesView *AccountRawTransactions) InsertAll(
 			row.BlockHeight,
 			row.BlockHash,
 			accountMessagesView.rdb.Tton(&row.BlockTime),
+			row.Account,
 			row.Hash,
 			row.Success,
 			row.Code,
