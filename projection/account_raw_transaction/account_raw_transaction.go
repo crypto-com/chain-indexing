@@ -224,7 +224,7 @@ func (projection *AccountRawTransaction) HandleEvents(height int64, events []eve
 		txs[i].BlockTime = blockTime
 		txs[i].BlockHash = blockHash
 
-		if err := accountTransactionsTotalView.Increment(fmt.Sprintf("%s", tx.Account), 1); err != nil {
+		if err := accountTransactionsTotalView.Increment(tx.Account, 1); err != nil {
 			return fmt.Errorf("error incrementing total account raw transaction of account: %w", err)
 		}
 	}
