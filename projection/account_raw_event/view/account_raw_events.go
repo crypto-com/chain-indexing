@@ -3,7 +3,6 @@ package view
 import (
 	"errors"
 	"fmt"
-	"strconv"
 
 	sq "github.com/Masterminds/squirrel"
 
@@ -16,18 +15,18 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-// AccountRawEvents projection view implemented by relational database
-type AccountRawEvents struct {
+// AccountRawEventsView projection view implemented by relational database
+type AccountRawEventsView struct {
 	rdb *rdb.Handle
 }
 
-func NewAccountRawEvents(handle *rdb.Handle) *AccountRawEvents {
-	return &AccountRawEvents{
+func NewAccountRawEventsView(handle *rdb.Handle) *AccountRawEventsView {
+	return &AccountRawEventsView{
 		handle,
 	}
 }
 
-func (eventsView *AccountRawEvents) Insert(accountRawEvent *AccountRawEventRow, accounts []string) error {
+func (eventsView *AccountRawEventsView) Insert(accountRawEvent *AccountRawEventRow, accounts []string) error {
 	accountRawEventDataJSON, err := json.MarshalToString(accountRawEvent.Data)
 	if err != nil {
 		return fmt.Errorf("error JSON marshalling account raw event for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -41,7 +40,6 @@ func (eventsView *AccountRawEvents) Insert(accountRawEvent *AccountRawEventRow, 
 		"block_time",
 		"data",
 	)
-
 
 	blockTime := eventsView.rdb.Tton(&accountRawEvent.BlockTime)
 	for _, account := range accounts {
@@ -70,7 +68,7 @@ func (eventsView *AccountRawEvents) Insert(accountRawEvent *AccountRawEventRow, 
 	return nil
 }
 
-func (eventsView *AccountRawEvents) InsertAll(accountRawEvents []AccountRawEventRow) error {
+func (eventsView *AccountRawEventsView) InsertAll(accountRawEvents []AccountRawEventRow) error {
 	if len(accountRawEvents) == 0 {
 		return nil
 	}
@@ -134,7 +132,7 @@ func (eventsView *AccountRawEvents) InsertAll(accountRawEvents []AccountRawEvent
 	return nil
 }
 
-func (eventsView *AccountRawEvents) FindById(id int64) (*AccountRawEventRow, error) {
+func (eventsView *AccountRawEventsView) FindById(id int64) (*AccountRawEventRow, error) {
 	var err error
 
 	selectStmtBuilder := eventsView.rdb.StmtBuilder.Select(
@@ -187,7 +185,7 @@ func (eventsView *AccountRawEvents) FindById(id int64) (*AccountRawEventRow, err
 	return &accountRawEvent, nil
 }
 
-func (eventsView *AccountRawEvents) List(
+func (eventsView *AccountRawEventsView) List(
 	filter AccountRawEventsListFilter,
 	order AccountRawEventsListOrder,
 	pagination *pagination_interface.Pagination,
@@ -201,16 +199,19 @@ func (eventsView *AccountRawEvents) List(
 		"data",
 	).From(
 		"view_account_raw_events",
+	).Where(
+		"view_account_raw_events.account = ?", filter.Account,
 	)
 
-	if order.Height == view.ORDER_DESC {
-		stmtBuilder = stmtBuilder.OrderBy("account DESC, id DESC")
-	} else {
-		stmtBuilder = stmtBuilder.OrderBy("account, id")
+	var totalIdentities []string
+	if filter.MaybeMsgTypes == nil {
+		totalIdentities = []string{fmt.Sprintf("%s:-", filter.Account)}
 	}
 
-	if filter.MaybeAccount != nil {
-		stmtBuilder = stmtBuilder.Where("account = ?", *filter.MaybeAccount)
+	if order.Id == view.ORDER_DESC {
+		stmtBuilder = stmtBuilder.OrderBy("id DESC")
+	} else {
+		stmtBuilder = stmtBuilder.OrderBy("id")
 	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
@@ -218,12 +219,8 @@ func (eventsView *AccountRawEvents) List(
 		eventsView.rdb,
 	).WithCustomTotalQueryFn(
 		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
-			identity := "-"
-			if filter.MaybeAccount != nil {
-				identity = strconv.FormatInt(*filter.MaybeAccount, 10)
-			}
-			totalView := NewAccountRawEventsTotal(rdbHandle)
-			total, err := totalView.FindBy(identity)
+			totalView := NewAccountRawEventsTotalView(rdbHandle)
+			total, err := totalView.SumBy(totalIdentities)
 			if err != nil {
 				return int64(0), err
 			}
@@ -249,6 +246,7 @@ func (eventsView *AccountRawEvents) List(
 
 		if err = rowsResult.Scan(
 			&accountRawEvent.MaybeId,
+			&accountRawEvent.Account,
 			&accountRawEvent.BlockHeight,
 			&accountRawEvent.BlockHash,
 			blockTimeReader.ScannableArg(),
@@ -283,17 +281,21 @@ func (eventsView *AccountRawEvents) List(
 }
 
 type AccountRawEventsListFilter struct {
-	MaybeAccount *int64
+	// Required account filter
+	Account string
+
+	// Optional filtering
+	MaybeMsgTypes []string
 }
 
 type AccountRawEventsListOrder struct {
-	Height view.ORDER
+	Id view.ORDER
 }
 
 type AccountRawEventRecord struct {
-	Row       AccountRawEventRow
+	Row      AccountRawEventRow
 	Accounts []string
-	Events 	 []model.BlockEvent
+	Events   []model.BlockEvent
 }
 
 type AccountRawEventRow struct {

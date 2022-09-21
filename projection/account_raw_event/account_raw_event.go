@@ -80,8 +80,8 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 	}()
 
 	rdbTxHandle := rdbTx.ToHandle()
-	eventsView := view.NewAccountRawEvents(rdbTxHandle)
-	totalView := view.NewAccountRawEventsTotal(rdbTxHandle)
+	eventsView := view.NewAccountRawEventsView(rdbTxHandle)
+	totalView := view.NewAccountRawEventsTotalView(rdbTxHandle)
 
 	var blockTime utctime.UTCTime
 	var blockHash string

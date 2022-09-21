@@ -5,12 +5,12 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 )
 
-type AccountRawEventsTotal struct {
+type AccountRawEventsTotalView struct {
 	*view.Total
 }
 
-func NewAccountRawEventsTotal(rdbHandle *rdb.Handle) *AccountRawEventsTotal {
-	return &AccountRawEventsTotal{
+func NewAccountRawEventsTotalView(rdbHandle *rdb.Handle) *AccountRawEventsTotalView {
+	return &AccountRawEventsTotalView{
 		view.NewTotal(rdbHandle, "view_account_raw_events_total"),
 	}
 }
