@@ -258,5 +258,17 @@ func extractAddressesFromMessageJSON(message string, accountAddressPrefix string
 		}
 	}
 
-	return addresses
+	return unique(addresses)
+}
+
+func unique(stringSlice []string) []string {
+	keys := make(map[string]bool)
+	var list []string
+	for _, entry := range stringSlice {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			list = append(list, entry)
+		}
+	}
+	return list
 }
