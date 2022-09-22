@@ -14,6 +14,11 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
+type AccountRawEvents interface {
+	Insert(*AccountRawEventRow, []string) error
+	List(AccountRawEventsListFilter, AccountRawEventsListOrder, *pagination_interface.Pagination) ([]AccountRawEventRow, *pagination_interface.PaginationResult, error)
+}
+
 // AccountRawEventsView projection view implemented by relational database
 type AccountRawEventsView struct {
 	rdb *rdb.Handle

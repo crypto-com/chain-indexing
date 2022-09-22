@@ -5,6 +5,14 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 )
 
+type AccountRawEventsTotal interface {
+	Set(string, int64) error
+	Increment(string, int64) error
+	IncrementAll([]string, int64) error
+	DecrementAll([]string, int64) error
+	FindBy(string) (int64, error)
+}
+
 type AccountRawEventsTotalView struct {
 	*view.Total
 }
