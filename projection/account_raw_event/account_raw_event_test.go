@@ -11,9 +11,8 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	"github.com/crypto-com/chain-indexing/projection/account_message"
 	"github.com/crypto-com/chain-indexing/projection/account_raw_event"
-	"github.com/crypto-com/chain-indexing/usecase/coin"
+	account_raw_event_view "github.com/crypto-com/chain-indexing/projection/account_raw_event/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 	"github.com/stretchr/testify/assert"
@@ -62,122 +61,2079 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 		MockFunc func(events []entity_event.Event) []*testify_mock.Mock
 	}{
 		{
-			Name: "HandleMsgSend",
+			Name: "HandleCoinSpent",
 			Events: []entity_event.Event{
-				&event_usecase.BlockCreated{
+				&event_usecase.BlockRawEventCreated{
 					Base: entity_event.NewBase(entity_event.BaseParams{
-						Name:        event_usecase.BLOCK_CREATED,
+						Name:        event_usecase.BLOCK_RAW_EVENT_CREATED,
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					Block: &usecase_model.Block{
-						Height:          1,
-						Hash:            "Hash",
-						Time:            utctime.UTCTime{},
-						AppHash:         "AppHash",
-						ProposerAddress: "ProposerAddress",
-						Txs:             nil,
-						Signatures:      nil,
-						Evidences:       nil,
-					},
-				},
-				&event_usecase.MsgSend{
-					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
-						MsgName: event_usecase.MSG_SEND,
-						Version: 1,
-						MsgCommonParams: event_usecase.MsgCommonParams{
-							BlockHeight: 1,
-							TxHash:      "TxHash",
-							TxSuccess:   true,
-							MsgIndex:    0,
-						},
-					}),
-					FromAddress: "FromAddress",
-					ToAddress:   "ToAddress",
-					Amount: coin.Coins{
-						coin.Coin{
-							Denom:  "Denom",
-							Amount: coin.NewInt(100),
+					BlockHash:  "",
+					BlockTime:  utctime.UTCTime{},
+					FromResult: "",
+					Data: usecase_model.DataParams{
+						Type: "coin_spent",
+						Content: usecase_model.BlockResultsEvent{
+							Type: "coin_spent",
+							Attributes: []usecase_model.BlockResultsEventAttribute{
+								{
+									Key:   "spender",
+									Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+									Index: true,
+								},
+							},
 						},
 					},
 				},
 			},
 			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
-				mockAccountMessagesTotalView := account_message_view.NewMockAccountMessagesTotalView(nil).(*account_message_view.MockAccountMessagesTotalView)
-				mocks = append(mocks, &mockAccountMessagesTotalView.Mock)
+				mockAccountRawEventsTotalView := account_raw_event_view.NewMockAccountRawEventsTotalView(nil).(*account_raw_event_view.MockAccountRawEventsTotalView)
+				mocks = append(mocks, &mockAccountRawEventsTotalView.Mock)
 
-				account_message.NewAccountMessagesTotal = func(_ *rdb.Handle) account_message_view.AccountMessagesTotal {
-					return mockAccountMessagesTotalView
+				account_raw_event.NewAccountRawEventsTotal = func(_ *rdb.Handle) account_raw_event_view.AccountRawEventsTotal {
+					return mockAccountRawEventsTotalView
 				}
 
-				mockAccountMessagesTotalView.On(
+				mockAccountRawEventsTotalView.On(
 					"Increment",
-					"FromAddress:-",
+					"account:-",
 					int64(1),
 				).Return(nil)
 
-				mockAccountMessagesTotalView.On(
+				mockAccountRawEventsTotalView.On(
 					"Increment",
-					"FromAddress:/cosmos.bank.v1beta1.MsgSend",
+					"account:cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
 					int64(1),
 				).Return(nil)
 
-				mockAccountMessagesTotalView.On(
-					"Increment",
-					"ToAddress:-",
-					int64(1),
-				).Return(nil)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
-				mockAccountMessagesTotalView.On(
-					"Increment",
-					"ToAddress:/cosmos.bank.v1beta1.MsgSend",
-					int64(1),
-				).Return(nil)
-
-				mockAccountMessagesView := account_message_view.NewMockAccountMessagesView(nil).(*account_message_view.MockAccountMessagesView)
-				mocks = append(mocks, &mockAccountMessagesView.Mock)
-
-				account_message.NewAccountMessages = func(_ *rdb.Handle) account_message_view.AccountMessages {
-					return mockAccountMessagesView
+				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
+					return mockAccountRawEventsView
 				}
 
-				mockAccountMessagesView.On(
+				mockAccountRawEventsView.On(
 					"Insert",
-					&account_message_view.AccountMessageRow{
-						MaybeAccount:    (*string)(nil),
-						BlockHeight:     1,
-						BlockHash:       "Hash",
-						BlockTime:       utctime.UTCTime{},
-						TransactionHash: "TxHash",
-						Success:         true,
-						MessageIndex:    0,
-						MessageType:     "/cosmos.bank.v1beta1.MsgSend",
-						Data: &event_usecase.MsgSend{
-							MsgBase: event_usecase.MsgBase{
-								Base: entity_event.Base{
-									EventName:    "/cosmos.bank.v1beta1.MsgSend.Created",
-									EventVersion: 1,
-									BlockHeight:  1,
-									EventUUID:    "TESTUUID",
-								},
-								MsgName:   "/cosmos.bank.v1beta1.MsgSend",
-								MsgTxHash: "TxHash",
-								MsgIndex:  0,
-							},
-							FromAddress: "FromAddress",
-							ToAddress:   "ToAddress",
-							Amount: coin.Coins{
-								{
-									Denom:  "Denom",
-									Amount: coin.NewInt(100),
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "coin_spent",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "coin_spent",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "spender",
+										Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+										Index: true,
+									},
 								},
 							},
 						},
 					},
-					[]string{"FromAddress", "ToAddress"},
 				).Return(nil)
 
-				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
+				account_raw_event.UpdateLastHandledEventHeight = func(_ *account_raw_event.AccountRawEvent, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleCoinReceived",
+			Events: []entity_event.Event{
+				&event_usecase.BlockRawEventCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_RAW_EVENT_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					BlockHash:  "",
+					BlockTime:  utctime.UTCTime{},
+					FromResult: "",
+					Data: usecase_model.DataParams{
+						Type: "coin_received",
+						Content: usecase_model.BlockResultsEvent{
+							Type: "coin_received",
+							Attributes: []usecase_model.BlockResultsEventAttribute{
+								{
+									Key:   "receiver",
+									Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockAccountRawEventsTotalView := account_raw_event_view.NewMockAccountRawEventsTotalView(nil).(*account_raw_event_view.MockAccountRawEventsTotalView)
+				mocks = append(mocks, &mockAccountRawEventsTotalView.Mock)
+
+				account_raw_event.NewAccountRawEventsTotal = func(_ *rdb.Handle) account_raw_event_view.AccountRawEventsTotal {
+					return mockAccountRawEventsTotalView
+				}
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mocks = append(mocks, &mockAccountRawEventsView.Mock)
+
+				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
+					return mockAccountRawEventsView
+				}
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "coin_received",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "coin_received",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "receiver",
+										Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				account_raw_event.UpdateLastHandledEventHeight = func(_ *account_raw_event.AccountRawEvent, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleTransfer",
+			Events: []entity_event.Event{
+				&event_usecase.BlockRawEventCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_RAW_EVENT_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					BlockHash:  "hash",
+					BlockTime:  utctime.UTCTime{},
+					FromResult: "",
+					Data: usecase_model.DataParams{
+						Type: "transfer",
+						Content: usecase_model.BlockResultsEvent{
+							Type: "transfer",
+							Attributes: []usecase_model.BlockResultsEventAttribute{
+								{
+									Key:   "recipient",
+									Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+									Index: true,
+								},
+								{
+									Key:   "spender",
+									Value: "cro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+									Index: true,
+								},
+								{
+									Key:   "amount",
+									Value: "1basecro",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockAccountRawEventsTotalView := account_raw_event_view.NewMockAccountRawEventsTotalView(nil).(*account_raw_event_view.MockAccountRawEventsTotalView)
+				mocks = append(mocks, &mockAccountRawEventsTotalView.Mock)
+
+				account_raw_event.NewAccountRawEventsTotal = func(_ *rdb.Handle) account_raw_event_view.AccountRawEventsTotal {
+					return mockAccountRawEventsTotalView
+				}
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:cro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mocks = append(mocks, &mockAccountRawEventsView.Mock)
+
+				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
+					return mockAccountRawEventsView
+				}
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "transfer",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "transfer",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "recipient",
+										Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+										Index: true,
+									},
+									{
+										Key:   "spender",
+										Value: "cro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+										Index: true,
+									},
+									{
+										Key:   "amount",
+										Value: "1basecro",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "cro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "transfer",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "transfer",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "recipient",
+										Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+										Index: true,
+									},
+									{
+										Key:   "spender",
+										Value: "cro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+										Index: true,
+									},
+									{
+										Key:   "amount",
+										Value: "1basecro",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				account_raw_event.UpdateLastHandledEventHeight = func(_ *account_raw_event.AccountRawEvent, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleCoinbase",
+			Events: []entity_event.Event{
+				&event_usecase.BlockRawEventCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_RAW_EVENT_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					BlockHash:  "hash",
+					BlockTime:  utctime.UTCTime{},
+					FromResult: "",
+					Data: usecase_model.DataParams{
+						Type: "coinbase",
+						Content: usecase_model.BlockResultsEvent{
+							Type: "coinbase",
+							Attributes: []usecase_model.BlockResultsEventAttribute{
+								{
+									Key:   "minter",
+									Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockAccountRawEventsTotalView := account_raw_event_view.NewMockAccountRawEventsTotalView(nil).(*account_raw_event_view.MockAccountRawEventsTotalView)
+				mocks = append(mocks, &mockAccountRawEventsTotalView.Mock)
+
+				account_raw_event.NewAccountRawEventsTotal = func(_ *rdb.Handle) account_raw_event_view.AccountRawEventsTotal {
+					return mockAccountRawEventsTotalView
+				}
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mocks = append(mocks, &mockAccountRawEventsView.Mock)
+
+				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
+					return mockAccountRawEventsView
+				}
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "coinbase",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "coinbase",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "minter",
+										Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				account_raw_event.UpdateLastHandledEventHeight = func(_ *account_raw_event.AccountRawEvent, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleBurn",
+			Events: []entity_event.Event{
+				&event_usecase.BlockRawEventCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_RAW_EVENT_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					BlockHash:  "hash",
+					BlockTime:  utctime.UTCTime{},
+					FromResult: "",
+					Data: usecase_model.DataParams{
+						Type: "burn",
+						Content: usecase_model.BlockResultsEvent{
+							Type: "burn",
+							Attributes: []usecase_model.BlockResultsEventAttribute{
+								{
+									Key:   "burner",
+									Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockAccountRawEventsTotalView := account_raw_event_view.NewMockAccountRawEventsTotalView(nil).(*account_raw_event_view.MockAccountRawEventsTotalView)
+				mocks = append(mocks, &mockAccountRawEventsTotalView.Mock)
+
+				account_raw_event.NewAccountRawEventsTotal = func(_ *rdb.Handle) account_raw_event_view.AccountRawEventsTotal {
+					return mockAccountRawEventsTotalView
+				}
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mocks = append(mocks, &mockAccountRawEventsView.Mock)
+
+				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
+					return mockAccountRawEventsView
+				}
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "burn",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "burn",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "burner",
+										Value: "tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				account_raw_event.UpdateLastHandledEventHeight = func(_ *account_raw_event.AccountRawEvent, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleProposerReward",
+			Events: []entity_event.Event{
+				&event_usecase.BlockRawEventCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_RAW_EVENT_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					BlockHash:  "hash",
+					BlockTime:  utctime.UTCTime{},
+					FromResult: "",
+					Data: usecase_model.DataParams{
+						Type: "proposer_reward",
+						Content: usecase_model.BlockResultsEvent{
+							Type: "proposer_reward",
+							Attributes: []usecase_model.BlockResultsEventAttribute{
+								{
+									Key:   "validator",
+									Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockAccountRawEventsTotalView := account_raw_event_view.NewMockAccountRawEventsTotalView(nil).(*account_raw_event_view.MockAccountRawEventsTotalView)
+				mocks = append(mocks, &mockAccountRawEventsTotalView.Mock)
+
+				account_raw_event.NewAccountRawEventsTotal = func(_ *rdb.Handle) account_raw_event_view.AccountRawEventsTotal {
+					return mockAccountRawEventsTotalView
+				}
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mocks = append(mocks, &mockAccountRawEventsView.Mock)
+
+				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
+					return mockAccountRawEventsView
+				}
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "proposer_reward",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "proposer_reward",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "validator",
+										Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				account_raw_event.UpdateLastHandledEventHeight = func(_ *account_raw_event.AccountRawEvent, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleRewards",
+			Events: []entity_event.Event{
+				&event_usecase.BlockRawEventCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_RAW_EVENT_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					BlockHash:  "hash",
+					BlockTime:  utctime.UTCTime{},
+					FromResult: "",
+					Data: usecase_model.DataParams{
+						Type: "rewards",
+						Content: usecase_model.BlockResultsEvent{
+							Type: "rewards",
+							Attributes: []usecase_model.BlockResultsEventAttribute{
+								{
+									Key:   "validator",
+									Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockAccountRawEventsTotalView := account_raw_event_view.NewMockAccountRawEventsTotalView(nil).(*account_raw_event_view.MockAccountRawEventsTotalView)
+				mocks = append(mocks, &mockAccountRawEventsTotalView.Mock)
+
+				account_raw_event.NewAccountRawEventsTotal = func(_ *rdb.Handle) account_raw_event_view.AccountRawEventsTotal {
+					return mockAccountRawEventsTotalView
+				}
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mocks = append(mocks, &mockAccountRawEventsView.Mock)
+
+				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
+					return mockAccountRawEventsView
+				}
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "rewards",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "rewards",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "validator",
+										Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				account_raw_event.UpdateLastHandledEventHeight = func(_ *account_raw_event.AccountRawEvent, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleCommission",
+			Events: []entity_event.Event{
+				&event_usecase.BlockRawEventCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_RAW_EVENT_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					BlockHash:  "hash",
+					BlockTime:  utctime.UTCTime{},
+					FromResult: "",
+					Data: usecase_model.DataParams{
+						Type: "commission",
+						Content: usecase_model.BlockResultsEvent{
+							Type: "commission",
+							Attributes: []usecase_model.BlockResultsEventAttribute{
+								{
+									Key:   "validator",
+									Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockAccountRawEventsTotalView := account_raw_event_view.NewMockAccountRawEventsTotalView(nil).(*account_raw_event_view.MockAccountRawEventsTotalView)
+				mocks = append(mocks, &mockAccountRawEventsTotalView.Mock)
+
+				account_raw_event.NewAccountRawEventsTotal = func(_ *rdb.Handle) account_raw_event_view.AccountRawEventsTotal {
+					return mockAccountRawEventsTotalView
+				}
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mocks = append(mocks, &mockAccountRawEventsView.Mock)
+
+				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
+					return mockAccountRawEventsView
+				}
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "commission",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "commission",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "validator",
+										Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				account_raw_event.UpdateLastHandledEventHeight = func(_ *account_raw_event.AccountRawEvent, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleSlash",
+			Events: []entity_event.Event{
+				&event_usecase.BlockRawEventCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_RAW_EVENT_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					BlockHash:  "hash",
+					BlockTime:  utctime.UTCTime{},
+					FromResult: "",
+					Data: usecase_model.DataParams{
+						Type: "slash",
+						Content: usecase_model.BlockResultsEvent{
+							Type: "slash",
+							Attributes: []usecase_model.BlockResultsEventAttribute{
+								{
+									Key:   "address",
+									Value: "tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockAccountRawEventsTotalView := account_raw_event_view.NewMockAccountRawEventsTotalView(nil).(*account_raw_event_view.MockAccountRawEventsTotalView)
+				mocks = append(mocks, &mockAccountRawEventsTotalView.Mock)
+
+				account_raw_event.NewAccountRawEventsTotal = func(_ *rdb.Handle) account_raw_event_view.AccountRawEventsTotal {
+					return mockAccountRawEventsTotalView
+				}
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mocks = append(mocks, &mockAccountRawEventsView.Mock)
+
+				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
+					return mockAccountRawEventsView
+				}
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "slash",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "slash",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "address",
+										Value: "tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				account_raw_event.UpdateLastHandledEventHeight = func(_ *account_raw_event.AccountRawEvent, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleCompleteUnbonding",
+			Events: []entity_event.Event{
+				&event_usecase.BlockRawEventCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_RAW_EVENT_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					BlockHash:  "hash",
+					BlockTime:  utctime.UTCTime{},
+					FromResult: "",
+					Data: usecase_model.DataParams{
+						Type: "complete_unbonding",
+						Content: usecase_model.BlockResultsEvent{
+							Type: "complete_unbonding",
+							Attributes: []usecase_model.BlockResultsEventAttribute{
+								{
+									Key:   "delegator",
+									Value: "tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockAccountRawEventsTotalView := account_raw_event_view.NewMockAccountRawEventsTotalView(nil).(*account_raw_event_view.MockAccountRawEventsTotalView)
+				mocks = append(mocks, &mockAccountRawEventsTotalView.Mock)
+
+				account_raw_event.NewAccountRawEventsTotal = func(_ *rdb.Handle) account_raw_event_view.AccountRawEventsTotal {
+					return mockAccountRawEventsTotalView
+				}
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mocks = append(mocks, &mockAccountRawEventsView.Mock)
+
+				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
+					return mockAccountRawEventsView
+				}
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "complete_unbonding",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "complete_unbonding",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "delegator",
+										Value: "tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "complete_unbonding",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "complete_unbonding",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "validator",
+										Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				account_raw_event.UpdateLastHandledEventHeight = func(_ *account_raw_event.AccountRawEvent, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleEthereumSendToCosmosHandled",
+			Events: []entity_event.Event{
+				&event_usecase.BlockRawEventCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_RAW_EVENT_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					BlockHash:  "hash",
+					BlockTime:  utctime.UTCTime{},
+					FromResult: "",
+					Data: usecase_model.DataParams{
+						Type: "ethereum_send_to_cosmos_handled",
+						Content: usecase_model.BlockResultsEvent{
+							Type: "ethereum_send_to_cosmos_handled",
+							Attributes: []usecase_model.BlockResultsEventAttribute{
+								{
+									Key:   "sender",
+									Value: "tcro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+									Index: true,
+								},
+								{
+									Key:   "receiver",
+									Value: "tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockAccountRawEventsTotalView := account_raw_event_view.NewMockAccountRawEventsTotalView(nil).(*account_raw_event_view.MockAccountRawEventsTotalView)
+				mocks = append(mocks, &mockAccountRawEventsTotalView.Mock)
+
+				account_raw_event.NewAccountRawEventsTotal = func(_ *rdb.Handle) account_raw_event_view.AccountRawEventsTotal {
+					return mockAccountRawEventsTotalView
+				}
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mocks = append(mocks, &mockAccountRawEventsView.Mock)
+
+				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
+					return mockAccountRawEventsView
+				}
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "ethereum_send_to_cosmos_handled",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "ethereum_send_to_cosmos_handled",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "sender",
+										Value: "tcro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+										Index: true,
+									},
+									{
+										Key:   "receiver",
+										Value: "tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "ethereum_send_to_cosmos_handled",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "ethereum_send_to_cosmos_handled",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "sender",
+										Value: "tcro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+										Index: true,
+									},
+									{
+										Key:   "receiver",
+										Value: "tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				account_raw_event.UpdateLastHandledEventHeight = func(_ *account_raw_event.AccountRawEvent, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMessage",
+			Events: []entity_event.Event{
+				&event_usecase.BlockRawEventCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_RAW_EVENT_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					BlockHash:  "hash",
+					BlockTime:  utctime.UTCTime{},
+					FromResult: "",
+					Data: usecase_model.DataParams{
+						Type: "message",
+						Content: usecase_model.BlockResultsEvent{
+							Type: "message",
+							Attributes: []usecase_model.BlockResultsEventAttribute{
+								{
+									Key:   "sender",
+									Value: "tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+									Index: true,
+								},
+								{
+									Key:   "granter",
+									Value: "tcro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+									Index: true,
+								},
+								{
+									Key:   "grantee",
+									Value: "tcro1v7h324rm06r5admszs3d5jvq5fqnnuzpy7xxxx",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockAccountRawEventsTotalView := account_raw_event_view.NewMockAccountRawEventsTotalView(nil).(*account_raw_event_view.MockAccountRawEventsTotalView)
+				mocks = append(mocks, &mockAccountRawEventsTotalView.Mock)
+
+				account_raw_event.NewAccountRawEventsTotal = func(_ *rdb.Handle) account_raw_event_view.AccountRawEventsTotal {
+					return mockAccountRawEventsTotalView
+				}
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcro1v7h324rm06r5admszs3d5jvq5fqnnuzpy7xxxx",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mocks = append(mocks, &mockAccountRawEventsView.Mock)
+
+				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
+					return mockAccountRawEventsView
+				}
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "message",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "message",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "sender",
+										Value: "tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+										Index: true,
+									},
+									{
+										Key:   "granter",
+										Value: "tcro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+										Index: true,
+									},
+									{
+										Key:   "grantee",
+										Value: "tcro1v7h324rm06r5admszs3d5jvq5fqnnuzpy7xxxx",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "message",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "message",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "sender",
+										Value: "tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+										Index: true,
+									},
+									{
+										Key:   "granter",
+										Value: "tcro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+										Index: true,
+									},
+									{
+										Key:   "grantee",
+										Value: "tcro1v7h324rm06r5admszs3d5jvq5fqnnuzpy7xxxx",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcro1v7h324rm06r5admszs3d5jvq5fqnnuzpy7xxxx",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "message",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "message",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "sender",
+										Value: "tcro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+										Index: true,
+									},
+									{
+										Key:   "granter",
+										Value: "tcro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+										Index: true,
+									},
+									{
+										Key:   "grantee",
+										Value: "tcro1v7h324rm06r5admszs3d5jvq5fqnnuzpy7xxxx",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				account_raw_event.UpdateLastHandledEventHeight = func(_ *account_raw_event.AccountRawEvent, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleWithdrawRewards",
+			Events: []entity_event.Event{
+				&event_usecase.BlockRawEventCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_RAW_EVENT_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					BlockHash:  "hash",
+					BlockTime:  utctime.UTCTime{},
+					FromResult: "",
+					Data: usecase_model.DataParams{
+						Type: "withdraw_rewards",
+						Content: usecase_model.BlockResultsEvent{
+							Type: "withdraw_rewards",
+							Attributes: []usecase_model.BlockResultsEventAttribute{
+								{
+									Key:   "validator",
+									Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockAccountRawEventsTotalView := account_raw_event_view.NewMockAccountRawEventsTotalView(nil).(*account_raw_event_view.MockAccountRawEventsTotalView)
+				mocks = append(mocks, &mockAccountRawEventsTotalView.Mock)
+
+				account_raw_event.NewAccountRawEventsTotal = func(_ *rdb.Handle) account_raw_event_view.AccountRawEventsTotal {
+					return mockAccountRawEventsTotalView
+				}
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mocks = append(mocks, &mockAccountRawEventsView.Mock)
+
+				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
+					return mockAccountRawEventsView
+				}
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "withdraw_rewards",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "withdraw_rewards",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "validator",
+										Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				account_raw_event.UpdateLastHandledEventHeight = func(_ *account_raw_event.AccountRawEvent, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleSetWithdrawAddress",
+			Events: []entity_event.Event{
+				&event_usecase.BlockRawEventCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_RAW_EVENT_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					BlockHash:  "hash",
+					BlockTime:  utctime.UTCTime{},
+					FromResult: "",
+					Data: usecase_model.DataParams{
+						Type: "set_withdraw_address",
+						Content: usecase_model.BlockResultsEvent{
+							Type: "set_withdraw_address",
+							Attributes: []usecase_model.BlockResultsEventAttribute{
+								{
+									Key:   "withdraw_address",
+									Value: "tcro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockAccountRawEventsTotalView := account_raw_event_view.NewMockAccountRawEventsTotalView(nil).(*account_raw_event_view.MockAccountRawEventsTotalView)
+				mocks = append(mocks, &mockAccountRawEventsTotalView.Mock)
+
+				account_raw_event.NewAccountRawEventsTotal = func(_ *rdb.Handle) account_raw_event_view.AccountRawEventsTotal {
+					return mockAccountRawEventsTotalView
+				}
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mocks = append(mocks, &mockAccountRawEventsView.Mock)
+
+				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
+					return mockAccountRawEventsView
+				}
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "set_withdraw_address",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "set_withdraw_address",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "withdraw_address",
+										Value: "tcro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				account_raw_event.UpdateLastHandledEventHeight = func(_ *account_raw_event.AccountRawEvent, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleSetWithdrawAddress",
+			Events: []entity_event.Event{
+				&event_usecase.BlockRawEventCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_RAW_EVENT_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					BlockHash:  "hash",
+					BlockTime:  utctime.UTCTime{},
+					FromResult: "",
+					Data: usecase_model.DataParams{
+						Type: "set_withdraw_address",
+						Content: usecase_model.BlockResultsEvent{
+							Type: "set_withdraw_address",
+							Attributes: []usecase_model.BlockResultsEventAttribute{
+								{
+									Key:   "withdraw_address",
+									Value: "tcro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockAccountRawEventsTotalView := account_raw_event_view.NewMockAccountRawEventsTotalView(nil).(*account_raw_event_view.MockAccountRawEventsTotalView)
+				mocks = append(mocks, &mockAccountRawEventsTotalView.Mock)
+
+				account_raw_event.NewAccountRawEventsTotal = func(_ *rdb.Handle) account_raw_event_view.AccountRawEventsTotal {
+					return mockAccountRawEventsTotalView
+				}
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mocks = append(mocks, &mockAccountRawEventsView.Mock)
+
+				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
+					return mockAccountRawEventsView
+				}
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "set_withdraw_address",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "set_withdraw_address",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "withdraw_address",
+										Value: "tcro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				account_raw_event.UpdateLastHandledEventHeight = func(_ *account_raw_event.AccountRawEvent, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleCompleteRedelegation",
+			Events: []entity_event.Event{
+				&event_usecase.BlockRawEventCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_RAW_EVENT_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					BlockHash:  "hash",
+					BlockTime:  utctime.UTCTime{},
+					FromResult: "",
+					Data: usecase_model.DataParams{
+						Type: "complete_redelegation",
+						Content: usecase_model.BlockResultsEvent{
+							Type: "complete_redelegation",
+							Attributes: []usecase_model.BlockResultsEventAttribute{
+								{
+									Key:   "source_validator",
+									Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+									Index: true,
+								},
+								{
+									Key:   "destination_validator",
+									Value: "tcrocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
+									Index: true,
+								},
+								{
+									Key:   "delegator",
+									Value: "tcro1qfqd93p68lr65xlgt3547vyxthzsr27pxp66ac",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockAccountRawEventsTotalView := account_raw_event_view.NewMockAccountRawEventsTotalView(nil).(*account_raw_event_view.MockAccountRawEventsTotalView)
+				mocks = append(mocks, &mockAccountRawEventsTotalView.Mock)
+
+				account_raw_event.NewAccountRawEventsTotal = func(_ *rdb.Handle) account_raw_event_view.AccountRawEventsTotal {
+					return mockAccountRawEventsTotalView
+				}
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcrocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcro1qfqd93p68lr65xlgt3547vyxthzsr27pxp66ac",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mocks = append(mocks, &mockAccountRawEventsView.Mock)
+
+				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
+					return mockAccountRawEventsView
+				}
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "complete_redelegation",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "complete_redelegation",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "source_validator",
+										Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+										Index: true,
+									},
+									{
+										Key:   "destination_validator",
+										Value: "tcrocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
+										Index: true,
+									},
+									{
+										Key:   "delegator",
+										Value: "tcro1qfqd93p68lr65xlgt3547vyxthzsr27pxp66ac",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcrocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "complete_redelegation",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "complete_redelegation",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "source_validator",
+										Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+										Index: true,
+									},
+									{
+										Key:   "destination_validator",
+										Value: "tcrocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
+										Index: true,
+									},
+									{
+										Key:   "delegator",
+										Value: "tcro1qfqd93p68lr65xlgt3547vyxthzsr27pxp66ac",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcro1qfqd93p68lr65xlgt3547vyxthzsr27pxp66ac",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "complete_redelegation",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "complete_redelegation",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "source_validator",
+										Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+										Index: true,
+									},
+									{
+										Key:   "destination_validator",
+										Value: "tcrocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
+										Index: true,
+									},
+									{
+										Key:   "delegator",
+										Value: "tcro1qfqd93p68lr65xlgt3547vyxthzsr27pxp66ac",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				account_raw_event.UpdateLastHandledEventHeight = func(_ *account_raw_event.AccountRawEvent, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleCreateValidator",
+			Events: []entity_event.Event{
+				&event_usecase.BlockRawEventCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_RAW_EVENT_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					BlockHash:  "hash",
+					BlockTime:  utctime.UTCTime{},
+					FromResult: "",
+					Data: usecase_model.DataParams{
+						Type: "create_validator",
+						Content: usecase_model.BlockResultsEvent{
+							Type: "create_validator",
+							Attributes: []usecase_model.BlockResultsEventAttribute{
+								{
+									Key:   "validator",
+									Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockAccountRawEventsTotalView := account_raw_event_view.NewMockAccountRawEventsTotalView(nil).(*account_raw_event_view.MockAccountRawEventsTotalView)
+				mocks = append(mocks, &mockAccountRawEventsTotalView.Mock)
+
+				account_raw_event.NewAccountRawEventsTotal = func(_ *rdb.Handle) account_raw_event_view.AccountRawEventsTotal {
+					return mockAccountRawEventsTotalView
+				}
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mocks = append(mocks, &mockAccountRawEventsView.Mock)
+
+				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
+					return mockAccountRawEventsView
+				}
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "create_validator",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "create_validator",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "validator",
+										Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				account_raw_event.UpdateLastHandledEventHeight = func(_ *account_raw_event.AccountRawEvent, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleDelegate",
+			Events: []entity_event.Event{
+				&event_usecase.BlockRawEventCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_RAW_EVENT_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					BlockHash:  "hash",
+					BlockTime:  utctime.UTCTime{},
+					FromResult: "",
+					Data: usecase_model.DataParams{
+						Type: "delegate",
+						Content: usecase_model.BlockResultsEvent{
+							Type: "delegate",
+							Attributes: []usecase_model.BlockResultsEventAttribute{
+								{
+									Key:   "validator",
+									Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockAccountRawEventsTotalView := account_raw_event_view.NewMockAccountRawEventsTotalView(nil).(*account_raw_event_view.MockAccountRawEventsTotalView)
+				mocks = append(mocks, &mockAccountRawEventsTotalView.Mock)
+
+				account_raw_event.NewAccountRawEventsTotal = func(_ *rdb.Handle) account_raw_event_view.AccountRawEventsTotal {
+					return mockAccountRawEventsTotalView
+				}
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mocks = append(mocks, &mockAccountRawEventsView.Mock)
+
+				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
+					return mockAccountRawEventsView
+				}
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "delegate",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "delegate",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "validator",
+										Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				account_raw_event.UpdateLastHandledEventHeight = func(_ *account_raw_event.AccountRawEvent, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleUnbond",
+			Events: []entity_event.Event{
+				&event_usecase.BlockRawEventCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_RAW_EVENT_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					BlockHash:  "hash",
+					BlockTime:  utctime.UTCTime{},
+					FromResult: "",
+					Data: usecase_model.DataParams{
+						Type: "unbond",
+						Content: usecase_model.BlockResultsEvent{
+							Type: "unbond",
+							Attributes: []usecase_model.BlockResultsEventAttribute{
+								{
+									Key:   "destination_validator",
+									Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockAccountRawEventsTotalView := account_raw_event_view.NewMockAccountRawEventsTotalView(nil).(*account_raw_event_view.MockAccountRawEventsTotalView)
+				mocks = append(mocks, &mockAccountRawEventsTotalView.Mock)
+
+				account_raw_event.NewAccountRawEventsTotal = func(_ *rdb.Handle) account_raw_event_view.AccountRawEventsTotal {
+					return mockAccountRawEventsTotalView
+				}
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mocks = append(mocks, &mockAccountRawEventsView.Mock)
+
+				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
+					return mockAccountRawEventsView
+				}
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "unbond",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "unbond",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "destination_validator",
+										Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				account_raw_event.UpdateLastHandledEventHeight = func(_ *account_raw_event.AccountRawEvent, _ *rdb.Handle, _ int64) error {
+					return nil
+				}
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleRedelegate",
+			Events: []entity_event.Event{
+				&event_usecase.BlockRawEventCreated{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        event_usecase.BLOCK_RAW_EVENT_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					BlockHash:  "hash",
+					BlockTime:  utctime.UTCTime{},
+					FromResult: "",
+					Data: usecase_model.DataParams{
+						Type: "redelegate",
+						Content: usecase_model.BlockResultsEvent{
+							Type: "redelegate",
+							Attributes: []usecase_model.BlockResultsEventAttribute{
+								{
+									Key:   "source_validator",
+									Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+									Index: true,
+								},
+								{
+									Key:   "destination_validator",
+									Value: "tcrocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
+									Index: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockAccountRawEventsTotalView := account_raw_event_view.NewMockAccountRawEventsTotalView(nil).(*account_raw_event_view.MockAccountRawEventsTotalView)
+				mocks = append(mocks, &mockAccountRawEventsTotalView.Mock)
+
+				account_raw_event.NewAccountRawEventsTotal = func(_ *rdb.Handle) account_raw_event_view.AccountRawEventsTotal {
+					return mockAccountRawEventsTotalView
+				}
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:-",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsTotalView.On(
+					"Increment",
+					"account:tcrocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
+					int64(1),
+				).Return(nil)
+
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mocks = append(mocks, &mockAccountRawEventsView.Mock)
+
+				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
+					return mockAccountRawEventsView
+				}
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "redelegate",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "redelegate",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "source_validator",
+										Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+										Index: true,
+									},
+									{
+										Key:   "destination_validator",
+										Value: "tcrocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				mockAccountRawEventsView.On(
+					"Insert",
+					&account_raw_event_view.AccountRawEventRow{
+						MaybeId:     nil,
+						Account:     "tcrocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
+						BlockHeight: 1,
+						BlockHash:   "Hash",
+						BlockTime:   utctime.UTCTime{},
+						Data: account_raw_event_view.AccountRawEventRowData{
+							Type: "redelegate",
+							Content: usecase_model.BlockResultsEvent{
+								Type: "redelegate",
+								Attributes: []usecase_model.BlockResultsEventAttribute{
+									{
+										Key:   "source_validator",
+										Value: "tcrocncl13up2ue4ttsnp83a84vauyn7449wut09ru0p2y3",
+										Index: true,
+									},
+									{
+										Key:   "destination_validator",
+										Value: "tcrocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
+										Index: true,
+									},
+								},
+							},
+						},
+					},
+				).Return(nil)
+
+				account_raw_event.UpdateLastHandledEventHeight = func(_ *account_raw_event.AccountRawEvent, _ *rdb.Handle, _ int64) error {
 					return nil
 				}
 

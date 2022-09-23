@@ -17,6 +17,12 @@ import (
 
 var _ projection.Projection = &AccountRawEvent{}
 
+var (
+	NewAccountRawEvents          = view.NewAccountRawEventsView
+	NewAccountRawEventsTotal     = view.NewAccountRawEventsTotalView
+	UpdateLastHandledEventHeight = (*AccountRawEvent).UpdateLastHandledEventHeight
+)
+
 type AccountRawEvent struct {
 	*rdbprojectionbase.Base
 

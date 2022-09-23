@@ -11,13 +11,14 @@ type AccountRawEventsTotal interface {
 	IncrementAll([]string, int64) error
 	DecrementAll([]string, int64) error
 	FindBy(string) (int64, error)
+	SumBy([]string) (int64, error)
 }
 
 type AccountRawEventsTotalView struct {
 	*view.Total
 }
 
-func NewAccountRawEventsTotalView(rdbHandle *rdb.Handle) *AccountRawEventsTotalView {
+func NewAccountRawEventsTotalView(rdbHandle *rdb.Handle) AccountRawEventsTotal {
 	return &AccountRawEventsTotalView{
 		view.NewTotal(rdbHandle, "view_account_raw_events_total"),
 	}

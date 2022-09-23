@@ -15,7 +15,8 @@ import (
 )
 
 type AccountRawEvents interface {
-	Insert(*AccountRawEventRow, []string) error
+	Insert(*AccountRawEventRow) error
+	InsertAll([]AccountRawEventRow) error
 	List(AccountRawEventsListFilter, AccountRawEventsListOrder, *pagination_interface.Pagination) ([]AccountRawEventRow, *pagination_interface.PaginationResult, error)
 }
 
@@ -24,13 +25,13 @@ type AccountRawEventsView struct {
 	rdb *rdb.Handle
 }
 
-func NewAccountRawEventsView(handle *rdb.Handle) *AccountRawEventsView {
+func NewAccountRawEventsView(handle *rdb.Handle) AccountRawEvents {
 	return &AccountRawEventsView{
 		handle,
 	}
 }
 
-func (eventsView *AccountRawEventsView) Insert(accountRawEvent *AccountRawEventRow, accounts []string) error {
+func (eventsView *AccountRawEventsView) Insert(accountRawEvent *AccountRawEventRow) error {
 	accountRawEventDataJSON, err := json.MarshalToString(accountRawEvent.Data)
 	if err != nil {
 		return fmt.Errorf("error JSON marshalling account raw event for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -46,15 +47,13 @@ func (eventsView *AccountRawEventsView) Insert(accountRawEvent *AccountRawEventR
 	)
 
 	blockTime := eventsView.rdb.Tton(&accountRawEvent.BlockTime)
-	for _, account := range accounts {
-		stmtBuilder = stmtBuilder.Values(
-			account,
-			accountRawEvent.BlockHeight,
-			accountRawEvent.BlockHash,
-			blockTime,
-			accountRawEventDataJSON,
-		)
-	}
+	stmtBuilder = stmtBuilder.Values(
+		accountRawEvent.Account,
+		accountRawEvent.BlockHeight,
+		accountRawEvent.BlockHash,
+		blockTime,
+		accountRawEventDataJSON,
+	)
 	sql, sqlArgs, err := stmtBuilder.ToSql()
 	if err != nil {
 		return fmt.Errorf("error building account raw event id insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -63,7 +62,7 @@ func (eventsView *AccountRawEventsView) Insert(accountRawEvent *AccountRawEventR
 	if err != nil {
 		return fmt.Errorf("error inserting ccount raw event into the table: %v: %w", err, rdb.ErrWrite)
 	}
-	if result.RowsAffected() != int64(len(accounts)) {
+	if result.RowsAffected() != int64(1) {
 		return fmt.Errorf(
 			"error inserting ccount raw event into the table: mismatched rows inserted: %w", rdb.ErrWrite,
 		)
