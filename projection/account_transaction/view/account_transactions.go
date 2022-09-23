@@ -18,7 +18,7 @@ import (
 	"github.com/crypto-com/chain-indexing/external/utctime"
 )
 
-// BlockTransactions projection view implemented by relational database
+// AccountTransactions projection view implemented by relational database
 type AccountTransactions struct {
 	rdb *rdb.Handle
 }
