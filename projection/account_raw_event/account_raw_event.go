@@ -85,8 +85,22 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 	}()
 
 	rdbTxHandle := rdbTx.ToHandle()
-	eventsView := view.NewAccountRawEventsView(rdbTxHandle)
-	totalView := view.NewAccountRawEventsTotalView(rdbTxHandle)
+
+	// TODO: Handle genesis transaction
+	if height == int64(0) {
+		if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
+			return fmt.Errorf("error updating last handled event height: %v", err)
+		}
+
+		if err := rdbTx.Commit(); err != nil {
+			return fmt.Errorf("error committing changes: %v", err)
+		}
+		committed = true
+		return nil
+	}
+
+	eventsView := NewAccountRawEvents(rdbTxHandle)
+	totalView := NewAccountRawEventsTotal(rdbTxHandle)
 
 	eventRows := make([]view.AccountRawEventRow, 0)
 
@@ -494,7 +508,7 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 
 	for _, eventRow := range eventRows {
 		// Calculate account raw event total
-		if err := totalView.Increment(fmt.Sprintf("%s:-", eventRow.Account), 1); err != nil {
+		if err := totalView.Increment(eventRow.Account, 1); err != nil {
 			return fmt.Errorf("error incrementing total account transaction of account: %w", err)
 		}
 
@@ -504,7 +518,7 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 		return fmt.Errorf("error inserting account message: %w", err)
 	}
 
-	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
+	if err := UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
 		return fmt.Errorf("error updating last handled event height: %v", err)
 	}
 
