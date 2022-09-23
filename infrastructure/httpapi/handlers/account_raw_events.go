@@ -12,7 +12,7 @@ import (
 type AccountRawEvents struct {
 	logger applogger.Logger
 
-	accountRawEventsView account_raw_event_view.AccountRawEventsView
+	accountRawEventsView account_raw_event_view.AccountRawEvents
 }
 
 func NewAccountRawEvents(logger applogger.Logger, rdbHandle *rdb.Handle) *AccountRawEvents {
@@ -20,7 +20,7 @@ func NewAccountRawEvents(logger applogger.Logger, rdbHandle *rdb.Handle) *Accoun
 		logger.WithFields(applogger.LogFields{
 			"module": "AccountMessagesHandler",
 		}),
-		*account_raw_event_view.NewAccountRawEventsView(rdbHandle),
+		account_raw_event_view.NewAccountRawEventsView(rdbHandle),
 	}
 }
 
