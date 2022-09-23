@@ -25,7 +25,7 @@ func (accountRawEventsView *MockAccountRawEventsView) Insert(messageRow *Account
 
 func (accountRawEventsView *MockAccountRawEventsView) InsertAll(messageRows []AccountRawEventRow) error {
 
-	for i, _ := range messageRows {
+	for i := range messageRows {
 		maybeId := random.Int64()
 		messageRows[i].MaybeId = &maybeId
 	}
