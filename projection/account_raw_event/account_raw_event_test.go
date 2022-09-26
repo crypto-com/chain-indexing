@@ -23,7 +23,7 @@ func NewAccountRawEventProjection(rdbConn rdb.Conn) *account_raw_event.AccountRa
 	return account_raw_event.NewAccountRawEvent(
 		nil,
 		rdbConn,
-		"crocncl",
+		"cro",
 		nil,
 	)
 }
@@ -69,9 +69,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "coin_spent",
 						Content: usecase_model.BlockResultsEvent{
@@ -80,6 +79,11 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 								{
 									Key:   "spender",
 									Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+									Index: true,
+								},
+								{
+									Key:   "amount",
+									Value: "6786516685basetcro",
 									Index: true,
 								},
 							},
@@ -126,6 +130,11 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 											Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
 											Index: true,
 										},
+										{
+											Key:   "amount",
+											Value: "6786516685basetcro",
+											Index: true,
+										},
 									},
 								},
 							},
@@ -149,9 +158,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "coin_received",
 						Content: usecase_model.BlockResultsEvent{
@@ -229,9 +237,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "transfer",
 						Content: usecase_model.BlockResultsEvent{
@@ -364,9 +371,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "coinbase",
 						Content: usecase_model.BlockResultsEvent{
@@ -444,9 +450,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "burn",
 						Content: usecase_model.BlockResultsEvent{
@@ -524,9 +529,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "proposer_reward",
 						Content: usecase_model.BlockResultsEvent{
@@ -604,9 +608,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "rewards",
 						Content: usecase_model.BlockResultsEvent{
@@ -684,9 +687,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "commission",
 						Content: usecase_model.BlockResultsEvent{
@@ -764,9 +766,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "slash",
 						Content: usecase_model.BlockResultsEvent{
@@ -844,9 +845,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "complete_unbonding",
 						Content: usecase_model.BlockResultsEvent{
@@ -964,9 +964,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "ethereum_send_to_cosmos_handled",
 						Content: usecase_model.BlockResultsEvent{
@@ -1084,9 +1083,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "message",
 						Content: usecase_model.BlockResultsEvent{
@@ -1107,9 +1105,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "message",
 						Content: usecase_model.BlockResultsEvent{
@@ -1130,9 +1127,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "message",
 						Content: usecase_model.BlockResultsEvent{
@@ -1262,9 +1258,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "withdraw_rewards",
 						Content: usecase_model.BlockResultsEvent{
@@ -1342,9 +1337,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "set_withdraw_address",
 						Content: usecase_model.BlockResultsEvent{
@@ -1422,9 +1416,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "set_withdraw_address",
 						Content: usecase_model.BlockResultsEvent{
@@ -1502,9 +1495,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "complete_redelegation",
 						Content: usecase_model.BlockResultsEvent{
@@ -1673,9 +1665,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "create_validator",
 						Content: usecase_model.BlockResultsEvent{
@@ -1753,9 +1744,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "delegate",
 						Content: usecase_model.BlockResultsEvent{
@@ -1833,9 +1823,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "unbond",
 						Content: usecase_model.BlockResultsEvent{
@@ -1913,9 +1902,8 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					BlockHash:  "",
-					BlockTime:  utctime.UTCTime{},
-					FromResult: "",
+					BlockHash: "",
+					BlockTime: utctime.UTCTime{},
 					Data: usecase_model.DataParams{
 						Type: "redelegate",
 						Content: usecase_model.BlockResultsEvent{
