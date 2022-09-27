@@ -221,7 +221,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 	logger.Info("synchronizing block")
 
 	if blockHeight == int64(0) {
-		genesis, err := manager.tendermintClient.Genesis()
+		genesis, err := manager.tendermintClient.GenesisChunked()
 		if err != nil {
 			return nil, fmt.Errorf("error requesting chain genesis: %v", err)
 		}

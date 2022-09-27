@@ -84,7 +84,7 @@ func (client *HTTPClient) GenesisChunked() (*genesis.Genesis, error) {
 	}
 	defer rawRespBody.Close()
 
-	genesis, err := ParseGenesisResp(rawRespBody, client.strictGenesisParsing)
+	genesis, err := ParseGenesisChunkedResp(rawRespBody, client.strictGenesisParsing)
 	if err != nil {
 		return nil, err
 	}
@@ -196,6 +196,18 @@ type GenesisResp struct {
 
 type GenesisRespResult struct {
 	Genesis genesis.Genesis `json:"genesis"`
+}
+
+type GenesisChunkedResp struct {
+	Jsonrpc string                   `json:"jsonrpc"`
+	ID      int64                    `json:"id"`
+	Result  GenesisChunkedRespResult `json:"result"`
+}
+
+type GenesisChunkedRespResult struct {
+	Chunk string `json:"chunk"`
+	Total string `json:"total"`
+	Data  string `json:"data"`
 }
 
 type RawBlockResp struct {
