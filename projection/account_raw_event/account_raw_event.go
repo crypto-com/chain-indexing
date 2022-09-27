@@ -9,6 +9,7 @@ import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
 	"github.com/crypto-com/chain-indexing/projection/account_raw_event/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
@@ -108,10 +109,12 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 			accounts := []string{}
 			// append related account
 			for _, attribute := range rawBlockCreatedEvent.Data.Content.Attributes {
-				if strings.HasPrefix(attribute.Value, projection.accountAddressPrefix) {
+				hasPrefix := strings.HasPrefix(attribute.Value, projection.accountAddressPrefix)
+				IsValidCosmosAddress := tmcosmosutils.IsValidCosmosAddress(attribute.Value)
+
+				if hasPrefix && IsValidCosmosAddress {
 					accounts = append(accounts, attribute.Value)
 				}
-
 			}
 
 			// create event for every account
