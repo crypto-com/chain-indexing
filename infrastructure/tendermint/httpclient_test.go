@@ -154,12 +154,12 @@ var _ = Describe("HTTPClient", func() {
 		It("should return genesis response", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/genesis"),
+					ghttp.VerifyRequest("GET", "/genesis_chunked"),
 					ghttp.RespondWith(http.StatusOK, infrastructure_tendermint_test.GENESIS_MIXED_NUMBER_AND_STRING_JSON),
 				),
 			)
 			client := NewHTTPClient(server.URL(), true)
-			_, err := client.Genesis()
+			_, err := client.GenesisChunked()
 			Expect(err).To(BeNil())
 		})
 	})

@@ -75,6 +75,23 @@ func (client *HTTPClient) Genesis() (*genesis.Genesis, error) {
 	return genesis, nil
 }
 
+func (client *HTTPClient) GenesisChunked() (*genesis.Genesis, error) {
+	var err error
+
+	rawRespBody, err := client.request("genesis_chunked")
+	if err != nil {
+		return nil, err
+	}
+	defer rawRespBody.Close()
+
+	genesis, err := ParseGenesisResp(rawRespBody, client.strictGenesisParsing)
+	if err != nil {
+		return nil, err
+	}
+
+	return genesis, nil
+}
+
 // Block gets the block response with target height
 func (client *HTTPClient) Block(height int64) (*usecase_model.Block, *usecase_model.RawBlock, error) {
 	var err error
