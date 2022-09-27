@@ -1,4 +1,4 @@
-package blockevent
+package block_raw_event
 
 import (
 	"fmt"

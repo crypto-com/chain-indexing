@@ -1,4 +1,4 @@
-package blockevent_test
+package block_raw_event_test
 
 import (
 	"path"
