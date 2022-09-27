@@ -1,0 +1,1 @@
+DROP TABLE DROP TABLE IF EXISTS view_account_raw_events_total;
