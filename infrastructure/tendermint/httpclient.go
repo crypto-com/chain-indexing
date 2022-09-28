@@ -97,15 +97,15 @@ func (client *HTTPClient) GenesisChunked() (*genesis.Genesis, error) {
 	// loop through the genesis chunks
 	decoded := make([]string, 0, total)
 	for i := 0; i < total; i++ {
-		rawRespBody, err := client.request("genesis_chunked", "chunkID="+strconv.FormatInt(int64(i), 10))
-		if err != nil {
-			return nil, err
+		rawRespBody, rawRespBodyErr := client.request("genesis_chunked", "chunkID="+strconv.FormatInt(int64(i), 10))
+		if rawRespBodyErr != nil {
+			return nil, rawRespBodyErr
 		}
 		defer rawRespBody.Close()
 
-		genesisData, err := ParseGenesisChunkedResp(rawRespBody, client.strictGenesisParsing)
-		if err != nil {
-			return nil, err
+		genesisData, genesisDataErr := ParseGenesisChunkedResp(rawRespBody, client.strictGenesisParsing)
+		if genesisDataErr != nil {
+			return nil, genesisDataErr
 		}
 		decoded = append(decoded, genesisData.Result.Data)
 	}
