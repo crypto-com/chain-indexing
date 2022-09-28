@@ -167,8 +167,14 @@ var _ = Describe("HTTPClient", func() {
 	Describe("Genesis Chunked", func() {
 		It("should return genesis chunked response", func() {
 			server.AppendHandlers(
+				// get the total number of genesis chunks
 				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/genesis_chunked"),
+					ghttp.VerifyRequest("GET", "/genesis_chunked", "chunkID=0"),
+					ghttp.RespondWith(http.StatusOK, infrastructure_tendermint_test.GENESIS_CHUNKED_MIXED_NUMBER_AND_STRING_JSON),
+				),
+				// get the genesis chunks
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/genesis_chunked", "chunkID=0"),
 					ghttp.RespondWith(http.StatusOK, infrastructure_tendermint_test.GENESIS_CHUNKED_MIXED_NUMBER_AND_STRING_JSON),
 				),
 			)

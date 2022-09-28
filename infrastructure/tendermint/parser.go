@@ -2,7 +2,6 @@ package tendermint
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"io"
 	"math/big"
@@ -31,9 +30,9 @@ func ParseGenesisResp(rawRespReader io.Reader, strictParsing bool) (*genesis.Gen
 	return &genesisResp.Result.Genesis, nil
 }
 
-func ParseGenesisChunkedResp(rawRespReader io.Reader, strictParsing bool) (*genesis.Genesis, error) {
+func ParseGenesisChunkedResp(rawRespReader io.Reader, strictParsing bool) (*GenesisChunkedResp, error) {
 	var genesisChunkedResp GenesisChunkedResp
-	var genesis genesis.Genesis
+
 	jsonDecoder := jsoniter.NewDecoder(rawRespReader)
 	if strictParsing {
 		jsonDecoder.DisallowUnknownFields()
@@ -43,16 +42,13 @@ func ParseGenesisChunkedResp(rawRespReader io.Reader, strictParsing bool) (*gene
 	}
 
 	genesisDataByte, err := base64.StdEncoding.DecodeString(genesisChunkedResp.Result.Data)
+	genesisChunkedResp.Result.Data = string(genesisDataByte)
+
 	if err != nil {
 		return nil, fmt.Errorf("error decoding Tendermint genesis chunked from base64 to byte: %v", err)
 	}
 
-	genesisErr := json.Unmarshal(genesisDataByte, &genesis)
-	if genesisErr != nil {
-		return nil, fmt.Errorf("error decoding Tendermint genesis chunked from string to json: %v", err)
-	}
-
-	return &genesis, nil
+	return &genesisChunkedResp, nil
 }
 
 func ParseBlockResp(rawRespReader io.Reader) (*model.Block, *model.RawBlock, error) {

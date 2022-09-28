@@ -78,18 +78,48 @@ func (client *HTTPClient) Genesis() (*genesis.Genesis, error) {
 func (client *HTTPClient) GenesisChunked() (*genesis.Genesis, error) {
 	var err error
 
-	rawRespBody, err := client.request("genesis_chunked")
+	// get the total number of genesis chunks
+	firstRawRespBody, err := client.request("genesis_chunked", "chunkID="+strconv.FormatInt(0, 10))
 	if err != nil {
 		return nil, err
 	}
-	defer rawRespBody.Close()
+	defer firstRawRespBody.Close()
 
-	genesis, err := ParseGenesisChunkedResp(rawRespBody, client.strictGenesisParsing)
+	firstGenesisData, err := ParseGenesisChunkedResp(firstRawRespBody, client.strictGenesisParsing)
 	if err != nil {
 		return nil, err
 	}
 
-	return genesis, nil
+	total, err := strconv.Atoi(firstGenesisData.Result.Total)
+	if err != nil {
+		return nil, err
+	}
+	// loop through the genesis chunks
+	decoded := make([]string, 0, total)
+	for i := 0; i < total; i++ {
+		rawRespBody, err := client.request("genesis_chunked", "chunkID="+strconv.FormatInt(int64(i), 10))
+		if err != nil {
+			return nil, err
+		}
+		defer rawRespBody.Close()
+
+		genesisData, err := ParseGenesisChunkedResp(rawRespBody, client.strictGenesisParsing)
+		if err != nil {
+			return nil, err
+		}
+		decoded = append(decoded, genesisData.Result.Data)
+	}
+
+	// combine the genesis chunks
+	genesisDataByte := []byte(strings.Join(decoded, ""))
+
+	var genesis genesis.Genesis
+	genesisErr := json.Unmarshal(genesisDataByte, &genesis)
+	if genesisErr != nil {
+		return nil, fmt.Errorf("error decoding Tendermint genesis chunked from string to json: %v", err)
+	}
+
+	return &genesis, nil
 }
 
 // Block gets the block response with target height
