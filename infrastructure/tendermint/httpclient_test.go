@@ -163,4 +163,19 @@ var _ = Describe("HTTPClient", func() {
 			Expect(err).To(BeNil())
 		})
 	})
+
+	Describe("Genesis Chunked", func() {
+		It("should return genesis chunked response", func() {
+			server.AppendHandlers(
+				// get the genesis chunks
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/genesis_chunked", "chunk=0"),
+					ghttp.RespondWith(http.StatusOK, infrastructure_tendermint_test.GENESIS_CHUNKED_MIXED_NUMBER_AND_STRING_JSON),
+				),
+			)
+			client := NewHTTPClient(server.URL(), true)
+			_, err := client.GenesisChunked()
+			Expect(err).To(BeNil())
+		})
+	})
 })
