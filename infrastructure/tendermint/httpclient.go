@@ -79,7 +79,7 @@ func (client *HTTPClient) GenesisChunked() (*genesis.Genesis, error) {
 	var err error
 
 	// get the total number of genesis chunks
-	firstRawRespBody, err := client.request("genesis_chunked", "chunkID="+strconv.FormatInt(0, 10))
+	firstRawRespBody, err := client.request("genesis_chunked", "chunk="+strconv.FormatInt(0, 10))
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (client *HTTPClient) GenesisChunked() (*genesis.Genesis, error) {
 	// loop through the genesis chunks
 	decoded := make([]string, 0, total)
 	for i := 0; i < total; i++ {
-		rawRespBody, rawRespBodyErr := client.request("genesis_chunked", "chunkID="+strconv.FormatInt(int64(i), 10))
+		rawRespBody, rawRespBodyErr := client.request("genesis_chunked", "chunk="+strconv.FormatInt(int64(i), 10))
 		if rawRespBodyErr != nil {
 			return nil, rawRespBodyErr
 		}
