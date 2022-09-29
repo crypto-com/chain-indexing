@@ -169,12 +169,12 @@ var _ = Describe("HTTPClient", func() {
 			server.AppendHandlers(
 				// get the total number of genesis chunks
 				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/genesis_chunked", "chunkID=0"),
+					ghttp.VerifyRequest("GET", "/genesis_chunked", "chunk=0"),
 					ghttp.RespondWith(http.StatusOK, infrastructure_tendermint_test.GENESIS_CHUNKED_MIXED_NUMBER_AND_STRING_JSON),
 				),
 				// get the genesis chunks
 				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/genesis_chunked", "chunkID=0"),
+					ghttp.VerifyRequest("GET", "/genesis_chunked", "chunk=0"),
 					ghttp.RespondWith(http.StatusOK, infrastructure_tendermint_test.GENESIS_CHUNKED_MIXED_NUMBER_AND_STRING_JSON),
 				),
 			)
