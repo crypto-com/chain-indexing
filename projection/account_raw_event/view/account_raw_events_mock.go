@@ -34,3 +34,11 @@ func (accountMessagesView *MockAccountRawEventsView) List(
 	result1, _ := mockArgs.Get(1).(*pagination_interface.PaginationResult)
 	return result0, result1, mockArgs.Error(2)
 }
+
+func (accountMessagesView *MockAccountRawEventsView) AccountListByHeight(
+	height int64,
+) ([]string, error) {
+	mockArgs := accountMessagesView.Called(height)
+	result, _ := mockArgs.Get(0).([]string)
+	return result, mockArgs.Error(1)
+}
