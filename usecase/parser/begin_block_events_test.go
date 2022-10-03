@@ -507,5 +507,51 @@ var _ = Describe("ParseBeginBlockEventsCommands", func() {
 				),
 			))
 		})
+		It("should return multi-send command base", func() {
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.BEGIN_BLOCK_MULTI_SEND_EVENT_BLOCK_RESULTS_RESP)
+			block, _ := mustParseBlockResp(usecase_parser_test.BEGIN_BLOCK_COMMON_EVENTS_BLOCK_RESP)
+
+			bondingDenom := "basetcro"
+			cmds, err := parser.ParseBeginBlockEventsCommands(
+				blockResults.Height,
+				block.Hash,
+				block.Time,
+				blockResults.BeginBlockEvents,
+				bondingDenom,
+			)
+			Expect(err).To(BeNil())
+			expectedBlockHeight := int64(165487)
+
+			Expect(cmds).To(Equal([]command.Command{
+				command_usecase.NewCreateAccountTransfer(
+					expectedBlockHeight, model.AccountTransferParams{
+						Recipient: "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+						Sender:    "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+						Amount:    coin.MustParseCoinsNormalized("51basetcro"),
+					},
+				),
+				command_usecase.NewCreateAccountTransfer(
+					expectedBlockHeight, model.AccountTransferParams{
+						Recipient: "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+						Sender:    "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+						Amount:    coin.MustParseCoinsNormalized("1basetcro"),
+					},
+				),
+				command_usecase.NewCreateAccountTransfer(
+					expectedBlockHeight, model.AccountTransferParams{
+						Recipient: "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+						Sender:    "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+						Amount:    coin.MustParseCoinsNormalized("20basetcro"),
+					},
+				),
+				command_usecase.NewCreateAccountTransfer(
+					expectedBlockHeight, model.AccountTransferParams{
+						Recipient: "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
+						Sender:    "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+						Amount:    coin.MustParseCoinsNormalized("30basetcro"),
+					},
+				),
+			}))
+		})
 	})
 })
