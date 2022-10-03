@@ -25,6 +25,7 @@ type AccountRawTransactions interface {
 		order AccountRawTransactionsListOrder,
 		pagination *pagination_interface.Pagination,
 	) ([]AccountRawTransactionRow, *pagination_interface.PaginationResult, error)
+	AccountListByHeight(int64) ([]string, error)
 }
 
 // AccountRawTransactionsView projection view implemented by relational database
@@ -273,6 +274,42 @@ func (accountMessagesView *AccountRawTransactionsView) List(
 	}
 
 	return accountMessages, paginationResult, nil
+}
+
+func (accountMessagesView *AccountRawTransactionsView) AccountListByHeight(height int64) ([]string, error) {
+	sql, sqlArgs, err := accountMessagesView.rdb.StmtBuilder.Select(
+		"account",
+	).From(
+		"view_account_raw_transactions",
+	).Where(
+		"view_account_raw_transactions.block_height = ?", height,
+	).ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("error building account raw transaction select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	rowsResult, err := accountMessagesView.rdb.Query(sql, sqlArgs...)
+	if err != nil {
+		return nil, fmt.Errorf("error executing account raw transactions select SQL: %v: %w", err, rdb.ErrQuery)
+	}
+	defer rowsResult.Close()
+
+	accounts := make([]string, 0)
+	for rowsResult.Next() {
+		var account string
+
+		if err = rowsResult.Scan(
+			&account,
+		); err != nil {
+			if errors.Is(err, rdb.ErrNoRows) {
+				return nil, rdb.ErrNoRows
+			}
+			return nil, fmt.Errorf("error scanning account raw transaction row: %v: %w", err, rdb.ErrQuery)
+		}
+		accounts = append(accounts, account)
+	}
+
+	return accounts, nil
 }
 
 type AccountRawTransactionRow struct {

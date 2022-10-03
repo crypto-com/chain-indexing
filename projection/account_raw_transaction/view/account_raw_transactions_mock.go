@@ -32,3 +32,9 @@ func (accountRawTransactionsView *MockAccountRawTransactionsView) List(
 	paginationResult, _ := mockArgs.Get(1).(*pagination_interface.PaginationResult)
 	return rows, paginationResult, mockArgs.Error(2)
 }
+
+func (accountRawTransactionsView *MockAccountRawTransactionsView) AccountListByHeight(height int64) ([]string, error) {
+	mockArgs := accountRawTransactionsView.Called(height)
+	rows, _ := mockArgs.Get(0).([]string)
+	return rows, mockArgs.Error(1)
+}

@@ -18,6 +18,7 @@ type AccountRawEvents interface {
 	Insert(*AccountRawEventRow) error
 	InsertAll([]AccountRawEventRow) error
 	List(AccountRawEventsListFilter, AccountRawEventsListOrder, *pagination_interface.Pagination) ([]AccountRawEventRow, *pagination_interface.PaginationResult, error)
+	AccountListByHeight(int64) ([]string, error)
 }
 
 // AccountRawEventsView projection view implemented by relational database
@@ -281,6 +282,43 @@ func (eventsView *AccountRawEventsView) List(
 	}
 
 	return accountRawEvents, paginationResult, nil
+}
+
+func (eventsView *AccountRawEventsView) AccountListByHeight(height int64) ([]string, error) {
+	sql, sqlArgs, err := eventsView.rdb.StmtBuilder.Select(
+		"account",
+	).From(
+		"view_account_raw_events",
+	).Where(
+		"view_account_raw_events.block_height = ?", height,
+	).ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("error building account raw events select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	rowsResult, err := eventsView.rdb.Query(sql, sqlArgs...)
+	if err != nil {
+		return nil, fmt.Errorf("error executing account raw events select SQL: %v: %w", err, rdb.ErrQuery)
+	}
+	defer rowsResult.Close()
+
+	accounts := make([]string, 0)
+	for rowsResult.Next() {
+		var account string
+
+		if err = rowsResult.Scan(
+			&account,
+		); err != nil {
+			if errors.Is(err, rdb.ErrNoRows) {
+				return nil, rdb.ErrNoRows
+			}
+			return nil, fmt.Errorf("error scanning account raw event row: %v: %w", err, rdb.ErrQuery)
+		}
+
+		accounts = append(accounts, account)
+	}
+
+	return accounts, nil
 }
 
 type AccountRawEventsListFilter struct {
