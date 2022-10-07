@@ -122,7 +122,7 @@ func (projection *AccountRawTransaction) HandleEvents(height int64, events []eve
 			)
 			for i := range addresses {
 				tx := view.AccountRawTransactionRow{
-					Account:       addresses[i],
+					Account:       strings.ToLower(addresses[i]),
 					BlockHeight:   height,
 					BlockTime:     utctime.UTCTime{}, // placeholder
 					Hash:          transactionCreatedEvent.TxHash,

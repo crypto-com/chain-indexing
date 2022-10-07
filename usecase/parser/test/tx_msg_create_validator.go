@@ -472,8 +472,8 @@ const TX_MSG_CREATE_VALIDATOR_TXS_RESP = `{
                         "max_change_rate": "0.010000000000000000"
                     },
                     "min_self_delegation": "1",
-                    "delegator_address": "tcro109ww3ss92v4vsaq470vvgw528mtqp98mq0vvp9",
-                    "validator_address": "tcrocncl109ww3ss92v4vsaq470vvgw528mtqp98m4s04ex",
+                    "delegator_address": "TCRO109WW3SS92V4VSAQ470VVGW528MTQP98MQ0VVP9",
+                    "validator_address": "TCROCNCL109WW3SS92V4VSAQ470VVGW528MTQP98M4S04EX",
                     "pubkey": {
                         "@type": "/cosmos.crypto.ed25519.PubKey",
                         "key": "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE="
@@ -627,8 +627,8 @@ const TX_MSG_CREATE_VALIDATOR_TXS_RESP = `{
                             "max_change_rate": "0.010000000000000000"
                         },
                         "min_self_delegation": "1",
-                        "delegator_address": "tcro109ww3ss92v4vsaq470vvgw528mtqp98mq0vvp9",
-                        "validator_address": "tcrocncl109ww3ss92v4vsaq470vvgw528mtqp98m4s04ex",
+                        "delegator_address": "TCRO109WW3SS92V4VSAQ470VVGW528MTQP98MQ0VVP9",
+                        "validator_address": "TCROCNCL109WW3SS92V4VSAQ470VVGW528MTQP98M4S04EX",
                         "pubkey": {
                             "@type": "/cosmos.crypto.ed25519.PubKey",
                             "key": "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE="

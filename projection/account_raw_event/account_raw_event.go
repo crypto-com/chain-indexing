@@ -123,7 +123,7 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 					BlockHeight: height,
 					BlockHash:   rawBlockCreatedEvent.BlockHash,
 					BlockTime:   rawBlockCreatedEvent.BlockTime,
-					Account:     account,
+					Account:     strings.ToLower(account),
 					Data: view.AccountRawEventRowData{
 						Type:    rawBlockCreatedEvent.Data.Content.Type,
 						Content: rawBlockCreatedEvent.Data.Content,
