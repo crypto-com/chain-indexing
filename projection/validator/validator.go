@@ -24,6 +24,7 @@ import (
 var _ projection_entity.Projection = &Validator{}
 
 const DO_NOT_MODIFY = "[do-not-modify]"
+const MAX_RECENT_ACTIVE_BLOCKS = 100000
 
 type Validator struct {
 	*rdbprojectionbase.Base
@@ -214,28 +215,42 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 				return fmt.Errorf("error querying active validators: %v", activeValidatorsQueryErr)
 			}
 
-			var mutActiveValidators []view.ValidatorRow
+			var mutSignedValidators []view.ValidatorRow
+			var mutUnsignedeValidators []view.ValidatorRow
+
 			for _, activeValidator := range activeValidators {
-				mutActiveValidator := activeValidator
-				if commitmentMap[mutActiveValidator.ConsensusNodeAddress] {
-					mutActiveValidator.TotalSignedBlock += 1
+				mutValidator := activeValidator
+				signed := false
+				if commitmentMap[mutValidator.ConsensusNodeAddress] {
+					mutValidator.TotalSignedBlock += 1
+					signed = true
 				} else {
 					// give 10 blocks buffer on validator first join
-					if height-mutActiveValidator.JoinedAtBlockHeight < 10 {
-						mutActiveValidator.TotalSignedBlock += 1
+					if height-mutValidator.JoinedAtBlockHeight < 10 {
+						mutValidator.TotalSignedBlock += 1
+						signed = true
 					}
 				}
-				mutActiveValidator.TotalActiveBlock += 1
+				mutValidator.TotalActiveBlock += 1
 
-				mutActiveValidator.ImpreciseUpTime = new(big.Float).Quo(
-					new(big.Float).SetInt64(mutActiveValidator.TotalSignedBlock),
-					new(big.Float).SetInt64(mutActiveValidator.TotalActiveBlock),
+				mutValidator.ImpreciseUpTime = new(big.Float).Quo(
+					new(big.Float).SetInt64(mutValidator.TotalSignedBlock),
+					new(big.Float).SetInt64(mutValidator.TotalActiveBlock),
 				)
 
-				mutActiveValidators = append(mutActiveValidators, mutActiveValidator)
+				if signed {
+					mutSignedValidators = append(mutSignedValidators, mutValidator)
+				} else {
+					mutUnsignedeValidators = append(mutUnsignedeValidators, mutValidator)
+				}
 			}
 
-			if activeValidatorUpdateErr := validatorsView.UpdateAllValidatorUpTime(mutActiveValidators); activeValidatorUpdateErr != nil {
+			if activeValidatorUpdateErr := validatorsView.UpdateAllValidatorUpTime(
+				mutSignedValidators,
+				mutUnsignedeValidators,
+				height,
+				MAX_RECENT_ACTIVE_BLOCKS,
+			); activeValidatorUpdateErr != nil {
 				return fmt.Errorf("error updating active validators up time data: %v", activeValidatorUpdateErr)
 			}
 

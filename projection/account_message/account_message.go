@@ -2,6 +2,7 @@ package account_message
 
 import (
 	"fmt"
+	"strings"
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
@@ -464,7 +465,7 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 				},
 				Accounts: []string{
 					typedEvent.Sender,
-					typedEvent.Recipient,
+					strings.ToLower(typedEvent.Recipient),
 				},
 			})
 		} else if typedEvent, ok := event.(*event_usecase.MsgNFTEditNFT); ok {

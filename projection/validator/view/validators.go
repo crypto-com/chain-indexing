@@ -241,36 +241,106 @@ func (validatorsView *Validators) Update(validator *ValidatorRow) error {
 	return nil
 }
 
-func (validatorsView *Validators) UpdateAllValidatorUpTime(validators []ValidatorRow) error {
+func (validatorsView *Validators) UpdateAllValidatorUpTime(
+	signedValidators []ValidatorRow,
+	unsignedValidators []ValidatorRow,
+	height int64,
+	maxRecentUpTimeInBlocks int64,
+) error {
 
 	pendingRowCount := 0
-	totalRowCount := len(validators)
+	totalSignedValidatorsRowCount := len(signedValidators)
 
 	sql := ""
 
-	for i, validator := range validators {
+	expiredRecentUpTimeBlock := int64(0)
+
+	if height-maxRecentUpTimeInBlocks > 0 {
+		expiredRecentUpTimeBlock = height - maxRecentUpTimeInBlocks
+	}
+
+	for i, signedValidator := range signedValidators {
 
 		if pendingRowCount == 0 {
 
-			sql = `UPDATE view_validators AS view SET
+			sql = fmt.Sprintf(
+				`UPDATE view_validators AS view SET
 							total_signed_block = row.total_signed_block,
 							total_active_block = row.total_active_block,
 							imprecise_up_time = row.imprecise_up_time
+							recent_active_blocks = array_append(array_remove(view.recent_active_blocks, %d), %d)
 						FROM (VALUES
-						`
+						`,
+				expiredRecentUpTimeBlock,
+				height,
+			)
 		}
 
 		sql += fmt.Sprintf(
 			"(%d, %d, %d, %s),\n",
-			*validator.MaybeId,
-			validator.TotalSignedBlock,
-			validator.TotalActiveBlock,
-			validator.ImpreciseUpTime.String(),
+			*signedValidator.MaybeId,
+			signedValidator.TotalSignedBlock,
+			signedValidator.TotalActiveBlock,
+			signedValidator.ImpreciseUpTime.String(),
 		)
 
 		pendingRowCount += 1
 
-		if pendingRowCount == 500 || i+1 == totalRowCount {
+		if pendingRowCount == 500 || i+1 == totalSignedValidatorsRowCount {
+
+			sql = strings.TrimSuffix(sql, ",\n")
+
+			sql += `) AS row(
+								id, 
+								total_signed_block,
+								total_active_block, 
+								imprecise_up_time
+							)
+							WHERE row.id = view.id;`
+
+			result, err := validatorsView.rdb.Exec(sql)
+			if err != nil {
+				return fmt.Errorf("error updating validators up time into the table: %v: %w", err, rdb.ErrWrite)
+			}
+			if result.RowsAffected() != int64(pendingRowCount) {
+				return fmt.Errorf("error updating validators up time into the table: wrong number of affected rows %d: %w", result.RowsAffected(), rdb.ErrWrite)
+			}
+
+			pendingRowCount = 0
+
+		}
+
+	}
+
+	totalUnsignedValidatorsRowCount := len(unsignedValidators)
+
+	for i, unsignedValidator := range unsignedValidators {
+
+		if pendingRowCount == 0 {
+
+			sql = fmt.Sprintf(
+				`UPDATE view_validators AS view SET
+							total_signed_block = row.total_signed_block,
+							total_active_block = row.total_active_block,
+							imprecise_up_time = row.imprecise_up_time
+							recent_active_blocks = array_remove(view.recent_active_blocks, %d)
+						FROM (VALUES
+						`,
+				expiredRecentUpTimeBlock,
+			)
+		}
+
+		sql += fmt.Sprintf(
+			"(%d, %d, %d, %s),\n",
+			*unsignedValidator.MaybeId,
+			unsignedValidator.TotalSignedBlock,
+			unsignedValidator.TotalActiveBlock,
+			unsignedValidator.ImpreciseUpTime.String(),
+		)
+
+		pendingRowCount += 1
+
+		if pendingRowCount == 500 || i+1 == totalUnsignedValidatorsRowCount {
 
 			sql = strings.TrimSuffix(sql, ",\n")
 
