@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/external/utctime"
@@ -48,8 +49,8 @@ func ParseBeginBlockEventsCommands(
 			}
 			commands = append(commands, command_usecase.NewCreateAccountTransfer(
 				blockHeight, model.AccountTransferParams{
-					Recipient: transferEvent.MustGetAttributeByKey("recipient"),
-					Sender:    transferEvent.MustGetAttributeByKey("sender"),
+					Recipient: strings.ToLower(transferEvent.MustGetAttributeByKey("recipient")),
+					Sender:    strings.ToLower(transferEvent.MustGetAttributeByKey("sender")),
 					Amount:    coin.MustParseCoinsNormalized(amount),
 				}))
 		} else if event.Type == "mint" {

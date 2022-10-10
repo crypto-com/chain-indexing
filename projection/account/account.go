@@ -2,7 +2,6 @@ package account
 
 import (
 	"fmt"
-	"strings"
 
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -108,12 +107,12 @@ func (projection *Account) HandleEvents(height int64, events []event_entity.Even
 
 func (projection *Account) handleAccountCreatedEvent(accountsView account_view.Accounts, event *event_usecase.AccountTransferred) error {
 
-	recipienterr := projection.writeAccountInfo(accountsView, strings.ToLower(event.Recipient))
+	recipienterr := projection.writeAccountInfo(accountsView, event.Recipient)
 	if recipienterr != nil {
 		return recipienterr
 	}
 
-	sendererr := projection.writeAccountInfo(accountsView, strings.ToLower(event.Sender))
+	sendererr := projection.writeAccountInfo(accountsView, event.Sender)
 	if sendererr != nil {
 		return sendererr
 	}

@@ -2,7 +2,6 @@ package account_message
 
 import (
 	"fmt"
-	"strings"
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
@@ -960,7 +959,6 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 			if _, exist := insertedAccounts[involvedAccount]; exist {
 				continue
 			}
-			involvedAccount = strings.ToLower(involvedAccount)
 
 			if err := accountMessagesTotalView.Increment(fmt.Sprintf("%s:-", involvedAccount), 1); err != nil {
 				return fmt.Errorf("error incremnting total account message of account: %w", err)
