@@ -1,2 +1,2 @@
 ALTER TABLE view_validators
-    ADD recent_active_blocks int64[];
+    ADD recent_active_blocks integer[];
