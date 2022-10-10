@@ -39,7 +39,7 @@ func (handler *AccountMessages) ListByAccount(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	filter := account_message_view.AccountMessagesListFilter{
-		Account:       account,
+		Account:       strings.ToLower(account),
 		MaybeMsgTypes: nil,
 	}
 	queryArgs := ctx.QueryArgs()
