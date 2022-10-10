@@ -512,8 +512,8 @@ const TX_MSG_NFT_MINT_NFT_TXS_RESP = `{
                         "name": "tokenName",
                         "uri": "tokenUri",
                         "data": "{\"title\":\"Vettel First Run\",\"type\":\"object\",\"properties\":{\"name\":\"Vettel First Run\",\"description\":\"Four-time Formula 1 world champion Sebastian Vettel made his name as one of the sport’s fastest and most fearless drivers. Vettel’s inaugural run in the AMR21 was also his first time out for Aston Martin Cognizant Formula One™ Team – his fifth Formula 1 outfit following stints at BMW Sauber, Scuderia Toro Rosso, Red Bull Racing and Scuderia Ferrari.\",\"image\":\"https://d2vi0z68k5oxnr.cloudfront.net/ac155986-d54c-4e23-957a-628325e051a4/original.mp4\",\"attributes\":[{\"trait_type\":\"Type\",\"value\":\"Human\"},{\"trait_type\":\"Hair Style\",\"value\":\"Bald\"},{\"trait_type\":\"Hat\",\"value\":\"Backwards Cap\"},{\"trait_type\":\"Hat Color\",\"value\":\"Gray\"},{\"trait_type\":\"Shirt\",\"value\":\"Skull Tee\"},{\"trait_type\":\"Overshirt\",\"value\":\"Athletic Jacket\"},{\"trait_type\":\"Overshirt Color\",\"value\":\"Red\"},{\"trait_type\":\"Pants\",\"value\":\"Cargo Pants\"},{\"trait_type\":\"Pants Color\",\"value\":\"Camo\"},{\"trait_type\":\"Shoes\",\"value\":\"Workboots\"}]}}",
-                        "sender": "cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd",
-                        "recipient": "cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd"
+                        "sender": "CRO1NK4RQ3Q46LTGJGHXZ80HY385P9UJ0TF58APKCD",
+                        "recipient": "CRO1NK4RQ3Q46LTGJGHXZ80HY385P9UJ0TF58APKCD"
                     }
                 ],
                 "memo": "",

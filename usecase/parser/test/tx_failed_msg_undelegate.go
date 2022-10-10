@@ -2292,8 +2292,8 @@ const TX_FAILED_MSG_UNDELEGATE_TXS_RESP = `{
             "messages": [
                 {
                     "@type": "/cosmos.staking.v1beta1.MsgUndelegate",
-                    "delegator_address": "tcro1llst0cguh5azl9t8wr6mz5yzjuwukz7f67z7f6",
-                    "validator_address": "tcrocncl15e69kdrtczajjdlzyt2qgs5q2anc5qpmk2c68z",
+                    "delegator_address": "TCRO1LLST0CGUH5AZL9T8WR6MZ5YZJUWUKZ7F67Z7F6",
+                    "validator_address": "TCROCNCL15E69KDRTCZAJJDLZYT2QGS5Q2ANC5QPMK2C68Z",
                     "amount": {
                         "denom": "basetcro",
                         "amount": "50000000000000"
@@ -2359,8 +2359,8 @@ const TX_FAILED_MSG_UNDELEGATE_TXS_RESP = `{
                 "messages": [
                     {
                         "@type": "/cosmos.staking.v1beta1.MsgUndelegate",
-                        "delegator_address": "tcro1llst0cguh5azl9t8wr6mz5yzjuwukz7f67z7f6",
-                        "validator_address": "tcrocncl15e69kdrtczajjdlzyt2qgs5q2anc5qpmk2c68z",
+                        "delegator_address": "TCRO1LLST0CGUH5AZL9T8WR6MZ5YZJUWUKZ7F67Z7F6",
+                        "validator_address": "TCROCNCL15E69KDRTCZAJJDLZYT2QGS5Q2ANC5QPMK2C68Z",
                         "amount": {
                             "denom": "basetcro",
                             "amount": "50000000000000"

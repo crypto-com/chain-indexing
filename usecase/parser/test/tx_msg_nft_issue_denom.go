@@ -1878,7 +1878,7 @@ const TX_MSG_NFT_ISSUE_DENOM_TXS_RESP = `{
                     "id": "denomid",
                     "name": "DenomName",
                     "schema": "Schema",
-                    "sender": "cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd"
+                    "sender": "CRO1NK4RQ3Q46LTGJGHXZ80HY385P9UJ0TF58APKCD"
                 }
             ],
             "memo": "",
@@ -2014,7 +2014,7 @@ const TX_MSG_NFT_ISSUE_DENOM_TXS_RESP = `{
                         "id": "denomid",
                         "name": "DenomName",
                         "schema": "Schema",
-                        "sender": "cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd"
+                        "sender": "CRO1NK4RQ3Q46LTGJGHXZ80HY385P9UJ0TF58APKCD"
                     }
                 ],
                 "memo": "",

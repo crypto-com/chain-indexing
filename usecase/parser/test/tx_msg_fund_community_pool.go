@@ -328,7 +328,7 @@ const TX_MSG_FUND_COMMUNITY_POOL_TXS_RESP = `{
                             "amount": "1"
                         }
                     ],
-                    "depositor": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"
+                    "depositor": "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN"
                 }
             ],
             "memo": "",
@@ -447,7 +447,7 @@ const TX_MSG_FUND_COMMUNITY_POOL_TXS_RESP = `{
                                 "amount": "1"
                             }
                         ],
-                        "depositor": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"
+                        "depositor": "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN"
                     }
                 ],
                 "memo": "",

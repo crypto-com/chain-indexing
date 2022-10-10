@@ -101,7 +101,7 @@ const TX_MSG_SET_WITHDRAW_ADDRESS_BLOCK_RESULTS_RESP = `
       {
         "code": 0,
         "data": "ChYKFHNldF93aXRoZHJhd19hZGRyZXNz",
-        "log": "[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"set_withdraw_address\"},{\"key\":\"module\",\"value\":\"distribution\"},{\"key\":\"sender\",\"value\":\"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn\"}]},{\"type\":\"set_withdraw_address\",\"attributes\":[{\"key\":\"withdraw_address\",\"value\":\"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn\"}]}]}]",
+        "log": "[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"set_withdraw_address\"},{\"key\":\"module\",\"value\":\"distribution\"},{\"key\":\"sender\",\"value\":\"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn\"}]},{\"type\":\"set_withdraw_address\",\"attributes\":[{\"key\":\"withdraw_address\",\"value\":\"TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN\"}]}]}]",
         "info": "",
         "gas_wanted": "200000",
         "gas_used": "42013",
@@ -315,7 +315,7 @@ const TX_MSG_SET_WITHDRAW_ADDRESS_TXS_RESP = `{
             "messages": [
                 {
                     "@type": "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
-                    "delegator_address": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+                    "delegator_address": "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN",
                     "withdraw_address": "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh"
                 }
             ],
@@ -356,7 +356,7 @@ const TX_MSG_SET_WITHDRAW_ADDRESS_TXS_RESP = `{
         "codespace": "",
         "code": 0,
         "data": "ChYKFHNldF93aXRoZHJhd19hZGRyZXNz",
-        "raw_log": "[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"set_withdraw_address\"},{\"key\":\"module\",\"value\":\"distribution\"},{\"key\":\"sender\",\"value\":\"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn\"}]},{\"type\":\"set_withdraw_address\",\"attributes\":[{\"key\":\"withdraw_address\",\"value\":\"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn\"}]}]}]",
+        "raw_log": "[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"set_withdraw_address\"},{\"key\":\"module\",\"value\":\"distribution\"},{\"key\":\"sender\",\"value\":\"tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn\"}]},{\"type\":\"set_withdraw_address\",\"attributes\":[{\"key\":\"withdraw_address\",\"value\":\"TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN\"}]}]}]",
         "logs": [
             {
                 "msg_index": 0,
@@ -409,7 +409,7 @@ const TX_MSG_SET_WITHDRAW_ADDRESS_TXS_RESP = `{
                 "messages": [
                     {
                         "@type": "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
-                        "delegator_address": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+                        "delegator_address": "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN",
                         "withdraw_address": "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh"
                     }
                 ],
