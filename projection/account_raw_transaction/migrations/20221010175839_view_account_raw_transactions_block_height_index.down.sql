@@ -1,0 +1,3 @@
+drop index view_account_raw_transactions_block_height_btree_index;
+
+drop index view_account_raw_transactions_account_block_height_btree_index;
