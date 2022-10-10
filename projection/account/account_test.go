@@ -69,13 +69,13 @@ func TestAccount_HandleEvents(t *testing.T) {
 						Version:     1,
 						BlockHeight: 1,
 					}),
-					Sender:    "SENDER",
-					Recipient: "RECIPIENT",
+					Sender:    "Sender",
+					Recipient: "Recipient",
 					Amount:    coin.Coins{},
 				},
 			},
 			MockFunc: func(mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
-				mockClient.On("Account", "recipient").Return(
+				mockClient.On("Account", "Recipient").Return(
 					&cosmosapp.Account{
 						Type:    "AccountType",
 						Address: "Recipient",
@@ -114,7 +114,7 @@ func TestAccount_HandleEvents(t *testing.T) {
 					nil,
 				)
 
-				mockClient.On("Balances", "recipient").Return(
+				mockClient.On("Balances", "Recipient").Return(
 					coin.Coins{
 						coin.Coin{
 							Denom:  "Denom",
@@ -136,7 +136,7 @@ func TestAccount_HandleEvents(t *testing.T) {
 				mockAccountsView.On(
 					"Upsert",
 					&account_view.AccountRow{
-						Address:        "recipient",
+						Address:        "Recipient",
 						Type:           "AccountType",
 						MaybeName:      (*string)(nil),
 						MaybePubkey:    &pubkey,
@@ -151,10 +151,10 @@ func TestAccount_HandleEvents(t *testing.T) {
 					},
 				).Return(nil)
 
-				mockClient.On("Account", "sender").Return(
+				mockClient.On("Account", "Sender").Return(
 					&cosmosapp.Account{
 						Type:    "AccountType",
-						Address: "sender",
+						Address: "Sender",
 						MaybePubkey: &cosmosapp.PubKey{
 							Type: "PubKeyType",
 							Key:  pubkey,
@@ -190,7 +190,7 @@ func TestAccount_HandleEvents(t *testing.T) {
 					nil,
 				)
 
-				mockClient.On("Balances", "sender").Return(
+				mockClient.On("Balances", "Sender").Return(
 					coin.Coins{
 						coin.Coin{
 							Denom:  "Denom",
@@ -203,7 +203,7 @@ func TestAccount_HandleEvents(t *testing.T) {
 				mockAccountsView.On(
 					"Upsert",
 					&account_view.AccountRow{
-						Address:        "sender",
+						Address:        "Sender",
 						Type:           "AccountType",
 						MaybeName:      (*string)(nil),
 						MaybePubkey:    &pubkey,
