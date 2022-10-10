@@ -490,7 +490,7 @@ func parseMsgSubmitParamChangeProposal(
 		model.MsgSubmitParamChangeProposalParams{
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
-			ProposerAddress: msg["proposer"].(string),
+			ProposerAddress: strings.ToLower(msg["proposer"].(string)),
 			InitialDeposit:  initialDepositAmount,
 		},
 	)}, possibleSignerAddresses
