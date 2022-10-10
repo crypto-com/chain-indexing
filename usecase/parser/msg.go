@@ -245,7 +245,7 @@ func ParseMsgSetWithdrawAddress(
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
 		if delegatorAddress, ok := parserParams.Msg["delegator_address"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, delegatorAddress.(string))
+			possibleSignerAddresses = append(possibleSignerAddresses, strings.ToLower(delegatorAddress.(string)))
 		}
 	}
 
