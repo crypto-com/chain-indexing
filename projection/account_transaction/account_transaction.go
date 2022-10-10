@@ -2,6 +2,7 @@ package account_transaction
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -516,7 +517,7 @@ func (info *TransactionInfo) IsAccountExist(address string) bool {
 }
 
 func (info *TransactionInfo) AddAccount(address string) {
-	info.involvedAccounts[address] = true
+	info.involvedAccounts[strings.ToLower(address)] = true
 }
 
 func (info *TransactionInfo) AddMessageTypes(messageTypes string) {

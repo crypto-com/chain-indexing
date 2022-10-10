@@ -78,7 +78,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							Attributes: []usecase_model.BlockResultsEventAttribute{
 								{
 									Key:   "spender",
-									Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+									Value: "CRO13UP2UE4TTSNP83A84VAUYN7449WUT09RLZZRXD",
 									Index: true,
 								},
 								{

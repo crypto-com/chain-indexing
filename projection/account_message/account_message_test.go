@@ -115,25 +115,25 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"FromAddress:-",
+					"fromaddress:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"FromAddress:/cosmos.bank.v1beta1.MsgSend",
+					"fromaddress:/cosmos.bank.v1beta1.MsgSend",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"ToAddress:-",
+					"toaddress:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"ToAddress:/cosmos.bank.v1beta1.MsgSend",
+					"toaddress:/cosmos.bank.v1beta1.MsgSend",
 					int64(1),
 				).Return(nil)
 
@@ -177,7 +177,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"FromAddress", "ToAddress"},
+					[]string{"fromaddress", "toaddress"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -252,25 +252,25 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"InputAddress:-",
+					"inputaddress:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"InputAddress:/cosmos.bank.v1beta1.MsgMultiSend",
+					"inputaddress:/cosmos.bank.v1beta1.MsgMultiSend",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"OutputAddress:-",
+					"outputaddress:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"OutputAddress:/cosmos.bank.v1beta1.MsgMultiSend",
+					"outputaddress:/cosmos.bank.v1beta1.MsgMultiSend",
 					int64(1),
 				).Return(nil)
 
@@ -328,7 +328,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"InputAddress", "OutputAddress"},
+					[]string{"inputaddress", "outputaddress"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -385,25 +385,25 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"DelegatorAddress:-",
+					"delegatoraddress:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"DelegatorAddress:/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
+					"delegatoraddress:/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"WithdrawAddress:-",
+					"withdrawaddress:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"WithdrawAddress:/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
+					"withdrawaddress:/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
 					int64(1),
 				).Return(nil)
 
@@ -443,7 +443,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"DelegatorAddress", "WithdrawAddress"},
+					[]string{"delegatoraddress", "withdrawaddress"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -507,13 +507,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"DelegatorAddress:-",
+					"delegatoraddress:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"DelegatorAddress:/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+					"delegatoraddress:/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
 					int64(1),
 				).Return(nil)
 
@@ -560,7 +560,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"DelegatorAddress"},
+					[]string{"delegatoraddress"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -623,13 +623,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"RecipientAddress:-",
+					"recipientaddress:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"RecipientAddress:/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission",
+					"recipientaddress:/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission",
 					int64(1),
 				).Return(nil)
 
@@ -675,7 +675,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"RecipientAddress"},
+					[]string{"recipientaddress"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -735,13 +735,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Depositor:-",
+					"depositor:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Depositor:/cosmos.distribution.v1beta1.MsgFundCommunityPool",
+					"depositor:/cosmos.distribution.v1beta1.MsgFundCommunityPool",
 					int64(1),
 				).Return(nil)
 
@@ -784,7 +784,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"Depositor"},
+					[]string{"depositor"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -859,13 +859,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"ProposerAddress:-",
+					"proposeraddress:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"ProposerAddress:/cosmos.params.v1beta1.ParameterChangeProposal",
+					"proposeraddress:/cosmos.params.v1beta1.ParameterChangeProposal",
 					int64(1),
 				).Return(nil)
 
@@ -923,7 +923,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"ProposerAddress"},
+					[]string{"proposeraddress"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -998,13 +998,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"ProposerAddress:-",
+					"proposeraddress:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"ProposerAddress:/cosmos.distribution.v1beta1.CommunityPoolSpendProposal",
+					"proposeraddress:/cosmos.distribution.v1beta1.CommunityPoolSpendProposal",
 					int64(1),
 				).Return(nil)
 
@@ -1062,7 +1062,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"ProposerAddress"},
+					[]string{"proposeraddress"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -1130,13 +1130,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"ProposerAddress:-",
+					"proposeraddress:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"ProposerAddress:/cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal",
+					"proposeraddress:/cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal",
 					int64(1),
 				).Return(nil)
 
@@ -1187,7 +1187,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"ProposerAddress"},
+					[]string{"proposeraddress"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -1248,13 +1248,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Depositor:-",
+					"depositor:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Depositor:/cosmos.gov.v1beta1.MsgDeposit",
+					"depositor:/cosmos.gov.v1beta1.MsgDeposit",
 					int64(1),
 				).Return(nil)
 
@@ -1298,7 +1298,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"Depositor"},
+					[]string{"depositor"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -1354,13 +1354,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Voter:-",
+					"voter:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Voter:/cosmos.gov.v1beta1.MsgVote",
+					"voter:/cosmos.gov.v1beta1.MsgVote",
 					int64(1),
 				).Return(nil)
 
@@ -1399,7 +1399,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							Option:     "Option",
 						},
 					},
-					[]string{"Voter"},
+					[]string{"voter"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -1472,13 +1472,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"DelegatorAddress:-",
+					"delegatoraddress:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"DelegatorAddress:/cosmos.staking.v1beta1.MsgCreateValidator",
+					"delegatoraddress:/cosmos.staking.v1beta1.MsgCreateValidator",
 					int64(1),
 				).Return(nil)
 
@@ -1534,7 +1534,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"DelegatorAddress"},
+					[]string{"delegatoraddress"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -1712,13 +1712,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"DelegatorAddress:-",
+					"delegatoraddress:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"DelegatorAddress:/cosmos.staking.v1beta1.MsgDelegate",
+					"delegatoraddress:/cosmos.staking.v1beta1.MsgDelegate",
 					int64(1),
 				).Return(nil)
 
@@ -1764,7 +1764,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							ValidatorAddress: "ValidatorAddress",
 						},
 					},
-					[]string{"DelegatorAddress"},
+					[]string{"delegatoraddress"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -1828,13 +1828,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"DelegatorAddress:-",
+					"delegatoraddress:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"DelegatorAddress:/cosmos.staking.v1beta1.MsgUndelegate",
+					"delegatoraddress:/cosmos.staking.v1beta1.MsgUndelegate",
 					int64(1),
 				).Return(nil)
 
@@ -1881,7 +1881,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							MaybeUnbondCompleteAt: nil,
 						},
 					},
-					[]string{"DelegatorAddress"},
+					[]string{"delegatoraddress"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -1945,13 +1945,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"DelegatorAddress:-",
+					"delegatoraddress:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"DelegatorAddress:/cosmos.staking.v1beta1.MsgBeginRedelegate",
+					"delegatoraddress:/cosmos.staking.v1beta1.MsgBeginRedelegate",
 					int64(1),
 				).Return(nil)
 
@@ -1998,7 +1998,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							ValidatorDstAddress: "ValidatorDstAddress",
 						},
 					},
-					[]string{"DelegatorAddress"},
+					[]string{"delegatoraddress"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -2152,13 +2152,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:-",
+					"sender:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:/chainmain.nft.v1.MsgIssueDenom",
+					"sender:/chainmain.nft.v1.MsgIssueDenom",
 					int64(1),
 				).Return(nil)
 
@@ -2198,7 +2198,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							Sender:    "Sender",
 						},
 					},
-					[]string{"Sender"},
+					[]string{"sender"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -2258,25 +2258,25 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:-",
+					"sender:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:/chainmain.nft.v1.MsgMintNFT",
+					"sender:/chainmain.nft.v1.MsgMintNFT",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Recipient:-",
+					"recipient:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Recipient:/chainmain.nft.v1.MsgMintNFT",
+					"recipient:/chainmain.nft.v1.MsgMintNFT",
 					int64(1),
 				).Return(nil)
 
@@ -2319,7 +2319,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							Recipient: "Recipient",
 						},
 					},
-					[]string{"Sender", "Recipient"},
+					[]string{"sender", "recipient"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -2376,25 +2376,25 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:-",
+					"sender:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:/chainmain.nft.v1.MsgTransferNFT",
+					"sender:/chainmain.nft.v1.MsgTransferNFT",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Recipient:-",
+					"recipient:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Recipient:/chainmain.nft.v1.MsgTransferNFT",
+					"recipient:/chainmain.nft.v1.MsgTransferNFT",
 					int64(1),
 				).Return(nil)
 
@@ -2434,7 +2434,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							Recipient: "Recipient",
 						},
 					},
-					[]string{"Sender", "Recipient"},
+					[]string{"sender", "recipient"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -2493,13 +2493,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:-",
+					"sender:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:/chainmain.nft.v1.MsgEditNFT",
+					"sender:/chainmain.nft.v1.MsgEditNFT",
 					int64(1),
 				).Return(nil)
 
@@ -2541,7 +2541,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							Sender:    "Sender",
 						},
 					},
-					[]string{"Sender"},
+					[]string{"sender"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -2597,13 +2597,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:-",
+					"sender:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:/chainmain.nft.v1.MsgBurnNFT",
+					"sender:/chainmain.nft.v1.MsgBurnNFT",
 					int64(1),
 				).Return(nil)
 
@@ -2642,7 +2642,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							Sender:  "Sender",
 						},
 					},
-					[]string{"Sender"},
+					[]string{"sender"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -2701,13 +2701,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:-",
+					"signer:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:/ibc.core.client.v1.MsgCreateClient",
+					"signer:/ibc.core.client.v1.MsgCreateClient",
 					int64(1),
 				).Return(nil)
 
@@ -2749,7 +2749,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"Signer"},
+					[]string{"signer"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -2808,13 +2808,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:-",
+					"signer:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:/ibc.core.client.v1.MsgUpdateClient",
+					"signer:/ibc.core.client.v1.MsgUpdateClient",
 					int64(1),
 				).Return(nil)
 
@@ -2856,7 +2856,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"Signer"},
+					[]string{"signer"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -2915,13 +2915,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:-",
+					"signer:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:/ibc.core.connection.v1.MsgConnectionOpenInit",
+					"signer:/ibc.core.connection.v1.MsgConnectionOpenInit",
 					int64(1),
 				).Return(nil)
 
@@ -2963,7 +2963,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"Signer"},
+					[]string{"signer"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -3021,13 +3021,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:-",
+					"signer:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:/ibc.core.connection.v1.MsgConnectionOpenAck",
+					"signer:/ibc.core.connection.v1.MsgConnectionOpenAck",
 					int64(1),
 				).Return(nil)
 
@@ -3068,7 +3068,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"Signer"},
+					[]string{"signer"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -3126,13 +3126,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:-",
+					"signer:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:/ibc.core.connection.v1.MsgConnectionOpenTry",
+					"signer:/ibc.core.connection.v1.MsgConnectionOpenTry",
 					int64(1),
 				).Return(nil)
 
@@ -3173,7 +3173,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"Signer"},
+					[]string{"signer"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -3231,13 +3231,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:-",
+					"signer:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:/ibc.core.connection.v1.MsgConnectionOpenConfirm",
+					"signer:/ibc.core.connection.v1.MsgConnectionOpenConfirm",
 					int64(1),
 				).Return(nil)
 
@@ -3278,7 +3278,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"Signer"},
+					[]string{"signer"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -3336,13 +3336,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:-",
+					"signer:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:/ibc.core.channel.v1.MsgChannelOpenInit",
+					"signer:/ibc.core.channel.v1.MsgChannelOpenInit",
 					int64(1),
 				).Return(nil)
 
@@ -3383,7 +3383,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"Signer"},
+					[]string{"signer"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -3441,13 +3441,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:-",
+					"signer:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:/ibc.core.channel.v1.MsgChannelOpenAck",
+					"signer:/ibc.core.channel.v1.MsgChannelOpenAck",
 					int64(1),
 				).Return(nil)
 
@@ -3488,7 +3488,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"Signer"},
+					[]string{"signer"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -3546,13 +3546,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:-",
+					"signer:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:/ibc.core.channel.v1.MsgChannelOpenTry",
+					"signer:/ibc.core.channel.v1.MsgChannelOpenTry",
 					int64(1),
 				).Return(nil)
 
@@ -3593,7 +3593,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"Signer"},
+					[]string{"signer"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -3651,13 +3651,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:-",
+					"signer:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:/ibc.core.channel.v1.MsgChannelOpenConfirm",
+					"signer:/ibc.core.channel.v1.MsgChannelOpenConfirm",
 					int64(1),
 				).Return(nil)
 
@@ -3698,7 +3698,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"Signer"},
+					[]string{"signer"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -3765,25 +3765,25 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:-",
+					"signer:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:/ibc.core.channel.v1.MsgAcknowledgement",
+					"signer:/ibc.core.channel.v1.MsgAcknowledgement",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:-",
+					"sender:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:/ibc.core.channel.v1.MsgAcknowledgement",
+					"sender:/ibc.core.channel.v1.MsgAcknowledgement",
 					int64(1),
 				).Return(nil)
 
@@ -3833,7 +3833,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"Signer", "Sender"},
+					[]string{"signer", "sender"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -3901,25 +3901,25 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:-",
+					"signer:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:/ibc.core.channel.v1.MsgRecvPacket",
+					"signer:/ibc.core.channel.v1.MsgRecvPacket",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Receiver:-",
+					"receiver:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Receiver:/ibc.core.channel.v1.MsgRecvPacket",
+					"receiver:/ibc.core.channel.v1.MsgRecvPacket",
 					int64(1),
 				).Return(nil)
 
@@ -3970,7 +3970,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"Signer", "Receiver"},
+					[]string{"signer", "receiver"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -4028,13 +4028,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:-",
+					"sender:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Sender:/ibc.applications.transfer.v1.MsgTransfer",
+					"sender:/ibc.applications.transfer.v1.MsgTransfer",
 					int64(1),
 				).Return(nil)
 
@@ -4075,7 +4075,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"Sender"},
+					[]string{"sender"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -4133,13 +4133,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:-",
+					"signer:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:/ibc.core.channel.v1.MsgTimeout",
+					"signer:/ibc.core.channel.v1.MsgTimeout",
 					int64(1),
 				).Return(nil)
 
@@ -4180,7 +4180,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"Signer"},
+					[]string{"signer"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -4238,13 +4238,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:-",
+					"signer:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:/ibc.core.channel.v1.MsgTimeoutOnClose",
+					"signer:/ibc.core.channel.v1.MsgTimeoutOnClose",
 					int64(1),
 				).Return(nil)
 
@@ -4285,7 +4285,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 						},
 					},
-					[]string{"Signer"},
+					[]string{"signer"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -4345,13 +4345,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:-",
+					"signer:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Signer:/ibc.core.channel.v1.MsgChannelCloseInit",
+					"signer:/ibc.core.channel.v1.MsgChannelCloseInit",
 					int64(1),
 				).Return(nil)
 
@@ -4375,7 +4375,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						MessageType:     "/ibc.core.channel.v1.MsgChannelCloseInit",
 						Data:            typedEvent,
 					},
-					[]string{"Signer"},
+					[]string{"signer"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -4436,25 +4436,25 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Granter:-",
+					"granter:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Granter:/cosmos.authz.v1beta1.MsgGrant",
+					"granter:/cosmos.authz.v1beta1.MsgGrant",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Grantee:-",
+					"grantee:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Grantee:/cosmos.authz.v1beta1.MsgGrant",
+					"grantee:/cosmos.authz.v1beta1.MsgGrant",
 					int64(1),
 				).Return(nil)
 
@@ -4478,7 +4478,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						MessageType:     "/cosmos.authz.v1beta1.MsgGrant",
 						Data:            typedEvent,
 					},
-					[]string{"Granter", "Grantee"},
+					[]string{"granter", "grantee"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -4539,25 +4539,25 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Granter:-",
+					"granter:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Granter:/cosmos.authz.v1beta1.MsgRevoke",
+					"granter:/cosmos.authz.v1beta1.MsgRevoke",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Grantee:-",
+					"grantee:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Grantee:/cosmos.authz.v1beta1.MsgRevoke",
+					"grantee:/cosmos.authz.v1beta1.MsgRevoke",
 					int64(1),
 				).Return(nil)
 
@@ -4581,7 +4581,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						MessageType:     "/cosmos.authz.v1beta1.MsgRevoke",
 						Data:            typedEvent,
 					},
-					[]string{"Granter", "Grantee"},
+					[]string{"granter", "grantee"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -4641,13 +4641,13 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Grantee:-",
+					"grantee:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Grantee:/cosmos.authz.v1beta1.MsgExec",
+					"grantee:/cosmos.authz.v1beta1.MsgExec",
 					int64(1),
 				).Return(nil)
 
@@ -4671,7 +4671,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						MessageType:     "/cosmos.authz.v1beta1.MsgExec",
 						Data:            typedEvent,
 					},
-					[]string{"Grantee"},
+					[]string{"grantee"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -4732,25 +4732,25 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Granter:-",
+					"granter:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Granter:/cosmos.feegrant.v1beta1.MsgGrantAllowance",
+					"granter:/cosmos.feegrant.v1beta1.MsgGrantAllowance",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Grantee:-",
+					"grantee:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Grantee:/cosmos.feegrant.v1beta1.MsgGrantAllowance",
+					"grantee:/cosmos.feegrant.v1beta1.MsgGrantAllowance",
 					int64(1),
 				).Return(nil)
 
@@ -4774,7 +4774,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						MessageType:     "/cosmos.feegrant.v1beta1.MsgGrantAllowance",
 						Data:            typedEvent,
 					},
-					[]string{"Granter", "Grantee"},
+					[]string{"granter", "grantee"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -4835,25 +4835,25 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Granter:-",
+					"granter:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Granter:/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
+					"granter:/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Grantee:-",
+					"grantee:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"Grantee:/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
+					"grantee:/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
 					int64(1),
 				).Return(nil)
 
@@ -4877,7 +4877,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						MessageType:     "/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
 						Data:            typedEvent,
 					},
-					[]string{"Granter", "Grantee"},
+					[]string{"granter", "grantee"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
@@ -4938,25 +4938,25 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"FromAddress:-",
+					"fromaddress:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"FromAddress:/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
+					"fromaddress:/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"ToAddress:-",
+					"toaddress:-",
 					int64(1),
 				).Return(nil)
 
 				mockAccountMessagesTotalView.On(
 					"Increment",
-					"ToAddress:/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
+					"toaddress:/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
 					int64(1),
 				).Return(nil)
 
@@ -4980,7 +4980,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						MessageType:     "/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
 						Data:            typedEvent,
 					},
-					[]string{"FromAddress", "ToAddress"},
+					[]string{"fromaddress", "toaddress"},
 				).Return(nil)
 
 				account_message.UpdateLastHandledEventHeight = func(_ *account_message.AccountMessage, _ *rdb.Handle, _ int64) error {
