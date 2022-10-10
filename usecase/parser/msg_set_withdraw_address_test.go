@@ -46,7 +46,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					MsgIndex:    0,
 				},
 				model.MsgSetWithdrawAddressParams{
-					DelegatorAddress: "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN",
+					DelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 					WithdrawAddress:  "tcro14m5a4kxt2e82uqqs5gtqza29dm5wqzya2jw9sh",
 				},
 			)}))
