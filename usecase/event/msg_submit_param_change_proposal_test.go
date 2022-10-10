@@ -22,7 +22,7 @@ var _ = Describe("Event", func() {
 			anyTxHash := "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416"
 			anyMsgIndex := 2
 			anyProposalId := "1"
-			anyProposerAddress := "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"
+			anyProposerAddress := "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN"
 			anyContent := model.MsgSubmitParamChangeProposalContent{
 				Type:        "/cosmos.params.v1beta1.ParameterChangeProposal",
 				Title:       "Param-Change Voting Period",

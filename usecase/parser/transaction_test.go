@@ -547,7 +547,7 @@ var _ = Describe("TransactionParser", func() {
 							Messages: []map[string]interface{}{
 								{
 									"@type":        "/cosmos.bank.v1beta1.MsgSend",
-									"from_address": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+									"from_address": "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN",
 									"to_address":   "tcro1782gn9hzqavecukdaqqclvsnpck4mtz3vwzpxl",
 									"amount": []interface{}{
 										map[string]interface{}{"denom": "basetcro", "amount": "100000000"},
@@ -643,7 +643,7 @@ var _ = Describe("TransactionParser", func() {
 							Messages: []map[string]interface{}{
 								{
 									"@type":        "/cosmos.bank.v1beta1.MsgSend",
-									"from_address": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+									"from_address": "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN",
 									"to_address":   "tcro1782gn9hzqavecukdaqqclvsnpck4mtz3vwzpxl",
 									"amount": []interface{}{
 										map[string]interface{}{"denom": "basetcro", "amount": "100000000"},
