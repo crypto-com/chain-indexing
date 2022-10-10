@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"strings"
+
 	"github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
@@ -37,8 +39,8 @@ func ParseTxAccountTransferCommands(
 				}
 				commands = append(commands, command_usecase.NewCreateAccountTransfer(
 					blockHeight, model.AccountTransferParams{
-						Recipient: transferEvent.MustGetAttributeByKey("recipient"),
-						Sender:    sender,
+						Recipient: strings.ToLower(transferEvent.MustGetAttributeByKey("recipient")),
+						Sender:    strings.ToLower(sender),
 						Amount:    coin.MustParseCoinsNormalized(amount),
 					}))
 			}
