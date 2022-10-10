@@ -155,7 +155,7 @@ func ParseMsgSend(
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
 		if fromAddress, ok := parserParams.Msg["from_address"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(fromAddress.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(fromAddress.(string)))
 		}
 	}
 
@@ -172,8 +172,8 @@ func ParseMsgSend(
 		parserParams.MsgCommonParams,
 
 		event.MsgSendCreatedParams{
-			FromAddress: utils.ToLowerCase(parserParams.Msg["from_address"].(string)),
-			ToAddress:   utils.ToLowerCase(parserParams.Msg["to_address"].(string)),
+			FromAddress: utils.AddressParse(parserParams.Msg["from_address"].(string)),
+			ToAddress:   utils.AddressParse(parserParams.Msg["to_address"].(string)),
 			Amount:      amount,
 		},
 	)}, possibleSignerAddresses
@@ -189,7 +189,7 @@ func ParseMsgMultiSend(
 		input, _ := rawInput.(map[string]interface{})
 
 		if fromAddress, ok := input["address"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(fromAddress.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(fromAddress.(string)))
 		}
 
 		amountInterface := input["coins"].([]interface{})
@@ -202,7 +202,7 @@ func ParseMsgMultiSend(
 		}
 
 		inputs = append(inputs, model.MsgMultiSendInput{
-			Address: utils.ToLowerCase(input["address"].(string)),
+			Address: utils.AddressParse(input["address"].(string)),
 			Amount:  amount,
 		})
 	}
@@ -222,7 +222,7 @@ func ParseMsgMultiSend(
 		}
 
 		outputs = append(outputs, model.MsgMultiSendOutput{
-			Address: utils.ToLowerCase(output["address"].(string)),
+			Address: utils.AddressParse(output["address"].(string)),
 			Amount:  amount,
 		})
 	}
@@ -244,7 +244,7 @@ func ParseMsgSetWithdrawAddress(
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
 		if delegatorAddress, ok := parserParams.Msg["delegator_address"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(delegatorAddress.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(delegatorAddress.(string)))
 		}
 	}
 
@@ -252,8 +252,8 @@ func ParseMsgSetWithdrawAddress(
 		parserParams.MsgCommonParams,
 
 		model.MsgSetWithdrawAddressParams{
-			DelegatorAddress: utils.ToLowerCase(parserParams.Msg["delegator_address"].(string)),
-			WithdrawAddress:  utils.ToLowerCase(parserParams.Msg["withdraw_address"].(string)),
+			DelegatorAddress: utils.AddressParse(parserParams.Msg["delegator_address"].(string)),
+			WithdrawAddress:  utils.AddressParse(parserParams.Msg["withdraw_address"].(string)),
 		},
 	)}, possibleSignerAddresses
 }
@@ -265,7 +265,7 @@ func ParseMsgWithdrawDelegatorReward(
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
 		if delegatorAddress, ok := parserParams.Msg["delegator_address"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(delegatorAddress.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(delegatorAddress.(string)))
 		}
 	}
 
@@ -275,9 +275,9 @@ func ParseMsgWithdrawDelegatorReward(
 			parserParams.MsgCommonParams,
 
 			model.MsgWithdrawDelegatorRewardParams{
-				DelegatorAddress: utils.ToLowerCase(delegatorAddress),
-				ValidatorAddress: utils.ToLowerCase(parserParams.Msg["validator_address"].(string)),
-				RecipientAddress: utils.ToLowerCase(delegatorAddress),
+				DelegatorAddress: utils.AddressParse(delegatorAddress),
+				ValidatorAddress: utils.AddressParse(parserParams.Msg["validator_address"].(string)),
+				RecipientAddress: utils.AddressParse(delegatorAddress),
 				Amount:           coin.NewEmptyCoins(),
 			},
 		)}, possibleSignerAddresses
@@ -299,9 +299,9 @@ func ParseMsgWithdrawDelegatorReward(
 		parserParams.MsgCommonParams,
 
 		model.MsgWithdrawDelegatorRewardParams{
-			DelegatorAddress: utils.ToLowerCase(parserParams.Msg["delegator_address"].(string)),
-			ValidatorAddress: utils.ToLowerCase(parserParams.Msg["validator_address"].(string)),
-			RecipientAddress: utils.ToLowerCase(recipient),
+			DelegatorAddress: utils.AddressParse(parserParams.Msg["delegator_address"].(string)),
+			ValidatorAddress: utils.AddressParse(parserParams.Msg["validator_address"].(string)),
+			RecipientAddress: utils.AddressParse(recipient),
 			Amount:           amount,
 		},
 	)}, possibleSignerAddresses
@@ -314,7 +314,7 @@ func ParseMsgWithdrawValidatorCommission(
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
 		if validatorAddress, ok := parserParams.Msg["validator_address"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(validatorAddress.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(validatorAddress.(string)))
 		}
 	}
 
@@ -323,7 +323,7 @@ func ParseMsgWithdrawValidatorCommission(
 			parserParams.MsgCommonParams,
 
 			model.MsgWithdrawValidatorCommissionParams{
-				ValidatorAddress: utils.ToLowerCase(parserParams.Msg["validator_address"].(string)),
+				ValidatorAddress: utils.AddressParse(parserParams.Msg["validator_address"].(string)),
 				RecipientAddress: "",
 				Amount:           coin.NewEmptyCoins(),
 			},
@@ -346,8 +346,8 @@ func ParseMsgWithdrawValidatorCommission(
 		parserParams.MsgCommonParams,
 
 		model.MsgWithdrawValidatorCommissionParams{
-			ValidatorAddress: utils.ToLowerCase(parserParams.Msg["validator_address"].(string)),
-			RecipientAddress: utils.ToLowerCase(recipient),
+			ValidatorAddress: utils.AddressParse(parserParams.Msg["validator_address"].(string)),
+			RecipientAddress: utils.AddressParse(recipient),
 			Amount:           amount,
 		},
 	)}, possibleSignerAddresses
@@ -360,7 +360,7 @@ func ParseMsgFundCommunityPool(
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
 		if depositor, ok := parserParams.Msg["depositor"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(depositor.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(depositor.(string)))
 		}
 	}
 
@@ -377,7 +377,7 @@ func ParseMsgFundCommunityPool(
 		parserParams.MsgCommonParams,
 
 		model.MsgFundCommunityPoolParams{
-			Depositor: utils.ToLowerCase(parserParams.Msg["depositor"].(string)),
+			Depositor: utils.AddressParse(parserParams.Msg["depositor"].(string)),
 			Amount:    amount,
 		},
 	)}, possibleSignerAddresses
@@ -448,7 +448,7 @@ func parseMsgSubmitParamChangeProposal(
 	var possibleSignerAddresses []string
 	if msg != nil {
 		if proposer, ok := msg["proposer"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(proposer.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(proposer.(string)))
 		}
 	}
 
@@ -468,7 +468,7 @@ func parseMsgSubmitParamChangeProposal(
 			model.MsgSubmitParamChangeProposalParams{
 				MaybeProposalId: nil,
 				Content:         proposalContent,
-				ProposerAddress: utils.ToLowerCase(msg["proposer"].(string)),
+				ProposerAddress: utils.AddressParse(msg["proposer"].(string)),
 				InitialDeposit:  initialDepositAmount,
 			},
 		)}, possibleSignerAddresses
@@ -489,7 +489,7 @@ func parseMsgSubmitParamChangeProposal(
 		model.MsgSubmitParamChangeProposalParams{
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
-			ProposerAddress: utils.ToLowerCase(msg["proposer"].(string)),
+			ProposerAddress: utils.AddressParse(msg["proposer"].(string)),
 			InitialDeposit:  initialDepositAmount,
 		},
 	)}, possibleSignerAddresses
@@ -518,7 +518,7 @@ func parseMsgSubmitCommunityFundSpendProposal(
 		Type:             rawProposalContent.Type,
 		Title:            rawProposalContent.Title,
 		Description:      rawProposalContent.Description,
-		RecipientAddress: utils.ToLowerCase(rawProposalContent.RecipientAddress),
+		RecipientAddress: utils.AddressParse(rawProposalContent.RecipientAddress),
 		Amount:           amount,
 	}
 
@@ -526,7 +526,7 @@ func parseMsgSubmitCommunityFundSpendProposal(
 	var possibleSignerAddresses []string
 	if msg != nil {
 		if proposer, ok := msg["proposer"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(proposer.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(proposer.(string)))
 		}
 	}
 
@@ -546,7 +546,7 @@ func parseMsgSubmitCommunityFundSpendProposal(
 			model.MsgSubmitCommunityPoolSpendProposalParams{
 				MaybeProposalId: nil,
 				Content:         proposalContent,
-				ProposerAddress: utils.ToLowerCase(msg["proposer"].(string)),
+				ProposerAddress: utils.AddressParse(msg["proposer"].(string)),
 				InitialDeposit:  initialDepositAmount,
 			},
 		)}, possibleSignerAddresses
@@ -568,7 +568,7 @@ func parseMsgSubmitCommunityFundSpendProposal(
 		model.MsgSubmitCommunityPoolSpendProposalParams{
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
-			ProposerAddress: utils.ToLowerCase(msg["proposer"].(string)),
+			ProposerAddress: utils.AddressParse(msg["proposer"].(string)),
 			InitialDeposit:  initialDepositAmount,
 		},
 	)}, possibleSignerAddresses
@@ -607,7 +607,7 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 	var possibleSignerAddresses []string
 	if msg != nil {
 		if proposer, ok := msg["proposer"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(proposer.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(proposer.(string)))
 		}
 	}
 
@@ -627,7 +627,7 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 			model.MsgSubmitSoftwareUpgradeProposalParams{
 				MaybeProposalId: nil,
 				Content:         proposalContent,
-				ProposerAddress: utils.ToLowerCase(msg["proposer"].(string)),
+				ProposerAddress: utils.AddressParse(msg["proposer"].(string)),
 				InitialDeposit:  initialDepositAmount,
 			},
 		)}, possibleSignerAddresses
@@ -649,7 +649,7 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 		model.MsgSubmitSoftwareUpgradeProposalParams{
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
-			ProposerAddress: utils.ToLowerCase(msg["proposer"].(string)),
+			ProposerAddress: utils.AddressParse(msg["proposer"].(string)),
 			InitialDeposit:  initialDepositAmount,
 		},
 	)}, possibleSignerAddresses
@@ -672,7 +672,7 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 	var possibleSignerAddresses []string
 	if msg != nil {
 		if proposer, ok := msg["proposer"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(proposer.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(proposer.(string)))
 		}
 	}
 
@@ -692,7 +692,7 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 			model.MsgSubmitCancelSoftwareUpgradeProposalParams{
 				MaybeProposalId: nil,
 				Content:         proposalContent,
-				ProposerAddress: utils.ToLowerCase(msg["proposer"].(string)),
+				ProposerAddress: utils.AddressParse(msg["proposer"].(string)),
 				InitialDeposit:  initialDepositAmount,
 			},
 		)}, possibleSignerAddresses
@@ -714,7 +714,7 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 		model.MsgSubmitCancelSoftwareUpgradeProposalParams{
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
-			ProposerAddress: utils.ToLowerCase(msg["proposer"].(string)),
+			ProposerAddress: utils.AddressParse(msg["proposer"].(string)),
 			InitialDeposit:  initialDepositAmount,
 		},
 	)}, possibleSignerAddresses
@@ -737,7 +737,7 @@ func parseMsgSubmitTextProposal(
 	var possibleSignerAddresses []string
 	if msg != nil {
 		if proposer, ok := msg["proposer"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(proposer.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(proposer.(string)))
 		}
 	}
 
@@ -757,7 +757,7 @@ func parseMsgSubmitTextProposal(
 			model.MsgSubmitTextProposalParams{
 				MaybeProposalId: nil,
 				Content:         proposalContent,
-				ProposerAddress: utils.ToLowerCase(msg["proposer"].(string)),
+				ProposerAddress: utils.AddressParse(msg["proposer"].(string)),
 				InitialDeposit:  initialDepositAmount,
 			},
 		)}, possibleSignerAddresses
@@ -779,7 +779,7 @@ func parseMsgSubmitTextProposal(
 		model.MsgSubmitTextProposalParams{
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
-			ProposerAddress: utils.ToLowerCase(msg["proposer"].(string)),
+			ProposerAddress: utils.AddressParse(msg["proposer"].(string)),
 			InitialDeposit:  initialDepositAmount,
 		},
 	)}, possibleSignerAddresses
@@ -806,7 +806,7 @@ func parseMsgSubmitUnknownProposal(
 	var possibleSignerAddresses []string
 	if msg != nil {
 		if proposer, ok := msg["proposer"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(proposer.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(proposer.(string)))
 		}
 	}
 
@@ -826,7 +826,7 @@ func parseMsgSubmitUnknownProposal(
 			model.MsgSubmitUnknownProposalParams{
 				MaybeProposalId: nil,
 				Content:         proposalContent,
-				ProposerAddress: utils.ToLowerCase(msg["proposer"].(string)),
+				ProposerAddress: utils.AddressParse(msg["proposer"].(string)),
 				InitialDeposit:  initialDepositAmount,
 			},
 		)}, possibleSignerAddresses
@@ -849,7 +849,7 @@ func parseMsgSubmitUnknownProposal(
 		model.MsgSubmitUnknownProposalParams{
 			MaybeProposalId: proposalId,
 			Content:         proposalContent,
-			ProposerAddress: utils.ToLowerCase(msg["proposer"].(string)),
+			ProposerAddress: utils.AddressParse(msg["proposer"].(string)),
 			InitialDeposit:  initialDepositAmount,
 		},
 	)}, possibleSignerAddresses
@@ -863,7 +863,7 @@ func ParseMsgVote(
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
 		if voter, ok := parserParams.Msg["voter"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(voter.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(voter.(string)))
 		}
 	}
 
@@ -872,7 +872,7 @@ func ParseMsgVote(
 
 		model.MsgVoteParams{
 			ProposalId: parserParams.Msg["proposal_id"].(string),
-			Voter:      utils.ToLowerCase(parserParams.Msg["voter"].(string)),
+			Voter:      utils.AddressParse(parserParams.Msg["voter"].(string)),
 			Option:     parserParams.Msg["option"].(string),
 		},
 	)}, possibleSignerAddresses
@@ -885,7 +885,7 @@ func ParseMsgDeposit(
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
 		if depositor, ok := parserParams.Msg["depositor"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(depositor.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(depositor.(string)))
 		}
 	}
 
@@ -903,7 +903,7 @@ func ParseMsgDeposit(
 
 		model.MsgDepositParams{
 			ProposalId: parserParams.Msg["proposal_id"].(string),
-			Depositor:  utils.ToLowerCase(parserParams.Msg["depositor"].(string)),
+			Depositor:  utils.AddressParse(parserParams.Msg["depositor"].(string)),
 			Amount:     amount,
 		},
 	)}
@@ -943,7 +943,7 @@ func ParseMsgDelegate(
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
 		if delegatorAddress, ok := parserParams.Msg["delegator_address"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(delegatorAddress.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(delegatorAddress.(string)))
 		}
 	}
 
@@ -952,8 +952,8 @@ func ParseMsgDelegate(
 			parserParams.MsgCommonParams,
 
 			model.MsgDelegateParams{
-				DelegatorAddress:   utils.ToLowerCase(parserParams.Msg["delegator_address"].(string)),
-				ValidatorAddress:   utils.ToLowerCase(parserParams.Msg["validator_address"].(string)),
+				DelegatorAddress:   utils.AddressParse(parserParams.Msg["delegator_address"].(string)),
+				ValidatorAddress:   utils.AddressParse(parserParams.Msg["validator_address"].(string)),
 				Amount:             amount,
 				AutoClaimedRewards: coin.Coin{},
 			},
@@ -982,8 +982,8 @@ func ParseMsgDelegate(
 		parserParams.MsgCommonParams,
 
 		model.MsgDelegateParams{
-			DelegatorAddress:   utils.ToLowerCase(parserParams.Msg["delegator_address"].(string)),
-			ValidatorAddress:   utils.ToLowerCase(parserParams.Msg["validator_address"].(string)),
+			DelegatorAddress:   utils.AddressParse(parserParams.Msg["delegator_address"].(string)),
+			ValidatorAddress:   utils.AddressParse(parserParams.Msg["validator_address"].(string)),
 			Amount:             amount,
 			AutoClaimedRewards: autoClaimedRewards,
 		},
@@ -1003,7 +1003,7 @@ func ParseMsgUndelegate(
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
 		if delegatorAddress, ok := parserParams.Msg["delegator_address"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(delegatorAddress.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(delegatorAddress.(string)))
 		}
 	}
 
@@ -1012,8 +1012,8 @@ func ParseMsgUndelegate(
 			parserParams.MsgCommonParams,
 
 			model.MsgUndelegateParams{
-				DelegatorAddress:      utils.ToLowerCase(parserParams.Msg["delegator_address"].(string)),
-				ValidatorAddress:      utils.ToLowerCase(parserParams.Msg["validator_address"].(string)),
+				DelegatorAddress:      utils.AddressParse(parserParams.Msg["delegator_address"].(string)),
+				ValidatorAddress:      utils.AddressParse(parserParams.Msg["validator_address"].(string)),
 				MaybeUnbondCompleteAt: nil,
 				Amount:                amount,
 				AutoClaimedRewards:    coin.Coin{},
@@ -1054,8 +1054,8 @@ func ParseMsgUndelegate(
 		parserParams.MsgCommonParams,
 
 		model.MsgUndelegateParams{
-			DelegatorAddress:      utils.ToLowerCase(parserParams.Msg["delegator_address"].(string)),
-			ValidatorAddress:      utils.ToLowerCase(parserParams.Msg["validator_address"].(string)),
+			DelegatorAddress:      utils.AddressParse(parserParams.Msg["delegator_address"].(string)),
+			ValidatorAddress:      utils.AddressParse(parserParams.Msg["validator_address"].(string)),
 			MaybeUnbondCompleteAt: &unbondCompletionTime,
 			Amount:                amount,
 			AutoClaimedRewards:    autoClaimedRewards,
@@ -1076,7 +1076,7 @@ func ParseMsgBeginRedelegate(
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
 		if delegatorAddress, ok := parserParams.Msg["delegator_address"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(delegatorAddress.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(delegatorAddress.(string)))
 		}
 	}
 
@@ -1085,9 +1085,9 @@ func ParseMsgBeginRedelegate(
 			parserParams.MsgCommonParams,
 
 			model.MsgBeginRedelegateParams{
-				DelegatorAddress:    utils.ToLowerCase(parserParams.Msg["delegator_address"].(string)),
-				ValidatorSrcAddress: utils.ToLowerCase(parserParams.Msg["validator_src_address"].(string)),
-				ValidatorDstAddress: utils.ToLowerCase(parserParams.Msg["validator_dst_address"].(string)),
+				DelegatorAddress:    utils.AddressParse(parserParams.Msg["delegator_address"].(string)),
+				ValidatorSrcAddress: utils.AddressParse(parserParams.Msg["validator_src_address"].(string)),
+				ValidatorDstAddress: utils.AddressParse(parserParams.Msg["validator_dst_address"].(string)),
 				Amount:              amount,
 				AutoClaimedRewards:  coin.Coin{},
 			},
@@ -1116,9 +1116,9 @@ func ParseMsgBeginRedelegate(
 		parserParams.MsgCommonParams,
 
 		model.MsgBeginRedelegateParams{
-			DelegatorAddress:    utils.ToLowerCase(parserParams.Msg["delegator_address"].(string)),
-			ValidatorSrcAddress: utils.ToLowerCase(parserParams.Msg["validator_src_address"].(string)),
-			ValidatorDstAddress: utils.ToLowerCase(parserParams.Msg["validator_dst_address"].(string)),
+			DelegatorAddress:    utils.AddressParse(parserParams.Msg["delegator_address"].(string)),
+			ValidatorSrcAddress: utils.AddressParse(parserParams.Msg["validator_src_address"].(string)),
+			ValidatorDstAddress: utils.AddressParse(parserParams.Msg["validator_dst_address"].(string)),
 			Amount:              amount,
 			AutoClaimedRewards:  autoClaimedRewards,
 		},
@@ -1132,7 +1132,7 @@ func ParseMsgUnjail(
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
 		if validatorAddr, ok := parserParams.Msg["validator_addr"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(validatorAddr.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(validatorAddr.(string)))
 		}
 	}
 
@@ -1140,7 +1140,7 @@ func ParseMsgUnjail(
 		parserParams.MsgCommonParams,
 
 		model.MsgUnjailParams{
-			ValidatorAddr: utils.ToLowerCase(parserParams.Msg["validator_addr"].(string)),
+			ValidatorAddr: utils.AddressParse(parserParams.Msg["validator_addr"].(string)),
 		},
 	)}, possibleSignerAddresses
 }
@@ -1193,8 +1193,8 @@ func parseGenesisGenTxsMsgCreateValidator(
 			Description:       description,
 			Commission:        commission,
 			MinSelfDelegation: msg["min_self_delegation"].(string),
-			DelegatorAddress:  utils.ToLowerCase(msg["delegator_address"].(string)),
-			ValidatorAddress:  utils.ToLowerCase(msg["validator_address"].(string)),
+			DelegatorAddress:  utils.AddressParse(msg["delegator_address"].(string)),
+			ValidatorAddress:  utils.AddressParse(msg["validator_address"].(string)),
 			TendermintPubkey:  tendermintPubkey["key"].(string),
 			Amount:            amount,
 			Jailed:            false,
@@ -1246,10 +1246,10 @@ func ParseMsgCreateValidator(
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
 		if delegatorAddress, ok := parserParams.Msg["delegator_address"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(delegatorAddress.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(delegatorAddress.(string)))
 		}
 		if validatorAddress, ok := parserParams.Msg["validator_address"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(validatorAddress.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(validatorAddress.(string)))
 		}
 	}
 
@@ -1260,8 +1260,8 @@ func ParseMsgCreateValidator(
 			Description:       description,
 			Commission:        commission,
 			MinSelfDelegation: parserParams.Msg["min_self_delegation"].(string),
-			DelegatorAddress:  utils.ToLowerCase(parserParams.Msg["delegator_address"].(string)),
-			ValidatorAddress:  utils.ToLowerCase(parserParams.Msg["validator_address"].(string)),
+			DelegatorAddress:  utils.AddressParse(parserParams.Msg["delegator_address"].(string)),
+			ValidatorAddress:  utils.AddressParse(parserParams.Msg["validator_address"].(string)),
 			TendermintPubkey:  tendermintPubkey["key"].(string),
 			Amount:            amount,
 		},
@@ -1296,7 +1296,7 @@ func ParseMsgEditValidator(
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
 		if validatorAddress, ok := parserParams.Msg["validator_address"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(validatorAddress.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(validatorAddress.(string)))
 		}
 	}
 
@@ -1305,7 +1305,7 @@ func ParseMsgEditValidator(
 
 		model.MsgEditValidatorParams{
 			Description:            description,
-			ValidatorAddress:       utils.ToLowerCase(parserParams.Msg["validator_address"].(string)),
+			ValidatorAddress:       utils.AddressParse(parserParams.Msg["validator_address"].(string)),
 			MaybeCommissionRate:    maybeCommissionRate,
 			MaybeMinSelfDelegation: maybeMinSelfDelegation,
 		},
@@ -1319,7 +1319,7 @@ func ParseMsgNFTIssueDenom(
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
 		if sender, ok := parserParams.Msg["sender"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(sender.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(sender.(string)))
 		}
 	}
 
@@ -1330,7 +1330,7 @@ func ParseMsgNFTIssueDenom(
 			DenomId:   parserParams.Msg["id"].(string),
 			DenomName: parserParams.Msg["name"].(string),
 			Schema:    parserParams.Msg["schema"].(string),
-			Sender:    utils.ToLowerCase(parserParams.Msg["sender"].(string)),
+			Sender:    utils.AddressParse(parserParams.Msg["sender"].(string)),
 		},
 	)}, possibleSignerAddresses
 }
@@ -1342,7 +1342,7 @@ func ParseMsgNFTMintNFT(
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
 		if sender, ok := parserParams.Msg["sender"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(sender.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(sender.(string)))
 		}
 	}
 
@@ -1355,8 +1355,8 @@ func ParseMsgNFTMintNFT(
 			TokenName: parserParams.Msg["name"].(string),
 			URI:       parserParams.Msg["uri"].(string),
 			Data:      parserParams.Msg["data"].(string),
-			Sender:    utils.ToLowerCase(parserParams.Msg["sender"].(string)),
-			Recipient: utils.ToLowerCase(parserParams.Msg["recipient"].(string)),
+			Sender:    utils.AddressParse(parserParams.Msg["sender"].(string)),
+			Recipient: utils.AddressParse(parserParams.Msg["recipient"].(string)),
 		},
 	)}, possibleSignerAddresses
 }
@@ -1368,7 +1368,7 @@ func ParseMsgNFTTransferNFT(
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
 		if sender, ok := parserParams.Msg["sender"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(sender.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(sender.(string)))
 		}
 	}
 
@@ -1378,8 +1378,8 @@ func ParseMsgNFTTransferNFT(
 		model.MsgNFTTransferNFTParams{
 			TokenId:   parserParams.Msg["id"].(string),
 			DenomId:   parserParams.Msg["denom_id"].(string),
-			Sender:    utils.ToLowerCase(parserParams.Msg["sender"].(string)),
-			Recipient: utils.ToLowerCase(parserParams.Msg["recipient"].(string)),
+			Sender:    utils.AddressParse(parserParams.Msg["sender"].(string)),
+			Recipient: utils.AddressParse(parserParams.Msg["recipient"].(string)),
 		},
 	)}, possibleSignerAddresses
 }
@@ -1391,7 +1391,7 @@ func ParseMsgNFTEditNFT(
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
 		if sender, ok := parserParams.Msg["sender"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(sender.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(sender.(string)))
 		}
 	}
 
@@ -1404,7 +1404,7 @@ func ParseMsgNFTEditNFT(
 			TokenName: parserParams.Msg["name"].(string),
 			URI:       parserParams.Msg["uri"].(string),
 			Data:      parserParams.Msg["data"].(string),
-			Sender:    utils.ToLowerCase(parserParams.Msg["sender"].(string)),
+			Sender:    utils.AddressParse(parserParams.Msg["sender"].(string)),
 		},
 	)}, possibleSignerAddresses
 }
@@ -1416,7 +1416,7 @@ func ParseMsgNFTBurnNFT(
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
 		if sender, ok := parserParams.Msg["sender"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.ToLowerCase(sender.(string)))
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(sender.(string)))
 		}
 	}
 
@@ -1426,7 +1426,7 @@ func ParseMsgNFTBurnNFT(
 		model.MsgNFTBurnNFTParams{
 			DenomId: parserParams.Msg["denom_id"].(string),
 			TokenId: parserParams.Msg["id"].(string),
-			Sender:  utils.ToLowerCase(parserParams.Msg["sender"].(string)),
+			Sender:  utils.AddressParse(parserParams.Msg["sender"].(string)),
 		},
 	)}, possibleSignerAddresses
 }
@@ -1471,8 +1471,8 @@ func parseRawMsgSendGrant(
 		panic(fmt.Errorf("error decoding RawMsgSendGrant: %v", err))
 	}
 
-	rawMsg.Grantee = utils.ToLowerCase(rawMsg.Grantee)
-	rawMsg.Granter = utils.ToLowerCase(rawMsg.Granter)
+	rawMsg.Grantee = utils.AddressParse(rawMsg.Grantee)
+	rawMsg.Granter = utils.AddressParse(rawMsg.Granter)
 
 	if !msgCommonParams.TxSuccess {
 		params := model.MsgGrantParams{
@@ -1537,8 +1537,8 @@ func parseRawMsgStackGrant(
 		panic(fmt.Errorf("error decoding RawMsgStakeGrant: %v", err))
 	}
 
-	rawMsg.Grantee = utils.ToLowerCase(rawMsg.Grantee)
-	rawMsg.Granter = utils.ToLowerCase(rawMsg.Granter)
+	rawMsg.Grantee = utils.AddressParse(rawMsg.Grantee)
+	rawMsg.Granter = utils.AddressParse(rawMsg.Granter)
 
 	if !msgCommonParams.TxSuccess {
 		params := model.MsgGrantParams{
@@ -1602,8 +1602,8 @@ func parseRawMsgGenericGrant(
 		panic(fmt.Errorf("error decoding RawMsgGenericGrant: %v", err))
 	}
 
-	rawMsg.Grantee = utils.ToLowerCase(rawMsg.Grantee)
-	rawMsg.Granter = utils.ToLowerCase(rawMsg.Granter)
+	rawMsg.Grantee = utils.AddressParse(rawMsg.Grantee)
+	rawMsg.Granter = utils.AddressParse(rawMsg.Granter)
 
 	if !msgCommonParams.TxSuccess {
 		params := model.MsgGrantParams{
@@ -1666,8 +1666,8 @@ func ParseMsgRevoke(
 		panic(fmt.Errorf("error decoding RawMsgRevoke: %v", err))
 	}
 
-	rawMsg.Grantee = utils.ToLowerCase(rawMsg.Grantee)
-	rawMsg.Granter = utils.ToLowerCase(rawMsg.Granter)
+	rawMsg.Grantee = utils.AddressParse(rawMsg.Grantee)
+	rawMsg.Granter = utils.AddressParse(rawMsg.Granter)
 
 	if !parserParams.MsgCommonParams.TxSuccess {
 		revokeParams := model.MsgRevokeParams{
@@ -1726,7 +1726,7 @@ func ParseMsgExec(
 		panic(fmt.Errorf("error decoding ParseMsgExec: %v", err))
 	}
 
-	rawMsg.Grantee = utils.ToLowerCase(rawMsg.Grantee)
+	rawMsg.Grantee = utils.AddressParse(rawMsg.Grantee)
 
 	if !parserParams.MsgCommonParams.TxSuccess {
 		execParams := model.MsgExecParams{
@@ -1848,8 +1848,8 @@ func parseRawMsgGrantBasicAllowance(
 		panic(fmt.Errorf("error decoding RawMsgGrantBasicAllowance: %v", err))
 	}
 
-	rawMsg.Grantee = utils.ToLowerCase(rawMsg.Grantee)
-	rawMsg.Granter = utils.ToLowerCase(rawMsg.Granter)
+	rawMsg.Grantee = utils.AddressParse(rawMsg.Grantee)
+	rawMsg.Granter = utils.AddressParse(rawMsg.Granter)
 
 	if !msgCommonParams.TxSuccess {
 		params := model.MsgGrantAllowanceParams{
@@ -1913,8 +1913,8 @@ func parseRawMsgGrantPeriodicAllowance(
 		panic(fmt.Errorf("error decoding RawMsgGrantPeriodicAllowance: %v", err))
 	}
 
-	rawMsg.Grantee = utils.ToLowerCase(rawMsg.Grantee)
-	rawMsg.Granter = utils.ToLowerCase(rawMsg.Granter)
+	rawMsg.Grantee = utils.AddressParse(rawMsg.Grantee)
+	rawMsg.Granter = utils.AddressParse(rawMsg.Granter)
 
 	if !msgCommonParams.TxSuccess {
 		params := model.MsgGrantAllowanceParams{
@@ -1978,8 +1978,8 @@ func parseRawMsgGrantAllowedMsgAllowance(
 		panic(fmt.Errorf("error decoding RawMsgGrantAllowedMsgAllowance: %v", err))
 	}
 
-	rawMsg.Grantee = utils.ToLowerCase(rawMsg.Grantee)
-	rawMsg.Granter = utils.ToLowerCase(rawMsg.Granter)
+	rawMsg.Grantee = utils.AddressParse(rawMsg.Grantee)
+	rawMsg.Granter = utils.AddressParse(rawMsg.Granter)
 
 	if !msgCommonParams.TxSuccess {
 		params := model.MsgGrantAllowanceParams{
@@ -2042,8 +2042,8 @@ func ParseMsgRevokeAllowance(
 		panic(fmt.Errorf("error decoding RawMsgRevokeAllowance: %v", err))
 	}
 
-	rawMsg.Grantee = utils.ToLowerCase(rawMsg.Grantee)
-	rawMsg.Granter = utils.ToLowerCase(rawMsg.Granter)
+	rawMsg.Grantee = utils.AddressParse(rawMsg.Grantee)
+	rawMsg.Granter = utils.AddressParse(rawMsg.Granter)
 
 	if !parserParams.MsgCommonParams.TxSuccess {
 		revokeAllowanceParams := model.MsgRevokeAllowanceParams{
@@ -2102,8 +2102,8 @@ func ParseMsgCreateVestingAccount(
 		panic(fmt.Errorf("error decoding RawMsgCreateVestingAccount: %v", err))
 	}
 
-	rawMsg.FromAddress = utils.ToLowerCase(rawMsg.FromAddress)
-	rawMsg.ToAddress = utils.ToLowerCase(rawMsg.ToAddress)
+	rawMsg.FromAddress = utils.AddressParse(rawMsg.FromAddress)
+	rawMsg.ToAddress = utils.AddressParse(rawMsg.ToAddress)
 
 	if !parserParams.MsgCommonParams.TxSuccess {
 		msgCreateVestingAccountParams := model.MsgCreateVestingAccountParams{
@@ -2162,7 +2162,7 @@ func ParseMsgEthereumTx(
 		panic(fmt.Errorf("error decoding RawMsgEthereumTx: %v", err))
 	}
 
-	rawMsg.From = utils.ToLowerCase(rawMsg.From)
+	rawMsg.From = utils.AddressParse(rawMsg.From)
 
 	if !parserParams.MsgCommonParams.TxSuccess {
 		// FIXME: https://github.com/crypto-com/chain-indexing/issues/730

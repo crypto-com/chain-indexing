@@ -4,6 +4,6 @@ import (
 	"strings"
 )
 
-func ToLowerCase(address string) string {
+func AddressParse(address string) string {
 	return strings.ToLower(address)
 }
