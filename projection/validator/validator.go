@@ -24,7 +24,7 @@ import (
 var _ projection_entity.Projection = &Validator{}
 
 const DO_NOT_MODIFY = "[do-not-modify]"
-const MAX_RECENT_ACTIVE_BLOCKS = 100000
+const MAX_RECENT_ACTIVE_BLOCKS = 10000
 
 type Validator struct {
 	*rdbprojectionbase.Base
@@ -208,46 +208,52 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 			}
 
 			// Update validator up time
-			activeValidators, activeValidatorsQueryErr := validatorsView.ListAll(view.ValidatorsListFilter{
-				MaybeStatuses: []constants.Status{constants.BONDED},
-			}, view.ValidatorsListOrder{})
+			emptyRecentActiveBlocksFilter := false
+			activeValidators, activeValidatorsQueryErr := validatorsView.ListAll(
+				view.ValidatorsListFilter{
+					MaybeEmptyRecentActiveBlocks: &emptyRecentActiveBlocksFilter,
+				},
+				view.ValidatorsListOrder{},
+			)
 			if activeValidatorsQueryErr != nil {
 				return fmt.Errorf("error querying active validators: %v", activeValidatorsQueryErr)
 			}
 
 			var mutSignedValidators []view.ValidatorRow
-			var mutUnsignedeValidators []view.ValidatorRow
+			var mutUnsignedValidators []view.ValidatorRow
 
 			for _, activeValidator := range activeValidators {
 				mutValidator := activeValidator
 				signed := false
-				if commitmentMap[mutValidator.ConsensusNodeAddress] {
-					mutValidator.TotalSignedBlock += 1
-					signed = true
-				} else {
-					// give 10 blocks buffer on validator first join
-					if height-mutValidator.JoinedAtBlockHeight < 10 {
+				if mutValidator.Status == "Bonded" {
+					if commitmentMap[mutValidator.ConsensusNodeAddress] {
 						mutValidator.TotalSignedBlock += 1
 						signed = true
+					} else {
+						// give 10 blocks buffer on validator first join
+						if height-mutValidator.JoinedAtBlockHeight < 10 {
+							mutValidator.TotalSignedBlock += 1
+							signed = true
+						}
 					}
-				}
-				mutValidator.TotalActiveBlock += 1
+					mutValidator.TotalActiveBlock += 1
 
-				mutValidator.ImpreciseUpTime = new(big.Float).Quo(
-					new(big.Float).SetInt64(mutValidator.TotalSignedBlock),
-					new(big.Float).SetInt64(mutValidator.TotalActiveBlock),
-				)
+					mutValidator.ImpreciseUpTime = new(big.Float).Quo(
+						new(big.Float).SetInt64(mutValidator.TotalSignedBlock),
+						new(big.Float).SetInt64(mutValidator.TotalActiveBlock),
+					)
+				}
 
 				if signed {
 					mutSignedValidators = append(mutSignedValidators, mutValidator)
 				} else {
-					mutUnsignedeValidators = append(mutUnsignedeValidators, mutValidator)
+					mutUnsignedValidators = append(mutUnsignedValidators, mutValidator)
 				}
 			}
 
 			if activeValidatorUpdateErr := validatorsView.UpdateAllValidatorUpTime(
 				mutSignedValidators,
-				mutUnsignedeValidators,
+				mutUnsignedValidators,
 				height,
 				MAX_RECENT_ACTIVE_BLOCKS,
 			); activeValidatorUpdateErr != nil {

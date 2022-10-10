@@ -267,7 +267,7 @@ func (validatorsView *Validators) UpdateAllValidatorUpTime(
 				`UPDATE view_validators AS view SET
 							total_signed_block = row.total_signed_block,
 							total_active_block = row.total_active_block,
-							imprecise_up_time = row.imprecise_up_time
+							imprecise_up_time = row.imprecise_up_time,
 							recent_active_blocks = array_append(array_remove(view.recent_active_blocks, %d), %d)
 						FROM (VALUES
 						`,
@@ -322,7 +322,7 @@ func (validatorsView *Validators) UpdateAllValidatorUpTime(
 				`UPDATE view_validators AS view SET
 							total_signed_block = row.total_signed_block,
 							total_active_block = row.total_active_block,
-							imprecise_up_time = row.imprecise_up_time
+							imprecise_up_time = row.imprecise_up_time,
 							recent_active_blocks = array_remove(view.recent_active_blocks, %d)
 						FROM (VALUES
 						`,
@@ -370,7 +370,8 @@ func (validatorsView *Validators) UpdateAllValidatorUpTime(
 }
 
 type ValidatorsListFilter struct {
-	MaybeStatuses []constants.Status
+	MaybeStatuses                []constants.Status
+	MaybeEmptyRecentActiveBlocks *bool
 }
 
 type ValidatorsListOrder struct {
@@ -445,12 +446,27 @@ func (validatorsView *Validators) ListAll(
 		}
 	}
 
+	var whereClause sq.And
+
 	var statusOrCondition sq.Or
 	if filter.MaybeStatuses != nil {
 		statusOrCondition = make(sq.Or, 0)
 		for _, status := range filter.MaybeStatuses {
 			statusOrCondition = append(statusOrCondition, sq.Eq{
 				"status": status,
+			})
+		}
+		whereClause = append(whereClause, statusOrCondition)
+	}
+
+	if filter.MaybeEmptyRecentActiveBlocks != nil {
+		if *filter.MaybeEmptyRecentActiveBlocks {
+			whereClause = append(whereClause, sq.Eq{
+				"recent_active_blocks": "{}",
+			})
+		} else {
+			whereClause = append(whereClause, sq.NotEq{
+				"recent_active_blocks": "{}",
 			})
 		}
 	}
@@ -485,7 +501,7 @@ func (validatorsView *Validators) ListAll(
 	stmtBuilder = stmtBuilder.OrderBy(orderClauses...)
 
 	if statusOrCondition != nil {
-		stmtBuilder = stmtBuilder.Where(statusOrCondition)
+		stmtBuilder = stmtBuilder.Where(whereClause)
 	}
 	sql, sqlArgs, err := stmtBuilder.ToSql()
 	if err != nil {
