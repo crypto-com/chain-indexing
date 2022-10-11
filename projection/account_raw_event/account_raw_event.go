@@ -105,7 +105,7 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 
 	eventRows := make([]view.AccountRawEventRow, 0)
 
-	accountToAccountRawEventRowMap := newAccountToAccountRawEventRowMap()
+	accountToAccountRawEventRowMap := newAccountToAccountRawEventRowOrderedMap()
 	for _, event := range events {
 		if rawBlockCreatedEvent, ok := event.(*event_usecase.BlockRawEventCreated); ok {
 			accounts := []string{}
@@ -175,26 +175,26 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 	return nil
 }
 
-type accountToAccountRawEventRowMap struct {
+type accountToAccountRawEventRowOrderedMap struct {
 	pairs     map[string]*view.AccountRawEventRow
 	orderList []string
 }
 
-func newAccountToAccountRawEventRowMap() *accountToAccountRawEventRowMap {
-	return &accountToAccountRawEventRowMap{
+func newAccountToAccountRawEventRowOrderedMap() *accountToAccountRawEventRowOrderedMap {
+	return &accountToAccountRawEventRowOrderedMap{
 		pairs:     make(map[string]*view.AccountRawEventRow),
 		orderList: []string{},
 	}
 }
 
-func (m *accountToAccountRawEventRowMap) Get(account string) (*view.AccountRawEventRow, bool) {
+func (m *accountToAccountRawEventRowOrderedMap) Get(account string) (*view.AccountRawEventRow, bool) {
 	if row, present := m.pairs[account]; present {
 		return row, present
 	}
 	return nil, false
 }
 
-func (m *accountToAccountRawEventRowMap) Set(account string, row view.AccountRawEventRow) {
+func (m *accountToAccountRawEventRowOrderedMap) Set(account string, row view.AccountRawEventRow) {
 	if _, present := m.pairs[account]; present {
 		m.pairs[account] = &row
 		return
@@ -204,7 +204,7 @@ func (m *accountToAccountRawEventRowMap) Set(account string, row view.AccountRaw
 	m.orderList = append(m.orderList, account)
 }
 
-func (m *accountToAccountRawEventRowMap) GetByOrder(index int) (*view.AccountRawEventRow, error) {
+func (m *accountToAccountRawEventRowOrderedMap) GetByOrder(index int) (*view.AccountRawEventRow, error) {
 	if index == 0 && len(m.orderList) == 0 {
 		return nil, fmt.Errorf("index out of bound")
 	} else if len(m.orderList) <= index {
@@ -214,6 +214,6 @@ func (m *accountToAccountRawEventRowMap) GetByOrder(index int) (*view.AccountRaw
 	return m.pairs[m.orderList[index]], nil
 }
 
-func (m *accountToAccountRawEventRowMap) Len() int {
+func (m *accountToAccountRawEventRowOrderedMap) Len() int {
 	return len(m.orderList)
 }
