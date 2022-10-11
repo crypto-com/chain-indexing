@@ -148,7 +148,7 @@ func (validatorActivitiesView *ValidatorActivities) List(
 		stmtBuilder = stmtBuilder.Where("operator_address = ?", *filter.MaybeOperatorAddress)
 	}
 	if filter.Last24hrAtBlockTime != nil {
-		stmtBuilder = stmtBuilder.Where("block_time <= ? - INTERVAL '24 HOURS'", *filter.Last24hrAtBlockTime)
+		stmtBuilder = stmtBuilder.Where("block_time >= ?", filter.Last24hrAtBlockTime.UnixNano()-24*60*60*100*1000000)
 	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(

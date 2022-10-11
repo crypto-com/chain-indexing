@@ -418,7 +418,10 @@ func (projection *Validator) projectValidatorView(
 			}
 
 			mutValidatorActivities, _, err := validatorActivities.List(
-				view.ValidatorActivitiesListFilter{Last24hrAtBlockTime: &blockTime},
+				view.ValidatorActivitiesListFilter{
+					Last24hrAtBlockTime:  &blockTime,
+					MaybeOperatorAddress: &msgEditValidatorEvent.ValidatorAddress,
+				},
 				view.ValidatorActivitiesListOrder{},
 				&pagination_interface.Pagination{},
 			)
@@ -430,15 +433,8 @@ func (projection *Validator) projectValidatorView(
 				)
 			}
 
-			fmt.Println("===> mutValidatorActivities:", mutValidatorActivities)
-
-			fmt.Println("===> msgEditValidatorEvent:", msgEditValidatorEvent)
-			fmt.Println("===> mutValidatorRow:", mutValidatorRow)
 			if msgEditValidatorEvent.Description.Moniker != DO_NOT_MODIFY {
-				// mutValidatorRow.DailyEditQuota = mutValidatorRow.DailyEditQuota + 1
-				// if mutValidatorRow.DailyEditQuota%2 == 0 && mutValidatorRow.Status == constants.BONDED {
-				// 	mutValidatorRow.Status = constants.ATTENTION
-				// }
+				checkAttentionAndSetStatus(mutValidatorRow, &mutValidatorActivities)
 				mutValidatorRow.Moniker = msgEditValidatorEvent.Description.Moniker
 			}
 			if msgEditValidatorEvent.Description.Identity != DO_NOT_MODIFY {
@@ -455,7 +451,7 @@ func (projection *Validator) projectValidatorView(
 			}
 
 			if msgEditValidatorEvent.MaybeCommissionRate != nil {
-				checkCommissionRateAndSetStatus(mutValidatorRow, *msgEditValidatorEvent.MaybeCommissionRate, msgEditValidatorEvent.ValidatorAddress)
+				checkAttentionAndSetStatus(mutValidatorRow, &mutValidatorActivities)
 				mutValidatorRow.CommissionRate = *msgEditValidatorEvent.MaybeCommissionRate
 			}
 			if msgEditValidatorEvent.MaybeMinSelfDelegation != nil {
@@ -538,22 +534,30 @@ func (projection *Validator) projectValidatorView(
 	return nil
 }
 
-func checkCommissionRateAndSetStatus(mutValidatorRow *view.ValidatorRow, newRateString string, validatorAddress string) error {
-	currentRate, err := strconv.ParseFloat(mutValidatorRow.CommissionRate, 32)
-	if err != nil {
-		return fmt.Errorf(
-			"error parsing current commission rate %s from view", validatorAddress,
-		)
-	}
-	newRate, err := strconv.ParseFloat(newRateString, 32)
-	if err != nil {
-		return fmt.Errorf(
-			"error parsing new commission rate %s from view", validatorAddress,
-		)
+func checkAttentionAndSetStatus(mutValidatorRow *view.ValidatorRow, mutValidatorActivities *[]view.ValidatorActivityRow) error {
+	attentionCounter := map[string]int{
+		"moniker":        0,
+		"commissionRate": 0,
 	}
 
-	if newRate-currentRate > 0.1 {
-		mutValidatorRow.Status = constants.ATTENTION
+	if mutValidatorRow.Status == constants.BONDED {
+		for _, activity := range *mutValidatorActivities {
+			content := activity.Data.Content.(map[string]interface{})
+			pastDescription := content["description"].(map[string]interface{})
+
+			if pastDescription["Moniker"] != DO_NOT_MODIFY {
+				attentionCounter["moniker"]++
+			}
+			if content["commissionRate"] != nil {
+				attentionCounter["commissionRate"]++
+			}
+		}
+		for _, count := range attentionCounter {
+			if count > 1 {
+				mutValidatorRow.Status = constants.ATTENTION
+			}
+		}
+
 	}
 
 	return nil
