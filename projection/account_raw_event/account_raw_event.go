@@ -104,6 +104,7 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 
 	eventRows := make([]view.AccountRawEventRow, 0)
 
+	accountToAccountRawEventRowMap := make(map[string]view.AccountRawEventRow)
 	for _, event := range events {
 		if rawBlockCreatedEvent, ok := event.(*event_usecase.BlockRawEventCreated); ok {
 			accounts := []string{}
@@ -119,19 +120,31 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 
 			// create event for every account
 			for _, account := range accounts {
-				eventRows = append(eventRows, view.AccountRawEventRow{
-					BlockHeight: height,
-					BlockHash:   rawBlockCreatedEvent.BlockHash,
-					BlockTime:   rawBlockCreatedEvent.BlockTime,
-					Account:     account,
-					Data: view.AccountRawEventRowData{
+				if accountEvents, ok := accountToAccountRawEventRowMap[account]; ok {
+					accountEvents.Data = append(accountEvents.Data, view.AccountRawEventRowData{
 						Type:    rawBlockCreatedEvent.Data.Content.Type,
 						Content: rawBlockCreatedEvent.Data.Content,
-					},
-				})
+					})
+				} else {
+					accountToAccountRawEventRowMap[account] = view.AccountRawEventRow{
+						BlockHeight: height,
+						BlockHash:   rawBlockCreatedEvent.BlockHash,
+						BlockTime:   rawBlockCreatedEvent.BlockTime,
+						Account:     account,
+						Data: []view.AccountRawEventRowData{
+							{
+								Type:    rawBlockCreatedEvent.Data.Content.Type,
+								Content: rawBlockCreatedEvent.Data.Content,
+							},
+						},
+					}
+				}
 			}
-
 		}
+	}
+
+	for account := range accountToAccountRawEventRowMap {
+		eventRows = append(eventRows, accountToAccountRawEventRowMap[account])
 	}
 
 	for _, eventRow := range eventRows {
@@ -139,7 +152,6 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 		if err := totalView.Increment(eventRow.Account, 1); err != nil {
 			return fmt.Errorf("error incrementing total account transaction of account: %w", err)
 		}
-
 	}
 
 	if err := eventsView.InsertAll(eventRows); err != nil {
