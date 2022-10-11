@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"strings"
+
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
@@ -36,7 +38,7 @@ func (handler *AccountRawEvents) ListByAccount(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	filter := account_raw_event_view.AccountRawEventsListFilter{
-		Account:       account,
+		Account:       strings.ToLower(account),
 		MaybeMsgTypes: nil,
 	}
 	queryArgs := ctx.QueryArgs()

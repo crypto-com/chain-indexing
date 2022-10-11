@@ -598,7 +598,7 @@ const TX_MSG_CREATE_VESTING_ACCOUNT_TXS_RESP = `{
             "messages": [
                 {
                     "@type": "/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
-                    "from_address": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2",
+                    "from_address": "TCRO15ZH5TN7XJDECU4ZJCLSMLNLHT5EAD2MX84GAU2",
                     "to_address": "tcro155kkac0jc05dxceylphwyhx2dt868u9t6jk6g5",
                     "amount": [
                         {
@@ -830,7 +830,7 @@ const TX_MSG_CREATE_VESTING_ACCOUNT_TXS_RESP = `{
                 "messages": [
                     {
                         "@type": "/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
-                        "from_address": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2",
+                        "from_address": "TCRO15ZH5TN7XJDECU4ZJCLSMLNLHT5EAD2MX84GAU2",
                         "to_address": "tcro155kkac0jc05dxceylphwyhx2dt868u9t6jk6g5",
                         "amount": [
                             {

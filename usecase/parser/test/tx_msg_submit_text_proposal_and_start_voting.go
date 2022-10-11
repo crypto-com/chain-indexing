@@ -410,7 +410,7 @@ const TX_MSG_SUBMIT_TEXT_PROPOSAL_AND_START_VOTING_TXS_RESP = `{
                             "amount": "20000"
                         }
                     ],
-                    "proposer": "cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd"
+                    "proposer": "CRO1NK4RQ3Q46LTGJGHXZ80HY385P9UJ0TF58APKCD"
                 }
             ],
             "memo": "",
@@ -609,7 +609,7 @@ const TX_MSG_SUBMIT_TEXT_PROPOSAL_AND_START_VOTING_TXS_RESP = `{
                                 "amount": "20000"
                             }
                         ],
-                        "proposer": "cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd"
+                        "proposer": "CRO1NK4RQ3Q46LTGJGHXZ80HY385P9UJ0TF58APKCD"
                     }
                 ],
                 "memo": "",
