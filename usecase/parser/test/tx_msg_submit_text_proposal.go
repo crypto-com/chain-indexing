@@ -2962,7 +2962,7 @@ const TX_MSG_SUBMIT_TEXT_PROPOSAL_TXS_RESP = `{
                             "amount": "1000000"
                         }
                     ],
-                    "proposer": "tcro14fnzv5g92s6f8dg534lccp4x5tylkvth7zcq0u"
+                    "proposer": "TCRO14FNZV5G92S6F8DG534LCCP4X5TYLKVTH7ZCQ0U"
                 }
             ],
             "memo": "",
@@ -3156,7 +3156,7 @@ const TX_MSG_SUBMIT_TEXT_PROPOSAL_TXS_RESP = `{
                                 "amount": "1000000"
                             }
                         ],
-                        "proposer": "tcro14fnzv5g92s6f8dg534lccp4x5tylkvth7zcq0u"
+                        "proposer": "TCRO14FNZV5G92S6F8DG534LCCP4X5TYLKVTH7ZCQ0U"
                     }
                 ],
                 "memo": "",

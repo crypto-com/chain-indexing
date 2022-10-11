@@ -48,8 +48,8 @@ func ParseBeginBlockEventsCommands(
 			}
 			commands = append(commands, command_usecase.NewCreateAccountTransfer(
 				blockHeight, model.AccountTransferParams{
-					Recipient: transferEvent.MustGetAttributeByKey("recipient"),
-					Sender:    transferEvent.MustGetAttributeByKey("sender"),
+					Recipient: utils.AddressParse(transferEvent.MustGetAttributeByKey("recipient")),
+					Sender:    utils.AddressParse(transferEvent.MustGetAttributeByKey("sender")),
 					Amount:    coin.MustParseCoinsNormalized(amount),
 				}))
 		} else if event.Type == "mint" {

@@ -2513,7 +2513,7 @@ const TX_MSG_EDIT_VALIDATOR_TXS_RESP_1 = `{
                         "security_contact": "[do-not-modify]",
                         "details": "[do-not-modify]"
                     },
-                    "validator_address": "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+                    "validator_address": "TCROCNCL1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVR4UFUS",
                     "commission_rate": null,
                     "min_self_delegation": "2"
                 }
@@ -2620,7 +2620,7 @@ const TX_MSG_EDIT_VALIDATOR_TXS_RESP_1 = `{
                             "security_contact": "[do-not-modify]",
                             "details": "[do-not-modify]"
                         },
-                        "validator_address": "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+                        "validator_address": "TCROCNCL1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVR4UFUS",
                         "commission_rate": null,
                         "min_self_delegation": "2"
                     }

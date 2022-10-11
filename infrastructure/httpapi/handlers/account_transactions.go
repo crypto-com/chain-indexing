@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"strings"
+
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/valyala/fasthttp"
 
@@ -52,7 +54,7 @@ func (handler *AccountTransactions) ListByAccount(ctx *fasthttp.RequestCtx) {
 	}
 
 	filter := account_transaction_view.AccountTransactionsListFilter{
-		Account: account,
+		Account: strings.ToLower(account),
 		Memo:    memo,
 	}
 
