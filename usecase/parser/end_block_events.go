@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"strings"
-
 	"github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/internal/typeconv"
@@ -31,8 +29,8 @@ func ParseEndBlockEventsCommands(blockHeight int64, blockHash string, blockTime 
 			}
 			commands = append(commands, command_usecase.NewCreateAccountTransfer(
 				blockHeight, model.AccountTransferParams{
-					Recipient: strings.ToLower(transferEvent.MustGetAttributeByKey("recipient")),
-					Sender:    strings.ToLower(transferEvent.MustGetAttributeByKey("sender")),
+					Recipient: utils.AddressParse(transferEvent.MustGetAttributeByKey("recipient")),
+					Sender:    utils.AddressParse(transferEvent.MustGetAttributeByKey("sender")),
 					Amount:    coin.MustParseCoinsNormalized(amount),
 				}))
 		} else if event.Type == "complete_unbonding" {
