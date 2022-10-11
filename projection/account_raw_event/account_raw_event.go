@@ -202,12 +202,12 @@ func (m *accountToAccountRawEventRowMap) Set(account string, row view.AccountRaw
 
 	m.pairs[account] = &row
 	m.orderList = append(m.orderList, account)
-
-	return
 }
 
 func (m *accountToAccountRawEventRowMap) GetByOrder(index int) (*view.AccountRawEventRow, error) {
-	if len(m.orderList) <= index-1 {
+	if index == 0 && len(m.orderList) == 0 {
+		return nil, fmt.Errorf("index out of bound")
+	} else if len(m.orderList) <= index {
 		return nil, fmt.Errorf("index out of bound")
 	}
 
