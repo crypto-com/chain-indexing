@@ -14,6 +14,7 @@ import (
 	"github.com/crypto-com/chain-indexing/projection/account_raw_event/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+	ordered_map "github.com/wk8/go-ordered-map/v2"
 )
 
 var _ projection.Projection = &AccountRawEvent{}
@@ -105,7 +106,7 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 
 	eventRows := make([]view.AccountRawEventRow, 0)
 
-	accountToAccountRawEventRowMap := make(map[string]view.AccountRawEventRow)
+	accountToAccountRawEventRowMap := ordered_map.New[string, view.AccountRawEventRow]()
 	for _, event := range events {
 		if rawBlockCreatedEvent, ok := event.(*event_usecase.BlockRawEventCreated); ok {
 			accounts := []string{}
@@ -122,13 +123,13 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 
 			// create event for every account
 			for _, account := range accounts {
-				if accountEvents, ok := accountToAccountRawEventRowMap[account]; ok {
+				if accountEvents, ok := accountToAccountRawEventRowMap.Get(account); ok {
 					accountEvents.Data = append(accountEvents.Data, view.AccountRawEventRowData{
 						Type:    rawBlockCreatedEvent.Data.Content.Type,
 						Content: rawBlockCreatedEvent.Data.Content,
 					})
 				} else {
-					accountToAccountRawEventRowMap[account] = view.AccountRawEventRow{
+					accountToAccountRawEventRowMap.Set(account, view.AccountRawEventRow{
 						BlockHeight: height,
 						BlockHash:   rawBlockCreatedEvent.BlockHash,
 						BlockTime:   rawBlockCreatedEvent.BlockTime,
@@ -139,14 +140,14 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 								Content: rawBlockCreatedEvent.Data.Content,
 							},
 						},
-					}
+					})
 				}
 			}
 		}
 	}
 
-	for account := range accountToAccountRawEventRowMap {
-		eventRows = append(eventRows, accountToAccountRawEventRowMap[account])
+	for pair := accountToAccountRawEventRowMap.Oldest(); pair != nil; pair = pair.Next() {
+		eventRows = append(eventRows, pair.Value)
 	}
 
 	for _, eventRow := range eventRows {

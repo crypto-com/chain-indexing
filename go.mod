@@ -1,6 +1,6 @@
 module github.com/crypto-com/chain-indexing
 
-go 1.17
+go 1.18
 
 require (
 	github.com/Masterminds/squirrel v1.5.0
@@ -36,6 +36,7 @@ require (
 	github.com/tendermint/tendermint v0.34.14
 	github.com/tharsis/ethermint v0.7.1
 	github.com/valyala/fasthttp v1.17.0
+	github.com/wk8/go-ordered-map/v2 v2.0.0
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	gopkg.in/yaml.v2 v2.4.0
 )
@@ -49,6 +50,7 @@ require (
 	github.com/VictoriaMetrics/fastcache v1.5.7 // indirect
 	github.com/andybalholm/brotli v1.0.0 // indirect
 	github.com/armon/go-metrics v0.3.9 // indirect
+	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/btcsuite/btcd v0.22.0-beta // indirect
