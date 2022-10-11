@@ -110,11 +110,12 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 			accounts := []string{}
 			// append related account
 			for _, attribute := range rawBlockCreatedEvent.Data.Content.Attributes {
-				hasPrefix := strings.HasPrefix(utils.AddressParse(attribute.Value), projection.accountAddressPrefix)
-				IsValidCosmosAddress := tmcosmosutils.IsValidCosmosAddress(utils.AddressParse(attribute.Value))
+				attribute.Value = utils.AddressParse(attribute.Value)
+				hasPrefix := strings.HasPrefix(attribute.Value, projection.accountAddressPrefix)
+				IsValidCosmosAddress := tmcosmosutils.IsValidCosmosAddress(attribute.Value)
 
 				if hasPrefix && IsValidCosmosAddress {
-					accounts = append(accounts, utils.AddressParse(attribute.Value))
+					accounts = append(accounts, attribute.Value)
 				}
 			}
 
