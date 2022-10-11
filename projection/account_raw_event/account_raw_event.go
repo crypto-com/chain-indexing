@@ -14,7 +14,6 @@ import (
 	"github.com/crypto-com/chain-indexing/projection/account_raw_event/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
-	ordered_map "github.com/wk8/go-ordered-map/v2"
 )
 
 var _ projection.Projection = &AccountRawEvent{}
@@ -106,7 +105,7 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 
 	eventRows := make([]view.AccountRawEventRow, 0)
 
-	accountToAccountRawEventRowMap := ordered_map.New[string, view.AccountRawEventRow]()
+	accountToAccountRawEventRowMap := newAccountToAccountRawEventRowMap()
 	for _, event := range events {
 		if rawBlockCreatedEvent, ok := event.(*event_usecase.BlockRawEventCreated); ok {
 			accounts := []string{}
@@ -146,19 +145,23 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 		}
 	}
 
-	for pair := accountToAccountRawEventRowMap.Oldest(); pair != nil; pair = pair.Next() {
-		eventRows = append(eventRows, pair.Value)
+	for i := 0; i < accountToAccountRawEventRowMap.Len(); i++ {
+		row, err := accountToAccountRawEventRowMap.GetByOrder(i)
+		if err != nil {
+			return fmt.Errorf("error fetch ordered map of account raw event row: %w", err)
+		}
+		eventRows = append(eventRows, *row)
 	}
 
 	for _, eventRow := range eventRows {
 		// Calculate account raw event total
 		if err := totalView.Increment(eventRow.Account, 1); err != nil {
-			return fmt.Errorf("error incrementing total account transaction of account: %w", err)
+			return fmt.Errorf("error incrementing total account raw event of account: %w", err)
 		}
 	}
 
 	if err := eventsView.InsertAll(eventRows); err != nil {
-		return fmt.Errorf("error inserting account message: %w", err)
+		return fmt.Errorf("error inserting account raw event: %w", err)
 	}
 
 	if err := UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
@@ -170,4 +173,47 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 	}
 	committed = true
 	return nil
+}
+
+type accountToAccountRawEventRowMap struct {
+	pairs     map[string]*view.AccountRawEventRow
+	orderList []string
+}
+
+func newAccountToAccountRawEventRowMap() *accountToAccountRawEventRowMap {
+	return &accountToAccountRawEventRowMap{
+		pairs:     make(map[string]*view.AccountRawEventRow),
+		orderList: []string{},
+	}
+}
+
+func (m *accountToAccountRawEventRowMap) Get(account string) (*view.AccountRawEventRow, bool) {
+	if row, present := m.pairs[account]; present {
+		return row, present
+	}
+	return nil, false
+}
+
+func (m *accountToAccountRawEventRowMap) Set(account string, row view.AccountRawEventRow) {
+	if _, present := m.pairs[account]; present {
+		m.pairs[account] = &row
+		return
+	}
+
+	m.pairs[account] = &row
+	m.orderList = append(m.orderList, account)
+
+	return
+}
+
+func (m *accountToAccountRawEventRowMap) GetByOrder(index int) (*view.AccountRawEventRow, error) {
+	if len(m.orderList) <= index-1 {
+		return nil, fmt.Errorf("index out of bound")
+	}
+
+	return m.pairs[m.orderList[index]], nil
+}
+
+func (m *accountToAccountRawEventRowMap) Len() int {
+	return len(m.orderList)
 }
