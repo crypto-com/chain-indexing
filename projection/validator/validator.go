@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
@@ -125,7 +126,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 		}
 	}
 
-	if projectErr := projection.projectValidatorView(validatorsView, height, events); projectErr != nil {
+	if projectErr := projection.projectValidatorView(validatorsView, validatorActivitiesView, blockTime, height, events); projectErr != nil {
 		return fmt.Errorf("error projecting validator view: %v", projectErr)
 	}
 
@@ -274,6 +275,8 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 
 func (projection *Validator) projectValidatorView(
 	validatorsView *view.Validators,
+	validatorActivities *view.ValidatorActivities,
+	blockTime utctime.UTCTime,
 	blockHeight int64,
 	events []event_entity.Event,
 ) error {
@@ -407,14 +410,35 @@ func (projection *Validator) projectValidatorView(
 			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
 				MaybeOperatorAddress: &msgEditValidatorEvent.ValidatorAddress,
 			})
+
 			if err != nil {
 				return fmt.Errorf(
 					"error getting existing validator %s from view", msgEditValidatorEvent.ValidatorAddress,
 				)
 			}
+
+			mutValidatorActivities, _, err := validatorActivities.List(
+				view.ValidatorActivitiesListFilter{Last24hrAtBlockTime: &blockTime},
+				view.ValidatorActivitiesListOrder{},
+				&pagination_interface.Pagination{},
+			)
+			if err != nil {
+				fmt.Println("===> err:", err)
+
+				return fmt.Errorf(
+					"error getting existing validator activities %s from view", msgEditValidatorEvent.ValidatorAddress,
+				)
+			}
+
+			fmt.Println("===> mutValidatorActivities:", mutValidatorActivities)
+
 			fmt.Println("===> msgEditValidatorEvent:", msgEditValidatorEvent)
 			fmt.Println("===> mutValidatorRow:", mutValidatorRow)
 			if msgEditValidatorEvent.Description.Moniker != DO_NOT_MODIFY {
+				// mutValidatorRow.DailyEditQuota = mutValidatorRow.DailyEditQuota + 1
+				// if mutValidatorRow.DailyEditQuota%2 == 0 && mutValidatorRow.Status == constants.BONDED {
+				// 	mutValidatorRow.Status = constants.ATTENTION
+				// }
 				mutValidatorRow.Moniker = msgEditValidatorEvent.Description.Moniker
 			}
 			if msgEditValidatorEvent.Description.Identity != DO_NOT_MODIFY {
@@ -431,6 +455,7 @@ func (projection *Validator) projectValidatorView(
 			}
 
 			if msgEditValidatorEvent.MaybeCommissionRate != nil {
+				checkCommissionRateAndSetStatus(mutValidatorRow, *msgEditValidatorEvent.MaybeCommissionRate, msgEditValidatorEvent.ValidatorAddress)
 				mutValidatorRow.CommissionRate = *msgEditValidatorEvent.MaybeCommissionRate
 			}
 			if msgEditValidatorEvent.MaybeMinSelfDelegation != nil {
@@ -508,6 +533,27 @@ func (projection *Validator) projectValidatorView(
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func checkCommissionRateAndSetStatus(mutValidatorRow *view.ValidatorRow, newRateString string, validatorAddress string) error {
+	currentRate, err := strconv.ParseFloat(mutValidatorRow.CommissionRate, 32)
+	if err != nil {
+		return fmt.Errorf(
+			"error parsing current commission rate %s from view", validatorAddress,
+		)
+	}
+	newRate, err := strconv.ParseFloat(newRateString, 32)
+	if err != nil {
+		return fmt.Errorf(
+			"error parsing new commission rate %s from view", validatorAddress,
+		)
+	}
+
+	if newRate-currentRate > 0.1 {
+		mutValidatorRow.Status = constants.ATTENTION
 	}
 
 	return nil

@@ -147,6 +147,9 @@ func (validatorActivitiesView *ValidatorActivities) List(
 	if filter.MaybeOperatorAddress != nil {
 		stmtBuilder = stmtBuilder.Where("operator_address = ?", *filter.MaybeOperatorAddress)
 	}
+	if filter.Last24hrAtBlockTime != nil {
+		stmtBuilder = stmtBuilder.Where("block_time <= ? - INTERVAL '24 HOURS'", *filter.Last24hrAtBlockTime)
+	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
@@ -225,6 +228,7 @@ func (validatorActivitiesView *ValidatorActivities) List(
 type ValidatorActivitiesListFilter struct {
 	MaybeOperatorAddress      *string
 	MaybeConsensusNodeAddress *string
+	Last24hrAtBlockTime       *utctime.UTCTime
 }
 
 type ValidatorActivitiesListOrder struct {
