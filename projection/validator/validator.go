@@ -412,7 +412,8 @@ func (projection *Validator) projectValidatorView(
 					"error getting existing validator %s from view", msgEditValidatorEvent.ValidatorAddress,
 				)
 			}
-
+			fmt.Println("===> msgEditValidatorEvent:", msgEditValidatorEvent)
+			fmt.Println("===> mutValidatorRow:", mutValidatorRow)
 			if msgEditValidatorEvent.Description.Moniker != DO_NOT_MODIFY {
 				mutValidatorRow.Moniker = msgEditValidatorEvent.Description.Moniker
 			}
