@@ -146,7 +146,7 @@ func (projection *AccountRawEvent) HandleEvents(height int64, events []event_ent
 	}
 
 	for i := 0; i < accountToAccountRawEventRowMap.Len(); i++ {
-		row, err := accountToAccountRawEventRowMap.GetByOrder(i)
+		row, err := accountToAccountRawEventRowMap.GetByIndex(i)
 		if err != nil {
 			return fmt.Errorf("error fetch ordered map of account raw event row: %w", err)
 		}
@@ -204,7 +204,7 @@ func (m *accountToAccountRawEventRowOrderedMap) Set(account string, row view.Acc
 	m.orderList = append(m.orderList, account)
 }
 
-func (m *accountToAccountRawEventRowOrderedMap) GetByOrder(index int) (*view.AccountRawEventRow, error) {
+func (m *accountToAccountRawEventRowOrderedMap) GetByIndex(index int) (*view.AccountRawEventRow, error) {
 	if index == 0 && len(m.orderList) == 0 {
 		return nil, fmt.Errorf("index out of bound")
 	} else if len(m.orderList) <= index {
