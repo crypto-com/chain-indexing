@@ -180,7 +180,7 @@ func (eventsView *AccountRawEventsView) FindById(id int64) (*AccountRawEventRow,
 	}
 	accountRawEvent.BlockTime = *blockTime
 
-	var accountRawEventData AccountRawEventRowData
+	var accountRawEventData []AccountRawEventRowData
 	if unmarshalErr := jsoniter.Unmarshal([]byte(*accountRawEventDataJSON), &accountRawEventData); unmarshalErr != nil {
 		return nil, fmt.Errorf("error unmarshalling account raw event data JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 	}
@@ -267,7 +267,7 @@ func (eventsView *AccountRawEventsView) List(
 		}
 		accountRawEvent.BlockTime = *blockTime
 
-		var accountRawEventData AccountRawEventRowData
+		var accountRawEventData []AccountRawEventRowData
 		if unmarshalErr := jsoniter.Unmarshal([]byte(*accountRawEventDataJSON), &accountRawEventData); unmarshalErr != nil {
 			return nil, nil, fmt.Errorf("error unmarshalling account raw event data JSON: %v: %w", unmarshalErr, rdb.ErrQuery)
 		}
@@ -334,12 +334,12 @@ type AccountRawEventsListOrder struct {
 }
 
 type AccountRawEventRow struct {
-	MaybeId     *int64                 `json:"id"`
-	Account     string                 `json:"account"`
-	BlockHeight int64                  `json:"blockHeight"`
-	BlockHash   string                 `json:"blockHash"`
-	BlockTime   utctime.UTCTime        `json:"blockTime"`
-	Data        AccountRawEventRowData `json:"data"`
+	MaybeId     *int64                   `json:"id"`
+	Account     string                   `json:"account"`
+	BlockHeight int64                    `json:"blockHeight"`
+	BlockHash   string                   `json:"blockHash"`
+	BlockTime   utctime.UTCTime          `json:"blockTime"`
+	Data        []AccountRawEventRowData `json:"data"`
 }
 
 type AccountRawEventRowData struct {
