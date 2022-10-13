@@ -148,7 +148,8 @@ func (validatorActivitiesView *ValidatorActivities) List(
 		stmtBuilder = stmtBuilder.Where("operator_address = ?", *filter.MaybeOperatorAddress)
 	}
 	if filter.Last24hrAtBlockTime != nil {
-		stmtBuilder = stmtBuilder.Where("block_time >= ?", filter.Last24hrAtBlockTime.UnixNano()-24*60*60*100*1000000)
+		// stmtBuilder = stmtBuilder.Where("block_time >= ?", filter.Last24hrAtBlockTime.UnixNano()-1*60*1000*1000000) // last 24 hours
+		stmtBuilder = stmtBuilder.Where("block_time >= ?", filter.Last24hrAtBlockTime.UnixNano()-24*60*60*1000*1000000) // last 24 hours
 	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
@@ -160,7 +161,7 @@ func (validatorActivitiesView *ValidatorActivities) List(
 			if filter.MaybeOperatorAddress != nil {
 				identity = *filter.MaybeOperatorAddress
 			} else if filter.MaybeConsensusNodeAddress != nil {
-				validatorsView := NewValidators(rdbHandle)
+				validatorsView := NewValidatorsView(rdbHandle)
 				validator, err := validatorsView.FindBy(ValidatorIdentity{
 					MaybeConsensusNodeAddress: filter.MaybeConsensusNodeAddress,
 				})

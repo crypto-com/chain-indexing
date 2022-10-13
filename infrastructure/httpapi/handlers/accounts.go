@@ -22,7 +22,7 @@ type Accounts struct {
 	logger applogger.Logger
 
 	accountsView   account_view.Accounts
-	validatorsView *validator_view.Validators
+	validatorsView validator_view.Validators
 	cosmosClient   cosmosapp.Client
 
 	validatorAddressPrefix string
@@ -40,7 +40,7 @@ func NewAccounts(
 		}),
 
 		account_view.NewAccountsView(rdbHandle),
-		validator_view.NewValidators(rdbHandle),
+		validator_view.NewValidatorsView(rdbHandle),
 		cosmosClient,
 
 		validatorAddressPrefix,

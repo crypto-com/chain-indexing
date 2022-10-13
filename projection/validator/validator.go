@@ -24,6 +24,13 @@ import (
 
 var _ projection_entity.Projection = &Validator{}
 
+var (
+	NewValidatorsView            = view.NewValidatorsView
+	NewValidatorActivitiess      = view.NewValidatorActivities
+	NewValidatorActivitiessTotal = view.NewValidatorActivitiesTotal
+	UpdateLastHandledEventHeight = (*Validator).UpdateLastHandledEventHeight
+)
+
 const DO_NOT_MODIFY = "[do-not-modify]"
 
 type Validator struct {
@@ -106,7 +113,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 	}()
 
 	rdbTxHandle := rdbTx.ToHandle()
-	validatorsView := view.NewValidators(rdbTxHandle)
+	validatorsView := view.NewValidatorsView(rdbTxHandle)
 	validatorBlockCommitmentsView := view.NewValidatorBlockCommitments(rdbTxHandle)
 	validatorBlockCommitmentsTotalView := view.NewValidatorBlockCommitmentsTotal(rdbTxHandle)
 	validatorActivitiesView := view.NewValidatorActivities(rdbTxHandle)
@@ -126,12 +133,12 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 		}
 	}
 
-	if projectErr := projection.projectValidatorView(validatorsView, validatorActivitiesView, blockTime, height, events); projectErr != nil {
+	if projectErr := projection.projectValidatorView(&validatorsView, validatorActivitiesView, blockTime, height, events); projectErr != nil {
 		return fmt.Errorf("error projecting validator view: %v", projectErr)
 	}
 
 	if projectErr := projection.projectValidatorActivitiesView(
-		validatorsView,
+		&validatorsView,
 		validatorActivitiesView,
 		validatorActivitiesTotalView,
 		blockHash,
@@ -328,7 +335,7 @@ func (projection *Validator) projectValidatorView(
 			}
 
 			// Validator re-joins
-			isJoined, joinedAtBlockHeight, err := validatorsView.LastJoinedBlockHeight(
+			isJoined, joinedAtBlockHeight, err := (*validatorsView).LastJoinedBlockHeight(
 				validatorRow.OperatorAddress, validatorRow.ConsensusNodeAddress,
 			)
 			if err != nil {
@@ -338,10 +345,11 @@ func (projection *Validator) projectValidatorView(
 				validatorRow.JoinedAtBlockHeight = joinedAtBlockHeight
 			}
 
-			if err := validatorsView.Upsert(&validatorRow); err != nil {
+			if err := (*validatorsView).Upsert(&validatorRow); err != nil {
 				return fmt.Errorf("error inserting new validator into view: %v", err)
 			}
 		} else if msgCreateValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
+			fmt.Println("===> projection", projection)
 			projection.logger.Debug("handling MsgCreateValidator event")
 			tendermintPubkey, err := base64.StdEncoding.DecodeString(msgCreateValidatorEvent.TendermintPubkey)
 			if err != nil {
@@ -387,7 +395,7 @@ func (projection *Validator) projectValidatorView(
 			}
 
 			// Validator re-joins
-			isJoined, joinedAtBlockHeight, err := validatorsView.LastJoinedBlockHeight(
+			isJoined, joinedAtBlockHeight, err := (*validatorsView).LastJoinedBlockHeight(
 				validatorRow.OperatorAddress, validatorRow.ConsensusNodeAddress,
 			)
 			if err != nil {
@@ -397,7 +405,7 @@ func (projection *Validator) projectValidatorView(
 				validatorRow.JoinedAtBlockHeight = joinedAtBlockHeight
 			}
 
-			if err := validatorsView.Upsert(&validatorRow); err != nil {
+			if err := (*validatorsView).Upsert(&validatorRow); err != nil {
 				return fmt.Errorf("error inserting new validator into view: %v", err)
 			}
 		}
@@ -407,7 +415,7 @@ func (projection *Validator) projectValidatorView(
 		if msgEditValidatorEvent, ok := event.(*event_usecase.MsgEditValidator); ok {
 			projection.logger.Debug("handling MsgEditValidator event")
 
-			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
+			mutValidatorRow, err := (*validatorsView).FindBy(view.ValidatorIdentity{
 				MaybeOperatorAddress: &msgEditValidatorEvent.ValidatorAddress,
 			})
 
@@ -417,24 +425,13 @@ func (projection *Validator) projectValidatorView(
 				)
 			}
 
-			mutValidatorActivities, _, err := validatorActivities.List(
-				view.ValidatorActivitiesListFilter{
-					Last24hrAtBlockTime:  &blockTime,
-					MaybeOperatorAddress: &msgEditValidatorEvent.ValidatorAddress,
-				},
-				view.ValidatorActivitiesListOrder{},
-				&pagination_interface.Pagination{},
-			)
-			if err != nil {
-				fmt.Println("===> err:", err)
-
-				return fmt.Errorf(
-					"error getting existing validator activities %s from view", msgEditValidatorEvent.ValidatorAddress,
-				)
-			}
-
 			if msgEditValidatorEvent.Description.Moniker != DO_NOT_MODIFY {
-				checkAttentionAndSetStatus(mutValidatorRow, &mutValidatorActivities)
+				errAttentionStatus := checkAttentionOnNumOfChanges(mutValidatorRow, validatorActivities, &blockTime, &msgEditValidatorEvent.ValidatorAddress)
+				if errAttentionStatus != nil {
+					return fmt.Errorf(
+						"error checking attention status validator %s from view", msgEditValidatorEvent.ValidatorAddress,
+					)
+				}
 				mutValidatorRow.Moniker = msgEditValidatorEvent.Description.Moniker
 			}
 			if msgEditValidatorEvent.Description.Identity != DO_NOT_MODIFY {
@@ -451,20 +448,33 @@ func (projection *Validator) projectValidatorView(
 			}
 
 			if msgEditValidatorEvent.MaybeCommissionRate != nil {
-				checkAttentionAndSetStatus(mutValidatorRow, &mutValidatorActivities)
+				errAttentionOnNumOfChanges := checkAttentionOnNumOfChanges(mutValidatorRow, validatorActivities, &blockTime, &msgEditValidatorEvent.ValidatorAddress)
+				if errAttentionOnNumOfChanges != nil {
+					return fmt.Errorf(
+						"error checking attention status on number of changes validator %s from view", msgEditValidatorEvent.ValidatorAddress,
+					)
+				}
+
+				errAttentionOnCommission := checkAttentionOnCommission(mutValidatorRow, *msgEditValidatorEvent.MaybeCommissionRate, mutValidatorRow.CommissionRate, msgEditValidatorEvent.ValidatorAddress)
+				if errAttentionOnCommission != nil {
+					return fmt.Errorf(
+						"error checking attention status on commission rate validator %s from view", msgEditValidatorEvent.ValidatorAddress,
+					)
+				}
+
 				mutValidatorRow.CommissionRate = *msgEditValidatorEvent.MaybeCommissionRate
 			}
 			if msgEditValidatorEvent.MaybeMinSelfDelegation != nil {
 				mutValidatorRow.MinSelfDelegation = *msgEditValidatorEvent.MaybeMinSelfDelegation
 			}
 
-			if err := validatorsView.Update(mutValidatorRow); err != nil {
+			if err := (*validatorsView).Update(mutValidatorRow); err != nil {
 				return fmt.Errorf("error updating validator into view: %v", err)
 			}
 		} else if validatorJailedEvent, ok := event.(*event_usecase.ValidatorJailed); ok {
 			projection.logger.Debug("handling ValidatorJailed event")
 
-			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
+			mutValidatorRow, err := (*validatorsView).FindBy(view.ValidatorIdentity{
 				MaybeConsensusNodeAddress: &validatorJailedEvent.ConsensusNodeAddress,
 			})
 			if err != nil {
@@ -476,13 +486,13 @@ func (projection *Validator) projectValidatorView(
 			mutValidatorRow.Status = constants.JAILED
 			mutValidatorRow.Jailed = true
 
-			if err := validatorsView.Update(mutValidatorRow); err != nil {
+			if err := (*validatorsView).Update(mutValidatorRow); err != nil {
 				return fmt.Errorf("error updating validator into view: %v", err)
 			}
 		} else if msgUnjailEvent, ok := event.(*event_usecase.MsgUnjail); ok {
 			projection.logger.Debug("handling MsgUnjail event")
 
-			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
+			mutValidatorRow, err := (*validatorsView).FindBy(view.ValidatorIdentity{
 				MaybeOperatorAddress: &msgUnjailEvent.ValidatorAddr,
 			})
 			if err != nil {
@@ -493,7 +503,7 @@ func (projection *Validator) projectValidatorView(
 			mutValidatorRow.Status = constants.INACTIVE
 			mutValidatorRow.Jailed = false
 
-			if err := validatorsView.Update(mutValidatorRow); err != nil {
+			if err := (*validatorsView).Update(mutValidatorRow); err != nil {
 				return fmt.Errorf("error updating validator into view: %v", err)
 			}
 		} else if powerChangedEvent, ok := event.(*event_usecase.PowerChanged); ok {
@@ -510,7 +520,7 @@ func (projection *Validator) projectValidatorView(
 				return fmt.Errorf("error converting tendermint pubkey to consensus pubkey")
 			}
 
-			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
+			mutValidatorRow, err := (*validatorsView).FindBy(view.ValidatorIdentity{
 				MaybeConsensusNodeAddress: &consensusNodeAddress,
 			})
 			if err != nil {
@@ -524,7 +534,7 @@ func (projection *Validator) projectValidatorView(
 				mutValidatorRow.Status = constants.BONDED
 			}
 
-			if err := validatorsView.Update(mutValidatorRow); err != nil {
+			if err := (*validatorsView).Update(mutValidatorRow); err != nil {
 				return fmt.Errorf("error updating validator into view: %v", err)
 			}
 		}
@@ -533,15 +543,51 @@ func (projection *Validator) projectValidatorView(
 
 	return nil
 }
+func checkAttentionOnCommission(mutValidatorRow *view.ValidatorRow, maybeCommissionRate string, commissionRate string, validatorAddress string) error {
+	newCommission, newCommissionErr := strconv.ParseFloat(maybeCommissionRate, 64)
+	if newCommissionErr != nil {
+		return fmt.Errorf(
+			"error cnoverting new commission rate to float validator %s from view", validatorAddress,
+		)
+	}
+	currentCommission, currentCommissionErr := strconv.ParseFloat(commissionRate, 64)
+	if currentCommissionErr != nil {
+		return fmt.Errorf(
+			"error cnoverting current commission rate to float validator %s from view", validatorAddress,
+		)
+	}
 
-func checkAttentionAndSetStatus(mutValidatorRow *view.ValidatorRow, mutValidatorActivities *[]view.ValidatorActivityRow) error {
+	if newCommission-currentCommission > 0.1 && mutValidatorRow.Status == constants.BONDED {
+		mutValidatorRow.Status = constants.ATTENTION
+	}
+
+	return nil
+}
+func checkAttentionOnNumOfChanges(mutValidatorRow *view.ValidatorRow, validatorActivities *view.ValidatorActivities, blockTime *utctime.UTCTime, validatorAddress *string) error {
 	attentionCounter := map[string]int{
 		"moniker":        0,
 		"commissionRate": 0,
 	}
 
+	fmt.Println("===> blockTime", *blockTime)
+	mutValidatorActivities, _, err := validatorActivities.List(
+		view.ValidatorActivitiesListFilter{
+			Last24hrAtBlockTime:  blockTime,
+			MaybeOperatorAddress: validatorAddress,
+		},
+		view.ValidatorActivitiesListOrder{},
+		&pagination_interface.Pagination{},
+	)
+	if err != nil {
+		return fmt.Errorf(
+			"error getting existing validator activities %s from view", *validatorAddress,
+		)
+	}
+
+	fmt.Println("===> mutValidatorActivities:", mutValidatorActivities, *validatorAddress)
+
 	if mutValidatorRow.Status == constants.BONDED {
-		for _, activity := range *mutValidatorActivities {
+		for _, activity := range mutValidatorActivities {
 			content := activity.Data.Content.(map[string]interface{})
 			pastDescription := content["description"].(map[string]interface{})
 
