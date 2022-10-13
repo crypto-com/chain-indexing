@@ -2,6 +2,7 @@ package validator_test
 
 import (
 	"fmt"
+	"math/big"
 	"testing"
 
 	test_logger "github.com/crypto-com/chain-indexing/external/logger/test"
@@ -16,8 +17,8 @@ import (
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/crypto-com/chain-indexing/projection/validator"
+	"github.com/crypto-com/chain-indexing/projection/validator/view"
 	validator_view "github.com/crypto-com/chain-indexing/projection/validator/view"
-	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	model_usecase "github.com/crypto-com/chain-indexing/usecase/model"
@@ -85,12 +86,12 @@ func TestValidator_HandleEvents(t *testing.T) {
 						Signatures:      nil,
 					},
 				},
-				event_usecase.NewMsgCreateValidator(event_usecase.MsgCommonParams{
+				event_usecase.NewMsgEditValidator(event_usecase.MsgCommonParams{
 					BlockHeight: 1,
 					TxHash:      "E69985AC8168383A81B7952DBE03EB9B3400FF80AEC0F362369DD7F38B1C2FE9",
 					TxSuccess:   true,
 					MsgIndex:    0,
-				}, usecase_model.MsgCreateValidatorParams{
+				}, usecase_model.MsgEditValidatorParams{
 					Description: model.ValidatorDescription{
 						Moniker:         "mymonicker",
 						Identity:        "myidentity",
@@ -98,31 +99,51 @@ func TestValidator_HandleEvents(t *testing.T) {
 						SecurityContact: "mysecuritycontact",
 						Details:         "mydetails",
 					},
-					Commission: model.ValidatorCommission{
-						Rate:          "0.100000000000000000",
-						MaxRate:       "0.200000000000000000",
-						MaxChangeRate: "0.010000000000000000",
-					},
-					MinSelfDelegation: "1",
-					DelegatorAddress:  "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-					ValidatorAddress:  "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
-					TendermintPubkey:  "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
-					Amount:            coin.MustParseCoinNormalized("10basetcro"),
+					ValidatorAddress:       "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+					MaybeCommissionRate:    nil,
+					MaybeMinSelfDelegation: nil,
 				}),
 			},
 			MockFunc: func(events []event_entity.Event) (mocks []*testify_mock.Mock) {
-
-				// msgEvent, _ := events[2].(event_usecase.MsgEvent)
-
 				mockValidatorsView := validator_view.NewMockValidatorsView(nil).(*validator_view.MockValidatorsView)
 				mocks = append(mocks, &mockValidatorsView.Mock)
 
-				validator.NewValidatorsView = func(_ *rdb.Handle) validator_view.Validators {
-					return mockValidatorsView
-				}
-				// transaction.NewTransactions = func(_ *rdb.Handle) transaction_view.BlockTransactions {
-				// 	return mockValidatorsView
-				// }
+				operaterAddress := "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus"
+
+				id := int64(3)
+				impreciseUpTime := new(big.Float).SetFloat64(0.1)
+				dailyEditQuota := new(big.Int).SetInt64(1)
+
+				mockValidatorsView.
+					On("FindBy", view.ValidatorIdentity{
+						MaybeOperatorAddress: &operaterAddress,
+					}).Return(
+					&validator_view.ValidatorRow{
+						MaybeId:                 &id,
+						OperatorAddress:         operaterAddress,
+						ConsensusNodeAddress:    "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+						InitialDelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+						TendermintPubkey:        "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
+						TendermintAddress:       "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+						Status:                  "Attention",
+						Jailed:                  false,
+						JoinedAtBlockHeight:     1,
+						Power:                   "",
+						Moniker:                 "mymonicker",
+						Identity:                "myidentity",
+						Website:                 "mywebsite",
+						SecurityContact:         "mysecuritycontact",
+						Details:                 "mydetails",
+						CommissionRate:          "0.100000000000000000",
+						CommissionMaxRate:       "0.200000000000000000",
+						CommissionMaxChangeRate: "0.010000000000000000",
+						MinSelfDelegation:       "1",
+						TotalSignedBlock:        1,
+						TotalActiveBlock:        1,
+						ImpreciseUpTime:         impreciseUpTime,
+						VotedGovProposal:        dailyEditQuota,
+						DailyEditQuota:          1,
+					}, nil)
 
 				mockValidatorsView.On(
 					"Upsert",
@@ -156,6 +177,10 @@ func TestValidator_HandleEvents(t *testing.T) {
 					},
 				).Return(nil)
 
+				validator.NewValidatorsView = func(_ *rdb.Handle) validator_view.Validators {
+					return mockValidatorsView
+				}
+
 				return mocks
 			},
 		},
@@ -165,15 +190,13 @@ func TestValidator_HandleEvents(t *testing.T) {
 		mockRDbConn := NewMockRDbConn()
 		mockTx := NewMockRDbTx()
 		mockRDbConn.On("Begin").Return(mockTx, nil)
-		mocks := tc.MockFunc(tc.Events)
 
-		// We are not interested in testing the below function in unit test
-		// transaction.UpdateLastHandledEventHeight = func(_ *transaction.Transaction, _ *rdb.Handle, _ int64) error {
-		// 	return nil
-		// }
+		mocks := tc.MockFunc(tc.Events)
+		mocks = append(mocks, &mockRDbConn.Mock)
+		mocks = append(mocks, &mockTx.Mock)
+
 		fakeLogger := test_logger.NewFakeLogger()
 
-		// projection := NewValidatorProjection(mockRDbConn)
 		projection := validator.NewValidator(fakeLogger, mockRDbConn, prefixConsensusAddress, nil)
 		err := projection.HandleEvents(1, tc.Events)
 		assert.NoError(t, err)

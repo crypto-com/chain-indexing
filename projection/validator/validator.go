@@ -349,7 +349,6 @@ func (projection *Validator) projectValidatorView(
 				return fmt.Errorf("error inserting new validator into view: %v", err)
 			}
 		} else if msgCreateValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
-			fmt.Println("===> projection", projection)
 			projection.logger.Debug("handling MsgCreateValidator event")
 			tendermintPubkey, err := base64.StdEncoding.DecodeString(msgCreateValidatorEvent.TendermintPubkey)
 			if err != nil {
