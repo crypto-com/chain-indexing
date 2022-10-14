@@ -25,7 +25,7 @@ import (
 var _ projection_entity.Projection = &Validator{}
 
 var (
-	NewValidatorsView            = view.NewValidatorsView
+	NewValidators                = view.NewValidatorsView
 	NewValidatorActivitiess      = view.NewValidatorActivities
 	NewValidatorActivitiessTotal = view.NewValidatorActivitiesTotal
 	UpdateLastHandledEventHeight = (*Validator).UpdateLastHandledEventHeight
@@ -582,8 +582,6 @@ func checkAttentionOnNumOfChanges(mutValidatorRow *view.ValidatorRow, validatorA
 			"error getting existing validator activities %s from view", *validatorAddress,
 		)
 	}
-
-	fmt.Println("===> mutValidatorActivities:", mutValidatorActivities, *validatorAddress)
 
 	if mutValidatorRow.Status == constants.BONDED {
 		for _, activity := range mutValidatorActivities {

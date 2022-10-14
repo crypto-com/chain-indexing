@@ -1,16 +1,16 @@
 package view
 
 import (
+	"fmt"
 	"math/big"
-
-	testify_mock "github.com/stretchr/testify/mock"
 
 	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/stretchr/testify/mock"
 )
 
 type MockValidatorsView struct {
-	testify_mock.Mock
+	mock.Mock
 }
 
 func NewMockValidatorsView(_ *rdb.Handle) Validators {
@@ -48,6 +48,7 @@ func (validatorsView *MockValidatorsView) Search(keyword string) ([]ValidatorRow
 }
 
 func (validatorsView *MockValidatorsView) FindBy(identity ValidatorIdentity) (*ValidatorRow, error) {
+	fmt.Println("===> s2")
 	mockArgs := validatorsView.Called(identity)
 	row, _ := mockArgs.Get(0).(*ValidatorRow)
 	return row, mockArgs.Error(0)

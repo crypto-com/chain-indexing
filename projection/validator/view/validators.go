@@ -20,14 +20,11 @@ type Validators interface {
 		operatorAddress string,
 		consensusNodeAddress string,
 	) (bool, int64, error)
-
 	Upsert(validator *ValidatorRow) error
 	Insert(validator *ValidatorRow) error
-
 	totalPower() (*big.Float, error)
 	Search(keyword string) ([]ValidatorRow, error)
 	FindBy(identity ValidatorIdentity) (*ValidatorRow, error)
-
 	Update(validator *ValidatorRow) error
 	UpdateAllValidatorUpTime(validators []ValidatorRow) error
 	ListAll(
