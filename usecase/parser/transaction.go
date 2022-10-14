@@ -20,7 +20,7 @@ import (
 
 func ParseTransactionCommands(
 	logger applogger.Logger,
-	txs []model.Tx,
+	txs []model.CosmosTxWithTxHash,
 	cosmosClient cosmosapp_interface.Client,
 	blockResults *model.BlockResults,
 	accountAddressPrefix string,
@@ -29,7 +29,7 @@ func ParseTransactionCommands(
 	blockHeight := blockResults.Height
 	cmds := make([]command.Command, 0, len(blockResults.TxsResults))
 	for i, tx := range txs {
-		txHash := tx.TxResponse.TxHash
+		txHash := tx.TxHash
 		txsResult := blockResults.TxsResults[i]
 
 		var log string
@@ -43,7 +43,7 @@ func ParseTransactionCommands(
 			}
 		}
 
-		fee, err := utils.SumAmount(tx.Tx.AuthInfo.Fee.Amount)
+		fee, err := utils.SumAmount(tx.AuthInfo.Fee.Amount)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing transaction fee: %v", err)
 		}
@@ -56,7 +56,7 @@ func ParseTransactionCommands(
 		if err != nil {
 			return nil, fmt.Errorf("error parsing gas wanted: %v", err)
 		}
-		timeoutHeight, err := strconv.ParseInt(tx.Tx.Body.TimeoutHeight, 10, 64)
+		timeoutHeight, err := strconv.ParseInt(tx.Body.TimeoutHeight, 10, 64)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing timeout height: %v", err)
 		}
@@ -65,7 +65,7 @@ func ParseTransactionCommands(
 			"submodule": "ParseSignerInfosToTransactionSigners",
 		})
 		signers, parseSignerInfosErr := ParseSignerInfosToTransactionSigners(
-			parseSignerInfosToTransactionSignersLogger, cosmosClient, tx.Tx.AuthInfo.SignerInfos, accountAddressPrefix, possibleSignerAddresses, txHash,
+			parseSignerInfosToTransactionSignersLogger, cosmosClient, tx.AuthInfo.SignerInfos, accountAddressPrefix, possibleSignerAddresses, txHash,
 		)
 
 		if parseSignerInfosErr != nil {
@@ -77,14 +77,14 @@ func ParseTransactionCommands(
 			Index:         i,
 			Code:          txsResult.Code,
 			Log:           log,
-			MsgCount:      len(tx.Tx.Body.Messages),
+			MsgCount:      len(tx.Body.Messages),
 			Signers:       signers,
 			Fee:           fee,
-			FeePayer:      tx.Tx.AuthInfo.Fee.Payer,
-			FeeGranter:    tx.Tx.AuthInfo.Fee.Granter,
+			FeePayer:      tx.AuthInfo.Fee.Payer,
+			FeeGranter:    tx.AuthInfo.Fee.Granter,
 			GasWanted:     gasWanted,
 			GasUsed:       gasUsed,
-			Memo:          tx.Tx.Body.Memo,
+			Memo:          tx.Body.Memo,
 			TimeoutHeight: timeoutHeight,
 		}))
 
@@ -95,13 +95,13 @@ func ParseTransactionCommands(
 			Log:           log,
 			Signers:       signers,
 			Fee:           fee,
-			FeePayer:      tx.Tx.AuthInfo.Fee.Payer,
-			FeeGranter:    tx.Tx.AuthInfo.Fee.Granter,
+			FeePayer:      tx.AuthInfo.Fee.Payer,
+			FeeGranter:    tx.AuthInfo.Fee.Granter,
 			GasWanted:     gasWanted,
 			GasUsed:       gasUsed,
-			Memo:          tx.Tx.Body.Memo,
+			Memo:          tx.Body.Memo,
 			TimeoutHeight: timeoutHeight,
-			Messages:      tx.Tx.Body.Messages,
+			Messages:      tx.Body.Messages,
 		}))
 	}
 

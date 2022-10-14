@@ -26,7 +26,7 @@ func ParseBlockTxsMsgToCommands(
 	parserManager *utils.CosmosParserManager,
 	blockHeight int64,
 	blockResults *model.BlockResults,
-	txs []model.Tx,
+	txs []model.CosmosTxWithTxHash,
 	accountAddressPrefix string,
 	stakingDenom string,
 ) ([]command.Command, []string, error) {
@@ -34,7 +34,7 @@ func ParseBlockTxsMsgToCommands(
 	var addresses []string
 
 	for i, tx := range txs {
-		txHash := tx.TxResponse.TxHash
+		txHash := tx.TxHash
 		txSuccess := true
 		txsResult := blockResults.TxsResults[i]
 
@@ -42,7 +42,7 @@ func ParseBlockTxsMsgToCommands(
 			txSuccess = false
 		}
 
-		for msgIndex, msg := range tx.Tx.Body.Messages {
+		for msgIndex, msg := range tx.Body.Messages {
 			msgCommonParams := event.MsgCommonParams{
 				BlockHeight: blockHeight,
 				TxHash:      txHash,

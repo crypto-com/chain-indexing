@@ -7,13 +7,11 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
-	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
-	"github.com/crypto-com/chain-indexing/usecase/model"
-
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	command_entity "github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/entity/event"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	chainfeed "github.com/crypto-com/chain-indexing/infrastructure/feed/chain"
 	"github.com/crypto-com/chain-indexing/infrastructure/metric/prometheus"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
@@ -240,14 +238,9 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		return nil, fmt.Errorf("error requesting chain block_results at height %d: %v", blockHeight, err)
 	}
 
-	txs := make([]model.Tx, 0)
-	for _, txHex := range block.Txs {
-		var tx *model.Tx
-		tx, err = manager.cosmosClient.Tx(parser.TxHash(txHex))
-		if err != nil {
-			return nil, fmt.Errorf("error requesting chain txs (%s) at height %d: %v", txHex, blockHeight, err)
-		}
-		txs = append(txs, *tx)
+	txs, err := manager.cosmosClient.TxsByHeight(blockHeight)
+	if err != nil {
+		return nil, fmt.Errorf("error requesting chain txs at height %d: %v", blockHeight, err)
 	}
 
 	parseBlockToCommandsLogger := manager.logger.WithFields(applogger.LogFields{

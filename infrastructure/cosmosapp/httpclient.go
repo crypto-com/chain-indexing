@@ -13,6 +13,7 @@ import (
 
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/model"
+	"github.com/crypto-com/chain-indexing/usecase/parser"
 	jsoniter "github.com/json-iterator/go"
 
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
@@ -735,6 +736,52 @@ func ParseTxsResp(rawRespReader io.Reader) (*model.Tx, error) {
 	}
 
 	return tx, nil
+}
+
+func (client *HTTPClient) TxsByHeight(height int64) ([]model.CosmosTxWithTxHash, error) {
+	rawRespBody, rawRespStatusCode, err := client.rawRequest(
+		fmt.Sprintf(
+			"%s/%d",
+			client.getUrl("tx", "txs/block"),
+			height,
+		), "",
+	)
+	if err != nil {
+		return nil, err
+	} else if rawRespStatusCode != 200 && rawRespStatusCode != 400 {
+		return nil, fmt.Errorf("error requesting TxsByHeight at %d: %s", height, rawRespStatusCode)
+	}
+	defer rawRespBody.Close()
+
+	txsExisted := rawRespStatusCode != 400
+
+	var txs []model.CosmosTxWithTxHash
+	if txsExisted {
+		txs, err = ParseTxsByHeightResp(rawRespBody)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing TxByHeight(%d): %v", height, err)
+		}
+	}
+
+	return txs, nil
+}
+
+func ParseTxsByHeightResp(rawRespReader io.Reader) ([]model.CosmosTxWithTxHash, error) {
+	var txsResp TxsByHeightResp
+	if err := jsoniter.NewDecoder(rawRespReader).Decode(&txsResp); err != nil {
+		return nil, err
+	}
+
+	txs := make([]model.CosmosTxWithTxHash, 0)
+	for i := range txsResp.Txs {
+		tx := model.CosmosTxWithTxHash{
+			CosmosTx: txsResp.Txs[i],
+			TxHash:   parser.TxHash(txsResp.Block.Data.Txs[i]),
+		}
+		txs = append(txs, tx)
+	}
+
+	return txs, nil
 }
 
 func (client *HTTPClient) getUrl(module string, method string) string {

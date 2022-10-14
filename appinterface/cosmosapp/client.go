@@ -28,6 +28,7 @@ type Client interface {
 	ProposalTally(id string) (Tally, error)
 
 	Tx(txHash string) (*model.Tx, error)
+	TxsByHeight(height int64) ([]model.CosmosTxWithTxHash, error)
 }
 
 var ErrAccountNotFound = errors.New("account not found")

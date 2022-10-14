@@ -19,7 +19,7 @@ func ParseBlockToCommands(
 	block *usecase_model.Block,
 	rawBlock *usecase_model.RawBlock,
 	blockResults *usecase_model.BlockResults,
-	txs []usecase_model.Tx,
+	txs []usecase_model.CosmosTxWithTxHash,
 	accountAddressPrefix string,
 	bondingDenom string,
 ) ([]entity_command.Command, error) {
