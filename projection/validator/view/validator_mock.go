@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/crypto-com/chain-indexing/appinterface/pagination"
 	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/stretchr/testify/mock"
@@ -22,8 +23,9 @@ func (validatorsView *MockValidatorsView) LastJoinedBlockHeight(
 	consensusNodeAddress string,
 ) (bool, int64, error) {
 	mockArgs := validatorsView.Called(operatorAddress, consensusNodeAddress)
-	rows, _ := mockArgs.Get(0).(int64)
-	return true, rows, mockArgs.Error(0)
+	result0, _ := mockArgs.Get(0).(bool)
+	result1, _ := mockArgs.Get(1).(int64)
+	return result0, result1, mockArgs.Error(2)
 }
 
 func (validatorsView *MockValidatorsView) Upsert(validator *ValidatorRow) error {
@@ -35,10 +37,11 @@ func (validatorsView *MockValidatorsView) Insert(validator *ValidatorRow) error 
 	mockArgs := validatorsView.Called(validator)
 	return mockArgs.Error(0)
 }
+
 func (validatorsView *MockValidatorsView) totalPower() (*big.Float, error) {
 	mockArgs := validatorsView.Called()
-	rows, _ := mockArgs.Get(0).(big.Float)
-	return &rows, mockArgs.Error(0)
+	row, _ := mockArgs.Get(0).(*big.Float)
+	return row, mockArgs.Error(2)
 }
 
 func (validatorsView *MockValidatorsView) Search(keyword string) ([]ValidatorRow, error) {
@@ -51,7 +54,7 @@ func (validatorsView *MockValidatorsView) FindBy(identity ValidatorIdentity) (*V
 	fmt.Println("===> s2")
 	mockArgs := validatorsView.Called(identity)
 	row, _ := mockArgs.Get(0).(*ValidatorRow)
-	return row, mockArgs.Error(0)
+	return row, mockArgs.Error(1)
 }
 
 func (validatorsView *MockValidatorsView) Update(validator *ValidatorRow) error {
@@ -64,28 +67,21 @@ func (validatorsView *MockValidatorsView) UpdateAllValidatorUpTime(validators []
 	return mockArgs.Error(0)
 }
 
-func (validatorsView *MockValidatorsView) ListAll(
-	filter ValidatorsListFilter,
-	order ValidatorsListOrder,
-) ([]ValidatorRow, error) {
+func (validatorsView *MockValidatorsView) ListAll(filter ValidatorsListFilter, order ValidatorsListOrder) ([]ValidatorRow, error) {
 	mockArgs := validatorsView.Called(filter, order)
 	rows, _ := mockArgs.Get(0).([]ValidatorRow)
-	return rows, mockArgs.Error(2)
+	return rows, mockArgs.Error(0)
 }
 
-func (validatorsView *MockValidatorsView) List(
-	filter ValidatorsListFilter,
-	order ValidatorsListOrder,
-	pagination *pagination_interface.Pagination,
-) ([]ListValidatorRow, *pagination_interface.PaginationResult, error) {
+func (validatorsView *MockValidatorsView) List(filter ValidatorsListFilter, order ValidatorsListOrder, pagination *pagination_interface.Pagination) ([]ListValidatorRow, *pagination.PaginationResult, error) {
 	mockArgs := validatorsView.Called(filter, order, pagination)
-	rows, _ := mockArgs.Get(0).([]ListValidatorRow)
-	paginationResult, _ := mockArgs.Get(1).(*pagination_interface.PaginationResult)
-	return rows, paginationResult, mockArgs.Error(2)
+	result0, _ := mockArgs.Get(0).([]ListValidatorRow)
+	result1, _ := mockArgs.Get(1).(*pagination_interface.PaginationResult)
+	return result0, result1, mockArgs.Error(2)
 }
 
 func (validatorsView *MockValidatorsView) Count(filter CountFilter) (int64, error) {
-	mockArgs := validatorsView.Called()
-	result, _ := mockArgs.Get(0).(int64)
-	return result, mockArgs.Error(1)
+	mockArgs := validatorsView.Called(filter)
+	total, _ := mockArgs.Get(0).(int64)
+	return total, mockArgs.Error(1)
 }

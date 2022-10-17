@@ -132,7 +132,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 			blockProposer = blockCreatedEvent.Block.ProposerAddress
 		}
 	}
-
+	fmt.Println("====> HandleEvents:", &validatorsView, validatorsView)
 	if projectErr := projection.projectValidatorView(&validatorsView, validatorActivitiesView, blockTime, height, events); projectErr != nil {
 		return fmt.Errorf("error projecting validator view: %v", projectErr)
 	}
@@ -287,6 +287,8 @@ func (projection *Validator) projectValidatorView(
 	blockHeight int64,
 	events []event_entity.Event,
 ) error {
+	fmt.Println("====> inside projectValidatorView function:", &validatorsView, validatorsView)
+
 	// MsgCreateValidator should be handled first
 	for _, event := range events {
 		if createGenesisValidator, ok := event.(*event_usecase.CreateGenesisValidator); ok {
@@ -413,6 +415,7 @@ func (projection *Validator) projectValidatorView(
 	for _, event := range events {
 		if msgEditValidatorEvent, ok := event.(*event_usecase.MsgEditValidator); ok {
 			projection.logger.Debug("handling MsgEditValidator event")
+			fmt.Println("===> s3", msgEditValidatorEvent.ValidatorAddress, &msgEditValidatorEvent.ValidatorAddress)
 
 			mutValidatorRow, err := (*validatorsView).FindBy(view.ValidatorIdentity{
 				MaybeOperatorAddress: &msgEditValidatorEvent.ValidatorAddress,
@@ -568,7 +571,6 @@ func checkAttentionOnNumOfChanges(mutValidatorRow *view.ValidatorRow, validatorA
 		"commissionRate": 0,
 	}
 
-	fmt.Println("===> blockTime", *blockTime)
 	mutValidatorActivities, _, err := validatorActivities.List(
 		view.ValidatorActivitiesListFilter{
 			Last24hrAtBlockTime:  blockTime,
