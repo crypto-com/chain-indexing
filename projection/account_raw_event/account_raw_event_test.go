@@ -2001,6 +2001,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
 					return mockAccountRawEventsView
 				}
+
 				mockAccountRawEventsView.On(
 					"InsertAll",
 					[]account_raw_event_view.AccountRawEventRow{
