@@ -74,8 +74,8 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_BLOCK_RESULTS_RESP,
 			))
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_TXS_RESP)
-			txs := []model.Tx{*tx}
+			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_TXS_RESP)
+			txs := []model.CosmosTxWithHash{*tx}
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
@@ -166,8 +166,8 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_ERROR_BLOCK_RESULTS_RESP,
 			))
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_ERROR_TXS_RESP)
-			txs := []model.Tx{*tx}
+			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_ERROR_TXS_RESP)
+			txs := []model.CosmosTxWithHash{*tx}
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
@@ -318,17 +318,17 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_BLOCK_RESULTS_RESP,
 			))
 
-			tx1 := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_1)
-			tx2 := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_2)
-			tx3 := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_3)
-			tx4 := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_4)
-			tx5 := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_5)
-			tx6 := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_6)
-			tx7 := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_7)
-			tx8 := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_8)
-			tx9 := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_9)
-			tx10 := mustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_10)
-			txs := []model.Tx{*tx1, *tx2, *tx3, *tx4, *tx5, *tx6, *tx7, *tx8, *tx9, *tx10}
+			tx1 := MustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_1)
+			tx2 := MustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_2)
+			tx3 := MustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_3)
+			tx4 := MustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_4)
+			tx5 := MustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_5)
+			tx6 := MustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_6)
+			tx7 := MustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_7)
+			tx8 := MustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_8)
+			tx9 := MustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_9)
+			tx10 := MustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_10)
+			txs := []model.CosmosTxWithHash{*tx1, *tx2, *tx3, *tx4, *tx5, *tx6, *tx7, *tx8, *tx9, *tx10}
 
 			accountAddressPrefix := "crc"
 			stakingDenom := "basecro"

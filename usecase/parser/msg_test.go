@@ -5,10 +5,9 @@ import (
 	"strings"
 
 	"github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
-	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
-
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	"github.com/crypto-com/chain-indexing/usecase/model"
+	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 )
 
 func mustParseBlockResp(rawResp string) (*model.Block, *model.RawBlock) {
@@ -40,12 +39,15 @@ func mustParseGenesisResp(rawResp string, strictParsing bool) *genesis.Genesis {
 	return genesis
 }
 
-func mustParseTxsResp(rawResp string) *model.Tx {
+func MustParseTxsResp(rawResp string) *model.CosmosTxWithHash {
 	tx, err := cosmosapp.ParseTxsResp(strings.NewReader(rawResp))
 
 	if err != nil {
 		panic(fmt.Sprintf("error parsing block results response: %v", err))
 	}
 
-	return tx
+	return &model.CosmosTxWithHash{
+		Tx:   tx.Tx,
+		Hash: tx.TxResponse.TxHash,
+	}
 }
