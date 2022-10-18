@@ -427,7 +427,7 @@ func (projection *Validator) projectValidatorView(
 			}
 
 			if msgEditValidatorEvent.Description.Moniker != DO_NOT_MODIFY {
-				errAttentionStatus := checkAttentionOnNumOfChanges(mutValidatorRow, validatorActivities, &blockTime, &msgEditValidatorEvent.ValidatorAddress)
+				errAttentionStatus := checkAttentionOnNumOfChanges(mutValidatorRow, validatorActivities, &blockTime, &msgEditValidatorEvent.ValidatorAddress, "Moniker")
 				if errAttentionStatus != nil {
 					return fmt.Errorf(
 						"error checking attention status validator %s from view", msgEditValidatorEvent.ValidatorAddress,
@@ -449,7 +449,7 @@ func (projection *Validator) projectValidatorView(
 			}
 
 			if msgEditValidatorEvent.MaybeCommissionRate != nil {
-				errAttentionOnNumOfChanges := checkAttentionOnNumOfChanges(mutValidatorRow, validatorActivities, &blockTime, &msgEditValidatorEvent.ValidatorAddress)
+				errAttentionOnNumOfChanges := checkAttentionOnNumOfChanges(mutValidatorRow, validatorActivities, &blockTime, &msgEditValidatorEvent.ValidatorAddress, "commissionRate")
 				if errAttentionOnNumOfChanges != nil {
 					return fmt.Errorf(
 						"error checking attention status on number of changes validator %s from view", msgEditValidatorEvent.ValidatorAddress,
@@ -564,11 +564,13 @@ func checkAttentionOnCommission(mutValidatorRow *view.ValidatorRow, maybeCommiss
 
 	return nil
 }
-func checkAttentionOnNumOfChanges(mutValidatorRow *view.ValidatorRow, validatorActivities *view.ValidatorActivities, blockTime *utctime.UTCTime, validatorAddress *string) error {
+func checkAttentionOnNumOfChanges(mutValidatorRow *view.ValidatorRow, validatorActivities *view.ValidatorActivities, blockTime *utctime.UTCTime, validatorAddress *string, editField string) error {
 	attentionCounter := map[string]int{
-		"moniker":        0,
+		"Moniker":        0,
 		"commissionRate": 0,
 	}
+	attentionCounter[editField]++
+
 	mutValidatorActivities, _, err := (*validatorActivities).List(
 		view.ValidatorActivitiesListFilter{
 			Last24hrAtBlockTime:  blockTime,
@@ -582,20 +584,21 @@ func checkAttentionOnNumOfChanges(mutValidatorRow *view.ValidatorRow, validatorA
 			"error getting existing validator activities %s from view", *validatorAddress,
 		)
 	}
-
+	// count previous changes
 	for _, activity := range mutValidatorActivities {
 		content := activity.Data.Content.(map[string]interface{})
 		pastDescription := content["description"].(map[string]interface{})
 
 		if pastDescription["Moniker"] != DO_NOT_MODIFY {
-			attentionCounter["moniker"]++
+			attentionCounter["Moniker"]++
 		}
 		if content["commissionRate"] != nil {
 			attentionCounter["commissionRate"]++
 		}
 	}
+	// check counter by each field
 	for _, count := range attentionCounter {
-		if count > 1 {
+		if count > 2 {
 			mutValidatorRow.Status = constants.ATTENTION
 		}
 	}
