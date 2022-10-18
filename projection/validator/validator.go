@@ -18,17 +18,21 @@ import (
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
+
 	"github.com/crypto-com/chain-indexing/projection/validator/view"
+
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
 var _ projection_entity.Projection = &Validator{}
 
 var (
-	NewValidators                = view.NewValidatorsView
-	NewValidatorActivitiess      = view.NewValidatorActivities
-	NewValidatorActivitiessTotal = view.NewValidatorActivitiesTotal
-	UpdateLastHandledEventHeight = (*Validator).UpdateLastHandledEventHeight
+	NewValidators                     = view.NewValidatorsView
+	NewValidatorActivities            = view.NewValidatorActivitiesView
+	NewValidatorActivitiessTotal      = view.NewValidatorActivitiesTotalView
+	NewValidatorBlockCommitments      = view.NewValidatorBlockCommitments
+	NewValidatorBlockCommitmentsTotal = view.NewValidatorBlockCommitmentsTotal
+	UpdateLastHandledEventHeight      = (*Validator).UpdateLastHandledEventHeight
 )
 
 const DO_NOT_MODIFY = "[do-not-modify]"
@@ -113,11 +117,11 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 	}()
 
 	rdbTxHandle := rdbTx.ToHandle()
-	validatorsView := view.NewValidatorsView(rdbTxHandle)
-	validatorBlockCommitmentsView := view.NewValidatorBlockCommitments(rdbTxHandle)
-	validatorBlockCommitmentsTotalView := view.NewValidatorBlockCommitmentsTotal(rdbTxHandle)
-	validatorActivitiesView := view.NewValidatorActivities(rdbTxHandle)
-	validatorActivitiesTotalView := view.NewValidatorActivitiesTotal(rdbTxHandle)
+	validatorsView := NewValidators(rdbTxHandle)
+	validatorBlockCommitmentsView := NewValidatorBlockCommitments(rdbTxHandle)
+	validatorBlockCommitmentsTotalView := NewValidatorBlockCommitmentsTotal(rdbTxHandle)
+	validatorActivitiesView := NewValidatorActivities(rdbTxHandle)
+	validatorActivitiesTotalView := NewValidatorActivitiessTotal(rdbTxHandle)
 
 	var blockTime utctime.UTCTime
 	var blockHash string
@@ -132,15 +136,14 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 			blockProposer = blockCreatedEvent.Block.ProposerAddress
 		}
 	}
-	fmt.Println("====> HandleEvents:", &validatorsView, validatorsView)
-	if projectErr := projection.projectValidatorView(&validatorsView, validatorActivitiesView, blockTime, height, events); projectErr != nil {
+	if projectErr := projection.projectValidatorView(&validatorsView, &validatorActivitiesView, blockTime, height, events); projectErr != nil {
 		return fmt.Errorf("error projecting validator view: %v", projectErr)
 	}
 
 	if projectErr := projection.projectValidatorActivitiesView(
 		&validatorsView,
-		validatorActivitiesView,
-		validatorActivitiesTotalView,
+		&validatorActivitiesView,
+		&validatorActivitiesTotalView,
 		blockHash,
 		blockTime,
 		events,
@@ -189,7 +192,6 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 
 				commitmentMap[signedValidator.ConsensusNodeAddress] = true
 			}
-
 			if err := validatorBlockCommitmentsView.InsertAll(commitmentRows); err != nil {
 				return fmt.Errorf("error incrementing validator block commitment rows: %v", err)
 			}
@@ -269,7 +271,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 		}
 	}
 
-	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
+	if err := UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
 		return fmt.Errorf("error updating last handled event height: %v", err)
 	}
 
@@ -287,8 +289,6 @@ func (projection *Validator) projectValidatorView(
 	blockHeight int64,
 	events []event_entity.Event,
 ) error {
-	fmt.Println("====> inside projectValidatorView function:", &validatorsView, validatorsView)
-
 	// MsgCreateValidator should be handled first
 	for _, event := range events {
 		if createGenesisValidator, ok := event.(*event_usecase.CreateGenesisValidator); ok {
@@ -415,7 +415,6 @@ func (projection *Validator) projectValidatorView(
 	for _, event := range events {
 		if msgEditValidatorEvent, ok := event.(*event_usecase.MsgEditValidator); ok {
 			projection.logger.Debug("handling MsgEditValidator event")
-			fmt.Println("===> s3", msgEditValidatorEvent.ValidatorAddress, &msgEditValidatorEvent.ValidatorAddress)
 
 			mutValidatorRow, err := (*validatorsView).FindBy(view.ValidatorIdentity{
 				MaybeOperatorAddress: &msgEditValidatorEvent.ValidatorAddress,
@@ -570,8 +569,7 @@ func checkAttentionOnNumOfChanges(mutValidatorRow *view.ValidatorRow, validatorA
 		"moniker":        0,
 		"commissionRate": 0,
 	}
-
-	mutValidatorActivities, _, err := validatorActivities.List(
+	mutValidatorActivities, _, err := (*validatorActivities).List(
 		view.ValidatorActivitiesListFilter{
 			Last24hrAtBlockTime:  blockTime,
 			MaybeOperatorAddress: validatorAddress,

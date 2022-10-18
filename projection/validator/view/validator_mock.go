@@ -1,7 +1,6 @@
 package view
 
 import (
-	"fmt"
 	"math/big"
 
 	"github.com/crypto-com/chain-indexing/appinterface/pagination"
@@ -51,10 +50,9 @@ func (validatorsView *MockValidatorsView) Search(keyword string) ([]ValidatorRow
 }
 
 func (validatorsView *MockValidatorsView) FindBy(identity ValidatorIdentity) (*ValidatorRow, error) {
-	fmt.Println("===> s2")
 	mockArgs := validatorsView.Called(identity)
-	row, _ := mockArgs.Get(0).(*ValidatorRow)
-	return row, mockArgs.Error(1)
+	result1, _ := mockArgs.Get(0).(*ValidatorRow)
+	return result1, mockArgs.Error(1)
 }
 
 func (validatorsView *MockValidatorsView) Update(validator *ValidatorRow) error {
@@ -70,7 +68,7 @@ func (validatorsView *MockValidatorsView) UpdateAllValidatorUpTime(validators []
 func (validatorsView *MockValidatorsView) ListAll(filter ValidatorsListFilter, order ValidatorsListOrder) ([]ValidatorRow, error) {
 	mockArgs := validatorsView.Called(filter, order)
 	rows, _ := mockArgs.Get(0).([]ValidatorRow)
-	return rows, mockArgs.Error(0)
+	return rows, mockArgs.Error(1)
 }
 
 func (validatorsView *MockValidatorsView) List(filter ValidatorsListFilter, order ValidatorsListOrder, pagination *pagination_interface.Pagination) ([]ListValidatorRow, *pagination.PaginationResult, error) {

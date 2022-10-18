@@ -34,7 +34,7 @@ func (totalMap *privTotalIncrementalMap) Set(key string, value int64) {
 }
 func (totalMap *privTotalIncrementalMap) Persist(validatorActivitiesTotalView *view.ValidatorActivitiesTotal) error {
 	for key, value := range totalMap.data {
-		if err := validatorActivitiesTotalView.Increment(key, value); err != nil {
+		if err := (*validatorActivitiesTotalView).Increment(key, value); err != nil {
 			return fmt.Errorf("error incrementing total of `%s`: %w", key, err)
 		}
 	}
@@ -312,7 +312,7 @@ func (projection *Validator) projectValidatorActivitiesView(
 		}
 	}
 
-	if err := validatorActivitiesView.InsertAll(activityRows); err != nil {
+	if err := (*validatorActivitiesView).InsertAll(activityRows); err != nil {
 		return fmt.Errorf("error inserting validator activities into view: %w", err)
 	}
 	if err := totalIncrementalMap.Persist(validatorActivitiesTotalView); err != nil {

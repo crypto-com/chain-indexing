@@ -43,7 +43,7 @@ type Validators struct {
 	cosmosAppClient         cosmosapp.Client
 	tendermintClient        tendermint.Client
 	validatorsView          validator_view.Validators
-	validatorActivitiesView *validator_view.ValidatorActivities
+	validatorActivitiesView validator_view.ValidatorActivities
 	chainStatsView          *chainstats_view.ChainStats
 	blockView               *block_view.Blocks
 
@@ -70,7 +70,7 @@ func NewValidators(
 		cosmosAppClient,
 		tendermintClient,
 		validator_view.NewValidatorsView(rdbHandle),
-		validator_view.NewValidatorActivities(rdbHandle),
+		validator_view.NewValidatorActivitiesView(rdbHandle),
 		chainstats_view.NewChainStats(rdbHandle),
 		block_view.NewBlocks(rdbHandle),
 
@@ -459,47 +459,6 @@ func (handler *Validators) ListActivities(ctx *fasthttp.RequestCtx) {
 	}
 
 	httpapi.SuccessWithPagination(ctx, blocks, paginationResult)
-}
-
-func (handler *Validators) ResetValidatorStatus(ctx *fasthttp.RequestCtx) {
-	addressParams, addressParamsOk := URLValueGuard(ctx, handler.logger, "address")
-	if !addressParamsOk {
-		return
-	}
-	var identity validator_view.ValidatorIdentity
-	if strings.HasPrefix(addressParams, handler.validatorAddressPrefix) {
-		identity = validator_view.ValidatorIdentity{
-			MaybeOperatorAddress: &addressParams,
-		}
-	} else if strings.HasPrefix(addressParams, handler.consNodeAddressPrefix) {
-		identity = validator_view.ValidatorIdentity{
-			MaybeConsensusNodeAddress: &addressParams,
-		}
-	} else {
-		httpapi.BadRequest(ctx, errors.New("invalid address"))
-		return
-	}
-
-	rawValidator, err := handler.validatorsView.FindBy(identity)
-	if err != nil {
-		if errors.Is(err, rdb.ErrNoRows) {
-			httpapi.NotFound(ctx)
-			return
-		}
-		handler.logger.Errorf("error finding validator by operator address: %v", err)
-		httpapi.InternalServerError(ctx)
-		return
-	}
-
-	rawValidator.Status = constants.BONDED
-
-	if err = handler.validatorsView.Update(rawValidator); err != nil {
-		handler.logger.Errorf("error updating validator by operator address: %v", err)
-		httpapi.InternalServerError(ctx)
-		return
-	}
-
-	httpapi.Success(ctx, rawValidator)
 }
 
 type ValidatorDetails struct {
