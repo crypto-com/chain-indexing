@@ -51,12 +51,14 @@ type SyncManager struct {
 	parserManager *utils.CosmosParserManager
 
 	startingBlockHeight int64
+
+	TxDecoder *TxDecoder
 }
 
 type SyncManagerParams struct {
 	Logger    applogger.Logger
 	RDbConn   rdb.Conn
-	TxDecoder *utils.TxDecoder
+	txDecoder *TxDecoder
 
 	Config SyncManagerConfig
 }
@@ -127,6 +129,8 @@ func NewSyncManager(
 		parserManager: pm,
 
 		startingBlockHeight: params.Config.StartingBlockHeight,
+
+		TxDecoder: params.txDecoder,
 	}
 }
 
@@ -245,7 +249,15 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		var tx *model.Tx
 		tx, err = manager.cosmosClient.Tx(parser.TxHash(txHex))
 		if err != nil {
-			return nil, fmt.Errorf("error requesting chain txs (%s) at height %d: %v", txHex, blockHeight, err)
+			if manager.TxDecoder != nil {
+				decoder := *manager.TxDecoder
+				tx, err = decoder.Decode(txHex)
+				if err != nil {
+					return nil, fmt.Errorf("error decoding chain txs (%s) at height %d: %v", txHex, blockHeight, err)
+				}
+			} else {
+				return nil, fmt.Errorf("error requesting chain txs (%s) at height %d: %v", txHex, blockHeight, err)
+			}
 		}
 		txs = append(txs, *tx)
 	}
