@@ -68,7 +68,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 		MockFunc func(events []event_entity.Event) []*testify_mock.Mock
 	}{
 		{
-			Name: "Handle MsgEditValidator moniker changed twice",
+			Name: "Handle MsgEditValidator moniker changed more than twice",
 			Events: []event_entity.Event{
 				&event_usecase.BlockCreated{
 					Base: event_entity.NewBase(event_entity.BaseParams{
@@ -334,7 +334,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 			},
 		},
 		{
-			Name: "Handle MsgEditValidator commission changed twice",
+			Name: "Handle MsgEditValidator commission changed more than twice",
 			Events: []event_entity.Event{
 				&event_usecase.BlockCreated{
 					Base: event_entity.NewBase(event_entity.BaseParams{
@@ -600,7 +600,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 			},
 		},
 		{
-			Name: "Handle MsgEditValidator high commission change",
+			Name: "Handle MsgEditValidator changed with extreme commission",
 			Events: []event_entity.Event{
 				&event_usecase.BlockCreated{
 					Base: event_entity.NewBase(event_entity.BaseParams{
