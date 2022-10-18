@@ -111,7 +111,6 @@ func TestValidator_HandleEvents(t *testing.T) {
 			},
 			MockFunc: func(events []event_entity.Event) (mocks []*testify_mock.Mock) {
 				mockValidatorsView := validator_view.NewMockValidatorsView(nil).(*validator_view.MockValidatorsView)
-
 				mocks = append(mocks, &mockValidatorsView.Mock)
 
 				validator.NewValidators = func(_ *rdb.Handle) validator_view.Validators {
@@ -378,7 +377,6 @@ func TestValidator_HandleEvents(t *testing.T) {
 			},
 			MockFunc: func(events []event_entity.Event) (mocks []*testify_mock.Mock) {
 				mockValidatorsView := validator_view.NewMockValidatorsView(nil).(*validator_view.MockValidatorsView)
-
 				mocks = append(mocks, &mockValidatorsView.Mock)
 
 				validator.NewValidators = func(_ *rdb.Handle) validator_view.Validators {
@@ -645,7 +643,6 @@ func TestValidator_HandleEvents(t *testing.T) {
 			},
 			MockFunc: func(events []event_entity.Event) (mocks []*testify_mock.Mock) {
 				mockValidatorsView := validator_view.NewMockValidatorsView(nil).(*validator_view.MockValidatorsView)
-
 				mocks = append(mocks, &mockValidatorsView.Mock)
 
 				validator.NewValidators = func(_ *rdb.Handle) validator_view.Validators {
