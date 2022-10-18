@@ -579,8 +579,8 @@ const TX_MSG_REVOKE_ALLOWANCE_TXS_RESP = `{
       "messages": [
         {
           "@type": "/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
-          "granter": "tcro16u0wuyhc73tdw0m7qt3cmfeg68ug8g4hc4verc",
-          "grantee": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2"
+          "granter": "TCRO16U0WUYHC73TDW0M7QT3CMFEG68UG8G4HC4VERC",
+          "grantee": "TCRO15ZH5TN7XJDECU4ZJCLSMLNLHT5EAD2MX84GAU2"
         }
       ],
       "memo": "",
@@ -667,8 +667,8 @@ const TX_MSG_REVOKE_ALLOWANCE_TXS_RESP = `{
         "messages": [
           {
             "@type": "/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
-            "granter": "tcro16u0wuyhc73tdw0m7qt3cmfeg68ug8g4hc4verc",
-            "grantee": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2"
+            "granter": "TCRO16U0WUYHC73TDW0M7QT3CMFEG68UG8G4HC4VERC",
+            "grantee": "TCRO15ZH5TN7XJDECU4ZJCLSMLNLHT5EAD2MX84GAU2"
           }
         ],
         "memo": "",

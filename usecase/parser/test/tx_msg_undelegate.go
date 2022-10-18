@@ -2266,7 +2266,7 @@ const TX_MSG_UNDELEGATE_TXS_RESP = `{
             "messages": [
                 {
                     "@type": "/cosmos.staking.v1beta1.MsgUndelegate",
-                    "delegator_address": "tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64",
+                    "delegator_address": "TCRO1GS80N8FPC5MC3YWKGFY93L23TG0GDQJ5W2LL64",
                     "validator_address": "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
                     "amount": {
                         "denom": "basetcro",
@@ -2484,7 +2484,7 @@ const TX_MSG_UNDELEGATE_TXS_RESP = `{
                 "messages": [
                     {
                         "@type": "/cosmos.staking.v1beta1.MsgUndelegate",
-                        "delegator_address": "tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64",
+                        "delegator_address": "TCRO1GS80N8FPC5MC3YWKGFY93L23TG0GDQJ5W2LL64",
                         "validator_address": "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
                         "amount": {
                             "denom": "basetcro",

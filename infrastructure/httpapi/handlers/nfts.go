@@ -307,6 +307,7 @@ func (handler *NFTs) ListTokensByAccount(ctx *fasthttp.RequestCtx) {
 	if !accountParamOk {
 		return
 	}
+	accountParam = strings.ToLower(accountParam)
 
 	pagination, paginationErr := httpapi.ParsePagination(ctx)
 	if paginationErr != nil {

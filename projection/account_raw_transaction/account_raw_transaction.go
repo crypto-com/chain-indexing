@@ -15,6 +15,7 @@ import (
 	"github.com/crypto-com/chain-indexing/projection/account_raw_transaction/view"
 	account_raw_transaction_view "github.com/crypto-com/chain-indexing/projection/account_raw_transaction/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
 var _ projection_entity.Projection = &AccountRawTransaction{}
@@ -122,7 +123,7 @@ func (projection *AccountRawTransaction) HandleEvents(height int64, events []eve
 			)
 			for i := range addresses {
 				tx := view.AccountRawTransactionRow{
-					Account:       addresses[i],
+					Account:       utils.AddressParse(addresses[i]),
 					BlockHeight:   height,
 					BlockTime:     utctime.UTCTime{}, // placeholder
 					Hash:          transactionCreatedEvent.TxHash,
@@ -169,7 +170,7 @@ func (projection *AccountRawTransaction) HandleEvents(height int64, events []eve
 			)
 			for i := range addresses {
 				tx := view.AccountRawTransactionRow{
-					Account:       addresses[i],
+					Account:       utils.AddressParse(addresses[i]),
 					BlockHeight:   height,
 					BlockTime:     utctime.UTCTime{}, // placeholder
 					Hash:          transactionFailedEvent.TxHash,

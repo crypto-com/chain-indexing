@@ -2364,12 +2364,12 @@ const TX_FAILED_MSG_WITHDRAW_VALIDATOR_COMMISSION_TXS_RESP = `{
             "messages": [
                 {
                     "@type": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
-                    "delegator_address": "tcro1pm27djcs5djxjsxw3unrkv3m3jtxdexk73hqel",
-                    "validator_address": "tcrocncl1pm27djcs5djxjsxw3unrkv3m3jtxdexktw5epu"
+                    "delegator_address": "TCRO1PM27DJCS5DJXJSXW3UNRKV3M3JTXDEXK73HQEL",
+                    "validator_address": "TCROCNCL1PM27DJCS5DJXJSXW3UNRKV3M3JTXDEXKTW5EPU"
                 },
                 {
                     "@type": "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission",
-                    "validator_address": "tcrocncl1pm27djcs5djxjsxw3unrkv3m3jtxdexktw5epu"
+                    "validator_address": "TCROCNCL1PM27DJCS5DJXJSXW3UNRKV3M3JTXDEXKTW5EPU"
                 }
             ],
             "memo": "",
@@ -2431,12 +2431,12 @@ const TX_FAILED_MSG_WITHDRAW_VALIDATOR_COMMISSION_TXS_RESP = `{
                 "messages": [
                     {
                         "@type": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
-                        "delegator_address": "tcro1pm27djcs5djxjsxw3unrkv3m3jtxdexk73hqel",
-                        "validator_address": "tcrocncl1pm27djcs5djxjsxw3unrkv3m3jtxdexktw5epu"
+                        "delegator_address": "TCRO1PM27DJCS5DJXJSXW3UNRKV3M3JTXDEXK73HQEL",
+                        "validator_address": "TCROCNCL1PM27DJCS5DJXJSXW3UNRKV3M3JTXDEXKTW5EPU"
                     },
                     {
                         "@type": "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission",
-                        "validator_address": "tcrocncl1pm27djcs5djxjsxw3unrkv3m3jtxdexktw5epu"
+                        "validator_address": "TCROCNCL1PM27DJCS5DJXJSXW3UNRKV3M3JTXDEXKTW5EPU"
                     }
                 ],
                 "memo": "",

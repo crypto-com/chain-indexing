@@ -558,7 +558,7 @@ func checkAttentionOnCommission(mutValidatorRow *view.ValidatorRow, maybeCommiss
 		)
 	}
 
-	if newCommission-currentCommission > 0.1 && mutValidatorRow.Status == constants.BONDED {
+	if newCommission-currentCommission > 0.1 {
 		mutValidatorRow.Status = constants.ATTENTION
 	}
 
@@ -583,24 +583,21 @@ func checkAttentionOnNumOfChanges(mutValidatorRow *view.ValidatorRow, validatorA
 		)
 	}
 
-	if mutValidatorRow.Status == constants.BONDED {
-		for _, activity := range mutValidatorActivities {
-			content := activity.Data.Content.(map[string]interface{})
-			pastDescription := content["description"].(map[string]interface{})
+	for _, activity := range mutValidatorActivities {
+		content := activity.Data.Content.(map[string]interface{})
+		pastDescription := content["description"].(map[string]interface{})
 
-			if pastDescription["Moniker"] != DO_NOT_MODIFY {
-				attentionCounter["moniker"]++
-			}
-			if content["commissionRate"] != nil {
-				attentionCounter["commissionRate"]++
-			}
+		if pastDescription["Moniker"] != DO_NOT_MODIFY {
+			attentionCounter["moniker"]++
 		}
-		for _, count := range attentionCounter {
-			if count > 1 {
-				mutValidatorRow.Status = constants.ATTENTION
-			}
+		if content["commissionRate"] != nil {
+			attentionCounter["commissionRate"]++
 		}
-
+	}
+	for _, count := range attentionCounter {
+		if count > 1 {
+			mutValidatorRow.Status = constants.ATTENTION
+		}
 	}
 
 	return nil

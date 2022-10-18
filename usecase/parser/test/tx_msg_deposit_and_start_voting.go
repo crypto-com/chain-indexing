@@ -385,7 +385,7 @@ const TX_MSG_DEPOSIT_AND_START_VOTING_TXS_RESP = `{
                 {
                     "@type": "/cosmos.gov.v1beta1.MsgDeposit",
                     "proposal_id": "1",
-                    "depositor": "cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd",
+                    "depositor": "CRO1NK4RQ3Q46LTGJGHXZ80HY385P9UJ0TF58APKCD",
                     "amount": [
                         {
                             "denom": "basecro",
@@ -565,7 +565,7 @@ const TX_MSG_DEPOSIT_AND_START_VOTING_TXS_RESP = `{
                     {
                         "@type": "/cosmos.gov.v1beta1.MsgDeposit",
                         "proposal_id": "1",
-                        "depositor": "cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd",
+                        "depositor": "CRO1NK4RQ3Q46LTGJGHXZ80HY385P9UJ0TF58APKCD",
                         "amount": [
                             {
                                 "denom": "basecro",

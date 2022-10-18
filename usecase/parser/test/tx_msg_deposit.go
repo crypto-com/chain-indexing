@@ -2180,7 +2180,7 @@ const TX_MSG_DEPOSIT_TXS_RESP = `{
                 {
                     "@type": "/cosmos.gov.v1beta1.MsgDeposit",
                     "proposal_id": "9",
-                    "depositor": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+                    "depositor": "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN",
                     "amount": [
                         {
                             "denom": "basetcro",
@@ -2315,7 +2315,7 @@ const TX_MSG_DEPOSIT_TXS_RESP = `{
                     {
                         "@type": "/cosmos.gov.v1beta1.MsgDeposit",
                         "proposal_id": "9",
-                        "depositor": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+                        "depositor": "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN",
                         "amount": [
                             {
                                 "denom": "basetcro",

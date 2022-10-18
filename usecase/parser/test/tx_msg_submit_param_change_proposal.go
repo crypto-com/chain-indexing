@@ -2289,7 +2289,7 @@ const TX_MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_TXS_RESP = `{
                             "amount": "10"
                         }
                     ],
-                    "proposer": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"
+                    "proposer": "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN"
                 }
             ],
             "memo": "",
@@ -2455,7 +2455,7 @@ const TX_MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_TXS_RESP = `{
                                 "amount": "10"
                             }
                         ],
-                        "proposer": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"
+                        "proposer": "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN"
                     }
                 ],
                 "memo": "",

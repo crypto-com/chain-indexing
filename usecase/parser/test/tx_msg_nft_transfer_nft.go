@@ -360,7 +360,7 @@ const TX_MSG_NFT_TRANSFER_NFT_TXS_RESP = `{
                     "@type": "/chainmain.nft.v1.MsgTransferNFT",
                     "id": "tokenid2",
                     "denom_id": "denomid",
-                    "sender": "cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd",
+                    "sender": "CRO1NK4RQ3Q46LTGJGHXZ80HY385P9UJ0TF58APKCD",
                     "recipient": "cro10ar7dpv4g95r3gj06pn52f64vwq7v9kdh0g58a"
                 }
             ],
@@ -506,7 +506,7 @@ const TX_MSG_NFT_TRANSFER_NFT_TXS_RESP = `{
                         "@type": "/chainmain.nft.v1.MsgTransferNFT",
                         "id": "tokenid2",
                         "denom_id": "denomid",
-                        "sender": "cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd",
+                        "sender": "CRO1NK4RQ3Q46LTGJGHXZ80HY385P9UJ0TF58APKCD",
                         "recipient": "cro10ar7dpv4g95r3gj06pn52f64vwq7v9kdh0g58a"
                     }
                 ],
