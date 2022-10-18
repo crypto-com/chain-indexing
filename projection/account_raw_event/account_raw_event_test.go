@@ -105,7 +105,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -191,7 +191,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -288,7 +288,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -410,7 +410,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -491,7 +491,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -572,7 +572,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -653,7 +653,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -734,7 +734,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -815,7 +815,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -907,7 +907,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -1030,7 +1030,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -1198,7 +1198,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -1323,7 +1323,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -1404,7 +1404,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -1485,7 +1485,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -1588,7 +1588,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -1741,7 +1741,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -1822,7 +1822,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -1903,7 +1903,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -1995,7 +1995,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {

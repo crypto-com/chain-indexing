@@ -10,7 +10,7 @@ type MockAccountRawEventsView struct {
 	mock.Mock
 }
 
-func NewMockAccountRawEventsView(_ *rdb.Handle) AccountRawEvents {
+func NewMockAccountMessagesView(_ *rdb.Handle) AccountRawEvents {
 	return &MockAccountRawEventsView{}
 }
 
