@@ -11,8 +11,8 @@ import (
 	"github.com/crypto-com/chain-indexing/entity/event"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
-	"github.com/crypto-com/chain-indexing/usecase/model"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
@@ -39,11 +39,7 @@ type IndexService struct {
 	GithubAPIUser  string
 	GithubAPIToken string
 
-	txDecoder *TxDecoder
-}
-
-type TxDecoder interface {
-	Decode(string) (*model.Tx, error)
+	txDecoder *txdecoder.TxDecoder
 }
 
 // NewIndexService creates a new server instance for polling and indexing
@@ -53,7 +49,7 @@ func NewIndexService(
 	config *config.Config,
 	projections []projection_entity.Projection,
 	cronJobs []projection_entity.CronJob,
-	txDecoder *TxDecoder,
+	txDecoder *txdecoder.TxDecoder,
 ) *IndexService {
 	return &IndexService{
 		logger:      logger,

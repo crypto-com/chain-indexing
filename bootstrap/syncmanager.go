@@ -7,6 +7,7 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
+	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 
@@ -52,13 +53,13 @@ type SyncManager struct {
 
 	startingBlockHeight int64
 
-	TxDecoder *TxDecoder
+	TxDecoder *txdecoder.TxDecoder
 }
 
 type SyncManagerParams struct {
 	Logger    applogger.Logger
 	RDbConn   rdb.Conn
-	txDecoder *TxDecoder
+	txDecoder *txdecoder.TxDecoder
 
 	Config SyncManagerConfig
 }
@@ -244,20 +245,28 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		return nil, fmt.Errorf("error requesting chain block_results at height %d: %v", blockHeight, err)
 	}
 
-	txs := make([]model.Tx, 0)
+	txs := make([]model.CosmosTxWithHash, 0)
 	for _, txHex := range block.Txs {
-		var tx *model.Tx
-		tx, err = manager.cosmosClient.Tx(parser.TxHash(txHex))
+		txHash := parser.TxHash(txHex)
+		tx := &model.CosmosTxWithHash{
+			Hash: txHash,
+		}
+
+		resTx, err := manager.cosmosClient.Tx(txHash)
 		if err != nil {
 			if manager.TxDecoder != nil {
 				decoder := *manager.TxDecoder
-				tx, err = decoder.Decode(txHex)
+				resTx, err := decoder.DecodeBase64(txHex)
 				if err != nil {
 					return nil, fmt.Errorf("error decoding chain txs (%s) at height %d: %v", txHex, blockHeight, err)
 				}
+
+				tx.Tx = *resTx
 			} else {
 				return nil, fmt.Errorf("error requesting chain txs (%s) at height %d: %v", txHex, blockHeight, err)
 			}
+		} else {
+			tx.Tx = resTx.Tx
 		}
 		txs = append(txs, *tx)
 	}
