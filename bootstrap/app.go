@@ -80,7 +80,7 @@ func (a *app) InitHTTPAPIServer(registry RouteRegistry) {
 	}
 }
 
-func (a *app) InitIndexService(projections []projection_entity.Projection, cronJobs []projection_entity.CronJob, txDecoder *txdecoder.TxDecoder) {
+func (a *app) InitIndexService(projections []projection_entity.Projection, cronJobs []projection_entity.CronJob, txDecoder txdecoder.TxDecoder) {
 	if a.config.IndexService.Enable {
 		a.indexService = NewIndexService(a.logger, a.rdbConn, a.config, projections, cronJobs, txDecoder)
 	}
