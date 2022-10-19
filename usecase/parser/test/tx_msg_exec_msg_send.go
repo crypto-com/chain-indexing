@@ -598,7 +598,7 @@ const TX_MSG_EXEC_MSG_SEND_TXS_RESP = `{
       "messages": [
         {
           "@type": "/cosmos.authz.v1beta1.MsgExec",
-          "grantee": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2",
+          "grantee": "TCRO15ZH5TN7XJDECU4ZJCLSMLNLHT5EAD2MX84GAU2",
           "msgs": [
             {
               "@type": "/cosmos.bank.v1beta1.MsgSend",
@@ -736,7 +736,7 @@ const TX_MSG_EXEC_MSG_SEND_TXS_RESP = `{
         "messages": [
           {
             "@type": "/cosmos.authz.v1beta1.MsgExec",
-            "grantee": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2",
+            "grantee": "TCRO15ZH5TN7XJDECU4ZJCLSMLNLHT5EAD2MX84GAU2",
             "msgs": [
               {
                 "@type": "/cosmos.bank.v1beta1.MsgSend",

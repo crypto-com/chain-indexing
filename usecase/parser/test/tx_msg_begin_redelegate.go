@@ -2263,9 +2263,9 @@ const TX_MSG_BEGIN_REDELEGATE_TXS_RESP = `{
             "messages": [
                 {
                     "@type": "/cosmos.staking.v1beta1.MsgBeginRedelegate",
-                    "delegator_address": "tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64",
-                    "validator_src_address": "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
-                    "validator_dst_address": "tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6",
+                    "delegator_address": "TCRO1GS80N8FPC5MC3YWKGFY93L23TG0GDQJ5W2LL64",
+                    "validator_src_address": "TCROCNCL1J7PEJ8KPLEM4WT50P4HFVNDHUW5JPRXXXTENVR",
+                    "validator_dst_address": "TCROCNCL1XWD3K8XTERDEFT3NXQG92SZHPZ6VX43QSPDPW6",
                     "amount": {
                         "denom": "basetcro",
                         "amount": "10000000000"
@@ -2457,7 +2457,7 @@ const TX_MSG_BEGIN_REDELEGATE_TXS_RESP = `{
                 "messages": [
                     {
                         "@type": "/cosmos.staking.v1beta1.MsgBeginRedelegate",
-                        "delegator_address": "tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64",
+                        "delegator_address": "TCRO1GS80N8FPC5MC3YWKGFY93L23TG0GDQJ5W2LL64",
                         "validator_src_address": "tcrocncl1j7pej8kplem4wt50p4hfvndhuw5jprxxxtenvr",
                         "validator_dst_address": "tcrocncl1xwd3k8xterdeft3nxqg92szhpz6vx43qspdpw6",
                         "amount": {

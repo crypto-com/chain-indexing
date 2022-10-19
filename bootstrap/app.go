@@ -8,6 +8,7 @@ import (
 	config "github.com/crypto-com/chain-indexing/bootstrap/config"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	"github.com/crypto-com/chain-indexing/infrastructure/metric/prometheus"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/golang-migrate/migrate/v4"
@@ -79,9 +80,9 @@ func (a *app) InitHTTPAPIServer(registry RouteRegistry) {
 	}
 }
 
-func (a *app) InitIndexService(projections []projection_entity.Projection, cronJobs []projection_entity.CronJob) {
+func (a *app) InitIndexService(projections []projection_entity.Projection, cronJobs []projection_entity.CronJob, txDecoder txdecoder.TxDecoder) {
 	if a.config.IndexService.Enable {
-		a.indexService = NewIndexService(a.logger, a.rdbConn, a.config, projections, cronJobs)
+		a.indexService = NewIndexService(a.logger, a.rdbConn, a.config, projections, cronJobs, txDecoder)
 	}
 }
 

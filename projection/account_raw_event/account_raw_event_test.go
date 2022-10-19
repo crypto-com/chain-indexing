@@ -78,7 +78,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							Attributes: []usecase_model.BlockResultsEventAttribute{
 								{
 									Key:   "spender",
-									Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+									Value: "CRO13UP2UE4TTSNP83A84VAUYN7449WUT09RLZZRXD",
 									Index: true,
 								},
 								{
@@ -105,7 +105,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -120,20 +120,22 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "coin_spent",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "coin_spent",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "spender",
-											Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
-											Index: true,
-										},
-										{
-											Key:   "amount",
-											Value: "6786516685basetcro",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "coin_spent",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "spender",
+												Value: "CRO13UP2UE4TTSNP83A84VAUYN7449WUT09RLZZRXD",
+												Index: true,
+											},
+											{
+												Key:   "amount",
+												Value: "6786516685basetcro",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -189,7 +191,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -204,15 +206,17 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "coin_received",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "coin_received",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "receiver",
-											Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "coin_received",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "receiver",
+												Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -284,7 +288,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -299,25 +303,27 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "transfer",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "transfer",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "recipient",
-											Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
-											Index: true,
-										},
-										{
-											Key:   "sender",
-											Value: "cro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
-											Index: true,
-										},
-										{
-											Key:   "amount",
-											Value: "1basecro",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "transfer",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "recipient",
+												Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+												Index: true,
+											},
+											{
+												Key:   "sender",
+												Value: "cro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+												Index: true,
+											},
+											{
+												Key:   "amount",
+												Value: "1basecro",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -328,25 +334,27 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "transfer",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "transfer",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "recipient",
-											Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
-											Index: true,
-										},
-										{
-											Key:   "sender",
-											Value: "cro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
-											Index: true,
-										},
-										{
-											Key:   "amount",
-											Value: "1basecro",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "transfer",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "recipient",
+												Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+												Index: true,
+											},
+											{
+												Key:   "sender",
+												Value: "cro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+												Index: true,
+											},
+											{
+												Key:   "amount",
+												Value: "1basecro",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -402,7 +410,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -417,15 +425,17 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "coinbase",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "coinbase",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "minter",
-											Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "coinbase",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "minter",
+												Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -481,7 +491,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -496,15 +506,17 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "burn",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "burn",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "burner",
-											Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "burn",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "burner",
+												Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -560,7 +572,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -575,15 +587,17 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "proposer_reward",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "proposer_reward",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "validator",
-											Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "proposer_reward",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "validator",
+												Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -639,7 +653,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -654,15 +668,17 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "rewards",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "rewards",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "validator",
-											Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "rewards",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "validator",
+												Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -718,7 +734,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -733,15 +749,17 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "commission",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "commission",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "validator",
-											Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "commission",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "validator",
+												Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -797,7 +815,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -812,15 +830,17 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "slash",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "slash",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "address",
-											Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "slash",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "address",
+												Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -887,7 +907,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -902,20 +922,22 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "complete_unbonding",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "complete_unbonding",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "delegator",
-											Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
-											Index: true,
-										},
-										{
-											Key:   "validator",
-											Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "complete_unbonding",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "delegator",
+												Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+												Index: true,
+											},
+											{
+												Key:   "validator",
+												Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -926,20 +948,22 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "complete_unbonding",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "complete_unbonding",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "delegator",
-											Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
-											Index: true,
-										},
-										{
-											Key:   "validator",
-											Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "complete_unbonding",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "delegator",
+												Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+												Index: true,
+											},
+											{
+												Key:   "validator",
+												Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -1006,7 +1030,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -1021,20 +1045,22 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "ethereum_send_to_cosmos_handled",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "ethereum_send_to_cosmos_handled",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "sender",
-											Value: "cro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
-											Index: true,
-										},
-										{
-											Key:   "receiver",
-											Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "ethereum_send_to_cosmos_handled",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "sender",
+												Value: "cro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+												Index: true,
+											},
+											{
+												Key:   "receiver",
+												Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -1045,20 +1071,22 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "ethereum_send_to_cosmos_handled",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "ethereum_send_to_cosmos_handled",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "sender",
-											Value: "cro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
-											Index: true,
-										},
-										{
-											Key:   "receiver",
-											Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "ethereum_send_to_cosmos_handled",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "sender",
+												Value: "cro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+												Index: true,
+											},
+											{
+												Key:   "receiver",
+												Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -1170,7 +1198,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -1185,15 +1213,17 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "message",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "message",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "sender",
-											Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "message",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "sender",
+												Value: "cro13up2ue4ttsnp83a84vauyn7449wut09rlzzrxd",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -1205,16 +1235,18 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "message",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "message",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
+									Content: usecase_model.BlockResultsEvent{
+										Type: "message",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
 
-										{
-											Key:   "granter",
-											Value: "cro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
-											Index: true,
+											{
+												Key:   "granter",
+												Value: "cro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -1225,15 +1257,17 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "message",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "message",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "grantee",
-											Value: "cro1v7h324rm06r5admszs3d5jvq5fqnnuzpy7xxxx",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "message",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "grantee",
+												Value: "cro1v7h324rm06r5admszs3d5jvq5fqnnuzpy7xxxx",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -1289,7 +1323,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -1304,15 +1338,17 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "withdraw_rewards",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "withdraw_rewards",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "validator",
-											Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "withdraw_rewards",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "validator",
+												Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -1368,7 +1404,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -1383,15 +1419,17 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "set_withdraw_address",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "set_withdraw_address",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "withdraw_address",
-											Value: "cro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "set_withdraw_address",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "withdraw_address",
+												Value: "cro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -1447,7 +1485,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -1462,15 +1500,17 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "set_withdraw_address",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "set_withdraw_address",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "withdraw_address",
-											Value: "cro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "set_withdraw_address",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "withdraw_address",
+												Value: "cro1l3g8w5567d4dqtvw7nljestgm5envh0n0rwqmh",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -1548,7 +1588,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -1563,26 +1603,27 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-
-								Type: "complete_redelegation",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "complete_redelegation",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "source_validator",
-											Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
-											Index: true,
-										},
-										{
-											Key:   "destination_validator",
-											Value: "crocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
-											Index: true,
-										},
-										{
-											Key:   "delegator",
-											Value: "cro1qfqd93p68lr65xlgt3547vyxthzsr27pxp66ac",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "complete_redelegation",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "source_validator",
+												Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
+												Index: true,
+											},
+											{
+												Key:   "destination_validator",
+												Value: "crocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
+												Index: true,
+											},
+											{
+												Key:   "delegator",
+												Value: "cro1qfqd93p68lr65xlgt3547vyxthzsr27pxp66ac",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -1593,25 +1634,27 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "complete_redelegation",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "complete_redelegation",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "source_validator",
-											Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
-											Index: true,
-										},
-										{
-											Key:   "destination_validator",
-											Value: "crocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
-											Index: true,
-										},
-										{
-											Key:   "delegator",
-											Value: "cro1qfqd93p68lr65xlgt3547vyxthzsr27pxp66ac",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "complete_redelegation",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "source_validator",
+												Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
+												Index: true,
+											},
+											{
+												Key:   "destination_validator",
+												Value: "crocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
+												Index: true,
+											},
+											{
+												Key:   "delegator",
+												Value: "cro1qfqd93p68lr65xlgt3547vyxthzsr27pxp66ac",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -1622,25 +1665,27 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "complete_redelegation",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "complete_redelegation",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "source_validator",
-											Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
-											Index: true,
-										},
-										{
-											Key:   "destination_validator",
-											Value: "crocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
-											Index: true,
-										},
-										{
-											Key:   "delegator",
-											Value: "cro1qfqd93p68lr65xlgt3547vyxthzsr27pxp66ac",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "complete_redelegation",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "source_validator",
+												Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
+												Index: true,
+											},
+											{
+												Key:   "destination_validator",
+												Value: "crocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
+												Index: true,
+											},
+											{
+												Key:   "delegator",
+												Value: "cro1qfqd93p68lr65xlgt3547vyxthzsr27pxp66ac",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -1696,7 +1741,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -1711,15 +1756,17 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "create_validator",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "create_validator",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "validator",
-											Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "create_validator",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "validator",
+												Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -1775,7 +1822,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -1790,15 +1837,17 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "delegate",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "delegate",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "validator",
-											Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "delegate",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "validator",
+												Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -1854,7 +1903,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -1869,15 +1918,17 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "unbond",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "unbond",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "destination_validator",
-											Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "unbond",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "destination_validator",
+												Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -1944,7 +1995,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 					int64(1),
 				).Return(nil)
 
-				mockAccountRawEventsView := account_raw_event_view.NewMockAccountMessagesView(nil).(*account_raw_event_view.MockAccountRawEventsView)
+				mockAccountRawEventsView := account_raw_event_view.NewMockAccountRawEventsView(nil).(*account_raw_event_view.MockAccountRawEventsView)
 				mocks = append(mocks, &mockAccountRawEventsView.Mock)
 
 				account_raw_event.NewAccountRawEvents = func(_ *rdb.Handle) account_raw_event_view.AccountRawEvents {
@@ -1959,20 +2010,22 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "redelegate",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "redelegate",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "source_validator",
-											Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
-											Index: true,
-										},
-										{
-											Key:   "destination_validator",
-											Value: "crocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "redelegate",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "source_validator",
+												Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
+												Index: true,
+											},
+											{
+												Key:   "destination_validator",
+												Value: "crocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
+												Index: true,
+											},
 										},
 									},
 								},
@@ -1983,20 +2036,22 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 							BlockHeight: 1,
 							BlockHash:   "",
 							BlockTime:   utctime.UTCTime{},
-							Data: account_raw_event_view.AccountRawEventRowData{
-								Type: "redelegate",
-								Content: usecase_model.BlockResultsEvent{
+							Data: []account_raw_event_view.AccountRawEventRowData{
+								{
 									Type: "redelegate",
-									Attributes: []usecase_model.BlockResultsEventAttribute{
-										{
-											Key:   "source_validator",
-											Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
-											Index: true,
-										},
-										{
-											Key:   "destination_validator",
-											Value: "crocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
-											Index: true,
+									Content: usecase_model.BlockResultsEvent{
+										Type: "redelegate",
+										Attributes: []usecase_model.BlockResultsEventAttribute{
+											{
+												Key:   "source_validator",
+												Value: "crocncl12razrhugyd75tpmek3t39gtelak20z8w68lzd7",
+												Index: true,
+											},
+											{
+												Key:   "destination_validator",
+												Value: "crocncl149dyku4d4c36dmvvw583xqcflau3d9x303ffcj",
+												Index: true,
+											},
 										},
 									},
 								},

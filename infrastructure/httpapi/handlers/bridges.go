@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/valyala/fasthttp"
@@ -261,6 +262,7 @@ func (handler *Bridges) ListActivitiesByNetwork(ctx *fasthttp.RequestCtx) {
 	if !accountParamOk {
 		return
 	}
+	accountParam = strings.ToLower(accountParam)
 
 	sourceBlockTimeOrder := view.ORDER_ASC
 	queryArgs := ctx.QueryArgs()

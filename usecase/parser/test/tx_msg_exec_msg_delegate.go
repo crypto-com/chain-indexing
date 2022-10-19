@@ -605,7 +605,7 @@ const TX_MSG_EXEC_MSG_DELEGATE_TXS_RESP = `{
       "messages": [
         {
           "@type": "/cosmos.authz.v1beta1.MsgExec",
-          "grantee": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2",
+          "grantee": "TCRO15ZH5TN7XJDECU4ZJCLSMLNLHT5EAD2MX84GAU2",
           "msgs": [
             {
               "@type": "/cosmos.staking.v1beta1.MsgDelegate",
@@ -741,7 +741,7 @@ const TX_MSG_EXEC_MSG_DELEGATE_TXS_RESP = `{
         "messages": [
           {
             "@type": "/cosmos.authz.v1beta1.MsgExec",
-            "grantee": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2",
+            "grantee": "TCRO15ZH5TN7XJDECU4ZJCLSMLNLHT5EAD2MX84GAU2",
             "msgs": [
               {
                 "@type": "/cosmos.staking.v1beta1.MsgDelegate",

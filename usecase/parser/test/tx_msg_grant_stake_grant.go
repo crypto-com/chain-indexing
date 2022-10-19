@@ -549,7 +549,7 @@ const TX_MSG_GRANT_STAKE_GRANT_TXS_RESP = `{
         {
           "@type": "/cosmos.authz.v1beta1.MsgGrant",
           "granter": "tcro1vurfhqf0j2jgfpjahlja6g6uq2ts2r60swm2d9",
-          "grantee": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2",
+          "grantee": "TCRO15ZH5TN7XJDECU4ZJCLSMLNLHT5EAD2MX84GAU2",
           "grant": {
             "authorization": {
               "@type": "/cosmos.staking.v1beta1.StakeAuthorization",
@@ -657,7 +657,7 @@ const TX_MSG_GRANT_STAKE_GRANT_TXS_RESP = `{
           {
             "@type": "/cosmos.authz.v1beta1.MsgGrant",
             "granter": "tcro1vurfhqf0j2jgfpjahlja6g6uq2ts2r60swm2d9",
-            "grantee": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2",
+            "grantee": "TCRO15ZH5TN7XJDECU4ZJCLSMLNLHT5EAD2MX84GAU2",
             "grant": {
               "authorization": {
                 "@type": "/cosmos.staking.v1beta1.StakeAuthorization",

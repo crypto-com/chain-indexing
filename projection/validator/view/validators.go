@@ -13,6 +13,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
+	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
 type Validators struct {
@@ -848,7 +849,7 @@ func (validatorsView *Validators) totalPower() (*big.Float, error) {
 }
 
 func (validatorsView *Validators) Search(keyword string) ([]ValidatorRow, error) {
-	keyword = strings.ToLower(keyword)
+	keyword = utils.AddressParse(keyword)
 	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Select(
 		"id",
 		"operator_address",

@@ -2113,8 +2113,8 @@ const TX_MSG_SEND_TXS_RESP = `{
             "messages": [
                 {
                     "@type": "/cosmos.bank.v1beta1.MsgSend",
-                    "from_address": "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
-                    "to_address": "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
+                    "from_address": "TCRO1FEQH6AD9YTJKR79KJK5NHNL4UN3WEZ0YNURRWV",
+                    "to_address": "TCRO1FEQH6AD9YTJKR79KJK5NHNL4UN3WEZ0YNURRWV",
                     "amount": [
                         {
                             "denom": "basetcro",
@@ -2263,8 +2263,8 @@ const TX_MSG_SEND_TXS_RESP = `{
                 "messages": [
                     {
                         "@type": "/cosmos.bank.v1beta1.MsgSend",
-                        "from_address": "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
-                        "to_address": "tcro1feqh6ad9ytjkr79kjk5nhnl4un3wez0ynurrwv",
+                        "from_address": "TCRO1FEQH6AD9YTJKR79KJK5NHNL4UN3WEZ0YNURRWV",
+                        "to_address": "TCRO1FEQH6AD9YTJKR79KJK5NHNL4UN3WEZ0YNURRWV",
                         "amount": [
                             {
                                 "denom": "basetcro",

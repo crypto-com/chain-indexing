@@ -33,8 +33,8 @@ var _ = Describe("TransactionParser", func() {
 			fakeLogger := FakeLogger.NewFakeLogger()
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.ONE_TX_TWO_MSG_BLOCK_RESULTS_RESP)
 
-			tx := mustParseTxsResp(usecase_parser_test.ONE_TX_TWO_MSG_TXS_RESP)
-			txs := []model.Tx{*tx}
+			tx := MustParseTxsResp(usecase_parser_test.ONE_TX_TWO_MSG_TXS_RESP)
+			txs := []model.CosmosTxWithHash{*tx}
 
 			anyAccountAddressPrefix := "tcro"
 
@@ -162,8 +162,8 @@ var _ = Describe("TransactionParser", func() {
 			fakeLogger := FakeLogger.NewFakeLogger()
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_WITH_FEE_BLOCK_RESULTS_RESP)
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_WITH_FEE_TXS_RESP)
-			txs := []model.Tx{*tx}
+			tx := MustParseTxsResp(usecase_parser_test.TX_WITH_FEE_TXS_RESP)
+			txs := []model.CosmosTxWithHash{*tx}
 
 			anyAccountAddressPrefix := "tcro"
 
@@ -260,8 +260,8 @@ var _ = Describe("TransactionParser", func() {
 			fakeLogger := FakeLogger.NewFakeLogger()
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESULTS_RESP)
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_FAILED_WITH_FEE_TXS_RESP)
-			txs := []model.Tx{*tx}
+			tx := MustParseTxsResp(usecase_parser_test.TX_FAILED_WITH_FEE_TXS_RESP)
+			txs := []model.CosmosTxWithHash{*tx}
 
 			anyAccountAddressPrefix := "tcro"
 
@@ -356,8 +356,8 @@ var _ = Describe("TransactionParser", func() {
 			fakeLogger := FakeLogger.NewFakeLogger()
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_FAILED_WITHOUT_FEE_BLOCK_RESULTS_RESP))
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_FAILED_WITHOUT_FEE_TXS_RESP)
-			txs := []model.Tx{*tx}
+			tx := MustParseTxsResp(usecase_parser_test.TX_FAILED_WITHOUT_FEE_TXS_RESP)
+			txs := []model.CosmosTxWithHash{*tx}
 
 			anyAccountAddressPrefix := "tcro"
 
@@ -469,8 +469,8 @@ var _ = Describe("TransactionParser", func() {
 			fakeLogger := FakeLogger.NewFakeLogger()
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESULTS_RESP)
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_WITH_MEMO_TIMEOUT_HEIGHT_TXS_RESP)
-			txs := []model.Tx{*tx}
+			tx := MustParseTxsResp(usecase_parser_test.TX_WITH_MEMO_TIMEOUT_HEIGHT_TXS_RESP)
+			txs := []model.CosmosTxWithHash{*tx}
 
 			anyAccountAddressPrefix := "tcro"
 
@@ -547,7 +547,7 @@ var _ = Describe("TransactionParser", func() {
 							Messages: []map[string]interface{}{
 								{
 									"@type":        "/cosmos.bank.v1beta1.MsgSend",
-									"from_address": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+									"from_address": "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN",
 									"to_address":   "tcro1782gn9hzqavecukdaqqclvsnpck4mtz3vwzpxl",
 									"amount": []interface{}{
 										map[string]interface{}{"denom": "basetcro", "amount": "100000000"},
@@ -565,8 +565,8 @@ var _ = Describe("TransactionParser", func() {
 			fakeLogger := FakeLogger.NewFakeLogger()
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESULTS_RESP)
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_FAILED_WITH_MEMO_TIMEOUT_HEIGHT_TXS_RESP)
-			txs := []model.Tx{*tx}
+			tx := MustParseTxsResp(usecase_parser_test.TX_FAILED_WITH_MEMO_TIMEOUT_HEIGHT_TXS_RESP)
+			txs := []model.CosmosTxWithHash{*tx}
 
 			anyAccountAddressPrefix := "tcro"
 
@@ -643,7 +643,7 @@ var _ = Describe("TransactionParser", func() {
 							Messages: []map[string]interface{}{
 								{
 									"@type":        "/cosmos.bank.v1beta1.MsgSend",
-									"from_address": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+									"from_address": "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN",
 									"to_address":   "tcro1782gn9hzqavecukdaqqclvsnpck4mtz3vwzpxl",
 									"amount": []interface{}{
 										map[string]interface{}{"denom": "basetcro", "amount": "100000000"},
@@ -661,10 +661,10 @@ var _ = Describe("TransactionParser", func() {
 			fakeLogger := FakeLogger.NewFakeLogger()
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_BLOCK_RESULTS_RESP)
 
-			tx1 := mustParseTxsResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_TXS_RESP_1)
-			tx2 := mustParseTxsResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_TXS_RESP_2)
-			tx3 := mustParseTxsResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_TXS_RESP_3)
-			txs := []model.Tx{*tx1, *tx2, *tx3}
+			tx1 := MustParseTxsResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_TXS_RESP_1)
+			tx2 := MustParseTxsResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_TXS_RESP_2)
+			tx3 := MustParseTxsResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_TXS_RESP_3)
+			txs := []model.CosmosTxWithHash{*tx1, *tx2, *tx3}
 
 			anyAccountAddressPrefix := "cosmos"
 
@@ -742,8 +742,8 @@ var _ = Describe("TransactionParser", func() {
 			fakeLogger := FakeLogger.NewFakeLogger()
 			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_SIGNER_PUBKEY_IN_STATE_BLOCK_RESULTS_RESP)
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_SIGNER_PUBKEY_IN_STATE_TXS_RESP)
-			txs := []model.Tx{*tx}
+			tx := MustParseTxsResp(usecase_parser_test.TX_SIGNER_PUBKEY_IN_STATE_TXS_RESP)
+			txs := []model.CosmosTxWithHash{*tx}
 
 			anyAccountAddressPrefix := "basecro"
 

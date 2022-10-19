@@ -585,7 +585,7 @@ const TX_MSG_REVOKE_TXS_RESP = `{
         {
           "@type": "/cosmos.authz.v1beta1.MsgRevoke",
           "granter": "tcro1vurfhqf0j2jgfpjahlja6g6uq2ts2r60swm2d9",
-          "grantee": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2",
+          "grantee": "TCRO15ZH5TN7XJDECU4ZJCLSMLNLHT5EAD2MX84GAU2",
           "msg_type_url": "/cosmos.bank.v1beta1.MsgSend"
         }
       ],
@@ -678,7 +678,7 @@ const TX_MSG_REVOKE_TXS_RESP = `{
           {
             "@type": "/cosmos.authz.v1beta1.MsgRevoke",
             "granter": "tcro1vurfhqf0j2jgfpjahlja6g6uq2ts2r60swm2d9",
-            "grantee": "tcro15zh5tn7xjdecu4zjclsmlnlht5ead2mx84gau2",
+            "grantee": "TCRO15ZH5TN7XJDECU4ZJCLSMLNLHT5EAD2MX84GAU2",
             "msg_type_url": "/cosmos.bank.v1beta1.MsgSend"
           }
         ],

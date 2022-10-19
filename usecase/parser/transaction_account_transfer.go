@@ -37,8 +37,8 @@ func ParseTxAccountTransferCommands(
 				}
 				commands = append(commands, command_usecase.NewCreateAccountTransfer(
 					blockHeight, model.AccountTransferParams{
-						Recipient: transferEvent.MustGetAttributeByKey("recipient"),
-						Sender:    sender,
+						Recipient: utils.AddressParse(transferEvent.MustGetAttributeByKey("recipient")),
+						Sender:    utils.AddressParse(sender),
 						Amount:    coin.MustParseCoinsNormalized(amount),
 					}))
 			}
