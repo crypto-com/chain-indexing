@@ -292,8 +292,13 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 				return fmt.Errorf("error querying NFT token being edited: %v", queryPrevTokenRowErr)
 			}
 
+			prevMessageRow, queryPrevMessageRowErr := nftMessagesView.FindById(msgBurnNFT.DenomId, msgBurnNFT.TokenId)
+			if queryPrevMessageRowErr != nil {
+				return fmt.Errorf("error querying NFT message being edited: %v", queryPrevTokenRowErr)
+			}
+
 			if deleteTokenErr := projection.deleteToken(
-				tokensView, tokensTotalView, nftMessagesView, prevTokenRow.TokenRow,
+				tokensView, tokensTotalView, nftMessagesView, prevTokenRow.TokenRow, *prevMessageRow,
 			); deleteTokenErr != nil {
 				return fmt.Errorf("error deleteing burnt NFT token: %v", deleteTokenErr)
 			}
@@ -468,21 +473,17 @@ func (projection *NFT) deleteToken(
 	tokensTotalView view.TokensTotal,
 	nftMessagesView view.Messages,
 	tokenRow view.TokenRow,
+	messageRow view.MessageRow,
 ) error {
-	prevTokenRow, queryPrevTokenRowErr := tokensView.FindById(tokenRow.DenomId, tokenRow.TokenId)
-	if queryPrevTokenRowErr != nil {
-		return fmt.Errorf("error querying NFT token being edited: %v", queryPrevTokenRowErr)
-	}
 	tokenRow.Status = constants.BURNED
+	messageRow.Status = constants.BURNED
 
 	if updateTokenErr := tokensView.Update(tokenRow); updateTokenErr != nil {
 		return fmt.Errorf("error updating NFT token row: %v", updateTokenErr)
 	}
-	if updateTokenErr := projection.updateToken(
-		tokensView,
-		prevTokenRow.TokenRow,
-		tokenRow,
-		tokensTotalView,
+
+	if updateTokenErr := nftMessagesView.Update(
+		messageRow,
 	); updateTokenErr != nil {
 		return updateTokenErr
 	}
@@ -495,15 +496,15 @@ func (projection *NFT) deleteToken(
 	// 	return fmt.Errorf("error deleting NFT token from view: %d rows deleted", deletedRowCount)
 	// }
 
-	deleteMessagesCount, deleteMessagesErr := nftMessagesView.DeleteAllByDenomTokenIds(
-		tokenRow.DenomId, tokenRow.TokenId,
-	)
-	if deleteMessagesErr != nil {
-		return fmt.Errorf("error deleting NFT messages from view: %v", deleteMessagesErr)
-	}
-	if deleteMessagesCount == 0 {
-		return fmt.Errorf("error deleting NFT messages from view: no rows deleted")
-	}
+	// deleteMessagesCount, deleteMessagesErr := nftMessagesView.DeleteAllByDenomTokenIds(
+	// 	tokenRow.DenomId, tokenRow.TokenId,
+	// )
+	// if deleteMessagesErr != nil {
+	// 	return fmt.Errorf("error deleting NFT messages from view: %v", deleteMessagesErr)
+	// }
+	// if deleteMessagesCount == 0 {
+	// 	return fmt.Errorf("error deleting NFT messages from view: no rows deleted")
+	// }
 
 	if decrementErr := tokensTotalView.DecrementAll([]string{
 		"-:-:-:-",
