@@ -74,10 +74,10 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_TIMEOUT_BLOCK_RESULTS_RESP,
 			))
 
-			tx1 := mustParseTxsResp(usecase_parser_test.TX_MSG_TIMEOUT_TXS_RESP_1)
-			tx2 := mustParseTxsResp(usecase_parser_test.TX_MSG_TIMEOUT_TXS_RESP_2)
-			tx3 := mustParseTxsResp(usecase_parser_test.TX_MSG_TIMEOUT_TXS_RESP_3)
-			txs := []model.Tx{*tx1, *tx2, *tx3}
+			tx1 := MustParseTxsResp(usecase_parser_test.TX_MSG_TIMEOUT_TXS_RESP_1)
+			tx2 := MustParseTxsResp(usecase_parser_test.TX_MSG_TIMEOUT_TXS_RESP_2)
+			tx3 := MustParseTxsResp(usecase_parser_test.TX_MSG_TIMEOUT_TXS_RESP_3)
+			txs := []model.CosmosTxWithHash{*tx1, *tx2, *tx3}
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
@@ -171,8 +171,8 @@ var _ = Describe("ParseMsgCommands", func() {
 			usecase_parser_test.TX_MSG_TIMEOUT_V1_0_BLOCK_RESULTS_RESP,
 		))
 
-		tx := mustParseTxsResp(usecase_parser_test.TX_MSG_TIMEOUT_V1_0_TXS_RESP)
-		txs := []model.Tx{*tx}
+		tx := MustParseTxsResp(usecase_parser_test.TX_MSG_TIMEOUT_V1_0_TXS_RESP)
+		txs := []model.CosmosTxWithHash{*tx}
 
 		accountAddressPrefix := "cro"
 		stakingDenom := "basecro"

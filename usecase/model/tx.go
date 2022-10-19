@@ -103,3 +103,8 @@ type TxResponseLog struct {
 	Log      string       `json:"log,omitempty"`
 	Events   []BlockEvent `json:"events"`
 }
+
+type CosmosTxWithHash struct {
+	Tx   CosmosTx `json:"tx"`
+	Hash string   `json:"hash"`
+}
