@@ -80,10 +80,15 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_V0_42_7_test.TX_MSG_RECV_PACKET_BLOCK_RESULTS_RESP,
 			))
 
-			tx, _ := cosmosapp.ParseTxsResp(strings.NewReader(
+			resTx, _ := cosmosapp.ParseTxsResp(strings.NewReader(
 				usecase_parser_V0_42_7_test.TX_MSG_RECV_PACKET_TXS_RESP,
 			))
-			txs := []model.Tx{*tx}
+			tx := &model.CosmosTxWithHash{
+				Tx:   resTx.Tx,
+				Hash: resTx.TxResponse.TxHash,
+			}
+
+			txs := []model.CosmosTxWithHash{*tx}
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
@@ -171,10 +176,14 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_V0_42_7_test.TX_MSG_RECV_PACKET_PACKET_ACK_ERROR_BLOCK_RESULTS_RESP,
 			))
 
-			tx, _ := cosmosapp.ParseTxsResp(strings.NewReader(
+			resTx, _ := cosmosapp.ParseTxsResp(strings.NewReader(
 				usecase_parser_V0_42_7_test.TX_MSG_RECV_PACKET_PACKET_ACK_ERROR_TXS_RESP,
 			))
-			txs := []model.Tx{*tx}
+			tx := &model.CosmosTxWithHash{
+				Tx:   resTx.Tx,
+				Hash: resTx.TxResponse.TxHash,
+			}
+			txs := []model.CosmosTxWithHash{*tx}
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
@@ -268,10 +277,14 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_V0_42_7_test.TX_MSG_RECV_PACKET_MISSING_FUNGIBLE_TOKEN_PACKET_BLOCK_RESULTS_RESP,
 			))
 
-			tx, _ := cosmosapp.ParseTxsResp(strings.NewReader(
+			resTx, _ := cosmosapp.ParseTxsResp(strings.NewReader(
 				usecase_parser_V0_42_7_test.TX_MSG_RECV_PACKET_MISSING_FUNGIBLE_TOKEN_PACKET_TXS_RESP,
 			))
-			txs := []model.Tx{*tx}
+			tx := &model.CosmosTxWithHash{
+				Tx:   resTx.Tx,
+				Hash: resTx.TxResponse.TxHash,
+			}
+			txs := []model.CosmosTxWithHash{*tx}
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"

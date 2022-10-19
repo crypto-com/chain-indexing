@@ -20,7 +20,7 @@ import (
 
 func ParseTransactionCommands(
 	logger applogger.Logger,
-	txs []model.Tx,
+	txs []model.CosmosTxWithHash,
 	cosmosClient cosmosapp_interface.Client,
 	blockResults *model.BlockResults,
 	accountAddressPrefix string,
@@ -29,7 +29,7 @@ func ParseTransactionCommands(
 	blockHeight := blockResults.Height
 	cmds := make([]command.Command, 0, len(blockResults.TxsResults))
 	for i, tx := range txs {
-		txHash := tx.TxResponse.TxHash
+		txHash := tx.Hash
 		txsResult := blockResults.TxsResults[i]
 
 		var log string
