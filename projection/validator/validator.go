@@ -582,13 +582,13 @@ func (projection *Validator) checkAttentionOnCommission(mutValidatorRow *view.Va
 	newCommission, newCommissionErr := strconv.ParseFloat(maybeCommissionRate, 64)
 	if newCommissionErr != nil {
 		return fmt.Errorf(
-			"error cnoverting new commission rate to float validator %s from view", validatorAddress,
+			"error converting new commission rate to float validator %s from view", validatorAddress,
 		)
 	}
 	currentCommission, currentCommissionErr := strconv.ParseFloat(commissionRate, 64)
 	if currentCommissionErr != nil {
 		return fmt.Errorf(
-			"error cnoverting current commission rate to float validator %s from view", validatorAddress,
+			"error converting current commission rate to float validator %s from view", validatorAddress,
 		)
 	}
 
@@ -609,9 +609,17 @@ func (projection *Validator) checkAttentionOnNumOfChanges(mutValidatorRow *view.
 	// count the current change
 	editLimitCounter[editField]--
 
+	// get checking interval from config
+	duration, durationParserErr := time.ParseDuration(projection.validatorCheckInterval)
+	if durationParserErr != nil {
+		return fmt.Errorf("error  %v", durationParserErr)
+	}
+
+	afterBlockTime := utctime.FromUnixNano(blockTime.UnixNano() - duration.Nanoseconds())
+
 	mutValidatorActivities, _, err := (*validatorActivities).List(
 		view.ValidatorActivitiesListFilter{
-			Last24hrAtBlockTime:  blockTime,
+			AfterBlockTime:       &afterBlockTime,
 			MaybeOperatorAddress: validatorAddress,
 		},
 		view.ValidatorActivitiesListOrder{},

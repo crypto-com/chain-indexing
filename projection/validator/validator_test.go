@@ -164,12 +164,12 @@ func TestValidator_HandleEvents(t *testing.T) {
 					return mockValidatorActivitiesView
 				}
 
-				timestamp := utctime.FromUnixNano(1665902976672205000)
+				timestamp := utctime.FromUnixNano(1665816576672205000)
 
 				mockValidatorActivitiesView.On(
 					"List",
 					validator_view.ValidatorActivitiesListFilter{
-						Last24hrAtBlockTime:  &timestamp,
+						AfterBlockTime:       &timestamp,
 						MaybeOperatorAddress: primptr.String("tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus"),
 					},
 					validator_view.ValidatorActivitiesListOrder{},
@@ -430,12 +430,12 @@ func TestValidator_HandleEvents(t *testing.T) {
 					return mockValidatorActivitiesView
 				}
 
-				timestamp := utctime.FromUnixNano(1665902976672205000)
+				timestamp := utctime.FromUnixNano(1665816576672205000)
 
 				mockValidatorActivitiesView.On(
 					"List",
 					validator_view.ValidatorActivitiesListFilter{
-						Last24hrAtBlockTime:  &timestamp,
+						AfterBlockTime:       &timestamp,
 						MaybeOperatorAddress: primptr.String("tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus"),
 					},
 					validator_view.ValidatorActivitiesListOrder{},
@@ -696,12 +696,12 @@ func TestValidator_HandleEvents(t *testing.T) {
 					return mockValidatorActivitiesView
 				}
 
-				timestamp := utctime.FromUnixNano(1665902976672205000)
+				timestamp := utctime.FromUnixNano(1665816576672205000)
 
 				mockValidatorActivitiesView.On(
 					"List",
 					validator_view.ValidatorActivitiesListFilter{
-						Last24hrAtBlockTime:  &timestamp,
+						AfterBlockTime:       &timestamp,
 						MaybeOperatorAddress: primptr.String("tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus"),
 					},
 					validator_view.ValidatorActivitiesListOrder{},

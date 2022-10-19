@@ -51,7 +51,7 @@ func (validatorActivitiesView *ValidatorActivitiesView) Insert(validatorActivity
 		"data",
 	).Values("?", "?", "?", "?", "?", "?", "?").ToSql()
 	if err != nil {
-		return fmt.Errorf("error building valiator activity insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		return fmt.Errorf("error building validator activity insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
 	result, err := validatorActivitiesView.rdb.Exec(sql,
@@ -157,8 +157,8 @@ func (validatorActivitiesView *ValidatorActivitiesView) List(
 	if filter.MaybeOperatorAddress != nil {
 		stmtBuilder = stmtBuilder.Where("operator_address = ?", *filter.MaybeOperatorAddress)
 	}
-	if filter.Last24hrAtBlockTime != nil {
-		stmtBuilder = stmtBuilder.Where("block_time >= ?", filter.Last24hrAtBlockTime.UnixNano()-24*60*60*1000*1000000) // last 24 hours
+	if filter.AfterBlockTime != nil {
+		stmtBuilder = stmtBuilder.Where("block_time >= ?", filter.AfterBlockTime.UnixNano()) // last 24 hours
 	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
@@ -237,7 +237,7 @@ func (validatorActivitiesView *ValidatorActivitiesView) List(
 type ValidatorActivitiesListFilter struct {
 	MaybeOperatorAddress      *string
 	MaybeConsensusNodeAddress *string
-	Last24hrAtBlockTime       *utctime.UTCTime
+	AfterBlockTime            *utctime.UTCTime
 }
 
 type ValidatorActivitiesListOrder struct {
