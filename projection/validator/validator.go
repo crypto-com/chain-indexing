@@ -136,7 +136,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 			blockProposer = blockCreatedEvent.Block.ProposerAddress
 		}
 	}
-	if projectErr := projection.projectValidatorView(&validatorsView, &validatorActivitiesView, blockTime, height, events); projectErr != nil {
+	if projectErr := projection.projectValidatorView(validatorsView, &validatorActivitiesView, blockTime, height, events); projectErr != nil {
 		return fmt.Errorf("error projecting validator view: %v", projectErr)
 	}
 
@@ -283,7 +283,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 }
 
 func (projection *Validator) projectValidatorView(
-	validatorsView *view.Validators,
+	validatorsView view.Validators,
 	validatorActivities *view.ValidatorActivities,
 	blockTime utctime.UTCTime,
 	blockHeight int64,
@@ -337,7 +337,7 @@ func (projection *Validator) projectValidatorView(
 			}
 
 			// Validator re-joins
-			isJoined, joinedAtBlockHeight, err := (*validatorsView).LastJoinedBlockHeight(
+			isJoined, joinedAtBlockHeight, err := validatorsView.LastJoinedBlockHeight(
 				validatorRow.OperatorAddress, validatorRow.ConsensusNodeAddress,
 			)
 			if err != nil {
@@ -347,7 +347,7 @@ func (projection *Validator) projectValidatorView(
 				validatorRow.JoinedAtBlockHeight = joinedAtBlockHeight
 			}
 
-			if err := (*validatorsView).Upsert(&validatorRow); err != nil {
+			if err := validatorsView.Upsert(&validatorRow); err != nil {
 				return fmt.Errorf("error inserting new validator into view: %v", err)
 			}
 		} else if msgCreateValidatorEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {
@@ -396,7 +396,7 @@ func (projection *Validator) projectValidatorView(
 			}
 
 			// Validator re-joins
-			isJoined, joinedAtBlockHeight, err := (*validatorsView).LastJoinedBlockHeight(
+			isJoined, joinedAtBlockHeight, err := validatorsView.LastJoinedBlockHeight(
 				validatorRow.OperatorAddress, validatorRow.ConsensusNodeAddress,
 			)
 			if err != nil {
@@ -406,7 +406,7 @@ func (projection *Validator) projectValidatorView(
 				validatorRow.JoinedAtBlockHeight = joinedAtBlockHeight
 			}
 
-			if err := (*validatorsView).Upsert(&validatorRow); err != nil {
+			if err := validatorsView.Upsert(&validatorRow); err != nil {
 				return fmt.Errorf("error inserting new validator into view: %v", err)
 			}
 		}
@@ -416,7 +416,7 @@ func (projection *Validator) projectValidatorView(
 		if msgEditValidatorEvent, ok := event.(*event_usecase.MsgEditValidator); ok {
 			projection.logger.Debug("handling MsgEditValidator event")
 
-			mutValidatorRow, err := (*validatorsView).FindBy(view.ValidatorIdentity{
+			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
 				MaybeOperatorAddress: &msgEditValidatorEvent.ValidatorAddress,
 			})
 
@@ -469,13 +469,13 @@ func (projection *Validator) projectValidatorView(
 				mutValidatorRow.MinSelfDelegation = *msgEditValidatorEvent.MaybeMinSelfDelegation
 			}
 
-			if err := (*validatorsView).Update(mutValidatorRow); err != nil {
+			if err := validatorsView.Update(mutValidatorRow); err != nil {
 				return fmt.Errorf("error updating validator into view: %v", err)
 			}
 		} else if validatorJailedEvent, ok := event.(*event_usecase.ValidatorJailed); ok {
 			projection.logger.Debug("handling ValidatorJailed event")
 
-			mutValidatorRow, err := (*validatorsView).FindBy(view.ValidatorIdentity{
+			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
 				MaybeConsensusNodeAddress: &validatorJailedEvent.ConsensusNodeAddress,
 			})
 			if err != nil {
@@ -487,13 +487,13 @@ func (projection *Validator) projectValidatorView(
 			mutValidatorRow.Status = constants.JAILED
 			mutValidatorRow.Jailed = true
 
-			if err := (*validatorsView).Update(mutValidatorRow); err != nil {
+			if err := validatorsView.Update(mutValidatorRow); err != nil {
 				return fmt.Errorf("error updating validator into view: %v", err)
 			}
 		} else if msgUnjailEvent, ok := event.(*event_usecase.MsgUnjail); ok {
 			projection.logger.Debug("handling MsgUnjail event")
 
-			mutValidatorRow, err := (*validatorsView).FindBy(view.ValidatorIdentity{
+			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
 				MaybeOperatorAddress: &msgUnjailEvent.ValidatorAddr,
 			})
 			if err != nil {
@@ -504,7 +504,7 @@ func (projection *Validator) projectValidatorView(
 			mutValidatorRow.Status = constants.INACTIVE
 			mutValidatorRow.Jailed = false
 
-			if err := (*validatorsView).Update(mutValidatorRow); err != nil {
+			if err := validatorsView.Update(mutValidatorRow); err != nil {
 				return fmt.Errorf("error updating validator into view: %v", err)
 			}
 		} else if powerChangedEvent, ok := event.(*event_usecase.PowerChanged); ok {
@@ -521,7 +521,7 @@ func (projection *Validator) projectValidatorView(
 				return fmt.Errorf("error converting tendermint pubkey to consensus pubkey")
 			}
 
-			mutValidatorRow, err := (*validatorsView).FindBy(view.ValidatorIdentity{
+			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
 				MaybeConsensusNodeAddress: &consensusNodeAddress,
 			})
 			if err != nil {
@@ -535,7 +535,7 @@ func (projection *Validator) projectValidatorView(
 				mutValidatorRow.Status = constants.BONDED
 			}
 
-			if err := (*validatorsView).Update(mutValidatorRow); err != nil {
+			if err := validatorsView.Update(mutValidatorRow); err != nil {
 				return fmt.Errorf("error updating validator into view: %v", err)
 			}
 		}
