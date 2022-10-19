@@ -70,6 +70,10 @@ func initProjections(
 		MigrationRepoRef: config.IndexService.GithubAPI.MigrationRepoRef,
 
 		ServerMigrationRepoRef: customConfig.ServerGithubAPI.MigrationRepoRef,
+
+		ValidatorCheckInterval:           config.ValidatorAttentionRules.CheckInterval,
+		ValidatorEditLimit:               config.ValidatorAttentionRules.EditLimit,
+		ValidatorMaxCommissionRateChange: config.ValidatorAttentionRules.MaxCommissionRateChange,
 	}
 	for _, projectionName := range config.IndexService.Projection.Enables {
 		projection := InitProjection(
@@ -217,7 +221,7 @@ func InitProjection(name string, params InitProjectionParams) projection_entity.
 		databaseURL := migrationhelper.GenerateDefaultDatabaseURL(name, connString)
 		migrationHelper := github_migrationhelper.NewGithubMigrationHelper(sourceURL, databaseURL)
 
-		return validator.NewValidator(params.Logger, params.RdbConn, params.ConsNodeAddressPrefix, migrationHelper)
+		return validator.NewValidator(params.Logger, params.RdbConn, params.ConsNodeAddressPrefix, migrationHelper, params.ValidatorCheckInterval, params.ValidatorEditLimit, params.ValidatorMaxCommissionRateChange)
 	case "ValidatorStats":
 		sourceURL := github_migrationhelper.GenerateSourceURL(
 			github_migrationhelper.MIGRATION_GITHUB_URL_FORMAT,
@@ -364,4 +368,8 @@ type InitProjectionParams struct {
 	MigrationRepoRef string
 
 	ServerMigrationRepoRef string
+
+	ValidatorCheckInterval           string
+	ValidatorEditLimit               map[string]int
+	ValidatorMaxCommissionRateChange float64
 }

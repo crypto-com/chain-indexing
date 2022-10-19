@@ -31,6 +31,13 @@ func NewValidatorProjection(rdbConn rdb.Conn) *validator.Validator {
 		rdbConn,
 		"tcrocncl",
 		nil,
+
+		map[string]int{
+			"moniker":        2,
+			"commissionRate": 2,
+		},
+		float64(0.1),
+		"24h",
 	)
 }
 
@@ -105,7 +112,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 						Details:         "[do-not-modify]",
 					},
 					ValidatorAddress:       "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
-					MaybeCommissionRate:    primptr.String("0.1"),
+					MaybeCommissionRate:    nil,
 					MaybeMinSelfDelegation: nil,
 				},
 			},
@@ -364,7 +371,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 						},
 					}),
 					Description: model.ValidatorDescription{
-						Moniker:         "newMoniker",
+						Moniker:         "[do-not-modify]",
 						Identity:        "[do-not-modify]",
 						Website:         "[do-not-modify]",
 						SecurityContact: "[do-not-modify]",
@@ -452,7 +459,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 									"msgName": "/cosmos.staking.v1beta1.MsgEditValidator",
 									"description": map[string]interface{}{
 										"details":         "[do-not-modify]",
-										"moniker":         "newMoniker",
+										"moniker":         "[do-not-modify]",
 										"website":         "[do-not-modify]",
 										"identity":        "[do-not-modify]",
 										"securityContact": "[do-not-modify]",
@@ -480,7 +487,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 									"msgName": "/cosmos.staking.v1beta1.MsgEditValidator",
 									"description": map[string]interface{}{
 										"details":         "[do-not-modify]",
-										"moniker":         "newMoniker",
+										"moniker":         "[do-not-modify]",
 										"website":         "[do-not-modify]",
 										"identity":        "[do-not-modify]",
 										"securityContact": "[do-not-modify]",
@@ -506,7 +513,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 						Jailed:                  false,
 						JoinedAtBlockHeight:     1,
 						Power:                   "",
-						Moniker:                 "newMoniker",
+						Moniker:                 "[do-not-modify]",
 						Identity:                "[do-not-modify]",
 						Website:                 "[do-not-modify]",
 						SecurityContact:         "[do-not-modify]",
@@ -630,7 +637,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 						},
 					}),
 					Description: model.ValidatorDescription{
-						Moniker:         "newMoniker",
+						Moniker:         "[do-not-modify]",
 						Identity:        "[do-not-modify]",
 						Website:         "[do-not-modify]",
 						SecurityContact: "[do-not-modify]",
@@ -715,7 +722,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 						Jailed:                  false,
 						JoinedAtBlockHeight:     1,
 						Power:                   "",
-						Moniker:                 "newMoniker",
+						Moniker:                 "[do-not-modify]",
 						Identity:                "[do-not-modify]",
 						Website:                 "[do-not-modify]",
 						SecurityContact:         "[do-not-modify]",

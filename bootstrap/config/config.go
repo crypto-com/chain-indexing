@@ -4,15 +4,16 @@ const SYSTEM_MODE_EVENT_STORE = "EVENT_STORE"
 const SYSTEM_MODE_TENDERMINT_DIRECT = "TENDERMINT_DIRECT"
 
 type Config struct {
-	Blockchain    Blockchain    `yaml:"blockchain" toml:"blockchain" xml:"blockchain" json:"blockchain"`
-	IndexService  IndexService  `yaml:"index_service" toml:"index_service" xml:"index_service" json:"index_service"`
-	HTTPService   HTTPService   `yaml:"http_service" toml:"http_service" xml:"http_service" json:"http_service"`
-	TendermintApp TendermintApp `yaml:"tendermint_app" toml:"tendermint_app" xml:"tendermint_app" json:"tendermint_app"`
-	CosmosApp     CosmosApp     `yaml:"cosmos_app" toml:"cosmos_app" xml:"cosmos_app" json:"cosmos_app"`
-	Debug         Debug         `yaml:"debug" toml:"debug" xml:"debug" json:"debug"`
-	Postgres      Postgres      `yaml:"postgres" toml:"postgres" xml:"postgres" json:"postgres"`
-	Logger        Logger        `yaml:"logger" toml:"logger" xml:"logger" json:"logger"`
-	Prometheus    Prometheus    `yaml:"prometheus" toml:"prometheus" xml:"prometheus" json:"prometheus"`
+	Blockchain              Blockchain              `yaml:"blockchain" toml:"blockchain" xml:"blockchain" json:"blockchain"`
+	IndexService            IndexService            `yaml:"index_service" toml:"index_service" xml:"index_service" json:"index_service"`
+	HTTPService             HTTPService             `yaml:"http_service" toml:"http_service" xml:"http_service" json:"http_service"`
+	TendermintApp           TendermintApp           `yaml:"tendermint_app" toml:"tendermint_app" xml:"tendermint_app" json:"tendermint_app"`
+	CosmosApp               CosmosApp               `yaml:"cosmos_app" toml:"cosmos_app" xml:"cosmos_app" json:"cosmos_app"`
+	Debug                   Debug                   `yaml:"debug" toml:"debug" xml:"debug" json:"debug"`
+	Postgres                Postgres                `yaml:"postgres" toml:"postgres" xml:"postgres" json:"postgres"`
+	Logger                  Logger                  `yaml:"logger" toml:"logger" xml:"logger" json:"logger"`
+	Prometheus              Prometheus              `yaml:"prometheus" toml:"prometheus" xml:"prometheus" json:"prometheus"`
+	ValidatorAttentionRules ValidatorAttentionRules `yaml:"validator_attention_rules" toml:"prometheus" xml:"validator_attention_rules" json:"validator_attention_rules"`
 }
 
 type IndexService struct {
@@ -105,4 +106,10 @@ type Prometheus struct {
 	Enable     bool   `yaml:"enable" toml:"enable" xml:"enable" json:"enable,omitempty"`
 	ExportPath string `yaml:"export_path" toml:"export_path" xml:"export_path" json:"export_path,omitempty"`
 	Port       string `yaml:"port" toml:"port" xml:"port" json:"port,omitempty"`
+}
+
+type ValidatorAttentionRules struct {
+	EditLimit               map[string]int `yaml:"edit_limit" toml:"edit_limit" xml:"edit_limit" json:"edit_limit,omitempty"`
+	MaxCommissionRateChange float64        `yaml:"max_commission_rate_change" toml:"max_commission_rate_change" xml:"max_commission_rate_change" json:"max_commission_rate_change,omitempty"`
+	CheckInterval           string         `yaml:"check_interval" toml:"check_interval" xml:"check_interval" json:"check_interval,omitempty"`
 }
