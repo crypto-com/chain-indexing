@@ -3,6 +3,7 @@ package view
 import (
 	"errors"
 	"fmt"
+
 	"github.com/crypto-com/chain-indexing/internal/sanitizer"
 
 	sq "github.com/Masterminds/squirrel"
@@ -215,6 +216,7 @@ func (tokensView *TokensView) Update(tokenRow TokenRow) error {
 		"last_edited_at_block_height":      tokenRow.LastEditedAtBlockHeight,
 		"last_transferred_at":              tokensView.rdb.TypeConv.Tton(&tokenRow.LastTransferredAt),
 		"last_transferred_at_block_height": tokenRow.LastTransferredAtBlockHeight,
+		"Status":                           tokenRow.Status,
 	}).Where(
 		"denom_id = ? AND token_id = ?",
 		sanitizer.SanitizePostgresString(tokenRow.DenomId),
@@ -483,4 +485,5 @@ type TokenRow struct {
 	LastEditedAtBlockHeight      int64           `json:"tokenLastEditedAtBlockHeight"`
 	LastTransferredAt            utctime.UTCTime `json:"tokenLastTransferredAt"`
 	LastTransferredAtBlockHeight int64           `json:"tokenLastTransferredAtBlockHeight"`
+	Status                       string          `json:"status"`
 }

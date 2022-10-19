@@ -257,6 +257,7 @@ type MessageRow struct {
 	MessageIndex    int             `json:"messageIndex"`
 	MessageType     string          `json:"messageType"`
 	Data            interface{}     `json:"data"`
+	Status          string          `json:"status"`
 }
 
 type MessagesListFilter struct {
