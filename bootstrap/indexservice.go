@@ -39,7 +39,7 @@ type IndexService struct {
 	GithubAPIUser  string
 	GithubAPIToken string
 
-	txDecoder *txdecoder.TxDecoder
+	txDecoder txdecoder.TxDecoder
 }
 
 // NewIndexService creates a new server instance for polling and indexing
@@ -49,7 +49,7 @@ func NewIndexService(
 	config *config.Config,
 	projections []projection_entity.Projection,
 	cronJobs []projection_entity.CronJob,
-	txDecoder *txdecoder.TxDecoder,
+	txDecoder txdecoder.TxDecoder,
 ) *IndexService {
 	return &IndexService{
 		logger:      logger,

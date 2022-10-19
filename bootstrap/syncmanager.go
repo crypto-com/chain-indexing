@@ -53,13 +53,13 @@ type SyncManager struct {
 
 	startingBlockHeight int64
 
-	txDecoder *txdecoder.TxDecoder
+	txDecoder txdecoder.TxDecoder
 }
 
 type SyncManagerParams struct {
 	Logger    applogger.Logger
 	RDbConn   rdb.Conn
-	TxDecoder *txdecoder.TxDecoder
+	TxDecoder txdecoder.TxDecoder
 
 	Config SyncManagerConfig
 }
@@ -257,7 +257,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		if err != nil {
 			if manager.txDecoder != nil {
 				var decodedTx *model.CosmosTx
-				decodedTx, err = (*manager.txDecoder).DecodeBase64(txHex)
+				decodedTx, err = manager.txDecoder.DecodeBase64(txHex)
 				if err != nil {
 					return nil, fmt.Errorf("error decoding chain txs (%s) at height %d: %v", txHex, blockHeight, err)
 				}
