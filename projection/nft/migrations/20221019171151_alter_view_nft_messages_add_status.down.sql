@@ -1,2 +1,2 @@
-ALTER TABLE view_nft_tokens
+ALTER TABLE view_nft_messages
     DROP status;
