@@ -53,7 +53,7 @@ type SyncManager struct {
 
 	startingBlockHeight int64
 
-	TxDecoder *txdecoder.TxDecoder
+	txDecoder *txdecoder.TxDecoder
 }
 
 type SyncManagerParams struct {
@@ -131,7 +131,7 @@ func NewSyncManager(
 
 		startingBlockHeight: params.Config.StartingBlockHeight,
 
-		TxDecoder: params.txDecoder,
+		txDecoder: params.txDecoder,
 	}
 }
 
@@ -255,9 +255,9 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		var resTx *model.Tx
 		resTx, err = manager.cosmosClient.Tx(txHash)
 		if err != nil {
-			if manager.TxDecoder != nil {
+			if manager.txDecoder != nil {
 				var decodedTx *model.CosmosTx
-				decoder := *manager.TxDecoder
+				decoder := *manager.txDecoder
 				decodedTx, err = decoder.DecodeBase64(txHex)
 				if err != nil {
 					return nil, fmt.Errorf("error decoding chain txs (%s) at height %d: %v", txHex, blockHeight, err)
