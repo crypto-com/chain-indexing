@@ -257,8 +257,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		if err != nil {
 			if manager.txDecoder != nil {
 				var decodedTx *model.CosmosTx
-				decoder := *manager.txDecoder
-				decodedTx, err = decoder.DecodeBase64(txHex)
+				decodedTx, err = (*manager.txDecoder).DecodeBase64(txHex)
 				if err != nil {
 					return nil, fmt.Errorf("error decoding chain txs (%s) at height %d: %v", txHex, blockHeight, err)
 				}
