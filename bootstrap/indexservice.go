@@ -154,6 +154,7 @@ func (service *IndexService) RunEventStoreMode() error {
 				StakingDenom:             service.bondingDenom,
 				StartingBlockHeight:      service.startingBlockHeight,
 			},
+			TxDecoder: service.txDecoder,
 		},
 		utils.NewCosmosParserManager(
 			utils.CosmosParserManagerParams{
@@ -192,7 +193,7 @@ func (service *IndexService) RunTendermintDirectMode() error {
 						StakingDenom:             service.bondingDenom,
 						StartingBlockHeight:      service.startingBlockHeight,
 					},
-					txDecoder: service.txDecoder,
+					TxDecoder: service.txDecoder,
 				},
 				utils.NewCosmosParserManager(
 					utils.CosmosParserManagerParams{

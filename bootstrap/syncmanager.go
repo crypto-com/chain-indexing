@@ -59,7 +59,7 @@ type SyncManager struct {
 type SyncManagerParams struct {
 	Logger    applogger.Logger
 	RDbConn   rdb.Conn
-	txDecoder *txdecoder.TxDecoder
+	TxDecoder *txdecoder.TxDecoder
 
 	Config SyncManagerConfig
 }
@@ -131,7 +131,7 @@ func NewSyncManager(
 
 		startingBlockHeight: params.Config.StartingBlockHeight,
 
-		txDecoder: params.txDecoder,
+		txDecoder: params.TxDecoder,
 	}
 }
 
