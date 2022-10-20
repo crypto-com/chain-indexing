@@ -611,6 +611,7 @@ func (projection *Validator) projectValidatorView(
 
 	return nil
 }
+
 func (projection *Validator) checkAttentionOnCommission(mutValidatorRow *view.ValidatorRow, maybeCommissionRate string, commissionRate string, validatorAddress string) error {
 	if projection.config.AttentionStatusRules.MaxCommissionRateChange.Enable {
 		newCommission, newCommissionErr := strconv.ParseFloat(maybeCommissionRate, 64)
@@ -633,6 +634,7 @@ func (projection *Validator) checkAttentionOnCommission(mutValidatorRow *view.Va
 
 	return nil
 }
+
 func (projection *Validator) checkAttentionOnNumOfChanges(mutValidatorRow *view.ValidatorRow, validatorActivities *view.ValidatorActivities, blockTime *utctime.UTCTime, validatorAddress *string, editField string) error {
 	if projection.config.AttentionStatusRules.MaxEditQuota.Enable {
 		editQuotaCounter := projection.config.AttentionStatusRules.MaxEditQuota.Quota
@@ -643,7 +645,9 @@ func (projection *Validator) checkAttentionOnNumOfChanges(mutValidatorRow *view.
 		}
 
 		// count the current change
-		editQuotaCounter[editField]--
+		if _, exists := editQuotaCounter[editField]; exists {
+			editQuotaCounter[editField]--
+		}
 
 		// get checking interval from config
 		duration, durationParserErr := time.ParseDuration(projection.config.AttentionStatusRules.MaxEditQuota.Interval)
@@ -671,23 +675,24 @@ func (projection *Validator) checkAttentionOnNumOfChanges(mutValidatorRow *view.
 		for _, activity := range mutValidatorActivities {
 			content := activity.Data.Content.(map[string]interface{})
 			pastDescription := content["description"].(map[string]interface{})
+
 			if pastDescription["moniker"] != DO_NOT_MODIFY {
-				editQuotaCounter["moniker"]--
+				checkAndUpdateQuota("moniker", &editQuotaCounter)
 			}
 			if pastDescription["identity"] != DO_NOT_MODIFY {
-				editQuotaCounter["identity"]--
+				checkAndUpdateQuota("identity", &editQuotaCounter)
 			}
 			if pastDescription["details"] != DO_NOT_MODIFY {
-				editQuotaCounter["details"]--
+				checkAndUpdateQuota("details", &editQuotaCounter)
 			}
 			if pastDescription["securityContact"] != DO_NOT_MODIFY {
-				editQuotaCounter["SecurityContact"]--
+				checkAndUpdateQuota("securityContact", &editQuotaCounter)
 			}
 			if pastDescription["website"] != DO_NOT_MODIFY {
-				editQuotaCounter["website"]--
+				checkAndUpdateQuota("website", &editQuotaCounter)
 			}
 			if content["commissionRate"] != nil {
-				editQuotaCounter["commissionRate"]--
+				checkAndUpdateQuota("commissionRate", &editQuotaCounter)
 			}
 		}
 
@@ -697,7 +702,14 @@ func (projection *Validator) checkAttentionOnNumOfChanges(mutValidatorRow *view.
 				mutValidatorRow.Status = constants.ATTENTION
 			}
 		}
+
 	}
 
 	return nil
+}
+
+func checkAndUpdateQuota(key string, counter *map[string]int) {
+	if _, exists := (*counter)[key]; exists {
+		(*counter)[key]--
+	}
 }
