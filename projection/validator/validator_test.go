@@ -32,13 +32,20 @@ func NewValidatorProjection(rdbConn rdb.Conn) *validator.Validator {
 		"tcrocncl",
 		nil,
 		&validator.Config{
-			true,
-			map[string]int{
-				"moniker":        2,
-				"commissionRate": 2,
+			validator.Rules{
+				validator.MaxCommissionRateChange{
+					Enable:    true,
+					MaxChange: float64(0.1),
+				},
+				validator.MaxEditQuota{
+					Enable: true,
+					Quota: map[string]int{
+						"moniker":        2,
+						"commissionRate": 2,
+					},
+					Interval: "24h",
+				},
 			},
-			float64(0.1),
-			"24h",
 		},
 	)
 }

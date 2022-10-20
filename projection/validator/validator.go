@@ -52,10 +52,22 @@ type Validator struct {
 }
 
 type Config struct {
-	Enable                  bool           `mapstructure:"enable"`
-	EditLimit               map[string]int `mapstructure:"edit_limit"`
-	MaxCommissionRateChange float64        `mapstructure:"max_commission_rate_change"`
-	CheckInterval           string         `mapstructure:"check_interval"`
+	Rules Rules `mapstructure:"Rules"`
+}
+
+type Rules struct {
+	MaxCommissionRateChange MaxCommissionRateChange `mapstructure:"max_commission_rate_change"`
+	MaxEditQuota            MaxEditQuota            `mapstructure:"max_edit_quota"`
+}
+
+type MaxCommissionRateChange struct {
+	Enable    bool    `mapstructure:"enable"`
+	MaxChange float64 `mapstructure:"max_change"`
+}
+type MaxEditQuota struct {
+	Enable   bool           `mapstructure:"enable"`
+	Quota    map[string]int `mapstructure:"quota"`
+	Interval string         `mapstructure:"interval"`
 }
 
 func ConfigFromInterface(data interface{}) (Config, error) {
@@ -600,7 +612,7 @@ func (projection *Validator) projectValidatorView(
 	return nil
 }
 func (projection *Validator) checkAttentionOnCommission(mutValidatorRow *view.ValidatorRow, maybeCommissionRate string, commissionRate string, validatorAddress string) error {
-	if projection.config.Enable {
+	if projection.config.Rules.MaxCommissionRateChange.Enable {
 		newCommission, newCommissionErr := strconv.ParseFloat(maybeCommissionRate, 64)
 		if newCommissionErr != nil {
 			return fmt.Errorf(
@@ -614,7 +626,7 @@ func (projection *Validator) checkAttentionOnCommission(mutValidatorRow *view.Va
 			)
 		}
 
-		if newCommission-currentCommission > projection.config.MaxCommissionRateChange {
+		if newCommission-currentCommission > projection.config.Rules.MaxCommissionRateChange.MaxChange {
 			mutValidatorRow.Status = constants.ATTENTION
 		}
 	}
@@ -622,8 +634,8 @@ func (projection *Validator) checkAttentionOnCommission(mutValidatorRow *view.Va
 	return nil
 }
 func (projection *Validator) checkAttentionOnNumOfChanges(mutValidatorRow *view.ValidatorRow, validatorActivities *view.ValidatorActivities, blockTime *utctime.UTCTime, validatorAddress *string, editField string) error {
-	if projection.config.Enable {
-		editLimitCounter := projection.config.EditLimit
+	if projection.config.Rules.MaxEditQuota.Enable {
+		editQuotaCounter := projection.config.Rules.MaxEditQuota.Quota
 
 		// skip validator with "Attention" status
 		if mutValidatorRow.Status == constants.ATTENTION {
@@ -631,12 +643,12 @@ func (projection *Validator) checkAttentionOnNumOfChanges(mutValidatorRow *view.
 		}
 
 		// count the current change
-		editLimitCounter[editField]--
+		editQuotaCounter[editField]--
 
 		// get checking interval from config
-		duration, durationParserErr := time.ParseDuration(projection.config.CheckInterval)
+		duration, durationParserErr := time.ParseDuration(projection.config.Rules.MaxEditQuota.Interval)
 		if durationParserErr != nil {
-			return fmt.Errorf("error  %v", durationParserErr)
+			return fmt.Errorf("error parsing config interval %v", durationParserErr)
 		}
 
 		afterBlockTime := utctime.FromUnixNano(blockTime.UnixNano() - duration.Nanoseconds())
@@ -660,27 +672,27 @@ func (projection *Validator) checkAttentionOnNumOfChanges(mutValidatorRow *view.
 			content := activity.Data.Content.(map[string]interface{})
 			pastDescription := content["description"].(map[string]interface{})
 			if pastDescription["moniker"] != DO_NOT_MODIFY {
-				editLimitCounter["moniker"]--
+				editQuotaCounter["moniker"]--
 			}
 			if pastDescription["identity"] != DO_NOT_MODIFY {
-				editLimitCounter["identity"]--
+				editQuotaCounter["identity"]--
 			}
 			if pastDescription["details"] != DO_NOT_MODIFY {
-				editLimitCounter["details"]--
+				editQuotaCounter["details"]--
 			}
 			if pastDescription["securityContact"] != DO_NOT_MODIFY {
-				editLimitCounter["SecurityContact"]--
+				editQuotaCounter["SecurityContact"]--
 			}
 			if pastDescription["website"] != DO_NOT_MODIFY {
-				editLimitCounter["website"]--
+				editQuotaCounter["website"]--
 			}
 			if content["commissionRate"] != nil {
-				editLimitCounter["commissionRate"]--
+				editQuotaCounter["commissionRate"]--
 			}
 		}
 
 		// check counter by each field
-		for _, count := range editLimitCounter {
+		for _, count := range editQuotaCounter {
 			if count < 0 {
 				mutValidatorRow.Status = constants.ATTENTION
 			}
