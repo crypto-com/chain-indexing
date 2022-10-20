@@ -1041,7 +1041,6 @@ type ValidatorRow struct {
 	TotalActiveBlock        int64      `json:"totalActiveBlock"`
 	ImpreciseUpTime         *big.Float `json:"impreciseUpTime"`
 	VotedGovProposal        *big.Int   `json:"votedGovProposal"`
-	DailyEditQuota          int64      `json:"dailyEditQuota"`
 }
 
 type ListValidatorRow struct {

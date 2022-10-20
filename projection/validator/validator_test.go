@@ -163,7 +163,6 @@ func TestValidator_HandleEvents(t *testing.T) {
 						TotalActiveBlock:        1,
 						ImpreciseUpTime:         big.NewFloat(0.1),
 						VotedGovProposal:        big.NewInt(1),
-						DailyEditQuota:          1,
 					}, nil)
 
 				mockValidatorActivitiesView := validator_view.NewMockValidatorActivitiesView(nil).(*validator_view.MockValidatorActivitiesView)
@@ -269,7 +268,6 @@ func TestValidator_HandleEvents(t *testing.T) {
 						TotalActiveBlock:        1,
 						ImpreciseUpTime:         big.NewFloat(0.1),
 						VotedGovProposal:        big.NewInt(1),
-						DailyEditQuota:          1,
 					},
 				).Return(nil)
 
@@ -429,7 +427,6 @@ func TestValidator_HandleEvents(t *testing.T) {
 						TotalActiveBlock:        1,
 						ImpreciseUpTime:         big.NewFloat(0.1),
 						VotedGovProposal:        big.NewInt(1),
-						DailyEditQuota:          1,
 					}, nil)
 
 				mockValidatorActivitiesView := validator_view.NewMockValidatorActivitiesView(nil).(*validator_view.MockValidatorActivitiesView)
@@ -535,7 +532,6 @@ func TestValidator_HandleEvents(t *testing.T) {
 						TotalActiveBlock:        1,
 						ImpreciseUpTime:         big.NewFloat(0.1),
 						VotedGovProposal:        big.NewInt(1),
-						DailyEditQuota:          1,
 					},
 				).Return(nil)
 
@@ -695,7 +691,6 @@ func TestValidator_HandleEvents(t *testing.T) {
 						TotalActiveBlock:        1,
 						ImpreciseUpTime:         big.NewFloat(0.1),
 						VotedGovProposal:        big.NewInt(1),
-						DailyEditQuota:          1,
 					}, nil)
 
 				mockValidatorActivitiesView := validator_view.NewMockValidatorActivitiesView(nil).(*validator_view.MockValidatorActivitiesView)
@@ -744,7 +739,6 @@ func TestValidator_HandleEvents(t *testing.T) {
 						TotalActiveBlock:        1,
 						ImpreciseUpTime:         big.NewFloat(0.1),
 						VotedGovProposal:        big.NewInt(1),
-						DailyEditQuota:          1,
 					},
 				).Return(nil)
 

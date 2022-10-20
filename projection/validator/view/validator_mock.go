@@ -40,7 +40,7 @@ func (validatorsView *MockValidatorsView) Insert(validator *ValidatorRow) error 
 func (validatorsView *MockValidatorsView) totalPower() (*big.Float, error) {
 	mockArgs := validatorsView.Called()
 	row, _ := mockArgs.Get(0).(*big.Float)
-	return row, mockArgs.Error(2)
+	return row, mockArgs.Error(1)
 }
 
 func (validatorsView *MockValidatorsView) Search(keyword string) ([]ValidatorRow, error) {

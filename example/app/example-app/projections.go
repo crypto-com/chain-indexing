@@ -369,8 +369,4 @@ type InitProjectionParams struct {
 	MigrationRepoRef string
 
 	ServerMigrationRepoRef string
-
-	ValidatorCheckInterval           string
-	ValidatorEditLimit               map[string]int
-	ValidatorMaxCommissionRateChange float64
 }
