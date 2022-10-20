@@ -25,7 +25,7 @@ type Messages interface {
 	) ([]MessageRow, *pagination_interface.PaginationResult, error)
 	FindById(denomId string, tokenId string) (*MessageRow, error)
 	DeleteAllByDenomTokenIds(denomId string, tokenId string) (int64, error)
-	Update(messageRow MessageRow) error
+	SoftDelete(status string, denomId string, maybeTokenId string) error
 }
 
 type MessagesView struct {
@@ -58,6 +58,7 @@ func (nftMessagesView *MessagesView) Insert(messageRow *MessageRow) error {
 		"message_index",
 		"message_type",
 		"data",
+		"status",
 	)
 	blockTime := nftMessagesView.rdb.Tton(&messageRow.BlockTime)
 
@@ -73,6 +74,7 @@ func (nftMessagesView *MessagesView) Insert(messageRow *MessageRow) error {
 		messageRow.MessageIndex,
 		messageRow.MessageType,
 		nftMessageDataJSON,
+		messageRow.Status,
 	)
 	sql, sqlArgs, err := stmtBuilder.ToSql()
 	if err != nil {
@@ -108,6 +110,7 @@ func (nftMessagesView *MessagesView) List(
 		"message_index",
 		"message_type",
 		"data",
+		"status",
 	).From(
 		MESSAGES_TABLE_NAME,
 	)
@@ -198,6 +201,7 @@ func (nftMessagesView *MessagesView) List(
 			&nftMessage.MessageIndex,
 			&nftMessage.MessageType,
 			&accountMessageDataJSON,
+			&nftMessage.Status,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
@@ -245,11 +249,12 @@ func (nftMessagesView *MessagesView) FindById(
 		"message_index",
 		"message_type",
 		"data",
+		"status",
 	).From(
 		MESSAGES_TABLE_NAME,
 	).Where(
 		fmt.Sprintf(
-			"%s.denom_id = ? AND %s.token_id = ?",
+			"%s.denom_id = ? AND %s.maybe_token_id = ?",
 			MESSAGES_TABLE_NAME, MESSAGES_TABLE_NAME,
 		),
 		denomId, tokenId,
@@ -284,6 +289,7 @@ func (nftMessagesView *MessagesView) FindById(
 		&nftMessage.MessageIndex,
 		&nftMessage.MessageType,
 		&accountMessageDataJSON,
+		&nftMessage.Status,
 	); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
@@ -325,15 +331,15 @@ func (nftMessagesView *MessagesView) DeleteAllByDenomTokenIds(denomId string, to
 	return result.RowsAffected(), nil
 }
 
-func (nftMessagesView *MessagesView) Update(messageRow MessageRow) error {
+func (nftMessagesView *MessagesView) SoftDelete(status string, denomId string, maybeTokenId string) error {
 	sql, sqlArgs, err := nftMessagesView.rdb.StmtBuilder.Update(
 		MESSAGES_TABLE_NAME,
 	).SetMap(map[string]interface{}{
-		"Status": messageRow.Status,
+		"Status": status,
 	}).Where(
 		"denom_id = ? AND token_id = ?",
-		sanitizer.SanitizePostgresString(messageRow.DenomId),
-		sanitizer.SanitizePostgresString(*messageRow.MaybeTokenId),
+		sanitizer.SanitizePostgresString(denomId),
+		sanitizer.SanitizePostgresString(maybeTokenId),
 	).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building NFT token update sql: %v: %w", err, rdb.ErrBuildSQLStmt)

@@ -62,6 +62,7 @@ func (tokensView *TokensView) Insert(tokenRow *TokenRow) error {
 		"last_edited_at_block_height",
 		"last_transferred_at",
 		"last_transferred_at_block_height",
+		"status",
 	).Values(
 		sanitizer.SanitizePostgresString(tokenRow.DenomId),
 		sanitizer.SanitizePostgresString(tokenRow.TokenId),
@@ -77,6 +78,7 @@ func (tokensView *TokensView) Insert(tokenRow *TokenRow) error {
 		tokenRow.LastEditedAtBlockHeight,
 		tokensView.rdb.Tton(&tokenRow.LastTransferredAt),
 		tokenRow.LastTransferredAtBlockHeight,
+		tokenRow.Status,
 	).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building NFT token insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -133,6 +135,7 @@ func (tokensView *TokensView) FindById(
 		fmt.Sprintf("%s.last_edited_at_block_height", TOKENS_TABLE_NAME),
 		fmt.Sprintf("%s.last_transferred_at", TOKENS_TABLE_NAME),
 		fmt.Sprintf("%s.last_transferred_at_block_height", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.status", TOKENS_TABLE_NAME),
 	).From(
 		TOKENS_TABLE_NAME,
 	).LeftJoin(
@@ -175,6 +178,7 @@ func (tokensView *TokensView) FindById(
 		&row.LastEditedAtBlockHeight,
 		lastTransferredAtTimeReader.ScannableArg(),
 		&row.LastTransferredAtBlockHeight,
+		&row.Status,
 	); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
@@ -216,7 +220,7 @@ func (tokensView *TokensView) Update(tokenRow TokenRow) error {
 		"last_edited_at_block_height":      tokenRow.LastEditedAtBlockHeight,
 		"last_transferred_at":              tokensView.rdb.TypeConv.Tton(&tokenRow.LastTransferredAt),
 		"last_transferred_at_block_height": tokenRow.LastTransferredAtBlockHeight,
-		"Status":                           tokenRow.Status,
+		"status":                           tokenRow.Status,
 	}).Where(
 		"denom_id = ? AND token_id = ?",
 		sanitizer.SanitizePostgresString(tokenRow.DenomId),
@@ -259,6 +263,7 @@ func (tokensView *TokensView) List(
 		fmt.Sprintf("%s.last_edited_at_block_height", TOKENS_TABLE_NAME),
 		fmt.Sprintf("%s.last_transferred_at", TOKENS_TABLE_NAME),
 		fmt.Sprintf("%s.last_transferred_at_block_height", TOKENS_TABLE_NAME),
+		fmt.Sprintf("%s.status", TOKENS_TABLE_NAME),
 	).From(
 		TOKENS_TABLE_NAME,
 	).LeftJoin(
@@ -365,6 +370,7 @@ func (tokensView *TokensView) List(
 			&row.LastEditedAtBlockHeight,
 			lastTransferredAtTimeReader.ScannableArg(),
 			&row.LastTransferredAtBlockHeight,
+			&row.Status,
 		); scanErr != nil {
 			if errors.Is(scanErr, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows

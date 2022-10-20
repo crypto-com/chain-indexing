@@ -160,6 +160,7 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 				MessageIndex:    msgIssueDenom.MsgIndex,
 				MessageType:     msgIssueDenom.MsgType(),
 				Data:            msgIssueDenom,
+				Status:          constants.MINTED,
 			}); insertMessageErr != nil {
 				return insertMessageErr
 			}
@@ -282,6 +283,7 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 				MessageIndex:    msgEditNFT.MsgIndex,
 				MessageType:     msgEditNFT.MsgType(),
 				Data:            msgEditNFT,
+				Status:          constants.MINTED,
 			}); insertMessageErr != nil {
 				return insertMessageErr
 			}
@@ -289,18 +291,18 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 		} else if msgBurnNFT, ok := event.(*event_usecase.MsgNFTBurnNFT); ok {
 			prevTokenRow, queryPrevTokenRowErr := tokensView.FindById(msgBurnNFT.DenomId, msgBurnNFT.TokenId)
 			if queryPrevTokenRowErr != nil {
-				return fmt.Errorf("error querying NFT token being edited: %v", queryPrevTokenRowErr)
+				return fmt.Errorf("error querying NFT token being burned: %v", queryPrevTokenRowErr)
 			}
 
-			prevMessageRow, queryPrevMessageRowErr := nftMessagesView.FindById(msgBurnNFT.DenomId, msgBurnNFT.TokenId)
-			if queryPrevMessageRowErr != nil {
-				return fmt.Errorf("error querying NFT message being edited: %v", queryPrevTokenRowErr)
-			}
+			// prevMessageRow, queryPrevMessageRowErr := nftMessagesView.FindById(msgBurnNFT.DenomId, msgBurnNFT.TokenId)
+			// if queryPrevMessageRowErr != nil {
+			// 	return fmt.Errorf("error querying NFT message being burned: %v", queryPrevTokenRowErr)
+			// }
 
 			if deleteTokenErr := projection.deleteToken(
-				tokensView, tokensTotalView, nftMessagesView, prevTokenRow.TokenRow, *prevMessageRow,
+				tokensView, tokensTotalView, nftMessagesView, prevTokenRow.TokenRow,
 			); deleteTokenErr != nil {
-				return fmt.Errorf("error deleteing burnt NFT token: %v", deleteTokenErr)
+				return fmt.Errorf("error deleting burnt NFT token: %v", deleteTokenErr)
 			}
 
 			// Burn does not need to record the message because the token and all the records will
@@ -348,6 +350,7 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 				MessageIndex:    msgTransferNFT.MsgIndex,
 				MessageType:     msgTransferNFT.MsgType(),
 				Data:            msgTransferNFT,
+				Status:          constants.MINTED,
 			}); insertMessageErr != nil {
 				return insertMessageErr
 			}
@@ -473,38 +476,18 @@ func (projection *NFT) deleteToken(
 	tokensTotalView view.TokensTotal,
 	nftMessagesView view.Messages,
 	tokenRow view.TokenRow,
-	messageRow view.MessageRow,
 ) error {
 	tokenRow.Status = constants.BURNED
-	messageRow.Status = constants.BURNED
 
 	if updateTokenErr := tokensView.Update(tokenRow); updateTokenErr != nil {
 		return fmt.Errorf("error updating NFT token row: %v", updateTokenErr)
 	}
 
-	if updateTokenErr := nftMessagesView.Update(
-		messageRow,
+	if updateTokenErr := nftMessagesView.SoftDelete(
+		constants.BURNED, tokenRow.DenomId, tokenRow.TokenId,
 	); updateTokenErr != nil {
 		return updateTokenErr
 	}
-
-	// deletedRowCount, deleteTokenErr := tokensView.Delete(tokenRow.DenomId, tokenRow.TokenId)
-	// if deleteTokenErr != nil {
-	// 	return fmt.Errorf("error deleting NFT token from view: %v", deleteTokenErr)
-	// }
-	// if deletedRowCount != 1 {
-	// 	return fmt.Errorf("error deleting NFT token from view: %d rows deleted", deletedRowCount)
-	// }
-
-	// deleteMessagesCount, deleteMessagesErr := nftMessagesView.DeleteAllByDenomTokenIds(
-	// 	tokenRow.DenomId, tokenRow.TokenId,
-	// )
-	// if deleteMessagesErr != nil {
-	// 	return fmt.Errorf("error deleting NFT messages from view: %v", deleteMessagesErr)
-	// }
-	// if deleteMessagesCount == 0 {
-	// 	return fmt.Errorf("error deleting NFT messages from view: no rows deleted")
-	// }
 
 	if decrementErr := tokensTotalView.DecrementAll([]string{
 		"-:-:-:-",
