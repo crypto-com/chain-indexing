@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
+	"github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
@@ -469,8 +469,30 @@ func (projection *Validator) projectValidatorView(
 				)
 			}
 
+			// get checking interval from config
+			duration, durationParserErr := time.ParseDuration(projection.config.AttentionStatusRules.MaxEditQuota.Interval)
+			if durationParserErr != nil {
+				return fmt.Errorf("error parsing config interval %v", durationParserErr)
+			}
+
+			afterBlockTime := utctime.FromUnixNano(blockTime.UnixNano() - duration.Nanoseconds())
+
+			mutValidatorActivities, _, err := (*validatorActivities).List(
+				view.ValidatorActivitiesListFilter{
+					AfterBlockTime:       &afterBlockTime,
+					MaybeOperatorAddress: &msgEditValidatorEvent.ValidatorAddress,
+				},
+				view.ValidatorActivitiesListOrder{},
+				&pagination.Pagination{},
+			)
+			if err != nil {
+				return fmt.Errorf(
+					"error getting existing validator activities %s from view", msgEditValidatorEvent.ValidatorAddress,
+				)
+			}
+
 			if msgEditValidatorEvent.Description.Moniker != DO_NOT_MODIFY {
-				errAttentionStatus := projection.checkAttentionOnNumOfChanges(mutValidatorRow, validatorActivities, &blockTime, &msgEditValidatorEvent.ValidatorAddress, "moniker")
+				errAttentionStatus := projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, &blockTime, &msgEditValidatorEvent.ValidatorAddress, "moniker")
 				if errAttentionStatus != nil {
 					return fmt.Errorf(
 						"error checking attention status validator %s from view", msgEditValidatorEvent.ValidatorAddress,
@@ -479,7 +501,7 @@ func (projection *Validator) projectValidatorView(
 				mutValidatorRow.Moniker = msgEditValidatorEvent.Description.Moniker
 			}
 			if msgEditValidatorEvent.Description.Identity != DO_NOT_MODIFY {
-				errAttentionOnNumOfChanges := projection.checkAttentionOnNumOfChanges(mutValidatorRow, validatorActivities, &blockTime, &msgEditValidatorEvent.ValidatorAddress, "identity")
+				errAttentionOnNumOfChanges := projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, &blockTime, &msgEditValidatorEvent.ValidatorAddress, "identity")
 				if errAttentionOnNumOfChanges != nil {
 					return fmt.Errorf(
 						"error checking attention status on number of changes validator %s from view", msgEditValidatorEvent.ValidatorAddress,
@@ -488,7 +510,7 @@ func (projection *Validator) projectValidatorView(
 				mutValidatorRow.Identity = msgEditValidatorEvent.Description.Identity
 			}
 			if msgEditValidatorEvent.Description.Details != DO_NOT_MODIFY {
-				errAttentionOnNumOfChanges := projection.checkAttentionOnNumOfChanges(mutValidatorRow, validatorActivities, &blockTime, &msgEditValidatorEvent.ValidatorAddress, "details")
+				errAttentionOnNumOfChanges := projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, &blockTime, &msgEditValidatorEvent.ValidatorAddress, "details")
 				if errAttentionOnNumOfChanges != nil {
 					return fmt.Errorf(
 						"error checking attention status on number of changes validator %s from view", msgEditValidatorEvent.ValidatorAddress,
@@ -497,7 +519,7 @@ func (projection *Validator) projectValidatorView(
 				mutValidatorRow.Details = msgEditValidatorEvent.Description.Details
 			}
 			if msgEditValidatorEvent.Description.SecurityContact != DO_NOT_MODIFY {
-				errAttentionOnNumOfChanges := projection.checkAttentionOnNumOfChanges(mutValidatorRow, validatorActivities, &blockTime, &msgEditValidatorEvent.ValidatorAddress, "securityContact")
+				errAttentionOnNumOfChanges := projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, &blockTime, &msgEditValidatorEvent.ValidatorAddress, "securityContact")
 				if errAttentionOnNumOfChanges != nil {
 					return fmt.Errorf(
 						"error checking attention status on number of changes validator %s from view", msgEditValidatorEvent.ValidatorAddress,
@@ -506,7 +528,7 @@ func (projection *Validator) projectValidatorView(
 				mutValidatorRow.SecurityContact = msgEditValidatorEvent.Description.SecurityContact
 			}
 			if msgEditValidatorEvent.Description.Website != DO_NOT_MODIFY {
-				errAttentionOnNumOfChanges := projection.checkAttentionOnNumOfChanges(mutValidatorRow, validatorActivities, &blockTime, &msgEditValidatorEvent.ValidatorAddress, "website")
+				errAttentionOnNumOfChanges := projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, &blockTime, &msgEditValidatorEvent.ValidatorAddress, "website")
 				if errAttentionOnNumOfChanges != nil {
 					return fmt.Errorf(
 						"error checking attention status on number of changes validator %s from view", msgEditValidatorEvent.ValidatorAddress,
@@ -516,7 +538,7 @@ func (projection *Validator) projectValidatorView(
 			}
 
 			if msgEditValidatorEvent.MaybeCommissionRate != nil {
-				errAttentionOnNumOfChanges := projection.checkAttentionOnNumOfChanges(mutValidatorRow, validatorActivities, &blockTime, &msgEditValidatorEvent.ValidatorAddress, "commissionRate")
+				errAttentionOnNumOfChanges := projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, &blockTime, &msgEditValidatorEvent.ValidatorAddress, "commissionRate")
 				if errAttentionOnNumOfChanges != nil {
 					return fmt.Errorf(
 						"error checking attention status on number of changes validator %s from view", msgEditValidatorEvent.ValidatorAddress,
@@ -635,9 +657,12 @@ func (projection *Validator) checkAttentionOnCommission(mutValidatorRow *view.Va
 	return nil
 }
 
-func (projection *Validator) checkAttentionOnNumOfChanges(mutValidatorRow *view.ValidatorRow, validatorActivities *view.ValidatorActivities, blockTime *utctime.UTCTime, validatorAddress *string, editField string) error {
+func (projection *Validator) checkAttentionOnNumOfChanges(mutValidatorRow *view.ValidatorRow, mutValidatorActivities []view.ValidatorActivityRow, blockTime *utctime.UTCTime, validatorAddress *string, editField string) error {
 	if projection.config.AttentionStatusRules.MaxEditQuota.Enable {
-		editQuotaCounter := projection.config.AttentionStatusRules.MaxEditQuota.Quota
+		editQuotaCounter := make(map[string]int)
+		for key, quota := range projection.config.AttentionStatusRules.MaxEditQuota.Quota {
+			editQuotaCounter[key] = quota
+		}
 
 		// skip validator with "Attention" status
 		if mutValidatorRow.Status == constants.ATTENTION {
@@ -647,28 +672,6 @@ func (projection *Validator) checkAttentionOnNumOfChanges(mutValidatorRow *view.
 		// count the current change
 		if _, exists := editQuotaCounter[editField]; exists {
 			editQuotaCounter[editField]--
-		}
-
-		// get checking interval from config
-		duration, durationParserErr := time.ParseDuration(projection.config.AttentionStatusRules.MaxEditQuota.Interval)
-		if durationParserErr != nil {
-			return fmt.Errorf("error parsing config interval %v", durationParserErr)
-		}
-
-		afterBlockTime := utctime.FromUnixNano(blockTime.UnixNano() - duration.Nanoseconds())
-
-		mutValidatorActivities, _, err := (*validatorActivities).List(
-			view.ValidatorActivitiesListFilter{
-				AfterBlockTime:       &afterBlockTime,
-				MaybeOperatorAddress: validatorAddress,
-			},
-			view.ValidatorActivitiesListOrder{},
-			&pagination_interface.Pagination{},
-		)
-		if err != nil {
-			return fmt.Errorf(
-				"error getting existing validator activities %s from view", *validatorAddress,
-			)
 		}
 
 		// count previous changes
@@ -695,7 +698,6 @@ func (projection *Validator) checkAttentionOnNumOfChanges(mutValidatorRow *view.
 				checkAndUpdateQuota("commissionRate", &editQuotaCounter)
 			}
 		}
-
 		// check counter by each field
 		for _, count := range editQuotaCounter {
 			if count < 0 {
