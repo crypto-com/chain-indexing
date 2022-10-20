@@ -52,10 +52,10 @@ type Validator struct {
 }
 
 type Config struct {
-	Rules Rules `mapstructure:"Rules"`
+	AttentionStatusRules AttentionStatusRules `mapstructure:"attention_status_rules"`
 }
 
-type Rules struct {
+type AttentionStatusRules struct {
 	MaxCommissionRateChange MaxCommissionRateChange `mapstructure:"max_commission_rate_change"`
 	MaxEditQuota            MaxEditQuota            `mapstructure:"max_edit_quota"`
 }
@@ -612,7 +612,7 @@ func (projection *Validator) projectValidatorView(
 	return nil
 }
 func (projection *Validator) checkAttentionOnCommission(mutValidatorRow *view.ValidatorRow, maybeCommissionRate string, commissionRate string, validatorAddress string) error {
-	if projection.config.Rules.MaxCommissionRateChange.Enable {
+	if projection.config.AttentionStatusRules.MaxCommissionRateChange.Enable {
 		newCommission, newCommissionErr := strconv.ParseFloat(maybeCommissionRate, 64)
 		if newCommissionErr != nil {
 			return fmt.Errorf(
@@ -626,7 +626,7 @@ func (projection *Validator) checkAttentionOnCommission(mutValidatorRow *view.Va
 			)
 		}
 
-		if newCommission-currentCommission > projection.config.Rules.MaxCommissionRateChange.MaxChange {
+		if newCommission-currentCommission > projection.config.AttentionStatusRules.MaxCommissionRateChange.MaxChange {
 			mutValidatorRow.Status = constants.ATTENTION
 		}
 	}
@@ -634,8 +634,8 @@ func (projection *Validator) checkAttentionOnCommission(mutValidatorRow *view.Va
 	return nil
 }
 func (projection *Validator) checkAttentionOnNumOfChanges(mutValidatorRow *view.ValidatorRow, validatorActivities *view.ValidatorActivities, blockTime *utctime.UTCTime, validatorAddress *string, editField string) error {
-	if projection.config.Rules.MaxEditQuota.Enable {
-		editQuotaCounter := projection.config.Rules.MaxEditQuota.Quota
+	if projection.config.AttentionStatusRules.MaxEditQuota.Enable {
+		editQuotaCounter := projection.config.AttentionStatusRules.MaxEditQuota.Quota
 
 		// skip validator with "Attention" status
 		if mutValidatorRow.Status == constants.ATTENTION {
@@ -646,7 +646,7 @@ func (projection *Validator) checkAttentionOnNumOfChanges(mutValidatorRow *view.
 		editQuotaCounter[editField]--
 
 		// get checking interval from config
-		duration, durationParserErr := time.ParseDuration(projection.config.Rules.MaxEditQuota.Interval)
+		duration, durationParserErr := time.ParseDuration(projection.config.AttentionStatusRules.MaxEditQuota.Interval)
 		if durationParserErr != nil {
 			return fmt.Errorf("error parsing config interval %v", durationParserErr)
 		}

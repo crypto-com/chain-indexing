@@ -32,7 +32,7 @@ func NewValidatorProjection(rdbConn rdb.Conn) *validator.Validator {
 		"tcrocncl",
 		nil,
 		&validator.Config{
-			validator.Rules{
+			validator.AttentionStatusRules{
 				validator.MaxCommissionRateChange{
 					Enable:    true,
 					MaxChange: float64(0.1),

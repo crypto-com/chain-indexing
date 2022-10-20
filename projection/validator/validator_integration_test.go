@@ -24,7 +24,7 @@ import (
 const prefixConsensusAddress string = "crocnclcons"
 
 var validatorAttentionRulesConfig = validator.Config{
-	validator.Rules{
+	validator.AttentionStatusRules{
 		validator.MaxCommissionRateChange{
 			Enable:    true,
 			MaxChange: float64(0.1),
