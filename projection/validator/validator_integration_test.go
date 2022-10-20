@@ -22,12 +22,15 @@ import (
 )
 
 const prefixConsensusAddress string = "crocnclcons"
-const validatorCheckInterval string = "24h"
-const validatorMaxCommissionRateChange float64 = 0.1
 
-var validatorEditLimit = map[string]int{
-	"moniker":        2,
-	"commissionRate": 2,
+var validatorAttentionRulesConfig = validator.Config{
+	true,
+	map[string]int{
+		"moniker":        2,
+		"commissionRate": 2,
+	},
+	float64(0.1),
+	"24h",
 }
 
 var VALIDATOR_MIGRATIONS_PATH = func() string {
@@ -115,7 +118,7 @@ var _ = Describe("Validator projection", func() {
 			}, createValidatorParams)
 			fakeLogger := NewFakeLogger()
 
-			projection := validator.NewValidator(fakeLogger, pgxConn, prefixConsensusAddress, nil, validatorEditLimit, validatorMaxCommissionRateChange, validatorCheckInterval)
+			projection := validator.NewValidator(fakeLogger, pgxConn, prefixConsensusAddress, nil, &validatorAttentionRulesConfig)
 
 			err := projection.HandleEvents(anyHeight, []event_entity.Event{
 				event,
@@ -188,7 +191,7 @@ var _ = Describe("Validator projection", func() {
 			}
 			fakeLogger := NewFakeLogger()
 
-			projection := validator.NewValidator(fakeLogger, pgxConn, prefixConsensusAddress, nil, validatorEditLimit, validatorMaxCommissionRateChange, validatorCheckInterval)
+			projection := validator.NewValidator(fakeLogger, pgxConn, prefixConsensusAddress, nil, &validatorAttentionRulesConfig)
 
 			validatorViewCountBeforeHandling, err := validatorView.Count(countFilter)
 
@@ -213,7 +216,7 @@ var _ = Describe("Validator projection", func() {
 			anyHeight := int64(1)
 
 			fakeLogger := NewFakeLogger()
-			projection := validator.NewValidator(fakeLogger, pgxConn, prefixConsensusAddress, nil, validatorEditLimit, validatorMaxCommissionRateChange, validatorCheckInterval)
+			projection := validator.NewValidator(fakeLogger, pgxConn, prefixConsensusAddress, nil, &validatorAttentionRulesConfig)
 
 			Expect(projection.GetLastHandledEventHeight()).To(BeNil())
 

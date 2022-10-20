@@ -31,13 +31,15 @@ func NewValidatorProjection(rdbConn rdb.Conn) *validator.Validator {
 		rdbConn,
 		"tcrocncl",
 		nil,
-
-		map[string]int{
-			"moniker":        2,
-			"commissionRate": 2,
+		&validator.Config{
+			true,
+			map[string]int{
+				"moniker":        2,
+				"commissionRate": 2,
+			},
+			float64(0.1),
+			"24h",
 		},
-		float64(0.1),
-		"24h",
 	)
 }
 
@@ -272,7 +274,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 				mockValidatorActivitiesTotalView := validator_view.NewMockValidatorActivitiesTotalView(nil).(*validator_view.MockValidatorActivitiesTotalView)
 				mocks = append(mocks, &mockValidatorActivitiesTotalView.Mock)
 
-				validator.NewValidatorActivitiessTotal = func(_ *rdb.Handle) validator_view.ValidatorActivitiesTotal {
+				validator.NewValidatorActivitiesTotal = func(_ *rdb.Handle) validator_view.ValidatorActivitiesTotal {
 					return mockValidatorActivitiesTotalView
 				}
 
@@ -538,7 +540,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 				mockValidatorActivitiesTotalView := validator_view.NewMockValidatorActivitiesTotalView(nil).(*validator_view.MockValidatorActivitiesTotalView)
 				mocks = append(mocks, &mockValidatorActivitiesTotalView.Mock)
 
-				validator.NewValidatorActivitiessTotal = func(_ *rdb.Handle) validator_view.ValidatorActivitiesTotal {
+				validator.NewValidatorActivitiesTotal = func(_ *rdb.Handle) validator_view.ValidatorActivitiesTotal {
 					return mockValidatorActivitiesTotalView
 				}
 
@@ -747,7 +749,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 				mockValidatorActivitiesTotalView := validator_view.NewMockValidatorActivitiesTotalView(nil).(*validator_view.MockValidatorActivitiesTotalView)
 				mocks = append(mocks, &mockValidatorActivitiesTotalView.Mock)
 
-				validator.NewValidatorActivitiessTotal = func(_ *rdb.Handle) validator_view.ValidatorActivitiesTotal {
+				validator.NewValidatorActivitiesTotal = func(_ *rdb.Handle) validator_view.ValidatorActivitiesTotal {
 					return mockValidatorActivitiesTotalView
 				}
 

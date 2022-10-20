@@ -18,6 +18,7 @@ import (
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/crypto-com/chain-indexing/projection/validator/view"
 
@@ -29,7 +30,7 @@ var _ projection_entity.Projection = &Validator{}
 var (
 	NewValidators                     = view.NewValidatorsView
 	NewValidatorActivities            = view.NewValidatorActivitiesView
-	NewValidatorActivitiessTotal      = view.NewValidatorActivitiesTotalView
+	NewValidatorActivitiesTotal       = view.NewValidatorActivitiesTotalView
 	NewValidatorBlockCommitments      = view.NewValidatorBlockCommitments
 	NewValidatorBlockCommitmentsTotal = view.NewValidatorBlockCommitmentsTotal
 	UpdateLastHandledEventHeight      = (*Validator).UpdateLastHandledEventHeight
@@ -47,9 +48,33 @@ type Validator struct {
 
 	migrationHelper migrationhelper.MigrationHelper
 
-	validatorEditLimit               map[string]int
-	validatorMaxCommissionRateChange float64
-	validatorCheckInterval           string
+	config *Config
+}
+
+type Config struct {
+	Enable                  bool           `mapstructure:"enable"`
+	EditLimit               map[string]int `mapstructure:"edit_limit"`
+	MaxCommissionRateChange float64        `mapstructure:"max_commission_rate_change"`
+	CheckInterval           string         `mapstructure:"check_interval"`
+}
+
+func ConfigFromInterface(data interface{}) (Config, error) {
+	config := Config{}
+
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		Result:           &config,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		return config, fmt.Errorf("error creating projection config decoder: %v", decoderErr)
+	}
+
+	if err := decoder.Decode(data); err != nil {
+		return config, fmt.Errorf("error decoding projection ValidatorAttentionRules config: %v", err)
+	}
+
+	return config, nil
 }
 
 func NewValidator(
@@ -57,9 +82,7 @@ func NewValidator(
 	rdbConn rdb.Conn,
 	conNodeAddressPrefix string,
 	migrationHelper migrationhelper.MigrationHelper,
-	validatorEditLimit map[string]int,
-	validatorMaxCommissionRateChange float64,
-	validatorCheckInterval string,
+	config *Config,
 ) *Validator {
 	return &Validator{
 		rdbprojectionbase.NewRDbBase(
@@ -71,9 +94,7 @@ func NewValidator(
 		logger,
 		conNodeAddressPrefix,
 		migrationHelper,
-		validatorEditLimit,
-		validatorMaxCommissionRateChange,
-		validatorCheckInterval,
+		config,
 	}
 }
 
@@ -131,7 +152,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 	validatorBlockCommitmentsView := NewValidatorBlockCommitments(rdbTxHandle)
 	validatorBlockCommitmentsTotalView := NewValidatorBlockCommitmentsTotal(rdbTxHandle)
 	validatorActivitiesView := NewValidatorActivities(rdbTxHandle)
-	validatorActivitiesTotalView := NewValidatorActivitiessTotal(rdbTxHandle)
+	validatorActivitiesTotalView := NewValidatorActivitiesTotal(rdbTxHandle)
 
 	var blockTime utctime.UTCTime
 	var blockHash string
@@ -579,86 +600,90 @@ func (projection *Validator) projectValidatorView(
 	return nil
 }
 func (projection *Validator) checkAttentionOnCommission(mutValidatorRow *view.ValidatorRow, maybeCommissionRate string, commissionRate string, validatorAddress string) error {
-	newCommission, newCommissionErr := strconv.ParseFloat(maybeCommissionRate, 64)
-	if newCommissionErr != nil {
-		return fmt.Errorf(
-			"error converting new commission rate to float validator %s from view", validatorAddress,
-		)
-	}
-	currentCommission, currentCommissionErr := strconv.ParseFloat(commissionRate, 64)
-	if currentCommissionErr != nil {
-		return fmt.Errorf(
-			"error converting current commission rate to float validator %s from view", validatorAddress,
-		)
-	}
+	if projection.config.Enable {
+		newCommission, newCommissionErr := strconv.ParseFloat(maybeCommissionRate, 64)
+		if newCommissionErr != nil {
+			return fmt.Errorf(
+				"error converting new commission rate to float validator %s from view", validatorAddress,
+			)
+		}
+		currentCommission, currentCommissionErr := strconv.ParseFloat(commissionRate, 64)
+		if currentCommissionErr != nil {
+			return fmt.Errorf(
+				"error converting current commission rate to float validator %s from view", validatorAddress,
+			)
+		}
 
-	if newCommission-currentCommission > projection.validatorMaxCommissionRateChange {
-		mutValidatorRow.Status = constants.ATTENTION
+		if newCommission-currentCommission > projection.config.MaxCommissionRateChange {
+			mutValidatorRow.Status = constants.ATTENTION
+		}
 	}
 
 	return nil
 }
 func (projection *Validator) checkAttentionOnNumOfChanges(mutValidatorRow *view.ValidatorRow, validatorActivities *view.ValidatorActivities, blockTime *utctime.UTCTime, validatorAddress *string, editField string) error {
-	editLimitCounter := projection.validatorEditLimit
+	if projection.config.Enable {
+		editLimitCounter := projection.config.EditLimit
 
-	// skip validator with "Attention" status
-	if mutValidatorRow.Status == constants.ATTENTION {
-		return nil
-	}
+		// skip validator with "Attention" status
+		if mutValidatorRow.Status == constants.ATTENTION {
+			return nil
+		}
 
-	// count the current change
-	editLimitCounter[editField]--
+		// count the current change
+		editLimitCounter[editField]--
 
-	// get checking interval from config
-	duration, durationParserErr := time.ParseDuration(projection.validatorCheckInterval)
-	if durationParserErr != nil {
-		return fmt.Errorf("error  %v", durationParserErr)
-	}
+		// get checking interval from config
+		duration, durationParserErr := time.ParseDuration(projection.config.CheckInterval)
+		if durationParserErr != nil {
+			return fmt.Errorf("error  %v", durationParserErr)
+		}
 
-	afterBlockTime := utctime.FromUnixNano(blockTime.UnixNano() - duration.Nanoseconds())
+		afterBlockTime := utctime.FromUnixNano(blockTime.UnixNano() - duration.Nanoseconds())
 
-	mutValidatorActivities, _, err := (*validatorActivities).List(
-		view.ValidatorActivitiesListFilter{
-			AfterBlockTime:       &afterBlockTime,
-			MaybeOperatorAddress: validatorAddress,
-		},
-		view.ValidatorActivitiesListOrder{},
-		&pagination_interface.Pagination{},
-	)
-	if err != nil {
-		return fmt.Errorf(
-			"error getting existing validator activities %s from view", *validatorAddress,
+		mutValidatorActivities, _, err := (*validatorActivities).List(
+			view.ValidatorActivitiesListFilter{
+				AfterBlockTime:       &afterBlockTime,
+				MaybeOperatorAddress: validatorAddress,
+			},
+			view.ValidatorActivitiesListOrder{},
+			&pagination_interface.Pagination{},
 		)
-	}
+		if err != nil {
+			return fmt.Errorf(
+				"error getting existing validator activities %s from view", *validatorAddress,
+			)
+		}
 
-	// count previous changes
-	for _, activity := range mutValidatorActivities {
-		content := activity.Data.Content.(map[string]interface{})
-		pastDescription := content["description"].(map[string]interface{})
-		if pastDescription["moniker"] != DO_NOT_MODIFY {
-			editLimitCounter["moniker"]--
+		// count previous changes
+		for _, activity := range mutValidatorActivities {
+			content := activity.Data.Content.(map[string]interface{})
+			pastDescription := content["description"].(map[string]interface{})
+			if pastDescription["moniker"] != DO_NOT_MODIFY {
+				editLimitCounter["moniker"]--
+			}
+			if pastDescription["identity"] != DO_NOT_MODIFY {
+				editLimitCounter["identity"]--
+			}
+			if pastDescription["details"] != DO_NOT_MODIFY {
+				editLimitCounter["details"]--
+			}
+			if pastDescription["securityContact"] != DO_NOT_MODIFY {
+				editLimitCounter["SecurityContact"]--
+			}
+			if pastDescription["website"] != DO_NOT_MODIFY {
+				editLimitCounter["website"]--
+			}
+			if content["commissionRate"] != nil {
+				editLimitCounter["commissionRate"]--
+			}
 		}
-		if pastDescription["identity"] != DO_NOT_MODIFY {
-			editLimitCounter["identity"]--
-		}
-		if pastDescription["details"] != DO_NOT_MODIFY {
-			editLimitCounter["details"]--
-		}
-		if pastDescription["securityContact"] != DO_NOT_MODIFY {
-			editLimitCounter["SecurityContact"]--
-		}
-		if pastDescription["website"] != DO_NOT_MODIFY {
-			editLimitCounter["website"]--
-		}
-		if content["commissionRate"] != nil {
-			editLimitCounter["commissionRate"]--
-		}
-	}
 
-	// check counter by each field
-	for _, count := range editLimitCounter {
-		if count < 0 {
-			mutValidatorRow.Status = constants.ATTENTION
+		// check counter by each field
+		for _, count := range editLimitCounter {
+			if count < 0 {
+				mutValidatorRow.Status = constants.ATTENTION
+			}
 		}
 	}
 
