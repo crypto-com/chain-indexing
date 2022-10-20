@@ -492,7 +492,7 @@ func (projection *Validator) projectValidatorView(
 			}
 
 			if msgEditValidatorEvent.Description.Moniker != DO_NOT_MODIFY {
-				errAttentionStatus := projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, &msgEditValidatorEvent.ValidatorAddress, "moniker")
+				errAttentionStatus := projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, "moniker")
 				if errAttentionStatus != nil {
 					return fmt.Errorf(
 						"error checking attention status validator %s from view", msgEditValidatorEvent.ValidatorAddress,
@@ -501,7 +501,7 @@ func (projection *Validator) projectValidatorView(
 				mutValidatorRow.Moniker = msgEditValidatorEvent.Description.Moniker
 			}
 			if msgEditValidatorEvent.Description.Identity != DO_NOT_MODIFY {
-				errAttentionOnNumOfChanges := projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, &msgEditValidatorEvent.ValidatorAddress, "identity")
+				errAttentionOnNumOfChanges := projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, "identity")
 				if errAttentionOnNumOfChanges != nil {
 					return fmt.Errorf(
 						"error checking attention status on number of changes validator %s from view", msgEditValidatorEvent.ValidatorAddress,
@@ -510,7 +510,7 @@ func (projection *Validator) projectValidatorView(
 				mutValidatorRow.Identity = msgEditValidatorEvent.Description.Identity
 			}
 			if msgEditValidatorEvent.Description.Details != DO_NOT_MODIFY {
-				errAttentionOnNumOfChanges := projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, &msgEditValidatorEvent.ValidatorAddress, "details")
+				errAttentionOnNumOfChanges := projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, "details")
 				if errAttentionOnNumOfChanges != nil {
 					return fmt.Errorf(
 						"error checking attention status on number of changes validator %s from view", msgEditValidatorEvent.ValidatorAddress,
@@ -519,7 +519,7 @@ func (projection *Validator) projectValidatorView(
 				mutValidatorRow.Details = msgEditValidatorEvent.Description.Details
 			}
 			if msgEditValidatorEvent.Description.SecurityContact != DO_NOT_MODIFY {
-				errAttentionOnNumOfChanges := projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, &msgEditValidatorEvent.ValidatorAddress, "securityContact")
+				errAttentionOnNumOfChanges := projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, "securityContact")
 				if errAttentionOnNumOfChanges != nil {
 					return fmt.Errorf(
 						"error checking attention status on number of changes validator %s from view", msgEditValidatorEvent.ValidatorAddress,
@@ -528,7 +528,7 @@ func (projection *Validator) projectValidatorView(
 				mutValidatorRow.SecurityContact = msgEditValidatorEvent.Description.SecurityContact
 			}
 			if msgEditValidatorEvent.Description.Website != DO_NOT_MODIFY {
-				errAttentionOnNumOfChanges := projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, &msgEditValidatorEvent.ValidatorAddress, "website")
+				errAttentionOnNumOfChanges := projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, "website")
 				if errAttentionOnNumOfChanges != nil {
 					return fmt.Errorf(
 						"error checking attention status on number of changes validator %s from view", msgEditValidatorEvent.ValidatorAddress,
@@ -538,7 +538,7 @@ func (projection *Validator) projectValidatorView(
 			}
 
 			if msgEditValidatorEvent.MaybeCommissionRate != nil {
-				errAttentionOnNumOfChanges := projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, &msgEditValidatorEvent.ValidatorAddress, "commissionRate")
+				errAttentionOnNumOfChanges := projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, "commissionRate")
 				if errAttentionOnNumOfChanges != nil {
 					return fmt.Errorf(
 						"error checking attention status on number of changes validator %s from view", msgEditValidatorEvent.ValidatorAddress,
@@ -657,7 +657,7 @@ func (projection *Validator) checkAttentionOnCommission(mutValidatorRow *view.Va
 	return nil
 }
 
-func (projection *Validator) checkAttentionOnNumOfChanges(mutValidatorRow *view.ValidatorRow, mutValidatorActivities []view.ValidatorActivityRow, validatorAddress *string, editField string) error {
+func (projection *Validator) checkAttentionOnNumOfChanges(mutValidatorRow *view.ValidatorRow, mutValidatorActivities []view.ValidatorActivityRow, editField string) error {
 	if projection.config.AttentionStatusRules.MaxEditQuota.Enable {
 		editQuotaCounter := make(map[string]int)
 		for key, quota := range projection.config.AttentionStatusRules.MaxEditQuota.Quota {
