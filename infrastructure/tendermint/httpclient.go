@@ -196,12 +196,11 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 	}
 	rawResp, err := client.httpClient.Do(req)
 	if err != nil {
-		client.logger.Debugf("error requesting Tendermint %s endpoint: %v %v", url, err, rawResp.Body)
 		return nil, fmt.Errorf("error requesting Tendermint %s endpoint: %v", url, err)
 	}
 
 	if rawResp.StatusCode != 200 {
-		client.logger.Debugf("error requesting Tendermint %s endpoint: %v %v", url, err, rawResp.Body)
+		client.logger.Debugf("error requesting Tendermint %s endpoint: %v Status: %v Body: %v Header: %v ", url, err, rawResp.Status, rawResp.Body, rawResp.Header)
 		rawResp.Body.Close()
 		return nil, fmt.Errorf("error requesting Tendermint %s endpoint: %s", method, rawResp.Status)
 	}
