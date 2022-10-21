@@ -68,6 +68,7 @@ type MaxEditQuota struct {
 	Enable   bool           `mapstructure:"enable"`
 	Quota    map[string]int `mapstructure:"quota"`
 	Interval string         `mapstructure:"interval"`
+	Duration int64
 }
 
 func ConfigFromInterface(data interface{}) (Config, error) {
@@ -96,6 +97,13 @@ func NewValidator(
 	migrationHelper migrationhelper.MigrationHelper,
 	config *Config,
 ) *Validator {
+	if config.AttentionStatusRules.MaxEditQuota.Enable {
+		duration, durationParserErr := time.ParseDuration(config.AttentionStatusRules.MaxEditQuota.Interval)
+		if durationParserErr != nil {
+			panic(fmt.Sprintf("error parsing config interval %v", durationParserErr))
+		}
+		config.AttentionStatusRules.MaxEditQuota.Duration = duration.Nanoseconds()
+	}
 	return &Validator{
 		rdbprojectionbase.NewRDbBase(
 			rdbConn.ToHandle(),
@@ -462,21 +470,13 @@ func (projection *Validator) projectValidatorView(
 			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
 				MaybeOperatorAddress: &msgEditValidatorEvent.ValidatorAddress,
 			})
-
 			if err != nil {
 				return fmt.Errorf(
 					"error getting existing validator %s from view", msgEditValidatorEvent.ValidatorAddress,
 				)
 			}
 
-			// get checking interval from config
-			duration, durationParserErr := time.ParseDuration(projection.config.AttentionStatusRules.MaxEditQuota.Interval)
-			if durationParserErr != nil {
-				return fmt.Errorf("error parsing config interval %v", durationParserErr)
-			}
-
-			MaybeAfterBlockTime := utctime.FromUnixNano(blockTime.UnixNano() - duration.Nanoseconds())
-
+			MaybeAfterBlockTime := utctime.FromUnixNano(blockTime.UnixNano() - projection.config.AttentionStatusRules.MaxEditQuota.Duration)
 			mutValidatorActivities, _, err := (*validatorActivities).List(
 				view.ValidatorActivitiesListFilter{
 					MaybeAfterBlockTime:  &MaybeAfterBlockTime,
