@@ -762,7 +762,7 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 		return nil, fmt.Errorf("error requesting Cosmos %s endpoint: %v", queryUrl, err)
 	}
 
-	if rawResp.StatusCode != 500 {
+	if rawResp.StatusCode != 200 {
 		defer rawResp.Body.Close()
 		body, errReadBody := ioutil.ReadAll(rawResp.Body)
 		if errReadBody != nil {
