@@ -177,7 +177,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 				mockValidatorActivitiesView.On(
 					"List",
 					validator_view.ValidatorActivitiesListFilter{
-						AfterBlockTime:       &timestamp,
+						MaybeAfterBlockTime:  &timestamp,
 						MaybeOperatorAddress: primptr.String("tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus"),
 					},
 					validator_view.ValidatorActivitiesListOrder{},
@@ -441,7 +441,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 				mockValidatorActivitiesView.On(
 					"List",
 					validator_view.ValidatorActivitiesListFilter{
-						AfterBlockTime:       &timestamp,
+						MaybeAfterBlockTime:  &timestamp,
 						MaybeOperatorAddress: primptr.String("tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus"),
 					},
 					validator_view.ValidatorActivitiesListOrder{},
@@ -705,7 +705,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 				mockValidatorActivitiesView.On(
 					"List",
 					validator_view.ValidatorActivitiesListFilter{
-						AfterBlockTime:       &timestamp,
+						MaybeAfterBlockTime:  &timestamp,
 						MaybeOperatorAddress: primptr.String("tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus"),
 					},
 					validator_view.ValidatorActivitiesListOrder{},

@@ -475,11 +475,11 @@ func (projection *Validator) projectValidatorView(
 				return fmt.Errorf("error parsing config interval %v", durationParserErr)
 			}
 
-			afterBlockTime := utctime.FromUnixNano(blockTime.UnixNano() - duration.Nanoseconds())
+			MaybeAfterBlockTime := utctime.FromUnixNano(blockTime.UnixNano() - duration.Nanoseconds())
 
 			mutValidatorActivities, _, err := (*validatorActivities).List(
 				view.ValidatorActivitiesListFilter{
-					AfterBlockTime:       &afterBlockTime,
+					MaybeAfterBlockTime:  &MaybeAfterBlockTime,
 					MaybeOperatorAddress: &msgEditValidatorEvent.ValidatorAddress,
 				},
 				view.ValidatorActivitiesListOrder{},
@@ -492,28 +492,46 @@ func (projection *Validator) projectValidatorView(
 			}
 
 			if msgEditValidatorEvent.Description.Moniker != DO_NOT_MODIFY {
-				projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, "moniker")
+				isExceeded := projection.isExceedNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.MONIKER)
+				if isExceeded {
+					mutValidatorRow.Status = constants.ATTENTION
+				}
 				mutValidatorRow.Moniker = msgEditValidatorEvent.Description.Moniker
 			}
 			if msgEditValidatorEvent.Description.Identity != DO_NOT_MODIFY {
-				projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, "identity")
+				isExceeded := projection.isExceedNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.IDENTITY)
+				if isExceeded {
+					mutValidatorRow.Status = constants.ATTENTION
+				}
 				mutValidatorRow.Identity = msgEditValidatorEvent.Description.Identity
 			}
 			if msgEditValidatorEvent.Description.Details != DO_NOT_MODIFY {
-				projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, "details")
+				isExceeded := projection.isExceedNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.DETAILS)
+				if isExceeded {
+					mutValidatorRow.Status = constants.ATTENTION
+				}
 				mutValidatorRow.Details = msgEditValidatorEvent.Description.Details
 			}
 			if msgEditValidatorEvent.Description.SecurityContact != DO_NOT_MODIFY {
-				projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, "securityContact")
+				isExceeded := projection.isExceedNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.SECURITY_CONTACT)
+				if isExceeded {
+					mutValidatorRow.Status = constants.ATTENTION
+				}
 				mutValidatorRow.SecurityContact = msgEditValidatorEvent.Description.SecurityContact
 			}
 			if msgEditValidatorEvent.Description.Website != DO_NOT_MODIFY {
-				projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, "website")
+				isExceeded := projection.isExceedNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.WEBSITE)
+				if isExceeded {
+					mutValidatorRow.Status = constants.ATTENTION
+				}
 				mutValidatorRow.Website = msgEditValidatorEvent.Description.Website
 			}
 
 			if msgEditValidatorEvent.MaybeCommissionRate != nil {
-				projection.checkAttentionOnNumOfChanges(mutValidatorRow, mutValidatorActivities, "commissionRate")
+				isExceeded := projection.isExceedNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.COMMISSION_RATE)
+				if isExceeded {
+					mutValidatorRow.Status = constants.ATTENTION
+				}
 
 				errAttentionOnCommission := projection.checkAttentionOnCommission(mutValidatorRow, *msgEditValidatorEvent.MaybeCommissionRate, mutValidatorRow.CommissionRate, msgEditValidatorEvent.ValidatorAddress)
 				if errAttentionOnCommission != nil {
@@ -627,7 +645,7 @@ func (projection *Validator) checkAttentionOnCommission(mutValidatorRow *view.Va
 	return nil
 }
 
-func (projection *Validator) checkAttentionOnNumOfChanges(mutValidatorRow *view.ValidatorRow, mutValidatorActivities []view.ValidatorActivityRow, editField string) {
+func (projection *Validator) isExceedNumOfEdit(mutValidatorRow *view.ValidatorRow, mutValidatorActivities []view.ValidatorActivityRow, editField string) bool {
 	if projection.config.AttentionStatusRules.MaxEditQuota.Enable {
 		editQuotaCounter := make(map[string]int)
 		for key, quota := range projection.config.AttentionStatusRules.MaxEditQuota.Quota {
@@ -636,7 +654,7 @@ func (projection *Validator) checkAttentionOnNumOfChanges(mutValidatorRow *view.
 
 		// skip validator with "Attention" status
 		if mutValidatorRow.Status == constants.ATTENTION {
-			return
+			return false
 		}
 
 		// count the current change
@@ -649,33 +667,34 @@ func (projection *Validator) checkAttentionOnNumOfChanges(mutValidatorRow *view.
 			content := activity.Data.Content.(map[string]interface{})
 			pastDescription := content["description"].(map[string]interface{})
 
-			if pastDescription["moniker"] != DO_NOT_MODIFY {
-				checkAndUpdateQuota("moniker", &editQuotaCounter)
+			if pastDescription[constants.MONIKER] != DO_NOT_MODIFY {
+				checkAndUpdateQuota(constants.MONIKER, &editQuotaCounter)
 			}
-			if pastDescription["identity"] != DO_NOT_MODIFY {
-				checkAndUpdateQuota("identity", &editQuotaCounter)
+			if pastDescription[constants.IDENTITY] != DO_NOT_MODIFY {
+				checkAndUpdateQuota(constants.IDENTITY, &editQuotaCounter)
 			}
-			if pastDescription["details"] != DO_NOT_MODIFY {
-				checkAndUpdateQuota("details", &editQuotaCounter)
+			if pastDescription[constants.DETAILS] != DO_NOT_MODIFY {
+				checkAndUpdateQuota(constants.DETAILS, &editQuotaCounter)
 			}
-			if pastDescription["securityContact"] != DO_NOT_MODIFY {
-				checkAndUpdateQuota("securityContact", &editQuotaCounter)
+			if pastDescription[constants.COMMISSION_RATE] != DO_NOT_MODIFY {
+				checkAndUpdateQuota(constants.COMMISSION_RATE, &editQuotaCounter)
 			}
-			if pastDescription["website"] != DO_NOT_MODIFY {
-				checkAndUpdateQuota("website", &editQuotaCounter)
+			if pastDescription[constants.WEBSITE] != DO_NOT_MODIFY {
+				checkAndUpdateQuota(constants.WEBSITE, &editQuotaCounter)
 			}
-			if content["commissionRate"] != nil {
-				checkAndUpdateQuota("commissionRate", &editQuotaCounter)
+			if content[constants.COMMISSION_RATE] != nil {
+				checkAndUpdateQuota(constants.COMMISSION_RATE, &editQuotaCounter)
 			}
 		}
 		// check counter by each field
 		for _, count := range editQuotaCounter {
 			if count < 0 {
-				mutValidatorRow.Status = constants.ATTENTION
+				return true
 			}
 		}
 
 	}
+	return false
 }
 
 func checkAndUpdateQuota(key string, counter *map[string]int) {

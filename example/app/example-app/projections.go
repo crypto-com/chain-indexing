@@ -327,7 +327,7 @@ func InitProjection(name string, params InitProjectionParams) projection_entity.
 		databaseURL := migrationhelper.GenerateDefaultDatabaseURL(name, connString)
 		migrationHelper := github_migrationhelper.NewGithubMigrationHelper(sourceURL, databaseURL)
 
-		config, err := bridge_pending_activity.ConfigFromInterface()(params.ExtraConfigs[name])
+		config, err := bridge_pending_activity.ConfigFromInterface(params.ExtraConfigs[name])
 		if err != nil {
 			params.Logger.Panicf(err.Error())
 		}
