@@ -8,7 +8,6 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 
-	. "github.com/crypto-com/chain-indexing/external/logger/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
@@ -28,7 +27,7 @@ var _ = Describe("HTTPClient", func() {
 	})
 
 	It("should implement Client", func() {
-		var _ tendermint.Client = NewHTTPClient("http://localhost:26657", true, NewFakeLogger())
+		var _ tendermint.Client = NewHTTPClient("http://localhost:26657", true)
 	})
 
 	Describe("RawBlockResults", func() {
@@ -41,7 +40,7 @@ var _ = Describe("HTTPClient", func() {
 				),
 			)
 
-			client := NewHTTPClient(server.URL(), true, NewFakeLogger())
+			client := NewHTTPClient(server.URL(), true)
 
 			blockResults, err := client.BlockResults(anyBlockHeight)
 			Expect(err).To(BeNil())
@@ -76,7 +75,7 @@ var _ = Describe("HTTPClient", func() {
 				),
 			)
 
-			client := NewHTTPClient(server.URL(), true, NewFakeLogger())
+			client := NewHTTPClient(server.URL(), true)
 
 			blockResults, err := client.BlockResults(anyBlockHeight)
 			Expect(err).To(BeNil())
@@ -93,7 +92,7 @@ var _ = Describe("HTTPClient", func() {
 				),
 			)
 
-			client := NewHTTPClient(server.URL(), true, NewFakeLogger())
+			client := NewHTTPClient(server.URL(), true)
 
 			blockResults, err := client.BlockResults(anyBlockHeight)
 			Expect(err).To(BeNil())
@@ -111,7 +110,7 @@ var _ = Describe("HTTPClient", func() {
 			)
 
 			blockHeight := int64(100)
-			client := NewHTTPClient(server.URL(), true, NewFakeLogger())
+			client := NewHTTPClient(server.URL(), true)
 			block, _, err := client.Block(blockHeight)
 			Expect(err).To(BeNil())
 			blockTime, _ := utctime.Parse("2006-01-02T15:04:05.000000000Z", "2020-10-15T09:33:42.195143319Z")
@@ -159,7 +158,7 @@ var _ = Describe("HTTPClient", func() {
 					ghttp.RespondWith(http.StatusOK, infrastructure_tendermint_test.GENESIS_MIXED_NUMBER_AND_STRING_JSON),
 				),
 			)
-			client := NewHTTPClient(server.URL(), true, NewFakeLogger())
+			client := NewHTTPClient(server.URL(), true)
 			_, err := client.Genesis()
 			Expect(err).To(BeNil())
 		})
@@ -174,7 +173,7 @@ var _ = Describe("HTTPClient", func() {
 					ghttp.RespondWith(http.StatusOK, infrastructure_tendermint_test.GENESIS_CHUNKED_MIXED_NUMBER_AND_STRING_JSON),
 				),
 			)
-			client := NewHTTPClient(server.URL(), true, NewFakeLogger())
+			client := NewHTTPClient(server.URL(), true)
 			_, err := client.GenesisChunked()
 			Expect(err).To(BeNil())
 		})

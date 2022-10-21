@@ -14,7 +14,6 @@ import (
 
 	"github.com/crypto-com/chain-indexing/appinterface/tendermint"
 
-	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
@@ -26,11 +25,10 @@ type HTTPClient struct {
 	httpClient           *http.Client
 	tendermintRPCUrl     string
 	strictGenesisParsing bool
-	logger               applogger.Logger
 }
 
 // NewHTTPClient returns a new HTTPClient for tendermint request
-func NewHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool, logger applogger.Logger) *HTTPClient {
+func NewHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool) *HTTPClient {
 	httpClient := &http.Client{
 		Timeout: 30 * time.Second,
 	}
@@ -39,12 +37,11 @@ func NewHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool, logger ap
 		httpClient,
 		strings.TrimSuffix(tendermintRPCUrl, "/"),
 		strictGenesisParsing,
-		logger,
 	}
 }
 
 // NewHTTPClient returns a new HTTPClient for tendermint request
-func NewInsecureHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool, logger applogger.Logger) *HTTPClient {
+func NewInsecureHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool) *HTTPClient {
 	// nolint:gosec
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -58,7 +55,6 @@ func NewInsecureHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool, l
 		httpClient,
 		strings.TrimSuffix(tendermintRPCUrl, "/"),
 		strictGenesisParsing,
-		logger,
 	}
 }
 
@@ -199,7 +195,7 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 		return nil, fmt.Errorf("error requesting Tendermint %s endpoint: %v", url, err)
 	}
 
-	if rawResp.StatusCode != 200 {
+	if rawResp.StatusCode != 500 {
 		defer rawResp.Body.Close()
 
 		body, errReadBody := ioutil.ReadAll(rawResp.Body)
@@ -213,8 +209,7 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 			return nil, fmt.Errorf("error unmarshalling Body : %v", errRead)
 		}
 
-		client.logger.Debugf("error requesting Tendermint %s endpoint: %v Status: %v Body: %v Header: %v ", url, err, rawResp.Status, bodyJsonMap, rawResp.Header)
-		return nil, fmt.Errorf("error requesting Tendermint %s endpoint: %s", method, rawResp.Status)
+		return nil, fmt.Errorf("error requesting Tendermint %s %s endpoint: %s Body: %v Header: %v", method, url, rawResp.Status, bodyJsonMap, rawResp.Header)
 	}
 
 	return rawResp.Body, nil
