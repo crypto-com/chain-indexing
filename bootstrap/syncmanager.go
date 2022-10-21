@@ -87,11 +87,13 @@ func NewSyncManager(
 		tendermintClient = tendermint.NewInsecureHTTPClient(
 			params.Config.TendermintRPCUrl,
 			params.Config.StrictGenesisParsing,
+			params.Logger,
 		)
 	} else {
 		tendermintClient = tendermint.NewHTTPClient(
 			params.Config.TendermintRPCUrl,
 			params.Config.StrictGenesisParsing,
+			params.Logger,
 		)
 	}
 

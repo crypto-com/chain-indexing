@@ -32,11 +32,13 @@ func NewInfoManager(
 		tendermintClient = tendermint.NewInsecureHTTPClient(
 			tendermintRPCUrl,
 			strictGenesisParsing,
+			logger,
 		)
 	} else {
 		tendermintClient = tendermint.NewHTTPClient(
 			tendermintRPCUrl,
 			strictGenesisParsing,
+			logger,
 		)
 	}
 

@@ -14,6 +14,7 @@ import (
 
 	"github.com/crypto-com/chain-indexing/appinterface/tendermint"
 
+	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
@@ -25,10 +26,11 @@ type HTTPClient struct {
 	httpClient           *http.Client
 	tendermintRPCUrl     string
 	strictGenesisParsing bool
+	logger               applogger.Logger
 }
 
 // NewHTTPClient returns a new HTTPClient for tendermint request
-func NewHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool) *HTTPClient {
+func NewHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool, logger applogger.Logger) *HTTPClient {
 	httpClient := &http.Client{
 		Timeout: 30 * time.Second,
 	}
@@ -37,11 +39,12 @@ func NewHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool) *HTTPClie
 		httpClient,
 		strings.TrimSuffix(tendermintRPCUrl, "/"),
 		strictGenesisParsing,
+		logger,
 	}
 }
 
 // NewHTTPClient returns a new HTTPClient for tendermint request
-func NewInsecureHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool) *HTTPClient {
+func NewInsecureHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool, logger applogger.Logger) *HTTPClient {
 	// nolint:gosec
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -55,6 +58,7 @@ func NewInsecureHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool) *
 		httpClient,
 		strings.TrimSuffix(tendermintRPCUrl, "/"),
 		strictGenesisParsing,
+		logger,
 	}
 }
 
@@ -190,12 +194,16 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 	if err != nil {
 		return nil, fmt.Errorf("error creating HTTP request with context: %v", err)
 	}
+
 	rawResp, err := client.httpClient.Do(req)
+
 	if err != nil {
+		client.logger.Debugf("error requesting Tendermint %s endpoint: %v %v", url, err, rawResp.Body)
 		return nil, fmt.Errorf("error requesting Tendermint %s endpoint: %v", url, err)
 	}
 
 	if rawResp.StatusCode != 200 {
+		client.logger.Debugf("error requesting Tendermint %s endpoint: %v %v", url, err, rawResp.Body)
 		rawResp.Body.Close()
 		return nil, fmt.Errorf("error requesting Tendermint %s endpoint: %s", method, rawResp.Status)
 	}
