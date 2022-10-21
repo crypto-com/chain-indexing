@@ -213,7 +213,7 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 			return nil, fmt.Errorf("error unmarshalling Body : %v", errRead)
 		}
 
-		client.logger.Debugf("error requesting Tendermint %s endpoint: %v Status: %v Body: %v Header: %v ", url, err, rawResp.Status, jsonMap, rawResp.Header)
+		client.logger.Debugf("error requesting Tendermint %s endpoint: %v Status: %v Body: %v Header: %v ", url, err, rawResp.Status, bodyJsonMap, rawResp.Header)
 		return nil, fmt.Errorf("error requesting Tendermint %s endpoint: %s", method, rawResp.Status)
 	}
 

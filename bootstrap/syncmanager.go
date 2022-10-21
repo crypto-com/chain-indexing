@@ -101,10 +101,12 @@ func NewSyncManager(
 	if params.Config.InsecureCosmosAppClient {
 		cosmosClient = cosmosapp_infrastructure.NewInsecureHTTPClient(
 			params.Config.CosmosAppHTTPRPCURL, params.Config.StakingDenom,
+			params.Logger,
 		)
 	} else {
 		cosmosClient = cosmosapp_infrastructure.NewHTTPClient(
 			params.Config.CosmosAppHTTPRPCURL, params.Config.StakingDenom,
+			params.Logger,
 		)
 	}
 
