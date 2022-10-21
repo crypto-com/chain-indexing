@@ -199,9 +199,17 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 		return nil, fmt.Errorf("error requesting Tendermint %s endpoint: %v", url, err)
 	}
 
-	if rawResp.StatusCode != 200 {
-		client.logger.Debugf("error requesting Tendermint %s endpoint: %v Status: %v Body: %v Header: %v ", url, err, rawResp.Status, rawResp.Body, rawResp.Header)
-		rawResp.Body.Close()
+	if rawResp.StatusCode != 500 {
+		defer rawResp.Body.Close()
+
+		body, _ := ioutil.ReadAll(rawResp.Body)
+		jsonMap := make(map[string]interface{})
+		errRead := json.Unmarshal([]byte(body), &jsonMap)
+		if errRead != nil {
+			return nil, fmt.Errorf("error requesting Status : %v", errRead)
+		}
+
+		client.logger.Debugf("error requesting Tendermint %s endpoint: %v Status: %v Body: %v Header: %v ", url, err, rawResp.Status, jsonMap, rawResp.Header)
 		return nil, fmt.Errorf("error requesting Tendermint %s endpoint: %s", method, rawResp.Status)
 	}
 
