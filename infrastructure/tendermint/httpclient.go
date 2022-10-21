@@ -194,9 +194,7 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 	if err != nil {
 		return nil, fmt.Errorf("error creating HTTP request with context: %v", err)
 	}
-
 	rawResp, err := client.httpClient.Do(req)
-
 	if err != nil {
 		client.logger.Debugf("error requesting Tendermint %s endpoint: %v %v", url, err, rawResp.Body)
 		return nil, fmt.Errorf("error requesting Tendermint %s endpoint: %v", url, err)
