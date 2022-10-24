@@ -694,22 +694,24 @@ func (projection *Validator) countEditQuotaOnLastActivities(validatorActivities 
 		// count previous changes
 		for _, activity := range mutValidatorActivities {
 			content := activity.Data.Content.(map[string]interface{})
-			pastDescription := content["description"].(map[string]interface{})
 
-			if pastDescription[constants.MONIKER] != DO_NOT_MODIFY {
-				checkAndUpdateQuota(constants.MONIKER, &editQuotaCounter)
-			}
-			if pastDescription[constants.IDENTITY] != DO_NOT_MODIFY {
-				checkAndUpdateQuota(constants.IDENTITY, &editQuotaCounter)
-			}
-			if pastDescription[constants.DETAILS] != DO_NOT_MODIFY {
-				checkAndUpdateQuota(constants.DETAILS, &editQuotaCounter)
-			}
-			if pastDescription[constants.WEBSITE] != DO_NOT_MODIFY {
-				checkAndUpdateQuota(constants.WEBSITE, &editQuotaCounter)
-			}
-			if content[constants.COMMISSION_RATE] != nil {
-				checkAndUpdateQuota(constants.COMMISSION_RATE, &editQuotaCounter)
+			pastDescription, exists := content["description"].(map[string]interface{})
+			if exists {
+				if pastDescription[constants.MONIKER] != DO_NOT_MODIFY {
+					checkAndUpdateQuota(constants.MONIKER, &editQuotaCounter)
+				}
+				if pastDescription[constants.IDENTITY] != DO_NOT_MODIFY {
+					checkAndUpdateQuota(constants.IDENTITY, &editQuotaCounter)
+				}
+				if pastDescription[constants.DETAILS] != DO_NOT_MODIFY {
+					checkAndUpdateQuota(constants.DETAILS, &editQuotaCounter)
+				}
+				if pastDescription[constants.WEBSITE] != DO_NOT_MODIFY {
+					checkAndUpdateQuota(constants.WEBSITE, &editQuotaCounter)
+				}
+				if content[constants.COMMISSION_RATE] != nil {
+					checkAndUpdateQuota(constants.COMMISSION_RATE, &editQuotaCounter)
+				}
 			}
 		}
 		return editQuotaCounter, nil
