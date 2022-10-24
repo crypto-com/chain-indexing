@@ -84,8 +84,8 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_EXTENSION_OPTION_DYNAMIC_FEE_TX_BLOCK_RESULTS_RESP,
 			)
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_EXTENSION_OPTION_DYNAMIC_FEE_TXS_RESP)
-			txs := []model.Tx{*tx}
+			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_EXTENSION_OPTION_DYNAMIC_FEE_TXS_RESP)
+			txs := []model.CosmosTxWithHash{*tx}
 
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"
