@@ -2178,10 +2178,10 @@ func ParseLegacyTx(
 	}
 	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
 	if decoderErr != nil {
-		panic(fmt.Errorf("error creating RawLegacyTx decoder: %v", decoderErr))
+		panic(fmt.Errorf("error creating decoder: %v", decoderErr))
 	}
 	if err := decoder.Decode(msg); err != nil {
-		panic(fmt.Errorf("error decoding RawLegacyTx: %v", err))
+		panic(fmt.Errorf("error decoding: %v", err))
 	}
 
 	rawMsg.From = utils.AddressParse(rawMsg.From)
@@ -2240,10 +2240,10 @@ func ParseExtensionOptionDynamicFeeTx(
 	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
 
 	if decoderErr != nil {
-		panic(fmt.Errorf("error creating RawLegacyTx decoder: %v", decoderErr))
+		panic(fmt.Errorf("error creating decoder: %v", decoderErr))
 	}
 	if err := decoder.Decode(msg); err != nil {
-		panic(fmt.Errorf("error decoding RawLegacyTx: %v", err))
+		panic(fmt.Errorf("error decoding: %v", err))
 	}
 
 	if !txSuccess {
