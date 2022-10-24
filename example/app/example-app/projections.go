@@ -217,7 +217,12 @@ func InitProjection(name string, params InitProjectionParams) projection_entity.
 		databaseURL := migrationhelper.GenerateDefaultDatabaseURL(name, connString)
 		migrationHelper := github_migrationhelper.NewGithubMigrationHelper(sourceURL, databaseURL)
 
-		return validator.NewValidator(params.Logger, params.RdbConn, params.ConsNodeAddressPrefix, migrationHelper)
+		config, err := validator.ConfigFromInterface(params.ExtraConfigs[name])
+		if err != nil {
+			params.Logger.Panicf(err.Error())
+		}
+
+		return validator.NewValidator(params.Logger, params.RdbConn, params.ConsNodeAddressPrefix, migrationHelper, &config)
 	case "ValidatorStats":
 		sourceURL := github_migrationhelper.GenerateSourceURL(
 			github_migrationhelper.MIGRATION_GITHUB_URL_FORMAT,

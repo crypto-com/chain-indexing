@@ -5,12 +5,23 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 )
 
-type ValidatorActivitiesTotal struct {
+const VALIDATOR_ACTIVITIES_TABLE_NAME = "view_validator_activities_total"
+
+type ValidatorActivitiesTotal interface {
+	Set(string, int64) error
+	Increment(string, int64) error
+	IncrementAll([]string, int64) error
+	DecrementAll([]string, int64) error
+	FindBy(string) (int64, error)
+	SumBy([]string) (int64, error)
+}
+
+type ValidatorActivitiesTotalView struct {
 	*view.Total
 }
 
-func NewValidatorActivitiesTotal(rdbHandle *rdb.Handle) *ValidatorActivitiesTotal {
-	return &ValidatorActivitiesTotal{
-		view.NewTotal(rdbHandle, "view_validator_activities_total"),
+func NewValidatorActivitiesTotalView(rdbHandle *rdb.Handle) ValidatorActivitiesTotal {
+	return &ValidatorActivitiesTotalView{
+		view.NewTotal(rdbHandle, VALIDATOR_ACTIVITIES_TABLE_NAME),
 	}
 }

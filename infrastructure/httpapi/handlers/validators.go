@@ -42,8 +42,8 @@ type Validators struct {
 
 	cosmosAppClient         cosmosapp.Client
 	tendermintClient        tendermint.Client
-	validatorsView          *validator_view.Validators
-	validatorActivitiesView *validator_view.ValidatorActivities
+	validatorsView          validator_view.Validators
+	validatorActivitiesView validator_view.ValidatorActivities
 	chainStatsView          *chainstats_view.ChainStats
 	blockView               *block_view.Blocks
 
@@ -69,8 +69,8 @@ func NewValidators(
 
 		cosmosAppClient,
 		tendermintClient,
-		validator_view.NewValidators(rdbHandle),
-		validator_view.NewValidatorActivities(rdbHandle),
+		validator_view.NewValidatorsView(rdbHandle),
+		validator_view.NewValidatorActivitiesView(rdbHandle),
 		chainstats_view.NewChainStats(rdbHandle),
 		block_view.NewBlocks(rdbHandle),
 

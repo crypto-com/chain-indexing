@@ -26,7 +26,7 @@ type Blocks struct {
 	blocksView                    *block_view.Blocks
 	transactionsView              transaction_view.BlockTransactions
 	blockEventsView               *blockevent_view.BlockEvents
-	validatorBlockCommitmentsView *validator_view.ValidatorBlockCommitments
+	validatorBlockCommitmentsView validator_view.ValidatorBlockCommitments
 	rawTransactionsView           raw_transaction_view.BlockRawTransactions
 	blockRawEventView             *blockrawevent_view.BlockRawEvents
 	accountRawEventView           account_raw_event_view.AccountRawEvents
