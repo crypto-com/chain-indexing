@@ -20,7 +20,7 @@ import (
 
 func ParseTransactionCommands(
 	logger applogger.Logger,
-	txs []model.Tx,
+	txs []model.CosmosTxWithHash,
 	cosmosClient cosmosapp_interface.Client,
 	blockResults *model.BlockResults,
 	accountAddressPrefix string,
@@ -29,7 +29,7 @@ func ParseTransactionCommands(
 	blockHeight := blockResults.Height
 	cmds := make([]command.Command, 0, len(blockResults.TxsResults))
 	for i, tx := range txs {
-		txHash := tx.TxResponse.TxHash
+		txHash := tx.Hash
 		txsResult := blockResults.TxsResults[i]
 
 		var log string
@@ -86,6 +86,22 @@ func ParseTransactionCommands(
 			GasUsed:       gasUsed,
 			Memo:          tx.Tx.Body.Memo,
 			TimeoutHeight: timeoutHeight,
+		}))
+
+		cmds = append(cmds, command_usecase.NewCreateRawTransaction(blockHeight, model.CreateRawTransactionParams{
+			TxHash:        txHash,
+			Index:         i,
+			Code:          txsResult.Code,
+			Log:           log,
+			Signers:       signers,
+			Fee:           fee,
+			FeePayer:      tx.Tx.AuthInfo.Fee.Payer,
+			FeeGranter:    tx.Tx.AuthInfo.Fee.Granter,
+			GasWanted:     gasWanted,
+			GasUsed:       gasUsed,
+			Memo:          tx.Tx.Body.Memo,
+			TimeoutHeight: timeoutHeight,
+			Messages:      tx.Tx.Body.Messages,
 		}))
 	}
 

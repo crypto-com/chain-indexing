@@ -84,6 +84,8 @@ func (handler *Validators) FindBy(ctx *fasthttp.RequestCtx) {
 	if !addressParamsOk {
 		return
 	}
+	addressParams = strings.ToLower(addressParams)
+
 	var identity validator_view.ValidatorIdentity
 	if strings.HasPrefix(addressParams, handler.validatorAddressPrefix) {
 		identity = validator_view.ValidatorIdentity{
@@ -234,7 +236,7 @@ func (handler *Validators) getGlobalAPY() (*big.Float, error) {
 	}
 
 	// estimated APY = expected APY * estimated block count / actual block count
-	genesis, err := handler.tendermintClient.Genesis()
+	genesis, err := handler.tendermintClient.GenesisChunked()
 	if err != nil {
 		return nil, fmt.Errorf("error fetching genesis: %v", err)
 	}
@@ -423,6 +425,9 @@ func (handler *Validators) ListActivities(ctx *fasthttp.RequestCtx) {
 	if !addressParamsOk {
 		return
 	}
+
+	addressParams = strings.ToLower(addressParams)
+
 	var filter validator_view.ValidatorActivitiesListFilter
 	if strings.HasPrefix(addressParams, handler.validatorAddressPrefix) {
 		filter = validator_view.ValidatorActivitiesListFilter{

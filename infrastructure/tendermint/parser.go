@@ -30,6 +30,27 @@ func ParseGenesisResp(rawRespReader io.Reader, strictParsing bool) (*genesis.Gen
 	return &genesisResp.Result.Genesis, nil
 }
 
+func ParseGenesisChunkedResp(rawRespReader io.Reader, strictParsing bool) (*GenesisChunkedResp, error) {
+	var genesisChunkedResp GenesisChunkedResp
+
+	jsonDecoder := jsoniter.NewDecoder(rawRespReader)
+	if strictParsing {
+		jsonDecoder.DisallowUnknownFields()
+	}
+	if err := jsonDecoder.Decode(&genesisChunkedResp); err != nil {
+		return nil, fmt.Errorf("error decoding Tendermint genesis response: %v", err)
+	}
+
+	genesisDataByte, err := base64.StdEncoding.DecodeString(genesisChunkedResp.Result.Data)
+	genesisChunkedResp.Result.Data = string(genesisDataByte)
+
+	if err != nil {
+		return nil, fmt.Errorf("error decoding Tendermint genesis chunked from base64 to byte: %v", err)
+	}
+
+	return &genesisChunkedResp, nil
+}
+
 func ParseBlockResp(rawRespReader io.Reader) (*model.Block, *model.RawBlock, error) {
 	var err error
 
@@ -188,6 +209,7 @@ func parseBlockResultsEvents(rawEvents []RawBlockResultsEvent) []model.BlockResu
 			attributes = append(attributes, model.BlockResultsEventAttribute{
 				Key:   mustBase64Decode(rawAttribute.Key),
 				Value: mustBase64Decode(rawAttribute.Value),
+				Index: rawAttribute.Index,
 			})
 		}
 		events = append(events, model.BlockResultsEvent{

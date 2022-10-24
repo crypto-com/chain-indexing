@@ -2293,7 +2293,7 @@ const TX_MSG_DELEGATE_TXS_RESP = `{
             "messages": [
                 {
                     "@type": "/cosmos.staking.v1beta1.MsgDelegate",
-                    "delegator_address": "tcro1fs8r6zxmr5nc86j8cpcmjmccf8s2cafxh5hy8r",
+                    "delegator_address": "TCRO1FS8R6ZXMR5NC86J8CPCMJMCCF8S2CAFXH5HY8R",
                     "validator_address": "tcrocncl1fs8r6zxmr5nc86j8cpcmjmccf8s2cafxzt5alq",
                     "amount": {
                         "denom": "basetcro",
@@ -2461,7 +2461,7 @@ const TX_MSG_DELEGATE_TXS_RESP = `{
                 "messages": [
                     {
                         "@type": "/cosmos.staking.v1beta1.MsgDelegate",
-                        "delegator_address": "tcro1fs8r6zxmr5nc86j8cpcmjmccf8s2cafxh5hy8r",
+                        "delegator_address": "TCRO1FS8R6ZXMR5NC86J8CPCMJMCCF8S2CAFXH5HY8R",
                         "validator_address": "tcrocncl1fs8r6zxmr5nc86j8cpcmjmccf8s2cafxzt5alq",
                         "amount": {
                             "denom": "basetcro",

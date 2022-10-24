@@ -2011,7 +2011,7 @@ const TX_MSG_UNJAIL_TXS_RESP = `{
             "messages": [
                 {
                     "@type": "/cosmos.slashing.v1beta1.MsgUnjail",
-                    "validator_addr": "tcrocncl1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5m4uxzk"
+                    "validator_addr": "TCROCNCL1GS80N8FPC5MC3YWKGFY93L23TG0GDQJ5M4UXZK"
                 }
             ],
             "memo": "",
@@ -2129,7 +2129,7 @@ const TX_MSG_UNJAIL_TXS_RESP = `{
                 "messages": [
                     {
                         "@type": "/cosmos.slashing.v1beta1.MsgUnjail",
-                        "validator_addr": "tcrocncl1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5m4uxzk"
+                        "validator_addr": "TCROCNCL1GS80N8FPC5MC3YWKGFY93L23TG0GDQJ5M4UXZK"
                     }
                 ],
                 "memo": "",

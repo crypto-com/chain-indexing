@@ -1828,3 +1828,124 @@ const END_BLOCK_COMPLETE_UNBONDING_BLOCK_RESULTS_RESP = `{
     }
   }
 }`
+
+const END_BLOCK_COMPLETE_UNBONDING_BLOCK_RESP = `
+{
+  "jsonrpc": "2.0",
+  "id": -1,
+  "result": {
+      "block_id": {
+          "hash": "8703C54C9FE1C2D6D05DAC79D795E120F385F5F43E5CDC17B73090E9DA40CEA9",
+          "parts": {
+              "total": 1,
+              "hash": "743D99C2AB5876299A9D1F561C87C7B8A495C668F7169194F4446C99202514E0"
+          }
+      },
+      "block": {
+          "header": {
+              "version": {
+                  "block": "11"
+              },
+              "chain_id": "testnet-croeseid-4",
+              "height": "477415",
+              "time": "2021-09-17T15:42:15.93678088Z",
+              "last_block_id": {
+                  "hash": "DA4F5D22E2970D0D12DA082FEB02205DF3D57F5B471AD4B2C2A8717D770B4647",
+                  "parts": {
+                      "total": 1,
+                      "hash": "2CE73021D268DA5CCC6F408E9804779E99F3951E4370F4D24F0015F1E5A4EC39"
+                  }
+              },
+              "last_commit_hash": "BDB6C397953F17208DA18591ACA1A025BCB92F9A9EF946FB47A3F3B0125A616C",
+              "data_hash": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+              "validators_hash": "CCBF104AF30399CA50C64DD6472D6D8E3ADD28C5D0A01A6E30E3E648523A2B37",
+              "next_validators_hash": "CCBF104AF30399CA50C64DD6472D6D8E3ADD28C5D0A01A6E30E3E648523A2B37",
+              "consensus_hash": "372B4AE845086C837EFEF79A189B085B1FD6610C53F3BEB17EE0E27B347C06DE",
+              "app_hash": "825028E82A9E5C79D7AAD74B6F273A7ECACC6E97D40A31D7C47D0EEB8DF0F5FE",
+              "last_results_hash": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+              "evidence_hash": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+              "proposer_address": "F9A4582896E5F2692BEDDD7C251755E33D2DE013"
+          },
+          "data": {
+              "txs": []
+          },
+          "evidence": {
+              "evidence": []
+          },
+          "last_commit": {
+              "height": "477414",
+              "round": 0,
+              "block_id": {
+                  "hash": "DA4F5D22E2970D0D12DA082FEB02205DF3D57F5B471AD4B2C2A8717D770B4647",
+                  "parts": {
+                      "total": 1,
+                      "hash": "2CE73021D268DA5CCC6F408E9804779E99F3951E4370F4D24F0015F1E5A4EC39"
+                  }
+              },
+              "signatures": [
+                  {
+                      "block_id_flag": 2,
+                      "validator_address": "F9A4582896E5F2692BEDDD7C251755E33D2DE013",
+                      "timestamp": "2021-09-17T15:42:15.93678088Z",
+                      "signature": "E+32hTyDGXzYrAgrfYGn4uD3jjlxRV6vuHIzWr6ZwtfRUu7fzvRuichsDAieHUNLJvxmfdKD8yZFJoZu88VADg=="
+                  },
+                  {
+                      "block_id_flag": 2,
+                      "validator_address": "71DA178AE52B2D0654102A86166CE91AC5121CB2",
+                      "timestamp": "2021-09-17T15:42:15.964979273Z",
+                      "signature": "TvldurapMMXfR6Jrme7u8aOI0HYETstXilTk2VUc17zzJKyUaChgSEy6ifP0CccS+FhipmFqVD8OQGHpwCNCCg=="
+                  },
+                  {
+                      "block_id_flag": 2,
+                      "validator_address": "7E2B455523A35AE8F4064C00AF01515FEF673079",
+                      "timestamp": "2021-09-17T15:42:15.930040983Z",
+                      "signature": "cWEszIVfhlvyVaEeXEiUketDJpLewMT5tgQjiKoD/15crH6kEBYUUP751+DV+GSvTnxpjHnU2h0Hnhc3b1CJBg=="
+                  },
+                  {
+                      "block_id_flag": 2,
+                      "validator_address": "2B1F2EB1BAB6A7EAF7B05CDAFA31827528B570EA",
+                      "timestamp": "2021-09-17T15:42:16.1537823Z",
+                      "signature": "a5gIahdWI3Ctdp1YNJQ8BbEzrrBUQdm2eaMCxpaDc/RMTTMovAwmZUNWQUKXL9bWglQtXYYK0iAyNYbQ6HYrAg=="
+                  },
+                  {
+                      "block_id_flag": 2,
+                      "validator_address": "54F9FBB3172484C77A661FCDA787BF953C15B002",
+                      "timestamp": "2021-09-17T15:42:16.055132688Z",
+                      "signature": "bziu6Zi0r5iTws9Jd/nYdQeUz3x9/wpyhg4bMkaj9E65wzxNNjk1p0D2mkzEnQE4ZxURmphM/4FCcWRCPHyvAA=="
+                  },
+                  {
+                      "block_id_flag": 2,
+                      "validator_address": "5D030E2F99075AA77A128218DEAE65F03E57BAD7",
+                      "timestamp": "2021-09-17T15:42:16.131033138Z",
+                      "signature": "6HJwgWypzH4k7WW6Kj/1pb7rczsy/zbRtV/QeDDjySV15E/zrUbxswtFk5MfQ5AllcnlOvL+y4eYTuidTnpEDw=="
+                  },
+                  {
+                      "block_id_flag": 2,
+                      "validator_address": "CF237EDC88CBFF3FE95B8077FDF1F1E6CBA5BB1B",
+                      "timestamp": "2021-09-17T15:42:16.117407856Z",
+                      "signature": "xGXM4Al8yow2AKQcYaOp+uZN3EyotCTXAHmsy+tWFMdIkZ7Uf8l8agp1ggVu2PTVwGqUVb4+z8kd4vUaqwUbCg=="
+                  },
+                  {
+                      "block_id_flag": 2,
+                      "validator_address": "CF43715FB7706185E1656766684E4A0F87BB1562",
+                      "timestamp": "2021-09-17T15:42:16.13727397Z",
+                      "signature": "HRxaSdkCYQY3173vjixloJcvtxEEmefqpgYrRsgSe4Uq2CTaTl+BdQJSBxH+KA5iSL2p4mM7fLy1YDUAs7K1Cw=="
+                  },
+                  {
+                      "block_id_flag": 2,
+                      "validator_address": "0E63B1F085D2E5551FD20CA8BE73F7C0F0E4A047",
+                      "timestamp": "2021-09-17T15:42:16.2387365Z",
+                      "signature": "W/C0gkM7DCp/2vL1S6JQpArXnXMz9aP4Ozlw4ulFd4C1k5iZ3a/xzaPegfGlu9x2+9KlYAQOGsTGXElUJZevAw=="
+                  },
+                  {
+                      "block_id_flag": 2,
+                      "validator_address": "9335DB7B31035F90778EF5D42103E35385E80906",
+                      "timestamp": "2021-09-17T15:42:16.11065429Z",
+                      "signature": "yYnJOMNrI6KoYLok+aV1m5M1lioHq+wZsYTQaZXXU8y+nclHHix49gRcte9g6yv2L8FMXZrWzGfuXYc3BqxaCQ=="
+                  }
+              ]
+          }
+      }
+  }
+}
+`

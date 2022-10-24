@@ -2260,7 +2260,7 @@ const TX_MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_HEIGHT_TXS_RESP = `{
                         }
                     },
                     "initial_deposit": [],
-                    "proposer": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"
+                    "proposer": "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN"
                 }
             ],
             "memo": "",
@@ -2421,7 +2421,7 @@ const TX_MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_HEIGHT_TXS_RESP = `{
                             }
                         },
                         "initial_deposit": [],
-                        "proposer": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"
+                        "proposer": "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN"
                     }
                 ],
                 "memo": "",

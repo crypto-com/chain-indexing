@@ -11,6 +11,7 @@ import (
 	"github.com/crypto-com/chain-indexing/entity/event"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
@@ -37,6 +38,8 @@ type IndexService struct {
 
 	GithubAPIUser  string
 	GithubAPIToken string
+
+	txDecoder txdecoder.TxDecoder
 }
 
 // NewIndexService creates a new server instance for polling and indexing
@@ -46,6 +49,7 @@ func NewIndexService(
 	config *config.Config,
 	projections []projection_entity.Projection,
 	cronJobs []projection_entity.CronJob,
+	txDecoder txdecoder.TxDecoder,
 ) *IndexService {
 	return &IndexService{
 		logger:      logger,
@@ -69,6 +73,8 @@ func NewIndexService(
 		},
 		GithubAPIUser:  config.IndexService.GithubAPI.Username,
 		GithubAPIToken: config.IndexService.GithubAPI.Token,
+
+		txDecoder: txDecoder,
 	}
 }
 
@@ -148,6 +154,7 @@ func (service *IndexService) RunEventStoreMode() error {
 				StakingDenom:             service.bondingDenom,
 				StartingBlockHeight:      service.startingBlockHeight,
 			},
+			TxDecoder: service.txDecoder,
 		},
 		utils.NewCosmosParserManager(
 			utils.CosmosParserManagerParams{
@@ -186,6 +193,7 @@ func (service *IndexService) RunTendermintDirectMode() error {
 						StakingDenom:             service.bondingDenom,
 						StartingBlockHeight:      service.startingBlockHeight,
 					},
+					TxDecoder: service.txDecoder,
 				},
 				utils.NewCosmosParserManager(
 					utils.CosmosParserManagerParams{

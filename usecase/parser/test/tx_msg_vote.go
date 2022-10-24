@@ -351,7 +351,7 @@ const TX_MSG_VOTE_TXS_RESP = `{
                 {
                     "@type": "/cosmos.gov.v1beta1.MsgVote",
                     "proposal_id": "1",
-                    "voter": "cro1tg4xpryye2v4fp3smpfc3s2kqmvnrkwfyd63y7",
+                    "voter": "CRO1TG4XPRYYE2V4FP3SMPFC3S2KQMVNRKWFYD63Y7",
                     "option": "VOTE_OPTION_YES"
                 }
             ],
@@ -451,7 +451,7 @@ const TX_MSG_VOTE_TXS_RESP = `{
                     {
                         "@type": "/cosmos.gov.v1beta1.MsgVote",
                         "proposal_id": "1",
-                        "voter": "cro1tg4xpryye2v4fp3smpfc3s2kqmvnrkwfyd63y7",
+                        "voter": "CRO1TG4XPRYYE2V4FP3SMPFC3S2KQMVNRKWFYD63Y7",
                         "option": "VOTE_OPTION_YES"
                     }
                 ],

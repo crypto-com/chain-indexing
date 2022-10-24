@@ -31,3 +31,19 @@ type TransactionSignerKeyInfo struct {
 	Pubkeys        []string `json:"pubkeys"`
 	MaybeThreshold *int     `json:"threshold,omitempty"`
 }
+
+type CreateRawTransactionParams struct {
+	TxHash        string
+	Index         int
+	Code          int
+	Log           string
+	Signers       []TransactionSigner
+	Fee           coin.Coins
+	FeePayer      string
+	FeeGranter    string
+	GasWanted     int
+	GasUsed       int
+	Memo          string
+	TimeoutHeight int64
+	Messages      []map[string]interface{}
+}

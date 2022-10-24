@@ -22,10 +22,10 @@ var _ = Describe("ParseMsgCommands", func() {
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_BLOCK_RESULTS_RESP))
 
-			tx1 := mustParseTxsResp(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_TXS_RESP_1)
-			tx2 := mustParseTxsResp(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_TXS_RESP_2)
-			tx3 := mustParseTxsResp(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_TXS_RESP_3)
-			txs := []model.Tx{*tx1, *tx2, *tx3}
+			tx1 := MustParseTxsResp(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_TXS_RESP_1)
+			tx2 := MustParseTxsResp(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_TXS_RESP_2)
+			tx3 := MustParseTxsResp(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_TXS_RESP_3)
+			txs := []model.CosmosTxWithHash{*tx1, *tx2, *tx3}
 
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"

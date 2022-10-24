@@ -22,8 +22,8 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_BLOCK_RESULTS_RESP,
 			)
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_TXS_RESP)
-			txs := []model.Tx{*tx}
+			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_TXS_RESP)
+			txs := []model.CosmosTxWithHash{*tx}
 
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"

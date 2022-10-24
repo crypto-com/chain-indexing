@@ -19,7 +19,7 @@ func ParseBlockToCommands(
 	block *usecase_model.Block,
 	rawBlock *usecase_model.RawBlock,
 	blockResults *usecase_model.BlockResults,
-	txs []usecase_model.Tx,
+	txs []usecase_model.CosmosTxWithHash,
 	accountAddressPrefix string,
 	bondingDenom string,
 ) ([]entity_command.Command, error) {
@@ -53,7 +53,14 @@ func ParseBlockToCommands(
 		parseTransactionCommandLogger := logger.WithFields(applogger.LogFields{
 			"submodule": "ParseTransactionCommands",
 		})
-		transactionCommands, parseErr := ParseTransactionCommands(parseTransactionCommandLogger, txs, cosmosClient, blockResults, accountAddressPrefix, possibleSignerAddresses)
+		transactionCommands, parseErr := ParseTransactionCommands(
+			parseTransactionCommandLogger,
+			txs,
+			cosmosClient,
+			blockResults,
+			accountAddressPrefix,
+			possibleSignerAddresses,
+		)
 		if parseErr != nil {
 			return nil, fmt.Errorf("error parsing transaction commands: %v", parseErr)
 		}
@@ -78,6 +85,8 @@ func ParseBlockToCommands(
 
 	beginBlockEventsCommands, parseErr := ParseBeginBlockEventsCommands(
 		block.Height,
+		block.Hash,
+		block.Time,
 		blockResults.BeginBlockEvents,
 		bondingDenom,
 	)
@@ -86,7 +95,7 @@ func ParseBlockToCommands(
 	}
 	commands = append(commands, beginBlockEventsCommands...)
 
-	endBlockEventsCommands, parseErr := ParseEndBlockEventsCommands(block.Height, blockResults.EndBlockEvents)
+	endBlockEventsCommands, parseErr := ParseEndBlockEventsCommands(block.Height, block.Hash, block.Time, blockResults.EndBlockEvents)
 	if parseErr != nil {
 		return nil, fmt.Errorf("error parsing end_block_events commands: %v", parseErr)
 	}

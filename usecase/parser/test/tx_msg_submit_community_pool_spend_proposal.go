@@ -2338,7 +2338,7 @@ const TX_MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_TXS_RESP = `{
                         "@type": "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal",
                         "title": "Community Pool Spend",
                         "description": "Pay me some Cro!",
-                        "recipient": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+                        "recipient": "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN",
                         "amount": [
                             {
                                 "denom": "basetcro",
@@ -2352,7 +2352,7 @@ const TX_MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_TXS_RESP = `{
                             "amount": "2"
                         }
                     ],
-                    "proposer": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"
+                    "proposer": "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN"
                 }
             ],
             "memo": "",
@@ -2504,7 +2504,7 @@ const TX_MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_TXS_RESP = `{
                             "@type": "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal",
                             "title": "Community Pool Spend",
                             "description": "Pay me some Cro!",
-                            "recipient": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+                            "recipient": "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN",
                             "amount": [
                                 {
                                     "denom": "basetcro",
@@ -2518,7 +2518,7 @@ const TX_MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_TXS_RESP = `{
                                 "amount": "2"
                             }
                         ],
-                        "proposer": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn"
+                        "proposer": "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN"
                     }
                 ],
                 "memo": "",

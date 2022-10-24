@@ -355,7 +355,7 @@ const TX_MSG_NFT_BURN_NFT_TXS_RESP = `{
                     "@type": "/chainmain.nft.v1.MsgBurnNFT",
                     "id": "tokenid4",
                     "denom_id": "denomid",
-                    "sender": "cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd"
+                    "sender": "CRO1NK4RQ3Q46LTGJGHXZ80HY385P9UJ0TF58APKCD"
                 }
             ],
             "memo": "",
@@ -495,7 +495,7 @@ const TX_MSG_NFT_BURN_NFT_TXS_RESP = `{
                         "@type": "/chainmain.nft.v1.MsgBurnNFT",
                         "id": "tokenid4",
                         "denom_id": "denomid",
-                        "sender": "cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd"
+                        "sender": "CRO1NK4RQ3Q46LTGJGHXZ80HY385P9UJ0TF58APKCD"
                     }
                 ],
                 "memo": "",

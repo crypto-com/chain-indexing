@@ -62,8 +62,8 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_EXEC_MSG_SEND_BLOCK_RESULTS_RESP,
 			))
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_EXEC_MSG_SEND_TXS_RESP)
-			txs := []model.Tx{*tx}
+			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_EXEC_MSG_SEND_TXS_RESP)
+			txs := []model.CosmosTxWithHash{*tx}
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
@@ -152,8 +152,8 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_EXEC_MSG_DELEGATE_BLOCK_RESULTS_RESP,
 			))
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_EXEC_MSG_DELEGATE_TXS_RESP)
-			txs := []model.Tx{*tx}
+			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_EXEC_MSG_DELEGATE_TXS_RESP)
+			txs := []model.CosmosTxWithHash{*tx}
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"

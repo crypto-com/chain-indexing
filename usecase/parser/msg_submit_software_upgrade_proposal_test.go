@@ -23,8 +23,8 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_HEIGHT_BLOCK_RESULTS_RESP,
 			)
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_HEIGHT_TXS_RESP)
-			txs := []model.Tx{*tx}
+			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_HEIGHT_TXS_RESP)
+			txs := []model.CosmosTxWithHash{*tx}
 
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"
@@ -77,8 +77,8 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_TIME_BLOCK_RESULTS_RESP,
 			)
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_TIME_TXS_RESP)
-			txs := []model.Tx{*tx}
+			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_TIME_TXS_RESP)
+			txs := []model.CosmosTxWithHash{*tx}
 
 			accountAddressPrefix := "tcro"
 			bondingDenom := "basetcro"

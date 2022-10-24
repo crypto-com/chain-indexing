@@ -75,6 +75,55 @@ func (client *HTTPClient) Genesis() (*genesis.Genesis, error) {
 	return genesis, nil
 }
 
+func (client *HTTPClient) GenesisChunked() (*genesis.Genesis, error) {
+	var err error
+
+	// get the total number of genesis chunks
+	firstRawRespBody, err := client.request("genesis_chunked", "chunk="+strconv.FormatInt(0, 10))
+	if err != nil {
+		return nil, err
+	}
+	defer firstRawRespBody.Close()
+
+	firstGenesisData, err := ParseGenesisChunkedResp(firstRawRespBody, client.strictGenesisParsing)
+	if err != nil {
+		return nil, err
+	}
+
+	total, err := strconv.Atoi(firstGenesisData.Result.Total)
+	if err != nil {
+		return nil, err
+	}
+	// loop through the genesis chunks
+	decoded := make([]string, 0, total)
+	decoded = append(decoded, firstGenesisData.Result.Data)
+
+	for i := 1; i < total; i++ {
+		rawRespBody, rawRespBodyErr := client.request("genesis_chunked", "chunk="+strconv.FormatInt(int64(i), 10))
+		if rawRespBodyErr != nil {
+			return nil, rawRespBodyErr
+		}
+		defer rawRespBody.Close()
+
+		genesisData, genesisDataErr := ParseGenesisChunkedResp(rawRespBody, client.strictGenesisParsing)
+		if genesisDataErr != nil {
+			return nil, genesisDataErr
+		}
+		decoded = append(decoded, genesisData.Result.Data)
+	}
+
+	// combine the genesis chunks
+	genesisDataByte := []byte(strings.Join(decoded, ""))
+
+	var genesis genesis.Genesis
+	genesisErr := json.Unmarshal(genesisDataByte, &genesis)
+	if genesisErr != nil {
+		return nil, fmt.Errorf("error decoding Tendermint genesis chunked from string to json: %v", err)
+	}
+
+	return &genesis, nil
+}
+
 // Block gets the block response with target height
 func (client *HTTPClient) Block(height int64) (*usecase_model.Block, *usecase_model.RawBlock, error) {
 	var err error
@@ -147,8 +196,20 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 	}
 
 	if rawResp.StatusCode != 200 {
-		rawResp.Body.Close()
-		return nil, fmt.Errorf("error requesting Tendermint %s endpoint: %s", method, rawResp.Status)
+		defer rawResp.Body.Close()
+
+		body, errReadBody := ioutil.ReadAll(rawResp.Body)
+		if errReadBody != nil {
+			return nil, fmt.Errorf("error reading Body : %v", errReadBody)
+		}
+
+		bodyJsonMap := make(map[string]interface{})
+		errRead := json.Unmarshal([]byte(body), &bodyJsonMap)
+		if errRead != nil {
+			return nil, fmt.Errorf("error unmarshalling Body : %v", errRead)
+		}
+
+		return nil, fmt.Errorf("error requesting Tendermint %s %s endpoint: %s Body: %v Header: %v", method, url, rawResp.Status, bodyJsonMap, rawResp.Header)
 	}
 
 	return rawResp.Body, nil
@@ -179,6 +240,18 @@ type GenesisResp struct {
 
 type GenesisRespResult struct {
 	Genesis genesis.Genesis `json:"genesis"`
+}
+
+type GenesisChunkedResp struct {
+	Jsonrpc string                   `json:"jsonrpc"`
+	ID      int64                    `json:"id"`
+	Result  GenesisChunkedRespResult `json:"result"`
+}
+
+type GenesisChunkedRespResult struct {
+	Chunk string `json:"chunk"`
+	Total string `json:"total"`
+	Data  string `json:"data"`
 }
 
 type RawBlockResp struct {

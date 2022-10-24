@@ -321,7 +321,7 @@ const TX_MSG_WITHDRAW_DELEGATOR_REWARD_NO_REWARD_TXS_RESP = `{
             "messages": [
                 {
                     "@type": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
-                    "delegator_address": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+                    "delegator_address": "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN",
                     "validator_address": "tcrocncl15grftg88l0gdw4mg9t9pwnl0pde2asjzekz0ek"
                 }
             ],
@@ -420,7 +420,7 @@ const TX_MSG_WITHDRAW_DELEGATOR_REWARD_NO_REWARD_TXS_RESP = `{
                 "messages": [
                     {
                         "@type": "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
-                        "delegator_address": "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+                        "delegator_address": "TCRO1FMPRM0SJY6LZ9LLV7RLTN0V2AZZWCWZVK2LSYN",
                         "validator_address": "tcrocncl15grftg88l0gdw4mg9t9pwnl0pde2asjzekz0ek"
                     }
                 ],
