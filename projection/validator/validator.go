@@ -693,8 +693,15 @@ func (projection *Validator) countEditQuotaOnLastActivities(validatorActivities 
 
 		// count previous changes
 		for _, activity := range mutValidatorActivities {
-			content := activity.Data.Content.(map[string]interface{})
-			pastDescription := content["description"].(map[string]interface{})
+			content, contentExists := activity.Data.Content.(map[string]interface{})
+			if !contentExists {
+				continue
+			}
+
+			pastDescription, pastDescriptionExists := content["description"].(map[string]interface{})
+			if !pastDescriptionExists {
+				continue
+			}
 
 			if pastDescription[constants.MONIKER] != DO_NOT_MODIFY {
 				checkAndUpdateQuota(constants.MONIKER, &editQuotaCounter)
