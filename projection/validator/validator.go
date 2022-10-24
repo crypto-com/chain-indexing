@@ -646,14 +646,14 @@ func (projection *Validator) isExceededMaxCommissionChange(maybeCommissionRate s
 
 func (projection *Validator) isExceededNumOfEdit(mutValidatorRow *view.ValidatorRow, mutValidatorActivities []view.ValidatorActivityRow, editField string) bool {
 	if projection.config.AttentionStatusRules.MaxEditQuota.Enable {
-		editQuotaCounter := make(map[string]int)
-		for key, quota := range projection.config.AttentionStatusRules.MaxEditQuota.Quota {
-			editQuotaCounter[key] = quota
-		}
-
 		// skip validator with "Attention" status
 		if mutValidatorRow.Status == constants.ATTENTION {
 			return false
+		}
+
+		editQuotaCounter := make(map[string]int)
+		for key, quota := range projection.config.AttentionStatusRules.MaxEditQuota.Quota {
+			editQuotaCounter[key] = quota
 		}
 
 		// count the current change
