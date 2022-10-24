@@ -15,17 +15,26 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 )
 
-type ValidatorBlockCommitments struct {
+type ValidatorBlockCommitments interface {
+	InsertAll(commitments []ValidatorBlockCommitmentRow) error
+	Insert(commitment ValidatorBlockCommitmentRow) error
+	List(
+		filter ValidatorBlockCommitmentsListFilter,
+		pagination *pagination_interface.Pagination,
+	) ([]ListValidatorBlockCommitmentRow, *pagination.PaginationResult, error)
+}
+
+type ValidatorBlockCommitmentsView struct {
 	rdb *rdb.Handle
 }
 
-func NewValidatorBlockCommitments(handle *rdb.Handle) *ValidatorBlockCommitments {
-	return &ValidatorBlockCommitments{
+func NewValidatorBlockCommitments(handle *rdb.Handle) ValidatorBlockCommitments {
+	return &ValidatorBlockCommitmentsView{
 		handle,
 	}
 }
 
-func (commitmentsView *ValidatorBlockCommitments) InsertAll(commitments []ValidatorBlockCommitmentRow) error {
+func (commitmentsView *ValidatorBlockCommitmentsView) InsertAll(commitments []ValidatorBlockCommitmentRow) error {
 	pendingRowCount := 0
 	var stmtBuilder sq.InsertBuilder
 
@@ -73,7 +82,7 @@ func (commitmentsView *ValidatorBlockCommitments) InsertAll(commitments []Valida
 	return nil
 }
 
-func (commitmentsView *ValidatorBlockCommitments) Insert(commitment ValidatorBlockCommitmentRow) error {
+func (commitmentsView *ValidatorBlockCommitmentsView) Insert(commitment ValidatorBlockCommitmentRow) error {
 	sql, sqlArgs, err := commitmentsView.rdb.StmtBuilder.Insert(
 		"view_validator_block_commitments",
 	).Columns(
@@ -105,7 +114,7 @@ func (commitmentsView *ValidatorBlockCommitments) Insert(commitment ValidatorBlo
 	return nil
 }
 
-func (commitmentsView *ValidatorBlockCommitments) List(
+func (commitmentsView *ValidatorBlockCommitmentsView) List(
 	filter ValidatorBlockCommitmentsListFilter,
 	pagination *pagination_interface.Pagination,
 ) ([]ListValidatorBlockCommitmentRow, *pagination.PaginationResult, error) {
