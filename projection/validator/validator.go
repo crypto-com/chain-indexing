@@ -476,51 +476,43 @@ func (projection *Validator) projectValidatorView(
 				)
 			}
 
-			MaybeAfterBlockTime := utctime.FromUnixNano(blockTime.UnixNano() - projection.config.AttentionStatusRules.MaxEditQuota.Duration)
-			mutValidatorActivities, _, err := (*validatorActivities).List(
-				view.ValidatorActivitiesListFilter{
-					MaybeAfterBlockTime:  &MaybeAfterBlockTime,
-					MaybeOperatorAddress: &msgEditValidatorEvent.ValidatorAddress,
-				},
-				view.ValidatorActivitiesListOrder{},
-				&pagination.Pagination{},
-			)
-			if err != nil {
+			editQuotaCounter, errGetEditQuotaCounter := projection.countEditQuotaOnLastActivities(validatorActivities, msgEditValidatorEvent, mutValidatorRow, blockTime)
+			if errGetEditQuotaCounter != nil {
 				return fmt.Errorf(
-					"error getting existing validator activities %s from view", msgEditValidatorEvent.ValidatorAddress,
+					"error getting edit quota counter %v from view", errGetEditQuotaCounter,
 				)
 			}
 
 			if msgEditValidatorEvent.Description.Moniker != DO_NOT_MODIFY {
-				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.MONIKER)
+				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.MONIKER)
 				if isExceeded {
 					mutValidatorRow.Status = constants.ATTENTION
 				}
 				mutValidatorRow.Moniker = msgEditValidatorEvent.Description.Moniker
 			}
 			if msgEditValidatorEvent.Description.Identity != DO_NOT_MODIFY {
-				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.IDENTITY)
+				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.IDENTITY)
 				if isExceeded {
 					mutValidatorRow.Status = constants.ATTENTION
 				}
 				mutValidatorRow.Identity = msgEditValidatorEvent.Description.Identity
 			}
 			if msgEditValidatorEvent.Description.Details != DO_NOT_MODIFY {
-				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.DETAILS)
+				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.DETAILS)
 				if isExceeded {
 					mutValidatorRow.Status = constants.ATTENTION
 				}
 				mutValidatorRow.Details = msgEditValidatorEvent.Description.Details
 			}
 			if msgEditValidatorEvent.Description.SecurityContact != DO_NOT_MODIFY {
-				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.SECURITY_CONTACT)
+				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.SECURITY_CONTACT)
 				if isExceeded {
 					mutValidatorRow.Status = constants.ATTENTION
 				}
 				mutValidatorRow.SecurityContact = msgEditValidatorEvent.Description.SecurityContact
 			}
 			if msgEditValidatorEvent.Description.Website != DO_NOT_MODIFY {
-				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.WEBSITE)
+				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.WEBSITE)
 				if isExceeded {
 					mutValidatorRow.Status = constants.ATTENTION
 				}
@@ -528,7 +520,7 @@ func (projection *Validator) projectValidatorView(
 			}
 
 			if msgEditValidatorEvent.MaybeCommissionRate != nil {
-				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.COMMISSION_RATE)
+				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.COMMISSION_RATE)
 				isExceededMaxCommissionChange, errMaxCommissionChange := projection.isExceededMaxCommissionChange(mutValidatorRow, *msgEditValidatorEvent.MaybeCommissionRate, mutValidatorRow.CommissionRate, msgEditValidatorEvent.ValidatorAddress)
 				if errMaxCommissionChange != nil {
 					return fmt.Errorf(
@@ -648,21 +640,55 @@ func (projection *Validator) isExceededMaxCommissionChange(mutValidatorRow *view
 	return false, nil
 }
 
-func (projection *Validator) isExceededNumOfEdit(mutValidatorRow *view.ValidatorRow, mutValidatorActivities []view.ValidatorActivityRow, editField string) bool {
+func (projection *Validator) isExceededNumOfEdit(mutValidatorRow *view.ValidatorRow, editQuotaCounter map[string]int, editField string) bool {
 	if projection.config.AttentionStatusRules.MaxEditQuota.Enable {
 		// skip validator with "Attention" status
 		if mutValidatorRow.Status == constants.ATTENTION {
 			return false
 		}
 
-		editQuotaCounter := make(map[string]int)
-		for key, quota := range projection.config.AttentionStatusRules.MaxEditQuota.Quota {
-			editQuotaCounter[key] = quota
-		}
-
 		// count the current change
 		if _, exists := editQuotaCounter[editField]; exists {
 			editQuotaCounter[editField]--
+		}
+
+		// check counter by each field
+		for _, count := range editQuotaCounter {
+			if count < 0 {
+				return true
+			}
+		}
+
+	}
+	return false
+}
+
+func (projection *Validator) countEditQuotaOnLastActivities(validatorActivities *view.ValidatorActivities, msgEditValidatorEvent *event_usecase.MsgEditValidator, mutValidatorRow *view.ValidatorRow, blockTime utctime.UTCTime) (map[string]int, error) {
+	if projection.config.AttentionStatusRules.MaxEditQuota.Enable {
+		// skip validator with "Attention" status
+		if mutValidatorRow.Status == constants.ATTENTION {
+			return map[string]int{}, nil
+		}
+
+		MaybeAfterBlockTime := utctime.FromUnixNano(blockTime.UnixNano() - projection.config.AttentionStatusRules.MaxEditQuota.Duration)
+
+		mutValidatorActivities, _, err := (*validatorActivities).List(
+			view.ValidatorActivitiesListFilter{
+				MaybeAfterBlockTime:  &MaybeAfterBlockTime,
+				MaybeOperatorAddress: &msgEditValidatorEvent.ValidatorAddress,
+			},
+			view.ValidatorActivitiesListOrder{},
+			&pagination.Pagination{},
+		)
+		if err != nil {
+			return map[string]int{}, fmt.Errorf(
+				"error getting existing validator activities %s from view", msgEditValidatorEvent.ValidatorAddress,
+			)
+		}
+
+		editQuotaCounter := make(map[string]int)
+		for key, quota := range projection.config.AttentionStatusRules.MaxEditQuota.Quota {
+			editQuotaCounter[key] = quota
 		}
 
 		// count previous changes
@@ -679,9 +705,6 @@ func (projection *Validator) isExceededNumOfEdit(mutValidatorRow *view.Validator
 			if pastDescription[constants.DETAILS] != DO_NOT_MODIFY {
 				checkAndUpdateQuota(constants.DETAILS, &editQuotaCounter)
 			}
-			if pastDescription[constants.COMMISSION_RATE] != DO_NOT_MODIFY {
-				checkAndUpdateQuota(constants.COMMISSION_RATE, &editQuotaCounter)
-			}
 			if pastDescription[constants.WEBSITE] != DO_NOT_MODIFY {
 				checkAndUpdateQuota(constants.WEBSITE, &editQuotaCounter)
 			}
@@ -689,15 +712,9 @@ func (projection *Validator) isExceededNumOfEdit(mutValidatorRow *view.Validator
 				checkAndUpdateQuota(constants.COMMISSION_RATE, &editQuotaCounter)
 			}
 		}
-		// check counter by each field
-		for _, count := range editQuotaCounter {
-			if count < 0 {
-				return true
-			}
-		}
-
+		return editQuotaCounter, nil
 	}
-	return false
+	return map[string]int{}, nil
 }
 
 func checkAndUpdateQuota(key string, counter *map[string]int) {
