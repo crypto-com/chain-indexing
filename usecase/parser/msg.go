@@ -2151,6 +2151,10 @@ func ParseMsgEthereumTx(
 		cmds, possibleSignerAddresses = ParseLegacyTx(parserParams.MsgCommonParams.TxSuccess, parserParams.MsgCommonParams, parserParams.Msg)
 	} else if data["@type"] == "/ethermint.evm.v1.DynamicFeeTx" {
 		cmds, possibleSignerAddresses = ParseExtensionOptionDynamicFeeTx(parserParams.MsgCommonParams.TxSuccess, parserParams.MsgCommonParams, parserParams.Msg)
+	} else if data["@type"] == "/ethermint.evm.v1.AccessListTx" {
+		cmds, possibleSignerAddresses = ParseAccessListTx(parserParams.MsgCommonParams.TxSuccess, parserParams.MsgCommonParams, parserParams.Msg)
+	} else {
+		parserParams.Logger.Errorf("error unsupported msg type: ", data["@type"])
 	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
@@ -2218,6 +2222,66 @@ func ParseLegacyTx(
 		msgCommonParams,
 
 		msgEthereumTxParams,
+	)}, possibleSignerAddresses
+}
+
+func ParseAccessListTx(
+	txSuccess bool,
+	msgCommonParams event.MsgCommonParams,
+	msg map[string]interface{},
+) ([]command.Command, []string) {
+	var rawMsg model.RawAccessListTx
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(msg); err != nil {
+		panic(fmt.Errorf("error decoding: %v", err))
+	}
+
+	if !txSuccess {
+		// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
+		msgAccessListTxParams := model.EthermintAccessListTxParams{
+			RawAccessListTx: rawMsg,
+		}
+
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		// FIXME: https://github.com/crypto-com/chain-indexing/issues/729
+		// possibleSignerAddresses = append(possibleSignerAddresses, msgDynamicFeeTxParams.From)
+
+		return []command.Command{command_usecase.NewCreateMsgAccessListTx(
+			msgCommonParams,
+
+			msgAccessListTxParams,
+		)}, possibleSignerAddresses
+	}
+
+	// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
+	msgAccessListTxParams := model.EthermintAccessListTxParams{
+		RawAccessListTx: rawMsg,
+	}
+
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	// FIXME: https://github.com/crypto-com/chain-indexing/issues/729
+	// possibleSignerAddresses = append(possibleSignerAddresses, msgDynamicFeeTxParams.From)
+
+	return []command.Command{command_usecase.NewCreateMsgAccessListTx(
+		msgCommonParams,
+
+		msgAccessListTxParams,
 	)}, possibleSignerAddresses
 }
 
