@@ -693,6 +693,10 @@ func (projection *Validator) countEditQuotaOnLastActivities(validatorActivities 
 
 		// count previous changes
 		for _, activity := range mutValidatorActivities {
+			if activity.Data.Type != event_usecase.MSG_EDIT_VALIDATOR {
+				continue
+			}
+
 			content, contentExists := activity.Data.Content.(map[string]interface{})
 			if !contentExists {
 				continue
