@@ -529,7 +529,7 @@ func (projection *Validator) projectValidatorView(
 
 			if msgEditValidatorEvent.MaybeCommissionRate != nil {
 				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.COMMISSION_RATE)
-				isExceededMaxCommissionChange, errMaxCommissionChange := projection.isExceededMaxCommissionChange(*msgEditValidatorEvent.MaybeCommissionRate, mutValidatorRow.CommissionRate, msgEditValidatorEvent.ValidatorAddress)
+				isExceededMaxCommissionChange, errMaxCommissionChange := projection.isExceededMaxCommissionChange(mutValidatorRow, *msgEditValidatorEvent.MaybeCommissionRate, mutValidatorRow.CommissionRate, msgEditValidatorEvent.ValidatorAddress)
 				if errMaxCommissionChange != nil {
 					return fmt.Errorf(
 						"error checking attention status on commission rate validator %s from view: %v", msgEditValidatorEvent.ValidatorAddress, errMaxCommissionChange,
@@ -621,8 +621,12 @@ func (projection *Validator) projectValidatorView(
 	return nil
 }
 
-func (projection *Validator) isExceededMaxCommissionChange(maybeCommissionRate string, commissionRate string, validatorAddress string) (bool, error) {
+func (projection *Validator) isExceededMaxCommissionChange(mutValidatorRow *view.ValidatorRow, maybeCommissionRate string, commissionRate string, validatorAddress string) (bool, error) {
 	if projection.config.AttentionStatusRules.MaxCommissionRateChange.Enable {
+		// skip validator with "Attention" status
+		if mutValidatorRow.Status == constants.ATTENTION {
+			return false, nil
+		}
 		newCommission, newCommissionErr := strconv.ParseFloat(maybeCommissionRate, 64)
 		if newCommissionErr != nil {
 			return false, fmt.Errorf(
