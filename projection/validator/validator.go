@@ -492,35 +492,35 @@ func (projection *Validator) projectValidatorView(
 			}
 
 			if msgEditValidatorEvent.Description.Moniker != DO_NOT_MODIFY {
-				isExceeded := projection.isExceedNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.MONIKER)
+				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.MONIKER)
 				if isExceeded {
 					mutValidatorRow.Status = constants.ATTENTION
 				}
 				mutValidatorRow.Moniker = msgEditValidatorEvent.Description.Moniker
 			}
 			if msgEditValidatorEvent.Description.Identity != DO_NOT_MODIFY {
-				isExceeded := projection.isExceedNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.IDENTITY)
+				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.IDENTITY)
 				if isExceeded {
 					mutValidatorRow.Status = constants.ATTENTION
 				}
 				mutValidatorRow.Identity = msgEditValidatorEvent.Description.Identity
 			}
 			if msgEditValidatorEvent.Description.Details != DO_NOT_MODIFY {
-				isExceeded := projection.isExceedNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.DETAILS)
+				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.DETAILS)
 				if isExceeded {
 					mutValidatorRow.Status = constants.ATTENTION
 				}
 				mutValidatorRow.Details = msgEditValidatorEvent.Description.Details
 			}
 			if msgEditValidatorEvent.Description.SecurityContact != DO_NOT_MODIFY {
-				isExceeded := projection.isExceedNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.SECURITY_CONTACT)
+				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.SECURITY_CONTACT)
 				if isExceeded {
 					mutValidatorRow.Status = constants.ATTENTION
 				}
 				mutValidatorRow.SecurityContact = msgEditValidatorEvent.Description.SecurityContact
 			}
 			if msgEditValidatorEvent.Description.Website != DO_NOT_MODIFY {
-				isExceeded := projection.isExceedNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.WEBSITE)
+				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.WEBSITE)
 				if isExceeded {
 					mutValidatorRow.Status = constants.ATTENTION
 				}
@@ -528,16 +528,15 @@ func (projection *Validator) projectValidatorView(
 			}
 
 			if msgEditValidatorEvent.MaybeCommissionRate != nil {
-				isExceeded := projection.isExceedNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.COMMISSION_RATE)
-				if isExceeded {
-					mutValidatorRow.Status = constants.ATTENTION
-				}
-
-				errAttentionOnCommission := projection.checkAttentionOnCommission(mutValidatorRow, *msgEditValidatorEvent.MaybeCommissionRate, mutValidatorRow.CommissionRate, msgEditValidatorEvent.ValidatorAddress)
-				if errAttentionOnCommission != nil {
+				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, mutValidatorActivities, constants.COMMISSION_RATE)
+				isExceededMaxCommissionChange, errMaxCommissionChange := projection.isExceededMaxCommissionChange(mutValidatorRow, *msgEditValidatorEvent.MaybeCommissionRate, mutValidatorRow.CommissionRate, msgEditValidatorEvent.ValidatorAddress)
+				if errMaxCommissionChange != nil {
 					return fmt.Errorf(
-						"error checking attention status on commission rate validator %s from view", msgEditValidatorEvent.ValidatorAddress,
+						"error checking attention status on commission rate validator %s from view: %v", msgEditValidatorEvent.ValidatorAddress, errMaxCommissionChange,
 					)
+				}
+				if isExceededMaxCommissionChange || isExceeded {
+					mutValidatorRow.Status = constants.ATTENTION
 				}
 
 				mutValidatorRow.CommissionRate = *msgEditValidatorEvent.MaybeCommissionRate
@@ -622,30 +621,30 @@ func (projection *Validator) projectValidatorView(
 	return nil
 }
 
-func (projection *Validator) checkAttentionOnCommission(mutValidatorRow *view.ValidatorRow, maybeCommissionRate string, commissionRate string, validatorAddress string) error {
+func (projection *Validator) isExceededMaxCommissionChange(mutValidatorRow *view.ValidatorRow, maybeCommissionRate string, commissionRate string, validatorAddress string) (bool, error) {
 	if projection.config.AttentionStatusRules.MaxCommissionRateChange.Enable {
 		newCommission, newCommissionErr := strconv.ParseFloat(maybeCommissionRate, 64)
 		if newCommissionErr != nil {
-			return fmt.Errorf(
+			return false, fmt.Errorf(
 				"error converting new commission rate to float validator %s from view", validatorAddress,
 			)
 		}
 		currentCommission, currentCommissionErr := strconv.ParseFloat(commissionRate, 64)
 		if currentCommissionErr != nil {
-			return fmt.Errorf(
+			return false, fmt.Errorf(
 				"error converting current commission rate to float validator %s from view", validatorAddress,
 			)
 		}
 
 		if newCommission-currentCommission > projection.config.AttentionStatusRules.MaxCommissionRateChange.MaxChange {
-			mutValidatorRow.Status = constants.ATTENTION
+			return true, nil
 		}
 	}
 
-	return nil
+	return false, nil
 }
 
-func (projection *Validator) isExceedNumOfEdit(mutValidatorRow *view.ValidatorRow, mutValidatorActivities []view.ValidatorActivityRow, editField string) bool {
+func (projection *Validator) isExceededNumOfEdit(mutValidatorRow *view.ValidatorRow, mutValidatorActivities []view.ValidatorActivityRow, editField string) bool {
 	if projection.config.AttentionStatusRules.MaxEditQuota.Enable {
 		editQuotaCounter := make(map[string]int)
 		for key, quota := range projection.config.AttentionStatusRules.MaxEditQuota.Quota {
