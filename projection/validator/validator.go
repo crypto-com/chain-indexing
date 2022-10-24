@@ -24,7 +24,6 @@ import (
 var _ projection_entity.Projection = &Validator{}
 
 const DO_NOT_MODIFY = "[do-not-modify]"
-const MAX_RECENT_ACTIVE_BLOCKS = 10000
 
 type Validator struct {
 	*rdbprojectionbase.Base
@@ -32,7 +31,8 @@ type Validator struct {
 	rdbConn rdb.Conn
 	logger  applogger.Logger
 
-	conNodeAddressPrefix string
+	conNodeAddressPrefix       string
+	maxActiveBlocksPeriodLimit int64
 
 	migrationHelper migrationhelper.MigrationHelper
 }
@@ -41,6 +41,7 @@ func NewValidator(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	conNodeAddressPrefix string,
+	maxActiveBlocksPeriodLimit int64,
 	migrationHelper migrationhelper.MigrationHelper,
 ) *Validator {
 	return &Validator{
@@ -52,6 +53,7 @@ func NewValidator(
 		rdbConn,
 		logger,
 		conNodeAddressPrefix,
+		maxActiveBlocksPeriodLimit,
 		migrationHelper,
 	}
 }
@@ -255,7 +257,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 				mutSignedValidators,
 				mutUnsignedValidators,
 				height,
-				MAX_RECENT_ACTIVE_BLOCKS,
+				projection.maxActiveBlocksPeriodLimit,
 			); activeValidatorUpdateErr != nil {
 				return fmt.Errorf("error updating active validators up time data: %v", activeValidatorUpdateErr)
 			}
@@ -430,7 +432,7 @@ func (projection *Validator) projectValidatorView(
 			})
 			if err != nil {
 				return fmt.Errorf(
-					"error getting existing validator %s from view", msgEditValidatorEvent.ValidatorAddress,
+					"error getting existing validator %s from view: %v", msgEditValidatorEvent.ValidatorAddress, err,
 				)
 			}
 
@@ -468,7 +470,7 @@ func (projection *Validator) projectValidatorView(
 			})
 			if err != nil {
 				return fmt.Errorf(
-					"error getting existing validator `%s` from view", validatorJailedEvent.ConsensusNodeAddress,
+					"error getting existing validator `%s` from view: %v", validatorJailedEvent.ConsensusNodeAddress, err,
 				)
 			}
 
@@ -485,7 +487,7 @@ func (projection *Validator) projectValidatorView(
 				MaybeOperatorAddress: &msgUnjailEvent.ValidatorAddr,
 			})
 			if err != nil {
-				return fmt.Errorf("error getting existing validator `%s` from view", msgUnjailEvent.ValidatorAddr)
+				return fmt.Errorf("error getting existing validator `%s` from view: %v", msgUnjailEvent.ValidatorAddr, err)
 			}
 
 			// Unjailed validator will become inactive first, if there's voting power changes then it becomes bonded
@@ -513,7 +515,7 @@ func (projection *Validator) projectValidatorView(
 				MaybeConsensusNodeAddress: &consensusNodeAddress,
 			})
 			if err != nil {
-				return fmt.Errorf("error getting existing validator `%s` from view", consensusNodeAddress)
+				return fmt.Errorf("error getting existing validator `%s` from view: %v", consensusNodeAddress, err)
 			}
 
 			mutValidatorRow.Power = powerChangedEvent.Power
