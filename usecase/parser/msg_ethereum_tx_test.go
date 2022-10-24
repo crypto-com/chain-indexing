@@ -125,6 +125,7 @@ var _ = Describe("ParseMsgCommands", func() {
 							To:        "0x904Bd5a5AAC0B9d88A0D47864724218986Ad4a3a",
 							Value:     "0",
 							Data:      "CV6nswAAAAAAAAAAAAAAAPVk7wA0u3182EQSJ14eUTZNTXc0//////////////////////////////////////////8=",
+							Accesses:  model.AccessList{},
 							V:         "",
 							R:         "HHigR02IN48gvEM991C/MOCmbVfOw9Sj804IhtI5z2Q=",
 							S:         "SspHmiOAoM4bQdvAig9I8PQzLv5GTzElhcROppO0WpU=",
