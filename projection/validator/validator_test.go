@@ -141,7 +141,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 				).Return(
 					&validator_view.ValidatorRow{
 						MaybeId:                 primptr.Int64(3),
-						OperatorAddress:         "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+						OperatorAddress:         "tcrovaloper1v76r7u4uyr3ewdks8cqmuw7ca4lejvc8unag2m",
 						ConsensusNodeAddress:    "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
 						InitialDelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 						TendermintPubkey:        "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
@@ -246,7 +246,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 					"Update",
 					&view.ValidatorRow{
 						MaybeId:                 primptr.Int64(3),
-						OperatorAddress:         "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+						OperatorAddress:         "tcrovaloper1v76r7u4uyr3ewdks8cqmuw7ca4lejvc8unag2m",
 						ConsensusNodeAddress:    "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
 						InitialDelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 						TendermintPubkey:        "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
@@ -405,7 +405,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 				).Return(
 					&validator_view.ValidatorRow{
 						MaybeId:                 primptr.Int64(3),
-						OperatorAddress:         "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+						OperatorAddress:         "tcrovaloper1v76r7u4uyr3ewdks8cqmuw7ca4lejvc8unag2m",
 						ConsensusNodeAddress:    "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
 						InitialDelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 						TendermintPubkey:        "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
@@ -510,7 +510,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 					"Update",
 					&view.ValidatorRow{
 						MaybeId:                 primptr.Int64(3),
-						OperatorAddress:         "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+						OperatorAddress:         "tcrovaloper1v76r7u4uyr3ewdks8cqmuw7ca4lejvc8unag2m",
 						ConsensusNodeAddress:    "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
 						InitialDelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 						TendermintPubkey:        "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
@@ -669,7 +669,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 				).Return(
 					&validator_view.ValidatorRow{
 						MaybeId:                 primptr.Int64(3),
-						OperatorAddress:         "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+						OperatorAddress:         "tcrovaloper1v76r7u4uyr3ewdks8cqmuw7ca4lejvc8unag2m",
 						ConsensusNodeAddress:    "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
 						InitialDelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 						TendermintPubkey:        "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
@@ -717,7 +717,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 					"Update",
 					&view.ValidatorRow{
 						MaybeId:                 primptr.Int64(3),
-						OperatorAddress:         "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+						OperatorAddress:         "tcrovaloper1v76r7u4uyr3ewdks8cqmuw7ca4lejvc8unag2m",
 						ConsensusNodeAddress:    "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
 						InitialDelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 						TendermintPubkey:        "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
@@ -876,7 +876,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 				).Return(
 					&validator_view.ValidatorRow{
 						MaybeId:                 primptr.Int64(3),
-						OperatorAddress:         "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+						OperatorAddress:         "tcrovaloper1v76r7u4uyr3ewdks8cqmuw7ca4lejvc8unag2m",
 						ConsensusNodeAddress:    "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
 						InitialDelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 						TendermintPubkey:        "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
@@ -981,7 +981,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 					"Update",
 					&view.ValidatorRow{
 						MaybeId:                 primptr.Int64(3),
-						OperatorAddress:         "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+						OperatorAddress:         "tcrovaloper1v76r7u4uyr3ewdks8cqmuw7ca4lejvc8unag2m",
 						ConsensusNodeAddress:    "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
 						InitialDelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 						TendermintPubkey:        "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
