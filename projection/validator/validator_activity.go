@@ -34,7 +34,7 @@ func (totalMap *privTotalIncrementalMap) Set(key string, value int64) {
 }
 func (totalMap *privTotalIncrementalMap) Persist(validatorActivitiesTotalView *view.ValidatorActivitiesTotal) error {
 	for key, value := range totalMap.data {
-		if err := validatorActivitiesTotalView.Increment(key, value); err != nil {
+		if err := (*validatorActivitiesTotalView).Increment(key, value); err != nil {
 			return fmt.Errorf("error incrementing total of `%s`: %w", key, err)
 		}
 	}
@@ -235,7 +235,7 @@ func (projection *Validator) projectValidatorActivitiesView(
 				fmt.Sprintf("-:%s", withdrawValidatorCommissionEvent.Name()),
 			)
 		} else if validatorJailedEvent, ok := event.(*event_usecase.ValidatorJailed); ok {
-			validatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
+			validatorRow, err := (*validatorsView).FindBy(view.ValidatorIdentity{
 				MaybeConsensusNodeAddress: &validatorJailedEvent.ConsensusNodeAddress,
 			})
 			if err != nil {
@@ -263,7 +263,7 @@ func (projection *Validator) projectValidatorActivitiesView(
 			)
 			totalIncrementalMap.IncrementByOne(fmt.Sprintf("-:%s", validatorJailedEvent.Name()))
 		} else if validatorSlashedEvent, ok := event.(*event_usecase.ValidatorSlashed); ok {
-			validatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
+			validatorRow, err := (*validatorsView).FindBy(view.ValidatorIdentity{
 				MaybeConsensusNodeAddress: &validatorSlashedEvent.ConsensusNodeAddress,
 			})
 			if err != nil {
@@ -312,7 +312,7 @@ func (projection *Validator) projectValidatorActivitiesView(
 		}
 	}
 
-	if err := validatorActivitiesView.InsertAll(activityRows); err != nil {
+	if err := (*validatorActivitiesView).InsertAll(activityRows); err != nil {
 		return fmt.Errorf("error inserting validator activities into view: %w", err)
 	}
 	if err := totalIncrementalMap.Persist(validatorActivitiesTotalView); err != nil {

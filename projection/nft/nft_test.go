@@ -15,6 +15,7 @@ import (
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/crypto-com/chain-indexing/projection/nft"
+	"github.com/crypto-com/chain-indexing/projection/nft/constants"
 	"github.com/crypto-com/chain-indexing/projection/nft/view"
 	usecase_event "github.com/crypto-com/chain-indexing/usecase/event"
 )
@@ -155,6 +156,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 						MessageIndex:    0,
 						MessageType:     "/chainmain.nft.v1.MsgIssueDenom",
 						Data:            typedEvent,
+						Status:          constants.MINTED,
 					}).
 					Return(nil)
 
@@ -213,6 +215,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 						LastEditedAtBlockHeight:      1,
 						LastTransferredAt:            utctime.UTCTime{},
 						LastTransferredAtBlockHeight: 1,
+						Status:                       constants.MINTED,
 					}).
 					Return(nil)
 
@@ -290,6 +293,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 						MessageIndex:    0,
 						MessageType:     "/chainmain.nft.v1.MsgMintNFT",
 						Data:            typedEvent,
+						Status:          constants.MINTED,
 					}).
 					Return(nil)
 
@@ -350,6 +354,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 							LastEditedAtBlockHeight:      0,
 							LastTransferredAt:            utctime.FromUnixNano(-1),
 							LastTransferredAtBlockHeight: 0,
+							Status:                       constants.MINTED,
 						},
 						DenomName:   "DenomName",
 						DenomSchema: "DenomSchema",
@@ -371,6 +376,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 						LastEditedAtBlockHeight:      1,
 						LastTransferredAt:            utctime.FromUnixNano(-1),
 						LastTransferredAtBlockHeight: 0,
+						Status:                       constants.MINTED,
 					}).
 					Return(nil)
 
@@ -453,6 +459,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 						MessageIndex:    0,
 						MessageType:     "/chainmain.nft.v1.MsgEditNFT",
 						Data:            typedEvent,
+						Status:          constants.MINTED,
 					}).
 					Return(nil)
 
@@ -472,7 +479,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 			Events: []entity_event.Event{
 				&usecase_event.MsgNFTBurnNFT{
 					MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
-						MsgName: usecase_event.MSG_NFT_EDIT_NFT,
+						MsgName: usecase_event.MSG_NFT_BURN_NFT,
 						Version: 1,
 						MsgCommonParams: usecase_event.MsgCommonParams{
 							BlockHeight: 1,
@@ -509,14 +516,15 @@ func TestNFT_HandleEvents(t *testing.T) {
 							LastEditedAtBlockHeight:      0,
 							LastTransferredAt:            utctime.FromUnixNano(-1),
 							LastTransferredAtBlockHeight: 0,
+							Status:                       constants.MINTED,
 						},
 						DenomName:   "DenomName",
 						DenomSchema: "DenomSchema",
 					}, nil)
 
 				mockTokensView.
-					On("Delete", "DenomId", "TokenId").
-					Return(int64(1), nil)
+					On("SoftDelete", "DenomId", "TokenId").
+					Return(nil)
 
 				nft.NewTokens = func(handle *rdb.Handle) view.Tokens {
 					return mockTokensView
@@ -525,7 +533,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 				mockMessagesView := &view.MockMessagesView{}
 				mocks = append(mocks, &mockMessagesView.Mock)
 				mockMessagesView.
-					On("DeleteAllByDenomTokenIds", "DenomId", "TokenId").
+					On("SoftDelete", "DenomId", "TokenId").
 					Return(int64(1), nil)
 
 				nft.NewMessages = func(handle *rdb.Handle) view.Messages {
@@ -611,6 +619,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 							LastEditedAtBlockHeight:      0,
 							LastTransferredAt:            utctime.FromUnixNano(-1),
 							LastTransferredAtBlockHeight: 0,
+							Status:                       constants.MINTED,
 						},
 						DenomName:   "DenomName",
 						DenomSchema: "DenomSchema",
@@ -632,6 +641,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 						LastEditedAtBlockHeight:      0,
 						LastTransferredAt:            utctime.UTCTime{},
 						LastTransferredAtBlockHeight: 1,
+						Status:                       constants.MINTED,
 					}).
 					Return(nil)
 
@@ -714,6 +724,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 						MessageIndex:    0,
 						MessageType:     "/chainmain.nft.v1.MsgTransferNFT",
 						Data:            typedEvent,
+						Status:          constants.MINTED,
 					}).
 					Return(nil)
 

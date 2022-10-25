@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/crypto-com/chain-indexing/internal/sanitizer"
+	"github.com/crypto-com/chain-indexing/projection/nft/constants"
 
 	sq "github.com/Masterminds/squirrel"
 
@@ -30,6 +31,7 @@ type Tokens interface {
 	ListDrops(
 		pagination *pagination_interface.Pagination,
 	) ([]string, *pagination_interface.PaginationResult, error)
+	SoftDelete(denomId string, tokenId string) error
 }
 
 type TokensView struct {
@@ -454,6 +456,31 @@ func (tokensView *TokensView) ListDrops(
 	}
 
 	return rows, paginationResult, nil
+}
+
+func (tokensView *TokensView) SoftDelete(denomId string, tokenId string) error {
+	sql, sqlArgs, err := tokensView.rdb.StmtBuilder.Update(
+		TOKENS_TABLE_NAME,
+	).SetMap(map[string]interface{}{
+		"status": constants.BURNED,
+	}).Where(
+		"denom_id = ? AND token_id = ?",
+		sanitizer.SanitizePostgresString(denomId),
+		sanitizer.SanitizePostgresString(tokenId),
+	).ToSql()
+	if err != nil {
+		return fmt.Errorf("error building NFT token soft delete sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	result, err := tokensView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error soft deleting NFT token into the table: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() != 1 {
+		return fmt.Errorf("error soft deleting NFT token: no rows deleted: %w", rdb.ErrWrite)
+	}
+
+	return nil
 }
 
 type TokenListFilter struct {

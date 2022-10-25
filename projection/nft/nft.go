@@ -260,6 +260,7 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 				LastEditedAtBlockHeight:      height,
 				LastTransferredAt:            mutPrevTokenRow.LastTransferredAt,
 				LastTransferredAtBlockHeight: mutPrevTokenRow.LastTransferredAtBlockHeight,
+				Status:                       mutPrevTokenRow.Status,
 			}
 
 			if updateTokenErr := projection.updateToken(
@@ -294,19 +295,13 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 				return fmt.Errorf("error querying NFT token being burned: %v", queryPrevTokenRowErr)
 			}
 
-			// prevMessageRow, queryPrevMessageRowErr := nftMessagesView.FindById(msgBurnNFT.DenomId, msgBurnNFT.TokenId)
-			// if queryPrevMessageRowErr != nil {
-			// 	return fmt.Errorf("error querying NFT message being burned: %v", queryPrevTokenRowErr)
-			// }
-
-			if deleteTokenErr := projection.deleteToken(
+			if deleteTokenErr := projection.softDeleteToken(
 				tokensView, tokensTotalView, nftMessagesView, prevTokenRow.TokenRow,
 			); deleteTokenErr != nil {
-				return fmt.Errorf("error deleting burnt NFT token: %v", deleteTokenErr)
+				return fmt.Errorf("error deleting burned NFT token: %v", deleteTokenErr)
 			}
-
 			// Burn does not need to record the message because the token and all the records will
-			// be deleted
+			// be soft deleted
 
 		} else if msgTransferNFT, ok := event.(*event_usecase.MsgNFTTransferNFT); ok {
 			prevTokenRow, queryPrevTokenRowErr := tokensView.FindById(msgTransferNFT.DenomId, msgTransferNFT.TokenId)
@@ -328,6 +323,7 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 				LastEditedAtBlockHeight:      prevTokenRow.LastEditedAtBlockHeight,
 				LastTransferredAt:            blockTime,
 				LastTransferredAtBlockHeight: height,
+				Status:                       prevTokenRow.Status,
 			}
 			if updateTokenErr := projection.updateToken(
 				tokensView,
@@ -471,7 +467,7 @@ func (projection *NFT) insertToken(
 	return nil
 }
 
-func (projection *NFT) deleteToken(
+func (projection *NFT) softDeleteToken(
 	tokensView view.Tokens,
 	tokensTotalView view.TokensTotal,
 	nftMessagesView view.Messages,
@@ -479,14 +475,14 @@ func (projection *NFT) deleteToken(
 ) error {
 	tokenRow.Status = constants.BURNED
 
-	if updateTokenErr := tokensView.Update(tokenRow); updateTokenErr != nil {
-		return fmt.Errorf("error updating NFT token row: %v", updateTokenErr)
+	if updateTokenErr := tokensView.SoftDelete(tokenRow.DenomId, tokenRow.TokenId); updateTokenErr != nil {
+		return fmt.Errorf("error soft deleting NFT token row: %v", updateTokenErr)
 	}
 
-	if updateTokenErr := nftMessagesView.SoftDelete(
-		constants.BURNED, tokenRow.DenomId, tokenRow.TokenId,
-	); updateTokenErr != nil {
-		return updateTokenErr
+	if updateMessageErr := nftMessagesView.SoftDelete(
+		tokenRow.DenomId, tokenRow.TokenId,
+	); updateMessageErr != nil {
+		return updateMessageErr
 	}
 
 	if decrementErr := tokensTotalView.DecrementAll([]string{

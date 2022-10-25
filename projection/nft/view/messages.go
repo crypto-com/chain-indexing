@@ -12,6 +12,7 @@ import (
 	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/internal/sanitizer"
+	"github.com/crypto-com/chain-indexing/projection/nft/constants"
 )
 
 const MESSAGES_TABLE_NAME = "view_nft_messages"
@@ -25,7 +26,7 @@ type Messages interface {
 	) ([]MessageRow, *pagination_interface.PaginationResult, error)
 	FindById(denomId string, tokenId string) (*MessageRow, error)
 	DeleteAllByDenomTokenIds(denomId string, tokenId string) (int64, error)
-	SoftDelete(status string, denomId string, maybeTokenId string) error
+	SoftDelete(denomId string, maybeTokenId string) error
 }
 
 type MessagesView struct {
@@ -325,32 +326,32 @@ func (nftMessagesView *MessagesView) DeleteAllByDenomTokenIds(denomId string, to
 
 	result, err := nftMessagesView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
-		return 0, fmt.Errorf("error deleteing NFT messages from the table: %v: %w", err, rdb.ErrWrite)
+		return 0, fmt.Errorf("error deleting NFT messages from the table: %v: %w", err, rdb.ErrWrite)
 	}
 
 	return result.RowsAffected(), nil
 }
 
-func (nftMessagesView *MessagesView) SoftDelete(status string, denomId string, maybeTokenId string) error {
+func (nftMessagesView *MessagesView) SoftDelete(denomId string, maybeTokenId string) error {
 	sql, sqlArgs, err := nftMessagesView.rdb.StmtBuilder.Update(
 		MESSAGES_TABLE_NAME,
 	).SetMap(map[string]interface{}{
-		"Status": status,
+		"status": constants.BURNED,
 	}).Where(
-		"denom_id = ? AND token_id = ?",
+		"denom_id = ? AND maybe_token_id = ?",
 		sanitizer.SanitizePostgresString(denomId),
 		sanitizer.SanitizePostgresString(maybeTokenId),
 	).ToSql()
 	if err != nil {
-		return fmt.Errorf("error building NFT token update sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		return fmt.Errorf("error building NFT token soft delete sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
 	result, err := nftMessagesView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
-		return fmt.Errorf("error updating NFT token into the table: %v: %w", err, rdb.ErrWrite)
+		return fmt.Errorf("error soft deleting NFT token into the table: %v: %w", err, rdb.ErrWrite)
 	}
-	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error updating NFT token: no rows updated: %w", rdb.ErrWrite)
+	if result.RowsAffected() <= 0 {
+		return fmt.Errorf("error soft deleting NFT token: no rows deleted: %w", rdb.ErrWrite)
 	}
 
 	return nil

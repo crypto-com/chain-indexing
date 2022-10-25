@@ -35,7 +35,7 @@ func (messagesView *MockMessagesView) DeleteAllByDenomTokenIds(denomId string, t
 	rowsAffected, _ := mockArgs.Get(0).(int64)
 	return rowsAffected, mockArgs.Error(1)
 }
-func (messagesView *MockMessagesView) SoftDelete(status string, denomId string, maybeTokenId string) error {
-	mockArgs := messagesView.Called(status, denomId, maybeTokenId)
-	return mockArgs.Error(0)
+func (messagesView *MockMessagesView) SoftDelete(denomId string, maybeTokenId string) error {
+	mockArgs := messagesView.Called(denomId, maybeTokenId)
+	return mockArgs.Error(1)
 }
