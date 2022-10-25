@@ -309,10 +309,10 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 				Status:          constants.BURNED,
 			}
 
-			if deleteTokenErr := projection.softDeleteToken(
+			if softDeleteTokenErr := projection.softDeleteToken(
 				tokensView, tokensTotalView, nftMessagesView, prevTokenRow.TokenRow, messageRow,
-			); deleteTokenErr != nil {
-				return fmt.Errorf("error deleting burned NFT token: %v", deleteTokenErr)
+			); softDeleteTokenErr != nil {
+				return fmt.Errorf("error soft deleting burned NFT token: %v", softDeleteTokenErr)
 			}
 
 		} else if msgTransferNFT, ok := event.(*event_usecase.MsgNFTTransferNFT); ok {
