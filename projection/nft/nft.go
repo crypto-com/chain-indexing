@@ -300,7 +300,7 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 				BlockTime:       blockTime,
 				DenomId:         msgBurnNFT.DenomId,
 				MaybeTokenId:    &msgBurnNFT.TokenId,
-				MaybeDrop:       nil,
+				MaybeDrop:       prevTokenRow.MaybeDrop,
 				TransactionHash: msgBurnNFT.TxHash(),
 				Success:         msgBurnNFT.TxSuccess(),
 				MessageIndex:    msgBurnNFT.MsgIndex,
