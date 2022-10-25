@@ -485,11 +485,11 @@ func (projection *NFT) softDeleteToken(
 	tokenRow view.TokenRow,
 	messageRow view.MessageRow,
 ) error {
-	if updateTokenErr := tokensView.SoftDelete(tokenRow.DenomId, tokenRow.TokenId); updateTokenErr != nil {
+	if updateTokenErr := tokensView.UpdateStatusToBurned(tokenRow.DenomId, tokenRow.TokenId); updateTokenErr != nil {
 		return fmt.Errorf("error soft deleting NFT token row: %v", updateTokenErr)
 	}
 
-	if updateMessageErr := nftMessagesView.SoftDelete(
+	if updateMessageErr := nftMessagesView.UpdateStatusToBurned(
 		tokenRow.DenomId, tokenRow.TokenId,
 	); updateMessageErr != nil {
 		return updateMessageErr

@@ -523,7 +523,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 					}, nil)
 
 				mockTokensView.
-					On("SoftDelete", "DenomId", "TokenId").
+					On("UpdateStatusToBurned", "DenomId", "TokenId").
 					Return(nil)
 
 				nft.NewTokens = func(handle *rdb.Handle) view.Tokens {
@@ -533,7 +533,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 				mockMessagesView := &view.MockMessagesView{}
 				mocks = append(mocks, &mockMessagesView.Mock)
 				mockMessagesView.
-					On("SoftDelete", "DenomId", "TokenId").
+					On("UpdateStatusToBurned", "DenomId", "TokenId").
 					Return(int64(1), nil)
 
 				mocks = append(mocks, &mockMessagesView.Mock)

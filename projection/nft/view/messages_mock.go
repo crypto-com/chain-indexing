@@ -25,12 +25,14 @@ func (messagesView *MockMessagesView) List(
 	paginationResult, _ := mockArgs.Get(1).(*pagination_interface.PaginationResult)
 	return rows, paginationResult, mockArgs.Error(2)
 }
+
 func (messagesView *MockMessagesView) DeleteAllByDenomTokenIds(denomId string, tokenId string) (int64, error) {
 	mockArgs := messagesView.Called(denomId, tokenId)
 	rowsAffected, _ := mockArgs.Get(0).(int64)
 	return rowsAffected, mockArgs.Error(1)
 }
-func (messagesView *MockMessagesView) SoftDelete(denomId string, maybeTokenId string) error {
+
+func (messagesView *MockMessagesView) UpdateStatusToBurned(denomId string, maybeTokenId string) error {
 	mockArgs := messagesView.Called(denomId, maybeTokenId)
 	return mockArgs.Error(1)
 }

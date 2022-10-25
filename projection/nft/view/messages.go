@@ -25,7 +25,7 @@ type Messages interface {
 		pagination *pagination_interface.Pagination,
 	) ([]MessageRow, *pagination_interface.PaginationResult, error)
 	DeleteAllByDenomTokenIds(denomId string, tokenId string) (int64, error)
-	SoftDelete(denomId string, maybeTokenId string) error
+	UpdateStatusToBurned(denomId string, maybeTokenId string) error
 }
 
 type MessagesView struct {
@@ -251,7 +251,7 @@ func (nftMessagesView *MessagesView) DeleteAllByDenomTokenIds(denomId string, to
 	return result.RowsAffected(), nil
 }
 
-func (nftMessagesView *MessagesView) SoftDelete(denomId string, maybeTokenId string) error {
+func (nftMessagesView *MessagesView) UpdateStatusToBurned(denomId string, maybeTokenId string) error {
 	sql, sqlArgs, err := nftMessagesView.rdb.StmtBuilder.Update(
 		MESSAGES_TABLE_NAME,
 	).SetMap(map[string]interface{}{

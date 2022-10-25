@@ -31,7 +31,7 @@ type Tokens interface {
 	ListDrops(
 		pagination *pagination_interface.Pagination,
 	) ([]string, *pagination_interface.PaginationResult, error)
-	SoftDelete(denomId string, tokenId string) error
+	UpdateStatusToBurned(denomId string, tokenId string) error
 }
 
 type TokensView struct {
@@ -457,7 +457,7 @@ func (tokensView *TokensView) ListDrops(
 	return rows, paginationResult, nil
 }
 
-func (tokensView *TokensView) SoftDelete(denomId string, tokenId string) error {
+func (tokensView *TokensView) UpdateStatusToBurned(denomId string, tokenId string) error {
 	sql, sqlArgs, err := tokensView.rdb.StmtBuilder.Update(
 		TOKENS_TABLE_NAME,
 	).SetMap(map[string]interface{}{
