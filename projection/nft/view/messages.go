@@ -24,7 +24,6 @@ type Messages interface {
 		order MessagesListOrder,
 		pagination *pagination_interface.Pagination,
 	) ([]MessageRow, *pagination_interface.PaginationResult, error)
-	FindById(denomId string, tokenId string) (*MessageRow, error)
 	DeleteAllByDenomTokenIds(denomId string, tokenId string) (int64, error)
 	SoftDelete(denomId string, maybeTokenId string) error
 }
@@ -234,86 +233,6 @@ func (nftMessagesView *MessagesView) List(
 	}
 
 	return nftMessages, paginationResult, nil
-}
-func (nftMessagesView *MessagesView) FindById(
-	denomId string, tokenId string,
-) (*MessageRow, error) {
-	stmtBuilder := nftMessagesView.rdb.StmtBuilder.Select(
-		"denom_id",
-		"maybe_token_id",
-		"maybe_drop",
-		"block_height",
-		"block_hash",
-		"block_time",
-		"transaction_hash",
-		"success",
-		"message_index",
-		"message_type",
-		"data",
-		"status",
-	).From(
-		MESSAGES_TABLE_NAME,
-	).Where(
-		fmt.Sprintf(
-			"%s.denom_id = ? AND %s.maybe_token_id = ?",
-			MESSAGES_TABLE_NAME, MESSAGES_TABLE_NAME,
-		),
-		denomId, tokenId,
-	)
-
-	sql, sqlArgs, err := stmtBuilder.ToSql()
-	if err != nil {
-		return nil, fmt.Errorf(
-			"error building nft messages selection SQL: %v, %w", err, rdb.ErrPrepare,
-		)
-	}
-
-	rowsResult, err := nftMessagesView.rdb.Query(sql, sqlArgs...)
-	if err != nil {
-		return nil, fmt.Errorf("error executing nft messages select SQL: %v: %w", err, rdb.ErrQuery)
-	}
-	defer rowsResult.Close()
-
-	var nftMessage MessageRow
-	var accountMessageDataJSON *string
-	blockTimeReader := nftMessagesView.rdb.NtotReader()
-
-	if err = rowsResult.Scan(
-		&nftMessage.DenomId,
-		&nftMessage.MaybeTokenId,
-		&nftMessage.MaybeDrop,
-		&nftMessage.BlockHeight,
-		&nftMessage.BlockHash,
-		blockTimeReader.ScannableArg(),
-		&nftMessage.TransactionHash,
-		&nftMessage.Success,
-		&nftMessage.MessageIndex,
-		&nftMessage.MessageType,
-		&accountMessageDataJSON,
-		&nftMessage.Status,
-	); err != nil {
-		if errors.Is(err, rdb.ErrNoRows) {
-			return nil, rdb.ErrNoRows
-		}
-		return nil, fmt.Errorf("error scanning nft message row: %v: %w", err, rdb.ErrQuery)
-	}
-	blockTime, parseErr := blockTimeReader.Parse()
-	if parseErr != nil {
-		return nil, fmt.Errorf(
-			"error parsing nft message block time: %v: %w", parseErr, rdb.ErrQuery,
-		)
-	}
-	nftMessage.BlockTime = *blockTime
-
-	var data interface{}
-	if unmarshalErr := json.Unmarshal([]byte(*accountMessageDataJSON), &data); unmarshalErr != nil {
-		return nil, fmt.Errorf(
-			"error unmarshalling nft message data JSON: %v: %w", unmarshalErr, rdb.ErrQuery,
-		)
-	}
-	nftMessage.Data = data
-
-	return &nftMessage, nil
 }
 
 func (nftMessagesView *MessagesView) DeleteAllByDenomTokenIds(denomId string, tokenId string) (int64, error) {

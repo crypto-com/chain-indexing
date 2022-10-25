@@ -376,7 +376,6 @@ func TestNFT_HandleEvents(t *testing.T) {
 						LastEditedAtBlockHeight:      1,
 						LastTransferredAt:            utctime.FromUnixNano(-1),
 						LastTransferredAtBlockHeight: 0,
-						Status:                       constants.MINTED,
 					}).
 					Return(nil)
 
@@ -494,6 +493,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 				},
 			},
 			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[0].(*usecase_event.MsgNFTBurnNFT)
 
 				mockTokensView := &view.MockTokensView{}
 				mocks = append(mocks, &mockTokensView.Mock)
@@ -535,6 +535,24 @@ func TestNFT_HandleEvents(t *testing.T) {
 				mockMessagesView.
 					On("SoftDelete", "DenomId", "TokenId").
 					Return(int64(1), nil)
+
+				mocks = append(mocks, &mockMessagesView.Mock)
+				mockMessagesView.
+					On("Insert", &view.MessageRow{
+						BlockHeight:     1,
+						BlockHash:       "",
+						BlockTime:       utctime.UTCTime{},
+						DenomId:         "DenomId",
+						MaybeTokenId:    primptr.String("TokenId"),
+						MaybeDrop:       nil,
+						TransactionHash: "TxHash",
+						Success:         true,
+						MessageIndex:    0,
+						MessageType:     "/chainmain.nft.v1.MsgBurnNFT",
+						Data:            typedEvent,
+						Status:          constants.BURNED,
+					}).
+					Return(nil)
 
 				nft.NewMessages = func(handle *rdb.Handle) view.Messages {
 					return mockMessagesView
@@ -641,7 +659,6 @@ func TestNFT_HandleEvents(t *testing.T) {
 						LastEditedAtBlockHeight:      0,
 						LastTransferredAt:            utctime.UTCTime{},
 						LastTransferredAtBlockHeight: 1,
-						Status:                       constants.MINTED,
 					}).
 					Return(nil)
 
