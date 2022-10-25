@@ -2,7 +2,6 @@ package nft
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -312,7 +311,7 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 				URI:                          prevTokenRow.URI,
 				Data:                         prevTokenRow.Data,
 				Minter:                       prevTokenRow.Minter,
-				Owner:                        strings.ToLower(msgTransferNFT.Recipient),
+				Owner:                        msgTransferNFT.Recipient,
 				MintedAt:                     prevTokenRow.MintedAt,
 				MintedAtBlockHeight:          prevTokenRow.MintedAtBlockHeight,
 				LastEditedAt:                 prevTokenRow.LastEditedAt,

@@ -2,7 +2,6 @@ package account_transaction
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
@@ -307,7 +306,7 @@ func (projection *AccountTransaction) HandleEvents(height int64, events []event_
 
 		} else if typedEvent, ok := event.(*event_usecase.MsgNFTTransferNFT); ok {
 			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Sender)
-			transactionInfos[typedEvent.TxHash()].AddAccount(strings.ToLower(typedEvent.Recipient))
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Recipient)
 
 		} else if typedEvent, ok := event.(*event_usecase.MsgNFTEditNFT); ok {
 			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Sender)
