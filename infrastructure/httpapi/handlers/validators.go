@@ -211,8 +211,9 @@ func (handler *Validators) List(ctx *fasthttp.RequestCtx) {
 	}
 
 	activeBlocksPeriodLimit := handler.maxActiveBlocksPeriodLimit
+	var activeBlocksPeriodLimitParam int
 	if queryArgs.Has("activeBlocksPeriodLimit") {
-		activeBlocksPeriodLimitParam, err := queryArgs.GetUint("activeBlocksPeriodLimit")
+		activeBlocksPeriodLimitParam, err = queryArgs.GetUint("activeBlocksPeriodLimit")
 		if err != nil {
 			httpapi.BadRequest(ctx, errors.New("invalid activeBlocksPeriodLimit"))
 			return
@@ -481,8 +482,9 @@ func (handler *Validators) ListActive(ctx *fasthttp.RequestCtx) {
 	}
 
 	activeBlocksPeriodLimit := handler.maxActiveBlocksPeriodLimit
+	var activeBlocksPeriodLimitParam int
 	if queryArgs.Has("activeBlocksPeriodLimit") {
-		activeBlocksPeriodLimitParam, err := queryArgs.GetUint("activeBlocksPeriodLimit")
+		activeBlocksPeriodLimitParam, err = queryArgs.GetUint("activeBlocksPeriodLimit")
 		if err != nil {
 			httpapi.BadRequest(ctx, errors.New("invalid activeBlocksPeriodLimit"))
 			return
