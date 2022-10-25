@@ -23,7 +23,7 @@ import (
 
 const prefixConsensusAddress string = "crocnclcons"
 
-var validatorAttentionRulesConfig = validator.Config{
+var validatorConfig = validator.Config{
 	validator.AttentionStatusRules{
 		validator.MaxCommissionRateChange{
 			Enable:    true,
@@ -38,6 +38,7 @@ var validatorAttentionRulesConfig = validator.Config{
 			Interval: "24h",
 		},
 	},
+	DefaultMaxActiveBlocksPeriodLimit,
 }
 
 var VALIDATOR_MIGRATIONS_PATH = func() string {
@@ -125,7 +126,7 @@ var _ = Describe("Validator projection", func() {
 			}, createValidatorParams)
 			fakeLogger := NewFakeLogger()
 
-			projection := validator.NewValidator(fakeLogger, pgxConn, prefixConsensusAddress, nil, &validatorAttentionRulesConfig)
+			projection := validator.NewValidator(fakeLogger, pgxConn, prefixConsensusAddress, nil, &validatorConfig)
 
 			err := projection.HandleEvents(anyHeight, []event_entity.Event{
 				event,
@@ -198,7 +199,7 @@ var _ = Describe("Validator projection", func() {
 			}
 			fakeLogger := NewFakeLogger()
 
-			projection := validator.NewValidator(fakeLogger, pgxConn, prefixConsensusAddress, nil, &validatorAttentionRulesConfig)
+			projection := validator.NewValidator(fakeLogger, pgxConn, prefixConsensusAddress, nil, &validatorConfig)
 
 			validatorViewCountBeforeHandling, err := validatorView.Count(countFilter)
 
@@ -223,7 +224,7 @@ var _ = Describe("Validator projection", func() {
 			anyHeight := int64(1)
 
 			fakeLogger := NewFakeLogger()
-			projection := validator.NewValidator(fakeLogger, pgxConn, prefixConsensusAddress, nil, &validatorAttentionRulesConfig)
+			projection := validator.NewValidator(fakeLogger, pgxConn, prefixConsensusAddress, nil, &validatorConfig)
 
 			Expect(projection.GetLastHandledEventHeight()).To(BeNil())
 

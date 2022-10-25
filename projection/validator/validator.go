@@ -44,8 +44,7 @@ type Validator struct {
 	rdbConn rdb.Conn
 	logger  applogger.Logger
 
-	conNodeAddressPrefix       string
-	maxActiveBlocksPeriodLimit int64
+	conNodeAddressPrefix string
 
 	migrationHelper migrationhelper.MigrationHelper
 
@@ -96,7 +95,6 @@ func NewValidator(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
 	conNodeAddressPrefix string,
-	maxActiveBlocksPeriodLimit int64,
 	migrationHelper migrationhelper.MigrationHelper,
 	config *Config,
 ) *Validator {
@@ -116,7 +114,6 @@ func NewValidator(
 		rdbConn,
 		logger,
 		conNodeAddressPrefix,
-		maxActiveBlocksPeriodLimit,
 		migrationHelper,
 		config,
 	}
@@ -272,10 +269,9 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 			}
 
 			// Update validator up time
-			emptyRecentActiveBlocksFilter := false
 			activeValidators, activeValidatorsQueryErr := validatorsView.ListAll(
 				view.ValidatorsListFilter{
-					MaybeEmptyRecentActiveBlocks: &emptyRecentActiveBlocksFilter,
+					MaybeStatuses: []constants.Status{constants.BONDED},
 				},
 				view.ValidatorsListOrder{},
 			)
@@ -293,16 +289,14 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 					if commitmentMap[mutValidator.ConsensusNodeAddress] {
 						mutValidator.TotalSignedBlock += 1
 						signed = true
-					} else {
+					} else if blockCreatedEvent.BlockHeight-mutValidator.JoinedAtBlockHeight < 10 {
 						// give 10 blocks buffer on validator first join
-						if height-mutValidator.JoinedAtBlockHeight < 10 {
-							mutValidator.TotalSignedBlock += 1
-							signed = true
-						}
+						mutValidator.TotalSignedBlock += 1
+						signed = true
 					}
 					mutValidator.TotalActiveBlock += 1
 
-					mutValidator.ImpreciseUpTime = new(big.Float).Quo(
+					mutValidator.ImpreciseUpTime.Quo(
 						new(big.Float).SetInt64(mutValidator.TotalSignedBlock),
 						new(big.Float).SetInt64(mutValidator.TotalActiveBlock),
 					)
@@ -315,11 +309,31 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 				}
 			}
 
+			emptyRecentActiveBlocks := false
+			inactiveValidators, inactiveValidatorsQueryErr := validatorsView.ListAll(
+				view.ValidatorsListFilter{
+					MaybeStatuses: []constants.Status{
+						constants.INACTIVE,
+						constants.JAILED,
+						constants.UNBONDED,
+						constants.UNBONDING,
+						constants.ATTENTION,
+					},
+					MaybeEmptyRecentActiveBlocks: &emptyRecentActiveBlocks,
+				},
+				view.ValidatorsListOrder{},
+			)
+			if inactiveValidatorsQueryErr != nil {
+				return fmt.Errorf("error querying active validators: %v", activeValidatorsQueryErr)
+			}
+
+			mutUnsignedValidators = append(mutUnsignedValidators, inactiveValidators...)
+
 			if activeValidatorUpdateErr := validatorsView.UpdateAllValidatorUpTime(
 				mutSignedValidators,
 				mutUnsignedValidators,
-				height,
-				projection.maxActiveBlocksPeriodLimit,
+				blockCreatedEvent.BlockHeight,
+				projection.config.MaxActiveBlocksPeriodLimit,
 			); activeValidatorUpdateErr != nil {
 				return fmt.Errorf("error updating active validators up time data: %v", activeValidatorUpdateErr)
 			}
