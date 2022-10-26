@@ -287,7 +287,7 @@ func (tokensView *TokensView) List(
 		stmtBuilder = stmtBuilder.Where(fmt.Sprintf("%s.owner = ?", TOKENS_TABLE_NAME), *filter.MaybeOwner)
 	}
 	if filter.MaybeStatus != nil {
-		stmtBuilder = stmtBuilder.Where(sq.Eq{fmt.Sprintf("%s.owner = ?", TOKENS_TABLE_NAME): filter.MaybeStatus})
+		stmtBuilder = stmtBuilder.Where(sq.Eq{fmt.Sprintf("%s.status = ?", TOKENS_TABLE_NAME): filter.MaybeStatus})
 	}
 
 	if order.MintedAt == view.ORDER_DESC {
