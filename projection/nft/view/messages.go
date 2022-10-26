@@ -191,7 +191,6 @@ func (nftMessagesView *MessagesView) List(
 		var nftMessage MessageRow
 		var accountMessageDataJSON *string
 		blockTimeReader := nftMessagesView.rdb.NtotReader()
-		fmt.Println("===> nftMessage.MaybeDrop:", nftMessage.MaybeDrop)
 
 		if err = rowsResult.Scan(
 			&nftMessage.DenomId,

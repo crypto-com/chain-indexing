@@ -287,7 +287,7 @@ func (tokensView *TokensView) List(
 		stmtBuilder = stmtBuilder.Where(fmt.Sprintf("%s.owner = ?", TOKENS_TABLE_NAME), *filter.MaybeOwner)
 	}
 	if filter.MaybeStatuses != nil {
-		stmtBuilder = stmtBuilder.Where(sq.Eq{fmt.Sprintf("%s.status = ?", TOKENS_TABLE_NAME): filter.MaybeStatuses})
+		stmtBuilder = stmtBuilder.Where(sq.Eq{fmt.Sprintf("%s.status ", TOKENS_TABLE_NAME): filter.MaybeStatuses})
 	}
 
 	if order.MintedAt == view.ORDER_DESC {
@@ -357,7 +357,7 @@ func (tokensView *TokensView) List(
 		mintedAtTimeReader := tokensView.rdb.NtotReader()
 		lastEditedAtTimeReader := tokensView.rdb.NtotReader()
 		lastTransferredAtTimeReader := tokensView.rdb.NtotReader()
-		fmt.Println("===> row.MaybeDrop:", row.MaybeDrop)
+
 		if scanErr := rowsResult.Scan(
 			&row.DenomId,
 			&row.DenomName,
