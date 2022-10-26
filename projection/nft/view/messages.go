@@ -127,6 +127,9 @@ func (nftMessagesView *MessagesView) List(
 	if filter.MaybeMsgTypes != nil {
 		stmtBuilder = stmtBuilder.Where(sq.Eq{"view_nft_messages.message_type": filter.MaybeMsgTypes})
 	}
+	if filter.MaybeStatus != nil {
+		stmtBuilder = stmtBuilder.Where(sq.Eq{"view_nft_messages.status": filter.MaybeStatus})
+	}
 
 	if order.Id == view.ORDER_DESC {
 		stmtBuilder = stmtBuilder.OrderBy("id DESC")
@@ -296,6 +299,7 @@ type MessagesListFilter struct {
 	MaybeTokenId  *string
 	MaybeDrop     *string
 	MaybeMsgTypes []string
+	MaybeStatus   []string
 }
 
 type MessagesListOrder struct {

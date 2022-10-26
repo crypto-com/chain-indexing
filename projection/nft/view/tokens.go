@@ -286,6 +286,9 @@ func (tokensView *TokensView) List(
 	if filter.MaybeOwner != nil {
 		stmtBuilder = stmtBuilder.Where(fmt.Sprintf("%s.owner = ?", TOKENS_TABLE_NAME), *filter.MaybeOwner)
 	}
+	if filter.MaybeStatus != nil {
+		stmtBuilder = stmtBuilder.Where(sq.Eq{fmt.Sprintf("%s.owner = ?", TOKENS_TABLE_NAME): filter.MaybeStatus})
+	}
 
 	if order.MintedAt == view.ORDER_DESC {
 		stmtBuilder = stmtBuilder.OrderBy(fmt.Sprintf("%s.minted_at DESC", TOKENS_TABLE_NAME))
@@ -324,6 +327,7 @@ func (tokensView *TokensView) List(
 			if filter.MaybeOwner != nil {
 				ownerIdentifier = *filter.MaybeOwner
 			}
+
 			identifier := fmt.Sprintf(
 				"%s:%s:%s:%s",
 				denomIdIdentifier, dropIdentifier, minterIdentifier, ownerIdentifier,
@@ -487,6 +491,7 @@ type TokenListFilter struct {
 	MaybeDrop    *string
 	MaybeMinter  *string
 	MaybeOwner   *string
+	MaybeStatus  []string
 }
 
 type TokenListOrder struct {

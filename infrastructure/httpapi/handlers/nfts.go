@@ -126,6 +126,7 @@ func (handler *NFTs) ListTokens(ctx *fasthttp.RequestCtx) {
 		MaybeDrop:    nil,
 		MaybeMinter:  nil,
 		MaybeOwner:   nil,
+		MaybeStatus:  nil,
 	}
 	if queryArgs.Has("filter.denomId") {
 		denomId := string(queryArgs.Peek("filter.denomId"))
@@ -142,6 +143,9 @@ func (handler *NFTs) ListTokens(ctx *fasthttp.RequestCtx) {
 	if queryArgs.Has("filter.owner") {
 		owner := string(queryArgs.Peek("filter.owner"))
 		filter.MaybeOwner = &owner
+	}
+	if queryArgs.Has("filter.status") {
+		filter.MaybeStatus = strings.Split(string(queryArgs.Peek("filter.status")), ",")
 	}
 
 	denoms, paginationResult, err := handler.tokensView.List(filter, nft_view.TokenListOrder{
@@ -192,7 +196,12 @@ func (handler *NFTs) ListTokensByDenomId(ctx *fasthttp.RequestCtx) {
 		MaybeDrop:    nil,
 		MaybeMinter:  nil,
 		MaybeOwner:   nil,
+		MaybeStatus:  nil,
 	}
+	if queryArgs.Has("filter.status") {
+		filter.MaybeStatus = strings.Split(string(queryArgs.Peek("filter.status")), ",")
+	}
+
 	order := nft_view.TokenListOrder{
 		MintedAt:          mintedAtOrder,
 		LastEditedAt:      lastEditedAtOrder,
@@ -285,7 +294,12 @@ func (handler *NFTs) ListTokensByDrop(ctx *fasthttp.RequestCtx) {
 		MaybeDrop:    &dropParam,
 		MaybeMinter:  nil,
 		MaybeOwner:   nil,
+		MaybeStatus:  nil,
 	}
+	if queryArgs.Has("filter.status") {
+		filter.MaybeStatus = strings.Split(string(queryArgs.Peek("filter.status")), ",")
+	}
+
 	order := nft_view.TokenListOrder{
 		MintedAt:          mintedAtOrder,
 		LastEditedAt:      lastEditedAtOrder,
@@ -339,7 +353,12 @@ func (handler *NFTs) ListTokensByAccount(ctx *fasthttp.RequestCtx) {
 		MaybeDrop:    nil,
 		MaybeMinter:  nil,
 		MaybeOwner:   &accountParam,
+		MaybeStatus:  nil,
 	}
+	if queryArgs.Has("filter.status") {
+		filter.MaybeStatus = strings.Split(string(queryArgs.Peek("filter.status")), ",")
+	}
+
 	order := nft_view.TokenListOrder{
 		MintedAt:          mintedAtOrder,
 		LastEditedAt:      lastEditedAtOrder,
@@ -385,6 +404,7 @@ func (handler *NFTs) ListTransfersByToken(ctx *fasthttp.RequestCtx) {
 		MaybeTokenId:  &tokenIdParam,
 		MaybeDrop:     nil,
 		MaybeMsgTypes: []string{"MsgTransferNFT"},
+		MaybeStatus:   nil,
 	}
 
 	transfers, paginationResult, err := handler.messagesView.List(filter, nft_view.MessagesListOrder{
@@ -417,10 +437,14 @@ func (handler *NFTs) ListMessagesByDenom(ctx *fasthttp.RequestCtx) {
 		MaybeTokenId:  nil,
 		MaybeDrop:     nil,
 		MaybeMsgTypes: nil,
+		MaybeStatus:   nil,
 	}
 	queryArgs := ctx.QueryArgs()
 	if queryArgs.Has("filter.msgType") {
 		filter.MaybeMsgTypes = strings.Split(string(queryArgs.Peek("filter.msgType")), ",")
+	}
+	if queryArgs.Has("filter.status") {
+		filter.MaybeStatus = strings.Split(string(queryArgs.Peek("filter.status")), ",")
 	}
 
 	idOrder := view.ORDER_ASC
@@ -464,10 +488,14 @@ func (handler *NFTs) ListMessagesByToken(ctx *fasthttp.RequestCtx) {
 		MaybeTokenId:  &tokenId,
 		MaybeDrop:     nil,
 		MaybeMsgTypes: nil,
+		MaybeStatus:   nil,
 	}
 	queryArgs := ctx.QueryArgs()
 	if queryArgs.Has("filter.msgType") {
 		filter.MaybeMsgTypes = strings.Split(string(queryArgs.Peek("filter.msgType")), ",")
+	}
+	if queryArgs.Has("filter.status") {
+		filter.MaybeStatus = strings.Split(string(queryArgs.Peek("filter.status")), ",")
 	}
 
 	idOrder := view.ORDER_ASC
@@ -503,6 +531,7 @@ func (handler *NFTs) ListMessages(ctx *fasthttp.RequestCtx) {
 		MaybeTokenId:  nil,
 		MaybeDrop:     nil,
 		MaybeMsgTypes: nil,
+		MaybeStatus:   nil,
 	}
 	queryArgs := ctx.QueryArgs()
 	if queryArgs.Has("filter.denomId") {
@@ -516,6 +545,9 @@ func (handler *NFTs) ListMessages(ctx *fasthttp.RequestCtx) {
 	}
 	if queryArgs.Has("filter.msgType") {
 		filter.MaybeMsgTypes = strings.Split(string(queryArgs.Peek("filter.msgType")), ",")
+	}
+	if queryArgs.Has("filter.status") {
+		filter.MaybeStatus = strings.Split(string(queryArgs.Peek("filter.status")), ",")
 	}
 
 	idOrder := view.ORDER_ASC
