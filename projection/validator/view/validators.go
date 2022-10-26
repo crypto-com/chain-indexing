@@ -16,17 +16,39 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 )
 
-type Validators struct {
+type Validators interface {
+	LastJoinedBlockHeight(
+		operatorAddress string,
+		consensusNodeAddress string,
+	) (bool, int64, error)
+	Upsert(validator *ValidatorRow) error
+	Insert(validator *ValidatorRow) error
+	totalPower() (*big.Float, error)
+	Search(keyword string) ([]ValidatorRow, error)
+	FindBy(identity ValidatorIdentity) (*ValidatorRow, error)
+	Update(validator *ValidatorRow) error
+	UpdateAllValidatorUpTime(validators []ValidatorRow) error
+	ListAll(
+		filter ValidatorsListFilter,
+		order ValidatorsListOrder) ([]ValidatorRow, error)
+	List(
+		filter ValidatorsListFilter,
+		order ValidatorsListOrder,
+		pagination *pagination_interface.Pagination) ([]ListValidatorRow, *pagination.PaginationResult, error)
+	Count(filter CountFilter) (int64, error)
+}
+
+type ValidatorsView struct {
 	rdb *rdb.Handle
 }
 
-func NewValidators(handle *rdb.Handle) *Validators {
-	return &Validators{
+func NewValidatorsView(handle *rdb.Handle) Validators {
+	return &ValidatorsView{
 		handle,
 	}
 }
 
-func (validatorsView *Validators) LastJoinedBlockHeight(
+func (validatorsView *ValidatorsView) LastJoinedBlockHeight(
 	operatorAddress string,
 	consensusNodeAddress string,
 ) (bool, int64, error) {
@@ -55,7 +77,7 @@ func (validatorsView *Validators) LastJoinedBlockHeight(
 	return true, joinedAtBlockHeight, nil
 }
 
-func (validatorsView *Validators) Upsert(validator *ValidatorRow) error {
+func (validatorsView *ValidatorsView) Upsert(validator *ValidatorRow) error {
 	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Insert(
 		"view_validators",
 	).Columns(
@@ -138,7 +160,7 @@ func (validatorsView *Validators) Upsert(validator *ValidatorRow) error {
 	return nil
 }
 
-func (validatorsView *Validators) Insert(validator *ValidatorRow) error {
+func (validatorsView *ValidatorsView) Insert(validator *ValidatorRow) error {
 	sql, sqlArgs, buildStmtErr := validatorsView.rdb.StmtBuilder.Insert(
 		"view_validators",
 	).Columns(
@@ -203,7 +225,7 @@ func (validatorsView *Validators) Insert(validator *ValidatorRow) error {
 	return nil
 }
 
-func (validatorsView *Validators) Update(validator *ValidatorRow) error {
+func (validatorsView *ValidatorsView) Update(validator *ValidatorRow) error {
 	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Update(
 		"view_validators",
 	).SetMap(map[string]interface{}{
@@ -242,7 +264,7 @@ func (validatorsView *Validators) Update(validator *ValidatorRow) error {
 	return nil
 }
 
-func (validatorsView *Validators) UpdateAllValidatorUpTime(validators []ValidatorRow) error {
+func (validatorsView *ValidatorsView) UpdateAllValidatorUpTime(validators []ValidatorRow) error {
 
 	pendingRowCount := 0
 	totalRowCount := len(validators)
@@ -312,7 +334,7 @@ type ValidatorsListOrder struct {
 	MaybeImpreciseUpTime     *view.ORDER
 }
 
-func (validatorsView *Validators) ListAll(
+func (validatorsView *ValidatorsView) ListAll(
 	filter ValidatorsListFilter,
 	order ValidatorsListOrder,
 ) ([]ValidatorRow, error) {
@@ -484,7 +506,7 @@ func (validatorsView *Validators) ListAll(
 	return validators, nil
 }
 
-func (validatorsView *Validators) List(
+func (validatorsView *ValidatorsView) List(
 	filter ValidatorsListFilter,
 	order ValidatorsListOrder,
 	pagination *pagination_interface.Pagination,
@@ -738,7 +760,7 @@ func (validatorsView *Validators) List(
 	return validators, paginationResult, nil
 }
 
-func (validatorsView *Validators) totalPower() (*big.Float, error) {
+func (validatorsView *ValidatorsView) totalPower() (*big.Float, error) {
 	sql, _, _ := validatorsView.rdb.StmtBuilder.Select("power").From("view_validators").ToSql()
 	rowsResult, err := validatorsView.rdb.Query(sql)
 	if err != nil {
@@ -762,7 +784,7 @@ func (validatorsView *Validators) totalPower() (*big.Float, error) {
 	return totalPower, nil
 }
 
-func (validatorsView *Validators) Search(keyword string) ([]ValidatorRow, error) {
+func (validatorsView *ValidatorsView) Search(keyword string) ([]ValidatorRow, error) {
 	keyword = utils.AddressParse(keyword)
 	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Select(
 		"id",
@@ -860,7 +882,7 @@ func (validatorsView *Validators) Search(keyword string) ([]ValidatorRow, error)
 	return validators, nil
 }
 
-func (validatorsView *Validators) FindBy(identity ValidatorIdentity) (*ValidatorRow, error) {
+func (validatorsView *ValidatorsView) FindBy(identity ValidatorIdentity) (*ValidatorRow, error) {
 	var err error
 
 	selectStmtBuilder := validatorsView.rdb.StmtBuilder.Select(
@@ -957,7 +979,7 @@ func (validatorsView *Validators) FindBy(identity ValidatorIdentity) (*Validator
 	return &validator, nil
 }
 
-func (validatorsView *Validators) Count(filter CountFilter) (int64, error) {
+func (validatorsView *ValidatorsView) Count(filter CountFilter) (int64, error) {
 	var count int64
 
 	stmt := validatorsView.rdb.StmtBuilder.Select(
