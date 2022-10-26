@@ -127,8 +127,8 @@ func (nftMessagesView *MessagesView) List(
 	if filter.MaybeMsgTypes != nil {
 		stmtBuilder = stmtBuilder.Where(sq.Eq{"view_nft_messages.message_type": filter.MaybeMsgTypes})
 	}
-	if filter.MaybeStatus != nil {
-		stmtBuilder = stmtBuilder.Where(sq.Eq{"view_nft_messages.status": filter.MaybeStatus})
+	if filter.MaybeStatuses != nil {
+		stmtBuilder = stmtBuilder.Where(sq.Eq{"view_nft_messages.status": filter.MaybeStatuses})
 	}
 
 	if order.Id == view.ORDER_DESC {
@@ -191,6 +191,7 @@ func (nftMessagesView *MessagesView) List(
 		var nftMessage MessageRow
 		var accountMessageDataJSON *string
 		blockTimeReader := nftMessagesView.rdb.NtotReader()
+		fmt.Println("===> nftMessage.MaybeDrop:", nftMessage.MaybeDrop)
 
 		if err = rowsResult.Scan(
 			&nftMessage.DenomId,
@@ -211,6 +212,7 @@ func (nftMessagesView *MessagesView) List(
 			}
 			return nil, nil, fmt.Errorf("error scanning nft message row: %v: %w", err, rdb.ErrQuery)
 		}
+
 		blockTime, parseErr := blockTimeReader.Parse()
 		if parseErr != nil {
 			return nil, nil, fmt.Errorf(
@@ -299,7 +301,7 @@ type MessagesListFilter struct {
 	MaybeTokenId  *string
 	MaybeDrop     *string
 	MaybeMsgTypes []string
-	MaybeStatus   []string
+	MaybeStatuses []string
 }
 
 type MessagesListOrder struct {
