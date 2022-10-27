@@ -52,7 +52,8 @@ type Validator struct {
 }
 
 type Config struct {
-	AttentionStatusRules AttentionStatusRules `mapstructure:"attention_status_rules"`
+	AttentionStatusRules       AttentionStatusRules `mapstructure:"attention_status_rules"`
+	MaxActiveBlocksPeriodLimit int64                `mapstructure:"max_active_blocks_period_limit"`
 }
 
 type AttentionStatusRules struct {
@@ -268,35 +269,72 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 			}
 
 			// Update validator up time
-			activeValidators, activeValidatorsQueryErr := validatorsView.ListAll(view.ValidatorsListFilter{
-				MaybeStatuses: []constants.Status{constants.BONDED},
-			}, view.ValidatorsListOrder{})
+			activeValidators, activeValidatorsQueryErr := validatorsView.ListAll(
+				view.ValidatorsListFilter{
+					MaybeStatuses: []constants.Status{constants.BONDED},
+				},
+				view.ValidatorsListOrder{},
+			)
 			if activeValidatorsQueryErr != nil {
 				return fmt.Errorf("error querying active validators: %v", activeValidatorsQueryErr)
 			}
 
-			var mutActiveValidators []view.ValidatorRow
+			var mutSignedValidators []view.ValidatorRow
+			var mutUnsignedValidators []view.ValidatorRow
+
 			for _, activeValidator := range activeValidators {
-				mutActiveValidator := activeValidator
-				if commitmentMap[mutActiveValidator.ConsensusNodeAddress] {
-					mutActiveValidator.TotalSignedBlock += 1
-				} else {
-					// give 10 blocks buffer on validator first join
-					if height-mutActiveValidator.JoinedAtBlockHeight < 10 {
-						mutActiveValidator.TotalSignedBlock += 1
+				mutValidator := activeValidator
+				signed := false
+				if mutValidator.Status == "Bonded" {
+					if commitmentMap[mutValidator.ConsensusNodeAddress] {
+						mutValidator.TotalSignedBlock += 1
+						signed = true
+					} else if blockCreatedEvent.BlockHeight-mutValidator.JoinedAtBlockHeight < 10 {
+						// give 10 blocks buffer on validator first join
+						mutValidator.TotalSignedBlock += 1
+						signed = true
 					}
+					mutValidator.TotalActiveBlock += 1
+
+					mutValidator.ImpreciseUpTime.Quo(
+						new(big.Float).SetInt64(mutValidator.TotalSignedBlock),
+						new(big.Float).SetInt64(mutValidator.TotalActiveBlock),
+					)
 				}
-				mutActiveValidator.TotalActiveBlock += 1
 
-				mutActiveValidator.ImpreciseUpTime = new(big.Float).Quo(
-					new(big.Float).SetInt64(mutActiveValidator.TotalSignedBlock),
-					new(big.Float).SetInt64(mutActiveValidator.TotalActiveBlock),
-				)
-
-				mutActiveValidators = append(mutActiveValidators, mutActiveValidator)
+				if signed {
+					mutSignedValidators = append(mutSignedValidators, mutValidator)
+				} else {
+					mutUnsignedValidators = append(mutUnsignedValidators, mutValidator)
+				}
 			}
 
-			if activeValidatorUpdateErr := validatorsView.UpdateAllValidatorUpTime(mutActiveValidators); activeValidatorUpdateErr != nil {
+			emptyRecentActiveBlocks := false
+			inactiveValidators, inactiveValidatorsQueryErr := validatorsView.ListAll(
+				view.ValidatorsListFilter{
+					MaybeStatuses: []constants.Status{
+						constants.INACTIVE,
+						constants.JAILED,
+						constants.UNBONDED,
+						constants.UNBONDING,
+						constants.ATTENTION,
+					},
+					MaybeEmptyRecentActiveBlocks: &emptyRecentActiveBlocks,
+				},
+				view.ValidatorsListOrder{},
+			)
+			if inactiveValidatorsQueryErr != nil {
+				return fmt.Errorf("error querying active validators: %v", activeValidatorsQueryErr)
+			}
+
+			mutUnsignedValidators = append(mutUnsignedValidators, inactiveValidators...)
+
+			if activeValidatorUpdateErr := validatorsView.UpdateAllValidatorUpTime(
+				mutSignedValidators,
+				mutUnsignedValidators,
+				blockCreatedEvent.BlockHeight,
+				projection.config.MaxActiveBlocksPeriodLimit,
+			); activeValidatorUpdateErr != nil {
 				return fmt.Errorf("error updating active validators up time data: %v", activeValidatorUpdateErr)
 			}
 
@@ -472,7 +510,7 @@ func (projection *Validator) projectValidatorView(
 			})
 			if err != nil {
 				return fmt.Errorf(
-					"error getting existing validator %s from view", msgEditValidatorEvent.ValidatorAddress,
+					"error getting existing validator %s from view: %v", msgEditValidatorEvent.ValidatorAddress, err,
 				)
 			}
 
@@ -548,7 +586,7 @@ func (projection *Validator) projectValidatorView(
 			})
 			if err != nil {
 				return fmt.Errorf(
-					"error getting existing validator `%s` from view", validatorJailedEvent.ConsensusNodeAddress,
+					"error getting existing validator `%s` from view: %v", validatorJailedEvent.ConsensusNodeAddress, err,
 				)
 			}
 
@@ -565,7 +603,7 @@ func (projection *Validator) projectValidatorView(
 				MaybeOperatorAddress: &msgUnjailEvent.ValidatorAddr,
 			})
 			if err != nil {
-				return fmt.Errorf("error getting existing validator `%s` from view", msgUnjailEvent.ValidatorAddr)
+				return fmt.Errorf("error getting existing validator `%s` from view: %v", msgUnjailEvent.ValidatorAddr, err)
 			}
 
 			// Unjailed validator will become inactive first, if there's voting power changes then it becomes bonded
@@ -593,7 +631,7 @@ func (projection *Validator) projectValidatorView(
 				MaybeConsensusNodeAddress: &consensusNodeAddress,
 			})
 			if err != nil {
-				return fmt.Errorf("error getting existing validator `%s` from view", consensusNodeAddress)
+				return fmt.Errorf("error getting existing validator `%s` from view: %v", consensusNodeAddress, err)
 			}
 
 			mutValidatorRow.Power = powerChangedEvent.Power

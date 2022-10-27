@@ -103,7 +103,7 @@ func (projection *Base) HandleEvents(conn *rdb.Handle, logger logger.Logger, eve
 			})
 			if err != nil {
 				return fmt.Errorf(
-					"error getting existing validator %s from view", msgEditValidatorEvent.ValidatorAddress,
+					"error getting existing validator %s from view: %v", msgEditValidatorEvent.ValidatorAddress, err,
 				)
 			}
 
