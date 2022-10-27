@@ -6,6 +6,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/valyala/fasthttp"
 )
 
 var (
@@ -19,7 +20,7 @@ func Run(path, port string) error {
 	http.Handle(path, promhttp.InstrumentMetricHandler(
 		Registerer, promhttp.HandlerFor(Gatherer, promhttp.HandlerOpts{}),
 	))
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
+	if err := fasthttp.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
 		return err
 	}
 
