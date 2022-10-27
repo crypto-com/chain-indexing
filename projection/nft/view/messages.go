@@ -12,7 +12,6 @@ import (
 	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/internal/sanitizer"
-	"github.com/crypto-com/chain-indexing/projection/nft/constants"
 )
 
 const MESSAGES_TABLE_NAME = "view_nft_messages"
@@ -25,7 +24,7 @@ type Messages interface {
 		pagination *pagination_interface.Pagination,
 	) ([]MessageRow, *pagination_interface.PaginationResult, error)
 	DeleteAllByDenomTokenIds(denomId string, tokenId string) (int64, error)
-	UpdateStatusToBurned(denomId string, maybeTokenId string) error
+	UpdateMessageToBurned(denomId string, maybeTokenId string) error
 }
 
 type MessagesView struct {
@@ -58,7 +57,7 @@ func (nftMessagesView *MessagesView) Insert(messageRow *MessageRow) error {
 		"message_index",
 		"message_type",
 		"data",
-		"status",
+		"burned",
 	)
 	blockTime := nftMessagesView.rdb.Tton(&messageRow.BlockTime)
 
@@ -74,7 +73,7 @@ func (nftMessagesView *MessagesView) Insert(messageRow *MessageRow) error {
 		messageRow.MessageIndex,
 		messageRow.MessageType,
 		nftMessageDataJSON,
-		messageRow.Status,
+		false,
 	)
 	sql, sqlArgs, err := stmtBuilder.ToSql()
 	if err != nil {
@@ -110,7 +109,6 @@ func (nftMessagesView *MessagesView) List(
 		"message_index",
 		"message_type",
 		"data",
-		"status",
 	).From(
 		MESSAGES_TABLE_NAME,
 	)
@@ -126,9 +124,6 @@ func (nftMessagesView *MessagesView) List(
 	}
 	if filter.MaybeMsgTypes != nil {
 		stmtBuilder = stmtBuilder.Where(sq.Eq{"view_nft_messages.message_type": filter.MaybeMsgTypes})
-	}
-	if filter.MaybeStatuses != nil {
-		stmtBuilder = stmtBuilder.Where(sq.Eq{"view_nft_messages.status": filter.MaybeStatuses})
 	}
 
 	if order.Id == view.ORDER_DESC {
@@ -204,7 +199,6 @@ func (nftMessagesView *MessagesView) List(
 			&nftMessage.MessageIndex,
 			&nftMessage.MessageType,
 			&accountMessageDataJSON,
-			&nftMessage.Status,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
@@ -255,11 +249,11 @@ func (nftMessagesView *MessagesView) DeleteAllByDenomTokenIds(denomId string, to
 	return result.RowsAffected(), nil
 }
 
-func (nftMessagesView *MessagesView) UpdateStatusToBurned(denomId string, maybeTokenId string) error {
+func (nftMessagesView *MessagesView) UpdateMessageToBurned(denomId string, maybeTokenId string) error {
 	sql, sqlArgs, err := nftMessagesView.rdb.StmtBuilder.Update(
 		MESSAGES_TABLE_NAME,
 	).SetMap(map[string]interface{}{
-		"status": constants.BURNED,
+		"burned": true,
 	}).Where(
 		"denom_id = ? AND maybe_token_id = ?",
 		sanitizer.SanitizePostgresString(denomId),
@@ -292,7 +286,6 @@ type MessageRow struct {
 	MessageIndex    int             `json:"messageIndex"`
 	MessageType     string          `json:"messageType"`
 	Data            interface{}     `json:"data"`
-	Status          string          `json:"status"`
 }
 
 type MessagesListFilter struct {
@@ -300,7 +293,6 @@ type MessagesListFilter struct {
 	MaybeTokenId  *string
 	MaybeDrop     *string
 	MaybeMsgTypes []string
-	MaybeStatuses []string
 }
 
 type MessagesListOrder struct {

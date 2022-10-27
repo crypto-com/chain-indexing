@@ -10,7 +10,6 @@ import (
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
-	"github.com/crypto-com/chain-indexing/projection/nft/constants"
 	"github.com/crypto-com/chain-indexing/projection/nft/utils"
 	"github.com/crypto-com/chain-indexing/projection/nft/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
@@ -160,7 +159,6 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 				MessageIndex:    msgIssueDenom.MsgIndex,
 				MessageType:     msgIssueDenom.MsgType(),
 				Data:            msgIssueDenom,
-				Status:          constants.MINTED,
 			}); insertMessageErr != nil {
 				return insertMessageErr
 			}
@@ -193,7 +191,6 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 				LastEditedAtBlockHeight:      height,
 				LastTransferredAt:            blockTime,
 				LastTransferredAtBlockHeight: height,
-				Status:                       constants.MINTED,
 			}
 			if insertTokenErr := projection.insertToken(tokensView, tokenRow, tokensTotalView); insertTokenErr != nil {
 				return insertTokenErr
@@ -211,7 +208,6 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 				MessageIndex:    msgMintNFT.MsgIndex,
 				MessageType:     msgMintNFT.MsgType(),
 				Data:            msgMintNFT,
-				Status:          constants.MINTED,
 			}); insertMessageErr != nil {
 				return insertMessageErr
 			}
@@ -283,7 +279,6 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 				MessageIndex:    msgEditNFT.MsgIndex,
 				MessageType:     msgEditNFT.MsgType(),
 				Data:            msgEditNFT,
-				Status:          constants.MINTED,
 			}); insertMessageErr != nil {
 				return insertMessageErr
 			}
@@ -306,7 +301,6 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 				MessageIndex:    msgBurnNFT.MsgIndex,
 				MessageType:     msgBurnNFT.MsgType(),
 				Data:            msgBurnNFT,
-				Status:          constants.BURNED,
 			}
 
 			if softDeleteTokenErr := projection.softDeleteToken(
@@ -357,7 +351,6 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 				MessageIndex:    msgTransferNFT.MsgIndex,
 				MessageType:     msgTransferNFT.MsgType(),
 				Data:            msgTransferNFT,
-				Status:          constants.MINTED,
 			}); insertMessageErr != nil {
 				return insertMessageErr
 			}
@@ -485,11 +478,11 @@ func (projection *NFT) softDeleteToken(
 	tokenRow view.TokenRow,
 	messageRow view.MessageRow,
 ) error {
-	if updateTokenErr := tokensView.UpdateStatusToBurned(tokenRow.DenomId, tokenRow.TokenId); updateTokenErr != nil {
+	if updateTokenErr := tokensView.UpdateTokenToBurned(tokenRow.DenomId, tokenRow.TokenId); updateTokenErr != nil {
 		return fmt.Errorf("error soft deleting NFT token row: %v", updateTokenErr)
 	}
 
-	if updateMessageErr := nftMessagesView.UpdateStatusToBurned(
+	if updateMessageErr := nftMessagesView.UpdateMessageToBurned(
 		tokenRow.DenomId, tokenRow.TokenId,
 	); updateMessageErr != nil {
 		return updateMessageErr

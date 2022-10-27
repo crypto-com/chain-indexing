@@ -52,7 +52,7 @@ func (tokensView *MockTokensView) ListDrops(
 	return rows, paginationResult, mockArgs.Error(2)
 }
 
-func (tokensView *MockTokensView) UpdateStatusToBurned(denomId string, tokenId string) error {
+func (tokensView *MockTokensView) UpdateTokenToBurned(denomId string, tokenId string) error {
 	mockArgs := tokensView.Called(denomId, tokenId)
 	return mockArgs.Error(0)
 }

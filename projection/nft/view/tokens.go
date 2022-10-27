@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/crypto-com/chain-indexing/internal/sanitizer"
-	"github.com/crypto-com/chain-indexing/projection/nft/constants"
 
 	sq "github.com/Masterminds/squirrel"
 
@@ -31,7 +30,7 @@ type Tokens interface {
 	ListDrops(
 		pagination *pagination_interface.Pagination,
 	) ([]string, *pagination_interface.PaginationResult, error)
-	UpdateStatusToBurned(denomId string, tokenId string) error
+	UpdateTokenToBurned(denomId string, tokenId string) error
 }
 
 type TokensView struct {
@@ -64,7 +63,7 @@ func (tokensView *TokensView) Insert(tokenRow *TokenRow) error {
 		"last_edited_at_block_height",
 		"last_transferred_at",
 		"last_transferred_at_block_height",
-		"status",
+		"burned",
 	).Values(
 		sanitizer.SanitizePostgresString(tokenRow.DenomId),
 		sanitizer.SanitizePostgresString(tokenRow.TokenId),
@@ -80,7 +79,7 @@ func (tokensView *TokensView) Insert(tokenRow *TokenRow) error {
 		tokenRow.LastEditedAtBlockHeight,
 		tokensView.rdb.Tton(&tokenRow.LastTransferredAt),
 		tokenRow.LastTransferredAtBlockHeight,
-		tokenRow.Status,
+		false,
 	).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building NFT token insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -137,7 +136,6 @@ func (tokensView *TokensView) FindById(
 		fmt.Sprintf("%s.last_edited_at_block_height", TOKENS_TABLE_NAME),
 		fmt.Sprintf("%s.last_transferred_at", TOKENS_TABLE_NAME),
 		fmt.Sprintf("%s.last_transferred_at_block_height", TOKENS_TABLE_NAME),
-		fmt.Sprintf("%s.status", TOKENS_TABLE_NAME),
 	).From(
 		TOKENS_TABLE_NAME,
 	).LeftJoin(
@@ -180,7 +178,6 @@ func (tokensView *TokensView) FindById(
 		&row.LastEditedAtBlockHeight,
 		lastTransferredAtTimeReader.ScannableArg(),
 		&row.LastTransferredAtBlockHeight,
-		&row.Status,
 	); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
@@ -264,7 +261,6 @@ func (tokensView *TokensView) List(
 		fmt.Sprintf("%s.last_edited_at_block_height", TOKENS_TABLE_NAME),
 		fmt.Sprintf("%s.last_transferred_at", TOKENS_TABLE_NAME),
 		fmt.Sprintf("%s.last_transferred_at_block_height", TOKENS_TABLE_NAME),
-		fmt.Sprintf("%s.status", TOKENS_TABLE_NAME),
 	).From(
 		TOKENS_TABLE_NAME,
 	).LeftJoin(
@@ -285,9 +281,6 @@ func (tokensView *TokensView) List(
 	}
 	if filter.MaybeOwner != nil {
 		stmtBuilder = stmtBuilder.Where(fmt.Sprintf("%s.owner = ?", TOKENS_TABLE_NAME), *filter.MaybeOwner)
-	}
-	if filter.MaybeStatuses != nil {
-		stmtBuilder = stmtBuilder.Where(sq.Eq{fmt.Sprintf("%s.status ", TOKENS_TABLE_NAME): filter.MaybeStatuses})
 	}
 
 	if order.MintedAt == view.ORDER_DESC {
@@ -375,7 +368,6 @@ func (tokensView *TokensView) List(
 			&row.LastEditedAtBlockHeight,
 			lastTransferredAtTimeReader.ScannableArg(),
 			&row.LastTransferredAtBlockHeight,
-			&row.Status,
 		); scanErr != nil {
 			if errors.Is(scanErr, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
@@ -461,11 +453,11 @@ func (tokensView *TokensView) ListDrops(
 	return rows, paginationResult, nil
 }
 
-func (tokensView *TokensView) UpdateStatusToBurned(denomId string, tokenId string) error {
+func (tokensView *TokensView) UpdateTokenToBurned(denomId string, tokenId string) error {
 	sql, sqlArgs, err := tokensView.rdb.StmtBuilder.Update(
 		TOKENS_TABLE_NAME,
 	).SetMap(map[string]interface{}{
-		"status": constants.BURNED,
+		"burned": true,
 	}).Where(
 		"denom_id = ? AND token_id = ?",
 		sanitizer.SanitizePostgresString(denomId),
@@ -487,11 +479,10 @@ func (tokensView *TokensView) UpdateStatusToBurned(denomId string, tokenId strin
 }
 
 type TokenListFilter struct {
-	MaybeDenomId  *string
-	MaybeDrop     *string
-	MaybeMinter   *string
-	MaybeOwner    *string
-	MaybeStatuses []string
+	MaybeDenomId *string
+	MaybeDrop    *string
+	MaybeMinter  *string
+	MaybeOwner   *string
 }
 
 type TokenListOrder struct {
@@ -522,5 +513,4 @@ type TokenRow struct {
 	LastEditedAtBlockHeight      int64           `json:"tokenLastEditedAtBlockHeight"`
 	LastTransferredAt            utctime.UTCTime `json:"tokenLastTransferredAt"`
 	LastTransferredAtBlockHeight int64           `json:"tokenLastTransferredAtBlockHeight"`
-	Status                       string          `json:"status"`
 }
