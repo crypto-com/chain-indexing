@@ -543,6 +543,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 						MessageIndex:    0,
 						MessageType:     "/chainmain.nft.v1.MsgBurnNFT",
 						Data:            typedEvent,
+						Burned:          true,
 					}).
 					Return(nil)
 
