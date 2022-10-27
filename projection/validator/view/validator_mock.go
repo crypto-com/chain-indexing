@@ -17,6 +17,12 @@ func NewMockValidatorsView(_ *rdb.Handle) Validators {
 	return &MockValidatorsView{}
 }
 
+func (validatorsView *MockValidatorsView) LastHandledHeight() (int64, error) {
+	mockArgs := validatorsView.Called()
+	result, _ := mockArgs.Get(0).(int64)
+	return result, mockArgs.Error(1)
+}
+
 func (validatorsView *MockValidatorsView) LastJoinedBlockHeight(
 	operatorAddress string,
 	consensusNodeAddress string,
@@ -60,8 +66,13 @@ func (validatorsView *MockValidatorsView) Update(validator *ValidatorRow) error 
 	return mockArgs.Error(0)
 }
 
-func (validatorsView *MockValidatorsView) UpdateAllValidatorUpTime(validators []ValidatorRow) error {
-	mockArgs := validatorsView.Called(validators)
+func (validatorsView *MockValidatorsView) UpdateAllValidatorUpTime(
+	signedValidators []ValidatorRow,
+	unsignedValidators []ValidatorRow,
+	height int64,
+	maxRecentUpTimeInBlocks int64,
+) error {
+	mockArgs := validatorsView.Called(signedValidators, unsignedValidators, height, maxRecentUpTimeInBlocks)
 	return mockArgs.Error(0)
 }
 
