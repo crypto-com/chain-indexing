@@ -113,6 +113,9 @@ func (nftMessagesView *MessagesView) List(
 		MESSAGES_TABLE_NAME,
 	)
 
+	// show non-burned nft
+	stmtBuilder = stmtBuilder.Where("view_nft_messages.burned = ?", false)
+
 	if filter.MaybeDenomId != nil {
 		stmtBuilder = stmtBuilder.Where("denom_id = ?", *filter.MaybeDenomId)
 	}

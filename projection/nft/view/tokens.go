@@ -270,6 +270,9 @@ func (tokensView *TokensView) List(
 		),
 	)
 
+	// show non-burned nft
+	stmtBuilder = stmtBuilder.Where(fmt.Sprintf("%s.burned = ?", TOKENS_TABLE_NAME), false)
+
 	if filter.MaybeDenomId != nil {
 		stmtBuilder = stmtBuilder.Where(fmt.Sprintf("%s.denom_id = ?", DENOMS_TABLE_NAME), *filter.MaybeDenomId)
 	}
