@@ -27,7 +27,12 @@ type Validators interface {
 	Search(keyword string) ([]ValidatorRow, error)
 	FindBy(identity ValidatorIdentity) (*ValidatorRow, error)
 	Update(validator *ValidatorRow) error
-	UpdateAllValidatorUpTime(validators []ValidatorRow) error
+	UpdateAllValidatorUpTime(
+		signedValidators []ValidatorRow,
+		unsignedValidators []ValidatorRow,
+		height int64,
+		maxRecentUpTimeInBlocks int64,
+	) error
 	ListAll(
 		filter ValidatorsListFilter,
 		order ValidatorsListOrder) ([]ValidatorRow, error)
@@ -36,6 +41,7 @@ type Validators interface {
 		order ValidatorsListOrder,
 		pagination *pagination_interface.Pagination) ([]ListValidatorRow, *pagination.PaginationResult, error)
 	Count(filter CountFilter) (int64, error)
+	LastHandledHeight() (int64, error)
 }
 
 type ValidatorsView struct {
@@ -46,6 +52,32 @@ func NewValidatorsView(handle *rdb.Handle) Validators {
 	return &ValidatorsView{
 		handle,
 	}
+}
+
+func (validatorsView *ValidatorsView) LastHandledHeight() (int64, error) {
+	var err error
+
+	var sql string
+	var sqlArgs []interface{}
+	if sql, sqlArgs, err = validatorsView.rdb.StmtBuilder.Select(
+		"last_handled_event_height",
+	).From(
+		"projections",
+	).Where(
+		"id = ?", "Validator",
+	).ToSql(); err != nil {
+		return int64(0), fmt.Errorf("error build last handled height from Validator projection sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	var lastHandledEventHeight int64
+	if err = validatorsView.rdb.QueryRow(sql, sqlArgs...).Scan(&lastHandledEventHeight); err != nil {
+		if errors.Is(err, rdb.ErrNoRows) {
+			return int64(0), nil
+		}
+		return int64(0), fmt.Errorf("error query last handled height from Validator projection sql: %v", err)
+	}
+
+	return lastHandledEventHeight, nil
 }
 
 func (validatorsView *ValidatorsView) LastJoinedBlockHeight(
@@ -264,36 +296,106 @@ func (validatorsView *ValidatorsView) Update(validator *ValidatorRow) error {
 	return nil
 }
 
-func (validatorsView *ValidatorsView) UpdateAllValidatorUpTime(validators []ValidatorRow) error {
+func (validatorsView *ValidatorsView) UpdateAllValidatorUpTime(
+	signedValidators []ValidatorRow,
+	unsignedValidators []ValidatorRow,
+	height int64,
+	maxRecentUpTimeInBlocks int64,
+) error {
 
 	pendingRowCount := 0
-	totalRowCount := len(validators)
+	totalSignedValidatorsRowCount := len(signedValidators)
 
 	sql := ""
 
-	for i, validator := range validators {
+	expiredRecentUpTimeBlock := int64(0)
+
+	if height-maxRecentUpTimeInBlocks > 0 {
+		expiredRecentUpTimeBlock = height - maxRecentUpTimeInBlocks
+	}
+
+	for i, signedValidator := range signedValidators {
 
 		if pendingRowCount == 0 {
 
-			sql = `UPDATE view_validators AS view SET
+			sql = fmt.Sprintf(
+				`UPDATE view_validators AS view SET
 							total_signed_block = row.total_signed_block,
 							total_active_block = row.total_active_block,
-							imprecise_up_time = row.imprecise_up_time
+							imprecise_up_time = row.imprecise_up_time,
+							recent_active_blocks = array_append(array_remove(view.recent_active_blocks, %d), %d)
 						FROM (VALUES
-						`
+						`,
+				expiredRecentUpTimeBlock,
+				height,
+			)
 		}
 
 		sql += fmt.Sprintf(
 			"(%d, %d, %d, %s),\n",
-			*validator.MaybeId,
-			validator.TotalSignedBlock,
-			validator.TotalActiveBlock,
-			validator.ImpreciseUpTime.String(),
+			*signedValidator.MaybeId,
+			signedValidator.TotalSignedBlock,
+			signedValidator.TotalActiveBlock,
+			signedValidator.ImpreciseUpTime.String(),
 		)
 
 		pendingRowCount += 1
 
-		if pendingRowCount == 500 || i+1 == totalRowCount {
+		if pendingRowCount == 500 || i+1 == totalSignedValidatorsRowCount {
+
+			sql = strings.TrimSuffix(sql, ",\n")
+
+			sql += `) AS row(
+								id, 
+								total_signed_block,
+								total_active_block, 
+								imprecise_up_time
+							)
+							WHERE row.id = view.id;`
+
+			result, err := validatorsView.rdb.Exec(sql)
+			if err != nil {
+				return fmt.Errorf("error updating validators up time into the table: %v: %w", err, rdb.ErrWrite)
+			}
+			if result.RowsAffected() != int64(pendingRowCount) {
+				return fmt.Errorf("error updating validators up time into the table: wrong number of affected rows %d: %w", result.RowsAffected(), rdb.ErrWrite)
+			}
+
+			pendingRowCount = 0
+
+		}
+
+	}
+
+	totalUnsignedValidatorsRowCount := len(unsignedValidators)
+
+	for i, unsignedValidator := range unsignedValidators {
+
+		if pendingRowCount == 0 {
+
+			sql = fmt.Sprintf(
+				`UPDATE view_validators AS view SET
+							total_signed_block = row.total_signed_block,
+							total_active_block = row.total_active_block,
+							imprecise_up_time = row.imprecise_up_time,
+							recent_active_blocks = array_remove(view.recent_active_blocks, %d)
+						FROM (VALUES
+						`,
+				expiredRecentUpTimeBlock,
+			)
+		}
+
+		sql += fmt.Sprintf(
+			"(%d, %d, %d, %s),\n",
+			*unsignedValidator.MaybeId,
+			unsignedValidator.TotalSignedBlock,
+			unsignedValidator.TotalActiveBlock,
+			unsignedValidator.ImpreciseUpTime.String(),
+		)
+
+		pendingRowCount += 1
+
+		if pendingRowCount == 500 || i+1 == totalUnsignedValidatorsRowCount {
 
 			sql = strings.TrimSuffix(sql, ",\n")
 
@@ -323,7 +425,8 @@ func (validatorsView *ValidatorsView) UpdateAllValidatorUpTime(validators []Vali
 }
 
 type ValidatorsListFilter struct {
-	MaybeStatuses []constants.Status
+	MaybeStatuses                []constants.Status
+	MaybeEmptyRecentActiveBlocks *bool
 }
 
 type ValidatorsListOrder struct {
@@ -343,20 +446,20 @@ func (validatorsView *ValidatorsView) ListAll(
 	if order.MaybeJoinedAtBlockHeight != nil {
 		if *order.MaybeStatus == view.ORDER_ASC {
 			statusOrder := "CASE UPPER(status) " +
-				"WHEN 'BONDED' THEN 1" +
-				"WHEN 'UNBONDING' THEN 2" +
-				"WHEN 'JAILED' THEN 3" +
-				"WHEN 'INACTIVE' THEN 4" +
-				"WHEN 'UNBONDED' THEN 5" +
+				"WHEN 'BONDED' THEN 1 " +
+				"WHEN 'UNBONDING' THEN 2 " +
+				"WHEN 'JAILED' THEN 3 " +
+				"WHEN 'INACTIVE' THEN 4 " +
+				"WHEN 'UNBONDED' THEN 5 " +
 				"ELSE 6 END"
 			orderClauses = append(orderClauses, statusOrder)
 		} else if *order.MaybeStatus == view.ORDER_DESC {
 			statusOrder := "CASE UPPER(status) " +
-				"WHEN 'UNBONDED' THEN 1" +
-				"WHEN 'JAILED' THEN 2" +
-				"WHEN 'UNBONDING' THEN 3" +
-				"WHEN 'INACTIVE' THEN 4" +
-				"WHEN 'UNBONDED' THEN 5" +
+				"WHEN 'UNBONDED' THEN 1 " +
+				"WHEN 'JAILED' THEN 2 " +
+				"WHEN 'UNBONDING' THEN 3 " +
+				"WHEN 'INACTIVE' THEN 4 " +
+				"WHEN 'UNBONDED' THEN 5 " +
 				"ELSE 6 END"
 			orderClauses = append(orderClauses, statusOrder)
 		}
@@ -398,12 +501,27 @@ func (validatorsView *ValidatorsView) ListAll(
 		}
 	}
 
+	var whereClause sq.And
+
 	var statusOrCondition sq.Or
 	if filter.MaybeStatuses != nil {
 		statusOrCondition = make(sq.Or, 0)
 		for _, status := range filter.MaybeStatuses {
 			statusOrCondition = append(statusOrCondition, sq.Eq{
 				"status": status,
+			})
+		}
+		whereClause = append(whereClause, statusOrCondition)
+	}
+
+	if filter.MaybeEmptyRecentActiveBlocks != nil {
+		if *filter.MaybeEmptyRecentActiveBlocks {
+			whereClause = append(whereClause, sq.Eq{
+				"recent_active_blocks": "{}",
+			})
+		} else {
+			whereClause = append(whereClause, sq.NotEq{
+				"recent_active_blocks": "{}",
 			})
 		}
 	}
@@ -432,13 +550,14 @@ func (validatorsView *ValidatorsView) ListAll(
 		"total_active_block",
 		"imprecise_up_time",
 		"voted_gov_proposal",
+		"recent_active_blocks",
 	).From(
 		"view_validators",
 	)
 	stmtBuilder = stmtBuilder.OrderBy(orderClauses...)
 
-	if statusOrCondition != nil {
-		stmtBuilder = stmtBuilder.Where(statusOrCondition)
+	if whereClause != nil {
+		stmtBuilder = stmtBuilder.Where(whereClause)
 	}
 	sql, sqlArgs, err := stmtBuilder.ToSql()
 	if err != nil {
@@ -481,6 +600,7 @@ func (validatorsView *ValidatorsView) ListAll(
 			&validator.TotalActiveBlock,
 			impreciseUpTimeReader.ScannableArg(),
 			votedGovProposalReader.ScannableArg(),
+			&validator.RecentActiveBlocks,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, rdb.ErrNoRows
@@ -499,6 +619,8 @@ func (validatorsView *ValidatorsView) ListAll(
 			return nil, fmt.Errorf("error parsing voted gov proposal: %v", votedGovProposalErr)
 		}
 		validator.VotedGovProposal = votedGovProposal
+
+		validator.TotalRecentActiveBlocks = int64(len(validator.RecentActiveBlocks))
 
 		validators = append(validators, validator)
 	}
@@ -520,20 +642,20 @@ func (validatorsView *ValidatorsView) List(
 	if order.MaybeJoinedAtBlockHeight != nil {
 		if *order.MaybeStatus == view.ORDER_ASC {
 			statusOrder := "CASE UPPER(status) " +
-				"WHEN 'BONDED' THEN 1" +
-				"WHEN 'UNBONDING' THEN 2" +
-				"WHEN 'JAILED' THEN 3" +
-				"WHEN 'INACTIVE' THEN 4" +
-				"WHEN 'UNBONDED' THEN 5" +
+				"WHEN 'BONDED' THEN 1 " +
+				"WHEN 'UNBONDING' THEN 2 " +
+				"WHEN 'JAILED' THEN 3 " +
+				"WHEN 'INACTIVE' THEN 4 " +
+				"WHEN 'UNBONDED' THEN 5 " +
 				"ELSE 6 END"
 			orderClauses = append(orderClauses, statusOrder)
 		} else if *order.MaybeStatus == view.ORDER_DESC {
 			statusOrder := "CASE UPPER(status) " +
-				"WHEN 'UNBONDED' THEN 1" +
-				"WHEN 'JAILED' THEN 2" +
-				"WHEN 'UNBONDING' THEN 3" +
-				"WHEN 'INACTIVE' THEN 4" +
-				"WHEN 'BONDED' THEN 5" +
+				"WHEN 'UNBONDED' THEN 1 " +
+				"WHEN 'JAILED' THEN 2 " +
+				"WHEN 'UNBONDING' THEN 3 " +
+				"WHEN 'INACTIVE' THEN 4 " +
+				"WHEN 'BONDED' THEN 5 " +
 				"ELSE 6 END"
 			orderClauses = append(orderClauses, statusOrder)
 		}
@@ -584,6 +706,8 @@ func (validatorsView *ValidatorsView) List(
 	)
 	cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.OrderBy(orderClauses...)
 
+	var whereClause sq.And
+
 	var statusOrCondition sq.Or
 	if filter.MaybeStatuses != nil {
 		statusOrCondition = make(sq.Or, 0)
@@ -592,7 +716,23 @@ func (validatorsView *ValidatorsView) List(
 				"status": status,
 			})
 		}
-		cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.Where(statusOrCondition)
+		whereClause = append(whereClause, statusOrCondition)
+	}
+
+	if filter.MaybeEmptyRecentActiveBlocks != nil {
+		if *filter.MaybeEmptyRecentActiveBlocks {
+			whereClause = append(whereClause, sq.Eq{
+				"recent_active_blocks": "{}",
+			})
+		} else {
+			whereClause = append(whereClause, sq.NotEq{
+				"recent_active_blocks": "{}",
+			})
+		}
+	}
+
+	if whereClause != nil {
+		cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.Where(whereClause)
 	}
 	cumulativePowerSql, cumulativePowerSqlArgs, err := cumulativePowerStmtBuilder.ToSql()
 	if err != nil {
@@ -654,13 +794,14 @@ func (validatorsView *ValidatorsView) List(
 		"total_active_block",
 		"imprecise_up_time",
 		"voted_gov_proposal",
+		"recent_active_blocks",
 	).From(
 		"view_validators",
 	)
 	stmtBuilder = stmtBuilder.OrderBy(orderClauses...)
 
-	if statusOrCondition != nil {
-		stmtBuilder = stmtBuilder.Where(statusOrCondition)
+	if whereClause != nil {
+		stmtBuilder = stmtBuilder.Where(whereClause)
 	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
@@ -708,6 +849,7 @@ func (validatorsView *ValidatorsView) List(
 			&validator.TotalActiveBlock,
 			impreciseUpTimeReader.ScannableArg(),
 			votedGovProposalReader.ScannableArg(),
+			&validator.RecentActiveBlocks,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
@@ -726,6 +868,8 @@ func (validatorsView *ValidatorsView) List(
 			return nil, nil, fmt.Errorf("error parsing voted gov proposal: %v", votedGovProposalErr)
 		}
 		validator.VotedGovProposal = votedGovProposal
+
+		validator.TotalRecentActiveBlocks = int64(len(validator.RecentActiveBlocks))
 
 		power, ok := new(big.Float).SetString(validator.Power)
 		if !ok {
@@ -909,6 +1053,7 @@ func (validatorsView *ValidatorsView) FindBy(identity ValidatorIdentity) (*Valid
 		"total_active_block",
 		"imprecise_up_time",
 		"voted_gov_proposal",
+		"recent_active_blocks",
 	).From(
 		"view_validators",
 	).OrderBy("id DESC")
@@ -957,6 +1102,7 @@ func (validatorsView *ValidatorsView) FindBy(identity ValidatorIdentity) (*Valid
 		&validator.TotalActiveBlock,
 		impreciseUpTimeReader.ScannableArg(),
 		votedGovProposalReader.ScannableArg(),
+		&validator.RecentActiveBlocks,
 	); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
@@ -975,6 +1121,8 @@ func (validatorsView *ValidatorsView) FindBy(identity ValidatorIdentity) (*Valid
 		return nil, fmt.Errorf("error parsing voted gov proposal: %v", votedGovProposalErr)
 	}
 	validator.VotedGovProposal = votedGovProposal
+
+	validator.TotalRecentActiveBlocks = int64(len(validator.RecentActiveBlocks))
 
 	return &validator, nil
 }
@@ -1041,6 +1189,8 @@ type ValidatorRow struct {
 	TotalActiveBlock        int64      `json:"totalActiveBlock"`
 	ImpreciseUpTime         *big.Float `json:"impreciseUpTime"`
 	VotedGovProposal        *big.Int   `json:"votedGovProposal"`
+	RecentActiveBlocks      []int64    `json:"-"`
+	TotalRecentActiveBlocks int64      `json:"totalRecentActiveBlocks"`
 }
 
 type ListValidatorRow struct {
