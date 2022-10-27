@@ -323,7 +323,6 @@ func (tokensView *TokensView) List(
 			if filter.MaybeOwner != nil {
 				ownerIdentifier = *filter.MaybeOwner
 			}
-
 			identifier := fmt.Sprintf(
 				"%s:%s:%s:%s",
 				denomIdIdentifier, dropIdentifier, minterIdentifier, ownerIdentifier,
