@@ -3,10 +3,10 @@ package prometheus
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/valyala/fasthttp"
 )
 
 var (
@@ -15,12 +15,21 @@ var (
 	Gatherer        prometheus.Gatherer   = defaultRegistry
 )
 
+const (
+	READ_HEADER_TIMEOUT = 5 * time.Second
+)
+
 func Run(path, port string) error {
 	register()
 	http.Handle(path, promhttp.InstrumentMetricHandler(
 		Registerer, promhttp.HandlerFor(Gatherer, promhttp.HandlerOpts{}),
 	))
-	if err := fasthttp.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
+	server := &http.Server{
+		Addr:              fmt.Sprintf(":%s", port),
+		ReadHeaderTimeout: READ_HEADER_TIMEOUT,
+	}
+
+	if err := server.ListenAndServe(); err != nil {
 		return err
 	}
 
