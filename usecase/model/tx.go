@@ -22,6 +22,17 @@ type CosmosTxBody struct {
 type CosmosTxAuthInfo struct {
 	SignerInfos []CosmosTxSignerInfo `json:"signer_infos"`
 	Fee         CosmosTxAuthInfoFee  `json:"fee"`
+	Tip         CosmosTxTip          `json:"tip"`
+}
+
+type CosmosTxTip struct {
+	Amount []CosmosTxTipAmount `json:"amount"`
+	Tipper string              `json:"tipper"`
+}
+
+type CosmosTxTipAmount struct {
+	Denom  string `json:"denom"`
+	Amount string `json:"amount"`
 }
 
 type CosmosTxAuthInfoFee struct {
