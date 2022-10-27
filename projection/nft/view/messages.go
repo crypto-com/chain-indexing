@@ -24,7 +24,7 @@ type Messages interface {
 		pagination *pagination_interface.Pagination,
 	) ([]MessageRow, *pagination_interface.PaginationResult, error)
 	DeleteAllByDenomTokenIds(denomId string, tokenId string) (int64, error)
-	UpdateMessageToBurned(denomId string, maybeTokenId string) error
+	SoftDeleteMessage(denomId string, maybeTokenId string) error
 }
 
 type MessagesView struct {
@@ -205,7 +205,6 @@ func (nftMessagesView *MessagesView) List(
 			}
 			return nil, nil, fmt.Errorf("error scanning nft message row: %v: %w", err, rdb.ErrQuery)
 		}
-
 		blockTime, parseErr := blockTimeReader.Parse()
 		if parseErr != nil {
 			return nil, nil, fmt.Errorf(
@@ -249,7 +248,7 @@ func (nftMessagesView *MessagesView) DeleteAllByDenomTokenIds(denomId string, to
 	return result.RowsAffected(), nil
 }
 
-func (nftMessagesView *MessagesView) UpdateMessageToBurned(denomId string, maybeTokenId string) error {
+func (nftMessagesView *MessagesView) SoftDeleteMessage(denomId string, maybeTokenId string) error {
 	sql, sqlArgs, err := nftMessagesView.rdb.StmtBuilder.Update(
 		MESSAGES_TABLE_NAME,
 	).SetMap(map[string]interface{}{

@@ -193,7 +193,6 @@ func (handler *NFTs) ListTokensByDenomId(ctx *fasthttp.RequestCtx) {
 		MaybeMinter:  nil,
 		MaybeOwner:   nil,
 	}
-
 	order := nft_view.TokenListOrder{
 		MintedAt:          mintedAtOrder,
 		LastEditedAt:      lastEditedAtOrder,
@@ -287,7 +286,6 @@ func (handler *NFTs) ListTokensByDrop(ctx *fasthttp.RequestCtx) {
 		MaybeMinter:  nil,
 		MaybeOwner:   nil,
 	}
-
 	order := nft_view.TokenListOrder{
 		MintedAt:          mintedAtOrder,
 		LastEditedAt:      lastEditedAtOrder,
@@ -342,7 +340,6 @@ func (handler *NFTs) ListTokensByAccount(ctx *fasthttp.RequestCtx) {
 		MaybeMinter:  nil,
 		MaybeOwner:   &accountParam,
 	}
-
 	order := nft_view.TokenListOrder{
 		MintedAt:          mintedAtOrder,
 		LastEditedAt:      lastEditedAtOrder,

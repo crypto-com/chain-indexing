@@ -303,10 +303,10 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 				Data:            msgBurnNFT,
 			}
 
-			if softDeleteTokenErr := projection.softDeleteToken(
+			if softDeleteNFTErr := projection.softDeleteNFT(
 				tokensView, tokensTotalView, nftMessagesView, prevTokenRow.TokenRow, messageRow,
-			); softDeleteTokenErr != nil {
-				return fmt.Errorf("error soft deleting burned NFT token: %v", softDeleteTokenErr)
+			); softDeleteNFTErr != nil {
+				return fmt.Errorf("error soft deleting NFT: %v", softDeleteNFTErr)
 			}
 
 		} else if msgTransferNFT, ok := event.(*event_usecase.MsgNFTTransferNFT); ok {
@@ -392,7 +392,7 @@ func (projection *NFT) insertMessage(
 		fmt.Sprintf("%s:%s:%s:%s", nilIdentifier(message.MaybeDrop), message.DenomId, nilIdentifier(message.MaybeTokenId), message.MessageType),
 	}
 	if err := messagesTotalView.IncrementAll(totalIdentities, 1); err != nil {
-		return fmt.Errorf("error incremnting NFT message total: %w", err)
+		return fmt.Errorf("error incrementing NFT message total: %w", err)
 	}
 
 	if err := messagesView.Insert(&message); err != nil {
@@ -471,21 +471,21 @@ func (projection *NFT) insertToken(
 	return nil
 }
 
-func (projection *NFT) softDeleteToken(
+func (projection *NFT) softDeleteNFT(
 	tokensView view.Tokens,
 	tokensTotalView view.TokensTotal,
 	nftMessagesView view.Messages,
 	tokenRow view.TokenRow,
 	messageRow view.MessageRow,
 ) error {
-	if updateTokenErr := tokensView.UpdateTokenToBurned(tokenRow.DenomId, tokenRow.TokenId); updateTokenErr != nil {
-		return fmt.Errorf("error soft deleting NFT token row: %v", updateTokenErr)
+	if softDeleteTokenErr := tokensView.SoftDeleteToken(tokenRow.DenomId, tokenRow.TokenId); softDeleteTokenErr != nil {
+		return fmt.Errorf("error soft deleting NFT token row: %v", softDeleteTokenErr)
 	}
 
-	if updateMessageErr := nftMessagesView.UpdateMessageToBurned(
+	if softDeleteMessageErr := nftMessagesView.SoftDeleteMessage(
 		tokenRow.DenomId, tokenRow.TokenId,
-	); updateMessageErr != nil {
-		return updateMessageErr
+	); softDeleteMessageErr != nil {
+		return fmt.Errorf("error soft deleting NFT message row: %v", softDeleteMessageErr)
 	}
 
 	if err := nftMessagesView.Insert(&messageRow); err != nil {
