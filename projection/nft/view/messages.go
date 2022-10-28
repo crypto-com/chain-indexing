@@ -24,7 +24,7 @@ type Messages interface {
 		pagination *pagination_interface.Pagination,
 	) ([]MessageRow, *pagination_interface.PaginationResult, error)
 	DeleteAllByDenomTokenIds(denomId string, tokenId string) (int64, error)
-	SoftDeleteMessage(denomId string, maybeTokenId string) error
+	BurnMessagesByToken(denomId string, maybeTokenId string) error
 }
 
 type MessagesView struct {
@@ -251,7 +251,7 @@ func (nftMessagesView *MessagesView) DeleteAllByDenomTokenIds(denomId string, to
 	return result.RowsAffected(), nil
 }
 
-func (nftMessagesView *MessagesView) SoftDeleteMessage(denomId string, maybeTokenId string) error {
+func (nftMessagesView *MessagesView) BurnMessagesByToken(denomId string, maybeTokenId string) error {
 	sql, sqlArgs, err := nftMessagesView.rdb.StmtBuilder.Update(
 		MESSAGES_TABLE_NAME,
 	).SetMap(map[string]interface{}{
@@ -262,15 +262,15 @@ func (nftMessagesView *MessagesView) SoftDeleteMessage(denomId string, maybeToke
 		sanitizer.SanitizePostgresString(maybeTokenId),
 	).ToSql()
 	if err != nil {
-		return fmt.Errorf("error building NFT token soft delete sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		return fmt.Errorf("error building burn NFT message by token  sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
 	result, err := nftMessagesView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
-		return fmt.Errorf("error soft deleting NFT token into the table: %v: %w", err, rdb.ErrWrite)
+		return fmt.Errorf("error burning NFT message by token into the table: %v: %w", err, rdb.ErrWrite)
 	}
 	if result.RowsAffected() <= 0 {
-		return fmt.Errorf("error soft deleting NFT token: no rows deleted: %w", rdb.ErrWrite)
+		return fmt.Errorf("error burning NFT message by token: no rows deleted: %w", rdb.ErrWrite)
 	}
 
 	return nil

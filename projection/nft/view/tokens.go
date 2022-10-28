@@ -30,7 +30,7 @@ type Tokens interface {
 	ListDrops(
 		pagination *pagination_interface.Pagination,
 	) ([]string, *pagination_interface.PaginationResult, error)
-	SoftDeleteToken(denomId string, tokenId string) error
+	BurnToken(denomId string, tokenId string) error
 }
 
 type TokensView struct {
@@ -455,7 +455,7 @@ func (tokensView *TokensView) ListDrops(
 	return rows, paginationResult, nil
 }
 
-func (tokensView *TokensView) SoftDeleteToken(denomId string, tokenId string) error {
+func (tokensView *TokensView) BurnToken(denomId string, tokenId string) error {
 	sql, sqlArgs, err := tokensView.rdb.StmtBuilder.Update(
 		TOKENS_TABLE_NAME,
 	).SetMap(map[string]interface{}{
@@ -466,15 +466,15 @@ func (tokensView *TokensView) SoftDeleteToken(denomId string, tokenId string) er
 		sanitizer.SanitizePostgresString(tokenId),
 	).ToSql()
 	if err != nil {
-		return fmt.Errorf("error building NFT token soft delete sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		return fmt.Errorf("error building burn NFT token sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
 	result, err := tokensView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
-		return fmt.Errorf("error soft deleting NFT token into the table: %v: %w", err, rdb.ErrWrite)
+		return fmt.Errorf("error burning NFT token into the table: %v: %w", err, rdb.ErrWrite)
 	}
 	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error soft deleting NFT token: no rows deleted: %w", rdb.ErrWrite)
+		return fmt.Errorf("error burning NFT token: no rows deleted: %w", rdb.ErrWrite)
 	}
 
 	return nil
