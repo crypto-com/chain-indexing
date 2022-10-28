@@ -286,22 +286,33 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 		} else if msgBurnNFT, ok := event.(*event_usecase.MsgNFTBurnNFT); ok {
 			prevTokenRow, queryPrevTokenRowErr := tokensView.FindById(msgBurnNFT.DenomId, msgBurnNFT.TokenId)
 			if queryPrevTokenRowErr != nil {
-				return fmt.Errorf("error querying NFT token being edited: %v", queryPrevTokenRowErr)
+				return fmt.Errorf("error querying NFT token being burned: %v", queryPrevTokenRowErr)
 			}
 
-			if deleteTokenErr := projection.deleteToken(
-				tokensView, tokensTotalView, nftMessagesView, prevTokenRow.TokenRow,
-			); deleteTokenErr != nil {
-				return fmt.Errorf("error deleteing burnt NFT token: %v", deleteTokenErr)
+			messageRow := view.MessageRow{
+				BlockHeight:     height,
+				BlockHash:       blockHash,
+				BlockTime:       blockTime,
+				DenomId:         msgBurnNFT.DenomId,
+				MaybeTokenId:    &msgBurnNFT.TokenId,
+				MaybeDrop:       prevTokenRow.MaybeDrop,
+				TransactionHash: msgBurnNFT.TxHash(),
+				Success:         msgBurnNFT.TxSuccess(),
+				MessageIndex:    msgBurnNFT.MsgIndex,
+				MessageType:     msgBurnNFT.MsgType(),
+				Data:            msgBurnNFT,
 			}
 
-			// Burn does not need to record the message because the token and all the records will
-			// be deleted
+			if softDeleteNFTErr := projection.burnNFT(
+				tokensView, tokensTotalView, nftMessagesView, prevTokenRow.TokenRow, messageRow,
+			); softDeleteNFTErr != nil {
+				return fmt.Errorf("error burning NFT: %v", softDeleteNFTErr)
+			}
 
 		} else if msgTransferNFT, ok := event.(*event_usecase.MsgNFTTransferNFT); ok {
 			prevTokenRow, queryPrevTokenRowErr := tokensView.FindById(msgTransferNFT.DenomId, msgTransferNFT.TokenId)
 			if queryPrevTokenRowErr != nil {
-				return fmt.Errorf("error querying NFT token being edited: %v", queryPrevTokenRowErr)
+				return fmt.Errorf("error querying NFT token being transferred: %v", queryPrevTokenRowErr)
 			}
 			tokenRow := view.TokenRow{
 				DenomId:                      msgTransferNFT.DenomId,
@@ -381,7 +392,7 @@ func (projection *NFT) insertMessage(
 		fmt.Sprintf("%s:%s:%s:%s", nilIdentifier(message.MaybeDrop), message.DenomId, nilIdentifier(message.MaybeTokenId), message.MessageType),
 	}
 	if err := messagesTotalView.IncrementAll(totalIdentities, 1); err != nil {
-		return fmt.Errorf("error incremnting NFT message total: %w", err)
+		return fmt.Errorf("error incrementing NFT message total: %w", err)
 	}
 
 	if err := messagesView.Insert(&message); err != nil {
@@ -460,28 +471,27 @@ func (projection *NFT) insertToken(
 	return nil
 }
 
-func (projection *NFT) deleteToken(
+func (projection *NFT) burnNFT(
 	tokensView view.Tokens,
 	tokensTotalView view.TokensTotal,
 	nftMessagesView view.Messages,
 	tokenRow view.TokenRow,
+	messageRow view.MessageRow,
 ) error {
-	deletedRowCount, deleteTokenErr := tokensView.Delete(tokenRow.DenomId, tokenRow.TokenId)
-	if deleteTokenErr != nil {
-		return fmt.Errorf("error deleting NFT token from view: %v", deleteTokenErr)
-	}
-	if deletedRowCount != 1 {
-		return fmt.Errorf("error deleting NFT token from view: %d rows deleted", deletedRowCount)
+	if burnTokenErr := tokensView.BurnToken(
+		tokenRow.DenomId, tokenRow.TokenId,
+	); burnTokenErr != nil {
+		return fmt.Errorf("error burning NFT token row: %v", burnTokenErr)
 	}
 
-	deleteMessagesCount, deleteMessagesErr := nftMessagesView.DeleteAllByDenomTokenIds(
-		tokenRow.DenomId, tokenRow.TokenId,
-	)
-	if deleteMessagesErr != nil {
-		return fmt.Errorf("error deleting NFT messages from view: %v", deleteMessagesErr)
+	if err := nftMessagesView.Insert(&messageRow); err != nil {
+		return fmt.Errorf("error inserting burned NFT message: %w", err)
 	}
-	if deleteMessagesCount == 0 {
-		return fmt.Errorf("error deleting NFT messages from view: no rows deleted")
+
+	if burnMessagesByTokenErr := nftMessagesView.BurnMessagesByToken(
+		tokenRow.DenomId, tokenRow.TokenId,
+	); burnMessagesByTokenErr != nil {
+		return fmt.Errorf("error burning NFT message row: %v", burnMessagesByTokenErr)
 	}
 
 	if decrementErr := tokensTotalView.DecrementAll([]string{

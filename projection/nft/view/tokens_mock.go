@@ -51,3 +51,8 @@ func (tokensView *MockTokensView) ListDrops(
 	paginationResult, _ := mockArgs.Get(1).(*pagination_interface.PaginationResult)
 	return rows, paginationResult, mockArgs.Error(2)
 }
+
+func (tokensView *MockTokensView) BurnToken(denomId string, tokenId string) error {
+	mockArgs := tokensView.Called(denomId, tokenId)
+	return mockArgs.Error(0)
+}

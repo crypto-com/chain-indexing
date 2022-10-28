@@ -3,6 +3,7 @@ package view
 import (
 	"errors"
 	"fmt"
+
 	"github.com/crypto-com/chain-indexing/internal/sanitizer"
 
 	sq "github.com/Masterminds/squirrel"
@@ -29,6 +30,7 @@ type Tokens interface {
 	ListDrops(
 		pagination *pagination_interface.Pagination,
 	) ([]string, *pagination_interface.PaginationResult, error)
+	BurnToken(denomId string, tokenId string) error
 }
 
 type TokensView struct {
@@ -61,6 +63,7 @@ func (tokensView *TokensView) Insert(tokenRow *TokenRow) error {
 		"last_edited_at_block_height",
 		"last_transferred_at",
 		"last_transferred_at_block_height",
+		"burned",
 	).Values(
 		sanitizer.SanitizePostgresString(tokenRow.DenomId),
 		sanitizer.SanitizePostgresString(tokenRow.TokenId),
@@ -76,6 +79,7 @@ func (tokensView *TokensView) Insert(tokenRow *TokenRow) error {
 		tokenRow.LastEditedAtBlockHeight,
 		tokensView.rdb.Tton(&tokenRow.LastTransferredAt),
 		tokenRow.LastTransferredAtBlockHeight,
+		false,
 	).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building NFT token insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -145,7 +149,7 @@ func (tokensView *TokensView) FindById(
 			TOKENS_TABLE_NAME, TOKENS_TABLE_NAME,
 		),
 		denomId, tokenId,
-	)
+	).Where(fmt.Sprintf("%s.burned = ?", TOKENS_TABLE_NAME), false)
 
 	sql, sqlArgs, err := selectStmtBuilder.ToSql()
 	if err != nil {
@@ -265,6 +269,9 @@ func (tokensView *TokensView) List(
 			DENOMS_TABLE_NAME, DENOMS_TABLE_NAME, TOKENS_TABLE_NAME,
 		),
 	)
+
+	// show non-burned nft
+	stmtBuilder = stmtBuilder.Where(fmt.Sprintf("%s.burned = ?", TOKENS_TABLE_NAME), false)
 
 	if filter.MaybeDenomId != nil {
 		stmtBuilder = stmtBuilder.Where(fmt.Sprintf("%s.denom_id = ?", DENOMS_TABLE_NAME), *filter.MaybeDenomId)
@@ -408,6 +415,8 @@ func (tokensView *TokensView) ListDrops(
 		TOKENS_TABLE_NAME,
 	).Where(
 		"drop IS NOT NULL AND drop <> ''",
+	).Where(
+		fmt.Sprintf("%s.burned = ?", TOKENS_TABLE_NAME), false,
 	).OrderBy("drop")
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
@@ -446,6 +455,31 @@ func (tokensView *TokensView) ListDrops(
 	}
 
 	return rows, paginationResult, nil
+}
+
+func (tokensView *TokensView) BurnToken(denomId string, tokenId string) error {
+	sql, sqlArgs, err := tokensView.rdb.StmtBuilder.Update(
+		TOKENS_TABLE_NAME,
+	).SetMap(map[string]interface{}{
+		"burned": true,
+	}).Where(
+		"denom_id = ? AND token_id = ?",
+		sanitizer.SanitizePostgresString(denomId),
+		sanitizer.SanitizePostgresString(tokenId),
+	).ToSql()
+	if err != nil {
+		return fmt.Errorf("error building burn NFT token sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	result, err := tokensView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error burning NFT token into the table: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() != 1 {
+		return fmt.Errorf("error burning NFT token: no rows deleted: %w", rdb.ErrWrite)
+	}
+
+	return nil
 }
 
 type TokenListFilter struct {
