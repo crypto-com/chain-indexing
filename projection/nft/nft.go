@@ -301,7 +301,6 @@ func (projection *NFT) HandleEvents(height int64, events []event_entity.Event) e
 				MessageIndex:    msgBurnNFT.MsgIndex,
 				MessageType:     msgBurnNFT.MsgType(),
 				Data:            msgBurnNFT,
-				Burned:          true,
 			}
 
 			if softDeleteNFTErr := projection.burnNFT(
@@ -485,14 +484,14 @@ func (projection *NFT) burnNFT(
 		return fmt.Errorf("error burning NFT token row: %v", burnTokenErr)
 	}
 
+	if err := nftMessagesView.Insert(&messageRow); err != nil {
+		return fmt.Errorf("error inserting burned NFT message: %w", err)
+	}
+
 	if burnMessagesByTokenErr := nftMessagesView.BurnMessagesByToken(
 		tokenRow.DenomId, tokenRow.TokenId,
 	); burnMessagesByTokenErr != nil {
 		return fmt.Errorf("error burning NFT message row: %v", burnMessagesByTokenErr)
-	}
-
-	if err := nftMessagesView.Insert(&messageRow); err != nil {
-		return fmt.Errorf("error inserting burned NFT message: %w", err)
 	}
 
 	if decrementErr := tokensTotalView.DecrementAll([]string{

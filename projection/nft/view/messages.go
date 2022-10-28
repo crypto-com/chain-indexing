@@ -73,7 +73,7 @@ func (nftMessagesView *MessagesView) Insert(messageRow *MessageRow) error {
 		messageRow.MessageIndex,
 		messageRow.MessageType,
 		nftMessageDataJSON,
-		messageRow.Burned,
+		false,
 	)
 	sql, sqlArgs, err := stmtBuilder.ToSql()
 	if err != nil {
@@ -288,7 +288,6 @@ type MessageRow struct {
 	MessageIndex    int             `json:"messageIndex"`
 	MessageType     string          `json:"messageType"`
 	Data            interface{}     `json:"data"`
-	Burned          bool            `json:"burned"`
 }
 
 type MessagesListFilter struct {

@@ -149,7 +149,7 @@ func (tokensView *TokensView) FindById(
 			TOKENS_TABLE_NAME, TOKENS_TABLE_NAME,
 		),
 		denomId, tokenId,
-	)
+	).Where(fmt.Sprintf("%s.burned = ?", TOKENS_TABLE_NAME), false)
 
 	sql, sqlArgs, err := selectStmtBuilder.ToSql()
 	if err != nil {
@@ -415,6 +415,8 @@ func (tokensView *TokensView) ListDrops(
 		TOKENS_TABLE_NAME,
 	).Where(
 		"drop IS NOT NULL AND drop <> ''",
+	).Where(
+		fmt.Sprintf("%s.burned = ?", TOKENS_TABLE_NAME), false,
 	).OrderBy("drop")
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
