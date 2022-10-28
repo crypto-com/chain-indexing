@@ -479,10 +479,10 @@ func (projection *NFT) burnNFT(
 	tokenRow view.TokenRow,
 	messageRow view.MessageRow,
 ) error {
-	if softDeleteTokenErr := tokensView.BurnToken(
+	if burnTokenErr := tokensView.BurnToken(
 		tokenRow.DenomId, tokenRow.TokenId,
-	); softDeleteTokenErr != nil {
-		return fmt.Errorf("error burning NFT token row: %v", softDeleteTokenErr)
+	); burnTokenErr != nil {
+		return fmt.Errorf("error burning NFT token row: %v", burnTokenErr)
 	}
 
 	if burnMessagesByTokenErr := nftMessagesView.BurnMessagesByToken(
