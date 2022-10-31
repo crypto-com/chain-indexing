@@ -135,6 +135,8 @@ func (validatorsView *ValidatorsView) Upsert(validator *ValidatorRow) error {
 		"total_active_block",
 		"imprecise_up_time",
 		"voted_gov_proposal",
+		"recent_active_blocks",
+		"recent_signed_blocks",
 	).Values(
 		validator.OperatorAddress,
 		validator.ConsensusNodeAddress,
@@ -158,6 +160,8 @@ func (validatorsView *ValidatorsView) Upsert(validator *ValidatorRow) error {
 		validator.TotalActiveBlock,
 		validatorsView.rdb.BFton(validator.ImpreciseUpTime),
 		validatorsView.rdb.Bton(validator.VotedGovProposal),
+		validator.RecentActiveBlocks,
+		validator.RecentSignedBlocks,
 	).Suffix(`ON CONFLICT (operator_address, consensus_node_address) DO UPDATE SET
 		initial_delegator_address = EXCLUDED.initial_delegator_address,
 		status = EXCLUDED.status,
@@ -176,7 +180,9 @@ func (validatorsView *ValidatorsView) Upsert(validator *ValidatorRow) error {
 		total_signed_block = EXCLUDED.total_signed_block,
 		total_active_block = EXCLUDED.total_active_block,
 		imprecise_up_time = EXCLUDED.imprecise_up_time,
-		voted_gov_proposal = EXCLUDED.voted_gov_proposal
+		voted_gov_proposal = EXCLUDED.voted_gov_proposal,
+		recent_active_blocks = EXCLUDED.recent_active_blocks,
+		recent_signed_blocks = EXCLUDED.recent_signed_blocks
 	`).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building validator upsertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -278,6 +284,8 @@ func (validatorsView *ValidatorsView) Update(validator *ValidatorRow) error {
 		"total_active_block":         validator.TotalActiveBlock,
 		"imprecise_up_time":          validatorsView.rdb.TypeConv.BFton(validator.ImpreciseUpTime),
 		"voted_gov_proposal":         validatorsView.rdb.TypeConv.Bton(validator.VotedGovProposal),
+		"recent_active_blocks":       validator.RecentActiveBlocks,
+		"recent_signed_blocks":       validator.RecentSignedBlocks,
 	}).Where(
 		"id = ?", validator.MaybeId,
 	).ToSql()
@@ -323,9 +331,12 @@ func (validatorsView *ValidatorsView) UpdateAllValidatorUpTime(
 							total_signed_block = row.total_signed_block,
 							total_active_block = row.total_active_block,
 							imprecise_up_time = row.imprecise_up_time,
-							recent_active_blocks = array_append(array_remove(view.recent_active_blocks, %d), %d)
+							recent_active_blocks = array_append(array_remove(view.recent_active_blocks, %d), %d),
+							recent_signed_blocks = array_append(array_remove(view.recent_signed_blocks, %d), %d)
 						FROM (VALUES
 						`,
+				expiredRecentUpTimeBlock,
+				height,
 				expiredRecentUpTimeBlock,
 				height,
 			)
@@ -355,10 +366,10 @@ func (validatorsView *ValidatorsView) UpdateAllValidatorUpTime(
 
 			result, err := validatorsView.rdb.Exec(sql)
 			if err != nil {
-				return fmt.Errorf("error updating validators up time into the table: %v: %w", err, rdb.ErrWrite)
+				return fmt.Errorf("error updating signedValidators up time into the table: %v: %w", err, rdb.ErrWrite)
 			}
 			if result.RowsAffected() != int64(pendingRowCount) {
-				return fmt.Errorf("error updating validators up time into the table: wrong number of affected rows %d: %w", result.RowsAffected(), rdb.ErrWrite)
+				return fmt.Errorf("error updating signedValidators up time into the table: wrong number of affected rows %d: %w", result.RowsAffected(), rdb.ErrWrite)
 			}
 
 			pendingRowCount = 0
@@ -378,9 +389,12 @@ func (validatorsView *ValidatorsView) UpdateAllValidatorUpTime(
 							total_signed_block = row.total_signed_block,
 							total_active_block = row.total_active_block,
 							imprecise_up_time = row.imprecise_up_time,
-							recent_active_blocks = array_remove(view.recent_active_blocks, %d)
+							recent_active_blocks = array_append(array_remove(view.recent_active_blocks, %d), %d),
+							recent_signed_blocks = array_remove(view.recent_signed_blocks, %d)
 						FROM (VALUES
 						`,
+				expiredRecentUpTimeBlock,
+				height,
 				expiredRecentUpTimeBlock,
 			)
 		}
@@ -409,10 +423,10 @@ func (validatorsView *ValidatorsView) UpdateAllValidatorUpTime(
 
 			result, err := validatorsView.rdb.Exec(sql)
 			if err != nil {
-				return fmt.Errorf("error updating validators up time into the table: %v: %w", err, rdb.ErrWrite)
+				return fmt.Errorf("error updating unsignedValidators up time into the table: %v: %w", err, rdb.ErrWrite)
 			}
 			if result.RowsAffected() != int64(pendingRowCount) {
-				return fmt.Errorf("error updating validators up time into the table: wrong number of affected rows %d: %w", result.RowsAffected(), rdb.ErrWrite)
+				return fmt.Errorf("error updating unsignedValidators up time into the table: wrong number of affected rows %d: %w", result.RowsAffected(), rdb.ErrWrite)
 			}
 
 			pendingRowCount = 0
@@ -425,8 +439,7 @@ func (validatorsView *ValidatorsView) UpdateAllValidatorUpTime(
 }
 
 type ValidatorsListFilter struct {
-	MaybeStatuses                []constants.Status
-	MaybeEmptyRecentActiveBlocks *bool
+	MaybeStatuses []constants.Status
 }
 
 type ValidatorsListOrder struct {
@@ -514,18 +527,6 @@ func (validatorsView *ValidatorsView) ListAll(
 		whereClause = append(whereClause, statusOrCondition)
 	}
 
-	if filter.MaybeEmptyRecentActiveBlocks != nil {
-		if *filter.MaybeEmptyRecentActiveBlocks {
-			whereClause = append(whereClause, sq.Eq{
-				"recent_active_blocks": "{}",
-			})
-		} else {
-			whereClause = append(whereClause, sq.NotEq{
-				"recent_active_blocks": "{}",
-			})
-		}
-	}
-
 	stmtBuilder := validatorsView.rdb.StmtBuilder.Select(
 		"id",
 		"operator_address",
@@ -551,6 +552,7 @@ func (validatorsView *ValidatorsView) ListAll(
 		"imprecise_up_time",
 		"voted_gov_proposal",
 		"recent_active_blocks",
+		"recent_signed_blocks",
 	).From(
 		"view_validators",
 	)
@@ -601,6 +603,7 @@ func (validatorsView *ValidatorsView) ListAll(
 			impreciseUpTimeReader.ScannableArg(),
 			votedGovProposalReader.ScannableArg(),
 			&validator.RecentActiveBlocks,
+			&validator.RecentSignedBlocks,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, rdb.ErrNoRows
@@ -719,18 +722,6 @@ func (validatorsView *ValidatorsView) List(
 		whereClause = append(whereClause, statusOrCondition)
 	}
 
-	if filter.MaybeEmptyRecentActiveBlocks != nil {
-		if *filter.MaybeEmptyRecentActiveBlocks {
-			whereClause = append(whereClause, sq.Eq{
-				"recent_active_blocks": "{}",
-			})
-		} else {
-			whereClause = append(whereClause, sq.NotEq{
-				"recent_active_blocks": "{}",
-			})
-		}
-	}
-
 	if whereClause != nil {
 		cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.Where(whereClause)
 	}
@@ -795,6 +786,7 @@ func (validatorsView *ValidatorsView) List(
 		"imprecise_up_time",
 		"voted_gov_proposal",
 		"recent_active_blocks",
+		"recent_signed_blocks",
 	).From(
 		"view_validators",
 	)
@@ -850,6 +842,7 @@ func (validatorsView *ValidatorsView) List(
 			impreciseUpTimeReader.ScannableArg(),
 			votedGovProposalReader.ScannableArg(),
 			&validator.RecentActiveBlocks,
+			&validator.RecentSignedBlocks,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
@@ -1054,6 +1047,7 @@ func (validatorsView *ValidatorsView) FindBy(identity ValidatorIdentity) (*Valid
 		"imprecise_up_time",
 		"voted_gov_proposal",
 		"recent_active_blocks",
+		"recent_signed_blocks",
 	).From(
 		"view_validators",
 	).OrderBy("id DESC")
@@ -1103,6 +1097,7 @@ func (validatorsView *ValidatorsView) FindBy(identity ValidatorIdentity) (*Valid
 		impreciseUpTimeReader.ScannableArg(),
 		votedGovProposalReader.ScannableArg(),
 		&validator.RecentActiveBlocks,
+		&validator.RecentSignedBlocks,
 	); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
@@ -1191,6 +1186,8 @@ type ValidatorRow struct {
 	VotedGovProposal        *big.Int   `json:"votedGovProposal"`
 	RecentActiveBlocks      []int64    `json:"-"`
 	TotalRecentActiveBlocks int64      `json:"totalRecentActiveBlocks"`
+	RecentSignedBlocks      []int64    `json:"-"`
+	TotalRecentSignedBlocks int64      `json:"totalRecentSignedBlocks"`
 }
 
 type ListValidatorRow struct {

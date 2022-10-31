@@ -269,23 +269,14 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 			}
 
 			// Update validator up time
-			activeValidators, activeValidatorsQueryErr := validatorsView.ListAll(
-				view.ValidatorsListFilter{
-					MaybeStatuses: []constants.Status{constants.BONDED},
-				},
-				view.ValidatorsListOrder{},
-			)
-			if activeValidatorsQueryErr != nil {
-				return fmt.Errorf("error querying active validators: %v", activeValidatorsQueryErr)
-			}
-
 			var mutSignedValidators []view.ValidatorRow
 			var mutUnsignedValidators []view.ValidatorRow
 
-			for _, activeValidator := range activeValidators {
-				mutValidator := activeValidator
+			for _, validator := range validatorList {
+				mutValidator := validator
 				signed := false
-				if mutValidator.Status == "Bonded" {
+				switch mutValidator.Status {
+				case constants.BONDED, constants.UNBONDING:
 					if commitmentMap[mutValidator.ConsensusNodeAddress] {
 						mutValidator.TotalSignedBlock += 1
 						signed = true
@@ -300,34 +291,14 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 						new(big.Float).SetInt64(mutValidator.TotalSignedBlock),
 						new(big.Float).SetInt64(mutValidator.TotalActiveBlock),
 					)
-				}
 
-				if signed {
-					mutSignedValidators = append(mutSignedValidators, mutValidator)
-				} else {
-					mutUnsignedValidators = append(mutUnsignedValidators, mutValidator)
+					if signed {
+						mutSignedValidators = append(mutSignedValidators, mutValidator)
+					} else {
+						mutUnsignedValidators = append(mutUnsignedValidators, mutValidator)
+					}
 				}
 			}
-
-			emptyRecentActiveBlocks := false
-			inactiveValidators, inactiveValidatorsQueryErr := validatorsView.ListAll(
-				view.ValidatorsListFilter{
-					MaybeStatuses: []constants.Status{
-						constants.INACTIVE,
-						constants.JAILED,
-						constants.UNBONDED,
-						constants.UNBONDING,
-						constants.ATTENTION,
-					},
-					MaybeEmptyRecentActiveBlocks: &emptyRecentActiveBlocks,
-				},
-				view.ValidatorsListOrder{},
-			)
-			if inactiveValidatorsQueryErr != nil {
-				return fmt.Errorf("error querying active validators: %v", activeValidatorsQueryErr)
-			}
-
-			mutUnsignedValidators = append(mutUnsignedValidators, inactiveValidators...)
 
 			if activeValidatorUpdateErr := validatorsView.UpdateAllValidatorUpTime(
 				mutSignedValidators,
@@ -423,6 +394,8 @@ func (projection *Validator) projectValidatorView(
 				TotalActiveBlock:        0,
 				ImpreciseUpTime:         big.NewFloat(1),
 				VotedGovProposal:        big.NewInt(0),
+				RecentActiveBlocks:      []int64{},
+				RecentSignedBlocks:      []int64{},
 			}
 
 			// Validator re-joins
@@ -482,6 +455,8 @@ func (projection *Validator) projectValidatorView(
 				TotalActiveBlock:        0,
 				ImpreciseUpTime:         big.NewFloat(1),
 				VotedGovProposal:        big.NewInt(0),
+				RecentActiveBlocks:      []int64{},
+				RecentSignedBlocks:      []int64{},
 			}
 
 			// Validator re-joins
@@ -592,6 +567,8 @@ func (projection *Validator) projectValidatorView(
 
 			mutValidatorRow.Status = constants.JAILED
 			mutValidatorRow.Jailed = true
+			mutValidatorRow.RecentActiveBlocks = []int64{}
+			mutValidatorRow.RecentSignedBlocks = []int64{}
 
 			if err := validatorsView.Update(mutValidatorRow); err != nil {
 				return fmt.Errorf("error updating validator into view: %v", err)
@@ -609,6 +586,8 @@ func (projection *Validator) projectValidatorView(
 			// Unjailed validator will become inactive first, if there's voting power changes then it becomes bonded
 			mutValidatorRow.Status = constants.INACTIVE
 			mutValidatorRow.Jailed = false
+			mutValidatorRow.RecentActiveBlocks = []int64{}
+			mutValidatorRow.RecentSignedBlocks = []int64{}
 
 			if err := validatorsView.Update(mutValidatorRow); err != nil {
 				return fmt.Errorf("error updating validator into view: %v", err)
@@ -637,6 +616,8 @@ func (projection *Validator) projectValidatorView(
 			mutValidatorRow.Power = powerChangedEvent.Power
 			if powerChangedEvent.Power == "0" && !mutValidatorRow.Jailed {
 				mutValidatorRow.Status = constants.INACTIVE
+				mutValidatorRow.RecentActiveBlocks = []int64{}
+				mutValidatorRow.RecentSignedBlocks = []int64{}
 			} else if powerChangedEvent.Power != "0" {
 				mutValidatorRow.Status = constants.BONDED
 			}
