@@ -328,6 +328,7 @@ func (validatorsView *ValidatorsView) UpdateAllValidatorUpTime(
 							total_active_block = row.total_active_block,
 							imprecise_up_time = row.imprecise_up_time,
 							recent_active_blocks = array_append(array_remove(view.recent_active_blocks, %d), %d)
+							recent_signed_blocks = array_append(array_remove(view.recent_signed_blocks, %d), %d)
 						FROM (VALUES
 						`,
 				expiredRecentUpTimeBlock,
@@ -383,6 +384,7 @@ func (validatorsView *ValidatorsView) UpdateAllValidatorUpTime(
 							total_active_block = row.total_active_block,
 							imprecise_up_time = row.imprecise_up_time,
 							recent_active_blocks = array_remove(view.recent_active_blocks, %d)
+							recent_signed_blocks = array_remove(view.recent_signed_blocks, %d)
 						FROM (VALUES
 						`,
 				expiredRecentUpTimeBlock,
@@ -1170,6 +1172,8 @@ type ValidatorRow struct {
 	VotedGovProposal        *big.Int   `json:"votedGovProposal"`
 	RecentActiveBlocks      []int64    `json:"-"`
 	TotalRecentActiveBlocks int64      `json:"totalRecentActiveBlocks"`
+	RecentSignedBlocks      []int64    `json:"-"`
+	TotalRecentSignedBlocks int64      `json:"totalRecentSignedBlocks"`
 }
 
 type ListValidatorRow struct {
