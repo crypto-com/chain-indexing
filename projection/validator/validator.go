@@ -210,12 +210,12 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 		return fmt.Errorf("error retrieving validator list: %v", listValidatorErr)
 	}
 	validatorMap := make(map[string]*view.ValidatorRow)
-	activeValidatorList := make([]*view.ValidatorRow, 0)
+	activeValidatorList := make([]view.ValidatorRow, 0)
 	for i, validator := range validatorList {
 		validatorMap[validator.TendermintAddress] = &validatorList[i]
 		switch validatorList[i].Status {
 		case constants.BONDED, constants.UNBONDING:
-			activeValidatorList = append(activeValidatorList, &validatorList[i])
+			activeValidatorList = append(activeValidatorList, validatorList[i])
 		}
 	}
 
@@ -278,27 +278,26 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 			var mutUnsignedValidators []view.ValidatorRow
 
 			for _, activeValidator := range activeValidatorList {
-				mutValidator := activeValidator
 				signed := false
-				if commitmentMap[mutValidator.ConsensusNodeAddress] {
-					mutValidator.TotalSignedBlock += 1
+				if commitmentMap[activeValidator.ConsensusNodeAddress] {
+					activeValidator.TotalSignedBlock += 1
 					signed = true
-				} else if blockCreatedEvent.BlockHeight-mutValidator.JoinedAtBlockHeight < 10 {
+				} else if blockCreatedEvent.BlockHeight-activeValidator.JoinedAtBlockHeight < 10 {
 					// give 10 blocks buffer on validator first join
-					mutValidator.TotalSignedBlock += 1
+					activeValidator.TotalSignedBlock += 1
 					signed = true
 				}
-				mutValidator.TotalActiveBlock += 1
+				activeValidator.TotalActiveBlock += 1
 
-				mutValidator.ImpreciseUpTime.Quo(
-					new(big.Float).SetInt64(mutValidator.TotalSignedBlock),
-					new(big.Float).SetInt64(mutValidator.TotalActiveBlock),
+				activeValidator.ImpreciseUpTime.Quo(
+					new(big.Float).SetInt64(activeValidator.TotalSignedBlock),
+					new(big.Float).SetInt64(activeValidator.TotalActiveBlock),
 				)
 
 				if signed {
-					mutSignedValidators = append(mutSignedValidators, mutValidator)
+					mutSignedValidators = append(mutSignedValidators, activeValidator)
 				} else {
-					mutUnsignedValidators = append(mutUnsignedValidators, mutValidator)
+					mutUnsignedValidators = append(mutUnsignedValidators, activeValidator)
 				}
 			}
 
