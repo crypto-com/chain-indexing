@@ -579,7 +579,6 @@ func (projection *Validator) projectValidatorView(
 			if err := validatorsView.Update(mutValidatorRow); err != nil {
 				return fmt.Errorf("error updating validator into view: %v", err)
 			}
-
 		} else if validatorJailedEvent, ok := event.(*event_usecase.ValidatorJailed); ok {
 			projection.logger.Debug("handling ValidatorJailed event")
 
