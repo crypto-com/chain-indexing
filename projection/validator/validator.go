@@ -210,8 +210,13 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 		return fmt.Errorf("error retrieving validator list: %v", listValidatorErr)
 	}
 	validatorMap := make(map[string]*view.ValidatorRow)
+	activeValidatorList := make([]*view.ValidatorRow)
 	for i, validator := range validatorList {
 		validatorMap[validator.TendermintAddress] = &validatorList[i]
+		switch validatorList[i].Status {
+		case constants.BONDED, constants.UNBONDING:
+			activeValidatorList = append(activeValidatorList, &validatorList[i])
+		}
 	}
 
 	for _, event := range events {
@@ -272,31 +277,28 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 			var mutSignedValidators []view.ValidatorRow
 			var mutUnsignedValidators []view.ValidatorRow
 
-			for _, validator := range validatorList {
-				mutValidator := validator
+			for _, activeValidator := range activeValidatorList {
+				mutValidator := activeValidator
 				signed := false
-				switch mutValidator.Status {
-				case constants.BONDED, constants.UNBONDING:
-					if commitmentMap[mutValidator.ConsensusNodeAddress] {
-						mutValidator.TotalSignedBlock += 1
-						signed = true
-					} else if blockCreatedEvent.BlockHeight-mutValidator.JoinedAtBlockHeight < 10 {
-						// give 10 blocks buffer on validator first join
-						mutValidator.TotalSignedBlock += 1
-						signed = true
-					}
-					mutValidator.TotalActiveBlock += 1
+				if commitmentMap[mutValidator.ConsensusNodeAddress] {
+					mutValidator.TotalSignedBlock += 1
+					signed = true
+				} else if blockCreatedEvent.BlockHeight-mutValidator.JoinedAtBlockHeight < 10 {
+					// give 10 blocks buffer on validator first join
+					mutValidator.TotalSignedBlock += 1
+					signed = true
+				}
+				mutValidator.TotalActiveBlock += 1
 
-					mutValidator.ImpreciseUpTime.Quo(
-						new(big.Float).SetInt64(mutValidator.TotalSignedBlock),
-						new(big.Float).SetInt64(mutValidator.TotalActiveBlock),
-					)
+				mutValidator.ImpreciseUpTime.Quo(
+					new(big.Float).SetInt64(mutValidator.TotalSignedBlock),
+					new(big.Float).SetInt64(mutValidator.TotalActiveBlock),
+				)
 
-					if signed {
-						mutSignedValidators = append(mutSignedValidators, mutValidator)
-					} else {
-						mutUnsignedValidators = append(mutUnsignedValidators, mutValidator)
-					}
+				if signed {
+					mutSignedValidators = append(mutSignedValidators, mutValidator)
+				} else {
+					mutUnsignedValidators = append(mutUnsignedValidators, mutValidator)
 				}
 			}
 
