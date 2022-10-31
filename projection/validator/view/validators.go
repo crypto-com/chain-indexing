@@ -552,6 +552,7 @@ func (validatorsView *ValidatorsView) ListAll(
 		"imprecise_up_time",
 		"voted_gov_proposal",
 		"recent_active_blocks",
+		"recent_signed_blocks",
 	).From(
 		"view_validators",
 	)
@@ -602,6 +603,7 @@ func (validatorsView *ValidatorsView) ListAll(
 			impreciseUpTimeReader.ScannableArg(),
 			votedGovProposalReader.ScannableArg(),
 			&validator.RecentActiveBlocks,
+			&validator.RecentSignedBlocks,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, rdb.ErrNoRows
@@ -784,6 +786,7 @@ func (validatorsView *ValidatorsView) List(
 		"imprecise_up_time",
 		"voted_gov_proposal",
 		"recent_active_blocks",
+		"recent_signed_blocks",
 	).From(
 		"view_validators",
 	)
@@ -839,6 +842,7 @@ func (validatorsView *ValidatorsView) List(
 			impreciseUpTimeReader.ScannableArg(),
 			votedGovProposalReader.ScannableArg(),
 			&validator.RecentActiveBlocks,
+			&validator.RecentSignedBlocks,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
@@ -1043,6 +1047,7 @@ func (validatorsView *ValidatorsView) FindBy(identity ValidatorIdentity) (*Valid
 		"imprecise_up_time",
 		"voted_gov_proposal",
 		"recent_active_blocks",
+		"recent_signed_blocks",
 	).From(
 		"view_validators",
 	).OrderBy("id DESC")
@@ -1092,6 +1097,7 @@ func (validatorsView *ValidatorsView) FindBy(identity ValidatorIdentity) (*Valid
 		impreciseUpTimeReader.ScannableArg(),
 		votedGovProposalReader.ScannableArg(),
 		&validator.RecentActiveBlocks,
+		&validator.RecentSignedBlocks,
 	); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
