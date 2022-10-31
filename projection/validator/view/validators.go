@@ -135,6 +135,7 @@ func (validatorsView *ValidatorsView) Upsert(validator *ValidatorRow) error {
 		"total_active_block",
 		"imprecise_up_time",
 		"voted_gov_proposal",
+		"attention",
 	).Values(
 		validator.OperatorAddress,
 		validator.ConsensusNodeAddress,
@@ -158,6 +159,7 @@ func (validatorsView *ValidatorsView) Upsert(validator *ValidatorRow) error {
 		validator.TotalActiveBlock,
 		validatorsView.rdb.BFton(validator.ImpreciseUpTime),
 		validatorsView.rdb.Bton(validator.VotedGovProposal),
+		validator.Attention,
 	).Suffix(`ON CONFLICT (operator_address, consensus_node_address) DO UPDATE SET
 		initial_delegator_address = EXCLUDED.initial_delegator_address,
 		status = EXCLUDED.status,
@@ -176,7 +178,8 @@ func (validatorsView *ValidatorsView) Upsert(validator *ValidatorRow) error {
 		total_signed_block = EXCLUDED.total_signed_block,
 		total_active_block = EXCLUDED.total_active_block,
 		imprecise_up_time = EXCLUDED.imprecise_up_time,
-		voted_gov_proposal = EXCLUDED.voted_gov_proposal
+		voted_gov_proposal = EXCLUDED.voted_gov_proposal,
+		attention = EXCLUDED.attention
 	`).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building validator upsertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -218,6 +221,7 @@ func (validatorsView *ValidatorsView) Insert(validator *ValidatorRow) error {
 		"total_active_block",
 		"imprecise_up_time",
 		"voted_gov_proposal",
+		"attention",
 	).Values(
 		validator.OperatorAddress,
 		validator.ConsensusNodeAddress,
@@ -241,6 +245,7 @@ func (validatorsView *ValidatorsView) Insert(validator *ValidatorRow) error {
 		validator.TotalActiveBlock,
 		validatorsView.rdb.TypeConv.BFton(validator.ImpreciseUpTime),
 		validatorsView.rdb.TypeConv.Bton(validator.VotedGovProposal),
+		validator.Attention,
 	).ToSql()
 	if buildStmtErr != nil {
 		return fmt.Errorf("error building validator insertion sql: %v: %w", buildStmtErr, rdb.ErrBuildSQLStmt)
@@ -278,6 +283,7 @@ func (validatorsView *ValidatorsView) Update(validator *ValidatorRow) error {
 		"total_active_block":         validator.TotalActiveBlock,
 		"imprecise_up_time":          validatorsView.rdb.TypeConv.BFton(validator.ImpreciseUpTime),
 		"voted_gov_proposal":         validatorsView.rdb.TypeConv.Bton(validator.VotedGovProposal),
+		"attention":                  validator.Attention,
 	}).Where(
 		"id = ?", validator.MaybeId,
 	).ToSql()
@@ -551,6 +557,7 @@ func (validatorsView *ValidatorsView) ListAll(
 		"imprecise_up_time",
 		"voted_gov_proposal",
 		"recent_active_blocks",
+		"attention",
 	).From(
 		"view_validators",
 	)
@@ -601,6 +608,7 @@ func (validatorsView *ValidatorsView) ListAll(
 			impreciseUpTimeReader.ScannableArg(),
 			votedGovProposalReader.ScannableArg(),
 			&validator.RecentActiveBlocks,
+			&validator.Attention,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, rdb.ErrNoRows
@@ -795,6 +803,7 @@ func (validatorsView *ValidatorsView) List(
 		"imprecise_up_time",
 		"voted_gov_proposal",
 		"recent_active_blocks",
+		"attention",
 	).From(
 		"view_validators",
 	)
@@ -850,6 +859,7 @@ func (validatorsView *ValidatorsView) List(
 			impreciseUpTimeReader.ScannableArg(),
 			votedGovProposalReader.ScannableArg(),
 			&validator.RecentActiveBlocks,
+			&validator.Attention,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
@@ -954,6 +964,7 @@ func (validatorsView *ValidatorsView) Search(keyword string) ([]ValidatorRow, er
 		"total_active_block",
 		"imprecise_up_time",
 		"voted_gov_proposal",
+		"attention",
 	).From(
 		"view_validators",
 	).Where(
@@ -1000,6 +1011,7 @@ func (validatorsView *ValidatorsView) Search(keyword string) ([]ValidatorRow, er
 			&validator.TotalActiveBlock,
 			impreciseUpTimeReader.ScannableArg(),
 			votedGovProposalReader.ScannableArg(),
+			&validator.Attention,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, rdb.ErrNoRows
@@ -1054,6 +1066,7 @@ func (validatorsView *ValidatorsView) FindBy(identity ValidatorIdentity) (*Valid
 		"imprecise_up_time",
 		"voted_gov_proposal",
 		"recent_active_blocks",
+		"attention",
 	).From(
 		"view_validators",
 	).OrderBy("id DESC")
@@ -1103,6 +1116,7 @@ func (validatorsView *ValidatorsView) FindBy(identity ValidatorIdentity) (*Valid
 		impreciseUpTimeReader.ScannableArg(),
 		votedGovProposalReader.ScannableArg(),
 		&validator.RecentActiveBlocks,
+		&validator.Attention,
 	); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
@@ -1191,6 +1205,7 @@ type ValidatorRow struct {
 	VotedGovProposal        *big.Int   `json:"votedGovProposal"`
 	RecentActiveBlocks      []int64    `json:"-"`
 	TotalRecentActiveBlocks int64      `json:"totalRecentActiveBlocks"`
+	Attention               bool       `json:"attention"`
 }
 
 type ListValidatorRow struct {
