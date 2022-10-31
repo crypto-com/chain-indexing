@@ -24,6 +24,7 @@ type Messages interface {
 		pagination *pagination_interface.Pagination,
 	) ([]MessageRow, *pagination_interface.PaginationResult, error)
 	DeleteAllByDenomTokenIds(denomId string, tokenId string) (int64, error)
+	BurnMessagesByToken(denomId string, maybeTokenId string) error
 }
 
 type MessagesView struct {
@@ -56,6 +57,7 @@ func (nftMessagesView *MessagesView) Insert(messageRow *MessageRow) error {
 		"message_index",
 		"message_type",
 		"data",
+		"burned",
 	)
 	blockTime := nftMessagesView.rdb.Tton(&messageRow.BlockTime)
 
@@ -71,6 +73,7 @@ func (nftMessagesView *MessagesView) Insert(messageRow *MessageRow) error {
 		messageRow.MessageIndex,
 		messageRow.MessageType,
 		nftMessageDataJSON,
+		false,
 	)
 	sql, sqlArgs, err := stmtBuilder.ToSql()
 	if err != nil {
@@ -109,6 +112,9 @@ func (nftMessagesView *MessagesView) List(
 	).From(
 		MESSAGES_TABLE_NAME,
 	)
+
+	// show non-burned nft
+	stmtBuilder = stmtBuilder.Where("view_nft_messages.burned = ?", false)
 
 	if filter.MaybeDenomId != nil {
 		stmtBuilder = stmtBuilder.Where("denom_id = ?", *filter.MaybeDenomId)
@@ -239,10 +245,35 @@ func (nftMessagesView *MessagesView) DeleteAllByDenomTokenIds(denomId string, to
 
 	result, err := nftMessagesView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
-		return 0, fmt.Errorf("error deleteing NFT messages from the table: %v: %w", err, rdb.ErrWrite)
+		return 0, fmt.Errorf("error deleting NFT messages from the table: %v: %w", err, rdb.ErrWrite)
 	}
 
 	return result.RowsAffected(), nil
+}
+
+func (nftMessagesView *MessagesView) BurnMessagesByToken(denomId string, maybeTokenId string) error {
+	sql, sqlArgs, err := nftMessagesView.rdb.StmtBuilder.Update(
+		MESSAGES_TABLE_NAME,
+	).SetMap(map[string]interface{}{
+		"burned": true,
+	}).Where(
+		"denom_id = ? AND maybe_token_id = ?",
+		sanitizer.SanitizePostgresString(denomId),
+		sanitizer.SanitizePostgresString(maybeTokenId),
+	).ToSql()
+	if err != nil {
+		return fmt.Errorf("error building burn NFT message by token  sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	result, err := nftMessagesView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error burning NFT message by token into the table: %v: %w", err, rdb.ErrWrite)
+	}
+	if result.RowsAffected() <= 0 {
+		return fmt.Errorf("error burning NFT message by token: no rows deleted: %w", rdb.ErrWrite)
+	}
+
+	return nil
 }
 
 type MessageRow struct {

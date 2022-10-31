@@ -472,7 +472,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 			Events: []entity_event.Event{
 				&usecase_event.MsgNFTBurnNFT{
 					MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
-						MsgName: usecase_event.MSG_NFT_EDIT_NFT,
+						MsgName: usecase_event.MSG_NFT_BURN_NFT,
 						Version: 1,
 						MsgCommonParams: usecase_event.MsgCommonParams{
 							BlockHeight: 1,
@@ -487,6 +487,7 @@ func TestNFT_HandleEvents(t *testing.T) {
 				},
 			},
 			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				typedEvent := events[0].(*usecase_event.MsgNFTBurnNFT)
 
 				mockTokensView := &view.MockTokensView{}
 				mocks = append(mocks, &mockTokensView.Mock)
@@ -515,8 +516,8 @@ func TestNFT_HandleEvents(t *testing.T) {
 					}, nil)
 
 				mockTokensView.
-					On("Delete", "DenomId", "TokenId").
-					Return(int64(1), nil)
+					On("BurnToken", "DenomId", "TokenId").
+					Return(nil)
 
 				nft.NewTokens = func(handle *rdb.Handle) view.Tokens {
 					return mockTokensView
@@ -525,8 +526,25 @@ func TestNFT_HandleEvents(t *testing.T) {
 				mockMessagesView := &view.MockMessagesView{}
 				mocks = append(mocks, &mockMessagesView.Mock)
 				mockMessagesView.
-					On("DeleteAllByDenomTokenIds", "DenomId", "TokenId").
+					On("BurnMessagesByToken", "DenomId", "TokenId").
 					Return(int64(1), nil)
+
+				mocks = append(mocks, &mockMessagesView.Mock)
+				mockMessagesView.
+					On("Insert", &view.MessageRow{
+						BlockHeight:     1,
+						BlockHash:       "",
+						BlockTime:       utctime.UTCTime{},
+						DenomId:         "DenomId",
+						MaybeTokenId:    primptr.String("TokenId"),
+						MaybeDrop:       nil,
+						TransactionHash: "TxHash",
+						Success:         true,
+						MessageIndex:    0,
+						MessageType:     "/chainmain.nft.v1.MsgBurnNFT",
+						Data:            typedEvent,
+					}).
+					Return(nil)
 
 				nft.NewMessages = func(handle *rdb.Handle) view.Messages {
 					return mockMessagesView
