@@ -210,7 +210,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 		return fmt.Errorf("error retrieving validator list: %v", listValidatorErr)
 	}
 	validatorMap := make(map[string]*view.ValidatorRow)
-	activeValidatorList := make([]*view.ValidatorRow)
+	activeValidatorList := make([]*view.ValidatorRow, 0)
 	for i, validator := range validatorList {
 		validatorMap[validator.TendermintAddress] = &validatorList[i]
 		switch validatorList[i].Status {
