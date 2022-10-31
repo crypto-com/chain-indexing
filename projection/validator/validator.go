@@ -275,8 +275,8 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 			for _, validator := range validatorList {
 				mutValidator := validator
 				signed := false
-				if mutValidator.Status == constants.BONDED ||
-					mutValidator.Status == constants.UNBONDING {
+				switch mutValidator.Status {
+				case constants.BONDED, constants.UNBONDING:
 					if commitmentMap[mutValidator.ConsensusNodeAddress] {
 						mutValidator.TotalSignedBlock += 1
 						signed = true
