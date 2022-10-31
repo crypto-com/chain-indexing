@@ -165,6 +165,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 						TotalActiveBlock:        1,
 						ImpreciseUpTime:         big.NewFloat(0.1),
 						VotedGovProposal:        big.NewInt(1),
+						Attention:               false,
 					}, nil)
 
 				mockValidatorActivitiesView := validator_view.NewMockValidatorActivitiesView(nil).(*validator_view.MockValidatorActivitiesView)
@@ -253,7 +254,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 						InitialDelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 						TendermintPubkey:        "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
 						TendermintAddress:       "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-						Status:                  "Attention",
+						Status:                  "Bonded",
 						Jailed:                  false,
 						JoinedAtBlockHeight:     1,
 						Power:                   "",
@@ -270,6 +271,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 						TotalActiveBlock:        1,
 						ImpreciseUpTime:         big.NewFloat(0.1),
 						VotedGovProposal:        big.NewInt(1),
+						Attention:               true,
 					},
 				).Return(nil)
 
@@ -432,6 +434,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 						TotalActiveBlock:        1,
 						ImpreciseUpTime:         big.NewFloat(0.1),
 						VotedGovProposal:        big.NewInt(1),
+						Attention:               false,
 					}, nil)
 
 				mockValidatorActivitiesView := validator_view.NewMockValidatorActivitiesView(nil).(*validator_view.MockValidatorActivitiesView)
@@ -520,7 +523,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 						InitialDelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 						TendermintPubkey:        "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
 						TendermintAddress:       "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-						Status:                  "Attention",
+						Status:                  "Bonded",
 						Jailed:                  false,
 						JoinedAtBlockHeight:     1,
 						Power:                   "",
@@ -537,6 +540,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 						TotalActiveBlock:        1,
 						ImpreciseUpTime:         big.NewFloat(0.1),
 						VotedGovProposal:        big.NewInt(1),
+						Attention:               true,
 					},
 				).Return(nil)
 
@@ -699,6 +703,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 						TotalActiveBlock:        1,
 						ImpreciseUpTime:         big.NewFloat(0.1),
 						VotedGovProposal:        big.NewInt(1),
+						Attention:               false,
 					}, nil)
 
 				mockValidatorActivitiesView := validator_view.NewMockValidatorActivitiesView(nil).(*validator_view.MockValidatorActivitiesView)
@@ -730,7 +735,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 						InitialDelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
 						TendermintPubkey:        "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
 						TendermintAddress:       "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
-						Status:                  "Attention",
+						Status:                  "Bonded",
 						Jailed:                  false,
 						JoinedAtBlockHeight:     1,
 						Power:                   "",
@@ -747,6 +752,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 						TotalActiveBlock:        1,
 						ImpreciseUpTime:         big.NewFloat(0.1),
 						VotedGovProposal:        big.NewInt(1),
+						Attention:               true,
 					},
 				).Return(nil)
 
@@ -909,6 +915,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 						TotalActiveBlock:        1,
 						ImpreciseUpTime:         big.NewFloat(0.1),
 						VotedGovProposal:        big.NewInt(1),
+						Attention:               false,
 					}, nil)
 
 				mockValidatorActivitiesView := validator_view.NewMockValidatorActivitiesView(nil).(*validator_view.MockValidatorActivitiesView)
@@ -1014,6 +1021,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 						TotalActiveBlock:        1,
 						ImpreciseUpTime:         big.NewFloat(0.1),
 						VotedGovProposal:        big.NewInt(1),
+						Attention:               false,
 					},
 				).Return(nil)
 
@@ -1173,6 +1181,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalRecentActiveBlocks: 0,
 							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
+							Attention:               false,
 						},
 						{
 							MaybeId:                 nil,
@@ -1202,6 +1211,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalRecentActiveBlocks: 0,
 							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
+							Attention:               false,
 						},
 						{
 							MaybeId:                 nil,
@@ -1231,6 +1241,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalRecentActiveBlocks: 0,
 							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
+							Attention:               false,
 						},
 						{
 							MaybeId:                 nil,
@@ -1260,6 +1271,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalRecentActiveBlocks: 0,
 							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
+							Attention:               false,
 						},
 						{
 							MaybeId:                 nil,
@@ -1289,6 +1301,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalRecentActiveBlocks: 0,
 							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
+							Attention:               false,
 						},
 					}, nil)
 
@@ -1472,6 +1485,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalRecentActiveBlocks: 0,
 							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
+							Attention:               false,
 						},
 					},
 					int64(11),

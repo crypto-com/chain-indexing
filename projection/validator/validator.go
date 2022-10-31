@@ -396,6 +396,7 @@ func (projection *Validator) projectValidatorView(
 				VotedGovProposal:        big.NewInt(0),
 				RecentActiveBlocks:      []int64{},
 				RecentSignedBlocks:      []int64{},
+				Attention:               false,
 			}
 
 			// Validator re-joins
@@ -457,6 +458,7 @@ func (projection *Validator) projectValidatorView(
 				VotedGovProposal:        big.NewInt(0),
 				RecentActiveBlocks:      []int64{},
 				RecentSignedBlocks:      []int64{},
+				Attention:               false,
 			}
 
 			// Validator re-joins
@@ -499,35 +501,35 @@ func (projection *Validator) projectValidatorView(
 			if msgEditValidatorEvent.Description.Moniker != DO_NOT_MODIFY {
 				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.MONIKER)
 				if isExceeded {
-					mutValidatorRow.Status = constants.ATTENTION
+					mutValidatorRow.Attention = true
 				}
 				mutValidatorRow.Moniker = msgEditValidatorEvent.Description.Moniker
 			}
 			if msgEditValidatorEvent.Description.Identity != DO_NOT_MODIFY {
 				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.IDENTITY)
 				if isExceeded {
-					mutValidatorRow.Status = constants.ATTENTION
+					mutValidatorRow.Attention = true
 				}
 				mutValidatorRow.Identity = msgEditValidatorEvent.Description.Identity
 			}
 			if msgEditValidatorEvent.Description.Details != DO_NOT_MODIFY {
 				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.DETAILS)
 				if isExceeded {
-					mutValidatorRow.Status = constants.ATTENTION
+					mutValidatorRow.Attention = true
 				}
 				mutValidatorRow.Details = msgEditValidatorEvent.Description.Details
 			}
 			if msgEditValidatorEvent.Description.SecurityContact != DO_NOT_MODIFY {
 				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.SECURITY_CONTACT)
 				if isExceeded {
-					mutValidatorRow.Status = constants.ATTENTION
+					mutValidatorRow.Attention = true
 				}
 				mutValidatorRow.SecurityContact = msgEditValidatorEvent.Description.SecurityContact
 			}
 			if msgEditValidatorEvent.Description.Website != DO_NOT_MODIFY {
 				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.WEBSITE)
 				if isExceeded {
-					mutValidatorRow.Status = constants.ATTENTION
+					mutValidatorRow.Attention = true
 				}
 				mutValidatorRow.Website = msgEditValidatorEvent.Description.Website
 			}
@@ -541,7 +543,7 @@ func (projection *Validator) projectValidatorView(
 					)
 				}
 				if isExceededMaxCommissionChange || isExceeded {
-					mutValidatorRow.Status = constants.ATTENTION
+					mutValidatorRow.Attention = true
 				}
 
 				mutValidatorRow.CommissionRate = *msgEditValidatorEvent.MaybeCommissionRate
@@ -635,7 +637,7 @@ func (projection *Validator) projectValidatorView(
 func (projection *Validator) isExceededMaxCommissionChange(mutValidatorRow *view.ValidatorRow, maybeCommissionRate string, commissionRate string, validatorAddress string) (bool, error) {
 	if projection.config.AttentionStatusRules.MaxCommissionRateChange.Enable {
 		// skip validator with "Attention" status
-		if mutValidatorRow.Status == constants.ATTENTION {
+		if mutValidatorRow.Attention {
 			return false, nil
 		}
 		newCommission, newCommissionErr := strconv.ParseFloat(maybeCommissionRate, 64)
@@ -662,7 +664,7 @@ func (projection *Validator) isExceededMaxCommissionChange(mutValidatorRow *view
 func (projection *Validator) isExceededNumOfEdit(mutValidatorRow *view.ValidatorRow, editQuotaCounter map[string]int, editField string) bool {
 	if projection.config.AttentionStatusRules.MaxEditQuota.Enable {
 		// skip validator with "Attention" status
-		if mutValidatorRow.Status == constants.ATTENTION {
+		if mutValidatorRow.Attention {
 			return false
 		}
 
@@ -685,7 +687,7 @@ func (projection *Validator) isExceededNumOfEdit(mutValidatorRow *view.Validator
 func (projection *Validator) countEditQuotaOnLastActivities(validatorActivities *view.ValidatorActivities, msgEditValidatorEvent *event_usecase.MsgEditValidator, mutValidatorRow *view.ValidatorRow, blockTime utctime.UTCTime) (map[string]int, error) {
 	if projection.config.AttentionStatusRules.MaxEditQuota.Enable {
 		// skip validator with "Attention" status
-		if mutValidatorRow.Status == constants.ATTENTION {
+		if mutValidatorRow.Attention {
 			return map[string]int{}, nil
 		}
 
