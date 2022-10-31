@@ -139,8 +139,10 @@ func (handler *Validators) FindBy(ctx *fasthttp.RequestCtx) {
 	}
 
 	var recentActiveBLocks []int64
+	var recentSignedBLocks []int64
 	if activeBlocksPeriodLimit == handler.maxActiveBlocksPeriodLimit {
 		recentActiveBLocks = rawValidator.RecentActiveBlocks
+		recentSignedBLocks = rawValidator.RecentSignedBlocks
 	} else if len(rawValidator.RecentActiveBlocks) > 0 &&
 		rawValidator.RecentActiveBlocks[len(rawValidator.RecentActiveBlocks)-1] >= (lastHandledHeight-activeBlocksPeriodLimit+1) {
 		for i := len(rawValidator.RecentActiveBlocks) - 1; i >= 0; i-- {
@@ -150,9 +152,18 @@ func (handler *Validators) FindBy(ctx *fasthttp.RequestCtx) {
 				break
 			}
 		}
+		for i := len(rawValidator.RecentSignedBlocks) - 1; i >= 0; i-- {
+			if rawValidator.RecentSignedBlocks[i] >= (lastHandledHeight - activeBlocksPeriodLimit + 1) {
+				recentSignedBLocks = append(recentSignedBLocks, rawValidator.RecentSignedBlocks[i])
+			} else {
+				break
+			}
+		}
 	}
 	rawValidator.TotalRecentActiveBlocks = int64(len(recentActiveBLocks))
 	rawValidator.RecentActiveBlocks = recentActiveBLocks
+	rawValidator.TotalRecentSignedBlocks = int64(len(recentSignedBLocks))
+	rawValidator.RecentSignedBlocks = recentSignedBLocks
 
 	validator := ValidatorDetails{
 		ValidatorRow: rawValidator,
@@ -256,8 +267,10 @@ func (handler *Validators) List(ctx *fasthttp.RequestCtx) {
 	validatorsWithAPY := make([]validatorRowWithAPY, 0, len(validators))
 	for _, validator := range validators {
 		var recentActiveBLocks []int64
+		var recentSignedBLocks []int64
 		if activeBlocksPeriodLimit == handler.maxActiveBlocksPeriodLimit {
 			recentActiveBLocks = validator.RecentActiveBlocks
+			recentSignedBLocks = validator.RecentSignedBlocks
 		} else if len(validator.RecentActiveBlocks) > 0 &&
 			validator.RecentActiveBlocks[len(validator.RecentActiveBlocks)-1] >= (lastHandledHeight-activeBlocksPeriodLimit+1) {
 			for i := len(validator.RecentActiveBlocks) - 1; i >= 0; i-- {
@@ -267,9 +280,18 @@ func (handler *Validators) List(ctx *fasthttp.RequestCtx) {
 					break
 				}
 			}
+			for i := len(validator.RecentSignedBlocks) - 1; i >= 0; i-- {
+				if validator.RecentSignedBlocks[i] >= (lastHandledHeight - activeBlocksPeriodLimit + 1) {
+					recentSignedBLocks = append(recentSignedBLocks, validator.RecentSignedBlocks[i])
+				} else {
+					break
+				}
+			}
 		}
 		validator.TotalRecentActiveBlocks = int64(len(recentActiveBLocks))
 		validator.RecentActiveBlocks = recentActiveBLocks
+		validator.TotalRecentSignedBlocks = int64(len(recentSignedBLocks))
+		validator.RecentSignedBlocks = recentSignedBLocks
 
 		if validator.Status != constants.BONDED {
 			validatorsWithAPY = append(validatorsWithAPY, validatorRowWithAPY{
@@ -520,8 +542,10 @@ func (handler *Validators) ListActive(ctx *fasthttp.RequestCtx) {
 
 	for _, validator := range validators {
 		var recentActiveBLocks []int64
+		var recentSignedBLocks []int64
 		if activeBlocksPeriodLimit == handler.maxActiveBlocksPeriodLimit {
 			recentActiveBLocks = validator.RecentActiveBlocks
+			recentSignedBLocks = validator.RecentSignedBlocks
 		} else if len(validator.RecentActiveBlocks) > 0 &&
 			validator.RecentActiveBlocks[len(validator.RecentActiveBlocks)-1] >= (lastHandledHeight-activeBlocksPeriodLimit+1) {
 			for i := len(validator.RecentActiveBlocks) - 1; i >= 0; i-- {
@@ -531,9 +555,18 @@ func (handler *Validators) ListActive(ctx *fasthttp.RequestCtx) {
 					break
 				}
 			}
+			for i := len(validator.RecentSignedBlocks) - 1; i >= 0; i-- {
+				if validator.RecentSignedBlocks[i] >= (lastHandledHeight - activeBlocksPeriodLimit + 1) {
+					recentSignedBLocks = append(recentSignedBLocks, validator.RecentSignedBlocks[i])
+				} else {
+					break
+				}
+			}
 		}
 		validator.TotalRecentActiveBlocks = int64(len(recentActiveBLocks))
 		validator.RecentActiveBlocks = recentActiveBLocks
+		validator.TotalRecentSignedBlocks = int64(len(recentSignedBLocks))
+		validator.RecentSignedBlocks = recentSignedBLocks
 	}
 
 	httpapi.SuccessWithPagination(ctx, validators, paginationResult)
