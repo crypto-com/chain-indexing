@@ -135,6 +135,7 @@ func (validatorsView *ValidatorsView) Upsert(validator *ValidatorRow) error {
 		"total_active_block",
 		"imprecise_up_time",
 		"voted_gov_proposal",
+		"recent_active_blocks",
 	).Values(
 		validator.OperatorAddress,
 		validator.ConsensusNodeAddress,
@@ -158,6 +159,7 @@ func (validatorsView *ValidatorsView) Upsert(validator *ValidatorRow) error {
 		validator.TotalActiveBlock,
 		validatorsView.rdb.BFton(validator.ImpreciseUpTime),
 		validatorsView.rdb.Bton(validator.VotedGovProposal),
+		validator.RecentActiveBlocks,
 	).Suffix(`ON CONFLICT (operator_address, consensus_node_address) DO UPDATE SET
 		initial_delegator_address = EXCLUDED.initial_delegator_address,
 		status = EXCLUDED.status,
@@ -176,7 +178,8 @@ func (validatorsView *ValidatorsView) Upsert(validator *ValidatorRow) error {
 		total_signed_block = EXCLUDED.total_signed_block,
 		total_active_block = EXCLUDED.total_active_block,
 		imprecise_up_time = EXCLUDED.imprecise_up_time,
-		voted_gov_proposal = EXCLUDED.voted_gov_proposal
+		voted_gov_proposal = EXCLUDED.voted_gov_proposal,
+		recent_active_blocks = EXCLUDED.recent_active_blocks
 	`).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building validator upsertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -278,6 +281,7 @@ func (validatorsView *ValidatorsView) Update(validator *ValidatorRow) error {
 		"total_active_block":         validator.TotalActiveBlock,
 		"imprecise_up_time":          validatorsView.rdb.TypeConv.BFton(validator.ImpreciseUpTime),
 		"voted_gov_proposal":         validatorsView.rdb.TypeConv.Bton(validator.VotedGovProposal),
+		"recent_active_blocks":       validator.RecentActiveBlocks,
 	}).Where(
 		"id = ?", validator.MaybeId,
 	).ToSql()
@@ -425,8 +429,7 @@ func (validatorsView *ValidatorsView) UpdateAllValidatorUpTime(
 }
 
 type ValidatorsListFilter struct {
-	MaybeStatuses                []constants.Status
-	MaybeEmptyRecentActiveBlocks *bool
+	MaybeStatuses []constants.Status
 }
 
 type ValidatorsListOrder struct {
@@ -512,18 +515,6 @@ func (validatorsView *ValidatorsView) ListAll(
 			})
 		}
 		whereClause = append(whereClause, statusOrCondition)
-	}
-
-	if filter.MaybeEmptyRecentActiveBlocks != nil {
-		if *filter.MaybeEmptyRecentActiveBlocks {
-			whereClause = append(whereClause, sq.Eq{
-				"recent_active_blocks": "{}",
-			})
-		} else {
-			whereClause = append(whereClause, sq.NotEq{
-				"recent_active_blocks": "{}",
-			})
-		}
 	}
 
 	stmtBuilder := validatorsView.rdb.StmtBuilder.Select(
@@ -717,18 +708,6 @@ func (validatorsView *ValidatorsView) List(
 			})
 		}
 		whereClause = append(whereClause, statusOrCondition)
-	}
-
-	if filter.MaybeEmptyRecentActiveBlocks != nil {
-		if *filter.MaybeEmptyRecentActiveBlocks {
-			whereClause = append(whereClause, sq.Eq{
-				"recent_active_blocks": "{}",
-			})
-		} else {
-			whereClause = append(whereClause, sq.NotEq{
-				"recent_active_blocks": "{}",
-			})
-		}
 	}
 
 	if whereClause != nil {
