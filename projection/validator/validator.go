@@ -395,6 +395,7 @@ func (projection *Validator) projectValidatorView(
 				ImpreciseUpTime:         big.NewFloat(1),
 				VotedGovProposal:        big.NewInt(0),
 				RecentActiveBlocks:      []int64{},
+				RecentSignedBlocks:      []int64{},
 			}
 
 			// Validator re-joins
@@ -455,6 +456,7 @@ func (projection *Validator) projectValidatorView(
 				ImpreciseUpTime:         big.NewFloat(1),
 				VotedGovProposal:        big.NewInt(0),
 				RecentActiveBlocks:      []int64{},
+				RecentSignedBlocks:      []int64{},
 			}
 
 			// Validator re-joins
@@ -566,6 +568,7 @@ func (projection *Validator) projectValidatorView(
 			mutValidatorRow.Status = constants.JAILED
 			mutValidatorRow.Jailed = true
 			mutValidatorRow.RecentActiveBlocks = []int64{}
+			mutValidatorRow.RecentSignedBlocks = []int64{}
 
 			if err := validatorsView.Update(mutValidatorRow); err != nil {
 				return fmt.Errorf("error updating validator into view: %v", err)
@@ -584,6 +587,7 @@ func (projection *Validator) projectValidatorView(
 			mutValidatorRow.Status = constants.INACTIVE
 			mutValidatorRow.Jailed = false
 			mutValidatorRow.RecentActiveBlocks = []int64{}
+			mutValidatorRow.RecentSignedBlocks = []int64{}
 
 			if err := validatorsView.Update(mutValidatorRow); err != nil {
 				return fmt.Errorf("error updating validator into view: %v", err)
@@ -613,6 +617,7 @@ func (projection *Validator) projectValidatorView(
 			if powerChangedEvent.Power == "0" && !mutValidatorRow.Jailed {
 				mutValidatorRow.Status = constants.INACTIVE
 				mutValidatorRow.RecentActiveBlocks = []int64{}
+				mutValidatorRow.RecentSignedBlocks = []int64{}
 			} else if powerChangedEvent.Power != "0" {
 				mutValidatorRow.Status = constants.BONDED
 			}

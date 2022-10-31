@@ -1171,6 +1171,8 @@ func TestValidator_HandleEvents(t *testing.T) {
 							VotedGovProposal:        nil,
 							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
+							RecentSignedBlocks:      []int64{},
+							TotalRecentSignedBlocks: 0,
 						},
 						{
 							MaybeId:                 nil,
@@ -1198,6 +1200,8 @@ func TestValidator_HandleEvents(t *testing.T) {
 							VotedGovProposal:        nil,
 							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
+							RecentSignedBlocks:      []int64{},
+							TotalRecentSignedBlocks: 0,
 						},
 						{
 							MaybeId:                 nil,
@@ -1225,6 +1229,8 @@ func TestValidator_HandleEvents(t *testing.T) {
 							VotedGovProposal:        nil,
 							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
+							RecentSignedBlocks:      []int64{},
+							TotalRecentSignedBlocks: 0,
 						},
 						{
 							MaybeId:                 nil,
@@ -1252,6 +1258,8 @@ func TestValidator_HandleEvents(t *testing.T) {
 							VotedGovProposal:        nil,
 							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
+							RecentSignedBlocks:      []int64{},
+							TotalRecentSignedBlocks: 0,
 						},
 						{
 							MaybeId:                 nil,
@@ -1279,6 +1287,8 @@ func TestValidator_HandleEvents(t *testing.T) {
 							VotedGovProposal:        nil,
 							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
+							RecentSignedBlocks:      []int64{},
+							TotalRecentSignedBlocks: 0,
 						},
 					}, nil)
 
@@ -1371,6 +1381,8 @@ func TestValidator_HandleEvents(t *testing.T) {
 							VotedGovProposal:        nil,
 							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
+							RecentSignedBlocks:      []int64{},
+							TotalRecentSignedBlocks: 0,
 						},
 						{
 							MaybeId:                 nil,
@@ -1398,6 +1410,8 @@ func TestValidator_HandleEvents(t *testing.T) {
 							VotedGovProposal:        nil,
 							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
+							RecentSignedBlocks:      []int64{},
+							TotalRecentSignedBlocks: 0,
 						},
 						{
 							MaybeId:                 nil,
@@ -1425,6 +1439,8 @@ func TestValidator_HandleEvents(t *testing.T) {
 							VotedGovProposal:        nil,
 							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
+							RecentSignedBlocks:      []int64{},
+							TotalRecentSignedBlocks: 0,
 						},
 					},
 					[]view.ValidatorRow{
@@ -1454,6 +1470,8 @@ func TestValidator_HandleEvents(t *testing.T) {
 							VotedGovProposal:        nil,
 							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
+							RecentSignedBlocks:      []int64{},
+							TotalRecentSignedBlocks: 0,
 						},
 					},
 					int64(11),
