@@ -1,1 +1,1 @@
-DROP INDEX IF EXISTS view_nft_tokens_ids_btree_index;
+DROP INDEX IF EXISTS view_nft_tokens_ids_burned_btree_index;
