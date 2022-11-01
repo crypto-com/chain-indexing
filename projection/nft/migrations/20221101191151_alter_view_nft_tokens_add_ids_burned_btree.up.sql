@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS view_nft_tokens_ids_burned_btree_index ON view_nft_tokens USING btree (denom_id, token_id, burned);

@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS view_nft_tokens_ids_btree_index;

@@ -220,7 +220,7 @@ func (tokensView *TokensView) Update(tokenRow TokenRow) error {
 		"last_transferred_at":              tokensView.rdb.TypeConv.Tton(&tokenRow.LastTransferredAt),
 		"last_transferred_at_block_height": tokenRow.LastTransferredAtBlockHeight,
 	}).Where(
-		"denom_id = ? AND token_id = ?",
+		"denom_id = ? AND token_id = ? AND burned = false",
 		sanitizer.SanitizePostgresString(tokenRow.DenomId),
 		sanitizer.SanitizePostgresString(tokenRow.TokenId),
 	).ToSql()
