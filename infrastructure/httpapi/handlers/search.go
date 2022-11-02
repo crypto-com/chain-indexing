@@ -68,7 +68,7 @@ func (search *Search) Search(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
-	validators, err := search.validatorsView.Search(keyword)
+	validators, err := search.validatorsView.Search(keyword, nil)
 	if err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			validators = []validator_view.ValidatorRow{}

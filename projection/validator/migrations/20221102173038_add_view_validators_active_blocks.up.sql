@@ -1,4 +1,4 @@
-CREATE TABLE view_validators_active_blocks
+CREATE TABLE view_validator_active_blocks
 (
     operator_address VARCHAR,
     block_height     BIGINT  NOT NULL,

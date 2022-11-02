@@ -15,7 +15,10 @@ type ValidatorActiveBlocks interface {
 		height int64,
 		maxRecentUpTimeInBlocks int64,
 	) error
+	ClearValidatorActiveBLocks(operatorAddress string) error
 }
+
+const VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME = "view_validator_active_blocks"
 
 // ValidatorActiveBlocksView projection view implemented by relational database
 type ValidatorActiveBlocksView struct {
@@ -32,12 +35,12 @@ func (validatorActiveBlocksView *ValidatorActiveBlocksView) UpdateValidatorsActi
 	signedValidators []ValidatorRow,
 	unsignedValidators []ValidatorRow,
 	height int64,
-	maxRecentUpTimeInBlocks int64,
+	maxRecentActiveBlocks int64,
 ) error {
 	expiredRecentUpTimeBlock := int64(0)
 
-	if height-maxRecentUpTimeInBlocks > 0 {
-		expiredRecentUpTimeBlock = height - maxRecentUpTimeInBlocks
+	if height-maxRecentActiveBlocks > 0 {
+		expiredRecentUpTimeBlock = height - maxRecentActiveBlocks
 	}
 
 	pendingRowCount := 0
@@ -47,7 +50,7 @@ func (validatorActiveBlocksView *ValidatorActiveBlocksView) UpdateValidatorsActi
 	for i, signedValidator := range signedValidators {
 		if pendingRowCount == 0 {
 			stmtBuilder = validatorActiveBlocksView.rdb.StmtBuilder.Insert(
-				"view_validator_active_blocks",
+				VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
 			).Columns(
 				"block_height",
 				"operator_address",
@@ -84,7 +87,7 @@ func (validatorActiveBlocksView *ValidatorActiveBlocksView) UpdateValidatorsActi
 	for i, unsignedValidator := range unsignedValidators {
 		if pendingRowCount == 0 {
 			stmtBuilder = validatorActiveBlocksView.rdb.StmtBuilder.Insert(
-				"view_validator_active_blocks",
+				VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
 			).Columns(
 				"block_height",
 				"operator_address",
@@ -118,9 +121,28 @@ func (validatorActiveBlocksView *ValidatorActiveBlocksView) UpdateValidatorsActi
 	}
 
 	sql, sqlArgs, err := validatorActiveBlocksView.rdb.StmtBuilder.Delete(
-		"view_validator_active_blocks",
+		VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
 	).Where(
 		"block_height <= ?", expiredRecentUpTimeBlock,
+	).ToSql()
+	if err != nil {
+		return fmt.Errorf("error building validator active block deletion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+	}
+
+	_, err = validatorActiveBlocksView.rdb.Exec(sql, sqlArgs...)
+	if err != nil {
+		return fmt.Errorf("error deleting validator active block from the table: %v: %w", err, rdb.ErrWrite)
+	}
+
+	return nil
+}
+
+func (validatorActiveBlocksView *ValidatorActiveBlocksView) ClearValidatorActiveBLocks(operatorAddress string) error {
+
+	sql, sqlArgs, err := validatorActiveBlocksView.rdb.StmtBuilder.Delete(
+		VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+	).Where(
+		"operator_address = ?", operatorAddress,
 	).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building validator active block deletion sql: %v: %w", err, rdb.ErrBuildSQLStmt)

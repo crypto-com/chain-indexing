@@ -140,6 +140,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 					validator_view.ValidatorIdentity{
 						MaybeOperatorAddress: primptr.String("tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus"),
 					},
+					(*int64)(nil),
 				).Return(
 					&validator_view.ValidatorRow{
 						MaybeId:                 primptr.Int64(3),
@@ -315,6 +316,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 					"ListAll",
 					testify_mock.Anything,
 					testify_mock.Anything,
+					(*int64)(nil),
 				).Return(
 					[]validator_view.ValidatorRow{}, nil)
 
@@ -345,6 +347,18 @@ func TestValidator_HandleEvents(t *testing.T) {
 
 				mockValidatorsView.On(
 					"UpdateAllValidatorUpTime",
+					[]view.ValidatorRow(nil),
+				).Return(nil)
+
+				mockValidatorActiveBlocksView := validator_view.NewMockValidatorActiveBlocksView(nil).(*validator_view.MockValidatorActiveBlocksView)
+				mocks = append(mocks, &mockValidatorActiveBlocksView.Mock)
+
+				validator.NewValidatorActiveBlocks = func(_ *rdb.Handle) validator_view.ValidatorActiveBlocks {
+					return mockValidatorActiveBlocksView
+				}
+
+				mockValidatorActiveBlocksView.On(
+					"UpdateValidatorsActiveBlocks",
 					[]view.ValidatorRow(nil),
 					[]view.ValidatorRow(nil),
 					int64(1),
@@ -409,6 +423,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 					validator_view.ValidatorIdentity{
 						MaybeOperatorAddress: primptr.String("tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus"),
 					},
+					(*int64)(nil),
 				).Return(
 					&validator_view.ValidatorRow{
 						MaybeId:                 primptr.Int64(3),
@@ -584,6 +599,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 					"ListAll",
 					testify_mock.Anything,
 					testify_mock.Anything,
+					(*int64)(nil),
 				).Return(
 					[]validator_view.ValidatorRow{}, nil)
 
@@ -614,6 +630,18 @@ func TestValidator_HandleEvents(t *testing.T) {
 
 				mockValidatorsView.On(
 					"UpdateAllValidatorUpTime",
+					[]view.ValidatorRow(nil),
+				).Return(nil)
+
+				mockValidatorActiveBlocksView := validator_view.NewMockValidatorActiveBlocksView(nil).(*validator_view.MockValidatorActiveBlocksView)
+				mocks = append(mocks, &mockValidatorActiveBlocksView.Mock)
+
+				validator.NewValidatorActiveBlocks = func(_ *rdb.Handle) validator_view.ValidatorActiveBlocks {
+					return mockValidatorActiveBlocksView
+				}
+
+				mockValidatorActiveBlocksView.On(
+					"UpdateValidatorsActiveBlocks",
 					[]view.ValidatorRow(nil),
 					[]view.ValidatorRow(nil),
 					int64(1),
@@ -678,6 +706,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 					validator_view.ValidatorIdentity{
 						MaybeOperatorAddress: primptr.String("tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus"),
 					},
+					(*int64)(nil),
 				).Return(
 					&validator_view.ValidatorRow{
 						MaybeId:                 primptr.Int64(3),
@@ -796,6 +825,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 					"ListAll",
 					testify_mock.Anything,
 					testify_mock.Anything,
+					(*int64)(nil),
 				).Return(
 					[]validator_view.ValidatorRow{}, nil)
 
@@ -826,6 +856,18 @@ func TestValidator_HandleEvents(t *testing.T) {
 
 				mockValidatorsView.On(
 					"UpdateAllValidatorUpTime",
+					[]view.ValidatorRow(nil),
+				).Return(nil)
+
+				mockValidatorActiveBlocksView := validator_view.NewMockValidatorActiveBlocksView(nil).(*validator_view.MockValidatorActiveBlocksView)
+				mocks = append(mocks, &mockValidatorActiveBlocksView.Mock)
+
+				validator.NewValidatorActiveBlocks = func(_ *rdb.Handle) validator_view.ValidatorActiveBlocks {
+					return mockValidatorActiveBlocksView
+				}
+
+				mockValidatorActiveBlocksView.On(
+					"UpdateValidatorsActiveBlocks",
 					[]view.ValidatorRow(nil),
 					[]view.ValidatorRow(nil),
 					int64(1),
@@ -890,6 +932,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 					validator_view.ValidatorIdentity{
 						MaybeOperatorAddress: primptr.String("tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus"),
 					},
+					(*int64)(nil),
 				).Return(
 					&validator_view.ValidatorRow{
 						MaybeId:                 primptr.Int64(3),
@@ -1065,6 +1108,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 					"ListAll",
 					testify_mock.Anything,
 					testify_mock.Anything,
+					(*int64)(nil),
 				).Return(
 					[]validator_view.ValidatorRow{}, nil)
 
@@ -1095,6 +1139,18 @@ func TestValidator_HandleEvents(t *testing.T) {
 
 				mockValidatorsView.On(
 					"UpdateAllValidatorUpTime",
+					[]view.ValidatorRow(nil),
+				).Return(nil)
+
+				mockValidatorActiveBlocksView := validator_view.NewMockValidatorActiveBlocksView(nil).(*validator_view.MockValidatorActiveBlocksView)
+				mocks = append(mocks, &mockValidatorActiveBlocksView.Mock)
+
+				validator.NewValidatorActiveBlocks = func(_ *rdb.Handle) validator_view.ValidatorActiveBlocks {
+					return mockValidatorActiveBlocksView
+				}
+
+				mockValidatorActiveBlocksView.On(
+					"UpdateValidatorsActiveBlocks",
 					[]view.ValidatorRow(nil),
 					[]view.ValidatorRow(nil),
 					int64(1),
@@ -1151,6 +1207,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 						MaybeStatuses: nil,
 					},
 					view.ValidatorsListOrder{MaybePower: nil},
+					(*int64)(nil),
 				).Return(
 					[]validator_view.ValidatorRow{
 						{
@@ -1177,9 +1234,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalActiveBlock:        0,
 							ImpreciseUpTime:         big.NewFloat(0),
 							VotedGovProposal:        nil,
-							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
-							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
 							Attention:               false,
 						},
@@ -1207,9 +1262,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalActiveBlock:        0,
 							ImpreciseUpTime:         big.NewFloat(0),
 							VotedGovProposal:        nil,
-							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
-							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
 							Attention:               false,
 						},
@@ -1237,9 +1290,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalActiveBlock:        0,
 							ImpreciseUpTime:         big.NewFloat(0),
 							VotedGovProposal:        nil,
-							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
-							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
 							Attention:               false,
 						},
@@ -1267,9 +1318,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalActiveBlock:        0,
 							ImpreciseUpTime:         big.NewFloat(0),
 							VotedGovProposal:        nil,
-							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
-							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
 							Attention:               false,
 						},
@@ -1297,9 +1346,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalActiveBlock:        0,
 							ImpreciseUpTime:         big.NewFloat(0),
 							VotedGovProposal:        nil,
-							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
-							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
 							Attention:               false,
 						},
@@ -1392,9 +1439,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalActiveBlock:        1,
 							ImpreciseUpTime:         big.NewFloat(1),
 							VotedGovProposal:        nil,
-							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
-							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
 						},
 						{
@@ -1421,9 +1466,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalActiveBlock:        1,
 							ImpreciseUpTime:         big.NewFloat(1),
 							VotedGovProposal:        nil,
-							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
-							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
 						},
 						{
@@ -1450,9 +1493,129 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalActiveBlock:        1,
 							ImpreciseUpTime:         big.NewFloat(1),
 							VotedGovProposal:        nil,
-							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
-							RecentSignedBlocks:      []int64{},
+							TotalRecentSignedBlocks: 0,
+						},
+						{
+							MaybeId:                 nil,
+							OperatorAddress:         "OperatorAddress4",
+							ConsensusNodeAddress:    "ConsensusNodeAddress4",
+							InitialDelegatorAddress: "InitialDelegatorAddress4",
+							TendermintPubkey:        "TendermintPubkey4",
+							TendermintAddress:       "TendermintAddress4",
+							Status:                  "Bonded",
+							Jailed:                  false,
+							JoinedAtBlockHeight:     1,
+							Power:                   "",
+							Moniker:                 "",
+							Identity:                "",
+							Website:                 "",
+							SecurityContact:         "",
+							Details:                 "",
+							CommissionRate:          "",
+							CommissionMaxRate:       "",
+							CommissionMaxChangeRate: "",
+							MinSelfDelegation:       "",
+							TotalSignedBlock:        0,
+							TotalActiveBlock:        1,
+							ImpreciseUpTime:         big.NewFloat(0),
+							VotedGovProposal:        nil,
+							TotalRecentActiveBlocks: 0,
+							TotalRecentSignedBlocks: 0,
+							Attention:               false,
+						},
+					},
+				).Return(nil)
+
+				mockValidatorActiveBlocksView := validator_view.NewMockValidatorActiveBlocksView(nil).(*validator_view.MockValidatorActiveBlocksView)
+				mocks = append(mocks, &mockValidatorActiveBlocksView.Mock)
+
+				validator.NewValidatorActiveBlocks = func(_ *rdb.Handle) validator_view.ValidatorActiveBlocks {
+					return mockValidatorActiveBlocksView
+				}
+
+				mockValidatorActiveBlocksView.On(
+					"UpdateValidatorsActiveBlocks",
+					[]view.ValidatorRow{
+						{
+							MaybeId:                 nil,
+							OperatorAddress:         "OperatorAddress1",
+							ConsensusNodeAddress:    "ConsensusNodeAddress1",
+							InitialDelegatorAddress: "InitialDelegatorAddress1",
+							TendermintPubkey:        "TendermintPubkey1",
+							TendermintAddress:       "F9E6FFB9B536956201AA138224FD888D03775AB4",
+							Status:                  "Bonded",
+							Jailed:                  false,
+							JoinedAtBlockHeight:     1,
+							Power:                   "",
+							Moniker:                 "",
+							Identity:                "",
+							Website:                 "",
+							SecurityContact:         "",
+							Details:                 "",
+							CommissionRate:          "",
+							CommissionMaxRate:       "",
+							CommissionMaxChangeRate: "",
+							MinSelfDelegation:       "",
+							TotalSignedBlock:        1,
+							TotalActiveBlock:        1,
+							ImpreciseUpTime:         big.NewFloat(1),
+							VotedGovProposal:        nil,
+							TotalRecentActiveBlocks: 0,
+							TotalRecentSignedBlocks: 0,
+						},
+						{
+							MaybeId:                 nil,
+							OperatorAddress:         "OperatorAddress2",
+							ConsensusNodeAddress:    "ConsensusNodeAddress2",
+							InitialDelegatorAddress: "InitialDelegatorAddress2",
+							TendermintPubkey:        "TendermintPubkey2",
+							TendermintAddress:       "031E3891DDB94FC7C7C132B7CD9736738110C889",
+							Status:                  "Bonded",
+							Jailed:                  false,
+							JoinedAtBlockHeight:     1,
+							Power:                   "",
+							Moniker:                 "",
+							Identity:                "",
+							Website:                 "",
+							SecurityContact:         "",
+							Details:                 "",
+							CommissionRate:          "",
+							CommissionMaxRate:       "",
+							CommissionMaxChangeRate: "",
+							MinSelfDelegation:       "",
+							TotalSignedBlock:        1,
+							TotalActiveBlock:        1,
+							ImpreciseUpTime:         big.NewFloat(1),
+							VotedGovProposal:        nil,
+							TotalRecentActiveBlocks: 0,
+							TotalRecentSignedBlocks: 0,
+						},
+						{
+							MaybeId:                 nil,
+							OperatorAddress:         "OperatorAddress3",
+							ConsensusNodeAddress:    "ConsensusNodeAddress3",
+							InitialDelegatorAddress: "InitialDelegatorAddress3",
+							TendermintPubkey:        "TendermintPubkey3",
+							TendermintAddress:       "TendermintAddress3",
+							Status:                  "Bonded",
+							Jailed:                  false,
+							JoinedAtBlockHeight:     2,
+							Power:                   "",
+							Moniker:                 "",
+							Identity:                "",
+							Website:                 "",
+							SecurityContact:         "",
+							Details:                 "",
+							CommissionRate:          "",
+							CommissionMaxRate:       "",
+							CommissionMaxChangeRate: "",
+							MinSelfDelegation:       "",
+							TotalSignedBlock:        1,
+							TotalActiveBlock:        1,
+							ImpreciseUpTime:         big.NewFloat(1),
+							VotedGovProposal:        nil,
+							TotalRecentActiveBlocks: 0,
 							TotalRecentSignedBlocks: 0,
 						},
 					},
@@ -1481,9 +1644,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalActiveBlock:        1,
 							ImpreciseUpTime:         big.NewFloat(0),
 							VotedGovProposal:        nil,
-							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
-							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
 							Attention:               false,
 						},

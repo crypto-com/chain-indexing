@@ -24,16 +24,26 @@ type Validators interface {
 	Upsert(validator *ValidatorRow) error
 	Insert(validator *ValidatorRow) error
 	totalPower() (*big.Float, error)
-	Search(keyword string) ([]ValidatorRow, error)
-	FindBy(identity ValidatorIdentity) (*ValidatorRow, error)
+	Search(
+		keyword string,
+		maybeLowestBlockHeight *int64,
+	) ([]ValidatorRow, error)
+	FindBy(
+		identity ValidatorIdentity,
+		maybeLowestBlockHeight *int64,
+	) (*ValidatorRow, error)
 	Update(validator *ValidatorRow) error
 	UpdateAllValidatorUpTime([]ValidatorRow) error
 	ListAll(
 		filter ValidatorsListFilter,
-		order ValidatorsListOrder) ([]ValidatorRow, error)
+		order ValidatorsListOrder,
+		maybeLowestBlockHeight *int64,
+	) ([]ValidatorRow, error)
+
 	List(
 		filter ValidatorsListFilter,
 		order ValidatorsListOrder,
+		maybeLowestBlockHeight *int64,
 		pagination *pagination_interface.Pagination) ([]ListValidatorRow, *pagination.PaginationResult, error)
 	Count(filter CountFilter) (int64, error)
 	LastHandledHeight() (int64, error)
@@ -48,6 +58,10 @@ func NewValidatorsView(handle *rdb.Handle) Validators {
 		handle,
 	}
 }
+
+const (
+	DEFAULT_LOWEST_ACTIVE_BLOCKS_BLOCK_HEIGHT = int64(0)
+)
 
 func (validatorsView *ValidatorsView) LastHandledHeight() (int64, error) {
 	var err error
@@ -130,8 +144,6 @@ func (validatorsView *ValidatorsView) Upsert(validator *ValidatorRow) error {
 		"total_active_block",
 		"imprecise_up_time",
 		"voted_gov_proposal",
-		"recent_active_blocks",
-		"recent_signed_blocks",
 		"attention",
 	).Values(
 		validator.OperatorAddress,
@@ -156,8 +168,6 @@ func (validatorsView *ValidatorsView) Upsert(validator *ValidatorRow) error {
 		validator.TotalActiveBlock,
 		validatorsView.rdb.BFton(validator.ImpreciseUpTime),
 		validatorsView.rdb.Bton(validator.VotedGovProposal),
-		validator.RecentActiveBlocks,
-		validator.RecentSignedBlocks,
 		validator.Attention,
 	).Suffix(`ON CONFLICT (operator_address, consensus_node_address) DO UPDATE SET
 		initial_delegator_address = EXCLUDED.initial_delegator_address,
@@ -178,8 +188,6 @@ func (validatorsView *ValidatorsView) Upsert(validator *ValidatorRow) error {
 		total_active_block = EXCLUDED.total_active_block,
 		imprecise_up_time = EXCLUDED.imprecise_up_time,
 		voted_gov_proposal = EXCLUDED.voted_gov_proposal,
-		recent_active_blocks = EXCLUDED.recent_active_blocks,
-		recent_signed_blocks = EXCLUDED.recent_signed_blocks,
 		attention = EXCLUDED.attention
 	`).ToSql()
 	if err != nil {
@@ -284,8 +292,6 @@ func (validatorsView *ValidatorsView) Update(validator *ValidatorRow) error {
 		"total_active_block":         validator.TotalActiveBlock,
 		"imprecise_up_time":          validatorsView.rdb.TypeConv.BFton(validator.ImpreciseUpTime),
 		"voted_gov_proposal":         validatorsView.rdb.TypeConv.Bton(validator.VotedGovProposal),
-		"recent_active_blocks":       validator.RecentActiveBlocks,
-		"recent_signed_blocks":       validator.RecentSignedBlocks,
 		"attention":                  validator.Attention,
 	}).Where(
 		"id = ?", validator.MaybeId,
@@ -305,12 +311,10 @@ func (validatorsView *ValidatorsView) Update(validator *ValidatorRow) error {
 	return nil
 }
 
-func (validatorsView *ValidatorsView) UpdateAllValidatorUpTime(
-	validators []ValidatorRow,
-) error {
+func (validatorsView *ValidatorsView) UpdateAllValidatorUpTime(validators []ValidatorRow) error {
 
 	pendingRowCount := 0
-	totalvalidatorsRowCount := len(validators)
+	totalRowCount := len(validators)
 
 	sql := ""
 
@@ -318,14 +322,12 @@ func (validatorsView *ValidatorsView) UpdateAllValidatorUpTime(
 
 		if pendingRowCount == 0 {
 
-			sql = fmt.Sprintf(
-				`UPDATE view_validators AS view SET
+			sql = `UPDATE view_validators AS view SET
 							total_signed_block = row.total_signed_block,
 							total_active_block = row.total_active_block,
-							imprecise_up_time = row.imprecise_up_time,
+							imprecise_up_time = row.imprecise_up_time
 						FROM (VALUES
-						`,
-			)
+						`
 		}
 
 		sql += fmt.Sprintf(
@@ -338,7 +340,7 @@ func (validatorsView *ValidatorsView) UpdateAllValidatorUpTime(
 
 		pendingRowCount += 1
 
-		if pendingRowCount == 500 || i+1 == totalvalidatorsRowCount {
+		if pendingRowCount == 500 || i+1 == totalRowCount {
 
 			sql = strings.TrimSuffix(sql, ",\n")
 
@@ -382,8 +384,14 @@ type ValidatorsListOrder struct {
 func (validatorsView *ValidatorsView) ListAll(
 	filter ValidatorsListFilter,
 	order ValidatorsListOrder,
+	maybeLowestBlockHeight *int64,
 ) ([]ValidatorRow, error) {
 	orderClauses := make([]string, 0)
+
+	if maybeLowestBlockHeight == nil {
+		lowestBlockHeight := DEFAULT_LOWEST_ACTIVE_BLOCKS_BLOCK_HEIGHT
+		maybeLowestBlockHeight = &lowestBlockHeight
+	}
 
 	if order.MaybeJoinedAtBlockHeight != nil {
 		if *order.MaybeStatus == view.ORDER_ASC {
@@ -458,7 +466,10 @@ func (validatorsView *ValidatorsView) ListAll(
 
 	stmtBuilder := validatorsView.rdb.StmtBuilder.Select(
 		"id",
-		"operator_address",
+		fmt.Sprintf(
+			"%s.operator_address",
+			"view_validators",
+		),
 		"consensus_node_address",
 		"initial_delegator_address",
 		"tendermint_pubkey",
@@ -480,17 +491,40 @@ func (validatorsView *ValidatorsView) ListAll(
 		"total_active_block",
 		"imprecise_up_time",
 		"voted_gov_proposal",
-		"recent_active_blocks",
-		"recent_signed_blocks",
 		"attention",
+		fmt.Sprintf(
+			"COUNT(CASE WHEN %s.signed THEN 1 END) as recent_signed_blocks",
+			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+		),
+		fmt.Sprintf(
+			"COUNT(%s.signed) as recent_active_blocks",
+			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+		),
 	).From(
 		"view_validators",
 	)
-	stmtBuilder = stmtBuilder.OrderBy(orderClauses...)
 
 	if whereClause != nil {
 		stmtBuilder = stmtBuilder.Where(whereClause)
 	}
+
+	stmtBuilder = stmtBuilder.LeftJoin(
+		fmt.Sprintf(
+			"%s ON %s.operator_address=%s.operator_address AND %s.block_height > %d",
+			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+			"view_validators",
+			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+			*maybeLowestBlockHeight,
+		),
+	).GroupBy(
+		fmt.Sprintf(
+			"%s.operator_address, %s.id",
+			"view_validators",
+			"view_validators",
+		),
+	).OrderBy(orderClauses...)
+
 	sql, sqlArgs, err := stmtBuilder.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("error building validators select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
@@ -532,9 +566,9 @@ func (validatorsView *ValidatorsView) ListAll(
 			&validator.TotalActiveBlock,
 			impreciseUpTimeReader.ScannableArg(),
 			votedGovProposalReader.ScannableArg(),
-			&validator.RecentActiveBlocks,
-			&validator.RecentSignedBlocks,
 			&validator.Attention,
+			&validator.TotalRecentSignedBlocks,
+			&validator.TotalRecentActiveBlocks,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, rdb.ErrNoRows
@@ -554,8 +588,6 @@ func (validatorsView *ValidatorsView) ListAll(
 		}
 		validator.VotedGovProposal = votedGovProposal
 
-		validator.TotalRecentActiveBlocks = int64(len(validator.RecentActiveBlocks))
-
 		validators = append(validators, validator)
 	}
 
@@ -565,6 +597,7 @@ func (validatorsView *ValidatorsView) ListAll(
 func (validatorsView *ValidatorsView) List(
 	filter ValidatorsListFilter,
 	order ValidatorsListOrder,
+	maybeLowestBlockHeight *int64,
 	pagination *pagination_interface.Pagination,
 ) ([]ListValidatorRow, *pagination.PaginationResult, error) {
 	if pagination.Type() != pagination_interface.PAGINATION_OFFSET {
@@ -572,6 +605,11 @@ func (validatorsView *ValidatorsView) List(
 	}
 
 	orderClauses := make([]string, 0)
+
+	if maybeLowestBlockHeight == nil {
+		lowestBlockHeight := DEFAULT_LOWEST_ACTIVE_BLOCKS_BLOCK_HEIGHT
+		maybeLowestBlockHeight = &lowestBlockHeight
+	}
 
 	if order.MaybeJoinedAtBlockHeight != nil {
 		if *order.MaybeStatus == view.ORDER_ASC {
@@ -694,7 +732,10 @@ func (validatorsView *ValidatorsView) List(
 
 	stmtBuilder := validatorsView.rdb.StmtBuilder.Select(
 		"id",
-		"operator_address",
+		fmt.Sprintf(
+			"%s.operator_address",
+			"view_validators",
+		),
 		"consensus_node_address",
 		"initial_delegator_address",
 		"tendermint_pubkey",
@@ -716,17 +757,39 @@ func (validatorsView *ValidatorsView) List(
 		"total_active_block",
 		"imprecise_up_time",
 		"voted_gov_proposal",
-		"recent_active_blocks",
-		"recent_signed_blocks",
 		"attention",
+		fmt.Sprintf(
+			"COUNT(CASE WHEN %s.signed THEN 1 END) as recent_signed_blocks",
+			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+		),
+		fmt.Sprintf(
+			"COUNT(%s.signed) as recent_active_blocks",
+			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+		),
 	).From(
 		"view_validators",
 	)
-	stmtBuilder = stmtBuilder.OrderBy(orderClauses...)
 
 	if whereClause != nil {
 		stmtBuilder = stmtBuilder.Where(whereClause)
 	}
+
+	stmtBuilder = stmtBuilder.LeftJoin(
+		fmt.Sprintf(
+			"%s ON %s.operator_address=%s.operator_address AND %s.block_height > %d",
+			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+			"view_validators",
+			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+			*maybeLowestBlockHeight,
+		),
+	).GroupBy(
+		fmt.Sprintf(
+			"%s.operator_address, %s.id",
+			"view_validators",
+			"view_validators",
+		),
+	).OrderBy(orderClauses...)
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
@@ -773,9 +836,9 @@ func (validatorsView *ValidatorsView) List(
 			&validator.TotalActiveBlock,
 			impreciseUpTimeReader.ScannableArg(),
 			votedGovProposalReader.ScannableArg(),
-			&validator.RecentActiveBlocks,
-			&validator.RecentSignedBlocks,
 			&validator.Attention,
+			&validator.TotalRecentSignedBlocks,
+			&validator.TotalRecentActiveBlocks,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, nil, rdb.ErrNoRows
@@ -794,8 +857,6 @@ func (validatorsView *ValidatorsView) List(
 			return nil, nil, fmt.Errorf("error parsing voted gov proposal: %v", votedGovProposalErr)
 		}
 		validator.VotedGovProposal = votedGovProposal
-
-		validator.TotalRecentActiveBlocks = int64(len(validator.RecentActiveBlocks))
 
 		power, ok := new(big.Float).SetString(validator.Power)
 		if !ok {
@@ -854,11 +915,22 @@ func (validatorsView *ValidatorsView) totalPower() (*big.Float, error) {
 	return totalPower, nil
 }
 
-func (validatorsView *ValidatorsView) Search(keyword string) ([]ValidatorRow, error) {
+func (validatorsView *ValidatorsView) Search(
+	keyword string,
+	maybeLowestBlockHeight *int64,
+) ([]ValidatorRow, error) {
+	if maybeLowestBlockHeight == nil {
+		lowestBlockHeight := DEFAULT_LOWEST_ACTIVE_BLOCKS_BLOCK_HEIGHT
+		maybeLowestBlockHeight = &lowestBlockHeight
+	}
+
 	keyword = utils.AddressParse(keyword)
 	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Select(
 		"id",
-		"operator_address",
+		fmt.Sprintf(
+			"%s.operator_address",
+			"view_validators",
+		),
 		"consensus_node_address",
 		"initial_delegator_address",
 		"tendermint_pubkey",
@@ -876,16 +948,37 @@ func (validatorsView *ValidatorsView) Search(keyword string) ([]ValidatorRow, er
 		"commission_max_rate",
 		"commission_max_change_rate",
 		"min_self_delegation",
-		"total_signed_block",
-		"total_active_block",
 		"imprecise_up_time",
 		"voted_gov_proposal",
 		"attention",
+		fmt.Sprintf(
+			"COUNT(CASE WHEN %s.signed THEN 1 END) as recent_signed_blocks",
+			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+		),
+		fmt.Sprintf(
+			"COUNT(%s.signed) as recent_active_blocks",
+			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+		),
 	).From(
 		"view_validators",
 	).Where(
 		"operator_address = ? OR consensus_node_address = ? OR LOWER(moniker) LIKE ?",
 		keyword, keyword, fmt.Sprintf("%%%s%%", keyword),
+	).LeftJoin(
+		fmt.Sprintf(
+			"%s ON %s.operator_address=%s.operator_address AND %s.block_height > %d",
+			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+			"view_validators",
+			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+			*maybeLowestBlockHeight,
+		),
+	).GroupBy(
+		fmt.Sprintf(
+			"%s.operator_address, %s.id",
+			"view_validators",
+			"view_validators",
+		),
 	).OrderBy("id").ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("error building blocks select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
@@ -928,6 +1021,8 @@ func (validatorsView *ValidatorsView) Search(keyword string) ([]ValidatorRow, er
 			impreciseUpTimeReader.ScannableArg(),
 			votedGovProposalReader.ScannableArg(),
 			&validator.Attention,
+			&validator.TotalRecentSignedBlocks,
+			&validator.TotalRecentActiveBlocks,
 		); err != nil {
 			if errors.Is(err, rdb.ErrNoRows) {
 				return nil, rdb.ErrNoRows
@@ -954,12 +1049,23 @@ func (validatorsView *ValidatorsView) Search(keyword string) ([]ValidatorRow, er
 	return validators, nil
 }
 
-func (validatorsView *ValidatorsView) FindBy(identity ValidatorIdentity) (*ValidatorRow, error) {
+func (validatorsView *ValidatorsView) FindBy(
+	identity ValidatorIdentity,
+	maybeLowestBlockHeight *int64,
+) (*ValidatorRow, error) {
+	if maybeLowestBlockHeight == nil {
+		lowestBlockHeight := DEFAULT_LOWEST_ACTIVE_BLOCKS_BLOCK_HEIGHT
+		maybeLowestBlockHeight = &lowestBlockHeight
+	}
+
 	var err error
 
 	selectStmtBuilder := validatorsView.rdb.StmtBuilder.Select(
 		"id",
-		"operator_address",
+		fmt.Sprintf(
+			"%s.operator_address",
+			"view_validators",
+		),
 		"consensus_node_address",
 		"initial_delegator_address",
 		"tendermint_pubkey",
@@ -981,12 +1087,19 @@ func (validatorsView *ValidatorsView) FindBy(identity ValidatorIdentity) (*Valid
 		"total_active_block",
 		"imprecise_up_time",
 		"voted_gov_proposal",
-		"recent_active_blocks",
-		"recent_signed_blocks",
 		"attention",
+		fmt.Sprintf(
+			"COUNT(CASE WHEN %s.signed THEN 1 END) as recent_signed_blocks",
+			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+		),
+		fmt.Sprintf(
+			"COUNT(%s.signed) as recent_active_blocks",
+			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+		),
 	).From(
 		"view_validators",
-	).OrderBy("id DESC")
+	)
+
 	if identity.MaybeConsensusNodeAddress != nil {
 		selectStmtBuilder = selectStmtBuilder.Where(
 			"consensus_node_address = ?", *identity.MaybeConsensusNodeAddress,
@@ -998,6 +1111,23 @@ func (validatorsView *ValidatorsView) FindBy(identity ValidatorIdentity) (*Valid
 	if identity.MaybeInitialDelegatorAddress != nil {
 		selectStmtBuilder = selectStmtBuilder.Where("initial_delegator_address = ?", *identity.MaybeInitialDelegatorAddress)
 	}
+
+	selectStmtBuilder = selectStmtBuilder.LeftJoin(
+		fmt.Sprintf(
+			"%s ON %s.operator_address=%s.operator_address AND %s.block_height > %d",
+			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+			"view_validators",
+			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+			*maybeLowestBlockHeight,
+		),
+	).GroupBy(
+		fmt.Sprintf(
+			"%s.operator_address, %s.id",
+			"view_validators",
+			"view_validators",
+		),
+	).OrderBy("id DESC")
 
 	sql, sqlArgs, err := selectStmtBuilder.ToSql()
 	if err != nil {
@@ -1032,9 +1162,9 @@ func (validatorsView *ValidatorsView) FindBy(identity ValidatorIdentity) (*Valid
 		&validator.TotalActiveBlock,
 		impreciseUpTimeReader.ScannableArg(),
 		votedGovProposalReader.ScannableArg(),
-		&validator.RecentActiveBlocks,
-		&validator.RecentSignedBlocks,
 		&validator.Attention,
+		&validator.TotalRecentSignedBlocks,
+		&validator.TotalRecentActiveBlocks,
 	); err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			return nil, rdb.ErrNoRows
@@ -1053,8 +1183,6 @@ func (validatorsView *ValidatorsView) FindBy(identity ValidatorIdentity) (*Valid
 		return nil, fmt.Errorf("error parsing voted gov proposal: %v", votedGovProposalErr)
 	}
 	validator.VotedGovProposal = votedGovProposal
-
-	validator.TotalRecentActiveBlocks = int64(len(validator.RecentActiveBlocks))
 
 	return &validator, nil
 }
@@ -1121,9 +1249,7 @@ type ValidatorRow struct {
 	TotalActiveBlock        int64      `json:"totalActiveBlock"`
 	ImpreciseUpTime         *big.Float `json:"impreciseUpTime"`
 	VotedGovProposal        *big.Int   `json:"votedGovProposal"`
-	RecentActiveBlocks      []int64    `json:"-"`
 	TotalRecentActiveBlocks int64      `json:"totalRecentActiveBlocks"`
-	RecentSignedBlocks      []int64    `json:"-"`
 	TotalRecentSignedBlocks int64      `json:"totalRecentSignedBlocks"`
 	Attention               bool       `json:"attention"`
 }

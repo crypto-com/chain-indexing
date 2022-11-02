@@ -235,9 +235,12 @@ func (projection *Validator) projectValidatorActivitiesView(
 				fmt.Sprintf("-:%s", withdrawValidatorCommissionEvent.Name()),
 			)
 		} else if validatorJailedEvent, ok := event.(*event_usecase.ValidatorJailed); ok {
-			validatorRow, err := (*validatorsView).FindBy(view.ValidatorIdentity{
-				MaybeConsensusNodeAddress: &validatorJailedEvent.ConsensusNodeAddress,
-			})
+			validatorRow, err := (*validatorsView).FindBy(
+				view.ValidatorIdentity{
+					MaybeConsensusNodeAddress: &validatorJailedEvent.ConsensusNodeAddress,
+				},
+				nil,
+			)
 			if err != nil {
 				return fmt.Errorf(
 					"error getting existing validator `%s`: %v", validatorJailedEvent.ConsensusNodeAddress, err,
@@ -263,9 +266,12 @@ func (projection *Validator) projectValidatorActivitiesView(
 			)
 			totalIncrementalMap.IncrementByOne(fmt.Sprintf("-:%s", validatorJailedEvent.Name()))
 		} else if validatorSlashedEvent, ok := event.(*event_usecase.ValidatorSlashed); ok {
-			validatorRow, err := (*validatorsView).FindBy(view.ValidatorIdentity{
-				MaybeConsensusNodeAddress: &validatorSlashedEvent.ConsensusNodeAddress,
-			})
+			validatorRow, err := (*validatorsView).FindBy(
+				view.ValidatorIdentity{
+					MaybeConsensusNodeAddress: &validatorSlashedEvent.ConsensusNodeAddress,
+				},
+				nil,
+			)
 			if err != nil {
 				return fmt.Errorf(
 					"error getting existing validator `%s`: %v", validatorSlashedEvent.ConsensusNodeAddress, err)
