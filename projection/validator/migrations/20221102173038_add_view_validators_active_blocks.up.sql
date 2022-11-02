@@ -4,7 +4,7 @@ CREATE TABLE view_validators_active_blocks
     block_height     BIGINT  NOT NULL,
     signed           BOOLEAN NOT NULL,
     PRIMARY KEY (operator_address, block_height)
-)
+);
 
 CREATE INDEX view_validators_active_blocks_block_height_index
     ON view_validators_active_blocks USING btree (block_height);
