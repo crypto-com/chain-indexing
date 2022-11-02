@@ -15,12 +15,11 @@ func NewMockValidatorActiveBlocksView(_ *rdb.Handle) ValidatorActiveBlocks {
 }
 
 func (view *MockValidatorActiveBlocksView) UpdateValidatorsActiveBlocks(
-	signedValidators []ValidatorRow,
-	unsignedValidators []ValidatorRow,
+	operatorAddressToSignedBlockFlagMap OperatorAddressToSignedBlockFlagMap,
 	height int64,
 	maxRecentUpTimeInBlocks int64,
 ) error {
-	mockArgs := view.Called(signedValidators, unsignedValidators, height, maxRecentUpTimeInBlocks)
+	mockArgs := view.Called(operatorAddressToSignedBlockFlagMap, height, maxRecentUpTimeInBlocks)
 	return mockArgs.Error(0)
 }
 

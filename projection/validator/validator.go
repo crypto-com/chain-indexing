@@ -216,12 +216,12 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 		return fmt.Errorf("error retrieving validator list: %v", listValidatorErr)
 	}
 	validatorMap := make(map[string]*view.ValidatorRow)
-	activeValidatorList := make([]view.ValidatorRow, 0)
+	bondedValidatorList := make([]view.ValidatorRow, 0)
 	for i, validator := range validatorList {
 		validatorMap[validator.TendermintAddress] = &validatorList[i]
 		switch validatorList[i].Status {
 		case constants.BONDED, constants.UNBONDING:
-			activeValidatorList = append(activeValidatorList, validatorList[i])
+			bondedValidatorList = append(bondedValidatorList, validatorList[i])
 		}
 	}
 
@@ -280,42 +280,38 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 			}
 
 			// Update validator up time
-			var mutSignedValidators []view.ValidatorRow
-			var mutUnsignedValidators []view.ValidatorRow
+			var activeValidtors []view.ValidatorRow
+			var operatorAddressToSignedBlockFlagMap = make(view.OperatorAddressToSignedBlockFlagMap)
 
-			for _, activeValidator := range activeValidatorList {
+			for _, bondedValidator := range bondedValidatorList {
 				signed := false
-				if commitmentMap[activeValidator.ConsensusNodeAddress] {
-					activeValidator.TotalSignedBlock += 1
+				if commitmentMap[bondedValidator.ConsensusNodeAddress] {
+					bondedValidator.TotalSignedBlock += 1
 					signed = true
-				} else if blockCreatedEvent.BlockHeight-activeValidator.JoinedAtBlockHeight < 10 {
+				} else if blockCreatedEvent.BlockHeight-bondedValidator.JoinedAtBlockHeight < 10 {
 					// give 10 blocks buffer on validator first join
-					activeValidator.TotalSignedBlock += 1
+					bondedValidator.TotalSignedBlock += 1
 					signed = true
 				}
-				activeValidator.TotalActiveBlock += 1
+				bondedValidator.TotalActiveBlock += 1
 
-				activeValidator.ImpreciseUpTime.Quo(
-					new(big.Float).SetInt64(activeValidator.TotalSignedBlock),
-					new(big.Float).SetInt64(activeValidator.TotalActiveBlock),
+				bondedValidator.ImpreciseUpTime.Quo(
+					new(big.Float).SetInt64(bondedValidator.TotalSignedBlock),
+					new(big.Float).SetInt64(bondedValidator.TotalActiveBlock),
 				)
 
-				if signed {
-					mutSignedValidators = append(mutSignedValidators, activeValidator)
-				} else {
-					mutUnsignedValidators = append(mutUnsignedValidators, activeValidator)
-				}
+				operatorAddressToSignedBlockFlagMap[bondedValidator.OperatorAddress] = signed
+				activeValidtors = append(activeValidtors, bondedValidator)
 			}
 
 			if validatorUpdateUpTimeErr := validatorsView.UpdateAllValidatorUpTime(
-				append(mutSignedValidators, mutUnsignedValidators...),
+				activeValidtors,
 			); validatorUpdateUpTimeErr != nil {
 				return fmt.Errorf("error updating active validators up time data: %v", validatorUpdateUpTimeErr)
 			}
 
 			if validatorUpdateActiveBlocksErr := validatorActiveBlocksView.UpdateValidatorsActiveBlocks(
-				mutSignedValidators,
-				mutUnsignedValidators,
+				operatorAddressToSignedBlockFlagMap,
 				blockCreatedEvent.BlockHeight,
 				projection.config.MaxActiveBlocksPeriodLimit,
 			); validatorUpdateActiveBlocksErr != nil {

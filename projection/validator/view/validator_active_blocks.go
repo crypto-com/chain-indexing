@@ -10,8 +10,7 @@ import (
 
 type ValidatorActiveBlocks interface {
 	UpdateValidatorsActiveBlocks(
-		signedValidators []ValidatorRow,
-		unsignedValidators []ValidatorRow,
+		operatorAddressToSignedBlockFlagMap OperatorAddressToSignedBlockFlagMap,
 		height int64,
 		maxRecentUpTimeInBlocks int64,
 	) error
@@ -32,8 +31,7 @@ func NewValidatorActiveBlocksView(handle *rdb.Handle) ValidatorActiveBlocks {
 }
 
 func (validatorActiveBlocksView *ValidatorActiveBlocksView) UpdateValidatorsActiveBlocks(
-	signedValidators []ValidatorRow,
-	unsignedValidators []ValidatorRow,
+	operatorAddressToSignedBlockFlagMap OperatorAddressToSignedBlockFlagMap,
 	height int64,
 	maxRecentActiveBlocks int64,
 ) error {
@@ -46,8 +44,9 @@ func (validatorActiveBlocksView *ValidatorActiveBlocksView) UpdateValidatorsActi
 	pendingRowCount := 0
 	var stmtBuilder sq.InsertBuilder
 
-	signedValidatorsCount := len(signedValidators)
-	for i, signedValidator := range signedValidators {
+	validatorsCount := len(operatorAddressToSignedBlockFlagMap)
+	i := 0
+	for operatorAddress, signed := range operatorAddressToSignedBlockFlagMap {
 		if pendingRowCount == 0 {
 			stmtBuilder = validatorActiveBlocksView.rdb.StmtBuilder.Insert(
 				VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
@@ -60,12 +59,12 @@ func (validatorActiveBlocksView *ValidatorActiveBlocksView) UpdateValidatorsActi
 
 		stmtBuilder = stmtBuilder.Values(
 			height,
-			signedValidator.OperatorAddress,
-			true,
+			operatorAddress,
+			signed,
 		)
 		pendingRowCount += 1
 
-		if pendingRowCount == 500 || i+1 == signedValidatorsCount {
+		if pendingRowCount == 500 || i+1 == validatorsCount {
 			sql, sqlArgs, err := stmtBuilder.ToSql()
 			if err != nil {
 				return fmt.Errorf("error building validator active block insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -81,43 +80,8 @@ func (validatorActiveBlocksView *ValidatorActiveBlocksView) UpdateValidatorsActi
 
 			pendingRowCount = 0
 		}
-	}
 
-	unsignedValidatorsCount := len(unsignedValidators)
-	for i, unsignedValidator := range unsignedValidators {
-		if pendingRowCount == 0 {
-			stmtBuilder = validatorActiveBlocksView.rdb.StmtBuilder.Insert(
-				VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
-			).Columns(
-				"block_height",
-				"operator_address",
-				"signed",
-			)
-		}
-
-		stmtBuilder = stmtBuilder.Values(
-			height,
-			unsignedValidator.OperatorAddress,
-			false,
-		)
-		pendingRowCount += 1
-
-		if pendingRowCount == 500 || i+1 == unsignedValidatorsCount {
-			sql, sqlArgs, err := stmtBuilder.ToSql()
-			if err != nil {
-				return fmt.Errorf("error building validator active block insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
-			}
-
-			result, err := validatorActiveBlocksView.rdb.Exec(sql, sqlArgs...)
-			if err != nil {
-				return fmt.Errorf("error inserting validator active block into the table: %v: %w", err, rdb.ErrWrite)
-			}
-			if result.RowsAffected() != int64(pendingRowCount) {
-				return fmt.Errorf("error inserting validator active block into the table: mismatch rows inserted: %w", rdb.ErrWrite)
-			}
-
-			pendingRowCount = 0
-		}
+		i += 1
 	}
 
 	sql, sqlArgs, err := validatorActiveBlocksView.rdb.StmtBuilder.Delete(
@@ -155,6 +119,8 @@ func (validatorActiveBlocksView *ValidatorActiveBlocksView) ClearValidatorActive
 
 	return nil
 }
+
+type OperatorAddressToSignedBlockFlagMap map[string]bool
 
 type ValidatorActiveBlockCountFilter struct {
 	MaybeOperatorAddresses []string
