@@ -6,11 +6,11 @@ CREATE TABLE view_validator_active_blocks
     PRIMARY KEY (operator_address, block_height)
 );
 
-CREATE INDEX view_validators_active_blocks_block_height_index
-    ON view_validators_active_blocks USING btree (block_height);
+CREATE INDEX view_validator_active_blocks_block_height_index
+    ON view_validator_active_blocks USING btree (block_height);
 
-CREATE INDEX view_validators_active_blocks_operator_address_block_height_signed_index
-    ON view_validators_active_blocks USING btree (operator_address, block_height, signed);
+CREATE INDEX view_validator_active_blocks_operator_address_block_height_signed_index
+    ON view_validator_active_blocks USING btree (operator_address, block_height, signed);
 
 ALTER TABLE view_validators
     DROP COLUMN recent_signed_blocks;
