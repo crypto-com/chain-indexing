@@ -53,6 +53,8 @@ func logLevelToZerologLevel(logLevel applogger.LogLevel) zerolog.Level {
 		return zerolog.PanicLevel
 	case applogger.LOG_LEVEL_ERROR:
 		return zerolog.ErrorLevel
+	case applogger.LOG_LEVEL_WARN:
+		return zerolog.WarnLevel
 	case applogger.LOG_LEVEL_INFO:
 		return zerolog.InfoLevel
 	case applogger.LOG_LEVEL_DEBUG:
@@ -76,6 +78,7 @@ func zerologLevelToLogLevel(logLevel zerolog.Level) applogger.LogLevel {
 	case zerolog.ErrorLevel:
 		return applogger.LOG_LEVEL_ERROR
 	case zerolog.WarnLevel:
+		return applogger.LOG_LEVEL_WARN
 	case zerolog.InfoLevel:
 		return applogger.LOG_LEVEL_INFO
 	case zerolog.DebugLevel:
@@ -103,6 +106,14 @@ func (logger *ZerologLogger) Error(message string) {
 
 func (logger *ZerologLogger) Errorf(format string, values ...interface{}) {
 	logger.instance.Error().Timestamp().Msgf(format, values...)
+}
+
+func (logger *ZerologLogger) Warn(message string) {
+	logger.instance.Warn().Timestamp().Msg(message)
+}
+
+func (logger *ZerologLogger) Warnf(format string, values ...interface{}) {
+	logger.instance.Warn().Timestamp().Msgf(format, values...)
 }
 
 func (logger *ZerologLogger) Info(message string) {
