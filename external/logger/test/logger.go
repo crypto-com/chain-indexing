@@ -16,6 +16,8 @@ func (l *FakeLogger) Panic(_ string)                    {}
 func (l *FakeLogger) Panicf(_ string, _ ...interface{}) {}
 func (l *FakeLogger) Error(_ string)                    {}
 func (l *FakeLogger) Errorf(_ string, _ ...interface{}) {}
+func (l *FakeLogger) Warn(_ string)                     {}
+func (l *FakeLogger) Warnf(_ string, _ ...interface{})  {}
 func (l *FakeLogger) Info(_ string)                     {}
 func (l *FakeLogger) Infof(_ string, _ ...interface{})  {}
 func (l *FakeLogger) Debug(_ string)                    {}
