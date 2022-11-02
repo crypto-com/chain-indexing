@@ -61,6 +61,7 @@ func NewValidatorsView(handle *rdb.Handle) Validators {
 
 const (
 	DEFAULT_LOWEST_ACTIVE_BLOCKS_BLOCK_HEIGHT = int64(0)
+	VALIDATORS_TABLE_NAME                     = "view_validators"
 )
 
 func (validatorsView *ValidatorsView) LastHandledHeight() (int64, error) {
@@ -100,7 +101,7 @@ func (validatorsView *ValidatorsView) LastJoinedBlockHeight(
 	if sql, sqlArgs, err = validatorsView.rdb.StmtBuilder.Select(
 		"joined_at_block_height",
 	).From(
-		"view_validators",
+		VALIDATORS_TABLE_NAME,
 	).Where(
 		"operator_address = ? AND consensus_node_address = ?", operatorAddress, consensusNodeAddress,
 	).ToSql(); err != nil {
@@ -120,7 +121,7 @@ func (validatorsView *ValidatorsView) LastJoinedBlockHeight(
 
 func (validatorsView *ValidatorsView) Upsert(validator *ValidatorRow) error {
 	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Insert(
-		"view_validators",
+		VALIDATORS_TABLE_NAME,
 	).Columns(
 		"operator_address",
 		"consensus_node_address",
@@ -206,7 +207,7 @@ func (validatorsView *ValidatorsView) Upsert(validator *ValidatorRow) error {
 
 func (validatorsView *ValidatorsView) Insert(validator *ValidatorRow) error {
 	sql, sqlArgs, buildStmtErr := validatorsView.rdb.StmtBuilder.Insert(
-		"view_validators",
+		VALIDATORS_TABLE_NAME,
 	).Columns(
 		"operator_address",
 		"consensus_node_address",
@@ -273,7 +274,7 @@ func (validatorsView *ValidatorsView) Insert(validator *ValidatorRow) error {
 
 func (validatorsView *ValidatorsView) Update(validator *ValidatorRow) error {
 	sql, sqlArgs, err := validatorsView.rdb.StmtBuilder.Update(
-		"view_validators",
+		VALIDATORS_TABLE_NAME,
 	).SetMap(map[string]interface{}{
 		"initial_delegator_address":  validator.InitialDelegatorAddress,
 		"status":                     validator.Status,
@@ -468,7 +469,7 @@ func (validatorsView *ValidatorsView) ListAll(
 		"id",
 		fmt.Sprintf(
 			"%s.operator_address",
-			"view_validators",
+			VALIDATORS_TABLE_NAME,
 		),
 		"consensus_node_address",
 		"initial_delegator_address",
@@ -501,7 +502,7 @@ func (validatorsView *ValidatorsView) ListAll(
 			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
 		),
 	).From(
-		"view_validators",
+		VALIDATORS_TABLE_NAME,
 	)
 
 	if whereClause != nil {
@@ -512,7 +513,7 @@ func (validatorsView *ValidatorsView) ListAll(
 		fmt.Sprintf(
 			"%s ON %s.operator_address=%s.operator_address AND %s.block_height > %d",
 			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
-			"view_validators",
+			VALIDATORS_TABLE_NAME,
 			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
 			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
 			*maybeLowestBlockHeight,
@@ -520,8 +521,8 @@ func (validatorsView *ValidatorsView) ListAll(
 	).GroupBy(
 		fmt.Sprintf(
 			"%s.operator_address, %s.id",
-			"view_validators",
-			"view_validators",
+			VALIDATORS_TABLE_NAME,
+			VALIDATORS_TABLE_NAME,
 		),
 	).OrderBy(orderClauses...)
 
@@ -672,7 +673,7 @@ func (validatorsView *ValidatorsView) List(
 	cumulativePowerStmtBuilder := validatorsView.rdb.StmtBuilder.Select(
 		"power",
 	).From(
-		"view_validators",
+		VALIDATORS_TABLE_NAME,
 	).Offset(0).Limit(
 		uint64(pagination.OffsetParams().Offset()),
 	)
@@ -734,7 +735,7 @@ func (validatorsView *ValidatorsView) List(
 		"id",
 		fmt.Sprintf(
 			"%s.operator_address",
-			"view_validators",
+			VALIDATORS_TABLE_NAME,
 		),
 		"consensus_node_address",
 		"initial_delegator_address",
@@ -767,7 +768,7 @@ func (validatorsView *ValidatorsView) List(
 			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
 		),
 	).From(
-		"view_validators",
+		VALIDATORS_TABLE_NAME,
 	)
 
 	if whereClause != nil {
@@ -778,7 +779,7 @@ func (validatorsView *ValidatorsView) List(
 		fmt.Sprintf(
 			"%s ON %s.operator_address=%s.operator_address AND %s.block_height > %d",
 			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
-			"view_validators",
+			VALIDATORS_TABLE_NAME,
 			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
 			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
 			*maybeLowestBlockHeight,
@@ -786,8 +787,8 @@ func (validatorsView *ValidatorsView) List(
 	).GroupBy(
 		fmt.Sprintf(
 			"%s.operator_address, %s.id",
-			"view_validators",
-			"view_validators",
+			VALIDATORS_TABLE_NAME,
+			VALIDATORS_TABLE_NAME,
 		),
 	).OrderBy(orderClauses...)
 
@@ -892,7 +893,7 @@ func (validatorsView *ValidatorsView) List(
 }
 
 func (validatorsView *ValidatorsView) totalPower() (*big.Float, error) {
-	sql, _, _ := validatorsView.rdb.StmtBuilder.Select("power").From("view_validators").ToSql()
+	sql, _, _ := validatorsView.rdb.StmtBuilder.Select("power").From(VALIDATORS_TABLE_NAME).ToSql()
 	rowsResult, err := validatorsView.rdb.Query(sql)
 	if err != nil {
 		return nil, fmt.Errorf("error getting validators from table: %v", err)
@@ -929,7 +930,7 @@ func (validatorsView *ValidatorsView) Search(
 		"id",
 		fmt.Sprintf(
 			"%s.operator_address",
-			"view_validators",
+			VALIDATORS_TABLE_NAME,
 		),
 		"consensus_node_address",
 		"initial_delegator_address",
@@ -960,7 +961,7 @@ func (validatorsView *ValidatorsView) Search(
 			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
 		),
 	).From(
-		"view_validators",
+		VALIDATORS_TABLE_NAME,
 	).Where(
 		"operator_address = ? OR consensus_node_address = ? OR LOWER(moniker) LIKE ?",
 		keyword, keyword, fmt.Sprintf("%%%s%%", keyword),
@@ -968,7 +969,7 @@ func (validatorsView *ValidatorsView) Search(
 		fmt.Sprintf(
 			"%s ON %s.operator_address=%s.operator_address AND %s.block_height > %d",
 			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
-			"view_validators",
+			VALIDATORS_TABLE_NAME,
 			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
 			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
 			*maybeLowestBlockHeight,
@@ -976,8 +977,8 @@ func (validatorsView *ValidatorsView) Search(
 	).GroupBy(
 		fmt.Sprintf(
 			"%s.operator_address, %s.id",
-			"view_validators",
-			"view_validators",
+			VALIDATORS_TABLE_NAME,
+			VALIDATORS_TABLE_NAME,
 		),
 	).OrderBy("id").ToSql()
 	if err != nil {
@@ -1064,7 +1065,7 @@ func (validatorsView *ValidatorsView) FindBy(
 		"id",
 		fmt.Sprintf(
 			"%s.operator_address",
-			"view_validators",
+			VALIDATORS_TABLE_NAME,
 		),
 		"consensus_node_address",
 		"initial_delegator_address",
@@ -1097,7 +1098,7 @@ func (validatorsView *ValidatorsView) FindBy(
 			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
 		),
 	).From(
-		"view_validators",
+		VALIDATORS_TABLE_NAME,
 	)
 
 	if identity.MaybeConsensusNodeAddress != nil {
@@ -1116,7 +1117,7 @@ func (validatorsView *ValidatorsView) FindBy(
 		fmt.Sprintf(
 			"%s ON %s.operator_address=%s.operator_address AND %s.block_height > %d",
 			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
-			"view_validators",
+			VALIDATORS_TABLE_NAME,
 			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
 			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
 			*maybeLowestBlockHeight,
@@ -1124,8 +1125,8 @@ func (validatorsView *ValidatorsView) FindBy(
 	).GroupBy(
 		fmt.Sprintf(
 			"%s.operator_address, %s.id",
-			"view_validators",
-			"view_validators",
+			VALIDATORS_TABLE_NAME,
+			VALIDATORS_TABLE_NAME,
 		),
 	).OrderBy("id DESC")
 
@@ -1193,7 +1194,7 @@ func (validatorsView *ValidatorsView) Count(filter CountFilter) (int64, error) {
 	stmt := validatorsView.rdb.StmtBuilder.Select(
 		"COUNT(*)",
 	).From(
-		"view_validators",
+		VALIDATORS_TABLE_NAME,
 	)
 
 	if filter.MaybeStatus != nil {
