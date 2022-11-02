@@ -12,3 +12,9 @@ CREATE INDEX view_validators_active_blocks_block_height_index
 CREATE INDEX view_validators_active_blocks_operator_address_block_height_signed_index
     ON view_validators_active_blocks USING btree (operator_address, block_height, signed);
 
+ALTER TABLE view_validators
+    DROP COLUMN recent_signed_blocks;
+
+ALTER TABLE view_validators
+    DROP COLUMN recent_active_blocks;
+
