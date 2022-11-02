@@ -389,7 +389,7 @@ func (validatorsView *ValidatorsView) ListAll(
 ) ([]ValidatorRow, error) {
 	orderClauses := make([]string, 0)
 
-	if maybeLowestBlockHeight == nil {
+	if maybeLowestBlockHeight == nil || *maybeLowestBlockHeight < 0 {
 		lowestBlockHeight := DEFAULT_LOWEST_ACTIVE_BLOCKS_BLOCK_HEIGHT
 		maybeLowestBlockHeight = &lowestBlockHeight
 	}
@@ -607,7 +607,7 @@ func (validatorsView *ValidatorsView) List(
 
 	orderClauses := make([]string, 0)
 
-	if maybeLowestBlockHeight == nil {
+	if maybeLowestBlockHeight == nil || *maybeLowestBlockHeight < 0 {
 		lowestBlockHeight := DEFAULT_LOWEST_ACTIVE_BLOCKS_BLOCK_HEIGHT
 		maybeLowestBlockHeight = &lowestBlockHeight
 	}
@@ -920,7 +920,7 @@ func (validatorsView *ValidatorsView) Search(
 	keyword string,
 	maybeLowestBlockHeight *int64,
 ) ([]ValidatorRow, error) {
-	if maybeLowestBlockHeight == nil {
+	if maybeLowestBlockHeight == nil || *maybeLowestBlockHeight < 0 {
 		lowestBlockHeight := DEFAULT_LOWEST_ACTIVE_BLOCKS_BLOCK_HEIGHT
 		maybeLowestBlockHeight = &lowestBlockHeight
 	}
@@ -1057,7 +1057,7 @@ func (validatorsView *ValidatorsView) FindBy(
 	identity ValidatorIdentity,
 	maybeLowestBlockHeight *int64,
 ) (*ValidatorRow, error) {
-	if maybeLowestBlockHeight == nil {
+	if maybeLowestBlockHeight == nil || *maybeLowestBlockHeight < 0 {
 		lowestBlockHeight := DEFAULT_LOWEST_ACTIVE_BLOCKS_BLOCK_HEIGHT
 		maybeLowestBlockHeight = &lowestBlockHeight
 	}
@@ -1259,8 +1259,8 @@ type ValidatorRow struct {
 	TotalActiveBlock        int64      `json:"totalActiveBlock"`
 	ImpreciseUpTime         *big.Float `json:"impreciseUpTime"`
 	VotedGovProposal        *big.Int   `json:"votedGovProposal"`
-	TotalRecentActiveBlocks int64      `json:"totalRecentActiveBlocks"`
 	TotalRecentSignedBlocks int64      `json:"totalRecentSignedBlocks"`
+	TotalRecentActiveBlocks int64      `json:"totalRecentActiveBlocks"`
 	Attention               bool       `json:"attention"`
 }
 
