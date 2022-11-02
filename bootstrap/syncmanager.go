@@ -251,6 +251,31 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		tx := &model.CosmosTxWithHash{
 			Hash: txHash,
 		}
+		if manager.txDecoder != nil {
+			var decodedTx *model.CosmosTx
+			decodedTx, err = manager.txDecoder.DecodeBase64(txHex)
+			if err != nil {
+				manager.logger.Warnf("error decoding chain txs (%s) at height %d: %v", txHex, blockHeight, err)
+				var resTx *model.Tx
+				resTx, err = manager.cosmosClient.Tx(txHash)
+				if err != nil {
+					return nil, fmt.Errorf("error requesting chain txs (%s) at height %d: %v", txHex, blockHeight, err)
+				} else {
+					tx.Tx = resTx.Tx
+				}
+			}
+
+			tx.Tx = *decodedTx
+		} else {
+			var resTx *model.Tx
+			resTx, err = manager.cosmosClient.Tx(txHash)
+			if err != nil {
+				return nil, fmt.Errorf("error requesting chain txs (%s) at height %d: %v", txHex, blockHeight, err)
+			} else {
+				tx.Tx = resTx.Tx
+			}
+		}
+		txs = append(txs, *tx)
 
 		var resTx *model.Tx
 		resTx, err = manager.cosmosClient.Tx(txHash)
