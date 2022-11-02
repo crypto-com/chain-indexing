@@ -127,7 +127,7 @@ func (handler *Validators) FindBy(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	lowestActiveBlockHeight := lastHandledHeight - activeBlocksPeriodLimit + 1
+	lowestActiveBlockHeight := lastHandledHeight - activeBlocksPeriodLimit
 
 	rawValidator, err := handler.validatorsView.FindBy(identity, &lowestActiveBlockHeight)
 	if err != nil {
@@ -220,7 +220,7 @@ func (handler *Validators) List(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	lowestActiveBlockHeight := lastHandledHeight - activeBlocksPeriodLimit + 1
+	lowestActiveBlockHeight := lastHandledHeight - activeBlocksPeriodLimit
 
 	validators, paginationResult, err := handler.validatorsView.List(
 		validator_view.ValidatorsListFilter{}, order, &lowestActiveBlockHeight, pagination,
@@ -477,7 +477,7 @@ func (handler *Validators) ListActive(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	lowestActiveBlockHeight := lastHandledHeight - activeBlocksPeriodLimit + 1
+	lowestActiveBlockHeight := lastHandledHeight - activeBlocksPeriodLimit
 
 	validators, paginationResult, err := handler.validatorsView.List(
 		validator_view.ValidatorsListFilter{

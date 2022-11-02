@@ -963,7 +963,10 @@ func (validatorsView *ValidatorsView) Search(
 	).From(
 		VALIDATORS_TABLE_NAME,
 	).Where(
-		"operator_address = ? OR consensus_node_address = ? OR LOWER(moniker) LIKE ?",
+		fmt.Sprintf(
+			"%s.operator_address = ? OR consensus_node_address = ? OR LOWER(moniker) LIKE ?",
+			VALIDATORS_TABLE_NAME,
+		),
 		keyword, keyword, fmt.Sprintf("%%%s%%", keyword),
 	).LeftJoin(
 		fmt.Sprintf(
@@ -1107,7 +1110,13 @@ func (validatorsView *ValidatorsView) FindBy(
 		)
 	}
 	if identity.MaybeOperatorAddress != nil {
-		selectStmtBuilder = selectStmtBuilder.Where("operator_address = ?", *identity.MaybeOperatorAddress)
+		selectStmtBuilder = selectStmtBuilder.Where(
+			fmt.Sprintf(
+				"%s.operator_address = ?",
+				VALIDATORS_TABLE_NAME,
+			),
+			*identity.MaybeOperatorAddress,
+		)
 	}
 	if identity.MaybeInitialDelegatorAddress != nil {
 		selectStmtBuilder = selectStmtBuilder.Where("initial_delegator_address = ?", *identity.MaybeInitialDelegatorAddress)
