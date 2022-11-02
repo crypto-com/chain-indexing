@@ -27,12 +27,7 @@ type Validators interface {
 	Search(keyword string) ([]ValidatorRow, error)
 	FindBy(identity ValidatorIdentity) (*ValidatorRow, error)
 	Update(validator *ValidatorRow) error
-	UpdateAllValidatorUpTime(
-		signedValidators []ValidatorRow,
-		unsignedValidators []ValidatorRow,
-		height int64,
-		maxRecentUpTimeInBlocks int64,
-	) error
+	UpdateAllValidatorUpTime([]ValidatorRow) error
 	ListAll(
 		filter ValidatorsListFilter,
 		order ValidatorsListOrder) ([]ValidatorRow, error)
@@ -311,24 +306,15 @@ func (validatorsView *ValidatorsView) Update(validator *ValidatorRow) error {
 }
 
 func (validatorsView *ValidatorsView) UpdateAllValidatorUpTime(
-	signedValidators []ValidatorRow,
-	unsignedValidators []ValidatorRow,
-	height int64,
-	maxRecentUpTimeInBlocks int64,
+	validators []ValidatorRow,
 ) error {
 
 	pendingRowCount := 0
-	totalSignedValidatorsRowCount := len(signedValidators)
+	totalvalidatorsRowCount := len(validators)
 
 	sql := ""
 
-	expiredRecentUpTimeBlock := int64(0)
-
-	if height-maxRecentUpTimeInBlocks > 0 {
-		expiredRecentUpTimeBlock = height - maxRecentUpTimeInBlocks
-	}
-
-	for i, signedValidator := range signedValidators {
+	for i, validator := range validators {
 
 		if pendingRowCount == 0 {
 
@@ -337,28 +323,22 @@ func (validatorsView *ValidatorsView) UpdateAllValidatorUpTime(
 							total_signed_block = row.total_signed_block,
 							total_active_block = row.total_active_block,
 							imprecise_up_time = row.imprecise_up_time,
-							recent_active_blocks = array_append(array_remove(view.recent_active_blocks, %d), %d),
-							recent_signed_blocks = array_append(array_remove(view.recent_signed_blocks, %d), %d)
 						FROM (VALUES
 						`,
-				expiredRecentUpTimeBlock,
-				height,
-				expiredRecentUpTimeBlock,
-				height,
 			)
 		}
 
 		sql += fmt.Sprintf(
 			"(%d, %d, %d, %s),\n",
-			*signedValidator.MaybeId,
-			signedValidator.TotalSignedBlock,
-			signedValidator.TotalActiveBlock,
-			signedValidator.ImpreciseUpTime.String(),
+			*validator.MaybeId,
+			validator.TotalSignedBlock,
+			validator.TotalActiveBlock,
+			validator.ImpreciseUpTime.String(),
 		)
 
 		pendingRowCount += 1
 
-		if pendingRowCount == 500 || i+1 == totalSignedValidatorsRowCount {
+		if pendingRowCount == 500 || i+1 == totalvalidatorsRowCount {
 
 			sql = strings.TrimSuffix(sql, ",\n")
 
@@ -372,67 +352,10 @@ func (validatorsView *ValidatorsView) UpdateAllValidatorUpTime(
 
 			result, err := validatorsView.rdb.Exec(sql)
 			if err != nil {
-				return fmt.Errorf("error updating signedValidators up time into the table: %v: %w", err, rdb.ErrWrite)
+				return fmt.Errorf("error updating validators up time into the table: %v: %w", err, rdb.ErrWrite)
 			}
 			if result.RowsAffected() != int64(pendingRowCount) {
-				return fmt.Errorf("error updating signedValidators up time into the table: wrong number of affected rows %d: %w", result.RowsAffected(), rdb.ErrWrite)
-			}
-
-			pendingRowCount = 0
-
-		}
-
-	}
-
-	totalUnsignedValidatorsRowCount := len(unsignedValidators)
-
-	for i, unsignedValidator := range unsignedValidators {
-
-		if pendingRowCount == 0 {
-
-			sql = fmt.Sprintf(
-				`UPDATE view_validators AS view SET
-							total_signed_block = row.total_signed_block,
-							total_active_block = row.total_active_block,
-							imprecise_up_time = row.imprecise_up_time,
-							recent_active_blocks = array_append(array_remove(view.recent_active_blocks, %d), %d),
-							recent_signed_blocks = array_remove(view.recent_signed_blocks, %d)
-						FROM (VALUES
-						`,
-				expiredRecentUpTimeBlock,
-				height,
-				expiredRecentUpTimeBlock,
-			)
-		}
-
-		sql += fmt.Sprintf(
-			"(%d, %d, %d, %s),\n",
-			*unsignedValidator.MaybeId,
-			unsignedValidator.TotalSignedBlock,
-			unsignedValidator.TotalActiveBlock,
-			unsignedValidator.ImpreciseUpTime.String(),
-		)
-
-		pendingRowCount += 1
-
-		if pendingRowCount == 500 || i+1 == totalUnsignedValidatorsRowCount {
-
-			sql = strings.TrimSuffix(sql, ",\n")
-
-			sql += `) AS row(
-								id, 
-								total_signed_block,
-								total_active_block, 
-								imprecise_up_time
-							)
-							WHERE row.id = view.id;`
-
-			result, err := validatorsView.rdb.Exec(sql)
-			if err != nil {
-				return fmt.Errorf("error updating unsignedValidators up time into the table: %v: %w", err, rdb.ErrWrite)
-			}
-			if result.RowsAffected() != int64(pendingRowCount) {
-				return fmt.Errorf("error updating unsignedValidators up time into the table: wrong number of affected rows %d: %w", result.RowsAffected(), rdb.ErrWrite)
+				return fmt.Errorf("error updating validators up time into the table: wrong number of affected rows %d: %w", result.RowsAffected(), rdb.ErrWrite)
 			}
 
 			pendingRowCount = 0

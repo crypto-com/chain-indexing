@@ -33,6 +33,7 @@ var (
 	NewValidatorActivitiesTotal       = view.NewValidatorActivitiesTotalView
 	NewValidatorBlockCommitments      = view.NewValidatorBlockCommitments
 	NewValidatorBlockCommitmentsTotal = view.NewValidatorBlockCommitmentsTotal
+	NewValidatorActiveBlocks          = view.NewValidatorActiveBlocksView
 	UpdateLastHandledEventHeight      = (*Validator).UpdateLastHandledEventHeight
 )
 
@@ -174,6 +175,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 	validatorBlockCommitmentsTotalView := NewValidatorBlockCommitmentsTotal(rdbTxHandle)
 	validatorActivitiesView := NewValidatorActivities(rdbTxHandle)
 	validatorActivitiesTotalView := NewValidatorActivitiesTotal(rdbTxHandle)
+	validatorActiveBlocksView := NewValidatorActiveBlocks(rdbTxHandle)
 
 	var blockTime utctime.UTCTime
 	var blockHash string
@@ -301,15 +303,20 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 				}
 			}
 
-			if activeValidatorUpdateErr := validatorsView.UpdateAllValidatorUpTime(
+			if validatorUpdateUpTimeErr := validatorsView.UpdateAllValidatorUpTime(
+				append(mutSignedValidators, mutUnsignedValidators...),
+			); validatorUpdateUpTimeErr != nil {
+				return fmt.Errorf("error updating active validators up time data: %v", validatorUpdateUpTimeErr)
+			}
+
+			if validatorUpdateActiveBlocksErr := validatorActiveBlocksView.UpdateValidatorsActiveBlocks(
 				mutSignedValidators,
 				mutUnsignedValidators,
 				blockCreatedEvent.BlockHeight,
 				projection.config.MaxActiveBlocksPeriodLimit,
-			); activeValidatorUpdateErr != nil {
-				return fmt.Errorf("error updating active validators up time data: %v", activeValidatorUpdateErr)
+			); validatorUpdateActiveBlocksErr != nil {
+				return fmt.Errorf("error updating validators active blocks data: %v", validatorUpdateActiveBlocksErr)
 			}
-
 		} else if votedEvent, ok := event.(*event_usecase.MsgVote); ok {
 			projection.logger.Debug("handling MsgVote event")
 

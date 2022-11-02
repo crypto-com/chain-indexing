@@ -67,12 +67,9 @@ func (validatorsView *MockValidatorsView) Update(validator *ValidatorRow) error 
 }
 
 func (validatorsView *MockValidatorsView) UpdateAllValidatorUpTime(
-	signedValidators []ValidatorRow,
-	unsignedValidators []ValidatorRow,
-	height int64,
-	maxRecentUpTimeInBlocks int64,
+	validators []ValidatorRow,
 ) error {
-	mockArgs := validatorsView.Called(signedValidators, unsignedValidators, height, maxRecentUpTimeInBlocks)
+	mockArgs := validatorsView.Called(validators)
 	return mockArgs.Error(0)
 }
 
