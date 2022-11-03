@@ -280,7 +280,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 			}
 
 			// Update validator up time
-			var activeValidtors []view.ValidatorRow
+			var activeValidators []view.ValidatorRow
 			var operatorAddressToSignedBlockFlagMap = make(view.OperatorAddressToSignedBlockFlagMap)
 
 			for _, bondedValidator := range bondedValidatorList {
@@ -301,11 +301,11 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 				)
 
 				operatorAddressToSignedBlockFlagMap[bondedValidator.OperatorAddress] = signed
-				activeValidtors = append(activeValidtors, bondedValidator)
+				activeValidators = append(activeValidators, bondedValidator)
 			}
 
 			if validatorUpdateUpTimeErr := validatorsView.UpdateAllValidatorUpTime(
-				activeValidtors,
+				activeValidators,
 			); validatorUpdateUpTimeErr != nil {
 				return fmt.Errorf("error updating active validators up time data: %v", validatorUpdateUpTimeErr)
 			}
