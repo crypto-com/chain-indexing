@@ -49,14 +49,14 @@ func (validatorsView *MockValidatorsView) totalPower() (*big.Float, error) {
 	return row, mockArgs.Error(1)
 }
 
-func (validatorsView *MockValidatorsView) Search(keyword string) ([]ValidatorRow, error) {
-	mockArgs := validatorsView.Called(keyword)
+func (validatorsView *MockValidatorsView) Search(keyword string, maybeLowestBlockHeight *int64) ([]ValidatorRow, error) {
+	mockArgs := validatorsView.Called(keyword, maybeLowestBlockHeight)
 	rows, _ := mockArgs.Get(0).([]ValidatorRow)
 	return rows, mockArgs.Error(1)
 }
 
-func (validatorsView *MockValidatorsView) FindBy(identity ValidatorIdentity) (*ValidatorRow, error) {
-	mockArgs := validatorsView.Called(identity)
+func (validatorsView *MockValidatorsView) FindBy(identity ValidatorIdentity, maybeLowestBlockHeight *int64) (*ValidatorRow, error) {
+	mockArgs := validatorsView.Called(identity, maybeLowestBlockHeight)
 	result1, _ := mockArgs.Get(0).(*ValidatorRow)
 	return result1, mockArgs.Error(1)
 }
@@ -67,23 +67,25 @@ func (validatorsView *MockValidatorsView) Update(validator *ValidatorRow) error 
 }
 
 func (validatorsView *MockValidatorsView) UpdateAllValidatorUpTime(
-	signedValidators []ValidatorRow,
-	unsignedValidators []ValidatorRow,
-	height int64,
-	maxRecentUpTimeInBlocks int64,
+	validators []ValidatorRow,
 ) error {
-	mockArgs := validatorsView.Called(signedValidators, unsignedValidators, height, maxRecentUpTimeInBlocks)
+	mockArgs := validatorsView.Called(validators)
 	return mockArgs.Error(0)
 }
 
-func (validatorsView *MockValidatorsView) ListAll(filter ValidatorsListFilter, order ValidatorsListOrder) ([]ValidatorRow, error) {
-	mockArgs := validatorsView.Called(filter, order)
+func (validatorsView *MockValidatorsView) ListAll(filter ValidatorsListFilter, order ValidatorsListOrder, maybeLowestBlockHeight *int64) ([]ValidatorRow, error) {
+	mockArgs := validatorsView.Called(filter, order, maybeLowestBlockHeight)
 	rows, _ := mockArgs.Get(0).([]ValidatorRow)
 	return rows, mockArgs.Error(1)
 }
 
-func (validatorsView *MockValidatorsView) List(filter ValidatorsListFilter, order ValidatorsListOrder, pagination *pagination_interface.Pagination) ([]ListValidatorRow, *pagination.PaginationResult, error) {
-	mockArgs := validatorsView.Called(filter, order, pagination)
+func (validatorsView *MockValidatorsView) List(
+	filter ValidatorsListFilter,
+	order ValidatorsListOrder,
+	maybeLowestBlockHeight *int64,
+	pagination *pagination_interface.Pagination,
+) ([]ListValidatorRow, *pagination.PaginationResult, error) {
+	mockArgs := validatorsView.Called(filter, order, pagination, maybeLowestBlockHeight)
 	result0, _ := mockArgs.Get(0).([]ListValidatorRow)
 	result1, _ := mockArgs.Get(1).(*pagination_interface.PaginationResult)
 	return result0, result1, mockArgs.Error(2)

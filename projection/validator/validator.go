@@ -33,6 +33,7 @@ var (
 	NewValidatorActivitiesTotal       = view.NewValidatorActivitiesTotalView
 	NewValidatorBlockCommitments      = view.NewValidatorBlockCommitments
 	NewValidatorBlockCommitmentsTotal = view.NewValidatorBlockCommitmentsTotal
+	NewValidatorActiveBlocks          = view.NewValidatorActiveBlocksView
 	UpdateLastHandledEventHeight      = (*Validator).UpdateLastHandledEventHeight
 )
 
@@ -174,6 +175,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 	validatorBlockCommitmentsTotalView := NewValidatorBlockCommitmentsTotal(rdbTxHandle)
 	validatorActivitiesView := NewValidatorActivities(rdbTxHandle)
 	validatorActivitiesTotalView := NewValidatorActivitiesTotal(rdbTxHandle)
+	validatorActiveBlocksView := NewValidatorActiveBlocks(rdbTxHandle)
 
 	var blockTime utctime.UTCTime
 	var blockHash string
@@ -188,7 +190,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 			blockProposer = blockCreatedEvent.Block.ProposerAddress
 		}
 	}
-	if projectErr := projection.projectValidatorView(validatorsView, &validatorActivitiesView, blockTime, height, events); projectErr != nil {
+	if projectErr := projection.projectValidatorView(validatorsView, &validatorActivitiesView, &validatorActiveBlocksView, blockTime, height, events); projectErr != nil {
 		return fmt.Errorf("error projecting validator view: %v", projectErr)
 	}
 
@@ -203,19 +205,23 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 		return fmt.Errorf("error projecting validator activities view: %v", err)
 	}
 
-	validatorList, listValidatorErr := validatorsView.ListAll(view.ValidatorsListFilter{
-		MaybeStatuses: nil,
-	}, view.ValidatorsListOrder{MaybePower: nil})
+	validatorList, listValidatorErr := validatorsView.ListAll(
+		view.ValidatorsListFilter{
+			MaybeStatuses: nil,
+		},
+		view.ValidatorsListOrder{MaybePower: nil},
+		nil,
+	)
 	if listValidatorErr != nil {
 		return fmt.Errorf("error retrieving validator list: %v", listValidatorErr)
 	}
 	validatorMap := make(map[string]*view.ValidatorRow)
-	activeValidatorList := make([]view.ValidatorRow, 0)
+	bondedValidatorList := make([]view.ValidatorRow, 0)
 	for i, validator := range validatorList {
 		validatorMap[validator.TendermintAddress] = &validatorList[i]
 		switch validatorList[i].Status {
 		case constants.BONDED, constants.UNBONDING:
-			activeValidatorList = append(activeValidatorList, validatorList[i])
+			bondedValidatorList = append(bondedValidatorList, validatorList[i])
 		}
 	}
 
@@ -274,48 +280,52 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 			}
 
 			// Update validator up time
-			var mutSignedValidators []view.ValidatorRow
-			var mutUnsignedValidators []view.ValidatorRow
+			var activeValidtors []view.ValidatorRow
+			var operatorAddressToSignedBlockFlagMap = make(view.OperatorAddressToSignedBlockFlagMap)
 
-			for _, activeValidator := range activeValidatorList {
+			for _, bondedValidator := range bondedValidatorList {
 				signed := false
-				if commitmentMap[activeValidator.ConsensusNodeAddress] {
-					activeValidator.TotalSignedBlock += 1
+				if commitmentMap[bondedValidator.ConsensusNodeAddress] {
+					bondedValidator.TotalSignedBlock += 1
 					signed = true
-				} else if blockCreatedEvent.BlockHeight-activeValidator.JoinedAtBlockHeight < 10 {
+				} else if blockCreatedEvent.BlockHeight-bondedValidator.JoinedAtBlockHeight < 10 {
 					// give 10 blocks buffer on validator first join
-					activeValidator.TotalSignedBlock += 1
+					bondedValidator.TotalSignedBlock += 1
 					signed = true
 				}
-				activeValidator.TotalActiveBlock += 1
+				bondedValidator.TotalActiveBlock += 1
 
-				activeValidator.ImpreciseUpTime.Quo(
-					new(big.Float).SetInt64(activeValidator.TotalSignedBlock),
-					new(big.Float).SetInt64(activeValidator.TotalActiveBlock),
+				bondedValidator.ImpreciseUpTime.Quo(
+					new(big.Float).SetInt64(bondedValidator.TotalSignedBlock),
+					new(big.Float).SetInt64(bondedValidator.TotalActiveBlock),
 				)
 
-				if signed {
-					mutSignedValidators = append(mutSignedValidators, activeValidator)
-				} else {
-					mutUnsignedValidators = append(mutUnsignedValidators, activeValidator)
-				}
+				operatorAddressToSignedBlockFlagMap[bondedValidator.OperatorAddress] = signed
+				activeValidtors = append(activeValidtors, bondedValidator)
 			}
 
-			if activeValidatorUpdateErr := validatorsView.UpdateAllValidatorUpTime(
-				mutSignedValidators,
-				mutUnsignedValidators,
+			if validatorUpdateUpTimeErr := validatorsView.UpdateAllValidatorUpTime(
+				activeValidtors,
+			); validatorUpdateUpTimeErr != nil {
+				return fmt.Errorf("error updating active validators up time data: %v", validatorUpdateUpTimeErr)
+			}
+
+			if validatorUpdateActiveBlocksErr := validatorActiveBlocksView.UpdateValidatorsActiveBlocks(
+				operatorAddressToSignedBlockFlagMap,
 				blockCreatedEvent.BlockHeight,
 				projection.config.MaxActiveBlocksPeriodLimit,
-			); activeValidatorUpdateErr != nil {
-				return fmt.Errorf("error updating active validators up time data: %v", activeValidatorUpdateErr)
+			); validatorUpdateActiveBlocksErr != nil {
+				return fmt.Errorf("error updating validators active blocks data: %v", validatorUpdateActiveBlocksErr)
 			}
-
 		} else if votedEvent, ok := event.(*event_usecase.MsgVote); ok {
 			projection.logger.Debug("handling MsgVote event")
 
-			mutVotedValidator, votedValidatorQueryErr := validatorsView.FindBy(view.ValidatorIdentity{
-				MaybeInitialDelegatorAddress: &votedEvent.Voter,
-			})
+			mutVotedValidator, votedValidatorQueryErr := validatorsView.FindBy(
+				view.ValidatorIdentity{
+					MaybeInitialDelegatorAddress: &votedEvent.Voter,
+				},
+				nil,
+			)
 
 			if votedValidatorQueryErr != nil {
 				if errors.Is(votedValidatorQueryErr, rdb.ErrNoRows) {
@@ -346,6 +356,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 func (projection *Validator) projectValidatorView(
 	validatorsView view.Validators,
 	validatorActivities *view.ValidatorActivities,
+	validatorActiveBlocks *view.ValidatorActiveBlocks,
 	blockTime utctime.UTCTime,
 	blockHeight int64,
 	events []event_entity.Event,
@@ -395,8 +406,6 @@ func (projection *Validator) projectValidatorView(
 				TotalActiveBlock:        0,
 				ImpreciseUpTime:         big.NewFloat(1),
 				VotedGovProposal:        big.NewInt(0),
-				RecentActiveBlocks:      []int64{},
-				RecentSignedBlocks:      []int64{},
 				Attention:               false,
 			}
 
@@ -457,8 +466,6 @@ func (projection *Validator) projectValidatorView(
 				TotalActiveBlock:        0,
 				ImpreciseUpTime:         big.NewFloat(1),
 				VotedGovProposal:        big.NewInt(0),
-				RecentActiveBlocks:      []int64{},
-				RecentSignedBlocks:      []int64{},
 				Attention:               false,
 			}
 
@@ -483,9 +490,12 @@ func (projection *Validator) projectValidatorView(
 		if msgEditValidatorEvent, ok := event.(*event_usecase.MsgEditValidator); ok {
 			projection.logger.Debug("handling MsgEditValidator event")
 
-			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
-				MaybeOperatorAddress: &msgEditValidatorEvent.ValidatorAddress,
-			})
+			mutValidatorRow, err := validatorsView.FindBy(
+				view.ValidatorIdentity{
+					MaybeOperatorAddress: &msgEditValidatorEvent.ValidatorAddress,
+				},
+				nil,
+			)
 			if err != nil {
 				return fmt.Errorf(
 					"error getting existing validator %s from view: %v", msgEditValidatorEvent.ValidatorAddress, err,
@@ -559,9 +569,12 @@ func (projection *Validator) projectValidatorView(
 		} else if validatorJailedEvent, ok := event.(*event_usecase.ValidatorJailed); ok {
 			projection.logger.Debug("handling ValidatorJailed event")
 
-			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
-				MaybeConsensusNodeAddress: &validatorJailedEvent.ConsensusNodeAddress,
-			})
+			mutValidatorRow, err := validatorsView.FindBy(
+				view.ValidatorIdentity{
+					MaybeConsensusNodeAddress: &validatorJailedEvent.ConsensusNodeAddress,
+				},
+				nil,
+			)
 			if err != nil {
 				return fmt.Errorf(
 					"error getting existing validator `%s` from view: %v", validatorJailedEvent.ConsensusNodeAddress, err,
@@ -570,18 +583,23 @@ func (projection *Validator) projectValidatorView(
 
 			mutValidatorRow.Status = constants.JAILED
 			mutValidatorRow.Jailed = true
-			mutValidatorRow.RecentActiveBlocks = []int64{}
-			mutValidatorRow.RecentSignedBlocks = []int64{}
 
 			if err := validatorsView.Update(mutValidatorRow); err != nil {
+				return fmt.Errorf("error updating validator into view: %v", err)
+			}
+
+			if err := (*validatorActiveBlocks).ClearValidatorActiveBLocks(mutValidatorRow.OperatorAddress); err != nil {
 				return fmt.Errorf("error updating validator into view: %v", err)
 			}
 		} else if msgUnjailEvent, ok := event.(*event_usecase.MsgUnjail); ok {
 			projection.logger.Debug("handling MsgUnjail event")
 
-			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
-				MaybeOperatorAddress: &msgUnjailEvent.ValidatorAddr,
-			})
+			mutValidatorRow, err := validatorsView.FindBy(
+				view.ValidatorIdentity{
+					MaybeOperatorAddress: &msgUnjailEvent.ValidatorAddr,
+				},
+				nil,
+			)
 			if err != nil {
 				return fmt.Errorf("error getting existing validator `%s` from view: %v", msgUnjailEvent.ValidatorAddr, err)
 			}
@@ -589,10 +607,12 @@ func (projection *Validator) projectValidatorView(
 			// Unjailed validator will become inactive first, if there's voting power changes then it becomes bonded
 			mutValidatorRow.Status = constants.INACTIVE
 			mutValidatorRow.Jailed = false
-			mutValidatorRow.RecentActiveBlocks = []int64{}
-			mutValidatorRow.RecentSignedBlocks = []int64{}
 
 			if err := validatorsView.Update(mutValidatorRow); err != nil {
+				return fmt.Errorf("error updating validator into view: %v", err)
+			}
+
+			if err := (*validatorActiveBlocks).ClearValidatorActiveBLocks(mutValidatorRow.OperatorAddress); err != nil {
 				return fmt.Errorf("error updating validator into view: %v", err)
 			}
 		} else if powerChangedEvent, ok := event.(*event_usecase.PowerChanged); ok {
@@ -609,9 +629,12 @@ func (projection *Validator) projectValidatorView(
 				return fmt.Errorf("error converting tendermint pubkey to consensus pubkey")
 			}
 
-			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
-				MaybeConsensusNodeAddress: &consensusNodeAddress,
-			})
+			mutValidatorRow, err := validatorsView.FindBy(
+				view.ValidatorIdentity{
+					MaybeConsensusNodeAddress: &consensusNodeAddress,
+				},
+				nil,
+			)
 			if err != nil {
 				return fmt.Errorf("error getting existing validator `%s` from view: %v", consensusNodeAddress, err)
 			}
@@ -619,8 +642,10 @@ func (projection *Validator) projectValidatorView(
 			mutValidatorRow.Power = powerChangedEvent.Power
 			if powerChangedEvent.Power == "0" && !mutValidatorRow.Jailed {
 				mutValidatorRow.Status = constants.INACTIVE
-				mutValidatorRow.RecentActiveBlocks = []int64{}
-				mutValidatorRow.RecentSignedBlocks = []int64{}
+
+				if err := (*validatorActiveBlocks).ClearValidatorActiveBLocks(mutValidatorRow.OperatorAddress); err != nil {
+					return fmt.Errorf("error updating validator into view: %v", err)
+				}
 			} else if powerChangedEvent.Power != "0" {
 				mutValidatorRow.Status = constants.BONDED
 			}

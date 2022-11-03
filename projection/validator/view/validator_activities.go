@@ -173,7 +173,7 @@ func (validatorActivitiesView *ValidatorActivitiesView) List(
 				validatorsView := NewValidatorsView(rdbHandle)
 				validator, err := validatorsView.FindBy(ValidatorIdentity{
 					MaybeConsensusNodeAddress: filter.MaybeConsensusNodeAddress,
-				})
+				}, nil)
 				if err != nil {
 					return int64(0), err
 				}

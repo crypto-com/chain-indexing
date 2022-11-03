@@ -140,6 +140,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 					validator_view.ValidatorIdentity{
 						MaybeOperatorAddress: primptr.String("tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus"),
 					},
+					(*int64)(nil),
 				).Return(
 					&validator_view.ValidatorRow{
 						MaybeId:                 primptr.Int64(3),
@@ -315,6 +316,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 					"ListAll",
 					testify_mock.Anything,
 					testify_mock.Anything,
+					(*int64)(nil),
 				).Return(
 					[]validator_view.ValidatorRow{}, nil)
 
@@ -346,7 +348,18 @@ func TestValidator_HandleEvents(t *testing.T) {
 				mockValidatorsView.On(
 					"UpdateAllValidatorUpTime",
 					[]view.ValidatorRow(nil),
-					[]view.ValidatorRow(nil),
+				).Return(nil)
+
+				mockValidatorActiveBlocksView := validator_view.NewMockValidatorActiveBlocksView(nil).(*validator_view.MockValidatorActiveBlocksView)
+				mocks = append(mocks, &mockValidatorActiveBlocksView.Mock)
+
+				validator.NewValidatorActiveBlocks = func(_ *rdb.Handle) validator_view.ValidatorActiveBlocks {
+					return mockValidatorActiveBlocksView
+				}
+
+				mockValidatorActiveBlocksView.On(
+					"UpdateValidatorsActiveBlocks",
+					view.OperatorAddressToSignedBlockFlagMap{},
 					int64(1),
 					int64(100000),
 				).Return(nil)
@@ -409,6 +422,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 					validator_view.ValidatorIdentity{
 						MaybeOperatorAddress: primptr.String("tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus"),
 					},
+					(*int64)(nil),
 				).Return(
 					&validator_view.ValidatorRow{
 						MaybeId:                 primptr.Int64(3),
@@ -584,6 +598,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 					"ListAll",
 					testify_mock.Anything,
 					testify_mock.Anything,
+					(*int64)(nil),
 				).Return(
 					[]validator_view.ValidatorRow{}, nil)
 
@@ -615,7 +630,18 @@ func TestValidator_HandleEvents(t *testing.T) {
 				mockValidatorsView.On(
 					"UpdateAllValidatorUpTime",
 					[]view.ValidatorRow(nil),
-					[]view.ValidatorRow(nil),
+				).Return(nil)
+
+				mockValidatorActiveBlocksView := validator_view.NewMockValidatorActiveBlocksView(nil).(*validator_view.MockValidatorActiveBlocksView)
+				mocks = append(mocks, &mockValidatorActiveBlocksView.Mock)
+
+				validator.NewValidatorActiveBlocks = func(_ *rdb.Handle) validator_view.ValidatorActiveBlocks {
+					return mockValidatorActiveBlocksView
+				}
+
+				mockValidatorActiveBlocksView.On(
+					"UpdateValidatorsActiveBlocks",
+					view.OperatorAddressToSignedBlockFlagMap{},
 					int64(1),
 					int64(100000),
 				).Return(nil)
@@ -678,6 +704,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 					validator_view.ValidatorIdentity{
 						MaybeOperatorAddress: primptr.String("tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus"),
 					},
+					(*int64)(nil),
 				).Return(
 					&validator_view.ValidatorRow{
 						MaybeId:                 primptr.Int64(3),
@@ -796,6 +823,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 					"ListAll",
 					testify_mock.Anything,
 					testify_mock.Anything,
+					(*int64)(nil),
 				).Return(
 					[]validator_view.ValidatorRow{}, nil)
 
@@ -827,7 +855,18 @@ func TestValidator_HandleEvents(t *testing.T) {
 				mockValidatorsView.On(
 					"UpdateAllValidatorUpTime",
 					[]view.ValidatorRow(nil),
-					[]view.ValidatorRow(nil),
+				).Return(nil)
+
+				mockValidatorActiveBlocksView := validator_view.NewMockValidatorActiveBlocksView(nil).(*validator_view.MockValidatorActiveBlocksView)
+				mocks = append(mocks, &mockValidatorActiveBlocksView.Mock)
+
+				validator.NewValidatorActiveBlocks = func(_ *rdb.Handle) validator_view.ValidatorActiveBlocks {
+					return mockValidatorActiveBlocksView
+				}
+
+				mockValidatorActiveBlocksView.On(
+					"UpdateValidatorsActiveBlocks",
+					view.OperatorAddressToSignedBlockFlagMap{},
 					int64(1),
 					int64(100000),
 				).Return(nil)
@@ -890,6 +929,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 					validator_view.ValidatorIdentity{
 						MaybeOperatorAddress: primptr.String("tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus"),
 					},
+					(*int64)(nil),
 				).Return(
 					&validator_view.ValidatorRow{
 						MaybeId:                 primptr.Int64(3),
@@ -1065,6 +1105,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 					"ListAll",
 					testify_mock.Anything,
 					testify_mock.Anything,
+					(*int64)(nil),
 				).Return(
 					[]validator_view.ValidatorRow{}, nil)
 
@@ -1096,7 +1137,18 @@ func TestValidator_HandleEvents(t *testing.T) {
 				mockValidatorsView.On(
 					"UpdateAllValidatorUpTime",
 					[]view.ValidatorRow(nil),
-					[]view.ValidatorRow(nil),
+				).Return(nil)
+
+				mockValidatorActiveBlocksView := validator_view.NewMockValidatorActiveBlocksView(nil).(*validator_view.MockValidatorActiveBlocksView)
+				mocks = append(mocks, &mockValidatorActiveBlocksView.Mock)
+
+				validator.NewValidatorActiveBlocks = func(_ *rdb.Handle) validator_view.ValidatorActiveBlocks {
+					return mockValidatorActiveBlocksView
+				}
+
+				mockValidatorActiveBlocksView.On(
+					"UpdateValidatorsActiveBlocks",
+					view.OperatorAddressToSignedBlockFlagMap{},
 					int64(1),
 					int64(100000),
 				).Return(nil)
@@ -1151,6 +1203,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 						MaybeStatuses: nil,
 					},
 					view.ValidatorsListOrder{MaybePower: nil},
+					(*int64)(nil),
 				).Return(
 					[]validator_view.ValidatorRow{
 						{
@@ -1177,9 +1230,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalActiveBlock:        0,
 							ImpreciseUpTime:         big.NewFloat(0),
 							VotedGovProposal:        nil,
-							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
-							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
 							Attention:               false,
 						},
@@ -1207,9 +1258,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalActiveBlock:        0,
 							ImpreciseUpTime:         big.NewFloat(0),
 							VotedGovProposal:        nil,
-							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
-							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
 							Attention:               false,
 						},
@@ -1237,9 +1286,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalActiveBlock:        0,
 							ImpreciseUpTime:         big.NewFloat(0),
 							VotedGovProposal:        nil,
-							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
-							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
 							Attention:               false,
 						},
@@ -1267,9 +1314,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalActiveBlock:        0,
 							ImpreciseUpTime:         big.NewFloat(0),
 							VotedGovProposal:        nil,
-							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
-							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
 							Attention:               false,
 						},
@@ -1297,9 +1342,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalActiveBlock:        0,
 							ImpreciseUpTime:         big.NewFloat(0),
 							VotedGovProposal:        nil,
-							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
-							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
 							Attention:               false,
 						},
@@ -1392,9 +1435,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalActiveBlock:        1,
 							ImpreciseUpTime:         big.NewFloat(1),
 							VotedGovProposal:        nil,
-							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
-							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
 						},
 						{
@@ -1421,9 +1462,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalActiveBlock:        1,
 							ImpreciseUpTime:         big.NewFloat(1),
 							VotedGovProposal:        nil,
-							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
-							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
 						},
 						{
@@ -1450,13 +1489,9 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalActiveBlock:        1,
 							ImpreciseUpTime:         big.NewFloat(1),
 							VotedGovProposal:        nil,
-							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
-							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
 						},
-					},
-					[]view.ValidatorRow{
 						{
 							MaybeId:                 nil,
 							OperatorAddress:         "OperatorAddress4",
@@ -1481,12 +1516,27 @@ func TestValidator_HandleEvents(t *testing.T) {
 							TotalActiveBlock:        1,
 							ImpreciseUpTime:         big.NewFloat(0),
 							VotedGovProposal:        nil,
-							RecentActiveBlocks:      []int64{},
 							TotalRecentActiveBlocks: 0,
-							RecentSignedBlocks:      []int64{},
 							TotalRecentSignedBlocks: 0,
 							Attention:               false,
 						},
+					},
+				).Return(nil)
+
+				mockValidatorActiveBlocksView := validator_view.NewMockValidatorActiveBlocksView(nil).(*validator_view.MockValidatorActiveBlocksView)
+				mocks = append(mocks, &mockValidatorActiveBlocksView.Mock)
+
+				validator.NewValidatorActiveBlocks = func(_ *rdb.Handle) validator_view.ValidatorActiveBlocks {
+					return mockValidatorActiveBlocksView
+				}
+
+				mockValidatorActiveBlocksView.On(
+					"UpdateValidatorsActiveBlocks",
+					view.OperatorAddressToSignedBlockFlagMap{
+						"OperatorAddress1": true,
+						"OperatorAddress2": true,
+						"OperatorAddress3": true,
+						"OperatorAddress4": false,
 					},
 					int64(11),
 					int64(100000),

@@ -89,21 +89,21 @@ func (handler *Validators) FindBy(ctx *fasthttp.RequestCtx) {
 	}
 	addressParams = strings.ToLower(addressParams)
 
-	activeBlocksPeriodLimit := handler.maxActiveBlocksPeriodLimit
+	recentBlocks := handler.maxActiveBlocksPeriodLimit
 	queryArgs := ctx.QueryArgs()
-	if queryArgs.Has("activeBlocksPeriodLimit") {
-		activeBlocksPeriodLimitParam, err := queryArgs.GetUint("activeBlocksPeriodLimit")
+	if queryArgs.Has("recentBlocks") {
+		recentBlocksParam, err := queryArgs.GetUint("recentBlocks")
 		if err != nil {
-			httpapi.BadRequest(ctx, errors.New("invalid activeBlocksPeriodLimit"))
+			httpapi.BadRequest(ctx, errors.New("invalid recentBlocks"))
 			return
 		}
 
-		if int64(activeBlocksPeriodLimitParam) > handler.maxActiveBlocksPeriodLimit {
-			httpapi.BadRequest(ctx, errors.New("activeBlocksPeriodLimit excess limit"))
+		if int64(recentBlocksParam) > handler.maxActiveBlocksPeriodLimit {
+			httpapi.BadRequest(ctx, errors.New("recentBlocks excess limit"))
 			return
 		}
 
-		activeBlocksPeriodLimit = int64(activeBlocksPeriodLimitParam)
+		recentBlocks = int64(recentBlocksParam)
 	}
 
 	var identity validator_view.ValidatorIdentity
@@ -127,7 +127,9 @@ func (handler *Validators) FindBy(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	rawValidator, err := handler.validatorsView.FindBy(identity)
+	lowestActiveBlockHeight := lastHandledHeight - recentBlocks
+
+	rawValidator, err := handler.validatorsView.FindBy(identity, &lowestActiveBlockHeight)
 	if err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			httpapi.NotFound(ctx)
@@ -137,33 +139,6 @@ func (handler *Validators) FindBy(ctx *fasthttp.RequestCtx) {
 		httpapi.InternalServerError(ctx)
 		return
 	}
-
-	var recentActiveBLocks []int64
-	var recentSignedBLocks []int64
-	if activeBlocksPeriodLimit == handler.maxActiveBlocksPeriodLimit {
-		recentActiveBLocks = rawValidator.RecentActiveBlocks
-		recentSignedBLocks = rawValidator.RecentSignedBlocks
-	} else if len(rawValidator.RecentActiveBlocks) > 0 &&
-		rawValidator.RecentActiveBlocks[len(rawValidator.RecentActiveBlocks)-1] >= (lastHandledHeight-activeBlocksPeriodLimit+1) {
-		for i := len(rawValidator.RecentActiveBlocks) - 1; i >= 0; i-- {
-			if rawValidator.RecentActiveBlocks[i] >= (lastHandledHeight - activeBlocksPeriodLimit + 1) {
-				recentActiveBLocks = append(recentActiveBLocks, rawValidator.RecentActiveBlocks[i])
-			} else {
-				break
-			}
-		}
-		for i := len(rawValidator.RecentSignedBlocks) - 1; i >= 0; i-- {
-			if rawValidator.RecentSignedBlocks[i] >= (lastHandledHeight - activeBlocksPeriodLimit + 1) {
-				recentSignedBLocks = append(recentSignedBLocks, rawValidator.RecentSignedBlocks[i])
-			} else {
-				break
-			}
-		}
-	}
-	rawValidator.TotalRecentActiveBlocks = int64(len(recentActiveBLocks))
-	rawValidator.RecentActiveBlocks = recentActiveBLocks
-	rawValidator.TotalRecentSignedBlocks = int64(len(recentSignedBLocks))
-	rawValidator.RecentSignedBlocks = recentSignedBLocks
 
 	validator := ValidatorDetails{
 		ValidatorRow: rawValidator,
@@ -221,21 +196,21 @@ func (handler *Validators) List(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
-	activeBlocksPeriodLimit := handler.maxActiveBlocksPeriodLimit
-	var activeBlocksPeriodLimitParam int
-	if queryArgs.Has("activeBlocksPeriodLimit") {
-		activeBlocksPeriodLimitParam, err = queryArgs.GetUint("activeBlocksPeriodLimit")
+	recentBlocks := handler.maxActiveBlocksPeriodLimit
+	var recentBlocksParam int
+	if queryArgs.Has("recentBlocks") {
+		recentBlocksParam, err = queryArgs.GetUint("recentBlocks")
 		if err != nil {
-			httpapi.BadRequest(ctx, errors.New("invalid activeBlocksPeriodLimit"))
+			httpapi.BadRequest(ctx, errors.New("invalid recentBlocks"))
 			return
 		}
 
-		if int64(activeBlocksPeriodLimitParam) > handler.maxActiveBlocksPeriodLimit {
-			httpapi.BadRequest(ctx, errors.New("activeBlocksPeriodLimit excess limit"))
+		if int64(recentBlocksParam) > handler.maxActiveBlocksPeriodLimit {
+			httpapi.BadRequest(ctx, errors.New("recentBlocks excess limit"))
 			return
 		}
 
-		activeBlocksPeriodLimit = int64(activeBlocksPeriodLimitParam)
+		recentBlocks = int64(recentBlocksParam)
 	}
 
 	lastHandledHeight, err := handler.validatorsView.LastHandledHeight()
@@ -245,8 +220,10 @@ func (handler *Validators) List(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
+	lowestActiveBlockHeight := lastHandledHeight - recentBlocks
+
 	validators, paginationResult, err := handler.validatorsView.List(
-		validator_view.ValidatorsListFilter{}, order, pagination,
+		validator_view.ValidatorsListFilter{}, order, &lowestActiveBlockHeight, pagination,
 	)
 	if err != nil {
 		handler.logger.Errorf("error listing validators: %v", err)
@@ -266,33 +243,6 @@ func (handler *Validators) List(ctx *fasthttp.RequestCtx) {
 	}
 	validatorsWithAPY := make([]validatorRowWithAPY, 0, len(validators))
 	for _, validator := range validators {
-		var recentActiveBLocks []int64
-		var recentSignedBLocks []int64
-		if activeBlocksPeriodLimit == handler.maxActiveBlocksPeriodLimit {
-			recentActiveBLocks = validator.RecentActiveBlocks
-			recentSignedBLocks = validator.RecentSignedBlocks
-		} else if len(validator.RecentActiveBlocks) > 0 &&
-			validator.RecentActiveBlocks[len(validator.RecentActiveBlocks)-1] >= (lastHandledHeight-activeBlocksPeriodLimit+1) {
-			for i := len(validator.RecentActiveBlocks) - 1; i >= 0; i-- {
-				if validator.RecentActiveBlocks[i] >= (lastHandledHeight - activeBlocksPeriodLimit + 1) {
-					recentActiveBLocks = append(recentActiveBLocks, validator.RecentActiveBlocks[i])
-				} else {
-					break
-				}
-			}
-			for i := len(validator.RecentSignedBlocks) - 1; i >= 0; i-- {
-				if validator.RecentSignedBlocks[i] >= (lastHandledHeight - activeBlocksPeriodLimit + 1) {
-					recentSignedBLocks = append(recentSignedBLocks, validator.RecentSignedBlocks[i])
-				} else {
-					break
-				}
-			}
-		}
-		validator.TotalRecentActiveBlocks = int64(len(recentActiveBLocks))
-		validator.RecentActiveBlocks = recentActiveBLocks
-		validator.TotalRecentSignedBlocks = int64(len(recentSignedBLocks))
-		validator.RecentSignedBlocks = recentSignedBLocks
-
 		if validator.Status != constants.BONDED {
 			validatorsWithAPY = append(validatorsWithAPY, validatorRowWithAPY{
 				validator,
@@ -503,21 +453,21 @@ func (handler *Validators) ListActive(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
-	activeBlocksPeriodLimit := handler.maxActiveBlocksPeriodLimit
-	var activeBlocksPeriodLimitParam int
-	if queryArgs.Has("activeBlocksPeriodLimit") {
-		activeBlocksPeriodLimitParam, err = queryArgs.GetUint("activeBlocksPeriodLimit")
+	recentBlocks := handler.maxActiveBlocksPeriodLimit
+	var recentBlocksParam int
+	if queryArgs.Has("recentBlocks") {
+		recentBlocksParam, err = queryArgs.GetUint("recentBlocks")
 		if err != nil {
-			httpapi.BadRequest(ctx, errors.New("invalid activeBlocksPeriodLimit"))
+			httpapi.BadRequest(ctx, errors.New("invalid recentBlocks"))
 			return
 		}
 
-		if int64(activeBlocksPeriodLimitParam) > handler.maxActiveBlocksPeriodLimit {
-			httpapi.BadRequest(ctx, errors.New("activeBlocksPeriodLimit excess limit"))
+		if int64(recentBlocksParam) > handler.maxActiveBlocksPeriodLimit {
+			httpapi.BadRequest(ctx, errors.New("recentBlocks excess limit"))
 			return
 		}
 
-		activeBlocksPeriodLimit = int64(activeBlocksPeriodLimitParam)
+		recentBlocks = int64(recentBlocksParam)
 	}
 
 	lastHandledHeight, err := handler.validatorsView.LastHandledHeight()
@@ -527,46 +477,24 @@ func (handler *Validators) ListActive(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	validators, paginationResult, err := handler.validatorsView.List(validator_view.ValidatorsListFilter{
-		MaybeStatuses: []constants.Status{
-			constants.BONDED,
-			constants.JAILED,
-			constants.UNBONDING,
+	lowestActiveBlockHeight := lastHandledHeight - recentBlocks
+
+	validators, paginationResult, err := handler.validatorsView.List(
+		validator_view.ValidatorsListFilter{
+			MaybeStatuses: []constants.Status{
+				constants.BONDED,
+				constants.JAILED,
+				constants.UNBONDING,
+			},
 		},
-	}, order, pagination)
+		order,
+		&lowestActiveBlockHeight,
+		pagination,
+	)
 	if err != nil {
 		handler.logger.Errorf("error listing active validators: %v", err)
 		httpapi.InternalServerError(ctx)
 		return
-	}
-
-	for _, validator := range validators {
-		var recentActiveBLocks []int64
-		var recentSignedBLocks []int64
-		if activeBlocksPeriodLimit == handler.maxActiveBlocksPeriodLimit {
-			recentActiveBLocks = validator.RecentActiveBlocks
-			recentSignedBLocks = validator.RecentSignedBlocks
-		} else if len(validator.RecentActiveBlocks) > 0 &&
-			validator.RecentActiveBlocks[len(validator.RecentActiveBlocks)-1] >= (lastHandledHeight-activeBlocksPeriodLimit+1) {
-			for i := len(validator.RecentActiveBlocks) - 1; i >= 0; i-- {
-				if validator.RecentActiveBlocks[i] >= (lastHandledHeight - activeBlocksPeriodLimit + 1) {
-					recentActiveBLocks = append(recentActiveBLocks, validator.RecentActiveBlocks[i])
-				} else {
-					break
-				}
-			}
-			for i := len(validator.RecentSignedBlocks) - 1; i >= 0; i-- {
-				if validator.RecentSignedBlocks[i] >= (lastHandledHeight - activeBlocksPeriodLimit + 1) {
-					recentSignedBLocks = append(recentSignedBLocks, validator.RecentSignedBlocks[i])
-				} else {
-					break
-				}
-			}
-		}
-		validator.TotalRecentActiveBlocks = int64(len(recentActiveBLocks))
-		validator.RecentActiveBlocks = recentActiveBLocks
-		validator.TotalRecentSignedBlocks = int64(len(recentSignedBLocks))
-		validator.RecentSignedBlocks = recentSignedBLocks
 	}
 
 	httpapi.SuccessWithPagination(ctx, validators, paginationResult)
