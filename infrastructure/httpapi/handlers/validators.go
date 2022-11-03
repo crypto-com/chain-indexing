@@ -455,7 +455,7 @@ func (handler *Validators) ListActive(ctx *fasthttp.RequestCtx) {
 
 	recentBlocks := handler.maxActiveBlocksPeriodLimit
 	var recentBlocksParam int
-	if queryArgs.Has("activeBlocksPeriodLimit") {
+	if queryArgs.Has("recentBlocks") {
 		recentBlocksParam, err = queryArgs.GetUint("recentBlocks")
 		if err != nil {
 			httpapi.BadRequest(ctx, errors.New("invalid recentBlocks"))
