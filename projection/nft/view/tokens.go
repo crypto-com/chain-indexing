@@ -464,7 +464,7 @@ func (tokensView *TokensView) BurnToken(denomId string, tokenId string) error {
 	).SetMap(map[string]interface{}{
 		SOFT_DELETE_FLAG: true,
 	}).Where(
-		"burned = false AND denom_id = ? AND token_id = ? ",
+		"burned = false AND denom_id = ? AND token_id = ?",
 		sanitizer.SanitizePostgresString(denomId),
 		sanitizer.SanitizePostgresString(tokenId),
 	).ToSql()

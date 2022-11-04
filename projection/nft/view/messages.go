@@ -257,7 +257,7 @@ func (nftMessagesView *MessagesView) BurnMessagesByToken(denomId string, maybeTo
 	).SetMap(map[string]interface{}{
 		"burned": true,
 	}).Where(
-		"denom_id = ? AND maybe_token_id = ?",
+		"burned = false AND denom_id = ? AND maybe_token_id = ? ",
 		sanitizer.SanitizePostgresString(denomId),
 		sanitizer.SanitizePostgresString(maybeTokenId),
 	).ToSql()
