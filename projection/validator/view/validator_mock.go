@@ -73,8 +73,8 @@ func (validatorsView *MockValidatorsView) UpdateAllValidatorUpTime(
 	return mockArgs.Error(0)
 }
 
-func (validatorsView *MockValidatorsView) ListAll(filter ValidatorsListFilter, order ValidatorsListOrder, maybeLowestBlockHeight *int64) ([]ValidatorRow, error) {
-	mockArgs := validatorsView.Called(filter, order, maybeLowestBlockHeight)
+func (validatorsView *MockValidatorsView) ListAll(filter ValidatorsListFilter, order ValidatorsListOrder) ([]ValidatorRow, error) {
+	mockArgs := validatorsView.Called(filter, order)
 	rows, _ := mockArgs.Get(0).([]ValidatorRow)
 	return rows, mockArgs.Error(1)
 }
@@ -82,10 +82,9 @@ func (validatorsView *MockValidatorsView) ListAll(filter ValidatorsListFilter, o
 func (validatorsView *MockValidatorsView) List(
 	filter ValidatorsListFilter,
 	order ValidatorsListOrder,
-	maybeLowestBlockHeight *int64,
 	pagination *pagination_interface.Pagination,
 ) ([]ListValidatorRow, *pagination.PaginationResult, error) {
-	mockArgs := validatorsView.Called(filter, order, pagination, maybeLowestBlockHeight)
+	mockArgs := validatorsView.Called(filter, order, pagination)
 	result0, _ := mockArgs.Get(0).([]ListValidatorRow)
 	result1, _ := mockArgs.Get(1).(*pagination_interface.PaginationResult)
 	return result0, result1, mockArgs.Error(2)

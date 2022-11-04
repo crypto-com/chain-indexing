@@ -37,13 +37,11 @@ type Validators interface {
 	ListAll(
 		filter ValidatorsListFilter,
 		order ValidatorsListOrder,
-		maybeLowestBlockHeight *int64,
 	) ([]ValidatorRow, error)
 
 	List(
 		filter ValidatorsListFilter,
 		order ValidatorsListOrder,
-		maybeLowestBlockHeight *int64,
 		pagination *pagination_interface.Pagination) ([]ListValidatorRow, *pagination.PaginationResult, error)
 	Count(filter CountFilter) (int64, error)
 	LastHandledHeight() (int64, error)
@@ -371,7 +369,12 @@ func (validatorsView *ValidatorsView) UpdateAllValidatorUpTime(validators []Vali
 }
 
 type ValidatorsListFilter struct {
-	MaybeStatuses []constants.Status
+	MaybeStatuses          []constants.Status
+	MaybeRecentActiveBlock *ValidatorsListRecentActiveBlockFilter
+}
+
+type ValidatorsListRecentActiveBlockFilter struct {
+	MaybeLowestActiveBlockHeight int64
 }
 
 type ValidatorsListOrder struct {
@@ -385,14 +388,8 @@ type ValidatorsListOrder struct {
 func (validatorsView *ValidatorsView) ListAll(
 	filter ValidatorsListFilter,
 	order ValidatorsListOrder,
-	maybeLowestBlockHeight *int64,
 ) ([]ValidatorRow, error) {
 	orderClauses := make([]string, 0)
-
-	if maybeLowestBlockHeight == nil || *maybeLowestBlockHeight < 0 {
-		lowestBlockHeight := DEFAULT_LOWEST_ACTIVE_BLOCKS_BLOCK_HEIGHT
-		maybeLowestBlockHeight = &lowestBlockHeight
-	}
 
 	if order.MaybeJoinedAtBlockHeight != nil {
 		if *order.MaybeStatus == view.ORDER_ASC {
@@ -465,66 +462,106 @@ func (validatorsView *ValidatorsView) ListAll(
 		whereClause = append(whereClause, statusOrCondition)
 	}
 
-	stmtBuilder := validatorsView.rdb.StmtBuilder.Select(
-		"id",
-		fmt.Sprintf(
-			"%s.operator_address",
+	var stmtBuilder sq.SelectBuilder
+
+	if filter.MaybeRecentActiveBlock != nil {
+		if filter.MaybeRecentActiveBlock.MaybeLowestActiveBlockHeight < 0 {
+			lowestBlockHeight := DEFAULT_LOWEST_ACTIVE_BLOCKS_BLOCK_HEIGHT
+			filter.MaybeRecentActiveBlock.MaybeLowestActiveBlockHeight = lowestBlockHeight
+		}
+
+		stmtBuilder = validatorsView.rdb.StmtBuilder.Select(
+			"id",
+			fmt.Sprintf(
+				"%s.operator_address",
+				VALIDATORS_TABLE_NAME,
+			),
+			"consensus_node_address",
+			"initial_delegator_address",
+			"tendermint_pubkey",
+			"tendermint_address",
+			"status",
+			"jailed",
+			"joined_at_block_height",
+			"power",
+			"moniker",
+			"identity",
+			"website",
+			"security_contact",
+			"details",
+			"commission_rate",
+			"commission_max_rate",
+			"commission_max_change_rate",
+			"min_self_delegation",
+			"total_signed_block",
+			"total_active_block",
+			"imprecise_up_time",
+			"voted_gov_proposal",
+			"attention",
+			fmt.Sprintf(
+				"COUNT(CASE WHEN %s.signed THEN 1 END) as recent_signed_blocks",
+				VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+			),
+			fmt.Sprintf(
+				"COUNT(%s.signed) as recent_active_blocks",
+				VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+			),
+		).From(
 			VALIDATORS_TABLE_NAME,
-		),
-		"consensus_node_address",
-		"initial_delegator_address",
-		"tendermint_pubkey",
-		"tendermint_address",
-		"status",
-		"jailed",
-		"joined_at_block_height",
-		"power",
-		"moniker",
-		"identity",
-		"website",
-		"security_contact",
-		"details",
-		"commission_rate",
-		"commission_max_rate",
-		"commission_max_change_rate",
-		"min_self_delegation",
-		"total_signed_block",
-		"total_active_block",
-		"imprecise_up_time",
-		"voted_gov_proposal",
-		"attention",
-		fmt.Sprintf(
-			"COUNT(CASE WHEN %s.signed THEN 1 END) as recent_signed_blocks",
-			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
-		),
-		fmt.Sprintf(
-			"COUNT(%s.signed) as recent_active_blocks",
-			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
-		),
-	).From(
-		VALIDATORS_TABLE_NAME,
-	)
+		).LeftJoin(
+			fmt.Sprintf(
+				"%s ON %s.operator_address=%s.operator_address AND %s.block_height > %d",
+				VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+				VALIDATORS_TABLE_NAME,
+				VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+				VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+				filter.MaybeRecentActiveBlock.MaybeLowestActiveBlockHeight,
+			),
+		).GroupBy(
+			fmt.Sprintf(
+				"%s.operator_address, %s.id",
+				VALIDATORS_TABLE_NAME,
+				VALIDATORS_TABLE_NAME,
+			),
+		)
+	} else {
+		stmtBuilder = validatorsView.rdb.StmtBuilder.Select(
+			"id",
+			"operator_address",
+			"consensus_node_address",
+			"initial_delegator_address",
+			"tendermint_pubkey",
+			"tendermint_address",
+			"status",
+			"jailed",
+			"joined_at_block_height",
+			"power",
+			"moniker",
+			"identity",
+			"website",
+			"security_contact",
+			"details",
+			"commission_rate",
+			"commission_max_rate",
+			"commission_max_change_rate",
+			"min_self_delegation",
+			"total_signed_block",
+			"total_active_block",
+			"imprecise_up_time",
+			"voted_gov_proposal",
+			"attention",
+			"-1 as recent_signed_blocks",
+			"-1 as recent_active_blocks",
+		).From(
+			VALIDATORS_TABLE_NAME,
+		)
+	}
 
 	if whereClause != nil {
 		stmtBuilder = stmtBuilder.Where(whereClause)
 	}
 
-	stmtBuilder = stmtBuilder.LeftJoin(
-		fmt.Sprintf(
-			"%s ON %s.operator_address=%s.operator_address AND %s.block_height > %d",
-			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
-			VALIDATORS_TABLE_NAME,
-			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
-			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
-			*maybeLowestBlockHeight,
-		),
-	).GroupBy(
-		fmt.Sprintf(
-			"%s.operator_address, %s.id",
-			VALIDATORS_TABLE_NAME,
-			VALIDATORS_TABLE_NAME,
-		),
-	).OrderBy(orderClauses...)
+	stmtBuilder = stmtBuilder.OrderBy(orderClauses...)
 
 	sql, sqlArgs, err := stmtBuilder.ToSql()
 	if err != nil {
@@ -598,7 +635,6 @@ func (validatorsView *ValidatorsView) ListAll(
 func (validatorsView *ValidatorsView) List(
 	filter ValidatorsListFilter,
 	order ValidatorsListOrder,
-	maybeLowestBlockHeight *int64,
 	pagination *pagination_interface.Pagination,
 ) ([]ListValidatorRow, *pagination.PaginationResult, error) {
 	if pagination.Type() != pagination_interface.PAGINATION_OFFSET {
@@ -606,11 +642,6 @@ func (validatorsView *ValidatorsView) List(
 	}
 
 	orderClauses := make([]string, 0)
-
-	if maybeLowestBlockHeight == nil || *maybeLowestBlockHeight < 0 {
-		lowestBlockHeight := DEFAULT_LOWEST_ACTIVE_BLOCKS_BLOCK_HEIGHT
-		maybeLowestBlockHeight = &lowestBlockHeight
-	}
 
 	if order.MaybeJoinedAtBlockHeight != nil {
 		if *order.MaybeStatus == view.ORDER_ASC {
@@ -731,66 +762,105 @@ func (validatorsView *ValidatorsView) List(
 		return nil, nil, fmt.Errorf("error getting total power: %v", err)
 	}
 
-	stmtBuilder := validatorsView.rdb.StmtBuilder.Select(
-		"id",
-		fmt.Sprintf(
-			"%s.operator_address",
+	var stmtBuilder sq.SelectBuilder
+
+	if filter.MaybeRecentActiveBlock != nil {
+		if filter.MaybeRecentActiveBlock.MaybeLowestActiveBlockHeight < 0 {
+			lowestBlockHeight := DEFAULT_LOWEST_ACTIVE_BLOCKS_BLOCK_HEIGHT
+			filter.MaybeRecentActiveBlock.MaybeLowestActiveBlockHeight = lowestBlockHeight
+		}
+		stmtBuilder = validatorsView.rdb.StmtBuilder.Select(
+			"id",
+			fmt.Sprintf(
+				"%s.operator_address",
+				VALIDATORS_TABLE_NAME,
+			),
+			"consensus_node_address",
+			"initial_delegator_address",
+			"tendermint_pubkey",
+			"tendermint_address",
+			"status",
+			"jailed",
+			"joined_at_block_height",
+			"power",
+			"moniker",
+			"identity",
+			"website",
+			"security_contact",
+			"details",
+			"commission_rate",
+			"commission_max_rate",
+			"commission_max_change_rate",
+			"min_self_delegation",
+			"total_signed_block",
+			"total_active_block",
+			"imprecise_up_time",
+			"voted_gov_proposal",
+			"attention",
+			fmt.Sprintf(
+				"COUNT(CASE WHEN %s.signed THEN 1 END) as recent_signed_blocks",
+				VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+			),
+			fmt.Sprintf(
+				"COUNT(%s.signed) as recent_active_blocks",
+				VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+			),
+		).From(
 			VALIDATORS_TABLE_NAME,
-		),
-		"consensus_node_address",
-		"initial_delegator_address",
-		"tendermint_pubkey",
-		"tendermint_address",
-		"status",
-		"jailed",
-		"joined_at_block_height",
-		"power",
-		"moniker",
-		"identity",
-		"website",
-		"security_contact",
-		"details",
-		"commission_rate",
-		"commission_max_rate",
-		"commission_max_change_rate",
-		"min_self_delegation",
-		"total_signed_block",
-		"total_active_block",
-		"imprecise_up_time",
-		"voted_gov_proposal",
-		"attention",
-		fmt.Sprintf(
-			"COUNT(CASE WHEN %s.signed THEN 1 END) as recent_signed_blocks",
-			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
-		),
-		fmt.Sprintf(
-			"COUNT(%s.signed) as recent_active_blocks",
-			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
-		),
-	).From(
-		VALIDATORS_TABLE_NAME,
-	)
+		).LeftJoin(
+			fmt.Sprintf(
+				"%s ON %s.operator_address=%s.operator_address AND %s.block_height > %d",
+				VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+				VALIDATORS_TABLE_NAME,
+				VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+				VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
+				filter.MaybeRecentActiveBlock.MaybeLowestActiveBlockHeight,
+			),
+		).GroupBy(
+			fmt.Sprintf(
+				"%s.operator_address, %s.id",
+				VALIDATORS_TABLE_NAME,
+				VALIDATORS_TABLE_NAME,
+			),
+		)
+	} else {
+		stmtBuilder = validatorsView.rdb.StmtBuilder.Select(
+			"id",
+			"operator_address",
+			"consensus_node_address",
+			"initial_delegator_address",
+			"tendermint_pubkey",
+			"tendermint_address",
+			"status",
+			"jailed",
+			"joined_at_block_height",
+			"power",
+			"moniker",
+			"identity",
+			"website",
+			"security_contact",
+			"details",
+			"commission_rate",
+			"commission_max_rate",
+			"commission_max_change_rate",
+			"min_self_delegation",
+			"total_signed_block",
+			"total_active_block",
+			"imprecise_up_time",
+			"voted_gov_proposal",
+			"attention",
+			"-1 as recent_signed_blocks",
+			"-1 as recent_active_blocks",
+		).From(
+			VALIDATORS_TABLE_NAME,
+		)
+	}
 
 	if whereClause != nil {
 		stmtBuilder = stmtBuilder.Where(whereClause)
 	}
 
-	stmtBuilder = stmtBuilder.LeftJoin(
-		fmt.Sprintf(
-			"%s ON %s.operator_address=%s.operator_address AND %s.block_height > %d",
-			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
-			VALIDATORS_TABLE_NAME,
-			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
-			VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
-			*maybeLowestBlockHeight,
-		),
-	).GroupBy(
-		fmt.Sprintf(
-			"%s.operator_address, %s.id",
-			VALIDATORS_TABLE_NAME,
-			VALIDATORS_TABLE_NAME,
-		),
-	).OrderBy(orderClauses...)
+	stmtBuilder = stmtBuilder.OrderBy(orderClauses...)
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,

@@ -207,10 +207,10 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 
 	validatorList, listValidatorErr := validatorsView.ListAll(
 		view.ValidatorsListFilter{
-			MaybeStatuses: nil,
+			MaybeStatuses:          nil,
+			MaybeRecentActiveBlock: nil,
 		},
 		view.ValidatorsListOrder{MaybePower: nil},
-		nil,
 	)
 	if listValidatorErr != nil {
 		return fmt.Errorf("error retrieving validator list: %v", listValidatorErr)
