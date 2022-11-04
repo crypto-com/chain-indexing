@@ -314,11 +314,18 @@ func TestValidator_HandleEvents(t *testing.T) {
 
 				mockValidatorsView.On(
 					"ListAll",
-					testify_mock.Anything,
-					testify_mock.Anything,
-					(*int64)(nil),
-				).Return(
-					[]validator_view.ValidatorRow{}, nil)
+					view.ValidatorsListFilter{
+						MaybeStatuses:          []string(nil),
+						MaybeRecentActiveBlock: (*view.ValidatorsListRecentActiveBlockFilter)(nil),
+					},
+					view.ValidatorsListOrder{
+						MaybeStatus:              (*string)(nil),
+						MaybePower:               (*string)(nil),
+						MaybeCommission:          (*string)(nil),
+						MaybeJoinedAtBlockHeight: (*string)(nil),
+						MaybeImpreciseUpTime:     (*string)(nil),
+					},
+				).Return([]validator_view.ValidatorRow{}, nil)
 
 				mockValidatorBlockCommitmentsTotalView := validator_view.NewMockValidatorBlockCommitmentsTotal(nil).(*validator_view.MockValidatorBlockCommitmentsTotalView)
 				mocks = append(mocks, &mockValidatorBlockCommitmentsTotalView.Mock)
@@ -596,11 +603,18 @@ func TestValidator_HandleEvents(t *testing.T) {
 
 				mockValidatorsView.On(
 					"ListAll",
-					testify_mock.Anything,
-					testify_mock.Anything,
-					(*int64)(nil),
-				).Return(
-					[]validator_view.ValidatorRow{}, nil)
+					view.ValidatorsListFilter{
+						MaybeStatuses:          []string(nil),
+						MaybeRecentActiveBlock: (*view.ValidatorsListRecentActiveBlockFilter)(nil),
+					},
+					view.ValidatorsListOrder{
+						MaybeStatus:              (*string)(nil),
+						MaybePower:               (*string)(nil),
+						MaybeCommission:          (*string)(nil),
+						MaybeJoinedAtBlockHeight: (*string)(nil),
+						MaybeImpreciseUpTime:     (*string)(nil),
+					},
+				).Return([]validator_view.ValidatorRow{}, nil)
 
 				mockValidatorBlockCommitmentsTotalView := validator_view.NewMockValidatorBlockCommitmentsTotal(nil).(*validator_view.MockValidatorBlockCommitmentsTotalView)
 				mocks = append(mocks, &mockValidatorBlockCommitmentsTotalView.Mock)
@@ -821,11 +835,18 @@ func TestValidator_HandleEvents(t *testing.T) {
 
 				mockValidatorsView.On(
 					"ListAll",
-					testify_mock.Anything,
-					testify_mock.Anything,
-					(*int64)(nil),
-				).Return(
-					[]validator_view.ValidatorRow{}, nil)
+					view.ValidatorsListFilter{
+						MaybeStatuses:          []string(nil),
+						MaybeRecentActiveBlock: (*view.ValidatorsListRecentActiveBlockFilter)(nil),
+					},
+					view.ValidatorsListOrder{
+						MaybeStatus:              (*string)(nil),
+						MaybePower:               (*string)(nil),
+						MaybeCommission:          (*string)(nil),
+						MaybeJoinedAtBlockHeight: (*string)(nil),
+						MaybeImpreciseUpTime:     (*string)(nil),
+					},
+				).Return([]validator_view.ValidatorRow{}, nil)
 
 				mockValidatorBlockCommitmentsTotalView := validator_view.NewMockValidatorBlockCommitmentsTotal(nil).(*validator_view.MockValidatorBlockCommitmentsTotalView)
 				mocks = append(mocks, &mockValidatorBlockCommitmentsTotalView.Mock)
@@ -1103,11 +1124,18 @@ func TestValidator_HandleEvents(t *testing.T) {
 
 				mockValidatorsView.On(
 					"ListAll",
-					testify_mock.Anything,
-					testify_mock.Anything,
-					(*int64)(nil),
-				).Return(
-					[]validator_view.ValidatorRow{}, nil)
+					view.ValidatorsListFilter{
+						MaybeStatuses:          []string(nil),
+						MaybeRecentActiveBlock: (*view.ValidatorsListRecentActiveBlockFilter)(nil),
+					},
+					view.ValidatorsListOrder{
+						MaybeStatus:              (*string)(nil),
+						MaybePower:               (*string)(nil),
+						MaybeCommission:          (*string)(nil),
+						MaybeJoinedAtBlockHeight: (*string)(nil),
+						MaybeImpreciseUpTime:     (*string)(nil),
+					},
+				).Return([]validator_view.ValidatorRow{}, nil)
 
 				mockValidatorBlockCommitmentsTotalView := validator_view.NewMockValidatorBlockCommitmentsTotal(nil).(*validator_view.MockValidatorBlockCommitmentsTotalView)
 				mocks = append(mocks, &mockValidatorBlockCommitmentsTotalView.Mock)
@@ -1200,10 +1228,16 @@ func TestValidator_HandleEvents(t *testing.T) {
 				mockValidatorsView.On(
 					"ListAll",
 					view.ValidatorsListFilter{
-						MaybeStatuses: nil,
+						MaybeStatuses:          []string(nil),
+						MaybeRecentActiveBlock: (*view.ValidatorsListRecentActiveBlockFilter)(nil),
 					},
-					view.ValidatorsListOrder{MaybePower: nil},
-					(*int64)(nil),
+					view.ValidatorsListOrder{
+						MaybeStatus:              (*string)(nil),
+						MaybePower:               (*string)(nil),
+						MaybeCommission:          (*string)(nil),
+						MaybeJoinedAtBlockHeight: (*string)(nil),
+						MaybeImpreciseUpTime:     (*string)(nil),
+					},
 				).Return(
 					[]validator_view.ValidatorRow{
 						{

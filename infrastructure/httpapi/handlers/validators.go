@@ -223,7 +223,11 @@ func (handler *Validators) List(ctx *fasthttp.RequestCtx) {
 	lowestActiveBlockHeight := lastHandledHeight - recentBlocks
 
 	validators, paginationResult, err := handler.validatorsView.List(
-		validator_view.ValidatorsListFilter{}, order, &lowestActiveBlockHeight, pagination,
+		validator_view.ValidatorsListFilter{
+			MaybeRecentActiveBlock: &validator_view.ValidatorsListRecentActiveBlockFilter{
+				MaybeLowestActiveBlockHeight: lowestActiveBlockHeight,
+			},
+		}, order, pagination,
 	)
 	if err != nil {
 		handler.logger.Errorf("error listing validators: %v", err)
@@ -486,9 +490,11 @@ func (handler *Validators) ListActive(ctx *fasthttp.RequestCtx) {
 				constants.JAILED,
 				constants.UNBONDING,
 			},
+			MaybeRecentActiveBlock: &validator_view.ValidatorsListRecentActiveBlockFilter{
+				MaybeLowestActiveBlockHeight: lowestActiveBlockHeight,
+			},
 		},
 		order,
-		&lowestActiveBlockHeight,
 		pagination,
 	)
 	if err != nil {
