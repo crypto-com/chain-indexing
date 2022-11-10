@@ -784,7 +784,7 @@ func ParseMsgRecvPacket(
 	rawPacketData, err := base64_internal.DecodeString(rawMsg.Packet.Data)
 	if err != nil {
 		rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
-	} else  {
+	} else {
 		if err := json.Unmarshal(rawPacketData, &rawFungibleTokenPacketData); err != nil {
 			rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
 		}
@@ -907,7 +907,7 @@ func ParseMsgAcknowledgement(
 	rawPacketData, err := base64_internal.DecodeString(rawMsg.Packet.Data)
 	if err != nil {
 		rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
-	} else  {
+	} else {
 		if err := json.Unmarshal(rawPacketData, &rawFungibleTokenPacketData); err != nil {
 			rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
 		}
@@ -940,20 +940,20 @@ func ParseMsgAcknowledgement(
 
 	acknowledgePacketEvents := log.GetEventsByType("acknowledge_packet")
 
-	var packetSequence  uint64
-	var channelOrdering  string
-	var connectionID  string
+	var packetSequence uint64
+	var channelOrdering string
+	var connectionID string
 	for _, acknowledgePacketEvent := range acknowledgePacketEvents {
 		if acknowledgePacketEvent.HasAttribute("packet_sequence") {
-			packetSequence =  typeconv.MustAtou64(acknowledgePacketEvent.MustGetAttributeByKey("packet_sequence"))
+			packetSequence = typeconv.MustAtou64(acknowledgePacketEvent.MustGetAttributeByKey("packet_sequence"))
 		}
 		if acknowledgePacketEvent.HasAttribute("packet_channel_ordering") {
 			channelOrdering = acknowledgePacketEvent.MustGetAttributeByKey("packet_channel_ordering")
 		}
 		if acknowledgePacketEvent.HasAttribute("packet_connection") {
-			connectionID=    acknowledgePacketEvent.MustGetAttributeByKey("packet_connection")
+			connectionID = acknowledgePacketEvent.MustGetAttributeByKey("packet_connection")
 		}
-	
+
 	}
 
 	fungibleTokenPacketEvents := log.GetEventsByType("fungible_token_packet")
