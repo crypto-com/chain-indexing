@@ -938,9 +938,22 @@ func ParseMsgAcknowledgement(
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 
-	acknowledgePacketEvent := log.GetEventByType("acknowledge_packet")
-	if acknowledgePacketEvent == nil {
-		panic("missing `acknowledge_packet` event in TxsResult log")
+	acknowledgePacketEvents := log.GetEventsByType("acknowledge_packet")
+
+	var packetSequence  uint64
+	var channelOrdering  string
+	var connectionID  string
+	for _, acknowledgePacketEvent := range acknowledgePacketEvents {
+		if acknowledgePacketEvent.HasAttribute("packet_sequence") {
+			packetSequence =  typeconv.MustAtou64(acknowledgePacketEvent.MustGetAttributeByKey("packet_sequence"))
+		}
+		if acknowledgePacketEvent.HasAttribute("packet_channel_ordering") {
+			channelOrdering = acknowledgePacketEvent.MustGetAttributeByKey("packet_channel_ordering")
+		}
+		if acknowledgePacketEvent.HasAttribute("packet_connection") {
+			connectionID=    acknowledgePacketEvent.MustGetAttributeByKey("packet_connection")
+		}
+	
 	}
 
 	fungibleTokenPacketEvents := log.GetEventsByType("fungible_token_packet")
@@ -954,9 +967,9 @@ func ParseMsgAcknowledgement(
 				FungibleTokenPacketData: rawFungibleTokenPacketData,
 			},
 
-			PacketSequence:  typeconv.MustAtou64(acknowledgePacketEvent.MustGetAttributeByKey("packet_sequence")),
-			ChannelOrdering: acknowledgePacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
-			ConnectionID:    acknowledgePacketEvent.MustGetAttributeByKey("packet_connection"),
+			PacketSequence:  packetSequence,
+			ChannelOrdering: channelOrdering,
+			ConnectionID:    connectionID,
 		}
 
 		// Getting possible signer address from Msg
@@ -1002,9 +1015,9 @@ func ParseMsgAcknowledgement(
 			MaybeError: maybeErr,
 		},
 
-		PacketSequence:  typeconv.MustAtou64(acknowledgePacketEvent.MustGetAttributeByKey("packet_sequence")),
-		ChannelOrdering: acknowledgePacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
-		ConnectionID:    acknowledgePacketEvent.MustGetAttributeByKey("packet_connection"),
+		PacketSequence:  packetSequence,
+		ChannelOrdering: channelOrdering,
+		ConnectionID:    connectionID,
 	}
 
 	// Getting possible signer address from Msg
