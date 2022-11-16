@@ -4,6 +4,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	V0_42_7_ibcmsg "github.com/crypto-com/chain-indexing/usecase/parser/v0_42_7/ibcmsg"
+	V0_46_msg "github.com/crypto-com/chain-indexing/usecase/parser/v0_46/msg"
 )
 
 const BEGIN_BLOCK_HEIGHT = 0
@@ -20,6 +21,7 @@ func InitParsers(manager *utils.CosmosParserManager) {
 	manager.RegisterParser("/cosmos.distribution.v1beta1.MsgFundCommunityPool", BEGIN_BLOCK_HEIGHT, ParseMsgFundCommunityPool)
 
 	// cosmos gov
+	manager.RegisterParser("/cosmos.gov.v1.MsgSubmitProposal", BEGIN_BLOCK_HEIGHT, V0_46_msg.ParseMsgSubmitProposal)
 	manager.RegisterParser("/cosmos.gov.v1beta1.MsgSubmitProposal", BEGIN_BLOCK_HEIGHT, ParseMsgSubmitProposal)
 	manager.RegisterParser("/cosmos.gov.v1beta1.MsgVote", BEGIN_BLOCK_HEIGHT, ParseMsgVote)
 	manager.RegisterParser("/cosmos.gov.v1beta1.MsgDeposit", BEGIN_BLOCK_HEIGHT, ParseMsgDeposit)

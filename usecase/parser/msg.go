@@ -67,6 +67,7 @@ func ParseBlockTxsMsgToCommands(
 				"/cosmos.distribution.v1beta1.MsgFundCommunityPool",
 
 				// cosmos gov
+				"/cosmos.gov.v1.MsgSubmitProposal",
 				"/cosmos.gov.v1beta1.MsgSubmitProposal",
 				"/cosmos.gov.v1beta1.MsgVote",
 				"/cosmos.gov.v1beta1.MsgDeposit",
@@ -401,7 +402,7 @@ func ParseMsgSubmitProposal(
 		cmds, possibleSignerAddresses = parseMsgSubmitParamChangeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal" {
 		cmds, possibleSignerAddresses = parseMsgSubmitCommunityFundSpendProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
-	} else if proposalContent.Type == "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal" {
+	} else if proposalContent.Type == "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade" {
 		cmds, possibleSignerAddresses = parseMsgSubmitSoftwareUpgradeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal" {
 		cmds, possibleSignerAddresses = parseMsgSubmitCancelSoftwareUpgradeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
@@ -819,6 +820,8 @@ func parseMsgSubmitUnknownProposal(
 		}
 	}
 
+	fmt.Println("===> 2b. proposalContent: ", proposalContent)
+
 	if !txSuccess {
 		return []command.Command{command_usecase.NewCreateMsgSubmitUnknownProposal(
 			msgCommonParams,
@@ -842,6 +845,8 @@ func parseMsgSubmitUnknownProposal(
 	if proposalId == nil {
 		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
 	}
+
+	fmt.Println("===> 2c. proposalId: ", proposalId)
 
 	return []command.Command{command_usecase.NewCreateMsgSubmitUnknownProposal(
 		msgCommonParams,
