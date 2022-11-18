@@ -130,8 +130,6 @@ func ParseBeginBlockEventsCommands(
 				))
 			}
 		}
-
-		commands = append(commands, parseBlockRawEventCmd)
 	}
 
 	return commands, nil
