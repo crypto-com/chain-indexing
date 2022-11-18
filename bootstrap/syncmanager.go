@@ -204,13 +204,14 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64, isRetry bool) error {
 			if err != nil {
 				return fmt.Errorf("error handling events: %v", err)
 			}
+
+			prometheus.RecordProjectionLatestHeight(manager.eventHandler.Id(), blockHeight)
 		}
 		prometheus.RecordProjectionExecTime(manager.eventHandler.Id(), time.Since(startTime).Milliseconds()/(syncedHeight-currentIndexingHeight+1))
 
 		// If there is any error before, short-circuit return in the error handling
 		// while the local currentIndexingHeight won't be incremented and will be retried later
 		manager.logger.Infof("successfully synced to block height %d", syncedHeight)
-		prometheus.RecordProjectionLatestHeight(manager.eventHandler.Id(), syncedHeight)
 
 		currentIndexingHeight = syncedHeight + 1
 	}
