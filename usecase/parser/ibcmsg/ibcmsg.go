@@ -815,9 +815,23 @@ func ParseMsgRecvPacket(
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 
-	recvPacketEvent := log.GetEventByType("recv_packet")
-	if recvPacketEvent == nil {
+	recvPacketEvents := log.GetEventsByType("recv_packet")
+	if recvPacketEvents == nil {
 		panic("missing `recv_packet` event in TxsResult log")
+	}
+	var packetSequence uint64
+	var channelOrdering string
+	var connectionID string
+	for _, recvPacketEvent := range recvPacketEvents {
+		if recvPacketEvent.HasAttribute("packet_sequence") {
+			packetSequence = typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence"))
+		}
+		if recvPacketEvent.HasAttribute("packet_channel_ordering") {
+			channelOrdering = recvPacketEvent.MustGetAttributeByKey("packet_channel_ordering")
+		}
+		if recvPacketEvent.HasAttribute("packet_connection") {
+			connectionID = recvPacketEvent.MustGetAttributeByKey("packet_connection")
+		}
 	}
 
 	fungibleTokenPacketEvent := log.GetEventByType("fungible_token_packet")
@@ -831,7 +845,7 @@ func ParseMsgRecvPacket(
 				FungibleTokenPacketData: rawFungibleTokenPacketData,
 			},
 
-			PacketSequence: typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
+			PacketSequence: packetSequence,
 		}
 
 		// Getting possible signer address from Msg
@@ -872,9 +886,9 @@ func ParseMsgRecvPacket(
 			MaybeDenominationTrace:  maybeDenominationTrace,
 		},
 
-		PacketSequence:  typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
-		ChannelOrdering: recvPacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
-		ConnectionID:    recvPacketEvent.MustGetAttributeByKey("packet_connection"),
+		PacketSequence:  packetSequence,
+		ChannelOrdering: channelOrdering,
+		ConnectionID:    connectionID,
 		PacketAck:       packetAck,
 	}
 
