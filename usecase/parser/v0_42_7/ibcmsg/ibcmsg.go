@@ -159,7 +159,7 @@ func ParseMsgRecvPacket(
 	}
 	var writeAckEventPacketAck string
 	for _, writeAckEvent := range writeAckEvents {
-		if writeAckEvent.HasAttribute("trace_hash") {
+		if writeAckEvent.HasAttribute("packet_ack") {
 			writeAckEventPacketAck = writeAckEvent.MustGetAttributeByKey("packet_ack")
 		}
 	}
