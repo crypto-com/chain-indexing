@@ -153,13 +153,8 @@ func ParseMsgRecvPacket(
 		}
 	}
 
-	writeAckEvent := log.GetEventByType("write_acknowledgement")
-	if writeAckEvent == nil {
-		panic("missing `write_acknowledgement` event in TxsResult log")
-	}
-
 	writeAckEvents := log.GetEventsByType("write_acknowledgement")
-	if writeAckEvent == nil {
+	if writeAckEvents == nil {
 		panic("missing `write_acknowledgement` event in TxsResult log")
 	}
 	var writeAckEventPacketAck string
