@@ -135,20 +135,36 @@ func ParseMsgRecvPacket(
 	}
 
 	var maybeDenominationTrace *ibc_model.MsgRecvPacketFungibleTokenDenominationTrace
-	denominationTraceEvent := log.GetEventByType("denomination_trace")
-	if denominationTraceEvent != nil {
+	denominationTraceEvents := log.GetEventsByType("denomination_trace")
+	var denominationTraceEventTraceHash string
+	var denominationTraceEventDenom string
+	for _, denominationTraceEvent := range denominationTraceEvents {
+		if denominationTraceEvent.HasAttribute("trace_hash") {
+			denominationTraceEventTraceHash = denominationTraceEvent.MustGetAttributeByKey("trace_hash")
+		}
+		if denominationTraceEvent.HasAttribute("denom") {
+			denominationTraceEventDenom = denominationTraceEvent.MustGetAttributeByKey("denom")
+		}
+	}
+	if denominationTraceEvents != nil {
 		maybeDenominationTrace = &ibc_model.MsgRecvPacketFungibleTokenDenominationTrace{
-			Hash:  denominationTraceEvent.MustGetAttributeByKey("trace_hash"),
-			Denom: denominationTraceEvent.MustGetAttributeByKey("denom"),
+			Hash:  denominationTraceEventTraceHash,
+			Denom: denominationTraceEventDenom,
 		}
 	}
 
-	writeAckEvent := log.GetEventByType("write_acknowledgement")
-	if writeAckEvent == nil {
+	writeAckEvents := log.GetEventsByType("write_acknowledgement")
+	if writeAckEvents == nil {
 		panic("missing `write_acknowledgement` event in TxsResult log")
 	}
+	var writeAckEventPacketAck string
+	for _, writeAckEvent := range writeAckEvents {
+		if writeAckEvent.HasAttribute("packet_ack") {
+			writeAckEventPacketAck = writeAckEvent.MustGetAttributeByKey("packet_ack")
+		}
+	}
 	var packetAck ibc_model.MsgRecvPacketPacketAck
-	json.MustUnmarshalFromString(writeAckEvent.MustGetAttributeByKey("packet_ack"), &packetAck)
+	json.MustUnmarshalFromString(writeAckEventPacketAck, &packetAck)
 
 	msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
 		RawMsgRecvPacket: rawMsg,
