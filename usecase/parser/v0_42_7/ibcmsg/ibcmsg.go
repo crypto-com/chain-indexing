@@ -129,7 +129,7 @@ func ParseMsgRecvPacket(
 	}
 	var success bool
 	for _, fungibleTokenPacketEvent := range fungibleTokenPacketEvents {
-		if fungibleTokenPacketEvent.HasAttribute("packet_sequence") {
+		if fungibleTokenPacketEvent.HasAttribute("success") {
 			success = fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "true"
 		}
 	}
