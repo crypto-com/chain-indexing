@@ -99,8 +99,8 @@ func ParseMsgRecvPacket(
 		}
 	}
 
-	fungibleTokenPacketEvent := log.GetEventByType("fungible_token_packet")
-	if fungibleTokenPacketEvent == nil {
+	fungibleTokenPacketEvents := log.GetEventsByType("recv_packet")
+	if fungibleTokenPacketEvents == nil {
 		// Note: this could happen when the packet is already relayed.
 		// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/04-channel/keeper/packet.go#L239
 		// https://github.com/cosmos/ibc-go/blob/760d15a3a55397678abe311b7f65203b2e8437d6/modules/core/keeper/msg_server.go#L508
@@ -127,6 +127,12 @@ func ParseMsgRecvPacket(
 			msgAlreadyRelayedRecvPacketParams,
 		)}, possibleSignerAddresses
 	}
+	var success bool
+	for _, fungibleTokenPacketEvent := range fungibleTokenPacketEvents {
+		if fungibleTokenPacketEvent.HasAttribute("packet_sequence") {
+			success = fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "true"
+		}
+	}
 
 	var maybeDenominationTrace *ibc_model.MsgRecvPacketFungibleTokenDenominationTrace
 	denominationTraceEvent := log.GetEventByType("denomination_trace")
@@ -151,7 +157,7 @@ func ParseMsgRecvPacket(
 		MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 		MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 			FungibleTokenPacketData: rawFungibleTokenPacketData,
-			Success:                 fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "true",
+			Success:                 success,
 			MaybeDenominationTrace:  maybeDenominationTrace,
 		},
 
