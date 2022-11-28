@@ -162,6 +162,6 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(CRONOS_SEND_TO_IBC_CREATED, 1, DecodeCronosSendToIBCCreated)
 
 	// Ethermint tx
-	registry.Register(MSG_ETHEREUM_TX_CREATED, 1, DecodeMsgEthereumTx)
-	registry.Register(MSG_ETHEREUM_TX_FAILED, 1, DecodeMsgEthereumTx)
+	registry.Register(LEGACY_TX_CREATED, 1, DecodeEthermintLegacyTx)
+	registry.Register(LEGACY_TX_FAILED, 1, DecodeEthermintLegacyTx)
 }

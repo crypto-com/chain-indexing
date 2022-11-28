@@ -6,30 +6,30 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
-type CreateMsgEthereumTx struct {
+type CreateLegacyTx struct {
 	msgCommonParams event.MsgCommonParams
-	params          model.MsgEthereumTxParams
+	params          model.EthermintLegacyTxParams
 }
 
-func NewCreateMsgEthereumTx(
+func NewCreateLegacyTx(
 	msgCommonParams event.MsgCommonParams,
-	params model.MsgEthereumTxParams,
-) *CreateMsgEthereumTx {
-	return &CreateMsgEthereumTx{
+	params model.EthermintLegacyTxParams,
+) *CreateLegacyTx {
+	return &CreateLegacyTx{
 		msgCommonParams,
 		params,
 	}
 }
 
-func (*CreateMsgEthereumTx) Name() string {
-	return "/ethermint.evm.v1.MsgEthereumTx.Create"
+func (*CreateLegacyTx) Name() string {
+	return "/ethermint.evm.v1.LegacyTx.Create"
 }
 
-func (*CreateMsgEthereumTx) Version() int {
+func (*CreateLegacyTx) Version() int {
 	return 1
 }
 
-func (cmd *CreateMsgEthereumTx) Exec() (entity_event.Event, error) {
-	event := event.NewMsgEthereumTx(cmd.msgCommonParams, cmd.params)
+func (cmd *CreateLegacyTx) Exec() (entity_event.Event, error) {
+	event := event.NewEthermintLegacyTx(cmd.msgCommonParams, cmd.params)
 	return event, nil
 }
