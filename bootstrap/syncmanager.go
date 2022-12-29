@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
+	backoff "github.com/cenkalti/backoff/v4"
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
 	"github.com/crypto-com/chain-indexing/external/txdecoder"
@@ -257,12 +257,18 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 			var decodedTx *model.CosmosTx
 			decodedTx, err = manager.txDecoder.DecodeBase64(txHex)
 			if err != nil {
-				return nil, fmt.Errorf("error decoding chain txs (%s) at height %d: %v", txHex, blockHeight, err)
-			}
+				var resTx *model.Tx
+				resTx, err = manager.cosmosClient.Tx(txHash)
+				if err != nil {
+					return nil, fmt.Errorf("error requesting chain txs (%s) at height %d: %v", txHex, blockHeight, err)
+				}
 
-			tx.Tx = *decodedTx
+				tx.Tx = resTx.Tx
+			} else {
+				tx.Tx = *decodedTx
+			}
 		} else {
-			return nil, fmt.Errorf("error requesting chain txs (%s) at height %d: %v", txHex, blockHeight, err)
+			return nil, fmt.Errorf("error decoding chain txs (%s) at height %d: %v", txHex, blockHeight, err)
 		}
 		txs = append(txs, *tx)
 	}
