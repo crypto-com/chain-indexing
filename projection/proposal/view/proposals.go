@@ -484,4 +484,6 @@ type ProposalRow struct {
 	MaybeVotingStartTime         *utctime.UTCTime `json:"maybeVotingStartTime"`
 	MaybeVotingEndBlockHeight    *int64           `json:"maybeVotingEndBlockHeight"`
 	MaybeVotingEndTime           *utctime.UTCTime `json:"maybeVotingEndTime"`
+	Message                      string           `json:"message"`
+	Metadata                     string           `json:"metadata"`
 }
