@@ -1,3 +1,3 @@
 ALTER TABLE view_proposals
-    ADD `message` VARCHAR NULL,
+    ADD msg VARCHAR NULL,
     ADD metadata VARCHAR NULL;
