@@ -72,6 +72,10 @@ func ParseBlockTxsMsgToCommands(
 				"/cosmos.gov.v1beta1.MsgVote",
 				"/cosmos.gov.v1beta1.MsgDeposit",
 
+				// cosmos upgrade
+				"/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
+				"/cosmos.upgrade.v1beta1.MsgCancelUpgrade",
+
 				// cosmos staking
 				"/cosmos.staking.v1beta1.MsgDelegate",
 				"/cosmos.staking.v1beta1.MsgUndelegate",
@@ -402,7 +406,7 @@ func ParseMsgSubmitProposal(
 		cmds, possibleSignerAddresses = parseMsgSubmitParamChangeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal" {
 		cmds, possibleSignerAddresses = parseMsgSubmitCommunityFundSpendProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
-	} else if proposalContent.Type == "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade" {
+	} else if proposalContent.Type == "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal" {
 		cmds, possibleSignerAddresses = parseMsgSubmitSoftwareUpgradeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)
 	} else if proposalContent.Type == "/cosmos.upgrade.v1beta1.CancelSoftwareUpgradeProposal" {
 		cmds, possibleSignerAddresses = parseMsgSubmitCancelSoftwareUpgradeProposal(parserParams.MsgCommonParams.TxSuccess, parserParams.TxsResult, parserParams.MsgIndex, parserParams.MsgCommonParams, parserParams.Msg, rawContent)

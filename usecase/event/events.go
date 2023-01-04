@@ -46,6 +46,8 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(MSG_SUBMIT_COMMUNITY_POOL_SPEND_PROPOSAL_FAILED, 1, DecodeMsgSubmitCommunityPoolSpendProposal)
 	registry.Register(MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_CREATED, 1, DecodeMsgSubmitSoftwareUpgradeProposal)
 	registry.Register(MSG_SUBMIT_SOFTWARE_UPGRADE_PROPOSAL_FAILED, 1, DecodeMsgSubmitSoftwareUpgradeProposal)
+	registry.Register(MSG_SOFTWARE_UPGRADE_CREATED, 1, DecodeMsgSoftwareUpgrade)
+	registry.Register(MSG_SOFTWARE_UPGRADE_FAILED, 1, DecodeMsgSoftwareUpgrade)
 	registry.Register(MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_CREATED, 1, DecodeMsgSubmitCancelSoftwareUpgradeProposal)
 	registry.Register(MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL_FAILED, 1, DecodeMsgSubmitCancelSoftwareUpgradeProposal)
 	registry.Register(MSG_SUBMIT_TEXT_PROPOSAL_CREATED, 1, DecodeMsgSubmitTextProposal)
