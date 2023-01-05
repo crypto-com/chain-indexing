@@ -172,6 +172,10 @@ func ParseMsgVoteWeighted(
 		if voter, ok := parserParams.Msg["voter"]; ok {
 			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(voter.(string)))
 		}
+
+		if options, ok := parserParams.Msg["options"]; ok {
+			fmt.Println("===> ParseMsgVoteWeighted", options)
+		}
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgVoteV1(
