@@ -26,7 +26,7 @@ func NewMsgCancelUpgrade(
 ) *MsgCancelUpgrade {
 	return &MsgCancelUpgrade{
 		NewMsgBase(MsgBaseParams{
-			MsgName:         MSG_SUBMIT_CANCEL_SOFTWARE_UPGRADE_PROPOSAL,
+			MsgName:         MSG_CANCEL_UPGRADE,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),

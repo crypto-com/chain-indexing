@@ -263,6 +263,22 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 					typedEvent.ProposerAddress,
 				},
 			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgSoftwareUpgrade); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Proposer,
+				},
+			})
 		} else if typedEvent, ok := event.(*event_usecase.MsgSubmitCancelSoftwareUpgradeProposal); ok {
 			accountMessages = append(accountMessages, view.AccountMessageRecord{
 				Row: view.AccountMessageRow{
@@ -277,6 +293,22 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 				},
 				Accounts: []string{
 					typedEvent.ProposerAddress,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgCancelUpgrade); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Proposer,
 				},
 			})
 		} else if typedEvent, ok := event.(*event_usecase.MsgDeposit); ok {

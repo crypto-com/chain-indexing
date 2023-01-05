@@ -344,7 +344,7 @@ func ParseMsgCancelUpgrade(
 		parserParams.MsgCommonParams,
 
 		v1_model.MsgCancelUpgradeParams{
-			MaybeProposalId: nil,
+			MaybeProposalId: proposalId,
 			Authority:       parserParams.Msg["authority"].(string),
 			Proposer:        utils.AddressParse(parserParams.Msg["proposer"].(string)),
 			InitialDeposit:  initialDepositAmount,
