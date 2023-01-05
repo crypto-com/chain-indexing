@@ -1,0 +1,1 @@
+ALTER TABLE view_proposals DROP CONSTRAINT view_proposals_proposal_id_key;

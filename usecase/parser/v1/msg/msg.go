@@ -207,6 +207,13 @@ func ParseMsgSoftwareUpgrade(
 		}
 	}
 
+	var metadata string
+	if parserParams.Msg != nil {
+		if msgMetadata, ok := parserParams.Msg["metadata"]; ok {
+			metadata = msgMetadata.(string)
+		}
+	}
+
 	initialDepositAmountInterface := parserParams.Msg["initial_deposit"].([]interface{})
 	initialDepositAmount, err := tmcosmosutils.NewCoinsFromAmountInterface(initialDepositAmountInterface)
 	if err != nil {
@@ -224,7 +231,7 @@ func ParseMsgSoftwareUpgrade(
 				MaybeProposalId: nil,
 				Proposer:        utils.AddressParse(parserParams.Msg["proposer"].(string)),
 				InitialDeposit:  initialDepositAmount,
-				Metadata:        parserParams.Msg["metadata"].(string),
+				Metadata:        metadata,
 				Authority:       utils.AddressParse(parserParams.Msg["proposer"].(string)),
 				Plan:            proposalPlan,
 			},
@@ -248,6 +255,19 @@ func ParseMsgSoftwareUpgrade(
 		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
 	}
 
+	fmt.Println("===> in", command_usecase.NewCreateMsgSoftwareUpgrade(
+		parserParams.MsgCommonParams,
+
+		v1_model.MsgSoftwareUpgradeParams{
+			MaybeProposalId: proposalId,
+			Proposer:        utils.AddressParse(parserParams.Msg["proposer"].(string)),
+			InitialDeposit:  initialDepositAmount,
+			Metadata:        metadata,
+			Authority:       utils.AddressParse(parserParams.Msg["proposer"].(string)),
+			Plan:            proposalPlan,
+		},
+	))
+
 	return append([]command.Command{
 		command_usecase.NewCreateMsgSoftwareUpgrade(
 			parserParams.MsgCommonParams,
@@ -256,82 +276,92 @@ func ParseMsgSoftwareUpgrade(
 				MaybeProposalId: proposalId,
 				Proposer:        utils.AddressParse(parserParams.Msg["proposer"].(string)),
 				InitialDeposit:  initialDepositAmount,
-				Metadata:        parserParams.Msg["metadata"].(string),
+				Metadata:        metadata,
 				Authority:       utils.AddressParse(parserParams.Msg["proposer"].(string)),
 				Plan:            proposalPlan,
 			},
 		)}, cmds...), possibleSignerAddresses
 }
 
-// func parseMsgSubmitCancelSoftwareUpgrade(
-// 	txSuccess bool,
-// 	txsResult model.BlockResultsTxsResult,
-// 	msgIndex int,
-// 	msgCommonParams event.MsgCommonParams,
-// 	msg map[string]interface{},
-// 	rawContent []byte,
-// ) ([]command.Command, []string) {
-// 	var proposalContent model.MsgSubmitCancelSoftwareUpgradeMessages
-// 	if err := jsoniter.Unmarshal(rawContent, &proposalContent); err != nil {
-// 		panic("error decoding software upgrade proposal content")
-// 	}
+func ParseMsgCancelUpgrade(
+	parserParams utils.CosmosParserParams,
+) ([]command.Command, []string) {
+	var rawProposalMsg v1_model.RawMsgCancelUpgrade
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawProposalMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating ParseMsgExec decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(parserParams.Msg); err != nil {
+		panic(fmt.Errorf("error decoding ParseMsgExec: %v", err))
+	}
 
-// 	// Getting possible signer address from Msg
-// 	var possibleSignerAddresses []string
-// 	if msg != nil {
-// 		if proposer, ok := msg["proposer"]; ok {
-// 			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(proposer.(string)))
-// 		}
-// 	}
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if proposer, ok := parserParams.Msg["proposer"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(proposer.(string)))
+		}
+	}
 
-// 	var metadata string
-// 	if msg != nil {
-// 		if msgMetadata, ok := msg["metadata"]; ok {
-// 			metadata = msgMetadata
-// 		}
-// 	}
+	var metadata string
+	if parserParams.Msg != nil {
+		if msgMetadata, ok := parserParams.Msg["metadata"]; ok {
+			metadata = msgMetadata.(string)
+		}
+	}
 
-// 	initialDepositAmountInterface := msg["initial_deposit"].([]interface{})
-// 	initialDepositAmount, err := tmcosmosutils.NewCoinsFromAmountInterface(initialDepositAmountInterface)
-// 	if err != nil {
-// 		initialDepositAmount = make([]coin.Coin, 0)
-// 		for i := 0; i < len(initialDepositAmountInterface); i++ {
-// 			initialDepositAmount = append(initialDepositAmount, coin.Coin{})
-// 		}
-// 	}
+	initialDepositAmountInterface := parserParams.Msg["initial_deposit"].([]interface{})
+	initialDepositAmount, err := tmcosmosutils.NewCoinsFromAmountInterface(initialDepositAmountInterface)
+	if err != nil {
+		initialDepositAmount = make([]coin.Coin, 0)
+		for i := 0; i < len(initialDepositAmountInterface); i++ {
+			initialDepositAmount = append(initialDepositAmount, coin.Coin{})
+		}
+	}
 
-// 	if !txSuccess {
-// 		return []command.Command{command_usecase.NewCreateMsgSubmitCancelSoftwareUpgradeProposal(
-// 			msgCommonParams,
+	if !parserParams.MsgCommonParams.TxSuccess {
+		return []command.Command{command_usecase.NewCreateMsgCancelUpgrade(
+			parserParams.MsgCommonParams,
 
-// 			model.MsgSubmitCancelSoftwareUpgradeParams{
-// 				MaybeProposalId: nil,
-// 				Metadata:        metadata,
-// 				Messages:        proposalContent,
-// 				ProposerAddress: utils.AddressParse(msg["proposer"].(string)),
-// 				InitialDeposit:  initialDepositAmount,
-// 			},
-// 		)}, possibleSignerAddresses
-// 	}
-// 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
-// 	// When there is no reward withdrew, `transfer` event would not exist
-// 	event := log.GetEventByType("submit_proposal")
-// 	if event == nil {
-// 		panic("missing `submit_proposal` event in TxsResult log")
-// 	}
-// 	proposalId := event.GetAttributeByKey("proposal_id")
-// 	if proposalId == nil {
-// 		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
-// 	}
+			v1_model.MsgCancelUpgradeParams{
+				MaybeProposalId: nil,
+				Authority:       parserParams.Msg["authority"].(string),
+				Proposer:        utils.AddressParse(parserParams.Msg["proposer"].(string)),
+				InitialDeposit:  initialDepositAmount,
+				Metadata:        metadata,
+			},
+		)}, possibleSignerAddresses
+	}
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
+	// When there is no reward withdrew, `transfer` event would not exist
+	event := log.GetEventByType("submit_proposal")
+	if event == nil {
+		panic("missing `submit_proposal` event in TxsResult log")
+	}
+	proposalId := event.GetAttributeByKey("proposal_id")
+	if proposalId == nil {
+		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+	}
 
-// 	return []command.Command{command_usecase.NewCreateMsgSubmitCancelSoftwareUpgradeProposal(
-// 		msgCommonParams,
+	return []command.Command{command_usecase.NewCreateMsgCancelUpgrade(
+		parserParams.MsgCommonParams,
 
-// 		model.MsgSubmitCancelSoftwareUpgradeProposalParams{
-// 			MaybeProposalId: proposalId,
-// 			Content:         proposalContent,
-// 			ProposerAddress: utils.AddressParse(msg["proposer"].(string)),
-// 			InitialDeposit:  initialDepositAmount,
-// 		},
-// 	)}, possibleSignerAddresses
-// }
+		v1_model.MsgCancelUpgradeParams{
+			MaybeProposalId: nil,
+			Authority:       parserParams.Msg["authority"].(string),
+			Proposer:        utils.AddressParse(parserParams.Msg["proposer"].(string)),
+			InitialDeposit:  initialDepositAmount,
+			Metadata:        parserParams.Msg["metadata"].(string),
+		},
+	)}, possibleSignerAddresses
+}

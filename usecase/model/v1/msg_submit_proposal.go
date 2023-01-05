@@ -58,7 +58,7 @@ type MsgSubmitParamChangeProposalChange struct {
 	Value    json.RawMessage `json:"value"`
 }
 
-// MsgSubmitSoftwareUpgradeProposal
+// MsgSoftwareUpgrade
 type MsgSoftwareUpgradeParams struct {
 	MaybeProposalId *string                `json:"proposalId"`
 	Authority       string                 `json:"authority"`
@@ -79,6 +79,7 @@ type MsgSoftwareUpgrade struct {
 	Authority string                 `json:"authority"`
 	Plan      MsgSoftwareUpgradePlan `json:"plan"`
 }
+
 type MsgSoftwareUpgradePlan struct {
 	Name                string          `json:"name"`
 	Time                utctime.UTCTime `json:"time"`
@@ -101,42 +102,24 @@ type RawMsgSubmitSoftwareUpgradeProposalPlan struct {
 	UpgradedClientState string    `json:"upgraded_client_state"`
 }
 
-// MsgSubmitSoftwareUpgrade
-type MsgSubmitSoftwareUpgradeParams struct {
-	MaybeProposalId *string                          `json:"proposalId"`
-	Metadata        string                           `json:"metadata"`
-	Messages        MsgSubmitSoftwareUpgradeMessages `json:"messages"`
-	Proposer        string                           `json:"proposer"`
-	InitialDeposit  coin.Coins                       `json:"initialDeposit"`
+// MsgSoftwareCancel
+
+type MsgCancelUpgradeParams struct {
+	MaybeProposalId *string    `json:"proposalId"`
+	Authority       string     `json:"authority"`
+	Proposer        string     `json:"proposer"`
+	InitialDeposit  coin.Coins `json:"initial_deposit"`
+	Metadata        string     `json:"metadata"`
+}
+type RawMsgCancelUpgrade struct {
+	Type      string `json:"@type"`
+	Authority string `json:"authority"`
+}
+type MsgCancelUpgrade struct {
+	Type      string `json:"@type"`
+	Authority string `json:"authority"`
 }
 
-type MsgSubmitSoftwareUpgradeMessages struct {
-	Plan MsgSoftwareUpgradePlan `json:"plan"`
-}
-
-type RawMsgSubmitSoftwareUpgradeContent struct {
-	Type string                                  `json:"@type"`
-	Plan RawMsgSubmitSoftwareUpgradeProposalPlan `json:"plan"`
-}
-
-type MsgSubmitCancelSoftwareUpgradeProposalParams struct {
-	MaybeProposalId *string                                       `json:"proposalId"`
-	Content         MsgSubmitCancelSoftwareUpgradeProposalContent `json:"content"`
-	ProposerAddress string                                        `json:"proposerAddress"`
-	InitialDeposit  coin.Coins                                    `json:"initialDeposit"`
-}
-type MsgSubmitCancelSoftwareUpgradeProposalContent struct {
-	Type        string `json:"@type"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-}
-type MsgSubmitCancelSoftwareUpgradeParams struct {
-	MaybeProposalId *string                                `json:"proposalId"`
-	Metadata        string                                 `json:"metadata"`
-	Messages        MsgSubmitCancelSoftwareUpgradeMessages `json:"messages"`
-	Proposer        string                                 `json:"proposer"`
-	InitialDeposit  coin.Coins                             `json:"initialDeposit"`
-}
 type MsgSubmitCancelSoftwareUpgradeMessages struct {
 	Type string `json:"@type"`
 }

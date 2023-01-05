@@ -32,6 +32,7 @@ func InitParsers(manager *utils.CosmosParserManager) {
 
 	// cosmos upgrade
 	manager.RegisterParser("/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade", BEGIN_BLOCK_HEIGHT, V1_msg.ParseMsgSoftwareUpgrade)
+	manager.RegisterParser("/cosmos.upgrade.v1beta1.MsgCancelUpgrade", BEGIN_BLOCK_HEIGHT, V1_msg.ParseMsgCancelUpgrade)
 
 	// cosmos staking
 	manager.RegisterParser("/cosmos.staking.v1beta1.MsgDelegate", BEGIN_BLOCK_HEIGHT, ParseMsgDelegate)

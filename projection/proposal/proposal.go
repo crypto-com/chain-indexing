@@ -108,6 +108,7 @@ func (proposal *Proposal) GetEventsToListen() []string {
 				event_usecase.MSG_VOTE_CREATED,
 
 				event_usecase.MSG_SOFTWARE_UPGRADE_CREATED,
+				event_usecase.MSG_CANCEL_UPGRADE_CREATED,
 			},
 			proposal.paramBase.GetEventsToListen()...,
 		),
@@ -389,19 +390,22 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				Status:                       view.PROPOSAL_STATUS_DEPOSIT_PERIOD,
 				ProposerAddress:              msgSubmitProposal.Proposer,
 				MaybeProposerOperatorAddress: context.maybeProposerValidatorAddress,
-				Data:                         msgSubmitProposal.Plan,
-				InitialDeposit:               msgSubmitProposal.InitialDeposit,
-				TotalDeposit:                 msgSubmitProposal.InitialDeposit,
-				TotalVote:                    big.NewInt(0),
-				TransactionHash:              msgSubmitProposal.TxHash(),
-				SubmitBlockHeight:            height,
-				SubmitTime:                   blockTime,
-				DepositEndTime:               depositEndTime,
-				MaybeVotingStartTime:         nil,
-				MaybeVotingEndTime:           nil,
-				MaybeVotingEndBlockHeight:    nil,
-				Message:                      nil,
-				Metadata:                     nil,
+				Data: types.MsgSoftwareUpgradeData{
+					Type:      msgSubmitProposal.MsgType(),
+					Authority: msgSubmitProposal.Authority,
+					Plan:      msgSubmitProposal.Plan,
+				},
+				InitialDeposit:            msgSubmitProposal.InitialDeposit,
+				TotalDeposit:              msgSubmitProposal.InitialDeposit,
+				TotalVote:                 big.NewInt(0),
+				TransactionHash:           msgSubmitProposal.TxHash(),
+				SubmitBlockHeight:         height,
+				SubmitTime:                blockTime,
+				DepositEndTime:            depositEndTime,
+				MaybeVotingStartTime:      nil,
+				MaybeVotingEndTime:        nil,
+				MaybeVotingEndBlockHeight: nil,
+				Metadata:                  msgSubmitProposal.Metadata,
 			}
 
 			if insertProposalErr := proposalsView.Insert(&row); insertProposalErr != nil {
@@ -429,8 +433,8 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
 			}
 
-		} else if msgSubmitProposal, ok := event.(*event_usecase.MsgSubmitCancelSoftwareUpgradeProposal); ok {
-			context, err := projection.prepareNewProposalSubmissionContext(rdbTxHandle, msgSubmitProposal.ProposerAddress)
+		} else if msgSubmitProposal, ok := event.(*event_usecase.MsgCancelUpgrade); ok {
+			context, err := projection.prepareNewProposalSubmissionContext(rdbTxHandle, msgSubmitProposal.Proposer)
 			if err != nil {
 				return err
 			}
@@ -438,23 +442,27 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 			depositEndTime := blockTime.Add(context.maxDepositPeriod)
 			row := view.ProposalRow{
 				ProposalId:                   *msgSubmitProposal.MaybeProposalId,
-				Title:                        msgSubmitProposal.Content.Title,
-				Description:                  msgSubmitProposal.Content.Description,
-				Type:                         msgSubmitProposal.Content.Type,
+				Title:                        "",
+				Description:                  "",
+				Type:                         msgSubmitProposal.MsgType(),
 				Status:                       view.PROPOSAL_STATUS_DEPOSIT_PERIOD,
-				ProposerAddress:              msgSubmitProposal.ProposerAddress,
+				ProposerAddress:              msgSubmitProposal.Proposer,
 				MaybeProposerOperatorAddress: context.maybeProposerValidatorAddress,
-				Data:                         nil,
-				InitialDeposit:               msgSubmitProposal.InitialDeposit,
-				TotalDeposit:                 msgSubmitProposal.InitialDeposit,
-				TotalVote:                    big.NewInt(0),
-				TransactionHash:              msgSubmitProposal.TxHash(),
-				SubmitBlockHeight:            height,
-				SubmitTime:                   blockTime,
-				DepositEndTime:               depositEndTime,
-				MaybeVotingStartTime:         nil,
-				MaybeVotingEndTime:           nil,
-				MaybeVotingEndBlockHeight:    nil,
+				Data: types.MsgCancelUpgradeData{
+					Type:      msgSubmitProposal.MsgType(),
+					Authority: msgSubmitProposal.Authority,
+				},
+				InitialDeposit:            msgSubmitProposal.InitialDeposit,
+				TotalDeposit:              msgSubmitProposal.InitialDeposit,
+				TotalVote:                 big.NewInt(0),
+				TransactionHash:           msgSubmitProposal.TxHash(),
+				SubmitBlockHeight:         height,
+				SubmitTime:                blockTime,
+				DepositEndTime:            depositEndTime,
+				MaybeVotingStartTime:      nil,
+				MaybeVotingEndTime:        nil,
+				MaybeVotingEndBlockHeight: nil,
+				Metadata:                  msgSubmitProposal.Metadata,
 			}
 
 			if insertProposalErr := proposalsView.Insert(&row); insertProposalErr != nil {
@@ -467,7 +475,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
 			if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
 				ProposalId:                    *msgSubmitProposal.MaybeProposalId,
-				DepositorAddress:              msgSubmitProposal.ProposerAddress,
+				DepositorAddress:              msgSubmitProposal.Proposer,
 				MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
 				TransactionHash:               msgSubmitProposal.TxHash(),
 				DepositAtBlockHeight:          height,
