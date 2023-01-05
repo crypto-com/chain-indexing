@@ -1,4 +1,4 @@
-package parser
+package v1_parser
 
 import (
 	"fmt"
@@ -12,36 +12,11 @@ import (
 
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
-	v1_command_usecase "github.com/crypto-com/chain-indexing/usecase/command/v1"
 	v1_model "github.com/crypto-com/chain-indexing/usecase/model/v1"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
 	mapstructure_utils "github.com/crypto-com/chain-indexing/usecase/parser/utils/mapstructure"
 )
-
-func ParseMsgVote(
-	parserParams utils.CosmosParserParams,
-) ([]command.Command, []string) {
-
-	// Getting possible signer address from Msg
-	var possibleSignerAddresses []string
-	if parserParams.Msg != nil {
-		if voter, ok := parserParams.Msg["voter"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(voter.(string)))
-		}
-	}
-
-	return []command.Command{v1_command_usecase.NewCreateMsgVote(
-		parserParams.MsgCommonParams,
-
-		v1_model.MsgVoteParams{
-			ProposalId: parserParams.Msg["proposal_id"].(string),
-			Voter:      utils.AddressParse(parserParams.Msg["voter"].(string)),
-			Option:     parserParams.Msg["option"].(string),
-			Metadata:   parserParams.Msg["metadata"].(string),
-		},
-	)}, possibleSignerAddresses
-}
 
 func ParseMsgDeposit(
 	parserParams utils.CosmosParserParams,
@@ -63,7 +38,7 @@ func ParseMsgDeposit(
 		}
 	}
 
-	cmds := []command.Command{v1_command_usecase.NewCreateMsgDeposit(
+	cmds := []command.Command{command_usecase.NewCreateMsgDepositV1(
 		parserParams.MsgCommonParams,
 
 		v1_model.MsgDepositParams{
@@ -161,6 +136,54 @@ func ParseMsgSubmitProposal(
 	}
 
 	return cmds, possibleSignerAddresses
+}
+
+func ParseMsgVote(
+	parserParams utils.CosmosParserParams,
+) ([]command.Command, []string) {
+
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if voter, ok := parserParams.Msg["voter"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(voter.(string)))
+		}
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgVoteV1(
+		parserParams.MsgCommonParams,
+
+		v1_model.MsgVoteParams{
+			ProposalId: parserParams.Msg["proposal_id"].(string),
+			Voter:      utils.AddressParse(parserParams.Msg["voter"].(string)),
+			Option:     parserParams.Msg["option"].(string),
+			Metadata:   parserParams.Msg["metadata"].(string),
+		},
+	)}, possibleSignerAddresses
+}
+
+func ParseMsgVoteWeighted(
+	parserParams utils.CosmosParserParams,
+) ([]command.Command, []string) {
+
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if parserParams.Msg != nil {
+		if voter, ok := parserParams.Msg["voter"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(voter.(string)))
+		}
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgVoteV1(
+		parserParams.MsgCommonParams,
+
+		v1_model.MsgVoteParams{
+			ProposalId: parserParams.Msg["proposal_id"].(string),
+			Voter:      utils.AddressParse(parserParams.Msg["voter"].(string)),
+			Option:     parserParams.Msg["option"].(string),
+			Metadata:   parserParams.Msg["metadata"].(string),
+		},
+	)}, possibleSignerAddresses
 }
 
 func ParseMsgSoftwareUpgrade(

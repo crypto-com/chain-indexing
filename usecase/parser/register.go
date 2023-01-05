@@ -26,11 +26,12 @@ func InitParsers(manager *utils.CosmosParserManager) {
 	manager.RegisterParser("/cosmos.gov.v1beta1.MsgDeposit", BEGIN_BLOCK_HEIGHT, ParseMsgDeposit)
 
 	// cosmos gov v1
+	manager.RegisterParser("/cosmos.gov.v1.MsgDeposit", BEGIN_BLOCK_HEIGHT, V1_msg.ParseMsgDeposit)
 	manager.RegisterParser("/cosmos.gov.v1.MsgSubmitProposal", BEGIN_BLOCK_HEIGHT, V1_msg.ParseMsgSubmitProposal)
 	manager.RegisterParser("/cosmos.gov.v1.MsgVote", BEGIN_BLOCK_HEIGHT, V1_msg.ParseMsgVote)
-	manager.RegisterParser("/cosmos.gov.v1.MsgDeposit", BEGIN_BLOCK_HEIGHT, V1_msg.ParseMsgDeposit)
+	// manager.RegisterParser("/cosmos.gov.v1.MsgVoteWeighted", BEGIN_BLOCK_HEIGHT, V1_msg.ParseMsgVote)
 
-	// cosmos upgrade
+	// cosmos upgrade v1
 	manager.RegisterParser("/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade", BEGIN_BLOCK_HEIGHT, V1_msg.ParseMsgSoftwareUpgrade)
 	manager.RegisterParser("/cosmos.upgrade.v1beta1.MsgCancelUpgrade", BEGIN_BLOCK_HEIGHT, V1_msg.ParseMsgCancelUpgrade)
 

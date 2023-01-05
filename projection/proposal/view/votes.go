@@ -293,6 +293,7 @@ type VoteRow struct {
 	VoteAtBlockTime           utctime.UTCTime `json:"voteAtBlockTime"`
 	Answer                    string          `json:"answer"`
 	Histories                 []VoteHistory   `json:"histories"`
+	Metadata                  string          `json:"metadata"`
 }
 
 type VoteHistory struct {

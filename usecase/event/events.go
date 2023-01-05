@@ -65,6 +65,10 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(MSG_SOFTWARE_UPGRADE_FAILED, 1, DecodeMsgSoftwareUpgrade)
 	registry.Register(MSG_CANCEL_UPGRADE_CREATED, 1, DecodeMsgCancelUpgrade)
 	registry.Register(MSG_CANCEL_UPGRADE_FAILED, 1, DecodeMsgCancelUpgrade)
+	registry.Register(MSG_DEPOSIT_V1_CREATED, 1, DecodeMsgDepositV1)
+	registry.Register(MSG_DEPOSIT_V1_FAILED, 1, DecodeMsgDepositV1)
+	registry.Register(MSG_VOTE_V1_CREATED, 1, DecodeMsgVoteV1)
+	registry.Register(MSG_VOTE_V1_FAILED, 1, DecodeMsgVoteV1)
 
 	// Staking
 	registry.Register(MSG_CREATE_VALIDATOR_CREATED, 1, DecodeMsgCreateValidator)

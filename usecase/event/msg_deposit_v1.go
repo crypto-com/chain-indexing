@@ -3,7 +3,6 @@ package event
 import (
 	"bytes"
 
-	"github.com/crypto-com/chain-indexing/usecase/event"
 	model "github.com/crypto-com/chain-indexing/usecase/model/v1"
 
 	"github.com/crypto-com/chain-indexing/usecase/coin"
@@ -13,22 +12,22 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_DEPOSIT = "/cosmos.gov.v1.MsgDeposit"
-const MSG_DEPOSIT_CREATED = "/cosmos.gov.v1.MsgDeposit.Created"
-const MSG_DEPOSIT_FAILED = "/cosmos.gov.v1.MsgDeposit.Failed"
+const MSG_DEPOSIT_V1 = "/cosmos.gov.v1.MsgDeposit"
+const MSG_DEPOSIT_V1_CREATED = "/cosmos.gov.v1.MsgDeposit.Created"
+const MSG_DEPOSIT_V1_FAILED = "/cosmos.gov.v1.MsgDeposit.Failed"
 
-type MsgDeposit struct {
-	event.MsgBase
+type MsgDepositV1 struct {
+	MsgBase
 
 	ProposalId string     `json:"proposalId"`
 	Depositor  string     `json:"depositor"`
 	Amount     coin.Coins `json:"amount"`
 }
 
-func NewMsgDeposit(msgCommonParams event.MsgCommonParams, params model.MsgDepositParams) *MsgDeposit {
-	return &MsgDeposit{
-		event.NewMsgBase(event.MsgBaseParams{
-			MsgName:         MSG_DEPOSIT,
+func NewMsgDepositV1(msgCommonParams MsgCommonParams, params model.MsgDepositParams) *MsgDepositV1 {
+	return &MsgDepositV1{
+		NewMsgBase(MsgBaseParams{
+			MsgName:         MSG_DEPOSIT_V1,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
@@ -39,7 +38,7 @@ func NewMsgDeposit(msgCommonParams event.MsgCommonParams, params model.MsgDeposi
 	}
 }
 
-func (event *MsgDeposit) ToJSON() (string, error) {
+func (event *MsgDepositV1) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
 		return "", err
@@ -48,15 +47,15 @@ func (event *MsgDeposit) ToJSON() (string, error) {
 	return string(encoded), nil
 }
 
-func (event *MsgDeposit) String() string {
+func (event *MsgDepositV1) String() string {
 	return render.Render(event)
 }
 
-func DecodeMsgDeposit(encoded []byte) (entity_event.Event, error) {
+func DecodeMsgDepositV1(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *MsgDeposit
+	var event *MsgDepositV1
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}

@@ -3,20 +3,18 @@ package event
 import (
 	"bytes"
 
-	"github.com/crypto-com/chain-indexing/usecase/event"
-
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 	model "github.com/crypto-com/chain-indexing/usecase/model/v1"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/luci/go-render/render"
 )
 
-const MSG_VOTE = "/cosmos.gov.v1.MsgVote"
-const MSG_VOTE_CREATED = "/cosmos.gov.v1.MsgVote.Created"
-const MSG_VOTE_FAILED = "/cosmos.gov.v1.MsgVote.Failed"
+const MSG_VOTE_V1 = "/cosmos.gov.v1.MsgVote"
+const MSG_VOTE_V1_CREATED = "/cosmos.gov.v1.MsgVote.Created"
+const MSG_VOTE_V1_FAILED = "/cosmos.gov.v1.MsgVote.Failed"
 
-type MsgVote struct {
-	event.MsgBase
+type MsgVoteV1 struct {
+	MsgBase
 
 	ProposalId string `json:"proposalId"`
 	Voter      string `json:"voter"`
@@ -24,10 +22,10 @@ type MsgVote struct {
 	Metadata   string `json:"metadata"`
 }
 
-func NewMsgVote(msgCommonParams event.MsgCommonParams, params model.MsgVoteParams) *MsgVote {
-	return &MsgVote{
-		event.NewMsgBase(event.MsgBaseParams{
-			MsgName:         MSG_VOTE,
+func NewMsgVoteV1(msgCommonParams MsgCommonParams, params model.MsgVoteParams) *MsgVoteV1 {
+	return &MsgVoteV1{
+		NewMsgBase(MsgBaseParams{
+			MsgName:         MSG_VOTE_V1,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
@@ -39,7 +37,7 @@ func NewMsgVote(msgCommonParams event.MsgCommonParams, params model.MsgVoteParam
 	}
 }
 
-func (event *MsgVote) ToJSON() (string, error) {
+func (event *MsgVoteV1) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
 		return "", err
@@ -48,15 +46,15 @@ func (event *MsgVote) ToJSON() (string, error) {
 	return string(encoded), nil
 }
 
-func (event *MsgVote) String() string {
+func (event *MsgVoteV1) String() string {
 	return render.Render(event)
 }
 
-func DecodeMsgVote(encoded []byte) (entity_event.Event, error) {
+func DecodeMsgVoteV1(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *MsgVote
+	var event *MsgVoteV1
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}
