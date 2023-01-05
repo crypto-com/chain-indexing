@@ -1,7 +1,6 @@
 package parser_test
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 
@@ -84,7 +83,6 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			regex, _ := regexp.Compile("\n?\r?\\s?")
 
-			fmt.Printf(json.MustMarshalToString(typedEvent))
 			Expect(json.MustMarshalToString(typedEvent)).To(Equal(
 				strings.Replace(
 					regex.ReplaceAllString(expected, ""),
