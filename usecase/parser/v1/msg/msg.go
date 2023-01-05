@@ -255,19 +255,6 @@ func ParseMsgSoftwareUpgrade(
 		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
 	}
 
-	fmt.Println("===> in", command_usecase.NewCreateMsgSoftwareUpgrade(
-		parserParams.MsgCommonParams,
-
-		v1_model.MsgSoftwareUpgradeParams{
-			MaybeProposalId: proposalId,
-			Proposer:        utils.AddressParse(parserParams.Msg["proposer"].(string)),
-			InitialDeposit:  initialDepositAmount,
-			Metadata:        metadata,
-			Authority:       utils.AddressParse(parserParams.Msg["proposer"].(string)),
-			Plan:            proposalPlan,
-		},
-	))
-
 	return append([]command.Command{
 		command_usecase.NewCreateMsgSoftwareUpgrade(
 			parserParams.MsgCommonParams,

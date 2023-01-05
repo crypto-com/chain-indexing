@@ -824,8 +824,6 @@ func parseMsgSubmitUnknownProposal(
 		}
 	}
 
-	fmt.Println("===> 2b. proposalContent: ", proposalContent)
-
 	if !txSuccess {
 		return []command.Command{command_usecase.NewCreateMsgSubmitUnknownProposal(
 			msgCommonParams,
@@ -849,8 +847,6 @@ func parseMsgSubmitUnknownProposal(
 	if proposalId == nil {
 		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
 	}
-
-	fmt.Println("===> 2c. proposalId: ", proposalId)
 
 	return []command.Command{command_usecase.NewCreateMsgSubmitUnknownProposal(
 		msgCommonParams,

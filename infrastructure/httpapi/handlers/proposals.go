@@ -247,7 +247,7 @@ func (handler *Proposals) ListDepositorsById(ctx *fasthttp.RequestCtx) {
 }
 
 type ProposalDetails struct {
-	*proposal_view.ProposalWithMonikerRow
+	proposals []proposal_view.ProposalWithMonikerRow
 
 	RequiredVotingPower string                   `json:"requiredVotingPower"`
 	TotalVotedPower     string                   `json:"totalVotedPower"`
