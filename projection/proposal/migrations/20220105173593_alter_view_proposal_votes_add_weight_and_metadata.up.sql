@@ -1,0 +1,3 @@
+ALTER TABLE view_proposal_votes
+    ADD weight VARCHAR NOT NULL DEFAULT "1.000000000000000000",
+    ADD metadata VARCHAR NULL;
