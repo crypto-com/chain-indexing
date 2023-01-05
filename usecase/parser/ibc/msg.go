@@ -1,4 +1,4 @@
-package ibcmsg
+package ibc
 
 import (
 	"bytes"
@@ -624,7 +624,7 @@ func parseMsgUpdateTendermintLightClient(
 
 		ClientID:        rawMsg.ClientID,
 		ClientType:      event.MustGetAttributeByKey("client_type"),
-		ConsensusHeight: mustParseHeight(event.MustGetAttributeByKey("consensus_height")),
+		ConsensusHeight: MustParseHeight(event.MustGetAttributeByKey("consensus_height")),
 		Signer:          rawMsg.Signer,
 	}
 
@@ -682,7 +682,7 @@ func parseMsgUpdateSolomachineLightClient(
 
 		ClientID:        rawMsg.ClientID,
 		ClientType:      event.MustGetAttributeByKey("client_type"),
-		ConsensusHeight: mustParseHeight(event.MustGetAttributeByKey("consensus_height")),
+		ConsensusHeight: MustParseHeight(event.MustGetAttributeByKey("consensus_height")),
 		Signer:          rawMsg.Signer,
 	}
 
@@ -697,7 +697,7 @@ func parseMsgUpdateSolomachineLightClient(
 	)}, possibleSignerAddresses
 }
 
-func mustParseHeight(height string) ibc_model.Height {
+func MustParseHeight(height string) ibc_model.Height {
 	heightTokens := strings.Split(height, "-")
 	if len(heightTokens) != 2 {
 		panic("invalid height")
@@ -1119,7 +1119,7 @@ func ParseMsgTimeout(
 			RefundAmount:   rawFungibleTokenPacketData.Amount,
 		},
 
-		PacketTimeoutHeight: mustParseHeight(
+		PacketTimeoutHeight: MustParseHeight(
 			timeoutPacketEvent.MustGetAttributeByKey("packet_timeout_height"),
 		),
 		PacketTimeoutTimestamp: typeconv.MustAtou64(
@@ -1206,7 +1206,7 @@ func ParseMsgTimeoutOnClose(
 			RefundAmount:   rawFungibleTokenPacketData.Amount,
 		},
 
-		PacketTimeoutHeight: mustParseHeight(
+		PacketTimeoutHeight: MustParseHeight(
 			timeoutPacketEvent.MustGetAttributeByKey("packet_timeout_height"),
 		),
 		PacketTimeoutTimestamp: typeconv.MustAtou64(
