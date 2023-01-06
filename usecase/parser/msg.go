@@ -88,6 +88,10 @@ func ParseBlockTxsMsgToCommands(
 				"/chainmain.nft.v1.MsgEditNFT",
 				"/chainmain.nft.v1.MsgBurnNFT",
 
+				// chainmain icaauth
+				"/chainmain.icaauth.v1.MsgRegisterAccount",
+				"/chainmain.icaauth.v1.MsgSubmitTx",
+
 				// ibc core client
 				"/ibc.core.client.v1.MsgCreateClient",
 				"/ibc.core.client.v1.MsgUpdateClient",

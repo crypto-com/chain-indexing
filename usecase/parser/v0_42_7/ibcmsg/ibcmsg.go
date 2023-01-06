@@ -12,7 +12,7 @@ import (
 	"github.com/crypto-com/chain-indexing/internal/typeconv"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
-	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
+	"github.com/crypto-com/chain-indexing/usecase/parser/ibc"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	mapstructure_utils "github.com/crypto-com/chain-indexing/usecase/parser/utils/mapstructure"
 )
@@ -39,7 +39,7 @@ func ParseMsgRecvPacket(
 		panic(fmt.Errorf("error decoding RawMsgRecvPacket: %v", err))
 	}
 
-	if !ibcmsg.IsPacketMsgTransfer(rawMsg.Packet) {
+	if !ibc.IsPacketMsgTransfer(rawMsg.Packet) {
 		// unsupported application
 		return []command.Command{}, []string{}
 	}
