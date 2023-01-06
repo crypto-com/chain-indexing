@@ -1,4 +1,4 @@
-package v1_parser
+package parser
 
 import (
 	"fmt"
@@ -165,29 +165,52 @@ func ParseMsgVote(
 func ParseMsgVoteWeighted(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
-
-	// Getting possible signer address from Msg
-	var possibleSignerAddresses []string
-	if parserParams.Msg != nil {
-		if voter, ok := parserParams.Msg["voter"]; ok {
-			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(voter.(string)))
-		}
-
-		if options, ok := parserParams.Msg["options"]; ok {
-			fmt.Println("===> ParseMsgVoteWeighted", options)
-		}
+	var rawMsg v1_model.RawMsgVoteWeight
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating ParseMsgSubmitProposal decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(parserParams.Msg); err != nil {
+		panic(fmt.Errorf("error decoding ParseMsgSubmitProposal: %v", err))
 	}
 
-	return []command.Command{command_usecase.NewCreateMsgVoteV1(
-		parserParams.MsgCommonParams,
+	var cmds []command.Command
+	var possibleSignerAddresses []string
 
-		v1_model.MsgVoteParams{
-			ProposalId: parserParams.Msg["proposal_id"].(string),
-			Voter:      utils.AddressParse(parserParams.Msg["voter"].(string)),
-			Option:     parserParams.Msg["option"].(string),
-			Metadata:   parserParams.Msg["metadata"].(string),
-		},
-	)}, possibleSignerAddresses
+	if rawMsg.Options != nil {
+		for _, option := range rawMsg.Options {
+			// Getting possible signer address from Msg
+			if voter, ok := parserParams.Msg["voter"]; ok {
+				possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(voter.(string)))
+			}
+
+			cmds = append(cmds, command_usecase.NewCreateMsgVoteWeighted(
+				parserParams.MsgCommonParams,
+
+				v1_model.MsgVoteWeightedParams{
+					ProposalId: parserParams.Msg["proposal_id"].(string),
+					Voter:      utils.AddressParse(parserParams.Msg["voter"].(string)),
+					VoteOption: option,
+					Metadata:   parserParams.Msg["metadata"].(string),
+				},
+			))
+
+		}
+
+		fmt.Println("===> ParseMsgVoteWeighted", rawMsg.Options)
+	}
+
+	return cmds, possibleSignerAddresses
 }
 
 func ParseMsgSoftwareUpgrade(

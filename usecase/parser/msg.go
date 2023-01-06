@@ -71,7 +71,7 @@ func ParseBlockTxsMsgToCommands(
 				// "/cosmos.gov.v1.MsgExecLegacyContent",
 				"/cosmos.gov.v1.MsgSubmitProposal",
 				"/cosmos.gov.v1.MsgVote",
-				// "/cosmos.gov.v1.MsgVoteWeighted",
+				"/cosmos.gov.v1.MsgVoteWeighted",
 				"/cosmos.gov.v1beta1.MsgSubmitProposal",
 				"/cosmos.gov.v1beta1.MsgVote",
 				"/cosmos.gov.v1beta1.MsgDeposit",

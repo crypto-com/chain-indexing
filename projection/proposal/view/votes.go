@@ -59,6 +59,8 @@ func (votesView *VotesView) Insert(row *VoteRow) error {
 		"vote_at_block_time",
 		"answer",
 		"histories",
+		"vote_weight",
+		"metadata",
 	).Values(
 		row.ProposalId,
 		row.VoterAddress,
@@ -68,6 +70,8 @@ func (votesView *VotesView) Insert(row *VoteRow) error {
 		votesView.rdb.TypeConv.Tton(&row.VoteAtBlockTime),
 		row.Answer,
 		historiesJSON,
+		row.VoteWeight,
+		row.Metadata,
 	).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building vote insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
@@ -293,6 +297,7 @@ type VoteRow struct {
 	VoteAtBlockTime           utctime.UTCTime `json:"voteAtBlockTime"`
 	Answer                    string          `json:"answer"`
 	Histories                 []VoteHistory   `json:"histories"`
+	VoteWeight                string          `json:"vote_weight"`
 	Metadata                  string          `json:"metadata"`
 }
 

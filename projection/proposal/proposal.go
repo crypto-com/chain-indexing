@@ -111,6 +111,7 @@ func (proposal *Proposal) GetEventsToListen() []string {
 				event_usecase.MSG_CANCEL_UPGRADE_CREATED,
 				event_usecase.MSG_DEPOSIT_V1_CREATED,
 				event_usecase.MSG_VOTE_V1_CREATED,
+				event_usecase.MSG_VOTE_WEIGHTED_CREATED,
 			},
 			proposal.paramBase.GetEventsToListen()...,
 		),
@@ -890,6 +891,88 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				mutVoteRow.VoteAtBlockHeight = height
 				mutVoteRow.VoteAtBlockTime = blockTime
 				mutVoteRow.Answer = vote.Option
+
+				if updateVoteErr := votesView.Update(&mutVoteRow.VoteRow); updateVoteErr != nil {
+					return fmt.Errorf("error updating existing vote record: %v", updateVoteErr)
+				}
+			}
+		} else if vote, ok := event.(*event_usecase.MsgVoteWeighted); ok {
+
+			fmt.Println("===> MsgVoteWeighted", vote)
+			validatorsView := ValidatorBaseGetView(projection.validatorBase, rdbTxHandle)
+			var maybeVoterOperatorAddress *string
+			maybeVoterValidatorRow, err := validatorsView.FindLastBy(validatorbase_view.ValidatorIdentity{
+				MaybeInititalDelegatorAddress: &vote.Voter,
+			})
+			if err != nil {
+				if !errors.Is(err, rdb.ErrNoRows) {
+					return fmt.Errorf("error querying voter validator address: %v", err)
+				}
+			} else {
+				maybeVoterOperatorAddress = &maybeVoterValidatorRow.OperatorAddress
+			}
+
+			votesView := NewVotes(rdbTxHandle)
+
+			// TODO: need to update the voter db structure
+			// Possible solution:  put it into answer: [option: "yes", weight: "1.0"] and patch the existing data to this format.
+			// Note: It may affect the explorer FE.
+			mutVoteRow, queryExistingVoteRowErr := votesView.FindByProposalIdVoter(vote.ProposalId, vote.Voter)
+			if queryExistingVoteRowErr != nil {
+				if !errors.Is(queryExistingVoteRowErr, rdb.ErrNoRows) {
+					return fmt.Errorf(
+						"error finding voter record with same proposal id and voter: %v",
+						queryExistingVoteRowErr,
+					)
+				}
+
+				// vote record does not exists
+				if insertVoteErr := votesView.Insert(&view.VoteRow{
+					ProposalId:                vote.ProposalId,
+					VoterAddress:              vote.Voter,
+					MaybeVoterOperatorAddress: maybeVoterOperatorAddress,
+					TransactionHash:           vote.TxHash(),
+					VoteAtBlockHeight:         height,
+					VoteAtBlockTime:           blockTime,
+					Answer:                    vote.VoteOption.Option,
+					Histories:                 make([]view.VoteHistory, 0),
+					VoteWeight:                vote.VoteOption.Weight,
+					Metadata:                  vote.Metadata,
+				}); insertVoteErr != nil {
+					return fmt.Errorf("error inserting vote record to view: %v", insertVoteErr)
+				}
+
+				mutProposals, queryVotedProposalErr := proposalsView.FindById(vote.ProposalId)
+				if queryVotedProposalErr != nil {
+					return fmt.Errorf("error querying proposal which has new vote: %v", queryVotedProposalErr)
+				}
+
+				for _, mutProposal := range mutProposals {
+					mutProposal.TotalVote = new(big.Int).Add(mutProposal.TotalVote, new(big.Int).SetInt64(int64(1)))
+					if updateProposalErr := proposalsView.Update(&mutProposal.ProposalRow); updateProposalErr != nil {
+						return fmt.Errorf("error updating proposal which has new vote: %v", updateProposalErr)
+					}
+				}
+
+				votesTotalView := NewVotesTotal(rdbTxHandle)
+				if updateVoteTotalErr := votesTotalView.Increment(vote.ProposalId, 1); updateVoteTotalErr != nil {
+					return fmt.Errorf("error updating votes total record: %v", updateVoteTotalErr)
+				}
+
+			} else {
+				// vote record already exists
+				mutVoteRow.Histories = append(mutVoteRow.Histories, view.VoteHistory{
+					TransactionHash:   mutVoteRow.TransactionHash,
+					VoteAtBlockHeight: mutVoteRow.VoteAtBlockHeight,
+					VoteAtBlockTime:   mutVoteRow.VoteAtBlockTime,
+					Answer:            mutVoteRow.Answer,
+				})
+				mutVoteRow.TransactionHash = vote.TxHash()
+				mutVoteRow.VoteAtBlockHeight = height
+				mutVoteRow.VoteAtBlockTime = blockTime
+				mutVoteRow.Answer = vote.VoteOption.Option
+				mutVoteRow.VoteWeight = vote.VoteOption.Weight
+				mutVoteRow.Metadata = vote.Metadata
 
 				if updateVoteErr := votesView.Update(&mutVoteRow.VoteRow); updateVoteErr != nil {
 					return fmt.Errorf("error updating existing vote record: %v", updateVoteErr)
