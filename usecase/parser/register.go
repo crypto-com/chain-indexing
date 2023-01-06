@@ -1,7 +1,8 @@
 package parser
 
 import (
-	"github.com/crypto-com/chain-indexing/usecase/parser/ibcmsg"
+	"github.com/crypto-com/chain-indexing/usecase/parser/ibc"
+	"github.com/crypto-com/chain-indexing/usecase/parser/icaauth"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	V0_42_7_ibcmsg "github.com/crypto-com/chain-indexing/usecase/parser/v0_42_7/ibcmsg"
 	V1_msg "github.com/crypto-com/chain-indexing/usecase/parser/v1/msg"
@@ -52,30 +53,34 @@ func InitParsers(manager *utils.CosmosParserManager) {
 	manager.RegisterParser("/chainmain.nft.v1.MsgEditNFT", BEGIN_BLOCK_HEIGHT, ParseMsgNFTEditNFT)
 	manager.RegisterParser("/chainmain.nft.v1.MsgBurnNFT", BEGIN_BLOCK_HEIGHT, ParseMsgNFTBurnNFT)
 
+	// chainmain icaauth
+	manager.RegisterParser("/chainmain.icaauth.v1.MsgRegisterAccount", BEGIN_BLOCK_HEIGHT, icaauth.ParseMsgRegisterAccount)
+	manager.RegisterParser("/chainmain.icaauth.v1.MsgSubmitTx", BEGIN_BLOCK_HEIGHT, icaauth.ParseMsgSubmitTx)
+
 	// ibc core client
-	manager.RegisterParser("/ibc.core.client.v1.MsgCreateClient", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgCreateClient)
-	manager.RegisterParser("/ibc.core.client.v1.MsgUpdateClient", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgUpdateClient)
+	manager.RegisterParser("/ibc.core.client.v1.MsgCreateClient", BEGIN_BLOCK_HEIGHT, ibc.ParseMsgCreateClient)
+	manager.RegisterParser("/ibc.core.client.v1.MsgUpdateClient", BEGIN_BLOCK_HEIGHT, ibc.ParseMsgUpdateClient)
 
 	// ibc core connection
-	manager.RegisterParser("/ibc.core.connection.v1.MsgConnectionOpenInit", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgConnectionOpenInit)
-	manager.RegisterParser("/ibc.core.connection.v1.MsgConnectionOpenTry", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgConnectionOpenTry)
-	manager.RegisterParser("/ibc.core.connection.v1.MsgConnectionOpenAck", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgConnectionOpenAck)
-	manager.RegisterParser("/ibc.core.connection.v1.MsgConnectionOpenConfirm", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgConnectionOpenConfirm)
+	manager.RegisterParser("/ibc.core.connection.v1.MsgConnectionOpenInit", BEGIN_BLOCK_HEIGHT, ibc.ParseMsgConnectionOpenInit)
+	manager.RegisterParser("/ibc.core.connection.v1.MsgConnectionOpenTry", BEGIN_BLOCK_HEIGHT, ibc.ParseMsgConnectionOpenTry)
+	manager.RegisterParser("/ibc.core.connection.v1.MsgConnectionOpenAck", BEGIN_BLOCK_HEIGHT, ibc.ParseMsgConnectionOpenAck)
+	manager.RegisterParser("/ibc.core.connection.v1.MsgConnectionOpenConfirm", BEGIN_BLOCK_HEIGHT, ibc.ParseMsgConnectionOpenConfirm)
 
 	// ibc core channel
-	manager.RegisterParser("/ibc.core.channel.v1.MsgChannelOpenInit", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgChannelOpenInit)
-	manager.RegisterParser("/ibc.core.channel.v1.MsgChannelOpenTry", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgChannelOpenTry)
-	manager.RegisterParser("/ibc.core.channel.v1.MsgChannelOpenAck", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgChannelOpenAck)
-	manager.RegisterParser("/ibc.core.channel.v1.MsgChannelOpenConfirm", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgChannelOpenConfirm)
-	manager.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgRecvPacket)
-	manager.RegisterParser("/ibc.core.channel.v1.MsgAcknowledgement", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgAcknowledgement)
-	manager.RegisterParser("/ibc.core.channel.v1.MsgTimeout", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgTimeout)
-	manager.RegisterParser("/ibc.core.channel.v1.MsgTimeoutOnClose", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgTimeoutOnClose)
-	manager.RegisterParser("/ibc.core.channel.v1.MsgChannelCloseInit", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgChannelCloseInit)
-	manager.RegisterParser("/ibc.core.channel.v1.MsgChannelCloseConfirm", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgChannelCloseConfirm)
+	manager.RegisterParser("/ibc.core.channel.v1.MsgChannelOpenInit", BEGIN_BLOCK_HEIGHT, ibc.ParseMsgChannelOpenInit)
+	manager.RegisterParser("/ibc.core.channel.v1.MsgChannelOpenTry", BEGIN_BLOCK_HEIGHT, ibc.ParseMsgChannelOpenTry)
+	manager.RegisterParser("/ibc.core.channel.v1.MsgChannelOpenAck", BEGIN_BLOCK_HEIGHT, ibc.ParseMsgChannelOpenAck)
+	manager.RegisterParser("/ibc.core.channel.v1.MsgChannelOpenConfirm", BEGIN_BLOCK_HEIGHT, ibc.ParseMsgChannelOpenConfirm)
+	manager.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", BEGIN_BLOCK_HEIGHT, ibc.ParseMsgRecvPacket)
+	manager.RegisterParser("/ibc.core.channel.v1.MsgAcknowledgement", BEGIN_BLOCK_HEIGHT, ibc.ParseMsgAcknowledgement)
+	manager.RegisterParser("/ibc.core.channel.v1.MsgTimeout", BEGIN_BLOCK_HEIGHT, ibc.ParseMsgTimeout)
+	manager.RegisterParser("/ibc.core.channel.v1.MsgTimeoutOnClose", BEGIN_BLOCK_HEIGHT, ibc.ParseMsgTimeoutOnClose)
+	manager.RegisterParser("/ibc.core.channel.v1.MsgChannelCloseInit", BEGIN_BLOCK_HEIGHT, ibc.ParseMsgChannelCloseInit)
+	manager.RegisterParser("/ibc.core.channel.v1.MsgChannelCloseConfirm", BEGIN_BLOCK_HEIGHT, ibc.ParseMsgChannelCloseConfirm)
 
 	// ibc applications transfer
-	manager.RegisterParser("/ibc.applications.transfer.v1.MsgTransfer", BEGIN_BLOCK_HEIGHT, ibcmsg.ParseMsgTransfer)
+	manager.RegisterParser("/ibc.applications.transfer.v1.MsgTransfer", BEGIN_BLOCK_HEIGHT, ibc.ParseMsgTransfer)
 
 	// cosmos authz
 	manager.RegisterParser("/cosmos.authz.v1beta1.MsgGrant", BEGIN_BLOCK_HEIGHT, ParseMsgGrant)

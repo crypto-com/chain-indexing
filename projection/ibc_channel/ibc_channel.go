@@ -91,6 +91,7 @@ func (_ *IBCChannel) GetEventsToListen() []string {
 		event_usecase.MSG_IBC_ACKNOWLEDGEMENT_CREATED,
 		event_usecase.MSG_IBC_TIMEOUT_CREATED,
 		event_usecase.MSG_IBC_TIMEOUT_ON_CLOSE_CREATED,
+		event_usecase.MSG_REGISTER_ACCOUNT_CREATED,
 	}
 }
 
@@ -260,6 +261,41 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				CounterpartyChainID:       counterpartyChainID,
 				Status:                    types.STATUS_NOT_ESTABLISHED,
 				PacketOrdering:            msgIBCChannelOpenInit.Params.Channel.Ordering,
+				LastInPacketSequence:      0,
+				LastOutPacketSequence:     0,
+				TotalRelayInCount:         0,
+				TotalRelayOutCount:        0,
+				TotalRelayOutSuccessCount: 0,
+				TotalRelayOutSuccessRate:  0,
+				CreatedAtBlockTime:        utctime.FromUnixNano(0),
+				CreatedAtBlockHeight:      0,
+				Verified:                  false,
+				Description:               "",
+				LastActivityBlockTime:     utctime.FromUnixNano(0),
+				LastActivityBlockHeight:   0,
+				BondedTokens:              *ibc_channel_view.NewEmptyBondedTokens(),
+			}
+			if err := ibcChannelsView.Insert(channel); err != nil {
+				return fmt.Errorf("error inserting channel: %w", err)
+			}
+
+		} else if msgRegisterAccount, ok := event.(*event_usecase.MsgRegisterAccount); ok {
+
+			connectionID := msgRegisterAccount.Params.ConnectionID
+			counterpartyChainID, err := ibcConnectionsView.FindCounterpartyChainIDBy(connectionID)
+			if err != nil {
+				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
+			}
+
+			channel := &ibc_channel_view.IBCChannelRow{
+				ChannelID:                 msgRegisterAccount.Params.ChannelID,
+				PortID:                    msgRegisterAccount.Params.PortID,
+				ConnectionID:              msgRegisterAccount.Params.ConnectionID,
+				CounterpartyChannelID:     msgRegisterAccount.Params.CounterpartyChannelID,
+				CounterpartyPortID:        msgRegisterAccount.Params.CounterpartyPortID,
+				CounterpartyChainID:       counterpartyChainID,
+				Status:                    types.STATUS_NOT_ESTABLISHED,
+				PacketOrdering:            "ORDER_ORDERED",
 				LastInPacketSequence:      0,
 				LastOutPacketSequence:     0,
 				TotalRelayInCount:         0,

@@ -1,4 +1,4 @@
-package ibcmsg
+package ibc
 
 import (
 	"bytes"
@@ -624,7 +624,7 @@ func parseMsgUpdateTendermintLightClient(
 
 		ClientID:        rawMsg.ClientID,
 		ClientType:      event.MustGetAttributeByKey("client_type"),
-		ConsensusHeight: mustParseHeight(event.MustGetAttributeByKey("consensus_height")),
+		ConsensusHeight: MustParseHeight(event.MustGetAttributeByKey("consensus_height")),
 		Signer:          rawMsg.Signer,
 	}
 
@@ -682,7 +682,7 @@ func parseMsgUpdateSolomachineLightClient(
 
 		ClientID:        rawMsg.ClientID,
 		ClientType:      event.MustGetAttributeByKey("client_type"),
-		ConsensusHeight: mustParseHeight(event.MustGetAttributeByKey("consensus_height")),
+		ConsensusHeight: MustParseHeight(event.MustGetAttributeByKey("consensus_height")),
 		Signer:          rawMsg.Signer,
 	}
 
@@ -697,7 +697,7 @@ func parseMsgUpdateSolomachineLightClient(
 	)}, possibleSignerAddresses
 }
 
-func mustParseHeight(height string) ibc_model.Height {
+func MustParseHeight(height string) ibc_model.Height {
 	heightTokens := strings.Split(height, "-")
 	if len(heightTokens) != 2 {
 		panic("invalid height")
@@ -815,9 +815,23 @@ func ParseMsgRecvPacket(
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 
-	recvPacketEvent := log.GetEventByType("recv_packet")
-	if recvPacketEvent == nil {
+	recvPacketEvents := log.GetEventsByType("recv_packet")
+	if recvPacketEvents == nil {
 		panic("missing `recv_packet` event in TxsResult log")
+	}
+	var packetSequence uint64
+	var channelOrdering string
+	var connectionID string
+	for _, recvPacketEvent := range recvPacketEvents {
+		if recvPacketEvent.HasAttribute("packet_sequence") {
+			packetSequence = typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence"))
+		}
+		if recvPacketEvent.HasAttribute("packet_channel_ordering") {
+			channelOrdering = recvPacketEvent.MustGetAttributeByKey("packet_channel_ordering")
+		}
+		if recvPacketEvent.HasAttribute("packet_connection") {
+			connectionID = recvPacketEvent.MustGetAttributeByKey("packet_connection")
+		}
 	}
 
 	fungibleTokenPacketEvent := log.GetEventByType("fungible_token_packet")
@@ -831,7 +845,7 @@ func ParseMsgRecvPacket(
 				FungibleTokenPacketData: rawFungibleTokenPacketData,
 			},
 
-			PacketSequence: typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
+			PacketSequence: packetSequence,
 		}
 
 		// Getting possible signer address from Msg
@@ -872,9 +886,9 @@ func ParseMsgRecvPacket(
 			MaybeDenominationTrace:  maybeDenominationTrace,
 		},
 
-		PacketSequence:  typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
-		ChannelOrdering: recvPacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
-		ConnectionID:    recvPacketEvent.MustGetAttributeByKey("packet_connection"),
+		PacketSequence:  packetSequence,
+		ChannelOrdering: channelOrdering,
+		ConnectionID:    connectionID,
 		PacketAck:       packetAck,
 	}
 
@@ -1105,7 +1119,7 @@ func ParseMsgTimeout(
 			RefundAmount:   rawFungibleTokenPacketData.Amount,
 		},
 
-		PacketTimeoutHeight: mustParseHeight(
+		PacketTimeoutHeight: MustParseHeight(
 			timeoutPacketEvent.MustGetAttributeByKey("packet_timeout_height"),
 		),
 		PacketTimeoutTimestamp: typeconv.MustAtou64(
@@ -1192,7 +1206,7 @@ func ParseMsgTimeoutOnClose(
 			RefundAmount:   rawFungibleTokenPacketData.Amount,
 		},
 
-		PacketTimeoutHeight: mustParseHeight(
+		PacketTimeoutHeight: MustParseHeight(
 			timeoutPacketEvent.MustGetAttributeByKey("packet_timeout_height"),
 		),
 		PacketTimeoutTimestamp: typeconv.MustAtou64(
