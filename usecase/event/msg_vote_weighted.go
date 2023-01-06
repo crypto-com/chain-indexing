@@ -16,10 +16,10 @@ const MSG_VOTE_WEIGHTED_FAILED = "/cosmos.gov.v1.MsgVoteWeighted.Failed"
 type MsgVoteWeighted struct {
 	MsgBase
 
-	ProposalId string           `json:"proposalId"`
-	Voter      string           `json:"voter"`
-	VoteOption model.VoteOption `json:"vote_option"`
-	Metadata   string           `json:"metadata"`
+	ProposalId  string             `json:"proposalId"`
+	Voter       string             `json:"voter"`
+	VoteOptions []model.VoteOption `json:"vote_options"`
+	Metadata    string             `json:"metadata"`
 }
 
 func NewMsgVoteWeighted(msgCommonParams MsgCommonParams, params model.MsgVoteWeightedParams) *MsgVoteWeighted {
@@ -32,7 +32,7 @@ func NewMsgVoteWeighted(msgCommonParams MsgCommonParams, params model.MsgVoteWei
 
 		params.ProposalId,
 		params.Voter,
-		params.VoteOption,
+		params.VoteOptions,
 		params.Metadata,
 	}
 }

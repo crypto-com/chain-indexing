@@ -1152,6 +1152,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						VoteAtBlockTime:           utctime.UTCTime{},
 						Answer:                    "Option",
 						Histories:                 make([]view.VoteHistory, 0),
+						Weight:                    "1.0",
 					}).
 					Return(nil, rdb.ErrNoRows)
 
@@ -1250,6 +1251,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 							VoteAtBlockTime:   utctime.FromUnixNano(-1),
 							Answer:            "PreviousAnswer",
 							Histories:         make([]view.VoteHistory, 0),
+							Weight:            "1.0",
 						},
 					}, nil)
 
@@ -1261,12 +1263,14 @@ func TestProposal_HandleEvents(t *testing.T) {
 						VoteAtBlockHeight: 1,
 						VoteAtBlockTime:   utctime.UTCTime{},
 						Answer:            "Option",
+						Weight:            "1.0",
 						Histories: []view.VoteHistory{
 							{
 								TransactionHash:   "PreviousTransactionHash",
 								VoteAtBlockHeight: 0,
 								VoteAtBlockTime:   utctime.FromUnixNano(-1),
 								Answer:            "PreviousAnswer",
+								Weight:            "1.0",
 							},
 						},
 					}).

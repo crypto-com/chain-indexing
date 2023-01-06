@@ -19,6 +19,15 @@ func (depositorsView *MockDepositorsView) Insert(row *DepositorRow) error {
 	return mockArgs.Error(0)
 }
 
+func (depositorsView *MockDepositorsView) FindByProposalIdAndDepositor(
+	proposalId string,
+	depositor string,
+) (*DepositorRow, error) {
+	mockArgs := depositorsView.Called(proposalId, depositor)
+	result, _ := mockArgs.Get(0).(*DepositorRow)
+	return result, mockArgs.Error(2)
+}
+
 func (depositorsView *MockDepositorsView) ListByProposalId(
 	proposalId string,
 	order DepositorListOrder,

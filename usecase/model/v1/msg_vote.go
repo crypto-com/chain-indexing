@@ -7,10 +7,10 @@ type MsgVoteParams struct {
 	Metadata   string `json:"metadata"`
 }
 type MsgVoteWeightedParams struct {
-	ProposalId string     `json:"proposalId"`
-	Voter      string     `json:"voter"`
-	VoteOption VoteOption `json:"vote_option"`
-	Metadata   string     `json:"metadata"`
+	ProposalId  string       `json:"proposalId"`
+	Voter       string       `json:"voter"`
+	VoteOptions []VoteOption `json:"vote_options"`
+	Metadata    string       `json:"metadata"`
 }
 type RawMsgVoteWeight struct {
 	ProposalId string       `json:"proposalId"`

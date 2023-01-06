@@ -188,26 +188,22 @@ func ParseMsgVoteWeighted(
 	var possibleSignerAddresses []string
 
 	if rawMsg.Options != nil {
-		for _, option := range rawMsg.Options {
-			// Getting possible signer address from Msg
-			if voter, ok := parserParams.Msg["voter"]; ok {
-				possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(voter.(string)))
-			}
-
-			cmds = append(cmds, command_usecase.NewCreateMsgVoteWeighted(
-				parserParams.MsgCommonParams,
-
-				v1_model.MsgVoteWeightedParams{
-					ProposalId: parserParams.Msg["proposal_id"].(string),
-					Voter:      utils.AddressParse(parserParams.Msg["voter"].(string)),
-					VoteOption: option,
-					Metadata:   parserParams.Msg["metadata"].(string),
-				},
-			))
-
+		// Getting possible signer address from Msg
+		if voter, ok := parserParams.Msg["voter"]; ok {
+			possibleSignerAddresses = append(possibleSignerAddresses, utils.AddressParse(voter.(string)))
 		}
 
-		fmt.Println("===> ParseMsgVoteWeighted", rawMsg.Options)
+		cmds = append(cmds, command_usecase.NewCreateMsgVoteWeighted(
+			parserParams.MsgCommonParams,
+
+			v1_model.MsgVoteWeightedParams{
+				ProposalId:  parserParams.Msg["proposal_id"].(string),
+				Voter:       utils.AddressParse(parserParams.Msg["voter"].(string)),
+				VoteOptions: rawMsg.Options,
+				Metadata:    parserParams.Msg["metadata"].(string),
+			},
+		))
+
 	}
 
 	return cmds, possibleSignerAddresses
