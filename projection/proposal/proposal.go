@@ -828,14 +828,15 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 			}
 
 			votesView := NewVotes(rdbTxHandle)
-
 			mutVoteRows, queryExistingVoteRowErr := votesView.FindByProposalIdVoter(vote.ProposalId, vote.Voter)
-			if queryExistingVoteRowErr != nil {
-				if !errors.Is(queryExistingVoteRowErr, rdb.ErrNoRows) {
-					return fmt.Errorf(
-						"error finding voter record with same proposal id and voter: %v",
-						queryExistingVoteRowErr,
-					)
+			if len(*mutVoteRows) <= 0 {
+				if queryExistingVoteRowErr != nil {
+					if !errors.Is(queryExistingVoteRowErr, rdb.ErrNoRows) {
+						return fmt.Errorf(
+							"error finding voter record with same proposal id and voter: %v",
+							queryExistingVoteRowErr,
+						)
+					}
 				}
 
 				// vote record does not exists
@@ -848,7 +849,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 					VoteAtBlockTime:           blockTime,
 					Answer:                    vote.Option,
 					Histories:                 make([]view.VoteHistory, 0),
-					Weight:                    "1.0",
+					Weight:                    "1.000000000000000000",
 				}); insertVoteErr != nil {
 					return fmt.Errorf("error inserting vote record to view: %v", insertVoteErr)
 				}
@@ -875,7 +876,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 
 				// vote record already exists
 				for _, mutVoteRow := range *mutVoteRows {
-					histories = append(mutVoteRow.Histories, view.VoteHistory{
+					histories = append(histories, view.VoteHistory{
 						TransactionHash:   mutVoteRow.TransactionHash,
 						VoteAtBlockHeight: mutVoteRow.VoteAtBlockHeight,
 						VoteAtBlockTime:   mutVoteRow.VoteAtBlockTime,
@@ -899,7 +900,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 					VoteAtBlockTime:           blockTime,
 					Answer:                    vote.Option,
 					Histories:                 histories,
-					Weight:                    "1.0",
+					Weight:                    "1.000000000000000000",
 				}); insertVoteErr != nil {
 					return fmt.Errorf("error inserting vote record to view: %v", insertVoteErr)
 				}
@@ -919,14 +920,15 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 			}
 
 			votesView := NewVotes(rdbTxHandle)
-
 			mutVoteRows, queryExistingVoteRowErr := votesView.FindByProposalIdVoter(vote.ProposalId, vote.Voter)
-			if queryExistingVoteRowErr != nil {
-				if !errors.Is(queryExistingVoteRowErr, rdb.ErrNoRows) {
-					return fmt.Errorf(
-						"error finding voter record with same proposal id and voter: %v",
-						queryExistingVoteRowErr,
-					)
+			if len(*mutVoteRows) <= 0 {
+				if queryExistingVoteRowErr != nil {
+					if !errors.Is(queryExistingVoteRowErr, rdb.ErrNoRows) {
+						return fmt.Errorf(
+							"error finding voter record with same proposal id and voter: %v",
+							queryExistingVoteRowErr,
+						)
+					}
 				}
 
 				// vote record does not exists
@@ -940,7 +942,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 					Answer:                    vote.Option,
 					Histories:                 make([]view.VoteHistory, 0),
 					Metadata:                  vote.Metadata,
-					Weight:                    "1.0",
+					Weight:                    "1.000000000000000000",
 				}); insertVoteErr != nil {
 					return fmt.Errorf("error inserting vote record to view: %v", insertVoteErr)
 				}
@@ -967,7 +969,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 
 				// vote record already exists
 				for _, mutVoteRow := range *mutVoteRows {
-					histories = append(mutVoteRow.Histories, view.VoteHistory{
+					histories = append(histories, view.VoteHistory{
 						TransactionHash:   mutVoteRow.TransactionHash,
 						VoteAtBlockHeight: mutVoteRow.VoteAtBlockHeight,
 						VoteAtBlockTime:   mutVoteRow.VoteAtBlockTime,
@@ -991,7 +993,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 					VoteAtBlockTime:           blockTime,
 					Answer:                    vote.Option,
 					Histories:                 histories,
-					Weight:                    "1.0",
+					Weight:                    "1.000000000000000000",
 				}); insertVoteErr != nil {
 					return fmt.Errorf("error inserting vote record to view: %v", insertVoteErr)
 				}
@@ -1011,14 +1013,16 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 			}
 
 			votesView := NewVotes(rdbTxHandle)
-
 			mutVoteRows, queryExistingVoteRowErr := votesView.FindByProposalIdVoter(vote.ProposalId, vote.Voter)
-			if queryExistingVoteRowErr != nil {
-				if !errors.Is(queryExistingVoteRowErr, rdb.ErrNoRows) {
-					return fmt.Errorf(
-						"error finding voter record with same proposal id and voter: %v",
-						queryExistingVoteRowErr,
-					)
+
+			if len(*mutVoteRows) <= 0 {
+				if queryExistingVoteRowErr != nil {
+					if !errors.Is(queryExistingVoteRowErr, rdb.ErrNoRows) {
+						return fmt.Errorf(
+							"error finding voter record with same proposal id and voter: %v",
+							queryExistingVoteRowErr,
+						)
+					}
 				}
 
 				for _, voteOption := range vote.VoteOptions {
@@ -1061,7 +1065,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 
 				// vote record already exists
 				for _, mutVoteRow := range *mutVoteRows {
-					histories = append(mutVoteRow.Histories, view.VoteHistory{
+					histories = append(histories, view.VoteHistory{
 						TransactionHash:   mutVoteRow.TransactionHash,
 						VoteAtBlockHeight: mutVoteRow.VoteAtBlockHeight,
 						VoteAtBlockTime:   mutVoteRow.VoteAtBlockTime,

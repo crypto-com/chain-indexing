@@ -18,7 +18,6 @@ const VOTES_TABLE_NAME = "view_proposal_votes"
 
 type Votes interface {
 	Insert(row *VoteRow) error
-	Update(row *VoteRow) error
 	FindByProposalIdVoter(
 		proposalId string,
 		voterAddress string,
@@ -92,40 +91,6 @@ func (votesView *VotesView) Insert(row *VoteRow) error {
 	}
 	if result.RowsAffected() != 1 {
 		return fmt.Errorf("error inserting vote into the table: no rows inserted: %w", rdb.ErrWrite)
-	}
-
-	return nil
-}
-
-func (votesView *VotesView) Update(row *VoteRow) error {
-	historiesJSON, err := jsoniter.MarshalToString(row.Histories)
-	if err != nil {
-		return fmt.Errorf("error JSON marshalling vote histories for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
-
-	var answerJSON string
-	if answerJSON, err = jsoniter.MarshalToString(row.Answer); err != nil {
-		return fmt.Errorf("error JSON marshalling vote answer for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
-
-	sql, sqlArgs, err := votesView.rdb.StmtBuilder.Update(
-		VOTES_TABLE_NAME,
-	).SetMap(map[string]interface{}{
-		"transaction_hash":     row.TransactionHash,
-		"vote_at_block_height": row.VoteAtBlockHeight,
-		"vote_at_block_time":   votesView.rdb.TypeConv.Tton(&row.VoteAtBlockTime),
-		"answer":               answerJSON,
-		"histories":            historiesJSON,
-	}).Where("voter_address = ?", row.VoterAddress).ToSql()
-	if err != nil {
-		return fmt.Errorf("error building vote update sql: %v: %w", err, rdb.ErrPrepare)
-	}
-	result, err := votesView.rdb.Exec(sql, sqlArgs...)
-	if err != nil {
-		return fmt.Errorf("error updating vote: %v: %w", err, rdb.ErrWrite)
-	}
-	if result.RowsAffected() == 0 {
-		return fmt.Errorf("error updating vote: no rows updated: %w", rdb.ErrWrite)
 	}
 
 	return nil

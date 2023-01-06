@@ -19,11 +19,6 @@ func (votesView *MockVotesView) Insert(row *VoteRow) error {
 	return mockArgs.Error(0)
 }
 
-func (votesView *MockVotesView) Update(row *VoteRow) error {
-	mockArgs := votesView.Called(row)
-	return mockArgs.Error(0)
-}
-
 func (votesView *MockVotesView) FindByProposalIdVoter(
 	proposalId string,
 	voterAddress string,

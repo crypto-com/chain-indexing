@@ -221,7 +221,7 @@ func (proposalView *ProposalsView) FindById(
 		fmt.Sprintf("%s.maybe_voting_start_time", PROPOSALS_TABLE_NAME),
 		fmt.Sprintf("%s.maybe_voting_end_block_height", PROPOSALS_TABLE_NAME),
 		fmt.Sprintf("%s.maybe_voting_end_time", PROPOSALS_TABLE_NAME),
-		// fmt.Sprintf("%s.metadata", PROPOSALS_TABLE_NAME),
+		fmt.Sprintf("%s.metadata", PROPOSALS_TABLE_NAME),
 		fmt.Sprintf("%s.moniker", VALIDATORS_TABLE_NAME),
 	).From(
 		PROPOSALS_TABLE_NAME,
@@ -274,7 +274,7 @@ func (proposalView *ProposalsView) FindById(
 			votingStartTimeReader.ScannableArg(),
 			&row.MaybeVotingEndBlockHeight,
 			votingEndTimeReader.ScannableArg(),
-			// &row.Metadata,
+			&row.Metadata,
 			&row.MaybeProposerMoniker,
 		); scanErr != nil {
 			if errors.Is(scanErr, rdb.ErrNoRows) {
