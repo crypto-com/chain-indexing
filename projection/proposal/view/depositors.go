@@ -21,7 +21,7 @@ const DEPOSITORS_TABLE_NAME = "view_proposal_depositors"
 
 type Depositors interface {
 	Insert(row *DepositorRow) error
-	FindByProposalIdAndDepositor(
+	FindByProposalIdAndTxHash(
 		proposalId string,
 		depositor string,
 	) (
@@ -86,52 +86,48 @@ func (depositorsView *DepositorsView) Insert(row *DepositorRow) error {
 	return nil
 }
 
-func (depositorsView *DepositorsView) FindByProposalIdAndDepositor(
+func (depositorsView *DepositorsView) FindByProposalIdAndTxHash(
 	proposalId string,
-	depositor string,
+	txHash string,
 ) (*DepositorRow, error) {
-	sql, sqlArgs, err := depositorsView.rdb.StmtBuilder.Select(
+	stmtBuilder := depositorsView.rdb.StmtBuilder.Select(
 		fmt.Sprintf("%s.proposal_id", DEPOSITORS_TABLE_NAME),
-		// fmt.Sprintf("%s.depositor_address", DEPOSITORS_TABLE_NAME),
-		// fmt.Sprintf("%s.maybe_depositor_operator_address", DEPOSITORS_TABLE_NAME),
-		// fmt.Sprintf("%s.transaction_hash", DEPOSITORS_TABLE_NAME),
-		// fmt.Sprintf("%s.deposit_at_block_height", DEPOSITORS_TABLE_NAME),
-		// fmt.Sprintf("%s.deposit_at_block_time", DEPOSITORS_TABLE_NAME),
-		// fmt.Sprintf("%s.amount", DEPOSITORS_TABLE_NAME),
+		fmt.Sprintf("%s.depositor_address", DEPOSITORS_TABLE_NAME),
+		fmt.Sprintf("%s.maybe_depositor_operator_address", DEPOSITORS_TABLE_NAME),
+		fmt.Sprintf("%s.transaction_hash", DEPOSITORS_TABLE_NAME),
+		fmt.Sprintf("%s.deposit_at_block_height", DEPOSITORS_TABLE_NAME),
+		fmt.Sprintf("%s.deposit_at_block_time", DEPOSITORS_TABLE_NAME),
+		fmt.Sprintf("%s.amount", DEPOSITORS_TABLE_NAME),
 	).From(
 		DEPOSITORS_TABLE_NAME,
 	).Where(
 		fmt.Sprintf("%s.proposal_id = ?", DEPOSITORS_TABLE_NAME), proposalId,
 	).Where(
-		fmt.Sprintf("%s.depositor_address = ?", DEPOSITORS_TABLE_NAME), depositor,
-	).ToSql()
-	if err != nil {
-		return nil, fmt.Errorf("error building depositor selection sql: %v: %w", err, rdb.ErrPrepare)
-	}
+		fmt.Sprintf("%s.transaction_hash = ?", DEPOSITORS_TABLE_NAME), txHash,
+	)
 
-	rowResult, err := depositorsView.rdb.Query(sql, sqlArgs...)
+	sql, sqlArgs, err := stmtBuilder.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("error executing depositor selection query: %v: %w", err, rdb.ErrQuery)
+		return nil, fmt.Errorf("error building depositor list SQL: %v: %w", err, rdb.ErrPrepare)
 	}
-	defer rowResult.Close()
 
 	var row DepositorRow
 	var amountJSON *string
 	depositAtBlockTimeReader := depositorsView.rdb.NtotReader()
 
-	if err := rowResult.Scan(
+	if scanErr := depositorsView.rdb.QueryRow(sql, sqlArgs...).Scan(
 		&row.ProposalId,
-		// &row.DepositorAddress,
-		// &row.MaybeDepositorOperatorAddress,
-		// &row.TransactionHash,
-		// &row.DepositAtBlockHeight,
-		// depositAtBlockTimeReader.ScannableArg(),
-	// &amountJSON,
-	); err != nil {
-		if errors.Is(err, rdb.ErrNoRows) {
-			return nil, nil
+		&row.DepositorAddress,
+		&row.MaybeDepositorOperatorAddress,
+		&row.TransactionHash,
+		&row.DepositAtBlockHeight,
+		depositAtBlockTimeReader.ScannableArg(),
+		&amountJSON,
+	); scanErr != nil {
+		if errors.Is(scanErr, rdb.ErrNoRows) {
+			return nil, rdb.ErrNoRows
 		}
-		return nil, fmt.Errorf("error scanning depositor row: %v: %w", err, rdb.ErrQuery)
+		return nil, fmt.Errorf("error scanning proposal row: %v: %w", scanErr, rdb.ErrQuery)
 	}
 
 	json.MustUnmarshalFromString(*amountJSON, &row.Amount)

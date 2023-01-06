@@ -19,11 +19,11 @@ func (depositorsView *MockDepositorsView) Insert(row *DepositorRow) error {
 	return mockArgs.Error(0)
 }
 
-func (depositorsView *MockDepositorsView) FindByProposalIdAndDepositor(
+func (depositorsView *MockDepositorsView) FindByProposalIdAndTxHash(
 	proposalId string,
-	depositor string,
+	txHash string,
 ) (*DepositorRow, error) {
-	mockArgs := depositorsView.Called(proposalId, depositor)
+	mockArgs := depositorsView.Called(proposalId, txHash)
 	result, _ := mockArgs.Get(0).(*DepositorRow)
 	return result, mockArgs.Error(2)
 }
