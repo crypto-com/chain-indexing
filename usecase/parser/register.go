@@ -1,11 +1,12 @@
 package parser
 
 import (
+	cosmos_gov_v1 "github.com/crypto-com/chain-indexing/usecase/parser/gov/v1"
 	"github.com/crypto-com/chain-indexing/usecase/parser/ibc"
 	"github.com/crypto-com/chain-indexing/usecase/parser/icaauth"
+	cosmos_upgrade_v1 "github.com/crypto-com/chain-indexing/usecase/parser/upgrade/v1"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	V0_42_7_ibcmsg "github.com/crypto-com/chain-indexing/usecase/parser/v0_42_7/ibcmsg"
-	V1_msg "github.com/crypto-com/chain-indexing/usecase/parser/v1/msg"
 )
 
 const BEGIN_BLOCK_HEIGHT = 0
@@ -27,14 +28,15 @@ func InitParsers(manager *utils.CosmosParserManager) {
 	manager.RegisterParser("/cosmos.gov.v1beta1.MsgDeposit", BEGIN_BLOCK_HEIGHT, ParseMsgDeposit)
 
 	// cosmos gov v1
-	manager.RegisterParser("/cosmos.gov.v1.MsgDeposit", BEGIN_BLOCK_HEIGHT, V1_msg.ParseMsgDeposit)
-	manager.RegisterParser("/cosmos.gov.v1.MsgSubmitProposal", BEGIN_BLOCK_HEIGHT, V1_msg.ParseMsgSubmitProposal)
-	manager.RegisterParser("/cosmos.gov.v1.MsgVote", BEGIN_BLOCK_HEIGHT, V1_msg.ParseMsgVote)
-	manager.RegisterParser("/cosmos.gov.v1.MsgVoteWeighted", BEGIN_BLOCK_HEIGHT, V1_msg.ParseMsgVoteWeighted)
+	manager.RegisterParser("/cosmos.gov.v1.MsgDeposit", BEGIN_BLOCK_HEIGHT, cosmos_gov_v1.ParseMsgDeposit)
+	manager.RegisterParser("/cosmos.gov.v1.MsgExecLegacyContent", BEGIN_BLOCK_HEIGHT, ParseMsgExecLegacyContent)
+	manager.RegisterParser("/cosmos.gov.v1.MsgSubmitProposal", BEGIN_BLOCK_HEIGHT, cosmos_gov_v1.ParseMsgSubmitProposal)
+	manager.RegisterParser("/cosmos.gov.v1.MsgVote", BEGIN_BLOCK_HEIGHT, cosmos_gov_v1.ParseMsgVote)
+	manager.RegisterParser("/cosmos.gov.v1.MsgVoteWeighted", BEGIN_BLOCK_HEIGHT, cosmos_gov_v1.ParseMsgVoteWeighted)
 
 	// cosmos upgrade v1
-	manager.RegisterParser("/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade", BEGIN_BLOCK_HEIGHT, V1_msg.ParseMsgSoftwareUpgrade)
-	manager.RegisterParser("/cosmos.upgrade.v1beta1.MsgCancelUpgrade", BEGIN_BLOCK_HEIGHT, V1_msg.ParseMsgCancelUpgrade)
+	manager.RegisterParser("/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade", BEGIN_BLOCK_HEIGHT, cosmos_upgrade_v1.ParseMsgSoftwareUpgrade)
+	manager.RegisterParser("/cosmos.upgrade.v1beta1.MsgCancelUpgrade", BEGIN_BLOCK_HEIGHT, cosmos_upgrade_v1.ParseMsgCancelUpgrade)
 
 	// cosmos staking
 	manager.RegisterParser("/cosmos.staking.v1beta1.MsgDelegate", BEGIN_BLOCK_HEIGHT, ParseMsgDelegate)

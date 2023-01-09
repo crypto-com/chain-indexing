@@ -12,11 +12,16 @@ type RawMsgSubmitProposal struct {
 	Type           string                 `json:"@type"`
 	Messages       []MsgSubmitProposalMsg `json:"messages"`
 	Proposer       string                 `json:"proposer"`
-	InitialDeposit coin.Coins             `json:"initial_deposit"`
+	InitialDeposit []interface{}          `mapstructure:"initial_deposit" json:"initial_deposit"`
 	Metadata       string                 `json:"metadata"`
 }
 type MsgSubmitProposalMsg struct {
 	Type string `mapstructure:"@type" json:"@type"`
+}
+
+type MsgExecLegacyContentParams struct {
+	Content   interface{} `json:"content"`
+	Authority string      `json:"authority"`
 }
 
 type MsgSubmitCommunityPoolSpendProposalParams struct {
@@ -148,4 +153,20 @@ type MsgSubmitUnknownProposalContent struct {
 	Title       string      `json:"title"`
 	Description string      `json:"description"`
 	RawContent  interface{} `json:"rawContent"`
+}
+
+type RawMsgExecLegacyContent struct {
+	Type           string                 `json:"@type"`
+	Content        map[string]interface{} `json:"content"`
+	Authority      string                 `json:"authority"`
+	Proposer       string                 `json:"proposer"`
+	InitialDeposit coin.Coins             `json:"initial_deposit"`
+	Metadata       string                 `json:"metadata"`
+}
+
+type RawContent struct {
+	Type        string                                  `json:"@type"`
+	Title       string                                  `json:"title"`
+	Description string                                  `json:"description"`
+	Plan        RawMsgSubmitSoftwareUpgradeProposalPlan `json:"plan"`
 }
