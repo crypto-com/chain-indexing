@@ -171,6 +171,10 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mockDepositorsView := &view.MockDepositorsView{}
 				mocks = append(mocks, &mockDepositorsView.Mock)
 				mockDepositorsView.
+					On("FindByProposalIdAndTxHash", "MaybeProposalId", "TxHash").
+					Return(nil, nil)
+
+				mockDepositorsView.
 					On("Insert", &view.DepositorRow{
 						ProposalId:                    "MaybeProposalId",
 						DepositorAddress:              "ProposerAddress",
@@ -317,6 +321,10 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mockDepositorsView := &view.MockDepositorsView{}
 				mocks = append(mocks, &mockDepositorsView.Mock)
 				mockDepositorsView.
+					On("FindByProposalIdAndTxHash", "MaybeProposalId", "TxHash").
+					Return(nil, nil)
+
+				mockDepositorsView.
 					On("Insert", &view.DepositorRow{
 						ProposalId:                    "MaybeProposalId",
 						DepositorAddress:              "ProposerAddress",
@@ -458,6 +466,10 @@ func TestProposal_HandleEvents(t *testing.T) {
 
 				mockDepositorsView := &view.MockDepositorsView{}
 				mocks = append(mocks, &mockDepositorsView.Mock)
+				mockDepositorsView.
+					On("FindByProposalIdAndTxHash", "MaybeProposalId", "TxHash").
+					Return(nil, nil)
+
 				mockDepositorsView.
 					On("Insert", &view.DepositorRow{
 						ProposalId:                    "MaybeProposalId",
@@ -603,6 +615,10 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mockDepositorsView := &view.MockDepositorsView{}
 				mocks = append(mocks, &mockDepositorsView.Mock)
 				mockDepositorsView.
+					On("FindByProposalIdAndTxHash", "MaybeProposalId", "TxHash").
+					Return(nil, nil)
+
+				mockDepositorsView.
 					On("Insert", &view.DepositorRow{
 						ProposalId:                    "MaybeProposalId",
 						DepositorAddress:              "ProposerAddress",
@@ -736,6 +752,10 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mockDepositorsView := &view.MockDepositorsView{}
 				mocks = append(mocks, &mockDepositorsView.Mock)
 				mockDepositorsView.
+					On("FindByProposalIdAndTxHash", "MaybeProposalId", "TxHash").
+					Return(nil, nil)
+
+				mockDepositorsView.
 					On("Insert", &view.DepositorRow{
 						ProposalId:                    "MaybeProposalId",
 						DepositorAddress:              "ProposerAddress",
@@ -786,12 +806,14 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mocks = append(mocks, &mockProposalsView.Mock)
 				mockProposalsView.
 					On("FindById", "ProposalId").
-					Return(&view.ProposalWithMonikerRow{
-						ProposalRow: view.ProposalRow{
-							ProposalId:           "ProposalId",
-							Status:               "Status",
-							MaybeVotingStartTime: nil,
-							MaybeVotingEndTime:   nil,
+					Return([]view.ProposalWithMonikerRow{
+						{
+							ProposalRow: view.ProposalRow{
+								ProposalId:           "ProposalId",
+								Status:               "Status",
+								MaybeVotingStartTime: nil,
+								MaybeVotingEndTime:   nil,
+							},
 						},
 					}, nil)
 
@@ -848,10 +870,12 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mocks = append(mocks, &mockProposalsView.Mock)
 				mockProposalsView.
 					On("FindById", "ProposalId").
-					Return(&view.ProposalWithMonikerRow{
-						ProposalRow: view.ProposalRow{
-							ProposalId: "ProposalId",
-							Status:     "Status",
+					Return([]view.ProposalWithMonikerRow{
+						{
+							ProposalRow: view.ProposalRow{
+								ProposalId: "ProposalId",
+								Status:     "Status",
+							},
 						},
 					}, nil)
 				mockProposalsView.
@@ -889,10 +913,12 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mocks = append(mocks, &mockProposalsView.Mock)
 				mockProposalsView.
 					On("FindById", "ProposalId").
-					Return(&view.ProposalWithMonikerRow{
-						ProposalRow: view.ProposalRow{
-							ProposalId: "ProposalId",
-							Status:     "Status",
+					Return([]view.ProposalWithMonikerRow{
+						{
+							ProposalRow: view.ProposalRow{
+								ProposalId: "ProposalId",
+								Status:     "Status",
+							},
 						},
 					}, nil)
 				mockProposalsView.
@@ -931,10 +957,12 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mocks = append(mocks, &mockProposalsView.Mock)
 				mockProposalsView.
 					On("FindById", "ProposalId").
-					Return(&view.ProposalWithMonikerRow{
-						ProposalRow: view.ProposalRow{
-							ProposalId: "ProposalId",
-							Status:     "Status",
+					Return([]view.ProposalWithMonikerRow{
+						{
+							ProposalRow: view.ProposalRow{
+								ProposalId: "ProposalId",
+								Status:     "Status",
+							},
 						},
 					}, nil)
 				mockProposalsView.
@@ -973,10 +1001,12 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mocks = append(mocks, &mockProposalsView.Mock)
 				mockProposalsView.
 					On("FindById", "ProposalId").
-					Return(&view.ProposalWithMonikerRow{
-						ProposalRow: view.ProposalRow{
-							ProposalId: "ProposalId",
-							Status:     "Status",
+					Return([]view.ProposalWithMonikerRow{
+						{
+							ProposalRow: view.ProposalRow{
+								ProposalId: "ProposalId",
+								Status:     "Status",
+							},
 						},
 					}, nil)
 				mockProposalsView.
@@ -1023,11 +1053,14 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mocks = append(mocks, &mockProposalsView.Mock)
 				mockProposalsView.
 					On("FindById", "ProposalId").
-					Return(&view.ProposalWithMonikerRow{
-						ProposalRow: view.ProposalRow{
-							ProposalId: "ProposalId",
-							TotalDeposit: []coin.Coin{
-								coin.NewInt64Coin("DENOM", 200),
+					Return([]view.ProposalWithMonikerRow{
+						{
+
+							ProposalRow: view.ProposalRow{
+								ProposalId: "ProposalId",
+								TotalDeposit: []coin.Coin{
+									coin.NewInt64Coin("DENOM", 200),
+								},
 							},
 						},
 					}, nil)
@@ -1140,7 +1173,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mocks = append(mocks, &mockVotesView.Mock)
 				mockVotesView.
 					On("FindByProposalIdVoter", "ProposalId", "Voter").
-					Return(nil, rdb.ErrNoRows)
+					Return(&[]view.VoteWithMonikerRow{}, rdb.ErrNoRows)
 
 				mockVotesView.
 					On("Insert", &view.VoteRow{
@@ -1152,7 +1185,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						VoteAtBlockTime:           utctime.UTCTime{},
 						Answer:                    "Option",
 						Histories:                 make([]view.VoteHistory, 0),
-						Weight:                    "1.0",
+						Weight:                    "1.000000000000000000",
 					}).
 					Return(nil, rdb.ErrNoRows)
 
@@ -1166,14 +1199,18 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mocks = append(mocks, &mockProposalsView.Mock)
 				mockProposalsView.
 					On("FindById", "ProposalId").
-					Return(&view.ProposalWithMonikerRow{
-						ProposalRow: view.ProposalRow{
-							ProposalId: "ProposalId",
-							TotalVote:  big.NewInt(1),
+					Return([]view.ProposalWithMonikerRow{
+						{
+							ProposalRow: view.ProposalRow{
+								MaybeId:    primptr.Int64(1),
+								ProposalId: "ProposalId",
+								TotalVote:  big.NewInt(1),
+							},
 						},
 					}, nil)
 				mockProposalsView.
 					On("Update", &view.ProposalRow{
+						MaybeId:    primptr.Int64(1),
 						ProposalId: "ProposalId",
 						TotalVote:  big.NewInt(2),
 					}).
@@ -1242,39 +1279,50 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mocks = append(mocks, &mockVotesView.Mock)
 				mockVotesView.
 					On("FindByProposalIdVoter", "ProposalId", "Voter").
-					Return(&view.VoteWithMonikerRow{
-						VoteRow: view.VoteRow{
-							ProposalId:        "ProposalId",
-							VoterAddress:      "Voter",
-							TransactionHash:   "PreviousTransactionHash",
-							VoteAtBlockHeight: 0,
-							VoteAtBlockTime:   utctime.FromUnixNano(-1),
-							Answer:            "PreviousAnswer",
-							Histories:         make([]view.VoteHistory, 0),
-							Weight:            "1.0",
+					Return([]view.VoteWithMonikerRow{
+						{
+							VoteRow: view.VoteRow{
+								ProposalId:                "ProposalId",
+								VoterAddress:              "Voter",
+								TransactionHash:           "PreviousTransactionHash",
+								MaybeVoterOperatorAddress: primptr.String("VoterOperatorAddress"),
+								VoteAtBlockHeight:         0,
+								VoteAtBlockTime:           utctime.FromUnixNano(-1),
+								Answer:                    "PreviousAnswer",
+								Histories:                 make([]view.VoteHistory, 0),
+								Metadata:                  "PreviousMetadata",
+								Weight:                    "1.000000000000000000",
+							},
 						},
 					}, nil)
 
 				mockVotesView.
-					On("Update", &view.VoteRow{
-						ProposalId:        "ProposalId",
-						VoterAddress:      "Voter",
-						TransactionHash:   "TxHash",
-						VoteAtBlockHeight: 1,
-						VoteAtBlockTime:   utctime.UTCTime{},
-						Answer:            "Option",
-						Weight:            "1.0",
+					On("DeleteByProposalIdVoter", "ProposalId", "Voter").
+					Return(int64(1), nil)
+
+				mockVotesView.
+					On("Insert", &view.VoteRow{
+						ProposalId:                "ProposalId",
+						VoterAddress:              "Voter",
+						MaybeVoterOperatorAddress: primptr.String("VoterOperatorAddress"),
+						TransactionHash:           "TxHash",
+						VoteAtBlockHeight:         1,
+						VoteAtBlockTime:           utctime.UTCTime{},
+						Answer:                    "Option",
+						Metadata:                  "",
+						Weight:                    "1.000000000000000000",
 						Histories: []view.VoteHistory{
 							{
 								TransactionHash:   "PreviousTransactionHash",
 								VoteAtBlockHeight: 0,
 								VoteAtBlockTime:   utctime.FromUnixNano(-1),
 								Answer:            "PreviousAnswer",
-								Weight:            "1.0",
+								Metadata:          "PreviousMetadata",
+								Weight:            "1.000000000000000000",
 							},
 						},
 					}).
-					Return(nil)
+					Return(nil, rdb.ErrNoRows)
 
 				proposal.NewVotes = func(
 					_ *rdb.Handle,

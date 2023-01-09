@@ -25,7 +25,7 @@ func (depositorsView *MockDepositorsView) FindByProposalIdAndTxHash(
 ) (*DepositorRow, error) {
 	mockArgs := depositorsView.Called(proposalId, txHash)
 	result, _ := mockArgs.Get(0).(*DepositorRow)
-	return result, mockArgs.Error(2)
+	return result, mockArgs.Error(1)
 }
 
 func (depositorsView *MockDepositorsView) ListByProposalId(

@@ -1,10 +1,10 @@
 package parser
 
 import (
-	cosmos_gov_v1 "github.com/crypto-com/chain-indexing/usecase/parser/gov/v1"
+	cosmos_gov_v1 "github.com/crypto-com/chain-indexing/usecase/parser/gov"
 	"github.com/crypto-com/chain-indexing/usecase/parser/ibc"
 	"github.com/crypto-com/chain-indexing/usecase/parser/icaauth"
-	cosmos_upgrade_v1 "github.com/crypto-com/chain-indexing/usecase/parser/upgrade/v1"
+	cosmos_upgrade_v1 "github.com/crypto-com/chain-indexing/usecase/parser/upgrade"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	V0_42_7_ibcmsg "github.com/crypto-com/chain-indexing/usecase/parser/v0_42_7/ibcmsg"
 )

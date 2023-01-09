@@ -23,11 +23,11 @@ func (votesView *MockVotesView) FindByProposalIdVoter(
 	proposalId string,
 	voterAddress string,
 ) (
-	*[]VoteWithMonikerRow,
+	[]VoteWithMonikerRow,
 	error,
 ) {
 	mockArgs := votesView.Called(proposalId, voterAddress)
-	result1, _ := mockArgs.Get(0).(*[]VoteWithMonikerRow)
+	result1, _ := mockArgs.Get(0).([]VoteWithMonikerRow)
 	return result1, mockArgs.Error(1)
 }
 

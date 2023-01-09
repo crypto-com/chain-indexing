@@ -206,7 +206,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				return fmt.Errorf("error selecting text proposal depositor: %w", selectDepositorErr)
 			}
 
-			if depositor != nil {
+			if depositor == nil {
 				if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
 					ProposalId:                    *msgSubmitProposal.MaybeProposalId,
 					DepositorAddress:              msgSubmitProposal.ProposerAddress,
@@ -260,8 +260,8 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 
 			depositorsView := NewDepositors(rdbTxHandle)
 			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
-
 			depositor, selectDepositorErr := depositorsView.FindByProposalIdAndTxHash(*msgSubmitProposal.MaybeProposalId, msgSubmitProposal.TxHash())
+
 			if selectDepositorErr != nil {
 				if !errors.Is(selectDepositorErr, rdb.ErrNoRows) {
 					return fmt.Errorf("error selecting software upgrade proposal depositor: %w", selectDepositorErr)
@@ -843,7 +843,8 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 
 			votesView := NewVotes(rdbTxHandle)
 			mutVoteRows, queryExistingVoteRowErr := votesView.FindByProposalIdVoter(vote.ProposalId, vote.Voter)
-			if len(*mutVoteRows) <= 0 {
+
+			if len(mutVoteRows) <= 0 {
 				if queryExistingVoteRowErr != nil {
 					if !errors.Is(queryExistingVoteRowErr, rdb.ErrNoRows) {
 						return fmt.Errorf(
@@ -889,12 +890,13 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				var histories []view.VoteHistory
 
 				// vote record already exists
-				for _, mutVoteRow := range *mutVoteRows {
+				for _, mutVoteRow := range mutVoteRows {
 					histories = append(histories, view.VoteHistory{
 						TransactionHash:   mutVoteRow.TransactionHash,
 						VoteAtBlockHeight: mutVoteRow.VoteAtBlockHeight,
 						VoteAtBlockTime:   mutVoteRow.VoteAtBlockTime,
 						Answer:            mutVoteRow.Answer,
+						Metadata:          mutVoteRow.Metadata,
 						Weight:            mutVoteRow.Weight,
 					})
 				}
@@ -935,7 +937,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 
 			votesView := NewVotes(rdbTxHandle)
 			mutVoteRows, queryExistingVoteRowErr := votesView.FindByProposalIdVoter(vote.ProposalId, vote.Voter)
-			if len(*mutVoteRows) <= 0 {
+			if len(mutVoteRows) <= 0 {
 				if queryExistingVoteRowErr != nil {
 					if !errors.Is(queryExistingVoteRowErr, rdb.ErrNoRows) {
 						return fmt.Errorf(
@@ -982,12 +984,13 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				var histories []view.VoteHistory
 
 				// vote record already exists
-				for _, mutVoteRow := range *mutVoteRows {
+				for _, mutVoteRow := range mutVoteRows {
 					histories = append(histories, view.VoteHistory{
 						TransactionHash:   mutVoteRow.TransactionHash,
 						VoteAtBlockHeight: mutVoteRow.VoteAtBlockHeight,
 						VoteAtBlockTime:   mutVoteRow.VoteAtBlockTime,
 						Answer:            mutVoteRow.Answer,
+						Metadata:          mutVoteRow.Metadata,
 						Weight:            mutVoteRow.Weight,
 					})
 				}
@@ -1029,7 +1032,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 			votesView := NewVotes(rdbTxHandle)
 			mutVoteRows, queryExistingVoteRowErr := votesView.FindByProposalIdVoter(vote.ProposalId, vote.Voter)
 
-			if len(*mutVoteRows) <= 0 {
+			if len(mutVoteRows) <= 0 {
 				if queryExistingVoteRowErr != nil {
 					if !errors.Is(queryExistingVoteRowErr, rdb.ErrNoRows) {
 						return fmt.Errorf(
@@ -1078,12 +1081,13 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				var histories []view.VoteHistory
 
 				// vote record already exists
-				for _, mutVoteRow := range *mutVoteRows {
+				for _, mutVoteRow := range mutVoteRows {
 					histories = append(histories, view.VoteHistory{
 						TransactionHash:   mutVoteRow.TransactionHash,
 						VoteAtBlockHeight: mutVoteRow.VoteAtBlockHeight,
 						VoteAtBlockTime:   mutVoteRow.VoteAtBlockTime,
 						Answer:            mutVoteRow.Answer,
+						Metadata:          mutVoteRow.Metadata,
 						Weight:            mutVoteRow.Weight,
 					})
 				}

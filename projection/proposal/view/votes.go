@@ -21,7 +21,7 @@ type Votes interface {
 	FindByProposalIdVoter(
 		proposalId string,
 		voterAddress string,
-	) (*[]VoteWithMonikerRow, error)
+	) ([]VoteWithMonikerRow, error)
 	ListByProposalId(
 		proposalId string,
 		order VoteListOrder,
@@ -96,7 +96,7 @@ func (votesView *VotesView) Insert(row *VoteRow) error {
 	return nil
 }
 
-func (votesView *VotesView) FindByProposalIdVoter(proposalId string, voterAddress string) (*[]VoteWithMonikerRow, error) {
+func (votesView *VotesView) FindByProposalIdVoter(proposalId string, voterAddress string) ([]VoteWithMonikerRow, error) {
 	sql, sqlArgs, err := votesView.rdb.StmtBuilder.Select(
 		fmt.Sprintf("%s.proposal_id", VOTES_TABLE_NAME),
 		fmt.Sprintf("%s.voter_address", VOTES_TABLE_NAME),
@@ -164,7 +164,7 @@ func (votesView *VotesView) FindByProposalIdVoter(proposalId string, voterAddres
 		rows = append(rows, row)
 	}
 
-	return &rows, nil
+	return rows, nil
 }
 
 func (votesView *VotesView) ListByProposalId(
@@ -311,5 +311,6 @@ type VoteHistory struct {
 	VoteAtBlockHeight int64           `json:"voteAtBlockHeight"`
 	VoteAtBlockTime   utctime.UTCTime `json:"voteAtBlockTime"`
 	Answer            string          `json:"answer"`
+	Metadata          string          `json:"metadata"`
 	Weight            string          `json:"weight"`
 }
