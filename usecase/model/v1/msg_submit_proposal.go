@@ -86,11 +86,10 @@ type MsgSoftwareUpgrade struct {
 }
 
 type MsgSoftwareUpgradePlan struct {
-	Name                string          `json:"name"`
-	Time                utctime.UTCTime `json:"time"`
-	Height              int64           `json:"height"`
-	Info                string          `json:"info"`
-	UpgradedClientState string          `json:"upgraded_client_state"`
+	Name   string          `json:"name"`
+	Time   utctime.UTCTime `json:"time"`
+	Height int64           `json:"height"`
+	Info   string          `json:"info"`
 }
 
 type RawMsgSubmitSoftwareUpgradeProposalContent struct {
@@ -100,15 +99,13 @@ type RawMsgSubmitSoftwareUpgradeProposalContent struct {
 	Plan        RawMsgSubmitSoftwareUpgradeProposalPlan `json:"plan"`
 }
 type RawMsgSubmitSoftwareUpgradeProposalPlan struct {
-	Name                string    `json:"name"`
-	Time                time.Time `json:"time"`
-	Height              string    `json:"height"`
-	Info                string    `json:"info"`
-	UpgradedClientState string    `json:"upgraded_client_state"`
+	Name   string    `json:"name"`
+	Time   time.Time `json:"time"`
+	Height string    `json:"height"`
+	Info   string    `json:"info"`
 }
 
 // MsgSoftwareCancel
-
 type MsgCancelUpgradeParams struct {
 	MaybeProposalId *string    `json:"proposalId"`
 	Authority       string     `json:"authority"`

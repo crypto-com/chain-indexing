@@ -11,7 +11,7 @@ type CreateMsgVoteWeighted struct {
 	params          v1_model.MsgVoteWeightedParams
 }
 
-func NewCreateMsgVoteWeighted(
+func NewCreateMsgVoteWeightedV1(
 	msgCommonParams event.MsgCommonParams,
 	params v1_model.MsgVoteWeightedParams,
 ) *CreateMsgVoteWeighted {
