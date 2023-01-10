@@ -11,12 +11,10 @@ type CommunityPoolSpendData struct {
 }
 
 type MsgSoftwareUpgradeData struct {
-	Type      string                          `json:"@type"`
 	Authority string                          `json:"authority"`
 	Plan      v1_model.MsgSoftwareUpgradePlan `json:"plan"`
 }
 
 type MsgCancelUpgradeData struct {
-	Type      string `json:"@type"`
 	Authority string `json:"authority"`
 }

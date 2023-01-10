@@ -868,7 +868,6 @@ func TestProposal_HandleEvents(t *testing.T) {
 						ProposerAddress:              "Proposer",
 						MaybeProposerOperatorAddress: primptr.String("ProposerOperatorAddress"),
 						Data: types.MsgSoftwareUpgradeData{
-							Type:      "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
 							Authority: "Authority",
 							Plan: v1_model.MsgSoftwareUpgradePlan{
 								Name:   "Name",
@@ -1012,7 +1011,6 @@ func TestProposal_HandleEvents(t *testing.T) {
 						ProposerAddress:              "Proposer",
 						MaybeProposerOperatorAddress: primptr.String("ProposerOperatorAddress"),
 						Data: types.MsgCancelUpgradeData{
-							Type:      "/cosmos.upgrade.v1beta1.MsgCancelUpgrade",
 							Authority: "Authority",
 						},
 						InitialDeposit: []coin.Coin{

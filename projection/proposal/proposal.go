@@ -495,7 +495,6 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				ProposerAddress:              msgSubmitProposal.Proposer,
 				MaybeProposerOperatorAddress: context.maybeProposerValidatorAddress,
 				Data: types.MsgCancelUpgradeData{
-					Type:      msgSubmitProposal.MsgType(),
 					Authority: msgSubmitProposal.Authority,
 				},
 				InitialDeposit:            msgSubmitProposal.InitialDeposit,
@@ -625,7 +624,6 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				ProposerAddress:              msgSubmitProposal.Proposer,
 				MaybeProposerOperatorAddress: context.maybeProposerValidatorAddress,
 				Data: types.MsgSoftwareUpgradeData{
-					Type:      msgSubmitProposal.MsgType(),
 					Authority: msgSubmitProposal.Authority,
 					Plan:      msgSubmitProposal.Plan,
 				},
@@ -693,7 +691,6 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				ProposerAddress:              msgSubmitProposal.Proposer,
 				MaybeProposerOperatorAddress: context.maybeProposerValidatorAddress,
 				Data: types.MsgCancelUpgradeData{
-					Type:      msgSubmitProposal.MsgType(),
 					Authority: msgSubmitProposal.Authority,
 				},
 				InitialDeposit:            msgSubmitProposal.InitialDeposit,
@@ -805,6 +802,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 			}
 
 		} else if deposit, ok := event.(*event_usecase.MsgDeposit); ok {
+			// get all proposal records by proposal ID
 			mutProposals, queryProposalErr := proposalsView.FindById(deposit.ProposalId)
 			if queryProposalErr != nil {
 				return fmt.Errorf("error querying proposal which has deposit: %v", queryProposalErr)
@@ -850,6 +848,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 			}
 
 		} else if deposit, ok := event.(*event_usecase.MsgDepositV1); ok {
+			// get all proposal records by proposal Id
 			mutProposals, queryProposalErr := proposalsView.FindById(deposit.ProposalId)
 			if queryProposalErr != nil {
 				return fmt.Errorf("error querying proposal which has deposit: %v", queryProposalErr)
@@ -936,6 +935,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 					return fmt.Errorf("error inserting vote record to view: %v", insertVoteErr)
 				}
 
+				// get all proposal records by proposal ID
 				mutProposals, queryVotedProposalErr := proposalsView.FindById(vote.ProposalId)
 				if queryVotedProposalErr != nil {
 					return fmt.Errorf("error querying proposal which has new vote: %v", queryVotedProposalErr)
@@ -1030,6 +1030,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 					return fmt.Errorf("error inserting vote record to view: %v", insertVoteErr)
 				}
 
+				// get all proposal records by proposal ID
 				mutProposals, queryVotedProposalErr := proposalsView.FindById(vote.ProposalId)
 				if queryVotedProposalErr != nil {
 					return fmt.Errorf("error querying proposal which has new vote: %v", queryVotedProposalErr)

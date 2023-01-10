@@ -51,11 +51,6 @@ func (votesView *VotesView) Insert(row *VoteRow) error {
 		return fmt.Errorf("error JSON marshalling vote histories for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	var answerJSON string
-	if answerJSON, err = jsoniter.MarshalToString(row.Answer); err != nil {
-		return fmt.Errorf("error JSON marshalling vote answer for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
-
 	sql, sqlArgs, err := votesView.rdb.StmtBuilder.Insert(
 		VOTES_TABLE_NAME,
 	).Columns(
@@ -76,7 +71,7 @@ func (votesView *VotesView) Insert(row *VoteRow) error {
 		row.TransactionHash,
 		row.VoteAtBlockHeight,
 		votesView.rdb.TypeConv.Tton(&row.VoteAtBlockTime),
-		answerJSON,
+		row.Answer,
 		historiesJSON,
 		row.Metadata,
 		row.Weight,
@@ -105,6 +100,7 @@ func (votesView *VotesView) FindByProposalIdVoter(proposalId string, voterAddres
 		fmt.Sprintf("%s.vote_at_block_height", VOTES_TABLE_NAME),
 		fmt.Sprintf("%s.vote_at_block_time", VOTES_TABLE_NAME),
 		fmt.Sprintf("%s.weight", VOTES_TABLE_NAME),
+		fmt.Sprintf("%s.metadata", VOTES_TABLE_NAME),
 		fmt.Sprintf("%s.answer", VOTES_TABLE_NAME),
 		fmt.Sprintf("%s.histories", VOTES_TABLE_NAME),
 		fmt.Sprintf("%s.moniker", VALIDATORS_TABLE_NAME),
@@ -125,7 +121,6 @@ func (votesView *VotesView) FindByProposalIdVoter(proposalId string, voterAddres
 	}
 
 	var historiesJSON *string
-	var answerJSON *string
 	voteAtBlockTimeReader := votesView.rdb.NtotReader()
 
 	rowsResult, err := votesView.rdb.Query(sql, sqlArgs...)
@@ -144,7 +139,8 @@ func (votesView *VotesView) FindByProposalIdVoter(proposalId string, voterAddres
 			&row.VoteAtBlockHeight,
 			voteAtBlockTimeReader.ScannableArg(),
 			&row.Weight,
-			&answerJSON,
+			&row.Metadata,
+			&row.Answer,
 			&historiesJSON,
 			&row.MaybeVoterMoniker,
 		); err != nil {
@@ -153,7 +149,6 @@ func (votesView *VotesView) FindByProposalIdVoter(proposalId string, voterAddres
 			}
 			return nil, fmt.Errorf("error scanning proposal row: %v: %w", err, rdb.ErrQuery)
 		}
-		json.MustUnmarshalFromString(*answerJSON, &row.Answer)
 		json.MustUnmarshalFromString(*historiesJSON, &row.Histories)
 
 		voteAtBlockTime, parseErr := voteAtBlockTimeReader.Parse()
@@ -179,6 +174,8 @@ func (votesView *VotesView) ListByProposalId(
 		fmt.Sprintf("%s.transaction_hash", VOTES_TABLE_NAME),
 		fmt.Sprintf("%s.vote_at_block_height", VOTES_TABLE_NAME),
 		fmt.Sprintf("%s.vote_at_block_time", VOTES_TABLE_NAME),
+		fmt.Sprintf("%s.weight", VOTES_TABLE_NAME),
+		fmt.Sprintf("%s.metadata", VOTES_TABLE_NAME),
 		fmt.Sprintf("%s.answer", VOTES_TABLE_NAME),
 		fmt.Sprintf("%s.histories", VOTES_TABLE_NAME),
 		fmt.Sprintf("%s.moniker", VALIDATORS_TABLE_NAME),
@@ -218,7 +215,6 @@ func (votesView *VotesView) ListByProposalId(
 	}
 
 	var historiesJSON *string
-	var answerJSON *string
 	voteAtBlockTimeReader := votesView.rdb.NtotReader()
 
 	rowsResult, err := votesView.rdb.Query(sql, sqlArgs...)
@@ -237,7 +233,9 @@ func (votesView *VotesView) ListByProposalId(
 			&row.TransactionHash,
 			&row.VoteAtBlockHeight,
 			voteAtBlockTimeReader.ScannableArg(),
-			&answerJSON,
+			&row.Weight,
+			&row.Metadata,
+			&row.Answer,
 			&historiesJSON,
 			&row.MaybeVoterMoniker,
 		); scanErr != nil {
@@ -247,7 +245,6 @@ func (votesView *VotesView) ListByProposalId(
 			return nil, nil, fmt.Errorf("error scanning proposal row: %v: %w", scanErr, rdb.ErrQuery)
 		}
 
-		json.MustUnmarshalFromString(*answerJSON, &row.Answer)
 		json.MustUnmarshalFromString(*historiesJSON, &row.Histories)
 
 		voteAtBlockTime, parseErr := voteAtBlockTimeReader.Parse()

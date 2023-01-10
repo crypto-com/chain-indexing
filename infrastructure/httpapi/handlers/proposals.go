@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"math/big"
 	"time"
 
@@ -51,7 +52,7 @@ func (handler *Proposals) FindById(ctx *fasthttp.RequestCtx) {
 	if !idParamOk {
 		return
 	}
-	proposal, err := handler.proposalsView.FindById(idParam)
+	proposals, err := handler.proposalsView.FindById(idParam)
 	if err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			httpapi.NotFound(ctx)
@@ -130,7 +131,7 @@ func (handler *Proposals) FindById(ctx *fasthttp.RequestCtx) {
 	}
 
 	proposalDetails := ProposalDetails{
-		proposal,
+		proposals,
 
 		requiredVotingPower.Text('f', 0),
 		totalVotedPower.Text(10),
@@ -141,6 +142,8 @@ func (handler *Proposals) FindById(ctx *fasthttp.RequestCtx) {
 			NoWithVeto: tally.NoWithVeto,
 		},
 	}
+
+	fmt.Println("===> proposalDetails:", proposalDetails)
 
 	httpapi.Success(ctx, proposalDetails)
 }
@@ -179,7 +182,36 @@ func (handler *Proposals) List(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	httpapi.SuccessWithPagination(ctx, proposals, paginationResult)
+	// aggregate proposal messages
+	proposalsDetails := make([]Proposal, 0)
+	for _, proposal := range proposals {
+		isExist := false
+
+		for i, proposalDetails := range proposalsDetails {
+			if proposalDetails.ProposalId == proposal.ProposalId {
+				proposalsDetails[i].Messages = append(proposalDetails.Messages, proposal.Data)
+				isExist = true
+			}
+		}
+
+		if !isExist {
+			messages := make([]interface{}, 0)
+			messages = append(messages, proposal.Data)
+			proposal.Data = nil
+			proposal.Type = "/cosmos.gov.v1.MsgSubmitProposal"
+
+			proposalsDetails = append(
+				proposalsDetails,
+				Proposal{
+					ProposalWithMonikerRow: proposal,
+					Messages:               messages,
+				},
+			)
+		}
+
+	}
+
+	httpapi.SuccessWithPagination(ctx, proposalsDetails, paginationResult)
 }
 
 func (handler *Proposals) ListVotesById(ctx *fasthttp.RequestCtx) {
@@ -259,4 +291,9 @@ type ProposalVotedPowerResult struct {
 	Abstain    string `json:"abstain"`
 	No         string `json:"no"`
 	NoWithVeto string `json:"noWithVeto"`
+}
+
+type Proposal struct {
+	proposal_view.ProposalWithMonikerRow
+	Messages []interface{} `json:"messages"`
 }

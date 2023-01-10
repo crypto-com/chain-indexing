@@ -183,6 +183,7 @@ func (proposalView *ProposalsView) Update(row *ProposalRow) error {
 		"maybe_voting_start_time":         proposalView.rdb.Tton(row.MaybeVotingStartTime),
 		"maybe_voting_end_block_height":   row.MaybeVotingEndBlockHeight,
 		"maybe_voting_end_time":           proposalView.rdb.Tton(row.MaybeVotingEndTime),
+		"metadata":                        row.Metadata,
 	}).Where("proposal_id = ? AND id = ?", row.ProposalId, row.MaybeId).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building proposal update sql: %v: %w", err, rdb.ErrPrepare)
@@ -345,6 +346,7 @@ func (proposalView *ProposalsView) List(
 		fmt.Sprintf("%s.maybe_voting_start_time", PROPOSALS_TABLE_NAME),
 		fmt.Sprintf("%s.maybe_voting_end_block_height", PROPOSALS_TABLE_NAME),
 		fmt.Sprintf("%s.maybe_voting_end_time", PROPOSALS_TABLE_NAME),
+		fmt.Sprintf("%s.metadata", PROPOSALS_TABLE_NAME),
 		fmt.Sprintf("%s.moniker", VALIDATORS_TABLE_NAME),
 	).From(
 		PROPOSALS_TABLE_NAME,
@@ -411,6 +413,7 @@ func (proposalView *ProposalsView) List(
 			votingStartTimeReader.ScannableArg(),
 			&row.MaybeVotingEndBlockHeight,
 			votingEndTimeReader.ScannableArg(),
+			&row.Metadata,
 			&row.MaybeProposerMoniker,
 		); scanErr != nil {
 			if errors.Is(scanErr, rdb.ErrNoRows) {
@@ -503,6 +506,5 @@ type ProposalRow struct {
 	MaybeVotingStartTime         *utctime.UTCTime `json:"maybeVotingStartTime"`
 	MaybeVotingEndBlockHeight    *int64           `json:"maybeVotingEndBlockHeight"`
 	MaybeVotingEndTime           *utctime.UTCTime `json:"maybeVotingEndTime"`
-	Message                      string           `json:"message"`
 	Metadata                     string           `json:"metadata"`
 }
