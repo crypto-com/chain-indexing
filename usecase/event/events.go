@@ -69,8 +69,8 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(MSG_DEPOSIT_V1_FAILED, 1, DecodeMsgDepositV1)
 	registry.Register(MSG_VOTE_V1_CREATED, 1, DecodeMsgVoteV1)
 	registry.Register(MSG_VOTE_V1_FAILED, 1, DecodeMsgVoteV1)
-	registry.Register(MSG_VOTE_WEIGHTED_CREATED, 1, DecodeMsgVoteWeighted)
-	registry.Register(MSG_VOTE_WEIGHTED_FAILED, 1, DecodeMsgVoteWeighted)
+	registry.Register(MSG_VOTE_WEIGHTED_V1_CREATED, 1, DecodeMsgVoteWeightedV1)
+	registry.Register(MSG_VOTE_WEIGHTED_V1_FAILED, 1, DecodeMsgVoteWeightedV1)
 
 	// Staking
 	registry.Register(MSG_CREATE_VALIDATOR_CREATED, 1, DecodeMsgCreateValidator)

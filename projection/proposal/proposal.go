@@ -111,7 +111,7 @@ func (proposal *Proposal) GetEventsToListen() []string {
 				event_usecase.MSG_CANCEL_UPGRADE_CREATED,
 				event_usecase.MSG_DEPOSIT_V1_CREATED,
 				event_usecase.MSG_VOTE_V1_CREATED,
-				event_usecase.MSG_VOTE_WEIGHTED_CREATED,
+				event_usecase.MSG_VOTE_WEIGHTED_V1_CREATED,
 			},
 			proposal.paramBase.GetEventsToListen()...,
 		),
@@ -1015,7 +1015,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 					return fmt.Errorf("error inserting vote record to view: %v", insertVoteErr)
 				}
 			}
-		} else if vote, ok := event.(*event_usecase.MsgVoteWeighted); ok {
+		} else if vote, ok := event.(*event_usecase.MsgVoteWeightedV1); ok {
 			validatorsView := ValidatorBaseGetView(projection.validatorBase, rdbTxHandle)
 			var maybeVoterOperatorAddress *string
 			maybeVoterValidatorRow, err := validatorsView.FindLastBy(validatorbase_view.ValidatorIdentity{

@@ -9,11 +9,11 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_VOTE_WEIGHTED = "/cosmos.gov.v1.MsgVoteWeighted"
-const MSG_VOTE_WEIGHTED_CREATED = "/cosmos.gov.v1.MsgVoteWeighted.Created"
-const MSG_VOTE_WEIGHTED_FAILED = "/cosmos.gov.v1.MsgVoteWeighted.Failed"
+const MSG_VOTE_WEIGHTED_V1 = "/cosmos.gov.v1.MsgVoteWeighted"
+const MSG_VOTE_WEIGHTED_V1_CREATED = "/cosmos.gov.v1.MsgVoteWeighted.Created"
+const MSG_VOTE_WEIGHTED_V1_FAILED = "/cosmos.gov.v1.MsgVoteWeighted.Failed"
 
-type MsgVoteWeighted struct {
+type MsgVoteWeightedV1 struct {
 	MsgBase
 
 	ProposalId  string             `json:"proposalId"`
@@ -22,10 +22,10 @@ type MsgVoteWeighted struct {
 	Metadata    string             `json:"metadata"`
 }
 
-func NewMsgVoteWeighted(msgCommonParams MsgCommonParams, params model.MsgVoteWeightedParams) *MsgVoteWeighted {
-	return &MsgVoteWeighted{
+func NewMsgVoteWeightedV1(msgCommonParams MsgCommonParams, params model.MsgVoteWeightedParams) *MsgVoteWeightedV1 {
+	return &MsgVoteWeightedV1{
 		NewMsgBase(MsgBaseParams{
-			MsgName:         MSG_VOTE_WEIGHTED,
+			MsgName:         MSG_VOTE_WEIGHTED_V1,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
@@ -37,7 +37,7 @@ func NewMsgVoteWeighted(msgCommonParams MsgCommonParams, params model.MsgVoteWei
 	}
 }
 
-func (event *MsgVoteWeighted) ToJSON() (string, error) {
+func (event *MsgVoteWeightedV1) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
 		return "", err
@@ -46,15 +46,15 @@ func (event *MsgVoteWeighted) ToJSON() (string, error) {
 	return string(encoded), nil
 }
 
-func (event *MsgVoteWeighted) String() string {
+func (event *MsgVoteWeightedV1) String() string {
 	return render.Render(event)
 }
 
-func DecodeMsgVoteWeighted(encoded []byte) (entity_event.Event, error) {
+func DecodeMsgVoteWeightedV1(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *MsgVoteWeighted
+	var event *MsgVoteWeightedV1
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}
