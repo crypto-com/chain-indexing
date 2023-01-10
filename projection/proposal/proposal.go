@@ -416,74 +416,6 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				}
 			}
 
-		} else if msgSubmitProposal, ok := event.(*event_usecase.MsgSoftwareUpgrade); ok {
-			context, err := projection.prepareNewProposalSubmissionContext(rdbTxHandle, msgSubmitProposal.Proposer)
-			if err != nil {
-				return err
-			}
-
-			depositEndTime := blockTime.Add(context.maxDepositPeriod)
-			row := view.ProposalRow{
-				ProposalId:                   *msgSubmitProposal.MaybeProposalId,
-				Title:                        "",
-				Description:                  "",
-				Type:                         msgSubmitProposal.MsgType(),
-				Status:                       view.PROPOSAL_STATUS_DEPOSIT_PERIOD,
-				ProposerAddress:              msgSubmitProposal.Proposer,
-				MaybeProposerOperatorAddress: context.maybeProposerValidatorAddress,
-				Data: types.MsgSoftwareUpgradeData{
-					Type:      msgSubmitProposal.MsgType(),
-					Authority: msgSubmitProposal.Authority,
-					Plan:      msgSubmitProposal.Plan,
-				},
-				InitialDeposit:            msgSubmitProposal.InitialDeposit,
-				TotalDeposit:              msgSubmitProposal.InitialDeposit,
-				TotalVote:                 big.NewInt(0),
-				TransactionHash:           msgSubmitProposal.TxHash(),
-				SubmitBlockHeight:         height,
-				SubmitTime:                blockTime,
-				DepositEndTime:            depositEndTime,
-				MaybeVotingStartTime:      nil,
-				MaybeVotingEndTime:        nil,
-				MaybeVotingEndBlockHeight: nil,
-				Metadata:                  msgSubmitProposal.Metadata,
-			}
-
-			if insertProposalErr := proposalsView.Insert(&row); insertProposalErr != nil {
-				return fmt.Errorf("error inserting software upgrade proposal into view: %v", insertProposalErr)
-			}
-
-			maybeDepositorValidatorAddress := context.maybeProposerValidatorAddress
-
-			depositorsView := NewDepositors(rdbTxHandle)
-			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
-
-			depositor, selectDepositorErr := depositorsView.FindByProposalIdAndTxHash(*msgSubmitProposal.MaybeProposalId, msgSubmitProposal.TxHash())
-			if selectDepositorErr != nil {
-				if !errors.Is(selectDepositorErr, rdb.ErrNoRows) {
-					return fmt.Errorf("error selecting software upgrade proposal depositor: %w", selectDepositorErr)
-				}
-			}
-
-			if depositor == nil {
-				if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
-					ProposalId:                    *msgSubmitProposal.MaybeProposalId,
-					DepositorAddress:              msgSubmitProposal.Proposer,
-					MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
-					TransactionHash:               msgSubmitProposal.TxHash(),
-					DepositAtBlockHeight:          height,
-					DepositAtBlockTime:            blockTime,
-					Amount:                        msgSubmitProposal.InitialDeposit,
-				}); insertDepositorErr != nil {
-					return fmt.Errorf("error inserting proposer deposit record into view: %v", insertDepositorErr)
-				}
-				if updateDepositorTotalErr := depositorsTotalView.Increment(
-					*msgSubmitProposal.MaybeProposalId, 1,
-				); updateDepositorTotalErr != nil {
-					return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
-				}
-			}
-
 		} else if msgSubmitProposal, ok := event.(*event_usecase.MsgSubmitCancelSoftwareUpgradeProposal); ok {
 			context, err := projection.prepareNewProposalSubmissionContext(rdbTxHandle, msgSubmitProposal.ProposerAddress)
 			if err != nil {
@@ -672,6 +604,141 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				}
 				if updateDepositorTotalErr := depositorsTotalView.Increment(
 					*MsgSubmitUnknownProposal.MaybeProposalId, 1,
+				); updateDepositorTotalErr != nil {
+					return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
+				}
+			}
+
+		} else if msgSubmitProposal, ok := event.(*event_usecase.MsgSoftwareUpgrade); ok {
+			context, err := projection.prepareNewProposalSubmissionContext(rdbTxHandle, msgSubmitProposal.Proposer)
+			if err != nil {
+				return err
+			}
+
+			depositEndTime := blockTime.Add(context.maxDepositPeriod)
+			row := view.ProposalRow{
+				ProposalId:                   *msgSubmitProposal.MaybeProposalId,
+				Title:                        "",
+				Description:                  "",
+				Type:                         msgSubmitProposal.MsgType(),
+				Status:                       view.PROPOSAL_STATUS_DEPOSIT_PERIOD,
+				ProposerAddress:              msgSubmitProposal.Proposer,
+				MaybeProposerOperatorAddress: context.maybeProposerValidatorAddress,
+				Data: types.MsgSoftwareUpgradeData{
+					Type:      msgSubmitProposal.MsgType(),
+					Authority: msgSubmitProposal.Authority,
+					Plan:      msgSubmitProposal.Plan,
+				},
+				InitialDeposit:            msgSubmitProposal.InitialDeposit,
+				TotalDeposit:              msgSubmitProposal.InitialDeposit,
+				TotalVote:                 big.NewInt(0),
+				TransactionHash:           msgSubmitProposal.TxHash(),
+				SubmitBlockHeight:         height,
+				SubmitTime:                blockTime,
+				DepositEndTime:            depositEndTime,
+				MaybeVotingStartTime:      nil,
+				MaybeVotingEndTime:        nil,
+				MaybeVotingEndBlockHeight: nil,
+				Metadata:                  msgSubmitProposal.Metadata,
+			}
+
+			if insertProposalErr := proposalsView.Insert(&row); insertProposalErr != nil {
+				return fmt.Errorf("error inserting software upgrade proposal into view: %v", insertProposalErr)
+			}
+
+			maybeDepositorValidatorAddress := context.maybeProposerValidatorAddress
+
+			depositorsView := NewDepositors(rdbTxHandle)
+			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
+
+			depositor, selectDepositorErr := depositorsView.FindByProposalIdAndTxHash(*msgSubmitProposal.MaybeProposalId, msgSubmitProposal.TxHash())
+			if selectDepositorErr != nil {
+				if !errors.Is(selectDepositorErr, rdb.ErrNoRows) {
+					return fmt.Errorf("error selecting software upgrade proposal depositor: %w", selectDepositorErr)
+				}
+			}
+
+			if depositor == nil {
+				if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
+					ProposalId:                    *msgSubmitProposal.MaybeProposalId,
+					DepositorAddress:              msgSubmitProposal.Proposer,
+					MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
+					TransactionHash:               msgSubmitProposal.TxHash(),
+					DepositAtBlockHeight:          height,
+					DepositAtBlockTime:            blockTime,
+					Amount:                        msgSubmitProposal.InitialDeposit,
+				}); insertDepositorErr != nil {
+					return fmt.Errorf("error inserting proposer deposit record into view: %v", insertDepositorErr)
+				}
+				if updateDepositorTotalErr := depositorsTotalView.Increment(
+					*msgSubmitProposal.MaybeProposalId, 1,
+				); updateDepositorTotalErr != nil {
+					return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
+				}
+			}
+
+		} else if msgSubmitProposal, ok := event.(*event_usecase.MsgCancelUpgrade); ok {
+			context, err := projection.prepareNewProposalSubmissionContext(rdbTxHandle, msgSubmitProposal.Proposer)
+			if err != nil {
+				return err
+			}
+
+			depositEndTime := blockTime.Add(context.maxDepositPeriod)
+			row := view.ProposalRow{
+				ProposalId:                   *msgSubmitProposal.MaybeProposalId,
+				Title:                        "",
+				Description:                  "",
+				Type:                         msgSubmitProposal.MsgType(),
+				Status:                       view.PROPOSAL_STATUS_DEPOSIT_PERIOD,
+				ProposerAddress:              msgSubmitProposal.Proposer,
+				MaybeProposerOperatorAddress: context.maybeProposerValidatorAddress,
+				Data: types.MsgCancelUpgradeData{
+					Type:      msgSubmitProposal.MsgType(),
+					Authority: msgSubmitProposal.Authority,
+				},
+				InitialDeposit:            msgSubmitProposal.InitialDeposit,
+				TotalDeposit:              msgSubmitProposal.InitialDeposit,
+				TotalVote:                 big.NewInt(0),
+				TransactionHash:           msgSubmitProposal.TxHash(),
+				SubmitBlockHeight:         height,
+				SubmitTime:                blockTime,
+				DepositEndTime:            depositEndTime,
+				MaybeVotingStartTime:      nil,
+				MaybeVotingEndTime:        nil,
+				MaybeVotingEndBlockHeight: nil,
+				Metadata:                  msgSubmitProposal.Metadata,
+			}
+
+			if insertProposalErr := proposalsView.Insert(&row); insertProposalErr != nil {
+				return fmt.Errorf("error inserting cancel software upgrade proposal into view: %v", insertProposalErr)
+			}
+
+			maybeDepositorValidatorAddress := context.maybeProposerValidatorAddress
+
+			depositorsView := NewDepositors(rdbTxHandle)
+			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
+
+			depositor, selectDepositorErr := depositorsView.FindByProposalIdAndTxHash(*msgSubmitProposal.MaybeProposalId, msgSubmitProposal.TxHash())
+			if selectDepositorErr != nil {
+				if !errors.Is(selectDepositorErr, rdb.ErrNoRows) {
+					return fmt.Errorf("error selecting software upgrade proposal depositor: %w", selectDepositorErr)
+				}
+			}
+
+			if depositor == nil {
+				if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
+					ProposalId:                    *msgSubmitProposal.MaybeProposalId,
+					DepositorAddress:              msgSubmitProposal.Proposer,
+					MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
+					TransactionHash:               msgSubmitProposal.TxHash(),
+					DepositAtBlockHeight:          height,
+					DepositAtBlockTime:            blockTime,
+					Amount:                        msgSubmitProposal.InitialDeposit,
+				}); insertDepositorErr != nil {
+					return fmt.Errorf("error inserting proposer deposit record into view: %v", insertDepositorErr)
+				}
+				if updateDepositorTotalErr := depositorsTotalView.Increment(
+					*msgSubmitProposal.MaybeProposalId, 1,
 				); updateDepositorTotalErr != nil {
 					return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
 				}
@@ -1010,6 +1077,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 					VoteAtBlockTime:           blockTime,
 					Answer:                    vote.Option,
 					Histories:                 histories,
+					Metadata:                  vote.Metadata,
 					Weight:                    "1.000000000000000000",
 				}); insertVoteErr != nil {
 					return fmt.Errorf("error inserting vote record to view: %v", insertVoteErr)
@@ -1108,6 +1176,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 						VoteAtBlockTime:           blockTime,
 						Answer:                    voteOption.Option,
 						Histories:                 histories,
+						Metadata:                  vote.Metadata,
 						Weight:                    voteOption.Weight,
 					}); insertVoteErr != nil {
 						return fmt.Errorf("error inserting vote record to view: %v", insertVoteErr)
