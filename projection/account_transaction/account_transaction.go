@@ -265,10 +265,22 @@ func (projection *AccountTransaction) HandleEvents(height int64, events []event_
 		} else if typedEvent, ok := event.(*event_usecase.MsgSubmitUnknownProposal); ok {
 			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.ProposerAddress)
 
+		} else if typedEvent, ok := event.(*event_usecase.MsgSubmitProposal); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Proposer)
+
 		} else if typedEvent, ok := event.(*event_usecase.MsgDeposit); ok {
 			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Depositor)
 
+		} else if typedEvent, ok := event.(*event_usecase.MsgDepositV1); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Depositor)
+
 		} else if typedEvent, ok := event.(*event_usecase.MsgVote); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Voter)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgVoteV1); ok {
+			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Voter)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgVoteWeightedV1); ok {
 			transactionInfos[typedEvent.TxHash()].AddAccount(typedEvent.Voter)
 
 		} else if typedEvent, ok := event.(*event_usecase.MsgCreateValidator); ok {

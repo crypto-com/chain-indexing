@@ -279,6 +279,22 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 					typedEvent.ProposerAddress,
 				},
 			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgSubmitProposal); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Proposer,
+				},
+			})
 		} else if typedEvent, ok := event.(*event_usecase.MsgDeposit); ok {
 			accountMessages = append(accountMessages, view.AccountMessageRecord{
 				Row: view.AccountMessageRow{
@@ -295,7 +311,55 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 					typedEvent.Depositor,
 				},
 			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgDepositV1); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Depositor,
+				},
+			})
 		} else if typedEvent, ok := event.(*event_usecase.MsgVote); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Voter,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgVoteV1); ok {
+			accountMessages = append(accountMessages, view.AccountMessageRecord{
+				Row: view.AccountMessageRow{
+					BlockHeight:     height,
+					BlockHash:       "",
+					BlockTime:       utctime.UTCTime{},
+					TransactionHash: typedEvent.TxHash(),
+					Success:         typedEvent.TxSuccess(),
+					MessageIndex:    typedEvent.MsgIndex,
+					MessageType:     typedEvent.MsgType(),
+					Data:            typedEvent,
+				},
+				Accounts: []string{
+					typedEvent.Voter,
+				},
+			})
+		} else if typedEvent, ok := event.(*event_usecase.MsgVoteWeightedV1); ok {
 			accountMessages = append(accountMessages, view.AccountMessageRecord{
 				Row: view.AccountMessageRow{
 					BlockHeight:     height,
