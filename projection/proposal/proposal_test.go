@@ -769,293 +769,303 @@ func TestProposal_HandleEvents(t *testing.T) {
 				return mocks
 			},
 		},
-		// {
-		// 	Name: "HandleMsgSoftwareUpgrade",
-		// 	Events: []entity_event.Event{
-		// 		&usecase_event.MsgSoftwareUpgrade{
-		// 			MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
-		// 				MsgName: usecase_event.MSG_SOFTWARE_UPGRADE,
-		// 				Version: 1,
-		// 				MsgCommonParams: usecase_event.MsgCommonParams{
-		// 					BlockHeight: 1,
-		// 					TxHash:      "TxHash",
-		// 					TxSuccess:   true,
-		// 					MsgIndex:    0,
-		// 				},
-		// 			}),
-		// 			MsgSoftwareUpgradeParams: v1_model.MsgSoftwareUpgradeParams{
-		// 				MaybeProposalId: primptr.String("MaybeProposalId"),
-		// 				Authority:       "Authority",
-		// 				Proposer:        "Proposer",
+		{
+			Name: "HandleMsgSubmitProposal",
+			Events: []entity_event.Event{
+				&usecase_event.MsgSubmitProposal{
+					MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
+						MsgName: usecase_event.MSG_SUBMIT_PROPOSAL,
+						Version: 1,
+						MsgCommonParams: usecase_event.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					MsgSubmitProposalParams: v1_model.MsgSubmitProposalParams{
+						MaybeProposalId: primptr.String("MaybeProposalId"),
+						Proposer:        "Proposer",
+						Messages: []interface{}{
+							map[string]interface{}{
+								"@type":     "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
+								"authority": "crc10d07y265gmmuvt4z0w9aw880jnsr700jdufnyd",
+								"plan": map[string]interface{}{
+									"name":                  "name",
+									"time":                  "0001-01-01T00:00:00Z",
+									"height":                "1000",
+									"info":                  "info",
+									"upgraded_client_state": nil,
+								},
+							},
+						},
+						InitialDeposit: []coin.Coin{
+							coin.NewInt64Coin("DENOM", 100),
+						},
+						Metadata: "Metadata",
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 
-		// 				Plan: v1_model.MsgSoftwareUpgradePlan{
-		// 					Name:   "Name",
-		// 					Time:   utctime.FromUnixNano(int64(1000)),
-		// 					Height: int64(1000),
-		// 					Info:   "Info",
-		// 				},
-		// 				InitialDeposit: []coin.Coin{
-		// 					coin.NewInt64Coin("DENOM", 100),
-		// 				},
-		// 				Metadata: "Metadata",
-		// 			},
-		// 		},
-		// 	},
-		// 	MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
+				mocks = append(mocks, &mockValidatorsView.Mock)
+				mockValidatorsView.
+					On("FindLastBy", rdbvalidatorbase_view.ValidatorIdentity{
+						MaybeInititalDelegatorAddress: primptr.String("Proposer"),
+					}).
+					Return(&rdbvalidatorbase_view.ValidatorRow{
+						OperatorAddress: "ProposerOperatorAddress",
+					}, nil)
 
-		// 		mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
-		// 		mocks = append(mocks, &mockValidatorsView.Mock)
-		// 		mockValidatorsView.
-		// 			On("FindLastBy", rdbvalidatorbase_view.ValidatorIdentity{
-		// 				MaybeInititalDelegatorAddress: primptr.String("Proposer"),
-		// 			}).
-		// 			Return(&rdbvalidatorbase_view.ValidatorRow{
-		// 				OperatorAddress: "ProposerOperatorAddress",
-		// 			}, nil)
+				proposal.ValidatorBaseGetView = func(
+					_ *rdbvalidatorbase.Base,
+					_ *rdb.Handle,
+				) rdbvalidatorbase_view.Validators {
+					return mockValidatorsView
+				}
 
-		// 		proposal.ValidatorBaseGetView = func(
-		// 			_ *rdbvalidatorbase.Base,
-		// 			_ *rdb.Handle,
-		// 		) rdbvalidatorbase_view.Validators {
-		// 			return mockValidatorsView
-		// 		}
+				mockParamsView := &rdbparambase_view.MockParamsView{}
+				mocks = append(mocks, &mockParamsView.Mock)
+				mockParamsView.
+					On("FindDurationBy", rdbparambase_types.ParamAccessor{
+						Module: "gov",
+						Key:    "max_deposit_period",
+					}).
+					Return(time.Duration(1), nil)
 
-		// 		mockParamsView := &rdbparambase_view.MockParamsView{}
-		// 		mocks = append(mocks, &mockParamsView.Mock)
-		// 		mockParamsView.
-		// 			On("FindDurationBy", rdbparambase_types.ParamAccessor{
-		// 				Module: "gov",
-		// 				Key:    "max_deposit_period",
-		// 			}).
-		// 			Return(time.Duration(1), nil)
+				proposal.ParamBaseGetView = func(
+					_ *rdbparambase.Base,
+					_ *rdb.Handle,
+				) rdbparambase_view.Params {
+					return mockParamsView
+				}
 
-		// 		proposal.ParamBaseGetView = func(
-		// 			_ *rdbparambase.Base,
-		// 			_ *rdb.Handle,
-		// 		) rdbparambase_view.Params {
-		// 			return mockParamsView
-		// 		}
+				mockProposalsView := &view.MockProposalsView{}
+				mocks = append(mocks, &mockProposalsView.Mock)
+				mockProposalsView.
+					On("Insert", &view.ProposalRow{
+						ProposalId:                   "MaybeProposalId",
+						Title:                        "",
+						Description:                  "",
+						Type:                         "/cosmos.gov.v1.MsgSubmitProposal",
+						Status:                       "DEPOSIT_PERIOD",
+						ProposerAddress:              "Proposer",
+						MaybeProposerOperatorAddress: primptr.String("ProposerOperatorAddress"),
+						Data: []interface{}{
+							map[string]interface{}{
+								"@type":     "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
+								"authority": "crc10d07y265gmmuvt4z0w9aw880jnsr700jdufnyd",
+								"plan": map[string]interface{}{
+									"name":                  "name",
+									"time":                  "0001-01-01T00:00:00Z",
+									"height":                "1000",
+									"info":                  "info",
+									"upgraded_client_state": nil,
+								},
+							},
+						},
+						InitialDeposit: []coin.Coin{
+							coin.NewInt64Coin("DENOM", 100),
+						},
+						TotalDeposit: []coin.Coin{
+							coin.NewInt64Coin("DENOM", 100),
+						},
+						TotalVote:                 big.NewInt(0),
+						TransactionHash:           "TxHash",
+						SubmitBlockHeight:         1,
+						SubmitTime:                utctime.UTCTime{},
+						DepositEndTime:            utctime.UTCTime{}.Add(time.Duration(1)),
+						MaybeVotingStartTime:      nil,
+						MaybeVotingEndTime:        nil,
+						MaybeVotingEndBlockHeight: nil,
+						Metadata:                  "Metadata",
+					}).
+					Return(nil)
 
-		// 		mockProposalsView := &view.MockProposalsView{}
-		// 		mocks = append(mocks, &mockProposalsView.Mock)
-		// 		mockProposalsView.
-		// 			On("Insert", &view.ProposalRow{
-		// 				ProposalId:                   "MaybeProposalId",
-		// 				Title:                        "",
-		// 				Description:                  "",
-		// 				Type:                         "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
-		// 				Status:                       "DEPOSIT_PERIOD",
-		// 				ProposerAddress:              "Proposer",
-		// 				MaybeProposerOperatorAddress: primptr.String("ProposerOperatorAddress"),
-		// 				Data: types.MsgSoftwareUpgradeData{
-		// 					Authority: "Authority",
-		// 					Plan: v1_model.MsgSoftwareUpgradePlan{
-		// 						Name:   "Name",
-		// 						Time:   utctime.FromUnixNano(int64(1000)),
-		// 						Height: 1000,
-		// 						Info:   "Info",
-		// 					},
-		// 				},
-		// 				InitialDeposit: []coin.Coin{
-		// 					coin.NewInt64Coin("DENOM", 100),
-		// 				},
-		// 				TotalDeposit: []coin.Coin{
-		// 					coin.NewInt64Coin("DENOM", 100),
-		// 				},
-		// 				TotalVote:                 big.NewInt(0),
-		// 				TransactionHash:           "TxHash",
-		// 				SubmitBlockHeight:         1,
-		// 				SubmitTime:                utctime.UTCTime{},
-		// 				DepositEndTime:            utctime.UTCTime{}.Add(time.Duration(1)),
-		// 				MaybeVotingStartTime:      nil,
-		// 				MaybeVotingEndTime:        nil,
-		// 				MaybeVotingEndBlockHeight: nil,
-		// 				Metadata:                  "Metadata",
-		// 			}).
-		// 			Return(nil)
+				proposal.NewProposals = func(
+					_ *rdb.Handle,
+				) view.Proposals {
+					return mockProposalsView
+				}
 
-		// 		proposal.NewProposals = func(
-		// 			_ *rdb.Handle,
-		// 		) view.Proposals {
-		// 			return mockProposalsView
-		// 		}
+				mockDepositorsView := &view.MockDepositorsView{}
+				mocks = append(mocks, &mockDepositorsView.Mock)
 
-		// 		mockDepositorsView := &view.MockDepositorsView{}
-		// 		mocks = append(mocks, &mockDepositorsView.Mock)
-		// 		mockDepositorsView.
-		// 			On("FindByProposalIdAndTxHash", "MaybeProposalId", "TxHash").
-		// 			Return(nil, nil)
+				mockDepositorsView.
+					On("Insert", &view.DepositorRow{
+						ProposalId:                    "MaybeProposalId",
+						DepositorAddress:              "Proposer",
+						MaybeDepositorOperatorAddress: primptr.String("ProposerOperatorAddress"),
+						TransactionHash:               "TxHash",
+						DepositAtBlockHeight:          1,
+						DepositAtBlockTime:            utctime.UTCTime{},
+						Amount: []coin.Coin{
+							coin.NewInt64Coin("DENOM", 100),
+						},
+					}).
+					Return(nil)
 
-		// 		mockDepositorsView.
-		// 			On("Insert", &view.DepositorRow{
-		// 				ProposalId:                    "MaybeProposalId",
-		// 				DepositorAddress:              "Proposer",
-		// 				MaybeDepositorOperatorAddress: primptr.String("ProposerOperatorAddress"),
-		// 				TransactionHash:               "TxHash",
-		// 				DepositAtBlockHeight:          1,
-		// 				DepositAtBlockTime:            utctime.UTCTime{},
-		// 				Amount: []coin.Coin{
-		// 					coin.NewInt64Coin("DENOM", 100),
-		// 				},
-		// 			}).
-		// 			Return(nil)
+				proposal.NewDepositors = func(
+					_ *rdb.Handle,
+				) view.Depositors {
+					return mockDepositorsView
+				}
 
-		// 		proposal.NewDepositors = func(
-		// 			_ *rdb.Handle,
-		// 		) view.Depositors {
-		// 			return mockDepositorsView
-		// 		}
+				mockDepositorsTotalView := &view.MockDepositorsTotalView{}
+				mocks = append(mocks, &mockDepositorsTotalView.Mock)
+				mockDepositorsTotalView.
+					On("Increment", "MaybeProposalId", int64(1)).
+					Return(nil)
 
-		// 		mockDepositorsTotalView := &view.MockDepositorsTotalView{}
-		// 		mocks = append(mocks, &mockDepositorsTotalView.Mock)
-		// 		mockDepositorsTotalView.
-		// 			On("Increment", "MaybeProposalId", int64(1)).
-		// 			Return(nil)
+				proposal.NewDepositorsTotal = func(handle *rdb.Handle) view.DepositorsTotal {
+					return mockDepositorsTotalView
+				}
 
-		// 		proposal.NewDepositorsTotal = func(handle *rdb.Handle) view.DepositorsTotal {
-		// 			return mockDepositorsTotalView
-		// 		}
+				return mocks
+			},
+		},
+		{
+			Name: "HandleMsgCancelUpgrade",
+			Events: []entity_event.Event{
+				&usecase_event.MsgSubmitProposal{
+					MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
+						MsgName: usecase_event.MSG_SUBMIT_PROPOSAL,
+						Version: 1,
+						MsgCommonParams: usecase_event.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					MsgSubmitProposalParams: v1_model.MsgSubmitProposalParams{
+						MaybeProposalId: primptr.String("MaybeProposalId"),
+						Proposer:        "Proposer",
+						InitialDeposit: []coin.Coin{
+							coin.NewInt64Coin("DENOM", 100),
+						},
+						Metadata: "Metadata",
+						Messages: []interface{}{
+							map[string]interface{}{
+								"@type":     "/cosmos.upgrade.v1beta1.MsgCancelUpgrade",
+								"authority": "crc10d07y265gmmuvt4z0w9aw880jnsr700jdufnyd",
+							},
+						},
+					},
+				},
+			},
+			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 
-		// 		return mocks
-		// 	},
-		// },
-		// {
-		// 	Name: "HandleMsgCancelUpgrade",
-		// 	Events: []entity_event.Event{
-		// 		&usecase_event.MsgCancelUpgrade{
-		// 			MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
-		// 				MsgName: usecase_event.MSG_CANCEL_UPGRADE,
-		// 				Version: 1,
-		// 				MsgCommonParams: usecase_event.MsgCommonParams{
-		// 					BlockHeight: 1,
-		// 					TxHash:      "TxHash",
-		// 					TxSuccess:   true,
-		// 					MsgIndex:    0,
-		// 				},
-		// 			}),
-		// 			MsgCancelUpgradeParams: v1_model.MsgCancelUpgradeParams{
-		// 				MaybeProposalId: primptr.String("MaybeProposalId"),
-		// 				Authority:       "Authority",
-		// 				Proposer:        "Proposer",
-		// 				InitialDeposit: []coin.Coin{
-		// 					coin.NewInt64Coin("DENOM", 100),
-		// 				},
-		// 				Metadata: "Metadata",
-		// 			},
-		// 		},
-		// 	},
-		// 	MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
+				mocks = append(mocks, &mockValidatorsView.Mock)
+				mockValidatorsView.
+					On("FindLastBy", rdbvalidatorbase_view.ValidatorIdentity{
+						MaybeInititalDelegatorAddress: primptr.String("Proposer"),
+					}).
+					Return(&rdbvalidatorbase_view.ValidatorRow{
+						OperatorAddress: "ProposerOperatorAddress",
+					}, nil)
 
-		// 		mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
-		// 		mocks = append(mocks, &mockValidatorsView.Mock)
-		// 		mockValidatorsView.
-		// 			On("FindLastBy", rdbvalidatorbase_view.ValidatorIdentity{
-		// 				MaybeInititalDelegatorAddress: primptr.String("Proposer"),
-		// 			}).
-		// 			Return(&rdbvalidatorbase_view.ValidatorRow{
-		// 				OperatorAddress: "ProposerOperatorAddress",
-		// 			}, nil)
+				proposal.ValidatorBaseGetView = func(
+					_ *rdbvalidatorbase.Base,
+					_ *rdb.Handle,
+				) rdbvalidatorbase_view.Validators {
+					return mockValidatorsView
+				}
 
-		// 		proposal.ValidatorBaseGetView = func(
-		// 			_ *rdbvalidatorbase.Base,
-		// 			_ *rdb.Handle,
-		// 		) rdbvalidatorbase_view.Validators {
-		// 			return mockValidatorsView
-		// 		}
+				mockParamsView := &rdbparambase_view.MockParamsView{}
+				mocks = append(mocks, &mockParamsView.Mock)
+				mockParamsView.
+					On("FindDurationBy", rdbparambase_types.ParamAccessor{
+						Module: "gov",
+						Key:    "max_deposit_period",
+					}).
+					Return(time.Duration(1), nil)
 
-		// 		mockParamsView := &rdbparambase_view.MockParamsView{}
-		// 		mocks = append(mocks, &mockParamsView.Mock)
-		// 		mockParamsView.
-		// 			On("FindDurationBy", rdbparambase_types.ParamAccessor{
-		// 				Module: "gov",
-		// 				Key:    "max_deposit_period",
-		// 			}).
-		// 			Return(time.Duration(1), nil)
+				proposal.ParamBaseGetView = func(
+					_ *rdbparambase.Base,
+					_ *rdb.Handle,
+				) rdbparambase_view.Params {
+					return mockParamsView
+				}
 
-		// 		proposal.ParamBaseGetView = func(
-		// 			_ *rdbparambase.Base,
-		// 			_ *rdb.Handle,
-		// 		) rdbparambase_view.Params {
-		// 			return mockParamsView
-		// 		}
+				mockProposalsView := &view.MockProposalsView{}
+				mocks = append(mocks, &mockProposalsView.Mock)
+				mockProposalsView.
+					On("Insert", &view.ProposalRow{
+						ProposalId:                   "MaybeProposalId",
+						Title:                        "",
+						Description:                  "",
+						Type:                         "/cosmos.gov.v1.MsgSubmitProposal",
+						Status:                       "DEPOSIT_PERIOD",
+						ProposerAddress:              "Proposer",
+						MaybeProposerOperatorAddress: primptr.String("ProposerOperatorAddress"),
+						Data: []interface{}{
+							map[string]interface{}{
+								"@type":     "/cosmos.upgrade.v1beta1.MsgCancelUpgrade",
+								"authority": "crc10d07y265gmmuvt4z0w9aw880jnsr700jdufnyd",
+							},
+						},
+						InitialDeposit: []coin.Coin{
+							coin.NewInt64Coin("DENOM", 100),
+						},
+						TotalDeposit: []coin.Coin{
+							coin.NewInt64Coin("DENOM", 100),
+						},
+						TotalVote:                 big.NewInt(0),
+						TransactionHash:           "TxHash",
+						SubmitBlockHeight:         1,
+						SubmitTime:                utctime.UTCTime{},
+						DepositEndTime:            utctime.UTCTime{}.Add(time.Duration(1)),
+						MaybeVotingStartTime:      nil,
+						MaybeVotingEndTime:        nil,
+						MaybeVotingEndBlockHeight: nil,
+						Metadata:                  "Metadata",
+					}).
+					Return(nil)
 
-		// 		mockProposalsView := &view.MockProposalsView{}
-		// 		mocks = append(mocks, &mockProposalsView.Mock)
-		// 		mockProposalsView.
-		// 			On("Insert", &view.ProposalRow{
-		// 				ProposalId:                   "MaybeProposalId",
-		// 				Title:                        "",
-		// 				Description:                  "",
-		// 				Type:                         "/cosmos.upgrade.v1beta1.MsgCancelUpgrade",
-		// 				Status:                       "DEPOSIT_PERIOD",
-		// 				ProposerAddress:              "Proposer",
-		// 				MaybeProposerOperatorAddress: primptr.String("ProposerOperatorAddress"),
-		// 				Data: types.MsgCancelUpgradeData{
-		// 					Authority: "Authority",
-		// 				},
-		// 				InitialDeposit: []coin.Coin{
-		// 					coin.NewInt64Coin("DENOM", 100),
-		// 				},
-		// 				TotalDeposit: []coin.Coin{
-		// 					coin.NewInt64Coin("DENOM", 100),
-		// 				},
-		// 				TotalVote:                 big.NewInt(0),
-		// 				TransactionHash:           "TxHash",
-		// 				SubmitBlockHeight:         1,
-		// 				SubmitTime:                utctime.UTCTime{},
-		// 				DepositEndTime:            utctime.UTCTime{}.Add(time.Duration(1)),
-		// 				MaybeVotingStartTime:      nil,
-		// 				MaybeVotingEndTime:        nil,
-		// 				MaybeVotingEndBlockHeight: nil,
-		// 				Metadata:                  "Metadata",
-		// 			}).
-		// 			Return(nil)
+				proposal.NewProposals = func(
+					_ *rdb.Handle,
+				) view.Proposals {
+					return mockProposalsView
+				}
 
-		// 		proposal.NewProposals = func(
-		// 			_ *rdb.Handle,
-		// 		) view.Proposals {
-		// 			return mockProposalsView
-		// 		}
+				mockDepositorsView := &view.MockDepositorsView{}
+				mocks = append(mocks, &mockDepositorsView.Mock)
+				mockDepositorsView.
+					On("Insert", &view.DepositorRow{
+						ProposalId:                    "MaybeProposalId",
+						DepositorAddress:              "Proposer",
+						MaybeDepositorOperatorAddress: primptr.String("ProposerOperatorAddress"),
+						TransactionHash:               "TxHash",
+						DepositAtBlockHeight:          1,
+						DepositAtBlockTime:            utctime.UTCTime{},
+						Amount: []coin.Coin{
+							coin.NewInt64Coin("DENOM", 100),
+						},
+					}).
+					Return(nil)
 
-		// 		mockDepositorsView := &view.MockDepositorsView{}
-		// 		mocks = append(mocks, &mockDepositorsView.Mock)
-		// 		mockDepositorsView.
-		// 			On("FindByProposalIdAndTxHash", "MaybeProposalId", "TxHash").
-		// 			Return(nil, nil)
+				proposal.NewDepositors = func(
+					_ *rdb.Handle,
+				) view.Depositors {
+					return mockDepositorsView
+				}
 
-		// 		mockDepositorsView.
-		// 			On("Insert", &view.DepositorRow{
-		// 				ProposalId:                    "MaybeProposalId",
-		// 				DepositorAddress:              "Proposer",
-		// 				MaybeDepositorOperatorAddress: primptr.String("ProposerOperatorAddress"),
-		// 				TransactionHash:               "TxHash",
-		// 				DepositAtBlockHeight:          1,
-		// 				DepositAtBlockTime:            utctime.UTCTime{},
-		// 				Amount: []coin.Coin{
-		// 					coin.NewInt64Coin("DENOM", 100),
-		// 				},
-		// 			}).
-		// 			Return(nil)
+				mockDepositorsTotalView := &view.MockDepositorsTotalView{}
+				mocks = append(mocks, &mockDepositorsTotalView.Mock)
+				mockDepositorsTotalView.
+					On("Increment", "MaybeProposalId", int64(1)).
+					Return(nil)
 
-		// 		proposal.NewDepositors = func(
-		// 			_ *rdb.Handle,
-		// 		) view.Depositors {
-		// 			return mockDepositorsView
-		// 		}
+				proposal.NewDepositorsTotal = func(handle *rdb.Handle) view.DepositorsTotal {
+					return mockDepositorsTotalView
+				}
 
-		// 		mockDepositorsTotalView := &view.MockDepositorsTotalView{}
-		// 		mocks = append(mocks, &mockDepositorsTotalView.Mock)
-		// 		mockDepositorsTotalView.
-		// 			On("Increment", "MaybeProposalId", int64(1)).
-		// 			Return(nil)
-
-		// 		proposal.NewDepositorsTotal = func(handle *rdb.Handle) view.DepositorsTotal {
-		// 			return mockDepositorsTotalView
-		// 		}
-
-		// 		return mocks
-		// 	},
-		// },
+				return mocks
+			},
+		},
 		{
 			Name: "HandleProposalVotingPeriodStarted",
 			Events: []entity_event.Event{

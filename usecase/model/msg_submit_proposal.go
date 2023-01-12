@@ -69,7 +69,6 @@ type MsgSubmitSoftwareUpgradeProposalPlan struct {
 	Height int64           `json:"height"`
 	Info   string          `json:"info"`
 }
-
 type RawMsgSubmitSoftwareUpgradeProposalContent struct {
 	Type        string                                  `json:"@type"`
 	Title       string                                  `json:"title"`

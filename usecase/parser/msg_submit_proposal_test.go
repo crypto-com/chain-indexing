@@ -1,8 +1,6 @@
 package parser_test
 
 import (
-	"encoding/json"
-
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -42,20 +40,6 @@ var _ = Describe("ParseMsgCommands", func() {
 				bondingDenom,
 			)
 
-			jsonByte := []byte(`[{
-				"@type":     "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
-				"authority": "crc10d07y265gmmuvt4z0w9aw880jnsr700jdufnyd",
-				"plan": {
-					"name":                  "name",
-					"time":                  "0001-01-01T00:00:00Z",
-					"height":                "1000",
-					"info":                  "info",
-					"upgraded_client_state": null
-				}
-			}]`)
-			var msg []interface{}
-			err = json.Unmarshal(jsonByte, &msg)
-
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))
 			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateMsgSubmitProposal(
@@ -76,7 +60,19 @@ var _ = Describe("ParseMsgCommands", func() {
 						},
 					},
 					Metadata: "ipfs://CID",
-					Messages: msg,
+					Messages: []interface{}{
+						map[string]interface{}{
+							"@type":     "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
+							"authority": "crc10d07y265gmmuvt4z0w9aw880jnsr700jdufnyd",
+							"plan": map[string]interface{}{
+								"name":                  "name",
+								"time":                  "0001-01-01T00:00:00Z",
+								"height":                "1000",
+								"info":                  "info",
+								"upgraded_client_state": nil,
+							},
+						},
+					},
 				},
 			),
 				command_usecase.NewStartProposalVotingPeriod(int64(1634), "3"),
@@ -107,13 +103,6 @@ var _ = Describe("ParseMsgCommands", func() {
 				bondingDenom,
 			)
 
-			jsonByte := []byte(`[{
-				"@type": "/cosmos.upgrade.v1beta1.MsgCancelUpgrade",
-				"authority": "crc10d07y265gmmuvt4z0w9aw880jnsr700jdufnyd"
-			}]`)
-			var msg []interface{}
-			err = json.Unmarshal(jsonByte, &msg)
-
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))
 			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateMsgSubmitProposal(
@@ -134,7 +123,12 @@ var _ = Describe("ParseMsgCommands", func() {
 						},
 					},
 					Metadata: "ipfs://CID",
-					Messages: msg,
+					Messages: []interface{}{
+						map[string]interface{}{
+							"@type":     "/cosmos.upgrade.v1beta1.MsgCancelUpgrade",
+							"authority": "crc10d07y265gmmuvt4z0w9aw880jnsr700jdufnyd",
+						},
+					},
 				},
 			),
 				command_usecase.NewStartProposalVotingPeriod(int64(2171), "4"),
@@ -165,25 +159,6 @@ var _ = Describe("ParseMsgCommands", func() {
 				bondingDenom,
 			)
 
-			jsonByte := []byte(`[{
-				"@type": "/cosmos.gov.v1.MsgExecLegacyContent",
-				"content": {
-				  "@type": "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal",
-				  "title": "title",
-				  "description": "description",
-				  "plan": {
-					"name": "test",
-					"time": "0001-01-01T00:00:00Z",
-					"height": "10000",
-					"info": "info",
-					"upgraded_client_state": null
-				  }
-				},
-				"authority": "crc10d07y265gmmuvt4z0w9aw880jnsr700jdufnyd"
-			  }]`)
-			var msg []interface{}
-			err = json.Unmarshal(jsonByte, &msg)
-
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(2))
 			Expect(cmds).To(Equal([]command.Command{command_usecase.NewCreateMsgSubmitProposal(
@@ -204,7 +179,24 @@ var _ = Describe("ParseMsgCommands", func() {
 						},
 					},
 					Metadata: "ipfs://CID",
-					Messages: msg,
+					Messages: []interface{}{
+						map[string]interface{}{
+							"@type": "/cosmos.gov.v1.MsgExecLegacyContent",
+							"content": map[string]interface{}{
+								"@type":       "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal",
+								"title":       "title",
+								"description": "description",
+								"plan": map[string]interface{}{
+									"name":                  "test",
+									"time":                  "0001-01-01T00:00:00Z",
+									"height":                "10000",
+									"info":                  "info",
+									"upgraded_client_state": nil,
+								},
+							},
+							"authority": "crc10d07y265gmmuvt4z0w9aw880jnsr700jdufnyd",
+						},
+					},
 				},
 			),
 				command_usecase.NewStartProposalVotingPeriod(int64(6580), "6"),
