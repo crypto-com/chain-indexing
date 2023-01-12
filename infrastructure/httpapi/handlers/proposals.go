@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"math/big"
+	"strings"
 	"time"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbparambase/types"
@@ -211,7 +212,28 @@ func (handler *Proposals) ListVotesById(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	httpapi.SuccessWithPagination(ctx, votes, paginationResult)
+	aggregatedVotes := make([]proposal_view.VoteWithMonikerRow, 0)
+	for _, vote := range votes {
+		isExisted := false
+		for j, aggregatedVote := range aggregatedVotes {
+			if vote.ProposalId == aggregatedVote.ProposalId && vote.VoterAddress == aggregatedVote.VoterAddress {
+				answerArray := strings.Split(aggregatedVotes[j].Answer, ",")
+				answerArray = append(answerArray, vote.Answer)
+
+				weightArray := strings.Split(aggregatedVotes[j].Weight, ",")
+				weightArray = append(weightArray, vote.Weight)
+
+				aggregatedVotes[j].Answer = strings.Join(answerArray, ",")
+				aggregatedVotes[j].Weight = strings.Join(weightArray, ",")
+				isExisted = true
+			}
+		}
+		if !isExisted {
+			aggregatedVotes = append(aggregatedVotes, vote)
+		}
+	}
+
+	httpapi.SuccessWithPagination(ctx, aggregatedVotes, paginationResult)
 }
 
 func (handler *Proposals) ListDepositorsById(ctx *fasthttp.RequestCtx) {

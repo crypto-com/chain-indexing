@@ -17,7 +17,6 @@ import (
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
-	"github.com/crypto-com/chain-indexing/projection/proposal/types"
 	"github.com/crypto-com/chain-indexing/projection/proposal/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
@@ -231,17 +230,19 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				Status:                       view.PROPOSAL_STATUS_DEPOSIT_PERIOD,
 				ProposerAddress:              msgSubmitProposal.ProposerAddress,
 				MaybeProposerOperatorAddress: context.maybeProposerValidatorAddress,
-				Data:                         msgSubmitProposal.Content.Changes,
-				InitialDeposit:               msgSubmitProposal.InitialDeposit,
-				TotalDeposit:                 msgSubmitProposal.InitialDeposit,
-				TotalVote:                    big.NewInt(0),
-				TransactionHash:              msgSubmitProposal.TxHash(),
-				SubmitBlockHeight:            height,
-				SubmitTime:                   blockTime,
-				DepositEndTime:               depositEndTime,
-				MaybeVotingStartTime:         nil,
-				MaybeVotingEndTime:           nil,
-				MaybeVotingEndBlockHeight:    nil,
+				Data: map[string]interface{}{
+					"content": msgSubmitProposal.Content,
+				},
+				InitialDeposit:            msgSubmitProposal.InitialDeposit,
+				TotalDeposit:              msgSubmitProposal.InitialDeposit,
+				TotalVote:                 big.NewInt(0),
+				TransactionHash:           msgSubmitProposal.TxHash(),
+				SubmitBlockHeight:         height,
+				SubmitTime:                blockTime,
+				DepositEndTime:            depositEndTime,
+				MaybeVotingStartTime:      nil,
+				MaybeVotingEndTime:        nil,
+				MaybeVotingEndBlockHeight: nil,
 			}
 
 			if insertProposalErr := proposalsView.Insert(&row); insertProposalErr != nil {
@@ -284,9 +285,8 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				Status:                       view.PROPOSAL_STATUS_DEPOSIT_PERIOD,
 				ProposerAddress:              msgSubmitProposal.ProposerAddress,
 				MaybeProposerOperatorAddress: context.maybeProposerValidatorAddress,
-				Data: types.CommunityPoolSpendData{
-					RecipientAddress: msgSubmitProposal.Content.RecipientAddress,
-					Amount:           msgSubmitProposal.Content.Amount,
+				Data: map[string]interface{}{
+					"content": msgSubmitProposal.Content,
 				},
 				InitialDeposit:            msgSubmitProposal.InitialDeposit,
 				TotalDeposit:              msgSubmitProposal.InitialDeposit,
@@ -340,17 +340,19 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				Status:                       view.PROPOSAL_STATUS_DEPOSIT_PERIOD,
 				ProposerAddress:              msgSubmitProposal.ProposerAddress,
 				MaybeProposerOperatorAddress: context.maybeProposerValidatorAddress,
-				Data:                         msgSubmitProposal.Content.Plan,
-				InitialDeposit:               msgSubmitProposal.InitialDeposit,
-				TotalDeposit:                 msgSubmitProposal.InitialDeposit,
-				TotalVote:                    big.NewInt(0),
-				TransactionHash:              msgSubmitProposal.TxHash(),
-				SubmitBlockHeight:            height,
-				SubmitTime:                   blockTime,
-				DepositEndTime:               depositEndTime,
-				MaybeVotingStartTime:         nil,
-				MaybeVotingEndTime:           nil,
-				MaybeVotingEndBlockHeight:    nil,
+				Data: map[string]interface{}{
+					"content": msgSubmitProposal.Content,
+				},
+				InitialDeposit:            msgSubmitProposal.InitialDeposit,
+				TotalDeposit:              msgSubmitProposal.InitialDeposit,
+				TotalVote:                 big.NewInt(0),
+				TransactionHash:           msgSubmitProposal.TxHash(),
+				SubmitBlockHeight:         height,
+				SubmitTime:                blockTime,
+				DepositEndTime:            depositEndTime,
+				MaybeVotingStartTime:      nil,
+				MaybeVotingEndTime:        nil,
+				MaybeVotingEndBlockHeight: nil,
 			}
 
 			if insertProposalErr := proposalsView.Insert(&row); insertProposalErr != nil {
@@ -446,17 +448,19 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				Status:                       view.PROPOSAL_STATUS_DEPOSIT_PERIOD,
 				ProposerAddress:              MsgSubmitUnknownProposal.ProposerAddress,
 				MaybeProposerOperatorAddress: context.maybeProposerValidatorAddress,
-				Data:                         MsgSubmitUnknownProposal.Content.RawContent,
-				InitialDeposit:               MsgSubmitUnknownProposal.InitialDeposit,
-				TotalDeposit:                 MsgSubmitUnknownProposal.InitialDeposit,
-				TotalVote:                    big.NewInt(0),
-				TransactionHash:              MsgSubmitUnknownProposal.TxHash(),
-				SubmitBlockHeight:            height,
-				SubmitTime:                   blockTime,
-				DepositEndTime:               depositEndTime,
-				MaybeVotingStartTime:         nil,
-				MaybeVotingEndTime:           nil,
-				MaybeVotingEndBlockHeight:    nil,
+				Data: map[string]interface{}{
+					"Content": MsgSubmitUnknownProposal.Content,
+				},
+				InitialDeposit:            MsgSubmitUnknownProposal.InitialDeposit,
+				TotalDeposit:              MsgSubmitUnknownProposal.InitialDeposit,
+				TotalVote:                 big.NewInt(0),
+				TransactionHash:           MsgSubmitUnknownProposal.TxHash(),
+				SubmitBlockHeight:         height,
+				SubmitTime:                blockTime,
+				DepositEndTime:            depositEndTime,
+				MaybeVotingStartTime:      nil,
+				MaybeVotingEndTime:        nil,
+				MaybeVotingEndBlockHeight: nil,
 			}
 
 			if insertProposalErr := proposalsView.Insert(&row); insertProposalErr != nil {

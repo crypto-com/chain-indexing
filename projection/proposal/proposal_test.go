@@ -24,7 +24,6 @@ import (
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/crypto-com/chain-indexing/projection/proposal"
-	"github.com/crypto-com/chain-indexing/projection/proposal/types"
 	"github.com/crypto-com/chain-indexing/projection/proposal/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	usecase_event "github.com/crypto-com/chain-indexing/usecase/event"
@@ -285,11 +284,18 @@ func TestProposal_HandleEvents(t *testing.T) {
 						Status:                       "DEPOSIT_PERIOD",
 						ProposerAddress:              "ProposerAddress",
 						MaybeProposerOperatorAddress: primptr.String("ProposerOperatorAddress"),
-						Data: []model.MsgSubmitParamChangeProposalChange{
-							{
-								Subspace: "Subspace",
-								Key:      "Key",
-								Value:    json.RawMessage([]byte("Value")),
+						Data: map[string]interface{}{
+							"content": model.MsgSubmitParamChangeProposalContent{
+								Title:       "Title",
+								Description: "Description",
+								Type:        "Type",
+								Changes: []model.MsgSubmitParamChangeProposalChange{
+									{
+										Subspace: "Subspace",
+										Key:      "Key",
+										Value:    json.RawMessage([]byte("Value")),
+									},
+								},
 							},
 						},
 						InitialDeposit: []coin.Coin{
@@ -428,10 +434,15 @@ func TestProposal_HandleEvents(t *testing.T) {
 						Status:                       "DEPOSIT_PERIOD",
 						ProposerAddress:              "ProposerAddress",
 						MaybeProposerOperatorAddress: primptr.String("ProposerOperatorAddress"),
-						Data: types.CommunityPoolSpendData{
-							RecipientAddress: "RecipientAddress",
-							Amount: []coin.Coin{
-								coin.NewInt64Coin("DENOM", 1000),
+						Data: map[string]interface{}{
+							"content": model.MsgSubmitCommunityPoolSpendProposalContent{
+								Title:            "Title",
+								Description:      "Description",
+								Type:             "Type",
+								RecipientAddress: "RecipientAddress",
+								Amount: []coin.Coin{
+									coin.NewInt64Coin("DENOM", 1000),
+								},
 							},
 						},
 						InitialDeposit: []coin.Coin{
@@ -572,11 +583,18 @@ func TestProposal_HandleEvents(t *testing.T) {
 						Status:                       "DEPOSIT_PERIOD",
 						ProposerAddress:              "ProposerAddress",
 						MaybeProposerOperatorAddress: primptr.String("ProposerOperatorAddress"),
-						Data: model.MsgSubmitSoftwareUpgradeProposalPlan{
-							Name:   "Name",
-							Time:   utctime.UTCTime{},
-							Height: 1,
-							Info:   "Info",
+						Data: map[string]interface{}{
+							"content": model.MsgSubmitSoftwareUpgradeProposalContent{
+								Title:       "Title",
+								Description: "Description",
+								Type:        "Type",
+								Plan: model.MsgSubmitSoftwareUpgradeProposalPlan{
+									Name:   "Name",
+									Time:   utctime.UTCTime{},
+									Height: 1,
+									Info:   "Info",
+								},
+							},
 						},
 						InitialDeposit: []coin.Coin{
 							coin.NewInt64Coin("DENOM", 100),
