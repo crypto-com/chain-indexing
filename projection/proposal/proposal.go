@@ -199,30 +199,23 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 
 			depositorsView := NewDepositors(rdbTxHandle)
 			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
-
-			depositor, selectDepositorErr := depositorsView.FindByProposalIdAndTxHash(*msgSubmitProposal.MaybeProposalId, msgSubmitProposal.TxHash())
-			if selectDepositorErr != nil {
-				return fmt.Errorf("error selecting text proposal depositor: %w", selectDepositorErr)
+			if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
+				ProposalId:                    *msgSubmitProposal.MaybeProposalId,
+				DepositorAddress:              msgSubmitProposal.ProposerAddress,
+				MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
+				TransactionHash:               msgSubmitProposal.TxHash(),
+				DepositAtBlockHeight:          height,
+				DepositAtBlockTime:            blockTime,
+				Amount:                        msgSubmitProposal.InitialDeposit,
+			}); insertDepositorErr != nil {
+				return fmt.Errorf("error inserting proposer deposit record into view: %v", insertDepositorErr)
+			}
+			if updateDepositorTotalErr := depositorsTotalView.Increment(
+				*msgSubmitProposal.MaybeProposalId, 1,
+			); updateDepositorTotalErr != nil {
+				return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
 			}
 
-			if depositor == nil {
-				if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
-					ProposalId:                    *msgSubmitProposal.MaybeProposalId,
-					DepositorAddress:              msgSubmitProposal.ProposerAddress,
-					MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
-					TransactionHash:               msgSubmitProposal.TxHash(),
-					DepositAtBlockHeight:          height,
-					DepositAtBlockTime:            blockTime,
-					Amount:                        msgSubmitProposal.InitialDeposit,
-				}); insertDepositorErr != nil {
-					return fmt.Errorf("error inserting proposer deposit record into view: %v", insertDepositorErr)
-				}
-				if updateDepositorTotalErr := depositorsTotalView.Increment(
-					*msgSubmitProposal.MaybeProposalId, 1,
-				); updateDepositorTotalErr != nil {
-					return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
-				}
-			}
 		} else if msgSubmitProposal, ok := event.(*event_usecase.MsgSubmitParamChangeProposal); ok {
 			context, err := projection.prepareNewProposalSubmissionContext(rdbTxHandle, msgSubmitProposal.ProposerAddress)
 			if err != nil {
@@ -259,31 +252,21 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 
 			depositorsView := NewDepositors(rdbTxHandle)
 			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
-			depositor, selectDepositorErr := depositorsView.FindByProposalIdAndTxHash(*msgSubmitProposal.MaybeProposalId, msgSubmitProposal.TxHash())
-
-			if selectDepositorErr != nil {
-				if !errors.Is(selectDepositorErr, rdb.ErrNoRows) {
-					return fmt.Errorf("error selecting software upgrade proposal depositor: %w", selectDepositorErr)
-				}
+			if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
+				ProposalId:                    *msgSubmitProposal.MaybeProposalId,
+				DepositorAddress:              msgSubmitProposal.ProposerAddress,
+				MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
+				TransactionHash:               msgSubmitProposal.TxHash(),
+				DepositAtBlockHeight:          height,
+				DepositAtBlockTime:            blockTime,
+				Amount:                        msgSubmitProposal.InitialDeposit,
+			}); insertDepositorErr != nil {
+				return fmt.Errorf("error inserting proposer deposit record into view: %v", insertDepositorErr)
 			}
-
-			if depositor == nil {
-				if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
-					ProposalId:                    *msgSubmitProposal.MaybeProposalId,
-					DepositorAddress:              msgSubmitProposal.ProposerAddress,
-					MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
-					TransactionHash:               msgSubmitProposal.TxHash(),
-					DepositAtBlockHeight:          height,
-					DepositAtBlockTime:            blockTime,
-					Amount:                        msgSubmitProposal.InitialDeposit,
-				}); insertDepositorErr != nil {
-					return fmt.Errorf("error inserting proposer deposit record into view: %v", insertDepositorErr)
-				}
-				if updateDepositorTotalErr := depositorsTotalView.Increment(
-					*msgSubmitProposal.MaybeProposalId, 1,
-				); updateDepositorTotalErr != nil {
-					return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
-				}
+			if updateDepositorTotalErr := depositorsTotalView.Increment(
+				*msgSubmitProposal.MaybeProposalId, 1,
+			); updateDepositorTotalErr != nil {
+				return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
 			}
 
 		} else if msgSubmitProposal, ok := event.(*event_usecase.MsgSubmitCommunityPoolSpendProposal); ok {
@@ -325,31 +308,21 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 
 			depositorsView := NewDepositors(rdbTxHandle)
 			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
-
-			depositor, selectDepositorErr := depositorsView.FindByProposalIdAndTxHash(*msgSubmitProposal.MaybeProposalId, msgSubmitProposal.TxHash())
-			if selectDepositorErr != nil {
-				if !errors.Is(selectDepositorErr, rdb.ErrNoRows) {
-					return fmt.Errorf("error selecting software upgrade proposal depositor: %w", selectDepositorErr)
-				}
+			if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
+				ProposalId:                    *msgSubmitProposal.MaybeProposalId,
+				DepositorAddress:              msgSubmitProposal.ProposerAddress,
+				MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
+				TransactionHash:               msgSubmitProposal.TxHash(),
+				DepositAtBlockHeight:          height,
+				DepositAtBlockTime:            blockTime,
+				Amount:                        msgSubmitProposal.InitialDeposit,
+			}); insertDepositorErr != nil {
+				return fmt.Errorf("error inserting proposer deposit record into view: %v", insertDepositorErr)
 			}
-
-			if depositor == nil {
-				if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
-					ProposalId:                    *msgSubmitProposal.MaybeProposalId,
-					DepositorAddress:              msgSubmitProposal.ProposerAddress,
-					MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
-					TransactionHash:               msgSubmitProposal.TxHash(),
-					DepositAtBlockHeight:          height,
-					DepositAtBlockTime:            blockTime,
-					Amount:                        msgSubmitProposal.InitialDeposit,
-				}); insertDepositorErr != nil {
-					return fmt.Errorf("error inserting proposer deposit record into view: %v", insertDepositorErr)
-				}
-				if updateDepositorTotalErr := depositorsTotalView.Increment(
-					*msgSubmitProposal.MaybeProposalId, 1,
-				); updateDepositorTotalErr != nil {
-					return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
-				}
+			if updateDepositorTotalErr := depositorsTotalView.Increment(
+				*msgSubmitProposal.MaybeProposalId, 1,
+			); updateDepositorTotalErr != nil {
+				return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
 			}
 
 		} else if msgSubmitProposal, ok := event.(*event_usecase.MsgSubmitSoftwareUpgradeProposal); ok {
@@ -388,31 +361,21 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 
 			depositorsView := NewDepositors(rdbTxHandle)
 			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
-
-			depositor, selectDepositorErr := depositorsView.FindByProposalIdAndTxHash(*msgSubmitProposal.MaybeProposalId, msgSubmitProposal.TxHash())
-			if selectDepositorErr != nil {
-				if !errors.Is(selectDepositorErr, rdb.ErrNoRows) {
-					return fmt.Errorf("error selecting software upgrade proposal depositor: %w", selectDepositorErr)
-				}
+			if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
+				ProposalId:                    *msgSubmitProposal.MaybeProposalId,
+				DepositorAddress:              msgSubmitProposal.ProposerAddress,
+				MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
+				TransactionHash:               msgSubmitProposal.TxHash(),
+				DepositAtBlockHeight:          height,
+				DepositAtBlockTime:            blockTime,
+				Amount:                        msgSubmitProposal.InitialDeposit,
+			}); insertDepositorErr != nil {
+				return fmt.Errorf("error inserting proposer deposit record into view: %v", insertDepositorErr)
 			}
-
-			if depositor == nil {
-				if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
-					ProposalId:                    *msgSubmitProposal.MaybeProposalId,
-					DepositorAddress:              msgSubmitProposal.ProposerAddress,
-					MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
-					TransactionHash:               msgSubmitProposal.TxHash(),
-					DepositAtBlockHeight:          height,
-					DepositAtBlockTime:            blockTime,
-					Amount:                        msgSubmitProposal.InitialDeposit,
-				}); insertDepositorErr != nil {
-					return fmt.Errorf("error inserting proposer deposit record into view: %v", insertDepositorErr)
-				}
-				if updateDepositorTotalErr := depositorsTotalView.Increment(
-					*msgSubmitProposal.MaybeProposalId, 1,
-				); updateDepositorTotalErr != nil {
-					return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
-				}
+			if updateDepositorTotalErr := depositorsTotalView.Increment(
+				*msgSubmitProposal.MaybeProposalId, 1,
+			); updateDepositorTotalErr != nil {
+				return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
 			}
 
 		} else if msgSubmitProposal, ok := event.(*event_usecase.MsgSubmitCancelSoftwareUpgradeProposal); ok {
@@ -451,31 +414,21 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 
 			depositorsView := NewDepositors(rdbTxHandle)
 			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
-
-			depositor, selectDepositorErr := depositorsView.FindByProposalIdAndTxHash(*msgSubmitProposal.MaybeProposalId, msgSubmitProposal.TxHash())
-			if selectDepositorErr != nil {
-				if !errors.Is(selectDepositorErr, rdb.ErrNoRows) {
-					return fmt.Errorf("error selecting software upgrade proposal depositor: %w", selectDepositorErr)
-				}
+			if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
+				ProposalId:                    *msgSubmitProposal.MaybeProposalId,
+				DepositorAddress:              msgSubmitProposal.ProposerAddress,
+				MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
+				TransactionHash:               msgSubmitProposal.TxHash(),
+				DepositAtBlockHeight:          height,
+				DepositAtBlockTime:            blockTime,
+				Amount:                        msgSubmitProposal.InitialDeposit,
+			}); insertDepositorErr != nil {
+				return fmt.Errorf("error inserting proposer deposit record into view: %v", insertDepositorErr)
 			}
-
-			if depositor == nil {
-				if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
-					ProposalId:                    *msgSubmitProposal.MaybeProposalId,
-					DepositorAddress:              msgSubmitProposal.ProposerAddress,
-					MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
-					TransactionHash:               msgSubmitProposal.TxHash(),
-					DepositAtBlockHeight:          height,
-					DepositAtBlockTime:            blockTime,
-					Amount:                        msgSubmitProposal.InitialDeposit,
-				}); insertDepositorErr != nil {
-					return fmt.Errorf("error inserting proposer deposit record into view: %v", insertDepositorErr)
-				}
-				if updateDepositorTotalErr := depositorsTotalView.Increment(
-					*msgSubmitProposal.MaybeProposalId, 1,
-				); updateDepositorTotalErr != nil {
-					return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
-				}
+			if updateDepositorTotalErr := depositorsTotalView.Increment(
+				*msgSubmitProposal.MaybeProposalId, 1,
+			); updateDepositorTotalErr != nil {
+				return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
 			}
 
 		} else if MsgSubmitUnknownProposal, ok := event.(*event_usecase.MsgSubmitUnknownProposal); ok {
@@ -514,32 +467,23 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 
 			depositorsView := NewDepositors(rdbTxHandle)
 			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
-
-			depositor, selectDepositorErr := depositorsView.FindByProposalIdAndTxHash(*msgSubmitProposal.MaybeProposalId, msgSubmitProposal.TxHash())
-			if selectDepositorErr != nil {
-				if !errors.Is(selectDepositorErr, rdb.ErrNoRows) {
-					return fmt.Errorf("error selecting software upgrade proposal depositor: %w", selectDepositorErr)
-				}
+			if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
+				ProposalId:                    *MsgSubmitUnknownProposal.MaybeProposalId,
+				DepositorAddress:              MsgSubmitUnknownProposal.ProposerAddress,
+				MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
+				TransactionHash:               MsgSubmitUnknownProposal.TxHash(),
+				DepositAtBlockHeight:          height,
+				DepositAtBlockTime:            blockTime,
+				Amount:                        MsgSubmitUnknownProposal.InitialDeposit,
+			}); insertDepositorErr != nil {
+				return fmt.Errorf("error inserting proposer deposit record into view: %v", insertDepositorErr)
+			}
+			if updateDepositorTotalErr := depositorsTotalView.Increment(
+				*MsgSubmitUnknownProposal.MaybeProposalId, 1,
+			); updateDepositorTotalErr != nil {
+				return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
 			}
 
-			if depositor == nil {
-				if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
-					ProposalId:                    *MsgSubmitUnknownProposal.MaybeProposalId,
-					DepositorAddress:              MsgSubmitUnknownProposal.ProposerAddress,
-					MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
-					TransactionHash:               MsgSubmitUnknownProposal.TxHash(),
-					DepositAtBlockHeight:          height,
-					DepositAtBlockTime:            blockTime,
-					Amount:                        MsgSubmitUnknownProposal.InitialDeposit,
-				}); insertDepositorErr != nil {
-					return fmt.Errorf("error inserting proposer deposit record into view: %v", insertDepositorErr)
-				}
-				if updateDepositorTotalErr := depositorsTotalView.Increment(
-					*MsgSubmitUnknownProposal.MaybeProposalId, 1,
-				); updateDepositorTotalErr != nil {
-					return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
-				}
-			}
 		} else if msgSubmitProposal, ok := event.(*event_usecase.MsgSubmitProposal); ok {
 			context, err := projection.prepareNewProposalSubmissionContext(rdbTxHandle, msgSubmitProposal.Proposer)
 			if err != nil {
@@ -578,30 +522,21 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 			depositorsView := NewDepositors(rdbTxHandle)
 			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
 
-			depositor, selectDepositorErr := depositorsView.FindByProposalIdAndTxHash(*msgSubmitProposal.MaybeProposalId, msgSubmitProposal.TxHash())
-			if selectDepositorErr != nil {
-				if !errors.Is(selectDepositorErr, rdb.ErrNoRows) {
-					return fmt.Errorf("error selecting software upgrade proposal depositor: %w", selectDepositorErr)
-				}
+			if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
+				ProposalId:                    *msgSubmitProposal.MaybeProposalId,
+				DepositorAddress:              msgSubmitProposal.Proposer,
+				MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
+				TransactionHash:               msgSubmitProposal.TxHash(),
+				DepositAtBlockHeight:          height,
+				DepositAtBlockTime:            blockTime,
+				Amount:                        msgSubmitProposal.InitialDeposit,
+			}); insertDepositorErr != nil {
+				return fmt.Errorf("error inserting proposer deposit record into view: %v", insertDepositorErr)
 			}
-
-			if depositor == nil {
-				if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
-					ProposalId:                    *msgSubmitProposal.MaybeProposalId,
-					DepositorAddress:              msgSubmitProposal.Proposer,
-					MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
-					TransactionHash:               msgSubmitProposal.TxHash(),
-					DepositAtBlockHeight:          height,
-					DepositAtBlockTime:            blockTime,
-					Amount:                        msgSubmitProposal.InitialDeposit,
-				}); insertDepositorErr != nil {
-					return fmt.Errorf("error inserting proposer deposit record into view: %v", insertDepositorErr)
-				}
-				if updateDepositorTotalErr := depositorsTotalView.Increment(
-					*msgSubmitProposal.MaybeProposalId, 1,
-				); updateDepositorTotalErr != nil {
-					return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
-				}
+			if updateDepositorTotalErr := depositorsTotalView.Increment(
+				*msgSubmitProposal.MaybeProposalId, 1,
+			); updateDepositorTotalErr != nil {
+				return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
 			}
 
 		} else if proposalVotingPeriodStarted, ok := event.(*event_usecase.ProposalVotingPeriodStarted); ok {

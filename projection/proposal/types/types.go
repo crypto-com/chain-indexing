@@ -1,8 +1,6 @@
 package types
 
-import (
-	"github.com/crypto-com/chain-indexing/usecase/coin"
-)
+import "github.com/crypto-com/chain-indexing/usecase/coin"
 
 type CommunityPoolSpendData struct {
 	RecipientAddress string     `json:"recipient"`

@@ -21,13 +21,6 @@ const DEPOSITORS_TABLE_NAME = "view_proposal_depositors"
 
 type Depositors interface {
 	Insert(row *DepositorRow) error
-	FindByProposalIdAndTxHash(
-		proposalId string,
-		depositor string,
-	) (
-		*DepositorRow,
-		error,
-	)
 	ListByProposalId(
 		proposalId string,
 		order DepositorListOrder,
@@ -84,61 +77,6 @@ func (depositorsView *DepositorsView) Insert(row *DepositorRow) error {
 	}
 
 	return nil
-}
-
-func (depositorsView *DepositorsView) FindByProposalIdAndTxHash(
-	proposalId string,
-	txHash string,
-) (*DepositorRow, error) {
-	stmtBuilder := depositorsView.rdb.StmtBuilder.Select(
-		fmt.Sprintf("%s.proposal_id", DEPOSITORS_TABLE_NAME),
-		fmt.Sprintf("%s.depositor_address", DEPOSITORS_TABLE_NAME),
-		fmt.Sprintf("%s.maybe_depositor_operator_address", DEPOSITORS_TABLE_NAME),
-		fmt.Sprintf("%s.transaction_hash", DEPOSITORS_TABLE_NAME),
-		fmt.Sprintf("%s.deposit_at_block_height", DEPOSITORS_TABLE_NAME),
-		fmt.Sprintf("%s.deposit_at_block_time", DEPOSITORS_TABLE_NAME),
-		fmt.Sprintf("%s.amount", DEPOSITORS_TABLE_NAME),
-	).From(
-		DEPOSITORS_TABLE_NAME,
-	).Where(
-		fmt.Sprintf("%s.proposal_id = ?", DEPOSITORS_TABLE_NAME), proposalId,
-	).Where(
-		fmt.Sprintf("%s.transaction_hash = ?", DEPOSITORS_TABLE_NAME), txHash,
-	)
-
-	sql, sqlArgs, err := stmtBuilder.ToSql()
-	if err != nil {
-		return nil, fmt.Errorf("error building depositor list SQL: %v: %w", err, rdb.ErrPrepare)
-	}
-
-	var row DepositorRow
-	var amountJSON *string
-	depositAtBlockTimeReader := depositorsView.rdb.NtotReader()
-
-	if scanErr := depositorsView.rdb.QueryRow(sql, sqlArgs...).Scan(
-		&row.ProposalId,
-		&row.DepositorAddress,
-		&row.MaybeDepositorOperatorAddress,
-		&row.TransactionHash,
-		&row.DepositAtBlockHeight,
-		depositAtBlockTimeReader.ScannableArg(),
-		&amountJSON,
-	); scanErr != nil {
-		if errors.Is(scanErr, rdb.ErrNoRows) {
-			return nil, rdb.ErrNoRows
-		}
-		return nil, fmt.Errorf("error scanning proposal row: %v: %w", scanErr, rdb.ErrQuery)
-	}
-
-	json.MustUnmarshalFromString(*amountJSON, &row.Amount)
-
-	depositAtBlockTime, parseErr := depositAtBlockTimeReader.Parse()
-	if parseErr != nil {
-		return nil, fmt.Errorf("error parsing deposit at block time: %v: %w", parseErr, rdb.ErrQuery)
-	}
-	row.DepositAtBlockTime = *depositAtBlockTime
-
-	return &row, nil
 }
 
 func (depositorsView *DepositorsView) ListByProposalId(

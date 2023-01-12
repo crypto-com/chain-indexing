@@ -54,7 +54,6 @@ func ParseBlockTxsMsgToCommands(
 			var possibleSignerAddresses []string
 
 			msgType := msg["@type"]
-
 			switch msgType {
 			case
 				// cosmos bank

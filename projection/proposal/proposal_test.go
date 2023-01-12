@@ -172,10 +172,6 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mockDepositorsView := &view.MockDepositorsView{}
 				mocks = append(mocks, &mockDepositorsView.Mock)
 				mockDepositorsView.
-					On("FindByProposalIdAndTxHash", "MaybeProposalId", "TxHash").
-					Return(nil, nil)
-
-				mockDepositorsView.
 					On("Insert", &view.DepositorRow{
 						ProposalId:                    "MaybeProposalId",
 						DepositorAddress:              "ProposerAddress",
@@ -322,10 +318,6 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mockDepositorsView := &view.MockDepositorsView{}
 				mocks = append(mocks, &mockDepositorsView.Mock)
 				mockDepositorsView.
-					On("FindByProposalIdAndTxHash", "MaybeProposalId", "TxHash").
-					Return(nil, nil)
-
-				mockDepositorsView.
 					On("Insert", &view.DepositorRow{
 						ProposalId:                    "MaybeProposalId",
 						DepositorAddress:              "ProposerAddress",
@@ -467,10 +459,6 @@ func TestProposal_HandleEvents(t *testing.T) {
 
 				mockDepositorsView := &view.MockDepositorsView{}
 				mocks = append(mocks, &mockDepositorsView.Mock)
-				mockDepositorsView.
-					On("FindByProposalIdAndTxHash", "MaybeProposalId", "TxHash").
-					Return(nil, nil)
-
 				mockDepositorsView.
 					On("Insert", &view.DepositorRow{
 						ProposalId:                    "MaybeProposalId",
@@ -616,10 +604,6 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mockDepositorsView := &view.MockDepositorsView{}
 				mocks = append(mocks, &mockDepositorsView.Mock)
 				mockDepositorsView.
-					On("FindByProposalIdAndTxHash", "MaybeProposalId", "TxHash").
-					Return(nil, nil)
-
-				mockDepositorsView.
 					On("Insert", &view.DepositorRow{
 						ProposalId:                    "MaybeProposalId",
 						DepositorAddress:              "ProposerAddress",
@@ -752,10 +736,6 @@ func TestProposal_HandleEvents(t *testing.T) {
 
 				mockDepositorsView := &view.MockDepositorsView{}
 				mocks = append(mocks, &mockDepositorsView.Mock)
-				mockDepositorsView.
-					On("FindByProposalIdAndTxHash", "MaybeProposalId", "TxHash").
-					Return(nil, nil)
-
 				mockDepositorsView.
 					On("Insert", &view.DepositorRow{
 						ProposalId:                    "MaybeProposalId",
