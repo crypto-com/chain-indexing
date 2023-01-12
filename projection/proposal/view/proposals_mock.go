@@ -37,10 +37,11 @@ func (proposalsView *MockProposalsView) Update(row *ProposalRow) error {
 func (proposalsView *MockProposalsView) FindById(
 	proposalId string,
 ) (
-	[]ProposalWithMonikerRow, error,
+	*ProposalWithMonikerRow,
+	error,
 ) {
 	mockArgs := proposalsView.Called(proposalId)
-	result1, _ := mockArgs.Get(0).([]ProposalWithMonikerRow)
+	result1, _ := mockArgs.Get(0).(*ProposalWithMonikerRow)
 	return result1, mockArgs.Error(1)
 }
 

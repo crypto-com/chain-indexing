@@ -22,9 +22,7 @@ type Proposals interface {
 	Insert(proposal *ProposalRow) error
 	IncrementTotalVoteBy(proposalId uint64, voteToAdd *big.Int) error
 	Update(row *ProposalRow) error
-	FindById(
-		proposalId string,
-	) ([]ProposalWithMonikerRow, error)
+	FindById(proposalId string) (*ProposalWithMonikerRow, error)
 	List(
 		filter ProposalListFilter,
 		order ProposalListOrder,
@@ -184,7 +182,7 @@ func (proposalView *ProposalsView) Update(row *ProposalRow) error {
 		"maybe_voting_end_block_height":   row.MaybeVotingEndBlockHeight,
 		"maybe_voting_end_time":           proposalView.rdb.Tton(row.MaybeVotingEndTime),
 		"metadata":                        row.Metadata,
-	}).Where("proposal_id = ? AND id = ?", row.ProposalId, row.MaybeId).ToSql()
+	}).Where("proposal_id = ?", row.ProposalId).ToSql()
 	if err != nil {
 		return fmt.Errorf("error building proposal update sql: %v: %w", err, rdb.ErrPrepare)
 	}
@@ -199,11 +197,8 @@ func (proposalView *ProposalsView) Update(row *ProposalRow) error {
 	return nil
 }
 
-func (proposalView *ProposalsView) FindById(
-	proposalId string,
-) ([]ProposalWithMonikerRow, error) {
-	stmtBuilder := proposalView.rdb.StmtBuilder.Select(
-		fmt.Sprintf("%s.id", PROPOSALS_TABLE_NAME),
+func (proposalView *ProposalsView) FindById(proposalId string) (*ProposalWithMonikerRow, error) {
+	selectStmtBuilder := proposalView.rdb.StmtBuilder.Select(
 		fmt.Sprintf("%s.proposal_id", PROPOSALS_TABLE_NAME),
 		fmt.Sprintf("%s.title", PROPOSALS_TABLE_NAME),
 		fmt.Sprintf("%s.description", PROPOSALS_TABLE_NAME),
@@ -231,95 +226,86 @@ func (proposalView *ProposalsView) FindById(
 			"%s ON %s.maybe_proposer_operator_address=%s.operator_address",
 			VALIDATORS_TABLE_NAME, PROPOSALS_TABLE_NAME, VALIDATORS_TABLE_NAME,
 		),
-	).Where(fmt.Sprintf("%s.proposal_id = ?", PROPOSALS_TABLE_NAME), proposalId)
+	).Where(
+		fmt.Sprintf("%s.proposal_id = ?", PROPOSALS_TABLE_NAME), proposalId,
+	)
 
-	sql, sqlArgs, err := stmtBuilder.ToSql()
+	sql, sqlArgs, err := selectStmtBuilder.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("error building validators select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
+		return nil, fmt.Errorf("error building proposal selection sql: %v: %w", err, rdb.ErrPrepare)
 	}
 
-	rowsResult, err := proposalView.rdb.Query(sql, sqlArgs...)
-	if err != nil {
-		return nil, fmt.Errorf("error executing proposal list query: %v: %w", err, rdb.ErrQuery)
-	}
-	defer rowsResult.Close()
+	var row ProposalWithMonikerRow
+	var dataJSON *string
+	var initialDepositJSON *string
+	var totalDepositJSON *string
+	totalVoteJSON := proposalView.rdb.NtobReader()
+	submitBlockTimeReader := proposalView.rdb.NtotReader()
+	depositEndTimeReader := proposalView.rdb.NtotReader()
+	votingStartTimeReader := proposalView.rdb.NtotReader()
+	votingEndTimeReader := proposalView.rdb.NtotReader()
 
-	rows := make([]ProposalWithMonikerRow, 0)
-	for rowsResult.Next() {
-		var row ProposalWithMonikerRow
-		var dataJSON *string
-		var initialDepositJSON *string
-		var totalDepositJSON *string
-		totalVoteJSON := proposalView.rdb.NtobReader()
-		submitBlockTimeReader := proposalView.rdb.NtotReader()
-		depositEndTimeReader := proposalView.rdb.NtotReader()
-		votingStartTimeReader := proposalView.rdb.NtotReader()
-		votingEndTimeReader := proposalView.rdb.NtotReader()
-		if scanErr := rowsResult.Scan(
-			&row.MaybeId,
-			&row.ProposalId,
-			&row.Title,
-			&row.Description,
-			&row.Type,
-			&row.Status,
-			&row.ProposerAddress,
-			&row.MaybeProposerOperatorAddress,
-			&dataJSON,
-			&initialDepositJSON,
-			&totalDepositJSON,
-			totalVoteJSON.ScannableArg(),
-			&row.TransactionHash,
-			&row.SubmitBlockHeight,
-			submitBlockTimeReader.ScannableArg(),
-			depositEndTimeReader.ScannableArg(),
-			votingStartTimeReader.ScannableArg(),
-			&row.MaybeVotingEndBlockHeight,
-			votingEndTimeReader.ScannableArg(),
-			&row.Metadata,
-			&row.MaybeProposerMoniker,
-		); scanErr != nil {
-			if errors.Is(scanErr, rdb.ErrNoRows) {
-				return nil, rdb.ErrNoRows
-			}
-			return nil, fmt.Errorf("error scanning proposal row: %v: %w", scanErr, rdb.ErrQuery)
+	if err = proposalView.rdb.QueryRow(sql, sqlArgs...).Scan(
+		&row.ProposalId,
+		&row.Title,
+		&row.Description,
+		&row.Type,
+		&row.Status,
+		&row.ProposerAddress,
+		&row.MaybeProposerOperatorAddress,
+		&dataJSON,
+		&initialDepositJSON,
+		&totalDepositJSON,
+		totalVoteJSON.ScannableArg(),
+		&row.TransactionHash,
+		&row.SubmitBlockHeight,
+		submitBlockTimeReader.ScannableArg(),
+		depositEndTimeReader.ScannableArg(),
+		votingStartTimeReader.ScannableArg(),
+		&row.MaybeVotingEndBlockHeight,
+		votingEndTimeReader.ScannableArg(),
+		&row.Metadata,
+		&row.MaybeProposerMoniker,
+	); err != nil {
+		if errors.Is(err, rdb.ErrNoRows) {
+			return nil, rdb.ErrNoRows
 		}
-
-		json.MustUnmarshalFromString(*dataJSON, &row.Data)
-		json.MustUnmarshalFromString(*initialDepositJSON, &row.InitialDeposit)
-		json.MustUnmarshalFromString(*totalDepositJSON, &row.TotalDeposit)
-
-		var parseErr error
-		row.TotalVote, parseErr = totalVoteJSON.Parse()
-		if parseErr != nil {
-			return nil, fmt.Errorf("error parsing proposal total vote: %v: %w", parseErr, rdb.ErrQuery)
-		}
-
-		submitBlockTime, parseErr := submitBlockTimeReader.Parse()
-		if parseErr != nil {
-			return nil, fmt.Errorf("error parsing proposal submit block time: %v: %w", parseErr, rdb.ErrQuery)
-		}
-		row.SubmitTime = *submitBlockTime
-
-		depositEndTime, parseErr := depositEndTimeReader.Parse()
-		if parseErr != nil {
-			return nil, fmt.Errorf("error parsing proposal deposit end time: %v: %w", parseErr, rdb.ErrQuery)
-		}
-		row.DepositEndTime = *depositEndTime
-
-		row.MaybeVotingStartTime, parseErr = votingStartTimeReader.Parse()
-		if parseErr != nil {
-			return nil, fmt.Errorf("error parsing proposal voting start time: %v: %w", parseErr, rdb.ErrQuery)
-		}
-
-		row.MaybeVotingEndTime, parseErr = votingEndTimeReader.Parse()
-		if parseErr != nil {
-			return nil, fmt.Errorf("error parsing proposal voting end time: %v: %w", parseErr, rdb.ErrQuery)
-		}
-
-		rows = append(rows, row)
+		return nil, fmt.Errorf("error scanning proposal row: %v: %w", err, rdb.ErrQuery)
 	}
 
-	return rows, nil
+	json.MustUnmarshalFromString(*dataJSON, &row.Data)
+	json.MustUnmarshalFromString(*initialDepositJSON, &row.InitialDeposit)
+	json.MustUnmarshalFromString(*totalDepositJSON, &row.TotalDeposit)
+
+	var parseErr error
+	row.TotalVote, parseErr = totalVoteJSON.Parse()
+	if parseErr != nil {
+		return nil, fmt.Errorf("error parsing proposal total vote: %v: %w", parseErr, rdb.ErrQuery)
+	}
+
+	submitBlockTime, parseErr := submitBlockTimeReader.Parse()
+	if parseErr != nil {
+		return nil, fmt.Errorf("error parsing proposal submit block time: %v: %w", parseErr, rdb.ErrQuery)
+	}
+	row.SubmitTime = *submitBlockTime
+
+	depositEndTime, parseErr := depositEndTimeReader.Parse()
+	if parseErr != nil {
+		return nil, fmt.Errorf("error parsing proposal deposit end time: %v: %w", parseErr, rdb.ErrQuery)
+	}
+	row.DepositEndTime = *depositEndTime
+
+	row.MaybeVotingStartTime, parseErr = votingStartTimeReader.Parse()
+	if parseErr != nil {
+		return nil, fmt.Errorf("error parsing proposal voting start time: %v: %w", parseErr, rdb.ErrQuery)
+	}
+
+	row.MaybeVotingEndTime, parseErr = votingEndTimeReader.Parse()
+	if parseErr != nil {
+		return nil, fmt.Errorf("error parsing proposal voting end time: %v: %w", parseErr, rdb.ErrQuery)
+	}
+
+	return &row, nil
 }
 
 func (proposalView *ProposalsView) List(
@@ -487,7 +473,6 @@ type ProposalWithMonikerRow struct {
 }
 
 type ProposalRow struct {
-	MaybeId                      *int64           `json:"-"`
 	ProposalId                   string           `json:"id"`
 	Title                        string           `json:"title"`
 	Description                  string           `json:"description"`

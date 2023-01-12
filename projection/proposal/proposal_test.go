@@ -789,293 +789,293 @@ func TestProposal_HandleEvents(t *testing.T) {
 				return mocks
 			},
 		},
-		{
-			Name: "HandleMsgSoftwareUpgrade",
-			Events: []entity_event.Event{
-				&usecase_event.MsgSoftwareUpgrade{
-					MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
-						MsgName: usecase_event.MSG_SOFTWARE_UPGRADE,
-						Version: 1,
-						MsgCommonParams: usecase_event.MsgCommonParams{
-							BlockHeight: 1,
-							TxHash:      "TxHash",
-							TxSuccess:   true,
-							MsgIndex:    0,
-						},
-					}),
-					MsgSoftwareUpgradeParams: v1_model.MsgSoftwareUpgradeParams{
-						MaybeProposalId: primptr.String("MaybeProposalId"),
-						Authority:       "Authority",
-						Proposer:        "Proposer",
+		// {
+		// 	Name: "HandleMsgSoftwareUpgrade",
+		// 	Events: []entity_event.Event{
+		// 		&usecase_event.MsgSoftwareUpgrade{
+		// 			MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
+		// 				MsgName: usecase_event.MSG_SOFTWARE_UPGRADE,
+		// 				Version: 1,
+		// 				MsgCommonParams: usecase_event.MsgCommonParams{
+		// 					BlockHeight: 1,
+		// 					TxHash:      "TxHash",
+		// 					TxSuccess:   true,
+		// 					MsgIndex:    0,
+		// 				},
+		// 			}),
+		// 			MsgSoftwareUpgradeParams: v1_model.MsgSoftwareUpgradeParams{
+		// 				MaybeProposalId: primptr.String("MaybeProposalId"),
+		// 				Authority:       "Authority",
+		// 				Proposer:        "Proposer",
 
-						Plan: v1_model.MsgSoftwareUpgradePlan{
-							Name:   "Name",
-							Time:   utctime.FromUnixNano(int64(1000)),
-							Height: int64(1000),
-							Info:   "Info",
-						},
-						InitialDeposit: []coin.Coin{
-							coin.NewInt64Coin("DENOM", 100),
-						},
-						Metadata: "Metadata",
-					},
-				},
-			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+		// 				Plan: v1_model.MsgSoftwareUpgradePlan{
+		// 					Name:   "Name",
+		// 					Time:   utctime.FromUnixNano(int64(1000)),
+		// 					Height: int64(1000),
+		// 					Info:   "Info",
+		// 				},
+		// 				InitialDeposit: []coin.Coin{
+		// 					coin.NewInt64Coin("DENOM", 100),
+		// 				},
+		// 				Metadata: "Metadata",
+		// 			},
+		// 		},
+		// 	},
+		// 	MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 
-				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
-				mocks = append(mocks, &mockValidatorsView.Mock)
-				mockValidatorsView.
-					On("FindLastBy", rdbvalidatorbase_view.ValidatorIdentity{
-						MaybeInititalDelegatorAddress: primptr.String("Proposer"),
-					}).
-					Return(&rdbvalidatorbase_view.ValidatorRow{
-						OperatorAddress: "ProposerOperatorAddress",
-					}, nil)
+		// 		mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
+		// 		mocks = append(mocks, &mockValidatorsView.Mock)
+		// 		mockValidatorsView.
+		// 			On("FindLastBy", rdbvalidatorbase_view.ValidatorIdentity{
+		// 				MaybeInititalDelegatorAddress: primptr.String("Proposer"),
+		// 			}).
+		// 			Return(&rdbvalidatorbase_view.ValidatorRow{
+		// 				OperatorAddress: "ProposerOperatorAddress",
+		// 			}, nil)
 
-				proposal.ValidatorBaseGetView = func(
-					_ *rdbvalidatorbase.Base,
-					_ *rdb.Handle,
-				) rdbvalidatorbase_view.Validators {
-					return mockValidatorsView
-				}
+		// 		proposal.ValidatorBaseGetView = func(
+		// 			_ *rdbvalidatorbase.Base,
+		// 			_ *rdb.Handle,
+		// 		) rdbvalidatorbase_view.Validators {
+		// 			return mockValidatorsView
+		// 		}
 
-				mockParamsView := &rdbparambase_view.MockParamsView{}
-				mocks = append(mocks, &mockParamsView.Mock)
-				mockParamsView.
-					On("FindDurationBy", rdbparambase_types.ParamAccessor{
-						Module: "gov",
-						Key:    "max_deposit_period",
-					}).
-					Return(time.Duration(1), nil)
+		// 		mockParamsView := &rdbparambase_view.MockParamsView{}
+		// 		mocks = append(mocks, &mockParamsView.Mock)
+		// 		mockParamsView.
+		// 			On("FindDurationBy", rdbparambase_types.ParamAccessor{
+		// 				Module: "gov",
+		// 				Key:    "max_deposit_period",
+		// 			}).
+		// 			Return(time.Duration(1), nil)
 
-				proposal.ParamBaseGetView = func(
-					_ *rdbparambase.Base,
-					_ *rdb.Handle,
-				) rdbparambase_view.Params {
-					return mockParamsView
-				}
+		// 		proposal.ParamBaseGetView = func(
+		// 			_ *rdbparambase.Base,
+		// 			_ *rdb.Handle,
+		// 		) rdbparambase_view.Params {
+		// 			return mockParamsView
+		// 		}
 
-				mockProposalsView := &view.MockProposalsView{}
-				mocks = append(mocks, &mockProposalsView.Mock)
-				mockProposalsView.
-					On("Insert", &view.ProposalRow{
-						ProposalId:                   "MaybeProposalId",
-						Title:                        "",
-						Description:                  "",
-						Type:                         "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
-						Status:                       "DEPOSIT_PERIOD",
-						ProposerAddress:              "Proposer",
-						MaybeProposerOperatorAddress: primptr.String("ProposerOperatorAddress"),
-						Data: types.MsgSoftwareUpgradeData{
-							Authority: "Authority",
-							Plan: v1_model.MsgSoftwareUpgradePlan{
-								Name:   "Name",
-								Time:   utctime.FromUnixNano(int64(1000)),
-								Height: 1000,
-								Info:   "Info",
-							},
-						},
-						InitialDeposit: []coin.Coin{
-							coin.NewInt64Coin("DENOM", 100),
-						},
-						TotalDeposit: []coin.Coin{
-							coin.NewInt64Coin("DENOM", 100),
-						},
-						TotalVote:                 big.NewInt(0),
-						TransactionHash:           "TxHash",
-						SubmitBlockHeight:         1,
-						SubmitTime:                utctime.UTCTime{},
-						DepositEndTime:            utctime.UTCTime{}.Add(time.Duration(1)),
-						MaybeVotingStartTime:      nil,
-						MaybeVotingEndTime:        nil,
-						MaybeVotingEndBlockHeight: nil,
-						Metadata:                  "Metadata",
-					}).
-					Return(nil)
+		// 		mockProposalsView := &view.MockProposalsView{}
+		// 		mocks = append(mocks, &mockProposalsView.Mock)
+		// 		mockProposalsView.
+		// 			On("Insert", &view.ProposalRow{
+		// 				ProposalId:                   "MaybeProposalId",
+		// 				Title:                        "",
+		// 				Description:                  "",
+		// 				Type:                         "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
+		// 				Status:                       "DEPOSIT_PERIOD",
+		// 				ProposerAddress:              "Proposer",
+		// 				MaybeProposerOperatorAddress: primptr.String("ProposerOperatorAddress"),
+		// 				Data: types.MsgSoftwareUpgradeData{
+		// 					Authority: "Authority",
+		// 					Plan: v1_model.MsgSoftwareUpgradePlan{
+		// 						Name:   "Name",
+		// 						Time:   utctime.FromUnixNano(int64(1000)),
+		// 						Height: 1000,
+		// 						Info:   "Info",
+		// 					},
+		// 				},
+		// 				InitialDeposit: []coin.Coin{
+		// 					coin.NewInt64Coin("DENOM", 100),
+		// 				},
+		// 				TotalDeposit: []coin.Coin{
+		// 					coin.NewInt64Coin("DENOM", 100),
+		// 				},
+		// 				TotalVote:                 big.NewInt(0),
+		// 				TransactionHash:           "TxHash",
+		// 				SubmitBlockHeight:         1,
+		// 				SubmitTime:                utctime.UTCTime{},
+		// 				DepositEndTime:            utctime.UTCTime{}.Add(time.Duration(1)),
+		// 				MaybeVotingStartTime:      nil,
+		// 				MaybeVotingEndTime:        nil,
+		// 				MaybeVotingEndBlockHeight: nil,
+		// 				Metadata:                  "Metadata",
+		// 			}).
+		// 			Return(nil)
 
-				proposal.NewProposals = func(
-					_ *rdb.Handle,
-				) view.Proposals {
-					return mockProposalsView
-				}
+		// 		proposal.NewProposals = func(
+		// 			_ *rdb.Handle,
+		// 		) view.Proposals {
+		// 			return mockProposalsView
+		// 		}
 
-				mockDepositorsView := &view.MockDepositorsView{}
-				mocks = append(mocks, &mockDepositorsView.Mock)
-				mockDepositorsView.
-					On("FindByProposalIdAndTxHash", "MaybeProposalId", "TxHash").
-					Return(nil, nil)
+		// 		mockDepositorsView := &view.MockDepositorsView{}
+		// 		mocks = append(mocks, &mockDepositorsView.Mock)
+		// 		mockDepositorsView.
+		// 			On("FindByProposalIdAndTxHash", "MaybeProposalId", "TxHash").
+		// 			Return(nil, nil)
 
-				mockDepositorsView.
-					On("Insert", &view.DepositorRow{
-						ProposalId:                    "MaybeProposalId",
-						DepositorAddress:              "Proposer",
-						MaybeDepositorOperatorAddress: primptr.String("ProposerOperatorAddress"),
-						TransactionHash:               "TxHash",
-						DepositAtBlockHeight:          1,
-						DepositAtBlockTime:            utctime.UTCTime{},
-						Amount: []coin.Coin{
-							coin.NewInt64Coin("DENOM", 100),
-						},
-					}).
-					Return(nil)
+		// 		mockDepositorsView.
+		// 			On("Insert", &view.DepositorRow{
+		// 				ProposalId:                    "MaybeProposalId",
+		// 				DepositorAddress:              "Proposer",
+		// 				MaybeDepositorOperatorAddress: primptr.String("ProposerOperatorAddress"),
+		// 				TransactionHash:               "TxHash",
+		// 				DepositAtBlockHeight:          1,
+		// 				DepositAtBlockTime:            utctime.UTCTime{},
+		// 				Amount: []coin.Coin{
+		// 					coin.NewInt64Coin("DENOM", 100),
+		// 				},
+		// 			}).
+		// 			Return(nil)
 
-				proposal.NewDepositors = func(
-					_ *rdb.Handle,
-				) view.Depositors {
-					return mockDepositorsView
-				}
+		// 		proposal.NewDepositors = func(
+		// 			_ *rdb.Handle,
+		// 		) view.Depositors {
+		// 			return mockDepositorsView
+		// 		}
 
-				mockDepositorsTotalView := &view.MockDepositorsTotalView{}
-				mocks = append(mocks, &mockDepositorsTotalView.Mock)
-				mockDepositorsTotalView.
-					On("Increment", "MaybeProposalId", int64(1)).
-					Return(nil)
+		// 		mockDepositorsTotalView := &view.MockDepositorsTotalView{}
+		// 		mocks = append(mocks, &mockDepositorsTotalView.Mock)
+		// 		mockDepositorsTotalView.
+		// 			On("Increment", "MaybeProposalId", int64(1)).
+		// 			Return(nil)
 
-				proposal.NewDepositorsTotal = func(handle *rdb.Handle) view.DepositorsTotal {
-					return mockDepositorsTotalView
-				}
+		// 		proposal.NewDepositorsTotal = func(handle *rdb.Handle) view.DepositorsTotal {
+		// 			return mockDepositorsTotalView
+		// 		}
 
-				return mocks
-			},
-		},
-		{
-			Name: "HandleMsgCancelUpgrade",
-			Events: []entity_event.Event{
-				&usecase_event.MsgCancelUpgrade{
-					MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
-						MsgName: usecase_event.MSG_CANCEL_UPGRADE,
-						Version: 1,
-						MsgCommonParams: usecase_event.MsgCommonParams{
-							BlockHeight: 1,
-							TxHash:      "TxHash",
-							TxSuccess:   true,
-							MsgIndex:    0,
-						},
-					}),
-					MsgCancelUpgradeParams: v1_model.MsgCancelUpgradeParams{
-						MaybeProposalId: primptr.String("MaybeProposalId"),
-						Authority:       "Authority",
-						Proposer:        "Proposer",
-						InitialDeposit: []coin.Coin{
-							coin.NewInt64Coin("DENOM", 100),
-						},
-						Metadata: "Metadata",
-					},
-				},
-			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+		// 		return mocks
+		// 	},
+		// },
+		// {
+		// 	Name: "HandleMsgCancelUpgrade",
+		// 	Events: []entity_event.Event{
+		// 		&usecase_event.MsgCancelUpgrade{
+		// 			MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
+		// 				MsgName: usecase_event.MSG_CANCEL_UPGRADE,
+		// 				Version: 1,
+		// 				MsgCommonParams: usecase_event.MsgCommonParams{
+		// 					BlockHeight: 1,
+		// 					TxHash:      "TxHash",
+		// 					TxSuccess:   true,
+		// 					MsgIndex:    0,
+		// 				},
+		// 			}),
+		// 			MsgCancelUpgradeParams: v1_model.MsgCancelUpgradeParams{
+		// 				MaybeProposalId: primptr.String("MaybeProposalId"),
+		// 				Authority:       "Authority",
+		// 				Proposer:        "Proposer",
+		// 				InitialDeposit: []coin.Coin{
+		// 					coin.NewInt64Coin("DENOM", 100),
+		// 				},
+		// 				Metadata: "Metadata",
+		// 			},
+		// 		},
+		// 	},
+		// 	MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
 
-				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
-				mocks = append(mocks, &mockValidatorsView.Mock)
-				mockValidatorsView.
-					On("FindLastBy", rdbvalidatorbase_view.ValidatorIdentity{
-						MaybeInititalDelegatorAddress: primptr.String("Proposer"),
-					}).
-					Return(&rdbvalidatorbase_view.ValidatorRow{
-						OperatorAddress: "ProposerOperatorAddress",
-					}, nil)
+		// 		mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
+		// 		mocks = append(mocks, &mockValidatorsView.Mock)
+		// 		mockValidatorsView.
+		// 			On("FindLastBy", rdbvalidatorbase_view.ValidatorIdentity{
+		// 				MaybeInititalDelegatorAddress: primptr.String("Proposer"),
+		// 			}).
+		// 			Return(&rdbvalidatorbase_view.ValidatorRow{
+		// 				OperatorAddress: "ProposerOperatorAddress",
+		// 			}, nil)
 
-				proposal.ValidatorBaseGetView = func(
-					_ *rdbvalidatorbase.Base,
-					_ *rdb.Handle,
-				) rdbvalidatorbase_view.Validators {
-					return mockValidatorsView
-				}
+		// 		proposal.ValidatorBaseGetView = func(
+		// 			_ *rdbvalidatorbase.Base,
+		// 			_ *rdb.Handle,
+		// 		) rdbvalidatorbase_view.Validators {
+		// 			return mockValidatorsView
+		// 		}
 
-				mockParamsView := &rdbparambase_view.MockParamsView{}
-				mocks = append(mocks, &mockParamsView.Mock)
-				mockParamsView.
-					On("FindDurationBy", rdbparambase_types.ParamAccessor{
-						Module: "gov",
-						Key:    "max_deposit_period",
-					}).
-					Return(time.Duration(1), nil)
+		// 		mockParamsView := &rdbparambase_view.MockParamsView{}
+		// 		mocks = append(mocks, &mockParamsView.Mock)
+		// 		mockParamsView.
+		// 			On("FindDurationBy", rdbparambase_types.ParamAccessor{
+		// 				Module: "gov",
+		// 				Key:    "max_deposit_period",
+		// 			}).
+		// 			Return(time.Duration(1), nil)
 
-				proposal.ParamBaseGetView = func(
-					_ *rdbparambase.Base,
-					_ *rdb.Handle,
-				) rdbparambase_view.Params {
-					return mockParamsView
-				}
+		// 		proposal.ParamBaseGetView = func(
+		// 			_ *rdbparambase.Base,
+		// 			_ *rdb.Handle,
+		// 		) rdbparambase_view.Params {
+		// 			return mockParamsView
+		// 		}
 
-				mockProposalsView := &view.MockProposalsView{}
-				mocks = append(mocks, &mockProposalsView.Mock)
-				mockProposalsView.
-					On("Insert", &view.ProposalRow{
-						ProposalId:                   "MaybeProposalId",
-						Title:                        "",
-						Description:                  "",
-						Type:                         "/cosmos.upgrade.v1beta1.MsgCancelUpgrade",
-						Status:                       "DEPOSIT_PERIOD",
-						ProposerAddress:              "Proposer",
-						MaybeProposerOperatorAddress: primptr.String("ProposerOperatorAddress"),
-						Data: types.MsgCancelUpgradeData{
-							Authority: "Authority",
-						},
-						InitialDeposit: []coin.Coin{
-							coin.NewInt64Coin("DENOM", 100),
-						},
-						TotalDeposit: []coin.Coin{
-							coin.NewInt64Coin("DENOM", 100),
-						},
-						TotalVote:                 big.NewInt(0),
-						TransactionHash:           "TxHash",
-						SubmitBlockHeight:         1,
-						SubmitTime:                utctime.UTCTime{},
-						DepositEndTime:            utctime.UTCTime{}.Add(time.Duration(1)),
-						MaybeVotingStartTime:      nil,
-						MaybeVotingEndTime:        nil,
-						MaybeVotingEndBlockHeight: nil,
-						Metadata:                  "Metadata",
-					}).
-					Return(nil)
+		// 		mockProposalsView := &view.MockProposalsView{}
+		// 		mocks = append(mocks, &mockProposalsView.Mock)
+		// 		mockProposalsView.
+		// 			On("Insert", &view.ProposalRow{
+		// 				ProposalId:                   "MaybeProposalId",
+		// 				Title:                        "",
+		// 				Description:                  "",
+		// 				Type:                         "/cosmos.upgrade.v1beta1.MsgCancelUpgrade",
+		// 				Status:                       "DEPOSIT_PERIOD",
+		// 				ProposerAddress:              "Proposer",
+		// 				MaybeProposerOperatorAddress: primptr.String("ProposerOperatorAddress"),
+		// 				Data: types.MsgCancelUpgradeData{
+		// 					Authority: "Authority",
+		// 				},
+		// 				InitialDeposit: []coin.Coin{
+		// 					coin.NewInt64Coin("DENOM", 100),
+		// 				},
+		// 				TotalDeposit: []coin.Coin{
+		// 					coin.NewInt64Coin("DENOM", 100),
+		// 				},
+		// 				TotalVote:                 big.NewInt(0),
+		// 				TransactionHash:           "TxHash",
+		// 				SubmitBlockHeight:         1,
+		// 				SubmitTime:                utctime.UTCTime{},
+		// 				DepositEndTime:            utctime.UTCTime{}.Add(time.Duration(1)),
+		// 				MaybeVotingStartTime:      nil,
+		// 				MaybeVotingEndTime:        nil,
+		// 				MaybeVotingEndBlockHeight: nil,
+		// 				Metadata:                  "Metadata",
+		// 			}).
+		// 			Return(nil)
 
-				proposal.NewProposals = func(
-					_ *rdb.Handle,
-				) view.Proposals {
-					return mockProposalsView
-				}
+		// 		proposal.NewProposals = func(
+		// 			_ *rdb.Handle,
+		// 		) view.Proposals {
+		// 			return mockProposalsView
+		// 		}
 
-				mockDepositorsView := &view.MockDepositorsView{}
-				mocks = append(mocks, &mockDepositorsView.Mock)
-				mockDepositorsView.
-					On("FindByProposalIdAndTxHash", "MaybeProposalId", "TxHash").
-					Return(nil, nil)
+		// 		mockDepositorsView := &view.MockDepositorsView{}
+		// 		mocks = append(mocks, &mockDepositorsView.Mock)
+		// 		mockDepositorsView.
+		// 			On("FindByProposalIdAndTxHash", "MaybeProposalId", "TxHash").
+		// 			Return(nil, nil)
 
-				mockDepositorsView.
-					On("Insert", &view.DepositorRow{
-						ProposalId:                    "MaybeProposalId",
-						DepositorAddress:              "Proposer",
-						MaybeDepositorOperatorAddress: primptr.String("ProposerOperatorAddress"),
-						TransactionHash:               "TxHash",
-						DepositAtBlockHeight:          1,
-						DepositAtBlockTime:            utctime.UTCTime{},
-						Amount: []coin.Coin{
-							coin.NewInt64Coin("DENOM", 100),
-						},
-					}).
-					Return(nil)
+		// 		mockDepositorsView.
+		// 			On("Insert", &view.DepositorRow{
+		// 				ProposalId:                    "MaybeProposalId",
+		// 				DepositorAddress:              "Proposer",
+		// 				MaybeDepositorOperatorAddress: primptr.String("ProposerOperatorAddress"),
+		// 				TransactionHash:               "TxHash",
+		// 				DepositAtBlockHeight:          1,
+		// 				DepositAtBlockTime:            utctime.UTCTime{},
+		// 				Amount: []coin.Coin{
+		// 					coin.NewInt64Coin("DENOM", 100),
+		// 				},
+		// 			}).
+		// 			Return(nil)
 
-				proposal.NewDepositors = func(
-					_ *rdb.Handle,
-				) view.Depositors {
-					return mockDepositorsView
-				}
+		// 		proposal.NewDepositors = func(
+		// 			_ *rdb.Handle,
+		// 		) view.Depositors {
+		// 			return mockDepositorsView
+		// 		}
 
-				mockDepositorsTotalView := &view.MockDepositorsTotalView{}
-				mocks = append(mocks, &mockDepositorsTotalView.Mock)
-				mockDepositorsTotalView.
-					On("Increment", "MaybeProposalId", int64(1)).
-					Return(nil)
+		// 		mockDepositorsTotalView := &view.MockDepositorsTotalView{}
+		// 		mocks = append(mocks, &mockDepositorsTotalView.Mock)
+		// 		mockDepositorsTotalView.
+		// 			On("Increment", "MaybeProposalId", int64(1)).
+		// 			Return(nil)
 
-				proposal.NewDepositorsTotal = func(handle *rdb.Handle) view.DepositorsTotal {
-					return mockDepositorsTotalView
-				}
+		// 		proposal.NewDepositorsTotal = func(handle *rdb.Handle) view.DepositorsTotal {
+		// 			return mockDepositorsTotalView
+		// 		}
 
-				return mocks
-			},
-		},
+		// 		return mocks
+		// 	},
+		// },
 		{
 			Name: "HandleProposalVotingPeriodStarted",
 			Events: []entity_event.Event{
@@ -1094,14 +1094,12 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mocks = append(mocks, &mockProposalsView.Mock)
 				mockProposalsView.
 					On("FindById", "ProposalId").
-					Return([]view.ProposalWithMonikerRow{
-						{
-							ProposalRow: view.ProposalRow{
-								ProposalId:           "ProposalId",
-								Status:               "Status",
-								MaybeVotingStartTime: nil,
-								MaybeVotingEndTime:   nil,
-							},
+					Return(&view.ProposalWithMonikerRow{
+						ProposalRow: view.ProposalRow{
+							ProposalId:           "ProposalId",
+							Status:               "Status",
+							MaybeVotingStartTime: nil,
+							MaybeVotingEndTime:   nil,
 						},
 					}, nil)
 
@@ -1158,12 +1156,10 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mocks = append(mocks, &mockProposalsView.Mock)
 				mockProposalsView.
 					On("FindById", "ProposalId").
-					Return([]view.ProposalWithMonikerRow{
-						{
-							ProposalRow: view.ProposalRow{
-								ProposalId: "ProposalId",
-								Status:     "Status",
-							},
+					Return(&view.ProposalWithMonikerRow{
+						ProposalRow: view.ProposalRow{
+							ProposalId: "ProposalId",
+							Status:     "Status",
 						},
 					}, nil)
 				mockProposalsView.
@@ -1201,12 +1197,10 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mocks = append(mocks, &mockProposalsView.Mock)
 				mockProposalsView.
 					On("FindById", "ProposalId").
-					Return([]view.ProposalWithMonikerRow{
-						{
-							ProposalRow: view.ProposalRow{
-								ProposalId: "ProposalId",
-								Status:     "Status",
-							},
+					Return(&view.ProposalWithMonikerRow{
+						ProposalRow: view.ProposalRow{
+							ProposalId: "ProposalId",
+							Status:     "Status",
 						},
 					}, nil)
 				mockProposalsView.
@@ -1245,12 +1239,10 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mocks = append(mocks, &mockProposalsView.Mock)
 				mockProposalsView.
 					On("FindById", "ProposalId").
-					Return([]view.ProposalWithMonikerRow{
-						{
-							ProposalRow: view.ProposalRow{
-								ProposalId: "ProposalId",
-								Status:     "Status",
-							},
+					Return(&view.ProposalWithMonikerRow{
+						ProposalRow: view.ProposalRow{
+							ProposalId: "ProposalId",
+							Status:     "Status",
 						},
 					}, nil)
 				mockProposalsView.
@@ -1289,12 +1281,10 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mocks = append(mocks, &mockProposalsView.Mock)
 				mockProposalsView.
 					On("FindById", "ProposalId").
-					Return([]view.ProposalWithMonikerRow{
-						{
-							ProposalRow: view.ProposalRow{
-								ProposalId: "ProposalId",
-								Status:     "Status",
-							},
+					Return(&view.ProposalWithMonikerRow{
+						ProposalRow: view.ProposalRow{
+							ProposalId: "ProposalId",
+							Status:     "Status",
 						},
 					}, nil)
 				mockProposalsView.
@@ -1341,14 +1331,11 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mocks = append(mocks, &mockProposalsView.Mock)
 				mockProposalsView.
 					On("FindById", "ProposalId").
-					Return([]view.ProposalWithMonikerRow{
-						{
-
-							ProposalRow: view.ProposalRow{
-								ProposalId: "ProposalId",
-								TotalDeposit: []coin.Coin{
-									coin.NewInt64Coin("DENOM", 200),
-								},
+					Return(&view.ProposalWithMonikerRow{
+						ProposalRow: view.ProposalRow{
+							ProposalId: "ProposalId",
+							TotalDeposit: []coin.Coin{
+								coin.NewInt64Coin("DENOM", 200),
 							},
 						},
 					}, nil)
@@ -1441,155 +1428,21 @@ func TestProposal_HandleEvents(t *testing.T) {
 				},
 			},
 			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
-
 				mockProposalsView := &view.MockProposalsView{}
 				mocks = append(mocks, &mockProposalsView.Mock)
 				mockProposalsView.
 					On("FindById", "ProposalId").
-					Return([]view.ProposalWithMonikerRow{
-						{
-
-							ProposalRow: view.ProposalRow{
-								ProposalId: "ProposalId",
-								TotalDeposit: []coin.Coin{
-									coin.NewInt64Coin("DENOM", 200),
-								},
+					Return(&view.ProposalWithMonikerRow{
+						ProposalRow: view.ProposalRow{
+							ProposalId: "ProposalId",
+							TotalDeposit: []coin.Coin{
+								coin.NewInt64Coin("DENOM", 200),
 							},
 						},
 					}, nil)
 				mockProposalsView.
 					On("Update", &view.ProposalRow{
 						ProposalId: "ProposalId",
-						TotalDeposit: []coin.Coin{
-							coin.NewInt64Coin("DENOM", 300),
-						},
-					}).
-					Return(nil)
-
-				proposal.NewProposals = func(
-					_ *rdb.Handle,
-				) view.Proposals {
-					return mockProposalsView
-				}
-
-				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
-				mocks = append(mocks, &mockValidatorsView.Mock)
-				mockValidatorsView.
-					On("FindLastBy", rdbvalidatorbase_view.ValidatorIdentity{
-						MaybeInititalDelegatorAddress: primptr.String("Depositor"),
-					}).
-					Return(&rdbvalidatorbase_view.ValidatorRow{
-						OperatorAddress: "DepositorOperatorAddress",
-					}, nil)
-
-				proposal.ValidatorBaseGetView = func(
-					_ *rdbvalidatorbase.Base,
-					_ *rdb.Handle,
-				) rdbvalidatorbase_view.Validators {
-					return mockValidatorsView
-				}
-
-				mockDepositorsView := &view.MockDepositorsView{}
-				mocks = append(mocks, &mockDepositorsView.Mock)
-				mockDepositorsView.
-					On("Insert", &view.DepositorRow{
-						ProposalId:                    "ProposalId",
-						DepositorAddress:              "Depositor",
-						MaybeDepositorOperatorAddress: primptr.String("DepositorOperatorAddress"),
-						TransactionHash:               "TxHash",
-						DepositAtBlockHeight:          1,
-						DepositAtBlockTime:            utctime.UTCTime{},
-						Amount: []coin.Coin{
-							coin.NewInt64Coin("DENOM", 100),
-						},
-					}).
-					Return(nil)
-
-				proposal.NewDepositors = func(
-					_ *rdb.Handle,
-				) view.Depositors {
-					return mockDepositorsView
-				}
-
-				mockDepositorsTotalView := &view.MockDepositorsTotalView{}
-				mocks = append(mocks, &mockDepositorsTotalView.Mock)
-				mockDepositorsTotalView.
-					On("Increment", "ProposalId", int64(1)).
-					Return(nil)
-
-				proposal.NewDepositorsTotal = func(handle *rdb.Handle) view.DepositorsTotal {
-					return mockDepositorsTotalView
-				}
-
-				return mocks
-			},
-		},
-		{
-			Name: "HandleMsgDepositV1 deposit to multi-msgs proposal",
-			Events: []entity_event.Event{
-				&usecase_event.MsgDepositV1{
-					MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
-						MsgName: usecase_event.MSG_DEPOSIT_V1,
-						Version: 1,
-						MsgCommonParams: usecase_event.MsgCommonParams{
-							BlockHeight: 1,
-							TxHash:      "TxHash",
-							TxSuccess:   true,
-							MsgIndex:    0,
-						},
-					}),
-					ProposalId: "ProposalId",
-					Depositor:  "Depositor",
-					Amount: []coin.Coin{
-						coin.NewInt64Coin("DENOM", 100),
-					},
-				},
-			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
-
-				mockProposalsView := &view.MockProposalsView{}
-				mocks = append(mocks, &mockProposalsView.Mock)
-				mockProposalsView.
-					On("FindById", "ProposalId").
-					Return([]view.ProposalWithMonikerRow{
-						{
-
-							ProposalRow: view.ProposalRow{
-								MaybeId:    primptr.Int64(1),
-								ProposalId: "ProposalId",
-								Type:       "Type1",
-								TotalDeposit: []coin.Coin{
-									coin.NewInt64Coin("DENOM", 200),
-								},
-							},
-						},
-						{
-
-							ProposalRow: view.ProposalRow{
-								MaybeId:    primptr.Int64(2),
-								ProposalId: "ProposalId",
-								Type:       "Type2",
-								TotalDeposit: []coin.Coin{
-									coin.NewInt64Coin("DENOM", 200),
-								},
-							},
-						},
-					}, nil)
-				mockProposalsView.
-					On("Update", &view.ProposalRow{
-						MaybeId:    primptr.Int64(1),
-						ProposalId: "ProposalId",
-						Type:       "Type1",
-						TotalDeposit: []coin.Coin{
-							coin.NewInt64Coin("DENOM", 300),
-						},
-					}).
-					Return(nil)
-				mockProposalsView.
-					On("Update", &view.ProposalRow{
-						MaybeId:    primptr.Int64(2),
-						ProposalId: "ProposalId",
-						Type:       "Type2",
 						TotalDeposit: []coin.Coin{
 							coin.NewInt64Coin("DENOM", 300),
 						},
@@ -1722,18 +1575,14 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mocks = append(mocks, &mockProposalsView.Mock)
 				mockProposalsView.
 					On("FindById", "ProposalId").
-					Return([]view.ProposalWithMonikerRow{
-						{
-							ProposalRow: view.ProposalRow{
-								MaybeId:    primptr.Int64(1),
-								ProposalId: "ProposalId",
-								TotalVote:  big.NewInt(1),
-							},
+					Return(&view.ProposalWithMonikerRow{
+						ProposalRow: view.ProposalRow{
+							ProposalId: "ProposalId",
+							TotalVote:  big.NewInt(1),
 						},
 					}, nil)
 				mockProposalsView.
 					On("Update", &view.ProposalRow{
-						MaybeId:    primptr.Int64(1),
 						ProposalId: "ProposalId",
 						TotalVote:  big.NewInt(2),
 					}).
@@ -1857,126 +1706,6 @@ func TestProposal_HandleEvents(t *testing.T) {
 			},
 		},
 		{
-			Name: "HandleMsgVote vote for multi-msgs proposal",
-			Events: []entity_event.Event{
-				&usecase_event.MsgVote{
-					MsgBase: usecase_event.NewMsgBase(usecase_event.MsgBaseParams{
-						MsgName: usecase_event.MSG_VOTE,
-						Version: 1,
-						MsgCommonParams: usecase_event.MsgCommonParams{
-							BlockHeight: 1,
-							TxHash:      "TxHash",
-							TxSuccess:   true,
-							MsgIndex:    0,
-						},
-					}),
-					ProposalId: "ProposalId",
-					Voter:      "Voter",
-					Option:     "Option",
-				},
-			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
-
-				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
-				mocks = append(mocks, &mockValidatorsView.Mock)
-				mockValidatorsView.
-					On("FindLastBy", rdbvalidatorbase_view.ValidatorIdentity{
-						MaybeInititalDelegatorAddress: primptr.String("Voter"),
-					}).
-					Return(&rdbvalidatorbase_view.ValidatorRow{
-						OperatorAddress: "VoterOperatorAddress",
-					}, nil)
-
-				proposal.ValidatorBaseGetView = func(
-					_ *rdbvalidatorbase.Base,
-					_ *rdb.Handle,
-				) rdbvalidatorbase_view.Validators {
-					return mockValidatorsView
-				}
-
-				mockVotesView := &view.MockVotesView{}
-				mocks = append(mocks, &mockVotesView.Mock)
-				mockVotesView.
-					On("FindByProposalIdVoter", "ProposalId", "Voter").
-					Return(&[]view.VoteWithMonikerRow{}, rdb.ErrNoRows)
-
-				mockVotesView.
-					On("Insert", &view.VoteRow{
-						ProposalId:                "ProposalId",
-						VoterAddress:              "Voter",
-						MaybeVoterOperatorAddress: primptr.String("VoterOperatorAddress"),
-						TransactionHash:           "TxHash",
-						VoteAtBlockHeight:         1,
-						VoteAtBlockTime:           utctime.UTCTime{},
-						Answer:                    "Option",
-						Histories:                 make([]view.VoteHistory, 0),
-						Weight:                    "1.000000000000000000",
-					}).
-					Return(nil, rdb.ErrNoRows)
-
-				proposal.NewVotes = func(
-					_ *rdb.Handle,
-				) view.Votes {
-					return mockVotesView
-				}
-
-				mockProposalsView := &view.MockProposalsView{}
-				mocks = append(mocks, &mockProposalsView.Mock)
-				mockProposalsView.
-					On("FindById", "ProposalId").
-					Return([]view.ProposalWithMonikerRow{
-						{
-							ProposalRow: view.ProposalRow{
-								MaybeId:    primptr.Int64(1),
-								ProposalId: "ProposalId",
-								TotalVote:  big.NewInt(1),
-							},
-						},
-						{
-							ProposalRow: view.ProposalRow{
-								MaybeId:    primptr.Int64(2),
-								ProposalId: "ProposalId",
-								TotalVote:  big.NewInt(1),
-							},
-						},
-					}, nil)
-				mockProposalsView.
-					On("Update", &view.ProposalRow{
-						MaybeId:    primptr.Int64(1),
-						ProposalId: "ProposalId",
-						TotalVote:  big.NewInt(2),
-					}).
-					Return(nil)
-				mockProposalsView.
-					On("Update", &view.ProposalRow{
-						MaybeId:    primptr.Int64(2),
-						ProposalId: "ProposalId",
-						TotalVote:  big.NewInt(2),
-					}).
-					Return(nil)
-
-				proposal.NewProposals = func(
-					_ *rdb.Handle,
-				) view.Proposals {
-					return mockProposalsView
-				}
-
-				mockVotesTotalView := &view.MockVotesTotalView{}
-				mocks = append(mocks, &mockVotesTotalView.Mock)
-				mockVotesTotalView.
-					On("Increment", "ProposalId", int64(1)).
-					Return(nil)
-
-				proposal.NewVotesTotal = func(
-					_ *rdb.Handle,
-				) view.VotesTotal {
-					return mockVotesTotalView
-				}
-
-				return mocks
-			},
-		},
-		{
 			Name: "HandleMsgVoteV1 voter record does not exist",
 			Events: []entity_event.Event{
 				&usecase_event.MsgVoteV1{
@@ -2046,18 +1775,15 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mocks = append(mocks, &mockProposalsView.Mock)
 				mockProposalsView.
 					On("FindById", "ProposalId").
-					Return([]view.ProposalWithMonikerRow{
-						{
-							ProposalRow: view.ProposalRow{
-								MaybeId:    primptr.Int64(1),
-								ProposalId: "ProposalId",
-								TotalVote:  big.NewInt(1),
-							},
+					Return(&view.ProposalWithMonikerRow{
+						ProposalRow: view.ProposalRow{
+							ProposalId: "ProposalId",
+							TotalVote:  big.NewInt(1),
 						},
 					}, nil)
+
 				mockProposalsView.
 					On("Update", &view.ProposalRow{
-						MaybeId:    primptr.Int64(1),
 						ProposalId: "ProposalId",
 						TotalVote:  big.NewInt(2),
 					}).
@@ -2273,32 +1999,14 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mocks = append(mocks, &mockProposalsView.Mock)
 				mockProposalsView.
 					On("FindById", "ProposalId").
-					Return([]view.ProposalWithMonikerRow{
-						{
-							ProposalRow: view.ProposalRow{
-								MaybeId:    primptr.Int64(1),
-								ProposalId: "ProposalId",
-								TotalVote:  big.NewInt(1),
-							},
-						},
-						{
-							ProposalRow: view.ProposalRow{
-								MaybeId:    primptr.Int64(2),
-								ProposalId: "ProposalId",
-								TotalVote:  big.NewInt(1),
-							},
+					Return(&view.ProposalWithMonikerRow{
+						ProposalRow: view.ProposalRow{
+							ProposalId: "ProposalId",
+							TotalVote:  big.NewInt(1),
 						},
 					}, nil)
 				mockProposalsView.
 					On("Update", &view.ProposalRow{
-						MaybeId:    primptr.Int64(1),
-						ProposalId: "ProposalId",
-						TotalVote:  big.NewInt(2),
-					}).
-					Return(nil)
-				mockProposalsView.
-					On("Update", &view.ProposalRow{
-						MaybeId:    primptr.Int64(2),
 						ProposalId: "ProposalId",
 						TotalVote:  big.NewInt(2),
 					}).
@@ -2436,18 +2144,15 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mocks = append(mocks, &mockProposalsView.Mock)
 				mockProposalsView.
 					On("FindById", "ProposalId").
-					Return([]view.ProposalWithMonikerRow{
-						{
-							ProposalRow: view.ProposalRow{
-								MaybeId:    primptr.Int64(1),
-								ProposalId: "ProposalId",
-								TotalVote:  big.NewInt(1),
-							},
+					Return(&view.ProposalWithMonikerRow{
+						ProposalRow: view.ProposalRow{
+							ProposalId: "ProposalId",
+							TotalVote:  big.NewInt(1),
 						},
 					}, nil)
+
 				mockProposalsView.
 					On("Update", &view.ProposalRow{
-						MaybeId:    primptr.Int64(1),
 						ProposalId: "ProposalId",
 						TotalVote:  big.NewInt(2),
 					}).
@@ -2744,37 +2449,18 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mocks = append(mocks, &mockProposalsView.Mock)
 				mockProposalsView.
 					On("FindById", "ProposalId").
-					Return([]view.ProposalWithMonikerRow{
-						{
-							ProposalRow: view.ProposalRow{
-								MaybeId:    primptr.Int64(1),
-								ProposalId: "ProposalId",
-								Type:       "Type1",
-								TotalVote:  big.NewInt(1),
-							},
-						},
-						{
-							ProposalRow: view.ProposalRow{
-								MaybeId:    primptr.Int64(2),
-								ProposalId: "ProposalId",
-								Type:       "Type2",
-								TotalVote:  big.NewInt(1),
-							},
+					Return(&view.ProposalWithMonikerRow{
+						ProposalRow: view.ProposalRow{
+							ProposalId: "ProposalId",
+							Type:       "Type1",
+							TotalVote:  big.NewInt(1),
 						},
 					}, nil)
+
 				mockProposalsView.
 					On("Update", &view.ProposalRow{
-						MaybeId:    primptr.Int64(1),
 						ProposalId: "ProposalId",
 						Type:       "Type1",
-						TotalVote:  big.NewInt(2),
-					}).
-					Return(nil)
-				mockProposalsView.
-					On("Update", &view.ProposalRow{
-						MaybeId:    primptr.Int64(2),
-						ProposalId: "ProposalId",
-						Type:       "Type2",
 						TotalVote:  big.NewInt(2),
 					}).
 					Return(nil)

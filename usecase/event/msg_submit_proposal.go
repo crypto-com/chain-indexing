@@ -10,23 +10,23 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_SOFTWARE_UPGRADE = "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade"
-const MSG_SOFTWARE_UPGRADE_CREATED = "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade.Created"
-const MSG_SOFTWARE_UPGRADE_FAILED = "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade.Failed"
+const MSG_SUBMIT_PROPOSAL = "/cosmos.gov.v1.MsgSubmitProposal"
+const MSG_SUBMIT_PROPOSAL_CREATED = "/cosmos.gov.v1.MsgSubmitProposal.Created"
+const MSG_SUBMIT_PROPOSAL_FAILED = "/cosmos.gov.v1.MsgSubmitProposal.Failed"
 
-type MsgSoftwareUpgrade struct {
+type MsgSubmitProposal struct {
 	MsgBase
 
-	model.MsgSoftwareUpgradeParams
+	model.MsgSubmitProposalParams
 }
 
-func NewMsgSoftwareUpgrade(
+func NewMsgSubmitProposal(
 	msgCommonParams MsgCommonParams,
-	params model.MsgSoftwareUpgradeParams,
-) *MsgSoftwareUpgrade {
-	return &MsgSoftwareUpgrade{
+	params model.MsgSubmitProposalParams,
+) *MsgSubmitProposal {
+	return &MsgSubmitProposal{
 		NewMsgBase(MsgBaseParams{
-			MsgName:         MSG_SOFTWARE_UPGRADE,
+			MsgName:         MSG_SUBMIT_PROPOSAL,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
@@ -35,7 +35,7 @@ func NewMsgSoftwareUpgrade(
 	}
 }
 
-func (event *MsgSoftwareUpgrade) ToJSON() (string, error) {
+func (event *MsgSubmitProposal) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
 		return "", err
@@ -44,15 +44,15 @@ func (event *MsgSoftwareUpgrade) ToJSON() (string, error) {
 	return string(encoded), nil
 }
 
-func (event *MsgSoftwareUpgrade) String() string {
+func (event *MsgSubmitProposal) String() string {
 	return render.Render(event)
 }
 
-func DecodeMsgSoftwareUpgrade(encoded []byte) (entity_event.Event, error) {
+func DecodeMsgSubmitProposal(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *MsgSoftwareUpgrade
+	var event *MsgSubmitProposal
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}

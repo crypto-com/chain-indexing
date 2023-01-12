@@ -54,6 +54,7 @@ func ParseBlockTxsMsgToCommands(
 			var possibleSignerAddresses []string
 
 			msgType := msg["@type"]
+
 			switch msgType {
 			case
 				// cosmos bank
@@ -68,17 +69,12 @@ func ParseBlockTxsMsgToCommands(
 
 				// cosmos gov
 				"/cosmos.gov.v1.MsgDeposit",
-				"/cosmos.gov.v1.MsgExecLegacyContent",
 				"/cosmos.gov.v1.MsgSubmitProposal",
 				"/cosmos.gov.v1.MsgVote",
 				"/cosmos.gov.v1.MsgVoteWeighted",
 				"/cosmos.gov.v1beta1.MsgSubmitProposal",
 				"/cosmos.gov.v1beta1.MsgVote",
 				"/cosmos.gov.v1beta1.MsgDeposit",
-
-				// cosmos upgrade
-				"/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
-				"/cosmos.upgrade.v1beta1.MsgCancelUpgrade",
 
 				// cosmos staking
 				"/cosmos.staking.v1beta1.MsgDelegate",
@@ -439,32 +435,6 @@ func ParseMsgSubmitProposal(
 		cmds = append(cmds, command_usecase.NewStartProposalVotingPeriod(
 			parserParams.MsgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"),
 		))
-	}
-
-	return cmds, possibleSignerAddresses
-}
-
-func ParseMsgExecLegacyContent(
-	parserParams utils.CosmosParserParams,
-) ([]command.Command, []string) {
-	rawContent, err := jsoniter.Marshal(parserParams.Msg["content"])
-	if err != nil {
-		panic(fmt.Sprintf("error encoding proposal content: %v", err))
-	}
-	var proposalContent model.MsgSubmitProposalContent
-	if err := jsoniter.Unmarshal(rawContent, &proposalContent); err != nil {
-		panic(fmt.Sprintf("error decoding proposal content: %v", err))
-	}
-
-	var cmds []command.Command
-	var possibleSignerAddresses []string
-	if proposalContent != (model.MsgSubmitProposalContent{}) {
-		// re-use /cosmos.gov.v1beta1.MsgSubmitProposal parser for legacy proposal content
-		cmds, possibleSignerAddresses = ParseMsgSubmitProposal(parserParams)
-	}
-
-	if !parserParams.MsgCommonParams.TxSuccess {
-		return cmds, possibleSignerAddresses
 	}
 
 	return cmds, possibleSignerAddresses

@@ -90,16 +90,25 @@ func ParseMsgSubmitProposal(
 		panic(fmt.Errorf("error decoding ParseMsgSubmitProposal: %v", err))
 	}
 
-	rawMsg.Proposer = utils.AddressParse(rawMsg.Proposer)
-
 	var cmds []command.Command
 	var possibleSignerAddresses []string
+
+	rawMsg.Proposer = utils.AddressParse(rawMsg.Proposer)
+	possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Proposer)
 
 	blockHeight := parserParams.MsgCommonParams.BlockHeight
 
 	msgs, ok := parserParams.Msg["messages"].([]interface{})
 	if !ok {
 		panic(fmt.Errorf("error parsing MsgSubmitProposal.msgs to []interface{}: %v", parserParams.Msg["messages"]))
+	}
+
+	initialDepositAmount, err := tmcosmosutils.NewCoinsFromAmountInterface(rawMsg.InitialDeposit)
+	if err != nil {
+		initialDepositAmount = make([]coin.Coin, 0)
+		for i := 0; i < len(rawMsg.InitialDeposit); i++ {
+			initialDepositAmount = append(initialDepositAmount, coin.Coin{})
+		}
 	}
 
 	for innerMsgIndex, innerMsgInterface := range msgs {
@@ -113,33 +122,79 @@ func ParseMsgSubmitProposal(
 			panic(fmt.Errorf("error missing '@type' in MsgSubmitProposal.msgs[%v]: %v", innerMsgIndex, innerMsg))
 		}
 
-		innerMsg["initial_deposit"] = rawMsg.InitialDeposit
-		innerMsg["proposer"] = rawMsg.Proposer
-		innerMsg["metadata"] = rawMsg.Metadata
+		switch innerMsgType {
+		case "/cosmos.gov.v1.MsgExecLegacyContent",
+			"/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
+			"/cosmos.upgrade.v1beta1.MsgCancelUpgrade":
+			break
+		default:
+			parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(innerMsgType), utils.ParserBlockHeight(blockHeight))
 
-		parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(innerMsgType), utils.ParserBlockHeight(blockHeight))
+			msgCommands, signers := parser(utils.CosmosParserParams{
+				AddressPrefix:   parserParams.AddressPrefix,
+				StakingDenom:    parserParams.StakingDenom,
+				TxsResult:       parserParams.TxsResult,
+				MsgCommonParams: parserParams.MsgCommonParams,
+				Msg:             innerMsg,
+				MsgIndex:        parserParams.MsgIndex,
+				ParserManager:   parserParams.ParserManager,
+			})
 
-		msgCommands, signers := parser(utils.CosmosParserParams{
-			AddressPrefix:   parserParams.AddressPrefix,
-			StakingDenom:    parserParams.StakingDenom,
-			TxsResult:       parserParams.TxsResult,
-			MsgCommonParams: parserParams.MsgCommonParams,
-			Msg:             innerMsg,
-			MsgIndex:        parserParams.MsgIndex,
-			ParserManager:   parserParams.ParserManager,
-		})
+			possibleSignerAddresses = append(possibleSignerAddresses, signers...)
+			cmds = append(cmds, msgCommands...)
+		}
 
-		possibleSignerAddresses = append(possibleSignerAddresses, signers...)
-		cmds = append(cmds, msgCommands...)
 	}
 
-	return cmds, possibleSignerAddresses
+	if !parserParams.MsgCommonParams.TxSuccess {
+		return []command.Command{command_usecase.NewCreateMsgSubmitProposal(
+			parserParams.MsgCommonParams,
+
+			v1_model.MsgSubmitProposalParams{
+				MaybeProposalId: nil,
+				Messages:        rawMsg.Messages,
+				InitialDeposit:  initialDepositAmount,
+				Proposer:        rawMsg.Proposer,
+				Metadata:        rawMsg.Metadata,
+			},
+		)}, possibleSignerAddresses
+	}
+
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
+	// When there is no reward withdrew, `transfer` event would not exist
+	event := log.GetEventByType("submit_proposal")
+	if event == nil {
+		panic("missing `submit_proposal` event in TxsResult log")
+	}
+	proposalId := event.GetAttributeByKey("proposal_id")
+	if proposalId == nil {
+		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+	}
+
+	if event.HasAttribute("voting_period_start") {
+		cmds = append(cmds, command_usecase.NewStartProposalVotingPeriod(
+			parserParams.MsgCommonParams.BlockHeight, event.MustGetAttributeByKey("voting_period_start"),
+		))
+	}
+
+	return append([]command.Command{
+		command_usecase.NewCreateMsgSubmitProposal(
+			parserParams.MsgCommonParams,
+
+			v1_model.MsgSubmitProposalParams{
+				MaybeProposalId: proposalId,
+				Messages:        rawMsg.Messages,
+				InitialDeposit:  initialDepositAmount,
+				Proposer:        rawMsg.Proposer,
+				Metadata:        rawMsg.Metadata,
+			},
+		),
+	}, cmds...), possibleSignerAddresses
 }
 
 func ParseMsgVote(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
-
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
