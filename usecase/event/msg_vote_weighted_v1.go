@@ -18,7 +18,7 @@ type MsgVoteWeightedV1 struct {
 
 	ProposalId  string             `json:"proposalId"`
 	Voter       string             `json:"voter"`
-	VoteOptions []model.VoteOption `json:"vote_options"`
+	VoteOptions []model.VoteOption `json:"voteOptions"`
 	Metadata    string             `json:"metadata"`
 }
 
