@@ -550,8 +550,8 @@ func (validatorsView *ValidatorsView) ListAll(
 			"imprecise_up_time",
 			"voted_gov_proposal",
 			"attention",
-			"-1 as recent_signed_blocks",
-			"-1 as recent_active_blocks",
+			"0 as recent_signed_blocks",
+			"0 as recent_active_blocks",
 		).From(
 			VALIDATORS_TABLE_NAME,
 		)
@@ -802,10 +802,7 @@ func (validatorsView *ValidatorsView) List(
 				"COUNT(CASE WHEN %s.signed THEN 1 END) as recent_signed_blocks",
 				VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
 			),
-			fmt.Sprintf(
-				"COUNT(%s.signed) as recent_active_blocks",
-				VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
-			),
+			"COUNT(id) as recent_active_blocks",
 		).From(
 			VALIDATORS_TABLE_NAME,
 		).LeftJoin(
@@ -819,8 +816,7 @@ func (validatorsView *ValidatorsView) List(
 			),
 		).GroupBy(
 			fmt.Sprintf(
-				"%s.operator_address, %s.id",
-				VALIDATORS_TABLE_NAME,
+				"%s.id",
 				VALIDATORS_TABLE_NAME,
 			),
 		)
@@ -850,8 +846,8 @@ func (validatorsView *ValidatorsView) List(
 			"imprecise_up_time",
 			"voted_gov_proposal",
 			"attention",
-			"-1 as recent_signed_blocks",
-			"-1 as recent_active_blocks",
+			"0 as recent_signed_blocks",
+			"0 as recent_active_blocks",
 		).From(
 			VALIDATORS_TABLE_NAME,
 		)
