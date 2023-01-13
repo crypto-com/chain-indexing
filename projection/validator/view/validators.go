@@ -879,12 +879,12 @@ func (validatorsView *ValidatorsView) List(
 			}
 
 			var total int64
-			sql, sqlArgs, err := totalStmtBuilder.ToSql()
-			if err != nil {
+			totalStmtSql, totalStmtSqlArgs, totalStmtBuilderErr := totalStmtBuilder.ToSql()
+			if totalStmtBuilderErr != nil {
 				return -1, fmt.Errorf("error building total select SQL: %v", err)
 			}
 
-			if err = rdbHandle.QueryRow(sql, sqlArgs...).Scan(&total); err != nil {
+			if err = rdbHandle.QueryRow(totalStmtSql, totalStmtSqlArgs...).Scan(&total); err != nil {
 				return -1, fmt.Errorf("error executing total count select SQL: %v", err)
 			}
 			return total, nil
