@@ -518,7 +518,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 			}
 
 			if insertProposalErr := proposalsView.Insert(&row); insertProposalErr != nil {
-				return fmt.Errorf("error inserting cancel software upgrade proposal into view: %v", insertProposalErr)
+				return fmt.Errorf("error inserting submit proposal into view: %v", insertProposalErr)
 			}
 
 			maybeDepositorValidatorAddress := context.maybeProposerValidatorAddress

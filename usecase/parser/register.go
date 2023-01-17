@@ -1,7 +1,7 @@
 package parser
 
 import (
-	cosmos_gov_v1 "github.com/crypto-com/chain-indexing/usecase/parser/gov"
+	cosmos_gov_v1 "github.com/crypto-com/chain-indexing/usecase/parser/gov/v1"
 	"github.com/crypto-com/chain-indexing/usecase/parser/ibc"
 	"github.com/crypto-com/chain-indexing/usecase/parser/icaauth"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
