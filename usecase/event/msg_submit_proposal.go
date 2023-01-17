@@ -3,7 +3,7 @@ package event
 import (
 	"bytes"
 
-	model "github.com/crypto-com/chain-indexing/usecase/model/v1"
+	model "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 	jsoniter "github.com/json-iterator/go"

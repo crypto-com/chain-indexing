@@ -28,7 +28,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	usecase_event "github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
-	v1_model "github.com/crypto-com/chain-indexing/usecase/model/v1"
+	v1_model "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
 )
 
 func NewProposalProjection(rdbConn rdb.Conn) *proposal.Proposal {

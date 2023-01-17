@@ -3,7 +3,7 @@ package event
 import (
 	"bytes"
 
-	model "github.com/crypto-com/chain-indexing/usecase/model/v1"
+	model "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
 
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 

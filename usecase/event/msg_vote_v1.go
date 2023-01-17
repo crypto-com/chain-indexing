@@ -4,7 +4,7 @@ import (
 	"bytes"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
-	model "github.com/crypto-com/chain-indexing/usecase/model/v1"
+	model "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/luci/go-render/render"
 )

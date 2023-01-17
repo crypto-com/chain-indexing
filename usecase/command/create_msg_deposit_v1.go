@@ -3,7 +3,7 @@ package command
 import (
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/usecase/event"
-	v1_model "github.com/crypto-com/chain-indexing/usecase/model/v1"
+	v1_model "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
 )
 
 type CreateMsgDepositV1 struct {

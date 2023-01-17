@@ -4,7 +4,7 @@ import (
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/model"
-	v1_model "github.com/crypto-com/chain-indexing/usecase/model/v1"
+	v1_model "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 

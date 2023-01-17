@@ -6,7 +6,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
-	v1_model "github.com/crypto-com/chain-indexing/usecase/model/v1"
+	v1_model "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
 )
 
 var _ = Describe("Event", func() {

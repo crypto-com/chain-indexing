@@ -8,7 +8,7 @@ import (
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
-	v1_model "github.com/crypto-com/chain-indexing/usecase/model/v1"
+	v1_model "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
 	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
 )
