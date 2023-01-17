@@ -1,4 +1,4 @@
-package v1_model
+package model
 
 type MsgVoteWeightedParams struct {
 	ProposalId  string       `json:"proposalId"`

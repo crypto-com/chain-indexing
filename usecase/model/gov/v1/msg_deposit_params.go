@@ -1,4 +1,4 @@
-package v1_model
+package model
 
 import "github.com/crypto-com/chain-indexing/usecase/coin"
 
