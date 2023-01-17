@@ -233,7 +233,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 									"msgName": "/cosmos.staking.v1beta1.MsgEditValidator",
 									"description": map[string]interface{}{
 										"details":         "[do-not-modify]",
-										"moniker":         "newMoniker",
+										"moniker":         "newMoniker2",
 										"website":         "[do-not-modify]",
 										"identity":        "[do-not-modify]",
 										"securityContact": "[do-not-modify]",
@@ -273,6 +273,295 @@ func TestValidator_HandleEvents(t *testing.T) {
 						ImpreciseUpTime:         big.NewFloat(0.1),
 						VotedGovProposal:        big.NewInt(1),
 						Attention:               true,
+					},
+				).Return(nil)
+
+				mockValidatorActivitiesView.On(
+					"InsertAll",
+					testify_mock.Anything,
+				).Return(nil)
+
+				mockValidatorActivitiesTotalView := validator_view.NewMockValidatorActivitiesTotalView(nil).(*validator_view.MockValidatorActivitiesTotalView)
+				mocks = append(mocks, &mockValidatorActivitiesTotalView.Mock)
+
+				validator.NewValidatorActivitiesTotal = func(_ *rdb.Handle) validator_view.ValidatorActivitiesTotal {
+					return mockValidatorActivitiesTotalView
+				}
+
+				mockValidatorActivitiesTotalView.On(
+					"Increment",
+					"-",
+					int64(1),
+				).Return(nil)
+
+				mockValidatorActivitiesTotalView.On(
+					"Increment",
+					"tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+					int64(1),
+				).Return(nil)
+
+				mockValidatorActivitiesTotalView.On(
+					"Increment",
+					"tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus:/cosmos.staking.v1beta1.MsgEditValidator.Created",
+					int64(1),
+				).Return(nil)
+
+				mockValidatorActivitiesTotalView.On(
+					"Increment",
+					"-:/cosmos.staking.v1beta1.MsgEditValidator.Created",
+					int64(1),
+				).Return(nil)
+
+				mockValidatorsView.On(
+					"ListAll",
+					view.ValidatorsListFilter{
+						MaybeStatuses:          []string(nil),
+						MaybeRecentActiveBlock: (*view.ValidatorsListRecentActiveBlockFilter)(nil),
+					},
+					view.ValidatorsListOrder{
+						MaybeStatus:              (*string)(nil),
+						MaybePower:               (*string)(nil),
+						MaybeCommission:          (*string)(nil),
+						MaybeJoinedAtBlockHeight: (*string)(nil),
+						MaybeImpreciseUpTime:     (*string)(nil),
+					},
+				).Return([]validator_view.ValidatorRow{}, nil)
+
+				mockValidatorBlockCommitmentsTotalView := validator_view.NewMockValidatorBlockCommitmentsTotal(nil).(*validator_view.MockValidatorBlockCommitmentsTotalView)
+				mocks = append(mocks, &mockValidatorBlockCommitmentsTotalView.Mock)
+
+				validator.NewValidatorBlockCommitmentsTotal = func(_ *rdb.Handle) validator_view.ValidatorBlockCommitmentsTotal {
+					return mockValidatorBlockCommitmentsTotalView
+				}
+
+				mockValidatorBlockCommitmentsTotalView.On(
+					"Set",
+					"1:-",
+					int64(0),
+				).Return(nil)
+
+				mockValidatorBlockCommitmentsTotalView.On(
+					"IncrementAll",
+					[]string{},
+					int64(1),
+				).Return(nil)
+
+				mockValidatorBlockCommitmentsTotalView.On(
+					"Increment",
+					"-:-",
+					int64(0),
+				).Return(nil)
+
+				mockValidatorsView.On(
+					"UpdateAllValidatorUpTime",
+					[]view.ValidatorRow(nil),
+				).Return(nil)
+
+				mockValidatorActiveBlocksView := validator_view.NewMockValidatorActiveBlocksView(nil).(*validator_view.MockValidatorActiveBlocksView)
+				mocks = append(mocks, &mockValidatorActiveBlocksView.Mock)
+
+				validator.NewValidatorActiveBlocks = func(_ *rdb.Handle) validator_view.ValidatorActiveBlocks {
+					return mockValidatorActiveBlocksView
+				}
+
+				mockValidatorActiveBlocksView.On(
+					"UpdateValidatorsActiveBlocks",
+					view.OperatorAddressToSignedBlockFlagMap{},
+					int64(1),
+					int64(100000),
+				).Return(nil)
+
+				return mocks
+			},
+		},
+		{
+			Name: "Handle MsgEditValidator same moniker changed more than twice",
+			Events: []event_entity.Event{
+				&event_usecase.BlockCreated{
+					Base: event_entity.NewBase(event_entity.BaseParams{
+						Name:        event_usecase.BLOCK_CREATED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					Block: &model_usecase.Block{
+						Height:          1,
+						Hash:            "Hash",
+						Time:            utctime.FromUnixNano(1665902976672205000),
+						AppHash:         "AppHash",
+						ProposerAddress: "ProposerAddress",
+						Txs:             nil,
+						Signatures:      nil,
+					},
+				},
+				&event_usecase.MsgEditValidator{
+					MsgBase: event_usecase.NewMsgBase(event_usecase.MsgBaseParams{
+						MsgName: event_usecase.MSG_EDIT_VALIDATOR,
+						Version: 1,
+						MsgCommonParams: event_usecase.MsgCommonParams{
+							BlockHeight: 1,
+							TxHash:      "TxHash",
+							TxSuccess:   true,
+							MsgIndex:    0,
+						},
+					}),
+					Description: model.ValidatorDescription{
+						Moniker:         "newMoniker",
+						Identity:        "[do-not-modify]",
+						Website:         "[do-not-modify]",
+						SecurityContact: "[do-not-modify]",
+						Details:         "[do-not-modify]",
+					},
+					ValidatorAddress:       "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+					MaybeCommissionRate:    nil,
+					MaybeMinSelfDelegation: nil,
+				},
+			},
+			MockFunc: func(events []event_entity.Event) (mocks []*testify_mock.Mock) {
+				mockValidatorsView := validator_view.NewMockValidatorsView(nil).(*validator_view.MockValidatorsView)
+				mocks = append(mocks, &mockValidatorsView.Mock)
+
+				validator.NewValidators = func(_ *rdb.Handle) validator_view.Validators {
+					return mockValidatorsView
+				}
+
+				mockValidatorsView.On(
+					"FindBy",
+					validator_view.ValidatorIdentity{
+						MaybeOperatorAddress: primptr.String("tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus"),
+					},
+					(*int64)(nil),
+				).Return(
+					&validator_view.ValidatorRow{
+						MaybeId:                 primptr.Int64(3),
+						OperatorAddress:         "tcrovaloper1v76r7u4uyr3ewdks8cqmuw7ca4lejvc8unag2m",
+						ConsensusNodeAddress:    "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+						InitialDelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+						TendermintPubkey:        "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
+						TendermintAddress:       "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+						Status:                  "Bonded",
+						Jailed:                  false,
+						JoinedAtBlockHeight:     1,
+						Power:                   "",
+						Moniker:                 "newMoniker",
+						Identity:                "[do-not-modify]",
+						Website:                 "[do-not-modify]",
+						SecurityContact:         "[do-not-modify]",
+						Details:                 "[do-not-modify]",
+						CommissionRate:          "0.1",
+						CommissionMaxRate:       "0.2",
+						CommissionMaxChangeRate: "0.01",
+						MinSelfDelegation:       "1",
+						TotalSignedBlock:        1,
+						TotalActiveBlock:        1,
+						ImpreciseUpTime:         big.NewFloat(0.1),
+						VotedGovProposal:        big.NewInt(1),
+						Attention:               false,
+					}, nil)
+
+				mockValidatorActivitiesView := validator_view.NewMockValidatorActivitiesView(nil).(*validator_view.MockValidatorActivitiesView)
+				mocks = append(mocks, &mockValidatorActivitiesView.Mock)
+
+				validator.NewValidatorActivities = func(_ *rdb.Handle) validator_view.ValidatorActivities {
+					return mockValidatorActivitiesView
+				}
+
+				timestamp := utctime.FromUnixNano(1665816576672205000)
+
+				mockValidatorActivitiesView.On(
+					"List",
+					validator_view.ValidatorActivitiesListFilter{
+						MaybeAfterBlockTime:  &timestamp,
+						MaybeOperatorAddress: primptr.String("tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus"),
+					},
+					validator_view.ValidatorActivitiesListOrder{},
+					&pagination_interface.Pagination{},
+				).Return(
+					[]validator_view.ValidatorActivityRow{
+						{
+
+							BlockHeight:          1,
+							BlockTime:            utctime.FromUnixNano(166590297672205000),
+							BlockHash:            "Hash",
+							MaybeTransactionHash: primptr.String("TxHash"),
+							OperatorAddress:      "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+							Success:              true,
+							Data: validator_view.ValidatorActivityRowData{
+								Type: "/cosmos.staking.v1beta1.MsgEditValidator",
+								Content: map[string]interface{}{
+									"name":    "/cosmos.staking.v1beta1.MsgEditValidator.Created",
+									"height":  37333,
+									"txHash":  "BD5D2BE22166DB174B93AA42689AFC737DE42365F79912E80B64890C127A28DA",
+									"msgName": "/cosmos.staking.v1beta1.MsgEditValidator",
+									"description": map[string]interface{}{
+										"details":         "[do-not-modify]",
+										"moniker":         "newMoniker",
+										"website":         "[do-not-modify]",
+										"identity":        "[do-not-modify]",
+										"securityContact": "[do-not-modify]",
+									},
+									"commissionRate":    nil,
+									"validatorAddress":  "crcvaloper12luku6uxehhak02py4rcz65zu0swh7wj6ulrlg",
+									"minSelfDelegation": nil,
+								},
+							},
+						},
+						{
+
+							BlockHeight:          1,
+							BlockTime:            utctime.FromUnixNano(166590297672205000),
+							BlockHash:            "Hash",
+							MaybeTransactionHash: primptr.String("TxHash"),
+							OperatorAddress:      "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+							Success:              true,
+							Data: validator_view.ValidatorActivityRowData{
+								Type: "/cosmos.staking.v1beta1.MsgEditValidator",
+								Content: map[string]interface{}{
+									"name":    "/cosmos.staking.v1beta1.MsgEditValidator.Created",
+									"height":  37333,
+									"txHash":  "BD5D2BE22166DB174B93AA42689AFC737DE42365F79912E80B64890C127A28DA",
+									"msgName": "/cosmos.staking.v1beta1.MsgEditValidator",
+									"description": map[string]interface{}{
+										"details":         "[do-not-modify]",
+										"moniker":         "newMoniker",
+										"website":         "[do-not-modify]",
+										"identity":        "[do-not-modify]",
+										"securityContact": "[do-not-modify]",
+									},
+									"commissionRate":    nil,
+									"validatorAddress":  "crcvaloper12luku6uxehhak02py4rcz65zu0swh7wj6ulrlg",
+									"minSelfDelegation": nil,
+								},
+							},
+						},
+					}, nil, nil)
+
+				mockValidatorsView.On(
+					"Update",
+					&view.ValidatorRow{
+						MaybeId:                 primptr.Int64(3),
+						OperatorAddress:         "tcrovaloper1v76r7u4uyr3ewdks8cqmuw7ca4lejvc8unag2m",
+						ConsensusNodeAddress:    "tcrocncl1fmprm0sjy6lz9llv7rltn0v2azzwcwzvr4ufus",
+						InitialDelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+						TendermintPubkey:        "Kpox5fS2po0sJUHmzllExuJ4uZ5nm0bbCp6UQKESsnE=",
+						TendermintAddress:       "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",
+						Status:                  "Bonded",
+						Jailed:                  false,
+						JoinedAtBlockHeight:     1,
+						Power:                   "",
+						Moniker:                 "newMoniker",
+						Identity:                "[do-not-modify]",
+						Website:                 "[do-not-modify]",
+						SecurityContact:         "[do-not-modify]",
+						Details:                 "[do-not-modify]",
+						CommissionRate:          "0.1",
+						CommissionMaxRate:       "0.2",
+						CommissionMaxChangeRate: "0.01",
+						MinSelfDelegation:       "1",
+						TotalSignedBlock:        1,
+						TotalActiveBlock:        1,
+						ImpreciseUpTime:         big.NewFloat(0.1),
+						VotedGovProposal:        big.NewInt(1),
+						Attention:               false,
 					},
 				).Return(nil)
 
