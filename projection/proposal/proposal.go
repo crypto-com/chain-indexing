@@ -17,7 +17,6 @@ import (
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
-	"github.com/crypto-com/chain-indexing/projection/proposal/types"
 	"github.com/crypto-com/chain-indexing/projection/proposal/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
@@ -106,6 +105,11 @@ func (proposal *Proposal) GetEventsToListen() []string {
 				event_usecase.PROPOSAL_ENDED,
 				event_usecase.MSG_DEPOSIT_CREATED,
 				event_usecase.MSG_VOTE_CREATED,
+
+				event_usecase.MSG_SUBMIT_PROPOSAL_CREATED,
+				event_usecase.MSG_DEPOSIT_V1_CREATED,
+				event_usecase.MSG_VOTE_V1_CREATED,
+				event_usecase.MSG_VOTE_WEIGHTED_V1_CREATED,
 			},
 			proposal.paramBase.GetEventsToListen()...,
 		),
@@ -187,7 +191,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 			}
 
 			if insertProposalErr := proposalsView.Insert(&row); insertProposalErr != nil {
-				return fmt.Errorf("error inserting  text proposal proposal into view: %v", insertProposalErr)
+				return fmt.Errorf("error inserting text proposal into view: %v", insertProposalErr)
 			}
 
 			maybeDepositorValidatorAddress := context.maybeProposerValidatorAddress
@@ -226,17 +230,19 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				Status:                       view.PROPOSAL_STATUS_DEPOSIT_PERIOD,
 				ProposerAddress:              msgSubmitProposal.ProposerAddress,
 				MaybeProposerOperatorAddress: context.maybeProposerValidatorAddress,
-				Data:                         msgSubmitProposal.Content.Changes,
-				InitialDeposit:               msgSubmitProposal.InitialDeposit,
-				TotalDeposit:                 msgSubmitProposal.InitialDeposit,
-				TotalVote:                    big.NewInt(0),
-				TransactionHash:              msgSubmitProposal.TxHash(),
-				SubmitBlockHeight:            height,
-				SubmitTime:                   blockTime,
-				DepositEndTime:               depositEndTime,
-				MaybeVotingStartTime:         nil,
-				MaybeVotingEndTime:           nil,
-				MaybeVotingEndBlockHeight:    nil,
+				Data: map[string]interface{}{
+					"content": msgSubmitProposal.Content,
+				},
+				InitialDeposit:            msgSubmitProposal.InitialDeposit,
+				TotalDeposit:              msgSubmitProposal.InitialDeposit,
+				TotalVote:                 big.NewInt(0),
+				TransactionHash:           msgSubmitProposal.TxHash(),
+				SubmitBlockHeight:         height,
+				SubmitTime:                blockTime,
+				DepositEndTime:            depositEndTime,
+				MaybeVotingStartTime:      nil,
+				MaybeVotingEndTime:        nil,
+				MaybeVotingEndBlockHeight: nil,
 			}
 
 			if insertProposalErr := proposalsView.Insert(&row); insertProposalErr != nil {
@@ -279,9 +285,8 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				Status:                       view.PROPOSAL_STATUS_DEPOSIT_PERIOD,
 				ProposerAddress:              msgSubmitProposal.ProposerAddress,
 				MaybeProposerOperatorAddress: context.maybeProposerValidatorAddress,
-				Data: types.CommunityPoolSpendData{
-					RecipientAddress: msgSubmitProposal.Content.RecipientAddress,
-					Amount:           msgSubmitProposal.Content.Amount,
+				Data: map[string]interface{}{
+					"content": msgSubmitProposal.Content,
 				},
 				InitialDeposit:            msgSubmitProposal.InitialDeposit,
 				TotalDeposit:              msgSubmitProposal.InitialDeposit,
@@ -296,7 +301,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 			}
 
 			if insertProposalErr := proposalsView.Insert(&row); insertProposalErr != nil {
-				return fmt.Errorf("error inserting param change proposal into view: %v", insertProposalErr)
+				return fmt.Errorf("error inserting community pool spend proposal into view: %v", insertProposalErr)
 			}
 
 			maybeDepositorValidatorAddress := context.maybeProposerValidatorAddress
@@ -335,21 +340,23 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				Status:                       view.PROPOSAL_STATUS_DEPOSIT_PERIOD,
 				ProposerAddress:              msgSubmitProposal.ProposerAddress,
 				MaybeProposerOperatorAddress: context.maybeProposerValidatorAddress,
-				Data:                         msgSubmitProposal.Content.Plan,
-				InitialDeposit:               msgSubmitProposal.InitialDeposit,
-				TotalDeposit:                 msgSubmitProposal.InitialDeposit,
-				TotalVote:                    big.NewInt(0),
-				TransactionHash:              msgSubmitProposal.TxHash(),
-				SubmitBlockHeight:            height,
-				SubmitTime:                   blockTime,
-				DepositEndTime:               depositEndTime,
-				MaybeVotingStartTime:         nil,
-				MaybeVotingEndTime:           nil,
-				MaybeVotingEndBlockHeight:    nil,
+				Data: map[string]interface{}{
+					"content": msgSubmitProposal.Content,
+				},
+				InitialDeposit:            msgSubmitProposal.InitialDeposit,
+				TotalDeposit:              msgSubmitProposal.InitialDeposit,
+				TotalVote:                 big.NewInt(0),
+				TransactionHash:           msgSubmitProposal.TxHash(),
+				SubmitBlockHeight:         height,
+				SubmitTime:                blockTime,
+				DepositEndTime:            depositEndTime,
+				MaybeVotingStartTime:      nil,
+				MaybeVotingEndTime:        nil,
+				MaybeVotingEndBlockHeight: nil,
 			}
 
 			if insertProposalErr := proposalsView.Insert(&row); insertProposalErr != nil {
-				return fmt.Errorf("error inserting param software upgrade proposal into view: %v", insertProposalErr)
+				return fmt.Errorf("error inserting software upgrade proposal into view: %v", insertProposalErr)
 			}
 
 			maybeDepositorValidatorAddress := context.maybeProposerValidatorAddress
@@ -402,7 +409,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 			}
 
 			if insertProposalErr := proposalsView.Insert(&row); insertProposalErr != nil {
-				return fmt.Errorf("error inserting cancel software upgrade proposal proposal into view: %v", insertProposalErr)
+				return fmt.Errorf("error inserting submit cancel software upgrade proposal into view: %v", insertProposalErr)
 			}
 
 			maybeDepositorValidatorAddress := context.maybeProposerValidatorAddress
@@ -441,17 +448,19 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				Status:                       view.PROPOSAL_STATUS_DEPOSIT_PERIOD,
 				ProposerAddress:              MsgSubmitUnknownProposal.ProposerAddress,
 				MaybeProposerOperatorAddress: context.maybeProposerValidatorAddress,
-				Data:                         MsgSubmitUnknownProposal.Content.RawContent,
-				InitialDeposit:               MsgSubmitUnknownProposal.InitialDeposit,
-				TotalDeposit:                 MsgSubmitUnknownProposal.InitialDeposit,
-				TotalVote:                    big.NewInt(0),
-				TransactionHash:              MsgSubmitUnknownProposal.TxHash(),
-				SubmitBlockHeight:            height,
-				SubmitTime:                   blockTime,
-				DepositEndTime:               depositEndTime,
-				MaybeVotingStartTime:         nil,
-				MaybeVotingEndTime:           nil,
-				MaybeVotingEndBlockHeight:    nil,
+				Data: map[string]interface{}{
+					"Content": MsgSubmitUnknownProposal.Content,
+				},
+				InitialDeposit:            MsgSubmitUnknownProposal.InitialDeposit,
+				TotalDeposit:              MsgSubmitUnknownProposal.InitialDeposit,
+				TotalVote:                 big.NewInt(0),
+				TransactionHash:           MsgSubmitUnknownProposal.TxHash(),
+				SubmitBlockHeight:         height,
+				SubmitTime:                blockTime,
+				DepositEndTime:            depositEndTime,
+				MaybeVotingStartTime:      nil,
+				MaybeVotingEndTime:        nil,
+				MaybeVotingEndBlockHeight: nil,
 			}
 
 			if insertProposalErr := proposalsView.Insert(&row); insertProposalErr != nil {
@@ -475,6 +484,61 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 			}
 			if updateDepositorTotalErr := depositorsTotalView.Increment(
 				*MsgSubmitUnknownProposal.MaybeProposalId, 1,
+			); updateDepositorTotalErr != nil {
+				return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
+			}
+
+		} else if msgSubmitProposal, ok := event.(*event_usecase.MsgSubmitProposal); ok {
+			context, err := projection.prepareNewProposalSubmissionContext(rdbTxHandle, msgSubmitProposal.Proposer)
+			if err != nil {
+				return err
+			}
+
+			depositEndTime := blockTime.Add(context.maxDepositPeriod)
+			row := view.ProposalRow{
+				ProposalId:                   *msgSubmitProposal.MaybeProposalId,
+				Title:                        "",
+				Description:                  "",
+				Type:                         msgSubmitProposal.MsgType(),
+				Status:                       view.PROPOSAL_STATUS_DEPOSIT_PERIOD,
+				ProposerAddress:              msgSubmitProposal.Proposer,
+				MaybeProposerOperatorAddress: context.maybeProposerValidatorAddress,
+				Data:                         msgSubmitProposal.Messages,
+				InitialDeposit:               msgSubmitProposal.InitialDeposit,
+				TotalDeposit:                 msgSubmitProposal.InitialDeposit,
+				TotalVote:                    big.NewInt(0),
+				TransactionHash:              msgSubmitProposal.TxHash(),
+				SubmitBlockHeight:            height,
+				SubmitTime:                   blockTime,
+				DepositEndTime:               depositEndTime,
+				MaybeVotingStartTime:         nil,
+				MaybeVotingEndTime:           nil,
+				MaybeVotingEndBlockHeight:    nil,
+				Metadata:                     msgSubmitProposal.Metadata,
+			}
+
+			if insertProposalErr := proposalsView.Insert(&row); insertProposalErr != nil {
+				return fmt.Errorf("error inserting submit proposal into view: %v", insertProposalErr)
+			}
+
+			maybeDepositorValidatorAddress := context.maybeProposerValidatorAddress
+
+			depositorsView := NewDepositors(rdbTxHandle)
+			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
+
+			if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
+				ProposalId:                    *msgSubmitProposal.MaybeProposalId,
+				DepositorAddress:              msgSubmitProposal.Proposer,
+				MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
+				TransactionHash:               msgSubmitProposal.TxHash(),
+				DepositAtBlockHeight:          height,
+				DepositAtBlockTime:            blockTime,
+				Amount:                        msgSubmitProposal.InitialDeposit,
+			}); insertDepositorErr != nil {
+				return fmt.Errorf("error inserting proposer deposit record into view: %v", insertDepositorErr)
+			}
+			if updateDepositorTotalErr := depositorsTotalView.Increment(
+				*msgSubmitProposal.MaybeProposalId, 1,
 			); updateDepositorTotalErr != nil {
 				return fmt.Errorf("error inserting proposer deposit total record into view: %v", updateDepositorTotalErr)
 			}
@@ -548,6 +612,50 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 			maybeDepositorValidatorRow, err := validatorsView.FindLastBy(validatorbase_view.ValidatorIdentity{
 				MaybeInititalDelegatorAddress: &deposit.Depositor,
 			})
+
+			var maybeDepositorValidatorAddress *string
+			if err != nil {
+				if !errors.Is(err, rdb.ErrNoRows) {
+					return fmt.Errorf("error querying depositor validator address: %v", err)
+				}
+			} else {
+				maybeDepositorValidatorAddress = &maybeDepositorValidatorRow.OperatorAddress
+			}
+
+			depositorsView := NewDepositors(rdbTxHandle)
+			depositorsTotalView := NewDepositorsTotal(rdbTxHandle)
+			if insertDepositorErr := depositorsView.Insert(&view.DepositorRow{
+				ProposalId:                    deposit.ProposalId,
+				DepositorAddress:              deposit.Depositor,
+				MaybeDepositorOperatorAddress: maybeDepositorValidatorAddress,
+				TransactionHash:               deposit.TxHash(),
+				DepositAtBlockHeight:          height,
+				DepositAtBlockTime:            blockTime,
+				Amount:                        deposit.Amount,
+			}); insertDepositorErr != nil {
+				return fmt.Errorf("error inserting depositor record into view: %v", insertDepositorErr)
+			}
+			if updateDepositorTotalErr := depositorsTotalView.Increment(
+				deposit.ProposalId, 1,
+			); updateDepositorTotalErr != nil {
+				return fmt.Errorf("error inserting depositor total record into view: %v", updateDepositorTotalErr)
+			}
+
+		} else if deposit, ok := event.(*event_usecase.MsgDepositV1); ok {
+			mutProposal, queryProposalErr := proposalsView.FindById(deposit.ProposalId)
+			if queryProposalErr != nil {
+				return fmt.Errorf("error querying proposal which has deposit: %v", queryProposalErr)
+			}
+
+			mutProposal.TotalDeposit = mutProposal.TotalDeposit.Add(deposit.Amount...)
+			if updateProposalErr := proposalsView.Update(&mutProposal.ProposalRow); updateProposalErr != nil {
+				return fmt.Errorf("error updating proposal which has deposit: %v", updateProposalErr)
+			}
+
+			validatorsView := ValidatorBaseGetView(projection.validatorBase, rdbTxHandle)
+			maybeDepositorValidatorRow, err := validatorsView.FindLastBy(validatorbase_view.ValidatorIdentity{
+				MaybeInititalDelegatorAddress: &deposit.Depositor,
+			})
 			var maybeDepositorValidatorAddress *string
 			if err != nil {
 				if !errors.Is(err, rdb.ErrNoRows) {
@@ -591,14 +699,16 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 			}
 
 			votesView := NewVotes(rdbTxHandle)
+			mutVoteRows, queryExistingVoteRowErr := votesView.FindByProposalIdVoter(vote.ProposalId, vote.Voter)
 
-			mutVoteRow, queryExistingVoteRowErr := votesView.FindByProposalIdVoter(vote.ProposalId, vote.Voter)
-			if queryExistingVoteRowErr != nil {
-				if !errors.Is(queryExistingVoteRowErr, rdb.ErrNoRows) {
-					return fmt.Errorf(
-						"error finding voter record with same proposal id and voter: %v",
-						queryExistingVoteRowErr,
-					)
+			if len(mutVoteRows) <= 0 {
+				if queryExistingVoteRowErr != nil {
+					if !errors.Is(queryExistingVoteRowErr, rdb.ErrNoRows) {
+						return fmt.Errorf(
+							"error finding voter record with same proposal id and voter: %v",
+							queryExistingVoteRowErr,
+						)
+					}
 				}
 
 				// vote record does not exists
@@ -611,6 +721,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 					VoteAtBlockTime:           blockTime,
 					Answer:                    vote.Option,
 					Histories:                 make([]view.VoteHistory, 0),
+					Weight:                    "1.000000000000000000",
 				}); insertVoteErr != nil {
 					return fmt.Errorf("error inserting vote record to view: %v", insertVoteErr)
 				}
@@ -631,20 +742,229 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				}
 
 			} else {
-				// vote record already exists
-				mutVoteRow.Histories = append(mutVoteRow.Histories, view.VoteHistory{
-					TransactionHash:   mutVoteRow.TransactionHash,
-					VoteAtBlockHeight: mutVoteRow.VoteAtBlockHeight,
-					VoteAtBlockTime:   mutVoteRow.VoteAtBlockTime,
-					Answer:            mutVoteRow.Answer,
-				})
-				mutVoteRow.TransactionHash = vote.TxHash()
-				mutVoteRow.VoteAtBlockHeight = height
-				mutVoteRow.VoteAtBlockTime = blockTime
-				mutVoteRow.Answer = vote.Option
+				var histories []view.VoteHistory
 
-				if updateVoteErr := votesView.Update(&mutVoteRow.VoteRow); updateVoteErr != nil {
-					return fmt.Errorf("error updating existing vote record: %v", updateVoteErr)
+				// vote record already exists
+				for _, mutVoteRow := range mutVoteRows {
+					histories = append(histories, view.VoteHistory{
+						TransactionHash:   mutVoteRow.TransactionHash,
+						VoteAtBlockHeight: mutVoteRow.VoteAtBlockHeight,
+						VoteAtBlockTime:   mutVoteRow.VoteAtBlockTime,
+						Answer:            mutVoteRow.Answer,
+						Metadata:          mutVoteRow.Metadata,
+						Weight:            mutVoteRow.Weight,
+					})
+				}
+
+				// remove all existing votes
+				if _, deleteVoteErr := votesView.DeleteByProposalIdVoter(vote.ProposalId, vote.Voter); deleteVoteErr != nil {
+					return fmt.Errorf("error deleting existing vote records: %v", deleteVoteErr)
+				}
+
+				// insert the latest vote
+				if insertVoteErr := votesView.Insert(&view.VoteRow{
+					ProposalId:                vote.ProposalId,
+					VoterAddress:              vote.Voter,
+					MaybeVoterOperatorAddress: maybeVoterOperatorAddress,
+					TransactionHash:           vote.TxHash(),
+					VoteAtBlockHeight:         height,
+					VoteAtBlockTime:           blockTime,
+					Answer:                    vote.Option,
+					Histories:                 histories,
+					Weight:                    "1.000000000000000000",
+				}); insertVoteErr != nil {
+					return fmt.Errorf("error inserting vote record to view: %v", insertVoteErr)
+				}
+			}
+		} else if vote, ok := event.(*event_usecase.MsgVoteV1); ok {
+			validatorsView := ValidatorBaseGetView(projection.validatorBase, rdbTxHandle)
+			var maybeVoterOperatorAddress *string
+			maybeVoterValidatorRow, err := validatorsView.FindLastBy(validatorbase_view.ValidatorIdentity{
+				MaybeInititalDelegatorAddress: &vote.Voter,
+			})
+			if err != nil {
+				if !errors.Is(err, rdb.ErrNoRows) {
+					return fmt.Errorf("error querying voter validator address: %v", err)
+				}
+			} else {
+				maybeVoterOperatorAddress = &maybeVoterValidatorRow.OperatorAddress
+			}
+
+			votesView := NewVotes(rdbTxHandle)
+			mutVoteRows, queryExistingVoteRowErr := votesView.FindByProposalIdVoter(vote.ProposalId, vote.Voter)
+			if len(mutVoteRows) <= 0 {
+				if queryExistingVoteRowErr != nil {
+					if !errors.Is(queryExistingVoteRowErr, rdb.ErrNoRows) {
+						return fmt.Errorf(
+							"error finding voter record with same proposal id and voter: %v",
+							queryExistingVoteRowErr,
+						)
+					}
+				}
+
+				// vote record does not exists
+				if insertVoteErr := votesView.Insert(&view.VoteRow{
+					ProposalId:                vote.ProposalId,
+					VoterAddress:              vote.Voter,
+					MaybeVoterOperatorAddress: maybeVoterOperatorAddress,
+					TransactionHash:           vote.TxHash(),
+					VoteAtBlockHeight:         height,
+					VoteAtBlockTime:           blockTime,
+					Answer:                    vote.Option,
+					Histories:                 make([]view.VoteHistory, 0),
+					Metadata:                  vote.Metadata,
+					Weight:                    "1.000000000000000000",
+				}); insertVoteErr != nil {
+					return fmt.Errorf("error inserting vote record to view: %v", insertVoteErr)
+				}
+
+				mutProposal, queryVotedProposalErr := proposalsView.FindById(vote.ProposalId)
+				if queryVotedProposalErr != nil {
+					return fmt.Errorf("error querying proposal which has new vote: %v", queryVotedProposalErr)
+				}
+
+				mutProposal.TotalVote = new(big.Int).Add(mutProposal.TotalVote, new(big.Int).SetInt64(int64(1)))
+				if updateProposalErr := proposalsView.Update(&mutProposal.ProposalRow); updateProposalErr != nil {
+					return fmt.Errorf("error updating proposal which has new vote: %v", updateProposalErr)
+				}
+
+				votesTotalView := NewVotesTotal(rdbTxHandle)
+				if updateVoteTotalErr := votesTotalView.Increment(vote.ProposalId, 1); updateVoteTotalErr != nil {
+					return fmt.Errorf("error updating votes total record: %v", updateVoteTotalErr)
+				}
+
+			} else {
+				var histories []view.VoteHistory
+
+				// vote record already exists
+				for _, mutVoteRow := range mutVoteRows {
+					histories = append(histories, view.VoteHistory{
+						TransactionHash:   mutVoteRow.TransactionHash,
+						VoteAtBlockHeight: mutVoteRow.VoteAtBlockHeight,
+						VoteAtBlockTime:   mutVoteRow.VoteAtBlockTime,
+						Answer:            mutVoteRow.Answer,
+						Metadata:          mutVoteRow.Metadata,
+						Weight:            mutVoteRow.Weight,
+					})
+				}
+
+				// remove all existing votes
+				if _, deleteVoteErr := votesView.DeleteByProposalIdVoter(vote.ProposalId, vote.Voter); deleteVoteErr != nil {
+					return fmt.Errorf("error deleting existing vote records: %v", deleteVoteErr)
+				}
+
+				// insert the latest vote
+				if insertVoteErr := votesView.Insert(&view.VoteRow{
+					ProposalId:                vote.ProposalId,
+					VoterAddress:              vote.Voter,
+					MaybeVoterOperatorAddress: maybeVoterOperatorAddress,
+					TransactionHash:           vote.TxHash(),
+					VoteAtBlockHeight:         height,
+					VoteAtBlockTime:           blockTime,
+					Answer:                    vote.Option,
+					Histories:                 histories,
+					Metadata:                  vote.Metadata,
+					Weight:                    "1.000000000000000000",
+				}); insertVoteErr != nil {
+					return fmt.Errorf("error inserting vote record to view: %v", insertVoteErr)
+				}
+			}
+		} else if vote, ok := event.(*event_usecase.MsgVoteWeightedV1); ok {
+			validatorsView := ValidatorBaseGetView(projection.validatorBase, rdbTxHandle)
+			var maybeVoterOperatorAddress *string
+			maybeVoterValidatorRow, err := validatorsView.FindLastBy(validatorbase_view.ValidatorIdentity{
+				MaybeInititalDelegatorAddress: &vote.Voter,
+			})
+			if err != nil {
+				if !errors.Is(err, rdb.ErrNoRows) {
+					return fmt.Errorf("error querying voter validator address: %v", err)
+				}
+			} else {
+				maybeVoterOperatorAddress = &maybeVoterValidatorRow.OperatorAddress
+			}
+
+			votesView := NewVotes(rdbTxHandle)
+			mutVoteRows, queryExistingVoteRowErr := votesView.FindByProposalIdVoter(vote.ProposalId, vote.Voter)
+
+			if len(mutVoteRows) <= 0 {
+				if queryExistingVoteRowErr != nil {
+					if !errors.Is(queryExistingVoteRowErr, rdb.ErrNoRows) {
+						return fmt.Errorf(
+							"error finding voter record with same proposal id and voter: %v",
+							queryExistingVoteRowErr,
+						)
+					}
+				}
+
+				for _, voteOption := range vote.VoteOptions {
+					// vote record does not exists
+					if insertVoteErr := votesView.Insert(&view.VoteRow{
+						ProposalId:                vote.ProposalId,
+						VoterAddress:              vote.Voter,
+						MaybeVoterOperatorAddress: maybeVoterOperatorAddress,
+						TransactionHash:           vote.TxHash(),
+						VoteAtBlockHeight:         height,
+						VoteAtBlockTime:           blockTime,
+						Answer:                    voteOption.Option,
+						Histories:                 make([]view.VoteHistory, 0),
+						Metadata:                  vote.Metadata,
+						Weight:                    voteOption.Weight,
+					}); insertVoteErr != nil {
+						return fmt.Errorf("error inserting vote record to view: %v", insertVoteErr)
+					}
+				}
+
+				mutProposal, queryVotedProposalErr := proposalsView.FindById(vote.ProposalId)
+				if queryVotedProposalErr != nil {
+					return fmt.Errorf("error querying proposal which has new vote: %v", queryVotedProposalErr)
+				}
+
+				mutProposal.TotalVote = new(big.Int).Add(mutProposal.TotalVote, new(big.Int).SetInt64(int64(1)))
+				if updateProposalErr := proposalsView.Update(&mutProposal.ProposalRow); updateProposalErr != nil {
+					return fmt.Errorf("error updating proposal which has new vote: %v", updateProposalErr)
+				}
+
+				votesTotalView := NewVotesTotal(rdbTxHandle)
+				if updateVoteTotalErr := votesTotalView.Increment(vote.ProposalId, 1); updateVoteTotalErr != nil {
+					return fmt.Errorf("error updating votes total record: %v", updateVoteTotalErr)
+				}
+
+			} else {
+				var histories []view.VoteHistory
+
+				// vote record already exists
+				for _, mutVoteRow := range mutVoteRows {
+					histories = append(histories, view.VoteHistory{
+						TransactionHash:   mutVoteRow.TransactionHash,
+						VoteAtBlockHeight: mutVoteRow.VoteAtBlockHeight,
+						VoteAtBlockTime:   mutVoteRow.VoteAtBlockTime,
+						Answer:            mutVoteRow.Answer,
+						Metadata:          mutVoteRow.Metadata,
+						Weight:            mutVoteRow.Weight,
+					})
+				}
+
+				// remove all existing votes
+				if _, deleteVoteErr := votesView.DeleteByProposalIdVoter(vote.ProposalId, vote.Voter); deleteVoteErr != nil {
+					return fmt.Errorf("error deleting existing vote records: %v", deleteVoteErr)
+				}
+
+				for _, voteOption := range vote.VoteOptions {
+					// insert the latest vote
+					if insertVoteErr := votesView.Insert(&view.VoteRow{
+						ProposalId:                vote.ProposalId,
+						VoterAddress:              vote.Voter,
+						MaybeVoterOperatorAddress: maybeVoterOperatorAddress,
+						TransactionHash:           vote.TxHash(),
+						VoteAtBlockHeight:         height,
+						VoteAtBlockTime:           blockTime,
+						Answer:                    voteOption.Option,
+						Histories:                 histories,
+						Metadata:                  vote.Metadata,
+						Weight:                    voteOption.Weight,
+					}); insertVoteErr != nil {
+						return fmt.Errorf("error inserting vote record to view: %v", insertVoteErr)
+					}
 				}
 			}
 		}

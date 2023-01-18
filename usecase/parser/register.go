@@ -1,6 +1,7 @@
 package parser
 
 import (
+	cosmos_gov_v1 "github.com/crypto-com/chain-indexing/usecase/parser/gov/v1"
 	"github.com/crypto-com/chain-indexing/usecase/parser/ibc"
 	"github.com/crypto-com/chain-indexing/usecase/parser/icaauth"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
@@ -24,6 +25,12 @@ func InitParsers(manager *utils.CosmosParserManager) {
 	manager.RegisterParser("/cosmos.gov.v1beta1.MsgSubmitProposal", BEGIN_BLOCK_HEIGHT, ParseMsgSubmitProposal)
 	manager.RegisterParser("/cosmos.gov.v1beta1.MsgVote", BEGIN_BLOCK_HEIGHT, ParseMsgVote)
 	manager.RegisterParser("/cosmos.gov.v1beta1.MsgDeposit", BEGIN_BLOCK_HEIGHT, ParseMsgDeposit)
+
+	// cosmos gov v1
+	manager.RegisterParser("/cosmos.gov.v1.MsgDeposit", BEGIN_BLOCK_HEIGHT, cosmos_gov_v1.ParseMsgDeposit)
+	manager.RegisterParser("/cosmos.gov.v1.MsgSubmitProposal", BEGIN_BLOCK_HEIGHT, cosmos_gov_v1.ParseMsgSubmitProposal)
+	manager.RegisterParser("/cosmos.gov.v1.MsgVote", BEGIN_BLOCK_HEIGHT, cosmos_gov_v1.ParseMsgVote)
+	manager.RegisterParser("/cosmos.gov.v1.MsgVoteWeighted", BEGIN_BLOCK_HEIGHT, cosmos_gov_v1.ParseMsgVoteWeighted)
 
 	// cosmos staking
 	manager.RegisterParser("/cosmos.staking.v1beta1.MsgDelegate", BEGIN_BLOCK_HEIGHT, ParseMsgDelegate)
