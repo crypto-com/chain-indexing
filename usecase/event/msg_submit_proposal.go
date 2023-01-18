@@ -3,7 +3,7 @@ package event
 import (
 	"bytes"
 
-	model "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
+	model_gov_v1 "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 	jsoniter "github.com/json-iterator/go"
@@ -17,12 +17,12 @@ const MSG_SUBMIT_PROPOSAL_FAILED = "/cosmos.gov.v1.MsgSubmitProposal.Failed"
 type MsgSubmitProposal struct {
 	MsgBase
 
-	model.MsgSubmitProposalParams
+	model_gov_v1.MsgSubmitProposalParams
 }
 
 func NewMsgSubmitProposal(
 	msgCommonParams MsgCommonParams,
-	params model.MsgSubmitProposalParams,
+	params model_gov_v1.MsgSubmitProposalParams,
 ) *MsgSubmitProposal {
 	return &MsgSubmitProposal{
 		NewMsgBase(MsgBaseParams{

@@ -4,7 +4,7 @@ import (
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/model"
-	v1_model "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
+	model_gov_v1 "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -50,7 +50,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					MsgIndex:    0,
 				},
 
-				v1_model.MsgSubmitProposalParams{
+				model_gov_v1.MsgSubmitProposalParams{
 					MaybeProposalId: primptr.String("3"),
 					Proposer:        "crc12luku6uxehhak02py4rcz65zu0swh7wjsrw0pp",
 					InitialDeposit: coin.Coins{
@@ -113,7 +113,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					MsgIndex:    0,
 				},
 
-				v1_model.MsgSubmitProposalParams{
+				model_gov_v1.MsgSubmitProposalParams{
 					MaybeProposalId: primptr.String("4"),
 					Proposer:        "crc12luku6uxehhak02py4rcz65zu0swh7wjsrw0pp",
 					InitialDeposit: coin.Coins{
@@ -169,7 +169,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					MsgIndex:    0,
 				},
 
-				v1_model.MsgSubmitProposalParams{
+				model_gov_v1.MsgSubmitProposalParams{
 					MaybeProposalId: primptr.String("6"),
 					Proposer:        "crc12luku6uxehhak02py4rcz65zu0swh7wjsrw0pp",
 					InitialDeposit: coin.Coins{

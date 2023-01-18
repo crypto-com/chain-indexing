@@ -6,7 +6,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
-	v1_model "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
+	model_gov_v1 "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
 )
 
 var _ = Describe("Event", func() {
@@ -20,7 +20,7 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 			anyProposalId := "1"
 			anyVoter := "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3"
-			anyVoteOptions := []v1_model.VoteOption{
+			anyVoteOptions := []model_gov_v1.VoteOption{
 				{
 					Option: "VOTE_OPTION_YES",
 					Weight: "0.2",
@@ -31,7 +31,7 @@ var _ = Describe("Event", func() {
 				},
 			}
 			anyMetadata := "Metadata"
-			anyParams := v1_model.MsgVoteWeightedParams{
+			anyParams := model_gov_v1.MsgVoteWeightedParams{
 				ProposalId:  anyProposalId,
 				Voter:       anyVoter,
 				VoteOptions: anyVoteOptions,
@@ -70,7 +70,7 @@ var _ = Describe("Event", func() {
 			anyMsgIndex := 2
 			anyProposalId := "1"
 			anyVoter := "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3"
-			anyVoteOptions := []v1_model.VoteOption{
+			anyVoteOptions := []model_gov_v1.VoteOption{
 				{
 					Option: "VOTE_OPTION_YES",
 					Weight: "0.2",
@@ -81,7 +81,7 @@ var _ = Describe("Event", func() {
 				},
 			}
 			anyMetadata := "Metadata"
-			anyParams := v1_model.MsgVoteWeightedParams{
+			anyParams := model_gov_v1.MsgVoteWeightedParams{
 				ProposalId:  anyProposalId,
 				Voter:       anyVoter,
 				VoteOptions: anyVoteOptions,

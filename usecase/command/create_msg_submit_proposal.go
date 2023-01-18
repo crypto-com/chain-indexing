@@ -3,17 +3,17 @@ package command
 import (
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/usecase/event"
-	v1_model "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
+	model_gov_v1 "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
 )
 
 type CreateMsgSubmitProposal struct {
 	msgCommonParams event.MsgCommonParams
-	params          v1_model.MsgSubmitProposalParams
+	params          model_gov_v1.MsgSubmitProposalParams
 }
 
 func NewCreateMsgSubmitProposal(
 	msgCommonParams event.MsgCommonParams,
-	params v1_model.MsgSubmitProposalParams,
+	params model_gov_v1.MsgSubmitProposalParams,
 ) *CreateMsgSubmitProposal {
 	return &CreateMsgSubmitProposal{
 		msgCommonParams,

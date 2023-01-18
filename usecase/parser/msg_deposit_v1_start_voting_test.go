@@ -9,7 +9,7 @@ import (
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
-	v1_model "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
+	model_gov_v1 "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
 	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
 )
@@ -49,7 +49,7 @@ var _ = Describe("ParseMsgCommands", func() {
 						TxSuccess:   true,
 						MsgIndex:    0,
 					},
-					v1_model.MsgDepositParams{
+					model_gov_v1.MsgDepositParams{
 						ProposalId: "5",
 						Depositor:  "crc18z6q38mhvtsvyr5mak8fj8s8g4gw7kjjtsgrn7",
 						Amount:     coin.MustParseCoinsNormalized("100000basecro"),

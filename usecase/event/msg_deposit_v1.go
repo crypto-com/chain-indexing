@@ -3,7 +3,7 @@ package event
 import (
 	"bytes"
 
-	model "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
+	model_gov_v1 "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
 
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 
@@ -24,7 +24,7 @@ type MsgDepositV1 struct {
 	Amount     coin.Coins `json:"amount"`
 }
 
-func NewMsgDepositV1(msgCommonParams MsgCommonParams, params model.MsgDepositParams) *MsgDepositV1 {
+func NewMsgDepositV1(msgCommonParams MsgCommonParams, params model_gov_v1.MsgDepositParams) *MsgDepositV1 {
 	return &MsgDepositV1{
 		NewMsgBase(MsgBaseParams{
 			MsgName:         MSG_DEPOSIT_V1,

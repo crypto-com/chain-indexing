@@ -6,7 +6,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
-	v1_model "github.com/crypto-com/chain-indexing/usecase/model/v1"
+	model_gov_v1 "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
 )
 
 var _ = Describe("Event", func() {
@@ -22,7 +22,7 @@ var _ = Describe("Event", func() {
 			anyVoter := "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3"
 			anyOption := "VOTE_OPTION_YES"
 			anyMetadata := "Metadata"
-			anyParams := v1_model.MsgVoteParams{
+			anyParams := model_gov_v1.MsgVoteParams{
 				ProposalId: anyProposalId,
 				Voter:      anyVoter,
 				Option:     anyOption,
@@ -63,7 +63,7 @@ var _ = Describe("Event", func() {
 			anyVoter := "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3"
 			anyOption := "VOTE_OPTION_YES"
 			anyMetadata := "Metadata"
-			anyParams := v1_model.MsgVoteParams{
+			anyParams := model_gov_v1.MsgVoteParams{
 				ProposalId: anyProposalId,
 				Voter:      anyVoter,
 				Option:     anyOption,

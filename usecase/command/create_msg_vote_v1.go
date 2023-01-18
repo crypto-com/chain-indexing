@@ -3,17 +3,17 @@ package command
 import (
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/usecase/event"
-	v1_model "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
+	model_gov_v1 "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
 )
 
 type CreateMsgVotV1 struct {
 	msgCommonParams event.MsgCommonParams
-	params          v1_model.MsgVoteParams
+	params          model_gov_v1.MsgVoteParams
 }
 
 func NewCreateMsgVoteV1(
 	msgCommonParams event.MsgCommonParams,
-	params v1_model.MsgVoteParams,
+	params model_gov_v1.MsgVoteParams,
 ) *CreateMsgVotV1 {
 	return &CreateMsgVotV1{
 		msgCommonParams,

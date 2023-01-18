@@ -10,7 +10,7 @@ import (
 
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
-	v1_model "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
+	model_gov_v1 "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
 	mapstructure_utils "github.com/crypto-com/chain-indexing/usecase/parser/utils/mapstructure"
@@ -39,7 +39,7 @@ func ParseMsgDeposit(
 	cmds := []command.Command{command_usecase.NewCreateMsgDepositV1(
 		parserParams.MsgCommonParams,
 
-		v1_model.MsgDepositParams{
+		model_gov_v1.MsgDepositParams{
 			ProposalId: parserParams.Msg["proposal_id"].(string),
 			Depositor:  utils.AddressParse(parserParams.Msg["depositor"].(string)),
 			Amount:     amount,
@@ -71,7 +71,7 @@ func ParseMsgDeposit(
 func ParseMsgSubmitProposal(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
-	var rawMsg v1_model.RawMsgSubmitProposal
+	var rawMsg model_gov_v1.RawMsgSubmitProposal
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -150,7 +150,7 @@ func ParseMsgSubmitProposal(
 		return []command.Command{command_usecase.NewCreateMsgSubmitProposal(
 			parserParams.MsgCommonParams,
 
-			v1_model.MsgSubmitProposalParams{
+			model_gov_v1.MsgSubmitProposalParams{
 				MaybeProposalId: nil,
 				Messages:        rawMsg.Messages,
 				InitialDeposit:  initialDepositAmount,
@@ -181,7 +181,7 @@ func ParseMsgSubmitProposal(
 		command_usecase.NewCreateMsgSubmitProposal(
 			parserParams.MsgCommonParams,
 
-			v1_model.MsgSubmitProposalParams{
+			model_gov_v1.MsgSubmitProposalParams{
 				MaybeProposalId: proposalId,
 				Messages:        rawMsg.Messages,
 				InitialDeposit:  initialDepositAmount,
@@ -206,7 +206,7 @@ func ParseMsgVote(
 	return []command.Command{command_usecase.NewCreateMsgVoteV1(
 		parserParams.MsgCommonParams,
 
-		v1_model.MsgVoteParams{
+		model_gov_v1.MsgVoteParams{
 			ProposalId: parserParams.Msg["proposal_id"].(string),
 			Voter:      utils.AddressParse(parserParams.Msg["voter"].(string)),
 			Option:     parserParams.Msg["option"].(string),
@@ -218,7 +218,7 @@ func ParseMsgVote(
 func ParseMsgVoteWeighted(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
-	var rawMsg v1_model.RawMsgVoteWeight
+	var rawMsg model_gov_v1.RawMsgVoteWeight
 	decoderConfig := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -249,7 +249,7 @@ func ParseMsgVoteWeighted(
 		cmds = append(cmds, command_usecase.NewCreateMsgVoteWeightedV1(
 			parserParams.MsgCommonParams,
 
-			v1_model.MsgVoteWeightedParams{
+			model_gov_v1.MsgVoteWeightedParams{
 				ProposalId:  parserParams.Msg["proposal_id"].(string),
 				Voter:       utils.AddressParse(parserParams.Msg["voter"].(string)),
 				VoteOptions: rawMsg.Options,

@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
-	v1_model "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
+	model_gov_v1 "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
 )
 
 var _ = Describe("Event", func() {
@@ -22,7 +22,7 @@ var _ = Describe("Event", func() {
 			anyProposalId := "3"
 			anyDepositor := "crc18z6q38mhvtsvyr5mak8fj8s8g4gw7kjjtsgrn7"
 			anyAmount := coin.MustParseCoinsNormalized("100000basecro")
-			anyParams := v1_model.MsgDepositParams{
+			anyParams := model_gov_v1.MsgDepositParams{
 				ProposalId: anyProposalId,
 				Depositor:  anyDepositor,
 				Amount:     anyAmount,
@@ -60,7 +60,7 @@ var _ = Describe("Event", func() {
 			anyProposalId := "3"
 			anyDepositor := "crc18z6q38mhvtsvyr5mak8fj8s8g4gw7kjjtsgrn7"
 			anyAmount := coin.MustParseCoinsNormalized("100000basecro, 10cro")
-			anyParams := v1_model.MsgDepositParams{
+			anyParams := model_gov_v1.MsgDepositParams{
 				ProposalId: anyProposalId,
 				Depositor:  anyDepositor,
 				Amount:     anyAmount,

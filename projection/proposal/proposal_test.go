@@ -28,7 +28,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	usecase_event "github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
-	v1_model "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
+	model_gov_v1 "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
 )
 
 func NewProposalProjection(rdbConn rdb.Conn) *proposal.Proposal {
@@ -801,7 +801,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 							MsgIndex:    0,
 						},
 					}),
-					MsgSubmitProposalParams: v1_model.MsgSubmitProposalParams{
+					MsgSubmitProposalParams: model_gov_v1.MsgSubmitProposalParams{
 						MaybeProposalId: primptr.String("MaybeProposalId"),
 						Proposer:        "Proposer",
 						Messages: []interface{}{
@@ -957,7 +957,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 							MsgIndex:    0,
 						},
 					}),
-					MsgSubmitProposalParams: v1_model.MsgSubmitProposalParams{
+					MsgSubmitProposalParams: model_gov_v1.MsgSubmitProposalParams{
 						MaybeProposalId: primptr.String("MaybeProposalId"),
 						Proposer:        "Proposer",
 						InitialDeposit: []coin.Coin{
@@ -2057,7 +2057,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					}),
 					ProposalId: "ProposalId",
 					Voter:      "Voter",
-					VoteOptions: []v1_model.VoteOption{
+					VoteOptions: []model_gov_v1.VoteOption{
 						{
 							Option: "Option1",
 							Weight: "0.7",
@@ -2203,7 +2203,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					}),
 					ProposalId: "ProposalId",
 					Voter:      "Voter",
-					VoteOptions: []v1_model.VoteOption{
+					VoteOptions: []model_gov_v1.VoteOption{
 						{
 							Option: "Option1",
 							Weight: "0.7",
@@ -2362,7 +2362,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					}),
 					ProposalId: "ProposalId",
 					Voter:      "Voter",
-					VoteOptions: []v1_model.VoteOption{
+					VoteOptions: []model_gov_v1.VoteOption{
 						{
 							Option: "Option1",
 							Weight: "0.7",
