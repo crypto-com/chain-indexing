@@ -550,8 +550,8 @@ func (validatorsView *ValidatorsView) ListAll(
 			"imprecise_up_time",
 			"voted_gov_proposal",
 			"attention",
-			"-1 as recent_signed_blocks",
-			"-1 as recent_active_blocks",
+			"0 as recent_signed_blocks",
+			"0 as recent_active_blocks",
 		).From(
 			VALIDATORS_TABLE_NAME,
 		)
@@ -732,6 +732,7 @@ func (validatorsView *ValidatorsView) List(
 			"error building validators cumulative power SQL: %v, %w", err, rdb.ErrBuildSQLStmt,
 		)
 	}
+
 	rowsResult, err := validatorsView.rdb.Query(cumulativePowerSql, cumulativePowerSqlArgs...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error preparing cumulative power SQL: %v", err)
@@ -801,10 +802,7 @@ func (validatorsView *ValidatorsView) List(
 				"COUNT(CASE WHEN %s.signed THEN 1 END) as recent_signed_blocks",
 				VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
 			),
-			fmt.Sprintf(
-				"COUNT(%s.signed) as recent_active_blocks",
-				VALIDATOR_ACTIVE_BLOCKS_TABLE_NAME,
-			),
+			"COUNT(id) as recent_active_blocks",
 		).From(
 			VALIDATORS_TABLE_NAME,
 		).LeftJoin(
@@ -818,8 +816,7 @@ func (validatorsView *ValidatorsView) List(
 			),
 		).GroupBy(
 			fmt.Sprintf(
-				"%s.operator_address, %s.id",
-				VALIDATORS_TABLE_NAME,
+				"%s.id",
 				VALIDATORS_TABLE_NAME,
 			),
 		)
@@ -849,8 +846,8 @@ func (validatorsView *ValidatorsView) List(
 			"imprecise_up_time",
 			"voted_gov_proposal",
 			"attention",
-			"-1 as recent_signed_blocks",
-			"-1 as recent_active_blocks",
+			"0 as recent_signed_blocks",
+			"0 as recent_active_blocks",
 		).From(
 			VALIDATORS_TABLE_NAME,
 		)
@@ -865,7 +862,31 @@ func (validatorsView *ValidatorsView) List(
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
 		validatorsView.rdb,
+	).WithCustomTotalQueryFn(
+		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
+			totalStmtBuilder := validatorsView.rdb.StmtBuilder.Select(
+				"COUNT(*)",
+			).From(
+				VALIDATORS_TABLE_NAME,
+			)
+
+			if whereClause != nil {
+				totalStmtBuilder = totalStmtBuilder.Where(whereClause)
+			}
+
+			var total int64
+			totalStmtSql, totalStmtSqlArgs, totalStmtBuilderErr := totalStmtBuilder.ToSql()
+			if totalStmtBuilderErr != nil {
+				return -1, fmt.Errorf("error building total select SQL: %v", err)
+			}
+
+			if err = rdbHandle.QueryRow(totalStmtSql, totalStmtSqlArgs...).Scan(&total); err != nil {
+				return -1, fmt.Errorf("error executing total count select SQL: %v", err)
+			}
+			return total, nil
+		},
 	).BuildStmt(stmtBuilder)
+
 	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
 	if err != nil {
 		return nil, nil, fmt.Errorf("error building blocks select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)

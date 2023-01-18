@@ -509,35 +509,35 @@ func (projection *Validator) projectValidatorView(
 				)
 			}
 
-			if msgEditValidatorEvent.Description.Moniker != DO_NOT_MODIFY {
+			if msgEditValidatorEvent.Description.Moniker != DO_NOT_MODIFY && msgEditValidatorEvent.Description.Moniker != mutValidatorRow.Moniker {
 				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.MONIKER)
 				if isExceeded {
 					mutValidatorRow.Attention = true
 				}
 				mutValidatorRow.Moniker = msgEditValidatorEvent.Description.Moniker
 			}
-			if msgEditValidatorEvent.Description.Identity != DO_NOT_MODIFY {
+			if msgEditValidatorEvent.Description.Identity != DO_NOT_MODIFY && msgEditValidatorEvent.Description.Identity != mutValidatorRow.Identity {
 				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.IDENTITY)
 				if isExceeded {
 					mutValidatorRow.Attention = true
 				}
 				mutValidatorRow.Identity = msgEditValidatorEvent.Description.Identity
 			}
-			if msgEditValidatorEvent.Description.Details != DO_NOT_MODIFY {
+			if msgEditValidatorEvent.Description.Details != DO_NOT_MODIFY && msgEditValidatorEvent.Description.Details != mutValidatorRow.Details {
 				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.DETAILS)
 				if isExceeded {
 					mutValidatorRow.Attention = true
 				}
 				mutValidatorRow.Details = msgEditValidatorEvent.Description.Details
 			}
-			if msgEditValidatorEvent.Description.SecurityContact != DO_NOT_MODIFY {
+			if msgEditValidatorEvent.Description.SecurityContact != DO_NOT_MODIFY && msgEditValidatorEvent.Description.SecurityContact != mutValidatorRow.SecurityContact {
 				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.SECURITY_CONTACT)
 				if isExceeded {
 					mutValidatorRow.Attention = true
 				}
 				mutValidatorRow.SecurityContact = msgEditValidatorEvent.Description.SecurityContact
 			}
-			if msgEditValidatorEvent.Description.Website != DO_NOT_MODIFY {
+			if msgEditValidatorEvent.Description.Website != DO_NOT_MODIFY && msgEditValidatorEvent.Description.Website != mutValidatorRow.Website {
 				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.WEBSITE)
 				if isExceeded {
 					mutValidatorRow.Attention = true
@@ -545,7 +545,7 @@ func (projection *Validator) projectValidatorView(
 				mutValidatorRow.Website = msgEditValidatorEvent.Description.Website
 			}
 
-			if msgEditValidatorEvent.MaybeCommissionRate != nil {
+			if msgEditValidatorEvent.MaybeCommissionRate != nil && *msgEditValidatorEvent.MaybeCommissionRate != mutValidatorRow.CommissionRate {
 				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.COMMISSION_RATE)
 				isExceededMaxCommissionChange, errMaxCommissionChange := projection.isExceededMaxCommissionChange(mutValidatorRow, *msgEditValidatorEvent.MaybeCommissionRate, mutValidatorRow.CommissionRate, msgEditValidatorEvent.ValidatorAddress)
 				if errMaxCommissionChange != nil {
@@ -738,6 +738,13 @@ func (projection *Validator) countEditQuotaOnLastActivities(validatorActivities 
 			editQuotaCounter[key] = quota
 		}
 
+		lastEdit := map[string]interface{}{
+			"moniker":  DO_NOT_MODIFY,
+			"identity": DO_NOT_MODIFY,
+			"details":  DO_NOT_MODIFY,
+			"website":  DO_NOT_MODIFY,
+		}
+
 		// count previous changes
 		for _, activity := range mutValidatorActivities {
 			if activity.Data.Type != event_usecase.MSG_EDIT_VALIDATOR {
@@ -749,25 +756,32 @@ func (projection *Validator) countEditQuotaOnLastActivities(validatorActivities 
 				continue
 			}
 
-			pastDescription, pastDescriptionExists := content["description"].(map[string]interface{})
-			if !pastDescriptionExists {
+			description, descriptionExists := content["description"].(map[string]interface{})
+			if !descriptionExists {
 				continue
 			}
 
-			if pastDescription[constants.MONIKER] != DO_NOT_MODIFY {
+			if description[constants.MONIKER] != DO_NOT_MODIFY && description[constants.MONIKER] != lastEdit[constants.MONIKER] {
 				checkAndUpdateQuota(constants.MONIKER, &editQuotaCounter)
 			}
-			if pastDescription[constants.IDENTITY] != DO_NOT_MODIFY {
+			if description[constants.IDENTITY] != DO_NOT_MODIFY && description[constants.IDENTITY] != lastEdit[constants.IDENTITY] {
 				checkAndUpdateQuota(constants.IDENTITY, &editQuotaCounter)
 			}
-			if pastDescription[constants.DETAILS] != DO_NOT_MODIFY {
+			if description[constants.DETAILS] != DO_NOT_MODIFY && description[constants.DETAILS] != lastEdit[constants.DETAILS] {
 				checkAndUpdateQuota(constants.DETAILS, &editQuotaCounter)
 			}
-			if pastDescription[constants.WEBSITE] != DO_NOT_MODIFY {
+			if description[constants.WEBSITE] != DO_NOT_MODIFY && description[constants.WEBSITE] != lastEdit[constants.WEBSITE] {
 				checkAndUpdateQuota(constants.WEBSITE, &editQuotaCounter)
 			}
 			if content[constants.COMMISSION_RATE] != nil {
 				checkAndUpdateQuota(constants.COMMISSION_RATE, &editQuotaCounter)
+			}
+
+			lastEdit = map[string]interface{}{
+				"moniker":  description[constants.MONIKER],
+				"identity": description[constants.IDENTITY],
+				"details":  description[constants.DETAILS],
+				"website":  description[constants.WEBSITE],
 			}
 		}
 		return editQuotaCounter, nil
