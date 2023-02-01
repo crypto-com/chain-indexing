@@ -225,9 +225,7 @@ func ParseMsgSubmitTx(
 		rawInterchainAccountPacketData = ibc_model.InterchainAccountPacketData{}
 	}
 	if unmarshalErr := jsoniter.Unmarshal(rawPacketData, &rawInterchainAccountPacketData); unmarshalErr != nil {
-		if err := json.Unmarshal(rawPacketData, &rawInterchainAccountPacketData); err != nil {
-			rawInterchainAccountPacketData = ibc_model.InterchainAccountPacketData{}
-		}
+		rawInterchainAccountPacketData = ibc_model.InterchainAccountPacketData{}
 	}
 
 	cosmosTx, innerMsgs, deserializeErr := parserParams.TxDecoder.DeserializeCosmosTx(rawInterchainAccountPacketData.Data)
