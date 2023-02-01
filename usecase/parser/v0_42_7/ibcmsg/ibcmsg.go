@@ -230,8 +230,8 @@ func ParseMsgSubmitTx(
 		}
 	}
 
-	cosmosTx, innerMsgs, err := parserParams.TxDecoder.DeserializeCosmosTx(rawInterchainAccountPacketData.Data)
-	if err != nil {
+	cosmosTx, innerMsgs, deserializeErr := parserParams.TxDecoder.DeserializeCosmosTx(rawInterchainAccountPacketData.Data)
+	if deserializeErr != nil {
 		panic(fmt.Sprintf("error deserializing cosmos tx: %v", err))
 	}
 
