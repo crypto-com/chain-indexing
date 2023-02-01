@@ -327,6 +327,10 @@ func ParseMsgSubmitTx(
 		for innerMsgIndex, innerMsg := range cosmosTx.Messages {
 			switch innerMsg.TypeUrl {
 			case
+				// cosmos distribution
+				"/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+				"/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission",
+
 				// cosmos staking
 				"/cosmos.staking.v1beta1.MsgDelegate",
 				"/cosmos.staking.v1beta1.MsgUndelegate",
