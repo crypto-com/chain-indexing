@@ -1,7 +1,6 @@
 package parser_test
 
 import (
-	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -30,11 +29,8 @@ var _ = Describe("ParseMsgCommands", func() {
 			bondingDenom := "basecro"
 
 			pm := usecase_parser_test.InitParserManager()
-
-			var txDecoder txdecoder.TxDecoder
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
 				block.Height,
 				blockResults,
 				txs,

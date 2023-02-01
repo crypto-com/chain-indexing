@@ -6,7 +6,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/event"
@@ -32,11 +31,8 @@ var _ = Describe("ParseMsgCommands", func() {
 			stakingDenom := "basetcro"
 
 			pm := usecase_parser_test.InitParserManager()
-
-			var txDecoder txdecoder.TxDecoder
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
 				block.Height,
 				blockResults,
 				txs,

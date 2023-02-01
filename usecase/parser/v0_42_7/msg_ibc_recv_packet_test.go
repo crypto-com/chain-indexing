@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/crypto-com/chain-indexing/external/json"
-	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	"github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	V0_42_7_ibcmsg "github.com/crypto-com/chain-indexing/usecase/parser/v0_42_7/ibcmsg"
@@ -96,11 +95,8 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_42_7_ibcmsg.ParseMsgRecvPacket)
-
-			var txDecoder txdecoder.TxDecoder
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
 				block.Height,
 				blockResults,
 				txs,
@@ -193,11 +189,8 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_42_7_ibcmsg.ParseMsgRecvPacket)
-
-			var txDecoder txdecoder.TxDecoder
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
 				block.Height,
 				blockResults,
 				txs,
@@ -296,11 +289,8 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			pm := usecase_parser_test.InitParserManager()
 			pm.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", 0, V0_42_7_ibcmsg.ParseMsgRecvPacket)
-
-			var txDecoder txdecoder.TxDecoder
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
-				txDecoder,
 				block.Height,
 				blockResults,
 				txs,

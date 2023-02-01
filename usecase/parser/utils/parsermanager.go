@@ -11,9 +11,10 @@ import (
 )
 
 type CosmosParserManager struct {
-	store  map[CosmosParserKey]BlockHeightToCosmosParserMap
-	logger applogger.Logger
-	config CosmosParserManagerConfig
+	store     map[CosmosParserKey]BlockHeightToCosmosParserMap
+	logger    applogger.Logger
+	config    CosmosParserManagerConfig
+	TxDecoder txdecoder.TxDecoder
 }
 
 type CosmosParserKey string

@@ -5,7 +5,6 @@ import (
 
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
-	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	"github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 
@@ -17,7 +16,6 @@ func ParseBlockToCommands(
 	logger applogger.Logger,
 	parserManager *utils.CosmosParserManager,
 	cosmosClient cosmosapp_interface.Client,
-	txDecoder txdecoder.TxDecoder,
 	block *usecase_model.Block,
 	rawBlock *usecase_model.RawBlock,
 	blockResults *usecase_model.BlockResults,
@@ -43,7 +41,6 @@ func ParseBlockToCommands(
 	if len(blockResults.TxsResults) > 0 {
 		msgCommands, possibleSignerAddresses, parseErr := ParseBlockTxsMsgToCommands(
 			parserManager,
-			txDecoder,
 			block.Height,
 			blockResults,
 			txs,
