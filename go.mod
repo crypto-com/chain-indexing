@@ -8,6 +8,7 @@ require (
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
 	github.com/cenkalti/backoff/v4 v4.1.1
 	github.com/cosmos/cosmos-sdk v0.46.2
+	github.com/cosmos/ibc-go/v5 v5.2.0
 	github.com/ettle/strcase v0.1.1
 	github.com/fasthttp/router v1.3.3
 	github.com/golang-migrate/migrate/v4 v4.15.1

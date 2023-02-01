@@ -1064,6 +1064,25 @@ func IsPacketMsgTransfer(
 	return true
 }
 
+func IsPacketMsgSubmitTx(
+	packet ibc_model.Packet,
+) bool {
+	if packet.DestinationPort != "icahost" {
+		return false
+	}
+
+	var rawInterchainAccountPacketData ibc_model.InterchainAccountPacketData
+	rawPacketData, decodeDataErr := base64.StdEncoding.DecodeString(packet.Data)
+	if decodeDataErr != nil {
+		return false
+	}
+	if unmarshalErr := jsoniter.Unmarshal(rawPacketData, &rawInterchainAccountPacketData); unmarshalErr != nil {
+		return false
+	}
+
+	return true
+}
+
 func ParseMsgTimeout(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {

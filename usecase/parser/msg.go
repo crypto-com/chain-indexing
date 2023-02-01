@@ -11,6 +11,7 @@ import (
 
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
+	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
@@ -24,6 +25,7 @@ import (
 
 func ParseBlockTxsMsgToCommands(
 	parserManager *utils.CosmosParserManager,
+	txDecoder txdecoder.TxDecoder,
 	blockHeight int64,
 	blockResults *model.BlockResults,
 	txs []model.CosmosTxWithHash,
@@ -147,6 +149,7 @@ func ParseBlockTxsMsgToCommands(
 					MsgIndex:        msgIndex,
 					ParserManager:   parserManager,
 					Logger:          parserManager.GetLogger(),
+					TxDecoder:       txDecoder,
 				})
 			}
 			addresses = append(addresses, possibleSignerAddresses...)

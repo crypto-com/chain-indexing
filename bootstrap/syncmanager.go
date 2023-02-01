@@ -282,6 +282,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		parseBlockToCommandsLogger,
 		manager.parserManager,
 		manager.cosmosClient,
+		manager.txDecoder,
 		block,
 		rawBlock,
 		blockResults,
