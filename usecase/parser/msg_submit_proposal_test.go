@@ -30,6 +30,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			bondingDenom := "basecro"
 
 			pm := usecase_parser_test.InitParserManager()
+
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				block.Height,
@@ -92,6 +93,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			bondingDenom := "basecro"
 
 			pm := usecase_parser_test.InitParserManager()
+
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				block.Height,
@@ -147,6 +149,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			bondingDenom := "basecro"
 
 			pm := usecase_parser_test.InitParserManager()
+
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				block.Height,

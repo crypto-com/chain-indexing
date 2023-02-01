@@ -28,6 +28,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			bondingDenom := "basetcro"
 
 			pm := usecase_parser_test.InitParserManager()
+
 			cmds, possibleSignerAddresses, err := parser.ParseBlockTxsMsgToCommands(
 				pm,
 				block.Height,
