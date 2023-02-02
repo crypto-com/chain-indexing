@@ -19,6 +19,7 @@ import (
 func ParseMsgDeposit(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
+
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
 	if parserParams.Msg != nil {
