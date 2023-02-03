@@ -514,7 +514,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				MaybeVotingStartTime:         nil,
 				MaybeVotingEndTime:           nil,
 				MaybeVotingEndBlockHeight:    nil,
-				Metadata:                     msgSubmitProposal.Metadata,
+				Metadata:                     &msgSubmitProposal.Metadata,
 			}
 
 			if insertProposalErr := proposalsView.Insert(&row); insertProposalErr != nil {
