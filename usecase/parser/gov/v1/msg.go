@@ -2,6 +2,7 @@ package cosmos_gov_v1
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
@@ -162,19 +163,31 @@ func ParseMsgSubmitProposal(
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	// When there is no reward withdrew, `transfer` event would not exist
-	event := log.GetEventByType("submit_proposal")
-	if event == nil {
-		panic("missing `submit_proposal` event in TxsResult log")
-	}
-	proposalId := event.GetAttributeByKey("proposal_id")
-	if proposalId == nil {
-		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
-	}
+	events := log.GetEventsByType("submit_proposal")
 
-	if event.HasAttribute("voting_period_start") {
-		cmds = append(cmds, command_usecase.NewStartProposalVotingPeriod(
-			parserParams.MsgCommonParams.BlockHeight, event.MustGetAttributeByKey("voting_period_start"),
-		))
+	var proposalId *string
+	if parserParams.Msg["msg_index"] != nil {
+		msgIndex, err := strconv.Atoi(parserParams.Msg["msg_index"].(string))
+		if err != nil {
+			panic("error on parsing `msg_index` to int")
+		}
+
+		proposalId = events[msgIndex].GetAttributeByKey("proposal_id")
+		if proposalId == nil {
+			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+		}
+	} else {
+		event := log.GetEventByType("submit_proposal")
+		proposalId = event.GetAttributeByKey("proposal_id")
+		if proposalId == nil {
+			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+		}
+
+		if event.HasAttribute("voting_period_start") {
+			cmds = append(cmds, command_usecase.NewStartProposalVotingPeriod(
+				parserParams.MsgCommonParams.BlockHeight, event.MustGetAttributeByKey("voting_period_start"),
+			))
+		}
 	}
 
 	return append([]command.Command{
