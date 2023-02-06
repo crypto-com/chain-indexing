@@ -163,6 +163,9 @@ func ParseMsgSubmitProposal(
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 	event := log.GetEventByType("submit_proposal")
+	if event == nil {
+		panic("missing `submit_proposal` event in TxsResult log")
+	}
 
 	proposalId := event.GetAttributeByKey("proposal_id")
 	if proposalId == nil {
