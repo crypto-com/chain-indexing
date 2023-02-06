@@ -897,7 +897,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						MaybeVotingStartTime:      nil,
 						MaybeVotingEndTime:        nil,
 						MaybeVotingEndBlockHeight: nil,
-						Metadata:                  "Metadata",
+						Metadata:                  primptr.String("Metadata"),
 					}).
 					Return(nil)
 
@@ -1039,7 +1039,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						MaybeVotingStartTime:      nil,
 						MaybeVotingEndTime:        nil,
 						MaybeVotingEndBlockHeight: nil,
-						Metadata:                  "Metadata",
+						Metadata:                  primptr.String("Metadata"),
 					}).
 					Return(nil)
 
