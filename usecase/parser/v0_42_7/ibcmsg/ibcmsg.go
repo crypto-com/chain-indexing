@@ -1,10 +1,12 @@
 package ibcmsg
 
 import (
+	"encoding/base64"
 	"fmt"
 	"time"
 
 	"github.com/crypto-com/chain-indexing/external/json"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/mitchellh/mapstructure"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
@@ -39,11 +41,29 @@ func ParseMsgRecvPacket(
 		panic(fmt.Errorf("error decoding RawMsgRecvPacket: %v", err))
 	}
 
-	if !ibc.IsPacketMsgTransfer(rawMsg.Packet) {
+	var cmds []command.Command
+	var possibleSignerAddresses []string
+
+	if ibc.IsPacketMsgTransfer(rawMsg.Packet) {
+		// Parse IBC transfer
+		cmds, possibleSignerAddresses = ParseMsgTransfer(parserParams, rawMsg)
+
+	} else if ibc.IsPacketMsgSubmitTx(rawMsg.Packet) {
+		// Parse host chain MsgSubmitTx
+		cmds, possibleSignerAddresses = ParseMsgSubmitTx(parserParams, rawMsg)
+
+	} else {
 		// unsupported application
 		return []command.Command{}, []string{}
 	}
 
+	return cmds, possibleSignerAddresses
+}
+
+func ParseMsgTransfer(
+	parserParams utils.CosmosParserParams,
+	rawMsg ibc_model.RawMsgRecvPacket,
+) ([]command.Command, []string) {
 	// Transfer application, MsgTransfer
 	var rawFungibleTokenPacketData ibc_model.FungibleTokenPacketData
 	rawPacketData, err := base64_internal.DecodeString(rawMsg.Packet.Data)
@@ -192,4 +212,151 @@ func ParseMsgRecvPacket(
 
 		msgRecvPacketParams,
 	)}, possibleSignerAddresses
+}
+
+func ParseMsgSubmitTx(
+	parserParams utils.CosmosParserParams,
+	rawMsg ibc_model.RawMsgRecvPacket,
+) ([]command.Command, []string) {
+	// MsgSubmitTx
+	var rawInterchainAccountPacketData ibc_model.InterchainAccountPacketData
+	rawPacketData, err := base64.StdEncoding.DecodeString(rawMsg.Packet.Data)
+	if err != nil {
+		rawInterchainAccountPacketData = ibc_model.InterchainAccountPacketData{}
+	}
+	if unmarshalErr := jsoniter.Unmarshal(rawPacketData, &rawInterchainAccountPacketData); unmarshalErr != nil {
+		rawInterchainAccountPacketData = ibc_model.InterchainAccountPacketData{}
+	}
+
+	cosmosTx, innerMsgs, deserializeErr := parserParams.TxDecoder.DeserializeCosmosTx(rawInterchainAccountPacketData.Data)
+	if deserializeErr != nil {
+		panic(fmt.Sprintf("error deserializing cosmos tx: %v", err))
+	}
+
+	var cmds []command.Command
+	var possibleSignerAddresses []string
+
+	if !parserParams.MsgCommonParams.TxSuccess {
+		msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
+			RawMsgRecvPacket: rawMsg,
+
+			Application: "icahost",
+			MessageType: "/chainmain.icaauth.v1.MsgSubmitTx",
+			MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
+				Success: false,
+			},
+		}
+
+		// Getting possible signer address from Msg
+		possibleSignerAddresses = append(possibleSignerAddresses, msgRecvPacketParams.Signer)
+		cmds = append(cmds, command_usecase.NewCreateMsgIBCRecvPacket(
+			parserParams.MsgCommonParams,
+
+			msgRecvPacketParams,
+		))
+	}
+
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
+
+	recvPacketEvents := log.GetEventsByType("recv_packet")
+	if recvPacketEvents == nil {
+		panic("missing `recv_packet` event in TxsResult log")
+	}
+	var packetSequence uint64
+	var channelOrdering string
+	var connectionID string
+	for _, recvPacketEvent := range recvPacketEvents {
+		if recvPacketEvent.HasAttribute("packet_sequence") {
+			packetSequence = typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence"))
+		}
+		if recvPacketEvent.HasAttribute("packet_channel_ordering") {
+			channelOrdering = recvPacketEvent.MustGetAttributeByKey("packet_channel_ordering")
+		}
+		if recvPacketEvent.HasAttribute("packet_connection") {
+			connectionID = recvPacketEvent.MustGetAttributeByKey("packet_connection")
+		}
+	}
+
+	ics27PacketEvents := log.GetEventsByType("ics27_packet")
+	var success bool
+	for _, ics27PacketEvent := range ics27PacketEvents {
+		if ics27PacketEvent.HasAttribute("success") {
+			success = ics27PacketEvent.MustGetAttributeByKey("success") == "true"
+		}
+	}
+
+	writeAckEvents := log.GetEventsByType("write_acknowledgement")
+	if writeAckEvents == nil {
+		panic("missing `write_acknowledgement` event in TxsResult log")
+	}
+	var writeAckEventPacketAck string
+	for _, writeAckEvent := range writeAckEvents {
+		if writeAckEvent.HasAttribute("packet_ack") {
+			writeAckEventPacketAck = writeAckEvent.MustGetAttributeByKey("packet_ack")
+		}
+	}
+	var packetAck ibc_model.MsgRecvPacketPacketAck
+	json.MustUnmarshalFromString(writeAckEventPacketAck, &packetAck)
+
+	msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
+		RawMsgRecvPacket: rawMsg,
+
+		Application: "icahost",
+		MessageType: "/chainmain.icaauth.v1.MsgSubmitTx",
+		MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
+			Success: success,
+		},
+
+		PacketSequence:  packetSequence,
+		ChannelOrdering: channelOrdering,
+		ConnectionID:    connectionID,
+		PacketAck:       packetAck,
+	}
+
+	// Getting possible signer address from Msg
+	possibleSignerAddresses = append(possibleSignerAddresses, msgRecvPacketParams.Signer)
+	cmds = append(cmds, command_usecase.NewCreateMsgIBCRecvPacket(
+		parserParams.MsgCommonParams,
+
+		msgRecvPacketParams,
+	))
+
+	if success {
+		for msgIndex, message := range cosmosTx.Messages {
+			switch message.Type {
+			case
+				// cosmos distribution
+				"/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+				"/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission",
+
+				// cosmos staking
+				"/cosmos.staking.v1beta1.MsgDelegate",
+				"/cosmos.staking.v1beta1.MsgUndelegate",
+				"/cosmos.staking.v1beta1.MsgBeginRedelegate",
+
+				// cosmos gov
+				"/cosmos.gov.v1.MsgSubmitProposal",
+				"/cosmos.gov.v1beta1.MsgSubmitProposal":
+				// Note: will encounter the same events mapping issue as MsgExec when having multiple inner msg
+				// https://github.com/crypto-com/chain-indexing/issues/673
+				continue
+			default:
+				parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(message.Type), utils.ParserBlockHeight(parserParams.MsgCommonParams.BlockHeight))
+				msgCommands, signers := parser(utils.CosmosParserParams{
+					AddressPrefix:   parserParams.AddressPrefix,
+					StakingDenom:    parserParams.StakingDenom,
+					TxsResult:       parserParams.TxsResult,
+					MsgCommonParams: parserParams.MsgCommonParams,
+					Msg:             innerMsgs[msgIndex],
+					MsgIndex:        parserParams.MsgIndex,
+					ParserManager:   parserParams.ParserManager,
+				})
+
+				possibleSignerAddresses = append(possibleSignerAddresses, signers...)
+				cmds = append(cmds, msgCommands...)
+			}
+		}
+	}
+
+	return cmds, possibleSignerAddresses
 }

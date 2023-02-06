@@ -147,6 +147,7 @@ func ParseBlockTxsMsgToCommands(
 					MsgIndex:        msgIndex,
 					ParserManager:   parserManager,
 					Logger:          parserManager.GetLogger(),
+					TxDecoder:       parserManager.TxDecoder,
 				})
 			}
 			addresses = append(addresses, possibleSignerAddresses...)

@@ -278,6 +278,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		"blockHeight": blockHeight,
 	})
 
+	manager.parserManager.TxDecoder = manager.txDecoder
 	commands, err := parser.ParseBlockToCommands(
 		parseBlockToCommandsLogger,
 		manager.parserManager,

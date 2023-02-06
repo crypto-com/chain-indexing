@@ -54,3 +54,9 @@ type FungibleTokenPacketData struct {
 	Denom    string              `mapstructure:"denom" json:"denom"`
 	Amount   *json.NumericString `mapstructure:"amount" json:"amount"`
 }
+
+type InterchainAccountPacketData struct {
+	Type string `mapstructure:"type" json:"type"`
+	Data []byte `mapstructure:"data" json:"data"`
+	Memo string `mapstructure:"memo" json:"memo"`
+}

@@ -162,11 +162,11 @@ func ParseMsgSubmitProposal(
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
-	// When there is no reward withdrew, `transfer` event would not exist
 	event := log.GetEventByType("submit_proposal")
 	if event == nil {
 		panic("missing `submit_proposal` event in TxsResult log")
 	}
+
 	proposalId := event.GetAttributeByKey("proposal_id")
 	if proposalId == nil {
 		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")

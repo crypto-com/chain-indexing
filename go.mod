@@ -10,6 +10,7 @@ require (
 	github.com/cosmos/cosmos-sdk v0.46.2
 	github.com/ettle/strcase v0.1.1
 	github.com/fasthttp/router v1.3.3
+	github.com/gogo/protobuf v1.3.3
 	github.com/golang-migrate/migrate/v4 v4.15.1
 	github.com/google/go-querystring v1.0.0
 	github.com/google/uuid v1.3.0
@@ -57,7 +58,6 @@ require (
 	github.com/go-kit/kit v0.12.0 // indirect
 	github.com/go-kit/log v0.2.1 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
-	github.com/gogo/protobuf v1.3.3 // indirect
 	github.com/golang/glog v1.0.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
