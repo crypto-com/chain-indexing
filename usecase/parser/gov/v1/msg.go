@@ -166,10 +166,10 @@ func ParseMsgSubmitProposal(
 	events := log.GetEventsByType("submit_proposal")
 
 	var proposalId *string
-	if parserParams.Msg["msg_index"] != nil {
-		msgIndex, err := strconv.Atoi(parserParams.Msg["msg_index"].(string))
+	if parserParams.Msg["inner_msg_index"] != nil {
+		msgIndex, err := strconv.Atoi(parserParams.Msg["inner_msg_index"].(string))
 		if err != nil {
-			panic("error on parsing `msg_index` to int")
+			panic("error on parsing `inner_msg_index` to int")
 		}
 
 		proposalId = events[msgIndex].GetAttributeByKey("proposal_id")

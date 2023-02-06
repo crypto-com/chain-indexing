@@ -486,10 +486,10 @@ func parseMsgSubmitParamChangeProposal(
 	events := log.GetEventsByType("submit_proposal")
 
 	var proposalId *string
-	if msg["msg_index"] != nil {
-		msgIndex, err := strconv.Atoi(msg["msg_index"].(string))
+	if msg["inner_msg_index"] != nil {
+		msgIndex, err := strconv.Atoi(msg["inner_msg_index"].(string))
 		if err != nil {
-			panic("error on parsing `msg_index` to int")
+			panic("error on parsing `inner_msg_index` to int")
 		}
 
 		proposalId = events[msgIndex].GetAttributeByKey("proposal_id")
@@ -579,10 +579,10 @@ func parseMsgSubmitCommunityFundSpendProposal(
 	events := log.GetEventsByType("submit_proposal")
 
 	var proposalId *string
-	if msg["msg_index"] != nil {
-		msgIndex, err := strconv.Atoi(msg["msg_index"].(string))
+	if msg["inner_msg_index"] != nil {
+		msgIndex, err := strconv.Atoi(msg["inner_msg_index"].(string))
 		if err != nil {
-			panic("error on parsing `msg_index` to int")
+			panic("error on parsing `inner_msg_index` to int")
 		}
 
 		proposalId = events[msgIndex].GetAttributeByKey("proposal_id")
@@ -674,10 +674,10 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 	events := log.GetEventsByType("submit_proposal")
 
 	var proposalId *string
-	if msg["msg_index"] != nil {
-		msgIndex, err := strconv.Atoi(msg["msg_index"].(string))
+	if msg["inner_msg_index"] != nil {
+		msgIndex, err := strconv.Atoi(msg["inner_msg_index"].(string))
 		if err != nil {
-			panic("error on parsing `msg_index` to int")
+			panic("error on parsing `inner_msg_index` to int")
 		}
 
 		proposalId = events[msgIndex].GetAttributeByKey("proposal_id")
@@ -753,10 +753,10 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 	events := log.GetEventsByType("submit_proposal")
 
 	var proposalId *string
-	if msg["msg_index"] != nil {
-		msgIndex, err := strconv.Atoi(msg["msg_index"].(string))
+	if msg["inner_msg_index"] != nil {
+		msgIndex, err := strconv.Atoi(msg["inner_msg_index"].(string))
 		if err != nil {
-			panic("error on parsing `msg_index` to int")
+			panic("error on parsing `inner_msg_index` to int")
 		}
 
 		proposalId = events[msgIndex].GetAttributeByKey("proposal_id")
@@ -832,10 +832,10 @@ func parseMsgSubmitTextProposal(
 	events := log.GetEventsByType("submit_proposal")
 
 	var proposalId *string
-	if msg["msg_index"] != nil {
-		msgIndex, err := strconv.Atoi(msg["msg_index"].(string))
+	if msg["inner_msg_index"] != nil {
+		msgIndex, err := strconv.Atoi(msg["inner_msg_index"].(string))
 		if err != nil {
-			panic("error on parsing `msg_index` to int")
+			panic("error on parsing `inner_msg_index` to int")
 		}
 
 		proposalId = events[msgIndex].GetAttributeByKey("proposal_id")
@@ -916,10 +916,10 @@ func parseMsgSubmitUnknownProposal(
 	events := log.GetEventsByType("submit_proposal")
 
 	var proposalId *string
-	if msg["msg_index"] != nil {
-		msgIndex, err := strconv.Atoi(msg["msg_index"].(string))
+	if msg["inner_msg_index"] != nil {
+		msgIndex, err := strconv.Atoi(msg["inner_msg_index"].(string))
 		if err != nil {
-			panic("error on parsing `msg_index` to int")
+			panic("error on parsing `inner_msg_index` to int")
 		}
 
 		proposalId = events[msgIndex].GetAttributeByKey("proposal_id")
