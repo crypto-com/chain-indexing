@@ -100,7 +100,7 @@ func ParseMsgTransfer(
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
-	if log.HasEvent("recv_packet") {
+	if !log.HasEvent("recv_packet") {
 		msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
 			RawMsgRecvPacket: rawMsg,
 
