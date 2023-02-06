@@ -483,13 +483,28 @@ func parseMsgSubmitParamChangeProposal(
 		)}, possibleSignerAddresses
 	}
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
-	event := log.GetEventByType("submit_proposal")
-	if event == nil {
-		panic("missing `submit_proposal` event in TxsResult log")
-	}
-	proposalId := event.GetAttributeByKey("proposal_id")
-	if proposalId == nil {
-		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+	events := log.GetEventsByType("submit_proposal")
+
+	var proposalId *string
+	if msg["msg_index"] != nil {
+		msgIndex, err := strconv.Atoi(msg["msg_index"].(string))
+		if err != nil {
+			panic("error on parsing `msg_index` to int")
+		}
+
+		proposalId = events[msgIndex].GetAttributeByKey("proposal_id")
+		if proposalId == nil {
+			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+		}
+	} else {
+		event := log.GetEventByType("submit_proposal")
+		if event == nil {
+			panic("missing `submit_proposal` event in TxsResult log")
+		}
+		proposalId := event.GetAttributeByKey("proposal_id")
+		if proposalId == nil {
+			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+		}
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgSubmitParamChangeProposal(
@@ -561,14 +576,28 @@ func parseMsgSubmitCommunityFundSpendProposal(
 		)}, possibleSignerAddresses
 	}
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
-	// When there is no reward withdrew, `transfer` event would not exist
-	event := log.GetEventByType("submit_proposal")
-	if event == nil {
-		panic("missing `submit_proposal` event in TxsResult log")
-	}
-	proposalId := event.GetAttributeByKey("proposal_id")
-	if proposalId == nil {
-		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+	events := log.GetEventsByType("submit_proposal")
+
+	var proposalId *string
+	if msg["msg_index"] != nil {
+		msgIndex, err := strconv.Atoi(msg["msg_index"].(string))
+		if err != nil {
+			panic("error on parsing `msg_index` to int")
+		}
+
+		proposalId = events[msgIndex].GetAttributeByKey("proposal_id")
+		if proposalId == nil {
+			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+		}
+	} else {
+		event := log.GetEventByType("submit_proposal")
+		if event == nil {
+			panic("missing `submit_proposal` event in TxsResult log")
+		}
+		proposalId := event.GetAttributeByKey("proposal_id")
+		if proposalId == nil {
+			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+		}
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgSubmitCommunityPoolSpendProposal(
@@ -642,14 +671,28 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 		)}, possibleSignerAddresses
 	}
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
-	// When there is no reward withdrew, `transfer` event would not exist
-	event := log.GetEventByType("submit_proposal")
-	if event == nil {
-		panic("missing `submit_proposal` event in TxsResult log")
-	}
-	proposalId := event.GetAttributeByKey("proposal_id")
-	if proposalId == nil {
-		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+	events := log.GetEventsByType("submit_proposal")
+
+	var proposalId *string
+	if msg["msg_index"] != nil {
+		msgIndex, err := strconv.Atoi(msg["msg_index"].(string))
+		if err != nil {
+			panic("error on parsing `msg_index` to int")
+		}
+
+		proposalId = events[msgIndex].GetAttributeByKey("proposal_id")
+		if proposalId == nil {
+			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+		}
+	} else {
+		event := log.GetEventByType("submit_proposal")
+		if event == nil {
+			panic("missing `submit_proposal` event in TxsResult log")
+		}
+		proposalId := event.GetAttributeByKey("proposal_id")
+		if proposalId == nil {
+			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+		}
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgSubmitSoftwareUpgradeProposal(
@@ -707,14 +750,28 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 		)}, possibleSignerAddresses
 	}
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
-	// When there is no reward withdrew, `transfer` event would not exist
-	event := log.GetEventByType("submit_proposal")
-	if event == nil {
-		panic("missing `submit_proposal` event in TxsResult log")
-	}
-	proposalId := event.GetAttributeByKey("proposal_id")
-	if proposalId == nil {
-		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+	events := log.GetEventsByType("submit_proposal")
+
+	var proposalId *string
+	if msg["msg_index"] != nil {
+		msgIndex, err := strconv.Atoi(msg["msg_index"].(string))
+		if err != nil {
+			panic("error on parsing `msg_index` to int")
+		}
+
+		proposalId = events[msgIndex].GetAttributeByKey("proposal_id")
+		if proposalId == nil {
+			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+		}
+	} else {
+		event := log.GetEventByType("submit_proposal")
+		if event == nil {
+			panic("missing `submit_proposal` event in TxsResult log")
+		}
+		proposalId := event.GetAttributeByKey("proposal_id")
+		if proposalId == nil {
+			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+		}
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgSubmitCancelSoftwareUpgradeProposal(
@@ -772,14 +829,28 @@ func parseMsgSubmitTextProposal(
 		)}, possibleSignerAddresses
 	}
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
-	// When there is no reward withdrew, `transfer` event would not exist
-	event := log.GetEventByType("submit_proposal")
-	if event == nil {
-		panic("missing `submit_proposal` event in TxsResult log")
-	}
-	proposalId := event.GetAttributeByKey("proposal_id")
-	if proposalId == nil {
-		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+	events := log.GetEventsByType("submit_proposal")
+
+	var proposalId *string
+	if msg["msg_index"] != nil {
+		msgIndex, err := strconv.Atoi(msg["msg_index"].(string))
+		if err != nil {
+			panic("error on parsing `msg_index` to int")
+		}
+
+		proposalId = events[msgIndex].GetAttributeByKey("proposal_id")
+		if proposalId == nil {
+			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+		}
+	} else {
+		event := log.GetEventByType("submit_proposal")
+		if event == nil {
+			panic("missing `submit_proposal` event in TxsResult log")
+		}
+		proposalId := event.GetAttributeByKey("proposal_id")
+		if proposalId == nil {
+			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+		}
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgSubmitTextProposal(
@@ -842,14 +913,28 @@ func parseMsgSubmitUnknownProposal(
 	}
 
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
-	// When there is no reward withdrew, `transfer` event would not exist
-	event := log.GetEventByType("submit_proposal")
-	if event == nil {
-		panic("missing `submit_proposal` event in TxsResult log")
-	}
-	proposalId := event.GetAttributeByKey("proposal_id")
-	if proposalId == nil {
-		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+	events := log.GetEventsByType("submit_proposal")
+
+	var proposalId *string
+	if msg["msg_index"] != nil {
+		msgIndex, err := strconv.Atoi(msg["msg_index"].(string))
+		if err != nil {
+			panic("error on parsing `msg_index` to int")
+		}
+
+		proposalId = events[msgIndex].GetAttributeByKey("proposal_id")
+		if proposalId == nil {
+			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+		}
+	} else {
+		event := log.GetEventByType("submit_proposal")
+		if event == nil {
+			panic("missing `submit_proposal` event in TxsResult log")
+		}
+		proposalId := event.GetAttributeByKey("proposal_id")
+		if proposalId == nil {
+			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+		}
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgSubmitUnknownProposal(

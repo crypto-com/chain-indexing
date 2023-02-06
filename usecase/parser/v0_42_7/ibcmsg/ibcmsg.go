@@ -333,12 +333,7 @@ func ParseMsgSubmitTx(
 				// cosmos staking
 				"/cosmos.staking.v1beta1.MsgDelegate",
 				"/cosmos.staking.v1beta1.MsgUndelegate",
-				"/cosmos.staking.v1beta1.MsgBeginRedelegate",
-
-				// cosmos gov
-				"/cosmos.gov.v1beta1.MsgSubmitProposal":
-				// Note: will encounter the same events mapping issue as MsgExec when having multiple inner msg
-				// https://github.com/crypto-com/chain-indexing/issues/673
+				"/cosmos.staking.v1beta1.MsgBeginRedelegate":
 				continue
 			default:
 				parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(messageType), utils.ParserBlockHeight(parserParams.MsgCommonParams.BlockHeight))
