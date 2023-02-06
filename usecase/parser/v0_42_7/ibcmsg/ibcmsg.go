@@ -3,7 +3,6 @@ package ibcmsg
 import (
 	"encoding/base64"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/crypto-com/chain-indexing/external/json"
@@ -333,11 +332,16 @@ func ParseMsgSubmitTx(
 				// cosmos staking
 				"/cosmos.staking.v1beta1.MsgDelegate",
 				"/cosmos.staking.v1beta1.MsgUndelegate",
-				"/cosmos.staking.v1beta1.MsgBeginRedelegate":
+				"/cosmos.staking.v1beta1.MsgBeginRedelegate",
+
+				// cosmos gov
+				"/cosmos.gov.v1.MsgSubmitProposal",
+				"/cosmos.gov.v1beta1.MsgSubmitProposal":
+				// Note: will encounter the same events mapping issue as MsgExec when having multiple inner msg
+				// https://github.com/crypto-com/chain-indexing/issues/673
 				continue
 			default:
 				parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(messageType), utils.ParserBlockHeight(parserParams.MsgCommonParams.BlockHeight))
-				innerMsgs[msgIndex]["msg_index"] = strconv.Itoa(msgIndex)
 				msgCommands, signers := parser(utils.CosmosParserParams{
 					AddressPrefix:   parserParams.AddressPrefix,
 					StakingDenom:    parserParams.StakingDenom,
