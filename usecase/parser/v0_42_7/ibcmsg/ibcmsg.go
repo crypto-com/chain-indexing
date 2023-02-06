@@ -100,11 +100,30 @@ func ParseMsgTransfer(
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
+	if log.HasEvent("recv_packet") {
+		msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
+			RawMsgRecvPacket: rawMsg,
+
+			Application: "transfer",
+			MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
+			MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
+				FungibleTokenPacketData: rawFungibleTokenPacketData,
+				Success:                 false,
+			},
+		}
+
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgRecvPacketParams.Signer)
+
+		return []command.Command{command_usecase.NewCreateMsgIBCRecvPacket(
+			parserParams.MsgCommonParams,
+
+			msgRecvPacketParams,
+		)}, possibleSignerAddresses
+	}
 
 	recvPacketEvents := log.GetEventsByType("recv_packet")
-	if recvPacketEvents == nil {
-		panic("missing `recv_packet` event in TxsResult log")
-	}
 	var packetSequence uint64
 	var channelOrdering string
 	var connectionID string
