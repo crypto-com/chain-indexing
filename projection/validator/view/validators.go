@@ -1040,6 +1040,8 @@ func (validatorsView *ValidatorsView) Search(
 		"commission_max_rate",
 		"commission_max_change_rate",
 		"min_self_delegation",
+		"total_signed_block",
+		"total_active_block",
 		"imprecise_up_time",
 		"voted_gov_proposal",
 		"attention",
