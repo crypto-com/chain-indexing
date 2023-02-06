@@ -322,8 +322,8 @@ func ParseMsgSubmitTx(
 	))
 
 	if success {
-		for msgIndex, messageType := range cosmosTx.MessageTypes {
-			switch messageType {
+		for msgIndex, message := range cosmosTx.Messages {
+			switch message.Type {
 			case
 				// cosmos distribution
 				"/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
@@ -341,7 +341,7 @@ func ParseMsgSubmitTx(
 				// https://github.com/crypto-com/chain-indexing/issues/673
 				continue
 			default:
-				parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(messageType), utils.ParserBlockHeight(parserParams.MsgCommonParams.BlockHeight))
+				parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(message.Type), utils.ParserBlockHeight(parserParams.MsgCommonParams.BlockHeight))
 				msgCommands, signers := parser(utils.CosmosParserParams{
 					AddressPrefix:   parserParams.AddressPrefix,
 					StakingDenom:    parserParams.StakingDenom,

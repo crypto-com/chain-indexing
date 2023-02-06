@@ -1,5 +1,9 @@
 package icaauth
 
 type CosmosTx struct {
-	MessageTypes []string `json:"messageTypes"`
+	Messages []Message
+}
+
+type Message struct {
+	Type string
 }
