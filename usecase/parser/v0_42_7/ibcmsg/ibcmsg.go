@@ -100,6 +100,7 @@ func ParseMsgTransfer(
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
+
 	if !log.HasEvent("recv_packet") {
 		msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
 			RawMsgRecvPacket: rawMsg,
@@ -277,6 +278,26 @@ func ParseMsgSubmitTx(
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
+
+	if !log.HasEvent("recv_packet") {
+		msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
+			RawMsgRecvPacket: rawMsg,
+
+			Application: "icahost",
+			MessageType: "/chainmain.icaauth.v1.MsgSubmitTx",
+			MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
+				Success: false,
+			},
+		}
+
+		// Getting possible signer address from Msg
+		possibleSignerAddresses = append(possibleSignerAddresses, msgRecvPacketParams.Signer)
+		cmds = append(cmds, command_usecase.NewCreateMsgIBCRecvPacket(
+			parserParams.MsgCommonParams,
+
+			msgRecvPacketParams,
+		))
+	}
 
 	recvPacketEvents := log.GetEventsByType("recv_packet")
 	if recvPacketEvents == nil {
