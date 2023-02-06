@@ -501,7 +501,7 @@ func parseMsgSubmitParamChangeProposal(
 		if event == nil {
 			panic("missing `submit_proposal` event in TxsResult log")
 		}
-		proposalId := event.GetAttributeByKey("proposal_id")
+		proposalId = event.GetAttributeByKey("proposal_id")
 		if proposalId == nil {
 			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
 		}
@@ -594,7 +594,7 @@ func parseMsgSubmitCommunityFundSpendProposal(
 		if event == nil {
 			panic("missing `submit_proposal` event in TxsResult log")
 		}
-		proposalId := event.GetAttributeByKey("proposal_id")
+		proposalId = event.GetAttributeByKey("proposal_id")
 		if proposalId == nil {
 			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
 		}
@@ -689,7 +689,7 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 		if event == nil {
 			panic("missing `submit_proposal` event in TxsResult log")
 		}
-		proposalId := event.GetAttributeByKey("proposal_id")
+		proposalId = event.GetAttributeByKey("proposal_id")
 		if proposalId == nil {
 			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
 		}
@@ -768,7 +768,7 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 		if event == nil {
 			panic("missing `submit_proposal` event in TxsResult log")
 		}
-		proposalId := event.GetAttributeByKey("proposal_id")
+		proposalId = event.GetAttributeByKey("proposal_id")
 		if proposalId == nil {
 			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
 		}
@@ -847,7 +847,7 @@ func parseMsgSubmitTextProposal(
 		if event == nil {
 			panic("missing `submit_proposal` event in TxsResult log")
 		}
-		proposalId := event.GetAttributeByKey("proposal_id")
+		proposalId = event.GetAttributeByKey("proposal_id")
 		if proposalId == nil {
 			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
 		}
@@ -931,7 +931,7 @@ func parseMsgSubmitUnknownProposal(
 		if event == nil {
 			panic("missing `submit_proposal` event in TxsResult log")
 		}
-		proposalId := event.GetAttributeByKey("proposal_id")
+		proposalId = event.GetAttributeByKey("proposal_id")
 		if proposalId == nil {
 			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
 		}
