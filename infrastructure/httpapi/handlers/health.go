@@ -18,7 +18,7 @@ type HealthHandler struct {
 func NewHealthHandler(logger applogger.Logger, rdbHandle *rdb.Handle) *HealthHandler {
 	return &HealthHandler{
 		logger.WithFields(applogger.LogFields{
-			"module": "StatusHandler",
+			"module": "HealthHandler",
 		}),
 		status_polling.NewStatus(rdbHandle),
 	}
