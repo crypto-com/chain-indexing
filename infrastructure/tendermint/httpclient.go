@@ -24,7 +24,13 @@ var _ tendermint.Client = &HTTPClient{}
 type HTTPClient struct {
 	httpClient           *http.Client
 	tendermintRPCUrl     string
+	maybeAuthQueryKV     *HTTPClientAuthKV
 	strictGenesisParsing bool
+}
+
+type HTTPClientAuthKV struct {
+	Key   string
+	Value string
 }
 
 // NewHTTPClient returns a new HTTPClient for tendermint request
@@ -36,6 +42,7 @@ func NewHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool) *HTTPClie
 	return &HTTPClient{
 		httpClient,
 		strings.TrimSuffix(tendermintRPCUrl, "/"),
+		nil,
 		strictGenesisParsing,
 	}
 }
@@ -54,8 +61,13 @@ func NewInsecureHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool) *
 	return &HTTPClient{
 		httpClient,
 		strings.TrimSuffix(tendermintRPCUrl, "/"),
+		nil,
 		strictGenesisParsing,
 	}
+}
+
+func (client *HTTPClient) SetAuthQueryKV(authKV HTTPClientAuthKV) {
+	client.maybeAuthQueryKV = &authKV
 }
 
 func (client *HTTPClient) Genesis() (*genesis.Genesis, error) {
@@ -176,6 +188,23 @@ func (client *HTTPClient) LatestBlockHeight() (int64, error) {
 	return block.Height, nil
 }
 
+func (client *HTTPClient) Status() (*map[string]interface{}, error) {
+	rawRespBody, err := client.request("status")
+	if err != nil {
+		return nil, err
+	}
+	defer rawRespBody.Close()
+
+	body, _ := ioutil.ReadAll(rawRespBody)
+	jsonMap := make(map[string]interface{})
+	errRead := json.Unmarshal([]byte(body), &jsonMap)
+	if errRead != nil {
+		return nil, fmt.Errorf("error requesting Status : %v", errRead)
+	}
+
+	return &jsonMap, nil
+}
+
 // request construct tendermint url and issues an HTTP request
 // returns the success http Body
 func (client *HTTPClient) request(method string, queryString ...string) (io.ReadCloser, error) {
@@ -184,6 +213,9 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 	url := client.tendermintRPCUrl + "/" + method
 	if len(queryString) > 0 {
 		url += "?" + queryString[0]
+	}
+	if client.maybeAuthQueryKV != nil {
+		url += fmt.Sprintf("&%s=%s", client.maybeAuthQueryKV.Key, client.maybeAuthQueryKV.Value)
 	}
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
@@ -201,23 +233,6 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 	}
 
 	return rawResp.Body, nil
-}
-
-func (client *HTTPClient) Status() (*map[string]interface{}, error) {
-	rawRespBody, err := client.request("status")
-	if err != nil {
-		return nil, err
-	}
-	defer rawRespBody.Close()
-
-	body, _ := ioutil.ReadAll(rawRespBody)
-	jsonMap := make(map[string]interface{})
-	errRead := json.Unmarshal([]byte(body), &jsonMap)
-	if errRead != nil {
-		return nil, fmt.Errorf("error requesting Status : %v", errRead)
-	}
-
-	return &jsonMap, nil
 }
 
 type GenesisResp struct {

@@ -24,10 +24,16 @@ const ERR_CODE_ACCOUNT_NOT_FOUND = 2
 const ERR_CODE_ACCOUNT_NO_DELEGATION = 5
 
 type HTTPClient struct {
-	httpClient *http.Client
-	rpcUrl     string
+	httpClient       *http.Client
+	rpcUrl           string
+	maybeAuthQueryKV *HTTPClientAuthKV
 
 	bondingDenom string
+}
+
+type HTTPClientAuthKV struct {
+	Key   string
+	Value string
 }
 
 // NewHTTPClient returns a new HTTPClient for tendermint request
@@ -39,6 +45,7 @@ func NewHTTPClient(rpcUrl string, bondingDenom string) *HTTPClient {
 	return &HTTPClient{
 		httpClient,
 		strings.TrimSuffix(rpcUrl, "/"),
+		nil,
 
 		bondingDenom,
 	}
@@ -57,9 +64,14 @@ func NewInsecureHTTPClient(rpcUrl string, bondingDenom string) *HTTPClient {
 	return &HTTPClient{
 		httpClient,
 		strings.TrimSuffix(rpcUrl, "/"),
+		nil,
 
 		bondingDenom,
 	}
+}
+
+func (client *HTTPClient) SetAuthQueryKV(authKV HTTPClientAuthKV) {
+	client.maybeAuthQueryKV = &authKV
 }
 
 func (client *HTTPClient) Account(accountAddress string) (*cosmosapp_interface.Account, error) {
@@ -741,7 +753,7 @@ func (client *HTTPClient) getUrl(module string, method string) string {
 	return fmt.Sprintf("cosmos/%s/v1beta1/%s", module, method)
 }
 
-// request construct tendermint getUrl and issues an HTTP request
+// request construct Cosmos getUrl and issues an HTTP request
 // returns the success http Body
 func (client *HTTPClient) request(method string, queryString ...string) (io.ReadCloser, error) {
 	var err error
@@ -749,6 +761,9 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 	queryUrl := client.rpcUrl + "/" + method
 	if len(queryString) > 0 {
 		queryUrl += "?" + queryString[0]
+	}
+	if client.maybeAuthQueryKV != nil {
+		queryUrl += fmt.Sprintf("&%s=%s", client.maybeAuthQueryKV.Key, client.maybeAuthQueryKV.Value)
 	}
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, queryUrl, nil)
@@ -776,6 +791,9 @@ func (client *HTTPClient) rawRequest(method string, queryString ...string) (io.R
 	queryUrl := client.rpcUrl + "/" + method
 	if len(queryString) > 0 {
 		queryUrl += "?" + queryString[0]
+	}
+	if client.maybeAuthQueryKV != nil {
+		queryUrl += fmt.Sprintf("&%s=%s", client.maybeAuthQueryKV.Key, client.maybeAuthQueryKV.Value)
 	}
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, queryUrl, nil)
