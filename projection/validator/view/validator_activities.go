@@ -14,18 +14,28 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 )
 
+type ValidatorActivities interface {
+	Insert(validatorActivity *ValidatorActivityRow) error
+	InsertAll(validatorActivities []ValidatorActivityRow) error
+	List(
+		filter ValidatorActivitiesListFilter,
+		order ValidatorActivitiesListOrder,
+		pagination *pagination_interface.Pagination,
+	) ([]ValidatorActivityRow, *pagination_interface.PaginationResult, error)
+}
+
 // BlockEvents projection view implemented by relational database
-type ValidatorActivities struct {
+type ValidatorActivitiesView struct {
 	rdb *rdb.Handle
 }
 
-func NewValidatorActivities(handle *rdb.Handle) *ValidatorActivities {
-	return &ValidatorActivities{
+func NewValidatorActivitiesView(handle *rdb.Handle) ValidatorActivities {
+	return &ValidatorActivitiesView{
 		handle,
 	}
 }
 
-func (validatorActivitiesView *ValidatorActivities) Insert(validatorActivity *ValidatorActivityRow) error {
+func (validatorActivitiesView *ValidatorActivitiesView) Insert(validatorActivity *ValidatorActivityRow) error {
 	var err error
 
 	var sql string
@@ -41,7 +51,7 @@ func (validatorActivitiesView *ValidatorActivities) Insert(validatorActivity *Va
 		"data",
 	).Values("?", "?", "?", "?", "?", "?", "?").ToSql()
 	if err != nil {
-		return fmt.Errorf("error building valiator activity insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+		return fmt.Errorf("error building validator activity insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
 	result, err := validatorActivitiesView.rdb.Exec(sql,
@@ -63,7 +73,7 @@ func (validatorActivitiesView *ValidatorActivities) Insert(validatorActivity *Va
 	return nil
 }
 
-func (validatorActivitiesView *ValidatorActivities) InsertAll(validatorActivities []ValidatorActivityRow) error {
+func (validatorActivitiesView *ValidatorActivitiesView) InsertAll(validatorActivities []ValidatorActivityRow) error {
 	if len(validatorActivities) == 0 {
 		return nil
 	}
@@ -119,7 +129,7 @@ func (validatorActivitiesView *ValidatorActivities) InsertAll(validatorActivitie
 	return nil
 }
 
-func (validatorActivitiesView *ValidatorActivities) List(
+func (validatorActivitiesView *ValidatorActivitiesView) List(
 	filter ValidatorActivitiesListFilter,
 	order ValidatorActivitiesListOrder,
 	pagination *pagination_interface.Pagination,
@@ -147,6 +157,9 @@ func (validatorActivitiesView *ValidatorActivities) List(
 	if filter.MaybeOperatorAddress != nil {
 		stmtBuilder = stmtBuilder.Where("operator_address = ?", *filter.MaybeOperatorAddress)
 	}
+	if filter.MaybeAfterBlockTime != nil {
+		stmtBuilder = stmtBuilder.Where("block_time >= ?", filter.MaybeAfterBlockTime.UnixNano()) // last 24 hours
+	}
 
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
@@ -157,16 +170,16 @@ func (validatorActivitiesView *ValidatorActivities) List(
 			if filter.MaybeOperatorAddress != nil {
 				identity = *filter.MaybeOperatorAddress
 			} else if filter.MaybeConsensusNodeAddress != nil {
-				validatorsView := NewValidators(rdbHandle)
+				validatorsView := NewValidatorsView(rdbHandle)
 				validator, err := validatorsView.FindBy(ValidatorIdentity{
 					MaybeConsensusNodeAddress: filter.MaybeConsensusNodeAddress,
-				})
+				}, nil)
 				if err != nil {
 					return int64(0), err
 				}
 				identity = validator.OperatorAddress
 			}
-			totalView := NewValidatorActivitiesTotal(rdbHandle)
+			totalView := NewValidatorActivitiesTotalView(rdbHandle)
 			total, err := totalView.FindBy(identity)
 			if err != nil {
 				return int64(0), err
@@ -178,7 +191,6 @@ func (validatorActivitiesView *ValidatorActivities) List(
 	if err != nil {
 		return nil, nil, fmt.Errorf("error building transactions select SQL: %v, %w", err, rdb.ErrBuildSQLStmt)
 	}
-
 	rowsResult, err := validatorActivitiesView.rdb.Query(sql, sqlArgs...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error executing transactions select SQL: %v: %w", err, rdb.ErrQuery)
@@ -225,6 +237,7 @@ func (validatorActivitiesView *ValidatorActivities) List(
 type ValidatorActivitiesListFilter struct {
 	MaybeOperatorAddress      *string
 	MaybeConsensusNodeAddress *string
+	MaybeAfterBlockTime       *utctime.UTCTime
 }
 
 type ValidatorActivitiesListOrder struct {

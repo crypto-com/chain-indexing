@@ -65,6 +65,8 @@ func (_ *IBCChannelMessage) GetEventsToListen() []string {
 		event_usecase.MSG_IBC_TIMEOUT_ON_CLOSE_CREATED,
 		event_usecase.MSG_IBC_CHANNEL_CLOSE_INIT_CREATED,
 		event_usecase.MSG_IBC_CHANNEL_CLOSE_CONFIRM_CREATED,
+		event_usecase.MSG_REGISTER_ACCOUNT_CREATED,
+		event_usecase.MSG_SUBMIT_TX_CREATED,
 	}
 }
 
@@ -104,7 +106,21 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 
 	var messages []view.IBCChannelMessageRow
 	for _, event := range events {
-		if typedEvent, ok := event.(*event_usecase.MsgIBCChannelOpenInit); ok {
+		if typedEvent, ok := event.(*event_usecase.MsgRegisterAccount); ok {
+			channelID := typedEvent.Params.ChannelID
+
+			message := view.IBCChannelMessageRow{
+				ChannelID:       channelID,
+				BlockHeight:     height,
+				BlockTime:       blockTime,
+				TransactionHash: typedEvent.TxHash(),
+				MaybeRelayer:    primptr.String(typedEvent.Params.Owner),
+				MessageType:     typedEvent.MsgName,
+				Message:         typedEvent,
+			}
+			messages = append(messages, message)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgIBCChannelOpenInit); ok {
 			channelID := typedEvent.Params.ChannelID
 
 			message := view.IBCChannelMessageRow{
@@ -202,7 +218,10 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 				message.MaybeSender = primptr.String(typedEvent.Params.MaybeFungibleTokenPacketData.Sender)
 				message.MaybeReceiver = primptr.String(typedEvent.Params.MaybeFungibleTokenPacketData.Receiver)
 				message.MaybeDenom = primptr.String(typedEvent.Params.MaybeFungibleTokenPacketData.Denom)
-				message.MaybeAmount = primptr.String(typedEvent.Params.MaybeFungibleTokenPacketData.Amount.String())
+
+				if typedEvent.Params.MaybeFungibleTokenPacketData.Amount != nil {
+					message.MaybeAmount = primptr.String(typedEvent.Params.MaybeFungibleTokenPacketData.Amount.String())
+				}
 			}
 
 			messages = append(messages, message)
@@ -229,6 +248,22 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 				if typedEvent.Params.MaybeFungibleTokenPacketData.MaybeError != nil {
 					message.MaybeError = typedEvent.Params.MaybeFungibleTokenPacketData.MaybeError
 				}
+			}
+
+			messages = append(messages, message)
+
+		} else if typedEvent, ok := event.(*event_usecase.MsgSubmitTx); ok {
+
+			channelID := typedEvent.Params.Packet.DestinationChannel
+
+			message := view.IBCChannelMessageRow{
+				ChannelID:       channelID,
+				BlockHeight:     height,
+				BlockTime:       blockTime,
+				TransactionHash: typedEvent.TxHash(),
+				MaybeRelayer:    primptr.String(typedEvent.Params.Owner),
+				MessageType:     typedEvent.MsgName,
+				Message:         typedEvent,
 			}
 
 			messages = append(messages, message)

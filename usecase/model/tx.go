@@ -22,6 +22,17 @@ type CosmosTxBody struct {
 type CosmosTxAuthInfo struct {
 	SignerInfos []CosmosTxSignerInfo `json:"signer_infos"`
 	Fee         CosmosTxAuthInfoFee  `json:"fee"`
+	Tip         *CosmosTxTip         `json:"tip"`
+}
+
+type CosmosTxTip struct {
+	Amount []CosmosTxTipAmount `json:"amount"`
+	Tipper string              `json:"tipper"`
+}
+
+type CosmosTxTipAmount struct {
+	Denom  string `json:"denom"`
+	Amount string `json:"amount"`
 }
 
 type CosmosTxAuthInfoFee struct {
@@ -102,4 +113,9 @@ type TxResponseLog struct {
 	MsgIndex uint32       `json:"msg_index,omitempty"`
 	Log      string       `json:"log,omitempty"`
 	Events   []BlockEvent `json:"events"`
+}
+
+type CosmosTxWithHash struct {
+	Tx   CosmosTx `json:"tx"`
+	Hash string   `json:"hash"`
 }

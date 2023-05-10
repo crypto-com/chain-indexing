@@ -57,6 +57,15 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(MSG_VOTE_CREATED, 1, DecodeMsgVote)
 	registry.Register(MSG_VOTE_FAILED, 1, DecodeMsgVote)
 
+	registry.Register(MSG_SUBMIT_PROPOSAL_CREATED, 1, DecodeMsgSubmitProposal)
+	registry.Register(MSG_SUBMIT_PROPOSAL_FAILED, 1, DecodeMsgSubmitProposal)
+	registry.Register(MSG_DEPOSIT_V1_CREATED, 1, DecodeMsgDepositV1)
+	registry.Register(MSG_DEPOSIT_V1_FAILED, 1, DecodeMsgDepositV1)
+	registry.Register(MSG_VOTE_V1_CREATED, 1, DecodeMsgVoteV1)
+	registry.Register(MSG_VOTE_V1_FAILED, 1, DecodeMsgVoteV1)
+	registry.Register(MSG_VOTE_WEIGHTED_V1_CREATED, 1, DecodeMsgVoteWeightedV1)
+	registry.Register(MSG_VOTE_WEIGHTED_V1_FAILED, 1, DecodeMsgVoteWeightedV1)
+
 	registry.Register(PROPOSAL_VOTING_PERIOD_STARTED, 1, DecodeProposalVotingPeriodStarted)
 	registry.Register(PROPOSAL_ENDED, 1, DecodeProposalEnded)
 	registry.Register(PROPOSAL_INACTIVED, 1, DecodeProposalInactived)
@@ -164,4 +173,10 @@ func RegisterEvents(registry *event.Registry) {
 	// Ethermint tx
 	registry.Register(MSG_ETHEREUM_TX_CREATED, 1, DecodeMsgEthereumTx)
 	registry.Register(MSG_ETHEREUM_TX_FAILED, 1, DecodeMsgEthereumTx)
+
+	// ica auth
+	registry.Register(MSG_REGISTER_ACCOUNT_CREATED, 1, DecodeMsgRegisterAccount)
+	registry.Register(MSG_REGISTER_ACCOUNT_FAILED, 1, DecodeMsgRegisterAccount)
+	registry.Register(MSG_SUBMIT_TX_CREATED, 1, DecodeMsgSubmitTx)
+	registry.Register(MSG_SUBMIT_TX_FAILED, 1, DecodeMsgSubmitTx)
 }

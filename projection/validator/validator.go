@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/crypto-com/chain-indexing/appinterface/pagination"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
@@ -17,11 +18,24 @@ import (
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
 	"github.com/crypto-com/chain-indexing/projection/validator/constants"
+	"github.com/mitchellh/mapstructure"
+
 	"github.com/crypto-com/chain-indexing/projection/validator/view"
+
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
 var _ projection_entity.Projection = &Validator{}
+
+var (
+	NewValidators                     = view.NewValidatorsView
+	NewValidatorActivities            = view.NewValidatorActivitiesView
+	NewValidatorActivitiesTotal       = view.NewValidatorActivitiesTotalView
+	NewValidatorBlockCommitments      = view.NewValidatorBlockCommitments
+	NewValidatorBlockCommitmentsTotal = view.NewValidatorBlockCommitmentsTotal
+	NewValidatorActiveBlocks          = view.NewValidatorActiveBlocksView
+	UpdateLastHandledEventHeight      = (*Validator).UpdateLastHandledEventHeight
+)
 
 const DO_NOT_MODIFY = "[do-not-modify]"
 
@@ -34,6 +48,48 @@ type Validator struct {
 	conNodeAddressPrefix string
 
 	migrationHelper migrationhelper.MigrationHelper
+
+	config *Config
+}
+
+type Config struct {
+	AttentionStatusRules       AttentionStatusRules `mapstructure:"attention_status_rules"`
+	MaxActiveBlocksPeriodLimit int64                `mapstructure:"max_active_blocks_period_limit"`
+}
+
+type AttentionStatusRules struct {
+	MaxCommissionRateChange MaxCommissionRateChange `mapstructure:"max_commission_rate_change"`
+	MaxEditQuota            MaxEditQuota            `mapstructure:"max_edit_quota"`
+}
+
+type MaxCommissionRateChange struct {
+	Enable    bool    `mapstructure:"enable"`
+	MaxChange float64 `mapstructure:"max_change"`
+}
+type MaxEditQuota struct {
+	Enable   bool           `mapstructure:"enable"`
+	Quota    map[string]int `mapstructure:"quota"`
+	Interval string         `mapstructure:"interval"`
+	Duration int64
+}
+
+func ConfigFromInterface(data interface{}) (Config, error) {
+	config := Config{}
+
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		Result:           &config,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		return config, fmt.Errorf("error creating projection config decoder: %v", decoderErr)
+	}
+
+	if err := decoder.Decode(data); err != nil {
+		return config, fmt.Errorf("error decoding projection ValidatorAttentionRules config: %v", err)
+	}
+
+	return config, nil
 }
 
 func NewValidator(
@@ -41,7 +97,15 @@ func NewValidator(
 	rdbConn rdb.Conn,
 	conNodeAddressPrefix string,
 	migrationHelper migrationhelper.MigrationHelper,
+	config *Config,
 ) *Validator {
+	if config.AttentionStatusRules.MaxEditQuota.Enable {
+		duration, durationParserErr := time.ParseDuration(config.AttentionStatusRules.MaxEditQuota.Interval)
+		if durationParserErr != nil {
+			panic(fmt.Sprintf("error parsing config interval %v", durationParserErr))
+		}
+		config.AttentionStatusRules.MaxEditQuota.Duration = duration.Nanoseconds()
+	}
 	return &Validator{
 		rdbprojectionbase.NewRDbBase(
 			rdbConn.ToHandle(),
@@ -52,6 +116,7 @@ func NewValidator(
 		logger,
 		conNodeAddressPrefix,
 		migrationHelper,
+		config,
 	}
 }
 
@@ -105,11 +170,12 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 	}()
 
 	rdbTxHandle := rdbTx.ToHandle()
-	validatorsView := view.NewValidators(rdbTxHandle)
-	validatorBlockCommitmentsView := view.NewValidatorBlockCommitments(rdbTxHandle)
-	validatorBlockCommitmentsTotalView := view.NewValidatorBlockCommitmentsTotal(rdbTxHandle)
-	validatorActivitiesView := view.NewValidatorActivities(rdbTxHandle)
-	validatorActivitiesTotalView := view.NewValidatorActivitiesTotal(rdbTxHandle)
+	validatorsView := NewValidators(rdbTxHandle)
+	validatorBlockCommitmentsView := NewValidatorBlockCommitments(rdbTxHandle)
+	validatorBlockCommitmentsTotalView := NewValidatorBlockCommitmentsTotal(rdbTxHandle)
+	validatorActivitiesView := NewValidatorActivities(rdbTxHandle)
+	validatorActivitiesTotalView := NewValidatorActivitiesTotal(rdbTxHandle)
+	validatorActiveBlocksView := NewValidatorActiveBlocks(rdbTxHandle)
 
 	var blockTime utctime.UTCTime
 	var blockHash string
@@ -124,15 +190,14 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 			blockProposer = blockCreatedEvent.Block.ProposerAddress
 		}
 	}
-
-	if projectErr := projection.projectValidatorView(validatorsView, height, events); projectErr != nil {
+	if projectErr := projection.projectValidatorView(validatorsView, &validatorActivitiesView, &validatorActiveBlocksView, blockTime, height, events); projectErr != nil {
 		return fmt.Errorf("error projecting validator view: %v", projectErr)
 	}
 
 	if projectErr := projection.projectValidatorActivitiesView(
-		validatorsView,
-		validatorActivitiesView,
-		validatorActivitiesTotalView,
+		&validatorsView,
+		&validatorActivitiesView,
+		&validatorActivitiesTotalView,
 		blockHash,
 		blockTime,
 		events,
@@ -140,15 +205,24 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 		return fmt.Errorf("error projecting validator activities view: %v", err)
 	}
 
-	validatorList, listValidatorErr := validatorsView.ListAll(view.ValidatorsListFilter{
-		MaybeStatuses: nil,
-	}, view.ValidatorsListOrder{MaybePower: nil})
+	validatorList, listValidatorErr := validatorsView.ListAll(
+		view.ValidatorsListFilter{
+			MaybeStatuses:          nil,
+			MaybeRecentActiveBlock: nil,
+		},
+		view.ValidatorsListOrder{MaybePower: nil},
+	)
 	if listValidatorErr != nil {
 		return fmt.Errorf("error retrieving validator list: %v", listValidatorErr)
 	}
 	validatorMap := make(map[string]*view.ValidatorRow)
+	bondedValidatorList := make([]view.ValidatorRow, 0)
 	for i, validator := range validatorList {
 		validatorMap[validator.TendermintAddress] = &validatorList[i]
+		switch validatorList[i].Status {
+		case constants.BONDED, constants.UNBONDING:
+			bondedValidatorList = append(bondedValidatorList, validatorList[i])
+		}
 	}
 
 	for _, event := range events {
@@ -181,7 +255,6 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 
 				commitmentMap[signedValidator.ConsensusNodeAddress] = true
 			}
-
 			if err := validatorBlockCommitmentsView.InsertAll(commitmentRows); err != nil {
 				return fmt.Errorf("error incrementing validator block commitment rows: %v", err)
 			}
@@ -207,44 +280,52 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 			}
 
 			// Update validator up time
-			activeValidators, activeValidatorsQueryErr := validatorsView.ListAll(view.ValidatorsListFilter{
-				MaybeStatuses: []constants.Status{constants.BONDED},
-			}, view.ValidatorsListOrder{})
-			if activeValidatorsQueryErr != nil {
-				return fmt.Errorf("error querying active validators: %v", activeValidatorsQueryErr)
-			}
+			var activeValidators []view.ValidatorRow
+			var operatorAddressToSignedBlockFlagMap = make(view.OperatorAddressToSignedBlockFlagMap)
 
-			var mutActiveValidators []view.ValidatorRow
-			for _, activeValidator := range activeValidators {
-				mutActiveValidator := activeValidator
-				if commitmentMap[mutActiveValidator.ConsensusNodeAddress] {
-					mutActiveValidator.TotalSignedBlock += 1
-				} else {
+			for _, bondedValidator := range bondedValidatorList {
+				signed := false
+				if commitmentMap[bondedValidator.ConsensusNodeAddress] {
+					bondedValidator.TotalSignedBlock += 1
+					signed = true
+				} else if blockCreatedEvent.BlockHeight-bondedValidator.JoinedAtBlockHeight < 10 {
 					// give 10 blocks buffer on validator first join
-					if height-mutActiveValidator.JoinedAtBlockHeight < 10 {
-						mutActiveValidator.TotalSignedBlock += 1
-					}
+					bondedValidator.TotalSignedBlock += 1
+					signed = true
 				}
-				mutActiveValidator.TotalActiveBlock += 1
+				bondedValidator.TotalActiveBlock += 1
 
-				mutActiveValidator.ImpreciseUpTime = new(big.Float).Quo(
-					new(big.Float).SetInt64(mutActiveValidator.TotalSignedBlock),
-					new(big.Float).SetInt64(mutActiveValidator.TotalActiveBlock),
+				bondedValidator.ImpreciseUpTime.Quo(
+					new(big.Float).SetInt64(bondedValidator.TotalSignedBlock),
+					new(big.Float).SetInt64(bondedValidator.TotalActiveBlock),
 				)
 
-				mutActiveValidators = append(mutActiveValidators, mutActiveValidator)
+				operatorAddressToSignedBlockFlagMap[bondedValidator.OperatorAddress] = signed
+				activeValidators = append(activeValidators, bondedValidator)
 			}
 
-			if activeValidatorUpdateErr := validatorsView.UpdateAllValidatorUpTime(mutActiveValidators); activeValidatorUpdateErr != nil {
-				return fmt.Errorf("error updating active validators up time data: %v", activeValidatorUpdateErr)
+			if validatorUpdateUpTimeErr := validatorsView.UpdateAllValidatorUpTime(
+				activeValidators,
+			); validatorUpdateUpTimeErr != nil {
+				return fmt.Errorf("error updating active validators up time data: %v", validatorUpdateUpTimeErr)
 			}
 
+			if validatorUpdateActiveBlocksErr := validatorActiveBlocksView.UpdateValidatorsActiveBlocks(
+				operatorAddressToSignedBlockFlagMap,
+				blockCreatedEvent.BlockHeight,
+				projection.config.MaxActiveBlocksPeriodLimit,
+			); validatorUpdateActiveBlocksErr != nil {
+				return fmt.Errorf("error updating validators active blocks data: %v", validatorUpdateActiveBlocksErr)
+			}
 		} else if votedEvent, ok := event.(*event_usecase.MsgVote); ok {
 			projection.logger.Debug("handling MsgVote event")
 
-			mutVotedValidator, votedValidatorQueryErr := validatorsView.FindBy(view.ValidatorIdentity{
-				MaybeInitialDelegatorAddress: &votedEvent.Voter,
-			})
+			mutVotedValidator, votedValidatorQueryErr := validatorsView.FindBy(
+				view.ValidatorIdentity{
+					MaybeInitialDelegatorAddress: &votedEvent.Voter,
+				},
+				nil,
+			)
 
 			if votedValidatorQueryErr != nil {
 				if errors.Is(votedValidatorQueryErr, rdb.ErrNoRows) {
@@ -261,7 +342,7 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 		}
 	}
 
-	if err := projection.UpdateLastHandledEventHeight(rdbTxHandle, height); err != nil {
+	if err := UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
 		return fmt.Errorf("error updating last handled event height: %v", err)
 	}
 
@@ -273,7 +354,10 @@ func (projection *Validator) HandleEvents(height int64, events []event_entity.Ev
 }
 
 func (projection *Validator) projectValidatorView(
-	validatorsView *view.Validators,
+	validatorsView view.Validators,
+	validatorActivities *view.ValidatorActivities,
+	validatorActiveBlocks *view.ValidatorActiveBlocks,
+	blockTime utctime.UTCTime,
 	blockHeight int64,
 	events []event_entity.Event,
 ) error {
@@ -322,6 +406,7 @@ func (projection *Validator) projectValidatorView(
 				TotalActiveBlock:        0,
 				ImpreciseUpTime:         big.NewFloat(1),
 				VotedGovProposal:        big.NewInt(0),
+				Attention:               false,
 			}
 
 			// Validator re-joins
@@ -381,6 +466,7 @@ func (projection *Validator) projectValidatorView(
 				TotalActiveBlock:        0,
 				ImpreciseUpTime:         big.NewFloat(1),
 				VotedGovProposal:        big.NewInt(0),
+				Attention:               false,
 			}
 
 			// Validator re-joins
@@ -404,32 +490,73 @@ func (projection *Validator) projectValidatorView(
 		if msgEditValidatorEvent, ok := event.(*event_usecase.MsgEditValidator); ok {
 			projection.logger.Debug("handling MsgEditValidator event")
 
-			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
-				MaybeOperatorAddress: &msgEditValidatorEvent.ValidatorAddress,
-			})
+			mutValidatorRow, err := validatorsView.FindBy(
+				view.ValidatorIdentity{
+					MaybeOperatorAddress: &msgEditValidatorEvent.ValidatorAddress,
+				},
+				nil,
+			)
 			if err != nil {
 				return fmt.Errorf(
-					"error getting existing validator %s from view", msgEditValidatorEvent.ValidatorAddress,
+					"error getting existing validator %s from view: %v", msgEditValidatorEvent.ValidatorAddress, err,
 				)
 			}
 
-			if msgEditValidatorEvent.Description.Moniker != DO_NOT_MODIFY {
+			editQuotaCounter, errGetEditQuotaCounter := projection.countEditQuotaOnLastActivities(validatorActivities, msgEditValidatorEvent, mutValidatorRow, blockTime)
+			if errGetEditQuotaCounter != nil {
+				return fmt.Errorf(
+					"error getting edit quota counter %v from view", errGetEditQuotaCounter,
+				)
+			}
+
+			if msgEditValidatorEvent.Description.Moniker != DO_NOT_MODIFY && msgEditValidatorEvent.Description.Moniker != mutValidatorRow.Moniker {
+				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.MONIKER)
+				if isExceeded {
+					mutValidatorRow.Attention = true
+				}
 				mutValidatorRow.Moniker = msgEditValidatorEvent.Description.Moniker
 			}
-			if msgEditValidatorEvent.Description.Identity != DO_NOT_MODIFY {
+			if msgEditValidatorEvent.Description.Identity != DO_NOT_MODIFY && msgEditValidatorEvent.Description.Identity != mutValidatorRow.Identity {
+				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.IDENTITY)
+				if isExceeded {
+					mutValidatorRow.Attention = true
+				}
 				mutValidatorRow.Identity = msgEditValidatorEvent.Description.Identity
 			}
-			if msgEditValidatorEvent.Description.Details != DO_NOT_MODIFY {
+			if msgEditValidatorEvent.Description.Details != DO_NOT_MODIFY && msgEditValidatorEvent.Description.Details != mutValidatorRow.Details {
+				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.DETAILS)
+				if isExceeded {
+					mutValidatorRow.Attention = true
+				}
 				mutValidatorRow.Details = msgEditValidatorEvent.Description.Details
 			}
-			if msgEditValidatorEvent.Description.SecurityContact != DO_NOT_MODIFY {
+			if msgEditValidatorEvent.Description.SecurityContact != DO_NOT_MODIFY && msgEditValidatorEvent.Description.SecurityContact != mutValidatorRow.SecurityContact {
+				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.SECURITY_CONTACT)
+				if isExceeded {
+					mutValidatorRow.Attention = true
+				}
 				mutValidatorRow.SecurityContact = msgEditValidatorEvent.Description.SecurityContact
 			}
-			if msgEditValidatorEvent.Description.Website != DO_NOT_MODIFY {
+			if msgEditValidatorEvent.Description.Website != DO_NOT_MODIFY && msgEditValidatorEvent.Description.Website != mutValidatorRow.Website {
+				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.WEBSITE)
+				if isExceeded {
+					mutValidatorRow.Attention = true
+				}
 				mutValidatorRow.Website = msgEditValidatorEvent.Description.Website
 			}
 
-			if msgEditValidatorEvent.MaybeCommissionRate != nil {
+			if msgEditValidatorEvent.MaybeCommissionRate != nil && *msgEditValidatorEvent.MaybeCommissionRate != mutValidatorRow.CommissionRate {
+				isExceeded := projection.isExceededNumOfEdit(mutValidatorRow, editQuotaCounter, constants.COMMISSION_RATE)
+				isExceededMaxCommissionChange, errMaxCommissionChange := projection.isExceededMaxCommissionChange(mutValidatorRow, *msgEditValidatorEvent.MaybeCommissionRate, mutValidatorRow.CommissionRate, msgEditValidatorEvent.ValidatorAddress)
+				if errMaxCommissionChange != nil {
+					return fmt.Errorf(
+						"error checking attention status on commission rate validator %s from view: %v", msgEditValidatorEvent.ValidatorAddress, errMaxCommissionChange,
+					)
+				}
+				if isExceededMaxCommissionChange || isExceeded {
+					mutValidatorRow.Attention = true
+				}
+
 				mutValidatorRow.CommissionRate = *msgEditValidatorEvent.MaybeCommissionRate
 			}
 			if msgEditValidatorEvent.MaybeMinSelfDelegation != nil {
@@ -442,12 +569,15 @@ func (projection *Validator) projectValidatorView(
 		} else if validatorJailedEvent, ok := event.(*event_usecase.ValidatorJailed); ok {
 			projection.logger.Debug("handling ValidatorJailed event")
 
-			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
-				MaybeConsensusNodeAddress: &validatorJailedEvent.ConsensusNodeAddress,
-			})
+			mutValidatorRow, err := validatorsView.FindBy(
+				view.ValidatorIdentity{
+					MaybeConsensusNodeAddress: &validatorJailedEvent.ConsensusNodeAddress,
+				},
+				nil,
+			)
 			if err != nil {
 				return fmt.Errorf(
-					"error getting existing validator `%s` from view", validatorJailedEvent.ConsensusNodeAddress,
+					"error getting existing validator `%s` from view: %v", validatorJailedEvent.ConsensusNodeAddress, err,
 				)
 			}
 
@@ -457,14 +587,21 @@ func (projection *Validator) projectValidatorView(
 			if err := validatorsView.Update(mutValidatorRow); err != nil {
 				return fmt.Errorf("error updating validator into view: %v", err)
 			}
+
+			if err := (*validatorActiveBlocks).ClearValidatorActiveBLocks(mutValidatorRow.OperatorAddress); err != nil {
+				return fmt.Errorf("error updating validator into view: %v", err)
+			}
 		} else if msgUnjailEvent, ok := event.(*event_usecase.MsgUnjail); ok {
 			projection.logger.Debug("handling MsgUnjail event")
 
-			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
-				MaybeOperatorAddress: &msgUnjailEvent.ValidatorAddr,
-			})
+			mutValidatorRow, err := validatorsView.FindBy(
+				view.ValidatorIdentity{
+					MaybeOperatorAddress: &msgUnjailEvent.ValidatorAddr,
+				},
+				nil,
+			)
 			if err != nil {
-				return fmt.Errorf("error getting existing validator `%s` from view", msgUnjailEvent.ValidatorAddr)
+				return fmt.Errorf("error getting existing validator `%s` from view: %v", msgUnjailEvent.ValidatorAddr, err)
 			}
 
 			// Unjailed validator will become inactive first, if there's voting power changes then it becomes bonded
@@ -472,6 +609,10 @@ func (projection *Validator) projectValidatorView(
 			mutValidatorRow.Jailed = false
 
 			if err := validatorsView.Update(mutValidatorRow); err != nil {
+				return fmt.Errorf("error updating validator into view: %v", err)
+			}
+
+			if err := (*validatorActiveBlocks).ClearValidatorActiveBLocks(mutValidatorRow.OperatorAddress); err != nil {
 				return fmt.Errorf("error updating validator into view: %v", err)
 			}
 		} else if powerChangedEvent, ok := event.(*event_usecase.PowerChanged); ok {
@@ -488,16 +629,23 @@ func (projection *Validator) projectValidatorView(
 				return fmt.Errorf("error converting tendermint pubkey to consensus pubkey")
 			}
 
-			mutValidatorRow, err := validatorsView.FindBy(view.ValidatorIdentity{
-				MaybeConsensusNodeAddress: &consensusNodeAddress,
-			})
+			mutValidatorRow, err := validatorsView.FindBy(
+				view.ValidatorIdentity{
+					MaybeConsensusNodeAddress: &consensusNodeAddress,
+				},
+				nil,
+			)
 			if err != nil {
-				return fmt.Errorf("error getting existing validator `%s` from view", consensusNodeAddress)
+				return fmt.Errorf("error getting existing validator `%s` from view: %v", consensusNodeAddress, err)
 			}
 
 			mutValidatorRow.Power = powerChangedEvent.Power
 			if powerChangedEvent.Power == "0" && !mutValidatorRow.Jailed {
 				mutValidatorRow.Status = constants.INACTIVE
+
+				if err := (*validatorActiveBlocks).ClearValidatorActiveBLocks(mutValidatorRow.OperatorAddress); err != nil {
+					return fmt.Errorf("error updating validator into view: %v", err)
+				}
 			} else if powerChangedEvent.Power != "0" {
 				mutValidatorRow.Status = constants.BONDED
 			}
@@ -510,4 +658,139 @@ func (projection *Validator) projectValidatorView(
 	}
 
 	return nil
+}
+
+func (projection *Validator) isExceededMaxCommissionChange(mutValidatorRow *view.ValidatorRow, maybeCommissionRate string, commissionRate string, validatorAddress string) (bool, error) {
+	if projection.config.AttentionStatusRules.MaxCommissionRateChange.Enable {
+		// skip validator with "Attention" status
+		if mutValidatorRow.Attention {
+			return false, nil
+		}
+		newCommission, newCommissionErr := strconv.ParseFloat(maybeCommissionRate, 64)
+		if newCommissionErr != nil {
+			return false, fmt.Errorf(
+				"error converting new commission rate to float validator %s from view", validatorAddress,
+			)
+		}
+		currentCommission, currentCommissionErr := strconv.ParseFloat(commissionRate, 64)
+		if currentCommissionErr != nil {
+			return false, fmt.Errorf(
+				"error converting current commission rate to float validator %s from view", validatorAddress,
+			)
+		}
+
+		if newCommission-currentCommission > projection.config.AttentionStatusRules.MaxCommissionRateChange.MaxChange {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func (projection *Validator) isExceededNumOfEdit(mutValidatorRow *view.ValidatorRow, editQuotaCounter map[string]int, editField string) bool {
+	if projection.config.AttentionStatusRules.MaxEditQuota.Enable {
+		// skip validator with "Attention" status
+		if mutValidatorRow.Attention {
+			return false
+		}
+
+		// count the current change
+		if _, exists := editQuotaCounter[editField]; exists {
+			editQuotaCounter[editField]--
+		}
+
+		// check counter by each field
+		for _, count := range editQuotaCounter {
+			if count < 0 {
+				return true
+			}
+		}
+
+	}
+	return false
+}
+
+func (projection *Validator) countEditQuotaOnLastActivities(validatorActivities *view.ValidatorActivities, msgEditValidatorEvent *event_usecase.MsgEditValidator, mutValidatorRow *view.ValidatorRow, blockTime utctime.UTCTime) (map[string]int, error) {
+	if projection.config.AttentionStatusRules.MaxEditQuota.Enable {
+		// skip validator with "Attention" status
+		if mutValidatorRow.Attention {
+			return map[string]int{}, nil
+		}
+
+		MaybeAfterBlockTime := utctime.FromUnixNano(blockTime.UnixNano() - projection.config.AttentionStatusRules.MaxEditQuota.Duration)
+
+		mutValidatorActivities, _, err := (*validatorActivities).List(
+			view.ValidatorActivitiesListFilter{
+				MaybeAfterBlockTime:  &MaybeAfterBlockTime,
+				MaybeOperatorAddress: &msgEditValidatorEvent.ValidatorAddress,
+			},
+			view.ValidatorActivitiesListOrder{},
+			&pagination.Pagination{},
+		)
+		if err != nil {
+			return map[string]int{}, fmt.Errorf(
+				"error getting existing validator activities %s from view", msgEditValidatorEvent.ValidatorAddress,
+			)
+		}
+
+		editQuotaCounter := make(map[string]int)
+		for key, quota := range projection.config.AttentionStatusRules.MaxEditQuota.Quota {
+			editQuotaCounter[key] = quota
+		}
+
+		lastEdit := map[string]interface{}{
+			"moniker":  DO_NOT_MODIFY,
+			"identity": DO_NOT_MODIFY,
+			"details":  DO_NOT_MODIFY,
+			"website":  DO_NOT_MODIFY,
+		}
+
+		// count previous changes
+		for _, activity := range mutValidatorActivities {
+			if activity.Data.Type != event_usecase.MSG_EDIT_VALIDATOR {
+				continue
+			}
+
+			content, contentExists := activity.Data.Content.(map[string]interface{})
+			if !contentExists {
+				continue
+			}
+
+			description, descriptionExists := content["description"].(map[string]interface{})
+			if !descriptionExists {
+				continue
+			}
+
+			if description[constants.MONIKER] != DO_NOT_MODIFY && description[constants.MONIKER] != lastEdit[constants.MONIKER] {
+				checkAndUpdateQuota(constants.MONIKER, &editQuotaCounter)
+			}
+			if description[constants.IDENTITY] != DO_NOT_MODIFY && description[constants.IDENTITY] != lastEdit[constants.IDENTITY] {
+				checkAndUpdateQuota(constants.IDENTITY, &editQuotaCounter)
+			}
+			if description[constants.DETAILS] != DO_NOT_MODIFY && description[constants.DETAILS] != lastEdit[constants.DETAILS] {
+				checkAndUpdateQuota(constants.DETAILS, &editQuotaCounter)
+			}
+			if description[constants.WEBSITE] != DO_NOT_MODIFY && description[constants.WEBSITE] != lastEdit[constants.WEBSITE] {
+				checkAndUpdateQuota(constants.WEBSITE, &editQuotaCounter)
+			}
+			if content[constants.COMMISSION_RATE] != nil {
+				checkAndUpdateQuota(constants.COMMISSION_RATE, &editQuotaCounter)
+			}
+
+			lastEdit = map[string]interface{}{
+				"moniker":  description[constants.MONIKER],
+				"identity": description[constants.IDENTITY],
+				"details":  description[constants.DETAILS],
+				"website":  description[constants.WEBSITE],
+			}
+		}
+		return editQuotaCounter, nil
+	}
+	return map[string]int{}, nil
+}
+
+func checkAndUpdateQuota(key string, counter *map[string]int) {
+	if _, exists := (*counter)[key]; exists {
+		(*counter)[key]--
+	}
 }

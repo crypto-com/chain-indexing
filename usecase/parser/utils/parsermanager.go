@@ -5,14 +5,16 @@ import (
 
 	"github.com/crypto-com/chain-indexing/entity/command"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 type CosmosParserManager struct {
-	store  map[CosmosParserKey]BlockHeightToCosmosParserMap
-	logger applogger.Logger
-	config CosmosParserManagerConfig
+	store     map[CosmosParserKey]BlockHeightToCosmosParserMap
+	logger    applogger.Logger
+	config    CosmosParserManagerConfig
+	TxDecoder txdecoder.TxDecoder
 }
 
 type CosmosParserKey string
@@ -47,6 +49,7 @@ type CosmosParserParams struct {
 	Msg             map[string]interface{}
 	ParserManager   *CosmosParserManager
 	Logger          applogger.Logger
+	TxDecoder       txdecoder.TxDecoder
 }
 
 func NewCosmosParserManager(params CosmosParserManagerParams) *CosmosParserManager {

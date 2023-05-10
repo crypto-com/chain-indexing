@@ -1,4 +1,4 @@
-package ibcmsg
+package ibc
 
 import (
 	"bytes"
@@ -624,7 +624,7 @@ func parseMsgUpdateTendermintLightClient(
 
 		ClientID:        rawMsg.ClientID,
 		ClientType:      event.MustGetAttributeByKey("client_type"),
-		ConsensusHeight: mustParseHeight(event.MustGetAttributeByKey("consensus_height")),
+		ConsensusHeight: MustParseHeight(event.MustGetAttributeByKey("consensus_height")),
 		Signer:          rawMsg.Signer,
 	}
 
@@ -682,7 +682,7 @@ func parseMsgUpdateSolomachineLightClient(
 
 		ClientID:        rawMsg.ClientID,
 		ClientType:      event.MustGetAttributeByKey("client_type"),
-		ConsensusHeight: mustParseHeight(event.MustGetAttributeByKey("consensus_height")),
+		ConsensusHeight: MustParseHeight(event.MustGetAttributeByKey("consensus_height")),
 		Signer:          rawMsg.Signer,
 	}
 
@@ -697,7 +697,7 @@ func parseMsgUpdateSolomachineLightClient(
 	)}, possibleSignerAddresses
 }
 
-func mustParseHeight(height string) ibc_model.Height {
+func MustParseHeight(height string) ibc_model.Height {
 	heightTokens := strings.Split(height, "-")
 	if len(heightTokens) != 2 {
 		panic("invalid height")
@@ -784,7 +784,7 @@ func ParseMsgRecvPacket(
 	rawPacketData, err := base64_internal.DecodeString(rawMsg.Packet.Data)
 	if err != nil {
 		rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
-	} else  {
+	} else {
 		if err := json.Unmarshal(rawPacketData, &rawFungibleTokenPacketData); err != nil {
 			rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
 		}
@@ -815,9 +815,23 @@ func ParseMsgRecvPacket(
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 
-	recvPacketEvent := log.GetEventByType("recv_packet")
-	if recvPacketEvent == nil {
+	recvPacketEvents := log.GetEventsByType("recv_packet")
+	if recvPacketEvents == nil {
 		panic("missing `recv_packet` event in TxsResult log")
+	}
+	var packetSequence uint64
+	var channelOrdering string
+	var connectionID string
+	for _, recvPacketEvent := range recvPacketEvents {
+		if recvPacketEvent.HasAttribute("packet_sequence") {
+			packetSequence = typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence"))
+		}
+		if recvPacketEvent.HasAttribute("packet_channel_ordering") {
+			channelOrdering = recvPacketEvent.MustGetAttributeByKey("packet_channel_ordering")
+		}
+		if recvPacketEvent.HasAttribute("packet_connection") {
+			connectionID = recvPacketEvent.MustGetAttributeByKey("packet_connection")
+		}
 	}
 
 	fungibleTokenPacketEvent := log.GetEventByType("fungible_token_packet")
@@ -831,7 +845,7 @@ func ParseMsgRecvPacket(
 				FungibleTokenPacketData: rawFungibleTokenPacketData,
 			},
 
-			PacketSequence: typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
+			PacketSequence: packetSequence,
 		}
 
 		// Getting possible signer address from Msg
@@ -872,9 +886,9 @@ func ParseMsgRecvPacket(
 			MaybeDenominationTrace:  maybeDenominationTrace,
 		},
 
-		PacketSequence:  typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence")),
-		ChannelOrdering: recvPacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
-		ConnectionID:    recvPacketEvent.MustGetAttributeByKey("packet_connection"),
+		PacketSequence:  packetSequence,
+		ChannelOrdering: channelOrdering,
+		ConnectionID:    connectionID,
 		PacketAck:       packetAck,
 	}
 
@@ -907,7 +921,7 @@ func ParseMsgAcknowledgement(
 	rawPacketData, err := base64_internal.DecodeString(rawMsg.Packet.Data)
 	if err != nil {
 		rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
-	} else  {
+	} else {
 		if err := json.Unmarshal(rawPacketData, &rawFungibleTokenPacketData); err != nil {
 			rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
 		}
@@ -938,9 +952,22 @@ func ParseMsgAcknowledgement(
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 
-	acknowledgePacketEvent := log.GetEventByType("acknowledge_packet")
-	if acknowledgePacketEvent == nil {
-		panic("missing `acknowledge_packet` event in TxsResult log")
+	acknowledgePacketEvents := log.GetEventsByType("acknowledge_packet")
+
+	var packetSequence uint64
+	var channelOrdering string
+	var connectionID string
+	for _, acknowledgePacketEvent := range acknowledgePacketEvents {
+		if acknowledgePacketEvent.HasAttribute("packet_sequence") {
+			packetSequence = typeconv.MustAtou64(acknowledgePacketEvent.MustGetAttributeByKey("packet_sequence"))
+		}
+		if acknowledgePacketEvent.HasAttribute("packet_channel_ordering") {
+			channelOrdering = acknowledgePacketEvent.MustGetAttributeByKey("packet_channel_ordering")
+		}
+		if acknowledgePacketEvent.HasAttribute("packet_connection") {
+			connectionID = acknowledgePacketEvent.MustGetAttributeByKey("packet_connection")
+		}
+
 	}
 
 	fungibleTokenPacketEvents := log.GetEventsByType("fungible_token_packet")
@@ -954,9 +981,9 @@ func ParseMsgAcknowledgement(
 				FungibleTokenPacketData: rawFungibleTokenPacketData,
 			},
 
-			PacketSequence:  typeconv.MustAtou64(acknowledgePacketEvent.MustGetAttributeByKey("packet_sequence")),
-			ChannelOrdering: acknowledgePacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
-			ConnectionID:    acknowledgePacketEvent.MustGetAttributeByKey("packet_connection"),
+			PacketSequence:  packetSequence,
+			ChannelOrdering: channelOrdering,
+			ConnectionID:    connectionID,
 		}
 
 		// Getting possible signer address from Msg
@@ -1002,9 +1029,9 @@ func ParseMsgAcknowledgement(
 			MaybeError: maybeErr,
 		},
 
-		PacketSequence:  typeconv.MustAtou64(acknowledgePacketEvent.MustGetAttributeByKey("packet_sequence")),
-		ChannelOrdering: acknowledgePacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
-		ConnectionID:    acknowledgePacketEvent.MustGetAttributeByKey("packet_connection"),
+		PacketSequence:  packetSequence,
+		ChannelOrdering: channelOrdering,
+		ConnectionID:    connectionID,
 	}
 
 	// Getting possible signer address from Msg
@@ -1031,6 +1058,25 @@ func IsPacketMsgTransfer(
 		return false
 	}
 	if unmarshalErr := jsoniter.Unmarshal(rawPacketData, &fungiblePacketData); unmarshalErr != nil {
+		return false
+	}
+
+	return true
+}
+
+func IsPacketMsgSubmitTx(
+	packet ibc_model.Packet,
+) bool {
+	if packet.DestinationPort != "icahost" {
+		return false
+	}
+
+	var rawInterchainAccountPacketData ibc_model.InterchainAccountPacketData
+	rawPacketData, decodeDataErr := base64.StdEncoding.DecodeString(packet.Data)
+	if decodeDataErr != nil {
+		return false
+	}
+	if unmarshalErr := jsoniter.Unmarshal(rawPacketData, &rawInterchainAccountPacketData); unmarshalErr != nil {
 		return false
 	}
 
@@ -1092,7 +1138,7 @@ func ParseMsgTimeout(
 			RefundAmount:   rawFungibleTokenPacketData.Amount,
 		},
 
-		PacketTimeoutHeight: mustParseHeight(
+		PacketTimeoutHeight: MustParseHeight(
 			timeoutPacketEvent.MustGetAttributeByKey("packet_timeout_height"),
 		),
 		PacketTimeoutTimestamp: typeconv.MustAtou64(
@@ -1179,7 +1225,7 @@ func ParseMsgTimeoutOnClose(
 			RefundAmount:   rawFungibleTokenPacketData.Amount,
 		},
 
-		PacketTimeoutHeight: mustParseHeight(
+		PacketTimeoutHeight: MustParseHeight(
 			timeoutPacketEvent.MustGetAttributeByKey("packet_timeout_height"),
 		),
 		PacketTimeoutTimestamp: typeconv.MustAtou64(

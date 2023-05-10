@@ -8,6 +8,8 @@ type Logger interface {
 	Panicf(format string, values ...interface{})
 	Error(message string)
 	Errorf(format string, values ...interface{})
+	Warn(message string)
+	Warnf(format string, values ...interface{})
 	Info(message string)
 	Infof(format string, values ...interface{})
 	Debug(message string)
@@ -25,6 +27,7 @@ type LogLevel int8
 const (
 	LOG_LEVEL_DEBUG LogLevel = iota
 	LOG_LEVEL_INFO
+	LOG_LEVEL_WARN
 	LOG_LEVEL_ERROR
 	LOG_LEVEL_PANIC
 	LOG_DISABLED

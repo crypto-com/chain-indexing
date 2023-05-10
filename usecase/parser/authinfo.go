@@ -22,12 +22,12 @@ func ParseSignerInfosToTransactionSigners(
 	var signers []model.TransactionSigner
 
 	if len(signerInfos) <= 0 && len(possibleSignerAddresses) <= 0 {
-		logger.Errorf("error signer info not found at tx %q", txHash)
+		logger.Warnf("error signer info not found at tx %q", txHash)
 	}
 
 	for _, possibleSignerAddress := range possibleSignerAddresses {
 		if possibleSignerAddress == "" {
-			logger.Errorf("error empty address in possibleSignerAddresses: %v at txHash %q", possibleSignerAddresses, txHash)
+			logger.Warnf("error empty address in possibleSignerAddresses: %v at txHash %q", possibleSignerAddresses, txHash)
 			break
 		}
 	}

@@ -1,6 +1,8 @@
 package event
 
-import "github.com/crypto-com/chain-indexing/entity/event"
+import (
+	"github.com/crypto-com/chain-indexing/entity/event"
+)
 
 type MsgEvent interface {
 	event.Event
@@ -41,6 +43,15 @@ var MSG_EVENTS = []string{
 	MSG_DEPOSIT_FAILED,
 	MSG_VOTE_CREATED,
 	MSG_VOTE_FAILED,
+
+	MSG_SUBMIT_PROPOSAL_CREATED,
+	MSG_SUBMIT_PROPOSAL_FAILED,
+	MSG_DEPOSIT_V1_CREATED,
+	MSG_DEPOSIT_V1_FAILED,
+	MSG_VOTE_V1_CREATED,
+	MSG_VOTE_V1_FAILED,
+	MSG_VOTE_WEIGHTED_V1_CREATED,
+	MSG_VOTE_WEIGHTED_V1_FAILED,
 
 	MSG_CREATE_VALIDATOR_CREATED,
 	MSG_CREATE_VALIDATOR_FAILED,

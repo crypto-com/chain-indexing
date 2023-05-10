@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS view_nft_tokens_burned_owner_btree_index ON view_nft_tokens USING btree (burned, owner);

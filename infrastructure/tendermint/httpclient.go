@@ -251,7 +251,20 @@ func (client *HTTPClient) request(method string, queryKVs ...queryKV) (io.ReadCl
 	defer rawResp.Body.Close()
 
 	if rawResp.StatusCode != 200 {
-		return nil, fmt.Errorf("error requesting Tendermint %s endpoint: %s", method, rawResp.Status)
+		defer rawResp.Body.Close()
+
+		var body []byte
+		body, err = ioutil.ReadAll(rawResp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("error reading Body : %w", err)
+		}
+
+		bodyJsonMap := make(map[string]interface{})
+		if err = json.Unmarshal([]byte(body), &bodyJsonMap); err != nil {
+			return nil, fmt.Errorf("error unmarshalling Body : %w", err)
+		}
+
+		return nil, fmt.Errorf("error requesting Tendermint %s %s endpoint: %s Body: %v Header: %v", method, url, rawResp.Status, bodyJsonMap, rawResp.Header)
 	}
 
 	return rawResp.Body, nil

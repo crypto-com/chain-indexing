@@ -55,8 +55,8 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_GRANT_SEND_GRANT_BLOCK_RESULTS_RESP,
 			))
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_GRANT_SEND_GRANT_TXS_RESP)
-			txs := []model.Tx{*tx}
+			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_GRANT_SEND_GRANT_TXS_RESP)
+			txs := []model.CosmosTxWithHash{*tx}
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"

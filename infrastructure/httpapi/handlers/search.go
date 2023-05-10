@@ -24,7 +24,7 @@ type Search struct {
 
 	blocksView                   *block_view.Blocks
 	transactionsView             transaction_view.BlockTransactions
-	validatorsView               *validator_view.Validators
+	validatorsView               validator_view.Validators
 	accountTransactionsTotalView *account_transaction_view.AccountTransactionsTotal
 }
 
@@ -36,7 +36,7 @@ func NewSearch(logger applogger.Logger, rdbHandle *rdb.Handle) *Search {
 
 		block_view.NewBlocks(rdbHandle),
 		transaction_view.NewTransactionsView(rdbHandle),
-		validator_view.NewValidators(rdbHandle),
+		validator_view.NewValidatorsView(rdbHandle),
 		account_transaction_view.NewAccountTransactionsTotal(rdbHandle),
 	}
 }
@@ -68,7 +68,7 @@ func (search *Search) Search(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
-	validators, err := search.validatorsView.Search(keyword)
+	validators, err := search.validatorsView.Search(keyword, nil)
 	if err != nil {
 		if errors.Is(err, rdb.ErrNoRows) {
 			validators = []validator_view.ValidatorRow{}

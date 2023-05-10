@@ -7,6 +7,7 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
+	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 
@@ -51,12 +52,14 @@ type SyncManager struct {
 	parserManager *utils.CosmosParserManager
 
 	startingBlockHeight int64
+
+	txDecoder txdecoder.TxDecoder
 }
 
 type SyncManagerParams struct {
 	Logger    applogger.Logger
 	RDbConn   rdb.Conn
-	TxDecoder *utils.TxDecoder
+	TxDecoder txdecoder.TxDecoder
 
 	Config SyncManagerConfig
 }
@@ -127,6 +130,8 @@ func NewSyncManager(
 		parserManager: pm,
 
 		startingBlockHeight: params.Config.StartingBlockHeight,
+
+		txDecoder: params.TxDecoder,
 	}
 }
 
@@ -199,13 +204,14 @@ func (manager *SyncManager) SyncBlocks(latestHeight int64, isRetry bool) error {
 			if err != nil {
 				return fmt.Errorf("error handling events: %v", err)
 			}
-			prometheus.RecordProjectionExecTime(manager.eventHandler.Id(), time.Since(startTime).Milliseconds())
+
+			prometheus.RecordProjectionLatestHeight(manager.eventHandler.Id(), blockHeight)
 		}
+		prometheus.RecordProjectionExecTime(manager.eventHandler.Id(), time.Since(startTime).Milliseconds()/(syncedHeight-currentIndexingHeight+1))
 
 		// If there is any error before, short-circuit return in the error handling
 		// while the local currentIndexingHeight won't be incremented and will be retried later
 		manager.logger.Infof("successfully synced to block height %d", syncedHeight)
-		prometheus.RecordProjectionLatestHeight(manager.eventHandler.Id(), syncedHeight)
 
 		currentIndexingHeight = syncedHeight + 1
 	}
@@ -240,12 +246,29 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		return nil, fmt.Errorf("error requesting chain block_results at height %d: %v", blockHeight, err)
 	}
 
-	txs := make([]model.Tx, 0)
+	txs := make([]model.CosmosTxWithHash, 0)
 	for _, txHex := range block.Txs {
-		var tx *model.Tx
-		tx, err = manager.cosmosClient.Tx(parser.TxHash(txHex))
-		if err != nil {
-			return nil, fmt.Errorf("error requesting chain txs (%s) at height %d: %v", txHex, blockHeight, err)
+		txHash := parser.TxHash(txHex)
+		tx := &model.CosmosTxWithHash{
+			Hash: txHash,
+		}
+
+		if manager.txDecoder != nil {
+			var decodedTx *model.CosmosTx
+			decodedTx, err = manager.txDecoder.DecodeBase64(txHex)
+			if err != nil {
+				var resTx *model.Tx
+				resTx, err = manager.cosmosClient.Tx(txHash)
+				if err != nil {
+					return nil, fmt.Errorf("error requesting chain txs (%s) at height %d: %v", txHex, blockHeight, err)
+				}
+
+				tx.Tx = resTx.Tx
+			} else {
+				tx.Tx = *decodedTx
+			}
+		} else {
+			return nil, fmt.Errorf("error decoding chain txs (%s) at height %d: %v", txHex, blockHeight, err)
 		}
 		txs = append(txs, *tx)
 	}
@@ -255,6 +278,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		"blockHeight": blockHeight,
 	})
 
+	manager.parserManager.TxDecoder = manager.txDecoder
 	commands, err := parser.ParseBlockToCommands(
 		parseBlockToCommandsLogger,
 		manager.parserManager,

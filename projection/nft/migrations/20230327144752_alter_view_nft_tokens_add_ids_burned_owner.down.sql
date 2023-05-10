@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS view_nft_tokens_burned_owner_btree_index;

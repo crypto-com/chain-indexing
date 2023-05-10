@@ -79,8 +79,8 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_RECV_PACKET_BLOCK_RESULTS_RESP,
 			))
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_RECV_PACKET_TXS_RESP)
-			txs := []model.Tx{*tx}
+			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_RECV_PACKET_TXS_RESP)
+			txs := []model.CosmosTxWithHash{*tx}
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
@@ -167,8 +167,8 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_RECV_PACKET_PACKET_ACK_ERROR_BLOCK_RESULTS_RESP,
 			))
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_RECV_PACKET_PACKET_ACK_ERROR_TXS_RESP)
-			txs := []model.Tx{*tx}
+			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_RECV_PACKET_PACKET_ACK_ERROR_TXS_RESP)
+			txs := []model.CosmosTxWithHash{*tx}
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
@@ -261,8 +261,8 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_RECV_PACKET_MISSING_FUNGIBLE_TOKEN_PACKET_BLOCK_RESULTS_RESP,
 			))
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_RECV_PACKET_MISSING_FUNGIBLE_TOKEN_PACKET_TXS_RESP)
-			txs := []model.Tx{*tx}
+			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_RECV_PACKET_MISSING_FUNGIBLE_TOKEN_PACKET_TXS_RESP)
+			txs := []model.CosmosTxWithHash{*tx}
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"
@@ -352,8 +352,8 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_RECV_PACKET_SOLO_MACHINE_BLOCK_RESULTS_RESP,
 			))
 
-			tx := mustParseTxsResp(usecase_parser_test.TX_MSG_RECV_PACKET_SOLO_MACHINE_TXS_RESP)
-			txs := []model.Tx{*tx}
+			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_RECV_PACKET_SOLO_MACHINE_TXS_RESP)
+			txs := []model.CosmosTxWithHash{*tx}
 
 			accountAddressPrefix := "cro"
 			stakingDenom := "basecro"

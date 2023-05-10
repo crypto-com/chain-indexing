@@ -3,8 +3,10 @@ package cosmosapp
 import (
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -754,16 +756,55 @@ func (client *HTTPClient) getUrl(module string, method string) string {
 }
 
 func (client *HTTPClient) request(method string, queryKVs ...queryKV) (io.ReadCloser, error) {
-	respBody, respStatusCode, err := client.rawRequest(method, queryKVs...)
+	var err error
+
+	var url *url.URL
+	url, err = url.Parse(client.rpcUrl + "/" + method)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error parsing HTTP request URL: %w", err)
 	}
 
-	if respStatusCode != 200 {
-		return nil, fmt.Errorf("error requesting Cosmos %s endpoint: %d", method, respStatusCode)
+	query := url.Query()
+	for _, kv := range queryKVs {
+		query.Add(kv.key, kv.value)
+	}
+	if client.maybeAuthQueryKV != nil {
+		query.Add(client.maybeAuthQueryKV.Key, client.maybeAuthQueryKV.Value)
 	}
 
-	return respBody, nil
+	url.RawQuery = query.Encode()
+	queryUrl := url.String()
+
+	var req *http.Request
+	req, err = http.NewRequestWithContext(context.Background(), http.MethodGet, queryUrl, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error creating HTTP request with context: %w", err)
+	}
+
+	var rawResp *http.Response
+	rawResp, err = client.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error requesting Cosmos %s endpoint: %w", queryUrl, err)
+	}
+	defer rawResp.Body.Close()
+
+	if rawResp.StatusCode != 200 {
+		defer rawResp.Body.Close()
+		var body []byte
+		body, err = ioutil.ReadAll(rawResp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("error reading Body : %w", err)
+		}
+
+		bodyJsonMap := make(map[string]interface{})
+		if err = json.Unmarshal([]byte(body), &bodyJsonMap); err != nil {
+			return nil, fmt.Errorf("error unmarshalling Body : %w", err)
+		}
+
+		return nil, fmt.Errorf("error requesting Cosmos %s %s endpoint: %s Body: %v Header: %v", method, queryUrl, rawResp.Status, bodyJsonMap, rawResp.Header)
+	}
+
+	return rawResp.Body, nil
 }
 
 func (client *HTTPClient) rawRequest(method string, queryKVs ...queryKV) (io.ReadCloser, int, error) {
