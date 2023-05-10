@@ -26,10 +26,16 @@ const ERR_CODE_ACCOUNT_NOT_FOUND = 2
 const ERR_CODE_ACCOUNT_NO_DELEGATION = 5
 
 type HTTPClient struct {
-	httpClient *http.Client
-	rpcUrl     string
+	httpClient       *http.Client
+	rpcUrl           string
+	maybeAuthQueryKV *HTTPClientAuthKV
 
 	bondingDenom string
+}
+
+type HTTPClientAuthKV struct {
+	Key   string
+	Value string
 }
 
 // NewHTTPClient returns a new HTTPClient for tendermint request
@@ -41,6 +47,7 @@ func NewHTTPClient(rpcUrl string, bondingDenom string) *HTTPClient {
 	return &HTTPClient{
 		httpClient,
 		strings.TrimSuffix(rpcUrl, "/"),
+		nil,
 
 		bondingDenom,
 	}
@@ -59,14 +66,19 @@ func NewInsecureHTTPClient(rpcUrl string, bondingDenom string) *HTTPClient {
 	return &HTTPClient{
 		httpClient,
 		strings.TrimSuffix(rpcUrl, "/"),
+		nil,
 
 		bondingDenom,
 	}
 }
 
+func (client *HTTPClient) SetAuthQueryKV(authKV HTTPClientAuthKV) {
+	client.maybeAuthQueryKV = &authKV
+}
+
 func (client *HTTPClient) Account(accountAddress string) (*cosmosapp_interface.Account, error) {
 	rawRespBody, err := client.request(
-		fmt.Sprintf("%s/%s", client.getUrl("auth", "accounts"), accountAddress), "",
+		fmt.Sprintf("%s/%s", client.getUrl("auth", "accounts"), accountAddress),
 	)
 	if err != nil {
 		return nil, err
@@ -368,7 +380,7 @@ func (client *HTTPClient) TotalRewards(accountAddress string) (coin.DecCoins, er
 			"%s/%s/rewards",
 			client.getUrl("distribution", "delegators"),
 			accountAddress,
-		), "",
+		),
 	)
 	if err != nil {
 		return nil, err
@@ -396,7 +408,7 @@ func (client *HTTPClient) Validator(validatorAddress string) (*cosmosapp_interfa
 		fmt.Sprintf(
 			"%s/%s",
 			client.getUrl("staking", "validators"), validatorAddress,
-		), "",
+		),
 	)
 	if err != nil {
 		return nil, err
@@ -415,7 +427,7 @@ func (client *HTTPClient) Commission(validatorAddress string) (coin.DecCoins, er
 	rawRespBody, err := client.request(
 		fmt.Sprintf("%s/%s/commission",
 			client.getUrl("distribution", "validators"), validatorAddress,
-		), "",
+		),
 	)
 	if err != nil {
 		return nil, err
@@ -609,19 +621,18 @@ func (client *HTTPClient) ProposalById(id string) (cosmosapp_interface.Proposal,
 		client.getUrl("gov", "proposals"), id,
 	)
 	rawRespBody, statusCode, err := client.rawRequest(
-		method, "",
+		method,
 	)
 	if err != nil {
 		return cosmosapp_interface.Proposal{}, err
 	}
+	defer rawRespBody.Close()
 	if statusCode == 404 {
 		return cosmosapp_interface.Proposal{}, cosmosapp_interface.ErrProposalNotFound
 	}
 	if statusCode != 200 {
-		rawRespBody.Close()
 		return cosmosapp_interface.Proposal{}, fmt.Errorf("error requesting Cosmos %s endpoint: %d", method, statusCode)
 	}
-	defer rawRespBody.Close()
 
 	var proposalResp ProposalResp
 	if err := jsoniter.NewDecoder(rawRespBody).Decode(&proposalResp); err != nil {
@@ -637,19 +648,18 @@ func (client *HTTPClient) ProposalTally(id string) (cosmosapp_interface.Tally, e
 		client.getUrl("gov", "proposals"), id,
 	)
 	rawRespBody, statusCode, err := client.rawRequest(
-		method, "",
+		method,
 	)
 	if err != nil {
 		return cosmosapp_interface.Tally{}, err
 	}
+	defer rawRespBody.Close()
 	if statusCode == 404 {
 		return cosmosapp_interface.Tally{}, cosmosapp_interface.ErrProposalNotFound
 	}
 	if statusCode != 200 {
-		rawRespBody.Close()
 		return cosmosapp_interface.Tally{}, fmt.Errorf("error requesting Cosmos %s endpoint: %d", method, statusCode)
 	}
-	defer rawRespBody.Close()
 
 	var tallyResp TallyResp
 	if err := jsoniter.NewDecoder(rawRespBody).Decode(&tallyResp); err != nil {
@@ -665,7 +675,7 @@ func (client *HTTPClient) Tx(hash string) (*model.Tx, error) {
 			"%s/%s",
 			client.getUrl("tx", "txs"),
 			hash,
-		), "",
+		),
 	)
 	if err != nil {
 		return nil, err
@@ -743,36 +753,50 @@ func (client *HTTPClient) getUrl(module string, method string) string {
 	return fmt.Sprintf("cosmos/%s/v1beta1/%s", module, method)
 }
 
-// request construct tendermint getUrl and issues an HTTP request
-// returns the success http Body
-func (client *HTTPClient) request(method string, queryString ...string) (io.ReadCloser, error) {
+// nolint:unparam
+func (client *HTTPClient) request(method string, queryKVs ...queryKV) (io.ReadCloser, error) {
 	var err error
 
-	queryUrl := client.rpcUrl + "/" + method
-	if len(queryString) > 0 {
-		queryUrl += "?" + queryString[0]
+	var url *url.URL
+	url, err = url.Parse(client.rpcUrl + "/" + method)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing HTTP request URL: %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, queryUrl, nil)
-	if err != nil {
-		return nil, fmt.Errorf("error creating HTTP request with context: %v", err)
+	query := url.Query()
+	for _, kv := range queryKVs {
+		query.Add(kv.key, kv.value)
 	}
-	rawResp, err := client.httpClient.Do(req)
+	if client.maybeAuthQueryKV != nil {
+		query.Add(client.maybeAuthQueryKV.Key, client.maybeAuthQueryKV.Value)
+	}
+
+	url.RawQuery = query.Encode()
+	queryUrl := url.String()
+
+	var req *http.Request
+	req, err = http.NewRequestWithContext(context.Background(), http.MethodGet, queryUrl, nil)
 	if err != nil {
-		return nil, fmt.Errorf("error requesting Cosmos %s endpoint: %v", queryUrl, err)
+		return nil, fmt.Errorf("error creating HTTP request with context: %w", err)
+	}
+
+	var rawResp *http.Response
+	rawResp, err = client.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error requesting Cosmos %s endpoint: %w", queryUrl, err)
 	}
 
 	if rawResp.StatusCode != 200 {
 		defer rawResp.Body.Close()
-		body, errReadBody := ioutil.ReadAll(rawResp.Body)
-		if errReadBody != nil {
-			return nil, fmt.Errorf("error reading Body : %v", errReadBody)
-		}
 
+		var rawRespBody []byte
+		rawRespBody, err = ioutil.ReadAll(rawResp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("error reading Body : %w", err)
+		}
 		bodyJsonMap := make(map[string]interface{})
-		errRead := json.Unmarshal([]byte(body), &bodyJsonMap)
-		if errRead != nil {
-			return nil, fmt.Errorf("error unmarshalling Body : %v", errRead)
+		if err = json.Unmarshal([]byte(rawRespBody), &bodyJsonMap); err != nil {
+			return nil, fmt.Errorf("error unmarshalling Body : %w", err)
 		}
 
 		return nil, fmt.Errorf("error requesting Cosmos %s %s endpoint: %s Body: %v Header: %v", method, queryUrl, rawResp.Status, bodyJsonMap, rawResp.Header)
@@ -781,24 +805,37 @@ func (client *HTTPClient) request(method string, queryString ...string) (io.Read
 	return rawResp.Body, nil
 }
 
-// rawRequest construct tendermint getUrl and issues an HTTP request
-// returns the http Body with any status code
-func (client *HTTPClient) rawRequest(method string, queryString ...string) (io.ReadCloser, int, error) {
+// nolint:unparam
+func (client *HTTPClient) rawRequest(method string, queryKVs ...queryKV) (io.ReadCloser, int, error) {
 	var err error
 
-	queryUrl := client.rpcUrl + "/" + method
-	if len(queryString) > 0 {
-		queryUrl += "?" + queryString[0]
+	var url *url.URL
+	url, err = url.Parse(client.rpcUrl + "/" + method)
+	if err != nil {
+		return nil, 0, fmt.Errorf("error parsing HTTP request URL: %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, queryUrl, nil)
-	if err != nil {
-		return nil, 0, fmt.Errorf("error creating HTTP request with context: %v", err)
+	query := url.Query()
+	for _, kv := range queryKVs {
+		query.Add(kv.key, kv.value)
 	}
-	// nolint:bodyclose
-	rawResp, err := client.httpClient.Do(req)
+	if client.maybeAuthQueryKV != nil {
+		query.Add(client.maybeAuthQueryKV.Key, client.maybeAuthQueryKV.Value)
+	}
+
+	url.RawQuery = query.Encode()
+	queryUrl := url.String()
+
+	var req *http.Request
+	req, err = http.NewRequestWithContext(context.Background(), http.MethodGet, queryUrl, nil)
 	if err != nil {
-		return nil, 0, fmt.Errorf("error requesting Cosmos %s endpoint: %v", queryUrl, err)
+		return nil, 0, fmt.Errorf("error creating HTTP request with context: %w", err)
+	}
+
+	var rawResp *http.Response
+	rawResp, err = client.httpClient.Do(req)
+	if err != nil {
+		return nil, 0, fmt.Errorf("error requesting Cosmos %s endpoint: %w", queryUrl, err)
 	}
 
 	return rawResp.Body, rawResp.StatusCode, nil
@@ -807,4 +844,9 @@ func (client *HTTPClient) rawRequest(method string, queryString ...string) (io.R
 type Pagination struct {
 	MaybeNextKey *string `json:"next_key"`
 	Total        string  `json:"total"`
+}
+
+type queryKV struct {
+	key   string
+	value string
 }

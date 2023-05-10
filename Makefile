@@ -54,6 +54,7 @@ else
 	# TODO: Migrate coin test cases to Ginkgo
 	docker run --rm -v $(shell pwd):/app -w /app \
 		-e TEST_DB=$(TEST_DB) \
+		-e ACK_GINKGO_RC=true \
 		crypto-com/chain-indexing/ginkgo \
 		ginkgo -r && \
 		go test ./usecase/coin/...
@@ -61,17 +62,19 @@ endif
 
 test_watch: has_docker has_docker_compose build_ginkgo_image
 	docker run --rm -v $(shell pwd):/app -w /app \
+		-e ACK_GINKGO_RC=true \
 		crypto-com/chain-indexing/ginkgo \
 		ginkgo watch -r
 
 ginkgo: has_docker has_docker_compose build_ginkgo_image
 	docker run --rm -v $(shell pwd):/app -w /app \
+		-e ACK_GINKGO_RC=true \
 		crypto-com/chain-indexing/ginkgo \
 		ginkgo $(filter-out $@,$(MAKECMDGOALS))
 
 test_local: has_golang install_ginkgo_local has_ginkgo
-	TEST_DB=$(TEST_DB) $(GINKGO) -r
+	TEST_DB=$(TEST_DB) ACK_GINKGO_RC=true $(GINKGO) -r
 	$(GO) test ./usecase/coin/...
 
 test_watch_local: has_golang install_ginkgo_local has_ginkgo
-	$(GINKGO) watch -r
+	ACK_GINKGO_RC=true $(GINKGO) watch -r

@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -24,7 +25,13 @@ var _ tendermint.Client = &HTTPClient{}
 type HTTPClient struct {
 	httpClient           *http.Client
 	tendermintRPCUrl     string
+	maybeAuthQueryKV     *HTTPClientAuthKV
 	strictGenesisParsing bool
+}
+
+type HTTPClientAuthKV struct {
+	Key   string
+	Value string
 }
 
 // NewHTTPClient returns a new HTTPClient for tendermint request
@@ -36,6 +43,7 @@ func NewHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool) *HTTPClie
 	return &HTTPClient{
 		httpClient,
 		strings.TrimSuffix(tendermintRPCUrl, "/"),
+		nil,
 		strictGenesisParsing,
 	}
 }
@@ -54,8 +62,13 @@ func NewInsecureHTTPClient(tendermintRPCUrl string, strictGenesisParsing bool) *
 	return &HTTPClient{
 		httpClient,
 		strings.TrimSuffix(tendermintRPCUrl, "/"),
+		nil,
 		strictGenesisParsing,
 	}
+}
+
+func (client *HTTPClient) SetAuthQueryKV(authKV HTTPClientAuthKV) {
+	client.maybeAuthQueryKV = &authKV
 }
 
 func (client *HTTPClient) Genesis() (*genesis.Genesis, error) {
@@ -79,7 +92,10 @@ func (client *HTTPClient) GenesisChunked() (*genesis.Genesis, error) {
 	var err error
 
 	// get the total number of genesis chunks
-	firstRawRespBody, err := client.request("genesis_chunked", "chunk="+strconv.FormatInt(0, 10))
+	firstRawRespBody, err := client.request("genesis_chunked", queryKV{
+		key:   "chunk",
+		value: strconv.FormatInt(int64(0), 10),
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +115,10 @@ func (client *HTTPClient) GenesisChunked() (*genesis.Genesis, error) {
 	decoded = append(decoded, firstGenesisData.Result.Data)
 
 	for i := 1; i < total; i++ {
-		rawRespBody, rawRespBodyErr := client.request("genesis_chunked", "chunk="+strconv.FormatInt(int64(i), 10))
+		rawRespBody, rawRespBodyErr := client.request("genesis_chunked", queryKV{
+			key:   "chunk",
+			value: strconv.FormatInt(int64(i), 10),
+		})
 		if rawRespBodyErr != nil {
 			return nil, rawRespBodyErr
 		}
@@ -128,7 +147,10 @@ func (client *HTTPClient) GenesisChunked() (*genesis.Genesis, error) {
 func (client *HTTPClient) Block(height int64) (*usecase_model.Block, *usecase_model.RawBlock, error) {
 	var err error
 
-	rawRespBody, err := client.request("block", "height="+strconv.FormatInt(height, 10))
+	rawRespBody, err := client.request("block", queryKV{
+		key:   "height",
+		value: strconv.FormatInt(height, 10),
+	})
 	if err != nil {
 		return nil, nil, err
 	}
@@ -145,7 +167,10 @@ func (client *HTTPClient) Block(height int64) (*usecase_model.Block, *usecase_mo
 func (client *HTTPClient) BlockResults(height int64) (*usecase_model.BlockResults, error) {
 	var err error
 
-	rawRespBody, err := client.request("block_results", "height="+strconv.FormatInt(height, 10))
+	rawRespBody, err := client.request("block_results", queryKV{
+		key:   "height",
+		value: strconv.FormatInt(height, 10),
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -176,45 +201,6 @@ func (client *HTTPClient) LatestBlockHeight() (int64, error) {
 	return block.Height, nil
 }
 
-// request construct tendermint url and issues an HTTP request
-// returns the success http Body
-func (client *HTTPClient) request(method string, queryString ...string) (io.ReadCloser, error) {
-	var err error
-
-	url := client.tendermintRPCUrl + "/" + method
-	if len(queryString) > 0 {
-		url += "?" + queryString[0]
-	}
-
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("error creating HTTP request with context: %v", err)
-	}
-	rawResp, err := client.httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("error requesting Tendermint %s endpoint: %v", url, err)
-	}
-
-	if rawResp.StatusCode != 200 {
-		defer rawResp.Body.Close()
-
-		body, errReadBody := ioutil.ReadAll(rawResp.Body)
-		if errReadBody != nil {
-			return nil, fmt.Errorf("error reading Body : %v", errReadBody)
-		}
-
-		bodyJsonMap := make(map[string]interface{})
-		errRead := json.Unmarshal([]byte(body), &bodyJsonMap)
-		if errRead != nil {
-			return nil, fmt.Errorf("error unmarshalling Body : %v", errRead)
-		}
-
-		return nil, fmt.Errorf("error requesting Tendermint %s %s endpoint: %s Body: %v Header: %v", method, url, rawResp.Status, bodyJsonMap, rawResp.Header)
-	}
-
-	return rawResp.Body, nil
-}
-
 func (client *HTTPClient) Status() (*map[string]interface{}, error) {
 	rawRespBody, err := client.request("status")
 	if err != nil {
@@ -230,6 +216,56 @@ func (client *HTTPClient) Status() (*map[string]interface{}, error) {
 	}
 
 	return &jsonMap, nil
+}
+
+func (client *HTTPClient) request(method string, queryKVs ...queryKV) (io.ReadCloser, error) {
+	var err error
+
+	var url *url.URL
+	url, err = url.Parse(client.tendermintRPCUrl + "/" + method)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing HTTP request URL: %w", err)
+	}
+
+	query := url.Query()
+	for _, kv := range queryKVs {
+		query.Add(kv.key, kv.value)
+	}
+	if client.maybeAuthQueryKV != nil {
+		query.Add(client.maybeAuthQueryKV.Key, client.maybeAuthQueryKV.Value)
+	}
+
+	url.RawQuery = query.Encode()
+	queryUrl := url.String()
+
+	var req *http.Request
+	req, err = http.NewRequestWithContext(context.Background(), http.MethodGet, queryUrl, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error creating HTTP request with context: %v", err)
+	}
+	var rawResp *http.Response
+	rawResp, err = client.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error requesting Tendermint %s endpoint: %v", url, err)
+	}
+
+	var rawRespBody []byte
+	if rawResp.StatusCode != 200 {
+		defer rawResp.Body.Close()
+
+		rawRespBody, err = ioutil.ReadAll(rawResp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("error reading Body : %w", err)
+		}
+		bodyJsonMap := make(map[string]interface{})
+		if err = json.Unmarshal([]byte(rawRespBody), &bodyJsonMap); err != nil {
+			return nil, fmt.Errorf("error unmarshalling Body : %w", err)
+		}
+
+		return nil, fmt.Errorf("error requesting Tendermint %s %s endpoint: %s Body: %v Header: %v", method, url, rawResp.Status, bodyJsonMap, rawResp.Header)
+	}
+
+	return rawResp.Body, nil
 }
 
 type GenesisResp struct {
@@ -264,4 +300,9 @@ type RawBlockResultsResp struct {
 	Jsonrpc string          `json:"jsonrpc"`
 	ID      int             `json:"id"`
 	Result  RawBlockResults `json:"result"`
+}
+
+type queryKV struct {
+	key   string
+	value string
 }

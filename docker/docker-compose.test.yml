@@ -25,6 +25,7 @@ services:
     command: >
       bash -c "ginkgo -r && go test ./usecase/coin/..."
     environment:
+      ACK_GINKGO_RC: "true"
       TEST_DB: "${TEST_DB:-1}"
       TEST_POSTGRES_HOST: "${TEST_POSTGRES_HOST:-postgres}"
       TEST_POSTGRES_PORT: "${TEST_POSTGRES_PORT:-5432}"

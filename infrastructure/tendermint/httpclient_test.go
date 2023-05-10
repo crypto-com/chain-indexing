@@ -30,6 +30,26 @@ var _ = Describe("HTTPClient", func() {
 		var _ tendermint.Client = NewHTTPClient("http://localhost:26657", true)
 	})
 
+	Describe("Authentication key value pair", func() {
+		It("should prepend the authentication key pair to the request URL when it is set", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/genesis", "authKey=authValue"),
+					ghttp.RespondWith(http.StatusOK, infrastructure_tendermint_test.GENESIS_MIXED_NUMBER_AND_STRING_JSON),
+				),
+			)
+
+			client := NewHTTPClient(server.URL(), true)
+			client.SetAuthQueryKV(HTTPClientAuthKV{
+				Key:   "authKey",
+				Value: "authValue",
+			})
+
+			_, err := client.Genesis()
+			Expect(err).To(BeNil())
+		})
+	})
+
 	Describe("RawBlockResults", func() {
 		It("should return nil Events when there are no transactions nor events", func() {
 			anyBlockHeight := int64(1)
