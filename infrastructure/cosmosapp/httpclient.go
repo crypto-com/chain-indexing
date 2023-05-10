@@ -651,6 +651,7 @@ func (client *HTTPClient) ProposalTally(id string) (cosmosapp_interface.Tally, e
 	rawRespBody, statusCode, err := client.rawRequest(
 		method,
 	)
+	defer rawRespBody.Close()
 	if err != nil {
 		return cosmosapp_interface.Tally{}, err
 	}
@@ -658,10 +659,8 @@ func (client *HTTPClient) ProposalTally(id string) (cosmosapp_interface.Tally, e
 		return cosmosapp_interface.Tally{}, cosmosapp_interface.ErrProposalNotFound
 	}
 	if statusCode != 200 {
-		rawRespBody.Close()
 		return cosmosapp_interface.Tally{}, fmt.Errorf("error requesting Cosmos %s endpoint: %d", method, statusCode)
 	}
-	defer rawRespBody.Close()
 
 	var tallyResp TallyResp
 	if err := jsoniter.NewDecoder(rawRespBody).Decode(&tallyResp); err != nil {
@@ -787,21 +786,21 @@ func (client *HTTPClient) request(method string, queryKVs ...queryKV) (io.ReadCl
 	if err != nil {
 		return nil, fmt.Errorf("error requesting Cosmos %s endpoint: %w", queryUrl, err)
 	}
-	defer rawResp.Body.Close()
 
 	if rawResp.StatusCode != 200 {
-		defer rawResp.Body.Close()
-		var body []byte
-		body, err = ioutil.ReadAll(rawResp.Body)
+		var rawRespBody []byte
+		rawRespBody, err = ioutil.ReadAll(rawResp.Body)
 		if err != nil {
+			rawResp.Body.Close()
 			return nil, fmt.Errorf("error reading Body : %w", err)
 		}
-
 		bodyJsonMap := make(map[string]interface{})
-		if err = json.Unmarshal([]byte(body), &bodyJsonMap); err != nil {
+		if err = json.Unmarshal([]byte(rawRespBody), &bodyJsonMap); err != nil {
+			rawResp.Body.Close()
 			return nil, fmt.Errorf("error unmarshalling Body : %w", err)
 		}
 
+		rawResp.Body.Close()
 		return nil, fmt.Errorf("error requesting Cosmos %s %s endpoint: %s Body: %v Header: %v", method, queryUrl, rawResp.Status, bodyJsonMap, rawResp.Header)
 	}
 
@@ -840,7 +839,6 @@ func (client *HTTPClient) rawRequest(method string, queryKVs ...queryKV) (io.Rea
 	if err != nil {
 		return nil, 0, fmt.Errorf("error requesting Cosmos %s endpoint: %w", queryUrl, err)
 	}
-	defer rawResp.Body.Close()
 
 	return rawResp.Body, rawResp.StatusCode, nil
 }

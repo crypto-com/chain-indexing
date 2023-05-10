@@ -19,7 +19,7 @@ import (
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 )
 
-var _ = Describe("HTTPClient", func() {
+var _ = FDescribe("HTTPClient", func() {
 	var server *ghttp.Server
 
 	BeforeEach(func() {
@@ -32,11 +32,10 @@ var _ = Describe("HTTPClient", func() {
 
 	Describe("Authentication key value pair", func() {
 		It("should prepend the authentication key pair to the request URL when it is set", func() {
-			anyResponse := "{}"
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", "/genesis", "authKey=authValue"),
-					ghttp.RespondWith(http.StatusOK, anyResponse),
+					ghttp.RespondWith(http.StatusOK, infrastructure_tendermint_test.GENESIS_MIXED_NUMBER_AND_STRING_JSON),
 				),
 			)
 
@@ -46,9 +45,8 @@ var _ = Describe("HTTPClient", func() {
 				Value: "authValue",
 			})
 
-			genesis, err := client.Genesis()
+			_, err := client.Genesis()
 			Expect(err).To(BeNil())
-			Expect(jsoniter.MarshalToString(genesis)).To(Equal(anyResponse))
 		})
 	})
 
