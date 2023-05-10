@@ -755,6 +755,7 @@ func (client *HTTPClient) getUrl(module string, method string) string {
 	return fmt.Sprintf("cosmos/%s/v1beta1/%s", module, method)
 }
 
+// nolint:unparam
 func (client *HTTPClient) request(method string, queryKVs ...queryKV) (io.ReadCloser, error) {
 	var err error
 
@@ -807,6 +808,7 @@ func (client *HTTPClient) request(method string, queryKVs ...queryKV) (io.ReadCl
 	return rawResp.Body, nil
 }
 
+// nolint:unparam
 func (client *HTTPClient) rawRequest(method string, queryKVs ...queryKV) (io.ReadCloser, int, error) {
 	var err error
 
