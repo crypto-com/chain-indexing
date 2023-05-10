@@ -16,8 +16,6 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-// TODO: change parser to accept []byte instead of io.Reader
-
 // Block related parsing functions
 func ParseGenesisResp(rawRespReader io.Reader, strictParsing bool) (*genesis.Genesis, error) {
 	var genesisResp GenesisResp
