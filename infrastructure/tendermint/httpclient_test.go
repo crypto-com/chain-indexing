@@ -19,7 +19,7 @@ import (
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 )
 
-var _ = FDescribe("HTTPClient", func() {
+var _ = Describe("HTTPClient", func() {
 	var server *ghttp.Server
 
 	BeforeEach(func() {
