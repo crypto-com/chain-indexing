@@ -626,14 +626,13 @@ func (client *HTTPClient) ProposalById(id string) (cosmosapp_interface.Proposal,
 	if err != nil {
 		return cosmosapp_interface.Proposal{}, err
 	}
+	defer rawRespBody.Close()
 	if statusCode == 404 {
 		return cosmosapp_interface.Proposal{}, cosmosapp_interface.ErrProposalNotFound
 	}
 	if statusCode != 200 {
-		rawRespBody.Close()
 		return cosmosapp_interface.Proposal{}, fmt.Errorf("error requesting Cosmos %s endpoint: %d", method, statusCode)
 	}
-	defer rawRespBody.Close()
 
 	var proposalResp ProposalResp
 	if err := jsoniter.NewDecoder(rawRespBody).Decode(&proposalResp); err != nil {
@@ -651,10 +650,10 @@ func (client *HTTPClient) ProposalTally(id string) (cosmosapp_interface.Tally, e
 	rawRespBody, statusCode, err := client.rawRequest(
 		method,
 	)
-	defer rawRespBody.Close()
 	if err != nil {
 		return cosmosapp_interface.Tally{}, err
 	}
+	defer rawRespBody.Close()
 	if statusCode == 404 {
 		return cosmosapp_interface.Tally{}, cosmosapp_interface.ErrProposalNotFound
 	}
