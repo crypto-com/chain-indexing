@@ -51,14 +51,21 @@ type Debug struct {
 }
 
 type TendermintApp struct {
-	HTTPRPCUrl           string `yaml:"http_rpc_url" toml:"http_rpc_url" xml:"http_rpc_url" json:"http_rpc_url,omitempty"`
-	Insecure             bool   `yaml:"insecure" toml:"insecure" xml:"insecure" json:"insecure,omitempty"`
-	StrictGenesisParsing bool   `yaml:"strict_genesis_parsing" toml:"strict_genesis_parsing" xml:"strict_genesis_parsing" json:"strict_genesis_parsing,omitempty"`
+	HTTPRPCUrl           string       `yaml:"http_rpc_url" toml:"http_rpc_url" xml:"http_rpc_url" json:"http_rpc_url,omitempty"`
+	Insecure             bool         `yaml:"insecure" toml:"insecure" xml:"insecure" json:"insecure,omitempty"`
+	MaybeAuthQueryKV     *AuthQueryKV `yaml:"auth_query_kv" toml:"auth_query_kv" xml:"auth_query_kv" json:"auth_query_kv,omitempty"`
+	StrictGenesisParsing bool         `yaml:"strict_genesis_parsing" toml:"strict_genesis_parsing" xml:"strict_genesis_parsing" json:"strict_genesis_parsing,omitempty"`
 }
 
 type CosmosApp struct {
-	HTTPRPCUrl string `yaml:"http_rpc_url" toml:"http_rpc_url" xml:"http_rpc_url" json:"http_rpc_url,omitempty"`
-	Insecure   bool   `yaml:"insecure" toml:"insecure" xml:"insecure" json:"insecure,omitempty"`
+	HTTPRPCUrl       string       `yaml:"http_rpc_url" toml:"http_rpc_url" xml:"http_rpc_url" json:"http_rpc_url,omitempty"`
+	Insecure         bool         `yaml:"insecure" toml:"insecure" xml:"insecure" json:"insecure,omitempty"`
+	MaybeAuthQueryKV *AuthQueryKV `yaml:"auth_query_kv" toml:"auth_query_kv" xml:"auth_query_kv" json:"auth_query_kv,omitempty"`
+}
+
+type AuthQueryKV struct {
+	Key   string `yaml:"key" toml:"key" xml:"key" json:"key,omitempty"`
+	Value string `yaml:"value" toml:"value" xml:"value" json:"value,omitempty"`
 }
 
 type Postgres struct {

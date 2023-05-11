@@ -7,6 +7,7 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
+	"github.com/crypto-com/chain-indexing/bootstrap/config"
 	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -29,14 +30,13 @@ const DEFAULT_MAX_RETRY_INTERVAL = 15 * time.Minute
 const DEFAULT_MAX_RETRY_TIME = MAX_RETRY_TIME_ALWAYS_RETRY
 
 type SyncManager struct {
-	rdbConn              rdb.Conn
-	tendermintClient     *tendermint.HTTPClient
-	cosmosClient         cosmosapp_interface.Client
-	logger               applogger.Logger
-	pollingInterval      time.Duration
-	maxRetryInterval     time.Duration
-	maxRetryTime         time.Duration
-	strictGenesisParsing bool
+	rdbConn          rdb.Conn
+	tendermintClient *tendermint.HTTPClient
+	cosmosClient     cosmosapp_interface.Client
+	logger           applogger.Logger
+	pollingInterval  time.Duration
+	maxRetryInterval time.Duration
+	maxRetryTime     time.Duration
 
 	accountAddressPrefix string
 	stakingDenom         string
@@ -65,15 +65,12 @@ type SyncManagerParams struct {
 }
 
 type SyncManagerConfig struct {
-	WindowSize               int
-	TendermintRPCUrl         string
-	CosmosAppHTTPRPCURL      string
-	InsecureTendermintClient bool
-	InsecureCosmosAppClient  bool
-	StrictGenesisParsing     bool
-	AccountAddressPrefix     string
-	StakingDenom             string
-	StartingBlockHeight      int64
+	WindowSize           int
+	TendermintApp        config.TendermintApp
+	CosmosApp            config.CosmosApp
+	AccountAddressPrefix string
+	StakingDenom         string
+	StartingBlockHeight  int64
 }
 
 // NewSyncManager creates a new feed with polling for latest block starts at a specific height
@@ -83,27 +80,41 @@ func NewSyncManager(
 	eventHandler eventhandler_interface.Handler,
 ) *SyncManager {
 	var tendermintClient *tendermint.HTTPClient
-	if params.Config.InsecureTendermintClient {
+	if params.Config.TendermintApp.Insecure {
 		tendermintClient = tendermint.NewInsecureHTTPClient(
-			params.Config.TendermintRPCUrl,
-			params.Config.StrictGenesisParsing,
+			params.Config.TendermintApp.HTTPRPCUrl,
+			params.Config.TendermintApp.StrictGenesisParsing,
 		)
 	} else {
 		tendermintClient = tendermint.NewHTTPClient(
-			params.Config.TendermintRPCUrl,
-			params.Config.StrictGenesisParsing,
+			params.Config.TendermintApp.HTTPRPCUrl,
+			params.Config.TendermintApp.StrictGenesisParsing,
 		)
 	}
+	if params.Config.TendermintApp.MaybeAuthQueryKV != nil {
+		tendermintClient.SetAuthQueryKV(tendermint.HTTPClientAuthKV{
+			Key:   params.Config.TendermintApp.MaybeAuthQueryKV.Key,
+			Value: params.Config.TendermintApp.MaybeAuthQueryKV.Value,
+		})
+	}
 
-	var cosmosClient cosmosapp_interface.Client
-	if params.Config.InsecureCosmosAppClient {
+	var cosmosClient *cosmosapp_infrastructure.HTTPClient
+	if params.Config.CosmosApp.Insecure {
 		cosmosClient = cosmosapp_infrastructure.NewInsecureHTTPClient(
-			params.Config.CosmosAppHTTPRPCURL, params.Config.StakingDenom,
+			params.Config.CosmosApp.HTTPRPCUrl,
+			params.Config.StakingDenom,
 		)
 	} else {
 		cosmosClient = cosmosapp_infrastructure.NewHTTPClient(
-			params.Config.CosmosAppHTTPRPCURL, params.Config.StakingDenom,
+			params.Config.CosmosApp.HTTPRPCUrl,
+			params.Config.StakingDenom,
 		)
+	}
+	if params.Config.CosmosApp.MaybeAuthQueryKV != nil {
+		cosmosClient.SetAuthQueryKV(cosmosapp_infrastructure.HTTPClientAuthKV{
+			Key:   params.Config.CosmosApp.MaybeAuthQueryKV.Key,
+			Value: params.Config.CosmosApp.MaybeAuthQueryKV.Value,
+		})
 	}
 
 	return &SyncManager{
@@ -113,10 +124,9 @@ func NewSyncManager(
 		logger: params.Logger.WithFields(applogger.LogFields{
 			"module": "SyncManager",
 		}),
-		pollingInterval:      DEFAULT_POLLING_INTERVAL,
-		maxRetryInterval:     DEFAULT_MAX_RETRY_INTERVAL,
-		maxRetryTime:         DEFAULT_MAX_RETRY_TIME,
-		strictGenesisParsing: params.Config.StrictGenesisParsing,
+		pollingInterval:  DEFAULT_POLLING_INTERVAL,
+		maxRetryInterval: DEFAULT_MAX_RETRY_INTERVAL,
+		maxRetryTime:     DEFAULT_MAX_RETRY_TIME,
 
 		accountAddressPrefix: params.Config.AccountAddressPrefix,
 		stakingDenom:         params.Config.StakingDenom,
