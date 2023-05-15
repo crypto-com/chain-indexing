@@ -139,15 +139,16 @@ func ParseBlockTxsMsgToCommands(
 				parser := parserManager.GetParser(utils.CosmosParserKey(msgType.(string)), utils.ParserBlockHeight(blockHeight))
 
 				msgCommands, possibleSignerAddresses = parser(utils.CosmosParserParams{
-					AddressPrefix:   accountAddressPrefix,
-					StakingDenom:    stakingDenom,
-					TxsResult:       txsResult,
-					MsgCommonParams: msgCommonParams,
-					Msg:             msg,
-					MsgIndex:        msgIndex,
-					ParserManager:   parserManager,
-					Logger:          parserManager.GetLogger(),
-					TxDecoder:       parserManager.TxDecoder,
+					AddressPrefix:      accountAddressPrefix,
+					StakingDenom:       stakingDenom,
+					TxsResult:          txsResult,
+					MsgCommonParams:    msgCommonParams,
+					Msg:                msg,
+					MsgIndex:           msgIndex,
+					ParserManager:      parserManager,
+					Logger:             parserManager.GetLogger(),
+					TxDecoder:          parserManager.TxDecoder,
+					IsProposalInnerMsg: false,
 				})
 			}
 			addresses = append(addresses, possibleSignerAddresses...)
@@ -1888,13 +1889,14 @@ func parseMsgExecInnerMsgs(
 		parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(innerMsgType), utils.ParserBlockHeight(blockHeight))
 
 		msgCommands, _ := parser(utils.CosmosParserParams{
-			AddressPrefix:   parserParams.AddressPrefix,
-			StakingDenom:    parserParams.StakingDenom,
-			TxsResult:       parserParams.TxsResult,
-			MsgCommonParams: parserParams.MsgCommonParams,
-			Msg:             innerMsg,
-			MsgIndex:        parserParams.MsgIndex,
-			ParserManager:   parserParams.ParserManager,
+			AddressPrefix:      parserParams.AddressPrefix,
+			StakingDenom:       parserParams.StakingDenom,
+			TxsResult:          parserParams.TxsResult,
+			MsgCommonParams:    parserParams.MsgCommonParams,
+			Msg:                innerMsg,
+			MsgIndex:           parserParams.MsgIndex,
+			ParserManager:      parserParams.ParserManager,
+			IsProposalInnerMsg: false,
 		})
 		commands = append(commands, msgCommands...)
 	}
