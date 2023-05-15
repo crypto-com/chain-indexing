@@ -133,13 +133,14 @@ func ParseMsgSubmitProposal(
 			parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(innerMsgType), utils.ParserBlockHeight(blockHeight))
 
 			msgCommands, signers := parser(utils.CosmosParserParams{
-				AddressPrefix:   parserParams.AddressPrefix,
-				StakingDenom:    parserParams.StakingDenom,
-				TxsResult:       parserParams.TxsResult,
-				MsgCommonParams: parserParams.MsgCommonParams,
-				Msg:             innerMsg,
-				MsgIndex:        parserParams.MsgIndex,
-				ParserManager:   parserParams.ParserManager,
+				AddressPrefix:      parserParams.AddressPrefix,
+				StakingDenom:       parserParams.StakingDenom,
+				TxsResult:          parserParams.TxsResult,
+				MsgCommonParams:    parserParams.MsgCommonParams,
+				Msg:                innerMsg,
+				MsgIndex:           parserParams.MsgIndex,
+				ParserManager:      parserParams.ParserManager,
+				IsProposalInnerMsg: true,
 			})
 
 			possibleSignerAddresses = append(possibleSignerAddresses, signers...)

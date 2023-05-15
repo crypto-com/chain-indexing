@@ -719,6 +719,10 @@ func ParseMsgTransfer(
 		panic(fmt.Errorf("error decoding RawMsgTransfer: %v", err))
 	}
 
+	if parserParams.IsProposalInnerMsg {
+		return []command.Command{}, []string{}
+	}
+
 	if !parserParams.MsgCommonParams.TxSuccess {
 		// Getting possible signer address from Msg
 		var possibleSignerAddresses []string
