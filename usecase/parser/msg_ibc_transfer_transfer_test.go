@@ -1,6 +1,7 @@
 package parser_test
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -149,8 +150,8 @@ var _ = Describe("ParseMsgCommands", func() {
 			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_TRANSFER_STRING_AMOUNT_TXS_RESP)
 			txs := []model.CosmosTxWithHash{*tx}
 
-			accountAddressPrefix := "cro"
-			stakingDenom := "basecro"
+			accountAddressPrefix := "tcro"
+			stakingDenom := "basetcro"
 
 			pm := usecase_parser_test.InitParserManager()
 
@@ -171,7 +172,13 @@ var _ = Describe("ParseMsgCommands", func() {
 			typedEvent := untypedEvent.(*event.MsgIBCTransferTransfer)
 
 			regex, _ := regexp.Compile("\n?\r?\\s?")
-
+			fmt.Println(json.MustMarshalToString(typedEvent))
+			fmt.Println(strings.Replace(
+				regex.ReplaceAllString(expected, ""),
+				"{UUID}",
+				typedEvent.UUID(),
+				-1,
+			))
 			Expect(json.MustMarshalToString(typedEvent)).To(Equal(
 				strings.Replace(
 					regex.ReplaceAllString(expected, ""),

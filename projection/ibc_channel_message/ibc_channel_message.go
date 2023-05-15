@@ -191,9 +191,12 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 				MaybeSender:     primptr.String(typedEvent.Params.Sender),
 				MaybeReceiver:   primptr.String(typedEvent.Params.Receiver),
 				MaybeDenom:      primptr.String(typedEvent.Params.PacketData.Denom),
-				MaybeAmount:     primptr.String(typedEvent.Params.PacketData.Amount.String()),
+				MaybeAmount:     primptr.String(""),
 				MessageType:     typedEvent.MsgName,
 				Message:         typedEvent,
+			}
+			if typedEvent.Params.PacketData.Amount != nil {
+				message.MaybeAmount = primptr.String(typedEvent.Params.PacketData.Amount.String())
 			}
 			messages = append(messages, message)
 

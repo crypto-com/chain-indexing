@@ -728,10 +728,6 @@ func ParseMsgTransfer(
 			parserParams.MsgCommonParams,
 			ibc_model.MsgTransferParams{
 				RawMsgTransfer: rawMsg,
-				PacketData: ibc_model.FungibleTokenPacketData{
-					Denom:  rawMsg.Token.Denom,
-					Amount: rawMsg.Token.Amount,
-				},
 			},
 		)}, possibleSignerAddresses
 	}
@@ -745,10 +741,6 @@ func ParseMsgTransfer(
 			parserParams.MsgCommonParams,
 			ibc_model.MsgTransferParams{
 				RawMsgTransfer: rawMsg,
-				PacketData: ibc_model.FungibleTokenPacketData{
-					Denom:  rawMsg.Token.Denom,
-					Amount: rawMsg.Token.Amount,
-				},
 			},
 		)}, possibleSignerAddresses
 	}
