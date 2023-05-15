@@ -146,7 +146,6 @@ func ParseMsgSubmitProposal(
 			possibleSignerAddresses = append(possibleSignerAddresses, signers...)
 			cmds = append(cmds, msgCommands...)
 		}
-
 	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {

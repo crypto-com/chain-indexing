@@ -720,7 +720,16 @@ func ParseMsgTransfer(
 	}
 
 	if parserParams.IsProposalInnerMsg {
-		return []command.Command{}, []string{}
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Sender)
+
+		return []command.Command{command_usecase.NewCreateMsgIBCTransferTransfer(
+			parserParams.MsgCommonParams,
+			ibc_model.MsgTransferParams{
+				RawMsgTransfer: rawMsg,
+			},
+		)}, possibleSignerAddresses
 	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
