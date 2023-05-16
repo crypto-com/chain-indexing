@@ -520,55 +520,26 @@ func (client *HTTPClient) AnnualProvisions() (coin.DecCoin, error) {
 }
 
 func (client *HTTPClient) TotalBondedBalance() (coin.Coin, error) {
-	resp := &ValidatorsResp{
-		MaybePagination: &Pagination{
-			MaybeNextKey: nil,
-			Total:        "",
-		},
+	resp := &StakingPoolResp{}
+
+	queryUrl := client.getUrl("staking", "pool")
+
+	rawRespBody, statusCode, err := client.rawRequest(queryUrl)
+	if err != nil {
+		return coin.Coin{}, err
+	}
+	defer rawRespBody.Close()
+
+	if decodeErr := jsoniter.NewDecoder(rawRespBody).Decode(&resp); decodeErr != nil {
+		return coin.Coin{}, decodeErr
+	}
+	if statusCode != 200 {
+		return coin.Coin{}, fmt.Errorf("error requesting Cosmos %s endpoint: status code %d", queryUrl, statusCode)
 	}
 
-	totalBondedBalance, newCoinErr := coin.NewCoin(client.bondingDenom, coin.ZeroInt())
+	totalBondedBalance, newCoinErr := coin.NewCoinFromString(client.bondingDenom, resp.Pool.BondedTokens)
 	if newCoinErr != nil {
 		return coin.Coin{}, fmt.Errorf("error when creating new coin: %v", newCoinErr)
-	}
-	for {
-		queryUrl := client.getUrl("staking", "validators")
-		if resp.MaybePagination.MaybeNextKey != nil {
-			queryUrl = fmt.Sprintf(
-				"%s?pagination.key=%s",
-				queryUrl, url.QueryEscape(*resp.MaybePagination.MaybeNextKey),
-			)
-		}
-
-		rawRespBody, statusCode, err := client.rawRequest(queryUrl)
-		if err != nil {
-			return coin.Coin{}, err
-		}
-		defer rawRespBody.Close()
-
-		if decodeErr := jsoniter.NewDecoder(rawRespBody).Decode(&resp); decodeErr != nil {
-			return coin.Coin{}, decodeErr
-		}
-		if resp.MaybeCode != nil && *resp.MaybeCode == ERR_CODE_ACCOUNT_NOT_FOUND {
-			return coin.Coin{}, cosmosapp_interface.ErrAccountNotFound
-		}
-		if statusCode != 200 {
-			return coin.Coin{}, fmt.Errorf("error requesting Cosmos %s endpoint: status code %d", queryUrl, statusCode)
-		}
-
-		for _, validator := range resp.MaybeValidatorResponse {
-			bondedCoin, coinErr := coin.NewCoinFromString(client.bondingDenom, validator.Tokens)
-			if coinErr != nil {
-				if coinErr != nil {
-					return coin.Coin{}, fmt.Errorf("error parsing Coin from validator tokens: %v", coinErr)
-				}
-			}
-			totalBondedBalance = totalBondedBalance.Add(bondedCoin)
-		}
-
-		if resp.MaybePagination.MaybeNextKey == nil {
-			break
-		}
 	}
 
 	return totalBondedBalance, nil

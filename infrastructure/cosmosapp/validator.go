@@ -13,3 +13,12 @@ type ValidatorsResp struct {
 type ValidatorResp struct {
 	Validator cosmosapp_interface.Validator `json:"validator"`
 }
+
+type StakingPoolResp struct {
+	Pool Pool `json:"pool"`
+}
+
+type Pool struct {
+	NotBondedTokens string `json:"not_bonded_tokens"`
+	BondedTokens    string `json:"bonded_tokens"`
+}
