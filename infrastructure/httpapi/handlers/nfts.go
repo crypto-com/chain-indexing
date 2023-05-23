@@ -464,10 +464,16 @@ func (handler *NFTs) ListMessagesByToken(ctx *fasthttp.RequestCtx) {
 		MaybeTokenId:  &tokenId,
 		MaybeDrop:     nil,
 		MaybeMsgTypes: nil,
+		MaybeBurned:   nil,
 	}
 	queryArgs := ctx.QueryArgs()
 	if queryArgs.Has("filter.msgType") {
 		filter.MaybeMsgTypes = strings.Split(string(queryArgs.Peek("filter.msgType")), ",")
+	}
+
+	if queryArgs.Has("filter.burned") {
+		burned := queryArgs.GetBool("filter.burned")
+		filter.MaybeBurned = &burned
 	}
 
 	idOrder := view.ORDER_ASC
@@ -477,7 +483,7 @@ func (handler *NFTs) ListMessagesByToken(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
-	blocks, paginationResult, err := handler.messagesView.List(
+	messages, paginationResult, err := handler.messagesView.List(
 		filter, nft_view.MessagesListOrder{Id: idOrder}, pagination,
 	)
 	if err != nil {
@@ -486,7 +492,11 @@ func (handler *NFTs) ListMessagesByToken(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	httpapi.SuccessWithPagination(ctx, blocks, paginationResult)
+	if len(messages) == 0 {
+		paginationResult.OffsetResult().TotalRecord = 0
+	}
+
+	httpapi.SuccessWithPagination(ctx, messages, paginationResult)
 }
 
 func (handler *NFTs) ListMessages(ctx *fasthttp.RequestCtx) {

@@ -113,9 +113,11 @@ func (nftMessagesView *MessagesView) List(
 		MESSAGES_TABLE_NAME,
 	)
 
-	// show non-burned nft
-	stmtBuilder = stmtBuilder.Where("view_nft_messages.burned = ?", false)
-
+	if filter.MaybeBurned != nil {
+		stmtBuilder = stmtBuilder.Where("burned = ?", *filter.MaybeBurned)
+	} else {
+		stmtBuilder = stmtBuilder.Where("burned = ?", false)
+	}
 	if filter.MaybeDenomId != nil {
 		stmtBuilder = stmtBuilder.Where("denom_id = ?", *filter.MaybeDenomId)
 	}
@@ -168,6 +170,13 @@ func (nftMessagesView *MessagesView) List(
 			if err != nil {
 				return int64(0), err
 			}
+
+			if filter.MaybeBurned != nil {
+				if *filter.MaybeBurned && total > 0 {
+					total += 1
+				}
+			}
+
 			return total, nil
 		},
 	).BuildStmt(stmtBuilder)
@@ -295,6 +304,7 @@ type MessagesListFilter struct {
 	MaybeTokenId  *string
 	MaybeDrop     *string
 	MaybeMsgTypes []string
+	MaybeBurned   *bool
 }
 
 type MessagesListOrder struct {
