@@ -140,75 +140,8 @@ func (nftMessagesView *MessagesView) List(
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
 		nftMessagesView.rdb,
-	).WithCustomTotalQueryFn(
-		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
-			if filter.MaybeBurned != nil {
-				if *filter.MaybeBurned {
-					var total int64
-					paginationStmtBuilder := rdbHandle.StmtBuilder.Select("COUNT(*)").From(MESSAGES_TABLE_NAME)
-					if filter.MaybeBurned != nil {
-						paginationStmtBuilder = paginationStmtBuilder.Where("burned = ?", *filter.MaybeBurned)
-					} else {
-						paginationStmtBuilder = paginationStmtBuilder.Where("burned = ?", false)
-					}
-					if filter.MaybeDenomId != nil {
-						paginationStmtBuilder = paginationStmtBuilder.Where("denom_id = ?", *filter.MaybeDenomId)
-					}
-					if filter.MaybeTokenId != nil {
-						paginationStmtBuilder = paginationStmtBuilder.Where("maybe_token_id = ?", *filter.MaybeTokenId)
-					}
-					if filter.MaybeDrop != nil {
-						paginationStmtBuilder = paginationStmtBuilder.Where("maybe_drop = ?", *filter.MaybeDrop)
-					}
-					if filter.MaybeMsgTypes != nil {
-						paginationStmtBuilder = paginationStmtBuilder.Where(sq.Eq{"view_nft_messages.message_type": filter.MaybeMsgTypes})
-					}
-					paginationSql, paginationSqlArgs, err := paginationStmtBuilder.ToSql()
-					if err != nil {
-						return int64(0), fmt.Errorf(
-							"error building nft messages pagination select SQL: %v, %w", err, rdb.ErrBuildSQLStmt,
-						)
-					}
-
-					if err := rdbHandle.QueryRow(paginationSql, paginationSqlArgs...).Scan(&total); err != nil {
-						return int64(0), err
-					}
-					return total, nil
-				}
-			}
-
-			var totalIdentities []string
-			drop := "-"
-			denomId := "-"
-			tokenId := "-"
-			if filter.MaybeDrop != nil {
-				drop = *filter.MaybeDrop
-			}
-			if filter.MaybeDenomId != nil {
-				denomId = *filter.MaybeDenomId
-			}
-			if filter.MaybeTokenId != nil {
-				tokenId = *filter.MaybeTokenId
-			}
-
-			if filter.MaybeMsgTypes == nil {
-				totalIdentities = []string{fmt.Sprintf("%s:%s:%s:-", drop, denomId, tokenId)}
-			} else {
-				totalIdentities = make([]string, 0)
-				for _, msgType := range filter.MaybeMsgTypes {
-					totalIdentities = append(totalIdentities, fmt.Sprintf("%s:%s:%s:%s", drop, denomId, tokenId, msgType))
-				}
-			}
-
-			totalView := NewMessagesTotalView(rdbHandle)
-			total, err := totalView.SumBy(totalIdentities)
-			if err != nil {
-				return int64(0), err
-			}
-
-			return total, nil
-		},
 	).BuildStmt(stmtBuilder)
+
 	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
 	if err != nil {
 		return nil, nil, fmt.Errorf(
@@ -268,10 +201,6 @@ func (nftMessagesView *MessagesView) List(
 	paginationResult, err := rDbPagination.Result()
 	if err != nil {
 		return nil, nil, fmt.Errorf("error preparing pagination result: %v", err)
-	}
-
-	if len(nftMessages) <= 0 {
-		paginationResult.OffsetResult().TotalRecord = 0
 	}
 
 	return nftMessages, paginationResult, nil
