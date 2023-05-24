@@ -492,10 +492,6 @@ func (handler *NFTs) ListMessagesByToken(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	if len(messages) == 0 {
-		paginationResult.OffsetResult().TotalRecord = 0
-	}
-
 	httpapi.SuccessWithPagination(ctx, messages, paginationResult)
 }
 
