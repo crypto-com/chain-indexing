@@ -113,9 +113,11 @@ func (nftMessagesView *MessagesView) List(
 		MESSAGES_TABLE_NAME,
 	)
 
-	// show non-burned nft
-	stmtBuilder = stmtBuilder.Where("view_nft_messages.burned = ?", false)
-
+	if filter.MaybeBurned != nil {
+		stmtBuilder = stmtBuilder.Where("burned = ?", *filter.MaybeBurned)
+	} else {
+		stmtBuilder = stmtBuilder.Where("burned = ?", false)
+	}
 	if filter.MaybeDenomId != nil {
 		stmtBuilder = stmtBuilder.Where("denom_id = ?", *filter.MaybeDenomId)
 	}
@@ -138,39 +140,8 @@ func (nftMessagesView *MessagesView) List(
 	rDbPagination := rdb.NewRDbPaginationBuilder(
 		pagination,
 		nftMessagesView.rdb,
-	).WithCustomTotalQueryFn(
-		func(rdbHandle *rdb.Handle, _ sq.SelectBuilder) (int64, error) {
-			var totalIdentities []string
-			drop := "-"
-			denomId := "-"
-			tokenId := "-"
-			if filter.MaybeDrop != nil {
-				drop = *filter.MaybeDrop
-			}
-			if filter.MaybeDenomId != nil {
-				denomId = *filter.MaybeDenomId
-			}
-			if filter.MaybeTokenId != nil {
-				tokenId = *filter.MaybeTokenId
-			}
-
-			if filter.MaybeMsgTypes == nil {
-				totalIdentities = []string{fmt.Sprintf("%s:%s:%s:-", drop, denomId, tokenId)}
-			} else {
-				totalIdentities = make([]string, 0)
-				for _, msgType := range filter.MaybeMsgTypes {
-					totalIdentities = append(totalIdentities, fmt.Sprintf("%s:%s:%s:%s", drop, denomId, tokenId, msgType))
-				}
-			}
-
-			totalView := NewMessagesTotalView(rdbHandle)
-			total, err := totalView.SumBy(totalIdentities)
-			if err != nil {
-				return int64(0), err
-			}
-			return total, nil
-		},
 	).BuildStmt(stmtBuilder)
+
 	sql, sqlArgs, err := rDbPagination.ToStmtBuilder().ToSql()
 	if err != nil {
 		return nil, nil, fmt.Errorf(
@@ -295,6 +266,7 @@ type MessagesListFilter struct {
 	MaybeTokenId  *string
 	MaybeDrop     *string
 	MaybeMsgTypes []string
+	MaybeBurned   *bool
 }
 
 type MessagesListOrder struct {
