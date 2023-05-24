@@ -206,12 +206,6 @@ func (nftMessagesView *MessagesView) List(
 				return int64(0), err
 			}
 
-			if filter.MaybeBurned != nil {
-				if *filter.MaybeBurned && total > 0 {
-					total += 1
-				}
-			}
-
 			return total, nil
 		},
 	).BuildStmt(stmtBuilder)
