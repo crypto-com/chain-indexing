@@ -5,6 +5,7 @@ import (
 
 	"github.com/crypto-com/chain-indexing/appinterface/polling"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
+	"github.com/crypto-com/chain-indexing/bootstrap/config"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 )
@@ -23,21 +24,25 @@ type InfoManager struct {
 func NewInfoManager(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
-	tendermintRPCUrl string,
-	insecureTendermintClient bool,
-	strictGenesisParsing bool,
+	tendermintApp config.TendermintApp,
 ) *InfoManager {
 	var tendermintClient *tendermint.HTTPClient
-	if insecureTendermintClient {
+	if tendermintApp.Insecure {
 		tendermintClient = tendermint.NewInsecureHTTPClient(
-			tendermintRPCUrl,
-			strictGenesisParsing,
+			tendermintApp.HTTPRPCUrl,
+			tendermintApp.StrictGenesisParsing,
 		)
 	} else {
 		tendermintClient = tendermint.NewHTTPClient(
-			tendermintRPCUrl,
-			strictGenesisParsing,
+			tendermintApp.HTTPRPCUrl,
+			tendermintApp.StrictGenesisParsing,
 		)
+	}
+	if tendermintApp.MaybeAuthQueryKV != nil {
+		tendermintClient.SetAuthQueryKV(tendermint.HTTPClientAuthKV{
+			Key:   tendermintApp.MaybeAuthQueryKV.Key,
+			Value: tendermintApp.MaybeAuthQueryKV.Value,
+		})
 	}
 
 	viewStatus := polling.NewStatus(rdbConn.ToHandle())

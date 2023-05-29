@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -761,7 +760,7 @@ func (client *HTTPClient) request(method string, queryKVs ...queryKV) (io.ReadCl
 		defer rawResp.Body.Close()
 
 		var rawRespBody []byte
-		rawRespBody, err = ioutil.ReadAll(rawResp.Body)
+		rawRespBody, err = io.ReadAll(rawResp.Body)
 		if err != nil {
 			return nil, fmt.Errorf("error reading Body : %w", err)
 		}

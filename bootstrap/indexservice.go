@@ -22,17 +22,15 @@ type IndexService struct {
 	projections []projection_entity.Projection
 	cronJobs    []projection_entity.CronJob
 
-	mode                     string
-	accountAddressPrefix     string
-	consNodeAddressPrefix    string
-	bondingDenom             string
-	windowSize               int
-	tendermintHTTPRPCURL     string
-	cosmosAppHTTPRPCURL      string
-	insecureTendermintClient bool
-	insecureCosmosAppClient  bool
-	strictGenesisParsing     bool
-	startingBlockHeight      int64
+	mode                  string
+	accountAddressPrefix  string
+	consNodeAddressPrefix string
+	bondingDenom          string
+	windowSize            int
+	tendermintApp         config.TendermintApp
+	cosmosApp             config.CosmosApp
+
+	startingBlockHeight int64
 
 	cosmosVersionBlockHeight utils.CosmosVersionBlockHeight
 
@@ -57,17 +55,14 @@ func NewIndexService(
 		projections: projections,
 		cronJobs:    cronJobs,
 
-		mode:                     config.IndexService.Mode,
-		consNodeAddressPrefix:    config.Blockchain.ConNodeAddressPrefix,
-		accountAddressPrefix:     config.Blockchain.AccountAddressPrefix,
-		bondingDenom:             config.Blockchain.BondingDenom,
-		windowSize:               config.IndexService.WindowSize,
-		tendermintHTTPRPCURL:     config.TendermintApp.HTTPRPCUrl,
-		cosmosAppHTTPRPCURL:      config.CosmosApp.HTTPRPCUrl,
-		insecureTendermintClient: config.TendermintApp.Insecure,
-		insecureCosmosAppClient:  config.CosmosApp.Insecure,
-		strictGenesisParsing:     config.TendermintApp.StrictGenesisParsing,
-		startingBlockHeight:      config.IndexService.StartingBlockHeight,
+		mode:                  config.IndexService.Mode,
+		consNodeAddressPrefix: config.Blockchain.ConNodeAddressPrefix,
+		accountAddressPrefix:  config.Blockchain.AccountAddressPrefix,
+		bondingDenom:          config.Blockchain.BondingDenom,
+		windowSize:            config.IndexService.WindowSize,
+		tendermintApp:         config.TendermintApp,
+		cosmosApp:             config.CosmosApp,
+		startingBlockHeight:   config.IndexService.StartingBlockHeight,
 		cosmosVersionBlockHeight: utils.CosmosVersionBlockHeight{
 			V0_42_7: utils.ParserBlockHeight(config.IndexService.CosmosVersionEnabledHeight.V0_42_7),
 		},
@@ -83,9 +78,7 @@ func (service *IndexService) Run() error {
 	infoManager := NewInfoManager(
 		service.logger,
 		service.rdbConn,
-		service.tendermintHTTPRPCURL,
-		service.insecureTendermintClient,
-		service.strictGenesisParsing,
+		service.tendermintApp,
 	)
 
 	switch service.mode {
@@ -144,15 +137,12 @@ func (service *IndexService) RunEventStoreMode() error {
 			Logger:  service.logger,
 			RDbConn: service.rdbConn,
 			Config: SyncManagerConfig{
-				WindowSize:               service.windowSize,
-				TendermintRPCUrl:         service.tendermintHTTPRPCURL,
-				CosmosAppHTTPRPCURL:      service.cosmosAppHTTPRPCURL,
-				InsecureTendermintClient: service.insecureTendermintClient,
-				InsecureCosmosAppClient:  service.insecureCosmosAppClient,
-				StrictGenesisParsing:     service.strictGenesisParsing,
-				AccountAddressPrefix:     service.accountAddressPrefix,
-				StakingDenom:             service.bondingDenom,
-				StartingBlockHeight:      service.startingBlockHeight,
+				WindowSize:           service.windowSize,
+				TendermintApp:        service.tendermintApp,
+				CosmosApp:            service.cosmosApp,
+				AccountAddressPrefix: service.accountAddressPrefix,
+				StakingDenom:         service.bondingDenom,
+				StartingBlockHeight:  service.startingBlockHeight,
 			},
 			TxDecoder: service.txDecoder,
 		},
@@ -174,7 +164,6 @@ func (service *IndexService) RunEventStoreMode() error {
 }
 
 func (service *IndexService) RunTendermintDirectMode() error {
-
 	for i := range service.projections {
 		go func(projection projection_entity.Projection) {
 			syncManager := NewSyncManager(
@@ -184,14 +173,12 @@ func (service *IndexService) RunTendermintDirectMode() error {
 					}),
 					RDbConn: service.rdbConn,
 					Config: SyncManagerConfig{
-						WindowSize:               service.windowSize,
-						TendermintRPCUrl:         service.tendermintHTTPRPCURL,
-						CosmosAppHTTPRPCURL:      service.cosmosAppHTTPRPCURL,
-						InsecureTendermintClient: service.insecureTendermintClient,
-						InsecureCosmosAppClient:  service.insecureCosmosAppClient,
-						AccountAddressPrefix:     service.accountAddressPrefix,
-						StakingDenom:             service.bondingDenom,
-						StartingBlockHeight:      service.startingBlockHeight,
+						WindowSize:           service.windowSize,
+						TendermintApp:        service.tendermintApp,
+						CosmosApp:            service.cosmosApp,
+						AccountAddressPrefix: service.accountAddressPrefix,
+						StakingDenom:         service.bondingDenom,
+						StartingBlockHeight:  service.startingBlockHeight,
 					},
 					TxDecoder: service.txDecoder,
 				},
