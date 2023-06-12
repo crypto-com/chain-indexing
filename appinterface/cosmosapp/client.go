@@ -2,6 +2,7 @@ package cosmosapp
 
 import (
 	"errors"
+	"math/big"
 
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -20,6 +21,7 @@ type Client interface {
 	Validator(validatorAddress string) (*Validator, error)
 	Delegation(delegator string, validator string) (*DelegationResponse, error)
 	TotalBondedBalance() (coin.Coin, error)
+	CommunityTax() (*big.Float, error)
 
 	AnnualProvisions() (coin.DecCoin, error)
 

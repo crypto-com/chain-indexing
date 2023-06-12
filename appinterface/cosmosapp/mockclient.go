@@ -1,6 +1,8 @@
 package cosmosapp
 
 import (
+	"math/big"
+
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	"github.com/stretchr/testify/mock"
@@ -71,6 +73,11 @@ func (conn *MockClient) Delegation(delegator string, validator string) (*Delegat
 func (conn *MockClient) TotalBondedBalance() (coin.Coin, error) {
 	args := conn.Called()
 	return args.Get(0).(coin.Coin), args.Error(1)
+}
+
+func (conn *MockClient) CommunityTax() (*big.Float, error) {
+	args := conn.Called()
+	return args.Get(0).(*big.Float), args.Error(1)
 }
 
 func (conn *MockClient) AnnualProvisions() (coin.DecCoin, error) {
