@@ -4,9 +4,11 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math/big"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -543,6 +545,28 @@ func (client *HTTPClient) TotalBondedBalance() (coin.Coin, error) {
 	}
 
 	return totalBondedBalance, nil
+}
+
+func (client *HTTPClient) CommunityTax() (*big.Float, error) {
+	var err error
+
+	var rawRespBody io.ReadCloser
+	rawRespBody, err = client.request(client.getUrl("distribution", "params"))
+	if err != nil {
+		return nil, err
+	}
+	defer rawRespBody.Close()
+
+	var distributionParamsResp DistributionParamsResp
+	if err = jsoniter.NewDecoder(rawRespBody).Decode(&distributionParamsResp); err != nil {
+		return nil, err
+	}
+
+	communityTax, ok := new(big.Float).SetString(distributionParamsResp.Params.CommunityTax)
+	if !ok {
+		return nil, errors.New("error parsing community tax")
+	}
+	return communityTax, nil
 }
 
 func (client *HTTPClient) Proposals() ([]cosmosapp_interface.Proposal, error) {

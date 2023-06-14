@@ -31,7 +31,6 @@ import (
 // Then in recent 7 days, number of estimated generated block will be:
 //
 // nRecentBlocks: n (block) = 7(day) * 24(hour/day) * 3600(sec/hour) / 6(sec/block)
-//
 const nRecentBlocksInInt = 100800
 
 type Validators struct {
@@ -300,7 +299,7 @@ func (handler *Validators) getGlobalAPY() (*big.Float, error) {
 		return nil, fmt.Errorf("error fetching total bonded: %v", err)
 	}
 
-	// estimated APY = expected APY * estimated block count / actual block count
+	// estimated APY = expected APY * estimated block count / actual block count * (1 - community tax)
 	genesis, err := handler.tendermintClient.GenesisChunked()
 	if err != nil {
 		return nil, fmt.Errorf("error fetching genesis: %v", err)
@@ -338,7 +337,20 @@ func (handler *Validators) getGlobalAPY() (*big.Float, error) {
 		),
 	)
 
-	return estimatedAPY, nil
+	communityTax, err := handler.cosmosAppClient.CommunityTax()
+	if err != nil {
+		return nil, fmt.Errorf("error fetching community tax: %v", err)
+	}
+
+	afterTaxEstimatedAPY := new(big.Float).Mul(
+		estimatedAPY,
+		new(big.Float).Sub(
+			new(big.Float).SetInt64(int64(1)),
+			communityTax,
+		),
+	)
+
+	return afterTaxEstimatedAPY, nil
 }
 
 func (handler *Validators) getAverageBlockTime() (*big.Float, error) {
