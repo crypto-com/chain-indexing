@@ -275,6 +275,7 @@ func ParseMsgSubmitTx(
 
 			msgRecvPacketParams,
 		))
+		return cmds, possibleSignerAddresses
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
