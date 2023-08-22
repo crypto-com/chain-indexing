@@ -1137,7 +1137,8 @@ func ParseMsgTimeout(
 
 	timeoutPacketEvent := log.GetEventByType("timeout_packet")
 	if timeoutPacketEvent == nil {
-		panic("missing `timeout_packet` event in TxsResult log")
+		parserParams.Logger.Errorf("missing `timeout_packet` event in TxsResult log: ", parserParams.MsgCommonParams.TxHash)
+		return []command.Command{}, []string{}
 	}
 
 	msgTimeoutParams := ibc_model.MsgTimeoutParams{
