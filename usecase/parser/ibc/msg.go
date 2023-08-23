@@ -1137,7 +1137,7 @@ func ParseMsgTimeout(
 
 	timeoutPacketEvent := log.GetEventByType("timeout_packet")
 	if timeoutPacketEvent == nil {
-		parserParams.Logger.Errorf("missing `timeout_packet` event in TxsResult log: ", parserParams.MsgCommonParams.TxHash)
+		parserParams.Logger.Warnf("missing `timeout_packet` event in TxsResult log: ", parserParams.MsgCommonParams.TxHash)
 		return []command.Command{}, []string{}
 	}
 
