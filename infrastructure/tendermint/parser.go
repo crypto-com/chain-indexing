@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"math/big"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -14,6 +15,10 @@ import (
 
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	jsoniter "github.com/json-iterator/go"
+)
+
+var (
+	regxASCII = regexp.MustCompile("^[\x00-\x7F]+$")
 )
 
 // Block related parsing functions
@@ -274,8 +279,11 @@ func base64Decode(s string) (string, error) {
 	decoded, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
 		return "", err
+	} else if regxASCII.Match(decoded) {
+		return string(decoded), nil
 	}
-	return string(decoded), nil
+
+	return "", fmt.Errorf("error `%s` is not base64 encoded", s)
 }
 
 func parseBlockResultsConsensusParamsUpdates(rawUpdates RawBlockResultsConsensusParamUpdates) model.BlockResultsConsensusParamUpdates {
