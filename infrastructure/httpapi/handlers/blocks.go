@@ -343,13 +343,8 @@ func (handler *Blocks) ListAccountByHeight(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	for i := range rawEventAccounts {
-		accountStrSlice = append(accountStrSlice, rawEventAccounts[i])
-	}
-
-	for i := range rawTransactionAccounts {
-		accountStrSlice = append(accountStrSlice, rawTransactionAccounts[i])
-	}
+	accountStrSlice = append(accountStrSlice, rawEventAccounts...)
+	accountStrSlice = append(accountStrSlice, rawTransactionAccounts...)
 
 	accountStrSlice = unique(accountStrSlice)
 	accounts := make([]account, 0)
