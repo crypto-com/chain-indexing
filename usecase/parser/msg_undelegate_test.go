@@ -3,6 +3,7 @@ package parser_test
 import (
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -19,7 +20,7 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgDelegate", func() {
 		It("should parse Msg commands when there is staking.MsgUndelegate in the transaction", func() {
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_UNDELEGATE_BLOCK_RESP)
-			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MSG_UNDELEGATE_BLOCK_RESULTS_RESP)
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MSG_UNDELEGATE_BLOCK_RESULTS_RESP, &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_UNDELEGATE_TXS_RESP)
 			txs := []model.CosmosTxWithHash{*tx}
@@ -59,7 +60,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 		It("should parse MsgUndelegate command in failed transaction", func() {
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_MSG_UNDELEGATE_BLOCK_RESP)
-			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_MSG_UNDELEGATE_BLOCK_RESULTS_RESP)
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_MSG_UNDELEGATE_BLOCK_RESULTS_RESP, &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_FAILED_MSG_UNDELEGATE_TXS_RESP)
 			txs := []model.CosmosTxWithHash{*tx}

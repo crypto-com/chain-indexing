@@ -164,7 +164,7 @@ func (client *HTTPClient) Block(height int64) (*usecase_model.Block, *usecase_mo
 	return block, rawBlock, nil
 }
 
-func (client *HTTPClient) BlockResults(height int64) (*usecase_model.BlockResults, error) {
+func (client *HTTPClient) BlockResults(height int64, eventAttributeDecoder tendermint.BlockResultEventAttributeDecoder) (*usecase_model.BlockResults, error) {
 	var err error
 
 	rawRespBody, err := client.request("block_results", queryKV{
@@ -176,7 +176,7 @@ func (client *HTTPClient) BlockResults(height int64) (*usecase_model.BlockResult
 	}
 	defer rawRespBody.Close()
 
-	blockResults, err := ParseBlockResultsResp(rawRespBody)
+	blockResults, err := ParseBlockResultsResp(rawRespBody, eventAttributeDecoder)
 	if err != nil {
 		return nil, err
 	}

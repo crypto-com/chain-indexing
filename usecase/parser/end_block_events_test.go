@@ -2,6 +2,7 @@ package parser_test
 
 import (
 	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	"github.com/crypto-com/chain-indexing/projection/block_raw_event/types"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -16,7 +17,7 @@ import (
 
 var _ = Describe("ParseEndBlockEventsCommands", func() {
 	It("should return EndProposal commands when end_block_events has proposal_active event", func() {
-		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_PROPOSAL_REJECTED_BLOCK_RESULTS_RESP)
+		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_PROPOSAL_REJECTED_BLOCK_RESULTS_RESP, &tendermint.Base64BlockResultEventAttributeDecoder{})
 		block, _ := mustParseBlockResp(usecase_parser_test.END_BLOCK_COMPLETE_UNBONDING_BLOCK_RESP)
 
 		cmds, err := parser.ParseEndBlockEventsCommands(
@@ -66,7 +67,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 	})
 
 	It("should return EndProposal commands when end_blocks_events has proposal_active passed event", func() {
-		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_PROPOSAL_PASSED_BLOCK_RESULTS_RESP)
+		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_PROPOSAL_PASSED_BLOCK_RESULTS_RESP, &tendermint.Base64BlockResultEventAttributeDecoder{})
 		block, _ := mustParseBlockResp(usecase_parser_test.END_BLOCK_COMPLETE_UNBONDING_BLOCK_RESP)
 
 		cmds, err := parser.ParseEndBlockEventsCommands(
@@ -116,7 +117,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 	})
 
 	It("should return InactiveProposal commands when end_blocks_events has proposal_inactive event", func() {
-		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_PROPOSAL_INACTIVED_BLOCK_RESULTS_RESP)
+		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_PROPOSAL_INACTIVED_BLOCK_RESULTS_RESP, &tendermint.Base64BlockResultEventAttributeDecoder{})
 		block, _ := mustParseBlockResp(usecase_parser_test.END_BLOCK_COMPLETE_UNBONDING_BLOCK_RESP)
 
 		cmds, err := parser.ParseEndBlockEventsCommands(
@@ -166,7 +167,7 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 	})
 
 	It("should return CompleteBonding commands when end_blocks_events has complete_unbonding event", func() {
-		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_COMPLETE_UNBONDING_BLOCK_RESULTS_RESP)
+		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_COMPLETE_UNBONDING_BLOCK_RESULTS_RESP, &tendermint.Base64BlockResultEventAttributeDecoder{})
 		block, _ := mustParseBlockResp(usecase_parser_test.END_BLOCK_COMPLETE_UNBONDING_BLOCK_RESP)
 
 		cmds, err := parser.ParseEndBlockEventsCommands(

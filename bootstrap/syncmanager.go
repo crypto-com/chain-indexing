@@ -7,6 +7,7 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
+	tendermint_interface "github.com/crypto-com/chain-indexing/appinterface/tendermint"
 	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -54,6 +55,8 @@ type SyncManager struct {
 	startingBlockHeight int64
 
 	txDecoder txdecoder.TxDecoder
+
+	eventAttributeDecoder tendermint_interface.BlockResultEventAttributeDecoder
 }
 
 type SyncManagerParams struct {
@@ -65,15 +68,16 @@ type SyncManagerParams struct {
 }
 
 type SyncManagerConfig struct {
-	WindowSize               int
-	TendermintRPCUrl         string
-	CosmosAppHTTPRPCURL      string
-	InsecureTendermintClient bool
-	InsecureCosmosAppClient  bool
-	StrictGenesisParsing     bool
-	AccountAddressPrefix     string
-	StakingDenom             string
-	StartingBlockHeight      int64
+	WindowSize                            int
+	TendermintRPCUrl                      string
+	CosmosAppHTTPRPCURL                   string
+	InsecureTendermintClient              bool
+	InsecureCosmosAppClient               bool
+	StrictGenesisParsing                  bool
+	AccountAddressPrefix                  string
+	StakingDenom                          string
+	StartingBlockHeight                   int64
+	BlockResultEventAttributeDecodeMethod string
 }
 
 // NewSyncManager creates a new feed with polling for latest block starts at a specific height
@@ -106,6 +110,15 @@ func NewSyncManager(
 		)
 	}
 
+	var eventAttributeDecoder tendermint_interface.BlockResultEventAttributeDecoder
+
+	switch params.Config.BlockResultEventAttributeDecodeMethod {
+	case "base64":
+		eventAttributeDecoder = &tendermint.Base64BlockResultEventAttributeDecoder{}
+	default:
+		eventAttributeDecoder = &tendermint.RawBlockResultEventAttributeDecoder{}
+	}
+
 	return &SyncManager{
 		rdbConn:          params.RDbConn,
 		tendermintClient: tendermintClient,
@@ -132,6 +145,8 @@ func NewSyncManager(
 		startingBlockHeight: params.Config.StartingBlockHeight,
 
 		txDecoder: params.TxDecoder,
+
+		eventAttributeDecoder: eventAttributeDecoder,
 	}
 }
 
@@ -241,7 +256,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 		return nil, fmt.Errorf("error requesting chain block at height %d: %v", blockHeight, err)
 	}
 
-	blockResults, err := manager.tendermintClient.BlockResults(blockHeight)
+	blockResults, err := manager.tendermintClient.BlockResults(blockHeight, manager.eventAttributeDecoder)
 	if err != nil {
 		return nil, fmt.Errorf("error requesting chain block_results at height %d: %v", blockHeight, err)
 	}

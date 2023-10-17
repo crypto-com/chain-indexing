@@ -72,7 +72,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_TIMEOUT_BLOCK_RESULTS_RESP,
-			))
+			), &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx1 := MustParseTxsResp(usecase_parser_test.TX_MSG_TIMEOUT_TXS_RESP_1)
 			tx2 := MustParseTxsResp(usecase_parser_test.TX_MSG_TIMEOUT_TXS_RESP_2)
@@ -169,7 +169,7 @@ var _ = Describe("ParseMsgCommands", func() {
 		))
 		blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 			usecase_parser_test.TX_MSG_TIMEOUT_V1_0_BLOCK_RESULTS_RESP,
-		))
+		), &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 		tx := MustParseTxsResp(usecase_parser_test.TX_MSG_TIMEOUT_V1_0_TXS_RESP)
 		txs := []model.CosmosTxWithHash{*tx}

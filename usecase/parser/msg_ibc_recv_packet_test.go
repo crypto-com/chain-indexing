@@ -77,7 +77,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_RECV_PACKET_BLOCK_RESULTS_RESP,
-			))
+			), &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_RECV_PACKET_TXS_RESP)
 			txs := []model.CosmosTxWithHash{*tx}
@@ -165,7 +165,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_RECV_PACKET_PACKET_ACK_ERROR_BLOCK_RESULTS_RESP,
-			))
+			), &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_RECV_PACKET_PACKET_ACK_ERROR_TXS_RESP)
 			txs := []model.CosmosTxWithHash{*tx}
@@ -259,7 +259,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_RECV_PACKET_MISSING_FUNGIBLE_TOKEN_PACKET_BLOCK_RESULTS_RESP,
-			))
+			), &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_RECV_PACKET_MISSING_FUNGIBLE_TOKEN_PACKET_TXS_RESP)
 			txs := []model.CosmosTxWithHash{*tx}
@@ -350,7 +350,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_RECV_PACKET_SOLO_MACHINE_BLOCK_RESULTS_RESP,
-			))
+			), &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_RECV_PACKET_SOLO_MACHINE_TXS_RESP)
 			txs := []model.CosmosTxWithHash{*tx}

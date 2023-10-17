@@ -2,6 +2,7 @@ package parser_test
 
 import (
 	"github.com/crypto-com/chain-indexing/external/primptr"
+	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	model_gov_v1 "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
@@ -21,6 +22,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_SOFTWARE_UPGRADE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_SOFTWARE_UPGRADE_BLOCK_RESULTS_RESP,
+				&tendermint.Base64BlockResultEventAttributeDecoder{},
 			)
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_SOFTWARE_UPGRADE_TXS_RESP)
@@ -84,6 +86,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_CANCEL_UPGRADE_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_CANCEL_UPGRADE_BLOCK_RESULTS_RESP,
+				&tendermint.Base64BlockResultEventAttributeDecoder{},
 			)
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_CANCEL_UPGRADE_TXS_RESP)
@@ -140,6 +143,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_EXEC_LEGACY_CONTENT_V1_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_EXEC_LEGACY_CONTENT_V1_BLOCK_RESULTS_RESP,
+				&tendermint.Base64BlockResultEventAttributeDecoder{},
 			)
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_EXEC_LEGACY_CONTENT_V1_TXS_RESP)

@@ -2,6 +2,7 @@ package parser_test
 
 import (
 	"github.com/crypto-com/chain-indexing/external/json"
+	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -14,7 +15,7 @@ import (
 var _ = Describe("ParseEndBlockEventsCommands", func() {
 	It("should return CreateCronosSendToIbc commands when end_block_events has cronos send to IBC transaction", func() {
 		block, _ := mustParseBlockResp(usecase_parser_test.BLOCK_RESULTS_TXS_RESULTS_CREATE_SEND_TO_IBC_BLOCK_RESP)
-		blockResults := mustParseBlockResultsResp(usecase_parser_test.BLOCK_RESULTS_TXS_RESULTS_CREATE_SEND_TO_IBC_BLOCK_RESULTS_RESP)
+		blockResults := mustParseBlockResultsResp(usecase_parser_test.BLOCK_RESULTS_TXS_RESULTS_CREATE_SEND_TO_IBC_BLOCK_RESULTS_RESP, &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 		cmds, err := parser.ParseBlockResultsTxsResults(
 			block,
