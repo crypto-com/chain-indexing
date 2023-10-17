@@ -206,9 +206,17 @@ func parseBlockResultsEvents(rawEvents []RawBlockResultsEvent) []model.BlockResu
 	for _, rawEvent := range rawEvents {
 		attributes := make([]model.BlockResultsEventAttribute, 0, len(rawEvent.Attributes))
 		for _, rawAttribute := range rawEvent.Attributes {
+			key, err := base64Decode(rawAttribute.Key)
+			if err != nil {
+				key = rawAttribute.Key
+			}
+			value, err := base64Decode(rawAttribute.Value)
+			if err != nil {
+				value = rawAttribute.Value
+			}
 			attributes = append(attributes, model.BlockResultsEventAttribute{
-				Key:   mustBase64Decode(rawAttribute.Key),
-				Value: mustBase64Decode(rawAttribute.Value),
+				Key:   key,
+				Value: value,
 				Index: rawAttribute.Index,
 			})
 		}
@@ -260,6 +268,14 @@ func mustBase64Decode(s string) string {
 		panic(fmt.Sprintf("error decoding block_results `%s`: %v", s, err))
 	}
 	return string(decoded)
+}
+
+func base64Decode(s string) (string, error) {
+	decoded, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		return "", err
+	}
+	return string(decoded), nil
 }
 
 func parseBlockResultsConsensusParamsUpdates(rawUpdates RawBlockResultsConsensusParamUpdates) model.BlockResultsConsensusParamUpdates {
