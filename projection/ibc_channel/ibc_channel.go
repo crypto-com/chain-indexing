@@ -424,9 +424,10 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 			}
 
 			var amount string
-			if msgIBCTransferTransfer.Params.PacketData.Amount != nil {
-				amount = msgIBCTransferTransfer.Params.PacketData.Amount.String()
+			if msgIBCTransferTransfer.Params.PacketData.Amount == nil {
+				return nil
 			}
+			amount = msgIBCTransferTransfer.Params.PacketData.Amount.String()
 			denom := msgIBCTransferTransfer.Params.PacketData.Denom
 			destinationChannelID := msgIBCTransferTransfer.Params.DestinationChannel
 			destinationPortID := msgIBCTransferTransfer.Params.DestinationPort
