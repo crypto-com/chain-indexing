@@ -72,7 +72,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_BLOCK_RESULTS_RESP,
-			))
+			), &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_TXS_RESP)
 			txs := []model.CosmosTxWithHash{*tx}
@@ -164,7 +164,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_ERROR_BLOCK_RESULTS_RESP,
-			))
+			), &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_ERROR_TXS_RESP)
 			txs := []model.CosmosTxWithHash{*tx}
@@ -316,7 +316,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_BLOCK_RESULTS_RESP,
-			))
+			), &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx1 := MustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_1)
 			tx2 := MustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_DUPLICATE_PACKET_SEQUENCE_TXS_RESP_2)

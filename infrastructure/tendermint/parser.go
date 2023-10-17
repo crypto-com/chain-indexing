@@ -3,6 +3,7 @@ package tendermint
 import (
 	"encoding/base64"
 	"fmt"
+	tendermint_interface "github.com/crypto-com/chain-indexing/appinterface/tendermint"
 	"io"
 	"math/big"
 	"strconv"
@@ -100,7 +101,7 @@ func parseBlockSignatures(rawSignatures []model.RawBlockSignature) []model.Block
 }
 
 // RawBlockResults related parsing functions
-func ParseBlockResultsResp(rawRespReader io.Reader) (*model.BlockResults, error) {
+func ParseBlockResultsResp(rawRespReader io.Reader, eventAttributeDecoder tendermint_interface.BlockResultEventAttributeDecoder) (*model.BlockResults, error) {
 	var err error
 
 	var resp RawBlockResultsResp
@@ -117,21 +118,21 @@ func ParseBlockResultsResp(rawRespReader io.Reader) (*model.BlockResults, error)
 		return nil, fmt.Errorf("error converting block height to unsigned integer: %v", err)
 	}
 
-	txsResults := parseBlockResultsTxsResults(rawBlockResults.TxsResults)
+	txsResults := parseBlockResultsTxsResults(rawBlockResults.TxsResults, eventAttributeDecoder)
 	return &model.BlockResults{
 		Height:                int64(height),
 		TxsResults:            txsResults,
-		BeginBlockEvents:      parseBlockResultsEvents(rawBlockResults.BeginBlockEvents),
-		EndBlockEvents:        parseBlockResultsEvents(rawBlockResults.EndBlockEvents),
+		BeginBlockEvents:      parseBlockResultsEvents(rawBlockResults.BeginBlockEvents, eventAttributeDecoder),
+		EndBlockEvents:        parseBlockResultsEvents(rawBlockResults.EndBlockEvents, eventAttributeDecoder),
 		ValidatorUpdates:      parseBlockResultsValidatorUpdates(rawBlockResults.ValidatorUpdates),
 		ConsensusParamUpdates: parseBlockResultsConsensusParamsUpdates(rawBlockResults.ConsensusParamUpdates),
 	}, nil
 }
 
-func parseBlockResultsTxsResults(rawTxsResults []RawBlockResultsTxsResult) []model.BlockResultsTxsResult {
+func parseBlockResultsTxsResults(rawTxsResults []RawBlockResultsTxsResult, eventAttributeDecoder tendermint_interface.BlockResultEventAttributeDecoder) []model.BlockResultsTxsResult {
 	txsResults := make([]model.BlockResultsTxsResult, 0, len(rawTxsResults))
 	for _, rawTxsResult := range rawTxsResults {
-		events := parseBlockResultsEvents(rawTxsResult.Events)
+		events := parseBlockResultsEvents(rawTxsResult.Events, eventAttributeDecoder)
 
 		txsResults = append(txsResults, model.BlockResultsTxsResult{
 			Code:      rawTxsResult.Code,
@@ -197,7 +198,7 @@ func parseBlockResultsTxsResultLogEvents(rawEvents []RawBlockResultsEvent) []mod
 	return events
 }
 
-func parseBlockResultsEvents(rawEvents []RawBlockResultsEvent) []model.BlockResultsEvent {
+func parseBlockResultsEvents(rawEvents []RawBlockResultsEvent, eventAttributeDecoder tendermint_interface.BlockResultEventAttributeDecoder) []model.BlockResultsEvent {
 	if rawEvents == nil {
 		return []model.BlockResultsEvent{}
 	}
@@ -206,13 +207,13 @@ func parseBlockResultsEvents(rawEvents []RawBlockResultsEvent) []model.BlockResu
 	for _, rawEvent := range rawEvents {
 		attributes := make([]model.BlockResultsEventAttribute, 0, len(rawEvent.Attributes))
 		for _, rawAttribute := range rawEvent.Attributes {
-			key, err := base64Decode(rawAttribute.Key)
+			key, err := eventAttributeDecoder.DecodeKey(rawAttribute.Key)
 			if err != nil {
-				key = rawAttribute.Key
+				panic(fmt.Sprintf("error blcok result event %s attribute key (%s): %v", rawEvent.Type, rawAttribute.Key, err))
 			}
-			value, err := base64Decode(rawAttribute.Value)
+			value, err := eventAttributeDecoder.DecodeValue(rawAttribute.Value)
 			if err != nil {
-				value = rawAttribute.Value
+				panic(fmt.Sprintf("error blcok result event %s attribute key (%s): %v", rawEvent.Type, rawAttribute.Key, err))
 			}
 			attributes = append(attributes, model.BlockResultsEventAttribute{
 				Key:   key,
@@ -268,14 +269,6 @@ func mustBase64Decode(s string) string {
 		panic(fmt.Sprintf("error decoding block_results `%s`: %v", s, err))
 	}
 	return string(decoded)
-}
-
-func base64Decode(s string) (string, error) {
-	decoded, err := base64.StdEncoding.DecodeString(s)
-	if err != nil {
-		return "", err
-	}
-	return string(decoded), nil
 }
 
 func parseBlockResultsConsensusParamsUpdates(rawUpdates RawBlockResultsConsensusParamUpdates) model.BlockResultsConsensusParamUpdates {

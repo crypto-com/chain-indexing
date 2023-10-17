@@ -482,6 +482,7 @@ github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ3
 github.com/creack/pty v1.1.11/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/crypto-com/chain-indexing v1.2.1-0.20220111132225-b2712ba4fe23 h1:Pit1X4i8SXU/pUg60mo3tj/fKM+xYJ5j3TGtBK41D3k=
 github.com/crypto-com/chain-indexing v1.2.1-0.20220111132225-b2712ba4fe23/go.mod h1:0KBBR7C2RZDavMpCBKlNtHkMZZ7tyndioZQRWUTD4YI=
+github.com/crypto-com/chain-indexing v1.3.0/go.mod h1:0KBBR7C2RZDavMpCBKlNtHkMZZ7tyndioZQRWUTD4YI=
 github.com/crypto-org-chain/chain-main/v3 v3.0.0-croeseid h1:YAffq+tYiSqYXgIb11Vc6dvBtgSvRsf2g1wPaMFkQUA=
 github.com/crypto-org-chain/chain-main/v3 v3.0.0-croeseid/go.mod h1:92Z70bDbsScrWzIHB496p7nXKydtq5am9rqa0fCpbM8=
 github.com/crypto-org-chain/cronos v0.6.0-testnet h1:iFLwra4QMZ6HgIEB1P0vMCa9pnQTeXjwSuYbH4glxqA=

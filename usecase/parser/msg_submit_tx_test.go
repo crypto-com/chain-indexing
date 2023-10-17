@@ -55,7 +55,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_SUBMIT_TX_BLOCK_RESULTS_RESP,
-			))
+			), &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_SUBMIT_TX_TXS_RESP)
 			txs := []model.CosmosTxWithHash{*tx}

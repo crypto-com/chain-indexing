@@ -1,6 +1,7 @@
 package parser_test
 
 import (
+	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -18,6 +19,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_NFT_TRANSFER_NFT_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_NFT_TRANSFER_NFT_BLOCK_RESULTS_RESP,
+				&tendermint.Base64BlockResultEventAttributeDecoder{},
 			)
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_NFT_TRANSFER_NFT_TXS_RESP)

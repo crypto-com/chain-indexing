@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	tendermint_interface "github.com/crypto-com/chain-indexing/appinterface/tendermint"
+
 	"github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -19,8 +21,8 @@ func mustParseBlockResp(rawResp string) (*model.Block, *model.RawBlock) {
 	return block, rawBlock
 }
 
-func mustParseBlockResultsResp(rawResp string) *model.BlockResults {
-	blockResults, err := tendermint.ParseBlockResultsResp(strings.NewReader(rawResp))
+func mustParseBlockResultsResp(rawResp string, decoder tendermint_interface.BlockResultEventAttributeDecoder) *model.BlockResults {
+	blockResults, err := tendermint.ParseBlockResultsResp(strings.NewReader(rawResp), decoder)
 
 	if err != nil {
 		panic(fmt.Sprintf("error parsing block results response: %v", err))

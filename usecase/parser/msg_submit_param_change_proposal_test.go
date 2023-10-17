@@ -2,6 +2,7 @@ package parser_test
 
 import (
 	"encoding/json"
+	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
@@ -23,6 +24,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_BLOCK_RESULTS_RESP,
+				&tendermint.Base64BlockResultEventAttributeDecoder{},
 			)
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_TXS_RESP)
@@ -77,6 +79,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_FAILED_MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_FAILED_MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_BLOCK_RESULTS_RESP,
+				&tendermint.Base64BlockResultEventAttributeDecoder{},
 			)
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_FAILED_MSG_SUBMIT_PARAM_CHANGE_PROPOSAL_TXS_RESP)

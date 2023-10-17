@@ -24,6 +24,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_MSGS_WITHDRAW_DELEGATOR_REWARD_WITHDRAW_VALIDATOR_COMMISSION_BLOCK_RESULTS_RESP,
+				&tendermint.Base64BlockResultEventAttributeDecoder{},
 			)
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_MSGS_WITHDRAW_DELEGATOR_REWARD_WITHDRAW_VALIDATOR_COMMISSION_TXS_RESP)
@@ -82,6 +83,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			)
 			blockResults := mustParseBlockResultsResp(
 				usecase_parser_test.TX_FAILED_MSG_WITHDRAW_VALIDATOR_COMMISSION_BLOCK_RESULTS_RESP,
+				&tendermint.Base64BlockResultEventAttributeDecoder{},
 			)
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_FAILED_MSG_WITHDRAW_VALIDATOR_COMMISSION_TXS_RESP)
@@ -140,7 +142,7 @@ var _ = Describe("ParseMsgCommands", func() {
 				usecase_parser_test.TX_MSG_WITHDRAW_DELEGATOR_REWARD_NO_REWARD_BLOCK_RESP))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_test.TX_MSG_WITHDRAW_DELEGATOR_REWARD_NO_REWARD_BLOCK_RESULTS_RESP,
-			))
+			), &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_WITHDRAW_DELEGATOR_REWARD_NO_REWARD_TXS_RESP)
 			txs := []model.CosmosTxWithHash{*tx}

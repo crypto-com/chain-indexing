@@ -3,6 +3,7 @@ package parser_test
 import (
 	"github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	"github.com/crypto-com/chain-indexing/projection/block_raw_event/types"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	. "github.com/onsi/ginkgo"
@@ -16,7 +17,7 @@ import (
 var _ = Describe("ParseTxsResultsBlockEventsCommands", func() {
 	It("should return CreateSend commands when txs_results has simple send transaction", func() {
 		block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_SEND_BLOCK_RESP)
-		blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MSG_SEND_BLOCK_RESULTS_RESP)
+		blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_MSG_SEND_BLOCK_RESULTS_RESP, &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 		cmds, err := parser.ParseBlockResultsTxsResults(
 			block,

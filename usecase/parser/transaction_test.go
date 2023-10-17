@@ -31,7 +31,7 @@ var _ = Describe("TransactionParser", func() {
 		It("should parse Transaction commands when there is two Msg in one transaction", func() {
 			mockClient := cosmosapp.NewMockClient()
 			fakeLogger := FakeLogger.NewFakeLogger()
-			blockResults := mustParseBlockResultsResp(usecase_parser_test.ONE_TX_TWO_MSG_BLOCK_RESULTS_RESP)
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.ONE_TX_TWO_MSG_BLOCK_RESULTS_RESP, &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx := MustParseTxsResp(usecase_parser_test.ONE_TX_TWO_MSG_TXS_RESP)
 			txs := []model.CosmosTxWithHash{*tx}
@@ -160,7 +160,7 @@ var _ = Describe("TransactionParser", func() {
 		It("should parse Transaction commands when there is transaction fee", func() {
 			mockClient := cosmosapp.NewMockClient()
 			fakeLogger := FakeLogger.NewFakeLogger()
-			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_WITH_FEE_BLOCK_RESULTS_RESP)
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_WITH_FEE_BLOCK_RESULTS_RESP, &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_WITH_FEE_TXS_RESP)
 			txs := []model.CosmosTxWithHash{*tx}
@@ -258,7 +258,7 @@ var _ = Describe("TransactionParser", func() {
 		It("should parse Transaction commands when transaction failed with fee", func() {
 			mockClient := cosmosapp.NewMockClient()
 			fakeLogger := FakeLogger.NewFakeLogger()
-			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESULTS_RESP)
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_FEE_BLOCK_RESULTS_RESP, &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_FAILED_WITH_FEE_TXS_RESP)
 			txs := []model.CosmosTxWithHash{*tx}
@@ -354,7 +354,7 @@ var _ = Describe("TransactionParser", func() {
 		It("should parse Transaction commands when transaction failed without fee", func() {
 			mockClient := cosmosapp.NewMockClient()
 			fakeLogger := FakeLogger.NewFakeLogger()
-			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_FAILED_WITHOUT_FEE_BLOCK_RESULTS_RESP))
+			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_FAILED_WITHOUT_FEE_BLOCK_RESULTS_RESP), &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_FAILED_WITHOUT_FEE_TXS_RESP)
 			txs := []model.CosmosTxWithHash{*tx}
@@ -467,7 +467,7 @@ var _ = Describe("TransactionParser", func() {
 		It("should parse Transaction commands when there is transaction memo and timeout_height", func() {
 			mockClient := cosmosapp.NewMockClient()
 			fakeLogger := FakeLogger.NewFakeLogger()
-			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESULTS_RESP)
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESULTS_RESP, &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_WITH_MEMO_TIMEOUT_HEIGHT_TXS_RESP)
 			txs := []model.CosmosTxWithHash{*tx}
@@ -563,7 +563,7 @@ var _ = Describe("TransactionParser", func() {
 		It("should parse failed Transaction commands when there is transaction memo and timeout_height", func() {
 			mockClient := cosmosapp.NewMockClient()
 			fakeLogger := FakeLogger.NewFakeLogger()
-			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESULTS_RESP)
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_FAILED_WITH_MEMO_TIMEOUT_HEIGHT_BLOCK_RESULTS_RESP, &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_FAILED_WITH_MEMO_TIMEOUT_HEIGHT_TXS_RESP)
 			txs := []model.CosmosTxWithHash{*tx}
@@ -659,7 +659,7 @@ var _ = Describe("TransactionParser", func() {
 		It("should parse Transaction commands when the signer public key is empty", func() {
 			mockClient := cosmosapp.NewMockClient()
 			fakeLogger := FakeLogger.NewFakeLogger()
-			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_BLOCK_RESULTS_RESP)
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_BLOCK_RESULTS_RESP, &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx1 := MustParseTxsResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_TXS_RESP_1)
 			tx2 := MustParseTxsResp(usecase_parser_test.TX_SIGNER_EMPTY_PUBKEY_TXS_RESP_2)
@@ -740,7 +740,7 @@ var _ = Describe("TransactionParser", func() {
 		It("should parse Transaction commands when the signer public key is in state", func() {
 			mockClient := cosmosapp.MockClient{}
 			fakeLogger := FakeLogger.NewFakeLogger()
-			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_SIGNER_PUBKEY_IN_STATE_BLOCK_RESULTS_RESP)
+			blockResults := mustParseBlockResultsResp(usecase_parser_test.TX_SIGNER_PUBKEY_IN_STATE_BLOCK_RESULTS_RESP, &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx := MustParseTxsResp(usecase_parser_test.TX_SIGNER_PUBKEY_IN_STATE_TXS_RESP)
 			txs := []model.CosmosTxWithHash{*tx}

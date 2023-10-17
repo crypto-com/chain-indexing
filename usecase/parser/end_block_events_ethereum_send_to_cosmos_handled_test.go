@@ -2,6 +2,7 @@ package parser_test
 
 import (
 	"github.com/crypto-com/chain-indexing/external/utctime"
+	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	. "github.com/onsi/ginkgo"
@@ -14,7 +15,7 @@ import (
 
 var _ = Describe("ParseEndBlockEventsCommands", func() {
 	It("should return GravityEthereumSendToCosmosHandled commands when end_block_events has ethereum_send_to_cosmos_handled event", func() {
-		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_ETHEREUM_SEND_TO_COSMOS_HANDLED_BLOCK_RESULTS_RESP)
+		blockResults := mustParseBlockResultsResp(usecase_parser_test.END_BLOCK_ETHEREUM_SEND_TO_COSMOS_HANDLED_BLOCK_RESULTS_RESP, &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 		cmds, err := parser.ParseEndBlockEventsCommands(
 			blockResults.Height,

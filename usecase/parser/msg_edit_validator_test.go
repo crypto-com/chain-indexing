@@ -20,7 +20,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 		It("should parse Msg commands when there is staking.MsgEditValidator in the transaction", func() {
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_BLOCK_RESP))
-			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_BLOCK_RESULTS_RESP))
+			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_BLOCK_RESULTS_RESP), &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			tx1 := MustParseTxsResp(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_TXS_RESP_1)
 			tx2 := MustParseTxsResp(usecase_parser_test.TX_MSG_EDIT_VALIDATOR_TXS_RESP_2)

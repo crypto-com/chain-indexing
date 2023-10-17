@@ -78,7 +78,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_V0_42_7_test.TX_MSG_RECV_PACKET_BLOCK_RESULTS_RESP,
-			))
+			), &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			resTx, _ := cosmosapp.ParseTxsResp(strings.NewReader(
 				usecase_parser_V0_42_7_test.TX_MSG_RECV_PACKET_TXS_RESP,
@@ -174,7 +174,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_V0_42_7_test.TX_MSG_RECV_PACKET_PACKET_ACK_ERROR_BLOCK_RESULTS_RESP,
-			))
+			), &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			resTx, _ := cosmosapp.ParseTxsResp(strings.NewReader(
 				usecase_parser_V0_42_7_test.TX_MSG_RECV_PACKET_PACKET_ACK_ERROR_TXS_RESP,
@@ -275,7 +275,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
 				usecase_parser_V0_42_7_test.TX_MSG_RECV_PACKET_MISSING_FUNGIBLE_TOKEN_PACKET_BLOCK_RESULTS_RESP,
-			))
+			), &tendermint.Base64BlockResultEventAttributeDecoder{})
 
 			resTx, _ := cosmosapp.ParseTxsResp(strings.NewReader(
 				usecase_parser_V0_42_7_test.TX_MSG_RECV_PACKET_MISSING_FUNGIBLE_TOKEN_PACKET_TXS_RESP,
