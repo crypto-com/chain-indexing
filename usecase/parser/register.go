@@ -14,6 +14,7 @@ func InitParsers(manager *utils.CosmosParserManager) {
 	// cosmos bank
 	manager.RegisterParser("/cosmos.bank.v1beta1.MsgSend", BEGIN_BLOCK_HEIGHT, ParseMsgSend)
 	manager.RegisterParser("/cosmos.bank.v1beta1.MsgMultiSend", BEGIN_BLOCK_HEIGHT, ParseMsgMultiSend)
+	manager.RegisterParser("/cosmos.bank.v1beta1.MsgSetSendEnabled", BEGIN_BLOCK_HEIGHT, ParseMsgSetSendEnabled)
 
 	// cosmos distribution
 	manager.RegisterParser("/cosmos.distribution.v1beta1.MsgSetWithdrawAddress", BEGIN_BLOCK_HEIGHT, ParseMsgSetWithdrawAddress)

@@ -59,6 +59,7 @@ func ParseBlockTxsMsgToCommands(
 				// cosmos bank
 				"/cosmos.bank.v1beta1.MsgSend",
 				"/cosmos.bank.v1beta1.MsgMultiSend",
+				"/cosmos.bank.v1beta1.MsgSetSendEnabled",
 
 				// cosmos distribution
 				"/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
@@ -244,6 +245,31 @@ func ParseMsgMultiSend(
 			Inputs:  inputs,
 			Outputs: outputs,
 		},
+	)}, possibleSignerAddresses
+}
+
+func ParseMsgSetSendEnabled(
+	parserParams utils.CosmosParserParams,
+) ([]command.Command, []string) {
+	var msgSetSendEnabled model.MsgSetSendEnabled
+	rawMsg, err := jsoniter.Marshal(parserParams.Msg)
+	if err != nil {
+		panic(fmt.Sprintf("error encoding msgSetSendEnabled msg: %v", err))
+	}
+
+	if err := jsoniter.Unmarshal(rawMsg, &msgSetSendEnabled); err != nil {
+		panic(fmt.Sprintf("error decoding msgSetSendEnabled msg: %v", err))
+	}
+
+	// Getting possible signer address from Msg
+	var possibleSignerAddresses []string
+	if msgSetSendEnabled.Authority != "" {
+		possibleSignerAddresses = append(possibleSignerAddresses, msgSetSendEnabled.Authority)
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgSetSendEnabled(
+		parserParams.MsgCommonParams,
+		msgSetSendEnabled,
 	)}, possibleSignerAddresses
 }
 
