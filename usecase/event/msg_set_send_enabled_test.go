@@ -19,9 +19,18 @@ var _ = Describe("Event", func() {
 			anyTxHash := "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416"
 			anyMsgIndex := 2
 
-			anyParams := model.MsgRevokeParams{}
+			anyParams := model.MsgSetSendEnabled{
+				Authority: "tcro1np7ztcfeycqwhj0nr8hxfu0lfjz27telqx53ra",
+				SendEnabled: []model.SendEnabled{
+					{
+						Denom:   "basetcro",
+						Enabled: true,
+					},
+				},
+				UseDefaultFor: []string{},
+			}
 
-			event := event_usecase.NewMsgRevoke(event_usecase.MsgCommonParams{
+			event := event_usecase.NewMsgSetSendEnabled(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
 				TxHash:      anyTxHash,
 				TxSuccess:   true,
@@ -32,12 +41,12 @@ var _ = Describe("Event", func() {
 			Expect(err).To(BeNil())
 
 			decodedEvent, err := registry.DecodeByType(
-				event_usecase.MSG_REVOKE_CREATED, 1, []byte(encoded),
+				event_usecase.MSG_SET_SEND_ENABLED_CREATED, 1, []byte(encoded),
 			)
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))
-			typedEvent, _ := decodedEvent.(*event_usecase.MsgRevoke)
-			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_REVOKE_CREATED))
+			typedEvent, _ := decodedEvent.(*event_usecase.MsgSetSendEnabled)
+			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_SET_SEND_ENABLED_CREATED))
 			Expect(typedEvent.Version()).To(Equal(1))
 			Expect(typedEvent.TxSuccess()).To(BeTrue())
 			Expect(typedEvent.TxHash()).To(Equal(anyTxHash))
@@ -51,9 +60,9 @@ var _ = Describe("Event", func() {
 			anyTxHash := "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416"
 			anyMsgIndex := 2
 
-			anyParams := model.MsgRevokeParams{}
+			anyParams := model.MsgSetSendEnabled{}
 
-			event := event_usecase.NewMsgRevoke(event_usecase.MsgCommonParams{
+			event := event_usecase.NewMsgSetSendEnabled(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
 				TxHash:      anyTxHash,
 				TxSuccess:   false,
@@ -64,12 +73,12 @@ var _ = Describe("Event", func() {
 			Expect(err).To(BeNil())
 
 			decodedEvent, err := registry.DecodeByType(
-				event_usecase.MSG_REVOKE_FAILED, 1, []byte(encoded),
+				event_usecase.MSG_SET_SEND_ENABLED_FAILED, 1, []byte(encoded),
 			)
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))
-			typedEvent, _ := decodedEvent.(*event_usecase.MsgRevoke)
-			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_REVOKE_FAILED))
+			typedEvent, _ := decodedEvent.(*event_usecase.MsgSetSendEnabled)
+			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_SET_SEND_ENABLED_FAILED))
 			Expect(typedEvent.Version()).To(Equal(1))
 			Expect(typedEvent.TxSuccess()).To(BeFalse())
 			Expect(typedEvent.TxHash()).To(Equal(anyTxHash))
