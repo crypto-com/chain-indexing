@@ -434,7 +434,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 			sourceChannelID := msgIBCTransferTransfer.Params.SourceChannel
 			sourcePortID := msgIBCTransferTransfer.Params.SourcePort
 
-			if err := updateBondedTokensWhenMsgIBCTransfer(
+			if err := projection.updateBondedTokensWhenMsgIBCTransfer(
 				ibcChannelsView,
 				channelID,
 				amount,
@@ -506,7 +506,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				sourceChannelID := msgIBCRecvPacket.Params.Packet.SourceChannel
 				sourcePortID := msgIBCRecvPacket.Params.Packet.SourcePort
 
-				if err := updateBondedTokensWhenMsgIBCRecvPacket(
+				if err := projection.updateBondedTokensWhenMsgIBCRecvPacket(
 					ibcChannelsView,
 					ibcDenomHashMappingView,
 					channelID,
@@ -826,7 +826,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 	return nil
 }
 
-func updateBondedTokensWhenMsgIBCRecvPacket(
+func (projection *IBCChannel) updateBondedTokensWhenMsgIBCRecvPacket(
 	ibcChannelsView ibc_channel_view.IBCChannels,
 	ibcDenomHashMappingView ibc_channel_view.IBCDenomHashMapping,
 	channelID string,
@@ -853,7 +853,7 @@ func updateBondedTokensWhenMsgIBCRecvPacket(
 		// Subtract it from the bondedTokens.OnCounterpartyChain
 		token := ibc_channel_view.NewBondedToken(denom, amountInCoinInt)
 		if subtractErr := subtractTokenOnCounterpartyChain(bondedTokens, token); subtractErr != nil {
-			return fmt.Errorf("error subtractTokenOnCounterpartyChain: %v", subtractErr)
+			projection.logger.Warnf("error subtractTokenOnCounterpartyChain: %v", subtractErr)
 		}
 	} else {
 		// Counterparty chain is token source, it is bonded to this chain now.
@@ -875,7 +875,7 @@ func updateBondedTokensWhenMsgIBCRecvPacket(
 	return nil
 }
 
-func updateBondedTokensWhenMsgIBCTransfer(
+func (projection *IBCChannel) updateBondedTokensWhenMsgIBCTransfer(
 	ibcChannelsView ibc_channel_view.IBCChannels,
 	channelID string,
 	amount string,
@@ -901,7 +901,7 @@ func updateBondedTokensWhenMsgIBCTransfer(
 		// Subtract it from the bondedTokens.OnThisChain
 		token := ibc_channel_view.NewBondedToken(denom, amountInCoinInt)
 		if subtractErr := subtractTokenOnThisChain(bondedTokens, token); subtractErr != nil {
-			return fmt.Errorf("error subtractTokenOnThisChain: %v", subtractErr)
+			projection.logger.Warnf("error subtractTokenOnThisChain: %v", subtractErr)
 		}
 	} else {
 		// This chain is token source, it is bonded to counterparty chain now.
