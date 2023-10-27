@@ -882,11 +882,10 @@ func ParseMsgRecvPacket(
 	}
 
 	writeAckEvent := log.GetEventByType("write_acknowledgement")
-	if writeAckEvent == nil {
-		panic("missing `write_acknowledgement` event in TxsResult log")
-	}
 	var packetAck ibc_model.MsgRecvPacketPacketAck
-	json.MustUnmarshalFromString(writeAckEvent.MustGetAttributeByKey("packet_ack"), &packetAck)
+	if writeAckEvent != nil {
+		json.MustUnmarshalFromString(writeAckEvent.MustGetAttributeByKey("packet_ack"), &packetAck)
+	}
 
 	msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
 		RawMsgRecvPacket: rawMsg,
