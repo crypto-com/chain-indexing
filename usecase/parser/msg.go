@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
@@ -1092,11 +1093,18 @@ func ParseMsgDelegate(
 		}
 
 		amount := transferEvent.MustGetAttributeByKey("amount")
-		coin, coinErr := coin.ParseCoinNormalized(amount)
-		if coinErr != nil {
-			panic(fmt.Errorf("error parsing auto claimed rewards amount: %v", coinErr))
+		amounts := strings.Split(amount, ",")
+
+		for i := range amounts {
+			parsedCoin, coinErr := coin.ParseCoinNormalized(amounts[i])
+			if coinErr != nil {
+				panic(fmt.Errorf("error parsing auto claimed rewards amount: %v", coinErr))
+			}
+
+			if autoClaimedRewards.Denom == parsedCoin.Denom {
+				autoClaimedRewards = autoClaimedRewards.Add(parsedCoin)
+			}
 		}
-		autoClaimedRewards = autoClaimedRewards.Add(coin)
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgDelegate(
@@ -1164,11 +1172,18 @@ func ParseMsgUndelegate(
 		}
 
 		amount := transferEvent.MustGetAttributeByKey("amount")
-		coin, coinErr := coin.ParseCoinNormalized(amount)
-		if coinErr != nil {
-			panic(fmt.Errorf("error parsing auto claimed rewards amount: %v", coinErr))
+		amounts := strings.Split(amount, ",")
+
+		for i := range amounts {
+			parsedCoin, coinErr := coin.ParseCoinNormalized(amounts[i])
+			if coinErr != nil {
+				panic(fmt.Errorf("error parsing auto claimed rewards amount: %v", coinErr))
+			}
+
+			if autoClaimedRewards.Denom == parsedCoin.Denom {
+				autoClaimedRewards = autoClaimedRewards.Add(parsedCoin)
+			}
 		}
-		autoClaimedRewards = autoClaimedRewards.Add(coin)
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgUndelegate(
@@ -1226,11 +1241,18 @@ func ParseMsgBeginRedelegate(
 		}
 
 		amount := transferEvent.MustGetAttributeByKey("amount")
-		coin, coinErr := coin.ParseCoinNormalized(amount)
-		if coinErr != nil {
-			panic(fmt.Errorf("error parsing auto claimed rewards amount: %v", coinErr))
+		amounts := strings.Split(amount, ",")
+
+		for i := range amounts {
+			parsedCoin, coinErr := coin.ParseCoinNormalized(amounts[i])
+			if coinErr != nil {
+				panic(fmt.Errorf("error parsing auto claimed rewards amount: %v", coinErr))
+			}
+
+			if autoClaimedRewards.Denom == parsedCoin.Denom {
+				autoClaimedRewards = autoClaimedRewards.Add(parsedCoin)
+			}
 		}
-		autoClaimedRewards = autoClaimedRewards.Add(coin)
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgBeginRedelegate(
