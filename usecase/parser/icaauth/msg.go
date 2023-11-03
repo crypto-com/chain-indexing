@@ -22,7 +22,12 @@ func ParseChainmainMsgSubmitTx(
 
 	if !parserParams.MsgCommonParams.TxSuccess {
 		msgSubmitTxParams := icaauth_model.MsgSubmitTxParams{
-			RawMsgSubmitTx: rawMsg,
+			MsgSubmitTx: icaauth_model.MsgSubmitTx{
+				Owner:           rawMsg.Owner,
+				ConnectionId:    rawMsg.ConnectionId,
+				Msgs:            rawMsg.Msgs,
+				TimeoutDuration: rawMsg.TimeoutDuration,
+			},
 		}
 
 		// Getting possible signer address from Msg
@@ -78,7 +83,12 @@ func ParseChainmainMsgSubmitTx(
 	}
 
 	msgSubmitTxParams := icaauth_model.MsgSubmitTxParams{
-		RawMsgSubmitTx: rawMsg,
+		MsgSubmitTx: icaauth_model.MsgSubmitTx{
+			Owner:           rawMsg.Owner,
+			ConnectionId:    rawMsg.ConnectionId,
+			Msgs:            rawMsg.Msgs,
+			TimeoutDuration: rawMsg.TimeoutDuration,
+		},
 
 		Packet: ibc_model.Packet{
 			Sequence:           packetSequence,
@@ -120,7 +130,11 @@ func ParseChainmainMsgRegisterAccount(
 			parserParams.MsgCommonParams,
 
 			icaauth_model.MsgRegisterAccountParams{
-				RawMsgRegisterAccount: rawMsg,
+				MsgRegisterAccount: icaauth_model.MsgRegisterAccount{
+					Owner:        rawMsg.Owner,
+					ConnectionID: rawMsg.ConnectionID,
+					Version:      rawMsg.Version,
+				},
 			},
 		)}, possibleSignerAddresses
 	}
@@ -132,7 +146,11 @@ func ParseChainmainMsgRegisterAccount(
 	}
 
 	msgRegisterAccountParams := icaauth_model.MsgRegisterAccountParams{
-		RawMsgRegisterAccount: rawMsg,
+		MsgRegisterAccount: icaauth_model.MsgRegisterAccount{
+			Owner:        rawMsg.Owner,
+			ConnectionID: rawMsg.ConnectionID,
+			Version:      rawMsg.Version,
+		},
 
 		PortID:                event.MustGetAttributeByKey("port_id"),
 		ChannelID:             event.MustGetAttributeByKey("channel_id"),
@@ -161,7 +179,12 @@ func ParseMsgSubmitTx(
 
 	if !parserParams.MsgCommonParams.TxSuccess {
 		msgSubmitTxParams := icaauth_model.MsgSubmitTxParams{
-			RawMsgSubmitTx: rawMsg,
+			MsgSubmitTx: icaauth_model.MsgSubmitTx{
+				Owner:           rawMsg.Owner,
+				ConnectionId:    rawMsg.ConnectionId,
+				Msgs:            rawMsg.Msgs,
+				TimeoutDuration: rawMsg.TimeoutDuration,
+			},
 		}
 
 		// Getting possible signer address from Msg
@@ -217,7 +240,12 @@ func ParseMsgSubmitTx(
 	}
 
 	msgSubmitTxParams := icaauth_model.MsgSubmitTxParams{
-		RawMsgSubmitTx: rawMsg,
+		MsgSubmitTx: icaauth_model.MsgSubmitTx{
+			Owner:           rawMsg.Owner,
+			ConnectionId:    rawMsg.ConnectionId,
+			Msgs:            rawMsg.Msgs,
+			TimeoutDuration: rawMsg.TimeoutDuration,
+		},
 
 		Packet: ibc_model.Packet{
 			Sequence:           packetSequence,
@@ -259,7 +287,11 @@ func ParseMsgRegisterAccount(
 			parserParams.MsgCommonParams,
 
 			icaauth_model.MsgRegisterAccountParams{
-				RawMsgRegisterAccount: rawMsg,
+				MsgRegisterAccount: icaauth_model.MsgRegisterAccount{
+					Owner:        rawMsg.Owner,
+					ConnectionID: rawMsg.ConnectionID,
+					Version:      rawMsg.Version,
+				},
 			},
 		)}, possibleSignerAddresses
 	}
@@ -271,8 +303,11 @@ func ParseMsgRegisterAccount(
 	}
 
 	msgRegisterAccountParams := icaauth_model.MsgRegisterAccountParams{
-		RawMsgRegisterAccount: rawMsg,
-
+		MsgRegisterAccount: icaauth_model.MsgRegisterAccount{
+			Owner:        rawMsg.Owner,
+			ConnectionID: rawMsg.ConnectionID,
+			Version:      rawMsg.Version,
+		},
 		PortID:                event.MustGetAttributeByKey("port_id"),
 		ChannelID:             event.MustGetAttributeByKey("channel_id"),
 		CounterpartyPortID:    event.MustGetAttributeByKey("counterparty_port_id"),

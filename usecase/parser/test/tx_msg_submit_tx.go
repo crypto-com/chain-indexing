@@ -614,9 +614,9 @@ const TX_MSG_SUBMIT_TX_TXS_RESP = `{
     "body": {
       "messages": [
         {
-          "@type": "/chainmain.icaauth.v1.MsgSubmitTx",
+          "@type": "/icaauth.v1.MsgSubmitTx",
           "owner": "tcro1np7ztcfeycqwhj0nr8hxfu0lfjz27telqx53ra",
-          "connectionId": "connection-18",
+          "connection_id": "connection-18",
           "msgs": [
             {
               "@type": "/cosmos.bank.v1beta1.MsgSend",
@@ -757,7 +757,7 @@ const TX_MSG_SUBMIT_TX_TXS_RESP = `{
       "body": {
         "messages": [
           {
-            "@type": "/chainmain.icaauth.v1.MsgSubmitTx",
+            "@type": "/icaauth.v1.MsgSubmitTx",
             "owner": "tcro1np7ztcfeycqwhj0nr8hxfu0lfjz27telqx53ra",
             "connectionId": "connection-18",
             "msgs": [

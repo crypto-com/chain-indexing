@@ -38,7 +38,7 @@ var _ = Describe("Event", func() {
 			anyTimeoutTimestamp := "anyTimeoutTimestamp"
 
 			var anyRawValue map[string]interface{}
-			var anyRawMsgSubmitTx icaauth_model.RawMsgSubmitTx
+			var anyRawMsgSubmitTx icaauth_model.MsgSubmitTx
 			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 				WeaklyTypedInput: true,
 				DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -73,7 +73,7 @@ var _ = Describe("Event", func() {
 			must.Do(decoder.Decode(anyRawValue))
 
 			anyParams := icaauth_model.MsgSubmitTxParams{
-				RawMsgSubmitTx: anyRawMsgSubmitTx,
+				MsgSubmitTx: anyRawMsgSubmitTx,
 
 				Packet: ibc_model.Packet{
 					Sequence:           anySequence,
@@ -131,7 +131,7 @@ var _ = Describe("Event", func() {
 			anyTimeoutTimestamp := "anyTimeoutTimestamp"
 
 			var anyRawValue map[string]interface{}
-			var anyRawMsgSubmitTx icaauth_model.RawMsgSubmitTx
+			var anyRawMsgSubmitTx icaauth_model.MsgSubmitTx
 			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 				WeaklyTypedInput: true,
 				DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -166,7 +166,7 @@ var _ = Describe("Event", func() {
 			must.Do(decoder.Decode(anyRawValue))
 
 			anyParams := icaauth_model.MsgSubmitTxParams{
-				RawMsgSubmitTx: anyRawMsgSubmitTx,
+				MsgSubmitTx: anyRawMsgSubmitTx,
 
 				Packet: ibc_model.Packet{
 					Sequence:           anySequence,

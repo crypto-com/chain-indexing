@@ -5,14 +5,21 @@ import (
 )
 
 type MsgSubmitTxParams struct {
-	RawMsgSubmitTx
+	MsgSubmitTx
 
 	ibc_model.Packet
 }
 
-type RawMsgSubmitTx struct {
+type MsgSubmitTx struct {
 	Owner           string           `mapstructure:"owner" json:"owner"`
 	ConnectionId    string           `mapstructure:"connectionId" json:"connectionId"`
+	Msgs            []MsgSubmitTxMsg `mapstructure:"msgs" json:"msgs"`
+	TimeoutDuration string           `mapstructure:"timeoutDuration" json:"timeoutDuration"`
+}
+
+type RawMsgSubmitTx struct {
+	Owner           string           `mapstructure:"owner" json:"owner"`
+	ConnectionId    string           `mapstructure:"connection_id" json:"connectionId"`
 	Msgs            []MsgSubmitTxMsg `mapstructure:"msgs" json:"msgs"`
 	TimeoutDuration string           `mapstructure:"timeoutDuration" json:"timeoutDuration"`
 }

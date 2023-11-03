@@ -19,11 +19,11 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgSubmitTx", func() {
 		It("should parse Msg commands when there is MsgSubmitTx in the transaction", func() {
 			expected := `{
-  "name": "/chainmain.icaauth.v1.MsgSubmitTx.Created",
+  "name": "/icaauth.v1.MsgSubmitTx.Created",
   "version": 1,
   "height": 67975,
   "uuid": "{UUID}",
-  "msgName": "/chainmain.icaauth.v1.MsgSubmitTx",
+  "msgName": "/icaauth.v1.MsgSubmitTx",
   "txHash": "A4AB8B9882379DC79EA19FD1CFCF53C1A8A252ECA557F39E4B316164DD27CF33",
   "msgIndex": 0,
   "params": {
@@ -76,7 +76,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("/chainmain.icaauth.v1.MsgSubmitTx.Create"))
+			Expect(cmd.Name()).To(Equal("/icaauth.v1.MsgSubmitTx.Create"))
 
 			untypedEvent, _ := cmd.Exec()
 			typedEvent := untypedEvent.(*event.MsgSubmitTx)

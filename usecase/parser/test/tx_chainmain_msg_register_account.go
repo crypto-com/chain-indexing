@@ -1,6 +1,6 @@
 package usecase_parser_test
 
-const TX_MSG_REGISTER_ACCOUNT_BLOCK_RESP = `
+const TX_CHAINMAIN_MSG_REGISTER_ACCOUNT_BLOCK_RESP = `
 {
   "jsonrpc": "2.0",
   "id": -1,
@@ -81,7 +81,7 @@ const TX_MSG_REGISTER_ACCOUNT_BLOCK_RESP = `
 }
 `
 
-const TX_MSG_REGISTER_ACCOUNT_BLOCK_RESULTS_RESP = `
+const TX_CHAINMAIN_MSG_REGISTER_ACCOUNT_BLOCK_RESULTS_RESP = `
 {
   "jsonrpc": "2.0",
   "id": -1,
@@ -584,12 +584,12 @@ const TX_MSG_REGISTER_ACCOUNT_BLOCK_RESULTS_RESP = `
 }
 `
 
-const TX_MSG_REGISTER_ACCOUNT_TXS_RESP = `{
+const TX_CHAINMAIN_MSG_REGISTER_ACCOUNT_TXS_RESP = `{
   "tx": {
     "body": {
       "messages": [
         {
-          "@type": "/icaauth.v1.MsgRegisterAccount",
+          "@type": "/chainmain.icaauth.v1.MsgRegisterAccount",
           "owner": "tcro1np7ztcfeycqwhj0nr8hxfu0lfjz27telqx53ra",
           "connection_id": "connection-18",
           "version": ""
@@ -699,7 +699,7 @@ const TX_MSG_REGISTER_ACCOUNT_TXS_RESP = `{
       "body": {
         "messages": [
           {
-            "@type": "/icaauth.v1.MsgRegisterAccount",
+            "@type": "/chainmain.icaauth.v1.MsgRegisterAccount",
             "owner": "tcro1np7ztcfeycqwhj0nr8hxfu0lfjz27telqx53ra",
             "connectionId": "connection-18",
             "version": ""

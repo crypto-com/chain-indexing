@@ -282,7 +282,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 		} else if msgRegisterAccount, ok := event.(*event_usecase.MsgRegisterAccount); ok {
 
-			connectionID := msgRegisterAccount.Params.RawMsgRegisterAccount.ConnectionID
+			connectionID := msgRegisterAccount.Params.ConnectionID
 			counterpartyChainID, err := ibcConnectionsView.FindCounterpartyChainIDBy(connectionID)
 			if err != nil {
 				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
@@ -318,7 +318,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 		} else if msgRegisterAccount, ok := event.(*event_usecase.ChainmainMsgRegisterAccount); ok {
 
-			connectionID := msgRegisterAccount.Params.RawMsgRegisterAccount.ConnectionID
+			connectionID := msgRegisterAccount.Params.ConnectionID
 			counterpartyChainID, err := ibcConnectionsView.FindCounterpartyChainIDBy(connectionID)
 			if err != nil {
 				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
