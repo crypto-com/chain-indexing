@@ -17,6 +17,6 @@ type MsgRegisterAccount struct {
 
 type RawMsgRegisterAccount struct {
 	Owner        string `mapstructure:"owner" json:"owner"`
-	ConnectionID string `mapstructure:"connection_id" json:"connection_id"`
+	ConnectionID string `mapstructure:"connection_id" json:"connectionId"`
 	Version      string `mapstructure:"version" json:"version"`
 }

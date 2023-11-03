@@ -1,6 +1,7 @@
 package icaauth
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
@@ -20,14 +21,20 @@ func ParseChainmainMsgSubmitTx(
 		panic(fmt.Errorf("error decoding RawMsgSubmitTx: %v", err))
 	}
 
+	var msgSubmitTx icaauth_model.MsgSubmitTx
+	msg, err := json.Marshal(rawMsg)
+	if err != nil {
+		panic(fmt.Errorf("error json marshalling RawMsgSubmitTx: %v", err))
+	}
+
+	err = json.Unmarshal(msg, &msgSubmitTx)
+	if err != nil {
+		panic(fmt.Errorf("error json unmarshlling MsgSubmitTx: %v", err))
+	}
+
 	if !parserParams.MsgCommonParams.TxSuccess {
 		msgSubmitTxParams := icaauth_model.MsgSubmitTxParams{
-			MsgSubmitTx: icaauth_model.MsgSubmitTx{
-				Owner:           rawMsg.Owner,
-				ConnectionId:    rawMsg.ConnectionId,
-				Msgs:            rawMsg.Msgs,
-				TimeoutDuration: rawMsg.TimeoutDuration,
-			},
+			MsgSubmitTx: msgSubmitTx,
 		}
 
 		// Getting possible signer address from Msg
@@ -83,12 +90,7 @@ func ParseChainmainMsgSubmitTx(
 	}
 
 	msgSubmitTxParams := icaauth_model.MsgSubmitTxParams{
-		MsgSubmitTx: icaauth_model.MsgSubmitTx{
-			Owner:           rawMsg.Owner,
-			ConnectionId:    rawMsg.ConnectionId,
-			Msgs:            rawMsg.Msgs,
-			TimeoutDuration: rawMsg.TimeoutDuration,
-		},
+		MsgSubmitTx: msgSubmitTx,
 
 		Packet: ibc_model.Packet{
 			Sequence:           packetSequence,
@@ -121,6 +123,17 @@ func ParseChainmainMsgRegisterAccount(
 		panic(fmt.Errorf("error decoding RawMsgRegisterAccount: %v", err))
 	}
 
+	var msgRegisterAccount icaauth_model.MsgRegisterAccount
+	msg, err := json.Marshal(rawMsg)
+	if err != nil {
+		panic(fmt.Errorf("error json marshalling RawMsgRegisterAccount: %v", err))
+	}
+
+	err = json.Unmarshal(msg, &msgRegisterAccount)
+	if err != nil {
+		panic(fmt.Errorf("error json unmarshlling MsgRegisterAccount: %v", err))
+	}
+
 	if !parserParams.MsgCommonParams.TxSuccess {
 		// Getting possible signer address from Msg
 		var possibleSignerAddresses []string
@@ -130,11 +143,7 @@ func ParseChainmainMsgRegisterAccount(
 			parserParams.MsgCommonParams,
 
 			icaauth_model.MsgRegisterAccountParams{
-				MsgRegisterAccount: icaauth_model.MsgRegisterAccount{
-					Owner:        rawMsg.Owner,
-					ConnectionID: rawMsg.ConnectionID,
-					Version:      rawMsg.Version,
-				},
+				MsgRegisterAccount: msgRegisterAccount,
 			},
 		)}, possibleSignerAddresses
 	}
@@ -146,11 +155,7 @@ func ParseChainmainMsgRegisterAccount(
 	}
 
 	msgRegisterAccountParams := icaauth_model.MsgRegisterAccountParams{
-		MsgRegisterAccount: icaauth_model.MsgRegisterAccount{
-			Owner:        rawMsg.Owner,
-			ConnectionID: rawMsg.ConnectionID,
-			Version:      rawMsg.Version,
-		},
+		MsgRegisterAccount: msgRegisterAccount,
 
 		PortID:                event.MustGetAttributeByKey("port_id"),
 		ChannelID:             event.MustGetAttributeByKey("channel_id"),
@@ -177,14 +182,20 @@ func ParseMsgSubmitTx(
 		panic(fmt.Errorf("error decoding RawMsgSubmitTx: %v", err))
 	}
 
+	var msgSubmitTx icaauth_model.MsgSubmitTx
+	msg, err := json.Marshal(rawMsg)
+	if err != nil {
+		panic(fmt.Errorf("error json marshalling RawMsgSubmitTx: %v", err))
+	}
+
+	err = json.Unmarshal(msg, &msgSubmitTx)
+	if err != nil {
+		panic(fmt.Errorf("error json unmarshlling MsgSubmitTx: %v", err))
+	}
+
 	if !parserParams.MsgCommonParams.TxSuccess {
 		msgSubmitTxParams := icaauth_model.MsgSubmitTxParams{
-			MsgSubmitTx: icaauth_model.MsgSubmitTx{
-				Owner:           rawMsg.Owner,
-				ConnectionId:    rawMsg.ConnectionId,
-				Msgs:            rawMsg.Msgs,
-				TimeoutDuration: rawMsg.TimeoutDuration,
-			},
+			MsgSubmitTx: msgSubmitTx,
 		}
 
 		// Getting possible signer address from Msg
@@ -240,12 +251,7 @@ func ParseMsgSubmitTx(
 	}
 
 	msgSubmitTxParams := icaauth_model.MsgSubmitTxParams{
-		MsgSubmitTx: icaauth_model.MsgSubmitTx{
-			Owner:           rawMsg.Owner,
-			ConnectionId:    rawMsg.ConnectionId,
-			Msgs:            rawMsg.Msgs,
-			TimeoutDuration: rawMsg.TimeoutDuration,
-		},
+		MsgSubmitTx: msgSubmitTx,
 
 		Packet: ibc_model.Packet{
 			Sequence:           packetSequence,
@@ -278,6 +284,17 @@ func ParseMsgRegisterAccount(
 		panic(fmt.Errorf("error decoding RawMsgRegisterAccount: %v", err))
 	}
 
+	var msgRegisterAccount icaauth_model.MsgRegisterAccount
+	msg, err := json.Marshal(rawMsg)
+	if err != nil {
+		panic(fmt.Errorf("error json marshalling RawMsgRegisterAccount: %v", err))
+	}
+
+	err = json.Unmarshal(msg, &msgRegisterAccount)
+	if err != nil {
+		panic(fmt.Errorf("error json unmarshlling MsgRegisterAccount: %v", err))
+	}
+
 	if !parserParams.MsgCommonParams.TxSuccess {
 		// Getting possible signer address from Msg
 		var possibleSignerAddresses []string
@@ -287,11 +304,7 @@ func ParseMsgRegisterAccount(
 			parserParams.MsgCommonParams,
 
 			icaauth_model.MsgRegisterAccountParams{
-				MsgRegisterAccount: icaauth_model.MsgRegisterAccount{
-					Owner:        rawMsg.Owner,
-					ConnectionID: rawMsg.ConnectionID,
-					Version:      rawMsg.Version,
-				},
+				MsgRegisterAccount: msgRegisterAccount,
 			},
 		)}, possibleSignerAddresses
 	}
@@ -303,11 +316,8 @@ func ParseMsgRegisterAccount(
 	}
 
 	msgRegisterAccountParams := icaauth_model.MsgRegisterAccountParams{
-		MsgRegisterAccount: icaauth_model.MsgRegisterAccount{
-			Owner:        rawMsg.Owner,
-			ConnectionID: rawMsg.ConnectionID,
-			Version:      rawMsg.Version,
-		},
+		MsgRegisterAccount: msgRegisterAccount,
+
 		PortID:                event.MustGetAttributeByKey("port_id"),
 		ChannelID:             event.MustGetAttributeByKey("channel_id"),
 		CounterpartyPortID:    event.MustGetAttributeByKey("counterparty_port_id"),
