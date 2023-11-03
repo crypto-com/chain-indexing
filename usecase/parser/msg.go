@@ -98,6 +98,10 @@ func ParseBlockTxsMsgToCommands(
 				"/chainmain.icaauth.v1.MsgRegisterAccount",
 				"/chainmain.icaauth.v1.MsgSubmitTx",
 
+				// cronos icaauth
+				"/icaauth.v1.MsgRegisterAccount",
+				"/icaauth.v1.MsgSubmitTx",
+
 				// ibc core client
 				"/ibc.core.client.v1.MsgCreateClient",
 				"/ibc.core.client.v1.MsgUpdateClient",

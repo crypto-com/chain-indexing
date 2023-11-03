@@ -65,6 +65,8 @@ func (_ *IBCChannelMessage) GetEventsToListen() []string {
 		event_usecase.MSG_IBC_TIMEOUT_ON_CLOSE_CREATED,
 		event_usecase.MSG_IBC_CHANNEL_CLOSE_INIT_CREATED,
 		event_usecase.MSG_IBC_CHANNEL_CLOSE_CONFIRM_CREATED,
+		event_usecase.CHAINMAIN_MSG_REGISTER_ACCOUNT_CREATED,
+		event_usecase.CHAINMAIN_MSG_SUBMIT_TX_CREATED,
 		event_usecase.MSG_REGISTER_ACCOUNT_CREATED,
 		event_usecase.MSG_SUBMIT_TX_CREATED,
 	}
@@ -107,6 +109,20 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 	var messages []view.IBCChannelMessageRow
 	for _, event := range events {
 		if typedEvent, ok := event.(*event_usecase.MsgRegisterAccount); ok {
+			channelID := typedEvent.Params.ChannelID
+
+			message := view.IBCChannelMessageRow{
+				ChannelID:       channelID,
+				BlockHeight:     height,
+				BlockTime:       blockTime,
+				TransactionHash: typedEvent.TxHash(),
+				MaybeRelayer:    primptr.String(typedEvent.Params.Owner),
+				MessageType:     typedEvent.MsgName,
+				Message:         typedEvent,
+			}
+			messages = append(messages, message)
+
+		} else if typedEvent, ok := event.(*event_usecase.ChainmainMsgRegisterAccount); ok {
 			channelID := typedEvent.Params.ChannelID
 
 			message := view.IBCChannelMessageRow{
@@ -256,6 +272,22 @@ func (projection *IBCChannelMessage) HandleEvents(height int64, events []event_e
 			messages = append(messages, message)
 
 		} else if typedEvent, ok := event.(*event_usecase.MsgSubmitTx); ok {
+
+			channelID := typedEvent.Params.Packet.DestinationChannel
+
+			message := view.IBCChannelMessageRow{
+				ChannelID:       channelID,
+				BlockHeight:     height,
+				BlockTime:       blockTime,
+				TransactionHash: typedEvent.TxHash(),
+				MaybeRelayer:    primptr.String(typedEvent.Params.Owner),
+				MessageType:     typedEvent.MsgName,
+				Message:         typedEvent,
+			}
+
+			messages = append(messages, message)
+
+		} else if typedEvent, ok := event.(*event_usecase.ChainmainMsgSubmitTx); ok {
 
 			channelID := typedEvent.Params.Packet.DestinationChannel
 

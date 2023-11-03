@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/crypto-com/chain-indexing/external/json"
-	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
 	icaauth_model "github.com/crypto-com/chain-indexing/usecase/model/icaauth"
 	"github.com/mitchellh/mapstructure"
 	. "github.com/onsi/ginkgo"
@@ -20,25 +19,18 @@ var _ = Describe("Event", func() {
 	registry := event_entity.NewRegistry()
 	event_usecase.RegisterEvents(registry)
 
-	Describe("En/DecodeMsgSubmitTx", func() {
+	Describe("En/DecodeMsgRegisterAccount", func() {
 		It("should able to encode and decode to the same event", func() {
 			anyHeight := int64(1000)
 			anyTxHash := "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416"
 			anyMsgIndex := 0
-			anySequence := "1"
-			anySourcePort := "anySourcePort"
-			anySourceChannel := "anySourceChannel"
-			anyDestinationPort := "anyDestinationPort"
-			anyDestinationChannel := "anyDestinationChannel"
-			anyData := "anyData"
-			anyTimeoutHeight := ibc_model.Height{
-				RevisionNumber: 0,
-				RevisionHeight: 0,
-			}
-			anyTimeoutTimestamp := "anyTimeoutTimestamp"
+			anyChannelId := "channel-0"
+			anyPortID := "anyPortID"
+			anyCounterpartyPortID := "anyCounterpartyPortID"
+			anyCounterpartyChannelID := "anyCounterpartyChannelID"
 
 			var anyRawValue map[string]interface{}
-			var anyRawMsgSubmitTx icaauth_model.MsgSubmitTx
+			var anyRawMsgRegisterAccount icaauth_model.MsgRegisterAccount
 			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 				WeaklyTypedInput: true,
 				DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -47,47 +39,28 @@ var _ = Describe("Event", func() {
 					mapstructure_utils.StringToDurationHookFunc(),
 					mapstructure_utils.StringToByteSliceHookFunc(),
 				),
-				Result: &anyRawMsgSubmitTx,
+				Result: &anyRawMsgRegisterAccount,
 			})
 			json.MustUnmarshalFromString(`
 {
-	"@type": "/chainmain.icaauth.v1.MsgSubmitTx",
+	"@type": "/chainmain.icaauth.v1.MsgRegisterAccount",
 	"owner": "tcro1np7ztcfeycqwhj0nr8hxfu0lfjz27telqx53ra",
 	"connectionId": "connection-18",
-	"msgs": [
-		{
-			"@type": "/cosmos.bank.v1beta1.MsgSend",
-			"from_address": "tcro1m902wnj38q76dxf425tcv5gze9rgeeht67eldf",
-			"to_address": "tcro144jtm7rx8y7wjwh8tufeke8n26dv4pdxp0zmm0",
-			"amount": [
-				{
-					"denom": "ibc/6B5A664BF0AF4F71B2F0BAA33141E2F1321242FBD5D19762F541EC971ACB0865",
-					"amount": "100"
-				}
-			]
-		}
-	],
-	"timeoutDuration": "300s"
+	"version": ""
 }
 `, &anyRawValue)
 			must.Do(decoder.Decode(anyRawValue))
 
-			anyParams := icaauth_model.MsgSubmitTxParams{
-				MsgSubmitTx: anyRawMsgSubmitTx,
+			anyParams := icaauth_model.MsgRegisterAccountParams{
+				MsgRegisterAccount: anyRawMsgRegisterAccount,
 
-				Packet: ibc_model.Packet{
-					Sequence:           anySequence,
-					SourcePort:         anySourcePort,
-					SourceChannel:      anySourceChannel,
-					DestinationPort:    anyDestinationPort,
-					DestinationChannel: anyDestinationChannel,
-					Data:               anyData,
-					TimeoutHeight:      anyTimeoutHeight,
-					TimeoutTimestamp:   anyTimeoutTimestamp,
-				},
+				PortID:                anyPortID,
+				ChannelID:             anyChannelId,
+				CounterpartyPortID:    anyCounterpartyPortID,
+				CounterpartyChannelID: anyCounterpartyChannelID,
 			}
 
-			event := event_usecase.NewMsgSubmitTx(event_usecase.MsgCommonParams{
+			event := event_usecase.NewChainmainMsgRegisterAccount(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
 				TxHash:      anyTxHash,
 				TxSuccess:   true,
@@ -98,12 +71,12 @@ var _ = Describe("Event", func() {
 			Expect(err).To(BeNil())
 
 			decodedEvent, err := registry.DecodeByType(
-				event_usecase.MSG_SUBMIT_TX_CREATED, 1, []byte(encoded),
+				event_usecase.CHAINMAIN_MSG_REGISTER_ACCOUNT_CREATED, 1, []byte(encoded),
 			)
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))
-			typedEvent, _ := decodedEvent.(*event_usecase.MsgSubmitTx)
-			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_SUBMIT_TX_CREATED))
+			typedEvent, _ := decodedEvent.(*event_usecase.ChainmainMsgRegisterAccount)
+			Expect(typedEvent.Name()).To(Equal(event_usecase.CHAINMAIN_MSG_REGISTER_ACCOUNT_CREATED))
 			Expect(typedEvent.Version()).To(Equal(1))
 			Expect(typedEvent.TxSuccess()).To(BeTrue())
 			Expect(typedEvent.TxHash()).To(Equal(anyTxHash))
@@ -111,27 +84,23 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 
-			Expect(typedEvent.Params.Packet).To(Equal(anyParams.Packet))
+			Expect(typedEvent.Params.PortID).To(Equal(anyParams.PortID))
+			Expect(typedEvent.Params.ChannelID).To(Equal(anyParams.ChannelID))
+			Expect(typedEvent.Params.CounterpartyPortID).To(Equal(anyParams.CounterpartyPortID))
+			Expect(typedEvent.Params.CounterpartyChannelID).To(Equal(anyParams.CounterpartyChannelID))
 		})
 
 		It("should able to encode and decode failed event", func() {
 			anyHeight := int64(1000)
 			anyTxHash := "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416"
 			anyMsgIndex := 0
-			anySequence := "1"
-			anySourcePort := "anySourcePort"
-			anySourceChannel := "anySourceChannel"
-			anyDestinationPort := "anyDestinationPort"
-			anyDestinationChannel := "anyDestinationChannel"
-			anyData := "anyData"
-			anyTimeoutHeight := ibc_model.Height{
-				RevisionNumber: 0,
-				RevisionHeight: 0,
-			}
-			anyTimeoutTimestamp := "anyTimeoutTimestamp"
+			anyChannelId := "channel-0"
+			anyPortID := "anyPortID"
+			anyCounterpartyPortID := "anyCounterpartyPortID"
+			anyCounterpartyChannelID := "anyCounterpartyChannelID"
 
 			var anyRawValue map[string]interface{}
-			var anyRawMsgSubmitTx icaauth_model.MsgSubmitTx
+			var anyRawMsgRegisterAccount icaauth_model.MsgRegisterAccount
 			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 				WeaklyTypedInput: true,
 				DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -140,47 +109,28 @@ var _ = Describe("Event", func() {
 					mapstructure_utils.StringToDurationHookFunc(),
 					mapstructure_utils.StringToByteSliceHookFunc(),
 				),
-				Result: &anyRawMsgSubmitTx,
+				Result: &anyRawMsgRegisterAccount,
 			})
 			json.MustUnmarshalFromString(`
 {
-	"@type": "/chainmain.icaauth.v1.MsgSubmitTx",
+	"@type": "/chainmain.icaauth.v1.MsgRegisterAccount",
 	"owner": "tcro1np7ztcfeycqwhj0nr8hxfu0lfjz27telqx53ra",
 	"connectionId": "connection-18",
-	"msgs": [
-		{
-			"@type": "/cosmos.bank.v1beta1.MsgSend",
-			"from_address": "tcro1m902wnj38q76dxf425tcv5gze9rgeeht67eldf",
-			"to_address": "tcro144jtm7rx8y7wjwh8tufeke8n26dv4pdxp0zmm0",
-			"amount": [
-				{
-					"denom": "ibc/6B5A664BF0AF4F71B2F0BAA33141E2F1321242FBD5D19762F541EC971ACB0865",
-					"amount": "100"
-				}
-			]
-		}
-	],
-	"timeoutDuration": "300s"
+	"version": ""
 }
 `, &anyRawValue)
 			must.Do(decoder.Decode(anyRawValue))
 
-			anyParams := icaauth_model.MsgSubmitTxParams{
-				MsgSubmitTx: anyRawMsgSubmitTx,
+			anyParams := icaauth_model.MsgRegisterAccountParams{
+				MsgRegisterAccount: anyRawMsgRegisterAccount,
 
-				Packet: ibc_model.Packet{
-					Sequence:           anySequence,
-					SourcePort:         anySourcePort,
-					SourceChannel:      anySourceChannel,
-					DestinationPort:    anyDestinationPort,
-					DestinationChannel: anyDestinationChannel,
-					Data:               anyData,
-					TimeoutHeight:      anyTimeoutHeight,
-					TimeoutTimestamp:   anyTimeoutTimestamp,
-				},
+				PortID:                anyPortID,
+				ChannelID:             anyChannelId,
+				CounterpartyPortID:    anyCounterpartyPortID,
+				CounterpartyChannelID: anyCounterpartyChannelID,
 			}
 
-			event := event_usecase.NewMsgSubmitTx(event_usecase.MsgCommonParams{
+			event := event_usecase.NewChainmainMsgRegisterAccount(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
 				TxHash:      anyTxHash,
 				TxSuccess:   false,
@@ -191,12 +141,12 @@ var _ = Describe("Event", func() {
 			Expect(err).To(BeNil())
 
 			decodedEvent, err := registry.DecodeByType(
-				event_usecase.MSG_SUBMIT_TX_FAILED, 1, []byte(encoded),
+				event_usecase.CHAINMAIN_MSG_REGISTER_ACCOUNT_FAILED, 1, []byte(encoded),
 			)
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))
-			typedEvent, _ := decodedEvent.(*event_usecase.MsgSubmitTx)
-			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_SUBMIT_TX_FAILED))
+			typedEvent, _ := decodedEvent.(*event_usecase.ChainmainMsgRegisterAccount)
+			Expect(typedEvent.Name()).To(Equal(event_usecase.CHAINMAIN_MSG_REGISTER_ACCOUNT_FAILED))
 			Expect(typedEvent.Version()).To(Equal(1))
 			Expect(typedEvent.TxSuccess()).To(BeFalse())
 			Expect(typedEvent.TxHash()).To(Equal(anyTxHash))
@@ -204,7 +154,10 @@ var _ = Describe("Event", func() {
 			Expect(typedEvent.MsgTxHash).To(Equal(anyTxHash))
 			Expect(typedEvent.MsgIndex).To(Equal(anyMsgIndex))
 
-			Expect(typedEvent.Params.Packet).To(Equal(anyParams.Packet))
+			Expect(typedEvent.Params.PortID).To(Equal(anyParams.PortID))
+			Expect(typedEvent.Params.ChannelID).To(Equal(anyParams.ChannelID))
+			Expect(typedEvent.Params.CounterpartyPortID).To(Equal(anyParams.CounterpartyPortID))
+			Expect(typedEvent.Params.CounterpartyChannelID).To(Equal(anyParams.CounterpartyChannelID))
 		})
 	})
 })

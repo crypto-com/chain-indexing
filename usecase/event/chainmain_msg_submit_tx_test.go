@@ -87,7 +87,7 @@ var _ = Describe("Event", func() {
 				},
 			}
 
-			event := event_usecase.NewMsgSubmitTx(event_usecase.MsgCommonParams{
+			event := event_usecase.NewChainmainMsgSubmitTx(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
 				TxHash:      anyTxHash,
 				TxSuccess:   true,
@@ -98,12 +98,12 @@ var _ = Describe("Event", func() {
 			Expect(err).To(BeNil())
 
 			decodedEvent, err := registry.DecodeByType(
-				event_usecase.MSG_SUBMIT_TX_CREATED, 1, []byte(encoded),
+				event_usecase.CHAINMAIN_MSG_SUBMIT_TX_CREATED, 1, []byte(encoded),
 			)
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))
-			typedEvent, _ := decodedEvent.(*event_usecase.MsgSubmitTx)
-			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_SUBMIT_TX_CREATED))
+			typedEvent, _ := decodedEvent.(*event_usecase.ChainmainMsgSubmitTx)
+			Expect(typedEvent.Name()).To(Equal(event_usecase.CHAINMAIN_MSG_SUBMIT_TX_CREATED))
 			Expect(typedEvent.Version()).To(Equal(1))
 			Expect(typedEvent.TxSuccess()).To(BeTrue())
 			Expect(typedEvent.TxHash()).To(Equal(anyTxHash))
@@ -180,7 +180,7 @@ var _ = Describe("Event", func() {
 				},
 			}
 
-			event := event_usecase.NewMsgSubmitTx(event_usecase.MsgCommonParams{
+			event := event_usecase.NewChainmainMsgSubmitTx(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
 				TxHash:      anyTxHash,
 				TxSuccess:   false,
@@ -191,12 +191,12 @@ var _ = Describe("Event", func() {
 			Expect(err).To(BeNil())
 
 			decodedEvent, err := registry.DecodeByType(
-				event_usecase.MSG_SUBMIT_TX_FAILED, 1, []byte(encoded),
+				event_usecase.CHAINMAIN_MSG_SUBMIT_TX_FAILED, 1, []byte(encoded),
 			)
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))
-			typedEvent, _ := decodedEvent.(*event_usecase.MsgSubmitTx)
-			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_SUBMIT_TX_FAILED))
+			typedEvent, _ := decodedEvent.(*event_usecase.ChainmainMsgSubmitTx)
+			Expect(typedEvent.Name()).To(Equal(event_usecase.CHAINMAIN_MSG_SUBMIT_TX_FAILED))
 			Expect(typedEvent.Version()).To(Equal(1))
 			Expect(typedEvent.TxSuccess()).To(BeFalse())
 			Expect(typedEvent.TxHash()).To(Equal(anyTxHash))

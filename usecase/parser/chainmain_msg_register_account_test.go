@@ -19,11 +19,11 @@ var _ = Describe("ParseMsgCommands", func() {
 	Describe("MsgRegisterAccount", func() {
 		It("should parse Msg commands when there is MsgRegisterAccount in the transaction", func() {
 			expected := `{
-  "name": "/icaauth.v1.MsgRegisterAccount.Created",
+  "name": "/chainmain.icaauth.v1.MsgRegisterAccount.Created",
   "version": 1,
   "height": 67461,
   "uuid": "{UUID}",
-  "msgName": "/icaauth.v1.MsgRegisterAccount",
+  "msgName": "/chainmain.icaauth.v1.MsgRegisterAccount",
   "txHash": "5FC4ECBEB0FFD3809F62052CADA161E542BAA1198EE94CCD0DF197EE4A885F35",
   "msgIndex": 0,
   "params": {
@@ -38,13 +38,13 @@ var _ = Describe("ParseMsgCommands", func() {
 }`
 
 			block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
-				usecase_parser_test.TX_MSG_REGISTER_ACCOUNT_BLOCK_RESP,
+				usecase_parser_test.TX_CHAINMAIN_MSG_REGISTER_ACCOUNT_BLOCK_RESP,
 			))
 			blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
-				usecase_parser_test.TX_MSG_REGISTER_ACCOUNT_BLOCK_RESULTS_RESP,
+				usecase_parser_test.TX_CHAINMAIN_MSG_REGISTER_ACCOUNT_BLOCK_RESULTS_RESP,
 			), &tendermint.Base64BlockResultEventAttributeDecoder{})
 
-			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_REGISTER_ACCOUNT_TXS_RESP)
+			tx := MustParseTxsResp(usecase_parser_test.TX_CHAINMAIN_MSG_REGISTER_ACCOUNT_TXS_RESP)
 			txs := []model.CosmosTxWithHash{*tx}
 
 			accountAddressPrefix := "tcro"
@@ -63,10 +63,10 @@ var _ = Describe("ParseMsgCommands", func() {
 			Expect(err).To(BeNil())
 			Expect(cmds).To(HaveLen(1))
 			cmd := cmds[0]
-			Expect(cmd.Name()).To(Equal("/icaauth.v1.MsgRegisterAccount.Create"))
+			Expect(cmd.Name()).To(Equal("/chainmain.icaauth.v1.MsgRegisterAccount.Create"))
 
 			untypedEvent, _ := cmd.Exec()
-			typedEvent := untypedEvent.(*event.MsgRegisterAccount)
+			typedEvent := untypedEvent.(*event.ChainmainMsgRegisterAccount)
 
 			regex, _ := regexp.Compile("\n?\r?\\s?")
 

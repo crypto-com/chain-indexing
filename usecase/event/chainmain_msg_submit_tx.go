@@ -10,23 +10,23 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_SUBMIT_TX = "/icaauth.v1.MsgSubmitTx"
-const MSG_SUBMIT_TX_CREATED = "/icaauth.v1.MsgSubmitTx.Created"
-const MSG_SUBMIT_TX_FAILED = "/icaauth.v1.MsgSubmitTx.Failed"
+const CHAINMAIN_MSG_SUBMIT_TX = "/chainmain.icaauth.v1.MsgSubmitTx"
+const CHAINMAIN_MSG_SUBMIT_TX_CREATED = "/chainmain.icaauth.v1.MsgSubmitTx.Created"
+const CHAINMAIN_MSG_SUBMIT_TX_FAILED = "/chainmain.icaauth.v1.MsgSubmitTx.Failed"
 
-type MsgSubmitTx struct {
+type ChainmainMsgSubmitTx struct {
 	MsgBase
 
 	Params icaauthmodel.MsgSubmitTxParams `json:"params"`
 }
 
-func NewMsgSubmitTx(
+func NewChainmainMsgSubmitTx(
 	msgCommonParams MsgCommonParams,
 	params icaauthmodel.MsgSubmitTxParams,
-) *MsgSubmitTx {
-	return &MsgSubmitTx{
+) *ChainmainMsgSubmitTx {
+	return &ChainmainMsgSubmitTx{
 		NewMsgBase(MsgBaseParams{
-			MsgName:         MSG_SUBMIT_TX,
+			MsgName:         CHAINMAIN_MSG_SUBMIT_TX,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
@@ -36,7 +36,7 @@ func NewMsgSubmitTx(
 }
 
 // ToJSON encodes the event into JSON string payload
-func (event *MsgSubmitTx) ToJSON() (string, error) {
+func (event *ChainmainMsgSubmitTx) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
 		return "", err
@@ -45,15 +45,15 @@ func (event *MsgSubmitTx) ToJSON() (string, error) {
 	return string(encoded), nil
 }
 
-func (event *MsgSubmitTx) String() string {
+func (event *ChainmainMsgSubmitTx) String() string {
 	return render.Render(event)
 }
 
-func DecodeMsgSubmitTx(encoded []byte) (entity_event.Event, error) {
+func DecodeChainmainMsgSubmitTx(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *MsgSubmitTx
+	var event *ChainmainMsgSubmitTx
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}
