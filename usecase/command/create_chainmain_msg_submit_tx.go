@@ -6,30 +6,30 @@ import (
 	icaauthmodel "github.com/crypto-com/chain-indexing/usecase/model/icaauth"
 )
 
-type CreateMsgSubmitTx struct {
+type CreateChainmainMsgSubmitTx struct {
 	msgCommonParams event.MsgCommonParams
 	params          icaauthmodel.MsgSubmitTxParams
 }
 
-func NewCreateMsgSubmitTx(
+func NewCreateChainmainMsgSubmitTx(
 	msgCommonParams event.MsgCommonParams,
 	params icaauthmodel.MsgSubmitTxParams,
-) *CreateMsgSubmitTx {
-	return &CreateMsgSubmitTx{
+) *CreateChainmainMsgSubmitTx {
+	return &CreateChainmainMsgSubmitTx{
 		msgCommonParams,
 		params,
 	}
 }
 
-func (*CreateMsgSubmitTx) Name() string {
-	return "/icaauth.v1.MsgSubmitTx.Create"
+func (*CreateChainmainMsgSubmitTx) Name() string {
+	return "/chainmain.icaauth.v1.MsgSubmitTx.Create"
 }
 
-func (*CreateMsgSubmitTx) Version() int {
+func (*CreateChainmainMsgSubmitTx) Version() int {
 	return 1
 }
 
-func (cmd *CreateMsgSubmitTx) Exec() (entity_event.Event, error) {
-	event := event.NewMsgSubmitTx(cmd.msgCommonParams, cmd.params)
+func (cmd *CreateChainmainMsgSubmitTx) Exec() (entity_event.Event, error) {
+	event := event.NewChainmainMsgSubmitTx(cmd.msgCommonParams, cmd.params)
 	return event, nil
 }

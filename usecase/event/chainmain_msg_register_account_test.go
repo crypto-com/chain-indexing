@@ -43,7 +43,7 @@ var _ = Describe("Event", func() {
 			})
 			json.MustUnmarshalFromString(`
 {
-	"@type": "/icaauth.v1.MsgRegisterAccount",
+	"@type": "/chainmain.icaauth.v1.MsgRegisterAccount",
 	"owner": "tcro1np7ztcfeycqwhj0nr8hxfu0lfjz27telqx53ra",
 	"connectionId": "connection-18",
 	"version": ""
@@ -60,7 +60,7 @@ var _ = Describe("Event", func() {
 				CounterpartyChannelID: anyCounterpartyChannelID,
 			}
 
-			event := event_usecase.NewMsgRegisterAccount(event_usecase.MsgCommonParams{
+			event := event_usecase.NewChainmainMsgRegisterAccount(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
 				TxHash:      anyTxHash,
 				TxSuccess:   true,
@@ -71,12 +71,12 @@ var _ = Describe("Event", func() {
 			Expect(err).To(BeNil())
 
 			decodedEvent, err := registry.DecodeByType(
-				event_usecase.MSG_REGISTER_ACCOUNT_CREATED, 1, []byte(encoded),
+				event_usecase.CHAINMAIN_MSG_REGISTER_ACCOUNT_CREATED, 1, []byte(encoded),
 			)
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))
-			typedEvent, _ := decodedEvent.(*event_usecase.MsgRegisterAccount)
-			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_REGISTER_ACCOUNT_CREATED))
+			typedEvent, _ := decodedEvent.(*event_usecase.ChainmainMsgRegisterAccount)
+			Expect(typedEvent.Name()).To(Equal(event_usecase.CHAINMAIN_MSG_REGISTER_ACCOUNT_CREATED))
 			Expect(typedEvent.Version()).To(Equal(1))
 			Expect(typedEvent.TxSuccess()).To(BeTrue())
 			Expect(typedEvent.TxHash()).To(Equal(anyTxHash))
@@ -113,7 +113,7 @@ var _ = Describe("Event", func() {
 			})
 			json.MustUnmarshalFromString(`
 {
-	"@type": "/icaauth.v1.MsgRegisterAccount",
+	"@type": "/chainmain.icaauth.v1.MsgRegisterAccount",
 	"owner": "tcro1np7ztcfeycqwhj0nr8hxfu0lfjz27telqx53ra",
 	"connectionId": "connection-18",
 	"version": ""
@@ -130,7 +130,7 @@ var _ = Describe("Event", func() {
 				CounterpartyChannelID: anyCounterpartyChannelID,
 			}
 
-			event := event_usecase.NewMsgRegisterAccount(event_usecase.MsgCommonParams{
+			event := event_usecase.NewChainmainMsgRegisterAccount(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
 				TxHash:      anyTxHash,
 				TxSuccess:   false,
@@ -141,12 +141,12 @@ var _ = Describe("Event", func() {
 			Expect(err).To(BeNil())
 
 			decodedEvent, err := registry.DecodeByType(
-				event_usecase.MSG_REGISTER_ACCOUNT_FAILED, 1, []byte(encoded),
+				event_usecase.CHAINMAIN_MSG_REGISTER_ACCOUNT_FAILED, 1, []byte(encoded),
 			)
 			Expect(err).To(BeNil())
 			Expect(decodedEvent).To(Equal(event))
-			typedEvent, _ := decodedEvent.(*event_usecase.MsgRegisterAccount)
-			Expect(typedEvent.Name()).To(Equal(event_usecase.MSG_REGISTER_ACCOUNT_FAILED))
+			typedEvent, _ := decodedEvent.(*event_usecase.ChainmainMsgRegisterAccount)
+			Expect(typedEvent.Name()).To(Equal(event_usecase.CHAINMAIN_MSG_REGISTER_ACCOUNT_FAILED))
 			Expect(typedEvent.Version()).To(Equal(1))
 			Expect(typedEvent.TxSuccess()).To(BeFalse())
 			Expect(typedEvent.TxHash()).To(Equal(anyTxHash))

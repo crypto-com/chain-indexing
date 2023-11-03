@@ -176,6 +176,11 @@ func RegisterEvents(registry *event.Registry) {
 	registry.Register(MSG_ETHEREUM_TX_FAILED, 1, DecodeMsgEthereumTx)
 
 	// ica auth
+	registry.Register(CHAINMAIN_MSG_REGISTER_ACCOUNT_CREATED, 1, DecodeChainmainMsgRegisterAccount)
+	registry.Register(CHAINMAIN_MSG_REGISTER_ACCOUNT_FAILED, 1, DecodeChainmainMsgRegisterAccount)
+	registry.Register(CHAINMAIN_MSG_SUBMIT_TX_CREATED, 1, DecodeChainmainMsgSubmitTx)
+	registry.Register(CHAINMAIN_MSG_SUBMIT_TX_FAILED, 1, DecodeChainmainMsgSubmitTx)
+
 	registry.Register(MSG_REGISTER_ACCOUNT_CREATED, 1, DecodeMsgRegisterAccount)
 	registry.Register(MSG_REGISTER_ACCOUNT_FAILED, 1, DecodeMsgRegisterAccount)
 	registry.Register(MSG_SUBMIT_TX_CREATED, 1, DecodeMsgSubmitTx)

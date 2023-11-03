@@ -51,8 +51,12 @@ func InitParsers(manager *utils.CosmosParserManager) {
 	manager.RegisterParser("/chainmain.nft.v1.MsgBurnNFT", BEGIN_BLOCK_HEIGHT, ParseMsgNFTBurnNFT)
 
 	// chainmain icaauth
-	manager.RegisterParser("/chainmain.icaauth.v1.MsgRegisterAccount", BEGIN_BLOCK_HEIGHT, icaauth.ParseMsgRegisterAccount)
-	manager.RegisterParser("/chainmain.icaauth.v1.MsgSubmitTx", BEGIN_BLOCK_HEIGHT, icaauth.ParseMsgSubmitTx)
+	manager.RegisterParser("/chainmain.icaauth.v1.MsgRegisterAccount", BEGIN_BLOCK_HEIGHT, icaauth.ParseChainmainMsgRegisterAccount)
+	manager.RegisterParser("/chainmain.icaauth.v1.MsgSubmitTx", BEGIN_BLOCK_HEIGHT, icaauth.ParseChainmainMsgSubmitTx)
+
+	// cronos icaauth
+	manager.RegisterParser("/icaauth.v1.MsgRegisterAccount", BEGIN_BLOCK_HEIGHT, icaauth.ParseMsgRegisterAccount)
+	manager.RegisterParser("/icaauth.v1.MsgSubmitTx", BEGIN_BLOCK_HEIGHT, icaauth.ParseMsgSubmitTx)
 
 	// ibc core client
 	manager.RegisterParser("/ibc.core.client.v1.MsgCreateClient", BEGIN_BLOCK_HEIGHT, ibc.ParseMsgCreateClient)

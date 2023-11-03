@@ -10,23 +10,23 @@ import (
 	"github.com/luci/go-render/render"
 )
 
-const MSG_REGISTER_ACCOUNT = "/icaauth.v1.MsgRegisterAccount"
-const MSG_REGISTER_ACCOUNT_CREATED = "/icaauth.v1.MsgRegisterAccount.Created"
-const MSG_REGISTER_ACCOUNT_FAILED = "/icaauth.v1.MsgRegisterAccount.Failed"
+const CHAINMAIN_MSG_REGISTER_ACCOUNT = "/chainmain.icaauth.v1.MsgRegisterAccount"
+const CHAINMAIN_MSG_REGISTER_ACCOUNT_CREATED = "/chainmain.icaauth.v1.MsgRegisterAccount.Created"
+const CHAINMAIN_MSG_REGISTER_ACCOUNT_FAILED = "/chainmain.icaauth.v1.MsgRegisterAccount.Failed"
 
-type MsgRegisterAccount struct {
+type ChainmainMsgRegisterAccount struct {
 	MsgBase
 
 	Params icaauthmodel.MsgRegisterAccountParams `json:"params"`
 }
 
-func NewMsgRegisterAccount(
+func NewChainmainMsgRegisterAccount(
 	msgCommonParams MsgCommonParams,
 	params icaauthmodel.MsgRegisterAccountParams,
-) *MsgRegisterAccount {
-	return &MsgRegisterAccount{
+) *ChainmainMsgRegisterAccount {
+	return &ChainmainMsgRegisterAccount{
 		NewMsgBase(MsgBaseParams{
-			MsgName:         MSG_REGISTER_ACCOUNT,
+			MsgName:         CHAINMAIN_MSG_REGISTER_ACCOUNT,
 			Version:         1,
 			MsgCommonParams: msgCommonParams,
 		}),
@@ -36,7 +36,7 @@ func NewMsgRegisterAccount(
 }
 
 // ToJSON encodes the event into JSON string payload
-func (event *MsgRegisterAccount) ToJSON() (string, error) {
+func (event *ChainmainMsgRegisterAccount) ToJSON() (string, error) {
 	encoded, err := jsoniter.Marshal(event)
 	if err != nil {
 		return "", err
@@ -45,15 +45,15 @@ func (event *MsgRegisterAccount) ToJSON() (string, error) {
 	return string(encoded), nil
 }
 
-func (event *MsgRegisterAccount) String() string {
+func (event *ChainmainMsgRegisterAccount) String() string {
 	return render.Render(event)
 }
 
-func DecodeMsgRegisterAccount(encoded []byte) (entity_event.Event, error) {
+func DecodeChainmainMsgRegisterAccount(encoded []byte) (entity_event.Event, error) {
 	jsonDecoder := jsoniter.NewDecoder(bytes.NewReader(encoded))
 	jsonDecoder.DisallowUnknownFields()
 
-	var event *MsgRegisterAccount
+	var event *ChainmainMsgRegisterAccount
 	if err := jsonDecoder.Decode(&event); err != nil {
 		return nil, err
 	}

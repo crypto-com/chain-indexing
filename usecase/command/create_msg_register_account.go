@@ -22,7 +22,7 @@ func NewCreateMsgRegisterAccount(
 }
 
 func (*CreateMsgRegisterAccount) Name() string {
-	return "/chainmain.icaauth.v1.MsgRegisterAccount.Create"
+	return "/icaauth.v1.MsgRegisterAccount.Create"
 }
 
 func (*CreateMsgRegisterAccount) Version() int {
