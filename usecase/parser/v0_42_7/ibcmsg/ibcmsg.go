@@ -196,7 +196,7 @@ func ParseMsgTransfer(
 
 	writeAckEvents := log.GetEventsByType("write_acknowledgement")
 	if writeAckEvents == nil {
-		panic("missing `write_acknowledgement` event in TxsResult log")
+		parserParams.Logger.Warnf("missing `write_acknowledgement` event in TxsResult log on TxHash: %s", parserParams.MsgCommonParams.TxHash)
 	}
 	var writeAckEventPacketAck string
 	for _, writeAckEvent := range writeAckEvents {
@@ -302,8 +302,9 @@ func ParseMsgSubmitTx(
 
 	recvPacketEvents := log.GetEventsByType("recv_packet")
 	if recvPacketEvents == nil {
-		panic("missing `recv_packet` event in TxsResult log")
+		parserParams.Logger.Warnf("missing `recv_packet` event in TxsResult log on TxHash: %s", parserParams.MsgCommonParams.TxHash)
 	}
+
 	var packetSequence uint64
 	var channelOrdering string
 	var connectionID string
