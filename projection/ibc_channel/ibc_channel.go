@@ -536,6 +536,9 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 			if msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData != nil &&
 				msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Success {
+				if msgIBCTransferTransfer.Params.PacketData.Amount == nil {
+					return nil
+				}
 
 				amount := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount.String()
 				denom := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Denom
@@ -560,7 +563,11 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 			}
 
-			if projection.config.EnableTxMsgTrace && msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData != nil {
+			if projection.config.EnableTxMsgTrace &&
+				msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData != nil {
+				if msgIBCTransferTransfer.Params.PacketData.Amount == nil {
+					return nil
+				}
 
 				msg, err := msgIBCRecvPacket.ToJSON()
 				if err != nil {
