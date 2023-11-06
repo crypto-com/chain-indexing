@@ -534,11 +534,12 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
+			if msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount == nil {
+				return nil
+			}
+
 			if msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData != nil &&
 				msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Success {
-				if msgIBCTransferTransfer.Params.PacketData.Amount == nil {
-					return nil
-				}
 
 				amount := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Amount.String()
 				denom := msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData.Denom
@@ -565,9 +566,6 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 			if projection.config.EnableTxMsgTrace &&
 				msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData != nil {
-				if msgIBCTransferTransfer.Params.PacketData.Amount == nil {
-					return nil
-				}
 
 				msg, err := msgIBCRecvPacket.ToJSON()
 				if err != nil {
@@ -621,8 +619,11 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating total_relay_out_success_rate: %w", err)
 			}
 
-			if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData != nil {
+			if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount == nil {
+				return nil
+			}
 
+			if msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData != nil {
 				if !msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Success {
 
 					amount := msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.Amount.String()
@@ -703,6 +704,10 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error updating total_relay_out_success_rate: %w", err)
 			}
 
+			if msgIBCTimeout.Params.MaybeMsgTransfer.RefundAmount == nil {
+				return nil
+			}
+
 			if msgIBCTimeout.Params.MaybeMsgTransfer != nil {
 
 				amount := msgIBCTimeout.Params.MaybeMsgTransfer.RefundAmount.String()
@@ -774,6 +779,10 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 			}
 			if err := ibcChannelsView.UpdateTotalRelayOutSuccessRate(channelID); err != nil {
 				return fmt.Errorf("error updating total_relay_out_success_rate: %w", err)
+			}
+
+			if msgIBCTimeoutOnClose.Params.MaybeMsgTransfer.RefundAmount == nil {
+				return nil
 			}
 
 			if msgIBCTimeoutOnClose.Params.MaybeMsgTransfer != nil {
