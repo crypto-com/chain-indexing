@@ -532,8 +532,7 @@ func parseMsgSubmitParamChangeProposal(
 	} else {
 		for _, event := range events {
 			if event.HasAttribute("proposal_id") {
-				tempProposalId := event.GetAttributeByKey("proposal_id")
-				proposalId = tempProposalId
+				proposalId = event.GetAttributeByKey("proposal_id")
 			}
 		}
 
@@ -627,8 +626,7 @@ func parseMsgSubmitCommunityFundSpendProposal(
 	} else {
 		for _, event := range events {
 			if event.HasAttribute("proposal_id") {
-				tempProposalId := event.GetAttributeByKey("proposal_id")
-				proposalId = tempProposalId
+				proposalId = event.GetAttributeByKey("proposal_id")
 			}
 		}
 
@@ -724,8 +722,7 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 	} else {
 		for _, event := range events {
 			if event.HasAttribute("proposal_id") {
-				tempProposalId := event.GetAttributeByKey("proposal_id")
-				proposalId = tempProposalId
+				proposalId = event.GetAttributeByKey("proposal_id")
 			}
 		}
 
@@ -805,8 +802,7 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 	} else {
 		for _, event := range events {
 			if event.HasAttribute("proposal_id") {
-				tempProposalId := event.GetAttributeByKey("proposal_id")
-				proposalId = tempProposalId
+				proposalId = event.GetAttributeByKey("proposal_id")
 			}
 		}
 
@@ -886,8 +882,7 @@ func parseMsgSubmitTextProposal(
 	} else {
 		for _, event := range events {
 			if event.HasAttribute("proposal_id") {
-				tempProposalId := event.GetAttributeByKey("proposal_id")
-				proposalId = tempProposalId
+				proposalId = event.GetAttributeByKey("proposal_id")
 			}
 		}
 
@@ -972,8 +967,7 @@ func parseMsgSubmitUnknownProposal(
 	} else {
 		for _, event := range events {
 			if event.HasAttribute("proposal_id") {
-				tempProposalId := event.GetAttributeByKey("proposal_id")
-				proposalId = tempProposalId
+				proposalId = event.GetAttributeByKey("proposal_id")
 			}
 		}
 
