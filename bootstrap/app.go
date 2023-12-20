@@ -29,7 +29,7 @@ func NewApp(logger applogger.Logger, config *config.Config) *app {
 		logger.Panicf("error setting up RDb connection: %v", err)
 	}
 
-	if config.IndexService.Enable && !config.IndexService.SkipMigration {
+	if config.IndexService.Enable {
 		ref := ""
 		if config.IndexService.GithubAPI.MigrationRepoRef != "" {
 			ref = "#" + config.IndexService.GithubAPI.MigrationRepoRef
