@@ -54,6 +54,14 @@ func (t UTCTime) Add(d gotime.Duration) UTCTime {
 	return FromUnixNano(newTime.UnixNano())
 }
 
+func (t UTCTime) Before(t2 UTCTime) bool {
+	return gotime.Unix(0, t.unixNano).UTC().Before(gotime.Unix(0, t2.unixNano).UTC())
+}
+
+func (t UTCTime) After(t2 UTCTime) bool {
+	return gotime.Unix(0, t.unixNano).UTC().After(gotime.Unix(0, t2.unixNano).UTC())
+}
+
 func (t UTCTime) Year() int {
 	return gotime.Unix(0, t.unixNano).UTC().Year()
 }

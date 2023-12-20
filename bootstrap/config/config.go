@@ -9,6 +9,7 @@ type Config struct {
 	HTTPService   HTTPService   `yaml:"http_service" toml:"http_service" xml:"http_service" json:"http_service"`
 	TendermintApp TendermintApp `yaml:"tendermint_app" toml:"tendermint_app" xml:"tendermint_app" json:"tendermint_app"`
 	CosmosApp     CosmosApp     `yaml:"cosmos_app" toml:"cosmos_app" xml:"cosmos_app" json:"cosmos_app"`
+	EvmApp        EvmApp        `yaml:"evm_app" toml:"evm_app" xml:"evm_app" json:"evm_app"`
 	Debug         Debug         `yaml:"debug" toml:"debug" xml:"debug" json:"debug"`
 	Postgres      Postgres      `yaml:"postgres" toml:"postgres" xml:"postgres" json:"postgres"`
 	Logger        Logger        `yaml:"logger" toml:"logger" xml:"logger" json:"logger"`
@@ -17,6 +18,7 @@ type Config struct {
 
 type IndexService struct {
 	Enable                                bool                       `yaml:"enable" toml:"enable" xml:"enable" json:"enable,omitempty"`
+	SkipMigration                         bool                       `yaml:"skip_migration" toml:"skip_migration" xml:"skip_migration" json:"skip_migration,omitempty"`
 	StartingBlockHeight                   int64                      `yaml:"starting_block_height" toml:"starting_block_height" xml:"starting_block_height" json:"starting_block_height,omitempty"`
 	Mode                                  string                     `yaml:"mode" toml:"mode" xml:"mode" json:"mode,omitempty"`
 	WindowSize                            int                        `yaml:"window_size" toml:"window_size" xml:"window_size" json:"window_size,omitempty"`
@@ -60,6 +62,10 @@ type TendermintApp struct {
 type CosmosApp struct {
 	HTTPRPCUrl string `yaml:"http_rpc_url" toml:"http_rpc_url" xml:"http_rpc_url" json:"http_rpc_url,omitempty"`
 	Insecure   bool   `yaml:"insecure" toml:"insecure" xml:"insecure" json:"insecure,omitempty"`
+}
+
+type EvmApp struct {
+	HTTPRPCUrl string `yaml:"http_rpc_url" toml:"http_rpc_url" xml:"http_rpc_url" json:"http_rpc_url,omitempty"`
 }
 
 type Postgres struct {
