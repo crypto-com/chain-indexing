@@ -529,10 +529,9 @@ func parseMsgSubmitParamChangeProposal(
 			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
 		}
 	} else {
-		for _, event := range events {
-			if event.HasAttribute("proposal_id") {
-				proposalId = event.GetAttributeByKey("proposal_id")
-			}
+		event := log.GetFirstEventByType("submit_proposal")
+		if event.HasAttribute("proposal_id") {
+			proposalId = event.GetAttributeByKey("proposal_id")
 		}
 
 		if proposalId == nil {
@@ -623,10 +622,9 @@ func parseMsgSubmitCommunityFundSpendProposal(
 			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
 		}
 	} else {
-		for _, event := range events {
-			if event.HasAttribute("proposal_id") {
-				proposalId = event.GetAttributeByKey("proposal_id")
-			}
+		event := log.GetFirstEventByType("submit_proposal")
+		if event.HasAttribute("proposal_id") {
+			proposalId = event.GetAttributeByKey("proposal_id")
 		}
 
 		if proposalId == nil {
@@ -719,10 +717,9 @@ func parseMsgSubmitSoftwareUpgradeProposal(
 			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
 		}
 	} else {
-		for _, event := range events {
-			if event.HasAttribute("proposal_id") {
-				proposalId = event.GetAttributeByKey("proposal_id")
-			}
+		event := log.GetFirstEventByType("submit_proposal")
+		if event.HasAttribute("proposal_id") {
+			proposalId = event.GetAttributeByKey("proposal_id")
 		}
 
 		if proposalId == nil {
@@ -799,10 +796,9 @@ func parseMsgSubmitCancelSoftwareUpgradeProposal(
 			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
 		}
 	} else {
-		for _, event := range events {
-			if event.HasAttribute("proposal_id") {
-				proposalId = event.GetAttributeByKey("proposal_id")
-			}
+		event := log.GetFirstEventByType("submit_proposal")
+		if event.HasAttribute("proposal_id") {
+			proposalId = event.GetAttributeByKey("proposal_id")
 		}
 
 		if proposalId == nil {
@@ -879,10 +875,9 @@ func parseMsgSubmitTextProposal(
 			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
 		}
 	} else {
-		for _, event := range events {
-			if event.HasAttribute("proposal_id") {
-				proposalId = event.GetAttributeByKey("proposal_id")
-			}
+		event := log.GetFirstEventByType("submit_proposal")
+		if event.HasAttribute("proposal_id") {
+			proposalId = event.GetAttributeByKey("proposal_id")
 		}
 
 		if proposalId == nil {
@@ -964,10 +959,9 @@ func parseMsgSubmitUnknownProposal(
 			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
 		}
 	} else {
-		for _, event := range events {
-			if event.HasAttribute("proposal_id") {
-				proposalId = event.GetAttributeByKey("proposal_id")
-			}
+		event := log.GetFirstEventByType("submit_proposal")
+		if event.HasAttribute("proposal_id") {
+			proposalId = event.GetAttributeByKey("proposal_id")
 		}
 
 		if proposalId == nil {
