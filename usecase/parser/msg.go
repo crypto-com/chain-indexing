@@ -517,7 +517,6 @@ func parseMsgSubmitParamChangeProposal(
 	log := utils.NewParsedTxsResultLog(&txsResult.Log[msgIndex])
 	events := log.GetEventsByType("submit_proposal")
 
-	fmt.Println(events)
 	var proposalId *string
 	if msg["msg_index"] != nil {
 		msgIndex, err := strconv.Atoi(msg["msg_index"].(string))
