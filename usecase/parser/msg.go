@@ -146,17 +146,17 @@ func ParseBlockTxsMsgToCommands(
 				parser := parserManager.GetParser(utils.CosmosParserKey(msgType.(string)), utils.ParserBlockHeight(blockHeight))
 
 				msgCommands, possibleSignerAddresses = parser(utils.CosmosParserParams{
-					AddressPrefix:      accountAddressPrefix,
-					StakingDenom:       stakingDenom,
-					TxsResult:          txsResult,
-					MsgCommonParams:    msgCommonParams,
-					Msg:                msg,
-					MsgIndex:           msgIndex,
-					ParserManager:      parserManager,
-					Logger:             parserManager.GetLogger(),
-					TxDecoder:          parserManager.TxDecoder,
-					IsProposalInnerMsg: false,
-					IsEvmInnerMsg:      false,
+					AddressPrefix:        accountAddressPrefix,
+					StakingDenom:         stakingDenom,
+					TxsResult:            txsResult,
+					MsgCommonParams:      msgCommonParams,
+					Msg:                  msg,
+					MsgIndex:             msgIndex,
+					ParserManager:        parserManager,
+					Logger:               parserManager.GetLogger(),
+					TxDecoder:            parserManager.TxDecoder,
+					IsProposalInnerMsg:   false,
+					IsEthereumTxInnerMsg: false,
 				})
 			}
 			addresses = append(addresses, possibleSignerAddresses...)
@@ -2344,7 +2344,7 @@ func ParseMsgEthereumTx(
 		log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 		events := log.GetEventsByType("channel_open_init")
 		if len(events) > 0 {
-			parserParams.IsEvmInnerMsg = true
+			parserParams.IsEthereumTxInnerMsg = true
 			cmds, signers := icaauth.ParseMsgRegisterAccount(parserParams)
 			commands = append(commands, cmds...)
 			possibleSignerAddresses = append(possibleSignerAddresses, signers...)

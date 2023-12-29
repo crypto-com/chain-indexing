@@ -311,7 +311,7 @@ func ParseMsgRegisterAccount(
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 
-	if parserParams.IsEvmInnerMsg {
+	if parserParams.IsEthereumTxInnerMsg {
 		var commands []command.Command
 		var possibleSignerAddresses []string
 

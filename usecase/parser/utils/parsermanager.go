@@ -41,17 +41,17 @@ type CosmosParser func(
 ) ([]command.Command, []string)
 
 type CosmosParserParams struct {
-	AddressPrefix      string
-	StakingDenom       string
-	TxsResult          model.BlockResultsTxsResult
-	MsgCommonParams    event.MsgCommonParams
-	MsgIndex           int
-	Msg                map[string]interface{}
-	ParserManager      *CosmosParserManager
-	Logger             applogger.Logger
-	TxDecoder          txdecoder.TxDecoder
-	IsProposalInnerMsg bool
-	IsEvmInnerMsg      bool
+	AddressPrefix        string
+	StakingDenom         string
+	TxsResult            model.BlockResultsTxsResult
+	MsgCommonParams      event.MsgCommonParams
+	MsgIndex             int
+	Msg                  map[string]interface{}
+	ParserManager        *CosmosParserManager
+	Logger               applogger.Logger
+	TxDecoder            txdecoder.TxDecoder
+	IsProposalInnerMsg   bool
+	IsEthereumTxInnerMsg bool
 }
 
 func NewCosmosParserManager(params CosmosParserManagerParams) *CosmosParserManager {
