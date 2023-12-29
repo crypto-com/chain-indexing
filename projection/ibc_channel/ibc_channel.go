@@ -92,7 +92,9 @@ func (_ *IBCChannel) GetEventsToListen() []string {
 		event_usecase.MSG_IBC_TIMEOUT_CREATED,
 		event_usecase.MSG_IBC_TIMEOUT_ON_CLOSE_CREATED,
 		event_usecase.CHAINMAIN_MSG_REGISTER_ACCOUNT_CREATED,
+		event_usecase.CHAINMAIN_MSG_SUBMIT_TX_CREATED,
 		event_usecase.MSG_REGISTER_ACCOUNT_CREATED,
+		event_usecase.MSG_SUBMIT_TX_CREATED,
 	}
 }
 
@@ -352,6 +354,58 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error inserting channel: %w", err)
 			}
 
+		} else if msgSubmitTx, ok := event.(*event_usecase.MsgSubmitTx); ok {
+			// Transfer started by source chain
+			channelID := msgSubmitTx.Params.SourceChannel
+
+			// TotalRelayOutSuccessRate
+			if err := ibcChannelsView.Increment(channelID, "total_relay_out_count", 1); err != nil {
+				return fmt.Errorf("error increasing total_relay_out_count: %w", err)
+			}
+			if err := ibcChannelsView.UpdateTotalRelayOutSuccessRate(channelID); err != nil {
+				return fmt.Errorf("error updating total_relay_out_success_rate: %w", err)
+			}
+
+			var lastOutPacketSequence uint64
+			packetSequence := msgSubmitTx.Params.Packet.Sequence
+			lastOutPacketSequence, err = strconv.ParseUint(packetSequence, 10, 64)
+			if err != nil {
+				return fmt.Errorf("error parsing last_out_packet_sequence: %w", err)
+			}
+
+			if err := ibcChannelsView.UpdateSequence(channelID, "last_out_packet_sequence", lastOutPacketSequence); err != nil {
+				return fmt.Errorf("error updating last_out_packet_sequence: %w", err)
+			}
+
+			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
+				return fmt.Errorf("error updating channel last_activity_time: %w", err)
+			}
+		} else if chainmainMsgSubmitTx, ok := event.(*event_usecase.ChainmainMsgSubmitTx); ok {
+			// Transfer started by source chain
+			channelID := chainmainMsgSubmitTx.Params.SourceChannel
+
+			// TotalRelayOutSuccessRate
+			if err := ibcChannelsView.Increment(channelID, "total_relay_out_count", 1); err != nil {
+				return fmt.Errorf("error increasing total_relay_out_count: %w", err)
+			}
+			if err := ibcChannelsView.UpdateTotalRelayOutSuccessRate(channelID); err != nil {
+				return fmt.Errorf("error updating total_relay_out_success_rate: %w", err)
+			}
+
+			var lastOutPacketSequence uint64
+			packetSequence := chainmainMsgSubmitTx.Params.Packet.Sequence
+			lastOutPacketSequence, err = strconv.ParseUint(packetSequence, 10, 64)
+			if err != nil {
+				return fmt.Errorf("error parsing last_out_packet_sequence: %w", err)
+			}
+
+			if err := ibcChannelsView.UpdateSequence(channelID, "last_out_packet_sequence", lastOutPacketSequence); err != nil {
+				return fmt.Errorf("error updating last_out_packet_sequence: %w", err)
+			}
+
+			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
+				return fmt.Errorf("error updating channel last_activity_time: %w", err)
+			}
 		} else if msgIBCChannelOpenTry, ok := event.(*event_usecase.MsgIBCChannelOpenTry); ok {
 
 			connectionID := msgIBCChannelOpenTry.Params.ConnectionID
