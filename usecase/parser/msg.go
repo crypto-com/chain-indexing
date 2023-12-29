@@ -19,6 +19,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
+	"github.com/crypto-com/chain-indexing/usecase/parser/icaauth"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	mapstructure_utils "github.com/crypto-com/chain-indexing/usecase/parser/utils/mapstructure"
 )
@@ -155,6 +156,7 @@ func ParseBlockTxsMsgToCommands(
 					Logger:             parserManager.GetLogger(),
 					TxDecoder:          parserManager.TxDecoder,
 					IsProposalInnerMsg: false,
+					IsEvmInnerMsg:      false,
 				})
 			}
 			addresses = append(addresses, possibleSignerAddresses...)
@@ -2335,14 +2337,34 @@ func ParseMsgEthereumTx(
 		RawMsgEthereumTx: rawMsg,
 	}
 
-	// Getting possible signer address from Msg
+	var commands []command.Command
 	var possibleSignerAddresses []string
+
+	if rawMsg.Data.Data != "" {
+		log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
+		events := log.GetEventsByType("channel_open_init")
+		if len(events) > 0 {
+			parserParams.IsEvmInnerMsg = true
+			cmds, signers := icaauth.ParseMsgRegisterAccount(parserParams)
+			commands = append(commands, cmds...)
+			possibleSignerAddresses = append(possibleSignerAddresses, signers...)
+		}
+
+		// parse ICA msgSendTx
+		submitEvent := log.GetEventByType("submit_msgs_result")
+		if submitEvent != nil {
+			cmds, signers := icaauth.ParseMsgSubmitTx(parserParams)
+			commands = append(commands, cmds...)
+			possibleSignerAddresses = append(possibleSignerAddresses, signers...)
+		}
+	}
+	// Getting possible signer address from Msg
 	// FIXME: https://github.com/crypto-com/chain-indexing/issues/729
 	// possibleSignerAddresses = append(possibleSignerAddresses, msgEthereumTxParams.From)
 
-	return []command.Command{command_usecase.NewCreateMsgEthereumTx(
+	return append(commands, command_usecase.NewCreateMsgEthereumTx(
 		parserParams.MsgCommonParams,
 
 		msgEthereumTxParams,
-	)}, possibleSignerAddresses
+	)), possibleSignerAddresses
 }

@@ -51,6 +51,7 @@ type CosmosParserParams struct {
 	Logger             applogger.Logger
 	TxDecoder          txdecoder.TxDecoder
 	IsProposalInnerMsg bool
+	IsEvmInnerMsg      bool
 }
 
 func NewCosmosParserManager(params CosmosParserManagerParams) *CosmosParserManager {
