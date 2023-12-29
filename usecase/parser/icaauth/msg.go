@@ -310,6 +310,53 @@ func ParseMsgRegisterAccount(
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
+
+	if parserParams.IsEthereumTxInnerMsg {
+		var commands []command.Command
+		var possibleSignerAddresses []string
+
+		events := log.GetEventsByType("channel_open_init")
+		msgRegisterAccountParams := make([]icaauth_model.MsgRegisterAccountParams, 0)
+
+		for _, event := range events {
+			param := icaauth_model.MsgRegisterAccountParams{
+				MsgRegisterAccount: icaauth_model.MsgRegisterAccount{
+					Owner:        msgRegisterAccount.Owner,
+					ConnectionID: event.MustGetAttributeByKey("connection_id"),
+					Version:      event.MustGetAttributeByKey("version"),
+				},
+
+				PortID:                event.MustGetAttributeByKey("port_id"),
+				ChannelID:             event.MustGetAttributeByKey("channel_id"),
+				CounterpartyPortID:    event.MustGetAttributeByKey("counterparty_port_id"),
+				CounterpartyChannelID: event.MustGetAttributeByKey("counterparty_channel_id"),
+			}
+
+			isExisted := false
+			for _, msgRegisterAccountParam := range msgRegisterAccountParams {
+				if msgRegisterAccountParam.ChannelID == param.ChannelID && msgRegisterAccountParam.PortID == param.PortID && msgRegisterAccountParam.CounterpartyChannelID == param.CounterpartyChannelID {
+					isExisted = true
+					break
+				}
+			}
+
+			if !isExisted {
+				// append non-duplicated msg register account params extracted from channel open init event
+				msgRegisterAccountParams = append(msgRegisterAccountParams, param)
+
+				// append commands
+				commands = append(commands, command_usecase.NewCreateMsgRegisterAccount(
+					parserParams.MsgCommonParams,
+					param,
+				))
+
+				// append possible signer addresses
+				possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Owner)
+			}
+		}
+		return commands, possibleSignerAddresses
+	}
+
 	event := log.GetEventByType("channel_open_init")
 	if event == nil {
 		panic("missing `channel_open_init` event in TxsResult log")
