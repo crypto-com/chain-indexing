@@ -167,14 +167,16 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 					CounterpartyChainID: msgIBCCreateClient.Params.MaybeLocalhostLightClient.LocalhostClientState.ChainID,
 				}
 			}
-			if err := ibcClientsView.Insert(client); err != nil {
+			if err = ibcClientsView.Insert(client); err != nil {
 				return fmt.Errorf("error inserting client: %w", err)
 			}
 
 		} else if msgIBCConnectionOpenInit, ok := event.(*event_usecase.MsgIBCConnectionOpenInit); ok {
 
 			clientID := msgIBCConnectionOpenInit.Params.ClientID
-			counterpartyChainID, err := ibcClientsView.FindCounterpartyChainIDBy(clientID)
+
+			var counterpartyChainID string
+			counterpartyChainID, err = ibcClientsView.FindCounterpartyChainIDBy(clientID)
 			if err != nil {
 				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
 			}
@@ -193,7 +195,9 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 		} else if msgIBCConnectionOpenTry, ok := event.(*event_usecase.MsgIBCConnectionOpenTry); ok {
 
 			clientID := msgIBCConnectionOpenTry.Params.ClientID
-			counterpartyChainID, err := ibcClientsView.FindCounterpartyChainIDBy(clientID)
+
+			var counterpartyChainID string
+			counterpartyChainID, err = ibcClientsView.FindCounterpartyChainIDBy(clientID)
 			if err != nil {
 				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
 			}
