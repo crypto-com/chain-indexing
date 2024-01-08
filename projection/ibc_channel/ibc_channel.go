@@ -188,7 +188,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				CounterpartyClientID:     msgIBCConnectionOpenInit.Params.Counterparty.ClientID,
 				CounterpartyChainID:      counterpartyChainID,
 			}
-			if err := ibcConnectionsView.Insert(connection); err != nil {
+			if err = ibcConnectionsView.Insert(connection); err != nil {
 				return fmt.Errorf("error inserting connection: %w", err)
 			}
 
@@ -209,14 +209,16 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				CounterpartyClientID:     msgIBCConnectionOpenTry.Params.Counterparty.ClientID,
 				CounterpartyChainID:      counterpartyChainID,
 			}
-			if err := ibcConnectionsView.Insert(connection); err != nil {
+			if err = ibcConnectionsView.Insert(connection); err != nil {
 				return fmt.Errorf("error inserting connection: %w", err)
 			}
 
 		} else if msgIBCConnectionOpenConfirm, ok := event.(*event_usecase.MsgIBCConnectionOpenConfirm); ok {
 
 			clientID := msgIBCConnectionOpenConfirm.Params.ClientID
-			counterpartyChainID, err := ibcClientsView.FindCounterpartyChainIDBy(clientID)
+
+			var counterpartyChainID string
+			counterpartyChainID, err = ibcClientsView.FindCounterpartyChainIDBy(clientID)
 			if err != nil {
 				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
 			}
@@ -228,14 +230,16 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				CounterpartyClientID:     msgIBCConnectionOpenConfirm.Params.CounterpartyClientID,
 				CounterpartyChainID:      counterpartyChainID,
 			}
-			if err := ibcConnectionsView.Update(connection); err != nil {
+			if err = ibcConnectionsView.Update(connection); err != nil {
 				return fmt.Errorf("error updating connection: %w", err)
 			}
 
 		} else if msgIBCConnectionOpenAck, ok := event.(*event_usecase.MsgIBCConnectionOpenAck); ok {
 
 			clientID := msgIBCConnectionOpenAck.Params.ClientID
-			counterpartyChainID, err := ibcClientsView.FindCounterpartyChainIDBy(clientID)
+
+			var counterpartyChainID string
+			counterpartyChainID, err = ibcClientsView.FindCounterpartyChainIDBy(clientID)
 			if err != nil {
 				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
 			}
@@ -247,14 +251,16 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				CounterpartyClientID:     msgIBCConnectionOpenAck.Params.CounterpartyClientID,
 				CounterpartyChainID:      counterpartyChainID,
 			}
-			if err := ibcConnectionsView.Update(connection); err != nil {
+			if err = ibcConnectionsView.Update(connection); err != nil {
 				return fmt.Errorf("error updating connection: %w", err)
 			}
 
 		} else if msgIBCChannelOpenInit, ok := event.(*event_usecase.MsgIBCChannelOpenInit); ok {
 
 			connectionID := msgIBCChannelOpenInit.Params.ConnectionID
-			counterpartyChainID, err := ibcConnectionsView.FindCounterpartyChainIDBy(connectionID)
+
+			var counterpartyChainID string
+			counterpartyChainID, err = ibcConnectionsView.FindCounterpartyChainIDBy(connectionID)
 			if err != nil {
 				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
 			}
@@ -282,14 +288,16 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				LastActivityBlockHeight:   0,
 				BondedTokens:              *ibc_channel_view.NewEmptyBondedTokens(),
 			}
-			if err := ibcChannelsView.Insert(channel); err != nil {
+			if err = ibcChannelsView.Insert(channel); err != nil {
 				return fmt.Errorf("error inserting channel: %w", err)
 			}
 
 		} else if msgRegisterAccount, ok := event.(*event_usecase.MsgRegisterAccount); ok {
 
 			connectionID := msgRegisterAccount.Params.ConnectionID
-			counterpartyChainID, err := ibcConnectionsView.FindCounterpartyChainIDBy(connectionID)
+
+			var counterpartyChainID string
+			counterpartyChainID, err = ibcConnectionsView.FindCounterpartyChainIDBy(connectionID)
 			if err != nil {
 				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
 			}
@@ -318,14 +326,16 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				BondedTokens:              *ibc_channel_view.NewEmptyBondedTokens(),
 			}
 
-			if err := ibcChannelsView.Insert(channel); err != nil {
+			if err = ibcChannelsView.Insert(channel); err != nil {
 				return fmt.Errorf("error inserting channel: %w", err)
 			}
 
 		} else if msgRegisterAccount, ok := event.(*event_usecase.ChainmainMsgRegisterAccount); ok {
 
 			connectionID := msgRegisterAccount.Params.ConnectionID
-			counterpartyChainID, err := ibcConnectionsView.FindCounterpartyChainIDBy(connectionID)
+
+			var counterpartyChainID string
+			counterpartyChainID, err = ibcConnectionsView.FindCounterpartyChainIDBy(connectionID)
 			if err != nil {
 				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
 			}
@@ -354,7 +364,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				BondedTokens:              *ibc_channel_view.NewEmptyBondedTokens(),
 			}
 
-			if err := ibcChannelsView.Insert(channel); err != nil {
+			if err = ibcChannelsView.Insert(channel); err != nil {
 				return fmt.Errorf("error inserting channel: %w", err)
 			}
 
@@ -363,10 +373,10 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 			channelID := msgSubmitTx.Params.SourceChannel
 
 			// TotalRelayOutSuccessRate
-			if err := ibcChannelsView.Increment(channelID, "total_relay_out_count", 1); err != nil {
+			if err = ibcChannelsView.Increment(channelID, "total_relay_out_count", 1); err != nil {
 				return fmt.Errorf("error increasing total_relay_out_count: %w", err)
 			}
-			if err := ibcChannelsView.UpdateTotalRelayOutSuccessRate(channelID); err != nil {
+			if err = ibcChannelsView.UpdateTotalRelayOutSuccessRate(channelID); err != nil {
 				return fmt.Errorf("error updating total_relay_out_success_rate: %w", err)
 			}
 
@@ -377,11 +387,11 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error parsing last_out_packet_sequence: %w", err)
 			}
 
-			if err := ibcChannelsView.UpdateSequence(channelID, "last_out_packet_sequence", lastOutPacketSequence); err != nil {
+			if err = ibcChannelsView.UpdateSequence(channelID, "last_out_packet_sequence", lastOutPacketSequence); err != nil {
 				return fmt.Errorf("error updating last_out_packet_sequence: %w", err)
 			}
 
-			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
+			if err = ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 		} else if chainmainMsgSubmitTx, ok := event.(*event_usecase.ChainmainMsgSubmitTx); ok {
@@ -389,10 +399,10 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 			channelID := chainmainMsgSubmitTx.Params.SourceChannel
 
 			// TotalRelayOutSuccessRate
-			if err := ibcChannelsView.Increment(channelID, "total_relay_out_count", 1); err != nil {
+			if err = ibcChannelsView.Increment(channelID, "total_relay_out_count", 1); err != nil {
 				return fmt.Errorf("error increasing total_relay_out_count: %w", err)
 			}
-			if err := ibcChannelsView.UpdateTotalRelayOutSuccessRate(channelID); err != nil {
+			if err = ibcChannelsView.UpdateTotalRelayOutSuccessRate(channelID); err != nil {
 				return fmt.Errorf("error updating total_relay_out_success_rate: %w", err)
 			}
 
@@ -403,17 +413,19 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				return fmt.Errorf("error parsing last_out_packet_sequence: %w", err)
 			}
 
-			if err := ibcChannelsView.UpdateSequence(channelID, "last_out_packet_sequence", lastOutPacketSequence); err != nil {
+			if err = ibcChannelsView.UpdateSequence(channelID, "last_out_packet_sequence", lastOutPacketSequence); err != nil {
 				return fmt.Errorf("error updating last_out_packet_sequence: %w", err)
 			}
 
-			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
+			if err = ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 		} else if msgIBCChannelOpenTry, ok := event.(*event_usecase.MsgIBCChannelOpenTry); ok {
 
 			connectionID := msgIBCChannelOpenTry.Params.ConnectionID
-			counterpartyChainID, err := ibcConnectionsView.FindCounterpartyChainIDBy(connectionID)
+
+			var counterpartyChainID string
+			counterpartyChainID, err = ibcConnectionsView.FindCounterpartyChainIDBy(connectionID)
 			if err != nil {
 				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
 			}
@@ -441,14 +453,16 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				LastActivityBlockHeight:   0,
 				BondedTokens:              *ibc_channel_view.NewEmptyBondedTokens(),
 			}
-			if err := ibcChannelsView.Insert(channel); err != nil {
+			if err = ibcChannelsView.Insert(channel); err != nil {
 				return fmt.Errorf("error inserting channel: %w", err)
 			}
 
 		} else if msgIBCChannelOpenAck, ok := event.(*event_usecase.MsgIBCChannelOpenAck); ok {
 
 			connectionID := msgIBCChannelOpenAck.Params.ConnectionID
-			counterpartyChainID, err := ibcConnectionsView.FindCounterpartyChainIDBy(connectionID)
+
+			var counterpartyChainID string
+			counterpartyChainID, err = ibcConnectionsView.FindCounterpartyChainIDBy(connectionID)
 			if err != nil {
 				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
 			}
@@ -463,18 +477,20 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				CreatedAtBlockTime:    blockTime,
 				CreatedAtBlockHeight:  height,
 			}
-			if err := ibcChannelsView.UpdateFactualColumns(channel); err != nil {
+			if err = ibcChannelsView.UpdateFactualColumns(channel); err != nil {
 				return fmt.Errorf("error updating channel: %w", err)
 			}
 
-			if err := ibcChannelsView.UpdateStatus(channel.ChannelID, types.STATUS_OPENED); err != nil {
+			if err = ibcChannelsView.UpdateStatus(channel.ChannelID, types.STATUS_OPENED); err != nil {
 				return fmt.Errorf("error updating channel established: %w", err)
 			}
 
 		} else if msgIBCChannelOpenConfirm, ok := event.(*event_usecase.MsgIBCChannelOpenConfirm); ok {
 
 			connectionID := msgIBCChannelOpenConfirm.Params.ConnectionID
-			counterpartyChainID, err := ibcConnectionsView.FindCounterpartyChainIDBy(connectionID)
+
+			var counterpartyChainID string
+			counterpartyChainID, err = ibcConnectionsView.FindCounterpartyChainIDBy(connectionID)
 			if err != nil {
 				return fmt.Errorf("error in finding counterparty_chain_id: %w", err)
 			}
@@ -489,11 +505,11 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				CreatedAtBlockTime:    blockTime,
 				CreatedAtBlockHeight:  height,
 			}
-			if err := ibcChannelsView.UpdateFactualColumns(channel); err != nil {
+			if err = ibcChannelsView.UpdateFactualColumns(channel); err != nil {
 				return fmt.Errorf("error updating channel: %w", err)
 			}
 
-			if err := ibcChannelsView.UpdateStatus(channel.ChannelID, types.STATUS_OPENED); err != nil {
+			if err = ibcChannelsView.UpdateStatus(channel.ChannelID, types.STATUS_OPENED); err != nil {
 				return fmt.Errorf("error updating channel established: %w", err)
 			}
 
@@ -503,19 +519,19 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 			channelID := msgIBCTransferTransfer.Params.SourceChannel
 
 			// TotalRelayOutSuccessRate
-			if err := ibcChannelsView.Increment(channelID, "total_relay_out_count", 1); err != nil {
+			if err = ibcChannelsView.Increment(channelID, "total_relay_out_count", 1); err != nil {
 				return fmt.Errorf("error increasing total_relay_out_count: %w", err)
 			}
-			if err := ibcChannelsView.UpdateTotalRelayOutSuccessRate(channelID); err != nil {
+			if err = ibcChannelsView.UpdateTotalRelayOutSuccessRate(channelID); err != nil {
 				return fmt.Errorf("error updating total_relay_out_success_rate: %w", err)
 			}
 
 			lastOutPacketSequence := msgIBCTransferTransfer.Params.PacketSequence
-			if err := ibcChannelsView.UpdateSequence(channelID, "last_out_packet_sequence", lastOutPacketSequence); err != nil {
+			if err = ibcChannelsView.UpdateSequence(channelID, "last_out_packet_sequence", lastOutPacketSequence); err != nil {
 				return fmt.Errorf("error updating last_out_packet_sequence: %w", err)
 			}
 
-			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
+			if err = ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
@@ -530,7 +546,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 			sourceChannelID := msgIBCTransferTransfer.Params.SourceChannel
 			sourcePortID := msgIBCTransferTransfer.Params.SourcePort
 
-			if err := projection.updateBondedTokensWhenMsgIBCTransfer(
+			if err = projection.updateBondedTokensWhenMsgIBCTransfer(
 				ibcChannelsView,
 				channelID,
 				amount,
@@ -545,18 +561,20 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 			if projection.config.EnableTxMsgTrace {
 
-				msg, err := msgIBCTransferTransfer.ToJSON()
+				var msg string
+				msg, err = msgIBCTransferTransfer.ToJSON()
 				if err != nil {
 					return fmt.Errorf("error msgIBCTransferTransfer.ToJSON(): %w", err)
 				}
 
+				var updatedBondedTokensJSON string
 				// Here the bonded_tokens has already been updated by the above updateBondedTokensWhenXXXX()
-				updatedBondedTokensJSON, err := getBondedTokensInJSON(ibcChannelsView, channelID)
+				updatedBondedTokensJSON, err = getBondedTokensInJSON(ibcChannelsView, channelID)
 				if err != nil {
 					return fmt.Errorf("error getBondedTokensInJSON: %v", err)
 				}
 
-				if err := ibcChannelTracesView.Insert(&ibc_channel_view.IBCChannelTraceRow{
+				if err = ibcChannelTracesView.Insert(&ibc_channel_view.IBCChannelTraceRow{
 					ChannelID:           channelID,
 					BlockHeight:         height,
 					SourceChannel:       msgIBCTransferTransfer.Params.SourceChannel,
@@ -579,16 +597,16 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 			// Transfer started by destination chain
 			channelID := msgIBCRecvPacket.Params.Packet.DestinationChannel
 
-			if err := ibcChannelsView.Increment(channelID, "total_relay_in_count", 1); err != nil {
+			if err = ibcChannelsView.Increment(channelID, "total_relay_in_count", 1); err != nil {
 				return fmt.Errorf("error increasing total_relay_in_count: %w", err)
 			}
 
 			lastInPacketSequence := msgIBCRecvPacket.Params.PacketSequence
-			if err := ibcChannelsView.UpdateSequence(channelID, "last_in_packet_sequence", lastInPacketSequence); err != nil {
+			if err = ibcChannelsView.UpdateSequence(channelID, "last_in_packet_sequence", lastInPacketSequence); err != nil {
 				return fmt.Errorf("error updating last_in_packet_sequence: %w", err)
 			}
 
-			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
+			if err = ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
@@ -606,7 +624,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				sourceChannelID := msgIBCRecvPacket.Params.Packet.SourceChannel
 				sourcePortID := msgIBCRecvPacket.Params.Packet.SourcePort
 
-				if err := projection.updateBondedTokensWhenMsgIBCRecvPacket(
+				if err = projection.updateBondedTokensWhenMsgIBCRecvPacket(
 					ibcChannelsView,
 					ibcDenomHashMappingView,
 					channelID,
@@ -625,7 +643,8 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 			if projection.config.EnableTxMsgTrace &&
 				msgIBCRecvPacket.Params.MaybeFungibleTokenPacketData != nil {
 
-				msg, err := msgIBCRecvPacket.ToJSON()
+				var msg string
+				msg, err = msgIBCRecvPacket.ToJSON()
 				if err != nil {
 					return fmt.Errorf("error msgIBCRecvPacket.ToJSON(): %w", err)
 				}
@@ -636,13 +655,14 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 					maybeError = *msgIBCRecvPacket.Params.PacketAck.MaybeError
 				}
 
+				var updatedBondedTokensJSON string
 				// Here the bonded_tokens has already been updated by the above updateBondedTokensWhenXXXX()
-				updatedBondedTokensJSON, err := getBondedTokensInJSON(ibcChannelsView, channelID)
+				updatedBondedTokensJSON, err = getBondedTokensInJSON(ibcChannelsView, channelID)
 				if err != nil {
 					return fmt.Errorf("error getBondedTokensInJSON: %v", err)
 				}
 
-				if err := ibcChannelTracesView.Insert(&ibc_channel_view.IBCChannelTraceRow{
+				if err = ibcChannelTracesView.Insert(&ibc_channel_view.IBCChannelTraceRow{
 					ChannelID:           channelID,
 					BlockHeight:         height,
 					SourceChannel:       msgIBCRecvPacket.Params.Packet.SourceChannel,
@@ -665,15 +685,15 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 			// Transfer started by source chain
 			channelID := msgIBCAcknowledgement.Params.Packet.SourceChannel
 
-			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
+			if err = ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
 			// TotalRelayOutSuccessRate
-			if err := ibcChannelsView.Increment(channelID, "total_relay_out_success_count", 1); err != nil {
+			if err = ibcChannelsView.Increment(channelID, "total_relay_out_success_count", 1); err != nil {
 				return fmt.Errorf("error increasing total_relay_out_success_count: %w", err)
 			}
-			if err := ibcChannelsView.UpdateTotalRelayOutSuccessRate(channelID); err != nil {
+			if err = ibcChannelsView.UpdateTotalRelayOutSuccessRate(channelID); err != nil {
 				return fmt.Errorf("error updating total_relay_out_success_rate: %w", err)
 			}
 
@@ -691,7 +711,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 					sourceChannelID := msgIBCAcknowledgement.Params.Packet.SourceChannel
 					sourcePortID := msgIBCAcknowledgement.Params.Packet.SourcePort
 
-					if err := revertUpdateBondedTokensWhenMsgIBCTransfer(
+					if err = revertUpdateBondedTokensWhenMsgIBCTransfer(
 						ibcChannelsView,
 						channelID,
 						amount,
@@ -710,7 +730,8 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 			if projection.config.EnableTxMsgTrace && msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData != nil {
 
-				msg, err := msgIBCAcknowledgement.ToJSON()
+				var msg string
+				msg, err = msgIBCAcknowledgement.ToJSON()
 				if err != nil {
 					return fmt.Errorf("error msgIBCAcknowledgement.ToJSON(): %w", err)
 				}
@@ -721,13 +742,14 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 					maybeError = *msgIBCAcknowledgement.Params.MaybeFungibleTokenPacketData.MaybeError
 				}
 
+				var updatedBondedTokensJSON string
 				// Here the bonded_tokens has already been updated by the above updateBondedTokensWhenXXXX()
-				updatedBondedTokensJSON, err := getBondedTokensInJSON(ibcChannelsView, channelID)
+				updatedBondedTokensJSON, err = getBondedTokensInJSON(ibcChannelsView, channelID)
 				if err != nil {
 					return fmt.Errorf("error getBondedTokensInJSON: %v", err)
 				}
 
-				if err := ibcChannelTracesView.Insert(&ibc_channel_view.IBCChannelTraceRow{
+				if err = ibcChannelTracesView.Insert(&ibc_channel_view.IBCChannelTraceRow{
 					ChannelID:           channelID,
 					BlockHeight:         height,
 					SourceChannel:       msgIBCAcknowledgement.Params.Packet.SourceChannel,
@@ -750,15 +772,15 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 			// Transfer started by source chain
 			channelID := msgIBCTimeout.Params.Packet.SourceChannel
 
-			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
+			if err = ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
 			// TotalRelayOutSuccessRate
-			if err := ibcChannelsView.Increment(channelID, "total_relay_out_success_count", 1); err != nil {
+			if err = ibcChannelsView.Increment(channelID, "total_relay_out_success_count", 1); err != nil {
 				return fmt.Errorf("error increasing total_relay_out_success_count: %w", err)
 			}
-			if err := ibcChannelsView.UpdateTotalRelayOutSuccessRate(channelID); err != nil {
+			if err = ibcChannelsView.UpdateTotalRelayOutSuccessRate(channelID); err != nil {
 				return fmt.Errorf("error updating total_relay_out_success_rate: %w", err)
 			}
 
@@ -775,7 +797,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				sourceChannelID := msgIBCTimeout.Params.Packet.SourceChannel
 				sourcePortID := msgIBCTimeout.Params.Packet.SourcePort
 
-				if err := revertUpdateBondedTokensWhenMsgIBCTransfer(
+				if err = revertUpdateBondedTokensWhenMsgIBCTransfer(
 					ibcChannelsView,
 					channelID,
 					amount,
@@ -793,18 +815,21 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 			if projection.config.EnableTxMsgTrace && msgIBCTimeout.Params.MaybeMsgTransfer != nil {
 
 				amount := msgIBCTimeout.Params.MaybeMsgTransfer.RefundAmount.String()
-				msg, err := msgIBCTimeout.ToJSON()
+
+				var msg string
+				msg, err = msgIBCTimeout.ToJSON()
 				if err != nil {
 					return fmt.Errorf("error msgIBCTimeout.ToJSON(): %w", err)
 				}
 
+				var updatedBondedTokensJSON string
 				// Here the bonded_tokens has already been updated by the above updateBondedTokensWhenXXXX()
-				updatedBondedTokensJSON, err := getBondedTokensInJSON(ibcChannelsView, channelID)
+				updatedBondedTokensJSON, err = getBondedTokensInJSON(ibcChannelsView, channelID)
 				if err != nil {
 					return fmt.Errorf("error getBondedTokensInJSON: %v", err)
 				}
 
-				if err := ibcChannelTracesView.Insert(&ibc_channel_view.IBCChannelTraceRow{
+				if err = ibcChannelTracesView.Insert(&ibc_channel_view.IBCChannelTraceRow{
 					ChannelID:           channelID,
 					BlockHeight:         height,
 					SourceChannel:       msgIBCTimeout.Params.Packet.SourceChannel,
@@ -827,15 +852,15 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 			// Transfer started by source chain
 			channelID := msgIBCTimeoutOnClose.Params.Packet.SourceChannel
 
-			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
+			if err = ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
 			// TotalRelayOutSuccessRate
-			if err := ibcChannelsView.Increment(channelID, "total_relay_out_success_count", 1); err != nil {
+			if err = ibcChannelsView.Increment(channelID, "total_relay_out_success_count", 1); err != nil {
 				return fmt.Errorf("error increasing total_relay_out_success_count: %w", err)
 			}
-			if err := ibcChannelsView.UpdateTotalRelayOutSuccessRate(channelID); err != nil {
+			if err = ibcChannelsView.UpdateTotalRelayOutSuccessRate(channelID); err != nil {
 				return fmt.Errorf("error updating total_relay_out_success_rate: %w", err)
 			}
 
@@ -852,7 +877,7 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 				sourceChannelID := msgIBCTimeoutOnClose.Params.Packet.SourceChannel
 				sourcePortID := msgIBCTimeoutOnClose.Params.Packet.SourcePort
 
-				if err := revertUpdateBondedTokensWhenMsgIBCTransfer(
+				if err = revertUpdateBondedTokensWhenMsgIBCTransfer(
 					ibcChannelsView,
 					channelID,
 					amount.String(),
@@ -870,18 +895,21 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 			if projection.config.EnableTxMsgTrace && msgIBCTimeoutOnClose.Params.MaybeMsgTransfer != nil {
 
 				amount := msgIBCTimeoutOnClose.Params.MaybeMsgTransfer.RefundAmount.String()
-				msg, err := msgIBCTimeoutOnClose.ToJSON()
+
+				var msg string
+				msg, err = msgIBCTimeoutOnClose.ToJSON()
 				if err != nil {
 					return fmt.Errorf("error msgIBCTimeoutOnClose.ToJSON(): %w", err)
 				}
 
+				var updatedBondedTokensJSON string
 				// Here the bonded_tokens has already been updated by the above updateBondedTokensWhenXXXX()
-				updatedBondedTokensJSON, err := getBondedTokensInJSON(ibcChannelsView, channelID)
+				updatedBondedTokensJSON, err = getBondedTokensInJSON(ibcChannelsView, channelID)
 				if err != nil {
 					return fmt.Errorf("error getBondedTokensInJSON: %v", err)
 				}
 
-				if err := ibcChannelTracesView.Insert(&ibc_channel_view.IBCChannelTraceRow{
+				if err = ibcChannelTracesView.Insert(&ibc_channel_view.IBCChannelTraceRow{
 					ChannelID:           channelID,
 					BlockHeight:         height,
 					SourceChannel:       msgIBCTimeoutOnClose.Params.Packet.SourceChannel,
@@ -903,11 +931,11 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 			channelID := msgIBCChannelCloseInit.Params.ChannelID
 
-			if err := ibcChannelsView.UpdateStatus(channelID, types.STATUS_CLOSED); err != nil {
+			if err = ibcChannelsView.UpdateStatus(channelID, types.STATUS_CLOSED); err != nil {
 				return fmt.Errorf("error updating channel closed: %w", err)
 			}
 
-			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
+			if err = ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
@@ -915,22 +943,22 @@ func (projection *IBCChannel) HandleEvents(height int64, events []event_entity.E
 
 			channelID := msgIBCChannelCloseConfirm.Params.ChannelID
 
-			if err := ibcChannelsView.UpdateStatus(channelID, types.STATUS_CLOSED); err != nil {
+			if err = ibcChannelsView.UpdateStatus(channelID, types.STATUS_CLOSED); err != nil {
 				return fmt.Errorf("error updating channel closed: %w", err)
 			}
 
-			if err := ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
+			if err = ibcChannelsView.UpdateLastActivityTimeAndHeight(channelID, blockTime, height); err != nil {
 				return fmt.Errorf("error updating channel last_activity_time: %w", err)
 			}
 
 		}
 	}
 
-	if err := UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
+	if err = UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
 		return fmt.Errorf("error updating last handled event height: %v", err)
 	}
 
-	if err := rdbTx.Commit(); err != nil {
+	if err = rdbTx.Commit(); err != nil {
 		return fmt.Errorf("error committing changes: %v", err)
 	}
 	committed = true
