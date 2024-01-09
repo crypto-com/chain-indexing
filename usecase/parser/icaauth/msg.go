@@ -131,7 +131,7 @@ func ParseChainmainMsgRegisterAccount(
 
 	err = json.Unmarshal(msg, &msgRegisterAccount)
 	if err != nil {
-		panic(fmt.Errorf("error json unmarshlling MsgRegisterAccount: %v", err))
+		panic(fmt.Errorf("error json unmarshalling MsgRegisterAccount: %v", err))
 	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
@@ -292,7 +292,7 @@ func ParseMsgRegisterAccount(
 
 	err = json.Unmarshal(msg, &msgRegisterAccount)
 	if err != nil {
-		panic(fmt.Errorf("error json unmarshlling MsgRegisterAccount: %v", err))
+		panic(fmt.Errorf("error json unmarshalling MsgRegisterAccount: %v", err))
 	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
