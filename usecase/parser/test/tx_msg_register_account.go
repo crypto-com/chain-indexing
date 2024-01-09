@@ -591,7 +591,7 @@ const TX_MSG_REGISTER_ACCOUNT_TXS_RESP = `{
         {
           "@type": "/icaauth.v1.MsgRegisterAccount",
           "owner": "tcro1np7ztcfeycqwhj0nr8hxfu0lfjz27telqx53ra",
-          "connectionId": "connection-18",
+          "connection_id": "connection-18",
           "version": ""
         }
       ],
