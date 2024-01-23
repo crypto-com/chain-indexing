@@ -63,21 +63,22 @@ func (handler *Proposals) FindById(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	tally := cosmosapp.Tally{
-		Yes:        "0",
-		Abstain:    "0",
-		No:         "0",
-		NoWithVeto: "0",
-	}
+	tally := cosmosapp.Tally{}
 
 	var queryTallyErr error
-	if proposal.Status == proposal_view.PROPOSAL_STATUS_VOTING_PERIOD {
+	if proposal.Status != proposal_view.PROPOSAL_STATUS_VOTING_PERIOD {
 		tally, queryTallyErr = handler.cosmosClient.ProposalTally(idParam)
 		if queryTallyErr != nil {
 			if !errors.Is(queryTallyErr, cosmosapp.ErrProposalNotFound) {
 				handler.logger.Errorf("error retrieving proposal tally: %v", queryTallyErr)
 				httpapi.InternalServerError(ctx)
 				return
+			}
+			tally = cosmosapp.Tally{
+				Yes:        "0",
+				Abstain:    "0",
+				No:         "0",
+				NoWithVeto: "0",
 			}
 		}
 	}
@@ -117,21 +118,32 @@ func (handler *Proposals) FindById(ctx *fasthttp.RequestCtx) {
 	}
 	requiredVotingPower := new(big.Float).Mul(totalBonded, quorum)
 
+	var votedPowerResult *ProposalVotedPowerResult
 	totalVotedPower := big.NewInt(0)
-	for _, votedPowerStr := range []string{
-		tally.Yes,
-		tally.No,
-		tally.NoWithVeto,
-		tally.Abstain,
-	} {
-		votedPower, parseVotedPowerOk := new(big.Int).SetString(votedPowerStr, 10)
-		if !parseVotedPowerOk {
-			handler.logger.Error("error parsing voted power")
-			httpapi.InternalServerError(ctx)
-			return
+
+	if proposal.Status != proposal_view.PROPOSAL_STATUS_VOTING_PERIOD {
+		for _, votedPowerStr := range []string{
+			tally.Yes,
+			tally.No,
+			tally.NoWithVeto,
+			tally.Abstain,
+		} {
+			votedPower, parseVotedPowerOk := new(big.Int).SetString(votedPowerStr, 10)
+			if !parseVotedPowerOk {
+				handler.logger.Error("error parsing voted power")
+				httpapi.InternalServerError(ctx)
+				return
+			}
+
+			totalVotedPower = new(big.Int).Add(totalVotedPower, votedPower)
 		}
 
-		totalVotedPower = new(big.Int).Add(totalVotedPower, votedPower)
+		votedPowerResult = &ProposalVotedPowerResult{
+			Yes:        tally.Yes,
+			Abstain:    tally.Abstain,
+			No:         tally.No,
+			NoWithVeto: tally.NoWithVeto,
+		}
 	}
 
 	proposalDetails := ProposalDetails{
@@ -139,12 +151,7 @@ func (handler *Proposals) FindById(ctx *fasthttp.RequestCtx) {
 
 		requiredVotingPower.Text('f', 0),
 		totalVotedPower.Text(10),
-		ProposalVotedPowerResult{
-			Yes:        tally.Yes,
-			Abstain:    tally.Abstain,
-			No:         tally.No,
-			NoWithVeto: tally.NoWithVeto,
-		},
+		votedPowerResult,
 	}
 
 	httpapi.Success(ctx, proposalDetails)
@@ -275,9 +282,9 @@ func (handler *Proposals) ListDepositorsById(ctx *fasthttp.RequestCtx) {
 type ProposalDetails struct {
 	*proposal_view.ProposalWithMonikerRow
 
-	RequiredVotingPower string                   `json:"requiredVotingPower"`
-	TotalVotedPower     string                   `json:"totalVotedPower"`
-	VotedPowerResult    ProposalVotedPowerResult `json:"votedPowerResult"`
+	RequiredVotingPower string                    `json:"requiredVotingPower"`
+	TotalVotedPower     string                    `json:"totalVotedPower"`
+	VotedPowerResult    *ProposalVotedPowerResult `json:"votedPowerResult"`
 }
 
 type ProposalVotedPowerResult struct {
