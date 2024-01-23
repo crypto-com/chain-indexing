@@ -284,20 +284,20 @@ func ParseMsgRegisterAccount(
 		panic(fmt.Errorf("error decoding RawMsgRegisterAccount: %v", err))
 	}
 
-	normalizedMsgRegisterAccount, err := json.MarshalIndent(icaauth_model.RawChainmainMsgRegisterAccount(rawMsg), "", "  ")
+	rawMsgRegisterAccount, err := json.MarshalIndent(icaauth_model.RawChainmainMsgRegisterAccount(rawMsg), "", "  ")
 	if err != nil {
-		panic(fmt.Errorf("error json marshalling RawMsgRegisterAccount: %v", err))
+		panic(fmt.Errorf("error json marshalling RawChainmainMsgRegisterAccount: %v", err))
 	}
 
-	var normalizedRawMsg icaauth_model.RawChainmainMsgRegisterAccount
-	err = json.Unmarshal(normalizedMsgRegisterAccount, &normalizedRawMsg)
+	var rawChainmainMsgRegisterAccount icaauth_model.RawChainmainMsgRegisterAccount
+	err = json.Unmarshal(rawMsgRegisterAccount, &rawChainmainMsgRegisterAccount)
 	if err != nil {
-		panic(fmt.Errorf("error json unmarshalling MsgRegisterAccount: %v", err))
+		panic(fmt.Errorf("error json unmarshalling RawChainmainMsgRegisterAccount: %v", err))
 	}
 
 	var msgRegisterAccount icaauth_model.MsgRegisterAccount
 	var msg []byte
-	msg, err = json.Marshal(normalizedRawMsg)
+	msg, err = json.Marshal(rawChainmainMsgRegisterAccount)
 	if err != nil {
 		panic(fmt.Errorf("error json marshalling RawMsgRegisterAccount: %v", err))
 	}
