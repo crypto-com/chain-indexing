@@ -30,7 +30,7 @@ var _ = Describe("Event", func() {
 			anyCounterpartyChannelID := "anyCounterpartyChannelID"
 
 			var anyRawValue map[string]interface{}
-			var anyRawMsgRegisterAccount icaauth_model.ChainmainMsgRegisterAccount
+			var anyRawMsgRegisterAccount icaauth_model.MsgRegisterAccount
 			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 				WeaklyTypedInput: true,
 				DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -51,8 +51,8 @@ var _ = Describe("Event", func() {
 `, &anyRawValue)
 			must.Do(decoder.Decode(anyRawValue))
 
-			anyParams := icaauth_model.ChainmainMsgRegisterAccountParams{
-				ChainmainMsgRegisterAccount: anyRawMsgRegisterAccount,
+			anyParams := icaauth_model.MsgRegisterAccountParams{
+				MsgRegisterAccount: anyRawMsgRegisterAccount,
 
 				PortID:                anyPortID,
 				ChannelID:             anyChannelId,
@@ -100,7 +100,7 @@ var _ = Describe("Event", func() {
 			anyCounterpartyChannelID := "anyCounterpartyChannelID"
 
 			var anyRawValue map[string]interface{}
-			var anyRawMsgRegisterAccount icaauth_model.ChainmainMsgRegisterAccount
+			var anyRawMsgRegisterAccount icaauth_model.MsgRegisterAccount
 			decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 				WeaklyTypedInput: true,
 				DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -121,8 +121,8 @@ var _ = Describe("Event", func() {
 `, &anyRawValue)
 			must.Do(decoder.Decode(anyRawValue))
 
-			anyParams := icaauth_model.ChainmainMsgRegisterAccountParams{
-				ChainmainMsgRegisterAccount: anyRawMsgRegisterAccount,
+			anyParams := icaauth_model.MsgRegisterAccountParams{
+				MsgRegisterAccount: anyRawMsgRegisterAccount,
 
 				PortID:                anyPortID,
 				ChannelID:             anyChannelId,

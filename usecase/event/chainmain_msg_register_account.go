@@ -17,12 +17,12 @@ const CHAINMAIN_MSG_REGISTER_ACCOUNT_FAILED = "/chainmain.icaauth.v1.MsgRegister
 type ChainmainMsgRegisterAccount struct {
 	MsgBase
 
-	Params icaauthmodel.ChainmainMsgRegisterAccountParams `json:"params"`
+	Params icaauthmodel.MsgRegisterAccountParams `json:"params"`
 }
 
 func NewChainmainMsgRegisterAccount(
 	msgCommonParams MsgCommonParams,
-	params icaauthmodel.ChainmainMsgRegisterAccountParams,
+	params icaauthmodel.MsgRegisterAccountParams,
 ) *ChainmainMsgRegisterAccount {
 	return &ChainmainMsgRegisterAccount{
 		NewMsgBase(MsgBaseParams{

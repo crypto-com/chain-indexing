@@ -120,13 +120,13 @@ func ParseChainmainMsgRegisterAccount(
 ) ([]command.Command, []string) {
 	var rawMsg icaauth_model.RawChainmainMsgRegisterAccount
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
-		panic(fmt.Errorf("error decoding RawMsgRegisterAccount: %v", err))
+		panic(fmt.Errorf("error decoding RawChainmainMsgRegisterAccount: %v", err))
 	}
 
-	var msgRegisterAccount icaauth_model.ChainmainMsgRegisterAccount
+	var msgRegisterAccount icaauth_model.MsgRegisterAccount
 	msg, err := json.Marshal(rawMsg)
 	if err != nil {
-		panic(fmt.Errorf("error json marshalling RawMsgRegisterAccount: %v", err))
+		panic(fmt.Errorf("error json marshalling RawChainmainMsgRegisterAccount: %v", err))
 	}
 
 	err = json.Unmarshal(msg, &msgRegisterAccount)
@@ -142,8 +142,8 @@ func ParseChainmainMsgRegisterAccount(
 		return []command.Command{command_usecase.NewCreateChainmainMsgRegisterAccount(
 			parserParams.MsgCommonParams,
 
-			icaauth_model.ChainmainMsgRegisterAccountParams{
-				ChainmainMsgRegisterAccount: msgRegisterAccount,
+			icaauth_model.MsgRegisterAccountParams{
+				MsgRegisterAccount: msgRegisterAccount,
 			},
 		)}, possibleSignerAddresses
 	}
@@ -154,8 +154,8 @@ func ParseChainmainMsgRegisterAccount(
 		panic("missing `channel_open_init` event in TxsResult log")
 	}
 
-	msgRegisterAccountParams := icaauth_model.ChainmainMsgRegisterAccountParams{
-		ChainmainMsgRegisterAccount: msgRegisterAccount,
+	msgRegisterAccountParams := icaauth_model.MsgRegisterAccountParams{
+		MsgRegisterAccount: msgRegisterAccount,
 
 		PortID:                event.MustGetAttributeByKey("port_id"),
 		ChannelID:             event.MustGetAttributeByKey("channel_id"),
@@ -284,8 +284,18 @@ func ParseMsgRegisterAccount(
 		panic(fmt.Errorf("error decoding RawMsgRegisterAccount: %v", err))
 	}
 
+	var normalizedRawMsg icaauth_model.RawChainmainMsgRegisterAccount
+	normalizedMsgRegisterAccount, _ := json.MarshalIndent(icaauth_model.RawChainmainMsgRegisterAccount(rawMsg), "", "  ")
+	err := json.Unmarshal(normalizedMsgRegisterAccount, &normalizedRawMsg)
+	if err != nil {
+		panic(fmt.Errorf("error json unmarshalling MsgRegisterAccount: %v", err))
+	}
+
+	fmt.Println(parserParams.Msg)
+	fmt.Println(normalizedRawMsg)
+
 	var msgRegisterAccount icaauth_model.MsgRegisterAccount
-	msg, err := json.Marshal(rawMsg)
+	msg, err := json.Marshal(normalizedRawMsg)
 	if err != nil {
 		panic(fmt.Errorf("error json marshalling RawMsgRegisterAccount: %v", err))
 	}
@@ -320,7 +330,11 @@ func ParseMsgRegisterAccount(
 
 		for _, event := range events {
 			param := icaauth_model.MsgRegisterAccountParams{
-				MsgRegisterAccount: msgRegisterAccount,
+				MsgRegisterAccount: icaauth_model.MsgRegisterAccount{
+					Owner:        msgRegisterAccount.Owner,
+					ConnectionID: event.MustGetAttributeByKey("connection_id"),
+					Version:      event.MustGetAttributeByKey("version"),
+				},
 
 				PortID:                event.MustGetAttributeByKey("port_id"),
 				ChannelID:             event.MustGetAttributeByKey("channel_id"),
