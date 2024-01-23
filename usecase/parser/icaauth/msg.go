@@ -299,7 +299,7 @@ func ParseMsgRegisterAccount(
 	var msg []byte
 	msg, err = json.Marshal(rawChainmainMsgRegisterAccount)
 	if err != nil {
-		panic(fmt.Errorf("error json marshalling RawMsgRegisterAccount: %v", err))
+		panic(fmt.Errorf("error json marshalling RawChainmainMsgRegisterAccount: %v", err))
 	}
 
 	err = json.Unmarshal(msg, &msgRegisterAccount)
