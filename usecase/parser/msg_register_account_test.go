@@ -28,7 +28,7 @@ var _ = Describe("ParseMsgCommands", func() {
   "msgIndex": 0,
   "params": {
 	"owner": "tcro1np7ztcfeycqwhj0nr8hxfu0lfjz27telqx53ra",
-    "connectionId": "",
+    "connectionId": "connection-18",
 	"version": "",
     "portId": "icacontroller-tcro1np7ztcfeycqwhj0nr8hxfu0lfjz27telqx53ra",
     "channelId": "channel-48",

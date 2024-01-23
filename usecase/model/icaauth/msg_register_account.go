@@ -15,8 +15,14 @@ type MsgRegisterAccount struct {
 	Version      string `mapstructure:"version" json:"version"`
 }
 
-type RawMsgRegisterAccount struct {
+type RawChainmainMsgRegisterAccount struct {
 	Owner        string `mapstructure:"owner" json:"owner"`
 	ConnectionID string `mapstructure:"connectionId" json:"connectionId"`
+	Version      string `mapstructure:"version" json:"version"`
+}
+
+type RawMsgRegisterAccount struct {
+	Owner        string `mapstructure:"owner" json:"owner"`
+	ConnectionID string `mapstructure:"connection_id" json:"connection_id"`
 	Version      string `mapstructure:"version" json:"version"`
 }

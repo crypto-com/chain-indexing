@@ -118,15 +118,15 @@ func ParseChainmainMsgSubmitTx(
 func ParseChainmainMsgRegisterAccount(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
-	var rawMsg icaauth_model.RawMsgRegisterAccount
+	var rawMsg icaauth_model.RawChainmainMsgRegisterAccount
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
-		panic(fmt.Errorf("error decoding RawMsgRegisterAccount: %v", err))
+		panic(fmt.Errorf("error decoding RawChainmainMsgRegisterAccount: %v", err))
 	}
 
 	var msgRegisterAccount icaauth_model.MsgRegisterAccount
 	msg, err := json.Marshal(rawMsg)
 	if err != nil {
-		panic(fmt.Errorf("error json marshalling RawMsgRegisterAccount: %v", err))
+		panic(fmt.Errorf("error json marshalling RawChainmainMsgRegisterAccount: %v", err))
 	}
 
 	err = json.Unmarshal(msg, &msgRegisterAccount)
@@ -284,10 +284,22 @@ func ParseMsgRegisterAccount(
 		panic(fmt.Errorf("error decoding RawMsgRegisterAccount: %v", err))
 	}
 
-	var msgRegisterAccount icaauth_model.MsgRegisterAccount
-	msg, err := json.Marshal(rawMsg)
+	rawMsgRegisterAccount, err := json.MarshalIndent(icaauth_model.RawChainmainMsgRegisterAccount(rawMsg), "", "  ")
 	if err != nil {
-		panic(fmt.Errorf("error json marshalling RawMsgRegisterAccount: %v", err))
+		panic(fmt.Errorf("error json marshalling RawChainmainMsgRegisterAccount: %v", err))
+	}
+
+	var rawChainmainMsgRegisterAccount icaauth_model.RawChainmainMsgRegisterAccount
+	err = json.Unmarshal(rawMsgRegisterAccount, &rawChainmainMsgRegisterAccount)
+	if err != nil {
+		panic(fmt.Errorf("error json unmarshalling RawChainmainMsgRegisterAccount: %v", err))
+	}
+
+	var msgRegisterAccount icaauth_model.MsgRegisterAccount
+	var msg []byte
+	msg, err = json.Marshal(rawChainmainMsgRegisterAccount)
+	if err != nil {
+		panic(fmt.Errorf("error json marshalling RawChainmainMsgRegisterAccount: %v", err))
 	}
 
 	err = json.Unmarshal(msg, &msgRegisterAccount)
