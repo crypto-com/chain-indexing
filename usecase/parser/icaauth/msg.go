@@ -118,12 +118,12 @@ func ParseChainmainMsgSubmitTx(
 func ParseChainmainMsgRegisterAccount(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
-	var rawMsg icaauth_model.RawMsgRegisterAccount
+	var rawMsg icaauth_model.RawChainmainMsgRegisterAccount
 	if err := mapstructure_utils.DefaultMapstructureDecoder.Decode(parserParams.Msg, &rawMsg); err != nil {
 		panic(fmt.Errorf("error decoding RawMsgRegisterAccount: %v", err))
 	}
 
-	var msgRegisterAccount icaauth_model.MsgRegisterAccount
+	var msgRegisterAccount icaauth_model.ChainmainMsgRegisterAccount
 	msg, err := json.Marshal(rawMsg)
 	if err != nil {
 		panic(fmt.Errorf("error json marshalling RawMsgRegisterAccount: %v", err))
@@ -142,8 +142,8 @@ func ParseChainmainMsgRegisterAccount(
 		return []command.Command{command_usecase.NewCreateChainmainMsgRegisterAccount(
 			parserParams.MsgCommonParams,
 
-			icaauth_model.MsgRegisterAccountParams{
-				MsgRegisterAccount: msgRegisterAccount,
+			icaauth_model.ChainmainMsgRegisterAccountParams{
+				ChainmainMsgRegisterAccount: msgRegisterAccount,
 			},
 		)}, possibleSignerAddresses
 	}
@@ -154,8 +154,8 @@ func ParseChainmainMsgRegisterAccount(
 		panic("missing `channel_open_init` event in TxsResult log")
 	}
 
-	msgRegisterAccountParams := icaauth_model.MsgRegisterAccountParams{
-		MsgRegisterAccount: msgRegisterAccount,
+	msgRegisterAccountParams := icaauth_model.ChainmainMsgRegisterAccountParams{
+		ChainmainMsgRegisterAccount: msgRegisterAccount,
 
 		PortID:                event.MustGetAttributeByKey("port_id"),
 		ChannelID:             event.MustGetAttributeByKey("channel_id"),
@@ -320,11 +320,7 @@ func ParseMsgRegisterAccount(
 
 		for _, event := range events {
 			param := icaauth_model.MsgRegisterAccountParams{
-				MsgRegisterAccount: icaauth_model.MsgRegisterAccount{
-					Owner:        msgRegisterAccount.Owner,
-					ConnectionID: event.MustGetAttributeByKey("connection_id"),
-					Version:      event.MustGetAttributeByKey("version"),
-				},
+				MsgRegisterAccount: msgRegisterAccount,
 
 				PortID:                event.MustGetAttributeByKey("port_id"),
 				ChannelID:             event.MustGetAttributeByKey("channel_id"),

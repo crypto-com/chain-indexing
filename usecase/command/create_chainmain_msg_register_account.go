@@ -8,12 +8,12 @@ import (
 
 type CreateChainmainMsgRegisterAccount struct {
 	msgCommonParams event.MsgCommonParams
-	params          icaauthmodel.MsgRegisterAccountParams
+	params          icaauthmodel.ChainmainMsgRegisterAccountParams
 }
 
 func NewCreateChainmainMsgRegisterAccount(
 	msgCommonParams event.MsgCommonParams,
-	params icaauthmodel.MsgRegisterAccountParams,
+	params icaauthmodel.ChainmainMsgRegisterAccountParams,
 ) *CreateChainmainMsgRegisterAccount {
 	return &CreateChainmainMsgRegisterAccount{
 		msgCommonParams,
