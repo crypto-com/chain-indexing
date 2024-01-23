@@ -63,18 +63,22 @@ func (handler *Proposals) FindById(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	tally, queryTallyErr := handler.cosmosClient.ProposalTally(idParam)
-	if queryTallyErr != nil {
-		if !errors.Is(queryTallyErr, cosmosapp.ErrProposalNotFound) {
-			handler.logger.Errorf("error retrieving proposal tally: %v", queryTallyErr)
-			httpapi.InternalServerError(ctx)
-			return
-		}
-		tally = cosmosapp.Tally{
-			Yes:        "0",
-			Abstain:    "0",
-			No:         "0",
-			NoWithVeto: "0",
+	tally := cosmosapp.Tally{
+		Yes:        "0",
+		Abstain:    "0",
+		No:         "0",
+		NoWithVeto: "0",
+	}
+
+	var queryTallyErr error
+	if proposal.Status == proposal_view.PROPOSAL_STATUS_VOTING_PERIOD {
+		tally, queryTallyErr = handler.cosmosClient.ProposalTally(idParam)
+		if queryTallyErr != nil {
+			if !errors.Is(queryTallyErr, cosmosapp.ErrProposalNotFound) {
+				handler.logger.Errorf("error retrieving proposal tally: %v", queryTallyErr)
+				httpapi.InternalServerError(ctx)
+				return
+			}
 		}
 	}
 
