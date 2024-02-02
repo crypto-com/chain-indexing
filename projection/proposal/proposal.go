@@ -6,6 +6,7 @@ import (
 	"math/big"
 	"time"
 
+	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbparambase"
 	rdbparambase_types "github.com/crypto-com/chain-indexing/appinterface/projection/rdbparambase/types"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
@@ -43,8 +44,9 @@ type Proposal struct {
 	paramBase     *rdbparambase.Base
 	validatorBase *rdbvalidatorbase.Base
 
-	rdbConn rdb.Conn
-	logger  applogger.Logger
+	rdbConn      rdb.Conn
+	logger       applogger.Logger
+	cosmosClient cosmosapp_interface.Client // cosmos light client deamon port : 1317 (default)
 
 	conNodeAddressPrefix string
 
@@ -54,6 +56,7 @@ type Proposal struct {
 func NewProposal(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
+	cosmosClient cosmosapp_interface.Client,
 	conNodeAddressPrefix string,
 	migrationHelper migrationhelper.MigrationHelper,
 ) *Proposal {
@@ -83,6 +86,7 @@ func NewProposal(
 
 		rdbConn,
 		logger,
+		cosmosClient,
 		conNodeAddressPrefix,
 
 		migrationHelper,
@@ -549,16 +553,35 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 				return fmt.Errorf("error finding proposal which voting period has started: %v", err)
 			}
 
-			paramsView := ParamBaseGetView(projection.paramBase, rdbTxHandle)
-			votingPeriod, err := paramsView.FindDurationBy(rdbparambase_types.ParamAccessor{
-				Module: "gov",
-				Key:    "voting_period",
-			})
+			// get voting end time from cosmos client
+			var proposal cosmosapp_interface.Proposal
+			proposal, err = projection.cosmosClient.ProposalById(proposalVotingPeriodStarted.ProposalId)
 			if err != nil {
-				return fmt.Errorf("error retrieving voting_period param: %v", err)
+				return fmt.Errorf("error retrieving proposal by id from cosmos client: %v", err)
 			}
 
-			votingEndTime := blockTime.Add(votingPeriod)
+			var votingEndTime utctime.UTCTime
+			if proposal.VotingEndTime != "" {
+				votingEndTime, err = utctime.Parse("2006-01-02T15:04:05.000000000Z", proposal.VotingEndTime)
+				if err != nil {
+					return fmt.Errorf("error parsing proposal voting end time: %v", err)
+				}
+			} else {
+				// get default voting period from genesis
+				paramsView := ParamBaseGetView(projection.paramBase, rdbTxHandle)
+
+				var defaultVotingPeriod time.Duration
+				defaultVotingPeriod, err = paramsView.FindDurationBy(rdbparambase_types.ParamAccessor{
+					Module: "gov",
+					Key:    "voting_period",
+				})
+				if err != nil {
+					return fmt.Errorf("error retrieving voting_period param: %v", err)
+				}
+
+				votingEndTime = blockTime.Add(defaultVotingPeriod)
+			}
+
 			mutProposal.Status = view.PROPOSAL_STATUS_VOTING_PERIOD
 			mutProposal.MaybeVotingStartTime = &blockTime
 			mutProposal.MaybeVotingEndTime = &votingEndTime
