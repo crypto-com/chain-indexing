@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	testify_mock "github.com/stretchr/testify/mock"
 
+	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbparambase"
 	rdbparambase_types "github.com/crypto-com/chain-indexing/appinterface/projection/rdbparambase/types"
 	rdbparambase_view "github.com/crypto-com/chain-indexing/appinterface/projection/rdbparambase/view"
@@ -31,11 +32,12 @@ import (
 	model_gov_v1 "github.com/crypto-com/chain-indexing/usecase/model/gov/v1"
 )
 
-func NewProposalProjection(rdbConn rdb.Conn) *proposal.Proposal {
+func NewProposalProjection(rdbConn rdb.Conn, client cosmosapp.Client) *proposal.Proposal {
 
 	return proposal.NewProposal(
 		nil,
 		rdbConn,
+		client,
 		"",
 		nil,
 	)
@@ -68,7 +70,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 	testCases := []struct {
 		Name     string
 		Events   []entity_event.Event
-		MockFunc func(events []entity_event.Event) []*testify_mock.Mock
+		MockFunc func(events []entity_event.Event, mockClient *cosmosapp.MockClient) []*testify_mock.Mock
 	}{
 		{
 			Name: "HandleMsgSubmitTextProposal",
@@ -98,7 +100,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
 				mocks = append(mocks, &mockValidatorsView.Mock)
@@ -238,7 +240,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
 				mocks = append(mocks, &mockValidatorsView.Mock)
@@ -388,7 +390,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
 				mocks = append(mocks, &mockValidatorsView.Mock)
@@ -537,7 +539,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
 				mocks = append(mocks, &mockValidatorsView.Mock)
@@ -682,7 +684,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
 				mocks = append(mocks, &mockValidatorsView.Mock)
@@ -824,7 +826,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
 				mocks = append(mocks, &mockValidatorsView.Mock)
@@ -973,7 +975,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
 				mocks = append(mocks, &mockValidatorsView.Mock)
@@ -1096,7 +1098,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					ProposalId: "ProposalId",
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockProposalsView := &view.MockProposalsView{}
 				mocks = append(mocks, &mockProposalsView.Mock)
@@ -1119,12 +1121,95 @@ func TestProposal_HandleEvents(t *testing.T) {
 
 				mockParamsView := &rdbparambase_view.MockParamsView{}
 				mocks = append(mocks, &mockParamsView.Mock)
+				mockClient.
+					On("ProposalById", "ProposalId").
+					Return(cosmosapp.Proposal{
+						ProposalID:    "ProposalId",
+						VotingEndTime: "1970-01-01T00:00:00.000000001Z",
+					}, nil)
+
+				proposal.ParamBaseGetView = func(
+					_ *rdbparambase.Base,
+					_ *rdb.Handle,
+				) rdbparambase_view.Params {
+					return mockParamsView
+				}
+
+				proposal.ParamBaseGetView = func(
+					_ *rdbparambase.Base,
+					_ *rdb.Handle,
+				) rdbparambase_view.Params {
+					return mockParamsView
+				}
+
+				maybeVotingEndTime := utctime.UTCTime{}.Add(time.Duration(1))
+				mockProposalsView.
+					On("Update", &view.ProposalRow{
+						ProposalId:           "ProposalId",
+						Status:               "VOTING_PERIOD",
+						MaybeVotingStartTime: &utctime.UTCTime{},
+						MaybeVotingEndTime:   &maybeVotingEndTime,
+					}).
+					Return(nil)
+
+				return mocks
+			},
+		},
+		{
+			Name: "HandleProposalVotingPeriodStarted with default voting end time",
+			Events: []entity_event.Event{
+				&usecase_event.ProposalVotingPeriodStarted{
+					Base: entity_event.NewBase(entity_event.BaseParams{
+						Name:        usecase_event.PROPOSAL_VOTING_PERIOD_STARTED,
+						Version:     1,
+						BlockHeight: 1,
+					}),
+					ProposalId: "ProposalId",
+				},
+			},
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
+
+				mockProposalsView := &view.MockProposalsView{}
+				mocks = append(mocks, &mockProposalsView.Mock)
+				mockProposalsView.
+					On("FindById", "ProposalId").
+					Return(&view.ProposalWithMonikerRow{
+						ProposalRow: view.ProposalRow{
+							ProposalId:           "ProposalId",
+							Status:               "Status",
+							MaybeVotingStartTime: nil,
+							MaybeVotingEndTime:   nil,
+						},
+					}, nil)
+
+				proposal.NewProposals = func(
+					_ *rdb.Handle,
+				) view.Proposals {
+					return mockProposalsView
+				}
+
+				mockParamsView := &rdbparambase_view.MockParamsView{}
+				mocks = append(mocks, &mockParamsView.Mock)
+				mockClient.
+					On("ProposalById", "ProposalId").
+					Return(cosmosapp.Proposal{
+						ProposalID:    "ProposalId",
+						VotingEndTime: "",
+					}, nil)
+
 				mockParamsView.
 					On("FindDurationBy", rdbparambase_types.ParamAccessor{
 						Module: "gov",
 						Key:    "voting_period",
 					}).
 					Return(time.Duration(1), nil)
+
+				proposal.ParamBaseGetView = func(
+					_ *rdbparambase.Base,
+					_ *rdb.Handle,
+				) rdbparambase_view.Params {
+					return mockParamsView
+				}
 
 				proposal.ParamBaseGetView = func(
 					_ *rdbparambase.Base,
@@ -1158,7 +1243,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					ProposalId: "ProposalId",
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockProposalsView := &view.MockProposalsView{}
 				mocks = append(mocks, &mockProposalsView.Mock)
@@ -1199,7 +1284,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					Result:     "proposal_passed",
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockProposalsView := &view.MockProposalsView{}
 				mocks = append(mocks, &mockProposalsView.Mock)
@@ -1241,7 +1326,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					Result:     "proposal_failed",
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockProposalsView := &view.MockProposalsView{}
 				mocks = append(mocks, &mockProposalsView.Mock)
@@ -1283,7 +1368,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					Result:     "proposal_rejected",
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockProposalsView := &view.MockProposalsView{}
 				mocks = append(mocks, &mockProposalsView.Mock)
@@ -1333,7 +1418,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockProposalsView := &view.MockProposalsView{}
 				mocks = append(mocks, &mockProposalsView.Mock)
@@ -1435,7 +1520,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					},
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 				mockProposalsView := &view.MockProposalsView{}
 				mocks = append(mocks, &mockProposalsView.Mock)
 				mockProposalsView.
@@ -1534,7 +1619,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					Option:     "Option",
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
 				mocks = append(mocks, &mockValidatorsView.Mock)
@@ -1636,7 +1721,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					Option:     "Option",
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
 				mocks = append(mocks, &mockValidatorsView.Mock)
@@ -1733,7 +1818,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					Metadata:   "Metadata",
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
 				mocks = append(mocks, &mockValidatorsView.Mock)
@@ -1838,7 +1923,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					Metadata:   "Metadata",
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
 				mocks = append(mocks, &mockValidatorsView.Mock)
@@ -1957,7 +2042,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					Metadata:   "Metadata",
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
 				mocks = append(mocks, &mockValidatorsView.Mock)
@@ -2074,7 +2159,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					Metadata: "Metadata",
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
 				mocks = append(mocks, &mockValidatorsView.Mock)
@@ -2216,7 +2301,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					Metadata: "Metadata",
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
 				mocks = append(mocks, &mockValidatorsView.Mock)
@@ -2379,7 +2464,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					Metadata: "Metadata",
 				},
 			},
-			MockFunc: func(events []entity_event.Event) (mocks []*testify_mock.Mock) {
+			MockFunc: func(events []entity_event.Event, mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
 
 				mockValidatorsView := &rdbvalidatorbase_view.MockValidatorsView{}
 				mocks = append(mocks, &mockValidatorsView.Mock)
@@ -2500,8 +2585,8 @@ func TestProposal_HandleEvents(t *testing.T) {
 		mockRDbConn := NewMockRDbConn()
 		mockTx := NewMockRDbTx()
 		mockRDbConn.On("Begin").Return(mockTx, nil)
-
-		mocks := tc.MockFunc(tc.Events)
+		mockClient := &cosmosapp.MockClient{}
+		mocks := tc.MockFunc(tc.Events, mockClient)
 		mocks = append(mocks, &mockRDbConn.Mock)
 		mocks = append(mocks, &mockTx.Mock)
 
@@ -2531,7 +2616,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 			return nil
 		}
 
-		projection := NewProposalProjection(mockRDbConn)
+		projection := NewProposalProjection(mockRDbConn, mockClient)
 		err := projection.HandleEvents(1, tc.Events)
 		assert.NoError(t, err)
 
