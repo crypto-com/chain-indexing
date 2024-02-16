@@ -19,6 +19,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
+	"github.com/crypto-com/chain-indexing/usecase/parser/ibc"
 	"github.com/crypto-com/chain-indexing/usecase/parser/icaauth"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	mapstructure_utils "github.com/crypto-com/chain-indexing/usecase/parser/utils/mapstructure"
@@ -2354,6 +2355,21 @@ func ParseMsgEthereumTx(
 		submitEvent := log.GetEventByType("submit_msgs_result")
 		if submitEvent != nil {
 			cmds, signers := icaauth.ParseMsgSubmitTx(parserParams)
+			commands = append(commands, cmds...)
+			possibleSignerAddresses = append(possibleSignerAddresses, signers...)
+		}
+
+		// parse MsgAcknowledgement
+		ackPacketEvent := log.GetEventByType("acknowledge_packet")
+		if ackPacketEvent != nil {
+			cmds, signers := ibc.ParseMsgAcknowledgement(parserParams)
+			commands = append(commands, cmds...)
+			possibleSignerAddresses = append(possibleSignerAddresses, signers...)
+		}
+
+		timeoutEvent := log.GetEventByType("timeout_packet")
+		if timeoutEvent != nil {
+			cmds, signers := ibc.ParseMsgTimeout(parserParams)
 			commands = append(commands, cmds...)
 			possibleSignerAddresses = append(possibleSignerAddresses, signers...)
 		}
