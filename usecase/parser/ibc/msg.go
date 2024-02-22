@@ -1016,7 +1016,6 @@ func ParseMsgAcknowledgement(
 	var success bool
 	var acknowledgement string
 	var maybeErr *string
-	var fungibleTokenPacketData ibc_model.FungibleTokenPacketData
 	for _, fungibleTokenPacketEvent := range fungibleTokenPacketEvents {
 		if fungibleTokenPacketEvent.HasAttribute("success") {
 			success = bytes.Equal(
@@ -1025,16 +1024,16 @@ func ParseMsgAcknowledgement(
 			)
 		}
 		if fungibleTokenPacketEvent.HasAttribute("sender") {
-			fungibleTokenPacketData.Sender = fungibleTokenPacketEvent.MustGetAttributeByKey("sender")
+			rawFungibleTokenPacketData.Sender = fungibleTokenPacketEvent.MustGetAttributeByKey("sender")
 		}
 		if fungibleTokenPacketEvent.HasAttribute("receiver") {
-			fungibleTokenPacketData.Receiver = fungibleTokenPacketEvent.MustGetAttributeByKey("receiver")
+			rawFungibleTokenPacketData.Receiver = fungibleTokenPacketEvent.MustGetAttributeByKey("receiver")
 		}
 		if fungibleTokenPacketEvent.HasAttribute("denom") {
-			fungibleTokenPacketData.Denom = fungibleTokenPacketEvent.MustGetAttributeByKey("denom")
+			rawFungibleTokenPacketData.Denom = fungibleTokenPacketEvent.MustGetAttributeByKey("denom")
 		}
 		if fungibleTokenPacketEvent.HasAttribute("amount") {
-			err := json.Unmarshal([]byte(fungibleTokenPacketEvent.MustGetAttributeByKey("amount")), &fungibleTokenPacketData.Amount)
+			err := json.Unmarshal([]byte(fungibleTokenPacketEvent.MustGetAttributeByKey("amount")), &rawFungibleTokenPacketData.Amount)
 			if err != nil {
 				parserParams.Logger.Errorf("error unmarshalling amount", err)
 			}
@@ -1053,7 +1052,7 @@ func ParseMsgAcknowledgement(
 		Application: "transfer",
 		MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 		MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
-			FungibleTokenPacketData: fungibleTokenPacketData,
+			FungibleTokenPacketData: rawFungibleTokenPacketData,
 			// https://github.com/cosmos/ibc-go/blob/e98838612a4fa5d240e392aad3409db5ec428f50/modules/apps/transfer/module.go#L327
 			Success:         success,
 			Acknowledgement: acknowledgement,
@@ -1177,9 +1176,14 @@ func ParseMsgTimeout(
 	timeoutEvent := log.GetEventByType("timeout")
 
 	var rawFungibleTokenPacketData ibc_model.FungibleTokenPacketData
+	rawPacketData := base64_internal.MustDecodeString(rawMsg.Packet.Data)
+	if err := json.Unmarshal(rawPacketData, &rawFungibleTokenPacketData); err != nil {
+		rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
+	}
+
 	if timeoutEvent != nil {
 		if timeoutEvent.HasAttribute("refund_receiver") {
-			rawFungibleTokenPacketData.Receiver = timeoutEvent.MustGetAttributeByKey("refund_receiver")
+			rawFungibleTokenPacketData.Sender = timeoutEvent.MustGetAttributeByKey("refund_receiver")
 		}
 		if timeoutEvent.HasAttribute("refund_denom") {
 			rawFungibleTokenPacketData.Denom = timeoutEvent.MustGetAttributeByKey("refund_denom")
@@ -1198,8 +1202,20 @@ func ParseMsgTimeout(
 		return []command.Command{}, []string{}
 	}
 
+	if timeoutPacketEvent.HasAttribute("packet_sequence") {
+		rawMsg.Packet.Sequence = timeoutPacketEvent.MustGetAttributeByKey("packet_sequence")
+	}
+	if timeoutPacketEvent.HasAttribute("packet_src_port") {
+		rawMsg.Packet.SourcePort = timeoutPacketEvent.MustGetAttributeByKey("packet_src_port")
+	}
 	if timeoutPacketEvent.HasAttribute("packet_src_channel") {
 		rawMsg.Packet.SourceChannel = timeoutPacketEvent.MustGetAttributeByKey("packet_src_channel")
+	}
+	if timeoutPacketEvent.HasAttribute("packet_dst_port") {
+		rawMsg.Packet.DestinationPort = timeoutPacketEvent.MustGetAttributeByKey("packet_dst_port")
+	}
+	if timeoutPacketEvent.HasAttribute("packet_dst_channel") {
+		rawMsg.Packet.DestinationChannel = timeoutPacketEvent.MustGetAttributeByKey("packet_dst_channel")
 	}
 
 	msgTimeoutParams := ibc_model.MsgTimeoutParams{
