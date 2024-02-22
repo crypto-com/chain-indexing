@@ -787,7 +787,7 @@ func ParseMsgRecvPacket(
 		panic(fmt.Errorf("error decoding RawMsgRecvPacket: %v", err))
 	}
 
-	if !IsPacketMsgTransfer(rawMsg.Packet) {
+	if !IsPacketMsgTransfer(rawMsg.Packet, &parserParams.TxsResult.Log[parserParams.MsgIndex]) {
 		// unsupported application
 		return []command.Command{}, []string{}
 	}
@@ -924,7 +924,7 @@ func ParseMsgAcknowledgement(
 		panic(fmt.Errorf("error decoding RawMsgAcknowledgement: %v", err))
 	}
 
-	if !IsPacketMsgTransfer(rawMsg.Packet) {
+	if !IsPacketMsgTransfer(rawMsg.Packet, &parserParams.TxsResult.Log[parserParams.MsgIndex]) {
 		// unsupported application
 		return []command.Command{}, []string{}
 	}
@@ -980,6 +980,9 @@ func ParseMsgAcknowledgement(
 		if acknowledgePacketEvent.HasAttribute("packet_connection") {
 			connectionID = acknowledgePacketEvent.MustGetAttributeByKey("packet_connection")
 		}
+		if acknowledgePacketEvent.HasAttribute("packet_src_channel") {
+			rawMsg.Packet.SourceChannel = acknowledgePacketEvent.MustGetAttributeByKey("packet_src_channel")
+		}
 
 	}
 
@@ -1013,12 +1016,28 @@ func ParseMsgAcknowledgement(
 	var success bool
 	var acknowledgement string
 	var maybeErr *string
+	var fungibleTokenPacketData ibc_model.FungibleTokenPacketData
 	for _, fungibleTokenPacketEvent := range fungibleTokenPacketEvents {
 		if fungibleTokenPacketEvent.HasAttribute("success") {
 			success = bytes.Equal(
 				[]byte(fungibleTokenPacketEvent.MustGetAttributeByKey("success")),
 				[]byte{byte(1)},
 			)
+		}
+		if fungibleTokenPacketEvent.HasAttribute("sender") {
+			fungibleTokenPacketData.Sender = fungibleTokenPacketEvent.MustGetAttributeByKey("sender")
+		}
+		if fungibleTokenPacketEvent.HasAttribute("receiver") {
+			fungibleTokenPacketData.Receiver = fungibleTokenPacketEvent.MustGetAttributeByKey("receiver")
+		}
+		if fungibleTokenPacketEvent.HasAttribute("denom") {
+			fungibleTokenPacketData.Denom = fungibleTokenPacketEvent.MustGetAttributeByKey("denom")
+		}
+		if fungibleTokenPacketEvent.HasAttribute("amount") {
+			err := json.Unmarshal([]byte(fungibleTokenPacketEvent.MustGetAttributeByKey("amount")), &fungibleTokenPacketData.Amount)
+			if err != nil {
+				parserParams.Logger.Errorf("error unmarshalling amount", err)
+			}
 		}
 		if fungibleTokenPacketEvent.HasAttribute("acknowledgement") {
 			acknowledgement = fungibleTokenPacketEvent.MustGetAttributeByKey("acknowledgement")
@@ -1034,7 +1053,7 @@ func ParseMsgAcknowledgement(
 		Application: "transfer",
 		MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 		MaybeFungibleTokenPacketData: &ibc_model.MsgAcknowledgementFungibleTokenPacketData{
-			FungibleTokenPacketData: rawFungibleTokenPacketData,
+			FungibleTokenPacketData: fungibleTokenPacketData,
 			// https://github.com/cosmos/ibc-go/blob/e98838612a4fa5d240e392aad3409db5ec428f50/modules/apps/transfer/module.go#L327
 			Success:         success,
 			Acknowledgement: acknowledgement,
@@ -1060,7 +1079,31 @@ func ParseMsgAcknowledgement(
 
 func IsPacketMsgTransfer(
 	packet ibc_model.Packet,
+	txsResultLog *model.BlockResultsTxsResultLog,
 ) bool {
+	log := utils.NewParsedTxsResultLog(txsResultLog)
+
+	// check for evm msgAcknowledgement
+	acknowledgePacketEvents := log.GetEventsByType("acknowledge_packet")
+	for _, acknowledgePacketEvent := range acknowledgePacketEvents {
+		if acknowledgePacketEvent.HasAttribute("packet_dst_port") {
+			if acknowledgePacketEvent.MustGetAttributeByKey("packet_dst_port") == "transfer" {
+				return true
+			}
+		}
+	}
+
+	// check for evm msgTimeout
+	timeoutPacketEvent := log.GetEventByType("timeout_packet")
+	if timeoutPacketEvent != nil {
+		if timeoutPacketEvent.HasAttribute("packet_dst_port") {
+			if timeoutPacketEvent.MustGetAttributeByKey("packet_dst_port") == "transfer" {
+				return true
+			}
+		}
+	}
+
+	// check for cosmos layer msgAcknowledgement
 	if packet.DestinationPort != "transfer" {
 		return false
 	}
@@ -1104,7 +1147,7 @@ func ParseMsgTimeout(
 		panic(fmt.Errorf("error decoding RawMsgTimeout: %v", err))
 	}
 
-	if !IsPacketMsgTransfer(rawMsg.Packet) {
+	if !IsPacketMsgTransfer(rawMsg.Packet, &parserParams.TxsResult.Log[parserParams.MsgIndex]) {
 		// unsupported application
 		return []command.Command{}, []string{}
 	}
@@ -1131,14 +1174,32 @@ func ParseMsgTimeout(
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 
 	// Transfer application, MsgTransfer
+	timeoutEvent := log.GetEventByType("timeout")
+
 	var rawFungibleTokenPacketData ibc_model.FungibleTokenPacketData
-	rawPacketData := base64_internal.MustDecodeString(rawMsg.Packet.Data)
-	json.MustUnmarshal(rawPacketData, &rawFungibleTokenPacketData)
+	if timeoutEvent != nil {
+		if timeoutEvent.HasAttribute("refund_receiver") {
+			rawFungibleTokenPacketData.Receiver = timeoutEvent.MustGetAttributeByKey("refund_receiver")
+		}
+		if timeoutEvent.HasAttribute("refund_denom") {
+			rawFungibleTokenPacketData.Denom = timeoutEvent.MustGetAttributeByKey("refund_denom")
+		}
+		if timeoutEvent.HasAttribute("refund_amount") {
+			err := json.Unmarshal([]byte(timeoutEvent.MustGetAttributeByKey("refund_amount")), &rawFungibleTokenPacketData.Amount)
+			if err != nil {
+				parserParams.Logger.Errorf("error unmarshalling refund amount", err)
+			}
+		}
+	}
 
 	timeoutPacketEvent := log.GetEventByType("timeout_packet")
 	if timeoutPacketEvent == nil {
 		parserParams.Logger.Warnf("missing `timeout_packet` event in TxsResult log: ", parserParams.MsgCommonParams.TxHash)
 		return []command.Command{}, []string{}
+	}
+
+	if timeoutPacketEvent.HasAttribute("packet_src_channel") {
+		rawMsg.Packet.SourceChannel = timeoutPacketEvent.MustGetAttributeByKey("packet_src_channel")
 	}
 
 	msgTimeoutParams := ibc_model.MsgTimeoutParams{
@@ -1162,8 +1223,6 @@ func ParseMsgTimeout(
 		PacketSequence:  typeconv.MustAtou64(timeoutPacketEvent.MustGetAttributeByKey("packet_sequence")),
 		ChannelOrdering: timeoutPacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
 	}
-
-	timeoutEvent := log.GetEventByType("timeout")
 
 	// Getting possible signer address from Msg
 	var possibleSignerAddresses []string
@@ -1192,7 +1251,7 @@ func ParseMsgTimeoutOnClose(
 		panic(fmt.Errorf("error decoding RawMsgTimeoutOnClose: %v", err))
 	}
 
-	if !IsPacketMsgTransfer(rawMsg.Packet) {
+	if !IsPacketMsgTransfer(rawMsg.Packet, &parserParams.TxsResult.Log[parserParams.MsgIndex]) {
 		// unsupported application
 		return []command.Command{}, []string{}
 	}

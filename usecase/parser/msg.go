@@ -2367,6 +2367,7 @@ func ParseMsgEthereumTx(
 			possibleSignerAddresses = append(possibleSignerAddresses, signers...)
 		}
 
+		// parse MsgTimeout
 		timeoutEvent := log.GetEventByType("timeout_packet")
 		if timeoutEvent != nil {
 			cmds, signers := ibc.ParseMsgTimeout(parserParams)
