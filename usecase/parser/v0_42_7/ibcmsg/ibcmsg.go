@@ -194,18 +194,22 @@ func ParseMsgTransfer(
 		}
 	}
 
+	var packetAck ibc_model.MsgRecvPacketPacketAck
 	writeAckEvents := log.GetEventsByType("write_acknowledgement")
 	if writeAckEvents == nil {
 		parserParams.Logger.Warnf("missing `write_acknowledgement` event in TxsResult log on TxHash: %s", parserParams.MsgCommonParams.TxHash)
-	}
-	var writeAckEventPacketAck string
-	for _, writeAckEvent := range writeAckEvents {
-		if writeAckEvent.HasAttribute("packet_ack") {
-			writeAckEventPacketAck = writeAckEvent.MustGetAttributeByKey("packet_ack")
+	} else {
+		var writeAckEventPacketAck string
+		for _, writeAckEvent := range writeAckEvents {
+			if writeAckEvent.HasAttribute("packet_ack") {
+				writeAckEventPacketAck = writeAckEvent.MustGetAttributeByKey("packet_ack")
+			}
+		}
+
+		if writeAckEventPacketAck != "" {
+			json.MustUnmarshalFromString(writeAckEventPacketAck, &packetAck)
 		}
 	}
-	var packetAck ibc_model.MsgRecvPacketPacketAck
-	json.MustUnmarshalFromString(writeAckEventPacketAck, &packetAck)
 
 	msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
 		RawMsgRecvPacket: rawMsg,
