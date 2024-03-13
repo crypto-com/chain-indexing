@@ -3,11 +3,12 @@ package tendermint
 import (
 	"encoding/base64"
 	"fmt"
-	tendermint_interface "github.com/crypto-com/chain-indexing/appinterface/tendermint"
 	"io"
 	"math/big"
 	"strconv"
 	"strings"
+
+	tendermint_interface "github.com/crypto-com/chain-indexing/appinterface/tendermint"
 
 	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 
@@ -16,6 +17,8 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	jsoniter "github.com/json-iterator/go"
 )
+
+const UNICODE_NULL_VALUE = "\u0000"
 
 // Block related parsing functions
 func ParseGenesisResp(rawRespReader io.Reader, strictParsing bool) (*genesis.Genesis, error) {
@@ -138,7 +141,7 @@ func parseBlockResultsTxsResults(rawTxsResults []RawBlockResultsTxsResult, event
 			Code:      rawTxsResult.Code,
 			Data:      mustBase64Decode(rawTxsResult.Data),
 			Log:       parseBlockResultsTxsResultLog(rawTxsResult.Log),
-			RawLog:    rawTxsResult.Log,
+			RawLog:    strings.ReplaceAll(rawTxsResult.Log, UNICODE_NULL_VALUE, ""),
 			Info:      rawTxsResult.Info,
 			GasWanted: rawTxsResult.GasWanted,
 			GasUsed:   rawTxsResult.GasUsed,
@@ -151,6 +154,8 @@ func parseBlockResultsTxsResults(rawTxsResults []RawBlockResultsTxsResult, event
 }
 
 func parseBlockResultsTxsResultLog(rawLog string) []model.BlockResultsTxsResultLog {
+	rawLog = strings.ReplaceAll(rawLog, UNICODE_NULL_VALUE, "")
+
 	jsonDecoder := jsoniter.NewDecoder(strings.NewReader(rawLog))
 	jsonDecoder.DisallowUnknownFields()
 	var decodedRawLogs []RawBlockResultsTxsResultLog

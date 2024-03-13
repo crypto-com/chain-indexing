@@ -2,6 +2,7 @@ package view
 
 import (
 	"fmt"
+
 	sq "github.com/Masterminds/squirrel"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
