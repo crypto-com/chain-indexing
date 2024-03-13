@@ -16,8 +16,6 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 )
 
-const UNICODE_NULL_VALUE = "\u0000"
-
 type BlockTransactions interface {
 	InsertAll(transactions []TransactionRow) error
 	Insert(transaction *TransactionRow) error
@@ -93,7 +91,7 @@ func (transactionsView *BlockTransactionsView) InsertAll(transactions []Transact
 			)
 		}
 
-		log := strings.ReplaceAll(transaction.Log, UNICODE_NULL_VALUE, "")
+		fmt.Println("===> transaction.Log", transaction.Log)
 
 		stmtBuilder = stmtBuilder.Values(
 			transaction.BlockHeight,
@@ -103,7 +101,7 @@ func (transactionsView *BlockTransactionsView) InsertAll(transactions []Transact
 			transaction.Index,
 			transaction.Success,
 			transaction.Code,
-			log,
+			transaction.Log,
 			feeJSON,
 			transaction.FeePayer,
 			transaction.FeeGranter,
@@ -181,8 +179,6 @@ func (transactionsView *BlockTransactionsView) Insert(transaction *TransactionRo
 		return fmt.Errorf("error JSON marshalling block transation signers for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
-	log := strings.ReplaceAll(transaction.Log, UNICODE_NULL_VALUE, "")
-
 	result, err := transactionsView.rdb.Exec(sql,
 		transaction.BlockHeight,
 		transaction.BlockHash,
@@ -191,7 +187,7 @@ func (transactionsView *BlockTransactionsView) Insert(transaction *TransactionRo
 		transaction.Index,
 		transaction.Success,
 		transaction.Code,
-		log,
+		transaction.Log,
 		feeJSON,
 		transaction.FeePayer,
 		transaction.FeeGranter,
