@@ -91,8 +91,6 @@ func (transactionsView *BlockTransactionsView) InsertAll(transactions []Transact
 			)
 		}
 
-		fmt.Println("===> transaction.Log", transaction.Log)
-
 		stmtBuilder = stmtBuilder.Values(
 			transaction.BlockHeight,
 			transaction.BlockHash,
