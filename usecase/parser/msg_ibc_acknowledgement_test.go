@@ -385,4 +385,49 @@ var _ = Describe("ParseMsgCommands", func() {
 		})
 	})
 
+	It("should parse Msg commands when there is MsgIBCAcknowledgement in the EVM transaction", func() {
+		expected := `{"name":"/ibc.core.channel.v1.MsgAcknowledgement.Created","version":1,"height":18211106,"uuid":"{UUID}","msgName":"/ibc.core.channel.v1.MsgAcknowledgement","txHash":"9A6B6497ABAE01FE87C4BBA0D579C39066256F7114332BF610DDBD0EF78DAA85","msgIndex":0,"params":{"packet":{"sequence":"","sourcePort":"","sourceChannel":"channel-0","destinationPort":"","destinationChannel":"","data":"","timeoutHeight":{"revisionNumber":"0","revisionHeight":"0"},"timeoutTimestamp":""},"acknowledgement":"","proofAcked":"","proofHeight":{"revisionNumber":"0","revisionHeight":"0"},"signer":"","application":"transfer","messageType":"/ibc.applications.transfer.v1.MsgTransfer","maybeMsgTransfer":{"sender":"tcrc1wvxth9zgp4g83pypxua58kp3x0shzdn72julh0","receiver":"tcro19p7khzurxqcyznawupp8zv0cy6fh6jn6lqx3mt","denom":"stake","amount":"1","success":true,"acknowledgement":"result:\"\\001\" ","error":null},"packetSequence":"1068","channelOrdering":"ORDER_UNORDERED","connectionId":"connection-0"}}`
+
+		block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
+			usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_EVM_TX_BLOCK_RESP,
+		))
+		blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
+			usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_EVM_TX_BLOCK_RESULTS_RESP,
+		), &tendermint.RawBlockResultEventAttributeDecoder{})
+
+		tx := MustParseTxsResp(usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_EVM_TX_TXS_RESP)
+		txs := []model.CosmosTxWithHash{*tx}
+
+		accountAddressPrefix := "tcrc"
+		stakingDenom := "basetcro"
+
+		pm := usecase_parser_test.InitParserManager()
+
+		cmds, _, err := parser.ParseBlockTxsMsgToCommands(
+			pm,
+			block.Height,
+			blockResults,
+			txs,
+			accountAddressPrefix,
+			stakingDenom,
+		)
+		Expect(err).To(BeNil())
+		Expect(cmds).To(HaveLen(2))
+		cmd := cmds[0]
+		Expect(cmd.Name()).To(Equal("/ibc.core.channel.v1.MsgAcknowledgement.Create"))
+
+		untypedEvent, _ := cmd.Exec()
+		typedEvent := untypedEvent.(*event.MsgIBCAcknowledgement)
+
+		regex, _ := regexp.Compile("\n?\r?")
+
+		Expect(json.MustMarshalToString(typedEvent)).To(Equal(
+			strings.Replace(
+				regex.ReplaceAllString(expected, ""),
+				"{UUID}",
+				typedEvent.UUID(),
+				-1,
+			),
+		))
+	})
 })

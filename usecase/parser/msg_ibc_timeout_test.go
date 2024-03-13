@@ -207,4 +207,95 @@ var _ = Describe("ParseMsgCommands", func() {
 		))
 		Expect(possibleSignerAddresses[1]).To(Equal("tcro18mcwp6vtlvpgxy62eledk3chhjguw636x8n7h6"))
 	})
+
+	It("should parse MsgIBCTimeout commands from EVM tx", func() {
+		expected := `
+{
+	"name": "/ibc.core.channel.v1.MsgTimeout.Created",
+	"version": 1,
+	"height": 17932006,
+	"uuid": "{UUID}",
+	"msgName": "/ibc.core.channel.v1.MsgTimeout",
+	"txHash": "DA4DA296DC103E7DB4D117BC1FF1E3FBFD4F90E3080C5416C28BBD20990A8C37",
+	"msgIndex": 0,
+	"params": {
+		"packet": {
+			"sequence": "1035",
+			"sourcePort": "transfer",
+			"sourceChannel": "channel-0",
+			"destinationPort": "transfer",
+			"destinationChannel": "channel-131",
+			"data": "",
+			"timeoutHeight": {
+				"revisionNumber": "0",
+				"revisionHeight": "0"
+			},
+			"timeoutTimestamp": ""
+		},
+		"proofUnreceived": null,
+		"proofHeight": {
+			"revisionNumber": "0",
+			"revisionHeight": "0"
+		},
+		"nextSequenceRecv": "0",
+		"signer": "",
+		"application": "transfer",
+		"messageType": "/ibc.applications.transfer.v1.MsgTransfer",
+		"maybeMsgTransfer": {
+			"refundReceiver": "tcrc1wvxth9zgp4g83pypxua58kp3x0shzdn72julh0",
+			"refundDenom": "stake",
+			"refundAmount": "1"
+		},
+		"packetTimeoutHeight": {
+			"revisionNumber": "4",
+			"revisionHeight": "14063192"
+		},
+		"packetTimeoutTimestamp": "1706656779673675230",
+		"packetSequence": "1035",
+		"channelOrdering": "ORDER_UNORDERED"
+	}
+}`
+
+		block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
+			usecase_parser_test.TX_MSG_TIMEOUT_EVM_TX_BLOCK_RESP,
+		))
+		blockResults, _ := tendermint.ParseBlockResultsResp(strings.NewReader(
+			usecase_parser_test.TX_MSG_TIMEOUT_EVM_TX_BLOCK_RESULTS_RESP,
+		), &tendermint.RawBlockResultEventAttributeDecoder{})
+
+		tx := MustParseTxsResp(usecase_parser_test.TX_MSG_TIMEOUT_EVM_TX_TXS_RESP)
+		txs := []model.CosmosTxWithHash{*tx}
+
+		accountAddressPrefix := "tcrc"
+		stakingDenom := "basetcro"
+
+		pm := usecase_parser_test.InitParserManager()
+
+		cmds, _, err := parser.ParseBlockTxsMsgToCommands(
+			pm,
+			block.Height,
+			blockResults,
+			txs,
+			accountAddressPrefix,
+			stakingDenom,
+		)
+		Expect(err).To(BeNil())
+		Expect(cmds).To(HaveLen(2))
+		cmd := cmds[0]
+		Expect(cmd.Name()).To(Equal("/ibc.core.channel.v1.MsgTimeout.Create"))
+
+		untypedEvent, _ := cmd.Exec()
+		typedEvent := untypedEvent.(*event.MsgIBCTimeout)
+
+		regex, _ := regexp.Compile("\n?\r?\\s?")
+
+		Expect(json.MustMarshalToString(typedEvent)).To(Equal(
+			strings.Replace(
+				regex.ReplaceAllString(expected, ""),
+				"{UUID}",
+				typedEvent.UUID(),
+				-1,
+			),
+		))
+	})
 })

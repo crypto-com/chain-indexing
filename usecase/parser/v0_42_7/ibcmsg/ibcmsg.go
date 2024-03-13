@@ -45,7 +45,7 @@ func ParseMsgRecvPacket(
 	var cmds []command.Command
 	var possibleSignerAddresses []string
 
-	if ibc.IsPacketMsgTransfer(rawMsg.Packet) {
+	if ibc.IsPacketMsgTransfer(rawMsg.Packet, &parserParams.TxsResult.Log[parserParams.MsgIndex]) {
 		// Parse IBC transfer
 		cmds, possibleSignerAddresses = ParseMsgTransfer(parserParams, rawMsg)
 
