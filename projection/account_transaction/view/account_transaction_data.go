@@ -2,6 +2,8 @@ package view
 
 import (
 	"fmt"
+	"strings"
+
 	sq "github.com/Masterminds/squirrel"
 
 	"github.com/crypto-com/chain-indexing/appinterface/projection/view"
@@ -10,6 +12,8 @@ import (
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 )
+
+const UNICODE_NULL_VALUE = "\u0000"
 
 // AccountTransactionData projection view implemented by relational database
 type AccountTransactionData struct {
@@ -60,6 +64,8 @@ func (transactionsView *AccountTransactionData) InsertAll(transactions []Transac
 			return fmt.Errorf("error JSON marshalling block transation fee for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 		}
 
+		log := strings.ReplaceAll(transaction.Log, UNICODE_NULL_VALUE, "")
+
 		stmtBuilder = stmtBuilder.Values(
 			transaction.BlockHeight,
 			transaction.BlockHash,
@@ -68,7 +74,7 @@ func (transactionsView *AccountTransactionData) InsertAll(transactions []Transac
 			transaction.Index,
 			transaction.Success,
 			transaction.Code,
-			transaction.Log,
+			log,
 			feeJSON,
 			transaction.FeePayer,
 			transaction.FeeGranter,
@@ -138,6 +144,8 @@ func (transactionsView *AccountTransactionData) Insert(transaction *TransactionR
 		return fmt.Errorf("error JSON marshalling block transation fee for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
+	log := strings.ReplaceAll(transaction.Log, UNICODE_NULL_VALUE, "")
+
 	result, err := transactionsView.rdb.Exec(sql,
 		transaction.BlockHeight,
 		transaction.BlockHash,
@@ -146,7 +154,7 @@ func (transactionsView *AccountTransactionData) Insert(transaction *TransactionR
 		transaction.Index,
 		transaction.Success,
 		transaction.Code,
-		transaction.Log,
+		log,
 		feeJSON,
 		transaction.FeePayer,
 		transaction.FeeGranter,

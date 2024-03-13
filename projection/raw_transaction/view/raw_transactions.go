@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	sq "github.com/Masterminds/squirrel"
 
@@ -14,6 +15,8 @@ import (
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 )
+
+const UNICODE_NULL_VALUE = "\u0000"
 
 type BlockRawTransactions interface {
 	InsertAll(transactions []RawTransactionRow) error
@@ -89,6 +92,8 @@ func (transactionsView *BlockRawTransactionsView) InsertAll(transactions []RawTr
 			)
 		}
 
+		log := strings.ReplaceAll(transaction.Log, UNICODE_NULL_VALUE, "")
+
 		stmtBuilder = stmtBuilder.Values(
 			transaction.BlockHeight,
 			transaction.BlockHash,
@@ -97,7 +102,7 @@ func (transactionsView *BlockRawTransactionsView) InsertAll(transactions []RawTr
 			transaction.Index,
 			transaction.Success,
 			transaction.Code,
-			transaction.Log,
+			log,
 			feeJSON,
 			transaction.FeePayer,
 			transaction.FeeGranter,
@@ -175,6 +180,8 @@ func (transactionsView *BlockRawTransactionsView) Insert(transaction *RawTransac
 		return fmt.Errorf("error JSON marshalling block transation signers for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
 
+	log := strings.ReplaceAll(transaction.Log, UNICODE_NULL_VALUE, "")
+
 	result, err := transactionsView.rdb.Exec(sql,
 		transaction.BlockHeight,
 		transaction.BlockHash,
@@ -183,7 +190,7 @@ func (transactionsView *BlockRawTransactionsView) Insert(transaction *RawTransac
 		transaction.Index,
 		transaction.Success,
 		transaction.Code,
-		transaction.Log,
+		log,
 		feeJSON,
 		transaction.FeePayer,
 		transaction.FeeGranter,
