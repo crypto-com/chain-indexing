@@ -9,7 +9,6 @@ import (
 
 // NumericString is numeric value stored in string representation. It supports
 // JSON unmarshalling from numeric and string.
-
 type NumericString struct {
 	v string
 }
