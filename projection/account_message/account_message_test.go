@@ -2,6 +2,7 @@ package account_message_test
 
 import (
 	"fmt"
+	"math/big"
 	"testing"
 
 	sq "github.com/Masterminds/squirrel"
@@ -3745,7 +3746,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 								Sender:   "Sender",
 								Receiver: "Receiver",
 								Denom:    "Denom",
-								Amount:   json.NewNumericStringFromUint64(100),
+								Amount:   json.NewNumericStringFromBigInt(big.NewInt(100)),
 							},
 							Success: true,
 						},
@@ -3823,7 +3824,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 										Sender:   "Sender",
 										Receiver: "Receiver",
 										Denom:    "Denom",
-										Amount:   json.NewNumericStringFromUint64(100),
+										Amount:   json.NewNumericStringFromBigInt(big.NewInt(100)),
 									},
 									Success: true,
 								},
@@ -3880,7 +3881,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 								Sender:   "Sender",
 								Receiver: "Receiver",
 								Denom:    "Denom",
-								Amount:   json.NewNumericStringFromUint64(100),
+								Amount:   json.NewNumericStringFromBigInt(big.NewInt(100)),
 							},
 							Success:                true,
 							MaybeDenominationTrace: nil,
@@ -3959,7 +3960,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 										Sender:   "Sender",
 										Receiver: "Receiver",
 										Denom:    "Denom",
-										Amount:   json.NewNumericStringFromUint64(100),
+										Amount:   json.NewNumericStringFromBigInt(big.NewInt(100)),
 									},
 									Success:                true,
 									MaybeDenominationTrace: nil,

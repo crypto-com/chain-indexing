@@ -2,6 +2,7 @@ package bridge_pending_activity_test
 
 import (
 	"fmt"
+	"math/big"
 	"testing"
 
 	sq "github.com/Masterminds/squirrel"
@@ -62,7 +63,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							SourceChannel: "channel-1",
 							Token: ibc_model.MsgTransferToken{
 								Denom:  "basecro",
-								Amount: json.NewNumericStringFromUint64(100),
+								Amount: json.NewNumericStringFromBigInt(big.NewInt(100)),
 							},
 							Sender:   "from",
 							Receiver: "to",
@@ -81,7 +82,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							Sender:   "from",
 							Receiver: "to",
 							Denom:    "basecro",
-							Amount:   json.NewNumericStringFromUint64(100),
+							Amount:   json.NewNumericStringFromBigInt(big.NewInt(100)),
 						},
 					},
 				},
@@ -157,7 +158,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							SourceChannel: "channel-0",
 							Token: ibc_model.MsgTransferToken{
 								Denom:  "basecro",
-								Amount: json.NewNumericStringFromUint64(100),
+								Amount: json.NewNumericStringFromBigInt(big.NewInt(100)),
 							},
 							Sender:   "from",
 							Receiver: "to",
@@ -176,7 +177,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							Sender:   "from",
 							Receiver: "to",
 							Denom:    "basecro",
-							Amount:   json.NewNumericStringFromUint64(100),
+							Amount:   json.NewNumericStringFromBigInt(big.NewInt(100)),
 						},
 					},
 				},
@@ -197,7 +198,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							SourceChannel: "channel-1",
 							Token: ibc_model.MsgTransferToken{
 								Denom:  "basecro",
-								Amount: json.NewNumericStringFromUint64(200),
+								Amount: json.NewNumericStringFromBigInt(big.NewInt(200)),
 							},
 							Sender:   "from",
 							Receiver: "to",
@@ -216,7 +217,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							Sender:   "from",
 							Receiver: "to",
 							Denom:    "basecro",
-							Amount:   json.NewNumericStringFromUint64(100),
+							Amount:   json.NewNumericStringFromBigInt(big.NewInt(100)),
 						},
 					},
 				},
@@ -330,7 +331,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							SourceChannel: "channel-0",
 							Token: ibc_model.MsgTransferToken{
 								Denom:  "basecro",
-								Amount: json.NewNumericStringFromUint64(100),
+								Amount: json.NewNumericStringFromBigInt(big.NewInt(100)),
 							},
 							Sender:   "from",
 							Receiver: "to",
@@ -349,7 +350,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							Sender:   "from",
 							Receiver: "to",
 							Denom:    "basecro",
-							Amount:   json.NewNumericStringFromUint64(100),
+							Amount:   json.NewNumericStringFromBigInt(big.NewInt(100)),
 						},
 					},
 				},
@@ -442,7 +443,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							SourceChannel: "channel-0",
 							Token: ibc_model.MsgTransferToken{
 								Denom:  "basecro",
-								Amount: json.NewNumericStringFromUint64(100),
+								Amount: json.NewNumericStringFromBigInt(big.NewInt(100)),
 							},
 							Sender:   "from",
 							Receiver: "to",
@@ -461,7 +462,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 							Sender:   "from",
 							Receiver: "to",
 							Denom:    "basecro",
-							Amount:   json.NewNumericStringFromUint64(100),
+							Amount:   json.NewNumericStringFromBigInt(big.NewInt(100)),
 						},
 					},
 				},
@@ -577,7 +578,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 								Sender:   "from",
 								Receiver: "to",
 								Denom:    "basecro",
-								Amount:   json.NewNumericStringFromUint64(1000),
+								Amount:   json.NewNumericStringFromBigInt(big.NewInt(1000)),
 							},
 							Success: true,
 							MaybeDenominationTrace: &ibc_model.MsgRecvPacketFungibleTokenDenominationTrace{
@@ -684,7 +685,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 								Sender:   "from",
 								Receiver: "to",
 								Denom:    "basecro",
-								Amount:   json.NewNumericStringFromUint64(1000),
+								Amount:   json.NewNumericStringFromBigInt(big.NewInt(1000)),
 							},
 							Success: true,
 							MaybeDenominationTrace: &ibc_model.MsgRecvPacketFungibleTokenDenominationTrace{
@@ -822,7 +823,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 								Sender:   "from",
 								Receiver: "to",
 								Denom:    "basecro",
-								Amount:   json.NewNumericStringFromUint64(1000),
+								Amount:   json.NewNumericStringFromBigInt(big.NewInt(1000)),
 							},
 							Success: true,
 							MaybeDenominationTrace: &ibc_model.MsgRecvPacketFungibleTokenDenominationTrace{
@@ -879,7 +880,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 								Sender:   "from",
 								Receiver: "to",
 								Denom:    "basecro",
-								Amount:   json.NewNumericStringFromUint64(2000),
+								Amount:   json.NewNumericStringFromBigInt(big.NewInt(2000)),
 							},
 							Success: true,
 							MaybeDenominationTrace: &ibc_model.MsgRecvPacketFungibleTokenDenominationTrace{
@@ -1031,7 +1032,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 								Sender:   "from",
 								Receiver: "to",
 								Denom:    "basecro",
-								Amount:   json.NewNumericStringFromUint64(1000),
+								Amount:   json.NewNumericStringFromBigInt(big.NewInt(1000)),
 							},
 							Success: false,
 							MaybeDenominationTrace: &ibc_model.MsgRecvPacketFungibleTokenDenominationTrace{
@@ -1163,7 +1164,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 								Sender:   "from",
 								Receiver: "to",
 								Denom:    "basecro",
-								Amount:   json.NewNumericStringFromUint64(1000),
+								Amount:   json.NewNumericStringFromBigInt(big.NewInt(1000)),
 							},
 							Success:         false,
 							Acknowledgement: "acknowledgement",
@@ -1267,7 +1268,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 								Sender:   "from",
 								Receiver: "to",
 								Denom:    "basecro",
-								Amount:   json.NewNumericStringFromUint64(1000),
+								Amount:   json.NewNumericStringFromBigInt(big.NewInt(1000)),
 							},
 							Success:         false,
 							Acknowledgement: "acknowledgement",
@@ -1393,7 +1394,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 								Sender:   "from",
 								Receiver: "to",
 								Denom:    "basecro",
-								Amount:   json.NewNumericStringFromUint64(1000),
+								Amount:   json.NewNumericStringFromBigInt(big.NewInt(1000)),
 							},
 							Success:         true,
 							Acknowledgement: "acknowledgement",
@@ -1526,7 +1527,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 								Sender:   "from",
 								Receiver: "to",
 								Denom:    "basecro",
-								Amount:   json.NewNumericStringFromUint64(1000),
+								Amount:   json.NewNumericStringFromBigInt(big.NewInt(1000)),
 							},
 							Success:         true,
 							Acknowledgement: "acknowledgement",
@@ -1578,7 +1579,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 								Sender:   "from",
 								Receiver: "to",
 								Denom:    "basecro",
-								Amount:   json.NewNumericStringFromUint64(2000),
+								Amount:   json.NewNumericStringFromBigInt(big.NewInt(2000)),
 							},
 							Success:         true,
 							Acknowledgement: "acknowledgement",
@@ -1697,7 +1698,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 						SourceChannel:  "channel-2",
 						Token: usecase_model.CronosSendToIBCToken{
 							Denom:  "basecro",
-							Amount: json.NewNumericStringFromUint64(100),
+							Amount: json.NewNumericStringFromBigInt(big.NewInt(100)),
 						},
 						Sender:   "from",
 						Receiver: "to",
@@ -1779,7 +1780,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 						SourceChannel:  "channel-0",
 						Token: usecase_model.CronosSendToIBCToken{
 							Denom:  "basecro",
-							Amount: json.NewNumericStringFromUint64(100),
+							Amount: json.NewNumericStringFromBigInt(big.NewInt(100)),
 						},
 						Sender:   "from",
 						Receiver: "to",
@@ -1890,7 +1891,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 						SourceChannel:  "channel-0",
 						Token: usecase_model.CronosSendToIBCToken{
 							Denom:  "basecro",
-							Amount: json.NewNumericStringFromUint64(100),
+							Amount: json.NewNumericStringFromBigInt(big.NewInt(100)),
 						},
 						Sender:   "from",
 						Receiver: "to",
@@ -1920,7 +1921,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 						SourceChannel:  "channel-1",
 						Token: usecase_model.CronosSendToIBCToken{
 							Denom:  "basecro",
-							Amount: json.NewNumericStringFromUint64(200),
+							Amount: json.NewNumericStringFromBigInt(big.NewInt(200)),
 						},
 						Sender:   "from",
 						Receiver: "to",
@@ -2052,7 +2053,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 						SourceChannel:  "channel-0",
 						Token: usecase_model.CronosSendToIBCToken{
 							Denom:  "basecro",
-							Amount: json.NewNumericStringFromUint64(100),
+							Amount: json.NewNumericStringFromBigInt(big.NewInt(100)),
 						},
 						Sender:   "from",
 						Receiver: "to",
@@ -2082,7 +2083,7 @@ func TestBridgePendingActivity_HandleEvents(t *testing.T) {
 						SourceChannel:  "channel-1",
 						Token: usecase_model.CronosSendToIBCToken{
 							Denom:  "basecro",
-							Amount: json.NewNumericStringFromUint64(200),
+							Amount: json.NewNumericStringFromBigInt(big.NewInt(200)),
 						},
 						Sender:   "from",
 						Receiver: "to",

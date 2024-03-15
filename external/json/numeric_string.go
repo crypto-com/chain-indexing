@@ -3,13 +3,13 @@ package json
 import (
 	"fmt"
 	"math/big"
-	"strconv"
 
 	jsoniter "github.com/json-iterator/go"
 )
 
 // NumericString is numeric value stored in string representation. It supports
 // JSON unmarshalling from numeric and string.
+
 type NumericString struct {
 	v string
 }
@@ -22,8 +22,8 @@ func NewNumericString(v string) (*NumericString, error) {
 	return &NumericString{v: v}, nil
 }
 
-func NewNumericStringFromUint64(v uint64) *NumericString {
-	return &NumericString{v: strconv.FormatUint(v, 10)}
+func NewNumericStringFromBigInt(v *big.Int) *NumericString {
+	return &NumericString{v: v.String()}
 }
 
 func (u NumericString) String() string {
@@ -50,18 +50,12 @@ func (u *NumericString) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 
-	var uint64Val uint64
-	parseUint64ValErr := jsoniter.Unmarshal(data, &uint64Val)
-	if parseUint64ValErr == nil {
-		u.v = strconv.FormatUint(uint64Val, 10)
+	var bigIntVal big.Int
+	parseBigIntValErr := jsoniter.Unmarshal(data, &bigIntVal)
+	if parseBigIntValErr == nil {
+		u.v = bigIntVal.String()
 		return nil
 	}
-
-	var int64Val int64
-	if err := jsoniter.Unmarshal(data, &int64Val); err != nil {
-		return err
-	}
-	u.v = strconv.FormatInt(int64Val, 10)
 
 	return nil
 }
