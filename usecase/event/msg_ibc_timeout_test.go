@@ -1,6 +1,8 @@
 package event_test
 
 import (
+	"math/big"
+
 	"github.com/crypto-com/chain-indexing/external/json"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -26,7 +28,7 @@ var _ = Describe("Event", func() {
 			anyMessageType := "/ibc.applications.transfer.v1.MsgTransfer"
 			anyRefundReceiver := "cro1s7cu28403gzdvy5tttyskm3zxjejxcv63espre"
 			anyRefundDenom := "basecro"
-			anyRefundAmount := json.NewNumericStringFromUint64(1)
+			anyRefundAmount := json.NewNumericStringFromBigInt(big.NewInt(1))
 			anyPacketTimeoutHeight := ibc_model.Height{
 				RevisionNumber: 4,
 				RevisionHeight: 6182017,
@@ -124,7 +126,7 @@ var _ = Describe("Event", func() {
 			anyMessageType := "/ibc.applications.transfer.v1.MsgTransfer"
 			anyRefundReceiver := "cro1s7cu28403gzdvy5tttyskm3zxjejxcv63espre"
 			anyRefundDenom := "basecro"
-			anyRefundAmount := json.NewNumericStringFromUint64(1)
+			anyRefundAmount := json.NewNumericStringFromBigInt(big.NewInt(1))
 			anyPacketTimeoutHeight := ibc_model.Height{
 				RevisionNumber: 4,
 				RevisionHeight: 6182017,
