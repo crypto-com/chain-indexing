@@ -787,11 +787,6 @@ func ParseMsgRecvPacket(
 		panic(fmt.Errorf("error decoding RawMsgRecvPacket: %v", err))
 	}
 
-	if !IsPacketMsgTransfer(rawMsg.Packet, &parserParams.TxsResult.Log[parserParams.MsgIndex]) {
-		// unsupported application
-		return []command.Command{}, []string{}
-	}
-
 	// Transfer application, MsgTransfer
 	var rawFungibleTokenPacketData ibc_model.FungibleTokenPacketData
 	rawPacketData, err := base64_internal.DecodeString(rawMsg.Packet.Data)
@@ -824,6 +819,11 @@ func ParseMsgRecvPacket(
 
 			msgRecvPacketParams,
 		)}, possibleSignerAddresses
+	}
+
+	if !IsPacketMsgTransfer(rawMsg.Packet, &parserParams.TxsResult.Log[parserParams.MsgIndex]) {
+		// unsupported application
+		return []command.Command{}, []string{}
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -924,11 +924,6 @@ func ParseMsgAcknowledgement(
 		panic(fmt.Errorf("error decoding RawMsgAcknowledgement: %v", err))
 	}
 
-	if !IsPacketMsgTransfer(rawMsg.Packet, &parserParams.TxsResult.Log[parserParams.MsgIndex]) {
-		// unsupported application
-		return []command.Command{}, []string{}
-	}
-
 	// Transfer application, MsgTransfer
 	var rawFungibleTokenPacketData ibc_model.FungibleTokenPacketData
 	rawPacketData, err := base64_internal.DecodeString(rawMsg.Packet.Data)
@@ -961,6 +956,11 @@ func ParseMsgAcknowledgement(
 
 			msgAcknowledgementParams,
 		)}, possibleSignerAddresses
+	}
+
+	if !IsPacketMsgTransfer(rawMsg.Packet, &parserParams.TxsResult.Log[parserParams.MsgIndex]) {
+		// unsupported application
+		return []command.Command{}, []string{}
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -1146,11 +1146,6 @@ func ParseMsgTimeout(
 		panic(fmt.Errorf("error decoding RawMsgTimeout: %v", err))
 	}
 
-	if !IsPacketMsgTransfer(rawMsg.Packet, &parserParams.TxsResult.Log[parserParams.MsgIndex]) {
-		// unsupported application
-		return []command.Command{}, []string{}
-	}
-
 	if !parserParams.MsgCommonParams.TxSuccess {
 		msgTimeoutParams := ibc_model.MsgTimeoutParams{
 			RawMsgTimeout: rawMsg,
@@ -1168,6 +1163,11 @@ func ParseMsgTimeout(
 
 			msgTimeoutParams,
 		)}, possibleSignerAddresses
+	}
+
+	if !IsPacketMsgTransfer(rawMsg.Packet, &parserParams.TxsResult.Log[parserParams.MsgIndex]) {
+		// unsupported application
+		return []command.Command{}, []string{}
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
@@ -1267,11 +1267,6 @@ func ParseMsgTimeoutOnClose(
 		panic(fmt.Errorf("error decoding RawMsgTimeoutOnClose: %v", err))
 	}
 
-	if !IsPacketMsgTransfer(rawMsg.Packet, &parserParams.TxsResult.Log[parserParams.MsgIndex]) {
-		// unsupported application
-		return []command.Command{}, []string{}
-	}
-
 	if !parserParams.MsgCommonParams.TxSuccess {
 		msgTimeoutOnCloseParams := ibc_model.MsgTimeoutOnCloseParams{
 			RawMsgTimeoutOnClose: rawMsg,
@@ -1289,6 +1284,11 @@ func ParseMsgTimeoutOnClose(
 
 			msgTimeoutOnCloseParams,
 		)}, possibleSignerAddresses
+	}
+
+	if !IsPacketMsgTransfer(rawMsg.Packet, &parserParams.TxsResult.Log[parserParams.MsgIndex]) {
+		// unsupported application
+		return []command.Command{}, []string{}
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
