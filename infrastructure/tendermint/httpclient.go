@@ -259,7 +259,7 @@ func (client *HTTPClient) request(method string, queryKVs ...queryKV) (io.ReadCl
 		}
 		bodyJsonMap := make(map[string]interface{})
 		if err = json.Unmarshal([]byte(rawRespBody), &bodyJsonMap); err != nil {
-			return nil, fmt.Errorf("error unmarshalling Body : %w", err)
+			return nil, fmt.Errorf("error unmarshalling Body : %w: %s", err, string(rawRespBody))
 		}
 
 		return nil, fmt.Errorf("error requesting Tendermint %s %s endpoint: %s Body: %v Header: %v", method, url, rawResp.Status, bodyJsonMap, rawResp.Header)
