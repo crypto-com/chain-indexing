@@ -49,6 +49,10 @@ type BankBalancesResp struct {
 	Pagination           Pagination    `json:"pagination"`
 }
 
+type BankBalanceByDenomResp struct {
+	BalanceResponse BankBalance `json:"balance"`
+}
+
 type BankBalance struct {
 	Amount string `json:"amount"`
 	Denom  string `json:"denom"`

@@ -231,6 +231,31 @@ func (client *HTTPClient) Balances(accountAddress string) (coin.Coins, error) {
 	return balances, nil
 }
 
+func (client *HTTPClient) BalanceByDenom(accountAddress string, denom string) (coin.Coin, error) {
+	var resp BankBalanceByDenomResp
+
+	queryUrl := fmt.Sprintf(
+		"%s/%s/by_denom?denom=%s",
+		client.getUrl("bank", "balances"), accountAddress, url.QueryEscape(denom),
+	)
+
+	rawRespBody, err := client.request(queryUrl)
+	if err != nil {
+		return coin.Coin{}, err
+	}
+	defer rawRespBody.Close()
+
+	if err := jsoniter.NewDecoder(rawRespBody).Decode(&resp); err != nil {
+		return coin.Coin{}, err
+	}
+	balance, coinErr := coin.NewCoinFromString(resp.BalanceResponse.Denom, resp.BalanceResponse.Amount)
+	if coinErr != nil {
+		return coin.Coin{}, coinErr
+	}
+
+	return balance, nil
+}
+
 func (client *HTTPClient) BondedBalance(accountAddress string) (coin.Coins, error) {
 	resp := &DelegationsResp{
 		MaybePagination: &Pagination{
@@ -376,6 +401,31 @@ func (client *HTTPClient) UnbondingBalance(accountAddress string) (coin.Coins, e
 	return balance, nil
 }
 
+func (client *HTTPClient) SupplyByDenom(denom string) (coin.Coin, error) {
+	var resp SupplyResp
+
+	queryUrl := fmt.Sprintf(
+		"%s/by_denom?denom=%s",
+		client.getUrl("bank", "supply"), url.QueryEscape(denom),
+	)
+
+	rawRespBody, err := client.request(queryUrl)
+	if err != nil {
+		return coin.Coin{}, err
+	}
+	defer rawRespBody.Close()
+
+	if err := jsoniter.NewDecoder(rawRespBody).Decode(&resp); err != nil {
+		return coin.Coin{}, err
+	}
+	supply, coinErr := coin.NewCoinFromString(resp.AmountResp.Denom, resp.AmountResp.Amount)
+	if coinErr != nil {
+		return coin.Coin{}, coinErr
+	}
+
+	return supply, nil
+}
+
 func (client *HTTPClient) TotalRewards(accountAddress string) (coin.DecCoins, error) {
 	rawRespBody, err := client.request(
 		fmt.Sprintf(
@@ -403,6 +453,22 @@ func (client *HTTPClient) TotalRewards(accountAddress string) (coin.DecCoins, er
 		rewards = rewards.Add(rewardCoin)
 	}
 	return rewards, nil
+}
+
+func (client *HTTPClient) CommunityPool() (coin.DecCoins, error) {
+	var resp CommunityPoolResp
+	queryUrl := client.getUrl("distribution", "community_pool")
+	rawRespBody, err := client.request(queryUrl)
+	if err != nil {
+		return nil, err
+	}
+	defer rawRespBody.Close()
+
+	if decodeErr := jsoniter.NewDecoder(rawRespBody).Decode(&resp); decodeErr != nil {
+		return nil, decodeErr
+	}
+
+	return resp.Pool, nil
 }
 
 func (client *HTTPClient) Validator(validatorAddress string) (*cosmosapp_interface.Validator, error) {
