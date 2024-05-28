@@ -11,12 +11,16 @@ import (
 type Client interface {
 	Account(accountAddress string) (*Account, error)
 	Balances(accountAddress string) (coin.Coins, error)
+	BalanceByDenom(accountAddresss string, denom string) (coin.Coin, error)
 	BondedBalance(accountAddress string) (coin.Coins, error)
 	RedelegatingBalance(accountAddress string) (coin.Coins, error)
 	UnbondingBalance(accountAddress string) (coin.Coins, error)
 
+	SupplyByDenom(denom string) (coin.Coin, error)
+
 	TotalRewards(accountAddress string) (coin.DecCoins, error)
 	Commission(validatorAddress string) (coin.DecCoins, error)
+	CommunityPool() (coin.DecCoins, error)
 
 	Validator(validatorAddress string) (*Validator, error)
 	Delegation(delegator string, validator string) (*DelegationResponse, error)

@@ -28,6 +28,12 @@ func (conn *MockClient) Balances(accountAddress string) (coin.Coins, error) {
 	return result, mockArgs.Error(1)
 }
 
+func (conn *MockClient) BalanceByDenom(accountAddress string, denom string) (coin.Coin, error) {
+	mockArgs := conn.Called(accountAddress, denom)
+	result, _ := mockArgs.Get(0).(coin.Coin)
+	return result, mockArgs.Error(1)
+}
+
 func (conn *MockClient) BondedBalance(accountAddress string) (coin.Coins, error) {
 	mockArgs := conn.Called(accountAddress)
 	result, _ := mockArgs.Get(0).(coin.Coins)
@@ -46,6 +52,12 @@ func (conn *MockClient) UnbondingBalance(accountAddress string) (coin.Coins, err
 	return result, mockArgs.Error(1)
 }
 
+func (conn *MockClient) SupplyByDenom(denom string) (coin.Coin, error) {
+	mockArgs := conn.Called(denom)
+	result, _ := mockArgs.Get(0).(coin.Coin)
+	return result, mockArgs.Error(1)
+}
+
 func (conn *MockClient) TotalRewards(accountAddress string) (coin.DecCoins, error) {
 	mockArgs := conn.Called(accountAddress)
 	result, _ := mockArgs.Get(0).(coin.DecCoins)
@@ -54,6 +66,12 @@ func (conn *MockClient) TotalRewards(accountAddress string) (coin.DecCoins, erro
 
 func (conn *MockClient) Commission(validatorAddress string) (coin.DecCoins, error) {
 	mockArgs := conn.Called(validatorAddress)
+	result, _ := mockArgs.Get(0).(coin.DecCoins)
+	return result, mockArgs.Error(1)
+}
+
+func (conn *MockClient) CommunityPool() (coin.DecCoins, error) {
+	mockArgs := conn.Called()
 	result, _ := mockArgs.Get(0).(coin.DecCoins)
 	return result, mockArgs.Error(1)
 }
