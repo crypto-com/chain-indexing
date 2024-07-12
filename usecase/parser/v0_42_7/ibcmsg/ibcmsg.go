@@ -75,7 +75,7 @@ func ParseMsgTransfer(
 	if err != nil {
 		rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
 	} else {
-		if err := json.Unmarshal(rawPacketData, &rawFungibleTokenPacketData); err != nil {
+		if err = json.Unmarshal(rawPacketData, &rawFungibleTokenPacketData); err != nil {
 			rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
 		}
 	}
