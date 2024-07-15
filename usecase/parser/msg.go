@@ -2374,6 +2374,14 @@ func ParseMsgEthereumTx(
 			commands = append(commands, cmds...)
 			possibleSignerAddresses = append(possibleSignerAddresses, signers...)
 		}
+
+		// parse MsgRecvPacket
+		recvPacketEvents := log.GetEventsByType("recv_packet")
+		if len(recvPacketEvents) > 0 {
+			cmds, signers := ibc.ParseMsgRecvPacket(parserParams)
+			commands = append(commands, cmds...)
+			possibleSignerAddresses = append(possibleSignerAddresses, signers...)
+		}
 	}
 	// Getting possible signer address from Msg
 	// FIXME: https://github.com/crypto-com/chain-indexing/issues/729

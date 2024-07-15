@@ -146,7 +146,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			"receiver": "tcro1pdn2nsn9wesz6px3lcjsgmp8pefednzp3gmp3q",
 			"denom": "transfer/channel-0/basetcro",
 			"amount": "200000002700066912",
-			"success": true,
+			"success": false,
 			"maybeDenominationTrace": null
 		},
 		"packetSequence": "15",
@@ -328,7 +328,7 @@ var _ = Describe("ParseMsgCommands", func() {
 			"receiver": "tcro14wku4hr74m0m4tvexs4f6jvuy6vnu2x2dg7hsy",
 			"denom": "solotoken",
 			"amount": "20",
-			"success": false,
+			"success": true,
 			"maybeDenominationTrace": {
 				"hash": "1A35E932DCE61466ED9F72D0B436628C388FB1BC60CB23A055039B7DE54883CC",
 				"denom": "ibc/1A35E932DCE61466ED9F72D0B436628C388FB1BC60CB23A055039B7DE54883CC"

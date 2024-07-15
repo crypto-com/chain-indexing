@@ -3,7 +3,9 @@ package ibc
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/crypto-com/chain-indexing/external/json"
@@ -787,14 +789,33 @@ func ParseMsgRecvPacket(
 		panic(fmt.Errorf("error decoding RawMsgRecvPacket: %v", err))
 	}
 
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
+
+	recvPacketEvent := log.GetEventByType("recv_packet")
+	if recvPacketEvent == nil {
+		parserParams.Logger.Warnf("missing `recv_packet` event in TxsResult log on TxHash: %s", parserParams.MsgCommonParams.TxHash)
+	}
+
 	// Transfer application, MsgTransfer
 	var rawFungibleTokenPacketData ibc_model.FungibleTokenPacketData
 	rawPacketData, err := base64_internal.DecodeString(rawMsg.Packet.Data)
 	if err != nil {
 		rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
 	} else {
-		if err := json.Unmarshal(rawPacketData, &rawFungibleTokenPacketData); err != nil {
-			rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
+		if err = json.Unmarshal(rawPacketData, &rawFungibleTokenPacketData); err != nil {
+			// try to get `packet` data from `recv_packet` events
+			if recvPacketEvent.HasAttribute("packet_data_hex") {
+				packetDataHex := recvPacketEvent.MustGetAttributeByKey("packet_data_hex")
+				var packetData []byte
+				packetData, err = hex.DecodeString(packetDataHex)
+				if err == nil {
+					if err = json.Unmarshal(packetData, &rawFungibleTokenPacketData); err != nil {
+						parserParams.Logger.Warnf("error unmarshalling packet data hex")
+					}
+				}
+			} else {
+				rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
+			}
 		}
 	}
 
@@ -826,26 +847,46 @@ func ParseMsgRecvPacket(
 		return []command.Command{}, []string{}
 	}
 
-	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
-
-	recvPacketEvents := log.GetEventsByType("recv_packet")
-	if recvPacketEvents == nil {
-		parserParams.Logger.Warnf("missing `recv_packet` event in TxsResult log on TxHash: %s", parserParams.MsgCommonParams.TxHash)
-	}
-
 	var packetSequence uint64
 	var channelOrdering string
 	var connectionID string
-	for _, recvPacketEvent := range recvPacketEvents {
-		if recvPacketEvent.HasAttribute("packet_sequence") {
-			packetSequence = typeconv.MustAtou64(recvPacketEvent.MustGetAttributeByKey("packet_sequence"))
+
+	if recvPacketEvent.HasAttribute("packet_sequence") {
+		sequence := recvPacketEvent.MustGetAttributeByKey("packet_sequence")
+		rawMsg.Packet.Sequence = sequence
+		packetSequence = typeconv.MustAtou64(sequence)
+	}
+	if recvPacketEvent.HasAttribute("packet_channel_ordering") {
+		channelOrdering = recvPacketEvent.MustGetAttributeByKey("packet_channel_ordering")
+	}
+	if recvPacketEvent.HasAttribute("packet_connection") {
+		connectionID = recvPacketEvent.MustGetAttributeByKey("packet_connection")
+	}
+	if recvPacketEvent.HasAttribute("packet_timeout_height") {
+		packetTimeoutHeight := recvPacketEvent.MustGetAttributeByKey("packet_timeout_height")
+		var revisionHeight uint64
+		revisionHeight, err = strconv.ParseUint(packetTimeoutHeight, 10, 64)
+		if err == nil {
+			rawMsg.Packet.TimeoutHeight.RevisionHeight = revisionHeight
 		}
-		if recvPacketEvent.HasAttribute("packet_channel_ordering") {
-			channelOrdering = recvPacketEvent.MustGetAttributeByKey("packet_channel_ordering")
-		}
-		if recvPacketEvent.HasAttribute("packet_connection") {
-			connectionID = recvPacketEvent.MustGetAttributeByKey("packet_connection")
-		}
+	}
+	if recvPacketEvent.HasAttribute("packet_timeout_timestamp") {
+		rawMsg.Packet.TimeoutTimestamp = recvPacketEvent.MustGetAttributeByKey("packet_timeout_timestamp")
+	}
+	if recvPacketEvent.HasAttribute("packet_sequence") {
+		rawMsg.Packet.Sequence = recvPacketEvent.MustGetAttributeByKey("packet_sequence")
+	}
+	if recvPacketEvent.HasAttribute("packet_src_port") {
+		rawMsg.Packet.SourcePort = recvPacketEvent.MustGetAttributeByKey("packet_src_port")
+	}
+	if recvPacketEvent.HasAttribute("packet_src_channel") {
+		rawMsg.Packet.SourceChannel = recvPacketEvent.MustGetAttributeByKey("packet_src_channel")
+	}
+	if recvPacketEvent.HasAttribute("packet_dst_port") {
+		rawMsg.Packet.DestinationPort = recvPacketEvent.MustGetAttributeByKey("packet_dst_port")
+	}
+	if recvPacketEvent.HasAttribute("packet_dst_channel") {
+		rawMsg.Packet.DestinationChannel = recvPacketEvent.MustGetAttributeByKey("packet_dst_channel")
 	}
 
 	fungibleTokenPacketEvent := log.GetEventByType("fungible_token_packet")
@@ -895,7 +936,7 @@ func ParseMsgRecvPacket(
 		MessageType: "/ibc.applications.transfer.v1.MsgTransfer",
 		MaybeFungibleTokenPacketData: &ibc_model.MsgRecvPacketFungibleTokenPacketData{
 			FungibleTokenPacketData: rawFungibleTokenPacketData,
-			Success:                 fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "false",
+			Success:                 fungibleTokenPacketEvent.MustGetAttributeByKey("success") == "true",
 			MaybeDenominationTrace:  maybeDenominationTrace,
 		},
 
@@ -930,7 +971,7 @@ func ParseMsgAcknowledgement(
 	if err != nil {
 		rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
 	} else {
-		if err := json.Unmarshal(rawPacketData, &rawFungibleTokenPacketData); err != nil {
+		if err = json.Unmarshal(rawPacketData, &rawFungibleTokenPacketData); err != nil {
 			rawFungibleTokenPacketData = ibc_model.FungibleTokenPacketData{}
 		}
 	}
@@ -972,7 +1013,9 @@ func ParseMsgAcknowledgement(
 	var connectionID string
 	for _, acknowledgePacketEvent := range acknowledgePacketEvents {
 		if acknowledgePacketEvent.HasAttribute("packet_sequence") {
-			packetSequence = typeconv.MustAtou64(acknowledgePacketEvent.MustGetAttributeByKey("packet_sequence"))
+			sequence := acknowledgePacketEvent.MustGetAttributeByKey("packet_sequence")
+			rawMsg.Packet.Sequence = sequence
+			packetSequence = typeconv.MustAtou64(sequence)
 		}
 		if acknowledgePacketEvent.HasAttribute("packet_channel_ordering") {
 			channelOrdering = acknowledgePacketEvent.MustGetAttributeByKey("packet_channel_ordering")
@@ -983,7 +1026,15 @@ func ParseMsgAcknowledgement(
 		if acknowledgePacketEvent.HasAttribute("packet_src_channel") {
 			rawMsg.Packet.SourceChannel = acknowledgePacketEvent.MustGetAttributeByKey("packet_src_channel")
 		}
-
+		if acknowledgePacketEvent.HasAttribute("packet_src_port") {
+			rawMsg.Packet.SourcePort = acknowledgePacketEvent.MustGetAttributeByKey("packet_src_port")
+		}
+		if acknowledgePacketEvent.HasAttribute("packet_dst_port") {
+			rawMsg.Packet.DestinationPort = acknowledgePacketEvent.MustGetAttributeByKey("packet_dst_port")
+		}
+		if acknowledgePacketEvent.HasAttribute("packet_dst_channel") {
+			rawMsg.Packet.DestinationChannel = acknowledgePacketEvent.MustGetAttributeByKey("packet_dst_channel")
+		}
 	}
 
 	fungibleTokenPacketEvents := log.GetEventsByType("fungible_token_packet")
@@ -1097,6 +1148,16 @@ func IsPacketMsgTransfer(
 	if timeoutPacketEvent != nil {
 		if timeoutPacketEvent.HasAttribute("packet_dst_port") {
 			if timeoutPacketEvent.MustGetAttributeByKey("packet_dst_port") == "transfer" {
+				return true
+			}
+		}
+	}
+
+	// check for evm msgRecvPacket
+	recvPacketEvent := log.GetEventByType("recv_packet")
+	if recvPacketEvent != nil {
+		if recvPacketEvent.HasAttribute("packet_dst_port") {
+			if recvPacketEvent.MustGetAttributeByKey("packet_dst_port") == "transfer" {
 				return true
 			}
 		}
