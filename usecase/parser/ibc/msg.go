@@ -1154,11 +1154,13 @@ func IsPacketMsgTransfer(
 	}
 
 	// check for evm msgRecvPacket
-	recvPacketEvent := log.GetEventByType("recv_packet")
-	if recvPacketEvent != nil {
-		if recvPacketEvent.HasAttribute("packet_dst_port") {
-			if recvPacketEvent.MustGetAttributeByKey("packet_dst_port") == "transfer" {
-				return true
+	recvPacketEvents := log.GetEventsByType("recv_packet")
+	if len(recvPacketEvents) > 0 {
+		for _, recvPacketEvent := range recvPacketEvents {
+			if recvPacketEvent.HasAttribute("packet_dst_port") {
+				if recvPacketEvent.MustGetAttributeByKey("packet_dst_port") == "transfer" {
+					return true
+				}
 			}
 		}
 	}
