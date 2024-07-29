@@ -196,6 +196,31 @@ func ParseMsgConnectionOpenInit(
 	if event == nil {
 		panic("missing `connection_open_init` event in TxsResult log")
 	}
+
+	if parserParams.IsEthereumTxInnerMsg {
+		msgConnectionOpenInitParams := ibc_model.MsgConnectionOpenInitParams{
+			RawMsgConnectionOpenInit: ibc_model.RawMsgConnectionOpenInit{
+				ClientID: event.MustGetAttributeByKey("client_id"),
+				Counterparty: ibc_model.ConnectionCounterparty{
+					ClientID:     event.MustGetAttributeByKey("counterparty_client_id"),
+					ConnectionID: event.MustGetAttributeByKey("counterparty_connection_id"),
+				},
+			},
+
+			ConnectionID: event.MustGetAttributeByKey("connection_id"),
+		}
+
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgConnectionOpenInitParams.Signer)
+
+		return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenInit(
+			parserParams.MsgCommonParams,
+
+			msgConnectionOpenInitParams,
+		)}, possibleSignerAddresses
+	}
+
 	msgConnectionOpenInitParams := ibc_model.MsgConnectionOpenInitParams{
 		RawMsgConnectionOpenInit: rawMessage,
 
@@ -248,6 +273,30 @@ func ParseMsgConnectionOpenTry(
 	event := log.GetEventByType("connection_open_try")
 	if event == nil {
 		panic("missing `connection_open_try` event in TxsResult log")
+	}
+
+	if parserParams.IsEthereumTxInnerMsg {
+		msgConnectionOpenTryParams := ibc_model.MsgConnectionOpenTryParams{
+			MsgConnectionOpenTryBaseParams: ibc_model.MsgConnectionOpenTryBaseParams{
+				ClientID: event.MustGetAttributeByKey("client_id"),
+				Counterparty: ibc_model.ConnectionCounterparty{
+					ClientID:     event.MustGetAttributeByKey("counterparty_client_id"),
+					ConnectionID: event.MustGetAttributeByKey("counterparty_connection_id"),
+				},
+			},
+
+			ConnectionID: event.MustGetAttributeByKey("connection_id"),
+		}
+
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgConnectionOpenTryParams.Signer)
+
+		return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenTry(
+			parserParams.MsgCommonParams,
+
+			msgConnectionOpenTryParams,
+		)}, possibleSignerAddresses
 	}
 
 	msgConnectionOpenTryParams := ibc_model.MsgConnectionOpenTryParams{
@@ -304,6 +353,28 @@ func ParseMsgConnectionOpenAck(
 		panic("missing `connection_open_ack` event in TxsResult log")
 	}
 
+	if parserParams.IsEthereumTxInnerMsg {
+		msgConnectionOpenAckParams := ibc_model.MsgConnectionOpenAckParams{
+			MsgConnectionOpenAckBaseParams: ibc_model.MsgConnectionOpenAckBaseParams{
+				ConnectionID:             event.MustGetAttributeByKey("connection_id"),
+				CounterpartyConnectionID: event.MustGetAttributeByKey("counterparty_connection_id"),
+			},
+
+			ClientID:             event.MustGetAttributeByKey("client_id"),
+			CounterpartyClientID: event.MustGetAttributeByKey("counterparty_client_id"),
+		}
+
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgConnectionOpenAckParams.Signer)
+
+		return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenAck(
+			parserParams.MsgCommonParams,
+
+			msgConnectionOpenAckParams,
+		)}, possibleSignerAddresses
+	}
+
 	msgConnectionOpenAckParams := ibc_model.MsgConnectionOpenAckParams{
 		MsgConnectionOpenAckBaseParams: rawMsg.MsgConnectionOpenAckBaseParams,
 		MaybeTendermintClientState:     &rawMsg.TendermintClientState,
@@ -351,6 +422,28 @@ func ParseMsgConnectionOpenConfirm(
 		panic("missing `connection_open_confirm` event in TxsResult log")
 	}
 
+	if parserParams.IsEthereumTxInnerMsg {
+		msgConnectionOpenConfirmParams := ibc_model.MsgConnectionOpenConfirmParams{
+			RawMsgConnectionOpenConfirm: ibc_model.RawMsgConnectionOpenConfirm{
+				ConnectionID: event.MustGetAttributeByKey("connection_id"),
+			},
+
+			ClientID:                 event.MustGetAttributeByKey("client_id"),
+			CounterpartyClientID:     event.MustGetAttributeByKey("counterparty_client_id"),
+			CounterpartyConnectionID: event.MustGetAttributeByKey("counterparty_connection_id"),
+		}
+
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgConnectionOpenConfirmParams.Signer)
+
+		return []command.Command{command_usecase.NewCreateMsgIBCConnectionOpenConfirm(
+			parserParams.MsgCommonParams,
+
+			msgConnectionOpenConfirmParams,
+		)}, possibleSignerAddresses
+	}
+
 	msgConnectionOpenConfirmParams := ibc_model.MsgConnectionOpenConfirmParams{
 		RawMsgConnectionOpenConfirm: rawMsg,
 
@@ -393,6 +486,35 @@ func ParseMsgChannelOpenInit(
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
+	if parserParams.IsEthereumTxInnerMsg {
+		events := log.GetEventsByType("channel_open_init")
+		for _, event := range events {
+			msgChannelOpenInitParams := ibc_model.MsgChannelOpenInitParams{
+				RawMsgChannelOpenInit: ibc_model.RawMsgChannelOpenInit{
+					PortID: event.MustGetAttributeByKey("port_id"),
+					Channel: ibc_model.Channel{
+						Counterparty: ibc_model.ChannelCounterparty{
+							PortID:    event.MustGetAttributeByKey("counterparty_port_id"),
+							ChannelID: event.MustGetAttributeByKey("counterparty_channel_id"),
+						},
+					},
+				},
+
+				ChannelID:    event.MustGetAttributeByKey("channel_id"),
+				ConnectionID: event.MustGetAttributeByKey("connection_id"),
+			}
+			// Getting possible signer address from Msg
+			var possibleSignerAddresses []string
+			possibleSignerAddresses = append(possibleSignerAddresses, msgChannelOpenInitParams.Signer)
+
+			return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenInit(
+				parserParams.MsgCommonParams,
+
+				msgChannelOpenInitParams,
+			)}, possibleSignerAddresses
+		}
+	}
+
 	event := log.GetEventByType("channel_open_init")
 	if event == nil {
 		panic("missing `channel_open_init` event in TxsResult log")
@@ -445,6 +567,33 @@ func ParseMsgChannelOpenTry(
 		panic("missing `channel_open_try` event in TxsResult log")
 	}
 
+	if parserParams.IsEthereumTxInnerMsg {
+		msgChannelOpenTryParams := ibc_model.MsgChannelOpenTryParams{
+			RawMsgChannelOpenTry: ibc_model.RawMsgChannelOpenTry{
+				PortID: event.MustGetAttributeByKey("port_id"),
+				Channel: ibc_model.Channel{
+					Counterparty: ibc_model.ChannelCounterparty{
+						PortID:    event.MustGetAttributeByKey("counterparty_port_id"),
+						ChannelID: event.MustGetAttributeByKey("counterparty_channel_id"),
+					},
+				},
+			},
+
+			ChannelID:    event.MustGetAttributeByKey("channel_id"),
+			ConnectionID: event.MustGetAttributeByKey("connection_id"),
+		}
+
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgChannelOpenTryParams.Signer)
+
+		return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenTry(
+			parserParams.MsgCommonParams,
+
+			msgChannelOpenTryParams,
+		)}, possibleSignerAddresses
+	}
+
 	msgChannelOpenTryParams := ibc_model.MsgChannelOpenTryParams{
 		RawMsgChannelOpenTry: rawMsg,
 
@@ -492,6 +641,29 @@ func ParseMsgChannelOpenAck(
 		panic("missing `channel_open_ack` event in TxsResult log")
 	}
 
+	if parserParams.IsEthereumTxInnerMsg {
+		msgChannelOpenAckParams := ibc_model.MsgChannelOpenAckParams{
+			RawMsgChannelOpenAck: ibc_model.RawMsgChannelOpenAck{
+				PortID:                event.MustGetAttributeByKey("port_id"),
+				ChannelID:             event.MustGetAttributeByKey("channel_id"),
+				CounterpartyChannelID: event.MustGetAttributeByKey("counterparty_channel_id"),
+			},
+
+			CounterpartyPortID: event.MustGetAttributeByKey("counterparty_port_id"),
+			ConnectionID:       event.MustGetAttributeByKey("connection_id"),
+		}
+
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgChannelOpenAckParams.Signer)
+
+		return []command.Command{command_usecase.NewCreateMsgIBCChannelOpenAck(
+			parserParams.MsgCommonParams,
+
+			msgChannelOpenAckParams,
+		)}, possibleSignerAddresses
+	}
+
 	msgChannelOpenAckParams := ibc_model.MsgChannelOpenAckParams{
 		RawMsgChannelOpenAck: rawMsg,
 
@@ -536,6 +708,13 @@ func ParseMsgChannelOpenConfirm(
 	event := log.GetEventByType("channel_open_confirm")
 	if event == nil {
 		panic("missing `channel_open_confirm` event in TxsResult log")
+	}
+
+	if rawMsg.PortID == "" {
+		rawMsg.PortID = event.MustGetAttributeByKey("port_id")
+	}
+	if rawMsg.ChannelID == "" {
+		rawMsg.ChannelID = event.MustGetAttributeByKey("channel_id")
 	}
 
 	msgChannelOpenConfirmParams := ibc_model.MsgChannelOpenConfirmParams{
@@ -751,6 +930,47 @@ func ParseMsgTransfer(
 	event := log.GetEventByType("send_packet")
 	if event == nil {
 		panic("missing `send_packet` event in TxsResult log")
+	}
+
+	if parserParams.IsEthereumTxInnerMsg {
+		// Transfer application, MsgTransfer
+		packetData := event.MustGetAttributeByKey("packet_data")
+		var fungiblePacketData ibc_model.FungibleTokenPacketData
+
+		if unmarshalErr := jsoniter.Unmarshal([]byte(packetData), &fungiblePacketData); unmarshalErr != nil {
+			panic("unable to parse `send_packet` event, key `packet_data`")
+		}
+
+		msgTransferParams := ibc_model.MsgTransferParams{
+			RawMsgTransfer: ibc_model.RawMsgTransfer{
+				Token: ibc_model.MsgTransferToken{
+					Denom:  fungiblePacketData.Denom,
+					Amount: fungiblePacketData.Amount,
+				},
+				Sender:           fungiblePacketData.Sender,
+				Receiver:         fungiblePacketData.Receiver,
+				SourcePort:       event.MustGetAttributeByKey("packet_src_port"),
+				SourceChannel:    event.MustGetAttributeByKey("packet_src_channel"),
+				TimeoutHeight:    MustParseHeight(event.MustGetAttributeByKey("packet_timeout_height")),
+				TimeoutTimestamp: event.MustGetAttributeByKey("packet_timeout_timestamp"),
+			},
+
+			PacketSequence:     typeconv.MustAtou64(event.MustGetAttributeByKey("packet_sequence")),
+			DestinationPort:    event.MustGetAttributeByKey("packet_dst_port"),
+			DestinationChannel: event.MustGetAttributeByKey("packet_dst_channel"),
+			ChannelOrdering:    event.MustGetAttributeByKey("packet_channel_ordering"),
+			ConnectionID:       event.MustGetAttributeByKey("packet_connection"),
+			PacketData:         fungiblePacketData,
+		}
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgTransferParams.Sender)
+
+		return []command.Command{command_usecase.NewCreateMsgIBCTransferTransfer(
+			parserParams.MsgCommonParams,
+
+			msgTransferParams,
+		)}, possibleSignerAddresses
 	}
 
 	packetData := event.MustGetAttributeByKey("packet_data")
@@ -1437,6 +1657,29 @@ func ParseMsgChannelCloseInit(
 		panic("missing `channel_close_init` event in TxsResult log")
 	}
 
+	if parserParams.IsEthereumTxInnerMsg {
+		msgChannelCloseInitParams := ibc_model.MsgChannelCloseInitParams{
+			RawMsgChannelCloseInit: ibc_model.RawMsgChannelCloseInit{
+				PortID:    event.MustGetAttributeByKey("port_id"),
+				ChannelID: event.MustGetAttributeByKey("channel_id"),
+			},
+
+			CounterpartyPortID:    event.MustGetAttributeByKey("counterparty_port_id"),
+			CounterpartyChannelID: event.MustGetAttributeByKey("counterparty_channel_id"),
+			ConnectionID:          event.MustGetAttributeByKey("connection_id"),
+		}
+
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgChannelCloseInitParams.Signer)
+
+		return []command.Command{command_usecase.NewCreateMsgIBCChannelCloseInit(
+			parserParams.MsgCommonParams,
+
+			msgChannelCloseInitParams,
+		)}, possibleSignerAddresses
+	}
+
 	msgChannelCloseInitParams := ibc_model.MsgChannelCloseInitParams{
 		RawMsgChannelCloseInit: rawMsg,
 
@@ -1482,6 +1725,29 @@ func ParseMsgChannelCloseConfirm(
 	event := log.GetEventByType("channel_close_confirm")
 	if event == nil {
 		panic("missing `channel_close_confirm` event in TxsResult log")
+	}
+
+	if parserParams.IsEthereumTxInnerMsg {
+		msgChannelCloseConfirmParams := ibc_model.MsgChannelCloseConfirmParams{
+			RawMsgChannelCloseConfirm: ibc_model.RawMsgChannelCloseConfirm{
+				PortID:    event.MustGetAttributeByKey("port_id"),
+				ChannelID: event.MustGetAttributeByKey("channel_id"),
+			},
+
+			CounterpartyPortID:    event.MustGetAttributeByKey("counterparty_port_id"),
+			CounterpartyChannelID: event.MustGetAttributeByKey("counterparty_channel_id"),
+			ConnectionID:          event.MustGetAttributeByKey("connection_id"),
+		}
+
+		// Getting possible signer address from Msg
+		var possibleSignerAddresses []string
+		possibleSignerAddresses = append(possibleSignerAddresses, msgChannelCloseConfirmParams.Signer)
+
+		return []command.Command{command_usecase.NewCreateMsgIBCChannelCloseConfirm(
+			parserParams.MsgCommonParams,
+
+			msgChannelCloseConfirmParams,
+		)}, possibleSignerAddresses
 	}
 
 	msgChannelCloseConfirmParams := ibc_model.MsgChannelCloseConfirmParams{
