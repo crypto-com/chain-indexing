@@ -927,41 +927,43 @@ func ParseMsgTransfer(
 	}
 
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
-	event := log.GetEventByType("send_packet")
-	if event == nil {
-		panic("missing `send_packet` event in TxsResult log")
-	}
 
 	if parserParams.IsEthereumTxInnerMsg {
-		// Transfer application, MsgTransfer
-		packetData := event.MustGetAttributeByKey("packet_data")
-		var fungiblePacketData ibc_model.FungibleTokenPacketData
+		events := log.GetEventsByType("send_packet")
 
-		if unmarshalErr := jsoniter.Unmarshal([]byte(packetData), &fungiblePacketData); unmarshalErr != nil {
-			panic("unable to parse `send_packet` event, key `packet_data`")
-		}
+		var msgTransferParams ibc_model.MsgTransferParams
+		for _, event := range events {
+			// Transfer application, MsgTransfer
+			packetData := event.MustGetAttributeByKey("packet_data")
+			var fungiblePacketData ibc_model.FungibleTokenPacketData
 
-		msgTransferParams := ibc_model.MsgTransferParams{
-			RawMsgTransfer: ibc_model.RawMsgTransfer{
-				Token: ibc_model.MsgTransferToken{
-					Denom:  fungiblePacketData.Denom,
-					Amount: fungiblePacketData.Amount,
+			if unmarshalErr := jsoniter.Unmarshal([]byte(packetData), &fungiblePacketData); unmarshalErr != nil {
+				panic("unable to parse `send_packet` event, key `packet_data`")
+			}
+
+			msgTransferParams = ibc_model.MsgTransferParams{
+				RawMsgTransfer: ibc_model.RawMsgTransfer{
+					Token: ibc_model.MsgTransferToken{
+						Denom:  fungiblePacketData.Denom,
+						Amount: fungiblePacketData.Amount,
+					},
+					Sender:           fungiblePacketData.Sender,
+					Receiver:         fungiblePacketData.Receiver,
+					SourcePort:       event.MustGetAttributeByKey("packet_src_port"),
+					SourceChannel:    event.MustGetAttributeByKey("packet_src_channel"),
+					TimeoutHeight:    MustParseHeight(event.MustGetAttributeByKey("packet_timeout_height")),
+					TimeoutTimestamp: event.MustGetAttributeByKey("packet_timeout_timestamp"),
 				},
-				Sender:           fungiblePacketData.Sender,
-				Receiver:         fungiblePacketData.Receiver,
-				SourcePort:       event.MustGetAttributeByKey("packet_src_port"),
-				SourceChannel:    event.MustGetAttributeByKey("packet_src_channel"),
-				TimeoutHeight:    MustParseHeight(event.MustGetAttributeByKey("packet_timeout_height")),
-				TimeoutTimestamp: event.MustGetAttributeByKey("packet_timeout_timestamp"),
-			},
 
-			PacketSequence:     typeconv.MustAtou64(event.MustGetAttributeByKey("packet_sequence")),
-			DestinationPort:    event.MustGetAttributeByKey("packet_dst_port"),
-			DestinationChannel: event.MustGetAttributeByKey("packet_dst_channel"),
-			ChannelOrdering:    event.MustGetAttributeByKey("packet_channel_ordering"),
-			ConnectionID:       event.MustGetAttributeByKey("packet_connection"),
-			PacketData:         fungiblePacketData,
+				PacketSequence:     typeconv.MustAtou64(event.MustGetAttributeByKey("packet_sequence")),
+				DestinationPort:    event.MustGetAttributeByKey("packet_dst_port"),
+				DestinationChannel: event.MustGetAttributeByKey("packet_dst_channel"),
+				ChannelOrdering:    event.MustGetAttributeByKey("packet_channel_ordering"),
+				ConnectionID:       event.MustGetAttributeByKey("packet_connection"),
+				PacketData:         fungiblePacketData,
+			}
 		}
+
 		// Getting possible signer address from Msg
 		var possibleSignerAddresses []string
 		possibleSignerAddresses = append(possibleSignerAddresses, msgTransferParams.Sender)
@@ -971,6 +973,11 @@ func ParseMsgTransfer(
 
 			msgTransferParams,
 		)}, possibleSignerAddresses
+	}
+
+	event := log.GetEventByType("send_packet")
+	if event == nil {
+		panic("missing `send_packet` event in TxsResult log")
 	}
 
 	packetData := event.MustGetAttributeByKey("packet_data")
