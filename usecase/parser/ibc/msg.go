@@ -930,8 +930,6 @@ func ParseMsgTransfer(
 
 	if parserParams.IsEthereumTxInnerMsg {
 		events := log.GetEventsByType("send_packet")
-
-		var msgTransferParams ibc_model.MsgTransferParams
 		for _, event := range events {
 			// Transfer application, MsgTransfer
 			packetData := event.MustGetAttributeByKey("packet_data")
@@ -941,7 +939,7 @@ func ParseMsgTransfer(
 				panic("unable to parse `send_packet` event, key `packet_data`")
 			}
 
-			msgTransferParams = ibc_model.MsgTransferParams{
+			msgTransferParams := ibc_model.MsgTransferParams{
 				RawMsgTransfer: ibc_model.RawMsgTransfer{
 					Token: ibc_model.MsgTransferToken{
 						Denom:  fungiblePacketData.Denom,
@@ -962,17 +960,17 @@ func ParseMsgTransfer(
 				ConnectionID:       event.MustGetAttributeByKey("packet_connection"),
 				PacketData:         fungiblePacketData,
 			}
+
+			// Getting possible signer address from Msg
+			var possibleSignerAddresses []string
+			possibleSignerAddresses = append(possibleSignerAddresses, msgTransferParams.Sender)
+
+			return []command.Command{command_usecase.NewCreateMsgIBCTransferTransfer(
+				parserParams.MsgCommonParams,
+
+				msgTransferParams,
+			)}, possibleSignerAddresses
 		}
-
-		// Getting possible signer address from Msg
-		var possibleSignerAddresses []string
-		possibleSignerAddresses = append(possibleSignerAddresses, msgTransferParams.Sender)
-
-		return []command.Command{command_usecase.NewCreateMsgIBCTransferTransfer(
-			parserParams.MsgCommonParams,
-
-			msgTransferParams,
-		)}, possibleSignerAddresses
 	}
 
 	event := log.GetEventByType("send_packet")
