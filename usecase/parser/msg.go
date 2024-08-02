@@ -2505,7 +2505,8 @@ func ParseMsgEthereumTx(
 		// parse msgTransfer
 		case log.HasEvent("send_packet"):
 			{
-				if log.GetEventByType("send_packet") != nil {
+				sendEvents := log.GetEventsByType("send_packet")
+				if len(sendEvents) > 0 {
 					parserParams.IsEthereumTxInnerMsg = true
 					cmds, signers := ibc.ParseMsgTransfer(parserParams)
 					commands = append(commands, cmds...)
