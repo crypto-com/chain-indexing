@@ -241,10 +241,13 @@ func ParseMsgConnectionOpenInit(
 func ParseMsgConnectionOpenTry(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
-	clientStateType := parserParams.Msg["client_state"].(map[string]interface{})["@type"]
-	if clientStateType != "/ibc.lightclients.tendermint.v1.ClientState" {
-		// TODO: SoloMachine and Localhost LightClient
-		return []command.Command{}, []string{}
+	clientState, ok := parserParams.Msg["client_state"]
+	if ok {
+		clientStateType := clientState.(map[string]interface{})["@type"]
+		if clientStateType != "/ibc.lightclients.tendermint.v1.ClientState" {
+			// TODO: SoloMachine and Localhost LightClient
+			return []command.Command{}, []string{}
+		}
 	}
 
 	var rawMsg ibc_model.RawMsgConnectionOpenTryTendermintClient
@@ -319,10 +322,13 @@ func ParseMsgConnectionOpenTry(
 func ParseMsgConnectionOpenAck(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
-	clientStateType := parserParams.Msg["client_state"].(map[string]interface{})["@type"]
-	if clientStateType != "/ibc.lightclients.tendermint.v1.ClientState" {
-		// TODO: SoloMachine and Localhost LightClient
-		return []command.Command{}, []string{}
+	clientState, ok := parserParams.Msg["client_state"]
+	if ok {
+		clientStateType := clientState.(map[string]interface{})["@type"]
+		if clientStateType != "/ibc.lightclients.tendermint.v1.ClientState" {
+			// TODO: SoloMachine and Localhost LightClient
+			return []command.Command{}, []string{}
+		}
 	}
 
 	var rawMsg ibc_model.RawMsgConnectionOpenAckTendermintClient
