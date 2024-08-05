@@ -6,7 +6,7 @@ GOLANGCI_LINT_VERSION := "v1.49.0"
 GO = $(shell command -v go)
 GINKGO = $(shell command -v ginkgo)
 DOCKER = $(shell command -v docker)
-DOCKER_COMPOSE = $(shell command -v docker-compose)
+DOCKER_COMPOSE = $(shell command -v docker compose)
 
 TEST_DB ?= 1
 
@@ -30,7 +30,7 @@ endif
 
 has_docker_compose:
 ifndef DOCKER_COMPOSE
-	@echo "docker-compose not found. Please install docker-compose and try again."
+	@echo "docker compose not found. Please install docker compose and try again."
 	@exit 1
 endif
 
@@ -49,7 +49,7 @@ build_ginkgo_image:
 
 test: has_docker has_docker_compose has_golang build_ginkgo_image
 ifeq ($(TEST_DB), 1)
-	docker-compose -f docker/docker-compose.test.yml up --abort-on-container-exit
+	docker compose -f docker/docker-compose.test.yml up --abort-on-container-exit
 else
 	# TODO: Migrate coin test cases to Ginkgo
 	docker run --rm -v $(shell pwd):/app -w /app \
