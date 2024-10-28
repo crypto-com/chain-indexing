@@ -128,7 +128,8 @@ func ParseMsgSubmitProposal(
 		case "/cosmos.gov.v1.MsgExecLegacyContent",
 			"/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
 			"/cosmos.upgrade.v1beta1.MsgCancelUpgrade",
-			"/ethermint.feemarket.v1.MsgUpdateParams":
+			"/ethermint.feemarket.v1.MsgUpdateParams",
+			"/cosmos.consensus.v1.MsgUpdateParams":
 			break
 		default:
 			parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(innerMsgType), utils.ParserBlockHeight(blockHeight))
