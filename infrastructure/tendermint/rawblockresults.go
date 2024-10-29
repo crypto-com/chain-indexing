@@ -61,4 +61,7 @@ type RawBlockResultsConsensusParamUpdates struct {
 	Validator struct {
 		PubKeyTypes []string `json:"pub_key_types"`
 	} `json:"validator"`
+	Version struct {
+		AppVersion string `json:"app_version"`
+	} `json:"version"`
 }

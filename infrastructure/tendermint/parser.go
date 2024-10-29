@@ -297,5 +297,8 @@ func parseBlockResultsConsensusParamsUpdates(rawUpdates RawBlockResultsConsensus
 		Validator: model.BlockResultsConsensusParamsUpdatesValidator{
 			PubKeyTypes: validatorPubKeyTypes,
 		},
+		Version: model.BlockResultsConsensusParamsUpdatesVersion{
+			AppVersion: rawUpdates.Version.AppVersion,
+		},
 	}
 }
