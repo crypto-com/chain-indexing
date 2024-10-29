@@ -62,6 +62,7 @@ type BlockResultsConsensusParamUpdates struct {
 	Block     BlockResultsConsensusParamUpdatesBlock      `json:"block"`
 	Evidence  BlockResultsConsensusParamUpdatesEvidence   `json:"evidence"`
 	Validator BlockResultsConsensusParamsUpdatesValidator `json:"validator"`
+	Version   BlockResultsConsensusParamsUpdatesVersion   `json:"version"`
 }
 
 type BlockResultsConsensusParamUpdatesBlock struct {
@@ -77,4 +78,8 @@ type BlockResultsConsensusParamUpdatesEvidence struct {
 
 type BlockResultsConsensusParamsUpdatesValidator struct {
 	PubKeyTypes []string `json:"pubKeyTypes"`
+}
+
+type BlockResultsConsensusParamsUpdatesVersion struct {
+	AppVersion string `json:"appVersion"`
 }
