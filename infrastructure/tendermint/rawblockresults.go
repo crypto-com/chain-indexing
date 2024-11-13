@@ -5,8 +5,10 @@ type RawBlockResults struct {
 	TxsResults            []RawBlockResultsTxsResult           `json:"txs_results"`
 	BeginBlockEvents      []RawBlockResultsEvent               `json:"begin_block_events"`
 	EndBlockEvents        []RawBlockResultsEvent               `json:"end_block_events"`
+	FinalizeBlockEvents   []RawBlockResultsEvent               `json:"finalize_block_events"`
 	ValidatorUpdates      []RawBlockResultsValidatorUpdate     `json:"validator_updates"`
 	ConsensusParamUpdates RawBlockResultsConsensusParamUpdates `json:"consensus_param_updates"`
+	AppHash               string                               `json:"app_hash"`
 }
 
 type RawBlockResultsTxsResult struct {

@@ -121,12 +121,22 @@ func ParseBlockResultsResp(rawRespReader io.Reader, eventAttributeDecoder tender
 		return nil, fmt.Errorf("error converting block height to unsigned integer: %v", err)
 	}
 
+	var beginBlockEvents []model.BlockResultsEvent
+	var endBlockEvents []model.BlockResultsEvent
+
+	if len(rawBlockResults.FinalizeBlockEvents) > 0 {
+		beginBlockEvents, endBlockEvents = ParseEthermintBlockResultfFinalizeBlockEvents(rawBlockResults.FinalizeBlockEvents, eventAttributeDecoder)
+	} else {
+		beginBlockEvents = parseBlockResultsEvents(rawBlockResults.BeginBlockEvents, eventAttributeDecoder)
+		endBlockEvents = parseBlockResultsEvents(rawBlockResults.EndBlockEvents, eventAttributeDecoder)
+	}
+
 	txsResults := parseBlockResultsTxsResults(rawBlockResults.TxsResults, eventAttributeDecoder)
 	return &model.BlockResults{
 		Height:                int64(height),
 		TxsResults:            txsResults,
-		BeginBlockEvents:      parseBlockResultsEvents(rawBlockResults.BeginBlockEvents, eventAttributeDecoder),
-		EndBlockEvents:        parseBlockResultsEvents(rawBlockResults.EndBlockEvents, eventAttributeDecoder),
+		BeginBlockEvents:      beginBlockEvents,
+		EndBlockEvents:        endBlockEvents,
 		ValidatorUpdates:      parseBlockResultsValidatorUpdates(rawBlockResults.ValidatorUpdates),
 		ConsensusParamUpdates: parseBlockResultsConsensusParamsUpdates(rawBlockResults.ConsensusParamUpdates),
 	}, nil
@@ -233,6 +243,58 @@ func parseBlockResultsEvents(rawEvents []RawBlockResultsEvent, eventAttributeDec
 	}
 
 	return events
+}
+
+func ParseEthermintBlockResultfFinalizeBlockEvents(rawEvents []RawBlockResultsEvent, eventAttributeDecoder tendermint_interface.BlockResultEventAttributeDecoder) ([]model.BlockResultsEvent, []model.BlockResultsEvent) {
+	if rawEvents == nil {
+		return []model.BlockResultsEvent{}, []model.BlockResultsEvent{}
+	}
+
+	beginBlockEvents := make([]model.BlockResultsEvent, 0, len(rawEvents))
+	endBlockEvents := make([]model.BlockResultsEvent, 0, len(rawEvents))
+	for _, rawEvent := range rawEvents {
+		mode := ""
+		attributes := make([]model.BlockResultsEventAttribute, 0, len(rawEvent.Attributes))
+		for _, rawAttribute := range rawEvent.Attributes {
+			key, err := eventAttributeDecoder.DecodeKey(rawAttribute.Key)
+			if err != nil {
+				key = rawAttribute.Key
+			}
+			value, err := eventAttributeDecoder.DecodeValue(rawAttribute.Value)
+			if err != nil {
+				value = rawAttribute.Value
+			}
+
+			if rawAttribute.Key == "mode" {
+				mode = rawAttribute.Value
+			}
+
+			attributes = append(attributes, model.BlockResultsEventAttribute{
+				Key:   key,
+				Value: value,
+				Index: rawAttribute.Index,
+			})
+		}
+
+		switch mode {
+		case "BeginBlock":
+			{
+				beginBlockEvents = append(beginBlockEvents, model.BlockResultsEvent{
+					Type:       rawEvent.Type,
+					Attributes: attributes,
+				})
+			}
+		case "EndBlock":
+			{
+				endBlockEvents = append(endBlockEvents, model.BlockResultsEvent{
+					Type:       rawEvent.Type,
+					Attributes: attributes,
+				})
+			}
+		}
+	}
+
+	return beginBlockEvents, endBlockEvents
 }
 
 func parseBlockResultsValidatorUpdates(rawUpdates []RawBlockResultsValidatorUpdate) []model.BlockResultsValidatorUpdate {
