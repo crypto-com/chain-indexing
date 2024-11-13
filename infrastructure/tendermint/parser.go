@@ -338,14 +338,6 @@ func mustBase64Decode(s string) string {
 	return string(decoded)
 }
 
-func base64Decode(s string) (string, error) {
-	decoded, err := base64.StdEncoding.DecodeString(s)
-	if err != nil {
-		return "", err
-	}
-	return string(decoded), nil
-}
-
 func parseBlockResultsConsensusParamsUpdates(rawUpdates RawBlockResultsConsensusParamUpdates) model.BlockResultsConsensusParamUpdates {
 	var validatorPubKeyTypes []string
 	if rawUpdates.Validator.PubKeyTypes == nil {
