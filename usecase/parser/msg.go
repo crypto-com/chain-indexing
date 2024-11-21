@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"encoding/base64"
 	"fmt"
 	"strconv"
 	"strings"
@@ -156,6 +157,7 @@ func ParseBlockTxsMsgToCommands(
 					ParserManager:        parserManager,
 					Logger:               parserManager.GetLogger(),
 					TxDecoder:            parserManager.TxDecoder,
+					EvmInnerMsgDecoder:   parserManager.EvmInnerMsgDecoder,
 					IsProposalInnerMsg:   false,
 					IsEthereumTxInnerMsg: false,
 				})
@@ -2344,176 +2346,183 @@ func ParseMsgEthereumTx(
 	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
 
 	if rawMsg.Data.Data != "" {
+		inputData, err := base64.StdEncoding.DecodeString(rawMsg.Data.Data)
+		if err != nil {
+			panic(fmt.Errorf("error decoding RawMsgEthereumTx.Data.Data: %v", err))
+		}
 
-		switch true {
 		// parse IBC msgChannelOpenInit
-		case log.HasEvent("channel_open_init"):
-			{
-				events := log.GetEventsByType("channel_open_init")
-				if len(events) > 0 {
-					for _, event := range events {
-						counterpartyPortId := event.GetAttributeByKey("counterparty_port_id")
-						if counterpartyPortId != nil {
-							if *counterpartyPortId == "icahost" {
-								parserParams.IsEthereumTxInnerMsg = true
-								cmds, signers := icaauth.ParseMsgRegisterAccount(parserParams)
-								commands = append(commands, cmds...)
-								possibleSignerAddresses = append(possibleSignerAddresses, signers...)
-								break
-							}
-						} else {
+		if log.HasEvent("channel_open_init") {
+			events := log.GetEventsByType("channel_open_init")
+			if len(events) > 0 {
+				for _, event := range events {
+					counterpartyPortId := event.GetAttributeByKey("counterparty_port_id")
+					if counterpartyPortId != nil {
+						if *counterpartyPortId == "icahost" {
 							parserParams.IsEthereumTxInnerMsg = true
-							cmds, signers := ibc.ParseMsgChannelOpenInit(parserParams)
+							cmds, signers := icaauth.ParseMsgRegisterAccount(parserParams)
 							commands = append(commands, cmds...)
 							possibleSignerAddresses = append(possibleSignerAddresses, signers...)
 							break
 						}
+					} else {
+						parserParams.IsEthereumTxInnerMsg = true
+						cmds, signers := ibc.ParseMsgChannelOpenInit(parserParams)
+						commands = append(commands, cmds...)
+						possibleSignerAddresses = append(possibleSignerAddresses, signers...)
+						break
 					}
 				}
 			}
-		// parse IBC msgChannelOpenTry
-		case log.HasEvent("channel_open_try"):
-			{
-				if log.GetEventByType("channel_open_try") != nil {
-					parserParams.IsEthereumTxInnerMsg = true
-					cmds, signers := ibc.ParseMsgChannelOpenTry(parserParams)
-					commands = append(commands, cmds...)
-					possibleSignerAddresses = append(possibleSignerAddresses, signers...)
-				}
+		} else if log.HasEvent("channel_open_try") {
+			// parse IBC msgChannelOpenTry
+			if log.GetEventByType("channel_open_try") != nil {
+				parserParams.IsEthereumTxInnerMsg = true
+				cmds, signers := ibc.ParseMsgChannelOpenTry(parserParams)
+				commands = append(commands, cmds...)
+				possibleSignerAddresses = append(possibleSignerAddresses, signers...)
 			}
-		// parse IBC msgChannelOpenAck
-		case log.HasEvent("channel_open_ack"):
-			{
-				if log.GetEventByType("channel_open_ack") != nil {
-					parserParams.IsEthereumTxInnerMsg = true
-					cmds, signers := ibc.ParseMsgChannelOpenAck(parserParams)
-					commands = append(commands, cmds...)
-					possibleSignerAddresses = append(possibleSignerAddresses, signers...)
-				}
+		} else if log.HasEvent("channel_open_ack") {
+			// parse IBC msgChannelOpenAck
+
+			if log.GetEventByType("channel_open_ack") != nil {
+				parserParams.IsEthereumTxInnerMsg = true
+				cmds, signers := ibc.ParseMsgChannelOpenAck(parserParams)
+				commands = append(commands, cmds...)
+				possibleSignerAddresses = append(possibleSignerAddresses, signers...)
 			}
-		// parse IBC msgChannelOpenConfirm
-		case log.HasEvent("channel_open_confirm"):
-			{
-				if log.GetEventByType("channel_open_confirm") != nil {
-					parserParams.IsEthereumTxInnerMsg = true
-					cmds, signers := ibc.ParseMsgChannelOpenConfirm(parserParams)
-					commands = append(commands, cmds...)
-					possibleSignerAddresses = append(possibleSignerAddresses, signers...)
-				}
+		} else if log.HasEvent("channel_open_confirm") {
+			// parse IBC msgChannelOpenConfirm
+
+			if log.GetEventByType("channel_open_confirm") != nil {
+				parserParams.IsEthereumTxInnerMsg = true
+				cmds, signers := ibc.ParseMsgChannelOpenConfirm(parserParams)
+				commands = append(commands, cmds...)
+				possibleSignerAddresses = append(possibleSignerAddresses, signers...)
 			}
-		// parse ICA msgSendTx
-		case log.HasEvent("submit_msgs_result"):
-			{
-				if log.GetEventByType("submit_msgs_result") != nil {
-					parserParams.IsEthereumTxInnerMsg = true
-					cmds, signers := icaauth.ParseMsgSubmitTx(parserParams)
-					commands = append(commands, cmds...)
-					possibleSignerAddresses = append(possibleSignerAddresses, signers...)
-				}
+		} else if log.HasEvent("submit_msgs_result") {
+			// parse ICA msgSendTx
+			if log.GetEventByType("submit_msgs_result") != nil {
+				parserParams.IsEthereumTxInnerMsg = true
+				cmds, signers := icaauth.ParseMsgSubmitTx(parserParams)
+				commands = append(commands, cmds...)
+				possibleSignerAddresses = append(possibleSignerAddresses, signers...)
 			}
-		// parse MsgAcknowledgement
-		case log.HasEvent("acknowledge_packet"):
-			{
-				if log.GetEventByType("acknowledge_packet") != nil {
-					parserParams.IsEthereumTxInnerMsg = true
-					cmds, signers := ibc.ParseMsgAcknowledgement(parserParams)
-					commands = append(commands, cmds...)
-					possibleSignerAddresses = append(possibleSignerAddresses, signers...)
-				}
+		} else if log.HasEvent("acknowledge_packet") {
+			// parse MsgAcknowledgement
+			if log.GetEventByType("acknowledge_packet") != nil {
+				parserParams.IsEthereumTxInnerMsg = true
+				cmds, signers := ibc.ParseMsgAcknowledgement(parserParams)
+				commands = append(commands, cmds...)
+				possibleSignerAddresses = append(possibleSignerAddresses, signers...)
 			}
-		// parse MsgTimeout
-		case log.HasEvent("timeout_packet"):
-			{
-				if log.GetEventByType("timeout_packet") != nil {
-					parserParams.IsEthereumTxInnerMsg = true
-					cmds, signers := ibc.ParseMsgTimeout(parserParams)
-					commands = append(commands, cmds...)
-					possibleSignerAddresses = append(possibleSignerAddresses, signers...)
-				}
+		} else if log.HasEvent("timeout_packet") {
+			// parse MsgTimeout
+
+			if log.GetEventByType("timeout_packet") != nil {
+				parserParams.IsEthereumTxInnerMsg = true
+				cmds, signers := ibc.ParseMsgTimeout(parserParams)
+				commands = append(commands, cmds...)
+				possibleSignerAddresses = append(possibleSignerAddresses, signers...)
 			}
-		// parse MsgRecvPacket
-		case log.HasEvent("recv_packet"):
-			{
-				recvPacketEvents := log.GetEventsByType("recv_packet")
-				if len(recvPacketEvents) > 0 {
-					parserParams.IsEthereumTxInnerMsg = true
-					cmds, signers := ibc.ParseMsgRecvPacket(parserParams)
-					commands = append(commands, cmds...)
-					possibleSignerAddresses = append(possibleSignerAddresses, signers...)
-				}
+		} else if log.HasEvent("recv_packet") {
+			// parse MsgRecvPacket
+			recvPacketEvents := log.GetEventsByType("recv_packet")
+			if len(recvPacketEvents) > 0 {
+				parserParams.IsEthereumTxInnerMsg = true
+				cmds, signers := ibc.ParseMsgRecvPacket(parserParams)
+				commands = append(commands, cmds...)
+				possibleSignerAddresses = append(possibleSignerAddresses, signers...)
 			}
-		// parse msgChannelCloseInit
-		case log.HasEvent("channel_close_init"):
-			{
-				if log.GetEventByType("channel_close_init") != nil {
-					parserParams.IsEthereumTxInnerMsg = true
-					cmds, signers := ibc.ParseMsgChannelCloseInit(parserParams)
-					commands = append(commands, cmds...)
-					possibleSignerAddresses = append(possibleSignerAddresses, signers...)
-				}
+		} else if log.HasEvent("channel_close_init") {
+			// parse msgChannelCloseInit
+			if log.GetEventByType("channel_close_init") != nil {
+				parserParams.IsEthereumTxInnerMsg = true
+				cmds, signers := ibc.ParseMsgChannelCloseInit(parserParams)
+				commands = append(commands, cmds...)
+				possibleSignerAddresses = append(possibleSignerAddresses, signers...)
 			}
-		// parse msgChannelCloseConfirm
-		case log.HasEvent("channel_close_confirm"):
-			{
-				if log.GetEventByType("channel_close_confirm") != nil {
-					parserParams.IsEthereumTxInnerMsg = true
-					cmds, signers := ibc.ParseMsgChannelCloseConfirm(parserParams)
-					commands = append(commands, cmds...)
-					possibleSignerAddresses = append(possibleSignerAddresses, signers...)
-				}
+		} else if log.HasEvent("channel_close_confirm") {
+			// parse msgChannelCloseConfirm
+			if log.GetEventByType("channel_close_confirm") != nil {
+				parserParams.IsEthereumTxInnerMsg = true
+				cmds, signers := ibc.ParseMsgChannelCloseConfirm(parserParams)
+				commands = append(commands, cmds...)
+				possibleSignerAddresses = append(possibleSignerAddresses, signers...)
 			}
-		// parse msgConnectionOpenInit
-		case log.HasEvent("connection_open_init"):
-			{
-				if log.GetEventByType("connection_open_init") != nil {
-					parserParams.IsEthereumTxInnerMsg = true
-					cmds, signers := ibc.ParseMsgConnectionOpenInit(parserParams)
-					commands = append(commands, cmds...)
-					possibleSignerAddresses = append(possibleSignerAddresses, signers...)
-				}
+		} else if log.HasEvent("connection_open_init") {
+			// parse msgConnectionOpenInit
+			if log.GetEventByType("connection_open_init") != nil {
+				parserParams.IsEthereumTxInnerMsg = true
+				cmds, signers := ibc.ParseMsgConnectionOpenInit(parserParams)
+				commands = append(commands, cmds...)
+				possibleSignerAddresses = append(possibleSignerAddresses, signers...)
 			}
-		// parse msgConnectionOpenTry
-		case log.HasEvent("connection_open_try"):
-			{
-				if log.GetEventByType("connection_open_try") != nil {
-					parserParams.IsEthereumTxInnerMsg = true
-					cmds, signers := ibc.ParseMsgConnectionOpenTry(parserParams)
-					commands = append(commands, cmds...)
-					possibleSignerAddresses = append(possibleSignerAddresses, signers...)
-				}
+		} else if log.HasEvent("connection_open_try") {
+			// parse msgConnectionOpenTry
+			if log.GetEventByType("connection_open_try") != nil {
+				parserParams.IsEthereumTxInnerMsg = true
+				cmds, signers := ibc.ParseMsgConnectionOpenTry(parserParams)
+				commands = append(commands, cmds...)
+				possibleSignerAddresses = append(possibleSignerAddresses, signers...)
 			}
-		// parse msgConnectionOpenAck
-		case log.HasEvent("connection_open_ack"):
-			{
-				if log.GetEventByType("connection_open_ack") != nil {
-					parserParams.IsEthereumTxInnerMsg = true
-					cmds, signers := ibc.ParseMsgConnectionOpenAck(parserParams)
-					commands = append(commands, cmds...)
-					possibleSignerAddresses = append(possibleSignerAddresses, signers...)
-				}
+		} else if log.HasEvent("connection_open_ack") {
+			// parse msgConnectionOpenAck
+			if log.GetEventByType("connection_open_ack") != nil {
+				parserParams.IsEthereumTxInnerMsg = true
+				cmds, signers := ibc.ParseMsgConnectionOpenAck(parserParams)
+				commands = append(commands, cmds...)
+				possibleSignerAddresses = append(possibleSignerAddresses, signers...)
 			}
-		// parse msgConnectionOpenConfirm
-		case log.HasEvent("connection_open_confirm"):
-			{
-				if log.GetEventByType("connection_open_confirm") != nil {
-					parserParams.IsEthereumTxInnerMsg = true
-					cmds, signers := ibc.ParseMsgConnectionOpenConfirm(parserParams)
-					commands = append(commands, cmds...)
-					possibleSignerAddresses = append(possibleSignerAddresses, signers...)
-				}
+		} else if log.HasEvent("connection_open_confirm") {
+			// parse msgConnectionOpenConfirm
+			if log.GetEventByType("connection_open_confirm") != nil {
+				parserParams.IsEthereumTxInnerMsg = true
+				cmds, signers := ibc.ParseMsgConnectionOpenConfirm(parserParams)
+				commands = append(commands, cmds...)
+				possibleSignerAddresses = append(possibleSignerAddresses, signers...)
 			}
-		// parse msgTransfer
-		case log.HasEvent("send_packet"):
-			{
-				sendEvents := log.GetEventsByType("send_packet")
-				if len(sendEvents) > 0 {
-					parserParams.IsEthereumTxInnerMsg = true
-					cmds, signers := ibc.ParseMsgTransfer(parserParams)
-					commands = append(commands, cmds...)
-					possibleSignerAddresses = append(possibleSignerAddresses, signers...)
+		} else if log.HasEvent("send_packet") {
+			// parse msgTransfer
+			sendEvents := log.GetEventsByType("send_packet")
+			if len(sendEvents) > 0 {
+				parserParams.IsEthereumTxInnerMsg = true
+				cmds, signers := ibc.ParseMsgTransfer(parserParams)
+				commands = append(commands, cmds...)
+				possibleSignerAddresses = append(possibleSignerAddresses, signers...)
+			}
+		} else if log.HasEvent("create_client") {
+			// parse msgCreateClient
+			sendEvents := log.GetEventsByType("create_client")
+			if len(sendEvents) > 0 {
+				msg, err := parserParams.EvmInnerMsgDecoder.DecodeCosmosMsgFromTxInput(inputData, "MsgCreateClient")
+				if err != nil {
+					panic(fmt.Errorf("error deserializing MsgCreateClient: %v", err))
 				}
+
+				parserParams.Msg = msg
+				parserParams.IsEthereumTxInnerMsg = true
+				cmds, signers := ibc.ParseMsgCreateClient(parserParams)
+				commands = append(commands, cmds...)
+				possibleSignerAddresses = append(possibleSignerAddresses, signers...)
+			}
+		} else if log.HasEvent("update_client") {
+			// parse MsgUpdateClient
+			sendEvents := log.GetEventsByType("update_client")
+			if len(sendEvents) > 0 {
+				msg, err := parserParams.EvmInnerMsgDecoder.DecodeCosmosMsgFromTxInput(inputData, "MsgUpdateClient")
+				if err != nil {
+					panic(fmt.Errorf("error deserializing MsgUpdateClient: %v", err))
+				}
+
+				parserParams.Msg = msg
+				parserParams.IsEthereumTxInnerMsg = true
+				cmds, signers := ibc.ParseMsgUpdateClient(parserParams)
+				commands = append(commands, cmds...)
+				possibleSignerAddresses = append(possibleSignerAddresses, signers...)
 			}
 		}
+
 	}
 
 	// Getting possible signer address from Msg

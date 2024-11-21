@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
+	"github.com/crypto-com/chain-indexing/external/evminnermsgdecoder"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	"github.com/crypto-com/chain-indexing/usecase/event"
@@ -11,10 +12,11 @@ import (
 )
 
 type CosmosParserManager struct {
-	store     map[CosmosParserKey]BlockHeightToCosmosParserMap
-	logger    applogger.Logger
-	config    CosmosParserManagerConfig
-	TxDecoder txdecoder.TxDecoder
+	store              map[CosmosParserKey]BlockHeightToCosmosParserMap
+	logger             applogger.Logger
+	config             CosmosParserManagerConfig
+	TxDecoder          txdecoder.TxDecoder
+	EvmInnerMsgDecoder evminnermsgdecoder.EvmInnerMsgDecoder
 }
 
 type CosmosParserKey string
@@ -50,6 +52,7 @@ type CosmosParserParams struct {
 	ParserManager        *CosmosParserManager
 	Logger               applogger.Logger
 	TxDecoder            txdecoder.TxDecoder
+	EvmInnerMsgDecoder   evminnermsgdecoder.EvmInnerMsgDecoder
 	IsProposalInnerMsg   bool
 	IsEthereumTxInnerMsg bool
 }

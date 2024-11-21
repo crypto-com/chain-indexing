@@ -11,6 +11,7 @@ type RawMsgEthereumTx struct {
 	Data LegacyTx `mapstructure:"data" json:"data"`
 	From string   `mapstructure:"from" json:"from"`
 	Hash string   `mapstructure:"hash" json:"hash"`
+	Raw  *string  `mapstructure:"raw" json:"raw"`
 }
 
 type MsgEthereumTx struct {

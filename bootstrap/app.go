@@ -7,6 +7,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	config "github.com/crypto-com/chain-indexing/bootstrap/config"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
+	"github.com/crypto-com/chain-indexing/external/evminnermsgdecoder"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	"github.com/crypto-com/chain-indexing/infrastructure/metric/prometheus"
@@ -80,9 +81,9 @@ func (a *app) InitHTTPAPIServer(registry RouteRegistry) {
 	}
 }
 
-func (a *app) InitIndexService(projections []projection_entity.Projection, cronJobs []projection_entity.CronJob, txDecoder txdecoder.TxDecoder) {
+func (a *app) InitIndexService(projections []projection_entity.Projection, cronJobs []projection_entity.CronJob, txDecoder txdecoder.TxDecoder, evmInnerMsgDecoder evminnermsgdecoder.EvmInnerMsgDecoder) {
 	if a.config.IndexService.Enable {
-		a.indexService = NewIndexService(a.logger, a.rdbConn, a.config, projections, cronJobs, txDecoder)
+		a.indexService = NewIndexService(a.logger, a.rdbConn, a.config, projections, cronJobs, txDecoder, evmInnerMsgDecoder)
 	}
 }
 

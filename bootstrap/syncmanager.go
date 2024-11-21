@@ -1,7 +1,6 @@
 package bootstrap
 
 import (
-	"encoding/hex"
 	"fmt"
 	"time"
 
@@ -9,11 +8,11 @@ import (
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
 	tendermint_interface "github.com/crypto-com/chain-indexing/appinterface/tendermint"
+	"github.com/crypto-com/chain-indexing/external/evminnermsgdecoder"
 	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 
-	clienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	command_entity "github.com/crypto-com/chain-indexing/entity/command"
 	"github.com/crypto-com/chain-indexing/entity/event"
@@ -24,7 +23,6 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/parser"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	"github.com/crypto-com/chain-indexing/usecase/syncstrategy"
-	evmenc "github.com/evmos/ethermint/encoding"
 )
 
 const MAX_RETRY_TIME_ALWAYS_RETRY = 0
@@ -57,15 +55,17 @@ type SyncManager struct {
 
 	startingBlockHeight int64
 
-	txDecoder txdecoder.TxDecoder
+	txDecoder          txdecoder.TxDecoder
+	evmInnerMsgDecoder evminnermsgdecoder.EvmInnerMsgDecoder
 
 	eventAttributeDecoder tendermint_interface.BlockResultEventAttributeDecoder
 }
 
 type SyncManagerParams struct {
-	Logger    applogger.Logger
-	RDbConn   rdb.Conn
-	TxDecoder txdecoder.TxDecoder
+	Logger             applogger.Logger
+	RDbConn            rdb.Conn
+	TxDecoder          txdecoder.TxDecoder
+	EvmInnerMsgDecoder evminnermsgdecoder.EvmInnerMsgDecoder
 
 	Config SyncManagerConfig
 }
@@ -122,25 +122,6 @@ func NewSyncManager(
 		eventAttributeDecoder = &tendermint.RawBlockResultEventAttributeDecoder{}
 	}
 
-	s := "000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000001690ab0010a2b2f6962632e6c69676874636c69656e74732e74656e6465726d696e742e76312e436c69656e7453746174651280010a0c63726f6e6f735f3737372d311204080110031a03089003220308d8042a02081432003a050801108a0242190a090801180120012a0100120c0a02000110211804200c300142190a090801180120012a0100120c0a02000110201801200130014a07757067726164654a1075706772616465644942435374617465500158011286010a2e2f6962632e6c69676874636c69656e74732e74656e6465726d696e742e76312e436f6e73656e737573537461746512540a0c08d1bda0af061098e78a910312220a20747b8fa5d146"
-
-	data, err := hex.DecodeString(s)
-	if err != nil {
-		panic(err)
-	}
-
-	encodingConfig := evmenc.MakeConfig()
-	appCodec := encodingConfig.Codec
-
-	var m clienttypes.MsgCreateClient
-
-	err = appCodec.Unmarshal(data, &m)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Println(m)
-
 	return &SyncManager{
 		rdbConn:          params.RDbConn,
 		tendermintClient: tendermintClient,
@@ -166,7 +147,8 @@ func NewSyncManager(
 
 		startingBlockHeight: params.Config.StartingBlockHeight,
 
-		txDecoder: params.TxDecoder,
+		txDecoder:          params.TxDecoder,
+		evmInnerMsgDecoder: params.EvmInnerMsgDecoder,
 
 		eventAttributeDecoder: eventAttributeDecoder,
 	}
@@ -316,6 +298,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 	})
 
 	manager.parserManager.TxDecoder = manager.txDecoder
+	manager.parserManager.EvmInnerMsgDecoder = manager.evmInnerMsgDecoder
 	commands, err := parser.ParseBlockToCommands(
 		parseBlockToCommandsLogger,
 		manager.parserManager,
