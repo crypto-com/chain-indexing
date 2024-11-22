@@ -27,6 +27,12 @@ import (
 	mapstructure_utils "github.com/crypto-com/chain-indexing/usecase/parser/utils/mapstructure"
 )
 
+const (
+	// ibc core client
+	MSG_CREATE_CLIENT_TYPE_URL = "/ibc.core.client.v1.MsgCreateClient"
+	MSG_UPDATE_CLIENT_TYPE_URL = "/ibc.core.client.v1.MsgUpdateClient"
+)
+
 func ParseBlockTxsMsgToCommands(
 	parserManager *utils.CosmosParserManager,
 	blockHeight int64,
@@ -2503,7 +2509,7 @@ func ParseMsgEthereumTx(
 			// parse msgCreateClient
 			sendEvents := log.GetEventsByType("create_client")
 			if len(sendEvents) > 0 {
-				msg, err := parserParams.EvmInnerMsgDecoder.DecodeCosmosMsgFromTxInput(inputData, "MsgCreateClient")
+				msg, err := parserParams.EvmInnerMsgDecoder.DecodeCosmosMsgFromTxInput(inputData, MSG_CREATE_CLIENT_TYPE_URL)
 				if err != nil {
 					panic(fmt.Errorf("error deserializing MsgCreateClient: %v", err))
 				}
@@ -2518,7 +2524,7 @@ func ParseMsgEthereumTx(
 			// parse MsgUpdateClient
 			sendEvents := log.GetEventsByType("update_client")
 			if len(sendEvents) > 0 {
-				msg, err := parserParams.EvmInnerMsgDecoder.DecodeCosmosMsgFromTxInput(inputData, "MsgUpdateClient")
+				msg, err := parserParams.EvmInnerMsgDecoder.DecodeCosmosMsgFromTxInput(inputData, MSG_UPDATE_CLIENT_TYPE_URL)
 				if err != nil {
 					panic(fmt.Errorf("error deserializing MsgUpdateClient: %v", err))
 				}
