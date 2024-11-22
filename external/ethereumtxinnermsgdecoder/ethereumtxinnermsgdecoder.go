@@ -1,5 +1,5 @@
-package evminnermsgdecoder
+package ethereumtxinnermsgdecoder
 
-type EvmInnerMsgDecoder interface {
+type EthereumTxInnerMsgDecoder interface {
 	DecodeCosmosMsgFromTxInput([]byte, string) (map[string]interface{}, error)
 }

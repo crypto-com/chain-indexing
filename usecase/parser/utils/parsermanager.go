@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
-	"github.com/crypto-com/chain-indexing/external/evminnermsgdecoder"
+	"github.com/crypto-com/chain-indexing/external/ethereumtxinnermsgdecoder"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	"github.com/crypto-com/chain-indexing/usecase/event"
@@ -12,11 +12,11 @@ import (
 )
 
 type CosmosParserManager struct {
-	store              map[CosmosParserKey]BlockHeightToCosmosParserMap
-	logger             applogger.Logger
-	config             CosmosParserManagerConfig
-	TxDecoder          txdecoder.TxDecoder
-	EvmInnerMsgDecoder evminnermsgdecoder.EvmInnerMsgDecoder
+	store                     map[CosmosParserKey]BlockHeightToCosmosParserMap
+	logger                    applogger.Logger
+	config                    CosmosParserManagerConfig
+	TxDecoder                 txdecoder.TxDecoder
+	EthereumTxInnerMsgDecoder ethereumtxinnermsgdecoder.EthereumTxInnerMsgDecoder
 }
 
 type CosmosParserKey string
@@ -48,18 +48,18 @@ type CosmosParser func(
 ) ([]command.Command, []string)
 
 type CosmosParserParams struct {
-	AddressPrefix        string
-	StakingDenom         string
-	TxsResult            model.BlockResultsTxsResult
-	MsgCommonParams      event.MsgCommonParams
-	MsgIndex             int
-	Msg                  map[string]interface{}
-	ParserManager        *CosmosParserManager
-	Logger               applogger.Logger
-	TxDecoder            txdecoder.TxDecoder
-	EvmInnerMsgDecoder   evminnermsgdecoder.EvmInnerMsgDecoder
-	IsProposalInnerMsg   bool
-	IsEthereumTxInnerMsg bool
+	AddressPrefix             string
+	StakingDenom              string
+	TxsResult                 model.BlockResultsTxsResult
+	MsgCommonParams           event.MsgCommonParams
+	MsgIndex                  int
+	Msg                       map[string]interface{}
+	ParserManager             *CosmosParserManager
+	Logger                    applogger.Logger
+	TxDecoder                 txdecoder.TxDecoder
+	EthereumTxInnerMsgDecoder ethereumtxinnermsgdecoder.EthereumTxInnerMsgDecoder
+	IsProposalInnerMsg        bool
+	IsEthereumTxInnerMsg      bool
 }
 
 func NewCosmosParserManager(params CosmosParserManagerParams) *CosmosParserManager {

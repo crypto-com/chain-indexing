@@ -10,7 +10,7 @@ import (
 	"github.com/crypto-com/chain-indexing/bootstrap/config"
 	"github.com/crypto-com/chain-indexing/entity/event"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
-	"github.com/crypto-com/chain-indexing/external/evminnermsgdecoder"
+	"github.com/crypto-com/chain-indexing/external/ethereumtxinnermsgdecoder"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
@@ -42,8 +42,8 @@ type IndexService struct {
 	GithubAPIUser  string
 	GithubAPIToken string
 
-	txDecoder          txdecoder.TxDecoder
-	evmInnerMsgDecoder evminnermsgdecoder.EvmInnerMsgDecoder
+	txDecoder                 txdecoder.TxDecoder
+	ethereumTxInnerMsgDecoder ethereumtxinnermsgdecoder.EthereumTxInnerMsgDecoder
 }
 
 // NewIndexService creates a new server instance for polling and indexing
@@ -54,7 +54,7 @@ func NewIndexService(
 	projections []projection_entity.Projection,
 	cronJobs []projection_entity.CronJob,
 	txDecoder txdecoder.TxDecoder,
-	evmInnerMsgDecoder evminnermsgdecoder.EvmInnerMsgDecoder,
+	ethereumTxInnerMsgDecoder ethereumtxinnermsgdecoder.EthereumTxInnerMsgDecoder,
 ) *IndexService {
 	return &IndexService{
 		logger:      logger,
@@ -83,8 +83,8 @@ func NewIndexService(
 		GithubAPIUser:  config.IndexService.GithubAPI.Username,
 		GithubAPIToken: config.IndexService.GithubAPI.Token,
 
-		txDecoder:          txDecoder,
-		evmInnerMsgDecoder: evmInnerMsgDecoder,
+		txDecoder:                 txDecoder,
+		ethereumTxInnerMsgDecoder: ethereumTxInnerMsgDecoder,
 	}
 }
 
@@ -165,8 +165,8 @@ func (service *IndexService) RunEventStoreMode() error {
 				StartingBlockHeight:                   service.startingBlockHeight,
 				BlockResultEventAttributeDecodeMethod: service.BlockResultEventAttributeDecodeMethod,
 			},
-			TxDecoder:          service.txDecoder,
-			EvmInnerMsgDecoder: service.evmInnerMsgDecoder,
+			TxDecoder:                 service.txDecoder,
+			EthereumTxInnerMsgDecoder: service.ethereumTxInnerMsgDecoder,
 		},
 		utils.NewCosmosParserManager(
 			utils.CosmosParserManagerParams{
@@ -207,8 +207,8 @@ func (service *IndexService) RunTendermintDirectMode() error {
 						StartingBlockHeight:                   service.startingBlockHeight,
 						BlockResultEventAttributeDecodeMethod: service.BlockResultEventAttributeDecodeMethod,
 					},
-					TxDecoder:          service.txDecoder,
-					EvmInnerMsgDecoder: service.evmInnerMsgDecoder,
+					TxDecoder:                 service.txDecoder,
+					EthereumTxInnerMsgDecoder: service.ethereumTxInnerMsgDecoder,
 				},
 				utils.NewCosmosParserManager(
 					utils.CosmosParserManagerParams{

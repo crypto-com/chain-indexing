@@ -155,18 +155,18 @@ func ParseBlockTxsMsgToCommands(
 				parser := parserManager.GetParser(utils.CosmosParserKey(msgType.(string)), utils.ParserBlockHeight(blockHeight))
 
 				msgCommands, possibleSignerAddresses = parser(utils.CosmosParserParams{
-					AddressPrefix:        accountAddressPrefix,
-					StakingDenom:         stakingDenom,
-					TxsResult:            txsResult,
-					MsgCommonParams:      msgCommonParams,
-					Msg:                  msg,
-					MsgIndex:             msgIndex,
-					ParserManager:        parserManager,
-					Logger:               parserManager.GetLogger(),
-					TxDecoder:            parserManager.TxDecoder,
-					EvmInnerMsgDecoder:   parserManager.EvmInnerMsgDecoder,
-					IsProposalInnerMsg:   false,
-					IsEthereumTxInnerMsg: false,
+					AddressPrefix:             accountAddressPrefix,
+					StakingDenom:              stakingDenom,
+					TxsResult:                 txsResult,
+					MsgCommonParams:           msgCommonParams,
+					Msg:                       msg,
+					MsgIndex:                  msgIndex,
+					ParserManager:             parserManager,
+					Logger:                    parserManager.GetLogger(),
+					TxDecoder:                 parserManager.TxDecoder,
+					EthereumTxInnerMsgDecoder: parserManager.EthereumTxInnerMsgDecoder,
+					IsProposalInnerMsg:        false,
+					IsEthereumTxInnerMsg:      false,
 				})
 			}
 			addresses = append(addresses, possibleSignerAddresses...)
@@ -2509,7 +2509,7 @@ func ParseMsgEthereumTx(
 			// parse msgCreateClient
 			sendEvents := log.GetEventsByType("create_client")
 			if len(sendEvents) > 0 {
-				msg, err := parserParams.EvmInnerMsgDecoder.DecodeCosmosMsgFromTxInput(inputData, MSG_CREATE_CLIENT_TYPE_URL)
+				msg, err := parserParams.EthereumTxInnerMsgDecoder.DecodeCosmosMsgFromTxInput(inputData, MSG_CREATE_CLIENT_TYPE_URL)
 				if err != nil {
 					panic(fmt.Errorf("error deserializing MsgCreateClient: %v", err))
 				}
@@ -2524,7 +2524,7 @@ func ParseMsgEthereumTx(
 			// parse MsgUpdateClient
 			sendEvents := log.GetEventsByType("update_client")
 			if len(sendEvents) > 0 {
-				msg, err := parserParams.EvmInnerMsgDecoder.DecodeCosmosMsgFromTxInput(inputData, MSG_UPDATE_CLIENT_TYPE_URL)
+				msg, err := parserParams.EthereumTxInnerMsgDecoder.DecodeCosmosMsgFromTxInput(inputData, MSG_UPDATE_CLIENT_TYPE_URL)
 				if err != nil {
 					panic(fmt.Errorf("error deserializing MsgUpdateClient: %v", err))
 				}

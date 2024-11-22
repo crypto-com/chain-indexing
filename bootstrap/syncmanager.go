@@ -8,7 +8,7 @@ import (
 	cosmosapp_interface "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
 	tendermint_interface "github.com/crypto-com/chain-indexing/appinterface/tendermint"
-	"github.com/crypto-com/chain-indexing/external/evminnermsgdecoder"
+	"github.com/crypto-com/chain-indexing/external/ethereumtxinnermsgdecoder"
 	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -55,17 +55,17 @@ type SyncManager struct {
 
 	startingBlockHeight int64
 
-	txDecoder          txdecoder.TxDecoder
-	evmInnerMsgDecoder evminnermsgdecoder.EvmInnerMsgDecoder
+	txDecoder                 txdecoder.TxDecoder
+	ethereumTxInnerMsgDecoder ethereumtxinnermsgdecoder.EthereumTxInnerMsgDecoder
 
 	eventAttributeDecoder tendermint_interface.BlockResultEventAttributeDecoder
 }
 
 type SyncManagerParams struct {
-	Logger             applogger.Logger
-	RDbConn            rdb.Conn
-	TxDecoder          txdecoder.TxDecoder
-	EvmInnerMsgDecoder evminnermsgdecoder.EvmInnerMsgDecoder
+	Logger                    applogger.Logger
+	RDbConn                   rdb.Conn
+	TxDecoder                 txdecoder.TxDecoder
+	EthereumTxInnerMsgDecoder ethereumtxinnermsgdecoder.EthereumTxInnerMsgDecoder
 
 	Config SyncManagerConfig
 }
@@ -147,8 +147,8 @@ func NewSyncManager(
 
 		startingBlockHeight: params.Config.StartingBlockHeight,
 
-		txDecoder:          params.TxDecoder,
-		evmInnerMsgDecoder: params.EvmInnerMsgDecoder,
+		txDecoder:                 params.TxDecoder,
+		ethereumTxInnerMsgDecoder: params.EthereumTxInnerMsgDecoder,
 
 		eventAttributeDecoder: eventAttributeDecoder,
 	}
@@ -298,7 +298,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 	})
 
 	manager.parserManager.TxDecoder = manager.txDecoder
-	manager.parserManager.EvmInnerMsgDecoder = manager.evmInnerMsgDecoder
+	manager.parserManager.EthereumTxInnerMsgDecoder = manager.ethereumTxInnerMsgDecoder
 	commands, err := parser.ParseBlockToCommands(
 		parseBlockToCommandsLogger,
 		manager.parserManager,

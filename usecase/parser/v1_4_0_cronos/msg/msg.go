@@ -253,7 +253,7 @@ func ParseMsgEthereumTx(
 			// parse msgCreateClient
 			sendEvents := events.GetEventsByType("create_client")
 			if len(sendEvents) > 0 {
-				msg, err := parserParams.EvmInnerMsgDecoder.DecodeCosmosMsgFromTxInput(inputData, "MsgCreateClient")
+				msg, err := parserParams.EthereumTxInnerMsgDecoder.DecodeCosmosMsgFromTxInput(inputData, "MsgCreateClient")
 				if err != nil {
 					panic(fmt.Errorf("error deserializing MsgCreateClient: %v", err))
 				}
@@ -268,7 +268,7 @@ func ParseMsgEthereumTx(
 			// parse MsgUpdateClient
 			sendEvents := events.GetEventsByType("update_client")
 			if len(sendEvents) > 0 {
-				msg, err := parserParams.EvmInnerMsgDecoder.DecodeCosmosMsgFromTxInput(inputData, "MsgUpdateClient")
+				msg, err := parserParams.EthereumTxInnerMsgDecoder.DecodeCosmosMsgFromTxInput(inputData, "MsgUpdateClient")
 				if err != nil {
 					panic(fmt.Errorf("error deserializing MsgUpdateClient: %v", err))
 				}
