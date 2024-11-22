@@ -224,11 +224,11 @@ func parseBlockResultsEvents(rawEvents []RawBlockResultsEvent, eventAttributeDec
 		for _, rawAttribute := range rawEvent.Attributes {
 			key, err := eventAttributeDecoder.DecodeKey(rawAttribute.Key)
 			if err != nil {
-				panic(fmt.Sprintf("error blcok result event %s attribute key (%s): %v", rawEvent.Type, rawAttribute.Key, err))
+				panic(fmt.Sprintf("error block result event %s attribute key (%s): %v", rawEvent.Type, rawAttribute.Key, err))
 			}
 			value, err := eventAttributeDecoder.DecodeValue(rawAttribute.Value)
 			if err != nil {
-				panic(fmt.Sprintf("error blcok result event %s attribute key (%s): %v", rawEvent.Type, rawAttribute.Key, err))
+				panic(fmt.Sprintf("error block result event %s attribute key (%s): %v", rawEvent.Type, rawAttribute.Key, err))
 			}
 			attributes = append(attributes, model.BlockResultsEventAttribute{
 				Key:   key,

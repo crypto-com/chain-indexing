@@ -37,6 +37,7 @@ type IndexService struct {
 	BlockResultEventAttributeDecodeMethod string
 
 	cosmosVersionBlockHeight utils.CosmosVersionBlockHeight
+	cronosVersionBlockHeight utils.CronosVersionBlockHeight
 
 	GithubAPIUser  string
 	GithubAPIToken string
@@ -75,6 +76,9 @@ func NewIndexService(
 		BlockResultEventAttributeDecodeMethod: config.IndexService.BlockResultEventAttributeDecodeMethod,
 		cosmosVersionBlockHeight: utils.CosmosVersionBlockHeight{
 			V0_42_7: utils.ParserBlockHeight(config.IndexService.CosmosVersionEnabledHeight.V0_42_7),
+		},
+		cronosVersionBlockHeight: utils.CronosVersionBlockHeight{
+			V1_4_0: utils.ParserBlockHeight(config.IndexService.CronosVersionEnabledHeight.V1_4_0),
 		},
 		GithubAPIUser:  config.IndexService.GithubAPI.Username,
 		GithubAPIToken: config.IndexService.GithubAPI.Token,
@@ -169,6 +173,7 @@ func (service *IndexService) RunEventStoreMode() error {
 				Logger: service.logger,
 				Config: utils.CosmosParserManagerConfig{
 					CosmosVersionBlockHeight: service.cosmosVersionBlockHeight,
+					CronosVersionBlockHeight: service.cronosVersionBlockHeight,
 				},
 			},
 		),
@@ -212,6 +217,7 @@ func (service *IndexService) RunTendermintDirectMode() error {
 						}),
 						Config: utils.CosmosParserManagerConfig{
 							CosmosVersionBlockHeight: service.cosmosVersionBlockHeight,
+							CronosVersionBlockHeight: service.cronosVersionBlockHeight,
 						},
 					},
 				),

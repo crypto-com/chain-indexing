@@ -23,6 +23,7 @@ type IndexService struct {
 	Projection                            Projection                 `yaml:"projection" toml:"projection" xml:"projection" json:"projection"`
 	CronJob                               CronJob                    `yaml:"cron_job" toml:"cron_job" xml:"cron_job" json:"cron_job"`
 	CosmosVersionEnabledHeight            CosmosVersionEnabledHeight `yaml:"cosmos_version_enabled_height" toml:"cosmos_version_enabled_height" xml:"cosmos_version_enabled_height" json:"cosmos_version_enabled_height"`
+	CronosVersionEnabledHeight            CronosVersionEnabledHeight `yaml:"cronos_version_enabled_height" toml:"cronos_version_enabled_height" xml:"cronos_version_enabled_height" json:"cronos_version_enabled_height"`
 	GithubAPI                             GithubAPI                  `yaml:"github_api" toml:"github_api" xml:"github_api" json:"github_api"`
 	BlockResultEventAttributeDecodeMethod string                     `yaml:"block_result_event_attribute_decode_method" toml:"block_result_event_attribute_decode_method" xml:"block_result_event_attribute_decode_method" json:"block_result_event_attribute_decode_method"`
 }
@@ -93,7 +94,11 @@ type CronJob struct {
 }
 
 type CosmosVersionEnabledHeight struct {
-	V0_42_7 uint64 `yaml:"v_0_42_7" toml:"v_0_42_7" xml:"v_0_42_7" json:"v_0_42_7,omitempty"`
+	V0_42_7 uint64 `yaml:"v0_42_7" toml:"v0_42_7" xml:"v0_42_7" json:"v0_42_7,omitempty"`
+}
+
+type CronosVersionEnabledHeight struct {
+	V1_4_0 uint64 `yaml:"v1_4_0" toml:"V1_4_0" xml:"V1_4_0" json:"V1_4_0,omitempty"`
 }
 
 type GithubAPI struct {

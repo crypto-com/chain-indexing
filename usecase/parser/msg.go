@@ -2,6 +2,7 @@ package parser
 
 import (
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"strconv"
 	"strings"
@@ -2315,7 +2316,14 @@ func ParseMsgEthereumTx(
 		panic(fmt.Errorf("error decoding RawMsgEthereumTx: %v", err))
 	}
 
-	rawMsg.From = utils.AddressParse(rawMsg.From)
+	fromBytes, err := base64.StdEncoding.DecodeString(rawMsg.From)
+	if err != nil {
+		panic(fmt.Errorf("error decoding from address: %v", err))
+	}
+	fromAddress := hex.EncodeToString(fromBytes)
+	if fromAddress != "" {
+		rawMsg.From = fmt.Sprintf("0x%s", utils.AddressParse(fromAddress))
+	}
 
 	if !parserParams.MsgCommonParams.TxSuccess {
 		// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
@@ -2522,7 +2530,6 @@ func ParseMsgEthereumTx(
 				possibleSignerAddresses = append(possibleSignerAddresses, signers...)
 			}
 		}
-
 	}
 
 	// Getting possible signer address from Msg

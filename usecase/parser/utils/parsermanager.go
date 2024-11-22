@@ -27,10 +27,15 @@ type BlockHeightToCosmosParserMap map[ParserBlockHeight]CosmosParser
 
 type CosmosParserManagerConfig struct {
 	CosmosVersionBlockHeight
+	CronosVersionBlockHeight
 }
 
 type CosmosVersionBlockHeight struct {
 	V0_42_7 ParserBlockHeight
+}
+
+type CronosVersionBlockHeight struct {
+	V1_4_0 ParserBlockHeight
 }
 
 type CosmosParserManagerParams struct {
@@ -70,6 +75,11 @@ func NewCosmosParserManager(params CosmosParserManagerParams) *CosmosParserManag
 // GetCosmosV0_42_7BlockHeight return height of the first block with cosmos sdk v0.42.7
 func (cpm *CosmosParserManager) GetCosmosV0_42_7BlockHeight() ParserBlockHeight {
 	return cpm.config.CosmosVersionBlockHeight.V0_42_7
+}
+
+// GetCronosV1_4_0BlockHeight return height of the first block with cronos v1.4.0
+func (cpm *CosmosParserManager) GetCronosV1_4_0BlockHeight() ParserBlockHeight {
+	return cpm.config.CronosVersionBlockHeight.V1_4_0
 }
 
 // RegisterParser register a cosmos message parser by a given key and a starting block height

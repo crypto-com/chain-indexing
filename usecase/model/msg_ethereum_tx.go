@@ -8,10 +8,11 @@ type RawMsgEthereumTx struct {
 	Type string `mapstructure:"@type" json:"@type"`
 	Size int    `mapstructure:"size" json:"size"`
 	// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
-	Data LegacyTx `mapstructure:"data" json:"data"`
-	From string   `mapstructure:"from" json:"from"`
-	Hash string   `mapstructure:"hash" json:"hash"`
-	Raw  *string  `mapstructure:"raw" json:"raw"`
+	Data       LegacyTx    `mapstructure:"data" json:"data"`
+	From       string      `mapstructure:"from" json:"from"`
+	Hash       string      `mapstructure:"hash" json:"hash"`
+	Raw        string      `mapstructure:"raw" json:"raw"`
+	DecodedRaw *DecodedRaw `mapstructure:"decodedRaw,omitempty" json:"decodedRaw,omitempty"`
 }
 
 type MsgEthereumTx struct {
@@ -31,4 +32,23 @@ type LegacyTx struct {
 	V        string `mapstructure:"v" json:"v"`
 	R        string `mapstructure:"r" json:"r"`
 	S        string `mapstructure:"s" json:"s"`
+}
+
+type DecodedRaw struct {
+	Type                 string `mapstructure:"type" json:"type"`
+	Hash                 string `mapstructure:"hash" json:"hash"`
+	Nonce                string `mapstructure:"nonce" json:"nonce"`
+	GasLimit             string `mapstructure:"gasLimit" json:"gasLimit"`
+	GasPrice             string `mapstructure:"gasPrice" json:"gasPrice"`
+	MaxFeePerGas         string `mapstructure:"maxFeePerGas" json:"maxFeePerGas"`
+	MaxPriorityFeePerGas string `mapstructure:"maxPriorityFeePerGas" json:"maxPriorityFeePerGas"`
+	From                 string `mapstructure:"from" json:"from"`
+	To                   string `mapstructure:"to" json:"to"`
+	PublicKey            string `mapstructure:"publicKey" json:"publicKey"`
+	V                    string `mapstructure:"v" json:"v"`
+	R                    string `mapstructure:"r" json:"r"`
+	S                    string `mapstructure:"s" json:"s"`
+	Value                string `mapstructure:"value" json:"value"`
+	Input                string `mapstructure:"input" json:"input"`
+	FunctionHash         string `mapstructure:"functionHash" json:"functionHash"`
 }

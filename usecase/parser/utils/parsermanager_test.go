@@ -17,6 +17,9 @@ var _ = Describe("ParseManager", func() {
 					CosmosVersionBlockHeight: utils.CosmosVersionBlockHeight{
 						V0_42_7: 123,
 					},
+					CronosVersionBlockHeight: utils.CronosVersionBlockHeight{
+						V1_4_0: 123,
+					},
 				},
 			},
 		)
@@ -32,6 +35,9 @@ var _ = Describe("ParseManager", func() {
 				Config: utils.CosmosParserManagerConfig{
 					CosmosVersionBlockHeight: utils.CosmosVersionBlockHeight{
 						V0_42_7: 0,
+					},
+					CronosVersionBlockHeight: utils.CronosVersionBlockHeight{
+						V1_4_0: 0,
 					},
 				},
 			},
@@ -60,6 +66,9 @@ var _ = Describe("ParseManager", func() {
 				Config: utils.CosmosParserManagerConfig{
 					CosmosVersionBlockHeight: utils.CosmosVersionBlockHeight{
 						V0_42_7: 0,
+					},
+					CronosVersionBlockHeight: utils.CronosVersionBlockHeight{
+						V1_4_0: 0,
 					},
 				},
 			},
@@ -90,6 +99,9 @@ var _ = Describe("ParseManager", func() {
 				Config: utils.CosmosParserManagerConfig{
 					CosmosVersionBlockHeight: utils.CosmosVersionBlockHeight{
 						V0_42_7: 0,
+					},
+					CronosVersionBlockHeight: utils.CronosVersionBlockHeight{
+						V1_4_0: 0,
 					},
 				},
 			},
