@@ -152,6 +152,7 @@ func ParseBlockTxsMsgToCommands(
 
 				// ethermint evm
 				"/ethermint.evm.v1.MsgEthereumTx":
+				//nolint:gosec
 				parser := parserManager.GetParser(utils.CosmosParserKey(msgType.(string)), utils.ParserBlockHeight(blockHeight))
 
 				msgCommands, possibleSignerAddresses = parser(utils.CosmosParserParams{
@@ -1950,6 +1951,7 @@ func parseMsgExecInnerMsgs(
 			panic(fmt.Errorf("error missing '@type' in MsgExec.msgs[%v]: %v", innerMsgIndex, innerMsg))
 		}
 
+		//nolint:gosec
 		parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(innerMsgType), utils.ParserBlockHeight(blockHeight))
 
 		msgCommands, _ := parser(utils.CosmosParserParams{
