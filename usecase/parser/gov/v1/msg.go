@@ -132,7 +132,7 @@ func ParseMsgSubmitProposal(
 			"/cosmos.consensus.v1.MsgUpdateParams":
 			break
 		default:
-			// disable G115
+			//nolint:gosec
 			parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(innerMsgType), utils.ParserBlockHeight(blockHeight))
 
 			msgCommands, signers := parser(utils.CosmosParserParams{
