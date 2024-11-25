@@ -133,6 +133,7 @@ func ParseBlockResultsResp(rawRespReader io.Reader, eventAttributeDecoder tender
 
 	txsResults := parseBlockResultsTxsResults(rawBlockResults.TxsResults, eventAttributeDecoder)
 	return &model.BlockResults{
+		// disable G115
 		Height:                int64(height),
 		TxsResults:            txsResults,
 		BeginBlockEvents:      beginBlockEvents,
