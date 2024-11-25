@@ -33,7 +33,7 @@ func (u NumericString) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf("\"%s\"", u.String())), nil
 }
 
-func (u *NumericString) UnmarshalJSON(data []byte) error {
+func (u NumericString) UnmarshalJSON(data []byte) error {
 	var untypedVal interface{}
 	if err := jsoniter.Unmarshal(data, &untypedVal); err != nil {
 		return err

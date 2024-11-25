@@ -128,7 +128,7 @@ func (t UTCTime) MarshalJSON() ([]byte, error) {
 	return result, nil
 }
 
-func (t *UTCTime) UnmarshalJSON(data []byte) error {
+func (t UTCTime) UnmarshalJSON(data []byte) error {
 	var timeVal gotime.Time
 	if err := jsoniter.Unmarshal(data, &timeVal); err != nil {
 		return err

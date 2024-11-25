@@ -26,7 +26,7 @@ func (u Uint32) MarshalJSON() ([]byte, error) {
 	return []byte(u.String()), nil
 }
 
-func (u *Uint32) UnmarshalJSON(data []byte) error {
+func (u Uint32) UnmarshalJSON(data []byte) error {
 	// Ignore null, like in the main JSON package.
 	if string(data) == "null" {
 		return nil

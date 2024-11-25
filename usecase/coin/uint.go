@@ -141,7 +141,7 @@ func (u Uint) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON defines custom decoding scheme
-func (u *Uint) UnmarshalJSON(bz []byte) error {
+func (u Uint) UnmarshalJSON(bz []byte) error {
 	if u.i == nil { // Necessary since default Uint initialization has i.i as nil
 		u.i = new(big.Int)
 	}
