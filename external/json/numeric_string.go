@@ -25,15 +25,15 @@ func NewNumericStringFromBigInt(v *big.Int) *NumericString {
 	return &NumericString{v: v.String()}
 }
 
-func (u NumericString) String() string {
+func (u *NumericString) String() string {
 	return u.v
 }
 
-func (u NumericString) MarshalJSON() ([]byte, error) {
+func (u *NumericString) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf("\"%s\"", u.String())), nil
 }
 
-func (u NumericString) UnmarshalJSON(data []byte) error {
+func (u *NumericString) UnmarshalJSON(data []byte) error {
 	var untypedVal interface{}
 	if err := jsoniter.Unmarshal(data, &untypedVal); err != nil {
 		return err

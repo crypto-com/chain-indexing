@@ -32,8 +32,7 @@ var _ = Describe("UTCTime", func() {
 			var err error
 			t, _ := jsoniter.Marshal(time.Unix(0, 1000000).UTC())
 
-			var actual utctime.UTCTime
-			err = jsoniter.Unmarshal(t, &actual)
+			actual, err := utctime.UnmarshalJSON(t)
 			Expect(err).To(BeNil())
 			Expect(actual.UnixNano()).To(Equal(int64(1000000)))
 		})
@@ -42,8 +41,7 @@ var _ = Describe("UTCTime", func() {
 			expected := utctime.FromUnixNano(1000000)
 			encoded, _ := jsoniter.Marshal(expected)
 
-			var actual utctime.UTCTime
-			err := jsoniter.Unmarshal(encoded, &actual)
+			actual, err := utctime.UnmarshalJSON(encoded)
 
 			Expect(err).To(BeNil())
 			Expect(actual.UnixNano()).To(Equal(expected.UnixNano()))
