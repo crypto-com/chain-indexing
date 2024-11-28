@@ -11,7 +11,7 @@ type Duration struct {
 	time.Duration
 }
 
-func (d Duration) MarshalJSON() ([]byte, error) {
+func (d *Duration) MarshalJSON() ([]byte, error) {
 	return jsoniter.Marshal(d.String())
 }
 

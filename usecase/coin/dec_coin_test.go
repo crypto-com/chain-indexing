@@ -547,7 +547,7 @@ func (s *decCoinTestSuite) TestNewDecCoinsWithIsValid() {
 
 func (s *decCoinTestSuite) TestDecCoins_AddDecCoinWithIsValid() {
 	lengthTestDecCoins := sdk.NewDecCoins().Add(sdk.NewDecCoin("mytoken", sdk.NewInt(10))).Add(sdk.DecCoin{Denom: "BTC", Amount: sdk.NewDec(10)})
-	s.Require().Equal(2, len(lengthTestDecCoins), "should be 2")
+	s.Require().Len(lengthTestDecCoins, 2, "should be 2")
 
 	tests := []struct {
 		coin       sdk.DecCoins

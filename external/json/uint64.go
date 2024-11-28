@@ -24,15 +24,15 @@ func NewUint64FromString(v string) (*Uint64, error) {
 	return &Uint64{v: typedVal}, nil
 }
 
-func (u Uint64) Uint64() uint64 {
+func (u *Uint64) Uint64() uint64 {
 	return u.v
 }
 
-func (u Uint64) String() string {
+func (u *Uint64) String() string {
 	return strconv.FormatUint(u.v, 10)
 }
 
-func (u Uint64) MarshalJSON() ([]byte, error) {
+func (u *Uint64) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf("\"%s\"", u.String())), nil
 }
 

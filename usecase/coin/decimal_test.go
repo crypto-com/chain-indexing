@@ -62,18 +62,18 @@ func (s *decimalTestSuite) TestNewDecFromStr() {
 	for tcIndex, tc := range tests {
 		res, err := sdk.NewDecFromStr(tc.decimalStr)
 		if tc.expErr {
-			s.Require().NotNil(err, "error expected, decimalStr %v, tc %v", tc.decimalStr, tcIndex)
+			s.Require().Error(err, "error expected, decimalStr %v, tc %v", tc.decimalStr, tcIndex)
 		} else {
-			s.Require().Nil(err, "unexpected error, decimalStr %v, tc %v", tc.decimalStr, tcIndex)
+			s.Require().NoError(err, "unexpected error, decimalStr %v, tc %v", tc.decimalStr, tcIndex)
 			s.Require().True(res.Equal(tc.exp), "equality was incorrect, res %v, exp %v, tc %v", res, tc.exp, tcIndex)
 		}
 
 		// negative tc
 		res, err = sdk.NewDecFromStr("-" + tc.decimalStr)
 		if tc.expErr {
-			s.Require().NotNil(err, "error expected, decimalStr %v, tc %v", tc.decimalStr, tcIndex)
+			s.Require().Error(err, "error expected, decimalStr %v, tc %v", tc.decimalStr, tcIndex)
 		} else {
-			s.Require().Nil(err, "unexpected error, decimalStr %v, tc %v", tc.decimalStr, tcIndex)
+			s.Require().NoError(err, "unexpected error, decimalStr %v, tc %v", tc.decimalStr, tcIndex)
 			exp := tc.exp.Mul(sdk.NewDec(-1))
 			s.Require().True(res.Equal(exp), "equality was incorrect, res %v, exp %v, tc %v", res, exp, tcIndex)
 		}

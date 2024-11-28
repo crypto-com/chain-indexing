@@ -14,15 +14,15 @@ func NewUint32(v uint32) Uint32 {
 	return Uint32{v: v}
 }
 
-func (u Uint32) Uint32() uint32 {
+func (u *Uint32) Uint32() uint32 {
 	return u.v
 }
 
-func (u Uint32) String() string {
+func (u *Uint32) String() string {
 	return strconv.Itoa(int(u.v))
 }
 
-func (u Uint32) MarshalJSON() ([]byte, error) {
+func (u *Uint32) MarshalJSON() ([]byte, error) {
 	return []byte(u.String()), nil
 }
 
