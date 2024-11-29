@@ -13,6 +13,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 
 	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
+	"github.com/crypto-com/chain-indexing/external/utctime"
 
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	jsoniter "github.com/json-iterator/go"
@@ -73,7 +74,7 @@ func ParseBlockResp(rawRespReader io.Reader) (*model.Block, *model.RawBlock, err
 	return &model.Block{
 		Height:          height,
 		Hash:            resp.Result.BlockID.Hash,
-		Time:            resp.Result.Block.Header.Time,
+		Time:            utctime.FromTime(resp.Result.Block.Header.Time),
 		AppHash:         resp.Result.Block.Header.AppHash,
 		ProposerAddress: resp.Result.Block.Header.ProposerAddress,
 		Txs:             resp.Result.Block.Data.Txs,
@@ -95,7 +96,7 @@ func parseBlockSignatures(rawSignatures []model.RawBlockSignature) []model.Block
 		signatures = append(signatures, model.BlockSignature{
 			BlockIdFlag:      rawSignature.BlockIDFlag,
 			ValidatorAddress: rawSignature.ValidatorAddress,
-			Timestamp:        rawSignature.Timestamp,
+			Timestamp:        utctime.FromTime(rawSignature.Timestamp),
 			Signature:        *rawSignature.Signature,
 		})
 	}

@@ -1,7 +1,8 @@
 package model
 
 import (
-	"github.com/crypto-com/chain-indexing/external/utctime"
+	"time"
+
 	"github.com/luci/go-render/render"
 )
 
@@ -19,9 +20,9 @@ type RawBlock struct {
 			Version struct {
 				Block string `json:"block"`
 			} `json:"version"`
-			ChainID     string          `json:"chain_id"`
-			Height      string          `json:"height"`
-			Time        utctime.UTCTime `json:"time"`
+			ChainID     string    `json:"chain_id"`
+			Height      string    `json:"height"`
+			Time        time.Time `json:"time"`
 			LastBlockID struct {
 				Hash  string `json:"hash"`
 				Parts struct {
@@ -66,8 +67,8 @@ func (rawBlock *RawBlock) String() string {
 
 // RawBlockSignature defines the structure for signatures in /block API
 type RawBlockSignature struct {
-	BlockIDFlag      int             `json:"block_id_flag"`
-	ValidatorAddress string          `json:"validator_address"`
-	Timestamp        utctime.UTCTime `json:"timestamp"`
-	Signature        *string         `json:"signature"`
+	BlockIDFlag      int       `json:"block_id_flag"`
+	ValidatorAddress string    `json:"validator_address"`
+	Timestamp        time.Time `json:"timestamp"`
+	Signature        *string   `json:"signature"`
 }
