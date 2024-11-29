@@ -79,7 +79,7 @@ var _ = Describe("PgMigrate", func() {
 				_, err := NewMigrate(&invalidConfig, "./test/valid")
 
 				Expect(err).NotTo(BeNil())
-				Expect(err.Error()).To(Equal("failed to open database, 127.0.0.1:12345: dial tcp 127.0.0.1:12345: connect: connection refused"))
+				Expect(err.Error()).To(Equal("failed to open database, postgres://127.0.0.1:12344/AnyNonExistDB: dial tcp 127.0.0.1:12345: connect: connection refused"))
 			})
 		})
 
