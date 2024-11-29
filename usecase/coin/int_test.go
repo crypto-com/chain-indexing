@@ -27,15 +27,17 @@ func (s *intTestSuite) SetupSuite() {
 func (s *intTestSuite) TestFromInt64() {
 	for n := 0; n < 20; n++ {
 		r := rand.Int63()
-		s.Require().Equal(r, sdk.NewInt(r).Int64())
+		i := sdk.NewInt(r)
+		s.Require().Equal(r, i.Int64())
 	}
 }
 
 func (s *intTestSuite) TestFromUint64() {
 	for n := 0; n < 20; n++ {
 		r := rand.Uint64()
-		s.Require().True(sdk.NewIntFromUint64(r).IsUint64())
-		s.Require().Equal(r, sdk.NewIntFromUint64(r).Uint64())
+		i := sdk.NewIntFromUint64(r)
+		s.Require().True(i.IsUint64())
+		s.Require().Equal(r, i.Uint64())
 	}
 }
 
@@ -94,7 +96,7 @@ func (s *intTestSuite) TestIntPanic() {
 	// Division-by-zero check
 	s.Require().Panics(func() { i1.Quo(sdk.NewInt(0)) })
 
-	s.Require().NotPanics(func() { sdk.Int{}.BigInt() })
+	s.Require().NotPanics(func() { (&sdk.Int{}).BigInt() })
 }
 
 // Tests below uses randomness
@@ -145,7 +147,7 @@ func (s *intTestSuite) TestArithInt() {
 		i2 := sdk.NewInt(n2)
 
 		cases := []struct {
-			ires sdk.Int
+			ires *sdk.Int
 			nres int64
 		}{
 			{i1.Add(i2), n1 + n2},
@@ -191,7 +193,7 @@ func (s *intTestSuite) TestCompInt() {
 	}
 }
 
-func randint() sdk.Int {
+func randint() *sdk.Int {
 	return sdk.NewInt(rand.Int63())
 }
 
@@ -219,7 +221,7 @@ func (s *intTestSuite) TestImmutabilityAllInt() {
 		ni := sdk.NewInt(n)
 
 		for opnum, op := range ops {
-			op(&ni)
+			op(ni)
 
 			s.Require().Equal(n, ni.Int64(), "Int is modified by operation. tc #%d", opnum)
 			s.Require().Equal(sdk.NewInt(n), ni, "Int is modified by operation. tc #%d", opnum)
@@ -236,47 +238,47 @@ func (s *intTestSuite) TestEncodingTableInt() {
 		rawBz  []byte
 	}{
 		{
-			sdk.NewInt(0),
+			*sdk.NewInt(0),
 			[]byte("\"0\""),
 			[]byte{0x30},
 		},
 		{
-			sdk.NewInt(100),
+			*sdk.NewInt(100),
 			[]byte("\"100\""),
 			[]byte{0x31, 0x30, 0x30},
 		},
 		{
-			sdk.NewInt(-100),
+			*sdk.NewInt(-100),
 			[]byte("\"-100\""),
 			[]byte{0x2d, 0x31, 0x30, 0x30},
 		},
 		{
-			sdk.NewInt(51842),
+			*sdk.NewInt(51842),
 			[]byte("\"51842\""),
 			[]byte{0x35, 0x31, 0x38, 0x34, 0x32},
 		},
 		{
-			sdk.NewInt(-51842),
+			*sdk.NewInt(-51842),
 			[]byte("\"-51842\""),
 			[]byte{0x2d, 0x35, 0x31, 0x38, 0x34, 0x32},
 		},
 		{
-			sdk.NewInt(19513368),
+			*sdk.NewInt(19513368),
 			[]byte("\"19513368\""),
 			[]byte{0x31, 0x39, 0x35, 0x31, 0x33, 0x33, 0x36, 0x38},
 		},
 		{
-			sdk.NewInt(-19513368),
+			*sdk.NewInt(-19513368),
 			[]byte("\"-19513368\""),
 			[]byte{0x2d, 0x31, 0x39, 0x35, 0x31, 0x33, 0x33, 0x36, 0x38},
 		},
 		{
-			sdk.NewInt(999999999999),
+			*sdk.NewInt(999999999999),
 			[]byte("\"999999999999\""),
 			[]byte{0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39},
 		},
 		{
-			sdk.NewInt(-999999999999),
+			*sdk.NewInt(-999999999999),
 			[]byte("\"-999999999999\""),
 			[]byte{0x2d, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39},
 		},
@@ -288,7 +290,7 @@ func (s *intTestSuite) TestEncodingTableInt() {
 		s.Require().Equal(tc.jsonBz, bz, "Marshaled value is different from exported. tc #%d", tcnum)
 
 		err = (&i).UnmarshalJSON(bz)
-		s.Require().Nil(err, "Error unmarshaling Int. tc #%d, err %s", tcnum, err)
+		s.Require().NoError(err, "Error unmarshaling Int. tc #%d, err %s", tcnum, err)
 		s.Require().Equal(tc.i, i, "Unmarshaled value is different from exported. tc #%d", tcnum)
 
 		//bz, err = tc.i.Marshal()
@@ -310,27 +312,27 @@ func (s *intTestSuite) TestEncodingTableUint() {
 		rawBz  []byte
 	}{
 		{
-			sdk.NewUint(0),
+			*sdk.NewUint(0),
 			[]byte("\"0\""),
 			[]byte{0x30},
 		},
 		{
-			sdk.NewUint(100),
+			*sdk.NewUint(100),
 			[]byte("\"100\""),
 			[]byte{0x31, 0x30, 0x30},
 		},
 		{
-			sdk.NewUint(51842),
+			*sdk.NewUint(51842),
 			[]byte("\"51842\""),
 			[]byte{0x35, 0x31, 0x38, 0x34, 0x32},
 		},
 		{
-			sdk.NewUint(19513368),
+			*sdk.NewUint(19513368),
 			[]byte("\"19513368\""),
 			[]byte{0x31, 0x39, 0x35, 0x31, 0x33, 0x33, 0x36, 0x38},
 		},
 		{
-			sdk.NewUint(999999999999),
+			*sdk.NewUint(999999999999),
 			[]byte("\"999999999999\""),
 			[]byte{0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39},
 		},
@@ -338,11 +340,11 @@ func (s *intTestSuite) TestEncodingTableUint() {
 
 	for tcnum, tc := range cases {
 		bz, err := tc.i.MarshalJSON()
-		s.Require().Nil(err, "Error marshaling Int. tc #%d, err %s", tcnum, err)
+		s.Require().NoError(err, "Error marshaling Int. tc #%d, err %s", tcnum, err)
 		s.Require().Equal(tc.jsonBz, bz, "Marshaled value is different from exported. tc #%d", tcnum)
 
 		err = (&i).UnmarshalJSON(bz)
-		s.Require().Nil(err, "Error unmarshaling Int. tc #%d, err %s", tcnum, err)
+		s.Require().NoError(err, "Error unmarshaling Int. tc #%d, err %s", tcnum, err)
 		s.Require().Equal(tc.i, i, "Unmarshaled value is different from exported. tc #%d", tcnum)
 
 		//bz, err = tc.i.Marshal()
@@ -371,7 +373,8 @@ func (s *intTestSuite) TestIntMod() {
 
 	for _, tt := range tests {
 		if tt.wantPanic {
-			s.Require().Panics(func() { sdk.NewInt(tt.x).Mod(sdk.NewInt(tt.y)) })
+			x := sdk.NewInt(tt.x)
+			s.Require().Panics(func() { x.Mod(sdk.NewInt(tt.y)) })
 			s.Require().Panics(func() { sdk.NewInt(tt.x).ModRaw(tt.y) })
 			return
 		}

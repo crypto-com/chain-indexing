@@ -93,7 +93,9 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 			httpapi.InternalServerError(ctx)
 			return
 		}
-		handler.totalDelegated, err = coin.NewCoins(totalBondedBalance)
+		var coins *coin.Coins
+		coins, err = coin.NewCoins(totalBondedBalance)
+		handler.totalDelegated = *coins
 		if err != nil {
 			handler.logger.Errorf("error parsing total bonded balance: %v", err)
 			httpapi.InternalServerError(ctx)

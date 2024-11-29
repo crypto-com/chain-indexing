@@ -8,8 +8,8 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/external/primptr"
-	"github.com/stretchr/testify/assert"
 	testify_mock "github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb/test"
@@ -1010,7 +1010,7 @@ func TestIBCChannelMessage_HandleEvents(t *testing.T) {
 
 		projection := NewIBCChannelMessageProjection(mockRDbConn)
 		err := projection.HandleEvents(1, tc.Events)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		for _, m := range mocks {
 			m.AssertExpectations(t)

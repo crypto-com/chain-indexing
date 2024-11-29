@@ -20,8 +20,8 @@ import (
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	model_usecase "github.com/crypto-com/chain-indexing/usecase/model"
-	"github.com/stretchr/testify/assert"
 	testify_mock "github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 const DefaultMaxActiveBlocksPeriodLimit = 100000
@@ -1882,7 +1882,7 @@ func TestValidator_HandleEvents(t *testing.T) {
 
 		projection := NewValidatorProjection(mockRDbConn)
 		err := projection.HandleEvents(1, tc.Events)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		for _, m := range mocks {
 			m.AssertExpectations(t)

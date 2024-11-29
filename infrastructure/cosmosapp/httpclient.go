@@ -219,7 +219,7 @@ func (client *HTTPClient) Balances(accountAddress string) (coin.Coins, error) {
 			if coinErr != nil {
 				return nil, coinErr
 			}
-			balances = balances.Add(balance)
+			balances = balances.Add(*balance)
 		}
 
 		if resp.Pagination.MaybeNextKey == nil {
@@ -252,7 +252,7 @@ func (client *HTTPClient) BalanceByDenom(accountAddress string, denom string) (c
 		return coin.Coin{}, coinErr
 	}
 
-	return balance, nil
+	return *balance, nil
 }
 
 func (client *HTTPClient) BondedBalance(accountAddress string) (coin.Coins, error) {
@@ -296,7 +296,7 @@ func (client *HTTPClient) BondedBalance(accountAddress string) (coin.Coins, erro
 			if coinErr != nil {
 				return nil, fmt.Errorf("error parsing Coin from delegation balance: %v", coinErr)
 			}
-			balance = balance.Add(delegatedCoin)
+			balance = balance.Add(*delegatedCoin)
 		}
 
 		if resp.MaybePagination.MaybeNextKey == nil {
@@ -341,7 +341,7 @@ func (client *HTTPClient) RedelegatingBalance(accountAddress string) (coin.Coins
 				if coinErr != nil {
 					return nil, fmt.Errorf("error parsing Coin from unbonding balance: %v", coinErr)
 				}
-				balance = balance.Add(unbondingCoin)
+				balance = balance.Add(*unbondingCoin)
 			}
 		}
 
@@ -388,7 +388,7 @@ func (client *HTTPClient) UnbondingBalance(accountAddress string) (coin.Coins, e
 				if coinErr != nil {
 					return nil, fmt.Errorf("error parsing Coin from unbonding balance: %v", coinErr)
 				}
-				balance = balance.Add(unbondingCoin)
+				balance = balance.Add(*unbondingCoin)
 			}
 		}
 
@@ -422,7 +422,7 @@ func (client *HTTPClient) SupplyByDenom(denom string) (coin.Coin, error) {
 		return coin.Coin{}, coinErr
 	}
 
-	return supply, nil
+	return *supply, nil
 }
 
 func (client *HTTPClient) TotalRewards(accountAddress string) (coin.DecCoins, error) {
@@ -609,7 +609,7 @@ func (client *HTTPClient) TotalBondedBalance() (coin.Coin, error) {
 		return coin.Coin{}, fmt.Errorf("error when creating new coin: %v", newCoinErr)
 	}
 
-	return totalBondedBalance, nil
+	return *totalBondedBalance, nil
 }
 
 func (client *HTTPClient) CommunityTax() (*big.Float, error) {

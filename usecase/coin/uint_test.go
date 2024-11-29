@@ -99,7 +99,7 @@ func (s *uintTestSuite) TestArithUint() {
 		u2 := sdk.NewUint(n2)
 
 		cases := []struct {
-			ures sdk.Uint
+			ures *sdk.Uint
 			nres uint64
 		}{
 			{u1.Add(u2), n1 + n2},
@@ -123,7 +123,7 @@ func (s *uintTestSuite) TestArithUint() {
 		}
 
 		subs := []struct {
-			ures sdk.Uint
+			ures *sdk.Uint
 			nres uint64
 		}{
 			{u1.Sub(u2), n1 - n2},
@@ -195,7 +195,7 @@ func (s *uintTestSuite) TestImmutabilityAllUint() {
 		ni := sdk.NewUint(n)
 
 		for opnum, op := range ops {
-			op(&ni)
+			op(ni)
 
 			s.Require().Equal(n, ni.Uint64(), "Uint is modified by operation. #%d", opnum)
 			s.Require().Equal(sdk.NewUint(n), ni, "Uint is modified by operation. #%d", opnum)
@@ -205,7 +205,7 @@ func (s *uintTestSuite) TestImmutabilityAllUint() {
 
 func (s *uintTestSuite) TestSafeSub() {
 	testCases := []struct {
-		x, y     sdk.Uint
+		x, y     *sdk.Uint
 		expected uint64
 		panic    bool
 	}{
@@ -240,9 +240,9 @@ func (s *uintTestSuite) TestParseUint() {
 	}{
 		{"malformed", args{"malformed"}, sdk.Uint{}, true},
 		{"empty", args{""}, sdk.Uint{}, true},
-		{"positive", args{"50"}, sdk.NewUint(uint64(50)), false},
+		{"positive", args{"50"}, *sdk.NewUint(uint64(50)), false},
 		{"negative", args{"-1"}, sdk.Uint{}, true},
-		{"zero", args{"0"}, sdk.ZeroUint(), false},
+		{"zero", args{"0"}, *sdk.ZeroUint(), false},
 	}
 	for _, tt := range tests {
 		got, err := sdk.ParseUint(tt.args.s)
@@ -251,29 +251,29 @@ func (s *uintTestSuite) TestParseUint() {
 			continue
 		}
 		s.Require().NoError(err)
-		s.Require().True(got.Equal(tt.want))
+		s.Require().True(got.Equal(&tt.want))
 	}
 }
 
-func randuint() sdk.Uint {
+func randuint() *sdk.Uint {
 	return sdk.NewUint(rand.Uint64())
 }
 
 func (s *uintTestSuite) TestRelativePow() {
 	tests := []struct {
 		args []sdk.Uint
-		want sdk.Uint
+		want *sdk.Uint
 	}{
-		{[]sdk.Uint{sdk.ZeroUint(), sdk.ZeroUint(), sdk.OneUint()}, sdk.OneUint()},
-		{[]sdk.Uint{sdk.ZeroUint(), sdk.ZeroUint(), sdk.NewUint(10)}, sdk.NewUint(10)},
-		{[]sdk.Uint{sdk.ZeroUint(), sdk.OneUint(), sdk.NewUint(10)}, sdk.ZeroUint()},
-		{[]sdk.Uint{sdk.NewUint(10), sdk.NewUint(2), sdk.OneUint()}, sdk.NewUint(100)},
-		{[]sdk.Uint{sdk.NewUint(210), sdk.NewUint(2), sdk.NewUint(100)}, sdk.NewUint(441)},
-		{[]sdk.Uint{sdk.NewUint(2100), sdk.NewUint(2), sdk.NewUint(1000)}, sdk.NewUint(4410)},
-		{[]sdk.Uint{sdk.NewUint(1000000001547125958), sdk.NewUint(600), sdk.NewUint(1000000000000000000)}, sdk.NewUint(1000000928276004850)},
+		{[]sdk.Uint{*sdk.ZeroUint(), *sdk.ZeroUint(), *sdk.OneUint()}, sdk.OneUint()},
+		{[]sdk.Uint{*sdk.ZeroUint(), *sdk.ZeroUint(), *sdk.NewUint(10)}, sdk.NewUint(10)},
+		{[]sdk.Uint{*sdk.ZeroUint(), *sdk.OneUint(), *sdk.NewUint(10)}, sdk.ZeroUint()},
+		{[]sdk.Uint{*sdk.NewUint(10), *sdk.NewUint(2), *sdk.OneUint()}, sdk.NewUint(100)},
+		{[]sdk.Uint{*sdk.NewUint(210), *sdk.NewUint(2), *sdk.NewUint(100)}, sdk.NewUint(441)},
+		{[]sdk.Uint{*sdk.NewUint(2100), *sdk.NewUint(2), *sdk.NewUint(1000)}, sdk.NewUint(4410)},
+		{[]sdk.Uint{*sdk.NewUint(1000000001547125958), *sdk.NewUint(600), *sdk.NewUint(1000000000000000000)}, sdk.NewUint(1000000928276004850)},
 	}
 	for i, tc := range tests {
-		res := sdk.RelativePow(tc.args[0], tc.args[1], tc.args[2])
+		res := sdk.RelativePow(&tc.args[0], &tc.args[1], &tc.args[2])
 		s.Require().Equal(tc.want, res, "unexpected result for test case %d, input: %v, got: %v", i, tc.args, res)
 	}
 }

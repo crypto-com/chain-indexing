@@ -118,7 +118,7 @@ func TestAccount_HandleEvents(t *testing.T) {
 					coin.Coins{
 						coin.Coin{
 							Denom:  "Denom",
-							Amount: coin.NewInt(100),
+							Amount: *coin.NewInt(100),
 						},
 					},
 					nil,
@@ -145,7 +145,7 @@ func TestAccount_HandleEvents(t *testing.T) {
 						Balance: coin.Coins{
 							{
 								Denom:  "Denom",
-								Amount: coin.NewInt(100),
+								Amount: *coin.NewInt(100),
 							},
 						},
 					},
@@ -194,7 +194,7 @@ func TestAccount_HandleEvents(t *testing.T) {
 					coin.Coins{
 						coin.Coin{
 							Denom:  "Denom",
-							Amount: coin.NewInt(1000),
+							Amount: *coin.NewInt(1000),
 						},
 					},
 					nil,
@@ -212,7 +212,7 @@ func TestAccount_HandleEvents(t *testing.T) {
 						Balance: coin.Coins{
 							{
 								Denom:  "Denom",
-								Amount: coin.NewInt(1000),
+								Amount: *coin.NewInt(1000),
 							},
 						},
 					},

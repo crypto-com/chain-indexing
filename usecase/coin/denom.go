@@ -23,8 +23,8 @@ func RegisterDenom(denom string, unit Dec) error {
 	}
 
 	denomUnits[denom] = unit
-
-	if baseDenom == "" || unit.LT(denomUnits[baseDenom]) {
+	baseDenomUnit := denomUnits[baseDenom]
+	if baseDenom == "" || unit.LT(&baseDenomUnit) {
 		baseDenom = denom
 	}
 	return nil
@@ -32,7 +32,7 @@ func RegisterDenom(denom string, unit Dec) error {
 
 // GetDenomUnit returns a unit for a given denomination if it exists. A boolean
 // is returned if the denomination is registered.
-func GetDenomUnit(denom string) (Dec, bool) {
+func GetDenomUnit(denom string) (*Dec, bool) {
 	if err := ValidateDenom(denom); err != nil {
 		return ZeroDec(), false
 	}
@@ -42,7 +42,7 @@ func GetDenomUnit(denom string) (Dec, bool) {
 		return ZeroDec(), false
 	}
 
-	return unit, true
+	return &unit, true
 }
 
 // GetBaseDenom returns the denom of smallest unit registered
@@ -56,26 +56,26 @@ func GetBaseDenom() (string, error) {
 // ConvertCoin attempts to convert a coin to a given denomination. If the given
 // denomination is invalid or if neither denomination is registered, an error
 // is returned.
-func ConvertCoin(coin Coin, denom string) (Coin, error) {
+func ConvertCoin(coin Coin, denom string) (*Coin, error) {
 	if err := ValidateDenom(denom); err != nil {
-		return Coin{}, err
+		return &Coin{}, err
 	}
 
 	srcUnit, ok := GetDenomUnit(coin.Denom)
 	if !ok {
-		return Coin{}, fmt.Errorf("source denom not registered: %s", coin.Denom)
+		return &Coin{}, fmt.Errorf("source denom not registered: %s", coin.Denom)
 	}
 
 	dstUnit, ok := GetDenomUnit(denom)
 	if !ok {
-		return Coin{}, fmt.Errorf("destination denom not registered: %s", denom)
+		return &Coin{}, fmt.Errorf("destination denom not registered: %s", denom)
 	}
 
 	if srcUnit.Equal(dstUnit) {
 		return NewCoin(denom, coin.Amount)
 	}
 
-	return NewCoin(denom, coin.Amount.ToDec().Mul(srcUnit).Quo(dstUnit).TruncateInt())
+	return NewCoin(denom, *coin.Amount.ToDec().Mul(srcUnit).Quo(dstUnit).TruncateInt())
 }
 
 // ConvertDecCoin attempts to convert a decimal coin to a given denomination. If the given
@@ -100,17 +100,17 @@ func ConvertDecCoin(coin DecCoin, denom string) (DecCoin, error) {
 		return NewDecCoinFromDec(denom, coin.Amount), nil
 	}
 
-	return NewDecCoinFromDec(denom, coin.Amount.Mul(srcUnit).Quo(dstUnit)), nil
+	return NewDecCoinFromDec(denom, *coin.Amount.Mul(srcUnit).Quo(dstUnit)), nil
 }
 
 // NormalizeCoin try to convert a coin to the smallest unit registered,
 // returns original one if failed.
-func NormalizeCoin(coin Coin) Coin {
+func NormalizeCoin(coin *Coin) *Coin {
 	base, err := GetBaseDenom()
 	if err != nil {
 		return coin
 	}
-	newCoin, err := ConvertCoin(coin, base)
+	newCoin, err := ConvertCoin(*coin, base)
 	if err != nil {
 		return coin
 	}

@@ -1119,7 +1119,7 @@ func ParseMsgDelegate(
 			}
 
 			if autoClaimedRewards.Denom == parsedCoin.Denom {
-				autoClaimedRewards = autoClaimedRewards.Add(parsedCoin)
+				autoClaimedRewards = autoClaimedRewards.Add(&parsedCoin)
 			}
 		}
 	}
@@ -1131,7 +1131,7 @@ func ParseMsgDelegate(
 			DelegatorAddress:   utils.AddressParse(parserParams.Msg["delegator_address"].(string)),
 			ValidatorAddress:   utils.AddressParse(parserParams.Msg["validator_address"].(string)),
 			Amount:             amount,
-			AutoClaimedRewards: autoClaimedRewards,
+			AutoClaimedRewards: *autoClaimedRewards,
 		},
 	)}, possibleSignerAddresses
 }
@@ -1198,7 +1198,7 @@ func ParseMsgUndelegate(
 			}
 
 			if autoClaimedRewards.Denom == parsedCoin.Denom {
-				autoClaimedRewards = autoClaimedRewards.Add(parsedCoin)
+				autoClaimedRewards = autoClaimedRewards.Add(&parsedCoin)
 			}
 		}
 	}
@@ -1211,7 +1211,7 @@ func ParseMsgUndelegate(
 			ValidatorAddress:      utils.AddressParse(parserParams.Msg["validator_address"].(string)),
 			MaybeUnbondCompleteAt: &unbondCompletionTime,
 			Amount:                amount,
-			AutoClaimedRewards:    autoClaimedRewards,
+			AutoClaimedRewards:    *autoClaimedRewards,
 		},
 	)}, possibleSignerAddresses
 }
@@ -1267,7 +1267,7 @@ func ParseMsgBeginRedelegate(
 			}
 
 			if autoClaimedRewards.Denom == parsedCoin.Denom {
-				autoClaimedRewards = autoClaimedRewards.Add(parsedCoin)
+				autoClaimedRewards = autoClaimedRewards.Add(&parsedCoin)
 			}
 		}
 	}
@@ -1280,7 +1280,7 @@ func ParseMsgBeginRedelegate(
 			ValidatorSrcAddress: utils.AddressParse(parserParams.Msg["validator_src_address"].(string)),
 			ValidatorDstAddress: utils.AddressParse(parserParams.Msg["validator_dst_address"].(string)),
 			Amount:              amount,
-			AutoClaimedRewards:  autoClaimedRewards,
+			AutoClaimedRewards:  *autoClaimedRewards,
 		},
 	)}, possibleSignerAddresses
 }

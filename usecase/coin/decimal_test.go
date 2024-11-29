@@ -20,7 +20,7 @@ func TestDecimalTestSuite(t *testing.T) {
 }
 
 // create a decimal from a decimal string (ex. "1234.5678")
-func (s *decimalTestSuite) mustNewDecFromStr(str string) (d sdk.Dec) {
+func (s *decimalTestSuite) mustNewDecFromStr(str string) (d *sdk.Dec) {
 	d, err := sdk.NewDecFromStr(str)
 	s.Require().NoError(err)
 
@@ -36,10 +36,10 @@ func (s *decimalTestSuite) TestNewDecFromStr() {
 	tests := []struct {
 		decimalStr string
 		expErr     bool
-		exp        sdk.Dec
+		exp        *sdk.Dec
 	}{
-		{"", true, sdk.Dec{}},
-		{"0.-75", true, sdk.Dec{}},
+		{"", true, &sdk.Dec{}},
+		{"0.-75", true, &sdk.Dec{}},
 		{"0", false, sdk.NewDec(0)},
 		{"1", false, sdk.NewDec(1)},
 		{"1.1", false, sdk.NewDecWithPrec(11, 1)},
@@ -51,12 +51,12 @@ func (s *decimalTestSuite) TestNewDecFromStr() {
 			true, sdk.NewDecFromBigIntWithPrec(largeBigInt, 4)},
 		{"314460551102969314427823434337.1835",
 			false, sdk.NewDecFromBigIntWithPrec(largeBigInt, 4)},
-		{".", true, sdk.Dec{}},
+		{".", true, &sdk.Dec{}},
 		{".0", true, sdk.NewDec(0)},
 		{"1.", true, sdk.NewDec(1)},
-		{"foobar", true, sdk.Dec{}},
-		{"0.foobar", true, sdk.Dec{}},
-		{"0.foobar.", true, sdk.Dec{}},
+		{"foobar", true, &sdk.Dec{}},
+		{"0.foobar", true, &sdk.Dec{}},
+		{"0.foobar.", true, &sdk.Dec{}},
 	}
 
 	for tcIndex, tc := range tests {
@@ -82,7 +82,7 @@ func (s *decimalTestSuite) TestNewDecFromStr() {
 
 func (s *decimalTestSuite) TestDecString() {
 	tests := []struct {
-		d    sdk.Dec
+		d    *sdk.Dec
 		want string
 	}{
 		{sdk.NewDec(0), "0.000000000000000000"},
@@ -101,7 +101,7 @@ func (s *decimalTestSuite) TestDecString() {
 
 func (s *decimalTestSuite) TestEqualities() {
 	tests := []struct {
-		d1, d2     sdk.Dec
+		d1, d2     *sdk.Dec
 		gt, lt, eq bool
 	}{
 		{sdk.NewDec(0), sdk.NewDec(0), false, false, true},
@@ -141,15 +141,15 @@ func (s *decimalTestSuite) TestDecsEqual() {
 		d1s, d2s []sdk.Dec
 		eq       bool
 	}{
-		{[]sdk.Dec{sdk.NewDec(0)}, []sdk.Dec{sdk.NewDec(0)}, true},
-		{[]sdk.Dec{sdk.NewDec(0)}, []sdk.Dec{sdk.NewDec(1)}, false},
-		{[]sdk.Dec{sdk.NewDec(0)}, []sdk.Dec{}, false},
-		{[]sdk.Dec{sdk.NewDec(0), sdk.NewDec(1)}, []sdk.Dec{sdk.NewDec(0), sdk.NewDec(1)}, true},
-		{[]sdk.Dec{sdk.NewDec(1), sdk.NewDec(0)}, []sdk.Dec{sdk.NewDec(1), sdk.NewDec(0)}, true},
-		{[]sdk.Dec{sdk.NewDec(1), sdk.NewDec(0)}, []sdk.Dec{sdk.NewDec(0), sdk.NewDec(1)}, false},
-		{[]sdk.Dec{sdk.NewDec(1), sdk.NewDec(0)}, []sdk.Dec{sdk.NewDec(1)}, false},
-		{[]sdk.Dec{sdk.NewDec(1), sdk.NewDec(2)}, []sdk.Dec{sdk.NewDec(2), sdk.NewDec(4)}, false},
-		{[]sdk.Dec{sdk.NewDec(3), sdk.NewDec(18)}, []sdk.Dec{sdk.NewDec(1), sdk.NewDec(6)}, false},
+		{[]sdk.Dec{*sdk.NewDec(0)}, []sdk.Dec{*sdk.NewDec(0)}, true},
+		{[]sdk.Dec{*sdk.NewDec(0)}, []sdk.Dec{*sdk.NewDec(1)}, false},
+		{[]sdk.Dec{*sdk.NewDec(0)}, []sdk.Dec{}, false},
+		{[]sdk.Dec{*sdk.NewDec(0), *sdk.NewDec(1)}, []sdk.Dec{*sdk.NewDec(0), *sdk.NewDec(1)}, true},
+		{[]sdk.Dec{*sdk.NewDec(1), *sdk.NewDec(0)}, []sdk.Dec{*sdk.NewDec(1), *sdk.NewDec(0)}, true},
+		{[]sdk.Dec{*sdk.NewDec(1), *sdk.NewDec(0)}, []sdk.Dec{*sdk.NewDec(0), *sdk.NewDec(1)}, false},
+		{[]sdk.Dec{*sdk.NewDec(1), *sdk.NewDec(0)}, []sdk.Dec{*sdk.NewDec(1)}, false},
+		{[]sdk.Dec{*sdk.NewDec(1), *sdk.NewDec(2)}, []sdk.Dec{*sdk.NewDec(2), *sdk.NewDec(4)}, false},
+		{[]sdk.Dec{*sdk.NewDec(3), *sdk.NewDec(18)}, []sdk.Dec{*sdk.NewDec(1), *sdk.NewDec(6)}, false},
 	}
 
 	for tcIndex, tc := range tests {
@@ -160,10 +160,10 @@ func (s *decimalTestSuite) TestDecsEqual() {
 
 func (s *decimalTestSuite) TestArithmetic() {
 	tests := []struct {
-		d1, d2                                sdk.Dec
-		expMul, expMulTruncate                sdk.Dec
-		expQuo, expQuoRoundUp, expQuoTruncate sdk.Dec
-		expAdd, expSub                        sdk.Dec
+		d1, d2                                *sdk.Dec
+		expMul, expMulTruncate                *sdk.Dec
+		expQuo, expQuoRoundUp, expQuoTruncate *sdk.Dec
+		expAdd, expSub                        *sdk.Dec
 	}{
 		//  d1         d2         MUL    MulTruncate    QUO    QUORoundUp QUOTrunctate  ADD         SUB
 		{sdk.NewDec(0), sdk.NewDec(0), sdk.NewDec(0), sdk.NewDec(0), sdk.NewDec(0), sdk.NewDec(0), sdk.NewDec(0), sdk.NewDec(0), sdk.NewDec(0)},
@@ -222,7 +222,7 @@ func (s *decimalTestSuite) TestArithmetic() {
 
 func (s *decimalTestSuite) TestBankerRoundChop() {
 	tests := []struct {
-		d1  sdk.Dec
+		d1  *sdk.Dec
 		exp int64
 	}{
 		{s.mustNewDecFromStr("0.25"), 0},
@@ -248,7 +248,7 @@ func (s *decimalTestSuite) TestBankerRoundChop() {
 
 func (s *decimalTestSuite) TestTruncate() {
 	tests := []struct {
-		d1  sdk.Dec
+		d1  *sdk.Dec
 		exp int64
 	}{
 		{s.mustNewDecFromStr("0"), 0},
@@ -287,9 +287,9 @@ func (s *decimalTestSuite) TestStringOverflow() {
 
 func (s *decimalTestSuite) TestDecMulInt() {
 	tests := []struct {
-		sdkDec sdk.Dec
-		sdkInt sdk.Int
-		want   sdk.Dec
+		sdkDec *sdk.Dec
+		sdkInt *sdk.Int
+		want   *sdk.Dec
 	}{
 		{sdk.NewDec(10), sdk.NewInt(2), sdk.NewDec(20)},
 		{sdk.NewDec(1000000), sdk.NewInt(100), sdk.NewDec(100000000)},
@@ -304,8 +304,8 @@ func (s *decimalTestSuite) TestDecMulInt() {
 
 func (s *decimalTestSuite) TestDecCeil() {
 	testCases := []struct {
-		input    sdk.Dec
-		expected sdk.Dec
+		input    *sdk.Dec
+		expected *sdk.Dec
 	}{
 		{sdk.NewDecWithPrec(1000000000000000, sdk.Precision), sdk.NewDec(1)},      // 0.001 => 1.0
 		{sdk.NewDecWithPrec(-1000000000000000, sdk.Precision), sdk.ZeroDec()},     // -0.001 => 0.0
@@ -325,16 +325,16 @@ func (s *decimalTestSuite) TestDecCeil() {
 
 func (s *decimalTestSuite) TestPower() {
 	testCases := []struct {
-		input    sdk.Dec
+		input    *sdk.Dec
 		power    uint64
-		expected sdk.Dec
+		expected *sdk.Dec
 	}{
-		{sdk.OneDec(), 10, sdk.OneDec()},                                                   // 1.0 ^ (10) => 1.0
-		{sdk.NewDecWithPrec(5, 1), 2, sdk.NewDecWithPrec(25, 2)},                           // 0.5 ^ 2 => 0.25
-		{sdk.NewDecWithPrec(2, 1), 2, sdk.NewDecWithPrec(4, 2)},                            // 0.2 ^ 2 => 0.04
-		{sdk.NewDecFromInt(sdk.NewInt(3)), 3, sdk.NewDecFromInt(sdk.NewInt(27))},           // 3 ^ 3 => 27
-		{sdk.NewDecFromInt(sdk.NewInt(-3)), 4, sdk.NewDecFromInt(sdk.NewInt(81))},          // -3 ^ 4 = 81
-		{sdk.NewDecWithPrec(1414213562373095049, 18), 2, sdk.NewDecFromInt(sdk.NewInt(2))}, // 1.414213562373095049 ^ 2 = 2
+		{sdk.OneDec(), 10, sdk.OneDec()},                                                    // 1.0 ^ (10) => 1.0
+		{sdk.NewDecWithPrec(5, 1), 2, sdk.NewDecWithPrec(25, 2)},                            // 0.5 ^ 2 => 0.25
+		{sdk.NewDecWithPrec(2, 1), 2, sdk.NewDecWithPrec(4, 2)},                             // 0.2 ^ 2 => 0.04
+		{sdk.NewDecFromInt(*sdk.NewInt(3)), 3, sdk.NewDecFromInt(*sdk.NewInt(27))},          // 3 ^ 3 => 27
+		{sdk.NewDecFromInt(*sdk.NewInt(-3)), 4, sdk.NewDecFromInt(*sdk.NewInt(81))},         // -3 ^ 4 = 81
+		{sdk.NewDecWithPrec(1414213562373095049, 18), 2, sdk.NewDecFromInt(*sdk.NewInt(2))}, // 1.414213562373095049 ^ 2 = 2
 	}
 
 	for i, tc := range testCases {
@@ -345,16 +345,16 @@ func (s *decimalTestSuite) TestPower() {
 
 func (s *decimalTestSuite) TestApproxRoot() {
 	testCases := []struct {
-		input    sdk.Dec
+		input    *sdk.Dec
 		root     uint64
-		expected sdk.Dec
+		expected *sdk.Dec
 	}{
 		{sdk.OneDec(), 10, sdk.OneDec()},                                                       // 1.0 ^ (0.1) => 1.0
 		{sdk.NewDecWithPrec(25, 2), 2, sdk.NewDecWithPrec(5, 1)},                               // 0.25 ^ (0.5) => 0.5
 		{sdk.NewDecWithPrec(4, 2), 2, sdk.NewDecWithPrec(2, 1)},                                // 0.04 ^ (0.5) => 0.2
-		{sdk.NewDecFromInt(sdk.NewInt(27)), 3, sdk.NewDecFromInt(sdk.NewInt(3))},               // 27 ^ (1/3) => 3
-		{sdk.NewDecFromInt(sdk.NewInt(-81)), 4, sdk.NewDecFromInt(sdk.NewInt(-3))},             // -81 ^ (0.25) => -3
-		{sdk.NewDecFromInt(sdk.NewInt(2)), 2, sdk.NewDecWithPrec(1414213562373095049, 18)},     // 2 ^ (0.5) => 1.414213562373095049
+		{sdk.NewDecFromInt(*sdk.NewInt(27)), 3, sdk.NewDecFromInt(*sdk.NewInt(3))},             // 27 ^ (1/3) => 3
+		{sdk.NewDecFromInt(*sdk.NewInt(-81)), 4, sdk.NewDecFromInt(*sdk.NewInt(-3))},           // -81 ^ (0.25) => -3
+		{sdk.NewDecFromInt(*sdk.NewInt(2)), 2, sdk.NewDecWithPrec(1414213562373095049, 18)},    // 2 ^ (0.5) => 1.414213562373095049
 		{sdk.NewDecWithPrec(1005, 3), 31536000, sdk.MustNewDecFromStr("1.000000000158153904")}, // 1.005 ^ (1/31536000) ≈ 1.00000000016
 		{sdk.SmallestDec(), 2, sdk.NewDecWithPrec(1, 9)},                                       // 1e-18 ^ (0.5) => 1e-9
 		{sdk.SmallestDec(), 3, sdk.MustNewDecFromStr("0.000000999999999997")},                  // 1e-18 ^ (1/3) => 1e-6
@@ -374,15 +374,15 @@ func (s *decimalTestSuite) TestApproxRoot() {
 
 func (s *decimalTestSuite) TestApproxSqrt() {
 	testCases := []struct {
-		input    sdk.Dec
-		expected sdk.Dec
+		input    *sdk.Dec
+		expected *sdk.Dec
 	}{
-		{sdk.OneDec(), sdk.OneDec()},                                                    // 1.0 => 1.0
-		{sdk.NewDecWithPrec(25, 2), sdk.NewDecWithPrec(5, 1)},                           // 0.25 => 0.5
-		{sdk.NewDecWithPrec(4, 2), sdk.NewDecWithPrec(2, 1)},                            // 0.09 => 0.3
-		{sdk.NewDecFromInt(sdk.NewInt(9)), sdk.NewDecFromInt(sdk.NewInt(3))},            // 9 => 3
-		{sdk.NewDecFromInt(sdk.NewInt(-9)), sdk.NewDecFromInt(sdk.NewInt(-3))},          // -9 => -3
-		{sdk.NewDecFromInt(sdk.NewInt(2)), sdk.NewDecWithPrec(1414213562373095049, 18)}, // 2 => 1.414213562373095049
+		{sdk.OneDec(), sdk.OneDec()},                                                     // 1.0 => 1.0
+		{sdk.NewDecWithPrec(25, 2), sdk.NewDecWithPrec(5, 1)},                            // 0.25 => 0.5
+		{sdk.NewDecWithPrec(4, 2), sdk.NewDecWithPrec(2, 1)},                             // 0.09 => 0.3
+		{sdk.NewDecFromInt(*sdk.NewInt(9)), sdk.NewDecFromInt(*sdk.NewInt(3))},           // 9 => 3
+		{sdk.NewDecFromInt(*sdk.NewInt(-9)), sdk.NewDecFromInt(*sdk.NewInt(-3))},         // -9 => -3
+		{sdk.NewDecFromInt(*sdk.NewInt(2)), sdk.NewDecWithPrec(1414213562373095049, 18)}, // 2 => 1.414213562373095049
 	}
 
 	for i, tc := range testCases {
@@ -394,7 +394,7 @@ func (s *decimalTestSuite) TestApproxSqrt() {
 
 func (s *decimalTestSuite) TestDecSortableBytes() {
 	tests := []struct {
-		d    sdk.Dec
+		d    *sdk.Dec
 		want []byte
 	}{
 		{sdk.NewDec(0), []byte("000000000000000000.000000000000000000")},
@@ -419,7 +419,7 @@ func (s *decimalTestSuite) TestDecSortableBytes() {
 
 func (s *decimalTestSuite) TestDecEncoding() {
 	testCases := []struct {
-		input   sdk.Dec
+		input   *sdk.Dec
 		rawBz   string
 		jsonStr string
 		yamlStr string
@@ -466,7 +466,7 @@ func (s *decimalTestSuite) TestDecEncoding() {
 
 		var bz []byte
 		var err error
-		var other sdk.Dec
+		var other *sdk.Dec
 		bz, err = json.Marshal(tc.input)
 		s.Require().NoError(err)
 		s.Require().Equal(tc.jsonStr, string(bz))

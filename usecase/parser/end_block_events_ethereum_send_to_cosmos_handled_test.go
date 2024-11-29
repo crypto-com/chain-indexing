@@ -34,8 +34,8 @@ var _ = Describe("ParseEndBlockEventsCommands", func() {
 					Module:   "gravity",
 					Sender:   "0x5E44D43F4Aa0B3ED004eaaD4eF21a83DFF2ef6E5",
 					Receiver: "tcrc13yux6z8mh6w5t3v4uq7clewnh35znrgdgye0k2",
-					Amount: coin.MustNewCoins(
-						coin.MustNewCoin("gravity0x564A1c3AF089D02D0B6C311C650eA3768424cbfa", coin.NewInt(250)),
+					Amount: *coin.MustNewCoins(
+						*coin.MustNewCoin("gravity0x564A1c3AF089D02D0B6C311C650eA3768424cbfa", *coin.NewInt(250)),
 					),
 					BridgeChainId:         42,
 					EthereumTokenContract: "0x564A1c3AF089D02D0B6C311C650eA3768424cbfa",

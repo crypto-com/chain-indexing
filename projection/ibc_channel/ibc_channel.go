@@ -1109,7 +1109,7 @@ func subtractTokenOnThisChain(
 ) error {
 	for i, token := range bondedTokens.OnThisChain {
 		if token.Denom == newToken.Denom {
-			bondedTokens.OnThisChain[i].Amount = bondedTokens.OnThisChain[i].Amount.Sub(newToken.Amount)
+			bondedTokens.OnThisChain[i].Amount = *bondedTokens.OnThisChain[i].Amount.Sub(&newToken.Amount)
 			if bondedTokens.OnThisChain[i].Amount.IsZero() {
 				bondedTokens.OnThisChain = append(bondedTokens.OnThisChain[:i], bondedTokens.OnThisChain[i+1:]...)
 			}
@@ -1125,7 +1125,7 @@ func subtractTokenOnCounterpartyChain(
 ) error {
 	for i, token := range bondedTokens.OnCounterpartyChain {
 		if token.Denom == newToken.Denom {
-			bondedTokens.OnCounterpartyChain[i].Amount = bondedTokens.OnCounterpartyChain[i].Amount.Sub(newToken.Amount)
+			bondedTokens.OnCounterpartyChain[i].Amount = *bondedTokens.OnCounterpartyChain[i].Amount.Sub(&newToken.Amount)
 			if bondedTokens.OnCounterpartyChain[i].Amount.IsZero() {
 				bondedTokens.OnCounterpartyChain = append(bondedTokens.OnCounterpartyChain[:i], bondedTokens.OnCounterpartyChain[i+1:]...)
 			}
@@ -1143,7 +1143,7 @@ func addTokenOnCounterpartyChain(
 	for i, token := range bondedTokens.OnCounterpartyChain {
 		if token.Denom == newToken.Denom {
 			// This token already has a record on bondedTokens.OnCounterpartyChain
-			bondedTokens.OnCounterpartyChain[i].Amount = bondedTokens.OnCounterpartyChain[i].Amount.Add(newToken.Amount)
+			bondedTokens.OnCounterpartyChain[i].Amount = *bondedTokens.OnCounterpartyChain[i].Amount.Add(&newToken.Amount)
 			return
 		}
 	}
@@ -1158,7 +1158,7 @@ func addTokenOnThisChain(
 	for i, token := range bondedTokens.OnThisChain {
 		if token.Denom == newToken.Denom {
 			// This token already has a record on bondedTokens.OnThisChain
-			bondedTokens.OnThisChain[i].Amount = bondedTokens.OnThisChain[i].Amount.Add(newToken.Amount)
+			bondedTokens.OnThisChain[i].Amount = *bondedTokens.OnThisChain[i].Amount.Add(&newToken.Amount)
 			return
 		}
 	}
