@@ -19,8 +19,8 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
+	"github.com/stretchr/testify/assert"
 	testify_mock "github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 )
 
 func NewAccountMessageProjection(rdbConn rdb.Conn) *account_message.AccountMessage {
@@ -101,7 +101,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					Amount: coin.Coins{
 						coin.Coin{
 							Denom:  "Denom",
-							Amount: *coin.NewInt(100),
+							Amount: coin.NewInt(100),
 						},
 					},
 				},
@@ -173,7 +173,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							Amount: coin.Coins{
 								{
 									Denom:  "Denom",
-									Amount: *coin.NewInt(100),
+									Amount: coin.NewInt(100),
 								},
 							},
 						},
@@ -225,7 +225,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							Amount: coin.Coins{
 								coin.Coin{
 									Denom:  "Denom",
-									Amount: *coin.NewInt(100),
+									Amount: coin.NewInt(100),
 								},
 							},
 						},
@@ -236,7 +236,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							Amount: coin.Coins{
 								coin.Coin{
 									Denom:  "Denom",
-									Amount: *coin.NewInt(100),
+									Amount: coin.NewInt(100),
 								},
 							},
 						},
@@ -311,7 +311,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 									Amount: coin.Coins{
 										coin.Coin{
 											Denom:  "Denom",
-											Amount: *coin.NewInt(100),
+											Amount: coin.NewInt(100),
 										},
 									},
 								},
@@ -322,7 +322,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 									Amount: coin.Coins{
 										coin.Coin{
 											Denom:  "Denom",
-											Amount: *coin.NewInt(100),
+											Amount: coin.NewInt(100),
 										},
 									},
 								},
@@ -492,7 +492,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						Amount: coin.Coins{
 							coin.Coin{
 								Denom:  "Denom",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 					},
@@ -555,7 +555,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 								Amount: coin.Coins{
 									coin.Coin{
 										Denom:  "Denom",
-										Amount: *coin.NewInt(100),
+										Amount: coin.NewInt(100),
 									},
 								},
 							},
@@ -608,7 +608,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						Amount: coin.Coins{
 							coin.Coin{
 								Denom:  "Denom",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 					},
@@ -670,7 +670,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 								Amount: coin.Coins{
 									coin.Coin{
 										Denom:  "Denom",
-										Amount: *coin.NewInt(100),
+										Amount: coin.NewInt(100),
 									},
 								},
 							},
@@ -721,7 +721,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					Amount: coin.Coins{
 						coin.Coin{
 							Denom:  "Denom",
-							Amount: *coin.NewInt(100),
+							Amount: coin.NewInt(100),
 						},
 					},
 				},
@@ -780,7 +780,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							Amount: coin.Coins{
 								coin.Coin{
 									Denom:  "Denom",
-									Amount: *coin.NewInt(100),
+									Amount: coin.NewInt(100),
 								},
 							},
 						},
@@ -844,7 +844,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						InitialDeposit: coin.Coins{
 							{
 								Denom:  "Denom",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 					},
@@ -918,7 +918,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 								InitialDeposit: coin.Coins{
 									{
 										Denom:  "Denom",
-										Amount: *coin.NewInt(100),
+										Amount: coin.NewInt(100),
 									},
 								},
 							},
@@ -975,7 +975,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							Amount: coin.Coins{
 								{
 									Denom:  "Denom",
-									Amount: *coin.NewInt(100),
+									Amount: coin.NewInt(100),
 								},
 							},
 						},
@@ -983,7 +983,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						InitialDeposit: coin.Coins{
 							{
 								Denom:  "Denom",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 					},
@@ -1049,7 +1049,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 									Amount: coin.Coins{
 										{
 											Denom:  "Denom",
-											Amount: *coin.NewInt(100),
+											Amount: coin.NewInt(100),
 										},
 									},
 								},
@@ -1057,7 +1057,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 								InitialDeposit: coin.Coins{
 									{
 										Denom:  "Denom",
-										Amount: *coin.NewInt(100),
+										Amount: coin.NewInt(100),
 									},
 								},
 							},
@@ -1115,7 +1115,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 						InitialDeposit: coin.Coins{
 							{
 								Denom:  "Denom",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 					},
@@ -1182,7 +1182,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 								InitialDeposit: coin.Coins{
 									{
 										Denom:  "Denom",
-										Amount: *coin.NewInt(100),
+										Amount: coin.NewInt(100),
 									},
 								},
 							},
@@ -1234,7 +1234,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					Amount: coin.Coins{
 						{
 							Denom:  "Denom",
-							Amount: *coin.NewInt(100),
+							Amount: coin.NewInt(100),
 						},
 					},
 				},
@@ -1294,7 +1294,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							Amount: coin.Coins{
 								{
 									Denom:  "Denom",
-									Amount: *coin.NewInt(100),
+									Amount: coin.NewInt(100),
 								},
 							},
 						},
@@ -1459,7 +1459,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					TendermintPubkey:  "TendermintPubkey",
 					Amount: coin.Coin{
 						Denom:  "Denom",
-						Amount: *coin.NewInt(100),
+						Amount: coin.NewInt(100),
 					},
 				},
 			},
@@ -1531,7 +1531,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							TendermintPubkey:  "TendermintPubkey",
 							Amount: coin.Coin{
 								Denom:  "Denom",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 					},
@@ -1693,11 +1693,11 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					}),
 					Amount: coin.Coin{
 						Denom:  "AmountDenom",
-						Amount: *coin.NewInt(100),
+						Amount: coin.NewInt(100),
 					},
 					AutoClaimedRewards: coin.Coin{
 						Denom:  "AutoClaimedRewardsDenom",
-						Amount: *coin.NewInt(1000),
+						Amount: coin.NewInt(1000),
 					},
 					DelegatorAddress: "DelegatorAddress",
 					ValidatorAddress: "ValidatorAddress",
@@ -1755,11 +1755,11 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 							Amount: coin.Coin{
 								Denom:  "AmountDenom",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 							AutoClaimedRewards: coin.Coin{
 								Denom:  "AutoClaimedRewardsDenom",
-								Amount: *coin.NewInt(1000),
+								Amount: coin.NewInt(1000),
 							},
 							DelegatorAddress: "DelegatorAddress",
 							ValidatorAddress: "ValidatorAddress",
@@ -1808,11 +1808,11 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					}),
 					Amount: coin.Coin{
 						Denom:  "AmountDenom",
-						Amount: *coin.NewInt(100),
+						Amount: coin.NewInt(100),
 					},
 					AutoClaimedRewards: coin.Coin{
 						Denom:  "AutoClaimedRewardsDenom",
-						Amount: *coin.NewInt(1000),
+						Amount: coin.NewInt(1000),
 					},
 					DelegatorAddress:      "DelegatorAddress",
 					ValidatorAddress:      "ValidatorAddress",
@@ -1871,11 +1871,11 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 							Amount: coin.Coin{
 								Denom:  "AmountDenom",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 							AutoClaimedRewards: coin.Coin{
 								Denom:  "AutoClaimedRewardsDenom",
-								Amount: *coin.NewInt(1000),
+								Amount: coin.NewInt(1000),
 							},
 							DelegatorAddress:      "DelegatorAddress",
 							ValidatorAddress:      "ValidatorAddress",
@@ -1925,11 +1925,11 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 					}),
 					Amount: coin.Coin{
 						Denom:  "AmountDenom",
-						Amount: *coin.NewInt(100),
+						Amount: coin.NewInt(100),
 					},
 					AutoClaimedRewards: coin.Coin{
 						Denom:  "AutoClaimedRewardsDenom",
-						Amount: *coin.NewInt(1000),
+						Amount: coin.NewInt(1000),
 					},
 					DelegatorAddress:    "DelegatorAddress",
 					ValidatorSrcAddress: "ValidatorSrcAddress",
@@ -1988,11 +1988,11 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 							},
 							Amount: coin.Coin{
 								Denom:  "AmountDenom",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 							AutoClaimedRewards: coin.Coin{
 								Denom:  "AutoClaimedRewardsDenom",
-								Amount: *coin.NewInt(1000),
+								Amount: coin.NewInt(1000),
 							},
 							DelegatorAddress:    "DelegatorAddress",
 							ValidatorSrcAddress: "ValidatorSrcAddress",
@@ -5001,7 +5001,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 		projection := NewAccountMessageProjection(mockRDbConn)
 		err := projection.HandleEvents(1, tc.Events)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 
 		for _, m := range mocks {
 			m.AssertExpectations(t)

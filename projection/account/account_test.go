@@ -14,8 +14,8 @@ import (
 	account_view "github.com/crypto-com/chain-indexing/projection/account/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+	"github.com/stretchr/testify/assert"
 	testify_mock "github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 )
 
 func NewAccountProjection(rdbConn rdb.Conn, client cosmosapp.Client) *account.Account {
@@ -118,7 +118,7 @@ func TestAccount_HandleEvents(t *testing.T) {
 					coin.Coins{
 						coin.Coin{
 							Denom:  "Denom",
-							Amount: *coin.NewInt(100),
+							Amount: coin.NewInt(100),
 						},
 					},
 					nil,
@@ -145,7 +145,7 @@ func TestAccount_HandleEvents(t *testing.T) {
 						Balance: coin.Coins{
 							{
 								Denom:  "Denom",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 					},
@@ -194,7 +194,7 @@ func TestAccount_HandleEvents(t *testing.T) {
 					coin.Coins{
 						coin.Coin{
 							Denom:  "Denom",
-							Amount: *coin.NewInt(1000),
+							Amount: coin.NewInt(1000),
 						},
 					},
 					nil,
@@ -212,7 +212,7 @@ func TestAccount_HandleEvents(t *testing.T) {
 						Balance: coin.Coins{
 							{
 								Denom:  "Denom",
-								Amount: *coin.NewInt(1000),
+								Amount: coin.NewInt(1000),
 							},
 						},
 					},
@@ -237,7 +237,7 @@ func TestAccount_HandleEvents(t *testing.T) {
 
 		projection := NewAccountProjection(mockRDbConn, mockClient)
 		err := projection.HandleEvents(1, tc.Events)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 
 		for _, m := range mocks {
 			m.AssertExpectations(t)

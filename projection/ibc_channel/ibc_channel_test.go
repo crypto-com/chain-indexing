@@ -11,8 +11,8 @@ import (
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	ibc_channel_view "github.com/crypto-com/chain-indexing/projection/ibc_channel/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
+	"github.com/stretchr/testify/assert"
 	testify_mock "github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb/test"
@@ -773,13 +773,13 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						OnThisChain: []ibc_channel_view.BondedToken{
 							{
 								Denom:  "OnThisChainDenom",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 						OnCounterpartyChain: []ibc_channel_view.BondedToken{
 							{
 								Denom:  "OnCounterpartyChainDenom",
-								Amount: *coin.NewInt(1000),
+								Amount: coin.NewInt(1000),
 							},
 						},
 					},
@@ -793,17 +793,17 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						OnThisChain: []ibc_channel_view.BondedToken{
 							{
 								Denom:  "OnThisChainDenom",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 						OnCounterpartyChain: []ibc_channel_view.BondedToken{
 							{
 								Denom:  "OnCounterpartyChainDenom",
-								Amount: *coin.NewInt(1000),
+								Amount: coin.NewInt(1000),
 							},
 							{
 								Denom:  "DestinationPort/DestinationChannel/DENOM",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 					},
@@ -890,13 +890,13 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						OnThisChain: []ibc_channel_view.BondedToken{
 							{
 								Denom:  "OnThisChainDenom",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 						OnCounterpartyChain: []ibc_channel_view.BondedToken{
 							{
 								Denom:  "OnCounterpartyChainDenom",
-								Amount: *coin.NewInt(1000),
+								Amount: coin.NewInt(1000),
 							},
 						},
 					},
@@ -927,17 +927,17 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						OnThisChain: []ibc_channel_view.BondedToken{
 							{
 								Denom:  "OnThisChainDenom",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 							{
 								Denom:  "DestinationPort/DestinationChannel/DENOM",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 						OnCounterpartyChain: []ibc_channel_view.BondedToken{
 							{
 								Denom:  "OnCounterpartyChainDenom",
-								Amount: *coin.NewInt(1000),
+								Amount: coin.NewInt(1000),
 							},
 						},
 					},
@@ -1160,17 +1160,17 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						OnThisChain: []ibc_channel_view.BondedToken{
 							{
 								Denom:  "OnThisChainDenom",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 						OnCounterpartyChain: []ibc_channel_view.BondedToken{
 							{
 								Denom:  "OnCounterpartyChainDenom",
-								Amount: *coin.NewInt(1000),
+								Amount: coin.NewInt(1000),
 							},
 							{
 								Denom:  "DestinationPort/DestinationChannel/DENOM",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 					},
@@ -1184,13 +1184,13 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						OnThisChain: []ibc_channel_view.BondedToken{
 							{
 								Denom:  "OnThisChainDenom",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 						OnCounterpartyChain: []ibc_channel_view.BondedToken{
 							{
 								Denom:  "OnCounterpartyChainDenom",
-								Amount: *coin.NewInt(1000),
+								Amount: coin.NewInt(1000),
 							},
 						},
 					},
@@ -1269,17 +1269,17 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						OnThisChain: []ibc_channel_view.BondedToken{
 							{
 								Denom:  "OnThisChainDenom",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 						OnCounterpartyChain: []ibc_channel_view.BondedToken{
 							{
 								Denom:  "OnCounterpartyChainDenom",
-								Amount: *coin.NewInt(1000),
+								Amount: coin.NewInt(1000),
 							},
 							{
 								Denom:  "DestinationPort/DestinationChannel/DENOM",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 					},
@@ -1293,13 +1293,13 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						OnThisChain: []ibc_channel_view.BondedToken{
 							{
 								Denom:  "OnThisChainDenom",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 						OnCounterpartyChain: []ibc_channel_view.BondedToken{
 							{
 								Denom:  "OnCounterpartyChainDenom",
-								Amount: *coin.NewInt(1000),
+								Amount: coin.NewInt(1000),
 							},
 						},
 					},
@@ -1378,17 +1378,17 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						OnThisChain: []ibc_channel_view.BondedToken{
 							{
 								Denom:  "OnThisChainDenom",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 						OnCounterpartyChain: []ibc_channel_view.BondedToken{
 							{
 								Denom:  "OnCounterpartyChainDenom",
-								Amount: *coin.NewInt(1000),
+								Amount: coin.NewInt(1000),
 							},
 							{
 								Denom:  "DestinationPort/DestinationChannel/DENOM",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 					},
@@ -1402,13 +1402,13 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 						OnThisChain: []ibc_channel_view.BondedToken{
 							{
 								Denom:  "OnThisChainDenom",
-								Amount: *coin.NewInt(100),
+								Amount: coin.NewInt(100),
 							},
 						},
 						OnCounterpartyChain: []ibc_channel_view.BondedToken{
 							{
 								Denom:  "OnCounterpartyChainDenom",
-								Amount: *coin.NewInt(1000),
+								Amount: coin.NewInt(1000),
 							},
 						},
 					},
@@ -1539,7 +1539,7 @@ func TestIBCChannel_HandleEvents(t *testing.T) {
 
 		projection := NewIBCChannelProjection(mockRDbConn)
 		err := projection.HandleEvents(1, tc.Events)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 
 		for _, m := range mocks {
 			m.AssertExpectations(t)

@@ -8,8 +8,8 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/stretchr/testify/assert"
 	testify_mock "github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbparambase"
@@ -95,7 +95,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						},
 						ProposerAddress: "ProposerAddress",
 						InitialDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 					},
 				},
@@ -148,10 +148,10 @@ func TestProposal_HandleEvents(t *testing.T) {
 						MaybeProposerOperatorAddress: primptr.String("ProposerOperatorAddress"),
 						Data:                         nil,
 						InitialDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 						TotalDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 						TotalVote:                 big.NewInt(0),
 						TransactionHash:           "TxHash",
@@ -181,7 +181,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						DepositAtBlockHeight:          1,
 						DepositAtBlockTime:            utctime.UTCTime{},
 						Amount: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 					}).
 					Return(nil)
@@ -235,7 +235,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						},
 						ProposerAddress: "ProposerAddress",
 						InitialDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 					},
 				},
@@ -301,10 +301,10 @@ func TestProposal_HandleEvents(t *testing.T) {
 							},
 						},
 						InitialDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 						TotalDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 						TotalVote:                 big.NewInt(0),
 						TransactionHash:           "TxHash",
@@ -334,7 +334,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						DepositAtBlockHeight:          1,
 						DepositAtBlockTime:            utctime.UTCTime{},
 						Amount: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 					}).
 					Return(nil)
@@ -380,12 +380,12 @@ func TestProposal_HandleEvents(t *testing.T) {
 							Type:             "Type",
 							RecipientAddress: "RecipientAddress",
 							Amount: []coin.Coin{
-								*coin.NewInt64Coin("DENOM", 1000),
+								coin.NewInt64Coin("DENOM", 1000),
 							},
 						},
 						ProposerAddress: "ProposerAddress",
 						InitialDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 					},
 				},
@@ -443,15 +443,15 @@ func TestProposal_HandleEvents(t *testing.T) {
 								Type:             "Type",
 								RecipientAddress: "RecipientAddress",
 								Amount: []coin.Coin{
-									*coin.NewInt64Coin("DENOM", 1000),
+									coin.NewInt64Coin("DENOM", 1000),
 								},
 							},
 						},
 						InitialDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 						TotalDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 						TotalVote:                 big.NewInt(0),
 						TransactionHash:           "TxHash",
@@ -481,7 +481,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						DepositAtBlockHeight:          1,
 						DepositAtBlockTime:            utctime.UTCTime{},
 						Amount: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 					}).
 					Return(nil)
@@ -534,7 +534,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						},
 						ProposerAddress: "ProposerAddress",
 						InitialDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 					},
 				},
@@ -599,10 +599,10 @@ func TestProposal_HandleEvents(t *testing.T) {
 							},
 						},
 						InitialDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 						TotalDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 						TotalVote:                 big.NewInt(0),
 						TransactionHash:           "TxHash",
@@ -632,7 +632,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						DepositAtBlockHeight:          1,
 						DepositAtBlockTime:            utctime.UTCTime{},
 						Amount: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 					}).
 					Return(nil)
@@ -679,7 +679,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						},
 						ProposerAddress: "ProposerAddress",
 						InitialDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 					},
 				},
@@ -732,10 +732,10 @@ func TestProposal_HandleEvents(t *testing.T) {
 						MaybeProposerOperatorAddress: primptr.String("ProposerOperatorAddress"),
 						Data:                         nil,
 						InitialDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 						TotalDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 						TotalVote:                 big.NewInt(0),
 						TransactionHash:           "TxHash",
@@ -765,7 +765,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						DepositAtBlockHeight:          1,
 						DepositAtBlockTime:            utctime.UTCTime{},
 						Amount: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 					}).
 					Return(nil)
@@ -820,7 +820,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 							},
 						},
 						InitialDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 						Metadata: "Metadata",
 					},
@@ -886,10 +886,10 @@ func TestProposal_HandleEvents(t *testing.T) {
 							},
 						},
 						InitialDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 						TotalDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 						TotalVote:                 big.NewInt(0),
 						TransactionHash:           "TxHash",
@@ -921,7 +921,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						DepositAtBlockHeight:          1,
 						DepositAtBlockTime:            utctime.UTCTime{},
 						Amount: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 					}).
 					Return(nil)
@@ -963,7 +963,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						MaybeProposalId: primptr.String("MaybeProposalId"),
 						Proposer:        "Proposer",
 						InitialDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 						Metadata: "Metadata",
 						Messages: []interface{}{
@@ -1028,10 +1028,10 @@ func TestProposal_HandleEvents(t *testing.T) {
 							},
 						},
 						InitialDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 						TotalDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 						TotalVote:                 big.NewInt(0),
 						TransactionHash:           "TxHash",
@@ -1062,7 +1062,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						DepositAtBlockHeight:          1,
 						DepositAtBlockTime:            utctime.UTCTime{},
 						Amount: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 					}).
 					Return(nil)
@@ -1414,7 +1414,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					ProposalId: "ProposalId",
 					Depositor:  "Depositor",
 					Amount: []coin.Coin{
-						*coin.NewInt64Coin("DENOM", 100),
+						coin.NewInt64Coin("DENOM", 100),
 					},
 				},
 			},
@@ -1428,7 +1428,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						ProposalRow: view.ProposalRow{
 							ProposalId: "ProposalId",
 							TotalDeposit: []coin.Coin{
-								*coin.NewInt64Coin("DENOM", 200),
+								coin.NewInt64Coin("DENOM", 200),
 							},
 						},
 					}, nil)
@@ -1436,7 +1436,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					On("Update", &view.ProposalRow{
 						ProposalId: "ProposalId",
 						TotalDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 300),
+							coin.NewInt64Coin("DENOM", 300),
 						},
 					}).
 					Return(nil)
@@ -1475,7 +1475,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						DepositAtBlockHeight:          1,
 						DepositAtBlockTime:            utctime.UTCTime{},
 						Amount: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 					}).
 					Return(nil)
@@ -1516,7 +1516,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					ProposalId: "ProposalId",
 					Depositor:  "Depositor",
 					Amount: []coin.Coin{
-						*coin.NewInt64Coin("DENOM", 100),
+						coin.NewInt64Coin("DENOM", 100),
 					},
 				},
 			},
@@ -1529,7 +1529,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						ProposalRow: view.ProposalRow{
 							ProposalId: "ProposalId",
 							TotalDeposit: []coin.Coin{
-								*coin.NewInt64Coin("DENOM", 200),
+								coin.NewInt64Coin("DENOM", 200),
 							},
 						},
 					}, nil)
@@ -1537,7 +1537,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 					On("Update", &view.ProposalRow{
 						ProposalId: "ProposalId",
 						TotalDeposit: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 300),
+							coin.NewInt64Coin("DENOM", 300),
 						},
 					}).
 					Return(nil)
@@ -1576,7 +1576,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						DepositAtBlockHeight:          1,
 						DepositAtBlockTime:            utctime.UTCTime{},
 						Amount: []coin.Coin{
-							*coin.NewInt64Coin("DENOM", 100),
+							coin.NewInt64Coin("DENOM", 100),
 						},
 					}).
 					Return(nil)
@@ -2618,7 +2618,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 
 		projection := NewProposalProjection(mockRDbConn, mockClient)
 		err := projection.HandleEvents(1, tc.Events)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 
 		for _, m := range mocks {
 			m.AssertExpectations(t)

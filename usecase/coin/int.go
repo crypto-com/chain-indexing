@@ -73,7 +73,7 @@ type Int struct {
 }
 
 // BigInt converts Int to big.Int
-func (i *Int) BigInt() *big.Int {
+func (i Int) BigInt() *big.Int {
 	if i.IsNil() {
 		return nil
 	}
@@ -81,28 +81,28 @@ func (i *Int) BigInt() *big.Int {
 }
 
 // IsNil returns true if Int is uninitialized
-func (i *Int) IsNil() bool {
+func (i Int) IsNil() bool {
 	return i.i == nil
 }
 
 // NewInt constructs Int from int64
-func NewInt(n int64) *Int {
-	return &Int{big.NewInt(n)}
+func NewInt(n int64) Int {
+	return Int{big.NewInt(n)}
 }
 
 // NewIntFromUint64 constructs an Int from a uint64.
-func NewIntFromUint64(n uint64) *Int {
+func NewIntFromUint64(n uint64) Int {
 	b := big.NewInt(0)
 	b.SetUint64(n)
-	return &Int{b}
+	return Int{b}
 }
 
 // NewIntFromBigInt constructs Int from big.Int
-func NewIntFromBigInt(i *big.Int) *Int {
+func NewIntFromBigInt(i *big.Int) Int {
 	if i.BitLen() > maxBitLen {
 		panic("NewIntFromBigInt() out of bound")
 	}
-	return &Int{i}
+	return Int{i}
 }
 
 // NewIntFromString constructs Int from string
@@ -121,7 +121,7 @@ func NewIntFromString(s string) (res Int, ok bool) {
 
 // NewIntWithDecimal constructs Int with decimal
 // Result value is n*10^dec
-func NewIntWithDecimal(n int64, dec int) *Int {
+func NewIntWithDecimal(n int64, dec int) Int {
 	if dec < 0 {
 		panic("NewIntWithDecimal() decimal is negative")
 	}
@@ -133,23 +133,23 @@ func NewIntWithDecimal(n int64, dec int) *Int {
 	if i.BitLen() > maxBitLen {
 		panic("NewIntWithDecimal() out of bound")
 	}
-	return &Int{i}
+	return Int{i}
 }
 
 // ZeroInt returns Int value with zero
-func ZeroInt() *Int { return &Int{big.NewInt(0)} }
+func ZeroInt() Int { return Int{big.NewInt(0)} }
 
 // OneInt returns Int value with one
-func OneInt() *Int { return &Int{big.NewInt(1)} }
+func OneInt() Int { return Int{big.NewInt(1)} }
 
 // ToDec converts Int to Dec
-func (i *Int) ToDec() *Dec {
-	return NewDecFromInt(*i)
+func (i Int) ToDec() Dec {
+	return NewDecFromInt(i)
 }
 
 // Int64 converts Int to int64
 // Panics if the value is out of range
-func (i *Int) Int64() int64 {
+func (i Int) Int64() int64 {
 	if !i.i.IsInt64() {
 		panic("Int64() out of bound")
 	}
@@ -157,13 +157,13 @@ func (i *Int) Int64() int64 {
 }
 
 // IsInt64 returns true if Int64() not panics
-func (i *Int) IsInt64() bool {
+func (i Int) IsInt64() bool {
 	return i.i.IsInt64()
 }
 
 // Uint64 converts Int to uint64
 // Panics if the value is out of range
-func (i *Int) Uint64() uint64 {
+func (i Int) Uint64() uint64 {
 	if !i.i.IsUint64() {
 		panic("Uint64() out of bounds")
 	}
@@ -171,59 +171,59 @@ func (i *Int) Uint64() uint64 {
 }
 
 // IsUint64 returns true if Uint64() not panics
-func (i *Int) IsUint64() bool {
+func (i Int) IsUint64() bool {
 	return i.i.IsUint64()
 }
 
 // IsZero returns true if Int is zero
-func (i *Int) IsZero() bool {
+func (i Int) IsZero() bool {
 	return i.i.Sign() == 0
 }
 
 // IsNegative returns true if Int is negative
-func (i *Int) IsNegative() bool {
+func (i Int) IsNegative() bool {
 	return i.i.Sign() == -1
 }
 
 // IsPositive returns true if Int is positive
-func (i *Int) IsPositive() bool {
+func (i Int) IsPositive() bool {
 	return i.i.Sign() == 1
 }
 
 // Sign returns sign of Int
-func (i *Int) Sign() int {
+func (i Int) Sign() int {
 	return i.i.Sign()
 }
 
 // Equal compares two Ints
-func (i *Int) Equal(i2 *Int) bool {
+func (i Int) Equal(i2 Int) bool {
 	return equal(i.i, i2.i)
 }
 
 // GT returns true if first Int is greater than second
-func (i *Int) GT(i2 *Int) bool {
+func (i Int) GT(i2 Int) bool {
 	return gt(i.i, i2.i)
 }
 
 // GTE returns true if receiver Int is greater than or equal to the parameter
 // Int.
-func (i *Int) GTE(i2 *Int) bool {
+func (i Int) GTE(i2 Int) bool {
 	return gte(i.i, i2.i)
 }
 
 // LT returns true if first Int is lesser than second
-func (i *Int) LT(i2 *Int) bool {
+func (i Int) LT(i2 Int) bool {
 	return lt(i.i, i2.i)
 }
 
 // LTE returns true if first Int is less than or equal to second
-func (i *Int) LTE(i2 *Int) bool {
+func (i Int) LTE(i2 Int) bool {
 	return lte(i.i, i2.i)
 }
 
 // Add adds Int from another
-func (i *Int) Add(i2 *Int) (res *Int) {
-	res = &Int{add(i.i, i2.i)}
+func (i Int) Add(i2 Int) (res Int) {
+	res = Int{add(i.i, i2.i)}
 	// Check overflow
 	if res.i.BitLen() > maxBitLen {
 		panic("Int overflow")
@@ -232,13 +232,13 @@ func (i *Int) Add(i2 *Int) (res *Int) {
 }
 
 // AddRaw adds int64 to Int
-func (i *Int) AddRaw(i2 int64) *Int {
+func (i Int) AddRaw(i2 int64) Int {
 	return i.Add(NewInt(i2))
 }
 
 // Sub subtracts Int from another
-func (i *Int) Sub(i2 *Int) (res *Int) {
-	res = &Int{sub(i.i, i2.i)}
+func (i Int) Sub(i2 Int) (res Int) {
+	res = Int{sub(i.i, i2.i)}
 	// Check overflow
 	if res.i.BitLen() > maxBitLen {
 		panic("Int overflow")
@@ -247,17 +247,17 @@ func (i *Int) Sub(i2 *Int) (res *Int) {
 }
 
 // SubRaw subtracts int64 from Int
-func (i *Int) SubRaw(i2 int64) *Int {
+func (i Int) SubRaw(i2 int64) Int {
 	return i.Sub(NewInt(i2))
 }
 
 // Mul multiples two Ints
-func (i *Int) Mul(i2 *Int) (res *Int) {
+func (i Int) Mul(i2 Int) (res Int) {
 	// Check overflow
 	if i.i.BitLen()+i2.i.BitLen()-1 > maxBitLen {
 		panic("Int overflow")
 	}
-	res = &Int{mul(i.i, i2.i)}
+	res = Int{mul(i.i, i2.i)}
 	// Check overflow if sign of both are same
 	if res.i.BitLen() > maxBitLen {
 		panic("Int overflow")
@@ -266,59 +266,59 @@ func (i *Int) Mul(i2 *Int) (res *Int) {
 }
 
 // MulRaw multipies Int and int64
-func (i *Int) MulRaw(i2 int64) *Int {
+func (i Int) MulRaw(i2 int64) Int {
 	return i.Mul(NewInt(i2))
 }
 
 // Quo divides Int with Int
-func (i *Int) Quo(i2 *Int) (res *Int) {
+func (i Int) Quo(i2 Int) (res Int) {
 	// Check division-by-zero
 	if i2.i.Sign() == 0 {
 		panic("Division by zero")
 	}
-	return &Int{div(i.i, i2.i)}
+	return Int{div(i.i, i2.i)}
 }
 
 // QuoRaw divides Int with int64
-func (i *Int) QuoRaw(i2 int64) *Int {
+func (i Int) QuoRaw(i2 int64) Int {
 	return i.Quo(NewInt(i2))
 }
 
 // Mod returns remainder after dividing with Int
-func (i *Int) Mod(i2 *Int) *Int {
+func (i Int) Mod(i2 Int) Int {
 	if i2.Sign() == 0 {
 		panic("division-by-zero")
 	}
-	return &Int{mod(i.i, i2.i)}
+	return Int{mod(i.i, i2.i)}
 }
 
 // ModRaw returns remainder after dividing with int64
-func (i *Int) ModRaw(i2 int64) *Int {
+func (i Int) ModRaw(i2 int64) Int {
 	return i.Mod(NewInt(i2))
 }
 
 // Neg negates Int
-func (i *Int) Neg() (res *Int) {
-	return &Int{neg(i.i)}
+func (i Int) Neg() (res Int) {
+	return Int{neg(i.i)}
 }
 
 // return the minimum of the ints
-func MinInt(i1, i2 *Int) *Int {
-	return &Int{min(i1.BigInt(), i2.BigInt())}
+func MinInt(i1, i2 Int) Int {
+	return Int{min(i1.BigInt(), i2.BigInt())}
 }
 
 // MaxInt returns the maximum between two integers.
-func MaxInt(i, i2 *Int) *Int {
-	return &Int{max(i.BigInt(), i2.BigInt())}
+func MaxInt(i, i2 Int) Int {
+	return Int{max(i.BigInt(), i2.BigInt())}
 }
 
 // Human readable string
-func (i *Int) String() string {
+func (i Int) String() string {
 	return i.i.String()
 }
 
 // MarshalJSON defines custom encoding scheme
-func (i *Int) MarshalJSON() ([]byte, error) {
+func (i Int) MarshalJSON() ([]byte, error) {
 	if i.i == nil { // Necessary since default Uint initialization has i.i as nil
 		i.i = new(big.Int)
 	}
@@ -356,12 +356,12 @@ func unmarshalJSON(i *big.Int, bz []byte) error {
 }
 
 // MarshalYAML returns the YAML representation.
-func (i *Int) MarshalYAML() (interface{}, error) {
+func (i Int) MarshalYAML() (interface{}, error) {
 	return i.String(), nil
 }
 
 //// Marshal implements the gogo proto custom type interface.
-//func (i *Int) Marshal() ([]byte, error) {
+//func (i Int) Marshal() ([]byte, error) {
 //	if i.i == nil {
 //		i.i = new(big.Int)
 //	}
@@ -416,11 +416,11 @@ func (i *Int) MarshalYAML() (interface{}, error) {
 //}
 
 //// Override Amino binary serialization by proxying to protobuf.
-//func (i *Int) MarshalAmino() ([]byte, error)   { return i.Marshal() }
+//func (i Int) MarshalAmino() ([]byte, error)   { return i.Marshal() }
 //func (i *Int) UnmarshalAmino(bz []byte) error { return i.Unmarshal(bz) }
 
 // intended to be used with require/assert:  require.True(IntEq(...))
-func IntEq(t *testing.T, exp, got *Int) (*testing.T, bool, string, string, string) {
+func IntEq(t *testing.T, exp, got Int) (*testing.T, bool, string, string, string) {
 	return t, exp.Equal(got), "expected:\t%v\ngot:\t\t%v", exp.String(), got.String()
 }
 

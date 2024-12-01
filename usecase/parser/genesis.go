@@ -70,7 +70,7 @@ func ParseGenesisCommands(
 				),
 				ValidatorAddress: validator.OperatorAddress,
 				TendermintPubkey: validator.ConsensusPubkey.Key,
-				Amount:           *amount,
+				Amount:           amount,
 				Jailed:           validator.Jailed,
 			},
 		))

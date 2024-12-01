@@ -58,7 +58,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					InitialDeposit: coin.Coins{
 						{
 							Denom:  "basecro",
-							Amount: *coin.NewInt(10000),
+							Amount: coin.NewInt(10000),
 						},
 					},
 					Metadata: "ipfs://CID",
@@ -122,7 +122,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					InitialDeposit: coin.Coins{
 						{
 							Denom:  "basecro",
-							Amount: *coin.NewInt(1000),
+							Amount: coin.NewInt(1000),
 						},
 					},
 					Metadata: "ipfs://CID",
@@ -179,7 +179,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					InitialDeposit: coin.Coins{
 						{
 							Denom:  "basecro",
-							Amount: *coin.NewInt(1000000),
+							Amount: coin.NewInt(1000000),
 						},
 					},
 					Metadata: "ipfs://CID",

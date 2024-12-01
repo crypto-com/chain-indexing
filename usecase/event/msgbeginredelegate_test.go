@@ -28,8 +28,8 @@ var _ = Describe("Event", func() {
 				DelegatorAddress:    anyDelegatorAddress,
 				ValidatorSrcAddress: anyValidatorSrcAddress,
 				ValidatorDstAddress: anyValidatorDstAddress,
-				Amount:              *anyAmount,
-				AutoClaimedRewards:  *anyAutoClaimedRewards,
+				Amount:              anyAmount,
+				AutoClaimedRewards:  anyAutoClaimedRewards,
 			}
 			event := event_usecase.NewMsgBeginRedelegate(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
@@ -70,8 +70,8 @@ var _ = Describe("Event", func() {
 				DelegatorAddress:    anyDelegatorAddress,
 				ValidatorSrcAddress: anyValidatorSrcAddress,
 				ValidatorDstAddress: anyValidatorDstAddress,
-				Amount:              *anyAmount,
-				AutoClaimedRewards:  *anyAutoClaimedRewards,
+				Amount:              anyAmount,
+				AutoClaimedRewards:  anyAutoClaimedRewards,
 			}
 			event := event_usecase.NewMsgBeginRedelegate(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,

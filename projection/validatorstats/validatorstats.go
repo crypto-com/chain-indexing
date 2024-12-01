@@ -133,7 +133,7 @@ func (projection *ValidatorStats) HandleEvents(height int64, events []event_enti
 				return fmt.Errorf("error adding delegate: %v", err)
 			}
 		} else if undelegateEvent, ok := event.(*event_usecase.MsgUndelegate); ok {
-			totalDelegate = totalDelegate.Add(*undelegateEvent.Amount.Neg())
+			totalDelegate = totalDelegate.Add(undelegateEvent.Amount.Neg())
 			if err != nil {
 				return fmt.Errorf("error subtracting delegate: %v", err)
 			}

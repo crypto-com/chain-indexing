@@ -26,8 +26,8 @@ var _ = Describe("Event", func() {
 			anyParams := model.MsgUndelegateParams{
 				DelegatorAddress:   anyDelegatorAddress,
 				ValidatorAddress:   anyValidatorAddress,
-				Amount:             *anyAmount,
-				AutoClaimedRewards: *anyAutoClaimedRewards,
+				Amount:             anyAmount,
+				AutoClaimedRewards: anyAutoClaimedRewards,
 			}
 			event := event_usecase.NewMsgUndelegate(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,
@@ -67,8 +67,8 @@ var _ = Describe("Event", func() {
 			anyParams := model.MsgUndelegateParams{
 				DelegatorAddress:   anyDelegatorAddress,
 				ValidatorAddress:   anyValidatorAddress,
-				Amount:             *anyAmount,
-				AutoClaimedRewards: *anyAutoClaimedRewards,
+				Amount:             anyAmount,
+				AutoClaimedRewards: anyAutoClaimedRewards,
 			}
 			event := event_usecase.NewMsgUndelegate(event_usecase.MsgCommonParams{
 				BlockHeight: anyHeight,

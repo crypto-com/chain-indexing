@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/stretchr/testify/assert"
 	testify_mock "github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb/test"
@@ -105,7 +105,7 @@ func TestBridgeActivityMatcher_HandleEvents(t *testing.T) {
 						ToAddress:                     "to-address",
 						MaybeToSmartContractAddress:   nil,
 						MaybeChannelId:                primptr.String("channel-0"),
-						Amount:                        *coin.NewInt(100),
+						Amount:                        coin.NewInt(100),
 						MaybeDenom:                    primptr.String("basecro"),
 						MaybeBridgeFeeAmount:          nil,
 						MaybeBridgeFeeDenom:           nil,
@@ -239,7 +239,7 @@ func TestBridgeActivityMatcher_HandleEvents(t *testing.T) {
 						ToAddress:                     "to-address",
 						MaybeToSmartContractAddress:   nil,
 						MaybeChannelId:                primptr.String("channel-0"),
-						Amount:                        *coin.NewInt(100),
+						Amount:                        coin.NewInt(100),
 						MaybeDenom:                    primptr.String("basecro"),
 						MaybeBridgeFeeAmount:          nil,
 						MaybeBridgeFeeDenom:           nil,
@@ -397,7 +397,7 @@ func TestBridgeActivityMatcher_HandleEvents(t *testing.T) {
 						ToAddress:                     "to-address",
 						MaybeToSmartContractAddress:   nil,
 						MaybeChannelId:                primptr.String("channel-0"),
-						Amount:                        *coin.NewInt(100),
+						Amount:                        coin.NewInt(100),
 						MaybeDenom:                    primptr.String("basecro"),
 						MaybeBridgeFeeAmount:          nil,
 						MaybeBridgeFeeDenom:           nil,
@@ -562,7 +562,7 @@ func TestBridgeActivityMatcher_HandleEvents(t *testing.T) {
 						ToAddress:                     "to-address",
 						MaybeToSmartContractAddress:   nil,
 						MaybeChannelId:                primptr.String("channel-0"),
-						Amount:                        *coin.NewInt(100),
+						Amount:                        coin.NewInt(100),
 						MaybeDenom:                    primptr.String("basecro"),
 						MaybeBridgeFeeAmount:          nil,
 						MaybeBridgeFeeDenom:           nil,
@@ -588,7 +588,7 @@ func TestBridgeActivityMatcher_HandleEvents(t *testing.T) {
 						ToAddress:                     "to-address",
 						MaybeToSmartContractAddress:   nil,
 						MaybeChannelId:                primptr.String("channel-1"),
-						Amount:                        *coin.NewInt(100),
+						Amount:                        coin.NewInt(100),
 						MaybeDenom:                    primptr.String("basecro"),
 						MaybeBridgeFeeAmount:          nil,
 						MaybeBridgeFeeDenom:           nil,
@@ -761,7 +761,7 @@ func TestBridgeActivityMatcher_HandleEvents(t *testing.T) {
 						MaybeDestinationSmartContractAddress: nil,
 						MaybeChannelId:                       nil,
 						LinkId:                               "link-id",
-						Amount:                               *coin.NewInt(100),
+						Amount:                               coin.NewInt(100),
 						MaybeDenom:                           primptr.String("basecro"),
 						MaybeBridgeFeeAmount:                 nil,
 						MaybeBridgeFeeDenom:                  nil,
@@ -956,7 +956,7 @@ func TestBridgeActivityMatcher_HandleEvents(t *testing.T) {
 						MaybeDestinationSmartContractAddress: nil,
 						MaybeChannelId:                       nil,
 						LinkId:                               "link-id",
-						Amount:                               *coin.NewInt(100),
+						Amount:                               coin.NewInt(100),
 						MaybeDenom:                           primptr.String("basecro"),
 						MaybeBridgeFeeAmount:                 nil,
 						MaybeBridgeFeeDenom:                  nil,
@@ -1010,7 +1010,7 @@ func TestBridgeActivityMatcher_HandleEvents(t *testing.T) {
 						MaybeDestinationSmartContractAddress: nil,
 						MaybeChannelId:                       nil,
 						LinkId:                               "link-id-2",
-						Amount:                               *coin.NewInt(100),
+						Amount:                               coin.NewInt(100),
 						MaybeDenom:                           primptr.String("basecro"),
 						MaybeBridgeFeeAmount:                 nil,
 						MaybeBridgeFeeDenom:                  nil,
@@ -1229,7 +1229,7 @@ func TestBridgeActivityMatcher_HandleEvents(t *testing.T) {
 						MaybeDestinationSmartContractAddress: nil,
 						MaybeChannelId:                       nil,
 						LinkId:                               "link-id",
-						Amount:                               *coin.NewInt(100),
+						Amount:                               coin.NewInt(100),
 						MaybeDenom:                           primptr.String("basecro"),
 						MaybeBridgeFeeAmount:                 nil,
 						MaybeBridgeFeeDenom:                  nil,
@@ -1401,7 +1401,7 @@ func TestBridgeActivityMatcher_HandleEvents(t *testing.T) {
 						MaybeDestinationSmartContractAddress: nil,
 						MaybeChannelId:                       nil,
 						LinkId:                               "link-id",
-						Amount:                               *coin.NewInt(100),
+						Amount:                               coin.NewInt(100),
 						MaybeDenom:                           primptr.String("basecro"),
 						MaybeBridgeFeeAmount:                 nil,
 						MaybeBridgeFeeDenom:                  nil,
@@ -1543,7 +1543,7 @@ func TestBridgeActivityMatcher_HandleEvents(t *testing.T) {
 						MaybeDestinationSmartContractAddress: nil,
 						MaybeChannelId:                       nil,
 						LinkId:                               "link-id",
-						Amount:                               *coin.NewInt(100),
+						Amount:                               coin.NewInt(100),
 						MaybeDenom:                           primptr.String("basecro"),
 						MaybeBridgeFeeAmount:                 nil,
 						MaybeBridgeFeeDenom:                  nil,
@@ -1618,10 +1618,10 @@ func TestBridgeActivityMatcher_HandleEvents(t *testing.T) {
 
 		projection := NewBridgeActivityMatcherProjection(mockThisRDbConn, tc.Config)
 		onInitErr := projection.OnInit()
-		require.NoError(t, onInitErr)
+		assert.NoError(t, onInitErr)
 
 		execErr := projection.Exec()
-		require.NoError(t, execErr)
+		assert.NoError(t, execErr)
 
 		for _, m := range mocks {
 			m.AssertExpectations(t)

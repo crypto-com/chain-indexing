@@ -8,8 +8,8 @@ import (
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/projection/raw_transaction"
 	raw_transaction_view "github.com/crypto-com/chain-indexing/projection/raw_transaction/view"
+	"github.com/stretchr/testify/assert"
 	testify_mock "github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb/test"
@@ -107,7 +107,7 @@ func TestRawTransaction_HandleEvents(t *testing.T) {
 							AccountSequence: 0,
 						},
 					},
-					Fee:           coin.Coins{*coin.MustNewCoinFromString("basetcro", "1")},
+					Fee:           coin.Coins{coin.MustNewCoinFromString("basetcro", "1")},
 					FeePayer:      "FeePayer",
 					FeeGranter:    "FeeGranter",
 					GasWanted:     200,
@@ -147,7 +147,7 @@ func TestRawTransaction_HandleEvents(t *testing.T) {
 							Success:       true,
 							Code:          0,
 							Log:           "Log",
-							Fee:           coin.Coins{*coin.MustNewCoinFromString("basetcro", "1")},
+							Fee:           coin.Coins{coin.MustNewCoinFromString("basetcro", "1")},
 							FeePayer:      "FeePayer",
 							FeeGranter:    "FeeGranter",
 							GasWanted:     200,
@@ -249,7 +249,7 @@ func TestRawTransaction_HandleEvents(t *testing.T) {
 							AccountSequence: 0,
 						},
 					},
-					Fee:           coin.Coins{*coin.MustNewCoinFromString("basetcro", "1")},
+					Fee:           coin.Coins{coin.MustNewCoinFromString("basetcro", "1")},
 					FeePayer:      "FeePayer",
 					FeeGranter:    "FeeGranter",
 					GasWanted:     200,
@@ -289,7 +289,7 @@ func TestRawTransaction_HandleEvents(t *testing.T) {
 							Success:       false,
 							Code:          0,
 							Log:           "Log",
-							Fee:           coin.Coins{*coin.MustNewCoinFromString("basetcro", "1")},
+							Fee:           coin.Coins{coin.MustNewCoinFromString("basetcro", "1")},
 							FeePayer:      "FeePayer",
 							FeeGranter:    "FeeGranter",
 							GasWanted:     200,
@@ -361,7 +361,7 @@ func TestRawTransaction_HandleEvents(t *testing.T) {
 
 		projection := NewRawTransactionProjection(mockRDbConn)
 		err := projection.HandleEvents(1, tc.Events)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 
 		for _, m := range mocks {
 			m.AssertExpectations(t)
