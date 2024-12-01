@@ -1,8 +1,6 @@
 package model
 
 import (
-	"time"
-
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/luci/go-render/render"
 )
@@ -43,10 +41,10 @@ type BlockEvidence struct {
 					Hash  string `json:"hash"`
 				} `json:"parts"`
 			} `json:"block_id"`
-			Timestamp        time.Time `json:"timestamp"`
-			ValidatorAddress string    `json:"validator_address"`
-			ValidatorIndex   int       `json:"validator_index"`
-			Signature        string    `json:"signature"`
+			Timestamp        utctime.UTCTime `json:"timestamp"`
+			ValidatorAddress string          `json:"validator_address"`
+			ValidatorIndex   int             `json:"validator_index"`
+			Signature        string          `json:"signature"`
 		} `json:"vote_a"`
 		VoteB struct {
 			Type    int    `json:"type"`
@@ -59,14 +57,14 @@ type BlockEvidence struct {
 					Hash  string `json:"hash"`
 				} `json:"parts"`
 			} `json:"block_id"`
-			Timestamp        time.Time `json:"timestamp"`
-			ValidatorAddress string    `json:"validator_address"`
-			ValidatorIndex   int       `json:"validator_index"`
-			Signature        string    `json:"signature"`
+			Timestamp        utctime.UTCTime `json:"timestamp"`
+			ValidatorAddress string          `json:"validator_address"`
+			ValidatorIndex   int             `json:"validator_index"`
+			Signature        string          `json:"signature"`
 		} `json:"vote_b"`
 		// TODO: Breaking changes to snake case in the future
-		TotalVotingPower string    `json:"TotalVotingPower"`
-		ValidatorPower   string    `json:"ValidatorPower"`
-		Timestamp        time.Time `json:"Timestamp"`
+		TotalVotingPower string          `json:"TotalVotingPower"`
+		ValidatorPower   string          `json:"ValidatorPower"`
+		Timestamp        utctime.UTCTime `json:"Timestamp"`
 	} `json:"value"`
 }
