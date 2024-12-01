@@ -17,7 +17,6 @@ var _ = Describe("Parser", func() {
 
 			_, _, err := ParseBlockResp(blockReader)
 			Expect(err).To(BeNil())
-			//Expect(block.)
 		})
 	})
 })
