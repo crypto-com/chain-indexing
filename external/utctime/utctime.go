@@ -128,13 +128,14 @@ func (t UTCTime) MarshalJSON() ([]byte, error) {
 	return result, nil
 }
 
-func UnmarshalJSON(data []byte) (gotime.Time, error) {
+func (t *UTCTime) UnmarshalJSON(data []byte) error {
 	var timeVal gotime.Time
 	if err := jsoniter.Unmarshal(data, &timeVal); err != nil {
-		return gotime.Time{}, err
+		return err
 	}
+	t.unixNano = timeVal.UTC().UnixNano()
 
-	return timeVal.UTC(), nil
+	return nil
 }
 
 // A Month specifies a month of the year (January = 1, ...).

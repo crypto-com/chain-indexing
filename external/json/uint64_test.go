@@ -35,7 +35,7 @@ var _ = Describe("Uint64", func() {
 
 		It("should encode to the string representation", func() {
 			v := json.NewUint64(18446744073709551615)
-			actual, err := v.MarshalJSON()
+			actual, err := jsoniter.Marshal(v)
 
 			Expect(err).To(BeNil())
 			Expect(actual).To(Equal([]byte("\"18446744073709551615\"")))
@@ -83,10 +83,10 @@ var _ = Describe("Uint64", func() {
 
 		It("should be able to encode and decode to/from json", func() {
 			expected := json.NewUint64(18446744073709551615)
-			encoded, _ := expected.MarshalJSON()
+			encoded, _ := jsoniter.Marshal(expected)
 
 			var actual json.Uint64
-			err := actual.UnmarshalJSON(encoded)
+			err := jsoniter.Unmarshal(encoded, &actual)
 
 			Expect(err).To(BeNil())
 			Expect(actual.String()).To(Equal(expected.String()))

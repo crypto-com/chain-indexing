@@ -35,8 +35,7 @@ var _ = Describe("Uint16", func() {
 
 		It("should encode to the number representation", func() {
 			v := json.NewUint16(65535)
-
-			actual, err := v.MarshalJSON()
+			actual, err := jsoniter.Marshal(v)
 
 			Expect(err).To(BeNil())
 			Expect(actual).To(Equal([]byte("65535")))
@@ -84,10 +83,10 @@ var _ = Describe("Uint16", func() {
 
 		It("should be able to encode and decode to/from json", func() {
 			expected := json.NewUint16(65535)
-			encoded, _ := expected.MarshalJSON()
+			encoded, _ := jsoniter.Marshal(expected)
 
 			var actual json.Uint16
-			err := actual.UnmarshalJSON(encoded)
+			err := jsoniter.Unmarshal(encoded, &actual)
 
 			Expect(err).To(BeNil())
 			Expect(actual.String()).To(Equal(expected.String()))

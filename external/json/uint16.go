@@ -14,15 +14,15 @@ func NewUint16(v uint16) Uint16 {
 	return Uint16{v: v}
 }
 
-func (u *Uint16) Uint16() uint16 {
+func (u Uint16) Uint16() uint16 {
 	return u.v
 }
 
-func (u *Uint16) String() string {
+func (u Uint16) String() string {
 	return strconv.Itoa(int(u.v))
 }
 
-func (u *Uint16) MarshalJSON() ([]byte, error) {
+func (u Uint16) MarshalJSON() ([]byte, error) {
 	// uint16 number can be handled by all languages as number
 	return []byte(u.String()), nil
 }
