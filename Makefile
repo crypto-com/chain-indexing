@@ -1,6 +1,6 @@
 .PHONY: has_docker has_docker_compose lint build_ginkgo_image test test_watch ginkgo
 
-GOLANGCI_LINT_VERSION := "v1.52.0"
+GOLANGCI_LINT_VERSION := "v1.49.0"
 
 # Use lazy assignment(`=`) such that command existence are evaluated when used
 GO = $(shell command -v go)
