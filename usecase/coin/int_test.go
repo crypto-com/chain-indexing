@@ -284,7 +284,7 @@ func (s *intTestSuite) TestEncodingTableInt() {
 
 	for tcnum, tc := range cases {
 		bz, err := tc.i.MarshalJSON()
-		s.Require().Nil(err, "Error marshaling Int. tc #%d, err %s", tcnum, err)
+		s.Require().NoError(err, "Error marshaling Int. tc #%d, err %s", tcnum, err)
 		s.Require().Equal(tc.jsonBz, bz, "Marshaled value is different from exported. tc #%d", tcnum)
 
 		err = (&i).UnmarshalJSON(bz)
