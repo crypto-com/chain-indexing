@@ -25,7 +25,7 @@ func NewCoinFromAmountInterface(amount map[string]interface{}) (coin.Coin, error
 		return coin.Coin{}, err
 	}
 
-	return *result, nil
+	return result, nil
 }
 
 // MustNewCoinsFromAmountInterface returns Coins from the list of amount in the
@@ -58,8 +58,8 @@ func NewCoinsFromAmountInterface(amounts []interface{}) (coin.Coins, error) {
 			return nil, err
 		}
 
-		*coins = coins.Add(coinUnit)
+		coins = coins.Add(coinUnit)
 	}
 
-	return *coins, nil
+	return coins, nil
 }
