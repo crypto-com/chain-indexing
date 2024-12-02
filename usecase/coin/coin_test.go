@@ -675,7 +675,7 @@ func (s *coinTestSuite) TestParseCoins() {
 		res, err := sdk.ParseCoinsNormalized(tc.input)
 		if !tc.valid {
 			s.Require().Error(err, "%s: %#v. tc #%d", tc.input, res, tcIndex)
-		} else if s.Assert().Nil(err, "%s: %+v", tc.input, err) {
+		} else if s.NoError(err, "%s: %+v", tc.input, err) {
 			s.Require().Equal(tc.expected, res, "coin parsing was incorrect, tc #%d", tcIndex)
 		}
 	}
@@ -900,7 +900,7 @@ func (s *coinTestSuite) TestCoinsIsAnyGT() {
 	}
 
 	for _, tc := range tests {
-		s.Require().True(tc.expPass == tc.coinsA.IsAnyGT(tc.coinsB), tc.name)
+		s.Require().Equal(tc.expPass, tc.coinsA.IsAnyGT(tc.coinsB), tc.name)
 	}
 }
 

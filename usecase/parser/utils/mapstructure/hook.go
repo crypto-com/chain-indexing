@@ -74,7 +74,7 @@ func StringToJsonUint64HookFunc() mapstructure.DecodeHookFunc {
 			}
 			return *u, nil
 		}
-		if t == reflect.PtrTo(reflect.TypeOf(json.Uint64{})) {
+		if t == reflect.PointerTo(reflect.TypeOf(json.Uint64{})) {
 			u, parseErr := json.NewUint64FromString(data.(string))
 			if parseErr != nil {
 				return nil, parseErr
@@ -104,7 +104,7 @@ func StringToJsonNumericStringHookFunc() mapstructure.DecodeHookFunc {
 			return *u, nil
 		}
 
-		if t == reflect.PtrTo(reflect.TypeOf(json.NumericString{})) {
+		if t == reflect.PointerTo(reflect.TypeOf(json.NumericString{})) {
 			u, parseErr := json.NewNumericString(data.(string))
 			if parseErr != nil {
 				return nil, parseErr

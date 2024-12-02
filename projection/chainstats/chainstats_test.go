@@ -1,10 +1,11 @@
 package chainstats_test
 
 import (
-	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 	"path"
 	"runtime"
 	"time"
+
+	"github.com/crypto-com/chain-indexing/usecase/model/genesis"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

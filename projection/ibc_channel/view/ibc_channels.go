@@ -166,10 +166,10 @@ func (ibcChannelsView *IBCChannelsView) Increment(channelID string, column strin
 
 	result, err := ibcChannelsView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
-		return fmt.Errorf("error incresing column: %v: %w", err, rdb.ErrWrite)
+		return fmt.Errorf("error increasing column: %v: %w", err, rdb.ErrWrite)
 	}
 	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error incresing column: no row updated: %w", rdb.ErrWrite)
+		return fmt.Errorf("error increasing column: no row updated: %w", rdb.ErrWrite)
 	}
 
 	return nil
@@ -193,10 +193,10 @@ func (ibcChannelsView *IBCChannelsView) UpdateSequence(channelID string, column 
 
 	result, err := ibcChannelsView.rdb.Exec(sql, sqlArgs...)
 	if err != nil {
-		return fmt.Errorf("error incresing column: %v: %w", err, rdb.ErrWrite)
+		return fmt.Errorf("error increasing column: %v: %w", err, rdb.ErrWrite)
 	}
 	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error incresing column: no row updated: %w", rdb.ErrWrite)
+		return fmt.Errorf("error increasing column: no row updated: %w", rdb.ErrWrite)
 	}
 
 	return nil

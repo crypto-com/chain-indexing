@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/stretchr/testify/assert"
 	testify_mock "github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb/test"
@@ -1618,10 +1618,10 @@ func TestBridgeActivityMatcher_HandleEvents(t *testing.T) {
 
 		projection := NewBridgeActivityMatcherProjection(mockThisRDbConn, tc.Config)
 		onInitErr := projection.OnInit()
-		assert.NoError(t, onInitErr)
+		require.NoError(t, onInitErr)
 
 		execErr := projection.Exec()
-		assert.NoError(t, execErr)
+		require.NoError(t, execErr)
 
 		for _, m := range mocks {
 			m.AssertExpectations(t)

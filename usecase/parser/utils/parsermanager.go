@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
+	"github.com/crypto-com/chain-indexing/external/ethereumtxinnermsgdecoder"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	"github.com/crypto-com/chain-indexing/usecase/event"
@@ -11,10 +12,11 @@ import (
 )
 
 type CosmosParserManager struct {
-	store     map[CosmosParserKey]BlockHeightToCosmosParserMap
-	logger    applogger.Logger
-	config    CosmosParserManagerConfig
-	TxDecoder txdecoder.TxDecoder
+	store                     map[CosmosParserKey]BlockHeightToCosmosParserMap
+	logger                    applogger.Logger
+	config                    CosmosParserManagerConfig
+	TxDecoder                 txdecoder.TxDecoder
+	EthereumTxInnerMsgDecoder ethereumtxinnermsgdecoder.EthereumTxInnerMsgDecoder
 }
 
 type CosmosParserKey string
@@ -25,10 +27,15 @@ type BlockHeightToCosmosParserMap map[ParserBlockHeight]CosmosParser
 
 type CosmosParserManagerConfig struct {
 	CosmosVersionBlockHeight
+	CronosVersionBlockHeight
 }
 
 type CosmosVersionBlockHeight struct {
 	V0_42_7 ParserBlockHeight
+}
+
+type CronosVersionBlockHeight struct {
+	V1_4_0 ParserBlockHeight
 }
 
 type CosmosParserManagerParams struct {
@@ -41,17 +48,18 @@ type CosmosParser func(
 ) ([]command.Command, []string)
 
 type CosmosParserParams struct {
-	AddressPrefix        string
-	StakingDenom         string
-	TxsResult            model.BlockResultsTxsResult
-	MsgCommonParams      event.MsgCommonParams
-	MsgIndex             int
-	Msg                  map[string]interface{}
-	ParserManager        *CosmosParserManager
-	Logger               applogger.Logger
-	TxDecoder            txdecoder.TxDecoder
-	IsProposalInnerMsg   bool
-	IsEthereumTxInnerMsg bool
+	AddressPrefix             string
+	StakingDenom              string
+	TxsResult                 model.BlockResultsTxsResult
+	MsgCommonParams           event.MsgCommonParams
+	MsgIndex                  int
+	Msg                       map[string]interface{}
+	ParserManager             *CosmosParserManager
+	Logger                    applogger.Logger
+	TxDecoder                 txdecoder.TxDecoder
+	EthereumTxInnerMsgDecoder ethereumtxinnermsgdecoder.EthereumTxInnerMsgDecoder
+	IsProposalInnerMsg        bool
+	IsEthereumTxInnerMsg      bool
 }
 
 func NewCosmosParserManager(params CosmosParserManagerParams) *CosmosParserManager {
@@ -67,6 +75,11 @@ func NewCosmosParserManager(params CosmosParserManagerParams) *CosmosParserManag
 // GetCosmosV0_42_7BlockHeight return height of the first block with cosmos sdk v0.42.7
 func (cpm *CosmosParserManager) GetCosmosV0_42_7BlockHeight() ParserBlockHeight {
 	return cpm.config.CosmosVersionBlockHeight.V0_42_7
+}
+
+// GetCronosV1_4_0BlockHeight return height of the first block with cronos v1.4.0
+func (cpm *CosmosParserManager) GetCronosV1_4_0BlockHeight() ParserBlockHeight {
+	return cpm.config.CronosVersionBlockHeight.V1_4_0
 }
 
 // RegisterParser register a cosmos message parser by a given key and a starting block height

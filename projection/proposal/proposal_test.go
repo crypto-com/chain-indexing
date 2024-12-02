@@ -8,8 +8,8 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/stretchr/testify/assert"
 	testify_mock "github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbparambase"
@@ -2618,7 +2618,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 
 		projection := NewProposalProjection(mockRDbConn, mockClient)
 		err := projection.HandleEvents(1, tc.Events)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		for _, m := range mocks {
 			m.AssertExpectations(t)

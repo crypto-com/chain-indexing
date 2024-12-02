@@ -284,11 +284,11 @@ func (s *intTestSuite) TestEncodingTableInt() {
 
 	for tcnum, tc := range cases {
 		bz, err := tc.i.MarshalJSON()
-		s.Require().Nil(err, "Error marshaling Int. tc #%d, err %s", tcnum, err)
+		s.Require().NoError(err, "Error marshaling Int. tc #%d, err %s", tcnum, err)
 		s.Require().Equal(tc.jsonBz, bz, "Marshaled value is different from exported. tc #%d", tcnum)
 
 		err = (&i).UnmarshalJSON(bz)
-		s.Require().Nil(err, "Error unmarshaling Int. tc #%d, err %s", tcnum, err)
+		s.Require().NoError(err, "Error unmarshaling Int. tc #%d, err %s", tcnum, err)
 		s.Require().Equal(tc.i, i, "Unmarshaled value is different from exported. tc #%d", tcnum)
 
 		//bz, err = tc.i.Marshal()
@@ -338,11 +338,11 @@ func (s *intTestSuite) TestEncodingTableUint() {
 
 	for tcnum, tc := range cases {
 		bz, err := tc.i.MarshalJSON()
-		s.Require().Nil(err, "Error marshaling Int. tc #%d, err %s", tcnum, err)
+		s.Require().NoError(err, "Error marshaling Int. tc #%d, err %s", tcnum, err)
 		s.Require().Equal(tc.jsonBz, bz, "Marshaled value is different from exported. tc #%d", tcnum)
 
 		err = (&i).UnmarshalJSON(bz)
-		s.Require().Nil(err, "Error unmarshaling Int. tc #%d, err %s", tcnum, err)
+		s.Require().NoError(err, "Error unmarshaling Int. tc #%d, err %s", tcnum, err)
 		s.Require().Equal(tc.i, i, "Unmarshaled value is different from exported. tc #%d", tcnum)
 
 		//bz, err = tc.i.Marshal()

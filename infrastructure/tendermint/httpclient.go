@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -208,7 +207,7 @@ func (client *HTTPClient) Status() (*map[string]interface{}, error) {
 	}
 	defer rawRespBody.Close()
 
-	body, _ := ioutil.ReadAll(rawRespBody)
+	body, _ := io.ReadAll(rawRespBody)
 	jsonMap := make(map[string]interface{})
 	errRead := json.Unmarshal([]byte(body), &jsonMap)
 	if errRead != nil {
@@ -253,7 +252,7 @@ func (client *HTTPClient) request(method string, queryKVs ...queryKV) (io.ReadCl
 	if rawResp.StatusCode != 200 {
 		defer rawResp.Body.Close()
 
-		rawRespBody, err = ioutil.ReadAll(rawResp.Body)
+		rawRespBody, err = io.ReadAll(rawResp.Body)
 		if err != nil {
 			return nil, fmt.Errorf("error reading Body : %w", err)
 		}

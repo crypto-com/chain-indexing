@@ -706,6 +706,7 @@ func (validatorsView *ValidatorsView) List(
 	).From(
 		VALIDATORS_TABLE_NAME,
 	).Offset(0).Limit(
+		//nolint:gosec
 		uint64(pagination.OffsetParams().Offset()),
 	)
 	cumulativePowerStmtBuilder = cumulativePowerStmtBuilder.OrderBy(orderClauses...)

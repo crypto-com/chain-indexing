@@ -6,6 +6,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/parser/icaauth"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	V0_42_7_ibcmsg "github.com/crypto-com/chain-indexing/usecase/parser/v0_42_7/ibcmsg"
+	V1_4_0_cronos_msg "github.com/crypto-com/chain-indexing/usecase/parser/v1_4_0_cronos/msg"
 )
 
 const BEGIN_BLOCK_HEIGHT = 0
@@ -101,6 +102,10 @@ func InitParsers(manager *utils.CosmosParserManager) {
 }
 
 func RegisterBreakingVersionParsers(manager *utils.CosmosParserManager) {
-	//v0.42.7
+	// cosmos sdk v0.42.7
 	manager.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", manager.GetCosmosV0_42_7BlockHeight(), V0_42_7_ibcmsg.ParseMsgRecvPacket)
+
+	// cronos v1.4.0
+	manager.RegisterParser("/ethermint.evm.v1.MsgEthereumTx", manager.GetCronosV1_4_0BlockHeight(), V1_4_0_cronos_msg.ParseMsgEthereumTx)
+
 }

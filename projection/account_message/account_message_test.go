@@ -19,8 +19,8 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
 	ibc_model "github.com/crypto-com/chain-indexing/usecase/model/ibc"
-	"github.com/stretchr/testify/assert"
 	testify_mock "github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 func NewAccountMessageProjection(rdbConn rdb.Conn) *account_message.AccountMessage {
@@ -5001,7 +5001,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 
 		projection := NewAccountMessageProjection(mockRDbConn)
 		err := projection.HandleEvents(1, tc.Events)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		for _, m := range mocks {
 			m.AssertExpectations(t)

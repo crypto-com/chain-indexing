@@ -57,7 +57,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 						Type: "/ethermint.evm.v1.MsgEthereumTx",
 						Size: 208,
-						Data: model.LegacyTx{
+						Data: &model.LegacyTx{
 							Type:     "/ethermint.evm.v1.LegacyTx",
 							Nonce:    "130",
 							GasPrice: "5000000000000",
@@ -69,8 +69,9 @@ var _ = Describe("ParseMsgCommands", func() {
 							R:        "GWDX+kHcVNVKp5K2lG+/zHAOJI8yR6lYZ2GW4kYgEhE=",
 							S:        "PqawF/sgoCKiOnqN9al9x9AAWOS2uKaW5Dq+cg74Lgg=",
 						},
-						From: "",
-						Hash: "0x3118583b6f71ebed92410afbdc069facb9e94169bd764711d58ca1f131d63fff",
+						From:       "",
+						Hash:       "0x3118583b6f71ebed92410afbdc069facb9e94169bd764711d58ca1f131d63fff",
+						DecodedRaw: nil,
 					},
 				},
 			)))

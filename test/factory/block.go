@@ -1,6 +1,7 @@
 package factory
 
 import (
+	crytporand "crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
 	"math/rand"
@@ -90,7 +91,7 @@ func RandomTxHash() string {
 func randomHex(n int) []byte {
 	placeholder := make([]byte, n)
 	// nolint:gosec
-	_, err := rand.Read(placeholder)
+	_, err := crytporand.Read(placeholder)
 	if err != nil {
 		panic(err)
 	}

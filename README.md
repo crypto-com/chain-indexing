@@ -155,8 +155,12 @@ config := bootstrap.Config{
             Color: false,
         },
         CosmosVersionEnabledHeight: bootstrap.CosmosVersionEnabledHeightConfig{
-            // BLock height from cosmos sdk version v0.42.7
+            // Block height from cosmos sdk version v0.42.7
             V0_42_7: 0,
+        },
+        CronosVersionEnabledHeight: bootstrap.CronosVersionEnabledHeightConfig{
+            // Block height from cronos version v1.4.0-rc3
+            V1_4_0: 0,
         },
         GithubAPI: bootstrap.GithubAPIConfig{
         	// Username of your git hub api account

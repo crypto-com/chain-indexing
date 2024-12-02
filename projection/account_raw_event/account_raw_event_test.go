@@ -15,8 +15,8 @@ import (
 	account_raw_event_view "github.com/crypto-com/chain-indexing/projection/account_raw_event/view"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 	usecase_model "github.com/crypto-com/chain-indexing/usecase/model"
-	"github.com/stretchr/testify/assert"
 	testify_mock "github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 func NewAccountRawEventProjection(rdbConn rdb.Conn) *account_raw_event.AccountRawEvent {
@@ -2077,7 +2077,7 @@ func TestAccountRawEvents_HandleEvents(t *testing.T) {
 		projection := NewAccountRawEventProjection(mockRDbConn)
 		err := projection.HandleEvents(1, tc.Events)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		for _, m := range mocks {
 			m.AssertExpectations(t)

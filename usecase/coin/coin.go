@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // Coin defines a token with a denomination and an amount.
 type Coin struct {
 	Denom  string `json:"denom,omitempty"`

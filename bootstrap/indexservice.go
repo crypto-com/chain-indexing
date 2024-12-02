@@ -10,6 +10,7 @@ import (
 	"github.com/crypto-com/chain-indexing/bootstrap/config"
 	"github.com/crypto-com/chain-indexing/entity/event"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
+	"github.com/crypto-com/chain-indexing/external/ethereumtxinnermsgdecoder"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
@@ -36,11 +37,13 @@ type IndexService struct {
 	BlockResultEventAttributeDecodeMethod string
 
 	cosmosVersionBlockHeight utils.CosmosVersionBlockHeight
+	cronosVersionBlockHeight utils.CronosVersionBlockHeight
 
 	GithubAPIUser  string
 	GithubAPIToken string
 
-	txDecoder txdecoder.TxDecoder
+	txDecoder                 txdecoder.TxDecoder
+	ethereumTxInnerMsgDecoder ethereumtxinnermsgdecoder.EthereumTxInnerMsgDecoder
 }
 
 // NewIndexService creates a new server instance for polling and indexing
@@ -51,6 +54,7 @@ func NewIndexService(
 	projections []projection_entity.Projection,
 	cronJobs []projection_entity.CronJob,
 	txDecoder txdecoder.TxDecoder,
+	ethereumTxInnerMsgDecoder ethereumtxinnermsgdecoder.EthereumTxInnerMsgDecoder,
 ) *IndexService {
 	return &IndexService{
 		logger:      logger,
@@ -73,10 +77,14 @@ func NewIndexService(
 		cosmosVersionBlockHeight: utils.CosmosVersionBlockHeight{
 			V0_42_7: utils.ParserBlockHeight(config.IndexService.CosmosVersionEnabledHeight.V0_42_7),
 		},
+		cronosVersionBlockHeight: utils.CronosVersionBlockHeight{
+			V1_4_0: utils.ParserBlockHeight(config.IndexService.CronosVersionEnabledHeight.V1_4_0),
+		},
 		GithubAPIUser:  config.IndexService.GithubAPI.Username,
 		GithubAPIToken: config.IndexService.GithubAPI.Token,
 
-		txDecoder: txDecoder,
+		txDecoder:                 txDecoder,
+		ethereumTxInnerMsgDecoder: ethereumTxInnerMsgDecoder,
 	}
 }
 
@@ -157,13 +165,15 @@ func (service *IndexService) RunEventStoreMode() error {
 				StartingBlockHeight:                   service.startingBlockHeight,
 				BlockResultEventAttributeDecodeMethod: service.BlockResultEventAttributeDecodeMethod,
 			},
-			TxDecoder: service.txDecoder,
+			TxDecoder:                 service.txDecoder,
+			EthereumTxInnerMsgDecoder: service.ethereumTxInnerMsgDecoder,
 		},
 		utils.NewCosmosParserManager(
 			utils.CosmosParserManagerParams{
 				Logger: service.logger,
 				Config: utils.CosmosParserManagerConfig{
 					CosmosVersionBlockHeight: service.cosmosVersionBlockHeight,
+					CronosVersionBlockHeight: service.cronosVersionBlockHeight,
 				},
 			},
 		),
@@ -197,7 +207,8 @@ func (service *IndexService) RunTendermintDirectMode() error {
 						StartingBlockHeight:                   service.startingBlockHeight,
 						BlockResultEventAttributeDecodeMethod: service.BlockResultEventAttributeDecodeMethod,
 					},
-					TxDecoder: service.txDecoder,
+					TxDecoder:                 service.txDecoder,
+					EthereumTxInnerMsgDecoder: service.ethereumTxInnerMsgDecoder,
 				},
 				utils.NewCosmosParserManager(
 					utils.CosmosParserManagerParams{
@@ -206,6 +217,7 @@ func (service *IndexService) RunTendermintDirectMode() error {
 						}),
 						Config: utils.CosmosParserManagerConfig{
 							CosmosVersionBlockHeight: service.cosmosVersionBlockHeight,
+							CronosVersionBlockHeight: service.cronosVersionBlockHeight,
 						},
 					},
 				),

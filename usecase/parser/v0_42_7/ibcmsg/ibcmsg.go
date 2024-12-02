@@ -388,6 +388,7 @@ func ParseMsgSubmitTx(
 				// https://github.com/crypto-com/chain-indexing/issues/673
 				continue
 			default:
+				//nolint:gosec
 				parser := parserParams.ParserManager.GetParser(utils.CosmosParserKey(message.Type), utils.ParserBlockHeight(parserParams.MsgCommonParams.BlockHeight))
 				innerMsgs[msgIndex]["msg_index"] = strconv.Itoa(msgIndex)
 				msgCommands, signers := parser(utils.CosmosParserParams{
