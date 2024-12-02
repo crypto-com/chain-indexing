@@ -89,7 +89,10 @@ func ParseMsgEthereumTx(
 	reader := bytes.NewReader(rawTxData)
 	err = tx.DecodeRLP(rlp.NewStream(reader, 0))
 	if err != nil {
-		panic(fmt.Errorf("error decoding raw tx data: %v", err))
+		err = tx.UnmarshalBinary(rawTxData)
+		if err != nil {
+			panic(fmt.Errorf("error unmarshalling tx: %v", err))
+		}
 	}
 
 	// unmarshal the raw tx data into `decodeRaw` field

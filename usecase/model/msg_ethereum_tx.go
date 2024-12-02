@@ -8,7 +8,7 @@ type RawMsgEthereumTx struct {
 	Type string `mapstructure:"@type" json:"@type"`
 	Size int    `mapstructure:"size" json:"size"`
 	// FIXME: https://github.com/crypto-com/chain-indexing/issues/730
-	Data       LegacyTx    `mapstructure:"data" json:"data"`
+	Data       *LegacyTx   `mapstructure:"data,omitempty" json:"data,omitempty"`
 	From       string      `mapstructure:"from" json:"from"`
 	Hash       string      `mapstructure:"hash" json:"hash"`
 	Raw        string      `mapstructure:"raw" json:"raw"`

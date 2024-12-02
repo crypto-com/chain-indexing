@@ -57,7 +57,7 @@ var _ = Describe("ParseMsgCommands", func() {
 
 						Type: "/ethermint.evm.v1.MsgEthereumTx",
 						Size: 208,
-						Data: model.LegacyTx{
+						Data: &model.LegacyTx{
 							Type:     "/ethermint.evm.v1.LegacyTx",
 							Nonce:    "130",
 							GasPrice: "5000000000000",
