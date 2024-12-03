@@ -78,6 +78,8 @@ func ParseMsgEthereumTx(
 	var possibleSignerAddresses []string
 
 	events := utils.NewParsedTxsResultsEvents(parserParams.TxsResult.Events)
+	log := events.ParsedEventToTxsResultLog()
+	parserParams.TxsResult.Log = log
 
 	rawTxData, err := hex.DecodeString(rawMsg.Raw[2:]) // Remove hex prefix "0x..."
 	if err != nil {
@@ -294,4 +296,26 @@ func ParseMsgEthereumTx(
 
 		msgEthereumTxParams,
 	)), possibleSignerAddresses
+}
+
+func ParseMsgEventsToLog(
+	parser utils.CosmosParser,
+) utils.CosmosParser {
+	return func(
+		parserParams utils.CosmosParserParams,
+	) ([]command.Command, []string) {
+		events := utils.NewParsedTxsResultsEvents(parserParams.TxsResult.Events)
+		log := events.ParsedEventToTxsResultLog()
+		parserParams.TxsResult.Log = log
+
+		return parser(utils.CosmosParserParams{
+			AddressPrefix:   parserParams.AddressPrefix,
+			StakingDenom:    parserParams.StakingDenom,
+			TxsResult:       parserParams.TxsResult,
+			MsgCommonParams: parserParams.MsgCommonParams,
+			Msg:             parserParams.Msg,
+			MsgIndex:        parserParams.MsgIndex,
+			ParserManager:   parserParams.ParserManager,
+		})
+	}
 }
