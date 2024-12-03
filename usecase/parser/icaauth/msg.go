@@ -331,6 +331,12 @@ func ParseMsgRegisterAccount(
 		msgRegisterAccountParams := make([]icaauth_model.MsgRegisterAccountParams, 0)
 
 		for _, event := range events {
+
+			var counterpartyChannelId string
+			if event.HasAttribute("counterparty_channel_id") {
+				counterpartyChannelId = event.MustGetAttributeByKey("counterparty_channel_id")
+			}
+
 			param := icaauth_model.MsgRegisterAccountParams{
 				MsgRegisterAccount: icaauth_model.MsgRegisterAccount{
 					Owner:        msgRegisterAccount.Owner,
@@ -341,7 +347,7 @@ func ParseMsgRegisterAccount(
 				PortID:                event.MustGetAttributeByKey("port_id"),
 				ChannelID:             event.MustGetAttributeByKey("channel_id"),
 				CounterpartyPortID:    event.MustGetAttributeByKey("counterparty_port_id"),
-				CounterpartyChannelID: event.MustGetAttributeByKey("counterparty_channel_id"),
+				CounterpartyChannelID: counterpartyChannelId,
 			}
 
 			isExisted := false

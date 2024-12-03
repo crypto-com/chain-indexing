@@ -1,6 +1,9 @@
 package utils
 
 import (
+	"fmt"
+	"strconv"
+
 	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
@@ -60,4 +63,32 @@ func (log *ParsedTxsResultsEvents) GetEventsByType(t string) []*ParsedTxsResultL
 	}
 
 	return logEvents
+}
+
+func (log *ParsedTxsResultsEvents) ParsedEventToTxsResultLog() []model.BlockResultsTxsResultLog {
+	logs := make([]model.BlockResultsTxsResultLog, 0)
+
+	for _, logEvent := range log.rawEvents {
+		logEvent := NewParsedTxsResultLogEvent(&logEvent)
+		msgIndex := logEvent.GetAttributeByKey("msg_index")
+		if msgIndex != nil {
+			i, err := strconv.Atoi(*msgIndex)
+			if err != nil || i < 0 {
+				panic(fmt.Sprintf("msg_index should be a number, got %s", *msgIndex))
+			}
+
+			if len(logs)-1 >= i {
+				logs[i].Events = append(logs[i].Events, logEvent.rawEvent)
+			} else {
+				logs = append(logs, model.BlockResultsTxsResultLog{
+					MsgIndex: i,
+					Events: []model.BlockResultsEvent{
+						logEvent.rawEvent,
+					},
+				})
+			}
+		}
+	}
+
+	return logs
 }
