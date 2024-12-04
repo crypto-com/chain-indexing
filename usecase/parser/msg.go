@@ -2368,7 +2368,8 @@ func ParseMsgEthereumTx(
 		log := events.ParsedEventToTxsResultLog()
 		parserParams.TxsResult.Log = log
 
-		rawTxData, err := hex.DecodeString(rawMsg.Raw[2:]) // Remove hex prefix "0x..."
+		var rawTxData []byte
+		rawTxData, err = hex.DecodeString(rawMsg.Raw[2:]) // Remove hex prefix "0x..."
 		if err != nil {
 			panic("error decoding raw tx data")
 		}
