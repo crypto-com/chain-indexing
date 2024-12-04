@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
@@ -9,9 +10,7 @@ import (
 	"time"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
-	jsoniter "github.com/json-iterator/go"
-	"github.com/mitchellh/mapstructure"
-
+	"github.com/crypto-com/chain-indexing/external/json"
 	"github.com/crypto-com/chain-indexing/external/primptr"
 	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/external/utctime"
@@ -25,6 +24,10 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/parser/icaauth"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	mapstructure_utils "github.com/crypto-com/chain-indexing/usecase/parser/utils/mapstructure"
+	eth_types "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/rlp"
+	jsoniter "github.com/json-iterator/go"
+	"github.com/mitchellh/mapstructure"
 )
 
 const (
@@ -2359,14 +2362,52 @@ func ParseMsgEthereumTx(
 	var commands []command.Command
 	var possibleSignerAddresses []string
 
-	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
+	var input []byte
+	if rawMsg.Raw != "" {
+		events := utils.NewParsedTxsResultsEvents(parserParams.TxsResult.Events)
+		log := events.ParsedEventToTxsResultLog()
+		parserParams.TxsResult.Log = log
 
-	if rawMsg.Data.Data != "" {
-		inputData, err := base64.StdEncoding.DecodeString(rawMsg.Data.Data)
+		rawTxData, err := hex.DecodeString(rawMsg.Raw[2:]) // Remove hex prefix "0x..."
+		if err != nil {
+			panic("error decoding raw tx data")
+		}
+
+		// decode the raw tx data
+		var tx eth_types.Transaction
+		reader := bytes.NewReader(rawTxData)
+		err = tx.DecodeRLP(rlp.NewStream(reader, 0))
+		if err != nil {
+			err = tx.UnmarshalBinary(rawTxData)
+			if err != nil {
+				panic(fmt.Errorf("error unmarshalling tx: %v", err))
+			}
+		}
+
+		// unmarshal the raw tx data into `decodeRaw` field
+		var txBytes []byte
+		txBytes, err = tx.MarshalJSON()
+		if err != nil {
+			panic(fmt.Errorf("error marshalling tx: %v", err))
+		}
+
+		var decodedRaw model.DecodedRaw
+		err = json.Unmarshal(txBytes, &decodedRaw)
+		if err != nil {
+			panic(fmt.Errorf("error unmarshalling tx: %v", err))
+		}
+		msgEthereumTxParams.DecodedRaw = &decodedRaw
+		input = tx.Data()
+	} else if rawMsg.Data.Data != "" {
+		input, err = base64.StdEncoding.DecodeString(rawMsg.Data.Data)
 		if err != nil {
 			panic(fmt.Errorf("error decoding RawMsgEthereumTx.Data.Data: %v", err))
 		}
+	}
 
+	log := utils.NewParsedTxsResultLog(&parserParams.TxsResult.Log[parserParams.MsgIndex])
+
+	if string(input) != "" {
 		// parse IBC msgChannelOpenInit
 		if log.HasEvent("channel_open_init") {
 			events := log.GetEventsByType("channel_open_init")
@@ -2511,7 +2552,7 @@ func ParseMsgEthereumTx(
 			// parse msgCreateClient
 			sendEvents := log.GetEventsByType("create_client")
 			if len(sendEvents) > 0 {
-				msg, err := parserParams.EthereumTxInnerMsgDecoder.DecodeCosmosMsgFromTxInput(inputData, MSG_CREATE_CLIENT_TYPE_URL)
+				msg, err := parserParams.EthereumTxInnerMsgDecoder.DecodeCosmosMsgFromTxInput(input, MSG_CREATE_CLIENT_TYPE_URL)
 				if err != nil {
 					panic(fmt.Errorf("error deserializing MsgCreateClient: %v", err))
 				}
@@ -2526,7 +2567,7 @@ func ParseMsgEthereumTx(
 			// parse MsgUpdateClient
 			sendEvents := log.GetEventsByType("update_client")
 			if len(sendEvents) > 0 {
-				msg, err := parserParams.EthereumTxInnerMsgDecoder.DecodeCosmosMsgFromTxInput(inputData, MSG_UPDATE_CLIENT_TYPE_URL)
+				msg, err := parserParams.EthereumTxInnerMsgDecoder.DecodeCosmosMsgFromTxInput(input, MSG_UPDATE_CLIENT_TYPE_URL)
 				if err != nil {
 					panic(fmt.Errorf("error deserializing MsgUpdateClient: %v", err))
 				}
