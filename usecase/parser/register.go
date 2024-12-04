@@ -108,9 +108,8 @@ func RegisterBreakingVersionParsers(manager *utils.CosmosParserManager) {
 	/*
 	   Cronos v1.4.0
 	*/
-
 	if manager.GetCronosV1_4_0BlockHeight() > 0 {
-		manager.RegisterParser("/ethermint.evm.v1.MsgEthereumTx", manager.GetCronosV1_4_0BlockHeight(), V1_4_0_cronos_msg.ParseMsgEthereumTx)
+		manager.RegisterParser("/ethermint.evm.v1.MsgEthereumTx", manager.GetCronosV1_4_0BlockHeight(), V1_4_0_cronos_msg.ParseMsgEventsToLog(ParseMsgEthereumTx))
 
 		// cosmos bank
 		manager.RegisterParser("/cosmos.bank.v1beta1.MsgSend", manager.GetCronosV1_4_0BlockHeight(), V1_4_0_cronos_msg.ParseMsgEventsToLog(ParseMsgSend))
