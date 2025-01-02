@@ -521,12 +521,12 @@ import (
 
 	"github.com/valyala/fasthttp"
 
-	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
+    "github.com/crypto-com/chain-indexing/infrastructure/httpapi"
     "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
     "github.com/crypto-com/chain-indexing/appinterface/rdb"
     "github.com/crypto-com/chain-indexing/appinterface/tendermint"
     "github.com/crypto-com/chain-indexing/bootstrap"
-	sysconfig "github.com/crypto-com/chain-indexing/bootstrap/config"
+    sysconfig "github.com/crypto-com/chain-indexing/bootstrap/config"
     applogger "github.com/crypto-com/chain-indexing/external/logger"
     httpapi_handlers "github.com/crypto-com/chain-indexing/infrastructure/httpapi/handlers"
 )
