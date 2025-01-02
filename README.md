@@ -10,68 +10,68 @@ Right now it supports Postgres database and provides RESTful API as query interf
 package main
 
 import (
-	"github.com/crypto-com/chain-indexing/external/ethereumtxinnermsgdecoder"
-	"os"
+    "github.com/crypto-com/chain-indexing/external/ethereumtxinnermsgdecoder"
+    "os"
 
-	applogger "github.com/crypto-com/chain-indexing/external/logger"
-	sysconfig "github.com/crypto-com/chain-indexing/bootstrap/config"
-	"github.com/crypto-com/chain-indexing/bootstrap"
-	"github.com/crypto-com/chain-indexing/external/txdecoder"
-	"github.com/crypto-com/chain-indexing/infrastructure"
-	"github.com/crypto-com/chain-indexing/entity/projection"
+    applogger "github.com/crypto-com/chain-indexing/external/logger"
+    sysconfig "github.com/crypto-com/chain-indexing/bootstrap/config"
+    "github.com/crypto-com/chain-indexing/bootstrap"
+    "github.com/crypto-com/chain-indexing/external/txdecoder"
+    "github.com/crypto-com/chain-indexing/infrastructure"
+    "github.com/crypto-com/chain-indexing/entity/projection"
 )
 
 func main() {
-	// Init configurations...
-	logger := infrastructure.NewZerologLogger(os.Stdout)
-	config := sysconfig.Config{
-		// Init configurations...
-	}
-	// Init indexing app
-	app := bootstrap.NewApp(logger, &config)
-	app.InitIndexService(
-		initProjections(logger, &config),
-		initCronJobs(logger, &config),
-		initTxdecoder(logger, &config),
-		initEthereumTxInnerMsgDecoder(logger, &config),
-	)
-	app.InitHTTPAPIServer(initRouteRegistry(logger, &config))
+    // Init configurations...
+    logger := infrastructure.NewZerologLogger(os.Stdout)
+    config := sysconfig.Config{
+        // Init configurations...
+    }
+    // Init indexing app
+    app := bootstrap.NewApp(logger, &config)
+    app.InitIndexService(
+        initProjections(logger, &config),
+        initCronJobs(logger, &config),
+        initTxdecoder(logger, &config),
+        initEthereumTxInnerMsgDecoder(logger, &config),
+    )
+    app.InitHTTPAPIServer(initRouteRegistry(logger, &config))
 
-	// Run indexing app
-	app.Run()
+    // Run indexing app
+    app.Run()
 }
 
 func initProjections(
-	logger applogger.Logger,
-	config *sysconfig.Config,
+    logger applogger.Logger,
+    config *sysconfig.Config,
 ) []projection.Projection {
-	// append your Projections
+    // append your Projections
 }
 
 func initCronJobs(
-	logger applogger.Logger,
-	config *sysconfig.Config,
+    logger applogger.Logger,
+    config *sysconfig.Config,
 ) []projection.CronJob {
-	// append your CronJobs
+    // append your CronJobs
 }
 
 func initRouteRegistry(
-	logger applogger.Logger,
-	config *sysconfig.Config,
+    logger applogger.Logger,
+    config *sysconfig.Config,
 ) bootstrap.RouteRegistry {
-	// append your Routes
+    // append your Routes
 }
 
 func initTxdecoder(
-	logger applogger.Logger,
-	config *sysconfig.Config,
+    logger applogger.Logger,
+    config *sysconfig.Config,
 ) txdecoder.TxDecoder {
-	// append your Routes
+    // append your Routes
 }
 
 func initEthereumTxInnerMsgDecoder(
-	logger applogger.Logger,
-	config *sysconfig.Config,
+    logger applogger.Logger,
+    config *sysconfig.Config,
 ) ethereumtxinnermsgdecoder.EthereumTxInnerMsgDecoder {
 // append your Routes
 }
@@ -175,9 +175,9 @@ config := bootstrap.Config{
             V1_4_0: 0,
         },
         GithubAPI: bootstrap.GithubAPIConfig{
-        	// Username of your git hub api account
+            // Username of your git hub api account
             Username:           "username",
-			// Token of your git hub api where at least have public repo access right
+            // Token of your git hub api where at least have public repo access right
             Token:              "token",
             // Specific branch, tag or commit. Leave it empty if always using the latest master
             MigrationRepoRef:   "ref",
@@ -195,36 +195,36 @@ config := bootstrap.Config{
 package main
 
 import (
-	"github.com/ettle/strcase"
+    "github.com/ettle/strcase"
 
-	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
-	"github.com/crypto-com/chain-indexing/appinterface/rdb"
-	"github.com/crypto-com/chain-indexing/bootstrap"
-	sysconfig "github.com/crypto-com/chain-indexing/bootstrap/config"
-	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
-	applogger "github.com/crypto-com/chain-indexing/external/logger"
-	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
-	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
-	github_migrationhelper "github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper/github"
-	"github.com/crypto-com/chain-indexing/projection/account"
-	"github.com/crypto-com/chain-indexing/projection/account_transaction"
+    "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
+    "github.com/crypto-com/chain-indexing/appinterface/rdb"
+    "github.com/crypto-com/chain-indexing/bootstrap"
+    sysconfig "github.com/crypto-com/chain-indexing/bootstrap/config"
+    projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
+    applogger "github.com/crypto-com/chain-indexing/external/logger"
+    cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
+    "github.com/crypto-com/chain-indexing/infrastructure/pg"
+    "github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
+    github_migrationhelper "github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper/github"
+    "github.com/crypto-com/chain-indexing/projection/account"
+    "github.com/crypto-com/chain-indexing/projection/account_transaction"
 )
 
 func initProjections(
     logger applogger.Logger,
-	rdbConn rdb.Conn,
+    rdbConn rdb.Conn,
     config *sysconfig.Config,
 ) (projections []projection_entity.Projection) {
     // Skip if API_ONLY is on
-	if !config.IndexService.Enable {
+    if !config.IndexService.Enable {
         return projections
     }
 
     connString := rdbConn.(*pg.PgxConn).ConnString()
     
     githubMigrationHelperConfig := github_migrationhelper.Config{
-		GithubAPIUser:    config.IndexService.GithubAPI.Username,
+        GithubAPIUser:    config.IndexService.GithubAPI.Username,
         GithubAPIToken:   config.IndexService.GithubAPI.Token,
         MigrationRepoRef: config.IndexService.GithubAPI.MigrationRepoRef,
         ConnString:       connString,
@@ -257,8 +257,8 @@ func initProjections(
     for _, projection := range projections {
         if onInitErr := projection.OnInit(); onInitErr != nil {
             logger.Errorf(
-			    "error initializing projection %s: %v",
-			    projection.Id(), onInitErr,
+                "error initializing projection %s: %v",
+                projection.Id(), onInitErr,
             )
         }
     }
@@ -273,91 +273,91 @@ func initProjections(
 package example
 
 import (
-	"fmt"
+    "fmt"
 
-	applogger "github.com/crypto-com/chain-indexing/external/logger"
-	example_view "your_view_packge"
+    applogger "github.com/crypto-com/chain-indexing/external/logger"
+    example_view "your_view_packge"
 
-	"github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
-	"github.com/crypto-com/chain-indexing/appinterface/rdb"
-	event_entity "github.com/crypto-com/chain-indexing/entity/event"
-	event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
+    "github.com/crypto-com/chain-indexing/appinterface/projection/rdbprojectionbase"
+    "github.com/crypto-com/chain-indexing/appinterface/rdb"
+    event_entity "github.com/crypto-com/chain-indexing/entity/event"
+    event_usecase "github.com/crypto-com/chain-indexing/usecase/event"
 )
 
 type AdditionalExampleProjection struct {
-	*rdbprojectionbase.Base
+    *rdbprojectionbase.Base
 
-	rdbConn      rdb.Conn
-	logger       applogger.Logger
+    rdbConn      rdb.Conn
+    logger       applogger.Logger
 }
 
 func NewAdditionalProjection(
-	logger applogger.Logger,
-	rdbConn rdb.Conn,
+    logger applogger.Logger,
+    rdbConn rdb.Conn,
 ) *AdditionalExampleProjection {
-	return &AdditionalExampleProjection{
-		rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Example"),
-		rdbConn,
-		logger,
-	}
+    return &AdditionalExampleProjection{
+        rdbprojectionbase.NewRDbBase(rdbConn.ToHandle(), "Example"),
+        rdbConn,
+        logger,
+    }
 }
 
 var (
-	NewExamplesView              = example_view.NewExamplesView
-	UpdateLastHandledEventHeight = (*AdditionalExampleProjection).UpdateLastHandledEventHeight
+    NewExamplesView              = example_view.NewExamplesView
+    UpdateLastHandledEventHeight = (*AdditionalExampleProjection).UpdateLastHandledEventHeight
 )
 
 func (_ *AdditionalExampleProjection) GetEventsToListen() []string {
-	return event_usecase.MSG_EVENTS
+    return event_usecase.MSG_EVENTS
 }
 
 func (projection *AdditionalExampleProjection) OnInit() error {
-	return nil
+    return nil
 }
 
 func (projection *AdditionalExampleProjection) HandleEvents(height int64, events []event_entity.Event) error {
-	rdbTx, err := projection.rdbConn.Begin()
-	if err != nil {
-		return fmt.Errorf("error beginning transaction: %v", err)
-	}
+    rdbTx, err := projection.rdbConn.Begin()
+    if err != nil {
+        return fmt.Errorf("error beginning transaction: %v", err)
+    }
 
-	committed := false
-	defer func() {
-		if !committed {
-			_ = rdbTx.Rollback()
-		}
-	}()
+    committed := false
+    defer func() {
+        if !committed {
+            _ = rdbTx.Rollback()
+        }
+    }()
 
-	rdbTxHandle := rdbTx.ToHandle()
+    rdbTxHandle := rdbTx.ToHandle()
 
-	examplesView := NewExamplesView(rdbTxHandle)
+    examplesView := NewExamplesView(rdbTxHandle)
 
-	for _, event := range events {
-		if typedEvent, ok := event.(*event_usecase.MsgSend); ok {
-			row := &example_view.ExampleRow{
-				Address: typedEvent.ToAddress,
-				Balance: typedEvent.Amount,
-			}
-			if handleErr := projection.handleSomeEvent(examplesView, row); handleErr != nil {
-				return fmt.Errorf("error handling MsgSend: %v", handleErr)
-			}
-		}
-	}
+    for _, event := range events {
+        if typedEvent, ok := event.(*event_usecase.MsgSend); ok {
+            row := &example_view.ExampleRow{
+                Address: typedEvent.ToAddress,
+                Balance: typedEvent.Amount,
+            }
+            if handleErr := projection.handleSomeEvent(examplesView, row); handleErr != nil {
+                return fmt.Errorf("error handling MsgSend: %v", handleErr)
+            }
+        }
+    }
 
-	if err = UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
-		return fmt.Errorf("error updating last handled event height: %v", err)
-	}
+    if err = UpdateLastHandledEventHeight(projection, rdbTxHandle, height); err != nil {
+        return fmt.Errorf("error updating last handled event height: %v", err)
+    }
 
-	if err = rdbTx.Commit(); err != nil {
-		return fmt.Errorf("error committing changes: %v", err)
-	}
-	committed = true
+    if err = rdbTx.Commit(); err != nil {
+        return fmt.Errorf("error committing changes: %v", err)
+    }
+    committed = true
 
-	return nil
+    return nil
 }
 
 func (projection *AdditionalExampleProjection) handleSomeEvent(examplesView example_view.Examples, row *example_view.ExampleRow) error {
-	return examplesView.Insert(row)
+    return examplesView.Insert(row)
 }
 ```
 
@@ -365,63 +365,63 @@ func (projection *AdditionalExampleProjection) handleSomeEvent(examplesView exam
 package view
 
 import (
-	"fmt"
+    "fmt"
 
-	"github.com/crypto-com/chain-indexing/external/json"
+    "github.com/crypto-com/chain-indexing/external/json"
 
-	"github.com/crypto-com/chain-indexing/usecase/coin"
+    "github.com/crypto-com/chain-indexing/usecase/coin"
 
-	"github.com/crypto-com/chain-indexing/appinterface/rdb"
-	_ "github.com/crypto-com/chain-indexing/test/factory"
+    "github.com/crypto-com/chain-indexing/appinterface/rdb"
+    _ "github.com/crypto-com/chain-indexing/test/factory"
 )
 
 type Examples interface {
-	Insert(*ExampleRow) error
+    Insert(*ExampleRow) error
 }
 
 type ExamplesView struct {
-	rdb *rdb.Handle
+    rdb *rdb.Handle
 }
 
 func NewExamplesView(handle *rdb.Handle) Examples {
-	return &ExamplesView{
-		handle,
-	}
+    return &ExamplesView{
+        handle,
+    }
 }
 
 func (exampleView *ExamplesView) Insert(example *ExampleRow) error {
-	sql, sqlArgs, err := exampleView.rdb.StmtBuilder.
-		Insert(
-			"view_examples",
-		).
-		Columns(
-			"address",
-			"balance",
-		).
-		Values(
-			example.Address,
-			json.MustMarshalToString(example.Balance),
-		).
-		ToSql()
+    sql, sqlArgs, err := exampleView.rdb.StmtBuilder.
+        Insert(
+            "view_examples",
+        ).
+        Columns(
+            "address",
+            "balance",
+        ).
+        Values(
+            example.Address,
+            json.MustMarshalToString(example.Balance),
+        ).
+        ToSql()
 
-	if err != nil {
-		return fmt.Errorf("error building examples insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
+    if err != nil {
+        return fmt.Errorf("error building examples insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+    }
 
-	result, err := exampleView.rdb.Exec(sql, sqlArgs...)
-	if err != nil {
-		return fmt.Errorf("error inserting example into the table: %v: %w", err, rdb.ErrWrite)
-	}
-	if result.RowsAffected() != 1 {
-		return fmt.Errorf("error inserting example into the table: no rows inserted: %w", rdb.ErrWrite)
-	}
+    result, err := exampleView.rdb.Exec(sql, sqlArgs...)
+    if err != nil {
+        return fmt.Errorf("error inserting example into the table: %v: %w", err, rdb.ErrWrite)
+    }
+    if result.RowsAffected() != 1 {
+        return fmt.Errorf("error inserting example into the table: no rows inserted: %w", rdb.ErrWrite)
+    }
 
-	return nil
+    return nil
 }
 
 type ExampleRow struct {
-	Address string     `json:"address"`
-	Balance coin.Coins `json:"balance"`
+    Address string     `json:"address"`
+    Balance coin.Coins `json:"balance"`
 }
 ```
 
@@ -457,24 +457,24 @@ func initProjections(
 package main
 
 import (
-	"github.com/crypto-com/chain-indexing/appinterface/rdb"
-	"github.com/crypto-com/chain-indexing/bootstrap"
-	sysconfig "github.com/crypto-com/chain-indexing/bootstrap/config"
-	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
-	applogger "github.com/crypto-com/chain-indexing/external/logger"
-	"github.com/crypto-com/chain-indexing/infrastructure/pg"
-	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
-	github_migrationhelper "github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper/github"
-	"github.com/crypto-com/chain-indexing/projection/bridge_activity/bridge_activity_matcher"
+    "github.com/crypto-com/chain-indexing/appinterface/rdb"
+    "github.com/crypto-com/chain-indexing/bootstrap"
+    sysconfig "github.com/crypto-com/chain-indexing/bootstrap/config"
+    projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
+    applogger "github.com/crypto-com/chain-indexing/external/logger"
+    "github.com/crypto-com/chain-indexing/infrastructure/pg"
+    "github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
+    github_migrationhelper "github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper/github"
+    "github.com/crypto-com/chain-indexing/projection/bridge_activity/bridge_activity_matcher"
 )
 
 func initCronJobs(
-	logger applogger.Logger,
-	rdbConn rdb.Conn,
-	config *sysconfig.Config,
+    logger applogger.Logger,
+    rdbConn rdb.Conn,
+    config *sysconfig.Config,
 ) (crons []projection_entity.CronJob) {
     // Skip if API_ONLY is on
-	if !config.IndexService.Enable {
+    if !config.IndexService.Enable {
         return crons
     }
 
@@ -492,19 +492,19 @@ func initCronJobs(
     
     // Append `BridgeActivityMatcher` cron
     crons = append(bridge_activity_matcher.New(
-		bridge_activity_matcher.Config{
-			// init config
+        bridge_activity_matcher.Config{
+            // init config
         },
-		logger,
-		rdbConn,
-		migrationHelper,
-		). crons)
+        logger,
+        rdbConn,
+        migrationHelper,
+        ). crons)
 
     for _, cron := range crons {
         if onInitErr := cron.OnInit(); onInitErr != nil {
             logger.Errorf(
                 "error initializing cronjob %s: %v",
-			    cron.Id(), onInitErr,
+                cron.Id(), onInitErr,
             )
         }
     }
@@ -517,9 +517,9 @@ func initCronJobs(
 package routes
 
 import (
-	"fmt"
+    "fmt"
 
-	"github.com/valyala/fasthttp"
+    "github.com/valyala/fasthttp"
 
     "github.com/crypto-com/chain-indexing/infrastructure/httpapi"
     "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
@@ -532,81 +532,81 @@ import (
 )
 
 type RouteRegistry struct {
-	routes []Route
+    routes []Route
 }
 
 type Route struct {
-	Method  string
-	path    string
-	handler fasthttp.RequestHandler
+    Method  string
+    path    string
+    handler fasthttp.RequestHandler
 }
 
 func (registry *RouteRegistry) Register(server *httpapi.Server, routePrefix string) {
-	if routePrefix == "/" {
-		routePrefix = ""
-	}
+    if routePrefix == "/" {
+        routePrefix = ""
+    }
 
-	for _, route := range registry.routes {
-		registerRoute(server, routePrefix, route)
-	}
+    for _, route := range registry.routes {
+        registerRoute(server, routePrefix, route)
+    }
 }
 
 func registerRoute(server *httpapi.Server, routePrefix string, route Route) {
-	switch route.Method {
-	case GET:
-		server.GET(fmt.Sprintf("%s/%s", routePrefix, route.path), route.handler)
-	}
+    switch route.Method {
+    case GET:
+        server.GET(fmt.Sprintf("%s/%s", routePrefix, route.path), route.handler)
+    }
 }
 
 const (
-	GET = "GET"
+    GET = "GET"
 )
 
 func InitRouteRegistry(
-	logger applogger.Logger,
-	rdbConn rdb.Conn,
-	config *sysconfig.Config,
+    logger applogger.Logger,
+    rdbConn rdb.Conn,
+    config *sysconfig.Config,
 ) bootstrap.RouteRegistry {
-	routes := make([]Route, 0)
-	searchHandler := httpapi_handlers.NewSearch(logger, rdbConn.ToHandle())
-	routes = append(routes,
-		Route{
-			Method:  GET,
-			path:    "api/v1/search",
-			handler: searchHandler.Search,
-		},
-	)
+    routes := make([]Route, 0)
+    searchHandler := httpapi_handlers.NewSearch(logger, rdbConn.ToHandle())
+    routes = append(routes,
+        Route{
+            Method:  GET,
+            path:    "api/v1/search",
+            handler: searchHandler.Search,
+        },
+    )
 
-	blocksHandler := httpapi_handlers.NewBlocks(logger, rdbConn.ToHandle())
-	routes = append(routes,
-		Route{
-			Method:  GET,
-			path:    "api/v1/blocks",
-			handler: blocksHandler.List,
-		},
-		Route{
-			Method:  GET,
-			path:    "api/v1/blocks/{height-or-hash}",
-			handler: blocksHandler.FindBy,
-		},
-		Route{
-			Method:  GET,
-			path:    "api/v1/blocks/{height}/transactions",
-			handler: blocksHandler.ListTransactionsByHeight,
-		},
-		Route{
-			Method:  GET,
-			path:    "api/v1/blocks/{height}/events",
-			handler: blocksHandler.ListEventsByHeight,
-		},
-		Route{
-			Method:  GET,
-			path:    "api/v1/blocks/{height}/commitments",
-			handler: blocksHandler.ListCommitmentsByHeight,
-		},
-	)
+    blocksHandler := httpapi_handlers.NewBlocks(logger, rdbConn.ToHandle())
+    routes = append(routes,
+        Route{
+            Method:  GET,
+            path:    "api/v1/blocks",
+            handler: blocksHandler.List,
+        },
+        Route{
+            Method:  GET,
+            path:    "api/v1/blocks/{height-or-hash}",
+            handler: blocksHandler.FindBy,
+        },
+        Route{
+            Method:  GET,
+            path:    "api/v1/blocks/{height}/transactions",
+            handler: blocksHandler.ListTransactionsByHeight,
+        },
+        Route{
+            Method:  GET,
+            path:    "api/v1/blocks/{height}/events",
+            handler: blocksHandler.ListEventsByHeight,
+        },
+        Route{
+            Method:  GET,
+            path:    "api/v1/blocks/{height}/commitments",
+            handler: blocksHandler.ListCommitmentsByHeight,
+        },
+    )
 
-	return &RouteRegistry{routes: routes}
+    return &RouteRegistry{routes: routes}
 }
 ```
 
