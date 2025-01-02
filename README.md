@@ -10,10 +10,13 @@ Right now it supports Postgres database and provides RESTful API as query interf
 package main
 
 import (
+	"github.com/crypto-com/chain-indexing/external/ethereumtxinnermsgdecoder"
 	"os"
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	sysconfig "github.com/crypto-com/chain-indexing/bootstrap/config"
 	"github.com/crypto-com/chain-indexing/bootstrap"
+	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	"github.com/crypto-com/chain-indexing/infrastructure"
 	"github.com/crypto-com/chain-indexing/entity/projection"
 )
@@ -21,20 +24,16 @@ import (
 func main() {
 	// Init configurations...
 	logger := infrastructure.NewZerologLogger(os.Stdout)
-	fileConfig := bootstrap.FileConfig{}
-	
-	// filling fileConfig
-	// ...
-	
-	config := bootstrap.Config{
-		FileConfig: fileConfig,
+	config := sysconfig.Config{
+		// Init configurations...
 	}
-
 	// Init indexing app
 	app := bootstrap.NewApp(logger, &config)
 	app.InitIndexService(
 		initProjections(logger, &config),
 		initCronJobs(logger, &config),
+		initTxdecoder(logger, &config),
+		initEthereumTxInnerMsgDecoder(logger, &config),
 	)
 	app.InitHTTPAPIServer(initRouteRegistry(logger, &config))
 
@@ -44,24 +43,37 @@ func main() {
 
 func initProjections(
 	logger applogger.Logger,
-	config *bootstrap.Config,
+	config *sysconfig.Config,
 ) []projection.Projection {
-    // append your Projections
+	// append your Projections
 }
-
 
 func initCronJobs(
 	logger applogger.Logger,
-	config *bootstrap.Config,
+	config *sysconfig.Config,
 ) []projection.CronJob {
 	// append your CronJobs
 }
 
 func initRouteRegistry(
 	logger applogger.Logger,
-	config *bootstrap.Config,
+	config *sysconfig.Config,
 ) bootstrap.RouteRegistry {
 	// append your Routes
+}
+
+func initTxdecoder(
+	logger applogger.Logger,
+	config *sysconfig.Config,
+) txdecoder.TxDecoder {
+	// append your Routes
+}
+
+func initEthereumTxInnerMsgDecoder(
+	logger applogger.Logger,
+	config *sysconfig.Config,
+) ethereumtxinnermsgdecoder.EthereumTxInnerMsgDecoder {
+// append your Routes
 }
 ```
 
@@ -188,6 +200,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/bootstrap"
+	sysconfig "github.com/crypto-com/chain-indexing/bootstrap/config"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
@@ -200,9 +213,8 @@ import (
 
 func initProjections(
     logger applogger.Logger,
-    rdbConn rdb.Conn,
-    config *bootstrap.Config,
-    customConfig *CustomConfig,
+	rdbConn rdb.Conn,
+    config *sysconfig.Config,
 ) (projections []projection_entity.Projection) {
     // Skip if API_ONLY is on
 	if !config.IndexService.Enable {
@@ -212,9 +224,9 @@ func initProjections(
     connString := rdbConn.(*pg.PgxConn).ConnString()
     
     githubMigrationHelperConfig := github_migrationhelper.Config{
-        GithubAPIUser:    config.GithubAPI.Username,
-        GithubAPIToken:   config.GithubAPI.Token,
-        MigrationRepoRef: config.GithubAPI.MigrationRepoRef,
+		GithubAPIUser:    config.IndexService.GithubAPI.Username,
+        GithubAPIToken:   config.IndexService.GithubAPI.Token,
+        MigrationRepoRef: config.IndexService.GithubAPI.MigrationRepoRef,
         ConnString:       connString,
     }
 
@@ -234,7 +246,7 @@ func initProjections(
     migrationHelper := github_migrationhelper.NewGithubMigrationHelper(sourceURL, databaseURL)
     
     // Append `Account` projection
-    projections = append(account.NewAccount(logger, rdbConn, config.Blockchain.AccountAddressPrefix, cosmosAppClient, migrationHelper). projections)
+    projections = append(account.NewAccount(logger, rdbConn, cosmosAppClient, migrationHelper). projections)
 
     sourceURL = github_migrationhelper.GenerateDefaultSourceURL("AccountTransaction", githubMigrationHelperConfig)
     databaseURL = migrationhelper.GenerateDefaultDatabaseURL("AccountTransaction", connString)
@@ -424,8 +436,8 @@ func initProjections(
     // ...
 
     githubMigrationHelperConfigForCustomProjection := github_migrationhelper.Config{
-        GithubAPIUser:    config.GithubAPI.Username,
-        GithubAPIToken:   config.GithubAPI.Token,
+        GithubAPIUser:    config.IndexService.GithubAPI.Username,
+        GithubAPIToken:   config.IndexService.GithubAPI.Token,
         MigrationRepoRef: customConfig.ServerGithubAPI.MigrationRepoRef,
         ConnString:       connString,
     }
@@ -447,6 +459,7 @@ package main
 import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/bootstrap"
+	sysconfig "github.com/crypto-com/chain-indexing/bootstrap/config"
 	projection_entity "github.com/crypto-com/chain-indexing/entity/projection"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
@@ -458,8 +471,7 @@ import (
 func initCronJobs(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
-	config *bootstrap.Config,
-	customConfig *CustomConfig,
+	config *sysconfig.Config,
 ) (crons []projection_entity.CronJob) {
     // Skip if API_ONLY is on
 	if !config.IndexService.Enable {
@@ -470,16 +482,23 @@ func initCronJobs(
     
     sourceURL := github_migrationhelper.GenerateSourceURL(
         github_migrationhelper.MIGRATION_GITHUB_URL_FORMAT,
-        config.GithubAPI.Username,
-        config.GithubAPI.Token,
+        config.IndexService.GithubAPI.Username,
+        config.IndexService.GithubAPI.Token,
         bridge_activity_matcher.MIGRATION_DIRECOTRY,
-        config.GithubAPI.MigrationRepoRef,
+        config.IndexService.GithubAPI.MigrationRepoRef,
     )
     databaseURL := migrationhelper.GenerateDefaultDatabaseURL("BridgeActivityMatcher", connString)
     migrationHelper := github_migrationhelper.NewGithubMigrationHelper(sourceURL, databaseURL)
     
     // Append `BridgeActivityMatcher` cron
-    crons = append(bridge_activity_matcher.New(logger, rdbConn, migrationHelper). crons)
+    crons = append(bridge_activity_matcher.New(
+		bridge_activity_matcher.Config{
+			// init config
+        },
+		logger,
+		rdbConn,
+		migrationHelper,
+		). crons)
 
     for _, cron := range crons {
         if onInitErr := cron.OnInit(); onInitErr != nil {
@@ -498,20 +517,55 @@ func initCronJobs(
 package routes
 
 import (
+	"fmt"
+
+	"github.com/valyala/fasthttp"
+
+	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
     "github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
     "github.com/crypto-com/chain-indexing/appinterface/rdb"
     "github.com/crypto-com/chain-indexing/appinterface/tendermint"
     "github.com/crypto-com/chain-indexing/bootstrap"
+	sysconfig "github.com/crypto-com/chain-indexing/bootstrap/config"
     applogger "github.com/crypto-com/chain-indexing/external/logger"
-    cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
     httpapi_handlers "github.com/crypto-com/chain-indexing/infrastructure/httpapi/handlers"
-    tendermint_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/tendermint"
+)
+
+type RouteRegistry struct {
+	routes []Route
+}
+
+type Route struct {
+	Method  string
+	path    string
+	handler fasthttp.RequestHandler
+}
+
+func (registry *RouteRegistry) Register(server *httpapi.Server, routePrefix string) {
+	if routePrefix == "/" {
+		routePrefix = ""
+	}
+
+	for _, route := range registry.routes {
+		registerRoute(server, routePrefix, route)
+	}
+}
+
+func registerRoute(server *httpapi.Server, routePrefix string, route Route) {
+	switch route.Method {
+	case GET:
+		server.GET(fmt.Sprintf("%s/%s", routePrefix, route.path), route.handler)
+	}
+}
+
+const (
+	GET = "GET"
 )
 
 func InitRouteRegistry(
 	logger applogger.Logger,
 	rdbConn rdb.Conn,
-	config *bootstrap.Config,
+	config *sysconfig.Config,
 ) bootstrap.RouteRegistry {
 	routes := make([]Route, 0)
 	searchHandler := httpapi_handlers.NewSearch(logger, rdbConn.ToHandle())
@@ -554,48 +608,6 @@ func InitRouteRegistry(
 
 	return &RouteRegistry{routes: routes}
 }
-```
-
-```go
-package routes
-
-import (
-	"fmt"
-
-	"github.com/crypto-com/chain-indexing/infrastructure/httpapi"
-	"github.com/valyala/fasthttp"
-)
-
-type RouteRegistry struct {
-	routes []Route
-}
-
-type Route struct {
-	Method  string
-	path    string
-	handler fasthttp.RequestHandler
-}
-
-func (registry *RouteRegistry) Register(server *httpapi.Server, routePrefix string) {
-	if routePrefix == "/" {
-		routePrefix = ""
-	}
-
-	for _, route := range registry.routes {
-		registerRoute(server, routePrefix, route)
-	}
-}
-
-func registerRoute(server *httpapi.Server, routePrefix string, route Route) {
-	switch route.Method {
-	case GET:
-		server.GET(fmt.Sprintf("%s/%s", routePrefix, route.path), route.handler)
-	}
-}
-
-const (
-	GET = "GET"
-)
 ```
 
 ## 2. Example implementation
