@@ -146,7 +146,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -283,7 +283,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -416,7 +416,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -526,7 +526,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -642,7 +642,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -754,7 +754,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -878,7 +878,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -1017,7 +1017,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -1149,7 +1149,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -1267,7 +1267,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -1373,7 +1373,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -1491,7 +1491,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -1616,7 +1616,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -1731,7 +1731,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -1847,7 +1847,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -1964,7 +1964,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -2071,7 +2071,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -2171,7 +2171,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -2289,7 +2289,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -2407,7 +2407,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -2512,7 +2512,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -2616,7 +2616,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -2720,7 +2720,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -2827,7 +2827,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -2934,7 +2934,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -3040,7 +3040,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -3145,7 +3145,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -3250,7 +3250,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -3355,7 +3355,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -3460,7 +3460,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -3565,7 +3565,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -3670,7 +3670,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -3796,7 +3796,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -3932,7 +3932,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -4047,7 +4047,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -4152,7 +4152,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -4257,7 +4257,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -4364,7 +4364,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -4467,7 +4467,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -4570,7 +4570,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -4660,7 +4660,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -4763,7 +4763,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -4866,7 +4866,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,
@@ -4969,7 +4969,7 @@ func TestAccountMessage_HandleEvents(t *testing.T) {
 				}
 
 				mockAccountMessagesView.On(
-					"Insert",
+					"InsertAll",
 					&account_message_view.AccountMessageRow{
 						MaybeAccount:    (*string)(nil),
 						BlockHeight:     1,

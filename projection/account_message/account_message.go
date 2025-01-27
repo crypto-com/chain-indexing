@@ -1036,7 +1036,7 @@ func (projection *AccountMessage) HandleEvents(height int64, events []event_enti
 			insertedAccounts[involvedAccount] = true
 		}
 
-		if err := accountMessagesView.Insert(&accountMessages[i].Row, deduplicatedAccounts); err != nil {
+		if err := accountMessagesView.InsertAll(&accountMessages[i].Row, deduplicatedAccounts); err != nil {
 			return fmt.Errorf("error inserting account message: %w", err)
 		}
 	}
