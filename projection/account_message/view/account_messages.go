@@ -3,7 +3,6 @@ package view
 import (
 	"errors"
 	"fmt"
-
 	sq "github.com/Masterminds/squirrel"
 
 	pagination_interface "github.com/crypto-com/chain-indexing/appinterface/pagination"
@@ -14,8 +13,8 @@ import (
 )
 
 type AccountMessages interface {
-	Insert(*AccountMessageRow, []string) error
 	List(AccountMessagesListFilter, AccountMessagesListOrder, *pagination_interface.Pagination) ([]AccountMessageRow, *pagination_interface.PaginationResult, error)
+	InsertAll(messageRow *AccountMessageRow, accounts []string) error
 }
 
 // BlockTransactions projection view implemented by relational database
@@ -29,27 +28,38 @@ func NewAccountMessagesView(handle *rdb.Handle) AccountMessages {
 	}
 }
 
-func (accountMessagesView *AccountMessagesView) Insert(messageRow *AccountMessageRow, accounts []string) error {
+func (accountMessagesView *AccountMessagesView) InsertAll(messageRow *AccountMessageRow, accounts []string) error {
+	if len(accounts) == 0 {
+		return nil
+	}
+
+	pendingRowCount := 0
+	var stmtBuilder sq.InsertBuilder
+
+	blockRawEventCount := len(accounts)
 	accountMessageDataJSON, err := json.MarshalToString(messageRow.Data)
 	if err != nil {
 		return fmt.Errorf("error JSON marshalling account message for insertion: %v: %w", err, rdb.ErrBuildSQLStmt)
 	}
-
-	stmtBuilder := accountMessagesView.rdb.StmtBuilder.Insert(
-		"view_account_messages",
-	).Columns(
-		"block_height",
-		"block_hash",
-		"block_time",
-		"account",
-		"transaction_hash",
-		"success",
-		"message_index",
-		"message_type",
-		"data",
-	)
 	blockTime := accountMessagesView.rdb.Tton(&messageRow.BlockTime)
-	for _, account := range accounts {
+	for i, account := range accounts {
+
+		if pendingRowCount == 0 {
+			stmtBuilder = accountMessagesView.rdb.StmtBuilder.Insert(
+				"view_account_messages",
+			).Columns(
+				"block_height",
+				"block_hash",
+				"block_time",
+				"account",
+				"transaction_hash",
+				"success",
+				"message_index",
+				"message_type",
+				"data",
+			)
+		}
+
 		stmtBuilder = stmtBuilder.Values(
 			messageRow.BlockHeight,
 			messageRow.BlockHash,
@@ -61,19 +71,29 @@ func (accountMessagesView *AccountMessagesView) Insert(messageRow *AccountMessag
 			messageRow.MessageType,
 			accountMessageDataJSON,
 		)
-	}
-	sql, sqlArgs, err := stmtBuilder.ToSql()
-	if err != nil {
-		return fmt.Errorf("error building account message id insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
-	}
-	result, err := accountMessagesView.rdb.Exec(sql, sqlArgs...)
-	if err != nil {
-		return fmt.Errorf("error inserting account messages into the table: %v: %w", err, rdb.ErrWrite)
-	}
-	if result.RowsAffected() != int64(len(accounts)) {
-		return fmt.Errorf(
-			"error inserting account messages into the table: mismatched rows inserted: %w", rdb.ErrWrite,
-		)
+
+		pendingRowCount += 1
+
+		// Postgres has a limit of 65536 parameters.
+		if pendingRowCount == 500 || i+1 == blockRawEventCount {
+			sql, sqlArgs, err := stmtBuilder.ToSql()
+			if err != nil {
+				return fmt.Errorf("error building account messages batch insertion sql: %v: %w", err, rdb.ErrBuildSQLStmt)
+			}
+
+			result, err := accountMessagesView.rdb.Exec(sql, sqlArgs...)
+			if err != nil {
+				return fmt.Errorf("error batch inserting account messages into the table: %v: %w", err, rdb.ErrWrite)
+			}
+			if result.RowsAffected() != int64(pendingRowCount) {
+				return fmt.Errorf(
+					"error batch inserting account messages into the table: mismatched number of rows inserted: %w",
+					rdb.ErrWrite,
+				)
+			}
+			pendingRowCount = 0
+		}
+
 	}
 
 	return nil

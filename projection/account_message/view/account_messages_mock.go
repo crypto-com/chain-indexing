@@ -15,7 +15,18 @@ func NewMockAccountMessagesView(_ *rdb.Handle) AccountMessages {
 	return &MockAccountMessagesView{}
 }
 
-func (accountMessagesView *MockAccountMessagesView) Insert(messageRow *AccountMessageRow, accounts []string) error {
+func (accountMessagesView *MockAccountMessagesView) List(
+	filter AccountMessagesListFilter,
+	order AccountMessagesListOrder,
+	pagination *pagination_interface.Pagination,
+) ([]AccountMessageRow, *pagination_interface.PaginationResult, error) {
+	mockArgs := accountMessagesView.Called(filter, order, pagination)
+	result0, _ := mockArgs.Get(0).([]AccountMessageRow)
+	result1, _ := mockArgs.Get(1).(*pagination_interface.PaginationResult)
+	return result0, result1, mockArgs.Error(2)
+}
+
+func (accountMessagesView *MockAccountMessagesView) InsertAll(messageRow *AccountMessageRow, accounts []string) error {
 	if data, ok := messageRow.Data.(*event_usecase.MsgSend); ok {
 		data.EventUUID = "TESTUUID"
 	} else if data, ok := messageRow.Data.(*event_usecase.MsgMultiSend); ok {
@@ -95,15 +106,4 @@ func (accountMessagesView *MockAccountMessagesView) Insert(messageRow *AccountMe
 	}
 	mockArgs := accountMessagesView.Called(messageRow, accounts)
 	return mockArgs.Error(0)
-}
-
-func (accountMessagesView *MockAccountMessagesView) List(
-	filter AccountMessagesListFilter,
-	order AccountMessagesListOrder,
-	pagination *pagination_interface.Pagination,
-) ([]AccountMessageRow, *pagination_interface.PaginationResult, error) {
-	mockArgs := accountMessagesView.Called(filter, order, pagination)
-	result0, _ := mockArgs.Get(0).([]AccountMessageRow)
-	result1, _ := mockArgs.Get(1).(*pagination_interface.PaginationResult)
-	return result0, result1, mockArgs.Error(2)
 }
