@@ -84,7 +84,7 @@ func (manager *StoreBasedManager) projectionRunner(projection Projection) {
 	for {
 		latestEventHeight, _ := manager.eventStore.GetLatestHeight()
 		if latestEventHeight == nil {
-			logger.Debugf("no event in in the system yet")
+			logger.Debugf("no event in the system yet")
 			<-waitFor(5 * time.Second)
 			continue
 		}

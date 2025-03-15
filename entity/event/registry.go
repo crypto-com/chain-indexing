@@ -23,7 +23,7 @@ func (registry *Registry) Register(eventName string, eventVersion int, decoder D
 	registry.decoders[eventType(eventName, eventVersion)] = decoder
 }
 
-// IsRegister returns true when the event to decoder mapping is already registered
+// IsRegistered returns true when the event to decoder mapping is already registered
 func (registry *Registry) IsRegistered(eventName string, eventVersion int) bool {
 	_, exist := registry.decoders[eventType(eventName, eventVersion)]
 	return exist
