@@ -170,30 +170,24 @@ func ParseMsgSubmitProposal(
 	events := log.GetEventsByType("submit_proposal")
 
 	var proposalId *string
-	if parserParams.Msg["msg_index"] != nil {
-		msgIndex, err := strconv.Atoi(parserParams.Msg["msg_index"].(string))
-		if err != nil {
-			panic("error on parsing `msg_index` to int")
+
+	for _, event := range events {
+		if proposalId != nil {
+			break
 		}
 
-		proposalId = events[msgIndex].GetAttributeByKey("proposal_id")
-		if proposalId == nil {
-			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+		if event.HasAttribute("msg_index") {
+			msgIndex, err := strconv.Atoi(event.MustGetAttributeByKey("msg_index"))
+			if err != nil {
+				panic("error on parsing `msg_index` to int")
+			}
+			if msgIndex != parserParams.MsgIndex {
+				continue
+			}
 		}
 
-		if events[msgIndex].HasAttribute("voting_period_start") {
-			cmds = append(cmds, command_usecase.NewStartProposalVotingPeriod(
-				parserParams.MsgCommonParams.BlockHeight, events[msgIndex].MustGetAttributeByKey("voting_period_start"),
-			))
-		}
-	} else {
-		event := log.GetEventByType("submit_proposal")
-		if event == nil {
-			panic("missing `submit_proposal` event in TxsResult log")
-		}
-		proposalId = event.GetAttributeByKey("proposal_id")
-		if proposalId == nil {
-			panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
+		if event.HasAttribute("proposal_id") {
+			proposalId = event.GetAttributeByKey("proposal_id")
 		}
 
 		if event.HasAttribute("voting_period_start") {
@@ -201,6 +195,10 @@ func ParseMsgSubmitProposal(
 				parserParams.MsgCommonParams.BlockHeight, event.MustGetAttributeByKey("voting_period_start"),
 			))
 		}
+	}
+
+	if proposalId == nil {
+		panic("missing `proposal_id` in `submit_proposal` event of TxsResult log")
 	}
 
 	return append([]command.Command{
