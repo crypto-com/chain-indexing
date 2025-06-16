@@ -7,6 +7,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
 	V0_42_7_ibcmsg "github.com/crypto-com/chain-indexing/usecase/parser/v0_42_7/ibcmsg"
 	V1_4_0_cronos_msg "github.com/crypto-com/chain-indexing/usecase/parser/v1_4_0_cronos/msg"
+	V6_0_0_cronos_pos_msg "github.com/crypto-com/chain-indexing/usecase/parser/v6_0_0_cronos_pos/msg"
 )
 
 const BEGIN_BLOCK_HEIGHT = 0
@@ -184,5 +185,92 @@ func RegisterBreakingVersionParsers(manager *utils.CosmosParserManager) {
 
 		// cosmos vesting
 		manager.RegisterParser("/cosmos.vesting.v1beta1.MsgCreateVestingAccount", manager.GetCronosV1_4_0BlockHeight(), V1_4_0_cronos_msg.ParseMsgEventsToLog(ParseMsgCreateVestingAccount))
+	}
+
+	/*
+	   Cronos POS v6.0.0
+	*/
+	if manager.GetCronosPosV6_0_0BlockHeight() > 0 {
+
+		// cosmos bank
+		manager.RegisterParser("/cosmos.bank.v1beta1.MsgSend", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgSend))
+		manager.RegisterParser("/cosmos.bank.v1beta1.MsgMultiSend", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgMultiSend))
+		manager.RegisterParser("/cosmos.bank.v1beta1.MsgSetSendEnabled", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgSetSendEnabled))
+
+		// cosmos distribution
+		manager.RegisterParser("/cosmos.distribution.v1beta1.MsgSetWithdrawAddress", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgSetWithdrawAddress))
+		manager.RegisterParser("/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgWithdrawDelegatorReward))
+		manager.RegisterParser("/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgWithdrawValidatorCommission))
+		manager.RegisterParser("/cosmos.distribution.v1beta1.MsgFundCommunityPool", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgFundCommunityPool))
+
+		// cosmos gov
+		manager.RegisterParser("/cosmos.gov.v1beta1.MsgSubmitProposal", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgSubmitProposal))
+		manager.RegisterParser("/cosmos.gov.v1beta1.MsgVote", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgVote))
+		manager.RegisterParser("/cosmos.gov.v1beta1.MsgDeposit", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgDeposit))
+
+		// cosmos gov v1
+		manager.RegisterParser("/cosmos.gov.v1.MsgDeposit", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(cosmos_gov_v1.ParseMsgDeposit))
+		manager.RegisterParser("/cosmos.gov.v1.MsgSubmitProposal", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(cosmos_gov_v1.ParseMsgSubmitProposal))
+		manager.RegisterParser("/cosmos.gov.v1.MsgVote", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(cosmos_gov_v1.ParseMsgVote))
+		manager.RegisterParser("/cosmos.gov.v1.MsgVoteWeighted", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(cosmos_gov_v1.ParseMsgVoteWeighted))
+
+		// cosmos staking
+		manager.RegisterParser("/cosmos.staking.v1beta1.MsgDelegate", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgDelegate))
+		manager.RegisterParser("/cosmos.staking.v1beta1.MsgUndelegate", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgUndelegate))
+		manager.RegisterParser("/cosmos.staking.v1beta1.MsgBeginRedelegate", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgBeginRedelegate))
+		manager.RegisterParser("/cosmos.staking.v1beta1.MsgCreateValidator", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgCreateValidator))
+		manager.RegisterParser("/cosmos.staking.v1beta1.MsgEditValidator", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgEditValidator))
+
+		// cosmos slashing
+		manager.RegisterParser("/cosmos.slashing.v1beta1.MsgUnjail", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgUnjail))
+
+		// chainmain nft
+		manager.RegisterParser("/chainmain.nft.v1.MsgIssueDenom", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgNFTIssueDenom))
+		manager.RegisterParser("/chainmain.nft.v1.MsgMintNFT", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgNFTMintNFT))
+		manager.RegisterParser("/chainmain.nft.v1.MsgTransferNFT", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgNFTTransferNFT))
+		manager.RegisterParser("/chainmain.nft.v1.MsgEditNFT", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgNFTEditNFT))
+		manager.RegisterParser("/chainmain.nft.v1.MsgBurnNFT", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgNFTBurnNFT))
+
+		// chainmain icaauth
+		manager.RegisterParser("/chainmain.icaauth.v1.MsgRegisterAccount", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(icaauth.ParseChainmainMsgRegisterAccount))
+		manager.RegisterParser("/chainmain.icaauth.v1.MsgSubmitTx", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(icaauth.ParseChainmainMsgSubmitTx))
+
+		// ibc core client
+		manager.RegisterParser("/ibc.core.client.v1.MsgCreateClient", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ibc.ParseMsgCreateClient))
+		manager.RegisterParser("/ibc.core.client.v1.MsgUpdateClient", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ibc.ParseMsgUpdateClient))
+
+		// ibc core connection
+		manager.RegisterParser("/ibc.core.connection.v1.MsgConnectionOpenInit", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ibc.ParseMsgConnectionOpenInit))
+		manager.RegisterParser("/ibc.core.connection.v1.MsgConnectionOpenTry", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ibc.ParseMsgConnectionOpenTry))
+		manager.RegisterParser("/ibc.core.connection.v1.MsgConnectionOpenAck", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ibc.ParseMsgConnectionOpenAck))
+		manager.RegisterParser("/ibc.core.connection.v1.MsgConnectionOpenConfirm", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ibc.ParseMsgConnectionOpenConfirm))
+
+		// ibc core channel
+		manager.RegisterParser("/ibc.core.channel.v1.MsgChannelOpenInit", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ibc.ParseMsgChannelOpenInit))
+		manager.RegisterParser("/ibc.core.channel.v1.MsgChannelOpenTry", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ibc.ParseMsgChannelOpenTry))
+		manager.RegisterParser("/ibc.core.channel.v1.MsgChannelOpenAck", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ibc.ParseMsgChannelOpenAck))
+		manager.RegisterParser("/ibc.core.channel.v1.MsgChannelOpenConfirm", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ibc.ParseMsgChannelOpenConfirm))
+		manager.RegisterParser("/ibc.core.channel.v1.MsgRecvPacket", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ibc.ParseMsgRecvPacket))
+		manager.RegisterParser("/ibc.core.channel.v1.MsgAcknowledgement", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ibc.ParseMsgAcknowledgement))
+		manager.RegisterParser("/ibc.core.channel.v1.MsgTimeout", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ibc.ParseMsgTimeout))
+		manager.RegisterParser("/ibc.core.channel.v1.MsgTimeoutOnClose", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ibc.ParseMsgTimeoutOnClose))
+		manager.RegisterParser("/ibc.core.channel.v1.MsgChannelCloseInit", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ibc.ParseMsgChannelCloseInit))
+		manager.RegisterParser("/ibc.core.channel.v1.MsgChannelCloseConfirm", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ibc.ParseMsgChannelCloseConfirm))
+
+		// ibc applications transfer
+		manager.RegisterParser("/ibc.applications.transfer.v1.MsgTransfer", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ibc.ParseMsgTransfer))
+
+		// cosmos authz
+		manager.RegisterParser("/cosmos.authz.v1beta1.MsgGrant", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgGrant))
+		manager.RegisterParser("/cosmos.authz.v1beta1.MsgRevoke", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgRevoke))
+		// FIXME: https://github.com/crypto-com/chain-indexing/issues/673
+		//manager.RegisterParser("/cosmos.authz.v1beta1.MsgExec", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgExec)
+
+		// cosmos feegrant
+		manager.RegisterParser("/cosmos.feegrant.v1beta1.MsgGrantAllowance", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgGrantAllowance))
+		manager.RegisterParser("/cosmos.feegrant.v1beta1.MsgRevokeAllowance", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgRevokeAllowance))
+
+		// cosmos vesting
+		manager.RegisterParser("/cosmos.vesting.v1beta1.MsgCreateVestingAccount", manager.GetCronosPosV6_0_0BlockHeight(), V6_0_0_cronos_pos_msg.ParseMsgEventsToLog(ParseMsgCreateVestingAccount))
 	}
 }

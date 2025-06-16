@@ -125,7 +125,7 @@ func ParseBlockResultsResp(rawRespReader io.Reader, eventAttributeDecoder tender
 	var endBlockEvents []model.BlockResultsEvent
 
 	if len(rawBlockResults.FinalizeBlockEvents) > 0 {
-		beginBlockEvents, endBlockEvents = ParseEthermintBlockResultfFinalizeBlockEvents(rawBlockResults.FinalizeBlockEvents, eventAttributeDecoder)
+		beginBlockEvents, endBlockEvents = ParseEthermintBlockResultFinalizeBlockEvents(rawBlockResults.FinalizeBlockEvents, eventAttributeDecoder)
 	} else {
 		beginBlockEvents = parseBlockResultsEvents(rawBlockResults.BeginBlockEvents, eventAttributeDecoder)
 		endBlockEvents = parseBlockResultsEvents(rawBlockResults.EndBlockEvents, eventAttributeDecoder)
@@ -246,7 +246,7 @@ func parseBlockResultsEvents(rawEvents []RawBlockResultsEvent, eventAttributeDec
 	return events
 }
 
-func ParseEthermintBlockResultfFinalizeBlockEvents(rawEvents []RawBlockResultsEvent, eventAttributeDecoder tendermint_interface.BlockResultEventAttributeDecoder) ([]model.BlockResultsEvent, []model.BlockResultsEvent) {
+func ParseEthermintBlockResultFinalizeBlockEvents(rawEvents []RawBlockResultsEvent, eventAttributeDecoder tendermint_interface.BlockResultEventAttributeDecoder) ([]model.BlockResultsEvent, []model.BlockResultsEvent) {
 	if rawEvents == nil {
 		return []model.BlockResultsEvent{}, []model.BlockResultsEvent{}
 	}

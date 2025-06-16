@@ -36,8 +36,9 @@ type IndexService struct {
 	startingBlockHeight                   int64
 	BlockResultEventAttributeDecodeMethod string
 
-	cosmosVersionBlockHeight utils.CosmosVersionBlockHeight
-	cronosVersionBlockHeight utils.CronosVersionBlockHeight
+	cosmosVersionBlockHeight    utils.CosmosVersionBlockHeight
+	cronosVersionBlockHeight    utils.CronosVersionBlockHeight
+	cronosPosVersionBlockHeight utils.CronosPosVersionBlockHeight
 
 	GithubAPIUser  string
 	GithubAPIToken string
@@ -79,6 +80,9 @@ func NewIndexService(
 		},
 		cronosVersionBlockHeight: utils.CronosVersionBlockHeight{
 			V1_4_0: utils.ParserBlockHeight(config.IndexService.CronosVersionEnabledHeight.V1_4_0),
+		},
+		cronosPosVersionBlockHeight: utils.CronosPosVersionBlockHeight{
+			V6_0_0: utils.ParserBlockHeight(config.IndexService.CronosPosVersionEnabledHeight.V6_0_0),
 		},
 		GithubAPIUser:  config.IndexService.GithubAPI.Username,
 		GithubAPIToken: config.IndexService.GithubAPI.Token,
@@ -172,8 +176,9 @@ func (service *IndexService) RunEventStoreMode() error {
 			utils.CosmosParserManagerParams{
 				Logger: service.logger,
 				Config: utils.CosmosParserManagerConfig{
-					CosmosVersionBlockHeight: service.cosmosVersionBlockHeight,
-					CronosVersionBlockHeight: service.cronosVersionBlockHeight,
+					CosmosVersionBlockHeight:    service.cosmosVersionBlockHeight,
+					CronosVersionBlockHeight:    service.cronosVersionBlockHeight,
+					CronosPosVersionBlockHeight: service.cronosPosVersionBlockHeight,
 				},
 			},
 		),
@@ -216,8 +221,9 @@ func (service *IndexService) RunTendermintDirectMode() error {
 							"projection": projection.Id(),
 						}),
 						Config: utils.CosmosParserManagerConfig{
-							CosmosVersionBlockHeight: service.cosmosVersionBlockHeight,
-							CronosVersionBlockHeight: service.cronosVersionBlockHeight,
+							CosmosVersionBlockHeight:    service.cosmosVersionBlockHeight,
+							CronosVersionBlockHeight:    service.cronosVersionBlockHeight,
+							CronosPosVersionBlockHeight: service.cronosPosVersionBlockHeight,
 						},
 					},
 				),
