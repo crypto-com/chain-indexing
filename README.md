@@ -174,6 +174,10 @@ config := bootstrap.Config{
             // Block height from cronos version v1.4.0-rc3
             V1_4_0: 0,
         },
+        CronosPosVersionEnabledHeight: bootstrap.CronosPosVersionEnabledHeightConfig{
+            // Block height from cronos pos version v6.0.0
+            V6_0_0: 0,
+        },
         GithubAPI: bootstrap.GithubAPIConfig{
             // Username of your git hub api account
             Username:           "username",

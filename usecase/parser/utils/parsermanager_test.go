@@ -39,6 +39,9 @@ var _ = Describe("ParseManager", func() {
 					CronosVersionBlockHeight: utils.CronosVersionBlockHeight{
 						V1_4_0: 0,
 					},
+					CronosPosVersionBlockHeight: utils.CronosPosVersionBlockHeight{
+						V6_0_0: 0,
+					},
 				},
 			},
 		)
@@ -69,6 +72,9 @@ var _ = Describe("ParseManager", func() {
 					},
 					CronosVersionBlockHeight: utils.CronosVersionBlockHeight{
 						V1_4_0: 0,
+					},
+					CronosPosVersionBlockHeight: utils.CronosPosVersionBlockHeight{
+						V6_0_0: 0,
 					},
 				},
 			},
@@ -102,6 +108,9 @@ var _ = Describe("ParseManager", func() {
 					},
 					CronosVersionBlockHeight: utils.CronosVersionBlockHeight{
 						V1_4_0: 0,
+					},
+					CronosPosVersionBlockHeight: utils.CronosPosVersionBlockHeight{
+						V6_0_0: 0,
 					},
 				},
 			},
