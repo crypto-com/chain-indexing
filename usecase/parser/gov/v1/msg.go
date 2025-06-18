@@ -130,7 +130,8 @@ func ParseMsgSubmitProposal(
 			"/cosmos.upgrade.v1beta1.MsgCancelUpgrade",
 			"/ethermint.feemarket.v1.MsgUpdateParams",
 			"/cosmos.consensus.v1.MsgUpdateParams",
-			"/ibc.core.client.v1.MsgRecoverClient":
+			"/ibc.core.client.v1.MsgRecoverClient",
+			"/cosmos.staking.v1beta1.MsgUpdateParams":
 			break
 		default:
 			//nolint:gosec
