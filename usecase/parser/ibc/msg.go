@@ -26,6 +26,7 @@ const tendermintClientStateTypeV1 = "/ibc.lightclients.tendermint.v1.ClientState
 const soloMachineClientStateTypeV2 = "/ibc.lightclients.solomachine.v2.ClientState"
 const tendermintHeaderTypeV1 = "/ibc.lightclients.tendermint.v1.Header"
 const soloMachineHeaderTypeV2 = "/ibc.lightclients.solomachine.v2.Header"
+const soloMachineHeaderTypeV3 = "/ibc.lightclients.solomachine.v3.Header"
 
 func ParseMsgCreateClient(
 	parserParams utils.CosmosParserParams,
@@ -745,7 +746,12 @@ func ParseMsgChannelOpenConfirm(
 func ParseMsgUpdateClient(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
-	headerType := parserParams.Msg["header"].(map[string]interface{})["@type"]
+	var headerType interface{}
+	if header, ok := parserParams.Msg["header"].(map[string]interface{}); ok {
+		headerType = header["@type"]
+	} else if header, ok := parserParams.Msg["client_message"].(map[string]interface{}); ok {
+		headerType = header["@type"]
+	}
 
 	switch headerType {
 	case tendermintHeaderTypeV1:
@@ -756,6 +762,13 @@ func ParseMsgUpdateClient(
 			parserParams.Msg,
 		)
 	case soloMachineHeaderTypeV2:
+		return parseMsgUpdateSolomachineLightClient(
+			parserParams.MsgCommonParams,
+			parserParams.TxsResult,
+			parserParams.MsgIndex,
+			parserParams.Msg,
+		)
+	case soloMachineHeaderTypeV3:
 		return parseMsgUpdateSolomachineLightClient(
 			parserParams.MsgCommonParams,
 			parserParams.TxsResult,
