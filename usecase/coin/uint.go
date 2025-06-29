@@ -18,7 +18,7 @@ func (u Uint) BigInt() *big.Int {
 	return new(big.Int).Set(u.i)
 }
 
-// NewUintFromBigUint constructs Uint from big.Uint
+// NewUintFromBigInt constructs Uint from big.Int
 func NewUintFromBigInt(i *big.Int) Uint {
 	u, err := checkNewUint(i)
 	if err != nil {
