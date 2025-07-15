@@ -501,8 +501,8 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 			depositEndTime := blockTime.Add(context.maxDepositPeriod)
 			row := view.ProposalRow{
 				ProposalId:                   *msgSubmitProposal.MaybeProposalId,
-				Title:                        "",
-				Description:                  "",
+				Title:                        msgSubmitProposal.Title,
+				Description:                  msgSubmitProposal.Description,
 				Type:                         msgSubmitProposal.MsgType(),
 				Status:                       view.PROPOSAL_STATUS_DEPOSIT_PERIOD,
 				ProposerAddress:              msgSubmitProposal.Proposer,

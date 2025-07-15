@@ -163,6 +163,8 @@ func ParseMsgSubmitProposal(
 				Messages:        rawMsg.Messages,
 				InitialDeposit:  initialDepositAmount,
 				Proposer:        rawMsg.Proposer,
+				Title:           rawMsg.Title,
+				Description:     rawMsg.Summary,
 				Metadata:        rawMsg.Metadata,
 			},
 		)}, possibleSignerAddresses
@@ -212,6 +214,8 @@ func ParseMsgSubmitProposal(
 				Messages:        rawMsg.Messages,
 				InitialDeposit:  initialDepositAmount,
 				Proposer:        rawMsg.Proposer,
+				Title:           rawMsg.Title,
+				Description:     rawMsg.Summary,
 				Metadata:        rawMsg.Metadata,
 			},
 		),
