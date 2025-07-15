@@ -66,4 +66,5 @@ type RawBlockResultsConsensusParamUpdates struct {
 	Version struct {
 		AppVersion string `json:"app_version"`
 	} `json:"version"`
+	ABCI interface{} `json:"abci"`
 }
