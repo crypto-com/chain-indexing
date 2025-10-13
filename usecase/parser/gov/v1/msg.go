@@ -132,7 +132,8 @@ func ParseMsgSubmitProposal(
 			"/cosmos.consensus.v1.MsgUpdateParams",
 			"/ibc.core.client.v1.MsgRecoverClient",
 			"/cosmos.staking.v1beta1.MsgUpdateParams",
-			"/cosmos.gov.v1.MsgUpdateParams":
+			"/cosmos.gov.v1.MsgUpdateParams",
+			"/cosmos.distribution.v1beta1.MsgCommunityPoolSpend":
 			break
 		default:
 			//nolint:gosec
@@ -176,10 +177,6 @@ func ParseMsgSubmitProposal(
 	var proposalId *string
 
 	for _, event := range events {
-		if proposalId != nil {
-			break
-		}
-
 		if event.HasAttribute("msg_index") {
 			msgIndex, err := strconv.Atoi(event.MustGetAttributeByKey("msg_index"))
 			if err != nil {
@@ -190,7 +187,7 @@ func ParseMsgSubmitProposal(
 			}
 		}
 
-		if event.HasAttribute("proposal_id") {
+		if event.HasAttribute("proposal_id") && proposalId == nil {
 			proposalId = event.GetAttributeByKey("proposal_id")
 		}
 
