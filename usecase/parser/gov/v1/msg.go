@@ -177,10 +177,6 @@ func ParseMsgSubmitProposal(
 	var proposalId *string
 
 	for _, event := range events {
-		if proposalId != nil {
-			break
-		}
-
 		if event.HasAttribute("msg_index") {
 			msgIndex, err := strconv.Atoi(event.MustGetAttributeByKey("msg_index"))
 			if err != nil {
@@ -191,7 +187,7 @@ func ParseMsgSubmitProposal(
 			}
 		}
 
-		if event.HasAttribute("proposal_id") {
+		if event.HasAttribute("proposal_id") && proposalId == nil {
 			proposalId = event.GetAttributeByKey("proposal_id")
 		}
 
