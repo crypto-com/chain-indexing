@@ -132,7 +132,8 @@ func ParseMsgSubmitProposal(
 			"/cosmos.consensus.v1.MsgUpdateParams",
 			"/ibc.core.client.v1.MsgRecoverClient",
 			"/cosmos.staking.v1beta1.MsgUpdateParams",
-			"/cosmos.gov.v1.MsgUpdateParams":
+			"/cosmos.gov.v1.MsgUpdateParams",
+			"/cosmos.distribution.v1beta1.MsgCommunityPoolSpend":
 			break
 		default:
 			//nolint:gosec
