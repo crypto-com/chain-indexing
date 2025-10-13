@@ -57,7 +57,12 @@ var _ = Describe("Zerolog", func() {
 				}()
 				logger.Panic("panic message")
 			}()
-			logger.Panic("any panic message")
+			func() {
+				defer func() {
+					_ = recover()
+				}()
+				logger.Panic("any panic message")
+			}()
 			Expect(mockWriter).NotTo(gbytes.Say("any panic message"))
 		})
 	})

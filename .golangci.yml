@@ -331,6 +331,7 @@ linters:
   disable:
     - maligned
     - prealloc
+    - recvcheck  # Mixed pointer/non-pointer receivers (required for JSON types)
   disable-all: false
   presets:
     - bugs
