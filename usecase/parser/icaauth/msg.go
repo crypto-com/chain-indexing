@@ -66,6 +66,9 @@ func ParseChainmainMsgSubmitTx(
 		if sendPacketEvent.HasAttribute("packet_data") {
 			packetData = sendPacketEvent.MustGetAttributeByKey("packet_data")
 		}
+		if sendPacketEvent.HasAttribute("packet_data_hex") {
+			packetData = sendPacketEvent.MustGetAttributeByKey("packet_data_hex")
+		}
 		if sendPacketEvent.HasAttribute("packet_timeout_height") {
 			packetTimeoutHeight = sendPacketEvent.MustGetAttributeByKey("packet_timeout_height")
 		}
@@ -226,6 +229,9 @@ func ParseMsgSubmitTx(
 	for _, sendPacketEvent := range sendPacketEvents {
 		if sendPacketEvent.HasAttribute("packet_data") {
 			packetData = sendPacketEvent.MustGetAttributeByKey("packet_data")
+		}
+		if sendPacketEvent.HasAttribute("packet_data_hex") {
+			packetData = sendPacketEvent.MustGetAttributeByKey("packet_data_hex")
 		}
 		if sendPacketEvent.HasAttribute("packet_timeout_height") {
 			packetTimeoutHeight = sendPacketEvent.MustGetAttributeByKey("packet_timeout_height")
