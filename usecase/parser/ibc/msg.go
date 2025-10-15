@@ -1193,7 +1193,21 @@ func ParseMsgRecvPacket(
 	writeAckEvent := log.GetEventByType("write_acknowledgement")
 	var packetAck ibc_model.MsgRecvPacketPacketAck
 	if writeAckEvent != nil {
-		json.MustUnmarshalFromString(writeAckEvent.MustGetAttributeByKey("packet_ack"), &packetAck)
+		if writeAckEvent.HasAttribute("packet_ack") {
+			json.MustUnmarshalFromString(writeAckEvent.MustGetAttributeByKey("packet_ack"), &packetAck)
+		}
+
+		if writeAckEvent.HasAttribute("packet_ack_hex") {
+			packetAckHex := writeAckEvent.MustGetAttributeByKey("packet_ack_hex")
+
+			var packetData []byte
+			packetData, err = hex.DecodeString(packetAckHex)
+			if err == nil {
+				if err = json.Unmarshal(packetData, &packetAck); err != nil {
+					panic("unable to parse `write_acknowledgement` event, key `packet_ack_hex`")
+				}
+			}
+		}
 	}
 
 	msgRecvPacketParams := ibc_model.MsgRecvPacketParams{
