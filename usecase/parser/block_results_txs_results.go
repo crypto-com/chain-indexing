@@ -72,7 +72,6 @@ func parseCronosSendToIBC(
 		return nil
 	}
 
-	fmt.Println("===> in parseCronosSendToIBC", maybeIBCSendPacketEvent)
 	params := model.RawCronosSendToIBCParams{
 		PacketChannelOrdering:  maybeIBCSendPacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
 		PacketConnection:       maybeIBCSendPacketEvent.MustGetAttributeByKey("packet_connection"),
