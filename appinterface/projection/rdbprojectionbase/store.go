@@ -40,7 +40,7 @@ func (impl *Store) UpdateLastHandledEventHeight(rdbHandle *rdb.Handle, projectio
 
 		execResult, sqlErr := rdbHandle.Exec(sql, args...)
 		if sqlErr != nil {
-			return fmt.Errorf("error exectuing last handled event height insertion SQL: %v", sqlErr)
+			return fmt.Errorf("error executing last handled event height insertion SQL: %v", sqlErr)
 		}
 		if execResult.RowsAffected() == 0 {
 			return errors.New("error executing last handled event height insertion SQL: no rows inserted")
