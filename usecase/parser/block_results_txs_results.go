@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"encoding/hex"
 	"fmt"
 	"strings"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	"github.com/crypto-com/chain-indexing/usecase/parser/utils"
+	jsoniter "github.com/json-iterator/go"
 )
 
 func ParseBlockResultsTxsResults(
@@ -73,8 +75,6 @@ func parseCronosSendToIBC(
 	params := model.RawCronosSendToIBCParams{
 		PacketChannelOrdering:  maybeIBCSendPacketEvent.MustGetAttributeByKey("packet_channel_ordering"),
 		PacketConnection:       maybeIBCSendPacketEvent.MustGetAttributeByKey("packet_connection"),
-		PacketData:             maybeIBCSendPacketEvent.MustGetAttributeByKey("packet_data"),
-		PacketDataHex:          maybeIBCSendPacketEvent.MustGetAttributeByKey("packet_data_hex"),
 		PacketDstChannel:       maybeIBCSendPacketEvent.MustGetAttributeByKey("packet_dst_channel"),
 		PacketDstPort:          maybeIBCSendPacketEvent.MustGetAttributeByKey("packet_dst_port"),
 		PacketSequence:         maybeIBCSendPacketEvent.MustGetAttributeByKey("packet_sequence"),
@@ -85,7 +85,26 @@ func parseCronosSendToIBC(
 	}
 
 	var fungibleTokenPacketData model.FungibleTokenPacketData
-	json.MustUnmarshalFromString(params.PacketData, &fungibleTokenPacketData)
+	if maybeIBCSendPacketEvent.HasAttribute("packet_data") {
+		packetData := maybeIBCSendPacketEvent.MustGetAttributeByKey("packet_data")
+		params.PacketData = packetData
+		if unmarshalErr := jsoniter.Unmarshal([]byte(packetData), &fungibleTokenPacketData); unmarshalErr != nil {
+			panic("unable to parse `send_packet` event, key `packet_data`")
+		}
+	}
+
+	if maybeIBCSendPacketEvent.HasAttribute("packet_data_hex") {
+		packetDataHex := maybeIBCSendPacketEvent.MustGetAttributeByKey("packet_data_hex")
+		params.PacketDataHex = packetDataHex
+
+		var packetData []byte
+		packetData, err := hex.DecodeString(packetDataHex)
+		if err == nil {
+			if err = json.Unmarshal(packetData, &fungibleTokenPacketData); err != nil {
+				panic("unable to parse `send_packet` event, key `packet_data_hex`")
+			}
+		}
+	}
 
 	timeoutHeight := mustParseCosmosSendToIBCTimeoutHeight(params.PacketTimeoutHeight)
 

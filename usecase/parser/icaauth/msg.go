@@ -1,6 +1,7 @@
 package icaauth
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 
@@ -65,6 +66,15 @@ func ParseChainmainMsgSubmitTx(
 	for _, sendPacketEvent := range sendPacketEvents {
 		if sendPacketEvent.HasAttribute("packet_data") {
 			packetData = sendPacketEvent.MustGetAttributeByKey("packet_data")
+		}
+		if sendPacketEvent.HasAttribute("packet_data_hex") {
+			packetDataHex := sendPacketEvent.MustGetAttributeByKey("packet_data_hex")
+
+			var packetDataBytes []byte
+			packetDataBytes, err := hex.DecodeString(packetDataHex)
+			if err == nil {
+				packetData = string(packetDataBytes)
+			}
 		}
 		if sendPacketEvent.HasAttribute("packet_timeout_height") {
 			packetTimeoutHeight = sendPacketEvent.MustGetAttributeByKey("packet_timeout_height")
@@ -226,6 +236,15 @@ func ParseMsgSubmitTx(
 	for _, sendPacketEvent := range sendPacketEvents {
 		if sendPacketEvent.HasAttribute("packet_data") {
 			packetData = sendPacketEvent.MustGetAttributeByKey("packet_data")
+		}
+		if sendPacketEvent.HasAttribute("packet_data_hex") {
+			packetDataHex := sendPacketEvent.MustGetAttributeByKey("packet_data_hex")
+
+			var packetDataBytes []byte
+			packetDataBytes, err := hex.DecodeString(packetDataHex)
+			if err == nil {
+				packetData = string(packetDataBytes)
+			}
 		}
 		if sendPacketEvent.HasAttribute("packet_timeout_height") {
 			packetTimeoutHeight = sendPacketEvent.MustGetAttributeByKey("packet_timeout_height")
