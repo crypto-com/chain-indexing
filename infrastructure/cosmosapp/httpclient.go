@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math/big"
 	"net/http"
 	"net/url"
@@ -851,7 +850,7 @@ func (client *HTTPClient) request(method string, queryKVs ...queryKV) (io.ReadCl
 		defer rawResp.Body.Close()
 
 		var rawRespBody []byte
-		rawRespBody, err = ioutil.ReadAll(rawResp.Body)
+		rawRespBody, err = io.ReadAll(rawResp.Body)
 		if err != nil {
 			return nil, fmt.Errorf("error reading Body : %w", err)
 		}

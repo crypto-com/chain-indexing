@@ -140,7 +140,11 @@ func (logger *ZerologLogger) WithInterface(key string, value interface{}) applog
 }
 
 func (logger *ZerologLogger) WithFields(fields applogger.LogFields) applogger.Logger {
-	instance := logger.instance.With().Fields(fields).Logger()
+	context := logger.instance.With()
+	for key, value := range fields {
+		context = context.Interface(key, value)
+	}
+	instance := context.Logger()
 	return &ZerologLogger{
 		instance: &instance,
 	}
