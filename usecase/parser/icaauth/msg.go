@@ -1,6 +1,7 @@
 package icaauth
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 
@@ -67,7 +68,21 @@ func ParseChainmainMsgSubmitTx(
 			packetData = sendPacketEvent.MustGetAttributeByKey("packet_data")
 		}
 		if sendPacketEvent.HasAttribute("packet_data_hex") {
-			packetData = sendPacketEvent.MustGetAttributeByKey("packet_data_hex")
+			packetDataHex := sendPacketEvent.MustGetAttributeByKey("packet_data_hex")
+
+			var packetDataBytes []byte
+			packetDataBytes, err := hex.DecodeString(packetDataHex)
+
+			var fungiblePacketData *ibc_model.FungibleTokenPacketData
+			if err == nil {
+				if err = json.Unmarshal(packetDataBytes, &fungiblePacketData); err != nil {
+					parserParams.Logger.Warnf("error unmarshalling packet data hex")
+				}
+			}
+
+			var fungiblePacketDataBytes []byte
+			fungiblePacketDataBytes, err = json.Marshal(fungiblePacketData)
+			packetData = string(fungiblePacketDataBytes)
 		}
 		if sendPacketEvent.HasAttribute("packet_timeout_height") {
 			packetTimeoutHeight = sendPacketEvent.MustGetAttributeByKey("packet_timeout_height")
@@ -231,7 +246,21 @@ func ParseMsgSubmitTx(
 			packetData = sendPacketEvent.MustGetAttributeByKey("packet_data")
 		}
 		if sendPacketEvent.HasAttribute("packet_data_hex") {
-			packetData = sendPacketEvent.MustGetAttributeByKey("packet_data_hex")
+			packetDataHex := sendPacketEvent.MustGetAttributeByKey("packet_data_hex")
+
+			var packetDataBytes []byte
+			packetDataBytes, err := hex.DecodeString(packetDataHex)
+
+			var fungiblePacketData *ibc_model.FungibleTokenPacketData
+			if err == nil {
+				if err = json.Unmarshal(packetDataBytes, &fungiblePacketData); err != nil {
+					parserParams.Logger.Warnf("error unmarshalling packet data hex")
+				}
+			}
+
+			var fungiblePacketDataBytes []byte
+			fungiblePacketDataBytes, err = json.Marshal(fungiblePacketData)
+			packetData = string(fungiblePacketDataBytes)
 		}
 		if sendPacketEvent.HasAttribute("packet_timeout_height") {
 			packetTimeoutHeight = sendPacketEvent.MustGetAttributeByKey("packet_timeout_height")
