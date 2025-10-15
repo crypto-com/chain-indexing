@@ -951,11 +951,21 @@ func ParseMsgTransfer(
 		events := log.GetEventsByType("send_packet")
 		for _, event := range events {
 			// Transfer application, MsgTransfer
-			packetData := event.MustGetAttributeByKey("packet_data")
-
 			var fungiblePacketData *ibc_model.FungibleTokenPacketData
-			if unmarshalErr := jsoniter.Unmarshal([]byte(packetData), &fungiblePacketData); unmarshalErr != nil {
-				panic("unable to parse `send_packet` event, key `packet_data`")
+			if event.HasAttribute("packet_data") {
+				packetData := event.MustGetAttributeByKey("packet_data")
+				if unmarshalErr := jsoniter.Unmarshal([]byte(packetData), &fungiblePacketData); unmarshalErr != nil {
+					panic("unable to parse `send_packet` event, key `packet_data`")
+				}
+			} else if event.HasAttribute("packet_data_hex") {
+				packetDataHex := event.MustGetAttributeByKey("packet_data_hex")
+				var packetData []byte
+				packetData, err := hex.DecodeString(packetDataHex)
+				if err == nil {
+					if err = json.Unmarshal(packetData, &fungiblePacketData); err != nil {
+						parserParams.Logger.Warnf("error unmarshalling packet data hex")
+					}
+				}
 			}
 
 			if fungiblePacketData != nil {
@@ -999,10 +1009,21 @@ func ParseMsgTransfer(
 		panic("missing `send_packet` event in TxsResult log")
 	}
 
-	packetData := event.MustGetAttributeByKey("packet_data")
 	var fungiblePacketData ibc_model.FungibleTokenPacketData
-	if unmarshalErr := jsoniter.Unmarshal([]byte(packetData), &fungiblePacketData); unmarshalErr != nil {
-		panic("unable to parse `send_packet` event, key `packet_data`")
+	if event.HasAttribute("packet_data") {
+		packetData := event.MustGetAttributeByKey("packet_data")
+		if unmarshalErr := jsoniter.Unmarshal([]byte(packetData), &fungiblePacketData); unmarshalErr != nil {
+			panic("unable to parse `send_packet` event, key `packet_data`")
+		}
+	} else if event.HasAttribute("packet_data_hex") {
+		packetDataHex := event.MustGetAttributeByKey("packet_data_hex")
+		var packetData []byte
+		packetData, err := hex.DecodeString(packetDataHex)
+		if err == nil {
+			if err = json.Unmarshal(packetData, &fungiblePacketData); err != nil {
+				parserParams.Logger.Warnf("error unmarshalling packet data hex")
+			}
+		}
 	}
 
 	msgTransferParams := ibc_model.MsgTransferParams{
