@@ -72,17 +72,9 @@ func ParseChainmainMsgSubmitTx(
 
 			var packetDataBytes []byte
 			packetDataBytes, err := hex.DecodeString(packetDataHex)
-
-			var fungiblePacketData *ibc_model.FungibleTokenPacketData
 			if err == nil {
-				if err = json.Unmarshal(packetDataBytes, &fungiblePacketData); err != nil {
-					parserParams.Logger.Warnf("error unmarshalling packet data hex")
-				}
+				packetData = string(packetDataBytes)
 			}
-
-			var fungiblePacketDataBytes []byte
-			fungiblePacketDataBytes, err = json.Marshal(fungiblePacketData)
-			packetData = string(fungiblePacketDataBytes)
 		}
 		if sendPacketEvent.HasAttribute("packet_timeout_height") {
 			packetTimeoutHeight = sendPacketEvent.MustGetAttributeByKey("packet_timeout_height")
@@ -250,17 +242,9 @@ func ParseMsgSubmitTx(
 
 			var packetDataBytes []byte
 			packetDataBytes, err := hex.DecodeString(packetDataHex)
-
-			var fungiblePacketData *ibc_model.FungibleTokenPacketData
 			if err == nil {
-				if err = json.Unmarshal(packetDataBytes, &fungiblePacketData); err != nil {
-					parserParams.Logger.Warnf("error unmarshalling packet data hex")
-				}
+				packetData = string(packetDataBytes)
 			}
-
-			var fungiblePacketDataBytes []byte
-			fungiblePacketDataBytes, err = json.Marshal(fungiblePacketData)
-			packetData = string(fungiblePacketDataBytes)
 		}
 		if sendPacketEvent.HasAttribute("packet_timeout_height") {
 			packetTimeoutHeight = sendPacketEvent.MustGetAttributeByKey("packet_timeout_height")
