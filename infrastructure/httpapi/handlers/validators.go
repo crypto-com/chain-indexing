@@ -9,6 +9,7 @@ import (
 
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/primptr"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/projection/chainstats"
 
 	"github.com/valyala/fasthttp"
@@ -146,14 +147,14 @@ func (handler *Validators) FindBy(ctx *fasthttp.RequestCtx) {
 		SelfDelegation: "0",
 	}
 
-	validatorData, err := handler.cosmosAppClient.Validator(validator.OperatorAddress)
+	validatorData, err := handler.cosmosAppClient.Validator(validator.OperatorAddress, tmcosmosutils.DefaultCosmosAPIVersion)
 	if err != nil {
 		handler.logger.Errorf("error getting validator details: %v", err)
 	} else {
 		validator.Tokens = validatorData.Tokens
 	}
 
-	delegation, err := handler.cosmosAppClient.Delegation(validator.InitialDelegatorAddress, validator.OperatorAddress)
+	delegation, err := handler.cosmosAppClient.Delegation(validator.InitialDelegatorAddress, validator.OperatorAddress, tmcosmosutils.DefaultCosmosAPIVersion)
 	if err != nil {
 		handler.logger.Errorf("error getting self delegation record: %v", err)
 	} else if delegation != nil {
@@ -289,12 +290,12 @@ func (handler *Validators) getGlobalAPY() (*big.Float, error) {
 	var err error
 
 	// TODO: should use annual provisions and total bonded from validator and validatorstats
-	annualProvisions, err := handler.cosmosAppClient.AnnualProvisions()
+	annualProvisions, err := handler.cosmosAppClient.AnnualProvisions(tmcosmosutils.DefaultCosmosAPIVersion)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching annual provisions: %v", err)
 	}
 
-	totalBonded, err := handler.cosmosAppClient.TotalBondedBalance()
+	totalBonded, err := handler.cosmosAppClient.TotalBondedBalance(tmcosmosutils.DefaultCosmosAPIVersion)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching total bonded: %v", err)
 	}
@@ -337,7 +338,7 @@ func (handler *Validators) getGlobalAPY() (*big.Float, error) {
 		),
 	)
 
-	communityTax, err := handler.cosmosAppClient.CommunityTax()
+	communityTax, err := handler.cosmosAppClient.CommunityTax(tmcosmosutils.DefaultCosmosAPIVersion)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching community tax: %v", err)
 	}

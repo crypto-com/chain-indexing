@@ -7,18 +7,20 @@ import (
 // Base is a JSON-compatible rdbprojectionbase event with sequence and EventUUID support. It is not a must to
 // use this as rdbprojectionbase event but to implement your own one rdbprojectionbase on your design
 type Base struct {
-	EventName    string `json:"name"`
-	EventVersion int    `json:"version"`
-	BlockHeight  int64  `json:"height"`
-	EventUUID    string `json:"uuid"`
+	EventName        string `json:"name"`
+	EventVersion     int    `json:"version"`
+	BlockHeight      int64  `json:"height"`
+	EventUUID        string `json:"uuid"`
+	CosmosAPIVersion string `json:"cosmosAPIVersion"`
 }
 
 func NewBase(params BaseParams) Base {
 	return Base{
-		EventName:    params.Name,
-		EventVersion: params.Version,
-		BlockHeight:  params.BlockHeight,
-		EventUUID:    uuid.New().String(),
+		EventName:        params.Name,
+		EventVersion:     params.Version,
+		BlockHeight:      params.BlockHeight,
+		EventUUID:        uuid.New().String(),
+		CosmosAPIVersion: params.CosmosAPIVersion,
 	}
 }
 
@@ -38,8 +40,13 @@ func (event *Base) UUID() string {
 	return event.EventUUID
 }
 
+func (event *Base) APIVersion() string {
+	return event.CosmosAPIVersion
+}
+
 type BaseParams struct {
-	Name        string
-	Version     int
-	BlockHeight int64
+	Name             string
+	Version          int
+	BlockHeight      int64
+	CosmosAPIVersion string
 }

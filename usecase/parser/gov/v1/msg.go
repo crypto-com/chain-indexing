@@ -61,7 +61,7 @@ func ParseMsgDeposit(
 	for _, logEvent := range logEvents {
 		if logEvent.HasAttribute("voting_period_start") {
 			cmds = append(cmds, command_usecase.NewStartProposalVotingPeriod(
-				parserParams.MsgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"),
+				parserParams.MsgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"), parserParams.MsgCommonParams.CosmosAPIVersion,
 			))
 			break
 		}
@@ -194,7 +194,7 @@ func ParseMsgSubmitProposal(
 
 		if event.HasAttribute("voting_period_start") {
 			cmds = append(cmds, command_usecase.NewStartProposalVotingPeriod(
-				parserParams.MsgCommonParams.BlockHeight, event.MustGetAttributeByKey("voting_period_start"),
+				parserParams.MsgCommonParams.BlockHeight, event.MustGetAttributeByKey("voting_period_start"), parserParams.MsgCommonParams.CosmosAPIVersion,
 			))
 		}
 	}

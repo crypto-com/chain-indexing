@@ -6,17 +6,20 @@ import (
 )
 
 type StartProposalVotingPeriod struct {
-	blockHeight int64
-	proposalId  string
+	blockHeight      int64
+	proposalId       string
+	cosmosAPIVersion string
 }
 
 func NewStartProposalVotingPeriod(
 	blockHeight int64,
 	proposalId string,
+	cosmosAPIVersion string,
 ) *StartProposalVotingPeriod {
 	return &StartProposalVotingPeriod{
 		blockHeight,
 		proposalId,
+		cosmosAPIVersion,
 	}
 }
 
@@ -32,6 +35,6 @@ func (*StartProposalVotingPeriod) Version() int {
 
 // Exec process the command data and return the event accordingly
 func (cmd *StartProposalVotingPeriod) Exec() (entity_event.Event, error) {
-	event := event.NewProposalVotingPeriodStarted(cmd.blockHeight, cmd.proposalId)
+	event := event.NewProposalVotingPeriodStarted(cmd.blockHeight, cmd.proposalId, cmd.cosmosAPIVersion)
 	return event, nil
 }

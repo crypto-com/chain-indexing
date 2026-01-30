@@ -2,6 +2,7 @@ package parser_test
 
 import (
 	"github.com/crypto-com/chain-indexing/external/primptr"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -77,7 +78,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					},
 				},
 			),
-				command_usecase.NewStartProposalVotingPeriod(int64(1634), "3"),
+				command_usecase.NewStartProposalVotingPeriod(int64(1634), "3", tmcosmosutils.DefaultCosmosAPIVersion),
 			}))
 			Expect(possibleSignerAddresses).To(Equal([]string{"crc12luku6uxehhak02py4rcz65zu0swh7wjsrw0pp"}))
 		})
@@ -134,7 +135,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					},
 				},
 			),
-				command_usecase.NewStartProposalVotingPeriod(int64(2171), "4"),
+				command_usecase.NewStartProposalVotingPeriod(int64(2171), "4", tmcosmosutils.DefaultCosmosAPIVersion),
 			}))
 			Expect(possibleSignerAddresses).To(Equal([]string{"crc12luku6uxehhak02py4rcz65zu0swh7wjsrw0pp"}))
 		})
@@ -203,7 +204,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					},
 				},
 			),
-				command_usecase.NewStartProposalVotingPeriod(int64(6580), "6"),
+				command_usecase.NewStartProposalVotingPeriod(int64(6580), "6", tmcosmosutils.DefaultCosmosAPIVersion),
 			}))
 			Expect(possibleSignerAddresses).To(Equal([]string{"crc12luku6uxehhak02py4rcz65zu0swh7wjsrw0pp"}))
 		})

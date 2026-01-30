@@ -9,6 +9,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	"github.com/crypto-com/chain-indexing/appinterface/rdb/test"
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/crypto-com/chain-indexing/projection/account"
 	account_view "github.com/crypto-com/chain-indexing/projection/account/view"
@@ -75,7 +76,7 @@ func TestAccount_HandleEvents(t *testing.T) {
 				},
 			},
 			MockFunc: func(mockClient *cosmosapp.MockClient) (mocks []*testify_mock.Mock) {
-				mockClient.On("Account", "Recipient").Return(
+				mockClient.On("Account", "Recipient", tmcosmosutils.DefaultCosmosAPIVersion).Return(
 					&cosmosapp.Account{
 						Type:    "AccountType",
 						Address: "Recipient",
@@ -114,7 +115,7 @@ func TestAccount_HandleEvents(t *testing.T) {
 					nil,
 				)
 
-				mockClient.On("Balances", "Recipient").Return(
+				mockClient.On("Balances", "Recipient", tmcosmosutils.DefaultCosmosAPIVersion).Return(
 					coin.Coins{
 						coin.Coin{
 							Denom:  "Denom",
@@ -151,7 +152,7 @@ func TestAccount_HandleEvents(t *testing.T) {
 					},
 				).Return(nil)
 
-				mockClient.On("Account", "Sender").Return(
+				mockClient.On("Account", "Sender", tmcosmosutils.DefaultCosmosAPIVersion).Return(
 					&cosmosapp.Account{
 						Type:    "AccountType",
 						Address: "Sender",
@@ -190,7 +191,7 @@ func TestAccount_HandleEvents(t *testing.T) {
 					nil,
 				)
 
-				mockClient.On("Balances", "Sender").Return(
+				mockClient.On("Balances", "Sender", tmcosmosutils.DefaultCosmosAPIVersion).Return(
 					coin.Coins{
 						coin.Coin{
 							Denom:  "Denom",

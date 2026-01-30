@@ -67,8 +67,9 @@ type MsgBaseParams struct {
 }
 
 type MsgCommonParams struct {
-	BlockHeight int64
-	TxHash      string
-	TxSuccess   bool
-	MsgIndex    int
+	BlockHeight      int64
+	TxHash           string
+	TxSuccess        bool
+	MsgIndex         int
+	CosmosAPIVersion string
 }

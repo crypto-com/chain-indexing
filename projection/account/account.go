@@ -12,6 +12,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/rdb"
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg/migrationhelper"
 	account_view "github.com/crypto-com/chain-indexing/projection/account/view"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
@@ -121,7 +122,7 @@ func (projection *Account) handleAccountCreatedEvent(accountsView account_view.A
 }
 
 func (projection *Account) getAccountInfo(address string) (*cosmosapp_interface.Account, error) {
-	var accountInfo, accountInfoError = projection.cosmosClient.Account(address)
+	var accountInfo, accountInfoError = projection.cosmosClient.Account(address, tmcosmosutils.DefaultCosmosAPIVersion)
 	if accountInfoError != nil {
 		return nil, accountInfoError
 	}
@@ -130,7 +131,7 @@ func (projection *Account) getAccountInfo(address string) (*cosmosapp_interface.
 }
 
 func (projection *Account) getAccountBalances(targetAddress string) (coin.Coins, error) {
-	var balanceInfo, balanceInfoError = projection.cosmosClient.Balances(targetAddress)
+	var balanceInfo, balanceInfoError = projection.cosmosClient.Balances(targetAddress, tmcosmosutils.DefaultCosmosAPIVersion)
 	if balanceInfoError != nil {
 		return nil, balanceInfoError
 	}

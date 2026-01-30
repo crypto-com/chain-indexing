@@ -9,31 +9,31 @@ import (
 )
 
 type Client interface {
-	Account(accountAddress string) (*Account, error)
-	Balances(accountAddress string) (coin.Coins, error)
-	BalanceByDenom(accountAddresss string, denom string) (coin.Coin, error)
-	BondedBalance(accountAddress string) (coin.Coins, error)
-	RedelegatingBalance(accountAddress string) (coin.Coins, error)
-	UnbondingBalance(accountAddress string) (coin.Coins, error)
+	Account(accountAddress string, cosmosAPIVersion string) (*Account, error)
+	Balances(accountAddress string, cosmosAPIVersion string) (coin.Coins, error)
+	BalanceByDenom(accountAddresss string, denom string, cosmosAPIVersion string) (coin.Coin, error)
+	BondedBalance(accountAddress string, cosmosAPIVersion string) (coin.Coins, error)
+	RedelegatingBalance(accountAddress string, cosmosAPIVersion string) (coin.Coins, error)
+	UnbondingBalance(accountAddress string, cosmosAPIVersion string) (coin.Coins, error)
 
-	SupplyByDenom(denom string) (coin.Coin, error)
+	SupplyByDenom(denom string, cosmosAPIVersion string) (coin.Coin, error)
 
-	TotalRewards(accountAddress string) (coin.DecCoins, error)
-	Commission(validatorAddress string) (coin.DecCoins, error)
-	CommunityPool() (coin.DecCoins, error)
+	TotalRewards(accountAddress string, cosmosAPIVersion string) (coin.DecCoins, error)
+	Commission(validatorAddress string, cosmosAPIVersion string) (coin.DecCoins, error)
+	CommunityPool(cosmosAPIVersion string) (coin.DecCoins, error)
 
-	Validator(validatorAddress string) (*Validator, error)
-	Delegation(delegator string, validator string) (*DelegationResponse, error)
-	TotalBondedBalance() (coin.Coin, error)
-	CommunityTax() (*big.Float, error)
+	Validator(validatorAddress string, cosmosAPIVersion string) (*Validator, error)
+	Delegation(delegator string, validator string, cosmosAPIVersion string) (*DelegationResponse, error)
+	TotalBondedBalance(cosmosAPIVersion string) (coin.Coin, error)
+	CommunityTax(cosmosAPIVersion string) (*big.Float, error)
 
-	AnnualProvisions() (coin.DecCoin, error)
+	AnnualProvisions(cosmosAPIVersion string) (coin.DecCoin, error)
 
-	Proposals() ([]Proposal, error)
-	ProposalById(id string) (Proposal, error)
-	ProposalTally(id string) (Tally, error)
+	Proposals(cosmosAPIVersion string) ([]Proposal, error)
+	ProposalById(id string, cosmosAPIVersion string) (Proposal, error)
+	ProposalTally(id string, cosmosAPIVersion string) (Tally, error)
 
-	Tx(txHash string) (*model.Tx, error)
+	Tx(txHash string, cosmosAPIVersion string) (*model.Tx, error)
 }
 
 var ErrAccountNotFound = errors.New("account not found")
