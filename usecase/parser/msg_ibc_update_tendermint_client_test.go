@@ -165,7 +165,6 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			untypedEvent, _ := cmd.Exec()
 			createMsgCreateClientEvent := untypedEvent.(*event.MsgIBCUpdateClient)
-
 			regex, _ := regexp.Compile("\n?\r?\\s?")
 
 			Expect(json.MustMarshalToString(createMsgCreateClientEvent)).To(Equal(

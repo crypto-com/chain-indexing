@@ -26,6 +26,7 @@ var _ = Describe("ParseMsgCommands", func() {
   "msgName": "/ibc.core.connection.v1.MsgConnectionOpenTry",
   "txHash": "B803E2AD7B78C667EC242CD73315E6BCADE4B4B63DE5B71BB7055D5B454E9E12",
   "msgIndex": 1,
+  "msgVersion": "v1",
   "params": {
 	"clientId": "07-tendermint-0",
 	"previousConnectionId": "",

@@ -26,6 +26,7 @@ var _ = Describe("ParseMsgCommands", func() {
   "msgName": "/ibc.core.channel.v1.MsgRecvPacket",
   "txHash": "C94E6D87ACC4DD809CC05B9F9773B32B0ECEF9E11B8DFF85DD8ADF4566AF9ED1",
   "msgIndex": 1,
+  "msgVersion": "v1",
   "params": {
     "packet": {
       "sequence": "1",

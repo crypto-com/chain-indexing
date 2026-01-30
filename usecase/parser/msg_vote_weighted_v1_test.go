@@ -50,7 +50,7 @@ var _ = Describe("ParseMsgCommands", func() {
 						TxHash:      "F258B015674DAFBE5D1788825690BC31D1F6254F599944AD4CDEE9A461179FF7",
 						TxSuccess:   true,
 						MsgIndex:    0,
-						MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
+						MsgVersion:  tmcosmosutils.CosmosAPIVersionV1,
 					},
 					model_gov_v1.MsgVoteWeightedParams{
 						ProposalId: "1",

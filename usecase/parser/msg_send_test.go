@@ -98,6 +98,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					TxHash:      "4936522F7391D425F2A93AD47576F8AEC3947DC907113BE8A2FBCFF8E9F2A416",
 					TxSuccess:   true,
 					MsgIndex:    1,
+					MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
 				},
 				event.MsgSendCreatedParams{
 					FromAddress: "tcro184lta2lsyu47vwyp2e8zmtca3k5yq85p6c4vp3",

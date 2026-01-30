@@ -49,7 +49,7 @@ var _ = Describe("ParseMsgCommands", func() {
 						TxHash:      "5CC860DC00862A729C463BA414F13F2AB84908304DCA906C64365D26E40063C0",
 						TxSuccess:   true,
 						MsgIndex:    0,
-						MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
+						MsgVersion:  tmcosmosutils.CosmosAPIVersionV1,
 					},
 					model.MsgNFTMintNFTParams{
 						DenomId:   "denomid",
