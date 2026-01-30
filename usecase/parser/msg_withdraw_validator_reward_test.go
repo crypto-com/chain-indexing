@@ -68,6 +68,7 @@ var _ = Describe("ParseMsgCommands", func() {
 						TxHash:      "202A0C0F03760D523C2F64F07C527E789F3D87819CB7097B35422A7F14FA055A",
 						TxSuccess:   true,
 						MsgIndex:    1,
+						MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
 					},
 					model.MsgWithdrawValidatorCommissionParams{
 						ValidatorAddress: "tcrocncl15grftg88l0gdw4mg9t9pwnl0pde2asjzekz0ek",
@@ -128,6 +129,7 @@ var _ = Describe("ParseMsgCommands", func() {
 						TxHash:      "CC5EE77B6CBCEA4DF26F5AC8FA06BA893D018602F03A09E9E02B8417B12C46ED",
 						TxSuccess:   false,
 						MsgIndex:    1,
+						MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
 					},
 					model.MsgWithdrawValidatorCommissionParams{
 						ValidatorAddress: "tcrocncl1pm27djcs5djxjsxw3unrkv3m3jtxdexktw5epu",

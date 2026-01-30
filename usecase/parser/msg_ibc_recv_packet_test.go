@@ -126,6 +126,7 @@ var _ = Describe("ParseMsgCommands", func() {
 	"msgName": "/ibc.core.channel.v1.MsgRecvPacket",
 	"txHash": "852566591D525E2F3DF54602091D33CEF2D87389E6D9AC260EC3267CF2C4CFCE",
 	"msgIndex": 1,
+	"msgVersion": "v1",
 	"params": {
 		"packet": {
 			"sequence": "15",
@@ -221,6 +222,7 @@ var _ = Describe("ParseMsgCommands", func() {
 	"msgName": "MsgAlreadyRelayedRecvPacket",
 	"txHash": "D4BBE348AB746FCED63D2028D8886B9091312336142AC040C1C2841E7BF78C9C",
 	"msgIndex": 1,
+	"msgVersion": "v1",
 	"params": {
 		"packet": {
 			"sequence": "45",
@@ -308,6 +310,7 @@ var _ = Describe("ParseMsgCommands", func() {
 	"msgName": "/ibc.core.channel.v1.MsgRecvPacket",
 	"txHash": "0696B4561D093E0AF784D6CC5701C4FB0645E47BE425C47108737E23BB4FBDEA",
 	"msgIndex": 0,
+	"msgVersion": "v1",
 	"params": {
 		"packet": {
 			"sequence": "1",

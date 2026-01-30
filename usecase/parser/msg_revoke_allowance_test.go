@@ -26,6 +26,7 @@ var _ = Describe("ParseMsgCommands", func() {
             "msgName": "/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
             "txHash": "002579A793A5ABD82FAF819FC77CC4FF765C550332151B4BA9A811D662ABD027",
             "msgIndex": 0,
+			"msgVersion": "v1beta1",
             "params": {
                 "@type": "/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
                 "granter": "tcro16u0wuyhc73tdw0m7qt3cmfeg68ug8g4hc4verc",

@@ -14,9 +14,10 @@ const MSG_FAILED_SUFFIX = "Failed"
 type MsgBase struct {
 	event.Base
 
-	MsgName   string `json:"msgName"`
-	MsgTxHash string `json:"txHash"`
-	MsgIndex  int    `json:"msgIndex"`
+	MsgName    string `json:"msgName"`
+	MsgTxHash  string `json:"txHash"`
+	MsgIndex   int    `json:"msgIndex"`
+	MsgVersion string `json:"MsgVersion"`
 }
 
 func NewMsgBase(params MsgBaseParams) MsgBase {
@@ -29,11 +30,13 @@ func NewMsgBase(params MsgBaseParams) MsgBase {
 			Name:        eventName(params.MsgName, params.TxSuccess),
 			Version:     params.Version,
 			BlockHeight: params.BlockHeight,
+			MsgVersion:  params.MsgVersion,
 		}),
 
 		params.MsgName,
 		params.TxHash,
 		params.MsgIndex,
+		params.MsgVersion,
 	}
 }
 

@@ -26,6 +26,7 @@ var _ = Describe("ParseMsgCommands", func() {
   "msgName": "/chainmain.icaauth.v1.MsgSubmitTx",
   "txHash": "A4AB8B9882379DC79EA19FD1CFCF53C1A8A252ECA557F39E4B316164DD27CF33",
   "msgIndex": 0,
+  "msgVersion": "v1",
   "params": {
 	"owner": "tcro1np7ztcfeycqwhj0nr8hxfu0lfjz27telqx53ra",
 	"connectionId": "connection-18",
