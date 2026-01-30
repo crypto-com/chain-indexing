@@ -1194,7 +1194,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mockParamsView := &rdbparambase_view.MockParamsView{}
 				mocks = append(mocks, &mockParamsView.Mock)
 				mockClient.
-					On("ProposalById", "ProposalId", tmcosmosutils.DefaultCosmosAPIVersion).
+					On("ProposalById", "ProposalId", tmcosmosutils.CosmosAPIVersionV1).
 					Return(cosmosapp.Proposal{
 						ProposalID:    "ProposalId",
 						VotingEndTime: "",
