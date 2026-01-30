@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	jsoniter "github.com/json-iterator/go"
@@ -811,7 +812,7 @@ func ParseTxsResp(rawRespReader io.Reader) (*model.Tx, error) {
 
 func (client *HTTPClient) getUrl(module string, method string, cosmosAPIVersion string) string {
 	if cosmosAPIVersion == "" {
-		cosmosAPIVersion = "v1beta1"
+		cosmosAPIVersion = tmcosmosutils.DefaultCosmosAPIVersion
 	}
 
 	return fmt.Sprintf("cosmos/%s/%s/%s", module, cosmosAPIVersion, method)
