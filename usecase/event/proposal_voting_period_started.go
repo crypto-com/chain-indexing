@@ -17,13 +17,13 @@ type ProposalVotingPeriodStarted struct {
 	ProposalId string `json:"proposalId"`
 }
 
-func NewProposalVotingPeriodStarted(blockHeight int64, proposalId string, cosmosAPIVersion string) *ProposalVotingPeriodStarted {
+func NewProposalVotingPeriodStarted(blockHeight int64, proposalId string, msgVersion string) *ProposalVotingPeriodStarted {
 	return &ProposalVotingPeriodStarted{
 		event_entity.NewBase(event_entity.BaseParams{
-			Name:             PROPOSAL_VOTING_PERIOD_STARTED,
-			Version:          1,
-			BlockHeight:      blockHeight,
-			CosmosAPIVersion: cosmosAPIVersion,
+			Name:        PROPOSAL_VOTING_PERIOD_STARTED,
+			Version:     1,
+			BlockHeight: blockHeight,
+			MsgVersion:  msgVersion,
 		}),
 
 		proposalId,

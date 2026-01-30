@@ -555,7 +555,7 @@ func (projection *Proposal) HandleEvents(height int64, events []event_entity.Eve
 
 			// get voting end time from cosmos client
 			var proposal cosmosapp_interface.Proposal
-			proposal, err = projection.cosmosClient.ProposalById(proposalVotingPeriodStarted.ProposalId, proposalVotingPeriodStarted.CosmosAPIVersion)
+			proposal, err = projection.cosmosClient.ProposalById(proposalVotingPeriodStarted.ProposalId, proposalVotingPeriodStarted.MsgVersion)
 			if err != nil {
 				return fmt.Errorf("error retrieving proposal by id from cosmos client: %v", err)
 			}

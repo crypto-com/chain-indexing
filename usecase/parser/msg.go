@@ -59,11 +59,11 @@ func ParseBlockTxsMsgToCommands(
 		for msgIndex, msg := range tx.Tx.Body.Messages {
 			msgType := msg["@type"]
 			msgCommonParams := event.MsgCommonParams{
-				BlockHeight:      blockHeight,
-				TxHash:           txHash,
-				TxSuccess:        txSuccess,
-				MsgIndex:         msgIndex,
-				CosmosAPIVersion: tmcosmosutils.GetCosmosAPIVersionByMsgType(msgType.(string)),
+				BlockHeight: blockHeight,
+				TxHash:      txHash,
+				TxSuccess:   txSuccess,
+				MsgIndex:    msgIndex,
+				MsgVersion:  tmcosmosutils.GetCosmosAPIVersionByMsgType(msgType.(string)),
 			}
 
 			var msgCommands []command.Command
@@ -482,7 +482,7 @@ func ParseMsgSubmitProposal(
 
 	if logEvent.HasAttribute("voting_period_start") {
 		cmds = append(cmds, command_usecase.NewStartProposalVotingPeriod(
-			parserParams.MsgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"), parserParams.MsgCommonParams.CosmosAPIVersion,
+			parserParams.MsgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"), parserParams.MsgCommonParams.MsgVersion,
 		))
 	}
 
@@ -1064,7 +1064,7 @@ func ParseMsgDeposit(
 	for _, logEvent := range logEvents {
 		if logEvent.HasAttribute("voting_period_start") {
 			cmds = append(cmds, command_usecase.NewStartProposalVotingPeriod(
-				parserParams.MsgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"), parserParams.MsgCommonParams.CosmosAPIVersion,
+				parserParams.MsgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"), parserParams.MsgCommonParams.MsgVersion,
 			))
 			break
 		}
