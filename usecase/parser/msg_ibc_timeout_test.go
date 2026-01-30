@@ -26,7 +26,6 @@ var _ = Describe("ParseMsgCommands", func() {
   "msgName": "/ibc.core.channel.v1.MsgTimeout",
   "txHash": "E86F52B60F3EC63EEAA9B77DB41BE90E99B7E1230BE94F3A7E4C06B7C7A20C2D",
   "msgIndex": 1,
-  "msgVersion": "v1",
   "params": {
 	"packet": {
   	"sequence": "5",

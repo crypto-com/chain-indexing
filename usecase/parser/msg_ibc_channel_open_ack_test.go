@@ -26,7 +26,6 @@ var _ = Describe("ParseMsgCommands", func() {
   "msgName": "/ibc.core.channel.v1.MsgChannelOpenAck",
   "txHash": "E66CCD50C9946AC5DC2AEA6C332ADFCF6FEF6229DBC6AC793158DF7CC9C2CD16",
   "msgIndex": 1,
-  "msgVersion": "v1",
   "params": {
 	"portId": "transfer",
 	"channelId": "channel-0",

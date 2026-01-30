@@ -26,7 +26,6 @@ var _ = Describe("ParseMsgCommands", func() {
   "msgName": "/ibc.applications.transfer.v1.MsgTransfer",
   "txHash": "579B97CD5B947C2FA0EC87EDD4DAA8BECF422B96A82E2C9DBFE15F9F6DB4109B",
   "msgIndex": 0,
-  "msgVersion": "v1",
   "params": {
     "sourcePort": "transfer",
     "sourceChannel": "channel-0",

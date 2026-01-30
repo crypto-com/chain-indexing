@@ -26,7 +26,6 @@ var _ = Describe("ParseMsgCommands", func() {
   "msgName": "/ibc.core.client.v1.MsgCreateClient",
   "txHash": "7E34A75D8063BADF7B93538C23C88DEEF1FF14E7BE7F13AD6AD34E228C64538D",
   "msgIndex": 0,
-  "msgVersion": "v1",
   "params": {
 	  "maybeTendermintLightClient": {
 		"clientState": {

@@ -26,7 +26,6 @@ var _ = Describe("ParseMsgCommands", func() {
   "msgName": "/ibc.core.connection.v1.MsgConnectionOpenAck",
   "txHash": "831EDBD3F114BDA5F49276A9AD591F4A3B8B82073101B142CDFA02A2AA21889B",
   "msgIndex": 1,
-  "msgVersion": "v1",
   "params": {
 	"connectionId": "connection-0",
 	"counterpartyConnectionId": "connection-0",
