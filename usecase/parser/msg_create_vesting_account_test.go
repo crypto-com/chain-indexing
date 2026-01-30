@@ -23,6 +23,7 @@ var _ = Describe("ParseMsgCommands", func() {
             "version": 1,
             "height": 193118,
             "uuid": "{UUID}",
+			"msgVersion": "",
             "msgName": "/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
             "txHash": "6DDA0564ED4ADB89AC8518CDB3B990D7959EBD5775D44AB2A3381E38722A21C7",
             "msgIndex": 0,

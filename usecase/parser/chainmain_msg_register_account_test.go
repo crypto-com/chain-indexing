@@ -23,6 +23,7 @@ var _ = Describe("ParseMsgCommands", func() {
   "version": 1,
   "height": 67461,
   "uuid": "{UUID}",
+  "msgVersion": "",
   "msgName": "/chainmain.icaauth.v1.MsgRegisterAccount",
   "txHash": "5FC4ECBEB0FFD3809F62052CADA161E542BAA1198EE94CCD0DF197EE4A885F35",
   "msgIndex": 0,

@@ -23,6 +23,7 @@ var _ = Describe("ParseMsgCommands", func() {
 				"version": 1,
 				"height": 170108,
 				"uuid": "{UUID}",
+				"msgVersion": "",
 				"msgName": "/cosmos.authz.v1beta1.MsgGrant",
 				"txHash": "D8AE71B4C05B7A220114F17347D6A66ADBFE75C51279E4541E911284A2BE7E04",
 				"msgIndex": 0,
