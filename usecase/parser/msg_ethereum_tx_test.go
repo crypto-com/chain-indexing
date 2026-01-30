@@ -12,7 +12,7 @@ import (
 	"github.com/crypto-com/chain-indexing/usecase/event"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	"github.com/crypto-com/chain-indexing/usecase/parser"
-	usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
+usecase_parser_test "github.com/crypto-com/chain-indexing/usecase/parser/test"
 )
 
 var _ = Describe("ParseMsgCommands", func() {
