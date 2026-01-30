@@ -6,6 +6,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
 	"github.com/crypto-com/chain-indexing/usecase/event"
@@ -51,6 +52,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					TxHash:      "2678437368AFC7E0E6D891D858F17B9C05CFEE850A786592A11992813D6A89FD",
 					TxSuccess:   true,
 					MsgIndex:    0,
+					MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
 				},
 				model.MsgEthereumTxParams{
 					RawMsgEthereumTx: model.RawMsgEthereumTx{

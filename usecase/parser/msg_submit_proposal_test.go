@@ -51,6 +51,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					TxHash:      "BFEDD454DED949E0CD349BBFD8F518AED187214A69630445CDDEBF924A48F83C",
 					TxSuccess:   true,
 					MsgIndex:    0,
+					MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
 				},
 
 				model_gov_v1.MsgSubmitProposalParams{
@@ -115,6 +116,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					TxHash:      "7360D83D7C9FB1B04D73546757200A375C46ECC1B591F77E1E2BA2666BACD710",
 					TxSuccess:   true,
 					MsgIndex:    0,
+					MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
 				},
 
 				model_gov_v1.MsgSubmitProposalParams{
@@ -172,6 +174,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					TxHash:      "DBAFA8C7C7F3A39C8162E2463E560822554A89A79DAB550882270125902AF39C",
 					TxSuccess:   true,
 					MsgIndex:    0,
+					MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
 				},
 
 				model_gov_v1.MsgSubmitProposalParams{

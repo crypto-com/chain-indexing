@@ -1,6 +1,7 @@
 package parser_test
 
 import (
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/event"
@@ -46,6 +47,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					TxHash:      "89D220EC5C551DA81EE6993D05B53F25912B072E7FFD863D93AA742923239A5F",
 					TxSuccess:   true,
 					MsgIndex:    0,
+					MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
 				},
 				model.MsgMultiSendParams{
 					Inputs: []model.MsgMultiSendInput{

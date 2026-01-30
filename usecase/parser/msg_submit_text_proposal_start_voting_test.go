@@ -51,6 +51,7 @@ var _ = Describe("ParseMsgCommands", func() {
 						TxHash:      "AAE71A09FFCDC3DD9D26CF2580CF26C38DDE2C6D7CBBF4264D295086B7E24148",
 						TxSuccess:   true,
 						MsgIndex:    0,
+						MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
 					},
 					model.MsgSubmitTextProposalParams{
 						MaybeProposalId: primptr.String("2"),

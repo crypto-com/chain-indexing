@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/crypto-com/chain-indexing/entity/command"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
@@ -52,6 +53,7 @@ var _ = Describe("ParseMsgCommands", func() {
 						TxHash:      "202A0C0F03760D523C2F64F07C527E789F3D87819CB7097B35422A7F14FA055A",
 						TxSuccess:   true,
 						MsgIndex:    0,
+						MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
 					},
 					model.MsgWithdrawDelegatorRewardParams{
 						DelegatorAddress: "tcro15grftg88l0gdw4mg9t9pwnl0pde2asjzvfpkp4",
@@ -111,6 +113,7 @@ var _ = Describe("ParseMsgCommands", func() {
 						TxHash:      "CC5EE77B6CBCEA4DF26F5AC8FA06BA893D018602F03A09E9E02B8417B12C46ED",
 						TxSuccess:   false,
 						MsgIndex:    0,
+						MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
 					},
 					model.MsgWithdrawDelegatorRewardParams{
 						DelegatorAddress: "tcro1pm27djcs5djxjsxw3unrkv3m3jtxdexk73hqel",
@@ -169,6 +172,7 @@ var _ = Describe("ParseMsgCommands", func() {
 						TxHash:      "3643A4CA41EC52BCB5B10DB32EC9867B2FA6B6A7C48B4DE9D45E6EDBC39B31B5",
 						TxSuccess:   true,
 						MsgIndex:    0,
+						MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
 					},
 					model.MsgWithdrawDelegatorRewardParams{
 						DelegatorAddress: "tcro1fmprm0sjy6lz9llv7rltn0v2azzwcwzvk2lsyn",

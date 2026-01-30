@@ -1,6 +1,7 @@
 package parser_test
 
 import (
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -44,6 +45,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					TxHash:      "2D2075ECAF45DB84052B6A98E84C5E7FE158AB5157364FD5A934FAC96B77C6B1",
 					TxSuccess:   true,
 					MsgIndex:    0,
+					MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
 				},
 				model.MsgUnjailParams{
 					ValidatorAddr: "tcrocncl1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5m4uxzk",
