@@ -63,7 +63,7 @@ func ParseBlockTxsMsgToCommands(
 				TxHash:      txHash,
 				TxSuccess:   txSuccess,
 				MsgIndex:    msgIndex,
-				MsgVersion:  tmcosmosutils.GetCosmosAPIVersionFromMsgType(msgType.(string)),
+				MsgVersion:  tmcosmosutils.GetMsgVersionFromMsgType(msgType.(string)),
 			}
 
 			var msgCommands []command.Command
