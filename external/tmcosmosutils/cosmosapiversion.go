@@ -14,7 +14,7 @@ var CosmosAPIVersionMap = map[string]bool{
 	CosmosAPIVersionV1:      true,
 }
 
-func GetCosmosAPIVersionByMsgType(msgType string) string {
+func GetCosmosAPIVersionFromMsgType(msgType string) string {
 	cosmosAPIVersion := DefaultCosmosAPIVersion
 	parts := strings.Split(msgType, ".")
 	if len(parts) >= 2 {

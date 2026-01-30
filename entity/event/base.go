@@ -40,7 +40,7 @@ func (event *Base) UUID() string {
 	return event.EventUUID
 }
 
-func (event *Base) APIVersion() string {
+func (event *Base) MessageVersion() string {
 	return event.MsgVersion
 }
 
