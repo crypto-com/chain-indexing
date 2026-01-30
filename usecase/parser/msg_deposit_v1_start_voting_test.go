@@ -51,7 +51,7 @@ var _ = Describe("ParseMsgCommands", func() {
 						TxHash:      "D41222A53DDCF690879AF8A681B0EE55991EC8EA204533223A10706DD945D7AA",
 						TxSuccess:   true,
 						MsgIndex:    0,
-						MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
+						MsgVersion:  tmcosmosutils.CosmosAPIVersionV1,
 					},
 					model_gov_v1.MsgDepositParams{
 						ProposalId: "5",
@@ -59,7 +59,7 @@ var _ = Describe("ParseMsgCommands", func() {
 						Amount:     coin.MustParseCoinsNormalized("100000basecro"),
 					},
 				),
-				command_usecase.NewStartProposalVotingPeriod(int64(5691), "5", tmcosmosutils.DefaultCosmosAPIVersion),
+				command_usecase.NewStartProposalVotingPeriod(int64(5691), "5", tmcosmosutils.CosmosAPIVersionV1),
 			}))
 			Expect(possibleSignerAddresses).To(Equal([]string{"crc18z6q38mhvtsvyr5mak8fj8s8g4gw7kjjtsgrn7"}))
 		})

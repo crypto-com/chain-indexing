@@ -79,7 +79,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					},
 				},
 			),
-				command_usecase.NewStartProposalVotingPeriod(int64(1634), "3", tmcosmosutils.DefaultCosmosAPIVersion),
+				command_usecase.NewStartProposalVotingPeriod(int64(1634), "3", tmcosmosutils.CosmosAPIVersionV1),
 			}))
 			Expect(possibleSignerAddresses).To(Equal([]string{"crc12luku6uxehhak02py4rcz65zu0swh7wjsrw0pp"}))
 		})
@@ -137,7 +137,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					},
 				},
 			),
-				command_usecase.NewStartProposalVotingPeriod(int64(2171), "4", tmcosmosutils.DefaultCosmosAPIVersion),
+				command_usecase.NewStartProposalVotingPeriod(int64(2171), "4", tmcosmosutils.CosmosAPIVersionV1),
 			}))
 			Expect(possibleSignerAddresses).To(Equal([]string{"crc12luku6uxehhak02py4rcz65zu0swh7wjsrw0pp"}))
 		})
@@ -207,7 +207,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					},
 				},
 			),
-				command_usecase.NewStartProposalVotingPeriod(int64(6580), "6", tmcosmosutils.DefaultCosmosAPIVersion),
+				command_usecase.NewStartProposalVotingPeriod(int64(6580), "6", tmcosmosutils.CosmosAPIVersionV1),
 			}))
 			Expect(possibleSignerAddresses).To(Equal([]string{"crc12luku6uxehhak02py4rcz65zu0swh7wjsrw0pp"}))
 		})
