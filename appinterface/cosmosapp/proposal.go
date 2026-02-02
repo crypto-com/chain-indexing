@@ -43,3 +43,10 @@ type Tally struct {
 	No         string `json:"no"`
 	NoWithVeto string `json:"no_with_veto"`
 }
+
+type TallyV1 struct {
+	YesCount        string `json:"yes_count"`
+	AbstainCount    string `json:"abstain_count"`
+	NoCount         string `json:"no_count"`
+	NoWithVetoCount string `json:"no_with_veto_count"`
+}

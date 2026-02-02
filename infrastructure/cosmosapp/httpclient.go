@@ -722,12 +722,34 @@ func (client *HTTPClient) ProposalTally(id string, cosmosAPIVersion string) (cos
 		return cosmosapp_interface.Tally{}, fmt.Errorf("error requesting Cosmos %s endpoint: %d", method, statusCode)
 	}
 
-	var tallyResp TallyResp
-	if err := jsoniter.NewDecoder(rawRespBody).Decode(&tallyResp); err != nil {
-		return cosmosapp_interface.Tally{}, err
+	switch cosmosAPIVersion {
+	case tmcosmosutils.CosmosAPIVersionV1:
+		var tallyResp TallyV1Resp
+		if err := jsoniter.NewDecoder(rawRespBody).Decode(&tallyResp); err != nil {
+			return cosmosapp_interface.Tally{}, err
+		}
+
+		return cosmosapp_interface.Tally{
+			Yes:        tallyResp.Tally.YesCount,
+			No:         tallyResp.Tally.NoCount,
+			NoWithVeto: tallyResp.Tally.NoWithVetoCount,
+			Abstain:    tallyResp.Tally.AbstainCount,
+		}, nil
+	case tmcosmosutils.DefaultCosmosAPIVersion:
+		var tallyResp TallyResp
+		if err := jsoniter.NewDecoder(rawRespBody).Decode(&tallyResp); err != nil {
+			return cosmosapp_interface.Tally{}, err
+		}
+
+		return cosmosapp_interface.Tally{
+			Yes:        tallyResp.Tally.Yes,
+			No:         tallyResp.Tally.No,
+			NoWithVeto: tallyResp.Tally.NoWithVeto,
+			Abstain:    tallyResp.Tally.Abstain,
+		}, nil
 	}
 
-	return tallyResp.Tally, nil
+	return cosmosapp_interface.Tally{}, nil
 }
 
 func (client *HTTPClient) Tx(hash string, cosmosAPIVersion string) (*model.Tx, error) {
