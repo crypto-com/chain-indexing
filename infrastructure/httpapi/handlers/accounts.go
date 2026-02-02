@@ -62,7 +62,7 @@ func (handler *Accounts) FindBy(ctx *fasthttp.RequestCtx) {
 		Commissions:         coin.NewEmptyDecCoins(),
 		TotalBalance:        coin.NewEmptyDecCoins(),
 	}
-	account, err := handler.cosmosClient.Account(accountParam)
+	account, err := handler.cosmosClient.Account(accountParam, tmcosmosutils.DefaultCosmosAPIVersion)
 	if err != nil {
 		httpapi.NotFound(ctx)
 		return
@@ -74,7 +74,7 @@ func (handler *Accounts) FindBy(ctx *fasthttp.RequestCtx) {
 		info.Name = account.MaybeModuleAccount.Name
 	}
 
-	if balance, queryErr := handler.cosmosClient.Balances(accountParam); queryErr != nil {
+	if balance, queryErr := handler.cosmosClient.Balances(accountParam, tmcosmosutils.DefaultCosmosAPIVersion); queryErr != nil {
 		handler.logger.Errorf("error fetching account balance: %v", queryErr)
 		httpapi.InternalServerError(ctx)
 		return
@@ -82,7 +82,7 @@ func (handler *Accounts) FindBy(ctx *fasthttp.RequestCtx) {
 		info.Balance = balance
 	}
 
-	if bondedBalance, queryErr := handler.cosmosClient.BondedBalance(accountParam); queryErr != nil {
+	if bondedBalance, queryErr := handler.cosmosClient.BondedBalance(accountParam, tmcosmosutils.DefaultCosmosAPIVersion); queryErr != nil {
 		if !errors.Is(queryErr, cosmosapp.ErrAccountNotFound) && !errors.Is(queryErr, cosmosapp.ErrAccountNoDelegation) {
 			handler.logger.Errorf("error fetching account bonded balance: %v", queryErr)
 			httpapi.InternalServerError(ctx)
@@ -92,7 +92,7 @@ func (handler *Accounts) FindBy(ctx *fasthttp.RequestCtx) {
 		info.BondedBalance = bondedBalance
 	}
 
-	if redelegatingBalance, queryErr := handler.cosmosClient.RedelegatingBalance(accountParam); queryErr != nil {
+	if redelegatingBalance, queryErr := handler.cosmosClient.RedelegatingBalance(accountParam, tmcosmosutils.DefaultCosmosAPIVersion); queryErr != nil {
 		handler.logger.Errorf("error fetching account redelegating balance: %v", queryErr)
 		httpapi.InternalServerError(ctx)
 		return
@@ -100,7 +100,7 @@ func (handler *Accounts) FindBy(ctx *fasthttp.RequestCtx) {
 		info.RedelegatingBalance = redelegatingBalance
 	}
 
-	if unbondingBalance, queryErr := handler.cosmosClient.UnbondingBalance(accountParam); queryErr != nil {
+	if unbondingBalance, queryErr := handler.cosmosClient.UnbondingBalance(accountParam, tmcosmosutils.DefaultCosmosAPIVersion); queryErr != nil {
 		handler.logger.Errorf("error fetching account unbonding balance: %v", queryErr)
 		httpapi.InternalServerError(ctx)
 		return
@@ -108,7 +108,7 @@ func (handler *Accounts) FindBy(ctx *fasthttp.RequestCtx) {
 		info.UnbondingBalance = unbondingBalance
 	}
 
-	if totalRewards, queryErr := handler.cosmosClient.TotalRewards(accountParam); queryErr != nil {
+	if totalRewards, queryErr := handler.cosmosClient.TotalRewards(accountParam, tmcosmosutils.DefaultCosmosAPIVersion); queryErr != nil {
 		handler.logger.Errorf("error fetching account total rewards: %v", queryErr)
 		httpapi.InternalServerError(ctx)
 		return
@@ -134,7 +134,7 @@ func (handler *Accounts) FindBy(ctx *fasthttp.RequestCtx) {
 		info.Commissions = coin.NewEmptyDecCoins()
 	} else {
 		// account has validator
-		commissions, commissionErr := handler.cosmosClient.Commission(validator.OperatorAddress)
+		commissions, commissionErr := handler.cosmosClient.Commission(validator.OperatorAddress, tmcosmosutils.DefaultCosmosAPIVersion)
 		if commissionErr != nil {
 			handler.logger.Errorf("error fetching account commissions: %v", commissionErr)
 			httpapi.InternalServerError(ctx)

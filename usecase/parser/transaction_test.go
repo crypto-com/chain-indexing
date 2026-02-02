@@ -9,6 +9,7 @@ import (
 
 	"github.com/crypto-com/chain-indexing/entity/command"
 	FakeLogger "github.com/crypto-com/chain-indexing/external/logger/test"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	command_usecase "github.com/crypto-com/chain-indexing/usecase/command"
@@ -747,7 +748,7 @@ var _ = Describe("TransactionParser", func() {
 
 			anyAccountAddressPrefix := "basecro"
 
-			mockClient.On("Account", "cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7").Return(
+			mockClient.On("Account", "cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7", tmcosmosutils.DefaultCosmosAPIVersion).Return(
 				&cosmosapp.Account{
 					Type:    "AccountType",
 					Address: "cro1rrnm2rkhrkgelj7j9pxeu7sggv8fde3tkymym7",
@@ -785,7 +786,7 @@ var _ = Describe("TransactionParser", func() {
 				},
 				nil,
 			)
-			mockClient.On("Account", "cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc").Return(
+			mockClient.On("Account", "cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc", tmcosmosutils.DefaultCosmosAPIVersion).Return(
 				&cosmosapp.Account{
 					Type:    "AccountType",
 					Address: "cro1442fdq2t62vqchraj6ujxnhq3gkzq3ra9nt4lc",

@@ -9,6 +9,7 @@ import (
 	eventhandler_interface "github.com/crypto-com/chain-indexing/appinterface/eventhandler"
 	tendermint_interface "github.com/crypto-com/chain-indexing/appinterface/tendermint"
 	"github.com/crypto-com/chain-indexing/external/ethereumtxinnermsgdecoder"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/external/txdecoder"
 	cosmosapp_infrastructure "github.com/crypto-com/chain-indexing/infrastructure/cosmosapp"
 	"github.com/crypto-com/chain-indexing/usecase/model"
@@ -277,7 +278,7 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 			decodedTx, err = manager.txDecoder.DecodeBase64(txHex)
 			if err != nil {
 				var resTx *model.Tx
-				resTx, err = manager.cosmosClient.Tx(txHash)
+				resTx, err = manager.cosmosClient.Tx(txHash, tmcosmosutils.DefaultCosmosAPIVersion)
 				if err != nil {
 					return nil, fmt.Errorf("error requesting chain txs (%s) at height %d: %v", txHex, blockHeight, err)
 				}

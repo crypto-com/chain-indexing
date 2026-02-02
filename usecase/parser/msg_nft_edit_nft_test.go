@@ -1,6 +1,7 @@
 package parser_test
 
 import (
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -48,6 +49,7 @@ var _ = Describe("ParseMsgCommands", func() {
 						TxHash:      "652358F0C39307A88C347013DF65317498DB81FE847821066559E401AFF8F632",
 						TxSuccess:   true,
 						MsgIndex:    0,
+						MsgVersion:  tmcosmosutils.CosmosAPIVersionV1,
 					},
 					model.MsgNFTEditNFTParams{
 						DenomId:   "denomid",

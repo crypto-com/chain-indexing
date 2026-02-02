@@ -11,6 +11,7 @@ type Base struct {
 	EventVersion int    `json:"version"`
 	BlockHeight  int64  `json:"height"`
 	EventUUID    string `json:"uuid"`
+	MsgVersion   string `json:"msgVersion"`
 }
 
 func NewBase(params BaseParams) Base {
@@ -19,6 +20,7 @@ func NewBase(params BaseParams) Base {
 		EventVersion: params.Version,
 		BlockHeight:  params.BlockHeight,
 		EventUUID:    uuid.New().String(),
+		MsgVersion:   params.MsgVersion,
 	}
 }
 
@@ -38,8 +40,13 @@ func (event *Base) UUID() string {
 	return event.EventUUID
 }
 
+func (event *Base) MessageVersion() string {
+	return event.MsgVersion
+}
+
 type BaseParams struct {
 	Name        string
 	Version     int
 	BlockHeight int64
+	MsgVersion  string
 }

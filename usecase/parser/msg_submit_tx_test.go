@@ -23,6 +23,7 @@ var _ = Describe("ParseMsgCommands", func() {
   "version": 1,
   "height": 67975,
   "uuid": "{UUID}",
+  "msgVersion": "",
   "msgName": "/icaauth.v1.MsgSubmitTx",
   "txHash": "A4AB8B9882379DC79EA19FD1CFCF53C1A8A252ECA557F39E4B316164DD27CF33",
   "msgIndex": 0,

@@ -23,6 +23,7 @@ var _ = Describe("ParseMsgCommands", func() {
   "version": 1,
   "height": 7,
   "uuid": "{UUID}",
+  "msgVersion": "",
   "msgName": "/ibc.core.client.v1.MsgUpdateClient",
   "txHash": "B803E2AD7B78C667EC242CD73315E6BCADE4B4B63DE5B71BB7055D5B454E9E12",
   "msgIndex": 0,
@@ -165,7 +166,6 @@ var _ = Describe("ParseMsgCommands", func() {
 
 			untypedEvent, _ := cmd.Exec()
 			createMsgCreateClientEvent := untypedEvent.(*event.MsgIBCUpdateClient)
-
 			regex, _ := regexp.Compile("\n?\r?\\s?")
 
 			Expect(json.MustMarshalToString(createMsgCreateClientEvent)).To(Equal(

@@ -8,6 +8,7 @@ import (
 	"github.com/crypto-com/chain-indexing/appinterface/cosmosapp"
 	"github.com/crypto-com/chain-indexing/external/json"
 	applogger "github.com/crypto-com/chain-indexing/external/logger"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 
 	"github.com/crypto-com/chain-indexing/projection/chainstats"
 
@@ -87,7 +88,7 @@ func (handler *StatusHandler) GetStatus(ctx *fasthttp.RequestCtx) {
 	//	json.MustUnmarshalFromString(rawTotalDelegated, &totalDelegated)
 	//}
 	if handler.totalDelegatedLastUpdatedAt.Add(15 * time.Minute).Before(time.Now()) {
-		totalBondedBalance, totalBondedBalanceErr := handler.cosmosAppClient.TotalBondedBalance()
+		totalBondedBalance, totalBondedBalanceErr := handler.cosmosAppClient.TotalBondedBalance(tmcosmosutils.DefaultCosmosAPIVersion)
 		if totalBondedBalanceErr != nil {
 			handler.logger.Errorf("error fetching total delegate: %v", totalBondedBalanceErr)
 			httpapi.InternalServerError(ctx)

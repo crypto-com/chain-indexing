@@ -47,7 +47,7 @@ func ParseSignerInfosToTransactionSigners(
 					address = ""
 				} else {
 					address = possibleSignerAddresses[i]
-					accountInfo, _ := cosmosClient.Account(address)
+					accountInfo, _ := cosmosClient.Account(address, tmcosmosutils.DefaultCosmosAPIVersion)
 					if accountInfo != nil {
 						transactionSignerInfo = &model.TransactionSignerKeyInfo{
 							Type:       accountInfo.MaybePubkey.Type,

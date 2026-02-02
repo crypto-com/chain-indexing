@@ -17,3 +17,7 @@ type ProposalResp struct {
 type TallyResp struct {
 	Tally cosmosapp_interface.Tally `json:"tally"`
 }
+
+type TallyV1Resp struct {
+	Tally cosmosapp_interface.TallyV1 `json:"tally"`
+}

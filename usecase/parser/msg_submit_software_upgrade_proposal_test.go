@@ -2,6 +2,7 @@ package parser_test
 
 import (
 	"github.com/crypto-com/chain-indexing/external/primptr"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
@@ -51,6 +52,7 @@ var _ = Describe("ParseMsgCommands", func() {
 						TxHash:      "6068B21BA119610D545939518D6399DFFC4914A0CEE0822D752813C4D68D272C",
 						TxSuccess:   true,
 						MsgIndex:    0,
+						MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
 					},
 					model.MsgSubmitSoftwareUpgradeProposalParams{
 						MaybeProposalId: primptr.String("6"),
@@ -106,6 +108,7 @@ var _ = Describe("ParseMsgCommands", func() {
 						TxHash:      "7422843783CADA0321F517CAD2F38CB63E3C2CBD126150272BC5D678C8869E92",
 						TxSuccess:   true,
 						MsgIndex:    0,
+						MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
 					},
 					model.MsgSubmitSoftwareUpgradeProposalParams{
 						MaybeProposalId: primptr.String("8"),

@@ -23,6 +23,7 @@ var _ = Describe("ParseMsgCommands", func() {
             "version": 1,
             "height": 128553,
             "uuid": "{UUID}",
+			"msgVersion": "",
             "msgName": "/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
             "txHash": "002579A793A5ABD82FAF819FC77CC4FF765C550332151B4BA9A811D662ABD027",
             "msgIndex": 0,

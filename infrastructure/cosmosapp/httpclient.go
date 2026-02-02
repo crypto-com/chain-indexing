@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	"github.com/crypto-com/chain-indexing/usecase/model"
 	jsoniter "github.com/json-iterator/go"
@@ -77,9 +78,9 @@ func (client *HTTPClient) SetAuthQueryKV(authKV HTTPClientAuthKV) {
 	client.maybeAuthQueryKV = &authKV
 }
 
-func (client *HTTPClient) Account(accountAddress string) (*cosmosapp_interface.Account, error) {
+func (client *HTTPClient) Account(accountAddress string, cosmosAPIVersion string) (*cosmosapp_interface.Account, error) {
 	rawRespBody, err := client.request(
-		fmt.Sprintf("%s/%s", client.getUrl("auth", "accounts"), accountAddress),
+		fmt.Sprintf("%s/%s", client.getUrl("auth", "accounts", cosmosAPIVersion), accountAddress),
 	)
 	if err != nil {
 		return nil, err
@@ -188,7 +189,7 @@ func (client *HTTPClient) Account(accountAddress string) (*cosmosapp_interface.A
 	return &account, nil
 }
 
-func (client *HTTPClient) Balances(accountAddress string) (coin.Coins, error) {
+func (client *HTTPClient) Balances(accountAddress string, cosmosAPIVersion string) (coin.Coins, error) {
 	resp := &BankBalancesResp{
 		Pagination: Pagination{
 			MaybeNextKey: nil,
@@ -197,7 +198,7 @@ func (client *HTTPClient) Balances(accountAddress string) (coin.Coins, error) {
 	}
 	balances := coin.NewEmptyCoins()
 	for {
-		queryUrl := fmt.Sprintf("%s/%s", client.getUrl("bank", "balances"), accountAddress)
+		queryUrl := fmt.Sprintf("%s/%s", client.getUrl("bank", "balances", cosmosAPIVersion), accountAddress)
 		if resp.Pagination.MaybeNextKey != nil {
 			queryUrl = fmt.Sprintf(
 				"%s?pagination.key=%s",
@@ -230,12 +231,12 @@ func (client *HTTPClient) Balances(accountAddress string) (coin.Coins, error) {
 	return balances, nil
 }
 
-func (client *HTTPClient) BalanceByDenom(accountAddress string, denom string) (coin.Coin, error) {
+func (client *HTTPClient) BalanceByDenom(accountAddress string, denom string, cosmosAPIVersion string) (coin.Coin, error) {
 	var resp BankBalanceByDenomResp
 
 	queryUrl := fmt.Sprintf(
 		"%s/%s/by_denom?denom=%s",
-		client.getUrl("bank", "balances"), accountAddress, url.QueryEscape(denom),
+		client.getUrl("bank", "balances", cosmosAPIVersion), accountAddress, url.QueryEscape(denom),
 	)
 
 	rawRespBody, err := client.request(queryUrl)
@@ -255,7 +256,7 @@ func (client *HTTPClient) BalanceByDenom(accountAddress string, denom string) (c
 	return balance, nil
 }
 
-func (client *HTTPClient) BondedBalance(accountAddress string) (coin.Coins, error) {
+func (client *HTTPClient) BondedBalance(accountAddress string, cosmosAPIVersion string) (coin.Coins, error) {
 	resp := &DelegationsResp{
 		MaybePagination: &Pagination{
 			MaybeNextKey: nil,
@@ -264,7 +265,7 @@ func (client *HTTPClient) BondedBalance(accountAddress string) (coin.Coins, erro
 	}
 	balance := coin.NewEmptyCoins()
 	for {
-		queryUrl := fmt.Sprintf("%s/%s", client.getUrl("staking", "delegations"), accountAddress)
+		queryUrl := fmt.Sprintf("%s/%s", client.getUrl("staking", "delegations", cosmosAPIVersion), accountAddress)
 		if resp.MaybePagination.MaybeNextKey != nil {
 			queryUrl = fmt.Sprintf(
 				"%s?pagination.key=%s",
@@ -307,7 +308,7 @@ func (client *HTTPClient) BondedBalance(accountAddress string) (coin.Coins, erro
 	return balance, nil
 }
 
-func (client *HTTPClient) RedelegatingBalance(accountAddress string) (coin.Coins, error) {
+func (client *HTTPClient) RedelegatingBalance(accountAddress string, cosmosAPIVersion string) (coin.Coins, error) {
 	resp := &UnbondingResp{
 		Pagination: Pagination{
 			MaybeNextKey: nil,
@@ -317,7 +318,7 @@ func (client *HTTPClient) RedelegatingBalance(accountAddress string) (coin.Coins
 	balance := coin.NewEmptyCoins()
 	for {
 		queryUrl := fmt.Sprintf(
-			"%s/%s/redelegations", client.getUrl("staking", "delegators"), accountAddress,
+			"%s/%s/redelegations", client.getUrl("staking", "delegators", cosmosAPIVersion), accountAddress,
 		)
 		if resp.Pagination.MaybeNextKey != nil {
 			queryUrl = fmt.Sprintf(
@@ -353,7 +354,7 @@ func (client *HTTPClient) RedelegatingBalance(accountAddress string) (coin.Coins
 	return balance, nil
 }
 
-func (client *HTTPClient) UnbondingBalance(accountAddress string) (coin.Coins, error) {
+func (client *HTTPClient) UnbondingBalance(accountAddress string, cosmosAPIVersion string) (coin.Coins, error) {
 	resp := &UnbondingResp{
 		Pagination: Pagination{
 			MaybeNextKey: nil,
@@ -364,7 +365,7 @@ func (client *HTTPClient) UnbondingBalance(accountAddress string) (coin.Coins, e
 	for {
 		queryUrl := fmt.Sprintf(
 			"%s/%s/unbonding_delegations",
-			client.getUrl("staking", "delegators"), accountAddress,
+			client.getUrl("staking", "delegators", cosmosAPIVersion), accountAddress,
 		)
 		if resp.Pagination.MaybeNextKey != nil {
 			queryUrl = fmt.Sprintf(
@@ -400,12 +401,12 @@ func (client *HTTPClient) UnbondingBalance(accountAddress string) (coin.Coins, e
 	return balance, nil
 }
 
-func (client *HTTPClient) SupplyByDenom(denom string) (coin.Coin, error) {
+func (client *HTTPClient) SupplyByDenom(denom string, cosmosAPIVersion string) (coin.Coin, error) {
 	var resp SupplyResp
 
 	queryUrl := fmt.Sprintf(
 		"%s/by_denom?denom=%s",
-		client.getUrl("bank", "supply"), url.QueryEscape(denom),
+		client.getUrl("bank", "supply", cosmosAPIVersion), url.QueryEscape(denom),
 	)
 
 	rawRespBody, err := client.request(queryUrl)
@@ -425,11 +426,11 @@ func (client *HTTPClient) SupplyByDenom(denom string) (coin.Coin, error) {
 	return supply, nil
 }
 
-func (client *HTTPClient) TotalRewards(accountAddress string) (coin.DecCoins, error) {
+func (client *HTTPClient) TotalRewards(accountAddress string, cosmosAPIVersion string) (coin.DecCoins, error) {
 	rawRespBody, err := client.request(
 		fmt.Sprintf(
 			"%s/%s/rewards",
-			client.getUrl("distribution", "delegators"),
+			client.getUrl("distribution", "delegators", cosmosAPIVersion),
 			accountAddress,
 		),
 	)
@@ -454,9 +455,9 @@ func (client *HTTPClient) TotalRewards(accountAddress string) (coin.DecCoins, er
 	return rewards, nil
 }
 
-func (client *HTTPClient) CommunityPool() (coin.DecCoins, error) {
+func (client *HTTPClient) CommunityPool(cosmosAPIVersion string) (coin.DecCoins, error) {
 	var resp CommunityPoolResp
-	queryUrl := client.getUrl("distribution", "community_pool")
+	queryUrl := client.getUrl("distribution", "community_pool", cosmosAPIVersion)
 	rawRespBody, err := client.request(queryUrl)
 	if err != nil {
 		return nil, err
@@ -470,11 +471,11 @@ func (client *HTTPClient) CommunityPool() (coin.DecCoins, error) {
 	return resp.Pool, nil
 }
 
-func (client *HTTPClient) Validator(validatorAddress string) (*cosmosapp_interface.Validator, error) {
+func (client *HTTPClient) Validator(validatorAddress string, cosmosAPIVersion string) (*cosmosapp_interface.Validator, error) {
 	rawRespBody, err := client.request(
 		fmt.Sprintf(
 			"%s/%s",
-			client.getUrl("staking", "validators"), validatorAddress,
+			client.getUrl("staking", "validators", cosmosAPIVersion), validatorAddress,
 		),
 	)
 	if err != nil {
@@ -490,10 +491,10 @@ func (client *HTTPClient) Validator(validatorAddress string) (*cosmosapp_interfa
 	return &validatorResp.Validator, nil
 }
 
-func (client *HTTPClient) Commission(validatorAddress string) (coin.DecCoins, error) {
+func (client *HTTPClient) Commission(validatorAddress string, cosmosAPIVersion string) (coin.DecCoins, error) {
 	rawRespBody, err := client.request(
 		fmt.Sprintf("%s/%s/commission",
-			client.getUrl("distribution", "validators"), validatorAddress,
+			client.getUrl("distribution", "validators", cosmosAPIVersion), validatorAddress,
 		),
 	)
 	if err != nil {
@@ -518,7 +519,7 @@ func (client *HTTPClient) Commission(validatorAddress string) (coin.DecCoins, er
 }
 
 func (client *HTTPClient) Delegation(
-	delegator string, validator string,
+	delegator string, validator string, cosmosAPIVersion string,
 ) (*cosmosapp_interface.DelegationResponse, error) {
 	resp := &DelegationsResp{
 		MaybePagination: &Pagination{
@@ -527,7 +528,7 @@ func (client *HTTPClient) Delegation(
 		},
 	}
 	for {
-		queryUrl := fmt.Sprintf("%s/%s", client.getUrl("staking", "delegations"), delegator)
+		queryUrl := fmt.Sprintf("%s/%s", client.getUrl("staking", "delegations", cosmosAPIVersion), delegator)
 		if resp.MaybePagination.MaybeNextKey != nil {
 			queryUrl = fmt.Sprintf(
 				"%s?pagination.key=%s",
@@ -566,8 +567,8 @@ func (client *HTTPClient) Delegation(
 	return nil, nil
 }
 
-func (client *HTTPClient) AnnualProvisions() (coin.DecCoin, error) {
-	rawRespBody, err := client.request(client.getUrl("mint", "annual_provisions"))
+func (client *HTTPClient) AnnualProvisions(cosmosAPIVersion string) (coin.DecCoin, error) {
+	rawRespBody, err := client.request(client.getUrl("mint", "annual_provisions", cosmosAPIVersion))
 	if err != nil {
 		return coin.DecCoin{}, err
 	}
@@ -586,10 +587,10 @@ func (client *HTTPClient) AnnualProvisions() (coin.DecCoin, error) {
 	return annualProvisions, nil
 }
 
-func (client *HTTPClient) TotalBondedBalance() (coin.Coin, error) {
+func (client *HTTPClient) TotalBondedBalance(cosmosAPIVersion string) (coin.Coin, error) {
 	resp := &StakingPoolResp{}
 
-	queryUrl := client.getUrl("staking", "pool")
+	queryUrl := client.getUrl("staking", "pool", cosmosAPIVersion)
 
 	rawRespBody, statusCode, err := client.rawRequest(queryUrl)
 	if err != nil {
@@ -612,11 +613,11 @@ func (client *HTTPClient) TotalBondedBalance() (coin.Coin, error) {
 	return totalBondedBalance, nil
 }
 
-func (client *HTTPClient) CommunityTax() (*big.Float, error) {
+func (client *HTTPClient) CommunityTax(cosmosAPIVersion string) (*big.Float, error) {
 	var err error
 
 	var rawRespBody io.ReadCloser
-	rawRespBody, err = client.request(client.getUrl("distribution", "params"))
+	rawRespBody, err = client.request(client.getUrl("distribution", "params", cosmosAPIVersion))
 	if err != nil {
 		return nil, err
 	}
@@ -634,7 +635,7 @@ func (client *HTTPClient) CommunityTax() (*big.Float, error) {
 	return communityTax, nil
 }
 
-func (client *HTTPClient) Proposals() ([]cosmosapp_interface.Proposal, error) {
+func (client *HTTPClient) Proposals(cosmosAPIVersion string) ([]cosmosapp_interface.Proposal, error) {
 	resp := &ProposalsResp{
 		MaybePagination: &Pagination{
 			MaybeNextKey: nil,
@@ -644,7 +645,7 @@ func (client *HTTPClient) Proposals() ([]cosmosapp_interface.Proposal, error) {
 
 	proposals := make([]cosmosapp_interface.Proposal, 0)
 	for {
-		queryUrl := client.getUrl("gov", "proposals")
+		queryUrl := client.getUrl("gov", "proposals", cosmosAPIVersion)
 		if resp.MaybePagination.MaybeNextKey != nil {
 			queryUrl = fmt.Sprintf(
 				"%s?pagination.key=%s",
@@ -675,10 +676,10 @@ func (client *HTTPClient) Proposals() ([]cosmosapp_interface.Proposal, error) {
 	return proposals, nil
 }
 
-func (client *HTTPClient) ProposalById(id string) (cosmosapp_interface.Proposal, error) {
+func (client *HTTPClient) ProposalById(id string, cosmosAPIVersion string) (cosmosapp_interface.Proposal, error) {
 	method := fmt.Sprintf(
 		"%s/%s",
-		client.getUrl("gov", "proposals"), id,
+		client.getUrl("gov", "proposals", cosmosAPIVersion), id,
 	)
 	rawRespBody, statusCode, err := client.rawRequest(
 		method,
@@ -702,10 +703,10 @@ func (client *HTTPClient) ProposalById(id string) (cosmosapp_interface.Proposal,
 	return proposalResp.Proposal, nil
 }
 
-func (client *HTTPClient) ProposalTally(id string) (cosmosapp_interface.Tally, error) {
+func (client *HTTPClient) ProposalTally(id string, cosmosAPIVersion string) (cosmosapp_interface.Tally, error) {
 	method := fmt.Sprintf(
 		"%s/%s/tally",
-		client.getUrl("gov", "proposals"), id,
+		client.getUrl("gov", "proposals", cosmosAPIVersion), id,
 	)
 	rawRespBody, statusCode, err := client.rawRequest(
 		method,
@@ -721,19 +722,41 @@ func (client *HTTPClient) ProposalTally(id string) (cosmosapp_interface.Tally, e
 		return cosmosapp_interface.Tally{}, fmt.Errorf("error requesting Cosmos %s endpoint: %d", method, statusCode)
 	}
 
-	var tallyResp TallyResp
-	if err := jsoniter.NewDecoder(rawRespBody).Decode(&tallyResp); err != nil {
-		return cosmosapp_interface.Tally{}, err
+	switch cosmosAPIVersion {
+	case tmcosmosutils.CosmosAPIVersionV1:
+		var tallyResp TallyV1Resp
+		if err := jsoniter.NewDecoder(rawRespBody).Decode(&tallyResp); err != nil {
+			return cosmosapp_interface.Tally{}, err
+		}
+
+		return cosmosapp_interface.Tally{
+			Yes:        tallyResp.Tally.YesCount,
+			No:         tallyResp.Tally.NoCount,
+			NoWithVeto: tallyResp.Tally.NoWithVetoCount,
+			Abstain:    tallyResp.Tally.AbstainCount,
+		}, nil
+	case tmcosmosutils.DefaultCosmosAPIVersion:
+		var tallyResp TallyResp
+		if err := jsoniter.NewDecoder(rawRespBody).Decode(&tallyResp); err != nil {
+			return cosmosapp_interface.Tally{}, err
+		}
+
+		return cosmosapp_interface.Tally{
+			Yes:        tallyResp.Tally.Yes,
+			No:         tallyResp.Tally.No,
+			NoWithVeto: tallyResp.Tally.NoWithVeto,
+			Abstain:    tallyResp.Tally.Abstain,
+		}, nil
 	}
 
-	return tallyResp.Tally, nil
+	return cosmosapp_interface.Tally{}, nil
 }
 
-func (client *HTTPClient) Tx(hash string) (*model.Tx, error) {
+func (client *HTTPClient) Tx(hash string, cosmosAPIVersion string) (*model.Tx, error) {
 	rawRespBody, err := client.request(
 		fmt.Sprintf(
 			"%s/%s",
-			client.getUrl("tx", "txs"),
+			client.getUrl("tx", "txs", cosmosAPIVersion),
 			hash,
 		),
 	)
@@ -809,8 +832,12 @@ func ParseTxsResp(rawRespReader io.Reader) (*model.Tx, error) {
 	return tx, nil
 }
 
-func (client *HTTPClient) getUrl(module string, method string) string {
-	return fmt.Sprintf("cosmos/%s/v1beta1/%s", module, method)
+func (client *HTTPClient) getUrl(module string, method string, cosmosAPIVersion string) string {
+	if cosmosAPIVersion == "" {
+		cosmosAPIVersion = tmcosmosutils.DefaultCosmosAPIVersion
+	}
+
+	return fmt.Sprintf("cosmos/%s/%s/%s", module, cosmosAPIVersion, method)
 }
 
 // nolint:unparam

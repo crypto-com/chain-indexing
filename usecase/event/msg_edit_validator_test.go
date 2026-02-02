@@ -3,6 +3,7 @@ package event_test
 import (
 	event_entity "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/external/primptr"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -24,6 +25,7 @@ var _ = Describe("Event", func() {
 					TxHash:      "E69985AC8168383A81B7952DBE03EB9B3400FF80AEC0F362369DD7F38B1C2FE9",
 					TxSuccess:   true,
 					MsgIndex:    0,
+					MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
 				},
 				model.MsgEditValidatorParams{
 					Description: model.ValidatorDescription{
@@ -66,6 +68,7 @@ var _ = Describe("Event", func() {
 					TxHash:      "E69985AC8168383A81B7952DBE03EB9B3400FF80AEC0F362369DD7F38B1C2FE9",
 					TxSuccess:   false,
 					MsgIndex:    0,
+					MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
 				},
 				model.MsgEditValidatorParams{
 					Description: model.ValidatorDescription{

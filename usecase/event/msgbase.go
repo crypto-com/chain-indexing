@@ -71,4 +71,5 @@ type MsgCommonParams struct {
 	TxHash      string
 	TxSuccess   bool
 	MsgIndex    int
+	MsgVersion  string
 }

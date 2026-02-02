@@ -22,6 +22,7 @@ import (
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
 	"github.com/crypto-com/chain-indexing/external/logger"
 	"github.com/crypto-com/chain-indexing/external/primptr"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/pg"
 	"github.com/crypto-com/chain-indexing/projection/proposal"
@@ -1094,6 +1095,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						Name:        usecase_event.PROPOSAL_VOTING_PERIOD_STARTED,
 						Version:     1,
 						BlockHeight: 1,
+						MsgVersion:  tmcosmosutils.CosmosAPIVersionV1,
 					}),
 					ProposalId: "ProposalId",
 				},
@@ -1122,7 +1124,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mockParamsView := &rdbparambase_view.MockParamsView{}
 				mocks = append(mocks, &mockParamsView.Mock)
 				mockClient.
-					On("ProposalById", "ProposalId").
+					On("ProposalById", "ProposalId", tmcosmosutils.CosmosAPIVersionV1).
 					Return(cosmosapp.Proposal{
 						ProposalID:    "ProposalId",
 						VotingEndTime: "1970-01-01T00:00:00.000000001Z",
@@ -1163,6 +1165,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 						Name:        usecase_event.PROPOSAL_VOTING_PERIOD_STARTED,
 						Version:     1,
 						BlockHeight: 1,
+						MsgVersion:  tmcosmosutils.CosmosAPIVersionV1,
 					}),
 					ProposalId: "ProposalId",
 				},
@@ -1191,7 +1194,7 @@ func TestProposal_HandleEvents(t *testing.T) {
 				mockParamsView := &rdbparambase_view.MockParamsView{}
 				mocks = append(mocks, &mockParamsView.Mock)
 				mockClient.
-					On("ProposalById", "ProposalId").
+					On("ProposalById", "ProposalId", tmcosmosutils.CosmosAPIVersionV1).
 					Return(cosmosapp.Proposal{
 						ProposalID:    "ProposalId",
 						VotingEndTime: "",

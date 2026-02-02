@@ -23,6 +23,7 @@ var _ = Describe("ParseMsgCommands", func() {
   "version": 1,
   "height": 28,
   "uuid": "{UUID}",
+  "msgVersion": "",
   "msgName": "/ibc.core.channel.v1.MsgAcknowledgement",
   "txHash": "06B6CEE9FB786050A41BA57026B3FF629188C06FCDD97F59AF55D2CD40938CD3",
   "msgIndex": 1,
@@ -117,6 +118,7 @@ var _ = Describe("ParseMsgCommands", func() {
 	"version": 1,
 	"height": 127749,
 	"uuid": "{UUID}",
+	"msgVersion": "",
 	"msgName": "/ibc.core.channel.v1.MsgAcknowledgement",
 	"txHash": "AA4C3C2A27587AA769D9198BEBB42218419D61C46F1A2C9CE7BC10FE45F81A39",
 	"msgIndex": 1,
@@ -223,6 +225,7 @@ var _ = Describe("ParseMsgCommands", func() {
 	"version": 1,
 	"height": 68821,
 	"uuid": "{UUID}",
+	"msgVersion": "",
 	"msgName": "/ibc.core.channel.v1.MsgAcknowledgement",
 	"txHash": "0F1205B05DDDC0B848AD50FE35335C993FEDE7EAD161F2099818B0A03321B97F",
 	"msgIndex": 0,
@@ -270,6 +273,7 @@ var _ = Describe("ParseMsgCommands", func() {
 	"version": 1,
 	"height": 68821,
 	"uuid": "{UUID}",
+	"msgVersion": "",
 	"msgName": "MsgAlreadyRelayedAcknowledgement",
 	"txHash": "961A752199E991F5653FB8773DF6A20F1381C3C7B3FAD2D817988BE6640FCF4E",
 	"msgIndex": 1,
@@ -386,7 +390,7 @@ var _ = Describe("ParseMsgCommands", func() {
 	})
 
 	It("should parse Msg commands when there is MsgIBCAcknowledgement in the EVM transaction", func() {
-		expected := `{"name":"/ibc.core.channel.v1.MsgAcknowledgement.Created","version":1,"height":18211106,"uuid":"{UUID}","msgName":"/ibc.core.channel.v1.MsgAcknowledgement","txHash":"9A6B6497ABAE01FE87C4BBA0D579C39066256F7114332BF610DDBD0EF78DAA85","msgIndex":0,"params":{"packet":{"sequence":"1068","sourcePort":"transfer","sourceChannel":"channel-0","destinationPort":"transfer","destinationChannel":"channel-131","data":"","timeoutHeight":{"revisionNumber":"0","revisionHeight":"0"},"timeoutTimestamp":""},"acknowledgement":"","proofAcked":"","proofHeight":{"revisionNumber":"0","revisionHeight":"0"},"signer":"","application":"transfer","messageType":"/ibc.applications.transfer.v1.MsgTransfer","maybeMsgTransfer":{"sender":"tcrc1wvxth9zgp4g83pypxua58kp3x0shzdn72julh0","receiver":"tcro19p7khzurxqcyznawupp8zv0cy6fh6jn6lqx3mt","denom":"stake","amount":"1","success":true,"acknowledgement":"result:\"\\001\" ","error":null},"packetSequence":"1068","channelOrdering":"ORDER_UNORDERED","connectionId":"connection-0"}}`
+		expected := `{"name":"/ibc.core.channel.v1.MsgAcknowledgement.Created","version":1,"height":18211106,"uuid":"{UUID}","msgVersion":"","msgName":"/ibc.core.channel.v1.MsgAcknowledgement","txHash":"9A6B6497ABAE01FE87C4BBA0D579C39066256F7114332BF610DDBD0EF78DAA85","msgIndex":0,"params":{"packet":{"sequence":"1068","sourcePort":"transfer","sourceChannel":"channel-0","destinationPort":"transfer","destinationChannel":"channel-131","data":"","timeoutHeight":{"revisionNumber":"0","revisionHeight":"0"},"timeoutTimestamp":""},"acknowledgement":"","proofAcked":"","proofHeight":{"revisionNumber":"0","revisionHeight":"0"},"signer":"","application":"transfer","messageType":"/ibc.applications.transfer.v1.MsgTransfer","maybeMsgTransfer":{"sender":"tcrc1wvxth9zgp4g83pypxua58kp3x0shzdn72julh0","receiver":"tcro19p7khzurxqcyznawupp8zv0cy6fh6jn6lqx3mt","denom":"stake","amount":"1","success":true,"acknowledgement":"result:\"\\001\" ","error":null},"packetSequence":"1068","channelOrdering":"ORDER_UNORDERED","connectionId":"connection-0"}}`
 
 		block, _, _ := tendermint.ParseBlockResp(strings.NewReader(
 			usecase_parser_test.TX_MSG_ACKNOWLEDGEMENT_EVM_TX_BLOCK_RESP,

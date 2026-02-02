@@ -23,6 +23,7 @@ var _ = Describe("ParseMsgCommands", func() {
   "version": 1,
   "height": 6,
   "uuid": "{UUID}",
+  "msgVersion": "",
   "msgName": "/ibc.core.connection.v1.MsgConnectionOpenInit",
   "txHash": "F2B7D61BA783E6CDD9FE5825EBF7770688F6F45C482CB78ACB51E84B06FC643E",
   "msgIndex": 0,

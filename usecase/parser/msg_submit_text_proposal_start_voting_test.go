@@ -2,6 +2,7 @@ package parser_test
 
 import (
 	"github.com/crypto-com/chain-indexing/external/primptr"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	"github.com/crypto-com/chain-indexing/usecase/coin"
 	. "github.com/onsi/ginkgo"
@@ -50,6 +51,7 @@ var _ = Describe("ParseMsgCommands", func() {
 						TxHash:      "AAE71A09FFCDC3DD9D26CF2580CF26C38DDE2C6D7CBBF4264D295086B7E24148",
 						TxSuccess:   true,
 						MsgIndex:    0,
+						MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
 					},
 					model.MsgSubmitTextProposalParams{
 						MaybeProposalId: primptr.String("2"),
@@ -62,7 +64,7 @@ var _ = Describe("ParseMsgCommands", func() {
 						InitialDeposit:  coin.MustParseCoinsNormalized("20000basecro"),
 					},
 				),
-				command_usecase.NewStartProposalVotingPeriod(int64(2036), "2"),
+				command_usecase.NewStartProposalVotingPeriod(int64(2036), "2", tmcosmosutils.DefaultCosmosAPIVersion),
 			}))
 			Expect(possibleSignerAddresses).To(Equal([]string{"cro1nk4rq3q46ltgjghxz80hy385p9uj0tf58apkcd"}))
 		})

@@ -23,6 +23,7 @@ var _ = Describe("ParseMsgCommands", func() {
             "version": 1,
             "height": 123731,
             "uuid": "{UUID}",
+			"msgVersion": "",
             "msgName": "/cosmos.authz.v1beta1.MsgRevoke",
             "txHash": "9921D7DDC530DB81B0A5FD1163678757A7B7B7D8ED78C2B4BE433BFFD30C1228",
             "msgIndex": 0,

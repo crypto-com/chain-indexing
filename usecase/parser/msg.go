@@ -57,17 +57,18 @@ func ParseBlockTxsMsgToCommands(
 		}
 
 		for msgIndex, msg := range tx.Tx.Body.Messages {
+			msgType := msg["@type"]
 			msgCommonParams := event.MsgCommonParams{
 				BlockHeight: blockHeight,
 				TxHash:      txHash,
 				TxSuccess:   txSuccess,
 				MsgIndex:    msgIndex,
+				MsgVersion:  tmcosmosutils.GetMsgVersionFromMsgType(msgType.(string)),
 			}
 
 			var msgCommands []command.Command
 			var possibleSignerAddresses []string
 
-			msgType := msg["@type"]
 			switch msgType {
 			case
 				// cosmos bank
@@ -481,7 +482,7 @@ func ParseMsgSubmitProposal(
 
 	if logEvent.HasAttribute("voting_period_start") {
 		cmds = append(cmds, command_usecase.NewStartProposalVotingPeriod(
-			parserParams.MsgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"),
+			parserParams.MsgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"), parserParams.MsgCommonParams.MsgVersion,
 		))
 	}
 
@@ -1063,7 +1064,7 @@ func ParseMsgDeposit(
 	for _, logEvent := range logEvents {
 		if logEvent.HasAttribute("voting_period_start") {
 			cmds = append(cmds, command_usecase.NewStartProposalVotingPeriod(
-				parserParams.MsgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"),
+				parserParams.MsgCommonParams.BlockHeight, logEvent.MustGetAttributeByKey("voting_period_start"), parserParams.MsgCommonParams.MsgVersion,
 			))
 			break
 		}

@@ -2,6 +2,7 @@ package parser_test
 
 import (
 	"github.com/crypto-com/chain-indexing/external/primptr"
+	"github.com/crypto-com/chain-indexing/external/tmcosmosutils"
 	"github.com/crypto-com/chain-indexing/external/utctime"
 	"github.com/crypto-com/chain-indexing/infrastructure/tendermint"
 	. "github.com/onsi/ginkgo"
@@ -46,6 +47,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					TxHash:      "0F525EFC1DD9C319E9036C35CF1656E09480B308301BB3A46F850AE482A3875C",
 					TxSuccess:   true,
 					MsgIndex:    0,
+					MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
 				},
 				model.MsgUndelegateParams{
 					DelegatorAddress:      "tcro1gs80n8fpc5mc3ywkgfy93l23tg0gdqj5w2ll64",
@@ -86,6 +88,7 @@ var _ = Describe("ParseMsgCommands", func() {
 					TxHash:      "5285A9B475157E01540536299A2B5F505AC900159C268B3D90652557F9ACDE1E",
 					TxSuccess:   false,
 					MsgIndex:    0,
+					MsgVersion:  tmcosmosutils.DefaultCosmosAPIVersion,
 				},
 				model.MsgUndelegateParams{
 					DelegatorAddress:      "tcro1llst0cguh5azl9t8wr6mz5yzjuwukz7f67z7f6",
