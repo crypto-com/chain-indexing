@@ -68,7 +68,7 @@ func (handler *Proposals) FindById(ctx *fasthttp.RequestCtx) {
 
 	var queryTallyErr error
 	if proposal.Status != proposal_view.PROPOSAL_STATUS_VOTING_PERIOD {
-		tally, queryTallyErr = handler.cosmosClient.ProposalTally(idParam, tmcosmosutils.DefaultCosmosAPIVersion)
+		tally, queryTallyErr = handler.cosmosClient.ProposalTally(idParam, tmcosmosutils.CosmosAPIVersionV1)
 		if queryTallyErr != nil {
 			if !errors.Is(queryTallyErr, cosmosapp.ErrProposalNotFound) {
 				handler.logger.Errorf("error retrieving proposal tally: %v", queryTallyErr)
@@ -86,7 +86,7 @@ func (handler *Proposals) FindById(ctx *fasthttp.RequestCtx) {
 
 	if handler.totalBondedLastUpdatedAt.Add(1 * time.Hour).Before(time.Now()) {
 		var queryTotalBondedErr error
-		handler.totalBonded, queryTotalBondedErr = handler.cosmosClient.TotalBondedBalance(tmcosmosutils.DefaultCosmosAPIVersion)
+		handler.totalBonded, queryTotalBondedErr = handler.cosmosClient.TotalBondedBalance(tmcosmosutils.CosmosAPIVersionV1)
 		if queryTotalBondedErr != nil {
 			handler.logger.Errorf("error retrieving total bonded balance: %v", queryTallyErr)
 			httpapi.InternalServerError(ctx)
