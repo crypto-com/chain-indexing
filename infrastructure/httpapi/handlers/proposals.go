@@ -68,7 +68,7 @@ func (handler *Proposals) FindById(ctx *fasthttp.RequestCtx) {
 
 	var queryTallyErr error
 	if proposal.Status != proposal_view.PROPOSAL_STATUS_VOTING_PERIOD {
-		tally, queryTallyErr = handler.cosmosClient.ProposalTally(idParam, tmcosmosutils.CosmosAPIVersionV1)
+		tally, queryTallyErr = handler.cosmosClient.ProposalTally(idParam, tmcosmosutils.DefaultCosmosAPIVersion)
 		if queryTallyErr != nil {
 			if !errors.Is(queryTallyErr, cosmosapp.ErrProposalNotFound) {
 				handler.logger.Errorf("error retrieving proposal tally: %v", queryTallyErr)
