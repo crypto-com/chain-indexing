@@ -86,7 +86,7 @@ func (handler *Proposals) FindById(ctx *fasthttp.RequestCtx) {
 
 	if handler.totalBondedLastUpdatedAt.Add(1 * time.Hour).Before(time.Now()) {
 		var queryTotalBondedErr error
-		handler.totalBonded, queryTotalBondedErr = handler.cosmosClient.TotalBondedBalance(tmcosmosutils.CosmosAPIVersionV1)
+		handler.totalBonded, queryTotalBondedErr = handler.cosmosClient.TotalBondedBalance(tmcosmosutils.DefaultCosmosAPIVersion)
 		if queryTotalBondedErr != nil {
 			handler.logger.Errorf("error retrieving total bonded balance: %v", queryTallyErr)
 			httpapi.InternalServerError(ctx)
