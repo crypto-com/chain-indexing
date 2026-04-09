@@ -134,6 +134,7 @@ func ParseMsgSubmitProposal(
 			"/cosmos.staking.v1beta1.MsgUpdateParams",
 			"/cosmos.slashing.v1beta1.MsgUpdateParams",
 			"/cosmos.gov.v1.MsgUpdateParams",
+			"/ethermint.evm.v1.MsgUpdateParams",
 			"/cosmos.distribution.v1beta1.MsgCommunityPoolSpend":
 			break
 		default:
