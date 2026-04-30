@@ -4,9 +4,9 @@ import (
 	"bytes"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/luci/go-render/render"
-	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 const MSG_TIER_DELEGATE = "/chainmain.tieredrewards.v1.MsgTierDelegate"
@@ -16,7 +16,7 @@ const MSG_TIER_DELEGATE_FAILED = "/chainmain.tieredrewards.v1.MsgTierDelegate.Fa
 type MsgTierDelegate struct {
 	MsgBase
 	Owner      string `json:"owner"`
-	PositionId string `json:"position_id"`
+	PositionId string `json:"positionId"`
 	Validator  string `json:"validator"`
 }
 

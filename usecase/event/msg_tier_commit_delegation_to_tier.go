@@ -15,11 +15,11 @@ const MSG_TIER_COMMIT_DELEGATION_TO_TIER_FAILED = "/chainmain.tieredrewards.v1.M
 
 type MsgTierCommitDelegationToTier struct {
 	MsgBase
-	DelegatorAddress       string `json:"delegator_address"`
-	ValidatorAddress       string `json:"validator_address"`
+	DelegatorAddress       string `json:"delegatorAddress"`
+	ValidatorAddress       string `json:"validatorAddress"`
 	Amount                 string `json:"amount"`
 	Id                     uint32 `json:"id"`
-	TriggerExitImmediately bool   `json:"trigger_exit_immediately"`
+	TriggerExitImmediately bool   `json:"triggerExitImmediately"`
 }
 
 func NewMsgTierCommitDelegationToTier(msgCommonParams MsgCommonParams, params model.MsgCommitDelegationToTierParams) *MsgTierCommitDelegationToTier {

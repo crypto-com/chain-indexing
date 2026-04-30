@@ -4,9 +4,9 @@ import (
 	"bytes"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/luci/go-render/render"
-	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 const MSG_TIER_EXIT_TIER_WITH_DELEGATION = "/chainmain.tieredrewards.v1.MsgExitTierWithDelegation"
@@ -16,7 +16,7 @@ const MSG_TIER_EXIT_TIER_WITH_DELEGATION_FAILED = "/chainmain.tieredrewards.v1.M
 type MsgTierExitTierWithDelegation struct {
 	MsgBase
 	Owner      string `json:"owner"`
-	PositionId string `json:"position_id"`
+	PositionId string `json:"positionId"`
 	Amount     string `json:"amount"`
 }
 

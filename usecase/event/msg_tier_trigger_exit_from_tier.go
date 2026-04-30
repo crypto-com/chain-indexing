@@ -4,9 +4,9 @@ import (
 	"bytes"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/luci/go-render/render"
-	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 const MSG_TIER_TRIGGER_EXIT_FROM_TIER = "/chainmain.tieredrewards.v1.MsgTriggerExitFromTier"
@@ -16,7 +16,7 @@ const MSG_TIER_TRIGGER_EXIT_FROM_TIER_FAILED = "/chainmain.tieredrewards.v1.MsgT
 type MsgTierTriggerExitFromTier struct {
 	MsgBase
 	Owner      string `json:"owner"`
-	PositionId string `json:"position_id"`
+	PositionId string `json:"positionId"`
 }
 
 func NewMsgTierTriggerExitFromTier(msgCommonParams MsgCommonParams, params model.MsgTriggerExitFromTierParams) *MsgTierTriggerExitFromTier {
