@@ -112,6 +112,22 @@ func ParseBlockTxsMsgToCommands(
 				"/chainmain.icaauth.v1.MsgRegisterAccount",
 				"/chainmain.icaauth.v1.MsgSubmitTx",
 
+				// chainmain tieredrewards
+				"/chainmain.tieredrewards.v1.MsgLockTier",
+				"/chainmain.tieredrewards.v1.MsgCommitDelegationToTier",
+				"/chainmain.tieredrewards.v1.MsgAddToTierPosition",
+				"/chainmain.tieredrewards.v1.MsgTierDelegate",
+				"/chainmain.tieredrewards.v1.MsgTierRedelegate",
+				"/chainmain.tieredrewards.v1.MsgTierUndelegate",
+				"/chainmain.tieredrewards.v1.MsgTriggerExitFromTier",
+				"/chainmain.tieredrewards.v1.MsgClearPosition",
+				"/chainmain.tieredrewards.v1.MsgWithdrawFromTier",
+				"/chainmain.tieredrewards.v1.MsgClaimTierRewards",
+				"/chainmain.tieredrewards.v1.MsgExitTierWithDelegation",
+				"/chainmain.tieredrewards.v1.MsgAddTier",
+				"/chainmain.tieredrewards.v1.MsgUpdateTier",
+				"/chainmain.tieredrewards.v1.MsgDeleteTier",
+
 				// cronos icaauth
 				"/icaauth.v1.MsgRegisterAccount",
 				"/icaauth.v1.MsgSubmitTx",
@@ -2592,4 +2608,494 @@ func ParseMsgEthereumTx(
 
 		msgEthereumTxParams,
 	)), possibleSignerAddresses
+}
+
+func ParseMsgTierLockTier(
+	parserParams utils.CosmosParserParams,
+) ([]command.Command, []string) {
+	var rawMsg model.RawMsgLockTier
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating ParseMsgTierLockTier decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(parserParams.Msg); err != nil {
+		panic(fmt.Errorf("error decoding ParseMsgTierLockTier: %v", err))
+	}
+
+	params := model.MsgLockTierParams{RawMsgLockTier: rawMsg}
+
+	var possibleSignerAddresses []string
+	if rawMsg.Owner != "" {
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Owner)
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgTierLockTier(
+		parserParams.MsgCommonParams,
+		params,
+	)}, possibleSignerAddresses
+}
+
+func ParseMsgTierCommitDelegationToTier(
+	parserParams utils.CosmosParserParams,
+) ([]command.Command, []string) {
+	var rawMsg model.RawMsgCommitDelegationToTier
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating ParseMsgTierCommitDelegationToTier decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(parserParams.Msg); err != nil {
+		panic(fmt.Errorf("error decoding ParseMsgTierCommitDelegationToTier: %v", err))
+	}
+
+	params := model.MsgCommitDelegationToTierParams{RawMsgCommitDelegationToTier: rawMsg}
+
+	var possibleSignerAddresses []string
+	if rawMsg.DelegatorAddress != "" {
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.DelegatorAddress)
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgTierCommitDelegationToTier(
+		parserParams.MsgCommonParams,
+		params,
+	)}, possibleSignerAddresses
+}
+
+func ParseMsgTierAddToTierPosition(
+	parserParams utils.CosmosParserParams,
+) ([]command.Command, []string) {
+	var rawMsg model.RawMsgAddToTierPosition
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating ParseMsgTierAddToTierPosition decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(parserParams.Msg); err != nil {
+		panic(fmt.Errorf("error decoding ParseMsgTierAddToTierPosition: %v", err))
+	}
+
+	params := model.MsgAddToTierPositionParams{RawMsgAddToTierPosition: rawMsg}
+
+	var possibleSignerAddresses []string
+	if rawMsg.Owner != "" {
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Owner)
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgTierAddToTierPosition(
+		parserParams.MsgCommonParams,
+		params,
+	)}, possibleSignerAddresses
+}
+
+func ParseMsgTierDelegate(
+	parserParams utils.CosmosParserParams,
+) ([]command.Command, []string) {
+	var rawMsg model.RawMsgTierDelegate
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating ParseMsgTierDelegate decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(parserParams.Msg); err != nil {
+		panic(fmt.Errorf("error decoding ParseMsgTierDelegate: %v", err))
+	}
+
+	params := model.MsgTierDelegateParams{RawMsgTierDelegate: rawMsg}
+
+	var possibleSignerAddresses []string
+	if rawMsg.Owner != "" {
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Owner)
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgTierDelegate(
+		parserParams.MsgCommonParams,
+		params,
+	)}, possibleSignerAddresses
+}
+
+func ParseMsgTierRedelegate(
+	parserParams utils.CosmosParserParams,
+) ([]command.Command, []string) {
+	var rawMsg model.RawMsgTierRedelegate
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating ParseMsgTierRedelegate decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(parserParams.Msg); err != nil {
+		panic(fmt.Errorf("error decoding ParseMsgTierRedelegate: %v", err))
+	}
+
+	params := model.MsgTierRedelegateParams{RawMsgTierRedelegate: rawMsg}
+
+	var possibleSignerAddresses []string
+	if rawMsg.Owner != "" {
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Owner)
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgTierRedelegate(
+		parserParams.MsgCommonParams,
+		params,
+	)}, possibleSignerAddresses
+}
+
+func ParseMsgTierUndelegate(
+	parserParams utils.CosmosParserParams,
+) ([]command.Command, []string) {
+	var rawMsg model.RawMsgTierUndelegate
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating ParseMsgTierUndelegate decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(parserParams.Msg); err != nil {
+		panic(fmt.Errorf("error decoding ParseMsgTierUndelegate: %v", err))
+	}
+
+	params := model.MsgTierUndelegateParams{RawMsgTierUndelegate: rawMsg}
+
+	var possibleSignerAddresses []string
+	if rawMsg.Owner != "" {
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Owner)
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgTierUndelegate(
+		parserParams.MsgCommonParams,
+		params,
+	)}, possibleSignerAddresses
+}
+
+func ParseMsgTierTriggerExitFromTier(
+	parserParams utils.CosmosParserParams,
+) ([]command.Command, []string) {
+	var rawMsg model.RawMsgTriggerExitFromTier
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating ParseMsgTierTriggerExitFromTier decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(parserParams.Msg); err != nil {
+		panic(fmt.Errorf("error decoding ParseMsgTierTriggerExitFromTier: %v", err))
+	}
+
+	params := model.MsgTriggerExitFromTierParams{RawMsgTriggerExitFromTier: rawMsg}
+
+	var possibleSignerAddresses []string
+	if rawMsg.Owner != "" {
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Owner)
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgTierTriggerExitFromTier(
+		parserParams.MsgCommonParams,
+		params,
+	)}, possibleSignerAddresses
+}
+
+func ParseMsgTierClearPosition(
+	parserParams utils.CosmosParserParams,
+) ([]command.Command, []string) {
+	var rawMsg model.RawMsgClearPosition
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating ParseMsgTierClearPosition decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(parserParams.Msg); err != nil {
+		panic(fmt.Errorf("error decoding ParseMsgTierClearPosition: %v", err))
+	}
+
+	params := model.MsgClearPositionParams{RawMsgClearPosition: rawMsg}
+
+	var possibleSignerAddresses []string
+	if rawMsg.Owner != "" {
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Owner)
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgTierClearPosition(
+		parserParams.MsgCommonParams,
+		params,
+	)}, possibleSignerAddresses
+}
+
+func ParseMsgTierWithdrawFromTier(
+	parserParams utils.CosmosParserParams,
+) ([]command.Command, []string) {
+	var rawMsg model.RawMsgWithdrawFromTier
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating ParseMsgTierWithdrawFromTier decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(parserParams.Msg); err != nil {
+		panic(fmt.Errorf("error decoding ParseMsgTierWithdrawFromTier: %v", err))
+	}
+
+	params := model.MsgWithdrawFromTierParams{RawMsgWithdrawFromTier: rawMsg}
+
+	var possibleSignerAddresses []string
+	if rawMsg.Owner != "" {
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Owner)
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgTierWithdrawFromTier(
+		parserParams.MsgCommonParams,
+		params,
+	)}, possibleSignerAddresses
+}
+
+func ParseMsgTierClaimTierRewards(
+	parserParams utils.CosmosParserParams,
+) ([]command.Command, []string) {
+	var rawMsg model.RawMsgClaimTierRewards
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating ParseMsgTierClaimTierRewards decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(parserParams.Msg); err != nil {
+		panic(fmt.Errorf("error decoding ParseMsgTierClaimTierRewards: %v", err))
+	}
+
+	params := model.MsgClaimTierRewardsParams{RawMsgClaimTierRewards: rawMsg}
+
+	var possibleSignerAddresses []string
+	if rawMsg.Owner != "" {
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Owner)
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgTierClaimTierRewards(
+		parserParams.MsgCommonParams,
+		params,
+	)}, possibleSignerAddresses
+}
+
+func ParseMsgTierExitTierWithDelegation(
+	parserParams utils.CosmosParserParams,
+) ([]command.Command, []string) {
+	var rawMsg model.RawMsgExitTierWithDelegation
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating ParseMsgTierExitTierWithDelegation decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(parserParams.Msg); err != nil {
+		panic(fmt.Errorf("error decoding ParseMsgTierExitTierWithDelegation: %v", err))
+	}
+
+	params := model.MsgExitTierWithDelegationParams{RawMsgExitTierWithDelegation: rawMsg}
+
+	var possibleSignerAddresses []string
+	if rawMsg.Owner != "" {
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Owner)
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgTierExitTierWithDelegation(
+		parserParams.MsgCommonParams,
+		params,
+	)}, possibleSignerAddresses
+}
+
+func ParseMsgTierAddTier(
+	parserParams utils.CosmosParserParams,
+) ([]command.Command, []string) {
+	var rawMsg model.RawMsgAddTier
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating ParseMsgTierAddTier decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(parserParams.Msg); err != nil {
+		panic(fmt.Errorf("error decoding ParseMsgTierAddTier: %v", err))
+	}
+
+	params := model.MsgAddTierParams{RawMsgAddTier: rawMsg}
+
+	var possibleSignerAddresses []string
+	if rawMsg.Authority != "" {
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Authority)
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgTierAddTier(
+		parserParams.MsgCommonParams,
+		params,
+	)}, possibleSignerAddresses
+}
+
+func ParseMsgTierUpdateTier(
+	parserParams utils.CosmosParserParams,
+) ([]command.Command, []string) {
+	var rawMsg model.RawMsgUpdateTier
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating ParseMsgTierUpdateTier decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(parserParams.Msg); err != nil {
+		panic(fmt.Errorf("error decoding ParseMsgTierUpdateTier: %v", err))
+	}
+
+	params := model.MsgUpdateTierParams{RawMsgUpdateTier: rawMsg}
+
+	var possibleSignerAddresses []string
+	if rawMsg.Authority != "" {
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Authority)
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgTierUpdateTier(
+		parserParams.MsgCommonParams,
+		params,
+	)}, possibleSignerAddresses
+}
+
+func ParseMsgTierDeleteTier(
+	parserParams utils.CosmosParserParams,
+) ([]command.Command, []string) {
+	var rawMsg model.RawMsgDeleteTier
+	decoderConfig := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToTimeHookFunc(time.RFC3339),
+			mapstructure_utils.StringToDurationHookFunc(),
+			mapstructure_utils.StringToByteSliceHookFunc(),
+		),
+		Result: &rawMsg,
+	}
+	decoder, decoderErr := mapstructure.NewDecoder(decoderConfig)
+	if decoderErr != nil {
+		panic(fmt.Errorf("error creating ParseMsgTierDeleteTier decoder: %v", decoderErr))
+	}
+	if err := decoder.Decode(parserParams.Msg); err != nil {
+		panic(fmt.Errorf("error decoding ParseMsgTierDeleteTier: %v", err))
+	}
+
+	params := model.MsgDeleteTierParams{RawMsgDeleteTier: rawMsg}
+
+	var possibleSignerAddresses []string
+	if rawMsg.Authority != "" {
+		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Authority)
+	}
+
+	return []command.Command{command_usecase.NewCreateMsgTierDeleteTier(
+		parserParams.MsgCommonParams,
+		params,
+	)}, possibleSignerAddresses
 }

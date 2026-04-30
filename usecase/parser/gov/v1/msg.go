@@ -135,7 +135,10 @@ func ParseMsgSubmitProposal(
 			"/cosmos.slashing.v1beta1.MsgUpdateParams",
 			"/cosmos.gov.v1.MsgUpdateParams",
 			"/ethermint.evm.v1.MsgUpdateParams",
-			"/cosmos.distribution.v1beta1.MsgCommunityPoolSpend":
+			"/cosmos.distribution.v1beta1.MsgCommunityPoolSpend",
+			"/chainmain.tieredrewards.v1.MsgAddTier",
+			"/chainmain.tieredrewards.v1.MsgUpdateTier",
+			"/chainmain.tieredrewards.v1.MsgDeleteTier":
 			break
 		default:
 			//nolint:gosec

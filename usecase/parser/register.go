@@ -56,6 +56,22 @@ func InitParsers(manager *utils.CosmosParserManager) {
 	manager.RegisterParser("/chainmain.icaauth.v1.MsgRegisterAccount", BEGIN_BLOCK_HEIGHT, icaauth.ParseChainmainMsgRegisterAccount)
 	manager.RegisterParser("/chainmain.icaauth.v1.MsgSubmitTx", BEGIN_BLOCK_HEIGHT, icaauth.ParseChainmainMsgSubmitTx)
 
+	// chainmain tieredrewards
+	manager.RegisterParser("/chainmain.tieredrewards.v1.MsgLockTier", BEGIN_BLOCK_HEIGHT, ParseMsgTierLockTier)
+	manager.RegisterParser("/chainmain.tieredrewards.v1.MsgCommitDelegationToTier", BEGIN_BLOCK_HEIGHT, ParseMsgTierCommitDelegationToTier)
+	manager.RegisterParser("/chainmain.tieredrewards.v1.MsgAddToTierPosition", BEGIN_BLOCK_HEIGHT, ParseMsgTierAddToTierPosition)
+	manager.RegisterParser("/chainmain.tieredrewards.v1.MsgTierDelegate", BEGIN_BLOCK_HEIGHT, ParseMsgTierDelegate)
+	manager.RegisterParser("/chainmain.tieredrewards.v1.MsgTierRedelegate", BEGIN_BLOCK_HEIGHT, ParseMsgTierRedelegate)
+	manager.RegisterParser("/chainmain.tieredrewards.v1.MsgTierUndelegate", BEGIN_BLOCK_HEIGHT, ParseMsgTierUndelegate)
+	manager.RegisterParser("/chainmain.tieredrewards.v1.MsgTriggerExitFromTier", BEGIN_BLOCK_HEIGHT, ParseMsgTierTriggerExitFromTier)
+	manager.RegisterParser("/chainmain.tieredrewards.v1.MsgClearPosition", BEGIN_BLOCK_HEIGHT, ParseMsgTierClearPosition)
+	manager.RegisterParser("/chainmain.tieredrewards.v1.MsgWithdrawFromTier", BEGIN_BLOCK_HEIGHT, ParseMsgTierWithdrawFromTier)
+	manager.RegisterParser("/chainmain.tieredrewards.v1.MsgClaimTierRewards", BEGIN_BLOCK_HEIGHT, ParseMsgTierClaimTierRewards)
+	manager.RegisterParser("/chainmain.tieredrewards.v1.MsgExitTierWithDelegation", BEGIN_BLOCK_HEIGHT, ParseMsgTierExitTierWithDelegation)
+	manager.RegisterParser("/chainmain.tieredrewards.v1.MsgAddTier", BEGIN_BLOCK_HEIGHT, ParseMsgTierAddTier)
+	manager.RegisterParser("/chainmain.tieredrewards.v1.MsgUpdateTier", BEGIN_BLOCK_HEIGHT, ParseMsgTierUpdateTier)
+	manager.RegisterParser("/chainmain.tieredrewards.v1.MsgDeleteTier", BEGIN_BLOCK_HEIGHT, ParseMsgTierDeleteTier)
+
 	// cronos icaauth
 	manager.RegisterParser("/icaauth.v1.MsgRegisterAccount", BEGIN_BLOCK_HEIGHT, icaauth.ParseMsgRegisterAccount)
 	manager.RegisterParser("/icaauth.v1.MsgSubmitTx", BEGIN_BLOCK_HEIGHT, icaauth.ParseMsgSubmitTx)
