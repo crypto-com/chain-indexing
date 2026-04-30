@@ -7,5 +7,5 @@ type MsgClaimTierRewardsParams struct {
 type RawMsgClaimTierRewards struct {
 	Type        string   `mapstructure:"@type" json:"@type"`
 	Owner       string   `mapstructure:"owner" json:"owner"`
-	PositionIds []string `mapstructure:"position_ids" json:"position_ids"`
+	PositionIds []string `mapstructure:"position_ids" json:"positionIds"`
 }
