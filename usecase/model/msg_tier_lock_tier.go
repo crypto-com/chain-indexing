@@ -9,6 +9,6 @@ type RawMsgLockTier struct {
 	Owner                  string `mapstructure:"owner" json:"owner"`
 	Id                     uint32 `mapstructure:"id" json:"id"`
 	Amount                 string `mapstructure:"amount" json:"amount"`
-	ValidatorAddress       string `mapstructure:"validator_address" json:"validator_address"`
-	TriggerExitImmediately bool   `mapstructure:"trigger_exit_immediately" json:"trigger_exit_immediately"`
+	ValidatorAddress       string `mapstructure:"validator_address" json:"validatorAddress"`
+	TriggerExitImmediately bool   `mapstructure:"trigger_exit_immediately" json:"triggerExitImmediately"`
 }

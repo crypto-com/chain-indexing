@@ -16,7 +16,7 @@ const MSG_TIER_CLEAR_POSITION_FAILED = "/chainmain.tieredrewards.v1.MsgClearPosi
 type MsgTierClearPosition struct {
 	MsgBase
 	Owner      string `json:"owner"`
-	PositionId string `json:"position_id"`
+	PositionId string `json:"positionId"`
 }
 
 func NewMsgTierClearPosition(msgCommonParams MsgCommonParams, params model.MsgClearPositionParams) *MsgTierClearPosition {

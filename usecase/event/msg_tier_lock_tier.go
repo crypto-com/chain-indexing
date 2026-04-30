@@ -4,9 +4,9 @@ import (
 	"bytes"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/luci/go-render/render"
-	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 const MSG_TIER_LOCK_TIER = "/chainmain.tieredrewards.v1.MsgLockTier"
@@ -18,8 +18,8 @@ type MsgTierLockTier struct {
 	Owner                  string `json:"owner"`
 	Id                     uint32 `json:"id"`
 	Amount                 string `json:"amount"`
-	ValidatorAddress       string `json:"validator_address"`
-	TriggerExitImmediately bool   `json:"trigger_exit_immediately"`
+	ValidatorAddress       string `json:"validatorAddress"`
+	TriggerExitImmediately bool   `json:"triggerExitImmediately"`
 }
 
 func NewMsgTierLockTier(msgCommonParams MsgCommonParams, params model.MsgLockTierParams) *MsgTierLockTier {

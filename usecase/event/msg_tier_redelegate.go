@@ -16,8 +16,8 @@ const MSG_TIER_REDELEGATE_FAILED = "/chainmain.tieredrewards.v1.MsgTierRedelegat
 type MsgTierRedelegate struct {
 	MsgBase
 	Owner        string `json:"owner"`
-	PositionId   string `json:"position_id"`
-	DstValidator string `json:"dst_validator"`
+	PositionId   string `json:"positionId"`
+	DstValidator string `json:"dstValidator"`
 }
 
 func NewMsgTierRedelegate(msgCommonParams MsgCommonParams, params model.MsgTierRedelegateParams) *MsgTierRedelegate {

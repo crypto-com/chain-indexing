@@ -4,9 +4,9 @@ import (
 	"bytes"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/luci/go-render/render"
-	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 const MSG_TIER_CLAIM_TIER_REWARDS = "/chainmain.tieredrewards.v1.MsgClaimTierRewards"
@@ -16,7 +16,7 @@ const MSG_TIER_CLAIM_TIER_REWARDS_FAILED = "/chainmain.tieredrewards.v1.MsgClaim
 type MsgTierClaimTierRewards struct {
 	MsgBase
 	Owner       string   `json:"owner"`
-	PositionIds []string `json:"position_ids"`
+	PositionIds []string `json:"positionIds"`
 }
 
 func NewMsgTierClaimTierRewards(msgCommonParams MsgCommonParams, params model.MsgClaimTierRewardsParams) *MsgTierClaimTierRewards {

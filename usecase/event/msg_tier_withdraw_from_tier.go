@@ -16,7 +16,7 @@ const MSG_TIER_WITHDRAW_FROM_TIER_FAILED = "/chainmain.tieredrewards.v1.MsgWithd
 type MsgTierWithdrawFromTier struct {
 	MsgBase
 	Owner      string `json:"owner"`
-	PositionId string `json:"position_id"`
+	PositionId string `json:"positionId"`
 }
 
 func NewMsgTierWithdrawFromTier(msgCommonParams MsgCommonParams, params model.MsgWithdrawFromTierParams) *MsgTierWithdrawFromTier {

@@ -16,7 +16,7 @@ const MSG_TIER_UNDELEGATE_FAILED = "/chainmain.tieredrewards.v1.MsgTierUndelegat
 type MsgTierUndelegate struct {
 	MsgBase
 	Owner      string `json:"owner"`
-	PositionId string `json:"position_id"`
+	PositionId string `json:"positionId"`
 }
 
 func NewMsgTierUndelegate(msgCommonParams MsgCommonParams, params model.MsgTierUndelegateParams) *MsgTierUndelegate {
