@@ -2639,6 +2639,18 @@ func ParseMsgTierLockTier(
 		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Owner)
 	}
 
+	if parserParams.MsgCommonParams.TxSuccess {
+		events := utils.NewParsedTxsResultsEvents(parserParams.TxsResult.Events)
+		for _, event := range events.GetEventsByType("chainmain.tieredrewards.v1.EventPositionCreated") {
+			if msgIndex := event.GetAttributeByKey("msg_index"); msgIndex != nil && *msgIndex == strconv.Itoa(parserParams.MsgIndex) {
+				if positionId := event.GetAttributeByKey("position_id"); positionId != nil {
+					params.PositionId = *positionId
+				}
+				break
+			}
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgTierLockTier(
 		parserParams.MsgCommonParams,
 		params,
@@ -2674,6 +2686,18 @@ func ParseMsgTierCommitDelegationToTier(
 		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.DelegatorAddress)
 	}
 
+	if parserParams.MsgCommonParams.TxSuccess {
+		events := utils.NewParsedTxsResultsEvents(parserParams.TxsResult.Events)
+		for _, event := range events.GetEventsByType("chainmain.tieredrewards.v1.EventDelegationCommitted") {
+			if msgIndex := event.GetAttributeByKey("msg_index"); msgIndex != nil && *msgIndex == strconv.Itoa(parserParams.MsgIndex) {
+				if positionId := event.GetAttributeByKey("position_id"); positionId != nil {
+					params.PositionId = *positionId
+				}
+				break
+			}
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgTierCommitDelegationToTier(
 		parserParams.MsgCommonParams,
 		params,
@@ -2707,6 +2731,18 @@ func ParseMsgTierAddToTierPosition(
 	var possibleSignerAddresses []string
 	if rawMsg.Owner != "" {
 		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Owner)
+	}
+
+	if parserParams.MsgCommonParams.TxSuccess {
+		events := utils.NewParsedTxsResultsEvents(parserParams.TxsResult.Events)
+		for _, event := range events.GetEventsByType("chainmain.tieredrewards.v1.EventPositionAmountAdded") {
+			if msgIndex := event.GetAttributeByKey("msg_index"); msgIndex != nil && *msgIndex == strconv.Itoa(parserParams.MsgIndex) {
+				if positionId := event.GetAttributeByKey("position_id"); positionId != nil {
+					params.PositionId = *positionId
+				}
+				break
+			}
+		}
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgTierAddToTierPosition(
@@ -2779,6 +2815,24 @@ func ParseMsgTierRedelegate(
 		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Owner)
 	}
 
+	if parserParams.MsgCommonParams.TxSuccess {
+		events := utils.NewParsedTxsResultsEvents(parserParams.TxsResult.Events)
+		for _, event := range events.GetEventsByType("chainmain.tieredrewards.v1.EventPositionRedelegated") {
+			if msgIndex := event.GetAttributeByKey("msg_index"); msgIndex != nil && *msgIndex == strconv.Itoa(parserParams.MsgIndex) {
+				if completionTime := event.GetAttributeByKey("completion_time"); completionTime != nil {
+					params.CompletionTime = *completionTime
+				}
+				if positionId := event.GetAttributeByKey("position_id"); positionId != nil {
+					params.PositionId = *positionId
+				}
+				if unbondingId := event.GetAttributeByKey("unbonding_id"); unbondingId != nil {
+					params.UnbondingId = *unbondingId
+				}
+				break
+			}
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgTierRedelegate(
 		parserParams.MsgCommonParams,
 		params,
@@ -2812,6 +2866,24 @@ func ParseMsgTierUndelegate(
 	var possibleSignerAddresses []string
 	if rawMsg.Owner != "" {
 		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Owner)
+	}
+
+	if parserParams.MsgCommonParams.TxSuccess {
+		events := utils.NewParsedTxsResultsEvents(parserParams.TxsResult.Events)
+		for _, event := range events.GetEventsByType("chainmain.tieredrewards.v1.EventPositionUndelegated") {
+			if msgIndex := event.GetAttributeByKey("msg_index"); msgIndex != nil && *msgIndex == strconv.Itoa(parserParams.MsgIndex) {
+				if completionTime := event.GetAttributeByKey("completion_time"); completionTime != nil {
+					params.CompletionTime = *completionTime
+				}
+				if positionId := event.GetAttributeByKey("position_id"); positionId != nil {
+					params.PositionId = *positionId
+				}
+				if unbondingId := event.GetAttributeByKey("unbonding_id"); unbondingId != nil {
+					params.UnbondingId = *unbondingId
+				}
+				break
+			}
+		}
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgTierUndelegate(
@@ -2849,6 +2921,21 @@ func ParseMsgTierTriggerExitFromTier(
 		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Owner)
 	}
 
+	if parserParams.MsgCommonParams.TxSuccess {
+		events := utils.NewParsedTxsResultsEvents(parserParams.TxsResult.Events)
+		for _, event := range events.GetEventsByType("chainmain.tieredrewards.v1.EventExitTriggered") {
+			if msgIndex := event.GetAttributeByKey("msg_index"); msgIndex != nil && *msgIndex == strconv.Itoa(parserParams.MsgIndex) {
+				if exitUnlockAt := event.GetAttributeByKey("exit_unlock_at"); exitUnlockAt != nil {
+					params.ExitUnlockAt = *exitUnlockAt
+				}
+				if positionId := event.GetAttributeByKey("position_id"); positionId != nil {
+					params.PositionId = *positionId
+				}
+				break
+			}
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgTierTriggerExitFromTier(
 		parserParams.MsgCommonParams,
 		params,
@@ -2882,6 +2969,18 @@ func ParseMsgTierClearPosition(
 	var possibleSignerAddresses []string
 	if rawMsg.Owner != "" {
 		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Owner)
+	}
+
+	if parserParams.MsgCommonParams.TxSuccess {
+		events := utils.NewParsedTxsResultsEvents(parserParams.TxsResult.Events)
+		for _, event := range events.GetEventsByType("chainmain.tieredrewards.v1.EventExitCleared") {
+			if msgIndex := event.GetAttributeByKey("msg_index"); msgIndex != nil && *msgIndex == strconv.Itoa(parserParams.MsgIndex) {
+				if positionId := event.GetAttributeByKey("position_id"); positionId != nil {
+					params.PositionId = *positionId
+				}
+				break
+			}
+		}
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgTierClearPosition(
@@ -2919,6 +3018,18 @@ func ParseMsgTierWithdrawFromTier(
 		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Owner)
 	}
 
+	if parserParams.MsgCommonParams.TxSuccess {
+		events := utils.NewParsedTxsResultsEvents(parserParams.TxsResult.Events)
+		for _, event := range events.GetEventsByType("chainmain.tieredrewards.v1.EventPositionWithdrawn") {
+			if msgIndex := event.GetAttributeByKey("msg_index"); msgIndex != nil && *msgIndex == strconv.Itoa(parserParams.MsgIndex) {
+				if amount := event.GetAttributeByKey("amount"); amount != nil {
+					params.Amount = *amount
+					break
+				}
+			}
+		}
+	}
+
 	return []command.Command{command_usecase.NewCreateMsgTierWithdrawFromTier(
 		parserParams.MsgCommonParams,
 		params,
@@ -2947,11 +3058,33 @@ func ParseMsgTierClaimTierRewards(
 		panic(fmt.Errorf("error decoding ParseMsgTierClaimTierRewards: %v", err))
 	}
 
-	params := model.MsgClaimTierRewardsParams{RawMsgClaimTierRewards: rawMsg}
-
 	var possibleSignerAddresses []string
 	if rawMsg.Owner != "" {
 		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Owner)
+	}
+
+	var baseRewards string
+	var bonusRewards string
+
+	if parserParams.MsgCommonParams.TxSuccess {
+		events := utils.NewParsedTxsResultsEvents(parserParams.TxsResult.Events)
+		for _, event := range events.GetEventsByType("chainmain.tieredrewards.v1.EventTierRewardsClaimed") {
+			if msgIndex := event.GetAttributeByKey("msg_index"); msgIndex != nil && *msgIndex == strconv.Itoa(parserParams.MsgIndex) {
+				if baseRewardsValue := event.GetAttributeByKey("base_rewards"); baseRewardsValue != nil {
+					baseRewards = *baseRewardsValue
+				}
+				if bonusRewardsValue := event.GetAttributeByKey("bonus_rewards"); bonusRewardsValue != nil {
+					bonusRewards = *bonusRewardsValue
+				}
+				break
+			}
+		}
+	}
+
+	params := model.MsgClaimTierRewardsParams{
+		RawMsgClaimTierRewards: rawMsg,
+		BaseRewards:            baseRewards,
+		BonusRewards:           bonusRewards,
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgTierClaimTierRewards(
@@ -2987,6 +3120,27 @@ func ParseMsgTierExitTierWithDelegation(
 	var possibleSignerAddresses []string
 	if rawMsg.Owner != "" {
 		possibleSignerAddresses = append(possibleSignerAddresses, rawMsg.Owner)
+	}
+
+	if parserParams.MsgCommonParams.TxSuccess {
+		events := utils.NewParsedTxsResultsEvents(parserParams.TxsResult.Events)
+		for _, event := range events.GetEventsByType("chainmain.tieredrewards.v1.EventExitTierWithDelegation") {
+			if msgIndex := event.GetAttributeByKey("msg_index"); msgIndex != nil && *msgIndex == strconv.Itoa(parserParams.MsgIndex) {
+				if positionId := event.GetAttributeByKey("position_id"); positionId != nil {
+					params.PositionId = *positionId
+				}
+				if transferredAmount := event.GetAttributeByKey("transferred_amount"); transferredAmount != nil {
+					params.TransferredAmount = *transferredAmount
+				}
+				if transferredShares := event.GetAttributeByKey("transferred_shares"); transferredShares != nil {
+					params.TransferredShares = *transferredShares
+				}
+				if fullExit := event.GetAttributeByKey("full_exit"); fullExit != nil {
+					params.FullExit = *fullExit == "true"
+				}
+				break
+			}
+		}
 	}
 
 	return []command.Command{command_usecase.NewCreateMsgTierExitTierWithDelegation(

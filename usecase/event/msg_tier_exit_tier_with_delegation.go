@@ -15,9 +15,12 @@ const MSG_TIER_EXIT_TIER_WITH_DELEGATION_FAILED = "/chainmain.tieredrewards.v1.M
 
 type MsgTierExitTierWithDelegation struct {
 	MsgBase
-	Owner      string `json:"owner"`
-	PositionId string `json:"positionId"`
-	Amount     string `json:"amount"`
+	Owner             string `json:"owner"`
+	PositionId        string `json:"positionId"`
+	Amount            string `json:"amount"`
+	TransferredAmount string `json:"transferredAmount"`
+	TransferredShares string `json:"transferredShares"`
+	FullExit          bool   `json:"fullExit"`
 }
 
 func NewMsgTierExitTierWithDelegation(msgCommonParams MsgCommonParams, params model.MsgExitTierWithDelegationParams) *MsgTierExitTierWithDelegation {
@@ -30,6 +33,9 @@ func NewMsgTierExitTierWithDelegation(msgCommonParams MsgCommonParams, params mo
 		params.Owner,
 		params.PositionId,
 		params.Amount,
+		params.TransferredAmount,
+		params.TransferredShares,
+		params.FullExit,
 	}
 }
 

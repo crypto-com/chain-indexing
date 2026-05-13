@@ -2,6 +2,10 @@ package model
 
 type MsgExitTierWithDelegationParams struct {
 	RawMsgExitTierWithDelegation
+
+	TransferredAmount string `json:"transferredAmount"`
+	TransferredShares string `json:"transferredShares"`
+	FullExit          bool   `json:"fullExit"`
 }
 
 type RawMsgExitTierWithDelegation struct {

@@ -20,6 +20,7 @@ type MsgTierLockTier struct {
 	Amount                 string `json:"amount"`
 	ValidatorAddress       string `json:"validatorAddress"`
 	TriggerExitImmediately bool   `json:"triggerExitImmediately"`
+	PositionId             string `json:"positionId"`
 }
 
 func NewMsgTierLockTier(msgCommonParams MsgCommonParams, params model.MsgLockTierParams) *MsgTierLockTier {
@@ -34,6 +35,7 @@ func NewMsgTierLockTier(msgCommonParams MsgCommonParams, params model.MsgLockTie
 		params.Amount,
 		params.ValidatorAddress,
 		params.TriggerExitImmediately,
+		params.PositionId,
 	}
 }
 

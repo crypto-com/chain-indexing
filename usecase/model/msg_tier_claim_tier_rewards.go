@@ -2,6 +2,9 @@ package model
 
 type MsgClaimTierRewardsParams struct {
 	RawMsgClaimTierRewards
+
+	BaseRewards  string `json:"baseRewards"`
+	BonusRewards string `json:"bonusRewards"`
 }
 
 type RawMsgClaimTierRewards struct {

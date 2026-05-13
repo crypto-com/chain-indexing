@@ -2,6 +2,9 @@ package model
 
 type MsgTierRedelegateParams struct {
 	RawMsgTierRedelegate
+
+	CompletionTime string `json:"completionTime"`
+	UnbondingId    string `json:"unbondingId"`
 }
 
 type RawMsgTierRedelegate struct {
