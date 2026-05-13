@@ -2644,7 +2644,7 @@ func ParseMsgTierLockTier(
 		for _, event := range events.GetEventsByType("chainmain.tieredrewards.v1.EventPositionCreated") {
 			if msgIndex := event.GetAttributeByKey("msg_index"); msgIndex != nil && *msgIndex == strconv.Itoa(parserParams.MsgIndex) {
 				if positionId := event.GetAttributeByKey("position_id"); positionId != nil {
-					params.PositionId = *positionId
+					params.PositionId = utils.UnquoteOrRaw(*positionId)
 				}
 				break
 			}
@@ -2691,7 +2691,7 @@ func ParseMsgTierCommitDelegationToTier(
 		for _, event := range events.GetEventsByType("chainmain.tieredrewards.v1.EventDelegationCommitted") {
 			if msgIndex := event.GetAttributeByKey("msg_index"); msgIndex != nil && *msgIndex == strconv.Itoa(parserParams.MsgIndex) {
 				if positionId := event.GetAttributeByKey("position_id"); positionId != nil {
-					params.PositionId = *positionId
+					params.PositionId = utils.UnquoteOrRaw(*positionId)
 				}
 				break
 			}
@@ -2738,7 +2738,7 @@ func ParseMsgTierAddToTierPosition(
 		for _, event := range events.GetEventsByType("chainmain.tieredrewards.v1.EventPositionAmountAdded") {
 			if msgIndex := event.GetAttributeByKey("msg_index"); msgIndex != nil && *msgIndex == strconv.Itoa(parserParams.MsgIndex) {
 				if positionId := event.GetAttributeByKey("position_id"); positionId != nil {
-					params.PositionId = *positionId
+					params.PositionId = utils.UnquoteOrRaw(*positionId)
 				}
 				break
 			}
@@ -2823,10 +2823,10 @@ func ParseMsgTierRedelegate(
 					params.CompletionTime = *completionTime
 				}
 				if positionId := event.GetAttributeByKey("position_id"); positionId != nil {
-					params.PositionId = *positionId
+					params.PositionId = utils.UnquoteOrRaw(*positionId)
 				}
 				if unbondingId := event.GetAttributeByKey("unbonding_id"); unbondingId != nil {
-					params.UnbondingId = *unbondingId
+					params.UnbondingId = utils.UnquoteOrRaw(*unbondingId)
 				}
 				break
 			}
@@ -2873,13 +2873,13 @@ func ParseMsgTierUndelegate(
 		for _, event := range events.GetEventsByType("chainmain.tieredrewards.v1.EventPositionUndelegated") {
 			if msgIndex := event.GetAttributeByKey("msg_index"); msgIndex != nil && *msgIndex == strconv.Itoa(parserParams.MsgIndex) {
 				if completionTime := event.GetAttributeByKey("completion_time"); completionTime != nil {
-					params.CompletionTime = *completionTime
+					params.CompletionTime = utils.UnquoteOrRaw(*completionTime)
 				}
 				if positionId := event.GetAttributeByKey("position_id"); positionId != nil {
-					params.PositionId = *positionId
+					params.PositionId = utils.UnquoteOrRaw(*positionId)
 				}
 				if unbondingId := event.GetAttributeByKey("unbonding_id"); unbondingId != nil {
-					params.UnbondingId = *unbondingId
+					params.UnbondingId = utils.UnquoteOrRaw(*unbondingId)
 				}
 				break
 			}
@@ -2926,10 +2926,10 @@ func ParseMsgTierTriggerExitFromTier(
 		for _, event := range events.GetEventsByType("chainmain.tieredrewards.v1.EventExitTriggered") {
 			if msgIndex := event.GetAttributeByKey("msg_index"); msgIndex != nil && *msgIndex == strconv.Itoa(parserParams.MsgIndex) {
 				if exitUnlockAt := event.GetAttributeByKey("exit_unlock_at"); exitUnlockAt != nil {
-					params.ExitUnlockAt = *exitUnlockAt
+					params.ExitUnlockAt = utils.UnquoteOrRaw(*exitUnlockAt)
 				}
 				if positionId := event.GetAttributeByKey("position_id"); positionId != nil {
-					params.PositionId = *positionId
+					params.PositionId = utils.UnquoteOrRaw(*positionId)
 				}
 				break
 			}
@@ -2976,7 +2976,7 @@ func ParseMsgTierClearPosition(
 		for _, event := range events.GetEventsByType("chainmain.tieredrewards.v1.EventExitCleared") {
 			if msgIndex := event.GetAttributeByKey("msg_index"); msgIndex != nil && *msgIndex == strconv.Itoa(parserParams.MsgIndex) {
 				if positionId := event.GetAttributeByKey("position_id"); positionId != nil {
-					params.PositionId = *positionId
+					params.PositionId = utils.UnquoteOrRaw(*positionId)
 				}
 				break
 			}
@@ -3127,13 +3127,13 @@ func ParseMsgTierExitTierWithDelegation(
 		for _, event := range events.GetEventsByType("chainmain.tieredrewards.v1.EventExitTierWithDelegation") {
 			if msgIndex := event.GetAttributeByKey("msg_index"); msgIndex != nil && *msgIndex == strconv.Itoa(parserParams.MsgIndex) {
 				if positionId := event.GetAttributeByKey("position_id"); positionId != nil {
-					params.PositionId = *positionId
+					params.PositionId = utils.UnquoteOrRaw(*positionId)
 				}
 				if transferredAmount := event.GetAttributeByKey("transferred_amount"); transferredAmount != nil {
-					params.TransferredAmount = *transferredAmount
+					params.TransferredAmount = utils.UnquoteOrRaw(*transferredAmount)
 				}
 				if transferredShares := event.GetAttributeByKey("transferred_shares"); transferredShares != nil {
-					params.TransferredShares = *transferredShares
+					params.TransferredShares = utils.UnquoteOrRaw(*transferredShares)
 				}
 				if fullExit := event.GetAttributeByKey("full_exit"); fullExit != nil {
 					params.FullExit = *fullExit == "true"
