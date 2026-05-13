@@ -4,9 +4,9 @@ import (
 	"bytes"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/luci/go-render/render"
-	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 const MSG_TIER_REDELEGATE = "/chainmain.tieredrewards.v1.MsgTierRedelegate"
@@ -15,9 +15,11 @@ const MSG_TIER_REDELEGATE_FAILED = "/chainmain.tieredrewards.v1.MsgTierRedelegat
 
 type MsgTierRedelegate struct {
 	MsgBase
-	Owner        string `json:"owner"`
-	PositionId   string `json:"positionId"`
-	DstValidator string `json:"dstValidator"`
+	Owner          string `json:"owner"`
+	PositionId     string `json:"positionId"`
+	DstValidator   string `json:"dstValidator"`
+	CompletionTime string `json:"completionTime"`
+	UnbondingId    string `json:"unbondingId"`
 }
 
 func NewMsgTierRedelegate(msgCommonParams MsgCommonParams, params model.MsgTierRedelegateParams) *MsgTierRedelegate {
@@ -30,6 +32,8 @@ func NewMsgTierRedelegate(msgCommonParams MsgCommonParams, params model.MsgTierR
 		params.Owner,
 		params.PositionId,
 		params.DstValidator,
+		params.CompletionTime,
+		params.UnbondingId,
 	}
 }
 

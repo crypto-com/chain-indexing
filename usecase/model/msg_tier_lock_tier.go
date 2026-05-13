@@ -2,6 +2,8 @@ package model
 
 type MsgLockTierParams struct {
 	RawMsgLockTier
+
+	PositionId string `json:"positionId"`
 }
 
 type RawMsgLockTier struct {

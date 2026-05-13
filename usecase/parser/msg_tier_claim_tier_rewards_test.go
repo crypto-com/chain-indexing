@@ -19,7 +19,7 @@ var _ = Describe("ParseMsgCommands", func() {
 		It("should parse tieredrewards.MsgClaimTierRewards command in the transaction", func() {
 			block, _ := mustParseBlockResp(usecase_parser_test.TX_MSG_TIER_BLOCK_RESP)
 			blockResults := mustParseBlockResultsResp(
-				usecase_parser_test.TX_MSG_TIER_BLOCK_RESULTS_RESP,
+				usecase_parser_test.TX_MSG_TIER_CLAIM_TIER_REWARDS_BLOCK_RESULTS_RESP,
 				&tendermint.Base64BlockResultEventAttributeDecoder{},
 			)
 			tx := MustParseTxsResp(usecase_parser_test.TX_MSG_TIER_CLAIM_TIER_REWARDS_TXS_RESP)
@@ -47,6 +47,8 @@ var _ = Describe("ParseMsgCommands", func() {
 							Owner:       "cro1dulwqgcdpemn8c34sjd92fxepz5p0sqpeevw84",
 							PositionIds: []string{"1", "2", "3"},
 						},
+						BaseRewards:  "1000basecro",
+						BonusRewards: "500basecro",
 					},
 				),
 			}))

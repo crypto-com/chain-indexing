@@ -2,6 +2,8 @@ package model
 
 type MsgCommitDelegationToTierParams struct {
 	RawMsgCommitDelegationToTier
+
+	PositionId string `json:"positionId"`
 }
 
 type RawMsgCommitDelegationToTier struct {

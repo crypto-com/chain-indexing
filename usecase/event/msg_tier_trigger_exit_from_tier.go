@@ -15,8 +15,9 @@ const MSG_TIER_TRIGGER_EXIT_FROM_TIER_FAILED = "/chainmain.tieredrewards.v1.MsgT
 
 type MsgTierTriggerExitFromTier struct {
 	MsgBase
-	Owner      string `json:"owner"`
-	PositionId string `json:"positionId"`
+	Owner        string `json:"owner"`
+	PositionId   string `json:"positionId"`
+	ExitUnlockAt string `json:"exitUnlockAt"`
 }
 
 func NewMsgTierTriggerExitFromTier(msgCommonParams MsgCommonParams, params model.MsgTriggerExitFromTierParams) *MsgTierTriggerExitFromTier {
@@ -28,6 +29,7 @@ func NewMsgTierTriggerExitFromTier(msgCommonParams MsgCommonParams, params model
 		}),
 		params.Owner,
 		params.PositionId,
+		params.ExitUnlockAt,
 	}
 }
 

@@ -4,7 +4,7 @@ import (
 	"bytes"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
-	"github.com/crypto-com/chain-indexing/usecase/model"
+"github.com/crypto-com/chain-indexing/usecase/model"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/luci/go-render/render"
 )
@@ -15,8 +15,9 @@ const MSG_TIER_WITHDRAW_FROM_TIER_FAILED = "/chainmain.tieredrewards.v1.MsgWithd
 
 type MsgTierWithdrawFromTier struct {
 	MsgBase
-	Owner      string `json:"owner"`
-	PositionId string `json:"positionId"`
+	Owner      string     `json:"owner"`
+	PositionId string     `json:"positionId"`
+	Amount     string     `json:"amount"`
 }
 
 func NewMsgTierWithdrawFromTier(msgCommonParams MsgCommonParams, params model.MsgWithdrawFromTierParams) *MsgTierWithdrawFromTier {
@@ -28,6 +29,7 @@ func NewMsgTierWithdrawFromTier(msgCommonParams MsgCommonParams, params model.Ms
 		}),
 		params.Owner,
 		params.PositionId,
+		params.Amount,
 	}
 }
 

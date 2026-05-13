@@ -54,6 +54,27 @@ const TX_MSG_TIER_WITHDRAW_FROM_TIER_TXS_RESP = `{
       "signatures": []
     },
     "timestamp": "2024-06-15T10:00:00Z",
-    "events": []
+    "events": [
+      {
+        "type": "chainmain.tieredrewards.v1.EventPositionWithdrawn",
+        "attributes": [
+            {
+                "key": "amount",
+                "value": "{\"denom\":\"basetcro\",\"amount\":\"1000000000\"}",
+                "index": true
+            },
+            {
+                "key": "position",
+                "value": "{\"id\":\"272\",\"owner\":\"tcro1vzgslnayeum4t6qt7j2cm79nrppaw4w4se038w\",\"tier_id\":3,\"amount\":\"1000000000\",\"validator\":\"\",\"delegated_shares\":\"0.000000000000000000\",\"base_rewards_per_share\":[],\"last_bonus_accrual\":\"0001-01-01T00:00:00Z\",\"exit_triggered_at\":\"2026-04-28T10:07:43.510505520Z\",\"exit_unlock_at\":\"2026-04-28T10:11:43.510505520Z\",\"created_at_height\":\"27374591\",\"created_at_time\":\"2026-04-28T10:03:12.278738851Z\",\"last_event_seq\":\"0\",\"last_known_bonded\":false}",
+                "index": true
+            },
+            {
+                "key": "msg_index",
+                "value": "0",
+                "index": true
+            }
+        ]
+      }
+    ]
   }
 }`

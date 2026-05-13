@@ -15,8 +15,10 @@ const MSG_TIER_CLAIM_TIER_REWARDS_FAILED = "/chainmain.tieredrewards.v1.MsgClaim
 
 type MsgTierClaimTierRewards struct {
 	MsgBase
-	Owner       string   `json:"owner"`
-	PositionIds []string `json:"positionIds"`
+	Owner        string   `json:"owner"`
+	PositionIds  []string `json:"positionIds"`
+	BaseRewards  string   `json:"baseRewards"`
+	BonusRewards string   `json:"bonusRewards"`
 }
 
 func NewMsgTierClaimTierRewards(msgCommonParams MsgCommonParams, params model.MsgClaimTierRewardsParams) *MsgTierClaimTierRewards {
@@ -28,6 +30,8 @@ func NewMsgTierClaimTierRewards(msgCommonParams MsgCommonParams, params model.Ms
 		}),
 		params.Owner,
 		params.PositionIds,
+		params.BaseRewards,
+		params.BonusRewards,
 	}
 }
 

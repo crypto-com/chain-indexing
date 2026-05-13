@@ -2,6 +2,8 @@ package model
 
 type MsgTriggerExitFromTierParams struct {
 	RawMsgTriggerExitFromTier
+
+	ExitUnlockAt string `json:"exitUnlockAt"`
 }
 
 type RawMsgTriggerExitFromTier struct {

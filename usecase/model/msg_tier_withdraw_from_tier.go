@@ -2,6 +2,8 @@ package model
 
 type MsgWithdrawFromTierParams struct {
 	RawMsgWithdrawFromTier
+
+	Amount string `json:"amount"`
 }
 
 type RawMsgWithdrawFromTier struct {

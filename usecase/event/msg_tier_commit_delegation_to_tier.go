@@ -4,9 +4,9 @@ import (
 	"bytes"
 
 	entity_event "github.com/crypto-com/chain-indexing/entity/event"
+	"github.com/crypto-com/chain-indexing/usecase/model"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/luci/go-render/render"
-	"github.com/crypto-com/chain-indexing/usecase/model"
 )
 
 const MSG_TIER_COMMIT_DELEGATION_TO_TIER = "/chainmain.tieredrewards.v1.MsgCommitDelegationToTier"
@@ -20,6 +20,7 @@ type MsgTierCommitDelegationToTier struct {
 	Amount                 string `json:"amount"`
 	Id                     uint32 `json:"id"`
 	TriggerExitImmediately bool   `json:"triggerExitImmediately"`
+	PositionId             string `json:"positionId"`
 }
 
 func NewMsgTierCommitDelegationToTier(msgCommonParams MsgCommonParams, params model.MsgCommitDelegationToTierParams) *MsgTierCommitDelegationToTier {
@@ -34,6 +35,7 @@ func NewMsgTierCommitDelegationToTier(msgCommonParams MsgCommonParams, params mo
 		params.Amount,
 		params.Id,
 		params.TriggerExitImmediately,
+		params.PositionId,
 	}
 }
 
