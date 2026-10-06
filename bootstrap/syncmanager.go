@@ -278,9 +278,25 @@ func (manager *SyncManager) syncBlockWorker(blockHeight int64) ([]command_entity
 			decodedTx, err = manager.txDecoder.DecodeBase64(txHex)
 			if err != nil {
 				var resTx *model.Tx
-				resTx, err = manager.cosmosClient.Tx(txHash, tmcosmosutils.DefaultCosmosAPIVersion)
-				if err != nil {
-					return nil, fmt.Errorf("error requesting chain txs (%s) at height %d: %v", txHex, blockHeight, err)
+				var maybeNextKey *string
+				for {
+					var page *model.Tx
+					page, maybeNextKey, err = manager.cosmosClient.Tx(txHash, tmcosmosutils.DefaultCosmosAPIVersion, maybeNextKey, 100)
+					if err != nil {
+						return nil, fmt.Errorf("error requesting chain txs (%s) at height %d: %v", txHex, blockHeight, err)
+					}
+					if resTx == nil {
+						resTx = page
+					} else {
+						resTx.TxResponse.Events = append(resTx.TxResponse.Events, page.TxResponse.Events...)
+						resTx.TxResponse.Logs = append(resTx.TxResponse.Logs, page.TxResponse.Logs...)
+					}
+					if maybeNextKey == nil {
+						break
+					}
+				}
+				if resTx == nil {
+					return nil, fmt.Errorf("error requesting chain txs (%s) at height %d: empty response", txHex, blockHeight)
 				}
 
 				tx.Tx = resTx.Tx

@@ -752,25 +752,37 @@ func (client *HTTPClient) ProposalTally(id string, cosmosAPIVersion string) (cos
 	return cosmosapp_interface.Tally{}, nil
 }
 
-func (client *HTTPClient) Tx(hash string, cosmosAPIVersion string) (*model.Tx, error) {
-	rawRespBody, err := client.request(
-		fmt.Sprintf(
-			"%s/%s",
-			client.getUrl("tx", "txs", cosmosAPIVersion),
-			hash,
-		),
-	)
+func (client *HTTPClient) Tx(hash string, cosmosAPIVersion string, maybeNextKey *string, limit int) (*model.Tx, *string, error) {
+	baseUrl := fmt.Sprintf("%s/%s", client.getUrl("tx", "txs", cosmosAPIVersion), hash)
+	params := url.Values{}
+	if maybeNextKey != nil {
+		params.Set("pagination.key", *maybeNextKey)
+	}
+	if limit > 0 {
+		params.Set("pagination.limit", strconv.Itoa(limit))
+	}
+	queryUrl := baseUrl
+	if len(params) > 0 {
+		queryUrl = baseUrl + "?" + params.Encode()
+	}
+
+	rawRespBody, err := client.request(queryUrl)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer rawRespBody.Close()
 
-	tx, err := ParseTxsResp(rawRespBody)
-	if err != nil {
-		return nil, fmt.Errorf("error parsing Tx(%s): %v", hash, err)
+	var txsResp TxsResp
+	if err := jsoniter.NewDecoder(rawRespBody).Decode(&txsResp); err != nil {
+		return nil, nil, fmt.Errorf("error parsing Tx(%s): %v", hash, err)
 	}
 
-	return tx, nil
+	tx, err := convertTxsRespToModel(txsResp)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error parsing Tx(%s): %v", hash, err)
+	}
+
+	return tx, txsResp.Pagination.MaybeNextKey, nil
 }
 
 func ParseTxsResp(rawRespReader io.Reader) (*model.Tx, error) {
@@ -778,7 +790,10 @@ func ParseTxsResp(rawRespReader io.Reader) (*model.Tx, error) {
 	if err := jsoniter.NewDecoder(rawRespReader).Decode(&txsResp); err != nil {
 		return nil, err
 	}
+	return convertTxsRespToModel(txsResp)
+}
 
+func convertTxsRespToModel(txsResp TxsResp) (*model.Tx, error) {
 	height, err := strconv.ParseInt(txsResp.TxResponse.Height, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing txsResp.TxResponse.Height to int64 param: %v", err)

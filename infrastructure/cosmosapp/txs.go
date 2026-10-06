@@ -7,6 +7,7 @@ import (
 type TxsResp struct {
 	Tx         model.CosmosTx `json:"tx"`
 	TxResponse TxResponse     `json:"tx_response"`
+	Pagination Pagination     `json:"pagination"`
 }
 
 type TxResponse struct {

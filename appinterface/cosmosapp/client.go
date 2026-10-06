@@ -33,7 +33,7 @@ type Client interface {
 	ProposalById(id string, cosmosAPIVersion string) (Proposal, error)
 	ProposalTally(id string, cosmosAPIVersion string) (Tally, error)
 
-	Tx(txHash string, cosmosAPIVersion string) (*model.Tx, error)
+	Tx(txHash string, cosmosAPIVersion string, maybeNextKey *string, limit int) (*model.Tx, *string, error)
 }
 
 var ErrAccountNotFound = errors.New("account not found")

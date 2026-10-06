@@ -120,8 +120,9 @@ func (conn *MockClient) ProposalTally(id string, cosmosAPIVersion string) (Tally
 	return result, mockArgs.Error(1)
 }
 
-func (conn *MockClient) Tx(txHash string, cosmosAPIVersion string) (*model.Tx, error) {
-	mockArgs := conn.Called(txHash, cosmosAPIVersion)
+func (conn *MockClient) Tx(txHash string, cosmosAPIVersion string, maybeNextKey *string, limit int) (*model.Tx, *string, error) {
+	mockArgs := conn.Called(txHash, cosmosAPIVersion, maybeNextKey, limit)
 	result, _ := mockArgs.Get(0).(*model.Tx)
-	return result, mockArgs.Error(1)
+	nextKey, _ := mockArgs.Get(1).(*string)
+	return result, nextKey, mockArgs.Error(2)
 }
