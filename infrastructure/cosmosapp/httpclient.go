@@ -773,7 +773,7 @@ func (client *HTTPClient) Tx(hash string, cosmosAPIVersion string, maybeNextKey 
 	defer rawRespBody.Close()
 
 	var txsResp TxsResp
-	if err := jsoniter.NewDecoder(rawRespBody).Decode(&txsResp); err != nil {
+	if err = jsoniter.NewDecoder(rawRespBody).Decode(&txsResp); err != nil {
 		return nil, nil, fmt.Errorf("error parsing Tx(%s): %v", hash, err)
 	}
 
