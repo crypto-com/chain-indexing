@@ -634,7 +634,7 @@ func (coins DecCoins) Sort() DecCoins {
 // ----------------------------------------------------------------------------
 // Parsing
 
-// MustParseDecCoins  parses a decimal coin from a string. It behaves the same as ParseDecCoin,
+// MustParseDecCoin parses a decimal coin from a string. It behaves the same as ParseDecCoin,
 // except it panics on any error.
 func MustParseDecCoin(coinStr string) DecCoin {
 	decCoin, err := ParseDecCoin(coinStr)
