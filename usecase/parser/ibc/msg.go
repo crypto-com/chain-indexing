@@ -243,7 +243,7 @@ func ParseMsgConnectionOpenTry(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
 	clientState, ok := parserParams.Msg["client_state"]
-	if ok {
+	if ok && clientState != nil {
 		clientStateType := clientState.(map[string]interface{})["@type"]
 		if clientStateType != "/ibc.lightclients.tendermint.v1.ClientState" {
 			// TODO: SoloMachine and Localhost LightClient
@@ -324,7 +324,7 @@ func ParseMsgConnectionOpenAck(
 	parserParams utils.CosmosParserParams,
 ) ([]command.Command, []string) {
 	clientState, ok := parserParams.Msg["client_state"]
-	if ok {
+	if ok && clientState != nil {
 		clientStateType := clientState.(map[string]interface{})["@type"]
 		if clientStateType != "/ibc.lightclients.tendermint.v1.ClientState" {
 			// TODO: SoloMachine and Localhost LightClient
